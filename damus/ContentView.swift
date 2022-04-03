@@ -8,36 +8,111 @@
 import SwiftUI
 import Starscream
 
-struct ContentView: View {
-    @State var status: String = "Not connected"
-    @State var events: [NostrEvent] = []
-    @State var connection: NostrConnection? = nil
-    
+struct EventView: View {
+    let event: NostrEvent
+
     var body: some View {
-        ForEach(events, id: \.id) {
-            Text($0.content)
-                .padding()
-        }
-        .onAppear() {
-            let url = URL(string: "wss://nostr.bitcoiner.social")!
-            let conn = NostrConnection(url: url, handleEvent: handle_event)
-            conn.connect()
-            self.connection = conn
+        VStack {
+            Text(String(event.pubkey.prefix(16)))
+                .bold()
+                .onTapGesture {
+                    UIPasteboard.general.string = event.pubkey
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Text(event.content)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Divider()
         }
     }
-    
+}
+
+enum Sheets: Identifiable {
+    case post
+
+    var id: String {
+        switch self {
+        case .post:
+            return "post"
+        }
+    }
+}
+
+struct ContentView: View {
+    @State var status: String = "Not connected"
+    @State var sub_id: String? = nil
+    @State var active_sheet: Sheets? = nil
+    @State var events: [NostrEvent] = []
+    @State var connection: NostrConnection? = nil
+
+    var MainContent: some View {
+        ScrollView {
+            ForEach(events.reversed(), id: \.id) {
+                EventView(event: $0)
+            }
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            MainContent
+            VStack {
+                Spacer()
+
+                HStack {
+                    Spacer()
+                    PostButton {
+                        self.active_sheet = .post
+                    }
+                }
+            }
+        }
+        .onAppear() {
+            self.connect()
+        }
+        .sheet(item: $active_sheet) { item in
+            switch item {
+            case .post:
+                PostView()
+            }
+        }
+    }
+
+    func connect() {
+        let url = URL(string: "wss://nostr.bitcoiner.social")!
+        let conn = NostrConnection(url: url, handleEvent: handle_event)
+        conn.connect()
+        self.connection = conn
+    }
+
     func handle_event(conn_event: NostrConnectionEvent) {
-        
         switch conn_event {
         case .ws_event(let ev):
-            if case .connected = ev {
-                self.connection?.send(NostrFilter.filter_since(1648851447))
+            switch ev {
+            case .connected:
+                let now = Int64(Date().timeIntervalSince1970)
+                let yesterday = now - 24 * 60 * 60
+                let filter = NostrFilter.filter_since(yesterday)
+                let sub_id = self.sub_id ?? UUID().description
+                if self.sub_id != sub_id {
+                    self.sub_id = sub_id
+                }
+                self.connection?.send(filter, sub_id: sub_id)
+            case .cancelled:
+                self.connection?.connect()
+            default:
+                break
             }
             print("ws_event \(ev)")
+
         case .nostr_event(let ev):
             switch ev {
             case .event(_, let ev):
-                self.events.append(ev)
+                self.sub_id = sub_id
+                if ev.kind == 1 {
+                    self.events.append(ev)
+                }
+                print(ev)
             case .notice(let msg):
                 print(msg)
             }
@@ -50,3 +125,21 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+
+func PostButton(action: @escaping () -> ()) -> some View {
+    return Button(action: action, label: {
+        Text("+")
+            .font(.system(.largeTitle))
+            .frame(width: 67, height: 60)
+            .foregroundColor(Color.white)
+            .padding(.bottom, 7)
+    })
+    .background(Color.blue)
+    .cornerRadius(38.5)
+    .padding()
+    .shadow(color: Color.black.opacity(0.3),
+            radius: 3,
+            x: 3,
+            y: 3)
+}
+

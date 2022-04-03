@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4C75EFA427FA577B0006080F /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFA327FA577B0006080F /* PostView.swift */; };
 		4CE6DEE727F7A08100C66700 /* damusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DEE627F7A08100C66700 /* damusApp.swift */; };
 		4CE6DEE927F7A08100C66700 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DEE827F7A08100C66700 /* ContentView.swift */; };
 		4CE6DEEB27F7A08200C66700 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4CE6DEEA27F7A08200C66700 /* Assets.xcassets */; };
@@ -37,6 +38,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4C75EFA327FA577B0006080F /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
 		4CE6DEE327F7A08100C66700 /* damus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = damus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CE6DEE627F7A08100C66700 /* damusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damusApp.swift; sourceTree = "<group>"; };
 		4CE6DEE827F7A08100C66700 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -77,6 +79,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4C75EFA227FA576C0006080F /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				4C75EFA327FA577B0006080F /* PostView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		4CE6DEDA27F7A08100C66700 = {
 			isa = PBXGroup;
 			children = (
@@ -100,6 +110,7 @@
 		4CE6DEE527F7A08100C66700 /* damus */ = {
 			isa = PBXGroup;
 			children = (
+				4C75EFA227FA576C0006080F /* Views */,
 				4CE6DEE627F7A08100C66700 /* damusApp.swift */,
 				4CE6DEE827F7A08100C66700 /* ContentView.swift */,
 				4CE6DEEA27F7A08200C66700 /* Assets.xcassets */,
@@ -275,6 +286,7 @@
 				4CE6DF1427F7A45200C66700 /* WSConnection.swift in Sources */,
 				4CE6DF1627F8DEBF00C66700 /* NostrConnection.swift in Sources */,
 				4CE6DEE727F7A08100C66700 /* damusApp.swift in Sources */,
+				4C75EFA427FA577B0006080F /* PostView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -361,7 +373,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.3;
+				MACOSX_DEPLOYMENT_TARGET = 12.3;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -415,7 +428,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.3;
+				MACOSX_DEPLOYMENT_TARGET = 12.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;

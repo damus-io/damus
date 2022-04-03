@@ -28,6 +28,11 @@ enum NostrTag {
     case key_event(KeyEvent)
 }
 
+struct NostrSubscription {
+    let sub_id: String
+    let filter: NostrFilter
+}
+
 struct NostrFilter: Codable {
     let ids: [String]?
     let kinds: [String]?
@@ -114,8 +119,8 @@ class NostrConnection: WebSocketDelegate {
         socket.disconnect()
     }
     
-    func send(_ filter: NostrFilter) {
-        guard let req = make_nostr_req(filter) else {
+    func send(_ filter: NostrFilter, sub_id: String) {
+        guard let req = make_nostr_req(filter, sub_id: sub_id) else {
             print("failed to encode nostr req: \(filter)")
             return
         }
@@ -165,14 +170,7 @@ func decode_data<T: Decodable>(_ data: Data) -> T? {
     return nil
 }
 
-func make_nostr_req(_ filter: NostrFilter) -> String? {
-    let sub_id = UUID()
-    var params: [Encodable] = []
-    
-    params.append("REQ")
-    params.append(sub_id)
-    params.append(filter)
-    
+func make_nostr_req(_ filter: NostrFilter, sub_id: String) -> String? {
     let encoder = JSONEncoder()
     guard let filter_json = try? encoder.encode(filter) else {
         return nil
