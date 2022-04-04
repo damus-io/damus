@@ -7,14 +7,80 @@
 
 import SwiftUI
 
-struct PostView: View {
-    var body: some View {
-        Text("New post")
+extension Notification.Name {
+    static var post: Notification.Name {
+        return Notification.Name("send post")
     }
 }
 
-struct Post_Previews: PreviewProvider {
-    static var previews: some View {
-        PostView()
+struct NostrPost {
+    let content: String
+}
+
+
+struct PostView: View {
+    @State var post: String = ""
+    @FocusState var focus: Bool
+
+    @Environment(\.presentationMode) var presmode
+
+    enum FocusField: Hashable {
+      case post
+    }
+
+    func dismiss() {
+        presmode.wrappedValue.dismiss()
+    }
+
+    func send_post() {
+        let new_post = NostrPost(content: self.post)
+        NotificationCenter.default.post(name: .post, object: new_post)
+        dismiss()
+    }
+
+    var body: some View {
+        VStack {
+            HStack {
+                Button("Cancel") {
+                    self.dismiss()
+                }
+                .foregroundColor(.primary)
+
+                Spacer()
+
+                Button("Post") {
+                    self.send_post()
+                }
+            }
+            .padding([.top, .bottom], 4)
+
+            HStack(alignment: .top) {
+                ZStack(alignment: .leading) {
+                    TextEditor(text: $post)
+                        .focused($focus)
+
+                    if self.post == "" {
+                        VStack {
+                            Text("What's happening?")
+                                .foregroundColor(.gray)
+                                .padding(6)
+                            Spacer()
+                        }
+                    }
+                }
+
+
+                Spacer()
+            }
+
+            Spacer()
+        }
+        .onAppear() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.focus = true
+            }
+        }
+        .padding()
     }
 }
+

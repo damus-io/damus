@@ -43,6 +43,8 @@ struct ContentView: View {
     @State var sub_id: String? = nil
     @State var active_sheet: Sheets? = nil
     @State var events: [NostrEvent] = []
+    @State var has_events: [String: Bool] = [:]
+    @State var loading: Bool = true
     @State var connection: NostrConnection? = nil
 
     var MainContent: some View {
@@ -56,6 +58,7 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             MainContent
+                .padding()
             VStack {
                 Spacer()
 
@@ -75,6 +78,10 @@ struct ContentView: View {
             case .post:
                 PostView()
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .post)) { obj in
+            let post = obj.object as! NostrPost
+            print("post \(post.content)")
         }
     }
 
@@ -97,6 +104,7 @@ struct ContentView: View {
                 if self.sub_id != sub_id {
                     self.sub_id = sub_id
                 }
+                print("subscribing to \(sub_id)")
                 self.connection?.send(filter, sub_id: sub_id)
             case .cancelled:
                 self.connection?.connect()
@@ -108,11 +116,14 @@ struct ContentView: View {
         case .nostr_event(let ev):
             switch ev {
             case .event(_, let ev):
+                if self.loading {
+                    self.loading = false
+                }
                 self.sub_id = sub_id
-                if ev.kind == 1 {
+                if ev.kind == 1 && !(has_events[ev.id] ?? false) {
+                    has_events[ev.id] = true
                     self.events.append(ev)
                 }
-                print(ev)
             case .notice(let msg):
                 print(msg)
             }
@@ -130,7 +141,7 @@ func PostButton(action: @escaping () -> ()) -> some View {
     return Button(action: action, label: {
         Text("+")
             .font(.system(.largeTitle))
-            .frame(width: 67, height: 60)
+            .frame(width: 57, height: 50)
             .foregroundColor(Color.white)
             .padding(.bottom, 7)
     })
