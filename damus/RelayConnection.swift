@@ -36,7 +36,7 @@ struct NostrSubscription {
 struct NostrFilter: Codable {
     let ids: [String]?
     let kinds: [String]?
-    let event_ids: [String]?
+    let referenced_ids: [String]?
     let pubkeys: [String]?
     let since: Int64?
     let until: Int64?
@@ -45,22 +45,22 @@ struct NostrFilter: Codable {
     private enum CodingKeys : String, CodingKey {
         case ids
         case kinds
-        case event_ids = "#e"
+        case referenced_ids = "#e"
         case pubkeys = "#p"
         case since
         case until
         case authors
     }
-    
+
     public static func filter_since(_ val: Int64) -> NostrFilter {
-        return NostrFilter(ids: nil, kinds: nil, event_ids: nil, pubkeys: nil, since: val, until: nil, authors: nil)
+        return NostrFilter(ids: nil, kinds: nil, referenced_ids: nil, pubkeys: nil, since: val, until: nil, authors: nil)
     }
 }
 
 enum NostrResponse: Decodable {
     case event(String, NostrEvent)
     case notice(String)
-    
+
     init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
 
@@ -82,7 +82,7 @@ enum NostrResponse: Decodable {
             self = .notice(msg)
             return
         }
-        
+
         throw DecodingError.dataCorrupted(.init(codingPath: [], debugDescription: "expected EVENT or NOTICE, got \(typ)"))
     }
 }
@@ -97,28 +97,120 @@ struct NostrEvent: Decodable, Identifiable {
     let sig: String
 }
 
-class NostrConnection: WebSocketDelegate {
+struct RelayInfo {
+    let read: Bool
+    let write: Bool
+
+    static let rw = RelayInfo(read: true, write: true)
+}
+
+struct Relay: Identifiable {
+    let url: URL
+    let info: RelayInfo
+    let connection: RelayConnection
+
+    var id: String {
+        return get_relay_id(url)
+    }
+
+}
+
+func get_relay_id(_ url: URL) -> String {
+    return url.absoluteString
+}
+
+enum RelayError: Error {
+    case RelayAlreadyExists
+    case RelayNotFound
+}
+
+class RelayPool {
+    var relays: [Relay] = []
+    let custom_handle_event: (String, NostrConnectionEvent) -> ()
+
+    init(handle_event: @escaping (String, NostrConnectionEvent) -> ()) {
+        self.custom_handle_event = handle_event
+    }
+
+    func add_relay(_ url: URL, info: RelayInfo) throws {
+        let relay_id = get_relay_id(url)
+        if get_relay(relay_id) != nil {
+            throw RelayError.RelayAlreadyExists
+        }
+        let conn = RelayConnection(url: url) { event in
+            self.handle_event(relay_id: relay_id, event: event)
+        }
+        let relay = Relay(url: url, info: info, connection: conn)
+        self.relays.append(relay)
+    }
+
+    func connect(to: [String]? = nil) {
+        let relays = to.map{ get_relays($0) } ?? self.relays
+        for relay in relays {
+            relay.connection.connect()
+        }
+    }
+
+    func send(filter: NostrFilter, sub_id: String, to: [String]? = nil) {
+        let relays = to.map{ get_relays($0) } ?? self.relays
+
+        for relay in relays {
+            if relay.connection.isConnected {
+                relay.connection.send(filter, sub_id: sub_id)
+            }
+        }
+    }
+
+    func get_relays(_ ids: [String]) -> [Relay] {
+        var relays: [Relay] = []
+
+        for id in ids {
+            if let relay = get_relay(id) {
+                relays.append(relay)
+            }
+        }
+
+        return relays
+    }
+
+    func get_relay(_ id: String) -> Relay? {
+        for relay in relays {
+            if relay.id == id {
+                return relay
+            }
+        }
+
+        return nil
+    }
+
+    func handle_event(relay_id: String, event: NostrConnectionEvent) {
+        // handle reconnect logic, etc?
+        custom_handle_event(relay_id, event)
+    }
+}
+
+class RelayConnection: WebSocketDelegate {
     var isConnected: Bool = false
     var socket: WebSocket
     var handleEvent: (NostrConnectionEvent) -> ()
-    
+
     init(url: URL, handleEvent: @escaping (NostrConnectionEvent) -> ()) {
         var req = URLRequest(url: url)
         req.timeoutInterval = 5
         self.socket = WebSocket(request: req)
         self.handleEvent = handleEvent
-        
+
         socket.delegate = self
     }
-    
+
     func connect(){
         socket.connect()
     }
-    
+
     func disconnect() {
         socket.disconnect()
     }
-    
+
     func send(_ filter: NostrFilter, sub_id: String) {
         guard let req = make_nostr_req(filter, sub_id: sub_id) else {
             print("failed to encode nostr req: \(filter)")
@@ -126,33 +218,33 @@ class NostrConnection: WebSocketDelegate {
         }
         socket.write(string: req)
     }
-    
+
     func didReceive(event: WebSocketEvent, client: WebSocket) {
         switch event {
         case .connected:
             self.isConnected = true
-            
+
         case .disconnected: fallthrough
         case .cancelled: fallthrough
         case .error:
             self.isConnected = false
-            
+
         case .text(let txt):
             if let ev = decode_nostr_event(txt: txt) {
                 handleEvent(.nostr_event(ev))
                 return
             }
-            
+
             print("decode failed for \(txt)")
             // TODO: trigger event error
-            
+
         default:
             break
         }
-        
+
         handleEvent(.ws_event(event))
     }
-    
+
 }
 
 func decode_nostr_event(txt: String) -> NostrResponse? {

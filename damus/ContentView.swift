@@ -10,10 +10,11 @@ import Starscream
 
 struct EventView: View {
     let event: NostrEvent
+    let profile: Profile?
 
     var body: some View {
         VStack {
-            Text(String(event.pubkey.prefix(16)))
+            Text(String(profile?.name ?? String(event.pubkey.prefix(16))))
                 .bold()
                 .onTapGesture {
                     UIPasteboard.general.string = event.pubkey
@@ -43,14 +44,15 @@ struct ContentView: View {
     @State var sub_id: String? = nil
     @State var active_sheet: Sheets? = nil
     @State var events: [NostrEvent] = []
+    @State var profiles: [String: Profile] = [:]
     @State var has_events: [String: Bool] = [:]
     @State var loading: Bool = true
-    @State var connection: NostrConnection? = nil
+    @State var pool: RelayPool? = nil
 
     var MainContent: some View {
         ScrollView {
             ForEach(events.reversed(), id: \.id) {
-                EventView(event: $0)
+                EventView(event: $0, profile: profiles[$0.pubkey])
             }
         }
     }
@@ -86,28 +88,46 @@ struct ContentView: View {
     }
 
     func connect() {
-        let url = URL(string: "wss://nostr.bitcoiner.social")!
-        let conn = NostrConnection(url: url, handleEvent: handle_event)
-        conn.connect()
-        self.connection = conn
+        let pool = RelayPool(handle_event: handle_event)
+
+        add_rw_relay(pool, "wss://nostr-pub.wellorder.net")
+        add_rw_relay(pool, "wss://nostr-relay.wlvs.space")
+        add_rw_relay(pool, "wss://nostr.bitcoiner.social")
+
+        self.pool = pool
+        pool.connect()
     }
 
-    func handle_event(conn_event: NostrConnectionEvent) {
+    func handle_contact_event(_ ev: NostrEvent) {
+    }
+
+    func handle_metadata_event(_ ev: NostrEvent) {
+        guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
+            return
+        }
+
+        self.profiles[ev.pubkey] = profile
+    }
+
+    func handle_event(relay_id: String, conn_event: NostrConnectionEvent) {
         switch conn_event {
         case .ws_event(let ev):
             switch ev {
             case .connected:
-                let now = Int64(Date().timeIntervalSince1970)
-                let yesterday = now - 24 * 60 * 60
-                let filter = NostrFilter.filter_since(yesterday)
+                // TODO: since times should be based on events from a specific relay
+                // perhaps we could mark this in the relay pool somehow
+
+                let since = get_since_time(events: self.events)
+                let filter = NostrFilter.filter_since(since)
+                print("connected to \(relay_id), refreshing from \(since)")
                 let sub_id = self.sub_id ?? UUID().description
                 if self.sub_id != sub_id {
                     self.sub_id = sub_id
                 }
                 print("subscribing to \(sub_id)")
-                self.connection?.send(filter, sub_id: sub_id)
+                self.pool?.send(filter: filter, sub_id: sub_id)
             case .cancelled:
-                self.connection?.connect()
+                self.pool?.connect(to: [relay_id])
             default:
                 break
             }
@@ -120,9 +140,16 @@ struct ContentView: View {
                     self.loading = false
                 }
                 self.sub_id = sub_id
-                if ev.kind == 1 && !(has_events[ev.id] ?? false) {
+
+                if !(has_events[ev.id] ?? false) {
                     has_events[ev.id] = true
-                    self.events.append(ev)
+                    if ev.kind == 1 {
+                        self.events.append(ev)
+                    } else if ev.kind == 0 {
+                        handle_metadata_event(ev)
+                    } else if ev.kind == 3 {
+                        handle_contact_event(ev)
+                    }
                 }
             case .notice(let msg):
                 print(msg)
@@ -154,3 +181,36 @@ func PostButton(action: @escaping () -> ()) -> some View {
             y: 3)
 }
 
+
+
+func get_since_time(events: [NostrEvent]) -> Int64 {
+    if events.count == 0 {
+        return Int64(Date().timeIntervalSince1970) - (24 * 60 * 60)
+    }
+
+    return events.last!.created_at - 60
+}
+
+/*
+func fetch_profiles(relay: URL, pubkeys: [String]) {
+    return NostrFilter(ids: nil, kinds: 3, event_ids: nil, pubkeys: pubkeys, since: nil, until: nil, authors: pubkeys)
+}
+
+
+func nostr_req(relays: [URL], filter: NostrFilter) {
+    if relays.count == 0 {
+        return
+    }
+    let conn = NostrConnection(url: relay) {
+    }
+}
+
+
+func get_profiles()
+
+*/
+
+func add_rw_relay(_ pool: RelayPool, _ url: String) {
+    let url_ = URL(string: url)!
+    try! pool.add_relay(url_, info: RelayInfo.rw)
+}

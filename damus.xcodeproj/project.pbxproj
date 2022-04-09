@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4C75EFA427FA577B0006080F /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFA327FA577B0006080F /* PostView.swift */; };
+		4C75EFA627FF87A20006080F /* Nostr.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFA527FF87A20006080F /* Nostr.swift */; };
 		4CE6DEE727F7A08100C66700 /* damusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DEE627F7A08100C66700 /* damusApp.swift */; };
 		4CE6DEE927F7A08100C66700 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DEE827F7A08100C66700 /* ContentView.swift */; };
 		4CE6DEEB27F7A08200C66700 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4CE6DEEA27F7A08200C66700 /* Assets.xcassets */; };
@@ -16,8 +17,7 @@
 		4CE6DF0227F7A08200C66700 /* damusUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF0127F7A08200C66700 /* damusUITests.swift */; };
 		4CE6DF0427F7A08200C66700 /* damusUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF0327F7A08200C66700 /* damusUITestsLaunchTests.swift */; };
 		4CE6DF1227F7A2B300C66700 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = 4CE6DF1127F7A2B300C66700 /* Starscream */; };
-		4CE6DF1427F7A45200C66700 /* WSConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF1327F7A45200C66700 /* WSConnection.swift */; };
-		4CE6DF1627F8DEBF00C66700 /* NostrConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF1527F8DEBF00C66700 /* NostrConnection.swift */; };
+		4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,6 +39,7 @@
 
 /* Begin PBXFileReference section */
 		4C75EFA327FA577B0006080F /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
+		4C75EFA527FF87A20006080F /* Nostr.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Nostr.swift; sourceTree = "<group>"; };
 		4CE6DEE327F7A08100C66700 /* damus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = damus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CE6DEE627F7A08100C66700 /* damusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damusApp.swift; sourceTree = "<group>"; };
 		4CE6DEE827F7A08100C66700 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -49,8 +50,7 @@
 		4CE6DEFD27F7A08200C66700 /* damusUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = damusUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CE6DF0127F7A08200C66700 /* damusUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damusUITests.swift; sourceTree = "<group>"; };
 		4CE6DF0327F7A08200C66700 /* damusUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damusUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		4CE6DF1327F7A45200C66700 /* WSConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WSConnection.swift; sourceTree = "<group>"; };
-		4CE6DF1527F8DEBF00C66700 /* NostrConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrConnection.swift; sourceTree = "<group>"; };
+		4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayConnection.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,8 +115,8 @@
 				4CE6DEE827F7A08100C66700 /* ContentView.swift */,
 				4CE6DEEA27F7A08200C66700 /* Assets.xcassets */,
 				4CE6DEEC27F7A08200C66700 /* Preview Content */,
-				4CE6DF1327F7A45200C66700 /* WSConnection.swift */,
-				4CE6DF1527F8DEBF00C66700 /* NostrConnection.swift */,
+				4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */,
+				4C75EFA527FF87A20006080F /* Nostr.swift */,
 			);
 			path = damus;
 			sourceTree = "<group>";
@@ -283,8 +283,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				4CE6DEE927F7A08100C66700 /* ContentView.swift in Sources */,
-				4CE6DF1427F7A45200C66700 /* WSConnection.swift in Sources */,
-				4CE6DF1627F8DEBF00C66700 /* NostrConnection.swift in Sources */,
+				4C75EFA627FF87A20006080F /* Nostr.swift in Sources */,
+				4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */,
 				4CE6DEE727F7A08100C66700 /* damusApp.swift in Sources */,
 				4C75EFA427FA577B0006080F /* PostView.swift in Sources */,
 			);
