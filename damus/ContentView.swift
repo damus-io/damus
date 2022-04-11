@@ -64,11 +64,6 @@ enum Sheets: Identifiable {
     }
 }
 
-enum NostrKind: Int {
-    case metadata = 0
-    case text = 1
-}
-
 struct ContentView: View {
     @State var status: String = "Not connected"
     @State var sub_id: String? = nil
@@ -228,22 +223,6 @@ struct ContentView_Previews: PreviewProvider {
     }
 }
 
-func PostButton(action: @escaping () -> ()) -> some View {
-    return Button(action: action, label: {
-        Text("+")
-            .font(.system(.largeTitle))
-            .frame(width: 57, height: 50)
-            .foregroundColor(Color.white)
-            .padding(.bottom, 7)
-    })
-    .background(Color.blue)
-    .cornerRadius(38.5)
-    .padding()
-    .shadow(color: Color.black.opacity(0.3),
-            radius: 3,
-            x: 3,
-            y: 3)
-}
 
 
 func get_metadata_since_time(_ metadata_event: NostrEvent?) -> Int64? {
@@ -281,7 +260,3 @@ func get_profiles()
 
 */
 
-func add_rw_relay(_ pool: RelayPool, _ url: String) {
-    let url_ = URL(string: url)!
-    try! pool.add_relay(url_, info: RelayInfo.rw)
-}
