@@ -25,6 +25,7 @@ struct NostrEvent: Decodable, Identifiable {
     let tags: [[String]]
     let content: String
     let sig: String
+    var pow: Int?
 }
 
 func decode_nostr_event(txt: String) -> NostrResponse? {
