@@ -40,6 +40,7 @@
 /* Begin PBXFileReference section */
 		4C75EFA327FA577B0006080F /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
 		4C75EFA527FF87A20006080F /* Nostr.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Nostr.swift; sourceTree = "<group>"; };
+		4C75EFA72804823E0006080F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4CE6DEE327F7A08100C66700 /* damus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = damus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CE6DEE627F7A08100C66700 /* damusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damusApp.swift; sourceTree = "<group>"; };
 		4CE6DEE827F7A08100C66700 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -110,6 +111,7 @@
 		4CE6DEE527F7A08100C66700 /* damus */ = {
 			isa = PBXGroup;
 			children = (
+				4C75EFA72804823E0006080F /* Info.plist */,
 				4C75EFA227FA576C0006080F /* Views */,
 				4CE6DEE627F7A08100C66700 /* damusApp.swift */,
 				4CE6DEE827F7A08100C66700 /* ContentView.swift */,
@@ -450,6 +452,7 @@
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = damus/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -479,6 +482,7 @@
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = damus/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

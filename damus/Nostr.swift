@@ -9,9 +9,9 @@ import Foundation
 
 
 struct Profile: Decodable {
-    let name: String
-    let about: String
-    let picture: String
+    let name: String?
+    let about: String?
+    let picture: String?
 }
 
 

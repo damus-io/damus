@@ -34,13 +34,13 @@ struct NostrSubscription {
 }
 
 struct NostrFilter: Codable {
-    let ids: [String]?
-    let kinds: [String]?
-    let referenced_ids: [String]?
-    let pubkeys: [String]?
-    let since: Int64?
-    let until: Int64?
-    let authors: [String]?
+    var ids: [String]?
+    var kinds: [Int]?
+    var referenced_ids: [String]?
+    var pubkeys: [String]?
+    var since: Int64?
+    var until: Int64?
+    var authors: [String]?
 
     private enum CodingKeys : String, CodingKey {
         case ids
@@ -50,6 +50,14 @@ struct NostrFilter: Codable {
         case since
         case until
         case authors
+    }
+
+    public static var filter_text: NostrFilter {
+        NostrFilter(ids: nil, kinds: [1], referenced_ids: nil, pubkeys: nil, since: nil, until: nil, authors: nil)
+    }
+
+    public static var filter_profiles: NostrFilter {
+        return NostrFilter(ids: nil, kinds: [0], referenced_ids: nil, pubkeys: nil, since: nil, until: nil, authors: nil)
     }
 
     public static func filter_since(_ val: Int64) -> NostrFilter {
@@ -151,12 +159,12 @@ class RelayPool {
         }
     }
 
-    func send(filter: NostrFilter, sub_id: String, to: [String]? = nil) {
+    func send(filters: [NostrFilter], sub_id: String, to: [String]? = nil) {
         let relays = to.map{ get_relays($0) } ?? self.relays
 
         for relay in relays {
             if relay.connection.isConnected {
-                relay.connection.send(filter, sub_id: sub_id)
+                relay.connection.send(filters, sub_id: sub_id)
             }
         }
     }
@@ -211,9 +219,9 @@ class RelayConnection: WebSocketDelegate {
         socket.disconnect()
     }
 
-    func send(_ filter: NostrFilter, sub_id: String) {
-        guard let req = make_nostr_req(filter, sub_id: sub_id) else {
-            print("failed to encode nostr req: \(filter)")
+    func send(_ filters: [NostrFilter], sub_id: String) {
+        guard let req = make_nostr_req(filters, sub_id: sub_id) else {
+            print("failed to encode nostr req: \(filters)")
             return
         }
         socket.write(string: req)
@@ -262,12 +270,19 @@ func decode_data<T: Decodable>(_ data: Data) -> T? {
     return nil
 }
 
-func make_nostr_req(_ filter: NostrFilter, sub_id: String) -> String? {
+func make_nostr_req(_ filters: [NostrFilter], sub_id: String) -> String? {
     let encoder = JSONEncoder()
-    guard let filter_json = try? encoder.encode(filter) else {
-        return nil
+    var req = "[\"REQ\",\"\(sub_id)\""
+    for filter in filters {
+        req += ","
+        guard let filter_json = try? encoder.encode(filter) else {
+            return nil
+        }
+        let filter_json_str = String(decoding: filter_json, as: UTF8.self)
+        req += filter_json_str
     }
-    let filter_json_str = String(decoding: filter_json, as: UTF8.self)
-    return "[\"REQ\",\"\(sub_id)\",\(filter_json_str)]"
+    req += "]"
+    print("req: \(req)")
+    return req
 }
 
