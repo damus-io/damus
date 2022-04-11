@@ -165,7 +165,9 @@ struct ContentView: View {
                         last_event_of_kind[ev.kind] = ev
                     }
                     if ev.kind == 1 {
-                        self.events.append(ev)
+                        if !should_hide_event(ev) {
+                            self.events.append(ev)
+                        }
                         self.events = self.events.sorted { $0.created_at > $1.created_at }
                     } else if ev.kind == 0 {
                         handle_metadata_event(ev)
@@ -177,6 +179,14 @@ struct ContentView: View {
                 print(msg)
             }
         }
+    }
+
+    func should_hide_event(_ ev: NostrEvent) -> Bool {
+        // TODO: implement mute
+        if ev.pubkey == "887645fef0ce0c3c1218d2f5d8e6132a19304cdc57cd20281d082f38cfea0072" {
+            return true
+        }
+        return false
     }
 }
 
