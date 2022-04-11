@@ -34,12 +34,18 @@ struct EventView: View {
             }
 
             VStack {
-                Text(String(profile?.name ?? String(event.pubkey.prefix(16))))
-                    .bold()
-                    .onTapGesture {
-                        UIPasteboard.general.string = event.pubkey
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                HStack {
+                    Text(String(profile?.name ?? String(event.pubkey.prefix(16))))
+                        .bold()
+                        .onTapGesture {
+                            UIPasteboard.general.string = event.pubkey
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Spacer()
+                    Text("\(event.pow ?? 0)")
+                        .font(.callout)
+                        .foregroundColor(calculate_pow_color(event.pow ?? 0))
+                }
                 Text(event.content)
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -53,3 +59,9 @@ struct EventView: View {
     }
 }
 
+
+func calculate_pow_color(_ pow: Int) -> Color
+{
+    let x = Double(pow) / 30.0;
+    return Color(.sRGB, red: 2.0 * (1.0 - x), green: 2.0 * x, blue: 0, opacity: 1.0)
+}
