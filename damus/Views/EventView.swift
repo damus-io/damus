@@ -15,18 +15,22 @@ struct EventView: View {
 
     var body: some View {
         HStack {
-            if let pic = profile?.picture.flatMap { URL(string: $0) } {
-                CachedAsyncImage(url: pic) { img in
-                    img.resizable()
-                } placeholder: {
-                    Color.purple.opacity(0.1)
-                }
-                .frame(width: PFP_SIZE, height: PFP_SIZE, alignment: .top)
-                .cornerRadius(CORNER_RADIUS)
-            } else {
-                Color.purple.opacity(0.1)
-                    .frame(width: PFP_SIZE, height: PFP_SIZE, alignment: .top)
+            VStack {
+                if let pic = profile?.picture.flatMap { URL(string: $0) } {
+                    CachedAsyncImage(url: pic) { img in
+                        img.resizable()
+                    } placeholder: {
+                        Color.purple.opacity(0.1)
+                    }
+                    .frame(width: PFP_SIZE, height: PFP_SIZE)
                     .cornerRadius(CORNER_RADIUS)
+                } else {
+                    Color.purple.opacity(0.1)
+                        .frame(width: PFP_SIZE, height: PFP_SIZE)
+                        .cornerRadius(CORNER_RADIUS)
+                }
+
+                Spacer()
             }
 
             VStack {
@@ -39,10 +43,13 @@ struct EventView: View {
                 Text(event.content)
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
+
+                Spacer()
+
                 Divider()
             }
-
         }
+        .frame(minHeight: PFP_SIZE)
     }
 }
 
