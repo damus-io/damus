@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import CachedAsyncImage
 
 struct EventView: View {
     let event: NostrEvent
@@ -15,7 +16,7 @@ struct EventView: View {
     var body: some View {
         HStack {
             if let pic = profile?.picture.flatMap { URL(string: $0) } {
-                AsyncImage(url: pic) { img in
+                CachedAsyncImage(url: pic) { img in
                     img.resizable()
                 } placeholder: {
                     Color.purple.opacity(0.1)
