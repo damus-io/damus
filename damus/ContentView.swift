@@ -74,6 +74,11 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .post)) { obj in
             let post = obj.object as! NostrPost
             print("post \(post.content)")
+            let pubkey = ""
+            let privkey = ""
+            let new_ev = NostrEvent(content: post.content, pubkey: pubkey)
+            new_ev.sign(privkey: privkey)
+            self.pool?.send(.event(new_ev))
         }
     }
 
@@ -129,7 +134,7 @@ struct ContentView: View {
             self.sub_id = sub_id
         }
         print("subscribing to \(sub_id)")
-        self.pool?.send(filters: filters, sub_id: sub_id)
+        self.pool?.send(.subscribe(.init(filters: filters, sub_id: sub_id)))
     }
 
     func handle_event(relay_id: String, conn_event: NostrConnectionEvent) {

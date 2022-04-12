@@ -27,6 +27,8 @@
 		4CE6DF0427F7A08200C66700 /* damusUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF0327F7A08200C66700 /* damusUITestsLaunchTests.swift */; };
 		4CE6DF1227F7A2B300C66700 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = 4CE6DF1127F7A2B300C66700 /* Starscream */; };
 		4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */; };
+		4CEE2AEB2805AEA300AB5EEF /* secp256k1 in Frameworks */ = {isa = PBXBuildFile; productRef = 4CEE2AEA2805AEA300AB5EEF /* secp256k1 */; };
+		4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +71,8 @@
 		4CE6DF0127F7A08200C66700 /* damusUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damusUITests.swift; sourceTree = "<group>"; };
 		4CE6DF0327F7A08200C66700 /* damusUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damusUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayConnection.swift; sourceTree = "<group>"; };
+		4CEE2AE72804F57C00AB5EEF /* libsecp256k1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libsecp256k1.a; sourceTree = "<group>"; };
+		4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrRequest.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CEE2AEB2805AEA300AB5EEF /* secp256k1 in Frameworks */,
 				4CE6DF1227F7A2B300C66700 /* Starscream in Frameworks */,
 				4C75EFAA28049C9F0006080F /* CachedAsyncImage in Frameworks */,
 			);
@@ -119,6 +124,7 @@
 				4C75EFB428049D790006080F /* Relay.swift */,
 				4C75EFB628049D990006080F /* RelayPool.swift */,
 				4C75EFBA2804A34C0006080F /* ProofOfWork.swift */,
+				4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */,
 			);
 			path = Nostr;
 			sourceTree = "<group>";
@@ -130,6 +136,7 @@
 				4CE6DEF627F7A08200C66700 /* damusTests */,
 				4CE6DF0027F7A08200C66700 /* damusUITests */,
 				4CE6DEE427F7A08100C66700 /* Products */,
+				4CEE2AE62804F57B00AB5EEF /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -182,6 +189,14 @@
 			path = damusUITests;
 			sourceTree = "<group>";
 		};
+		4CEE2AE62804F57B00AB5EEF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4CEE2AE72804F57C00AB5EEF /* libsecp256k1.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -201,6 +216,7 @@
 			packageProductDependencies = (
 				4CE6DF1127F7A2B300C66700 /* Starscream */,
 				4C75EFA928049C9F0006080F /* CachedAsyncImage */,
+				4CEE2AEA2805AEA300AB5EEF /* secp256k1 */,
 			);
 			productName = damus;
 			productReference = 4CE6DEE327F7A08100C66700 /* damus.app */;
@@ -277,6 +293,7 @@
 			packageReferences = (
 				4CE6DF1027F7A2B300C66700 /* XCRemoteSwiftPackageReference "Starscream" */,
 				4C75EFA828049C9F0006080F /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */,
+				4CEE2AE92805AEA300AB5EEF /* XCRemoteSwiftPackageReference "secp256k1" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -330,6 +347,7 @@
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
 				4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */,
 				4CE6DEE727F7A08100C66700 /* damusApp.swift in Sources */,
+				4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */,
 				4C75EFA427FA577B0006080F /* PostView.swift in Sources */,
 				4C75EFB528049D790006080F /* Relay.swift in Sources */,
 				4C75EFBB2804A34C0006080F /* ProofOfWork.swift in Sources */,
@@ -506,6 +524,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -535,6 +557,10 @@
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus;
@@ -679,6 +705,14 @@
 				minimumVersion = 4.0.0;
 			};
 		};
+		4CEE2AE92805AEA300AB5EEF /* XCRemoteSwiftPackageReference "secp256k1" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/GigaBitcoin/secp256k1.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.5.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -691,6 +725,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4CE6DF1027F7A2B300C66700 /* XCRemoteSwiftPackageReference "Starscream" */;
 			productName = Starscream;
+		};
+		4CEE2AEA2805AEA300AB5EEF /* secp256k1 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4CEE2AE92805AEA300AB5EEF /* XCRemoteSwiftPackageReference "secp256k1" */;
+			productName = secp256k1;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

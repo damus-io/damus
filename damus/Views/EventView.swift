@@ -63,5 +63,5 @@ struct EventView: View {
 func calculate_pow_color(_ pow: Int) -> Color
 {
     let x = Double(pow) / 30.0;
-    return Color(.sRGB, red: 2.0 * (1.0 - x), green: 2.0 * x, blue: 0, opacity: 1.0)
+    return Color(.sRGB, red: 2.0 * (1.0 - x), green: 2.0 * x, blue: 0, opacity: 0.5)
 }

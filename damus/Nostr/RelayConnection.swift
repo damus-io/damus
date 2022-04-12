@@ -35,9 +35,9 @@ class RelayConnection: WebSocketDelegate {
         socket.disconnect()
     }
 
-    func send(_ filters: [NostrFilter], sub_id: String) {
-        guard let req = make_nostr_req(filters, sub_id: sub_id) else {
-            print("failed to encode nostr req: \(filters)")
+    func send(_ req: NostrRequest) {
+        guard let req = make_nostr_req(req) else {
+            print("failed to encode nostr req: \(req)")
             return
         }
         socket.write(string: req)
@@ -71,7 +71,23 @@ class RelayConnection: WebSocketDelegate {
 
 }
 
-func make_nostr_req(_ filters: [NostrFilter], sub_id: String) -> String? {
+func make_nostr_req(_ req: NostrRequest) -> String? {
+    switch req {
+    case .subscribe(let sub):
+        return make_nostr_subscription_req(sub.filters, sub_id: sub.sub_id)
+    case .event(let ev):
+        return make_nostr_push_event(ev: ev)
+    }
+}
+
+func make_nostr_push_event(ev: NostrEvent) -> String? {
+    let encoder = JSONEncoder()
+    let event_data = try! encoder.encode(ev)
+    let event = String(decoding: event_data, as: UTF8.self)
+    return "[\"EVENT\",\(event)]"
+}
+
+func make_nostr_subscription_req(_ filters: [NostrFilter], sub_id: String) -> String? {
     let encoder = JSONEncoder()
     var req = "[\"REQ\",\"\(sub_id)\""
     for filter in filters {

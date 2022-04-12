@@ -34,12 +34,12 @@ class RelayPool {
         }
     }
 
-    func send(filters: [NostrFilter], sub_id: String, to: [String]? = nil) {
+    func send(_ req: NostrRequest, to: [String]? = nil) {
         let relays = to.map{ get_relays($0) } ?? self.relays
 
         for relay in relays {
             if relay.connection.isConnected {
-                relay.connection.send(filters, sub_id: sub_id)
+                relay.connection.send(req)
             }
         }
     }
