@@ -29,6 +29,7 @@
 		4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */; };
 		4CEE2AEB2805AEA300AB5EEF /* secp256k1 in Frameworks */ = {isa = PBXBuildFile; productRef = 4CEE2AEA2805AEA300AB5EEF /* secp256k1 */; };
 		4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */; };
+		4CEE2AEF2805BE2500AB5EEF /* NostrTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AEE2805BE2500AB5EEF /* NostrTimeline.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -73,6 +74,7 @@
 		4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayConnection.swift; sourceTree = "<group>"; };
 		4CEE2AE72804F57C00AB5EEF /* libsecp256k1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libsecp256k1.a; sourceTree = "<group>"; };
 		4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrRequest.swift; sourceTree = "<group>"; };
+		4CEE2AEE2805BE2500AB5EEF /* NostrTimeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrTimeline.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +127,7 @@
 				4C75EFB628049D990006080F /* RelayPool.swift */,
 				4C75EFBA2804A34C0006080F /* ProofOfWork.swift */,
 				4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */,
+				4CEE2AEE2805BE2500AB5EEF /* NostrTimeline.swift */,
 			);
 			path = Nostr;
 			sourceTree = "<group>";
@@ -344,6 +347,7 @@
 				4C75EFA627FF87A20006080F /* Nostr.swift in Sources */,
 				4C75EFB328049D640006080F /* NostrEvent.swift in Sources */,
 				4C75EFB128049D510006080F /* NostrResponse.swift in Sources */,
+				4CEE2AEF2805BE2500AB5EEF /* NostrTimeline.swift in Sources */,
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
 				4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */,
 				4CE6DEE727F7A08100C66700 /* damusApp.swift in Sources */,

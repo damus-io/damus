@@ -27,11 +27,19 @@ struct NostrFilter: Codable {
     }
 
     public static var filter_text: NostrFilter {
-        NostrFilter(ids: nil, kinds: [1], referenced_ids: nil, pubkeys: nil, since: nil, until: nil, authors: nil)
+        return filter_kinds([1])
     }
 
     public static var filter_profiles: NostrFilter {
-        return NostrFilter(ids: nil, kinds: [0], referenced_ids: nil, pubkeys: nil, since: nil, until: nil, authors: nil)
+        return filter_kinds([0])
+    }
+
+    public static var filter_contacts: NostrFilter {
+        return filter_kinds([3])
+    }
+
+    public static func filter_kinds(_ kinds: [Int]) -> NostrFilter {
+        return NostrFilter(ids: nil, kinds: kinds, referenced_ids: nil, pubkeys: nil, since: nil, until: nil, authors: nil)
     }
 
     public static func filter_since(_ val: Int64) -> NostrFilter {

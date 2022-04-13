@@ -84,7 +84,9 @@ func make_nostr_push_event(ev: NostrEvent) -> String? {
     let encoder = JSONEncoder()
     let event_data = try! encoder.encode(ev)
     let event = String(decoding: event_data, as: UTF8.self)
-    return "[\"EVENT\",\(event)]"
+    let encoded = "[\"EVENT\",\(event)]"
+    print(encoded)
+    return encoded
 }
 
 func make_nostr_subscription_req(_ filters: [NostrFilter], sub_id: String) -> String? {

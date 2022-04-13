@@ -27,37 +27,66 @@ enum Sheets: Identifiable {
     }
 }
 
+enum Timeline {
+    case friends
+    case global
+}
+
 struct ContentView: View {
     @State var status: String = "Not connected"
-    @State var sub_id: String? = nil
     @State var active_sheet: Sheets? = nil
     @State var events: [NostrEvent] = []
     @State var profiles: [String: TimestampedProfile] = [:]
+    @State var friends: [String: ()] = [:]
     @State var has_events: [String: ()] = [:]
     @State var profile_count: Int = 0
     @State var last_event_of_kind: [Int: NostrEvent] = [:]
     @State var loading: Bool = true
+    @State var timeline: Timeline = .friends
     @State var pool: RelayPool? = nil
+
+    let pubkey = "fd3fdb0d0d8d6f9a7667b53211de8ae3c5246b79bdaf64ebac849d5148b5615f"
 
     var MainContent: some View {
         ScrollView {
             ForEach(events, id: \.id) {
-                EventView(event: $0, profile: profiles[$0.pubkey]?.profile)
+                if timeline == .global || (timeline == .friends && is_friend($0.pubkey)) {
+                    EventView(event: $0, profile: profiles[$0.pubkey]?.profile)
+                }
             }
         }
     }
 
-    var body: some View {
-        ZStack {
-            MainContent
-                .padding()
-            VStack {
-                Spacer()
+    var TopBar: some View {
+        HStack {
+            Button(action: {switch_timeline(.friends)}) {
+                Label("", systemImage: "person.2")
+            }
+            .padding([.trailing], 50.0)
+            .foregroundColor(self.timeline == .global ? .gray : .primary)
 
-                HStack {
+            Button(action: {switch_timeline(.global)}) {
+                Label("", systemImage: "globe.americas")
+            }
+            .padding([.leading], 50.0)
+            .foregroundColor(self.timeline == .friends ? .gray : .primary)
+        }
+    }
+
+    var body: some View {
+        VStack {
+            TopBar
+            ZStack {
+                MainContent
+                    .padding()
+                VStack {
                     Spacer()
-                    PostButton() {
-                        self.active_sheet = .post
+
+                    HStack {
+                        Spacer()
+                        PostButton() {
+                            self.active_sheet = .post
+                        }
                     }
                 }
             }
@@ -74,12 +103,19 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .post)) { obj in
             let post = obj.object as! NostrPost
             print("post \(post.content)")
-            let pubkey = ""
             let privkey = ""
             let new_ev = NostrEvent(content: post.content, pubkey: pubkey)
             new_ev.sign(privkey: privkey)
             self.pool?.send(.event(new_ev))
         }
+    }
+
+    func is_friend(_ pubkey: String) -> Bool {
+        return pubkey == self.pubkey || self.friends[pubkey] != nil
+    }
+
+    func switch_timeline(_ timeline: Timeline) {
+        self.timeline = timeline
     }
 
     func connect() {
@@ -94,6 +130,14 @@ struct ContentView: View {
     }
 
     func handle_contact_event(_ ev: NostrEvent) {
+        if ev.pubkey == self.pubkey {
+            // our contacts
+            for tag in ev.tags {
+                if tag.count > 1 && tag[0] == "p" {
+                    self.friends[tag[1]] = ()
+                }
+            }
+        }
     }
 
     func handle_metadata_event(_ ev: NostrEvent) {
@@ -127,12 +171,12 @@ struct ContentView: View {
             profile_filter.since = prof_since
         }
 
-        let filters = [since_filter, profile_filter]
+        var contacts_filter = NostrFilter.filter_contacts
+        contacts_filter.authors = [self.pubkey]
+
+        let filters = [since_filter, profile_filter, contacts_filter]
         print("connected to \(relay_id), refreshing from \(since)")
-        let sub_id = self.sub_id ?? UUID().description
-        if self.sub_id != sub_id {
-            self.sub_id = sub_id
-        }
+        let sub_id = UUID().description
         print("subscribing to \(sub_id)")
         self.pool?.send(.subscribe(.init(filters: filters, sub_id: sub_id)))
     }
@@ -161,7 +205,6 @@ struct ContentView: View {
                 if self.loading {
                     self.loading = false
                 }
-                self.sub_id = sub_id
 
                 if has_events[ev.id] == nil {
                     has_events[ev.id] = ()
@@ -213,7 +256,7 @@ func get_metadata_since_time(_ metadata_event: NostrEvent?) -> Int64? {
 
 func get_since_time(last_event: NostrEvent?) -> Int64 {
     if last_event == nil {
-        return Int64(Date().timeIntervalSince1970) - (24 * 60 * 60 * 3)
+        return Int64(Date().timeIntervalSince1970) - (24 * 60 * 60 * 4)
     }
 
     return last_event!.created_at - 60 * 10
