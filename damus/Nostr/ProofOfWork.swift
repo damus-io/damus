@@ -77,7 +77,14 @@ func hex_decode(_ str: String) -> [UInt8]?
 {
     var ret: [UInt8] = []
     let chars = Array(str.utf8)
+    var i: Int = 0
     for c in zip(chars, chars[1...]) {
+        i += 1
+
+        if i % 2 == 0 {
+            continue
+        }
+
         guard let c1 = char_to_hex(c.0) else {
             return nil
         }
