@@ -12,11 +12,12 @@ import CachedAsyncImage
 struct EventView: View {
     let event: NostrEvent
     let profile: Profile?
+    let highlighted: Bool
 
     var body: some View {
         HStack {
             VStack {
-                ProfilePicView(picture: profile?.picture, size: 64)
+                ProfilePicView(picture: profile?.picture, size: 64, highlighted: highlighted)
 
                 Spacer()
             }

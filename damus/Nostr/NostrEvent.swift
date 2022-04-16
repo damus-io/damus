@@ -19,6 +19,19 @@ struct KeyEvent {
     let relay_url: String
 }
 
+struct ReferencedId {
+    let ref_id: String
+    let relay_id: String?
+}
+
+struct EventId: Identifiable, CustomStringConvertible {
+    let id: String
+
+    var description: String {
+        id
+    }
+}
+
 class NostrEvent: Codable, Identifiable {
     var id: String
     var sig: String
@@ -37,6 +50,26 @@ class NostrEvent: Codable, Identifiable {
 
     private enum CodingKeys: String, CodingKey {
         case id, sig, tags, pubkey, created_at, kind, content
+    }
+
+    private func get_referenced_ids(key: String) -> [ReferencedId] {
+        return tags.reduce(into: []) { (acc, tag) in
+            if tag.count >= 2 && tag[0] == key {
+                var relay_id: String? = nil
+                if tag.count >= 3 {
+                    relay_id = tag[2]
+                }
+                acc.append(ReferencedId(ref_id: tag[1], relay_id: relay_id))
+            }
+        }
+    }
+
+    public var referenced_ids: [ReferencedId] {
+        return get_referenced_ids(key: "e")
+    }
+
+    public var referenced_pubkeys: [ReferencedId] {
+        return get_referenced_ids(key: "p")
     }
 
     /// Make a local event

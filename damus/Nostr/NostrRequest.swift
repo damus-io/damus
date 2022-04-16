@@ -14,5 +14,6 @@ struct NostrSubscribe {
 
 enum NostrRequest {
     case subscribe(NostrSubscribe)
+    case unsubscribe(String)
     case event(NostrEvent)
 }

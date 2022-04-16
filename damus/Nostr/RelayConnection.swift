@@ -40,6 +40,8 @@ class RelayConnection: WebSocketDelegate {
             print("failed to encode nostr req: \(req)")
             return
         }
+        print("req: \(req)")
+
         socket.write(string: req)
     }
 
@@ -75,6 +77,8 @@ func make_nostr_req(_ req: NostrRequest) -> String? {
     switch req {
     case .subscribe(let sub):
         return make_nostr_subscription_req(sub.filters, sub_id: sub.sub_id)
+    case .unsubscribe(let sub_id):
+        return make_nostr_unsubscribe_req(sub_id)
     case .event(let ev):
         return make_nostr_push_event(ev: ev)
     }
@@ -89,6 +93,10 @@ func make_nostr_push_event(ev: NostrEvent) -> String? {
     return encoded
 }
 
+func make_nostr_unsubscribe_req(_ sub_id: String) -> String? {
+    return "[\"CLOSE\",\"\(sub_id)\"]"
+}
+
 func make_nostr_subscription_req(_ filters: [NostrFilter], sub_id: String) -> String? {
     let encoder = JSONEncoder()
     var req = "[\"REQ\",\"\(sub_id)\""
@@ -101,7 +109,6 @@ func make_nostr_subscription_req(_ filters: [NostrFilter], sub_id: String) -> St
         req += filter_json_str
     }
     req += "]"
-    print("req: \(req)")
     return req
 }
 

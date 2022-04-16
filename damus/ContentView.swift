@@ -43,15 +43,18 @@ struct ContentView: View {
     @State var timeline: Timeline = .friends
     @State var pool: RelayPool? = nil
 
+    let sub_id = UUID().description
     let pubkey = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
 
-    var MainContent: some View {
+    func MainContent(pool: RelayPool) -> some View {
         ScrollView {
-            ForEach(events, id: \.id) { ev in
+            ForEach(self.events, id: \.id) { (ev: NostrEvent) in
                 if ev.is_local && timeline == .debug || (timeline == .global && !ev.is_local) || (timeline == .friends && is_friend(ev.pubkey)) {
                     let profile: Profile? = profiles[ev.pubkey]?.profile
-                    NavigationLink(destination: EventDetailView(event: ev, profile: profile).navigationBarTitle("Note")) {
-                        EventView(event: ev, profile: profile)
+                    let evdet = EventDetailView(event: ev, pool: pool, profiles: profiles)
+                        .navigationBarTitle("Note")
+                    NavigationLink(destination: evdet) {
+                        EventView(event: ev, profile: profile, highlighted: false)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
@@ -93,8 +96,10 @@ struct ContentView: View {
             VStack {
                 TopBar(selected: self.timeline)
                 ZStack {
-                    MainContent
-                        .padding()
+                    if let pool = self.pool {
+                        MainContent(pool: pool)
+                            .padding()
+                    }
                     PostButtonContainer
                 }
             }
@@ -137,12 +142,14 @@ struct ContentView: View {
     }
 
     func connect() {
-        let pool = RelayPool(handle_event: handle_event)
+        let pool = RelayPool()
 
-        add_relay(pool, "nostr-relay.wlvs.space")
+        add_relay(pool, "wss://nostr.onsats.org")
         add_relay(pool, "nostr.bitcoiner.social")
         add_relay(pool, "nostr-relay.freeberty.net")
         add_relay(pool, "nostr-relay.untethr.me")
+
+        pool.register_handler(sub_id: sub_id, handler: handle_event)
 
         self.pool = pool
         pool.connect()
@@ -194,8 +201,6 @@ struct ContentView: View {
 
         let filters = [since_filter, profile_filter, contacts_filter]
         print("connected to \(relay_id), refreshing from \(since)")
-        let sub_id = UUID().description
-        print("subscribing to \(sub_id)")
         self.pool?.send(.subscribe(.init(filters: filters, sub_id: sub_id)))
     }
 
@@ -211,6 +216,11 @@ struct ContentView: View {
             switch ev {
             case .connected:
                 send_filters(relay_id: relay_id)
+            case .error(let merr):
+                let desc = merr.debugDescription
+                if desc.contains("Software caused connection abort") {
+                    self.pool?.connect(to: [relay_id])
+                }
             case .disconnected:
                 self.pool?.connect(to: [relay_id])
             case .cancelled:
@@ -227,7 +237,12 @@ struct ContentView: View {
 
         case .nostr_event(let ev):
             switch ev {
-            case .event(_, let ev):
+            case .event(let sub_id, let ev):
+                if sub_id != self.sub_id {
+                    // TODO: other views like threads might have their own sub ids, so ignore those events... or should we?
+                    return
+                }
+
                 if self.loading {
                     self.loading = false
                 }

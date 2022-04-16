@@ -7,12 +7,41 @@
 
 import Foundation
 
+struct SubscriptionId: Identifiable, CustomStringConvertible {
+    let id: String
+
+    var description: String {
+        id
+    }
+}
+
+struct RelayId: Identifiable, CustomStringConvertible {
+    let id: String
+
+    var description: String {
+        id
+    }
+}
+
+struct RelayHandler {
+    let sub_id: String
+    let callback: (String, NostrConnectionEvent) -> ()
+}
+
 class RelayPool {
     var relays: [Relay] = []
-    let custom_handle_event: (String, NostrConnectionEvent) -> ()
+    var handlers: [RelayHandler] = []
 
-    init(handle_event: @escaping (String, NostrConnectionEvent) -> ()) {
-        self.custom_handle_event = handle_event
+    var descriptors: [RelayDescriptor] {
+        relays.map { $0.descriptor }
+    }
+
+    func remove_handler(sub_id: String) {
+        handlers = handlers.filter { $0.sub_id != sub_id }
+    }
+
+    func register_handler(sub_id: String, handler: @escaping (String, NostrConnectionEvent) -> ()) {
+        self.handlers.append(RelayHandler(sub_id: sub_id, callback: handler))
     }
 
     func add_relay(_ url: URL, info: RelayInfo) throws {
@@ -23,7 +52,8 @@ class RelayPool {
         let conn = RelayConnection(url: url) { event in
             self.handle_event(relay_id: relay_id, event: event)
         }
-        let relay = Relay(url: url, info: info, connection: conn)
+        let descriptor = RelayDescriptor(url: url, info: info)
+        let relay = Relay(descriptor: descriptor, connection: conn)
         self.relays.append(relay)
     }
 
@@ -31,6 +61,13 @@ class RelayPool {
         let relays = to.map{ get_relays($0) } ?? self.relays
         for relay in relays {
             relay.connection.connect()
+        }
+    }
+
+    func disconnect(to: [String]? = nil) {
+        let relays = to.map{ get_relays($0) } ?? self.relays
+        for relay in relays {
+            relay.connection.disconnect()
         }
     }
 
@@ -68,7 +105,9 @@ class RelayPool {
 
     func handle_event(relay_id: String, event: NostrConnectionEvent) {
         // handle reconnect logic, etc?
-        custom_handle_event(relay_id, event)
+        for handler in handlers {
+            handler.callback(relay_id, event)
+        }
     }
 }
 

@@ -14,13 +14,17 @@ struct RelayInfo {
     static let rw = RelayInfo(read: true, write: true)
 }
 
-struct Relay: Identifiable {
+struct RelayDescriptor {
     let url: URL
     let info: RelayInfo
+}
+
+struct Relay: Identifiable {
+    let descriptor: RelayDescriptor
     let connection: RelayConnection
 
     var id: String {
-        return get_relay_id(url)
+        return get_relay_id(descriptor.url)
     }
 
 }
