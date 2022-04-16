@@ -27,6 +27,9 @@ class NostrEvent: Codable, Identifiable {
     // cached field for pow calc
     var pow: Int?
 
+    // custom flags for internal use
+    var flags: Int = 0
+
     let pubkey: String
     let created_at: Int64
     let kind: Int
@@ -34,6 +37,17 @@ class NostrEvent: Codable, Identifiable {
 
     private enum CodingKeys: String, CodingKey {
         case id, sig, tags, pubkey, created_at, kind, content
+    }
+
+    /// Make a local event
+    public static func local(content: String, pubkey: String) -> NostrEvent {
+        let ev = NostrEvent(content: content, pubkey: pubkey)
+        ev.flags |= 1
+        return ev
+    }
+
+    public var is_local: Bool {
+        return (self.flags & 1) != 0
     }
 
     init(content: String, pubkey: String, kind: Int = 1, tags: [[String]] = []) {
