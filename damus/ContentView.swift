@@ -118,12 +118,22 @@ struct ContentView: View {
         self.timeline = timeline
     }
 
+    func add_relay(_ pool: RelayPool, _ relay: String) {
+        //add_rw_relay(pool, "wss://nostr-pub.wellorder.net")
+        add_rw_relay(pool, "wss://\(relay)")
+        let profile = Profile(name: relay, about: nil, picture: nil)
+        let ts = Int64(Date().timeIntervalSince1970)
+        let tsprofile = TimestampedProfile(profile: profile, timestamp: ts)
+        self.profiles["wss://\(relay)"] = tsprofile
+    }
+
     func connect() {
         let pool = RelayPool(handle_event: handle_event)
 
-        add_rw_relay(pool, "wss://nostr-pub.wellorder.net")
-        add_rw_relay(pool, "wss://nostr-relay.wlvs.space")
-        add_rw_relay(pool, "wss://nostr.bitcoiner.social")
+        add_relay(pool, "nostr-relay.wlvs.space")
+        add_relay(pool, "nostr.bitcoiner.social")
+        add_relay(pool, "nostr-relay.freeberty.net")
+        add_relay(pool, "nostr-relay.untethr.me")
 
         self.pool = pool
         pool.connect()
