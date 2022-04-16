@@ -91,13 +91,16 @@ struct EventDetailView: View {
     var body: some View {
         ScrollView {
             ForEach(events, id: \.id) { ev in
-                let evdet = EventDetailView(event: ev, pool: pool, profiles: profiles)
-                    .navigationBarTitle("Note")
-                NavigationLink(destination: evdet) {
+                if ev.id == event.id {
                     EventView(event: ev, profile: self.profiles[ev.pubkey]?.profile, highlighted: ev.id == event.id)
+                } else {
+                    let evdet = EventDetailView(event: ev, pool: pool, profiles: profiles)
+                        .navigationBarTitle("Note")
+                    NavigationLink(destination: evdet) {
+                        EventView(event: ev, profile: self.profiles[ev.pubkey]?.profile, highlighted: ev.id == event.id)
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .buttonStyle(PlainButtonStyle())
-                //EventView(event: ev, profile: self.profiles[ev.pubkey]?.profile, highlighted: ev.id == event.id)
             }
         }
         .padding()
