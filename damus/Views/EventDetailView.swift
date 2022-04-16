@@ -18,7 +18,27 @@ struct EventDetailView: View {
 
                 Spacer()
             }
+
+            VStack {
+                HStack {
+                    ProfileName(pubkey: event.pubkey, profile: profile)
+                    Text("\(format_relative_time(event.created_at))")
+                        .foregroundColor(.gray)
+                    Spacer()
+                    PowView(event.pow)
+                }
+                Text(event.content)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                Divider()
+                    .padding([.bottom], 10)
+
+                EventActionBar(event: event)
+
+                Spacer()
+            }
         }
+        .padding()
     }
 }
 

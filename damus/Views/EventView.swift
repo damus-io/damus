@@ -23,40 +23,30 @@ struct EventView: View {
 
             VStack {
                 HStack {
-                    Text(String(profile?.name ?? String(event.pubkey.prefix(16))))
-                        .bold()
-                        .onTapGesture {
-                            UIPasteboard.general.string = event.pubkey
-                        }
+                    ProfileName(pubkey: event.pubkey, profile: profile)
                     Text("\(format_relative_time(event.created_at))")
                         .foregroundColor(.gray)
                     Spacer()
                     if (event.pow ?? 0) >= 10 {
-                        Text("\(event.pow ?? 0)")
-                            .font(.callout)
-                            .foregroundColor(calculate_pow_color(event.pow ?? 0))
+                        PowView(event.pow)
                     }
                 }
                 Text(event.content)
-                    .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 Spacer()
 
+                EventActionBar(event: event)
+
                 Divider()
+                    .padding([.top], 4)
             }
         }
         .frame(minHeight: PFP_SIZE)
+        .padding([.bottom], 4)
     }
 }
 
-
-// TODO: make this less saturated on white theme
-func calculate_pow_color(_ pow: Int) -> Color
-{
-    let x = Double(pow) / 30.0;
-    return Color(.sRGB, red: 2.0 * (1.0 - x), green: 2.0 * x, blue: 0, opacity: 0.5)
-}
 
 func format_relative_time(_ created_at: Int64) -> String
 {

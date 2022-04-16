@@ -50,7 +50,7 @@ struct ContentView: View {
             ForEach(events, id: \.id) { ev in
                 if ev.is_local && timeline == .debug || (timeline == .global && !ev.is_local) || (timeline == .friends && is_friend(ev.pubkey)) {
                     let profile: Profile? = profiles[ev.pubkey]?.profile
-                    NavigationLink(destination: EventDetailView(event: ev, profile: profile)) {
+                    NavigationLink(destination: EventDetailView(event: ev, profile: profile).navigationBarTitle("Note")) {
                         EventView(event: ev, profile: profile)
                     }
                     .buttonStyle(PlainButtonStyle())

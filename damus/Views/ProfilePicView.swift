@@ -17,7 +17,7 @@ struct ProfilePicView: View {
 
     var body: some View {
         if let pic = picture.flatMap({ URL(string: $0) }) {
-            CachedAsyncImage(url: pic) { img in
+            AsyncImage(url: pic) { img in
                 img.resizable()
             } placeholder: {
                 Color.purple.opacity(0.1)
