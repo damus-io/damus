@@ -50,6 +50,7 @@ struct EventView: View {
 }
 
 
+// TODO: make this less saturated on white theme
 func calculate_pow_color(_ pow: Int) -> Color
 {
     let x = Double(pow) / 30.0;
