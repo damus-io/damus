@@ -144,6 +144,7 @@ struct ContentView: View {
     func connect() {
         let pool = RelayPool()
 
+        add_relay(pool, "nostr-pub.wellorder.net")
         add_relay(pool, "nostr.onsats.org")
         add_relay(pool, "nostr.bitcoiner.social")
         add_relay(pool, "nostr-relay.freeberty.net")
