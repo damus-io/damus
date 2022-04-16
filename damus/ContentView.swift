@@ -27,6 +27,7 @@ enum Sheets: Identifiable {
 enum Timeline {
     case friends
     case global
+    case debug
 }
 
 struct ContentView: View {
@@ -46,47 +47,57 @@ struct ContentView: View {
 
     var MainContent: some View {
         ScrollView {
-            ForEach(events, id: \.id) {
-                if timeline == .global || (timeline == .friends && is_friend($0.pubkey)) {
-                    EventView(event: $0, profile: profiles[$0.pubkey]?.profile)
+            ForEach(events, id: \.id) { ev in
+                if ev.is_local && timeline == .debug || (timeline == .global && !ev.is_local) || (timeline == .friends && is_friend(ev.pubkey)) {
+                    NavigationLink(destination: EventDetailView(event: ev)) {
+                        EventView(event: ev, profile: profiles[ev.pubkey]?.profile)
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
         }
     }
 
-    var TopBar: some View {
-        HStack {
-            Button(action: {switch_timeline(.friends)}) {
-                Label("", systemImage: "person.2")
-            }
-            .padding([.trailing], 50.0)
-            .foregroundColor(self.timeline == .global ? .gray : .primary)
+    func TimelineButton(timeline: Timeline, img: String) -> some View {
+        Button(action: {switch_timeline(timeline)}) {
+            Label("", systemImage: img)
+        }
+        .frame(maxWidth: .infinity)
+        .foregroundColor(self.timeline != timeline ? .gray : .primary)
+    }
 
-            Button(action: {switch_timeline(.global)}) {
-                Label("", systemImage: "globe.americas")
+    func TopBar(selected: Timeline) -> some View {
+        HStack {
+            TimelineButton(timeline: .friends, img: selected == .friends ? "person.2.fill" : "person.2")
+            TimelineButton(timeline: .global, img: selected == .global ? "globe.americas.fill" : "globe.americas")
+            TimelineButton(timeline: .debug, img: selected == .debug ? "wrench.fill" : "wrench")
+        }
+    }
+
+    var PostButtonContainer: some View {
+        VStack {
+            Spacer()
+
+            HStack {
+                Spacer()
+                PostButton() {
+                    self.active_sheet = .post
+                }
             }
-            .padding([.leading], 50.0)
-            .foregroundColor(self.timeline == .friends ? .gray : .primary)
         }
     }
 
     var body: some View {
-        VStack {
-            TopBar
-            ZStack {
-                MainContent
-                    .padding()
-                VStack {
-                    Spacer()
-
-                    HStack {
-                        Spacer()
-                        PostButton() {
-                            self.active_sheet = .post
-                        }
-                    }
+        NavigationView {
+            VStack {
+                TopBar(selected: self.timeline)
+                ZStack {
+                    MainContent
+                        .padding()
+                    PostButtonContainer
                 }
             }
+            .navigationBarTitle("Damus", displayMode: .inline)
         }
         .onAppear() {
             self.connect()
@@ -190,10 +201,17 @@ struct ContentView: View {
     func handle_event(relay_id: String, conn_event: NostrConnectionEvent) {
         switch conn_event {
         case .ws_event(let ev):
+
+            if let wsev = ws_nostr_event(relay: relay_id, ev: ev) {
+                wsev.flags |= 1
+                self.events.insert(wsev, at: 0)
+            }
+
             switch ev {
             case .connected:
                 send_filters(relay_id: relay_id)
-            case .disconnected: fallthrough
+            case .disconnected:
+                self.pool?.connect(to: [relay_id])
             case .cancelled:
                 self.pool?.connect(to: [relay_id])
             case .reconnectSuggested(let t):
@@ -203,6 +221,7 @@ struct ContentView: View {
             default:
                 break
             }
+
             print("ws_event \(ev)")
 
         case .nostr_event(let ev):
@@ -230,6 +249,7 @@ struct ContentView: View {
                     }
                 }
             case .notice(let msg):
+                self.events.insert(NostrEvent(content: "NOTICE from \(relay_id): \(msg)", pubkey: "system"), at: 0)
                 print(msg)
             }
         }
@@ -287,3 +307,28 @@ func get_profiles()
 
 */
 
+
+func ws_nostr_event(relay: String, ev: WebSocketEvent) -> NostrEvent? {
+    switch ev {
+    case .binary(let dat):
+        return NostrEvent(content: "binary data? \(dat.count) bytes", pubkey: relay)
+    case .cancelled:
+        return NostrEvent(content: "cancelled", pubkey: relay)
+    case .connected:
+        return NostrEvent(content: "connected", pubkey: relay)
+    case .disconnected:
+        return NostrEvent(content: "disconnected", pubkey: relay)
+    case .error(let err):
+        return NostrEvent(content: "error \(err.debugDescription)", pubkey: relay)
+    case .text(let txt):
+        return NostrEvent(content: "text \(txt)", pubkey: relay)
+    case .pong:
+        return NostrEvent(content: "pong", pubkey: relay)
+    case .ping:
+        return NostrEvent(content: "ping", pubkey: relay)
+    case .viabilityChanged(let b):
+        return NostrEvent(content: "viabilityChanged \(b)", pubkey: relay)
+    case .reconnectSuggested(let b):
+        return NostrEvent(content: "reconnectSuggested \(b)", pubkey: relay)
+    }
+}
