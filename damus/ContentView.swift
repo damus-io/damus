@@ -49,8 +49,9 @@ struct ContentView: View {
         ScrollView {
             ForEach(events, id: \.id) { ev in
                 if ev.is_local && timeline == .debug || (timeline == .global && !ev.is_local) || (timeline == .friends && is_friend(ev.pubkey)) {
-                    NavigationLink(destination: EventDetailView(event: ev)) {
-                        EventView(event: ev, profile: profiles[ev.pubkey]?.profile)
+                    let profile: Profile? = profiles[ev.pubkey]?.profile
+                    NavigationLink(destination: EventDetailView(event: ev, profile: profile)) {
+                        EventView(event: ev, profile: profile)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }

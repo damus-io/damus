@@ -32,6 +32,7 @@
 		4CEE2AEF2805BE2500AB5EEF /* NostrTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AEE2805BE2500AB5EEF /* NostrTimeline.swift */; };
 		4CEE2AF1280B216B00AB5EEF /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */; };
 		4CEE2AF3280B25C500AB5EEF /* ProfilePicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF2280B25C500AB5EEF /* ProfilePicView.swift */; };
+		4CEE2AF5280B29E600AB5EEF /* TimeAgo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF4280B29E600AB5EEF /* TimeAgo.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,6 +80,7 @@
 		4CEE2AEE2805BE2500AB5EEF /* NostrTimeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrTimeline.swift; sourceTree = "<group>"; };
 		4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
 		4CEE2AF2280B25C500AB5EEF /* ProfilePicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePicView.swift; sourceTree = "<group>"; };
+		4CEE2AF4280B29E600AB5EEF /* TimeAgo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeAgo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +171,7 @@
 				4CE6DEE827F7A08100C66700 /* ContentView.swift */,
 				4CE6DEEA27F7A08200C66700 /* Assets.xcassets */,
 				4CE6DEEC27F7A08200C66700 /* Preview Content */,
+				4CEE2AF4280B29E600AB5EEF /* TimeAgo.swift */,
 			);
 			path = damus;
 			sourceTree = "<group>";
@@ -348,6 +351,7 @@
 			files = (
 				4C75EFB728049D990006080F /* RelayPool.swift in Sources */,
 				4CE6DEE927F7A08100C66700 /* ContentView.swift in Sources */,
+				4CEE2AF5280B29E600AB5EEF /* TimeAgo.swift in Sources */,
 				4C75EFAD28049CFB0006080F /* PostButton.swift in Sources */,
 				4C75EFB92804A2740006080F /* EventView.swift in Sources */,
 				4C75EFA627FF87A20006080F /* Nostr.swift in Sources */,

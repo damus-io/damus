@@ -28,7 +28,8 @@ struct EventView: View {
                         .onTapGesture {
                             UIPasteboard.general.string = event.pubkey
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text("\(format_relative_time(event.created_at))")
+                        .foregroundColor(.gray)
                     Spacer()
                     if (event.pow ?? 0) >= 10 {
                         Text("\(event.pow ?? 0)")
@@ -55,4 +56,9 @@ func calculate_pow_color(_ pow: Int) -> Color
 {
     let x = Double(pow) / 30.0;
     return Color(.sRGB, red: 2.0 * (1.0 - x), green: 2.0 * x, blue: 0, opacity: 0.5)
+}
+
+func format_relative_time(_ created_at: Int64) -> String
+{
+    return time_ago_since(Date(timeIntervalSince1970: Double(created_at)))
 }
