@@ -151,7 +151,6 @@ struct ContentView: View {
     }
 
     func handle_metadata_event(_ ev: NostrEvent) {
-
         guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
             return
         }
