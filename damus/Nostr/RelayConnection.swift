@@ -21,7 +21,7 @@ class RelayConnection: WebSocketDelegate {
     init(url: URL, handleEvent: @escaping (NostrConnectionEvent) -> ()) {
         var req = URLRequest(url: url)
         req.timeoutInterval = 5
-        self.socket = WebSocket(request: req)
+        self.socket = WebSocket(request: req, certPinner: nil, compressionHandler: .none, useCustomEngine: false)
         self.handleEvent = handleEvent
 
         socket.delegate = self
