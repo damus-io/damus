@@ -8,9 +8,6 @@
 import SwiftUI
 import Starscream
 
-let PFP_SIZE: CGFloat? = 64
-let CORNER_RADIUS: CGFloat = 32
-
 struct TimestampedProfile {
     let profile: Profile
     let timestamp: Int64

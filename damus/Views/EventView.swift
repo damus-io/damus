@@ -16,19 +16,7 @@ struct EventView: View {
     var body: some View {
         HStack {
             VStack {
-                if let pic = profile?.picture.flatMap { URL(string: $0) } {
-                    CachedAsyncImage(url: pic) { img in
-                        img.resizable()
-                    } placeholder: {
-                        Color.purple.opacity(0.1)
-                    }
-                    .frame(width: PFP_SIZE, height: PFP_SIZE)
-                    .cornerRadius(CORNER_RADIUS)
-                } else {
-                    Color.purple.opacity(0.1)
-                        .frame(width: PFP_SIZE, height: PFP_SIZE)
-                        .cornerRadius(CORNER_RADIUS)
-                }
+                ProfilePicView(picture: profile?.picture, size: 64)
 
                 Spacer()
             }
