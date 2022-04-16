@@ -42,9 +42,11 @@ struct EventView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     Spacer()
-                    Text("\(event.pow ?? 0)")
-                        .font(.callout)
-                        .foregroundColor(calculate_pow_color(event.pow ?? 0))
+                    if (event.pow ?? 0) >= 10 {
+                        Text("\(event.pow ?? 0)")
+                            .font(.callout)
+                            .foregroundColor(calculate_pow_color(event.pow ?? 0))
+                    }
                 }
                 Text(event.content)
                     .textSelection(.enabled)
