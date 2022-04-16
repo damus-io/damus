@@ -45,7 +45,7 @@ struct ContentView: View {
     @State var timeline: Timeline = .friends
     @State var pool: RelayPool? = nil
 
-    let pubkey = "fd3fdb0d0d8d6f9a7667b53211de8ae3c5246b79bdaf64ebac849d5148b5615f"
+    let pubkey = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
 
     var MainContent: some View {
         ScrollView {
