@@ -196,11 +196,14 @@ func event_commitment(ev: NostrEvent, tags: String) -> String {
     let encoder = JSONEncoder()
     let str_data = try! encoder.encode(ev.content)
     let content = String(decoding: str_data, as: UTF8.self)
-    return "[0,\"\(ev.pubkey)\",\(ev.created_at),\(ev.kind),\(tags),\(content)]"
+    let commit = "[0,\"\(ev.pubkey)\",\(ev.created_at),\(ev.kind),\(tags),\(content)]"
+    //print("COMMIT", commit)
+    return commit
 }
 
 func calculate_event_id(ev: NostrEvent) -> String {
     let tags_encoder = JSONEncoder()
+    tags_encoder.outputFormatting = .withoutEscapingSlashes
     let tags_data = try! tags_encoder.encode(ev.tags)
     let tags = String(decoding: tags_data, as: UTF8.self)
 
