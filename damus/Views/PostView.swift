@@ -15,12 +15,14 @@ extension Notification.Name {
 
 struct NostrPost {
     let content: String
+    let references: [String]
 }
 
 
 struct PostView: View {
     @State var post: String = ""
     @FocusState var focus: Bool
+    let references: [String]
 
     @Environment(\.presentationMode) var presmode
 
@@ -33,7 +35,7 @@ struct PostView: View {
     }
 
     func send_post() {
-        let new_post = NostrPost(content: self.post)
+        let new_post = NostrPost(content: self.post, references: references)
         NotificationCenter.default.post(name: .post, object: new_post)
         dismiss()
     }

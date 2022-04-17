@@ -85,7 +85,13 @@ class NostrEvent: Codable, Identifiable {
 
         return false
     }
-
+    
+    public func reply_ids() -> [String] {
+        var ids = self.referenced_ids.map { $0.ref_id }
+        ids.append(self.id)
+        return ids
+    }
+    
     public var referenced_ids: [ReferencedId] {
         return get_referenced_ids(key: "e")
     }

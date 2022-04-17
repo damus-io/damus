@@ -112,7 +112,7 @@ struct ContentView: View {
         .sheet(item: $active_sheet) { item in
             switch item {
             case .post:
-                PostView()
+                PostView(references: [])
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .post)) { obj in
@@ -120,6 +120,10 @@ struct ContentView: View {
             print("post \(post.content)")
             let privkey = ""
             let new_ev = NostrEvent(content: post.content, pubkey: pubkey)
+            for id in post.references {
+                new_ev.tags.append(["e", id])
+            }
+            new_ev.calculate_id()
             new_ev.sign(privkey: privkey)
             self.pool?.send(.event(new_ev))
         }
