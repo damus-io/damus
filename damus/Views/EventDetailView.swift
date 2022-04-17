@@ -14,9 +14,10 @@ struct EventDetailView: View {
 
     @State var events: [NostrEvent] = []
     @State var has_event: [String: ()] = [:]
-
+    
+    @EnvironmentObject var profiles: Profiles
+    
     let pool: RelayPool
-    let profiles: [String: TimestampedProfile]
 
     func unsubscribe_to_thread() {
         print("unsubscribing from thread \(event.id) with sub_id \(sub_id)")
@@ -59,45 +60,18 @@ struct EventDetailView: View {
         }
     }
 
-    var NoteBody: some View {
-        HStack {
-            let profile = profiles[event.pubkey]?.profile
-
-            VStack {
-                ProfilePicView(picture: profile?.picture, size: 64, highlighted: false)
-
-                Spacer()
-            }
-
-            VStack {
-                HStack {
-                    ProfileName(pubkey: event.pubkey, profile: profile)
-                    Text("\(format_relative_time(event.created_at))")
-                        .foregroundColor(.gray)
-                    Spacer()
-                    PowView(event.pow)
-                }
-                Text(event.content)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                EventActionBar(event: event)
-
-                Divider()
-                    .padding([.bottom], 10)
-            }
-        }
-    }
-
     var body: some View {
         ScrollView {
             ForEach(events, id: \.id) { ev in
                 if ev.id == event.id {
-                    EventView(event: ev, profile: self.profiles[ev.pubkey]?.profile, highlighted: ev.id == event.id)
+                    EventView(event: ev, highlighted: ev.id == event.id)
                 } else {
-                    let evdet = EventDetailView(event: ev, pool: pool, profiles: profiles)
+                    let evdet = EventDetailView(event: ev, pool: pool)
                         .navigationBarTitle("Note")
+                        .environmentObject(profiles)
+                    
                     NavigationLink(destination: evdet) {
-                        EventView(event: ev, profile: self.profiles[ev.pubkey]?.profile, highlighted: ev.id == event.id)
+                        EventView(event: ev, highlighted: ev.id == event.id)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }

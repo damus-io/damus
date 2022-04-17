@@ -12,6 +12,10 @@ struct Profile: Decodable {
     let name: String?
     let about: String?
     let picture: String?
+    
+    static func displayName(profile: Profile?, pubkey: String) -> String {
+        return profile?.name ?? String(pubkey.prefix(16))
+    }
 }
 
 enum NostrKind: Int {

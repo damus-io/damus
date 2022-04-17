@@ -8,7 +8,7 @@
 import SwiftUI
 
 func ProfileName(pubkey: String, profile: Profile?) -> some View {
-    Text(String(profile?.name ?? String(pubkey.prefix(16))))
+    Text(String(Profile.displayName(profile: profile, pubkey: pubkey)))
         .bold()
 }
 

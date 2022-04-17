@@ -11,10 +11,12 @@ import CachedAsyncImage
 
 struct EventView: View {
     let event: NostrEvent
-    let profile: Profile?
     let highlighted: Bool
+    
+    @EnvironmentObject var profiles: Profiles
 
     var body: some View {
+        let profile = profiles.lookup(id: event.pubkey)
         HStack {
             VStack {
                 ProfilePicView(picture: profile?.picture, size: 64, highlighted: highlighted)
@@ -32,12 +34,14 @@ struct EventView: View {
                         PowView(event.pow)
                     }
                 }
+                
                 Text(event.content)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .textSelection(.enabled)
 
                 Spacer()
 
-                EventActionBar(event: event)
+                EventActionBar(event: event, profiles: profiles)
 
                 Divider()
                     .padding([.top], 4)

@@ -34,7 +34,7 @@ struct ContentView: View {
     @State var status: String = "Not connected"
     @State var active_sheet: Sheets? = nil
     @State var events: [NostrEvent] = []
-    @State var profiles: [String: TimestampedProfile] = [:]
+    @State var profiles: Profiles = Profiles()
     @State var friends: [String: ()] = [:]
     @State var has_events: [String: ()] = [:]
     @State var profile_count: Int = 0
@@ -50,16 +50,17 @@ struct ContentView: View {
         ScrollView {
             ForEach(self.events, id: \.id) { (ev: NostrEvent) in
                 if ev.is_local && timeline == .debug || (timeline == .global && !ev.is_local) || (timeline == .friends && is_friend(ev.pubkey)) {
-                    let profile: Profile? = profiles[ev.pubkey]?.profile
-                    let evdet = EventDetailView(event: ev, pool: pool, profiles: profiles)
+                    let evdet = EventDetailView(event: ev, pool: pool)
                         .navigationBarTitle("Note")
+                        .environmentObject(profiles)
                     NavigationLink(destination: evdet) {
-                        EventView(event: ev, profile: profile, highlighted: false)
+                        EventView(event: ev, highlighted: false)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
             }
         }
+        .environmentObject(profiles)
     }
 
     func TimelineButton(timeline: Timeline, img: String) -> some View {
@@ -134,11 +135,12 @@ struct ContentView: View {
 
     func add_relay(_ pool: RelayPool, _ relay: String) {
         //add_rw_relay(pool, "wss://nostr-pub.wellorder.net")
-        add_rw_relay(pool, "wss://\(relay)")
+        let wssrelay = "wss://\(relay)"
+        add_rw_relay(pool, wssrelay)
         let profile = Profile(name: relay, about: nil, picture: nil)
         let ts = Int64(Date().timeIntervalSince1970)
         let tsprofile = TimestampedProfile(profile: profile, timestamp: ts)
-        self.profiles["wss://\(relay)"] = tsprofile
+        self.profiles.add(id: wssrelay, profile: tsprofile)
     }
 
     func connect() {
@@ -172,14 +174,15 @@ struct ContentView: View {
             return
         }
 
-        if let mprof = self.profiles[ev.pubkey] {
+        if let mprof = self.profiles.lookup_with_timestamp(id: ev.pubkey) {
             if mprof.timestamp > ev.created_at {
                 // skip if we already have an newer profile
                 return
             }
         }
 
-        self.profiles[ev.pubkey] = TimestampedProfile(profile: profile, timestamp: ev.created_at)
+        let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at)
+        self.profiles.add(id: ev.pubkey, profile: tprof)
     }
 
     func send_filters(relay_id: String) {
