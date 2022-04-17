@@ -61,29 +61,40 @@ struct EventDetailView: View {
     }
 
     var body: some View {
-        ScrollView {
-            ForEach(events, id: \.id) { ev in
-                if ev.id == event.id {
-                    EventView(event: ev, highlighted: ev.id == event.id)
-                } else {
-                    let evdet = EventDetailView(event: ev, pool: pool)
-                        .navigationBarTitle("Note")
-                        .environmentObject(profiles)
-                    
-                    NavigationLink(destination: evdet) {
-                        EventView(event: ev, highlighted: ev.id == event.id)
+        ScrollViewReader { proxy in
+            ScrollView {
+                ForEach(events, id: \.id) { ev in
+                    let is_active_id = ev.id == event.id
+                    if is_active_id {
+                        EventView(event: ev, highlighted: is_active_id, has_action_bar: true)
+                            .onAppear() {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    withAnimation {
+                                        proxy.scrollTo(event.id)
+                                    }
+                                }
+                            }
+                    } else {
+                        let evdet = EventDetailView(event: ev, pool: pool)
+                            .navigationBarTitle("Note")
+                            .environmentObject(profiles)
+                        
+                        NavigationLink(destination: evdet) {
+                            EventView(event: ev, highlighted: is_active_id, has_action_bar: true)
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
-                    .buttonStyle(PlainButtonStyle())
                 }
             }
-        }
-        .padding()
-        .onDisappear() {
-            unsubscribe_to_thread()
-        }
-        .onAppear() {
-            self.add_event(event)
-            subscribe_to_thread()
+            .padding()
+            .onDisappear() {
+                unsubscribe_to_thread()
+            }
+            .onAppear() {
+                self.add_event(event)
+                subscribe_to_thread()
+                
+            }
         }
 
     }

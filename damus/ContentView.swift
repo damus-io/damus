@@ -54,7 +54,7 @@ struct ContentView: View {
                         .navigationBarTitle("Note")
                         .environmentObject(profiles)
                     NavigationLink(destination: evdet) {
-                        EventView(event: ev, highlighted: false)
+                        EventView(event: ev, highlighted: false, has_action_bar: true)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }

@@ -12,6 +12,7 @@ import CachedAsyncImage
 struct EventView: View {
     let event: NostrEvent
     let highlighted: Bool
+    let has_action_bar: Bool
     
     @EnvironmentObject var profiles: Profiles
 
@@ -41,12 +42,15 @@ struct EventView: View {
 
                 Spacer()
 
-                EventActionBar(event: event, profiles: profiles)
+                if has_action_bar {
+                    EventActionBar(event: event)
+                }
 
                 Divider()
                     .padding([.top], 4)
             }
         }
+        .id(event.id)
         .frame(minHeight: PFP_SIZE)
         .padding([.bottom], 4)
     }
