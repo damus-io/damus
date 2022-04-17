@@ -220,15 +220,15 @@ struct ContentView: View {
             case .error(let merr):
                 let desc = merr.debugDescription
                 if desc.contains("Software caused connection abort") {
-                    self.pool?.connect(to: [relay_id])
+                    self.pool?.reconnect(to: [relay_id])
                 }
             case .disconnected:
-                self.pool?.connect(to: [relay_id])
+                self.pool?.reconnect(to: [relay_id])
             case .cancelled:
-                self.pool?.connect(to: [relay_id])
+                self.pool?.reconnect(to: [relay_id])
             case .reconnectSuggested(let t):
                 if t {
-                    self.pool?.connect(to: [relay_id])
+                    self.pool?.reconnect(to: [relay_id])
                 }
             default:
                 break

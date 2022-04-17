@@ -15,24 +15,47 @@ enum NostrConnectionEvent {
 
 class RelayConnection: WebSocketDelegate {
     var isConnected: Bool = false
+    var isConnecting: Bool = false
+    var isReconnecting: Bool = false
     var socket: WebSocket
     var handleEvent: (NostrConnectionEvent) -> ()
+    let url: URL
 
     init(url: URL, handleEvent: @escaping (NostrConnectionEvent) -> ()) {
-        var req = URLRequest(url: url)
-        req.timeoutInterval = 5
-        self.socket = WebSocket(request: req, certPinner: nil, compressionHandler: .none, useCustomEngine: true)
+        self.url = url
         self.handleEvent = handleEvent
+        // just init, we don't actually use this one
+        self.socket = WebSocket(request: URLRequest(url: self.url), compressionHandler: .none)
+    }
 
-        socket.delegate = self
+    func reconnect() {
+        if self.isConnected {
+            self.isReconnecting = true
+            self.disconnect()
+        } else {
+            // we're already disconnected, so just connect
+            self.connect()
+        }
     }
 
     func connect(){
+        if self.isConnected || self.isConnecting {
+            return
+        }
+
+        var req = URLRequest(url: self.url)
+        req.timeoutInterval = 5
+        socket = WebSocket(request: req, compressionHandler: .none)
+        socket.delegate = self
+
+        isConnecting = true
         socket.connect()
     }
 
     func disconnect() {
         socket.disconnect()
+        isConnected = false
+        isConnecting = false
     }
 
     func send(_ req: NostrRequest) {
@@ -49,10 +72,19 @@ class RelayConnection: WebSocketDelegate {
         switch event {
         case .connected:
             self.isConnected = true
+            self.isConnecting = false
 
-        case .disconnected: fallthrough
+        case .disconnected:
+            self.isConnecting = false
+            self.isConnected = false
+            if self.isReconnecting {
+                self.isReconnecting = false
+                self.connect()
+            }
+
         case .cancelled: fallthrough
         case .error:
+            self.isConnecting = false
             self.isConnected = false
 
         case .text(let txt):

@@ -57,6 +57,13 @@ class RelayPool {
         self.relays.append(relay)
     }
 
+    func reconnect(to: [String]? = nil) {
+        let relays = to.map{ get_relays($0) } ?? self.relays
+        for relay in relays {
+            relay.connection.reconnect()
+        }
+    }
+
     func connect(to: [String]? = nil) {
         let relays = to.map{ get_relays($0) } ?? self.relays
         for relay in relays {
