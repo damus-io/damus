@@ -189,6 +189,8 @@ func calculated_collapsed_events(collapsed: Bool, active: NostrEvent, events: [N
         }
     }
     
+    let nevents = events.count
+    var i: Int = 0
     return events.reduce(into: []) { (acc, ev) in
         let highlight = determine_highlight(current: ev, active: active)
         
@@ -209,6 +211,14 @@ func calculated_collapsed_events(collapsed: Bool, active: NostrEvent, events: [N
             acc.append(.event(ev, highlight))
         }
         
+        if i == nevents-1 {
+            if count != 0 {
+                acc.append(.collapsed(count, UUID().description))
+                count = 0
+            }
+        }
+        
+        i += 1
     }
 }
 
