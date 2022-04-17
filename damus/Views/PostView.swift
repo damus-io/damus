@@ -16,6 +16,28 @@ extension Notification.Name {
 struct NostrPost {
     let content: String
     let references: [ReferencedId]
+    
+    public func to_event(privkey: String, pubkey: String) -> NostrEvent {
+        let new_ev = NostrEvent(content: content, pubkey: pubkey)
+        for id in references {
+            var tag = [id.key, id.ref_id]
+            if let relay_id = id.relay_id {
+                tag.append(relay_id)
+            }
+            new_ev.tags.append(tag)
+            // filter our pubkeys
+            new_ev.tags = new_ev.tags.filter {
+                if $0[0] == "p" {
+                    return $0[1] != pubkey
+                } else {
+                    return true
+                }
+            }
+        }
+        new_ev.calculate_id()
+        new_ev.sign(privkey: privkey)
+        return new_ev
+    }
 }
 
 

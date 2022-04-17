@@ -119,16 +119,7 @@ struct ContentView: View {
             let post = obj.object as! NostrPost
             print("post \(post.content)")
             let privkey = ""
-            let new_ev = NostrEvent(content: post.content, pubkey: pubkey)
-            for id in post.references {
-                var tag = [id.key, id.ref_id]
-                if let relay_id = id.relay_id {
-                    tag.append(relay_id)
-                }
-                new_ev.tags.append(tag)
-            }
-            new_ev.calculate_id()
-            new_ev.sign(privkey: privkey)
+            let new_ev = post.to_event(privkey: privkey, pubkey: pubkey)
             self.pool?.send(.event(new_ev))
         }
     }
