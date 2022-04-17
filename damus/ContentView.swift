@@ -51,10 +51,10 @@ struct ContentView: View {
             ForEach(self.events, id: \.id) { (ev: NostrEvent) in
                 if ev.is_local && timeline == .debug || (timeline == .global && !ev.is_local) || (timeline == .friends && is_friend(ev.pubkey)) {
                     let evdet = EventDetailView(event: ev, pool: pool)
-                        .navigationBarTitle("Note")
+                        .navigationBarTitle("Thread")
                         .environmentObject(profiles)
                     NavigationLink(destination: evdet) {
-                        EventView(event: ev, highlighted: false, has_action_bar: true)
+                        EventView(event: ev, highlight: .none, has_action_bar: true)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }

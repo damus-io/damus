@@ -64,6 +64,28 @@ class NostrEvent: Codable, Identifiable {
         }
     }
 
+    public func references(id: String, key: String) -> Bool {
+        for tag in tags {
+            if tag.count >= 2 && tag[0] == key {
+                if tag[1] == id {
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
+
+    public var is_reply: Bool {
+        for tag in tags {
+            if tag[0] == "e" {
+                return true
+            }
+        }
+
+        return false
+    }
+
     public var referenced_ids: [ReferencedId] {
         return get_referenced_ids(key: "e")
     }

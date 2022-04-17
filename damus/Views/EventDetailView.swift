@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct EventDetailView: View {
-    let event: NostrEvent
+    @State var event: NostrEvent
 
     let sub_id = UUID().description
 
@@ -21,8 +21,8 @@ struct EventDetailView: View {
 
     func unsubscribe_to_thread() {
         print("unsubscribing from thread \(event.id) with sub_id \(sub_id)")
-        self.pool.send(.unsubscribe(sub_id))
         self.pool.remove_handler(sub_id: sub_id)
+        self.pool.send(.unsubscribe(sub_id))
     }
 
     func subscribe_to_thread() {
@@ -53,8 +53,11 @@ struct EventDetailView: View {
                 }
                 self.add_event(ev)
 
-            case .notice(_):
-                // TODO: handle notices in threads?
+            case .notice(let note):
+                if note.contains("Too many subscription filters") {
+                    // TODO: resend filters?
+                    pool.reconnect(to: [relay_id])
+                }
                 break
             }
         }
@@ -64,25 +67,24 @@ struct EventDetailView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 ForEach(events, id: \.id) { ev in
-                    let is_active_id = ev.id == event.id
-                    if is_active_id {
-                        EventView(event: ev, highlighted: is_active_id, has_action_bar: true)
-                            .onAppear() {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    withAnimation {
-                                        proxy.scrollTo(event.id)
+                    Group {
+                        let is_active_id = ev.id == event.id
+                        if is_active_id {
+                            EventView(event: ev, highlight: .main, has_action_bar: true)
+                                .onAppear() {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                        withAnimation {
+                                            proxy.scrollTo(event.id)
+                                        }
                                     }
                                 }
-                            }
-                    } else {
-                        let evdet = EventDetailView(event: ev, pool: pool)
-                            .navigationBarTitle("Note")
-                            .environmentObject(profiles)
-                        
-                        NavigationLink(destination: evdet) {
-                            EventView(event: ev, highlighted: is_active_id, has_action_bar: true)
+                        } else {
+                            let highlight = determine_highlight(current: ev, active: event)
+                            EventView(event: ev, highlight: highlight, has_action_bar: true)
+                                .onTapGesture {
+                                    self.event = ev
+                                }
                         }
-                        .buttonStyle(PlainButtonStyle())
                     }
                 }
             }
@@ -115,3 +117,13 @@ struct EventDetailView_Previews: PreviewProvider {
     }
 }
  */
+
+func determine_highlight(current: NostrEvent, active: NostrEvent) -> Highlight
+{
+    if active.references(id: current.id, key: "e") {
+        return .replied_to(active.id)
+    } else if current.references(id: active.id, key: "e") {
+        return .replied_to(current.id)
+    }
+    return .none
+}
