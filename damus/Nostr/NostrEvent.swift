@@ -88,7 +88,7 @@ class NostrEvent: Codable, Identifiable {
     }
     
     public func reply_ids(pubkey: String) -> [ReferencedId] {
-        var ids = self.referenced_ids.first.map { [$0] } ?? []
+        var ids = self.referenced_ids
         ids.append(ReferencedId(ref_id: self.id, relay_id: nil, key: "e"))
         ids.append(contentsOf: self.referenced_pubkeys)
         ids.append(ReferencedId(ref_id: pubkey, relay_id: nil, key: "p"))
