@@ -31,14 +31,18 @@ struct EventActionBar: View {
 
     var body: some View {
         HStack {
-            EventActionButton(img: "bubble.left") {
-                self.sheet = .reply
+            Spacer()
+            
+            /*
+            EventActionButton(img: "square.and.arrow.up") {
+                print("share")
             }
 
             Spacer()
+             */
 
-            EventActionButton(img: "square.and.arrow.up") {
-                print("share")
+            EventActionButton(img: "bubble.left") {
+                self.sheet = .reply
             }
         }
         .sheet(item: $sheet) { sheet in

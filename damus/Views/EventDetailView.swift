@@ -7,6 +7,20 @@
 
 import SwiftUI
 
+enum CollapsedEvent: Identifiable {
+    case event(NostrEvent, Highlight)
+    case collapsed(Int, String)
+    
+    var id: String {
+        switch self {
+        case .event(let ev, _):
+            return ev.id
+        case .collapsed(_, let id):
+            return id
+        }
+    }
+}
+
 struct EventDetailView: View {
     @State var event: NostrEvent
 
@@ -14,6 +28,7 @@ struct EventDetailView: View {
 
     @State var events: [NostrEvent] = []
     @State var has_event: [String: ()] = [:]
+    @State var collapsed: Bool = true
     
     @EnvironmentObject var profiles: Profiles
     
@@ -39,7 +54,13 @@ struct EventDetailView: View {
         pool.register_handler(sub_id: sub_id, handler: handle_event)
         pool.send(.subscribe(.init(filters: [ref_events, events], sub_id: sub_id)))
     }
-
+    
+    func add_event(ev: NostrEvent) {
+        if sub_id != self.sub_id || self.has_event[ev.id] != nil {
+            return
+        }
+        self.add_event(ev)
+    }
 
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
         switch ev {
@@ -48,11 +69,8 @@ struct EventDetailView: View {
         case .nostr_event(let res):
             switch res {
             case .event(let sub_id, let ev):
-                if sub_id != self.sub_id || self.has_event[ev.id] != nil {
-                    return
-                }
-                self.add_event(ev)
-
+                add_event(ev: ev)
+                
             case .notice(let note):
                 if note.contains("Too many subscription filters") {
                     // TODO: resend filters?
@@ -62,29 +80,54 @@ struct EventDetailView: View {
             }
         }
     }
-
+    
+    func toggle_collapse_thread(scroller: ScrollViewProxy, id: String) {
+        self.collapsed = !self.collapsed
+        if !self.collapsed {
+            scroll_to_event(scroller: scroller, id: id, delay: 0.1)
+        }
+    }
+    
+    func scroll_to_event(scroller: ScrollViewProxy, id: String, delay: Double) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            withAnimation {
+                scroller.scrollTo(event.id)
+            }
+        }
+    }
+    
+    func OurEventView(proxy: ScrollViewProxy, ev: NostrEvent, highlight: Highlight) -> some View {
+        Group {
+            if ev.id == event.id {
+                EventView(event: ev, highlight: .main, has_action_bar: true)
+                    .onAppear() {
+                        scroll_to_event(scroller: proxy, id: ev.id, delay: 0.5)
+                    }
+                    .onTapGesture {
+                        toggle_collapse_thread(scroller: proxy, id: ev.id)
+                    }
+            } else {
+                if !(self.collapsed && highlight.is_none) {
+                    EventView(event: ev, highlight: collapsed ? .none : highlight, has_action_bar: true)
+                        .onTapGesture {
+                            self.event = ev
+                        }
+                }
+            }
+        }
+    }
+    
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                ForEach(events, id: \.id) { ev in
-                    Group {
-                        let is_active_id = ev.id == event.id
-                        if is_active_id {
-                            EventView(event: ev, highlight: .main, has_action_bar: true)
-                                .onAppear() {
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                        withAnimation {
-                                            proxy.scrollTo(event.id)
-                                        }
-                                    }
-                                }
-                        } else {
-                            let highlight = determine_highlight(current: ev, active: event)
-                            EventView(event: ev, highlight: highlight, has_action_bar: true)
-                                .onTapGesture {
-                                    self.event = ev
-                                }
-                        }
+                ForEach(calculated_collapsed_events(collapsed: self.collapsed, active: self.event, events: self.events), id: \.id) { cev in
+                    switch cev {
+                    case .collapsed(let i, _):
+                        Text("··· \(i) notes hidden ···")
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                    case .event(let ev, let highlight):
+                        OurEventView(proxy: proxy, ev: ev, highlight: highlight)
                     }
                 }
             }
@@ -120,6 +163,9 @@ struct EventDetailView_Previews: PreviewProvider {
 
 func determine_highlight(current: NostrEvent, active: NostrEvent) -> Highlight
 {
+    if current.id == active.id {
+        return .main
+    }
     if active.references(id: current.id, key: "e") {
         return .replied_to(active.id)
     } else if current.references(id: active.id, key: "e") {
@@ -127,3 +173,37 @@ func determine_highlight(current: NostrEvent, active: NostrEvent) -> Highlight
     }
     return .none
 }
+
+func calculated_collapsed_events(collapsed: Bool, active: NostrEvent, events: [NostrEvent]) -> [CollapsedEvent] {
+    var count: Int = 0
+    
+    if !collapsed {
+        return events.reduce(into: []) { acc, ev in
+            let highlight = determine_highlight(current: ev, active: active)
+            return acc.append(.event(ev, highlight))
+        }
+    }
+    
+    return events.reduce(into: []) { (acc, ev) in
+        let highlight = determine_highlight(current: ev, active: active)
+        
+        switch highlight {
+        case .none:
+            count += 1
+        case .main:
+            if count != 0 {
+                acc.append(.collapsed(count, UUID().description))
+                count = 0
+            }
+            acc.append(.event(ev, .main))
+        case .replied_to:
+            if count != 0 {
+                acc.append(.collapsed(count, UUID().description))
+                count = 0
+            }
+            acc.append(.event(ev, highlight))
+        }
+        
+    }
+}
+

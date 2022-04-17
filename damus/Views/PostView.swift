@@ -15,14 +15,14 @@ extension Notification.Name {
 
 struct NostrPost {
     let content: String
-    let references: [String]
+    let references: [ReferencedId]
 }
 
 
 struct PostView: View {
     @State var post: String = ""
     @FocusState var focus: Bool
-    let references: [String]
+    let references: [ReferencedId]
 
     @Environment(\.presentationMode) var presmode
 

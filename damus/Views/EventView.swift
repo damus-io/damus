@@ -12,7 +12,6 @@ import CachedAsyncImage
 enum Highlight {
     case none
     case main
-    case referenced(String)
     case replied_to(String)
 
     var is_none: Bool {
@@ -75,6 +74,7 @@ struct EventView: View {
                 Divider()
                     .padding([.top], 4)
             }
+            .padding([.leading], 2)
         }
         .id(event.id)
         .frame(minHeight: PFP_SIZE)
