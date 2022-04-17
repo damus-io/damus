@@ -69,7 +69,9 @@ struct EventDetailView: View {
         case .nostr_event(let res):
             switch res {
             case .event(let sub_id, let ev):
-                add_event(ev: ev)
+                if sub_id == self.sub_id {
+                    add_event(ev: ev)
+                }
                 
             case .notice(let note):
                 if note.contains("Too many subscription filters") {
