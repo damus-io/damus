@@ -112,6 +112,9 @@ struct EventDetailView: View {
                 if !(self.collapsed && highlight.is_none) {
                     EventView(event: ev, highlight: collapsed ? .none : highlight, has_action_bar: true)
                         .onTapGesture {
+                            if !collapsed {
+                                toggle_collapse_thread(scroller: proxy, id: ev.id)
+                            }
                             self.event = ev
                         }
                 }
