@@ -121,7 +121,7 @@ struct ContentView: View {
             let privkey = ""
             let new_ev = NostrEvent(content: post.content, pubkey: pubkey)
             for id in post.references {
-                var tag = ["e", id.ref_id]
+                var tag = [id.key, id.ref_id]
                 if let relay_id = id.relay_id {
                     tag.append(relay_id)
                 }

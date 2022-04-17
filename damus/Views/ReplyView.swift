@@ -14,7 +14,7 @@ struct ReplyView: View {
         VStack {
             Text("Replying to:")
             EventView(event: replying_to, highlight: .none, has_action_bar: false)
-            PostView(references: replying_to.reply_ids())
+            PostView(references: replying_to.reply_ids(pubkey: replying_to.pubkey))
             
             Spacer()
         }

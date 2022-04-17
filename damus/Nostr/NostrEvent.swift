@@ -22,6 +22,7 @@ struct KeyEvent {
 struct ReferencedId {
     let ref_id: String
     let relay_id: String?
+    let key: String
 }
 
 struct EventId: Identifiable, CustomStringConvertible {
@@ -59,7 +60,7 @@ class NostrEvent: Codable, Identifiable {
                 if tag.count >= 3 {
                     relay_id = tag[2]
                 }
-                acc.append(ReferencedId(ref_id: tag[1], relay_id: relay_id))
+                acc.append(ReferencedId(ref_id: tag[1], relay_id: relay_id, key: key))
             }
         }
     }
@@ -86,9 +87,11 @@ class NostrEvent: Codable, Identifiable {
         return false
     }
     
-    public func reply_ids() -> [ReferencedId] {
-        var ids = self.referenced_ids.first.map { [$0] } ?? []
-        ids.append(ReferencedId(ref_id: self.id, relay_id: nil))
+    public func reply_ids(pubkey: String) -> [ReferencedId] {
+        var ids = self.referenced_ids
+        ids.append(contentsOf: self.referenced_pubkeys)
+        ids.append(ReferencedId(ref_id: self.id, relay_id: nil, key: "e"))
+        ids.append(ReferencedId(ref_id: pubkey, relay_id: nil, key: "p"))
         return ids
     }
     
