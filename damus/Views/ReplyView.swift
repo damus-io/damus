@@ -35,7 +35,7 @@ struct ReplyView: View {
                     .font(.footnote)
             }
             EventView(event: replying_to, highlight: .none, has_action_bar: false)
-            PostView(references: replying_to.reply_ids(pubkey: replying_to.pubkey))
+            PostView(references: replying_to.reply_ids())
             
             Spacer()
         }

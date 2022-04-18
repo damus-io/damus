@@ -91,36 +91,39 @@ struct EventDetailView: View {
         }
     }
 
-    func toggle_collapse_thread(scroller: ScrollViewProxy, id mid: String?, animate: Bool = true) {
+    func toggle_collapse_thread(scroller: ScrollViewProxy, id mid: String?, animate: Bool = true, anchor: UnitPoint = .center) {
         self.collapsed = !self.collapsed
         if let id = mid {
             if !self.collapsed {
-                scroll_to_event(scroller: scroller, id: id, delay: 0.1, animate: animate)
+                scroll_to_event(scroller: scroller, id: id, delay: 0.1, animate: animate, anchor: anchor)
             }
         }
     }
 
-    func scroll_to_event(scroller: ScrollViewProxy, id: String, delay: Double, animate: Bool) {
+    func scroll_to_event(scroller: ScrollViewProxy, id: String, delay: Double, animate: Bool, anchor: UnitPoint = .center) {
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
             if animate {
                 withAnimation {
-                    scroller.scrollTo(id, anchor: .top)
+                    scroller.scrollTo(id, anchor: anchor)
                 }
             } else {
-                scroller.scrollTo(id, anchor: .top)
+                scroller.scrollTo(id, anchor: anchor)
             }
         }
     }
 
-    func OurEventView(proxy: ScrollViewProxy, ev: NostrEvent, highlight: Highlight) -> some View {
+    func OurEventView(proxy: ScrollViewProxy, ev: NostrEvent, highlight: Highlight, collapsed_events: [CollapsedEvent]) -> some View {
         Group {
             if ev.id == event.id {
                 EventView(event: ev, highlight: .main, has_action_bar: true)
                     .onAppear() {
-                        scroll_to_event(scroller: proxy, id: ev.id, delay: 0.5, animate: true)
+                        scroll_to_event(scroller: proxy, id: ev.id, delay: 0.3, animate: true)
                     }
                     .onTapGesture {
-                        toggle_collapse_thread(scroller: proxy, id: ev.id)
+                        let any = any_collapsed(collapsed_events)
+                        if (collapsed && any) || (!collapsed && !any) {
+                            toggle_collapse_thread(scroller: proxy, id: ev.id)
+                        }
                     }
             } else {
                 if !(self.collapsed && highlight.is_none) {
@@ -142,13 +145,14 @@ struct EventDetailView: View {
         print("uncollapsing section at \(c.start) '\(ev.content.prefix(12))...'")
         let start_id = ev.id
         
-        toggle_collapse_thread(scroller: scroller, id: start_id, animate: true)
+        toggle_collapse_thread(scroller: scroller, id: start_id, animate: true, anchor: .top)
     }
     
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                ForEach(calculated_collapsed_events(collapsed: self.collapsed, active: self.event, events: self.events), id: \.id) { cev in
+                let collapsed_events = calculated_collapsed_events(collapsed: self.collapsed, active: self.event, events: self.events)
+                ForEach(collapsed_events, id: \.id) { cev in
                     switch cev {
                     case .collapsed(let c):
                         Text("··· \(c.count) other replies ···")
@@ -159,7 +163,7 @@ struct EventDetailView: View {
                                 //self.toggle_collapse_thread(scroller: proxy, id: nil)
                             }
                     case .event(let ev, let highlight):
-                        OurEventView(proxy: proxy, ev: ev, highlight: highlight)
+                        OurEventView(proxy: proxy, ev: ev, highlight: highlight, collapsed_events: collapsed_events)
                     }
                 }
             }
@@ -305,7 +309,7 @@ func calculated_collapsed_events(collapsed: Bool, active: NostrEvent, events: [N
 
         switch highlight {
         case .none:
-            if (count == 0) {
+            if (i == 0) {
                 start = 1
             }
             count += 1
@@ -339,3 +343,16 @@ func calculated_collapsed_events(collapsed: Bool, active: NostrEvent, events: [N
     }
 }
 
+
+
+func any_collapsed(_ evs: [CollapsedEvent]) -> Bool {
+    for ev in evs {
+        switch ev {
+        case .collapsed:
+            return true
+        case .event:
+            continue
+        }
+    }
+    return false
+}
