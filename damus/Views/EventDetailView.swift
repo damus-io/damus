@@ -208,9 +208,14 @@ func make_reply_map(active: NostrEvent, events: [NostrEvent]) -> [String: ()]
     if events.count == 0 {
         return is_reply
     }
-
+    
+    let is_root = active.is_root_event()
+    
     for ev in events {
-        if ev.references(id: active.id, key: "e") {
+        if is_root && ev.directly_references(active.id) {
+            is_reply[ev.id] = ()
+            start = i
+        } else if !is_root && ev.references(id: active.id, key: "e") {
             is_reply[ev.id] = ()
             start = i
         } else if active.references(id: ev.id, key: "e") {
@@ -257,11 +262,20 @@ func determine_highlight(current: NostrEvent, active: NostrEvent) -> Highlight
     if current.id == active.id {
         return .main
     }
-    if active.references(id: current.id, key: "e") {
-        return .reply
-    } else if current.references(id: active.id, key: "e") {
-        return .reply
+    if active.is_root_event() {
+        if active.directly_references(current.id) {
+            return .reply
+        } else if current.directly_references(active.id) {
+            return .reply
+        }
+    } else {
+        if active.references(id: current.id, key: "e") {
+            return .reply
+        } else if current.references(id: active.id, key: "e") {
+            return .reply
+        }
     }
+    
     return .none
 }
 

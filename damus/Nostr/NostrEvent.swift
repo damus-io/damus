@@ -64,7 +64,39 @@ class NostrEvent: Codable, Identifiable {
             }
         }
     }
-
+    
+    public func is_root_event() -> Bool {
+        for tag in tags {
+            if tag.count >= 1 && tag[0] == "e" {
+                return false
+            }
+        }
+        return true
+    }
+    
+    public func directly_references(_ id: String) -> Bool {
+        // conditions: if it only has 1 e ref
+        // OR it has more than 1 e ref, ignoring the first
+        
+        var nrefs = 0
+        var i = 0
+        var first_matched = false
+        var matched = true
+        
+        for tag in tags {
+            if tag.count >= 2 && tag[0] == "e" {
+                nrefs += 1
+                if tag[1] == id {
+                    matched = true
+                    first_matched = nrefs == 1
+                }
+            }
+            i += 1
+        }
+        
+        return (nrefs == 1 && matched) || (nrefs > 1 && matched && !first_matched)
+    }
+    
     public func references(id: String, key: String) -> Bool {
         for tag in tags {
             if tag.count >= 2 && tag[0] == key {
