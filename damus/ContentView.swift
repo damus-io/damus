@@ -211,10 +211,12 @@ struct ContentView: View {
         switch conn_event {
         case .ws_event(let ev):
 
+            /*
             if let wsev = ws_nostr_event(relay: relay_id, ev: ev) {
                 wsev.flags |= 1
                 self.events.insert(wsev, at: 0)
             }
+             */
 
             switch ev {
             case .connected:
