@@ -95,7 +95,12 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             VStack {
-                TopBar(selected: self.timeline)
+                if self.loading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .padding([.bottom], 4)
+                }
+
                 ZStack {
                     if let pool = self.pool {
                         MainContent(pool: pool)
@@ -103,6 +108,7 @@ struct ContentView: View {
                     }
                     PostButtonContainer
                 }
+                TopBar(selected: self.timeline ?? .friends)
             }
             .navigationBarTitle("Damus", displayMode: .inline)
         }
@@ -220,14 +226,14 @@ struct ContentView: View {
 
             switch ev {
             case .connected:
+                self.loading = ((self.pool?.num_connecting ?? 0) > 0)
                 send_filters(relay_id: relay_id)
             case .error(let merr):
                 let desc = merr.debugDescription
                 if desc.contains("Software caused connection abort") {
                     self.pool?.reconnect(to: [relay_id])
                 }
-            case .disconnected:
-                self.pool?.reconnect(to: [relay_id])
+            case .disconnected: fallthrough
             case .cancelled:
                 self.pool?.reconnect(to: [relay_id])
             case .reconnectSuggested(let t):
@@ -246,10 +252,6 @@ struct ContentView: View {
                 if sub_id != self.sub_id {
                     // TODO: other views like threads might have their own sub ids, so ignore those events... or should we?
                     return
-                }
-
-                if self.loading {
-                    self.loading = false
                 }
 
                 if has_events[ev.id] == nil {

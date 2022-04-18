@@ -35,6 +35,10 @@ class RelayPool {
     var descriptors: [RelayDescriptor] {
         relays.map { $0.descriptor }
     }
+    
+    var num_connecting: Int {
+        return relays.reduce(0) { n, r in n + (r.connection.isConnecting ? 1 : 0) }
+    }
 
     func remove_handler(sub_id: String) {
         handlers = handlers.filter { $0.sub_id != sub_id }
