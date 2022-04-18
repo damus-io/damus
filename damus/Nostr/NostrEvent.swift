@@ -194,6 +194,7 @@ func decode_data<T: Decodable>(_ data: Data) -> T? {
 
 func event_commitment(ev: NostrEvent, tags: String) -> String {
     let encoder = JSONEncoder()
+    encoder.outputFormatting = .withoutEscapingSlashes
     let str_data = try! encoder.encode(ev.content)
     let content = String(decoding: str_data, as: UTF8.self)
     let commit = "[0,\"\(ev.pubkey)\",\(ev.created_at),\(ev.kind),\(tags),\(content)]"
