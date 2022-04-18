@@ -12,7 +12,7 @@ import CachedAsyncImage
 enum Highlight {
     case none
     case main
-    case replied_to(String)
+    case reply
 
     var is_none: Bool {
         switch self {
@@ -23,7 +23,7 @@ enum Highlight {
 
     var is_replied_to: Bool {
         switch self {
-        case .replied_to: return true
+        case .reply: return true
         default: return false
         }
     }

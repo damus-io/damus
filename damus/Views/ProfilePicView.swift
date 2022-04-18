@@ -19,7 +19,7 @@ func highlight_color(_ h: Highlight) -> Color {
     switch h {
     case .none: return Color.black
     case .main: return Color.red
-    case .replied_to: return Color.blue
+    case .reply: return Color.blue
     }
 }
 
