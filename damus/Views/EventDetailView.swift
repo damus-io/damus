@@ -261,8 +261,17 @@ func make_reply_map(active: NostrEvent, events: [NostrEvent]) -> [String: ()]
     return is_reply
 }
 
-func determine_highlight(current: NostrEvent, active: NostrEvent) -> Highlight
+func determine_highlight(reply_map: [String: ()], current: NostrEvent, active: NostrEvent) -> Highlight
 {
+    if current.id == active.id {
+        return .main
+    } else if reply_map[current.id] != nil {
+        return .reply
+    } else {
+        return .none
+    }
+    
+    /*
     if current.id == active.id {
         return .main
     }
@@ -281,35 +290,31 @@ func determine_highlight(current: NostrEvent, active: NostrEvent) -> Highlight
     }
     
     return .none
+     */
 }
 
 func calculated_collapsed_events(collapsed: Bool, active: NostrEvent, events: [NostrEvent]) -> [CollapsedEvent] {
     var count: Int = 0
 
+    let reply_map = make_reply_map(active: active, events: events)
+    
     if !collapsed {
         return events.reduce(into: []) { acc, ev in
-            let highlight = determine_highlight(current: ev, active: active)
+            let highlight = determine_highlight(reply_map: reply_map, current: ev, active: active)
             return acc.append(.event(ev, highlight))
         }
     }
-
-    let reply_map = make_reply_map(active: active, events: events)
 
     let nevents = events.count
     var start: Int = 0
     var i: Int = 0
     
     return events.reduce(into: []) { (acc, ev) in
-        var highlight: Highlight = .none
-        if ev.id == active.id {
-            highlight = .main
-        } else if reply_map[ev.id] != nil {
-            highlight = .reply
-        }
+        let highlight = determine_highlight(reply_map: reply_map, current: ev, active: active)
 
         switch highlight {
         case .none:
-            if (i == 0) {
+            if i == 0 {
                 start = 1
             }
             count += 1
