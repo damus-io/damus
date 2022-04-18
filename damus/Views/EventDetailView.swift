@@ -7,16 +7,24 @@
 
 import SwiftUI
 
+struct CollapsedEvents: Identifiable {
+    let count: Int
+    let start: Int
+    let end: Int
+    
+    var id: String = UUID().description
+}
+
 enum CollapsedEvent: Identifiable {
     case event(NostrEvent, Highlight)
-    case collapsed(Int, String)
+    case collapsed(CollapsedEvents)
 
     var id: String {
         switch self {
         case .event(let ev, _):
             return ev.id
-        case .collapsed(_, let id):
-            return id
+        case .collapsed(let c):
+            return c.id
         }
     }
 }
@@ -83,17 +91,23 @@ struct EventDetailView: View {
         }
     }
 
-    func toggle_collapse_thread(scroller: ScrollViewProxy, id: String) {
+    func toggle_collapse_thread(scroller: ScrollViewProxy, id mid: String?, animate: Bool = true) {
         self.collapsed = !self.collapsed
-        if !self.collapsed {
-            scroll_to_event(scroller: scroller, id: id, delay: 0.1)
+        if let id = mid {
+            if !self.collapsed {
+                scroll_to_event(scroller: scroller, id: id, delay: 0.1, animate: animate)
+            }
         }
     }
 
-    func scroll_to_event(scroller: ScrollViewProxy, id: String, delay: Double) {
+    func scroll_to_event(scroller: ScrollViewProxy, id: String, delay: Double, animate: Bool) {
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-            withAnimation {
-                scroller.scrollTo(event.id)
+            if animate {
+                withAnimation {
+                    scroller.scrollTo(id, anchor: .top)
+                }
+            } else {
+                scroller.scrollTo(id, anchor: .top)
             }
         }
     }
@@ -103,7 +117,7 @@ struct EventDetailView: View {
             if ev.id == event.id {
                 EventView(event: ev, highlight: .main, has_action_bar: true)
                     .onAppear() {
-                        scroll_to_event(scroller: proxy, id: ev.id, delay: 0.5)
+                        scroll_to_event(scroller: proxy, id: ev.id, delay: 0.5, animate: true)
                     }
                     .onTapGesture {
                         toggle_collapse_thread(scroller: proxy, id: ev.id)
@@ -121,16 +135,29 @@ struct EventDetailView: View {
             }
         }
     }
-
+    
+    func uncollapse_section(scroller: ScrollViewProxy, c: CollapsedEvents)
+    {
+        let ev = events[c.start]
+        print("uncollapsing section at \(c.start) '\(ev.content.prefix(12))...'")
+        let start_id = ev.id
+        
+        toggle_collapse_thread(scroller: scroller, id: start_id, animate: true)
+    }
+    
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
                 ForEach(calculated_collapsed_events(collapsed: self.collapsed, active: self.event, events: self.events), id: \.id) { cev in
                     switch cev {
-                    case .collapsed(let i, _):
-                        Text("··· \(i) notes hidden ···")
+                    case .collapsed(let c):
+                        Text("··· \(c.count) other replies ···")
                             .font(.footnote)
                             .foregroundColor(.gray)
+                            .onTapGesture {
+                                self.uncollapse_section(scroller: proxy, c: c)
+                                //self.toggle_collapse_thread(scroller: proxy, id: nil)
+                            }
                     case .event(let ev, let highlight):
                         OurEventView(proxy: proxy, ev: ev, highlight: highlight)
                     }
@@ -251,7 +278,10 @@ func calculated_collapsed_events(collapsed: Bool, active: NostrEvent, events: [N
     let reply_map = make_reply_map(active: active, events: events)
 
     let nevents = events.count
+    var start: Int = 0
+    var end: Int = 0
     var i: Int = 0
+    
     return events.reduce(into: []) { (acc, ev) in
         var highlight: Highlight = .none
         if ev.id == active.id {
@@ -265,13 +295,17 @@ func calculated_collapsed_events(collapsed: Bool, active: NostrEvent, events: [N
             count += 1
         case .main:
             if count != 0 {
-                acc.append(.collapsed(count, UUID().description))
+                let c = CollapsedEvents(count: count, start: start, end: i)
+                acc.append(.collapsed(c))
+                start = i
                 count = 0
             }
             acc.append(.event(ev, .main))
         case .reply:
             if count != 0 {
-                acc.append(.collapsed(count, UUID().description))
+                let c = CollapsedEvents(count: count, start: start, end: i)
+                acc.append(.collapsed(c))
+                start = i
                 count = 0
             }
             acc.append(.event(ev, highlight))
@@ -279,7 +313,8 @@ func calculated_collapsed_events(collapsed: Bool, active: NostrEvent, events: [N
 
         if i == nevents-1 {
             if count != 0 {
-                acc.append(.collapsed(count, UUID().description))
+                let c = CollapsedEvents(count: count, start: i-count, end: i)
+                acc.append(.collapsed(c))
                 count = 0
             }
         }
