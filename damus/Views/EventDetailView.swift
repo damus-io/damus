@@ -318,14 +318,7 @@ func calculated_collapsed_events(collapsed: Bool, active: NostrEvent, events: [N
                 start = 1
             }
             count += 1
-        case .main:
-            if count != 0 {
-                let c = CollapsedEvents(count: count, start: start, end: i)
-                acc.append(.collapsed(c))
-                start = i
-                count = 0
-            }
-            acc.append(.event(ev, .main))
+        case .main: fallthrough
         case .reply:
             if count != 0 {
                 let c = CollapsedEvents(count: count, start: start, end: i)
