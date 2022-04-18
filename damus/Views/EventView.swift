@@ -69,6 +69,7 @@ struct EventView: View {
 
                 if has_action_bar {
                     EventActionBar(event: event)
+                        .environmentObject(profiles)
                 }
 
                 Divider()

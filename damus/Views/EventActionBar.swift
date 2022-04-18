@@ -49,6 +49,7 @@ struct EventActionBar: View {
             switch sheet {
             case .reply:
                 ReplyView(replying_to: event)
+                    .environmentObject(profiles)
             }
         }
     }
