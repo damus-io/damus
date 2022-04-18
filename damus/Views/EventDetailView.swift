@@ -293,7 +293,6 @@ func calculated_collapsed_events(collapsed: Bool, active: NostrEvent, events: [N
 
     let nevents = events.count
     var start: Int = 0
-    var end: Int = 0
     var i: Int = 0
     
     return events.reduce(into: []) { (acc, ev) in
@@ -306,6 +305,9 @@ func calculated_collapsed_events(collapsed: Bool, active: NostrEvent, events: [N
 
         switch highlight {
         case .none:
+            if (count == 0) {
+                start = 1
+            }
             count += 1
         case .main:
             if count != 0 {

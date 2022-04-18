@@ -50,15 +50,17 @@ struct EventView: View {
                     ProfileName(pubkey: event.pubkey, profile: profile)
                     Text("\(format_relative_time(event.created_at))")
                         .foregroundColor(.gray)
-                    if event.is_reply {
-                        Label("", systemImage: "arrowshape.turn.up.left")
-                            .font(.footnote)
-                            .foregroundColor(.gray)
-                    }
                     Spacer()
                     if (event.pow ?? 0) >= 10 {
                         PowView(event.pow)
                     }
+                }
+                
+                if event.is_reply {
+                    Text("\(reply_desc(profiles: profiles, event: event))")
+                        .font(.footnote)
+                        .foregroundColor(.gray)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
                 Text(event.content)
@@ -87,4 +89,26 @@ struct EventView: View {
 func format_relative_time(_ created_at: Int64) -> String
 {
     return time_ago_since(Date(timeIntervalSince1970: Double(created_at)))
+}
+
+func reply_desc(profiles: Profiles, event: NostrEvent) -> String {
+    let (pubkeys, n) = event.reply_description
+    if pubkeys.count == 0 {
+        return "Reply"
+    }
+    
+    let names: [String] = pubkeys.map {
+        let prof = profiles.lookup(id: $0)
+        return Profile.displayName(profile: prof, pubkey: $0)
+    }
+    
+    if names.count == 2 {
+        return "Replying to \(names[0]) & \(names[1])"
+    }
+    
+    let other = n - pubkeys.count
+    let plural = other == 1 ? "" : "s"
+    let and_other = n > 1 ? " & \(other) other\(plural)" : ""
+    
+    return "Replying to \(names[0])\(and_other)"
 }

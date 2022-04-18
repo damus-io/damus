@@ -40,14 +40,14 @@ struct ProfilePicView: View {
             AsyncImage(url: pic) { img in
                 img.resizable()
             } placeholder: {
-                Color.purple.opacity(0.1)
+                Color.purple.opacity(0.2)
             }
             .frame(width: PFP_SIZE, height: PFP_SIZE)
             .clipShape(Circle())
             .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
             .padding(2)
         } else {
-            Color.purple.opacity(0.1)
+            Color.purple.opacity(0.2)
                 .frame(width: PFP_SIZE, height: PFP_SIZE)
                 .cornerRadius(CORNER_RADIUS)
                 .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))

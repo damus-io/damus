@@ -130,7 +130,26 @@ class NostrEvent: Codable, Identifiable {
     public var referenced_ids: [ReferencedId] {
         return get_referenced_ids(key: "e")
     }
-
+    
+    public var reply_description: ([String], Int) {
+        var c = 0
+        var ns: [String] = []
+        var i = tags.count - 1
+        
+        while i >= 0 {
+            let tag = tags[i]
+            if tag.count >= 2 && tag[0] == "p" {
+                c += 1
+                if ns.count < 3 {
+                    ns.append(tag[1])
+                }
+            }
+            i -= 1
+        }
+        
+        return (ns, c)
+    }
+    
     public var referenced_pubkeys: [ReferencedId] {
         return get_referenced_ids(key: "p")
     }
