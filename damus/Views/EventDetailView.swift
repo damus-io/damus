@@ -117,7 +117,7 @@ struct EventDetailView: View {
             if ev.id == event.id {
                 EventView(event: ev, highlight: .main, has_action_bar: true)
                     .onAppear() {
-                        scroll_to_event(scroller: proxy, id: ev.id, delay: 0.3, animate: true)
+                        scroll_to_event(scroller: proxy, id: ev.id, delay: 0.5, animate: true)
                     }
                     .onTapGesture {
                         let any = any_collapsed(collapsed_events)
