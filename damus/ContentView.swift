@@ -24,58 +24,44 @@ enum Sheets: Identifiable {
     }
 }
 
-enum Timeline {
-    case friends
-    case global
-    case debug
+enum Timeline: String, CustomStringConvertible {
+    case home
+    case notifications
+    
+    var description: String {
+        return self.rawValue
+    }
 }
 
 struct ContentView: View {
     @State var status: String = "Not connected"
     @State var active_sheet: Sheets? = nil
-    @State var events: [NostrEvent] = []
     @State var profiles: Profiles = Profiles()
     @State var friends: [String: ()] = [:]
-    @State var has_events: [String: ()] = [:]
-    @State var profile_count: Int = 0
-    @State var last_event_of_kind: [Int: NostrEvent] = [:]
     @State var loading: Bool = true
-    @State var timeline: Timeline = .friends
     @State var pool: RelayPool? = nil
+    @State var selected_timeline: Timeline? = .home
+    @State var last_event_of_kind: [Int: NostrEvent] = [:]
+    @State var has_events: [String: ()] = [:]
+    
+    @State var events: [NostrEvent] = []
+    @State var notifications: [NostrEvent] = []
 
     let sub_id = UUID().description
     let pubkey = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
 
-    func MainContent(pool: RelayPool) -> some View {
-        ScrollView {
-            ForEach(self.events, id: \.id) { (ev: NostrEvent) in
-                if ev.is_local && timeline == .debug || (timeline == .global && !ev.is_local) || (timeline == .friends && is_friend(ev.pubkey)) {
-                    let evdet = EventDetailView(event: ev, pool: pool)
-                        .navigationBarTitle("Thread")
-                        .environmentObject(profiles)
-                    NavigationLink(destination: evdet) {
-                        EventView(event: ev, highlight: .none, has_action_bar: true)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-            }
-        }
-        .environmentObject(profiles)
-    }
-
     func TimelineButton(timeline: Timeline, img: String) -> some View {
-        Button(action: {switch_timeline(timeline)}) {
+        NavigationLink(destination: Text("\(timeline.description)"), tag: timeline, selection: $selected_timeline){
             Label("", systemImage: img)
         }
         .frame(maxWidth: .infinity)
-        .foregroundColor(self.timeline != timeline ? .gray : .primary)
+        .foregroundColor(selected_timeline != timeline ? .gray : .primary)
     }
 
     func TopBar(selected: Timeline) -> some View {
         HStack {
-            TimelineButton(timeline: .friends, img: selected == .friends ? "person.2.fill" : "person.2")
-            TimelineButton(timeline: .global, img: selected == .global ? "globe.americas.fill" : "globe.americas")
-            TimelineButton(timeline: .debug, img: selected == .debug ? "wrench.fill" : "wrench")
+            TimelineButton(timeline: .home, img: selected == .home ? "house.fill" : "house")
+            TimelineButton(timeline: .notifications, img: selected == .notifications ? "bell.fill" : "bell")
         }
     }
 
@@ -93,24 +79,26 @@ struct ContentView: View {
     }
 
     var body: some View {
-        NavigationView {
-            VStack {
-                if self.loading {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .padding([.bottom], 4)
-                }
-
+        VStack {
+            if self.loading {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .padding([.bottom], 4)
+            }
+            
+            NavigationView {
                 ZStack {
                     if let pool = self.pool {
-                        MainContent(pool: pool)
+                        TimelineView(events: $events, pool: pool)
+                            .environmentObject(profiles)
                             .padding()
                     }
                     PostButtonContainer
                 }
-                TopBar(selected: self.timeline ?? .friends)
+                .navigationBarTitle("Damus", displayMode: .inline)
             }
-            .navigationBarTitle("Damus", displayMode: .inline)
+            
+            TopBar(selected: selected_timeline ?? .home)
         }
         .onAppear() {
             self.connect()
@@ -135,7 +123,7 @@ struct ContentView: View {
     }
 
     func switch_timeline(_ timeline: Timeline) {
-        self.timeline = timeline
+        self.selected_timeline = timeline
     }
 
     func add_relay(_ pool: RelayPool, _ relay: String) {
@@ -292,7 +280,6 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
-
 
 
 func get_metadata_since_time(_ metadata_event: NostrEvent?) -> Int64? {
