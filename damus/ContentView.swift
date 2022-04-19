@@ -443,7 +443,7 @@ func get_metadata_since_time(_ metadata_event: NostrEvent?) -> Int64? {
 
 func get_since_time(last_event: NostrEvent?) -> Int64 {
     if last_event == nil {
-        return Int64(Date().timeIntervalSince1970) - (24 * 60 * 60 * 1)
+        return Int64(Date().timeIntervalSince1970) - (24 * 60 * 60 * 3)
     }
 
     return last_event!.created_at - 60 * 10

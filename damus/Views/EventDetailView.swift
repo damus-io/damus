@@ -175,7 +175,6 @@ struct EventDetailView: View {
             .onAppear() {
                 self.add_event(event)
                 subscribe_to_thread()
-
             }
         }
 

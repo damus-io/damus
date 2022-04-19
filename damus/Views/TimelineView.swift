@@ -15,15 +15,17 @@ struct TimelineView: View {
     
     var body: some View {
         ScrollView {
-            ForEach(events, id: \.id) { (ev: NostrEvent) in
-                let evdet = EventDetailView(event: ev, pool: pool)
-                    .navigationBarTitle("Thread")
-                    .padding([.leading, .trailing], 6)
-                    .environmentObject(profiles)
-                NavigationLink(destination: evdet) {
-                    EventView(event: ev, highlight: .none, has_action_bar: true)
+            LazyVStack {
+                ForEach(events, id: \.id) { (ev: NostrEvent) in
+                    let evdet = EventDetailView(event: ev, pool: pool)
+                        .navigationBarTitle("Thread")
+                        .padding([.leading, .trailing], 6)
+                        .environmentObject(profiles)
+                    NavigationLink(destination: evdet) {
+                        EventView(event: ev, highlight: .none, has_action_bar: true)
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .buttonStyle(PlainButtonStyle())
             }
         }
         .padding([.leading, .trailing], 6)
