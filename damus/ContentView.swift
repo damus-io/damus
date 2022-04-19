@@ -27,6 +27,7 @@ enum Sheets: Identifiable {
 enum Timeline: String, CustomStringConvertible {
     case home
     case notifications
+    case global
     
     var description: String {
         return self.rawValue
@@ -43,10 +44,11 @@ struct ContentView: View {
     @State var selected_timeline: Timeline? = .home
     @State var last_event_of_kind: [Int: NostrEvent] = [:]
     @State var has_events: [String: ()] = [:]
-    @State var notifications_active: Bool = false
+    @State var has_friend_event: [String: ()] = [:]
     @State var new_notifications: Bool = false
     
     @State var events: [NostrEvent] = []
+    @State var friend_events: [NostrEvent] = []
     @State var notifications: [NostrEvent] = []
     
     // connect retry timer
@@ -75,21 +77,22 @@ struct ContentView: View {
         }
     }
     
-    var HomeTab: some View {
-        Button(action: {switch_timeline(.home)}) {
-            Label("", systemImage: selected_timeline == .home ? "house.fill" : "house")
+    func TabButton(timeline: Timeline, img: String) -> some View {
+        Button(action: {switch_timeline(timeline)}) {
+            Label("", systemImage: selected_timeline == timeline ? "\(img).fill" : img)
                 .contentShape(Rectangle())
                 .frame(maxWidth: .infinity, minHeight: 30.0)
         }
-        .foregroundColor(selected_timeline != .home ? .gray : .primary)
+        .foregroundColor(selected_timeline != timeline ? .gray : .primary)
     }
     
     var TabBar: some View {
         VStack {
             Divider()
             HStack {
-                HomeTab
+                TabButton(timeline: .home, img: "house")
                 NotificationTab
+                TabButton(timeline: .global, img: "globe.americas")
             }
         }
     }
@@ -111,7 +114,6 @@ struct ContentView: View {
 
     var PostButtonContainer: some View {
         VStack {
-            
             Spacer()
 
             HStack {
@@ -126,10 +128,36 @@ struct ContentView: View {
     var PostingTimelineView: some View {
         ZStack {
             if let pool = self.pool {
-                TimelineView(events: $events, pool: pool)
+                TimelineView(events: $friend_events, pool: pool)
                     .environmentObject(profiles)
             }
             PostButtonContainer
+        }
+    }
+    
+    func MainContent(pool: RelayPool) -> some View {
+        NavigationView {
+            VStack {
+                PostingTimelineView
+                    .onAppear() {
+                        switch_timeline(.home)
+                    }
+                
+                let notif = TimelineView(events: $notifications, pool: pool)
+                    .environmentObject(profiles)
+                    .navigationTitle("Notifications")
+                    .navigationBarBackButtonHidden(true)
+                
+                let global = TimelineView(events: $events, pool: pool)
+                    .environmentObject(profiles)
+                    .navigationTitle("Global")
+                    .navigationBarBackButtonHidden(true)
+                
+                NavigationLink(destination: notif, tag: .notifications, selection: $selected_timeline) { EmptyView() }
+                
+                NavigationLink(destination: global, tag: .global, selection: $selected_timeline) { EmptyView() }
+            }
+            .navigationBarTitle("Damus", displayMode: .inline)
         }
     }
     
@@ -137,26 +165,9 @@ struct ContentView: View {
         VStack {
             if let pool = self.pool {
                 ZStack {
-                    NavigationView {
-                        VStack {
-                            PostingTimelineView
-                                .onAppear() {
-                                    switch_timeline(.home)
-                                }
-                            
-                                let tlv = TimelineView(events: $notifications, pool: pool)
-                                    .environmentObject(profiles)
-                                    .navigationTitle("Notifications")
-                                    .navigationBarBackButtonHidden(true)
-                            
-                                NavigationLink(destination: tlv, isActive: $notifications_active) {
-                                    EmptyView()
-                                }
-                        }
-                        .navigationBarTitle("Damus", displayMode: .inline)
-                    }
-                    .padding([.bottom], -8.0)
-
+                    MainContent(pool: pool)
+                        .padding([.bottom], -8.0)
+                    
                     LoadingContainer
                 }
             }
@@ -184,20 +195,36 @@ struct ContentView: View {
             self.loading = (self.pool?.num_connecting ?? 0) != 0
         }
     }
-
-    func is_friend(_ pubkey: String) -> Bool {
-        return pubkey == self.pubkey || self.friends[pubkey] != nil
+    
+    func is_friend(pubkey: String) -> Bool {
+        return pubkey == self.pubkey || friends[pubkey] != nil
+    }
+    
+    func is_friend_event(_ ev: NostrEvent) -> Bool {
+        if is_friend(pubkey: ev.pubkey) {
+            return true
+        }
+        
+        if ev.is_reply {
+            // show our replies?
+            if ev.pubkey == self.pubkey {
+                return true
+            }
+            for pk in ev.referenced_pubkeys {
+                if is_friend(pubkey: pk.ref_id) {
+                    return true
+                }
+            }
+        }
+        
+        return false
     }
 
     func switch_timeline(_ timeline: Timeline) {
-        if timeline == .notifications {
-            self.notifications_active = true
-            self.selected_timeline = .notifications
+        if timeline != .notifications {
             new_notifications = false
-        } else {
-            self.notifications_active = false
-            self.selected_timeline = .home
         }
+        self.selected_timeline = timeline
         //self.selected_timeline = timeline
     }
 
@@ -294,6 +321,15 @@ struct ContentView: View {
         }
     }
     
+    func handle_friend_event(_ ev: NostrEvent) {
+        if has_friend_event[ev.id] != nil || !is_friend_event(ev) {
+            return
+        }
+        self.has_friend_event[ev.id] = ()
+        self.friend_events.append(ev)
+        self.friend_events = self.friend_events.sorted { $0.created_at > $1.created_at }
+    }
+    
     func process_event(_ ev: NostrEvent) {
         if has_events[ev.id] == nil {
             has_events[ev.id] = ()
@@ -306,6 +342,8 @@ struct ContentView: View {
                     self.events.append(ev)
                     self.events = self.events.sorted { $0.created_at > $1.created_at }
                     
+                    handle_friend_event(ev)
+                    
                     if is_notification(ev: ev, pubkey: pubkey) {
                         handle_notification(ev: ev)
                     }
@@ -314,7 +352,17 @@ struct ContentView: View {
                 handle_metadata_event(ev)
             } else if ev.kind == 3 {
                 handle_contact_event(ev)
+                
+                if ev.pubkey == pubkey {
+                    process_friend_events()
+                }
             }
+        }
+    }
+    
+    func process_friend_events() {
+        for event in events {
+            handle_friend_event(event)
         }
     }
     
@@ -395,7 +443,7 @@ func get_metadata_since_time(_ metadata_event: NostrEvent?) -> Int64? {
 
 func get_since_time(last_event: NostrEvent?) -> Int64 {
     if last_event == nil {
-        return Int64(Date().timeIntervalSince1970) - (24 * 60 * 60 * 4)
+        return Int64(Date().timeIntervalSince1970) - (24 * 60 * 60 * 1)
     }
 
     return last_event!.created_at - 60 * 10
