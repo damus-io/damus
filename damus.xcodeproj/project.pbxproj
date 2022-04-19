@@ -31,7 +31,6 @@
 		4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */; };
 		4CEE2AEB2805AEA300AB5EEF /* secp256k1 in Frameworks */ = {isa = PBXBuildFile; productRef = 4CEE2AEA2805AEA300AB5EEF /* secp256k1 */; };
 		4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */; };
-		4CEE2AEF2805BE2500AB5EEF /* NostrTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AEE2805BE2500AB5EEF /* NostrTimeline.swift */; };
 		4CEE2AF1280B216B00AB5EEF /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */; };
 		4CEE2AF3280B25C500AB5EEF /* ProfilePicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF2280B25C500AB5EEF /* ProfilePicView.swift */; };
 		4CEE2AF5280B29E600AB5EEF /* TimeAgo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF4280B29E600AB5EEF /* TimeAgo.swift */; };
@@ -85,7 +84,6 @@
 		4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayConnection.swift; sourceTree = "<group>"; };
 		4CEE2AE72804F57C00AB5EEF /* libsecp256k1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libsecp256k1.a; sourceTree = "<group>"; };
 		4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrRequest.swift; sourceTree = "<group>"; };
-		4CEE2AEE2805BE2500AB5EEF /* NostrTimeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrTimeline.swift; sourceTree = "<group>"; };
 		4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
 		4CEE2AF2280B25C500AB5EEF /* ProfilePicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePicView.swift; sourceTree = "<group>"; };
 		4CEE2AF4280B29E600AB5EEF /* TimeAgo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeAgo.swift; sourceTree = "<group>"; };
@@ -150,7 +148,6 @@
 				4C75EFB628049D990006080F /* RelayPool.swift */,
 				4C75EFBA2804A34C0006080F /* ProofOfWork.swift */,
 				4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */,
-				4CEE2AEE2805BE2500AB5EEF /* NostrTimeline.swift */,
 				4CACA9DB280C38C000D9BBE8 /* Profiles.swift */,
 			);
 			path = Nostr;
@@ -374,7 +371,6 @@
 				4C75EFB128049D510006080F /* NostrResponse.swift in Sources */,
 				4CEE2AF7280B2DEA00AB5EEF /* ProfileName.swift in Sources */,
 				4CEE2B02280B39E800AB5EEF /* EventActionBar.swift in Sources */,
-				4CEE2AEF2805BE2500AB5EEF /* NostrTimeline.swift in Sources */,
 				4CACA9DC280C38C000D9BBE8 /* Profiles.swift in Sources */,
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
 				4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */,
