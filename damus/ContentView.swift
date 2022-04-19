@@ -94,8 +94,24 @@ struct ContentView: View {
         }
     }
 
+    var LoadingContainer: some View {
+        VStack {
+            HStack {
+                Spacer()
+        
+                if self.loading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                }
+            }
+
+            Spacer()
+        }
+    }
+
     var PostButtonContainer: some View {
         VStack {
+            
             Spacer()
 
             HStack {
@@ -120,32 +136,29 @@ struct ContentView: View {
     var body: some View {
         VStack {
             if let pool = self.pool {
-                NavigationView {
-                    VStack {
-                        if self.loading {
-                            ProgressView()
-                                .progressViewStyle(.circular)
-                                .padding([.bottom], 4)
+                ZStack {
+                    NavigationView {
+                        VStack {
+                            PostingTimelineView
+                                .onAppear() {
+                                    switch_timeline(.home)
+                                }
+                            
+                                let tlv = TimelineView(events: $notifications, pool: pool)
+                                    .environmentObject(profiles)
+                                    .navigationTitle("Notifications")
+                                    .navigationBarBackButtonHidden(true)
+                            
+                                NavigationLink(destination: tlv, isActive: $notifications_active) {
+                                    EmptyView()
+                                }
                         }
-                        
-                        PostingTimelineView
-                            .onAppear() {
-                                switch_timeline(.home)
-                            }
-                        
-                        let tlv = TimelineView(events: $notifications, pool: pool)
-                            .environmentObject(profiles)
-                            .navigationTitle("Notifications")
-                            .navigationBarBackButtonHidden(true)
-                        
-                        NavigationLink(destination: tlv, isActive: $notifications_active) {
-                            EmptyView()
-                        }
+                        .navigationBarTitle("Damus", displayMode: .inline)
                     }
-                    .navigationBarTitle("Damus", displayMode: .inline)
-                    
+                    .padding([.bottom], -8.0)
+
+                    LoadingContainer
                 }
-                .padding([.bottom], -8.0)
             }
             
             TabBar
