@@ -103,12 +103,19 @@ func reply_desc(profiles: Profiles, event: NostrEvent) -> String {
     }
     
     if names.count == 2 {
+        if n > 2 {
+            let and_other = reply_others_desc(n: n, n_pubkeys: pubkeys.count)
+            return "Replying to \(names[0]), \(names[1])\(and_other)"
+        }
         return "Replying to \(names[0]) & \(names[1])"
     }
     
-    let other = n - pubkeys.count
-    let plural = other == 1 ? "" : "s"
-    let and_other = n > 1 ? " & \(other) other\(plural)" : ""
-    
+    let and_other = reply_others_desc(n: n, n_pubkeys: pubkeys.count)
     return "Replying to \(names[0])\(and_other)"
+}
+
+func reply_others_desc(n: Int, n_pubkeys: Int) -> String {
+    let other = n - n_pubkeys
+    let plural = other == 1 ? "" : "s"
+    return n > 1 ? " & \(other) other\(plural)" : ""
 }

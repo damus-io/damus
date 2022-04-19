@@ -33,7 +33,7 @@ struct EventId: Identifiable, CustomStringConvertible {
     }
 }
 
-class NostrEvent: Codable, Identifiable {
+class NostrEvent: Codable, Identifiable, CustomStringConvertible {
     var id: String
     var sig: String
     var tags: [[String]]
@@ -48,6 +48,11 @@ class NostrEvent: Codable, Identifiable {
     let created_at: Int64
     let kind: Int
     let content: String
+    
+    var description: String {
+        let p = pow.map { String($0) } ?? "?"
+        return "NostrEvent { id: \(id) pubkey \(pubkey) kind \(kind) tags \(tags) pow \(p) content '\(content)' }"
+    }
 
     private enum CodingKeys: String, CodingKey {
         case id, sig, tags, pubkey, created_at, kind, content
@@ -140,7 +145,7 @@ class NostrEvent: Codable, Identifiable {
             let tag = tags[i]
             if tag.count >= 2 && tag[0] == "p" {
                 c += 1
-                if ns.count < 3 {
+                if ns.count < 2 {
                     ns.append(tag[1])
                 }
             }

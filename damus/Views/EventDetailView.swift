@@ -120,6 +120,7 @@ struct EventDetailView: View {
                         scroll_to_event(scroller: proxy, id: ev.id, delay: 0.5, animate: true)
                     }
                     .onTapGesture {
+                        print_event(ev)
                         let any = any_collapsed(collapsed_events)
                         if (collapsed && any) || (!collapsed && !any) {
                             toggle_collapse_thread(scroller: proxy, id: ev.id)
@@ -129,6 +130,7 @@ struct EventDetailView: View {
                 if !(self.collapsed && highlight.is_none) {
                     EventView(event: ev, highlight: collapsed ? .none : highlight, has_action_bar: true)
                         .onTapGesture {
+                            print_event(ev)
                             if !collapsed {
                                 toggle_collapse_thread(scroller: proxy, id: ev.id)
                             }
@@ -353,4 +355,9 @@ func any_collapsed(_ evs: [CollapsedEvent]) -> Bool {
         }
     }
     return false
+}
+
+
+func print_event(_ ev: NostrEvent) {
+    print(ev.description)
 }
