@@ -17,6 +17,7 @@ class RelayConnection: WebSocketDelegate {
     var isConnected: Bool = false
     var isConnecting: Bool = false
     var isReconnecting: Bool = false
+    var last_connection_attempt: Double = 0
     var socket: WebSocket
     var handleEvent: (NostrConnectionEvent) -> ()
     let url: URL
@@ -25,9 +26,9 @@ class RelayConnection: WebSocketDelegate {
         self.url = url
         self.handleEvent = handleEvent
         // just init, we don't actually use this one
-        self.socket = WebSocket(request: URLRequest(url: self.url), compressionHandler: .none)
+        self.socket = make_websocket(url: url)
     }
-
+    
     func reconnect() {
         if self.isConnected {
             self.isReconnecting = true
@@ -45,10 +46,11 @@ class RelayConnection: WebSocketDelegate {
 
         var req = URLRequest(url: self.url)
         req.timeoutInterval = 5
-        socket = WebSocket(request: req, compressionHandler: .none)
+        socket = make_websocket(url: url)
         socket.delegate = self
 
         isConnecting = true
+        last_connection_attempt = Date().timeIntervalSince1970
         socket.connect()
     }
 
@@ -143,5 +145,9 @@ func make_nostr_subscription_req(_ filters: [NostrFilter], sub_id: String) -> St
     }
     req += "]"
     return req
+}
+
+func make_websocket(url: URL) -> WebSocket {
+    return WebSocket(request: URLRequest(url: url), compressionHandler: .none)
 }
 

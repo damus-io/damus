@@ -169,7 +169,6 @@ struct EventDetailView: View {
                     }
                 }
             }
-            .padding()
             .onDisappear() {
                 unsubscribe_to_thread()
             }

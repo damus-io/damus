@@ -79,6 +79,7 @@ struct EventView: View {
             }
             .padding([.leading], 2)
         }
+        .contentShape(Rectangle())
         .id(event.id)
         .frame(minHeight: PFP_SIZE)
         .padding([.bottom], 4)

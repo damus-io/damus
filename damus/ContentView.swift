@@ -43,25 +43,54 @@ struct ContentView: View {
     @State var selected_timeline: Timeline? = .home
     @State var last_event_of_kind: [Int: NostrEvent] = [:]
     @State var has_events: [String: ()] = [:]
+    @State var notifications_active: Bool = false
+    @State var new_notifications: Bool = false
     
     @State var events: [NostrEvent] = []
     @State var notifications: [NostrEvent] = []
+    
+    // connect retry timer
+    let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
     let sub_id = UUID().description
     let pubkey = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
-
-    func TimelineButton(timeline: Timeline, img: String) -> some View {
-        NavigationLink(destination: Text("\(timeline.description)"), tag: timeline, selection: $selected_timeline){
-            Label("", systemImage: img)
+    
+    var NotificationTab: some View {
+        ZStack(alignment: .center) {
+            Button(action: {switch_timeline(.notifications)}) {
+                Label("", systemImage: selected_timeline == .notifications ? "bell.fill" : "bell")
+                    .contentShape(Rectangle())
+                    .frame(maxWidth: .infinity, minHeight: 30.0)
+            }
+            .foregroundColor(selected_timeline != .notifications ? .gray : .primary)
+            
+            if new_notifications {
+                Circle()
+                    .size(CGSize(width: 8, height: 8))
+                    .frame(width: 10, height: 10, alignment: .topTrailing)
+                    .alignmentGuide(VerticalAlignment.center) { a in a.height + 2.0 }
+                    .alignmentGuide(HorizontalAlignment.center) { a in a.width - 12.0 }
+                    .foregroundColor(.accentColor)
+            }
         }
-        .frame(maxWidth: .infinity)
-        .foregroundColor(selected_timeline != timeline ? .gray : .primary)
     }
-
-    func TopBar(selected: Timeline) -> some View {
-        HStack {
-            TimelineButton(timeline: .home, img: selected == .home ? "house.fill" : "house")
-            TimelineButton(timeline: .notifications, img: selected == .notifications ? "bell.fill" : "bell")
+    
+    var HomeTab: some View {
+        Button(action: {switch_timeline(.home)}) {
+            Label("", systemImage: selected_timeline == .home ? "house.fill" : "house")
+                .contentShape(Rectangle())
+                .frame(maxWidth: .infinity, minHeight: 30.0)
+        }
+        .foregroundColor(selected_timeline != .home ? .gray : .primary)
+    }
+    
+    var TabBar: some View {
+        VStack {
+            Divider()
+            HStack {
+                HomeTab
+                NotificationTab
+            }
         }
     }
 
@@ -77,28 +106,49 @@ struct ContentView: View {
             }
         }
     }
-
+    
+    var PostingTimelineView: some View {
+        ZStack {
+            if let pool = self.pool {
+                TimelineView(events: $events, pool: pool)
+                    .environmentObject(profiles)
+            }
+            PostButtonContainer
+        }
+    }
+    
     var body: some View {
         VStack {
-            if self.loading {
-                ProgressView()
-                    .progressViewStyle(.circular)
-                    .padding([.bottom], 4)
-            }
-            
-            NavigationView {
-                ZStack {
-                    if let pool = self.pool {
-                        TimelineView(events: $events, pool: pool)
+            if let pool = self.pool {
+                NavigationView {
+                    VStack {
+                        if self.loading {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .padding([.bottom], 4)
+                        }
+                        
+                        PostingTimelineView
+                            .onAppear() {
+                                switch_timeline(.home)
+                            }
+                        
+                        let tlv = TimelineView(events: $notifications, pool: pool)
                             .environmentObject(profiles)
-                            .padding()
+                            .navigationTitle("Notifications")
+                            .navigationBarBackButtonHidden(true)
+                        
+                        NavigationLink(destination: tlv, isActive: $notifications_active) {
+                            EmptyView()
+                        }
                     }
-                    PostButtonContainer
+                    .navigationBarTitle("Damus", displayMode: .inline)
+                    
                 }
-                .navigationBarTitle("Damus", displayMode: .inline)
+                .padding([.bottom], -8.0)
             }
             
-            TopBar(selected: selected_timeline ?? .home)
+            TabBar
         }
         .onAppear() {
             self.connect()
@@ -116,6 +166,10 @@ struct ContentView: View {
             let new_ev = post.to_event(privkey: privkey, pubkey: pubkey)
             self.pool?.send(.event(new_ev))
         }
+        .onReceive(timer) { n in
+            self.pool?.connect_to_disconnected()
+            self.loading = (self.pool?.num_connecting ?? 0) != 0
+        }
     }
 
     func is_friend(_ pubkey: String) -> Bool {
@@ -123,7 +177,15 @@ struct ContentView: View {
     }
 
     func switch_timeline(_ timeline: Timeline) {
-        self.selected_timeline = timeline
+        if timeline == .notifications {
+            self.notifications_active = true
+            self.selected_timeline = .notifications
+            new_notifications = false
+        } else {
+            self.notifications_active = false
+            self.selected_timeline = .home
+        }
+        //self.selected_timeline = timeline
     }
 
     func add_relay(_ pool: RelayPool, _ relay: String) {
@@ -192,6 +254,11 @@ struct ContentView: View {
         if let prof_since = get_metadata_since_time(last_metadata_event) {
             profile_filter.since = prof_since
         }
+        
+        /*
+        var notification_filter = NostrFilter.filter_text
+        notification_filter.since = since
+         */
 
         var contacts_filter = NostrFilter.filter_contacts
         contacts_filter.authors = [self.pubkey]
@@ -199,8 +266,45 @@ struct ContentView: View {
         let filters = [since_filter, profile_filter, contacts_filter]
         print("connected to \(relay_id), refreshing from \(since)")
         self.pool?.send(.subscribe(.init(filters: filters, sub_id: sub_id)))
+        //self.pool?.send(.subscribe(.init(filters: [notification_filter], sub_id: "notifications")))
     }
-
+    
+    func handle_notification(ev: NostrEvent) {
+        notifications.append(ev)
+        notifications = notifications.sorted { $0.created_at > $1.created_at }
+        
+        let last_notified = get_last_notified()
+        
+        if last_notified == nil || last_notified!.created_at < ev.created_at {
+            save_last_notified(ev)
+            new_notifications = true
+        }
+    }
+    
+    func process_event(_ ev: NostrEvent) {
+        if has_events[ev.id] == nil {
+            has_events[ev.id] = ()
+            let last_k = last_event_of_kind[ev.kind]
+            if last_k == nil || ev.created_at > last_k!.created_at {
+                last_event_of_kind[ev.kind] = ev
+            }
+            if ev.kind == 1 {
+                if !should_hide_event(ev) {
+                    self.events.append(ev)
+                    self.events = self.events.sorted { $0.created_at > $1.created_at }
+                    
+                    if is_notification(ev: ev, pubkey: pubkey) {
+                        handle_notification(ev: ev)
+                    }
+                }
+            } else if ev.kind == 0 {
+                handle_metadata_event(ev)
+            } else if ev.kind == 3 {
+                handle_contact_event(ev)
+            }
+        }
+    }
+    
     func handle_event(relay_id: String, conn_event: NostrConnectionEvent) {
         switch conn_event {
         case .ws_event(let ev):
@@ -211,10 +315,10 @@ struct ContentView: View {
                 self.events.insert(wsev, at: 0)
             }
              */
+            
 
             switch ev {
             case .connected:
-                self.loading = ((self.pool?.num_connecting ?? 0) > 0)
                 send_filters(relay_id: relay_id)
             case .error(let merr):
                 let desc = merr.debugDescription
@@ -231,6 +335,8 @@ struct ContentView: View {
             default:
                 break
             }
+            
+            self.loading = (self.pool?.num_connecting ?? 0) != 0
 
             print("ws_event \(ev)")
 
@@ -241,24 +347,8 @@ struct ContentView: View {
                     // TODO: other views like threads might have their own sub ids, so ignore those events... or should we?
                     return
                 }
-
-                if has_events[ev.id] == nil {
-                    has_events[ev.id] = ()
-                    let last_k = last_event_of_kind[ev.kind]
-                    if last_k == nil || ev.created_at > last_k!.created_at {
-                        last_event_of_kind[ev.kind] = ev
-                    }
-                    if ev.kind == 1 {
-                        if !should_hide_event(ev) {
-                            self.events.append(ev)
-                        }
-                        self.events = self.events.sorted { $0.created_at > $1.created_at }
-                    } else if ev.kind == 0 {
-                        handle_metadata_event(ev)
-                    } else if ev.kind == 3 {
-                        handle_contact_event(ev)
-                    }
-                }
+                
+                self.process_event(ev)
             case .notice(let msg):
                 self.events.insert(NostrEvent(content: "NOTICE from \(relay_id): \(msg)", pubkey: "system"), at: 0)
                 print(msg)
@@ -341,4 +431,45 @@ func ws_nostr_event(relay: String, ev: WebSocketEvent) -> NostrEvent? {
     case .reconnectSuggested(let b):
         return NostrEvent(content: "reconnectSuggested \(b)", pubkey: relay)
     }
+}
+
+func is_notification(ev: NostrEvent, pubkey: String) -> Bool {
+    if ev.pubkey == pubkey {
+        return false
+    }
+    return ev.references(id: pubkey, key: "p")
+}
+
+
+extension UINavigationController: UIGestureRecognizerDelegate {
+    override open func viewDidLoad() {
+        super.viewDidLoad()
+        interactivePopGestureRecognizer?.delegate = self
+    }
+
+    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        return viewControllers.count > 1
+    }
+}
+
+struct LastNotification {
+    let id: String
+    let created_at: Int64
+}
+
+func get_last_notified() -> LastNotification? {
+    let last = UserDefaults.standard.string(forKey: "last_notification")
+    let last_created = UserDefaults.standard.string(forKey: "last_notification_time")
+        .flatMap { Int64($0) }
+    
+    return last.flatMap { id in
+        last_created.map { created in
+            return LastNotification(id: id, created_at: created)
+        }
+    }
+}
+
+func save_last_notified(_ ev: NostrEvent) {
+    UserDefaults.standard.set(ev.id, forKey: "last_notification")
+    UserDefaults.standard.set(String(ev.created_at), forKey: "last_notification_time")
 }
