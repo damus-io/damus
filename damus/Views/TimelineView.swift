@@ -17,10 +17,18 @@ struct TimelineView: View {
         ScrollView {
             LazyVStack {
                 ForEach(events, id: \.id) { (ev: NostrEvent) in
-                    let evdet = EventDetailView(event: ev, pool: pool)
+                    /*
+                    let evdet = EventDetailView(thread: ThreadModel(event: ev, pool: pool))
                         .navigationBarTitle("Thread")
                         .padding([.leading, .trailing], 6)
                         .environmentObject(profiles)
+                     */
+                    
+                    let evdet = ThreadView(thread: ThreadModel(event: ev, pool: pool))
+                        .navigationBarTitle("Chat")
+                        .padding([.leading, .trailing], 6)
+                        .environmentObject(profiles)
+                    
                     NavigationLink(destination: evdet) {
                         EventView(event: ev, highlight: .none, has_action_bar: true)
                     }

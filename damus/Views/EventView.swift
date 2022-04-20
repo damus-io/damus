@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftUI
-import CachedAsyncImage
 
 enum Highlight {
     case none
@@ -35,7 +34,7 @@ struct EventView: View {
     let has_action_bar: Bool
 
     @EnvironmentObject var profiles: Profiles
-
+    
     var body: some View {
         let profile = profiles.lookup(id: event.pubkey)
         HStack {
@@ -95,7 +94,7 @@ func format_relative_time(_ created_at: Int64) -> String
 func reply_desc(profiles: Profiles, event: NostrEvent) -> String {
     let (pubkeys, n) = event.reply_description
     if pubkeys.count == 0 {
-        return "Reply"
+        return "Reply to self"
     }
     
     let names: [String] = pubkeys.map {

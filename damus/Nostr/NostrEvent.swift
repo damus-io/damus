@@ -79,6 +79,30 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
         return true
     }
     
+    /// find a non-root reply
+    public func find_direct_reply() -> String? {
+        var i = tags.count - 1
+        var first: String? = nil
+        var matches: Int = 0
+        
+        while i >= 0 {
+            let tag = tags[i]
+            if tag.count >= 2 && tag[0] == "e" {
+                if first == nil {
+                    first = tag[1]
+                }
+                matches += 1
+            }
+            i -= 1
+        }
+        
+        if matches <= 1 {
+            return nil
+        }
+        
+        return first
+    }
+    
     public func directly_references(_ id: String) -> Bool {
         // conditions: if it only has 1 e ref
         // OR it has more than 1 e ref, ignoring the first

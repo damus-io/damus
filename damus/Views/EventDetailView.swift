@@ -29,68 +29,16 @@ enum CollapsedEvent: Identifiable {
     }
 }
 
+
 struct EventDetailView: View {
-    @State var event: NostrEvent
 
     let sub_id = UUID().description
-
-    @State var events: [NostrEvent] = []
-    @State var has_event: [String: ()] = [:]
+    
+    @StateObject var thread: ThreadModel
     @State var collapsed: Bool = true
 
     @EnvironmentObject var profiles: Profiles
-
-    let pool: RelayPool
-
-    func unsubscribe_to_thread() {
-        print("unsubscribing from thread \(event.id) with sub_id \(sub_id)")
-        self.pool.remove_handler(sub_id: sub_id)
-        self.pool.send(.unsubscribe(sub_id))
-    }
-
-    func subscribe_to_thread() {
-        var ref_events = NostrFilter.filter_text
-        var events = NostrFilter.filter_text
-
-        // TODO: add referenced relays
-        ref_events.referenced_ids = event.referenced_ids.map { $0.ref_id }
-        ref_events.referenced_ids!.append(event.id)
-
-        events.ids = ref_events.referenced_ids!
-
-        print("subscribing to thread \(event.id) with sub_id \(sub_id)")
-        pool.register_handler(sub_id: sub_id, handler: handle_event)
-        pool.send(.subscribe(.init(filters: [ref_events, events], sub_id: sub_id)))
-    }
-
-    func add_event(ev: NostrEvent) {
-        if sub_id != self.sub_id || self.has_event[ev.id] != nil {
-            return
-        }
-        self.add_event(ev)
-    }
-
-    func handle_event(relay_id: String, ev: NostrConnectionEvent) {
-        switch ev {
-        case .ws_event:
-            break
-        case .nostr_event(let res):
-            switch res {
-            case .event(let sub_id, let ev):
-                if sub_id == self.sub_id {
-                    add_event(ev: ev)
-                }
-
-            case .notice(let note):
-                if note.contains("Too many subscription filters") {
-                    // TODO: resend filters?
-                    pool.reconnect(to: [relay_id])
-                }
-                break
-            }
-        }
-    }
-
+    
     func toggle_collapse_thread(scroller: ScrollViewProxy, id mid: String?, animate: Bool = true, anchor: UnitPoint = .center) {
         self.collapsed = !self.collapsed
         if let id = mid {
@@ -100,21 +48,9 @@ struct EventDetailView: View {
         }
     }
 
-    func scroll_to_event(scroller: ScrollViewProxy, id: String, delay: Double, animate: Bool, anchor: UnitPoint = .center) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-            if animate {
-                withAnimation {
-                    scroller.scrollTo(id, anchor: anchor)
-                }
-            } else {
-                scroller.scrollTo(id, anchor: anchor)
-            }
-        }
-    }
-
     func OurEventView(proxy: ScrollViewProxy, ev: NostrEvent, highlight: Highlight, collapsed_events: [CollapsedEvent]) -> some View {
         Group {
-            if ev.id == event.id {
+            if ev.id == thread.event.id {
                 EventView(event: ev, highlight: .main, has_action_bar: true)
                     .onAppear() {
                         scroll_to_event(scroller: proxy, id: ev.id, delay: 0.5, animate: true)
@@ -134,7 +70,7 @@ struct EventDetailView: View {
                             if !collapsed {
                                 toggle_collapse_thread(scroller: proxy, id: ev.id)
                             }
-                            self.event = ev
+                            thread.event = ev
                         }
                 }
             }
@@ -143,7 +79,7 @@ struct EventDetailView: View {
     
     func uncollapse_section(scroller: ScrollViewProxy, c: CollapsedEvents)
     {
-        let ev = events[c.start]
+        let ev = thread.events[c.start]
         print("uncollapsing section at \(c.start) '\(ev.content.prefix(12))...'")
         let start_id = ev.id
         
@@ -153,39 +89,24 @@ struct EventDetailView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                let collapsed_events = calculated_collapsed_events(collapsed: self.collapsed, active: self.event, events: self.events)
-                ForEach(collapsed_events, id: \.id) { cev in
-                    switch cev {
-                    case .collapsed(let c):
-                        Text("··· \(c.count) other replies ···")
-                            .font(.footnote)
-                            .foregroundColor(.gray)
-                            .onTapGesture {
-                                self.uncollapse_section(scroller: proxy, c: c)
-                                //self.toggle_collapse_thread(scroller: proxy, id: nil)
-                            }
-                    case .event(let ev, let highlight):
-                        OurEventView(proxy: proxy, ev: ev, highlight: highlight, collapsed_events: collapsed_events)
+                let collapsed_events = calculated_collapsed_events(collapsed: self.collapsed, active: thread.event, events: thread.events)
+                    ForEach(collapsed_events, id: \.id) { cev in
+                        switch cev {
+                        case .collapsed(let c):
+                            Text("··· \(c.count) other replies ···")
+                                .font(.footnote)
+                                .foregroundColor(.gray)
+                                .onTapGesture {
+                                    self.uncollapse_section(scroller: proxy, c: c)
+                                    //self.toggle_collapse_thread(scroller: proxy, id: nil)
+                                }
+                        case .event(let ev, let highlight):
+                            OurEventView(proxy: proxy, ev: ev, highlight: highlight, collapsed_events: collapsed_events)
+                        }
                     }
-                }
-            }
-            .onDisappear() {
-                unsubscribe_to_thread()
-            }
-            .onAppear() {
-                self.add_event(event)
-                subscribe_to_thread()
             }
         }
 
-    }
-
-    func add_event(_ ev: NostrEvent) {
-        if self.has_event[ev.id] == nil {
-            self.has_event[ev.id] = ()
-            self.events.append(ev)
-            self.events = self.events.sorted { $0.created_at < $1.created_at }
-        }
     }
 }
 
@@ -359,3 +280,16 @@ func any_collapsed(_ evs: [CollapsedEvent]) -> Bool {
 func print_event(_ ev: NostrEvent) {
     print(ev.description)
 }
+
+func scroll_to_event(scroller: ScrollViewProxy, id: String, delay: Double, animate: Bool, anchor: UnitPoint = .center) {
+    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+        if animate {
+            withAnimation {
+                scroller.scrollTo(id, anchor: anchor)
+            }
+        } else {
+            scroller.scrollTo(id, anchor: anchor)
+        }
+    }
+}
+
