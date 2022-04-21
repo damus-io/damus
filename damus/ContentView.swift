@@ -42,7 +42,7 @@ struct ContentView: View {
     @State var loading: Bool = true
     @State var pool: RelayPool? = nil
     @State var selected_timeline: Timeline? = .home
-    @State var last_event_of_kind: [Int: NostrEvent] = [:]
+    @State var last_event_of_kind: [String: [Int: NostrEvent]] = [:]
     @State var has_events: [String: ()] = [:]
     @State var has_friend_event: [String: ()] = [:]
     @State var new_notifications: Bool = false
@@ -184,11 +184,17 @@ struct ContentView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .post)) { obj in
-            let post = obj.object as! NostrPost
-            print("post \(post.content)")
-            let privkey = ""
-            let new_ev = post.to_event(privkey: privkey, pubkey: pubkey)
-            self.pool?.send(.event(new_ev))
+
+            let post_res = obj.object as! NostrPostResult
+            switch post_res {
+            case .post(let post):
+                print("post \(post.content)")
+                let new_ev = post.to_event(privkey: privkey, pubkey: pubkey)
+                self.pool?.send(.event(new_ev))
+            case .cancel:
+                active_sheet = nil
+                print("post cancelled")
+            }
         }
         .onReceive(timer) { n in
             self.pool?.connect_to_disconnected()
@@ -230,24 +236,26 @@ struct ContentView: View {
 
     func add_relay(_ pool: RelayPool, _ relay: String) {
         //add_rw_relay(pool, "wss://nostr-pub.wellorder.net")
-        let wssrelay = "wss://\(relay)"
-        add_rw_relay(pool, wssrelay)
+        add_rw_relay(pool, relay)
         let profile = Profile(name: relay, about: nil, picture: nil)
         let ts = Int64(Date().timeIntervalSince1970)
         let tsprofile = TimestampedProfile(profile: profile, timestamp: ts)
-        self.profiles.add(id: wssrelay, profile: tsprofile)
+        self.profiles.add(id: relay, profile: tsprofile)
     }
 
     func connect() {
         let pool = RelayPool()
 
-        add_relay(pool, "nostr-pub.wellorder.net")
-        add_relay(pool, "nostr.onsats.org")
-        add_relay(pool, "nostr.bitcoiner.social")
-        add_relay(pool, "nostr-relay.freeberty.net")
-        add_relay(pool, "nostr-relay.untethr.me")
+        add_relay(pool, "wss://nostr-pub.wellorder.net")
+        add_relay(pool, "wss://nostr.onsats.org")
+        add_relay(pool, "wss://nostr.bitcoiner.social")
+        add_relay(pool, "ws://monad.jb55.com:8080")
+        add_relay(pool, "wss://nostr-relay.freeberty.net")
+        add_relay(pool, "wss://nostr-relay.untethr.me")
 
-        pool.register_handler(sub_id: sub_id, handler: handle_event)
+        pool.register_handler(sub_id: sub_id) { (relay_id, ev) in
+            self.handle_event(relay_id: relay_id, conn_event: ev)
+        }
 
         self.pool = pool
         pool.connect()
@@ -279,17 +287,26 @@ struct ContentView: View {
         let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at)
         self.profiles.add(id: ev.pubkey, profile: tprof)
     }
-
+    
+    func get_last_event_of_kind(relay_id: String, kind: Int) -> NostrEvent? {
+        guard let m = last_event_of_kind[relay_id] else {
+            last_event_of_kind[relay_id] = [:]
+            return nil
+        }
+        
+        return m[kind]
+    }
+    
     func send_filters(relay_id: String) {
         // TODO: since times should be based on events from a specific relay
         // perhaps we could mark this in the relay pool somehow
 
-        let last_text_event = last_event_of_kind[NostrKind.text.rawValue]
+        let last_text_event = get_last_event_of_kind(relay_id: relay_id, kind: NostrKind.text.rawValue)
         let since = get_since_time(last_event: last_text_event)
         var since_filter = NostrFilter.filter_text
         since_filter.since = since
 
-        let last_metadata_event = last_event_of_kind[NostrKind.metadata.rawValue]
+        let last_metadata_event = get_last_event_of_kind(relay_id: relay_id, kind: NostrKind.metadata.rawValue)
         var profile_filter = NostrFilter.filter_profiles
         if let prof_since = get_metadata_since_time(last_metadata_event) {
             profile_filter.since = prof_since
@@ -305,7 +322,7 @@ struct ContentView: View {
 
         let filters = [since_filter, profile_filter, contacts_filter]
         print("connected to \(relay_id), refreshing from \(since)")
-        self.pool?.send(.subscribe(.init(filters: filters, sub_id: sub_id)))
+        self.pool?.send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: [relay_id])
         //self.pool?.send(.subscribe(.init(filters: [notification_filter], sub_id: "notifications")))
     }
     
@@ -330,12 +347,12 @@ struct ContentView: View {
         self.friend_events = self.friend_events.sorted { $0.created_at > $1.created_at }
     }
     
-    func process_event(_ ev: NostrEvent) {
+    func process_event(relay_id: String, ev: NostrEvent) {
         if has_events[ev.id] == nil {
             has_events[ev.id] = ()
-            let last_k = last_event_of_kind[ev.kind]
+            let last_k = get_last_event_of_kind(relay_id: relay_id, kind: ev.kind)
             if last_k == nil || ev.created_at > last_k!.created_at {
-                last_event_of_kind[ev.kind] = ev
+                last_event_of_kind[relay_id]?[ev.kind] = ev
             }
             if ev.kind == 1 {
                 if !should_hide_event(ev) {
@@ -409,7 +426,7 @@ struct ContentView: View {
                     return
                 }
                 
-                self.process_event(ev)
+                self.process_event(relay_id: relay_id, ev: ev)
             case .notice(let msg):
                 self.events.insert(NostrEvent(content: "NOTICE from \(relay_id): \(msg)", pubkey: "system"), at: 0)
                 print(msg)
@@ -418,10 +435,6 @@ struct ContentView: View {
     }
 
     func should_hide_event(_ ev: NostrEvent) -> Bool {
-        // TODO: implement mute
-        if ev.pubkey == "887645fef0ce0c3c1218d2f5d8e6132a19304cdc57cd20281d082f38cfea0072" {
-            return true
-        }
         return false
     }
 }
