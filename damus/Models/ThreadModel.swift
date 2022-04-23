@@ -9,39 +9,53 @@ import Foundation
 
 /// manages the lifetime of a thread
 class ThreadModel: ObservableObject {
-    @Published var event: NostrEvent
+    @Published var event: NostrEvent? = nil
     @Published var events: [NostrEvent] = []
     @Published var event_map: [String: Int] = [:]
     var replies: ReplyMap = ReplyMap()
     
-    let pool: RelayPool
-    let sub_id = UUID().description
+    var pool: RelayPool? = nil
+    var sub_id = UUID().description
     
-    init(event: NostrEvent, pool: RelayPool) {
-        self.event = event
-        self.pool = pool
-        add_event(event)
+    deinit {
+        unsubscribe()
     }
     
     func unsubscribe() {
+        guard let event = self.event else {
+            return
+        }
         print("unsubscribing from thread \(event.id) with sub_id \(sub_id)")
-        self.pool.remove_handler(sub_id: sub_id)
-        self.pool.send(.unsubscribe(sub_id))
+        self.pool?.remove_handler(sub_id: sub_id)
+        self.pool?.send(.unsubscribe(sub_id))
     }
     
-    func subscribe() {
+    func reset_events() {
+        self.events.removeAll()
+        self.event_map.removeAll()
+        self.replies.replies.removeAll()
+    }
+    
+    func set_active_event(_ ev: NostrEvent) {
+        unsubscribe()
+        self.event = ev
+        add_event(ev)
+        subscribe(ev)
+    }
+    
+    private func subscribe(_ ev: NostrEvent) {
         var ref_events = NostrFilter.filter_text
-        var events = NostrFilter.filter_text
+        var events_filter = NostrFilter.filter_text
 
         // TODO: add referenced relays
-        ref_events.referenced_ids = event.referenced_ids.map { $0.ref_id }
-        ref_events.referenced_ids!.append(event.id)
+        ref_events.referenced_ids = ev.referenced_ids.map { $0.ref_id }
+        ref_events.referenced_ids!.append(ev.id)
 
-        events.ids = ref_events.referenced_ids!
+        events_filter.ids = ref_events.referenced_ids!
 
-        print("subscribing to thread \(event.id) with sub_id \(sub_id)")
-        pool.register_handler(sub_id: sub_id, handler: handle_event)
-        pool.send(.subscribe(.init(filters: [ref_events, events], sub_id: sub_id)))
+        print("subscribing to thread \(ev.id) with sub_id \(sub_id)")
+        pool?.register_handler(sub_id: sub_id, handler: handle_event)
+        pool?.send(.subscribe(.init(filters: [ref_events, events_filter], sub_id: sub_id)))
     }
     
     func lookup(_ event_id: String) -> NostrEvent? {
@@ -83,7 +97,7 @@ class ThreadModel: ObservableObject {
             case .notice(let note):
                 if note.contains("Too many subscription filters") {
                     // TODO: resend filters?
-                    pool.reconnect(to: [relay_id])
+                    pool?.reconnect(to: [relay_id])
                 }
                 break
             }

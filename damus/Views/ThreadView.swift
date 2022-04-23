@@ -7,30 +7,37 @@
 
 import SwiftUI
 
+
 struct ThreadView: View {
-    @StateObject var thread: ThreadModel
-    @State var is_thread: Bool = false
+    @State var is_chatroom: Bool = false
     
     @EnvironmentObject var profiles: Profiles
+    @EnvironmentObject var thread: ThreadModel
     
     var body: some View {
         Group {
-            ChatroomView()
-                .environmentObject(thread)
-                .onReceive(NotificationCenter.default.publisher(for: .convert_to_thread)) { _ in
-                    is_thread = true
-                }
+            if is_chatroom {
+                ChatroomView()
+                    .navigationBarTitle("Chat")
+                    .environmentObject(profiles)
+                    .environmentObject(thread)
+            } else {
+                EventDetailView(thread: thread)
+                    .navigationBarTitle("Thread")
+                    .environmentObject(profiles)
+                    .environmentObject(thread)
+            }
             
-            let edv = EventDetailView(thread: thread).environmentObject(profiles)
-            NavigationLink(destination: edv, isActive: $is_thread) {
+            
+            /*
+            NavigationLink(destination: edv, isActive: $is_chatroom) {
                 EmptyView()
             }
+             */
         }
-        .onDisappear() {
-            thread.unsubscribe()
-        }
-        .onAppear() {
-            thread.subscribe()
+        .onReceive(NotificationCenter.default.publisher(for: .toggle_thread_view)) { _ in
+            is_chatroom = !is_chatroom
+            //print("is_chatroom: \(is_chatroom)")
         }
     }
 }

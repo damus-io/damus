@@ -24,6 +24,11 @@ enum Sheets: Identifiable {
     }
 }
 
+enum ThreadState {
+    case event_details
+    case chatroom
+}
+
 enum Timeline: String, CustomStringConvertible {
     case home
     case notifications
@@ -42,11 +47,13 @@ struct ContentView: View {
     @State var loading: Bool = true
     @State var pool: RelayPool? = nil
     @State var selected_timeline: Timeline? = .home
+    @StateObject var thread: ThreadModel = ThreadModel()
+    @State var is_thread_open: Bool = false
     @State var last_event_of_kind: [String: [Int: NostrEvent]] = [:]
     @State var has_events: [String: ()] = [:]
     @State var has_friend_event: [String: ()] = [:]
     @State var new_notifications: Bool = false
-    
+    @State var event: NostrEvent? = nil
     @State var events: [NostrEvent] = []
     @State var friend_events: [NostrEvent] = []
     @State var notifications: [NostrEvent] = []
@@ -129,6 +136,7 @@ struct ContentView: View {
         ZStack {
             if let pool = self.pool {
                 TimelineView(events: $friend_events, pool: pool)
+                    .environmentObject(thread)
                     .environmentObject(profiles)
             }
             PostButtonContainer
@@ -138,24 +146,35 @@ struct ContentView: View {
     func MainContent(pool: RelayPool) -> some View {
         NavigationView {
             VStack {
-                PostingTimelineView
-                    .onAppear() {
-                        switch_timeline(.home)
-                    }
+                switch selected_timeline {
+                case .home:
+                    PostingTimelineView
+                        .onAppear() {
+                            switch_timeline(.home)
+                        }
+                    
+                case .notifications:
+                    TimelineView(events: $notifications, pool: pool)
+                        .environmentObject(profiles)
+                        .navigationTitle("Notifications")
                 
-                let notif = TimelineView(events: $notifications, pool: pool)
+                case .global:
+                    
+                    TimelineView(events: $events, pool: pool)
+                        .environmentObject(profiles)
+                        .navigationTitle("Global")
+                case .none:
+                    EmptyView()
+                }
+                
+                let tv = ThreadView()
+                    .environmentObject(thread)
                     .environmentObject(profiles)
-                    .navigationTitle("Notifications")
-                    .navigationBarBackButtonHidden(true)
+                    .padding([.leading, .trailing], 6)
                 
-                let global = TimelineView(events: $events, pool: pool)
-                    .environmentObject(profiles)
-                    .navigationTitle("Global")
-                    .navigationBarBackButtonHidden(true)
-                
-                NavigationLink(destination: notif, tag: .notifications, selection: $selected_timeline) { EmptyView() }
-                
-                NavigationLink(destination: global, tag: .global, selection: $selected_timeline) { EmptyView() }
+                NavigationLink(destination: tv, isActive: $is_thread_open) {
+                    EmptyView()
+                }
             }
             .navigationBarTitle("Damus", displayMode: .inline)
         }
@@ -182,6 +201,16 @@ struct ContentView: View {
             case .post:
                 PostView(references: [])
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .open_thread)) { obj in
+            let ev = obj.object as! NostrEvent
+            thread.reset_events()
+            thread.set_active_event(ev)
+            is_thread_open = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .broadcast_event)) { obj in
+            let ev = obj.object as! NostrEvent
+            self.pool?.send(.event(ev))
         }
         .onReceive(NotificationCenter.default.publisher(for: .post)) { obj in
 
@@ -253,11 +282,10 @@ struct ContentView: View {
         add_relay(pool, "wss://nostr-relay.freeberty.net")
         add_relay(pool, "wss://nostr-relay.untethr.me")
 
-        pool.register_handler(sub_id: sub_id) { (relay_id, ev) in
-            self.handle_event(relay_id: relay_id, conn_event: ev)
-        }
+        pool.register_handler(sub_id: sub_id, handler: handle_event)
 
         self.pool = pool
+        self.thread.pool = pool
         pool.connect()
     }
 
@@ -439,11 +467,13 @@ struct ContentView: View {
     }
 }
 
+/*
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
     }
 }
+ */
 
 
 func get_metadata_since_time(_ metadata_event: NostrEvent?) -> Int64? {
@@ -547,3 +577,4 @@ func save_last_notified(_ ev: NostrEvent) {
     UserDefaults.standard.set(ev.id, forKey: "last_notification")
     UserDefaults.standard.set(String(ev.created_at), forKey: "last_notification_time")
 }
+

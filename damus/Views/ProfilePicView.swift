@@ -16,17 +16,19 @@ func id_to_color(_ id: String) -> Color {
 
 func highlight_color(_ h: Highlight) -> Color {
     switch h {
+    case .reply: fallthrough
     case .none: return Color.black
     case .main: return Color.red
-    case .reply: return Color.blue
     }
 }
 
 func pfp_line_width(_ h: Highlight) -> CGFloat {
-    if h.is_none {
+    switch h {
+    case .none: fallthrough
+    case .reply:
         return 0
+    case .main: return 4
     }
-    return 4
 }
 
 struct ProfilePicView: View {

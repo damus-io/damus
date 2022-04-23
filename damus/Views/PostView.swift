@@ -7,10 +7,9 @@
 
 import SwiftUI
 
-extension Notification.Name {
-    static var post: Notification.Name {
-        return Notification.Name("send post")
-    }
+enum NostrPostResult {
+    case post(NostrPost)
+    case cancel
 }
 
 struct NostrPost {
@@ -45,28 +44,33 @@ struct PostView: View {
     @State var post: String = ""
     @FocusState var focus: Bool
     let references: [ReferencedId]
-
-    @Environment(\.presentationMode) var presmode
+    
+    @Environment(\.presentationMode) var presentationMode
 
     enum FocusField: Hashable {
       case post
     }
 
+    func cancel() {
+        NotificationCenter.default.post(name: .post, object: NostrPostResult.cancel)
+        dismiss()
+    }
+    
     func dismiss() {
-        presmode.wrappedValue.dismiss()
+        self.presentationMode.wrappedValue.dismiss()
     }
 
     func send_post() {
         let new_post = NostrPost(content: self.post, references: references)
-        NotificationCenter.default.post(name: .post, object: new_post)
-        dismiss()
+        NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
+        //dismiss()
     }
 
     var body: some View {
         VStack {
             HStack {
                 Button("Cancel") {
-                    self.dismiss()
+                    self.cancel()
                 }
                 .foregroundColor(.primary)
 

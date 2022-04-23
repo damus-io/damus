@@ -47,8 +47,9 @@ struct EventDetailView: View {
             }
         }
     }
-
-    func OurEventView(proxy: ScrollViewProxy, ev: NostrEvent, highlight: Highlight, collapsed_events: [CollapsedEvent]) -> some View {
+    
+    /*
+    func OldEventView(proxy: ScrollViewProxy, ev: NostrEvent, highlight: Highlight, collapsed_events: [CollapsedEvent]) -> some View {
         Group {
             if ev.id == thread.event.id {
                 EventView(event: ev, highlight: .main, has_action_bar: true)
@@ -76,6 +77,7 @@ struct EventDetailView: View {
             }
         }
     }
+     */
     
     func uncollapse_section(scroller: ScrollViewProxy, c: CollapsedEvents)
     {
@@ -86,27 +88,51 @@ struct EventDetailView: View {
         toggle_collapse_thread(scroller: scroller, id: start_id, animate: true, anchor: .top)
     }
     
-    var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                let collapsed_events = calculated_collapsed_events(collapsed: self.collapsed, active: thread.event, events: thread.events)
-                    ForEach(collapsed_events, id: \.id) { cev in
-                        switch cev {
-                        case .collapsed(let c):
-                            Text("··· \(c.count) other replies ···")
-                                .font(.footnote)
-                                .foregroundColor(.gray)
-                                .onTapGesture {
-                                    self.uncollapse_section(scroller: proxy, c: c)
-                                    //self.toggle_collapse_thread(scroller: proxy, id: nil)
-                                }
-                        case .event(let ev, let highlight):
-                            OurEventView(proxy: proxy, ev: ev, highlight: highlight, collapsed_events: collapsed_events)
+    func CollapsedEventView(_ cev: CollapsedEvent, scroller: ScrollViewProxy) -> some View {
+        Group {
+            switch cev {
+            case .collapsed(let c):
+                Text("··· \(c.count) other replies ···")
+                    .font(.footnote)
+                    .foregroundColor(.gray)
+                    .onTapGesture {
+                        //self.uncollapse_section(scroller: proxy, c: c)
+                        //self.toggle_collapse_thread(scroller: proxy, id: nil)
+                        toggle_thread_view()
+                    }
+            case .event(let ev, let highlight):
+                EventView(event: ev, highlight: highlight, has_action_bar: true)
+                    .onTapGesture {
+                        if thread.event!.id == ev.id {
+                            toggle_thread_view()
+                        } else {
+                            thread.set_active_event(ev)
+                        }
+                    }
+                    .onAppear() {
+                        if highlight == .main {
+                            scroll_to_event(scroller: scroller, id: ev.id, delay: 0.5, animate: true)
                         }
                     }
             }
         }
+    }
+    
+    var body: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                let collapsed_events = calculated_collapsed_events(collapsed: self.collapsed, active: thread.event, events: thread.events)
+                ForEach(collapsed_events, id: \.id) { cev in
+                    CollapsedEventView(cev, scroller: proxy)
+                }
+            }
+        }
+        .navigationBarTitle("Thread")
 
+    }
+
+    func toggle_thread_view() {
+        NotificationCenter.default.post(name: .toggle_thread_view, object: nil)
     }
 }
 
@@ -214,9 +240,13 @@ func determine_highlight(reply_map: [String: ()], current: NostrEvent, active: N
      */
 }
 
-func calculated_collapsed_events(collapsed: Bool, active: NostrEvent, events: [NostrEvent]) -> [CollapsedEvent] {
+func calculated_collapsed_events(collapsed: Bool, active: NostrEvent?, events: [NostrEvent]) -> [CollapsedEvent] {
     var count: Int = 0
-
+    
+    guard let active = active else {
+        return []
+    }
+    
     let reply_map = make_reply_map(active: active, events: events)
     
     if !collapsed {

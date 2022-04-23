@@ -7,12 +7,6 @@
 
 import SwiftUI
 
-extension Notification.Name {
-    static var thread_focus: Notification.Name {
-        return Notification.Name("thread focus")
-    }
-}
-
 enum ActionBarSheet: Identifiable {
     case reply
 
@@ -50,6 +44,15 @@ struct EventActionBar: View {
             case .reply:
                 ReplyView(replying_to: event)
                     .environmentObject(profiles)
+                    .onReceive(NotificationCenter.default.publisher(for: .post)) { obj in
+                        let res = obj.object as! NostrPostResult
+                        switch res {
+                        case .cancel:
+                            self.sheet = nil
+                        case .post:
+                            self.sheet = nil
+                        }
+                    }
             }
         }
     }

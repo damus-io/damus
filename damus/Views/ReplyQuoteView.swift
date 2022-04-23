@@ -41,12 +41,15 @@ struct ReplyQuoteView: View {
     var body: some View {
         Group {
             if let event = thread.lookup(event_id) {
-                Group {
-                    MainContent(event: event)
-                        .padding(4)
-                }
-                .background(Color.secondary.opacity(0.2))
+                MainContent(event: event)
+                .padding(4)
+                .frame(maxHeight: 100)
+                .background(event.id == thread.event!.id ? Color.red.opacity(0.2) : Color.secondary.opacity(0.2))
                 .cornerRadius(8.0)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    thread.set_active_event(event)
+                }
             } else {
                 ProgressView()
                     .progressViewStyle(.circular)

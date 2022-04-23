@@ -148,7 +148,7 @@ func make_nostr_subscription_req(_ filters: [NostrFilter], sub_id: String) -> St
 }
 
 func make_websocket(url: URL) -> WebSocket {
-    var req = URLRequest(url: url)
+    let req = URLRequest(url: url)
     //req.setValue("chat,superchat", forHTTPHeaderField: "Sec-WebSocket-Protocol")
     return WebSocket(request: req, compressionHandler: .none)
 }

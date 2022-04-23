@@ -50,9 +50,6 @@ struct EventView: View {
                     Text("\(format_relative_time(event.created_at))")
                         .foregroundColor(.gray)
                     Spacer()
-                    if (event.pow ?? 0) >= 10 {
-                        PowView(event.pow)
-                    }
                 }
                 
                 if event.is_reply {
@@ -82,6 +79,25 @@ struct EventView: View {
         .id(event.id)
         .frame(minHeight: PFP_SIZE)
         .padding([.bottom], 4)
+        .contextMenu {
+            Button {
+                UIPasteboard.general.string = event.content
+            } label: {
+                Label("Copy", systemImage: "doc.on.doc")
+            }
+            
+            Button {
+                UIPasteboard.general.string = event.id
+            } label: {
+                Label("Copy ID", systemImage: "tag")
+            }
+            
+            Button {
+                NotificationCenter.default.post(name: .broadcast_event, object: event)
+            } label: {
+                Label("Broadcast", systemImage: "globe")
+            }
+        }
     }
 }
 
@@ -119,3 +135,5 @@ func reply_others_desc(n: Int, n_pubkeys: Int) -> String {
     let plural = other == 1 ? "" : "s"
     return n > 1 ? " & \(other) other\(plural)" : ""
 }
+
+

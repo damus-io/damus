@@ -20,7 +20,10 @@ struct ChatView: View {
     }
     
     var is_active: Bool {
-        thread.event.id == event.id
+        guard let ev = thread.event else {
+            return false
+        }
+        return ev.id == event.id
     }
     
     func prev_reply_is_same() -> String? {
@@ -98,7 +101,7 @@ struct ChatView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .textSelection(.enabled)
                 
-                if next_ev == nil || next_ev!.pubkey != event.pubkey {
+                if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
                     EventActionBar(event: event)
                         .environmentObject(profiles)
                 }
@@ -112,30 +115,14 @@ struct ChatView: View {
         .id(event.id)
         .frame(minHeight: just_started ? PFP_SIZE : 0)
         .padding([.bottom], next_ev == nil ? 4 : 0)
-        .onTapGesture {
-            if is_active {
-                convert_to_thread()
-            } else {
-                thread.event = event
-            }
-        }
         //.border(Color.green)
         
     }
     
-    @Environment(\.presentationMode) var presmode
-    
-    func dismiss() {
-        presmode.wrappedValue.dismiss()
-    }
-    
-    func convert_to_thread() {
-        NotificationCenter.default.post(name: .convert_to_thread, object: nil)
-    }
 }
 
 extension Notification.Name {
-    static var convert_to_thread: Notification.Name {
+    static var toggle_thread_view: Notification.Name {
         return Notification.Name("convert_to_thread")
     }
 }
@@ -149,3 +136,5 @@ struct ChatView_Previews: PreviewProvider {
 }
 
 */
+
+

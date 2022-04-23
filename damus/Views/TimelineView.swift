@@ -7,13 +7,25 @@
 
 import SwiftUI
 
+enum TimelineAction {
+    case chillin
+    case navigating
+}
+
 struct TimelineView: View {
     @Binding var events: [NostrEvent]
+
     @EnvironmentObject var profiles: Profiles
     
     let pool: RelayPool
     
     var body: some View {
+        MainContent
+        .padding([.leading, .trailing], 6)
+        .environmentObject(profiles)
+    }
+    
+    var MainContent: some View {
         ScrollView {
             LazyVStack {
                 ForEach(events, id: \.id) { (ev: NostrEvent) in
@@ -24,20 +36,13 @@ struct TimelineView: View {
                         .environmentObject(profiles)
                      */
                     
-                    let evdet = ThreadView(thread: ThreadModel(event: ev, pool: pool))
-                        .navigationBarTitle("Chat")
-                        .padding([.leading, .trailing], 6)
-                        .environmentObject(profiles)
-                    
-                    NavigationLink(destination: evdet) {
-                        EventView(event: ev, highlight: .none, has_action_bar: true)
-                    }
-                    .buttonStyle(PlainButtonStyle())
+                    EventView(event: ev, highlight: .none, has_action_bar: true)
+                        .onTapGesture {
+                            NotificationCenter.default.post(name: .open_thread, object: ev)
+                        }
                 }
             }
         }
-        .padding([.leading, .trailing], 6)
-        .environmentObject(profiles)
     }
 }
 
@@ -48,3 +53,14 @@ struct TimelineView_Previews: PreviewProvider {
     }
 }
  */
+
+
+struct NavigationLazyView<Content: View>: View {
+    let build: () -> Content
+    init(_ build: @autoclosure @escaping () -> Content) {
+        self.build = build
+    }
+    var body: Content {
+        build()
+    }
+}
