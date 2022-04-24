@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-let PFP_SIZE: CGFloat? = 64
+let PFP_SIZE: CGFloat? = 52.0
 let CORNER_RADIUS: CGFloat = 32
 
 func id_to_color(_ id: String) -> Color {
@@ -27,7 +27,7 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
     case .none: fallthrough
     case .reply:
         return 0
-    case .main: return 4
+    case .main: return 2
     }
 }
 
@@ -35,20 +35,22 @@ struct ProfilePicView: View {
     let picture: String?
     let size: CGFloat
     let highlight: Highlight
-
+    
+    var Placeholder: some View {
+        Color.purple.opacity(0.2)
+    }
+    
     var body: some View {
         if let pic = picture.flatMap({ URL(string: $0) }) {
             AsyncImage(url: pic) { img in
                 img.resizable()
-            } placeholder: {
-                Color.purple.opacity(0.2)
-            }
+            } placeholder: { Placeholder }
             .frame(width: size, height: size)
             .clipShape(Circle())
             .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
             .padding(2)
         } else {
-            Color.purple.opacity(0.2)
+            Placeholder
                 .frame(width: size, height: size)
                 .cornerRadius(CORNER_RADIUS)
                 .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))

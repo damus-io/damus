@@ -20,6 +20,12 @@ extension Notification.Name {
 }
 
 extension Notification.Name {
+    static var select_quote: Notification.Name {
+        return Notification.Name("select quote")
+    }
+}
+
+extension Notification.Name {
     static var broadcast_event: Notification.Name {
         return Notification.Name("broadcast event")
     }

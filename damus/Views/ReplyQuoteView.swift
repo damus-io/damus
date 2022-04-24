@@ -16,19 +16,20 @@ struct ReplyQuoteView: View {
     
     func MainContent(event: NostrEvent) -> some View {
         HStack(alignment: .top) {
-            ProfilePicView(picture: profiles.lookup(id: event.pubkey)?.picture, size: 16, highlight: .none)
-            //.border(Color.blue)
+            Rectangle().frame(width: 2)
+                .padding([.leading], 4)
             
-            VStack {
-                HStack {
+            
+            VStack(alignment: .leading) {
+                HStack(alignment: .top) {
+                    ProfilePicView(picture: profiles.lookup(id: event.pubkey)?.picture, size: 16, highlight: .none)
                     ProfileName(pubkey: event.pubkey, profile: profiles.lookup(id: event.pubkey))
                     Text("\(format_relative_time(event.created_at))")
                         .foregroundColor(.gray)
-                    Spacer()
                 }
                 
                 Text(event.content)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    //.frame(maxWidth: .infinity, alignment: .leading)
                     .textSelection(.enabled)
                 
                 //Spacer()
@@ -44,11 +45,9 @@ struct ReplyQuoteView: View {
                 MainContent(event: event)
                 .padding(4)
                 .frame(maxHeight: 100)
-                .background(event.id == thread.event!.id ? Color.red.opacity(0.2) : Color.secondary.opacity(0.2))
-                .cornerRadius(8.0)
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    thread.set_active_event(event)
+                    NotificationCenter.default.post(name: .select_quote, object: event)
                 }
             } else {
                 ProgressView()

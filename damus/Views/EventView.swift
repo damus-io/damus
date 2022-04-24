@@ -39,7 +39,7 @@ struct EventView: View {
         let profile = profiles.lookup(id: event.pubkey)
         HStack {
             VStack {
-                ProfilePicView(picture: profile?.picture, size: 64, highlight: highlight)
+                ProfilePicView(picture: profile?.picture, size: PFP_SIZE!, highlight: highlight)
 
                 Spacer()
             }

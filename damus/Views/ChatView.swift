@@ -19,6 +19,26 @@ struct ChatView: View {
         return prev_ev == nil || prev_ev!.pubkey != event.pubkey
     }
     
+    func next_replies_to_this() -> Bool {
+        guard let next = next_ev else {
+            return false
+        }
+        
+        return thread.replies.lookup(next.id) != nil
+    }
+    
+    func is_reply_to_prev() -> Bool {
+        guard let prev = prev_ev else {
+            return true
+        }
+        
+        if let rep = thread.replies.lookup(event.id) {
+            return rep == prev.id
+        }
+        
+        return false
+    }
+    
     var is_active: Bool {
         guard let ev = thread.event else {
             return false
@@ -56,65 +76,79 @@ struct ChatView: View {
         Text("\(reply_desc(profiles: profiles, event: event))")
             .font(.footnote)
             .foregroundColor(.gray)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(alignment: .leading)
     }
+    
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         let profile = profiles.lookup(id: event.pubkey)
         HStack {
-            VStack {
-                if is_active || just_started {
-                    ProfilePicView(picture: profile?.picture, size: 32, highlight: is_active ? .main : .none)
-                }
-                /*
-                if just_started {
-                    ProfilePicView(picture: profile?.picture, size: 32, highlight: thread.event.id == event.id ? .main : .none)
-                } else {
-                    Text("\(format_relative_time(event.created_at))")
-                        .font(.footnote)
-                        .foregroundColor(.gray.opacity(0.5))
-                }
-                 */
+            //ZStack {
+                //Rectangle()
+                    //.foregroundColor(Color.gray)
+                    //.frame(width: 2)
+                
+                VStack {
+                    if is_active || just_started {
+                        ProfilePicView(picture: profile?.picture, size: 32, highlight: is_active ? .main : .none)
+                    }
+                    /*
+                    if just_started {
+                        ProfilePicView(picture: profile?.picture, size: 32, highlight: thread.event.id == event.id ? .main : .none)
+                    } else {
+                        Text("\(format_relative_time(event.created_at))")
+                            .font(.footnote)
+                            .foregroundColor(.gray.opacity(0.5))
+                    }
+                     */
 
-                Spacer()
-            }
-            .frame(maxWidth: 32)
+                    Spacer()
+                }
+                .frame(maxWidth: 32)
+            //}
 
-            VStack {
-                if just_started {
-                    HStack {
+            Group {
+                VStack(alignment: .leading) {
+                    if just_started {
+                        HStack {
                             ProfileName(pubkey: event.pubkey, profile: profile)
                             Text("\(format_relative_time(event.created_at))")
-                                .foregroundColor(.gray)
-                            Spacer()
+                                    .foregroundColor(.gray)
+                        }
                     }
-                }
-            
-                if let ref_id = thread.replies.lookup(event.id) {
-                    ReplyQuoteView(quoter: event, event_id: ref_id)
-                        .environmentObject(thread)
-                        .environmentObject(profiles)
-                    ReplyDescription
-                }
-
-                Text(event.content)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .textSelection(.enabled)
                 
-                if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
-                    EventActionBar(event: event)
-                        .environmentObject(profiles)
-                }
+                    if let ref_id = thread.replies.lookup(event.id) {
+                        if !is_reply_to_prev() {
+                            ReplyQuoteView(quoter: event, event_id: ref_id)
+                                .environmentObject(thread)
+                                .environmentObject(profiles)
+                            ReplyDescription
+                        }
+                    }
 
-                Spacer()
+                    Text(event.content)
+                        .textSelection(.enabled)
+                    
+                    if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
+                        EventActionBar(event: event)
+                            .environmentObject(profiles)
+                    }
+
+                    //Spacer()
+                }
+                .padding(6)
             }
             .padding([.leading], 2)
+            .background(Color.secondary.opacity(0.1))
+            .cornerRadius(8.0)
+            
             //.border(Color.red)
         }
         .contentShape(Rectangle())
         .id(event.id)
         .frame(minHeight: just_started ? PFP_SIZE : 0)
-        .padding([.bottom], next_ev == nil ? 4 : 0)
+        //.padding([.bottom], next_ev == nil ? 2 : 0)
         //.border(Color.green)
         
     }

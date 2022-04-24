@@ -25,8 +25,6 @@ struct EventActionBar: View {
 
     var body: some View {
         HStack {
-            Spacer()
-            
             /*
             EventActionButton(img: "square.and.arrow.up") {
                 print("share")
