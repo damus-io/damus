@@ -179,6 +179,20 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
         return (ns, c)
     }
     
+    public func count_ids() -> Int {
+        return count_refs("e")
+    }
+    
+    public func count_refs(_ type: String) -> Int {
+        var count: Int = 0
+        for tag in tags {
+            if tag.count >= 2 && tag[0] == "e" {
+                count += 1
+            }
+        }
+        return count
+    }
+    
     public var referenced_pubkeys: [ReferencedId] {
         return get_referenced_ids(key: "p")
     }

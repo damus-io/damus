@@ -36,11 +36,35 @@ class ThreadModel: ObservableObject {
         self.replies.replies.removeAll()
     }
     
+    func should_resubscribe(_ ev_b: NostrEvent) -> Bool {
+        if self.events.count == 0 {
+            return true
+        }
+        
+        guard let ev_a = self.event else {
+            return true
+        }
+        
+        if ev_b.is_root_event() {
+            return false
+        }
+
+        // rough heuristic to save us from resubscribing all the time
+        return ev_b.count_ids() != ev_a.count_ids()
+    }
+    
     func set_active_event(_ ev: NostrEvent) {
-        unsubscribe()
-        self.event = ev
-        add_event(ev)
-        subscribe(ev)
+        if should_resubscribe(ev) {
+            unsubscribe()
+            self.event = ev
+            add_event(ev)
+            subscribe(ev)
+        } else {
+            self.event = ev
+            if events.count == 0 {
+                add_event(ev)
+            }
+        }
     }
     
     private func subscribe(_ ev: NostrEvent) {

@@ -213,7 +213,6 @@ struct ContentView: View {
             self.pool?.send(.event(ev))
         }
         .onReceive(NotificationCenter.default.publisher(for: .post)) { obj in
-
             let post_res = obj.object as! NostrPostResult
             switch post_res {
             case .post(let post):
@@ -256,13 +255,19 @@ struct ContentView: View {
     }
 
     func switch_timeline(_ timeline: Timeline) {
-        if timeline != .notifications {
+        if timeline == self.selected_timeline {
+            NotificationCenter.default.post(name: .scroll_to_top, object: nil)
+            return
+        }
+        
+        if (timeline != .notifications && self.selected_timeline == .notifications) || timeline == .notifications {
             new_notifications = false
         }
         self.selected_timeline = timeline
+        NotificationCenter.default.post(name: .switched_timeline, object: timeline)
         //self.selected_timeline = timeline
     }
-
+    
     func add_relay(_ pool: RelayPool, _ relay: String) {
         //add_rw_relay(pool, "wss://nostr-pub.wellorder.net")
         add_rw_relay(pool, relay)

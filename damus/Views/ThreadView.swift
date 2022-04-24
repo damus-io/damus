@@ -13,6 +13,7 @@ struct ThreadView: View {
     
     @EnvironmentObject var profiles: Profiles
     @EnvironmentObject var thread: ThreadModel
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         Group {
@@ -34,6 +35,9 @@ struct ThreadView: View {
                 EmptyView()
             }
              */
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .switched_timeline)) { n in
+            dismiss()
         }
         .onReceive(NotificationCenter.default.publisher(for: .toggle_thread_view)) { _ in
             is_chatroom = !is_chatroom

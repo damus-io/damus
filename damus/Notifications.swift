@@ -26,6 +26,18 @@ extension Notification.Name {
 }
 
 extension Notification.Name {
+    static var switched_timeline: Notification.Name {
+        return Notification.Name("switched_timeline")
+    }
+}
+
+extension Notification.Name {
+    static var scroll_to_top: Notification.Name {
+        return Notification.Name("scroll_to_to")
+    }
+}
+
+extension Notification.Name {
     static var broadcast_event: Notification.Name {
         return Notification.Name("broadcast event")
     }

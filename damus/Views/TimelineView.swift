@@ -26,21 +26,29 @@ struct TimelineView: View {
     }
     
     var MainContent: some View {
-        ScrollView {
-            LazyVStack {
-                ForEach(events, id: \.id) { (ev: NostrEvent) in
-                    /*
-                    let evdet = EventDetailView(thread: ThreadModel(event: ev, pool: pool))
-                        .navigationBarTitle("Thread")
-                        .padding([.leading, .trailing], 6)
-                        .environmentObject(profiles)
-                     */
-                    
-                    EventView(event: ev, highlight: .none, has_action_bar: true)
-                        .onTapGesture {
-                            NotificationCenter.default.post(name: .open_thread, object: ev)
-                        }
+        ScrollViewReader { scroller in
+            ScrollView {
+                LazyVStack {
+                    ForEach(events, id: \.id) { (ev: NostrEvent) in
+                        /*
+                        let evdet = EventDetailView(thread: ThreadModel(event: ev, pool: pool))
+                            .navigationBarTitle("Thread")
+                            .padding([.leading, .trailing], 6)
+                            .environmentObject(profiles)
+                         */
+                        
+                        EventView(event: ev, highlight: .none, has_action_bar: true)
+                            .onTapGesture {
+                                NotificationCenter.default.post(name: .open_thread, object: ev)
+                            }
+                    }
                 }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .scroll_to_top)) { _ in
+                guard let event = events.first else {
+                    return
+                }
+                scroll_to_event(scroller: scroller, id: event.id, delay: 0.0, animate: true)
             }
         }
     }
