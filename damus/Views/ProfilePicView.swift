@@ -11,23 +11,24 @@ let PFP_SIZE: CGFloat? = 52.0
 let CORNER_RADIUS: CGFloat = 32
 
 func id_to_color(_ id: String) -> Color {
-    return .init(hex: String(id.reversed().prefix(6)))
+    return hex_to_rgb(id)
 }
 
 func highlight_color(_ h: Highlight) -> Color {
     switch h {
-    case .reply: fallthrough
-    case .none: return Color.black
     case .main: return Color.red
+    case .reply: return Color.black
+    case .none: return Color.black
+    case .custom(let c, _): return c
     }
 }
 
 func pfp_line_width(_ h: Highlight) -> CGFloat {
     switch h {
-    case .none: fallthrough
-    case .reply:
-        return 0
+    case .reply: return 0
+    case .none: return 0
     case .main: return 2
+    case .custom(_, let lw): return CGFloat(lw)
     }
 }
 
@@ -40,22 +41,28 @@ struct ProfilePicView: View {
         Color.purple.opacity(0.2)
     }
     
-    var body: some View {
-        if let pic = picture.flatMap({ URL(string: $0) }) {
-            AsyncImage(url: pic) { img in
-                img.resizable()
-            } placeholder: { Placeholder }
-            .frame(width: size, height: size)
-            .clipShape(Circle())
-            .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
-            .padding(2)
-        } else {
-            Placeholder
+    var MainContent: some View {
+        Group {
+            if let pic = picture.flatMap({ URL(string: $0) }) {
+                AsyncImage(url: pic) { img in
+                    img.resizable()
+                } placeholder: { Placeholder }
                 .frame(width: size, height: size)
-                .cornerRadius(CORNER_RADIUS)
+                .clipShape(Circle())
                 .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
                 .padding(2)
+            } else {
+                Placeholder
+                    .frame(width: size, height: size)
+                    .cornerRadius(CORNER_RADIUS)
+                    .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
+                    .padding(2)
+            }
         }
+    }
+    
+    var body: some View {
+        MainContent
     }
 }
 
@@ -66,28 +73,36 @@ struct ProfilePicView_Previews: PreviewProvider {
 }
     
 
-extension Color {
-    init(hex: String) {
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (1, 1, 1, 0)
+func hex_to_rgb(_ hex: String) -> Color {
+    guard hex.count >= 6 else {
+        return Color.black
+    }
+    
+    let arr = Array(hex.utf8)
+    var rgb: [UInt8] = []
+    var i: Int = 0
+    
+    while i < 6 {
+        let cs1 = arr[i]
+        let cs2 = arr[i+1]
+        
+        guard let c1 = char_to_hex(cs1) else {
+            return Color.black
         }
 
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue:  Double(b) / 255,
-            opacity: Double(a) / 255
-        )
+        guard let c2 = char_to_hex(cs2) else {
+            return Color.black
+        }
+        
+        rgb.append((c1 << 4) | c2)
+        i += 2
     }
+
+    return Color.init(
+        .sRGB,
+        red: Double(rgb[0]) / 255,
+        green: Double(rgb[1]) / 255,
+        blue:  Double(rgb[2]) / 255,
+        opacity: 1
+    )
 }

@@ -12,12 +12,20 @@ enum Highlight {
     case none
     case main
     case reply
+    case custom(Color, Float)
 
-    var is_none: Bool {
-        switch self {
-        case .none: return true
-        default: return false
+    var is_main: Bool {
+        if case .main = self {
+            return true
         }
+        return false
+    }
+    
+    var is_none: Bool {
+        if case .none = self {
+            return true
+        }
+        return false
     }
 
     var is_replied_to: Bool {
@@ -40,6 +48,9 @@ struct EventView: View {
         HStack {
             VStack {
                 ProfilePicView(picture: profile?.picture, size: PFP_SIZE!, highlight: highlight)
+                    .onTapGesture {
+                        NotificationCenter.default.post(name: .click_profile_pic, object: event.pubkey)
+                    }
 
                 Spacer()
             }

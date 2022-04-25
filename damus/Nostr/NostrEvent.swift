@@ -217,8 +217,6 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
         self.kind = kind
         self.tags = tags
         self.created_at = Int64(Date().timeIntervalSince1970)
-
-        self.calculate_id()
     }
 
     func calculate_id() {

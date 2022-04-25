@@ -110,7 +110,7 @@ struct EventDetailView: View {
                         }
                     }
                     .onAppear() {
-                        if highlight == .main {
+                        if highlight.is_main {
                             scroll_to_event(scroller: scroller, id: ev.id, delay: 0.5, animate: true)
                         }
                     }
@@ -270,6 +270,7 @@ func calculated_collapsed_events(collapsed: Bool, active: NostrEvent?, events: [
             }
             count += 1
         case .main: fallthrough
+        case .custom: fallthrough
         case .reply:
             if count != 0 {
                 let c = CollapsedEvents(count: count, start: start, end: i)

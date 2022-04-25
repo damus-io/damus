@@ -113,6 +113,8 @@ struct ChatView: View {
                     if just_started {
                         HStack {
                             ProfileName(pubkey: event.pubkey, profile: profile)
+                                .foregroundColor(id_to_color(event.pubkey))
+                                //.shadow(color: Color.secondary, radius: 2, x: 2, y: 2)
                             Text("\(format_relative_time(event.created_at))")
                                     .foregroundColor(.gray)
                         }

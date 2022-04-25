@@ -31,27 +31,17 @@ struct EventActionBar: View {
             }
 
             Spacer()
+            
              */
-
             EventActionButton(img: "bubble.left") {
-                self.sheet = .reply
+                notify(.reply, event)
             }
-        }
-        .sheet(item: $sheet) { sheet in
-            switch sheet {
-            case .reply:
-                ReplyView(replying_to: event)
-                    .environmentObject(profiles)
-                    .onReceive(NotificationCenter.default.publisher(for: .post)) { obj in
-                        let res = obj.object as! NostrPostResult
-                        switch res {
-                        case .cancel:
-                            self.sheet = nil
-                        case .post:
-                            self.sheet = nil
-                        }
-                    }
+            .padding([.trailing], 40)
+
+            EventActionButton(img: "arrow.2.squarepath") {
+                notify(.boost, event)
             }
+
         }
     }
 }
@@ -64,3 +54,4 @@ func EventActionButton(img: String, action: @escaping () -> ()) -> some View {
             .foregroundColor(.gray)
     }
 }
+

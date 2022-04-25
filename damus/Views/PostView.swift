@@ -63,7 +63,7 @@ struct PostView: View {
     func send_post() {
         let new_post = NostrPost(content: self.post, references: references)
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
-        //dismiss()
+        dismiss()
     }
 
     var body: some View {

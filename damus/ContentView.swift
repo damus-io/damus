@@ -15,11 +15,12 @@ struct TimestampedProfile {
 
 enum Sheets: Identifiable {
     case post
+    case reply(NostrEvent)
 
     var id: String {
         switch self {
-        case .post:
-            return "post"
+        case .post: return "post"
+        case .reply(let ev): return "reply-" + ev.id
         }
     }
 }
@@ -43,12 +44,14 @@ struct ContentView: View {
     @State var status: String = "Not connected"
     @State var active_sheet: Sheets? = nil
     @State var profiles: Profiles = Profiles()
+    @State var active_profile: String? = nil
     @State var friends: [String: ()] = [:]
     @State var loading: Bool = true
     @State var pool: RelayPool? = nil
     @State var selected_timeline: Timeline? = .home
     @StateObject var thread: ThreadModel = ThreadModel()
     @State var is_thread_open: Bool = false
+    @State var is_profile_open: Bool = false
     @State var last_event_of_kind: [String: [Int: NostrEvent]] = [:]
     @State var has_events: [String: ()] = [:]
     @State var has_friend_event: [String: ()] = [:]
@@ -172,7 +175,13 @@ struct ContentView: View {
                     .environmentObject(profiles)
                     .padding([.leading, .trailing], 6)
                 
+                let pv = ProfileView()
+                
                 NavigationLink(destination: tv, isActive: $is_thread_open) {
+                    EmptyView()
+                }
+                
+                NavigationLink(destination: pv, isActive: $is_profile_open) {
                     EmptyView()
                 }
             }
@@ -200,19 +209,36 @@ struct ContentView: View {
             switch item {
             case .post:
                 PostView(references: [])
+            case .reply(let event):
+                ReplyView(replying_to: event)
+                    .environmentObject(profiles)
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .open_thread)) { obj in
+        .onReceive(handle_notify(.boost)) { notif in
+            let ev = notif.object as! NostrEvent
+            let boost = make_boost_event(ev, privkey: privkey, pubkey: pubkey)
+            self.pool?.send(.event(boost))
+        }
+        .onReceive(handle_notify(.open_thread)) { obj in
             let ev = obj.object as! NostrEvent
             thread.reset_events()
             thread.set_active_event(ev)
             is_thread_open = true
         }
-        .onReceive(NotificationCenter.default.publisher(for: .broadcast_event)) { obj in
+        .onReceive(handle_notify(.reply)) { notif in
+            let ev = notif.object as! NostrEvent
+            self.active_sheet = .reply(ev)
+        }
+        .onReceive(handle_notify(.broadcast_event)) { obj in
             let ev = obj.object as! NostrEvent
             self.pool?.send(.event(ev))
         }
-        .onReceive(NotificationCenter.default.publisher(for: .post)) { obj in
+        .onReceive(handle_notify(.click_profile_pic)) { obj in
+            let pubkey = obj.object as! String
+            self.active_profile = pubkey
+            self.is_profile_open = true
+        }
+        .onReceive(handle_notify(.post)) { obj in
             let post_res = obj.object as! NostrPostResult
             switch post_res {
             case .post(let post):
@@ -583,3 +609,11 @@ func save_last_notified(_ ev: NostrEvent) {
     UserDefaults.standard.set(String(ev.created_at), forKey: "last_notification_time")
 }
 
+
+
+func make_boost_event(_ ev: NostrEvent, privkey: String, pubkey: String) -> NostrEvent {
+    let boost = NostrEvent(content: "", pubkey: pubkey, kind: 6, tags: [["e", ev.id]])
+    boost.calculate_id()
+    boost.sign(privkey: privkey)
+    return boost
+}

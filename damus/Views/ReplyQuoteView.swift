@@ -18,12 +18,13 @@ struct ReplyQuoteView: View {
         HStack(alignment: .top) {
             Rectangle().frame(width: 2)
                 .padding([.leading], 4)
-            
+                .foregroundColor(.accentColor)
             
             VStack(alignment: .leading) {
                 HStack(alignment: .top) {
-                    ProfilePicView(picture: profiles.lookup(id: event.pubkey)?.picture, size: 16, highlight: .none)
-                    ProfileName(pubkey: event.pubkey, profile: profiles.lookup(id: event.pubkey))
+                    ProfilePicView(picture: profiles.lookup(id: event.pubkey)?.picture, size: 16, highlight: .reply)
+                    Text(Profile.displayName(profile: profiles.lookup(id: event.pubkey), pubkey: event.pubkey))
+                        .foregroundColor(.accentColor)
                     Text("\(format_relative_time(event.created_at))")
                         .foregroundColor(.gray)
                 }
