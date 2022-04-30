@@ -16,6 +16,7 @@ func all_referenced_pubkeys(_ ev: NostrEvent) -> [ReferencedId] {
 
 struct ReplyView: View {
     let replying_to: NostrEvent
+    let pool: RelayPool
     
     @EnvironmentObject var profiles: Profiles
     
@@ -34,7 +35,7 @@ struct ReplyView: View {
                     .foregroundColor(.gray)
                     .font(.footnote)
             }
-            EventView(event: replying_to, highlight: .none, has_action_bar: false)
+            EventView(event: replying_to, highlight: .none, has_action_bar: false, pool: pool)
             PostView(references: replying_to.reply_ids())
             
             Spacer()

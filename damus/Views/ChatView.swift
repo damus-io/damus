@@ -40,10 +40,7 @@ struct ChatView: View {
     }
     
     var is_active: Bool {
-        guard let ev = thread.event else {
-            return false
-        }
-        return ev.id == event.id
+        return thread.event.id == event.id
     }
     
     func prev_reply_is_same() -> String? {

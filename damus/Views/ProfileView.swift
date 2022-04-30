@@ -15,13 +15,14 @@ enum ProfileTab: Hashable {
 struct ProfileView: View {
     let pool: RelayPool
     @State private var selected_tab: ProfileTab = .posts
+    @StateObject var profile: ProfileModel
     
-    @EnvironmentObject var profile: ProfileModel
+    //@EnvironmentObject var profile: ProfileModel
     @EnvironmentObject var profiles: Profiles
     
     var TopSection: some View {
         HStack(alignment: .top) {
-            let data = profile.pubkey.flatMap { profiles.lookup(id: $0) }
+            let data = profiles.lookup(id: profile.pubkey)
             ProfilePicView(picture: data?.picture, size: 64, highlight: .custom(Color.black, 4))
                 //.border(Color.blue)
             VStack(alignment: .leading) {
@@ -64,6 +65,13 @@ struct ProfileView: View {
         //.border(Color.white)
         .frame(maxWidth: .infinity, alignment: .topLeading)
         .navigationBarTitle("Profile")
+        .onAppear() {
+            profile.subscribe()
+        }
+        .onDisappear {
+            profile.unsubscribe()
+            // our profilemodel needs a bit more help
+        }
     }
 }
 

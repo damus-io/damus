@@ -37,10 +37,16 @@ struct TimelineView: View {
                             .environmentObject(profiles)
                          */
                         
-                        EventView(event: ev, highlight: .none, has_action_bar: true)
-                            .onTapGesture {
-                                NotificationCenter.default.post(name: .open_thread, object: ev)
-                            }
+                        let tv = ThreadView(thread: ThreadModel(ev: ev, pool: pool), pool: pool)
+                            .environmentObject(profiles)
+                        
+                        NavigationLink(destination: tv) {
+                            EventView(event: ev, highlight: .none, has_action_bar: true, pool: pool)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                            //.onTapGesture {
+                                //NotificationCenter.default.post(name: .open_thread, object: ev)
+                            //}
                     }
                 }
             }

@@ -10,9 +10,10 @@ import SwiftUI
 
 struct ThreadView: View {
     @State var is_chatroom: Bool = false
+    @StateObject var thread: ThreadModel
+    let pool: RelayPool
     
     @EnvironmentObject var profiles: Profiles
-    @EnvironmentObject var thread: ThreadModel
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -23,12 +24,11 @@ struct ThreadView: View {
                     .environmentObject(profiles)
                     .environmentObject(thread)
             } else {
-                EventDetailView(thread: thread)
+                EventDetailView(pool: pool, thread: thread)
                     .navigationBarTitle("Thread")
                     .environmentObject(profiles)
                     .environmentObject(thread)
             }
-            
             
             /*
             NavigationLink(destination: edv, isActive: $is_chatroom) {

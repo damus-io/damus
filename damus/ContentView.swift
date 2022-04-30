@@ -44,12 +44,10 @@ struct ContentView: View {
     @State var status: String = "Not connected"
     @State var active_sheet: Sheets? = nil
     @State var profiles: Profiles = Profiles()
-    @State var active_profile: ProfileModel = ProfileModel()
     @State var friends: [String: ()] = [:]
     @State var loading: Bool = true
     @State var pool: RelayPool? = nil
     @State var selected_timeline: Timeline? = .home
-    @StateObject var thread: ThreadModel = ThreadModel()
     @State var is_thread_open: Bool = false
     @State var is_profile_open: Bool = false
     @State var last_event_of_kind: [String: [Int: NostrEvent]] = [:]
@@ -139,7 +137,6 @@ struct ContentView: View {
         ZStack {
             if let pool = self.pool {
                 TimelineView(events: $friend_events, pool: pool)
-                    .environmentObject(thread)
                     .environmentObject(profiles)
             }
             PostButtonContainer
@@ -169,23 +166,6 @@ struct ContentView: View {
                 case .none:
                     EmptyView()
                 }
-                
-                let tv = ThreadView()
-                    .environmentObject(thread)
-                    .environmentObject(profiles)
-                    .padding([.leading, .trailing], 6)
-                
-                let pv = ProfileView(pool: pool)
-                    .environmentObject(active_profile)
-                    .environmentObject(profiles)
-                
-                NavigationLink(destination: tv, isActive: $is_thread_open) {
-                    EmptyView()
-                }
-                
-                NavigationLink(destination: pv, isActive: $is_profile_open) {
-                    EmptyView()
-                }
             }
             .navigationBarTitle("Damus", displayMode: .inline)
         }
@@ -212,7 +192,7 @@ struct ContentView: View {
             case .post:
                 PostView(references: [])
             case .reply(let event):
-                ReplyView(replying_to: event)
+                ReplyView(replying_to: event, pool: pool!)
                     .environmentObject(profiles)
             }
         }
@@ -222,10 +202,9 @@ struct ContentView: View {
             self.pool?.send(.event(boost))
         }
         .onReceive(handle_notify(.open_thread)) { obj in
-            let ev = obj.object as! NostrEvent
-            thread.reset_events()
-            thread.set_active_event(ev)
-            is_thread_open = true
+            //let ev = obj.object as! NostrEvent
+            //thread.set_active_event(ev)
+            //is_thread_open = true
         }
         .onReceive(handle_notify(.reply)) { notif in
             let ev = notif.object as! NostrEvent
@@ -234,11 +213,6 @@ struct ContentView: View {
         .onReceive(handle_notify(.broadcast_event)) { obj in
             let ev = obj.object as! NostrEvent
             self.pool?.send(.event(ev))
-        }
-        .onReceive(handle_notify(.click_profile_pic)) { obj in
-            let pubkey = obj.object as! String
-            self.active_profile.set_pubkey(pubkey)
-            self.is_profile_open = true
         }
         .onReceive(handle_notify(.post)) { obj in
             let post_res = obj.object as! NostrPostResult
@@ -318,8 +292,6 @@ struct ContentView: View {
         pool.register_handler(sub_id: sub_id, handler: handle_event)
 
         self.pool = pool
-        self.thread.pool = pool
-        self.active_profile.pool = pool
         pool.connect()
     }
 

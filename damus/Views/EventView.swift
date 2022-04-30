@@ -40,17 +40,21 @@ struct EventView: View {
     let event: NostrEvent
     let highlight: Highlight
     let has_action_bar: Bool
+    let pool: RelayPool
 
     @EnvironmentObject var profiles: Profiles
+    @EnvironmentObject var action_bar: ActionBarModel
     
     var body: some View {
         let profile = profiles.lookup(id: event.pubkey)
         HStack {
             VStack {
-                ProfilePicView(picture: profile?.picture, size: PFP_SIZE!, highlight: highlight)
-                    .onTapGesture {
-                        NotificationCenter.default.post(name: .click_profile_pic, object: event.pubkey)
-                    }
+                let pv = ProfileView(pool: pool, profile: ProfileModel(pubkey: event.pubkey, pool: pool))
+                    .environmentObject(profiles)
+                
+                NavigationLink(destination: pv) {
+                    ProfilePicView(picture: profile?.picture, size: PFP_SIZE!, highlight: highlight)
+                }
 
                 Spacer()
             }

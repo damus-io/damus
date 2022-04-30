@@ -19,10 +19,10 @@ enum ActionBarSheet: Identifiable {
 
 struct EventActionBar: View {
     let event: NostrEvent
-
     @State var sheet: ActionBarSheet? = nil
     @EnvironmentObject var profiles: Profiles
-
+    @StateObject var bar: ActionBarModel = ActionBarModel()
+    
     var body: some View {
         HStack {
             /*
@@ -33,13 +33,26 @@ struct EventActionBar: View {
             Spacer()
             
              */
-            EventActionButton(img: "bubble.left") {
+            EventActionButton(img: "bubble.left", col: nil) {
                 notify(.reply, event)
             }
             .padding([.trailing], 40)
 
-            EventActionButton(img: "arrow.2.squarepath") {
-                notify(.boost, event)
+            EventActionButton(img: bar.liked ? "heart.fill" : "heart", col: bar.liked ? Color.red : nil) {
+                if bar.liked {
+                    notify(.delete, bar.our_like_event)
+                } else {
+                    notify(.like, event)
+                }
+            }
+            .padding([.trailing], 40)
+
+            EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
+                if bar.boosted {
+                    notify(.delete, bar.our_boost_event)
+                } else {
+                    notify(.boost, event)
+                }
             }
 
         }
@@ -47,11 +60,11 @@ struct EventActionBar: View {
 }
 
 
-func EventActionButton(img: String, action: @escaping () -> ()) -> some View {
+func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> some View {
     Button(action: action) {
         Label("", systemImage: img)
             .font(.footnote)
-            .foregroundColor(.gray)
+            .foregroundColor(col == nil ? Color.gray : col!)
     }
 }
 

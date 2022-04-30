@@ -9,41 +9,24 @@ import Foundation
 
 class ProfileModel: ObservableObject {
     @Published var events: [NostrEvent] = []
-    @Published var pubkey: String?
-    var seen_event: Set<String> = Set()
+    let pubkey: String
+    let pool: RelayPool
     
+    var seen_event: Set<String> = Set()
     var sub_id = UUID().description
     
-    var pool: RelayPool? = nil
     
-    deinit {
-        unsubscribe()
+    init(pubkey: String, pool: RelayPool) {
+        self.pubkey = pubkey
+        self.pool = pool
     }
     
     func unsubscribe() {
-        print("unsubscribing from profile \(pubkey ?? "?") with sub_id \(sub_id)")
-        pool?.unsubscribe(sub_id: sub_id)
-    }
-    
-    func set_pubkey(_ pk: String) {
-        if pk == self.pubkey {
-            return
-        }
-        
-        self.events.removeAll()
-        self.seen_event.removeAll()
-        
-        unsubscribe()
-        self.sub_id = UUID().description
-        self.pubkey = pk
-        subscribe()
+        print("unsubscribing from profile \(pubkey) with sub_id \(sub_id)")
+        pool.unsubscribe(sub_id: sub_id)
     }
     
     func subscribe() {
-        guard let pubkey = self.pubkey else {
-            return
-        }
-        
         let kinds: [Int] = [
             NostrKind.text.rawValue,
             NostrKind.delete.rawValue,
@@ -54,7 +37,7 @@ class ProfileModel: ObservableObject {
         filter.authors = [pubkey]
 
         print("subscribing to profile \(pubkey) with sub_id \(sub_id)")
-        pool?.subscribe(sub_id: sub_id, filters: [filter], handler: handle_event)
+        pool.subscribe(sub_id: sub_id, filters: [filter], handler: handle_event)
     }
     
     func add_event(_ ev: NostrEvent) {

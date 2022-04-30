@@ -62,6 +62,24 @@ extension Notification.Name {
 }
 
 extension Notification.Name {
+    static var notice: Notification.Name {
+        return Notification.Name("notice")
+    }
+}
+
+extension Notification.Name {
+    static var like: Notification.Name {
+        return Notification.Name("like note")
+    }
+}
+
+extension Notification.Name {
+    static var delete: Notification.Name {
+        return Notification.Name("delete note")
+    }
+}
+
+extension Notification.Name {
     static var post: Notification.Name {
         return Notification.Name("send post")
     }

@@ -31,8 +31,8 @@ enum CollapsedEvent: Identifiable {
 
 
 struct EventDetailView: View {
-
     let sub_id = UUID().description
+    let pool: RelayPool
     
     @StateObject var thread: ThreadModel
     @State var collapsed: Bool = true
@@ -47,37 +47,6 @@ struct EventDetailView: View {
             }
         }
     }
-    
-    /*
-    func OldEventView(proxy: ScrollViewProxy, ev: NostrEvent, highlight: Highlight, collapsed_events: [CollapsedEvent]) -> some View {
-        Group {
-            if ev.id == thread.event.id {
-                EventView(event: ev, highlight: .main, has_action_bar: true)
-                    .onAppear() {
-                        scroll_to_event(scroller: proxy, id: ev.id, delay: 0.5, animate: true)
-                    }
-                    .onTapGesture {
-                        print_event(ev)
-                        let any = any_collapsed(collapsed_events)
-                        if (collapsed && any) || (!collapsed && !any) {
-                            toggle_collapse_thread(scroller: proxy, id: ev.id)
-                        }
-                    }
-            } else {
-                if !(self.collapsed && highlight.is_none) {
-                    EventView(event: ev, highlight: collapsed ? .none : highlight, has_action_bar: true)
-                        .onTapGesture {
-                            print_event(ev)
-                            if !collapsed {
-                                toggle_collapse_thread(scroller: proxy, id: ev.id)
-                            }
-                            thread.event = ev
-                        }
-                }
-            }
-        }
-    }
-     */
     
     func uncollapse_section(scroller: ScrollViewProxy, c: CollapsedEvents)
     {
@@ -101,9 +70,9 @@ struct EventDetailView: View {
                         toggle_thread_view()
                     }
             case .event(let ev, let highlight):
-                EventView(event: ev, highlight: highlight, has_action_bar: true)
+                EventView(event: ev, highlight: highlight, has_action_bar: true, pool: pool)
                     .onTapGesture {
-                        if thread.event!.id == ev.id {
+                        if thread.event.id == ev.id {
                             toggle_thread_view()
                         } else {
                             thread.set_active_event(ev)
@@ -324,3 +293,34 @@ func scroll_to_event(scroller: ScrollViewProxy, id: String, delay: Double, anima
     }
 }
 
+    
+    /*
+    func OldEventView(proxy: ScrollViewProxy, ev: NostrEvent, highlight: Highlight, collapsed_events: [CollapsedEvent]) -> some View {
+        Group {
+            if ev.id == thread.event.id {
+                EventView(event: ev, highlight: .main, has_action_bar: true)
+                    .onAppear() {
+                        scroll_to_event(scroller: proxy, id: ev.id, delay: 0.5, animate: true)
+                    }
+                    .onTapGesture {
+                        print_event(ev)
+                        let any = any_collapsed(collapsed_events)
+                        if (collapsed && any) || (!collapsed && !any) {
+                            toggle_collapse_thread(scroller: proxy, id: ev.id)
+                        }
+                    }
+            } else {
+                if !(self.collapsed && highlight.is_none) {
+                    EventView(event: ev, highlight: collapsed ? .none : highlight, has_action_bar: true)
+                        .onTapGesture {
+                            print_event(ev)
+                            if !collapsed {
+                                toggle_collapse_thread(scroller: proxy, id: ev.id)
+                            }
+                            thread.event = ev
+                        }
+                }
+            }
+        }
+    }
+     */
