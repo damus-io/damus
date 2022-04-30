@@ -53,6 +53,10 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
         let p = pow.map { String($0) } ?? "?"
         return "NostrEvent { id: \(id) pubkey \(pubkey) kind \(kind) tags \(tags) pow \(p) content '\(content)' }"
     }
+    
+    var known_kind: NostrKind? {
+        return NostrKind.init(rawValue: kind)
+    }
 
     private enum CodingKeys: String, CodingKey {
         case id, sig, tags, pubkey, created_at, kind, content

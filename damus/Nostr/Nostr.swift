@@ -18,11 +18,6 @@ struct Profile: Decodable {
     }
 }
 
-enum NostrKind: Int {
-    case metadata = 0
-    case text = 1
-}
-
 enum NostrTag {
     case other_event(OtherEvent)
     case key_event(KeyEvent)

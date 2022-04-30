@@ -13,6 +13,9 @@
 		4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F92280F66F5000448DE /* ReplyMap.swift */; };
 		4C0A3F95280F6C78000448DE /* ReplyQuoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F94280F6C78000448DE /* ReplyQuoteView.swift */; };
 		4C0A3F97280F8E02000448DE /* ThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F96280F8E02000448DE /* ThreadView.swift */; };
+		4C3BEFD22819DB9B00B3DE84 /* ProfileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD12819DB9B00B3DE84 /* ProfileModel.swift */; };
+		4C3BEFD42819DE8F00B3DE84 /* NostrKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */; };
+		4C3BEFD6281D995700B3DE84 /* ActionBarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD5281D995700B3DE84 /* ActionBarModel.swift */; };
 		4C75EFA427FA577B0006080F /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFA327FA577B0006080F /* PostView.swift */; };
 		4C75EFA627FF87A20006080F /* Nostr.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFA527FF87A20006080F /* Nostr.swift */; };
 		4C75EFAD28049CFB0006080F /* PostButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFAC28049CFB0006080F /* PostButton.swift */; };
@@ -71,6 +74,9 @@
 		4C0A3F92280F66F5000448DE /* ReplyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyMap.swift; sourceTree = "<group>"; };
 		4C0A3F94280F6C78000448DE /* ReplyQuoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyQuoteView.swift; sourceTree = "<group>"; };
 		4C0A3F96280F8E02000448DE /* ThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadView.swift; sourceTree = "<group>"; };
+		4C3BEFD12819DB9B00B3DE84 /* ProfileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileModel.swift; sourceTree = "<group>"; };
+		4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrKind.swift; sourceTree = "<group>"; };
+		4C3BEFD5281D995700B3DE84 /* ActionBarModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionBarModel.swift; sourceTree = "<group>"; };
 		4C75EFA327FA577B0006080F /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
 		4C75EFA527FF87A20006080F /* Nostr.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Nostr.swift; sourceTree = "<group>"; };
 		4C75EFA72804823E0006080F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -140,6 +146,8 @@
 			children = (
 				4C0A3F8E280F640A000448DE /* ThreadModel.swift */,
 				4C0A3F92280F66F5000448DE /* ReplyMap.swift */,
+				4C3BEFD12819DB9B00B3DE84 /* ProfileModel.swift */,
+				4C3BEFD5281D995700B3DE84 /* ActionBarModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -179,6 +187,7 @@
 				4C75EFBA2804A34C0006080F /* ProofOfWork.swift */,
 				4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */,
 				4CACA9DB280C38C000D9BBE8 /* Profiles.swift */,
+				4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */,
 			);
 			path = Nostr;
 			sourceTree = "<group>";
@@ -407,13 +416,16 @@
 				4CEE2AF7280B2DEA00AB5EEF /* ProfileName.swift in Sources */,
 				4CEE2B02280B39E800AB5EEF /* EventActionBar.swift in Sources */,
 				4C0A3F8F280F640A000448DE /* ThreadModel.swift in Sources */,
+				4C3BEFD22819DB9B00B3DE84 /* ProfileModel.swift in Sources */,
 				4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */,
 				4CACA9DC280C38C000D9BBE8 /* Profiles.swift in Sources */,
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
 				4C8682872814DE470026224F /* ProfileView.swift in Sources */,
 				4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */,
+				4C3BEFD6281D995700B3DE84 /* ActionBarModel.swift in Sources */,
 				4CEE2AF3280B25C500AB5EEF /* ProfilePicView.swift in Sources */,
 				4CEE2AF9280B2EAC00AB5EEF /* PowView.swift in Sources */,
+				4C3BEFD42819DE8F00B3DE84 /* NostrKind.swift in Sources */,
 				4CE6DEE727F7A08100C66700 /* damusApp.swift in Sources */,
 				4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */,
 				4C0A3F95280F6C78000448DE /* ReplyQuoteView.swift in Sources */,
@@ -587,6 +599,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = damus/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Damus;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -621,6 +634,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = damus/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Damus;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

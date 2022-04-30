@@ -7,20 +7,70 @@
 
 import SwiftUI
 
+enum ProfileTab: Hashable {
+    case posts
+    case following
+}
+
 struct ProfileView: View {
-    let profile: Profile? = nil
+    let pool: RelayPool
+    @State private var selected_tab: ProfileTab = .posts
+    
+    @EnvironmentObject var profile: ProfileModel
+    @EnvironmentObject var profiles: Profiles
+    
+    var TopSection: some View {
+        HStack(alignment: .top) {
+            let data = profile.pubkey.flatMap { profiles.lookup(id: $0) }
+            ProfilePicView(picture: data?.picture, size: 64, highlight: .custom(Color.black, 4))
+                //.border(Color.blue)
+            VStack(alignment: .leading) {
+                if let pubkey = profile.pubkey {
+                    ProfileName(pubkey: pubkey, profile: data)
+                        .font(.title)
+                        //.border(Color.green)
+                }
+                Text(data?.about ?? "")
+                    //.border(Color.red)
+            }
+            //.border(Color.purple)
+            //Spacer()
+        }
+        //.border(Color.indigo)
+    }
     
     var body: some View {
-        VStack {
-            ProfilePicView(picture: profile?.picture, size: 64, highlight: .custom(Color.black, 4))
-            //ProfileName(pubkey: <#T##String#>, profile: <#T##Profile?#>)
+        VStack(alignment: .leading) {
+            TopSection
+            Picker("", selection: $selected_tab) {
+                Text("Posts").tag(ProfileTab.posts)
+                Text("Following").tag(ProfileTab.following)
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            
+            Divider()
+
+            Group {
+                switch(selected_tab) {
+                case .posts:
+                        TimelineView(events: $profile.events, pool: pool)
+                            .environmentObject(profiles)
+                case .following:
+                        Text("Following")
+                }
+            }
+            .frame(maxHeight: .infinity, alignment: .topLeading)
         }
+        //.border(Color.white)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
         .navigationBarTitle("Profile")
     }
 }
 
+/*
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         ProfileView()
     }
 }
+ */

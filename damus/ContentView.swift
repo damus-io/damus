@@ -44,7 +44,7 @@ struct ContentView: View {
     @State var status: String = "Not connected"
     @State var active_sheet: Sheets? = nil
     @State var profiles: Profiles = Profiles()
-    @State var active_profile: String? = nil
+    @State var active_profile: ProfileModel = ProfileModel()
     @State var friends: [String: ()] = [:]
     @State var loading: Bool = true
     @State var pool: RelayPool? = nil
@@ -153,7 +153,7 @@ struct ContentView: View {
                 case .home:
                     PostingTimelineView
                         .onAppear() {
-                            switch_timeline(.home)
+                            //switch_timeline(.home)
                         }
                     
                 case .notifications:
@@ -175,7 +175,9 @@ struct ContentView: View {
                     .environmentObject(profiles)
                     .padding([.leading, .trailing], 6)
                 
-                let pv = ProfileView()
+                let pv = ProfileView(pool: pool)
+                    .environmentObject(active_profile)
+                    .environmentObject(profiles)
                 
                 NavigationLink(destination: tv, isActive: $is_thread_open) {
                     EmptyView()
@@ -235,7 +237,7 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.click_profile_pic)) { obj in
             let pubkey = obj.object as! String
-            self.active_profile = pubkey
+            self.active_profile.set_pubkey(pubkey)
             self.is_profile_open = true
         }
         .onReceive(handle_notify(.post)) { obj in
@@ -317,6 +319,7 @@ struct ContentView: View {
 
         self.pool = pool
         self.thread.pool = pool
+        self.active_profile.pool = pool
         pool.connect()
     }
 
