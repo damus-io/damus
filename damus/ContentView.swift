@@ -169,6 +169,7 @@ struct ContentView: View {
             }
             .navigationBarTitle("Damus", displayMode: .inline)
         }
+        .navigationViewStyle(.stack)
     }
     
     var body: some View {

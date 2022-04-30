@@ -43,6 +43,7 @@ struct TimelineView: View {
                         NavigationLink(destination: tv) {
                             EventView(event: ev, highlight: .none, has_action_bar: true, pool: pool)
                         }
+                        .isDetailLink(true)
                         .buttonStyle(PlainButtonStyle())
                             //.onTapGesture {
                                 //NotificationCenter.default.post(name: .open_thread, object: ev)

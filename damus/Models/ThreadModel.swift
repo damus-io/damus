@@ -20,11 +20,6 @@ class ThreadModel: ObservableObject {
     init(ev: NostrEvent, pool: RelayPool) {
         self.event = ev
         self.pool = pool
-        subscribe()
-    }
-    
-    deinit {
-        unsubscribe()
     }
     
     func unsubscribe() {

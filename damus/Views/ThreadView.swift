@@ -43,6 +43,12 @@ struct ThreadView: View {
             is_chatroom = !is_chatroom
             //print("is_chatroom: \(is_chatroom)")
         }
+        .onAppear() {
+            thread.subscribe()
+        }
+        .onDisappear() {
+            thread.unsubscribe()
+        }
     }
 }
 

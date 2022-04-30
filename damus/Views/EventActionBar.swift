@@ -56,6 +56,7 @@ struct EventActionBar: View {
             }
 
         }
+        .contentShape(Rectangle())
     }
 }
 
@@ -66,5 +67,6 @@ func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> 
             .font(.footnote)
             .foregroundColor(col == nil ? Color.gray : col!)
     }
+    .contentShape(Rectangle())
 }
 
