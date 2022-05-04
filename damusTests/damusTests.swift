@@ -43,6 +43,21 @@ class damusTests: XCTestCase {
         XCTAssertTrue(parsed[2].is_text)
     }
     
+    func testParseInvalidMention() throws {
+        let parsed = parse_mentions(content: "this is #[0] a mention", tags: [])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 1)
+        XCTAssertTrue(parsed[0].is_text)
+        
+        guard case .text(let txt) = parsed[0] else {
+            XCTAssertTrue(false)
+            return
+        }
+        
+        XCTAssertEqual(txt, "this is #[0] a mention")
+    }
+    
     func testParseMentionBlank() {
         let parsed = parse_mentions(content: "", tags: [["e", "event_id"]])
         
