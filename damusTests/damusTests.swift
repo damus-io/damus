@@ -32,5 +32,15 @@ class damusTests: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
+    
+    func testParseMention() throws {
+        let parsed = parse_mentions(content: "this is #[0] a mention", tags: [["e", "event_id"]])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 3)
+        XCTAssertTrue(parsed[0].is_text)
+        XCTAssertTrue(parsed[1].is_mention)
+        XCTAssertTrue(parsed[2].is_text)
+    }
 
 }

@@ -38,6 +38,12 @@ extension Notification.Name {
 }
 
 extension Notification.Name {
+    static var liked: Notification.Name {
+        return Notification.Name("liked")
+    }
+}
+
+extension Notification.Name {
     static var click_profile_pic: Notification.Name {
         return Notification.Name("click_profile_pic")
     }

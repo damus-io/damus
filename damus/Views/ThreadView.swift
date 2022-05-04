@@ -11,7 +11,7 @@ import SwiftUI
 struct ThreadView: View {
     @State var is_chatroom: Bool = false
     @StateObject var thread: ThreadModel
-    let pool: RelayPool
+    let damus: DamusState
     
     @EnvironmentObject var profiles: Profiles
     @Environment(\.dismiss) var dismiss
@@ -19,12 +19,12 @@ struct ThreadView: View {
     var body: some View {
         Group {
             if is_chatroom {
-                ChatroomView()
+                ChatroomView(likes: damus.likes, our_pubkey: damus.pubkey)
                     .navigationBarTitle("Chat")
                     .environmentObject(profiles)
                     .environmentObject(thread)
             } else {
-                EventDetailView(pool: pool, thread: thread)
+                EventDetailView(damus: damus, thread: thread)
                     .navigationBarTitle("Thread")
                     .environmentObject(profiles)
                     .environmentObject(thread)

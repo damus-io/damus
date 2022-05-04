@@ -19,9 +19,10 @@ enum ActionBarSheet: Identifiable {
 
 struct EventActionBar: View {
     let event: NostrEvent
+    let our_pubkey: String
     @State var sheet: ActionBarSheet? = nil
     @EnvironmentObject var profiles: Profiles
-    @StateObject var bar: ActionBarModel = ActionBarModel()
+    @StateObject var bar: ActionBarModel
     
     var body: some View {
         HStack {
@@ -38,25 +39,40 @@ struct EventActionBar: View {
             }
             .padding([.trailing], 40)
 
-            EventActionButton(img: bar.liked ? "heart.fill" : "heart", col: bar.liked ? Color.red : nil) {
-                if bar.liked {
-                    notify(.delete, bar.our_like_event)
-                } else {
-                    notify(.like, event)
+            HStack(alignment: .bottom) {
+                Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
+                    .font(.footnote)
+                    .foregroundColor(Color.gray)
+                    
+                EventActionButton(img: bar.liked ? "heart.fill" : "heart", col: bar.liked ? Color.red : nil) {
+                    if bar.liked {
+                        notify(.delete, bar.our_like)
+                    } else {
+                        notify(.like, event)
+                    }
                 }
             }
             .padding([.trailing], 40)
 
             EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
                 if bar.boosted {
-                    notify(.delete, bar.our_boost_event)
+                    notify(.delete, bar.our_boost)
                 } else {
                     notify(.boost, event)
                 }
             }
 
         }
-        .contentShape(Rectangle())
+        .onReceive(handle_notify(.liked)) { n in
+            let liked = n.object as! Liked
+            if liked.id != event.id {
+                return
+            }
+            self.bar.likes = liked.total
+            if liked.like.pubkey == our_pubkey {
+                self.bar.our_like = liked.like
+            }
+        }
     }
 }
 
@@ -67,6 +83,5 @@ func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> 
             .font(.footnote)
             .foregroundColor(col == nil ? Color.gray : col!)
     }
-    .contentShape(Rectangle())
 }
 

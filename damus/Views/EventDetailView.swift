@@ -32,7 +32,7 @@ enum CollapsedEvent: Identifiable {
 
 struct EventDetailView: View {
     let sub_id = UUID().description
-    let pool: RelayPool
+    let damus: DamusState
     
     @StateObject var thread: ThreadModel
     @State var collapsed: Bool = true
@@ -70,7 +70,7 @@ struct EventDetailView: View {
                         toggle_thread_view()
                     }
             case .event(let ev, let highlight):
-                EventView(event: ev, highlight: highlight, has_action_bar: true, pool: pool)
+                EventView(event: ev, highlight: highlight, has_action_bar: true, damus: damus)
                     .onTapGesture {
                         if thread.event.id == ev.id {
                             toggle_thread_view()

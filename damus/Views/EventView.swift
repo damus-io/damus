@@ -40,7 +40,7 @@ struct EventView: View {
     let event: NostrEvent
     let highlight: Highlight
     let has_action_bar: Bool
-    let pool: RelayPool
+    let damus: DamusState
 
     @EnvironmentObject var profiles: Profiles
     @EnvironmentObject var action_bar: ActionBarModel
@@ -49,7 +49,7 @@ struct EventView: View {
         let profile = profiles.lookup(id: event.pubkey)
         HStack {
             VStack {
-                let pv = ProfileView(pool: pool, profile: ProfileModel(pubkey: event.pubkey, pool: pool))
+                let pv = ProfileView(damus: damus, profile: ProfileModel(pubkey: event.pubkey, damus: damus))
                     .environmentObject(profiles)
                 
                 NavigationLink(destination: pv) {
@@ -81,7 +81,7 @@ struct EventView: View {
                 Spacer()
 
                 if has_action_bar {
-                    EventActionBar(event: event)
+                    EventActionBar(event: event, our_pubkey: damus.pubkey, bar: make_actionbar_model(ev: event, counter: damus.likes))
                         .environmentObject(profiles)
                 }
 
@@ -152,3 +152,11 @@ func reply_others_desc(n: Int, n_pubkeys: Int) -> String {
 }
 
 
+
+func make_actionbar_model(ev: NostrEvent, counter: EventCounter) -> ActionBarModel {
+    let likes = counter.counts[ev.id]
+    let our_like = counter.our_events[ev.id]
+    let our_boost: NostrEvent? = nil
+    
+    return ActionBarModel(likes: likes ?? 0, our_like: our_like, our_boost: our_boost)
+}

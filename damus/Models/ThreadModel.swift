@@ -62,14 +62,16 @@ class ThreadModel: ObservableObject {
     }
     
     func subscribe() {
-        let kinds: [Int] = [1, 5, 6]
+        let kinds: [Int] = [1, 5, 6, 7]
         var ref_events = NostrFilter.filter_kinds(kinds)
         var events_filter = NostrFilter.filter_kinds(kinds)
+        //var likes_filter = NostrFilter.filter_kinds(7])
 
         // TODO: add referenced relays
         ref_events.referenced_ids = event.referenced_ids.map { $0.ref_id }
         ref_events.referenced_ids!.append(event.id)
 
+        //likes_filter.ids = ref_events.referenced_ids!
         events_filter.ids = ref_events.referenced_ids!
 
         print("subscribing to thread \(event.id) with sub_id \(sub_id)")
@@ -110,7 +112,9 @@ class ThreadModel: ObservableObject {
             switch res {
             case .event(let sub_id, let ev):
                 if sub_id == self.sub_id {
-                    add_event(ev)
+                    if ev.known_kind == .text {
+                        add_event(ev)
+                    }
                 }
 
             case .notice(let note):

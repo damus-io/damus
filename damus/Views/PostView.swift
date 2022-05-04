@@ -24,14 +24,6 @@ struct NostrPost {
                 tag.append(relay_id)
             }
             new_ev.tags.append(tag)
-            // filter our pubkeys
-            new_ev.tags = new_ev.tags.filter {
-                if $0[0] == "p" {
-                    return $0[1] != pubkey
-                } else {
-                    return true
-                }
-            }
         }
         new_ev.calculate_id()
         new_ev.sign(privkey: privkey)

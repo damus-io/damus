@@ -11,7 +11,10 @@ struct ChatView: View {
     let event: NostrEvent
     let prev_ev: NostrEvent?
     let next_ev: NostrEvent?
-
+    
+    let likes: EventCounter
+    let our_pubkey: String
+    
     @EnvironmentObject var profiles: Profiles
     @EnvironmentObject var thread: ThreadModel
     
@@ -130,7 +133,7 @@ struct ChatView: View {
                         .textSelection(.enabled)
                     
                     if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
-                        EventActionBar(event: event)
+                        EventActionBar(event: event, our_pubkey: our_pubkey, bar: make_actionbar_model(ev: event, counter: likes))
                             .environmentObject(profiles)
                     }
 

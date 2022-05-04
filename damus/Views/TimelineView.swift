@@ -17,7 +17,7 @@ struct TimelineView: View {
 
     @EnvironmentObject var profiles: Profiles
     
-    let pool: RelayPool
+    let damus: DamusState
     
     var body: some View {
         MainContent
@@ -37,11 +37,11 @@ struct TimelineView: View {
                             .environmentObject(profiles)
                          */
                         
-                        let tv = ThreadView(thread: ThreadModel(ev: ev, pool: pool), pool: pool)
+                        let tv = ThreadView(thread: ThreadModel(ev: ev, pool: damus.pool), damus: damus)
                             .environmentObject(profiles)
                         
                         NavigationLink(destination: tv) {
-                            EventView(event: ev, highlight: .none, has_action_bar: true, pool: pool)
+                            EventView(event: ev, highlight: .none, has_action_bar: true, damus: damus)
                         }
                         .isDetailLink(true)
                         .buttonStyle(PlainButtonStyle())

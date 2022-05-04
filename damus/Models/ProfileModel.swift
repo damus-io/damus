@@ -10,34 +10,35 @@ import Foundation
 class ProfileModel: ObservableObject {
     @Published var events: [NostrEvent] = []
     let pubkey: String
-    let pool: RelayPool
+    let damus: DamusState
     
     var seen_event: Set<String> = Set()
     var sub_id = UUID().description
     
-    
-    init(pubkey: String, pool: RelayPool) {
+    init(pubkey: String, damus: DamusState) {
         self.pubkey = pubkey
-        self.pool = pool
+        self.damus = damus
     }
     
     func unsubscribe() {
         print("unsubscribing from profile \(pubkey) with sub_id \(sub_id)")
-        pool.unsubscribe(sub_id: sub_id)
+        damus.pool.unsubscribe(sub_id: sub_id)
     }
     
     func subscribe() {
         let kinds: [Int] = [
             NostrKind.text.rawValue,
             NostrKind.delete.rawValue,
+            NostrKind.contacts.rawValue,
+            NostrKind.metadata.rawValue,
             NostrKind.boost.rawValue
         ]
         
-        var filter = NostrFilter.filter_kinds(kinds)
-        filter.authors = [pubkey]
-
+        var filter = NostrFilter.filter_authors([pubkey])
+        filter.kinds = kinds
+        
         print("subscribing to profile \(pubkey) with sub_id \(sub_id)")
-        pool.subscribe(sub_id: sub_id, filters: [filter], handler: handle_event)
+        damus.pool.subscribe(sub_id: sub_id, filters: [filter], handler: handle_event)
     }
     
     func add_event(_ ev: NostrEvent) {

@@ -10,6 +10,8 @@ import SwiftUI
 struct ChatroomView: View {
     @EnvironmentObject var thread: ThreadModel
     @Environment(\.dismiss) var dismiss
+    let likes: EventCounter
+    let our_pubkey: String
     
     var body: some View {
         ScrollViewReader { scroller in
@@ -19,7 +21,9 @@ struct ChatroomView: View {
                     ForEach(Array(zip(thread.events, thread.events.indices)), id: \.0.id) { (ev, ind) in
                         ChatView(event: thread.events[ind],
                                  prev_ev: ind > 0 ? thread.events[ind-1] : nil,
-                                 next_ev: ind == count-1 ? nil : thread.events[ind+1]
+                                 next_ev: ind == count-1 ? nil : thread.events[ind+1],
+                                 likes: likes,
+                                 our_pubkey: our_pubkey
                         )
                         .onTapGesture {
                             if thread.event.id == ev.id {

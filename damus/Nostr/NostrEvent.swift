@@ -63,15 +63,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
     }
 
     private func get_referenced_ids(key: String) -> [ReferencedId] {
-        return tags.reduce(into: []) { (acc, tag) in
-            if tag.count >= 2 && tag[0] == key {
-                var relay_id: String? = nil
-                if tag.count >= 3 {
-                    relay_id = tag[2]
-                }
-                acc.append(ReferencedId(ref_id: tag[1], relay_id: relay_id, key: key))
-            }
-        }
+        return damus.get_referenced_ids(tags: self.tags, key: key)
     }
     
     public func is_root_event() -> Bool {
@@ -105,6 +97,23 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
         }
         
         return first
+    }
+    
+    public func last_refid() -> ReferencedId? {
+        var mlast: Int? = nil
+        var i: Int = 0
+        for tag in tags {
+            if tag.count >= 2 && tag[0] == "e" {
+                mlast = i
+            }
+            i += 1
+        }
+        
+        guard let last = mlast else {
+            return nil
+        }
+        
+        return tag_to_refid(tags[last])
     }
     
     public func directly_references(_ id: String) -> Bool {
@@ -150,14 +159,6 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
         }
 
         return false
-    }
-    
-    public func reply_ids() -> [ReferencedId] {
-        var ids = self.referenced_ids.first.map { [$0] } ?? []
-        ids.append(ReferencedId(ref_id: self.id, relay_id: nil, key: "e"))
-        ids.append(contentsOf: self.referenced_pubkeys)
-        ids.append(ReferencedId(ref_id: self.pubkey, relay_id: nil, key: "p"))
-        return ids
     }
     
     public var referenced_ids: [ReferencedId] {
@@ -353,3 +354,75 @@ func random_bytes(count: Int) -> Data {
     }
     return data
 }
+
+func tag_to_refid(_ tag: [String]) -> ReferencedId? {
+    if tag.count == 0 {
+        return nil
+    }
+    if tag.count == 1 {
+        return nil
+    }
+    
+    var relay_id: String? = nil
+    if tag.count > 2 {
+        relay_id = tag[2]
+    }
+    
+    return ReferencedId(ref_id: tag[1], relay_id: relay_id, key: tag[0])
+}
+
+func parse_reply_refs(tags: [[String]]) -> ReplyRefs? {
+    let ids = get_referenced_ids(tags: tags, key: "e")
+    
+    if ids.count == 0 {
+        return nil
+    }
+    
+    let first = ids.first!
+    let last = ids.last!
+    
+    return ReplyRefs(thread_id: first.ref_id, direct_reply: last.ref_id)
+}
+    
+func get_referenced_ids(tags: [[String]], key: String) -> [ReferencedId] {
+    return tags.reduce(into: []) { (acc, tag) in
+        if tag.count >= 2 && tag[0] == key {
+            var relay_id: String? = nil
+            if tag.count >= 3 {
+                relay_id = tag[2]
+            }
+            acc.append(ReferencedId(ref_id: tag[1], relay_id: relay_id, key: key))
+        }
+    }
+}
+
+
+func make_like_event(pubkey: String, liked: NostrEvent) -> NostrEvent? {
+    var tags: [[String]]
+    
+    if let refs = parse_reply_refs(tags: liked.tags) {
+        if refs.thread_id == refs.direct_reply {
+            tags = [["e", refs.thread_id], ["e", liked.id]]
+        } else {
+            tags = [["e", refs.thread_id], ["e", refs.direct_reply], ["e", liked.id]]
+        }
+    } else {
+        // root event
+        tags = [["e", liked.id]]
+    }
+    
+   
+    return NostrEvent(content: "", pubkey: pubkey, kind: 7, tags: tags)
+}
+
+func gather_reply_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
+    var ids = get_referenced_ids(tags: from.tags, key: "e").first.map { [$0] } ?? []
+    
+    ids.append(ReferencedId(ref_id: from.id, relay_id: nil, key: "e"))
+    ids.append(contentsOf: from.referenced_pubkeys.filter { $0.ref_id != our_pubkey })
+    if from.pubkey != our_pubkey {
+        ids.append(ReferencedId(ref_id: from.pubkey, relay_id: nil, key: "p"))
+    }
+    return ids
+}
+

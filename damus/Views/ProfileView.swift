@@ -13,7 +13,8 @@ enum ProfileTab: Hashable {
 }
 
 struct ProfileView: View {
-    let pool: RelayPool
+    let damus: DamusState
+    
     @State private var selected_tab: ProfileTab = .posts
     @StateObject var profile: ProfileModel
     
@@ -54,7 +55,7 @@ struct ProfileView: View {
             Group {
                 switch(selected_tab) {
                 case .posts:
-                        TimelineView(events: $profile.events, pool: pool)
+                    TimelineView(events: $profile.events, damus: damus)
                             .environmentObject(profiles)
                 case .following:
                         Text("Following")
