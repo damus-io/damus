@@ -42,5 +42,27 @@ class damusTests: XCTestCase {
         XCTAssertTrue(parsed[1].is_mention)
         XCTAssertTrue(parsed[2].is_text)
     }
+    
+    func testParseMentionBlank() {
+        let parsed = parse_mentions(content: "", tags: [["e", "event_id"]])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 0)
+    }
+    
+    func testParseMentionOnlyText() {
+        let parsed = parse_mentions(content: "there is no mention here", tags: [["e", "event_id"]])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 1)
+        XCTAssertTrue(parsed[0].is_text)
+        
+        guard case .text(let txt) = parsed[0] else {
+            XCTAssertTrue(false)
+            return
+        }
+        
+        XCTAssertEqual(txt, "there is no mention here")
+    }
 
 }
