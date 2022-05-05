@@ -10,6 +10,7 @@ import SwiftUI
 struct ReplyQuoteView: View {
     let quoter: NostrEvent
     let event_id: String
+    let image_cache: ImageCache
     
     @EnvironmentObject var profiles: Profiles
     @EnvironmentObject var thread: ThreadModel
@@ -22,7 +23,7 @@ struct ReplyQuoteView: View {
             
             VStack(alignment: .leading) {
                 HStack(alignment: .top) {
-                    ProfilePicView(picture: profiles.lookup(id: event.pubkey)?.picture, size: 16, highlight: .reply)
+                    ProfilePicView(picture: profiles.lookup(id: event.pubkey)?.picture, size: 16, highlight: .reply, image_cache: image_cache)
                     Text(Profile.displayName(profile: profiles.lookup(id: event.pubkey), pubkey: event.pubkey))
                         .foregroundColor(.accentColor)
                     Text("\(format_relative_time(event.created_at))")

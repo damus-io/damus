@@ -10,8 +10,7 @@ import SwiftUI
 struct ChatroomView: View {
     @EnvironmentObject var thread: ThreadModel
     @Environment(\.dismiss) var dismiss
-    let likes: EventCounter
-    let our_pubkey: String
+    let damus: DamusState
     
     var body: some View {
         ScrollViewReader { scroller in
@@ -22,8 +21,7 @@ struct ChatroomView: View {
                         ChatView(event: thread.events[ind],
                                  prev_ev: ind > 0 ? thread.events[ind-1] : nil,
                                  next_ev: ind == count-1 ? nil : thread.events[ind+1],
-                                 likes: likes,
-                                 our_pubkey: our_pubkey
+                                 damus: damus
                         )
                         .onTapGesture {
                             if thread.event.id == ev.id {

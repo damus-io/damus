@@ -53,7 +53,7 @@ struct EventView: View {
                     .environmentObject(profiles)
                 
                 NavigationLink(destination: pv) {
-                    ProfilePicView(picture: profile?.picture, size: PFP_SIZE!, highlight: highlight)
+                    ProfilePicView(picture: profile?.picture, size: PFP_SIZE!, highlight: highlight, image_cache: damus.image_cache)
                 }
 
                 Spacer()

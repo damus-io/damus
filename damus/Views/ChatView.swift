@@ -12,8 +12,7 @@ struct ChatView: View {
     let prev_ev: NostrEvent?
     let next_ev: NostrEvent?
     
-    let likes: EventCounter
-    let our_pubkey: String
+    let damus: DamusState
     
     @EnvironmentObject var profiles: Profiles
     @EnvironmentObject var thread: ThreadModel
@@ -91,7 +90,7 @@ struct ChatView: View {
                 
                 VStack {
                     if is_active || just_started {
-                        ProfilePicView(picture: profile?.picture, size: 32, highlight: is_active ? .main : .none)
+                        ProfilePicView(picture: profile?.picture, size: 32, highlight: is_active ? .main : .none, image_cache: damus.image_cache)
                     }
                     /*
                     if just_started {
@@ -122,7 +121,7 @@ struct ChatView: View {
                 
                     if let ref_id = thread.replies.lookup(event.id) {
                         if !is_reply_to_prev() {
-                            ReplyQuoteView(quoter: event, event_id: ref_id)
+                            ReplyQuoteView(quoter: event, event_id: ref_id, image_cache: damus.image_cache)
                                 .environmentObject(thread)
                                 .environmentObject(profiles)
                             ReplyDescription
@@ -133,7 +132,10 @@ struct ChatView: View {
                         .textSelection(.enabled)
                     
                     if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
-                        EventActionBar(event: event, our_pubkey: our_pubkey, bar: make_actionbar_model(ev: event, counter: likes))
+                        EventActionBar(event: event,
+                                       our_pubkey: damus.pubkey,
+                                       bar: make_actionbar_model(ev: event, counter: damus.likes)
+                        )
                             .environmentObject(profiles)
                     }
 

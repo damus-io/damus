@@ -19,7 +19,7 @@ struct ThreadView: View {
     var body: some View {
         Group {
             if is_chatroom {
-                ChatroomView(likes: damus.likes, our_pubkey: damus.pubkey)
+                ChatroomView(damus: damus)
                     .navigationBarTitle("Chat")
                     .environmentObject(profiles)
                     .environmentObject(thread)

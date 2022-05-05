@@ -36,27 +36,46 @@ struct ProfilePicView: View {
     let picture: String?
     let size: CGFloat
     let highlight: Highlight
+    let image_cache: ImageCache
+    
+    @State var img: Image? = nil
+    
+    @EnvironmentObject var profiles: Profiles
     
     var Placeholder: some View {
         Color.purple.opacity(0.2)
+            .frame(width: size, height: size)
+            .cornerRadius(CORNER_RADIUS)
+            .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
+            .padding(2)
+    }
+    
+    func ProfilePic(_ url: URL) -> some View {
+        let pub = load_image(cache: image_cache, from: url)
+        return Group {
+            if let img = self.img {
+                img
+                    .frame(width: size, height: size)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
+                    .padding(2)
+            } else {
+                Placeholder
+            }
+        }
+        .onReceive(pub) { mimg in
+            if let img = mimg {
+                self.img = Image(uiImage: img)
+            }
+        }
     }
     
     var MainContent: some View {
         Group {
-            if let pic = picture.flatMap({ URL(string: $0) }) {
-                AsyncImage(url: pic) { img in
-                    img.resizable()
-                } placeholder: { Placeholder }
-                .frame(width: size, height: size)
-                .clipShape(Circle())
-                .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
-                .padding(2)
+            if let pic_url = picture.flatMap { URL(string: $0) } {
+                ProfilePic(pic_url)
             } else {
                 Placeholder
-                    .frame(width: size, height: size)
-                    .cornerRadius(CORNER_RADIUS)
-                    .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
-                    .padding(2)
             }
         }
     }
@@ -66,11 +85,13 @@ struct ProfilePicView: View {
     }
 }
 
+/*
 struct ProfilePicView_Previews: PreviewProvider {
     static var previews: some View {
         ProfilePicView(picture: "http://cdn.jb55.com/img/red-me.jpg", size: 64, highlight: .none)
     }
 }
+ */
     
 
 func hex_to_rgb(_ hex: String) -> Color {

@@ -24,7 +24,7 @@ struct ProfileView: View {
     var TopSection: some View {
         HStack(alignment: .top) {
             let data = profiles.lookup(id: profile.pubkey)
-            ProfilePicView(picture: data?.picture, size: 64, highlight: .custom(Color.black, 4))
+            ProfilePicView(picture: data?.picture, size: 64, highlight: .custom(Color.black, 4), image_cache: damus.image_cache)
                 //.border(Color.blue)
             VStack(alignment: .leading) {
                 if let pubkey = profile.pubkey {

@@ -303,7 +303,9 @@ struct ContentView: View {
 
         self.damus = DamusState(pool: pool, pubkey: pubkey,
                                 likes: EventCounter(our_pubkey: pubkey),
-                                boosts: EventCounter(our_pubkey: pubkey))
+                                boosts: EventCounter(our_pubkey: pubkey),
+                                image_cache: ImageCache()
+        )
         pool.connect()
     }
 

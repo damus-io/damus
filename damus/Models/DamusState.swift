@@ -12,5 +12,6 @@ struct DamusState {
     let pubkey: String
     let likes: EventCounter
     let boosts: EventCounter
+    let image_cache: ImageCache
     
 }
