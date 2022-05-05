@@ -14,7 +14,13 @@ enum MentionType {
 
 struct Mention {
     let index: Int
-    let kind: MentionType
+    let type: MentionType
+    let ref: ReferencedId
+}
+
+struct IdBlock: Identifiable {
+    let id: String = UUID().description
+    let block: Block
 }
 
 enum Block {
@@ -90,6 +96,8 @@ func parse_mentions(content: String, tags: [[String]]) -> [Block] {
             blocks.append(parse_textblock(str: p.str, from: starting_from, to: pre_mention))
             blocks.append(.mention(mention))
             starting_from = p.pos
+        } else {
+            p.pos += 1
         }
     }
     
@@ -127,6 +135,10 @@ func parse_mention(_ p: Parser, tags: [[String]]) -> Mention? {
     default: return nil
     }
     
-    return Mention(index: digit, kind: kind)
+    guard let ref = tag_to_refid(tags[digit]) else {
+        return nil
+    }
+    
+    return Mention(index: digit, type: kind, ref: ref)
 }
 

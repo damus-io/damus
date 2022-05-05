@@ -24,7 +24,7 @@ struct ProfileView: View {
     var TopSection: some View {
         HStack(alignment: .top) {
             let data = profiles.lookup(id: profile.pubkey)
-            ProfilePicView(picture: data?.picture, size: 64, highlight: .custom(Color.black, 4), image_cache: damus.image_cache)
+            ProfilePicView(picture: data?.picture, size: PFP_SIZE!, highlight: .custom(Color.black, 4), image_cache: damus.image_cache)
                 //.border(Color.blue)
             VStack(alignment: .leading) {
                 if let pubkey = profile.pubkey {
@@ -44,11 +44,14 @@ struct ProfileView: View {
     var body: some View {
         VStack(alignment: .leading) {
             TopSection
+            /*
             Picker("", selection: $selected_tab) {
                 Text("Posts").tag(ProfileTab.posts)
                 Text("Following").tag(ProfileTab.following)
             }
             .pickerStyle(SegmentedPickerStyle())
+             */
+             
             
             Divider()
 
@@ -64,7 +67,9 @@ struct ProfileView: View {
             .frame(maxHeight: .infinity, alignment: .topLeading)
         }
         //.border(Color.white)
+        .padding([.leading, .trailing], 6)
         .frame(maxWidth: .infinity, alignment: .topLeading)
+        
         .navigationBarTitle("Profile")
         .onAppear() {
             profile.subscribe()

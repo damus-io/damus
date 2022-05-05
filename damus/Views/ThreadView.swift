@@ -36,6 +36,7 @@ struct ThreadView: View {
             }
              */
         }
+        .padding([.leading, .trailing], 6)
         .onReceive(NotificationCenter.default.publisher(for: .switched_timeline)) { n in
             dismiss()
         }

@@ -128,8 +128,7 @@ struct ChatView: View {
                         }
                     }
 
-                    Text(event.content)
-                        .textSelection(.enabled)
+                    NoteContentView(event)
                     
                     if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
                         EventActionBar(event: event,

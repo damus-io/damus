@@ -58,6 +58,37 @@ class damusTests: XCTestCase {
         XCTAssertEqual(txt, "this is #[0] a mention")
     }
     
+    func testParseMentionWithMarkdown() {
+        let md = """
+        Testing markdown in damus
+        
+        **bold**
+
+        _italics_
+
+        `monospace`
+
+        # h1
+
+        ## h2
+
+        ### h3
+
+        * list1
+        * list2
+
+        > some awesome quote
+
+        [my website](https://jb55.com)
+        """
+        
+        let parsed = parse_mentions(content: md, tags: [])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 1)
+        XCTAssertTrue(parsed[0].is_text)
+    }
+    
     func testParseMentionBlank() {
         let parsed = parse_mentions(content: "", tags: [["e", "event_id"]])
         

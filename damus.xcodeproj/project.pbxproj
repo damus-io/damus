@@ -15,6 +15,10 @@
 		4C0A3F97280F8E02000448DE /* ThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F96280F8E02000448DE /* ThreadView.swift */; };
 		4C363A8428233689006E126D /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8328233689006E126D /* Parser.swift */; };
 		4C363A8628234FDE006E126D /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8528234FDE006E126D /* ImageCache.swift */; };
+		4C363A8828236948006E126D /* BlocksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8728236948006E126D /* BlocksView.swift */; };
+		4C363A8A28236B57006E126D /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8928236B57006E126D /* MentionView.swift */; };
+		4C363A8C28236B92006E126D /* PubkeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8B28236B92006E126D /* PubkeyView.swift */; };
+		4C363A8E28236FE4006E126D /* NoteContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8D28236FE4006E126D /* NoteContentView.swift */; };
 		4C3BEFD22819DB9B00B3DE84 /* ProfileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD12819DB9B00B3DE84 /* ProfileModel.swift */; };
 		4C3BEFD42819DE8F00B3DE84 /* NostrKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */; };
 		4C3BEFD6281D995700B3DE84 /* ActionBarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD5281D995700B3DE84 /* ActionBarModel.swift */; };
@@ -83,6 +87,10 @@
 		4C0A3F96280F8E02000448DE /* ThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadView.swift; sourceTree = "<group>"; };
 		4C363A8328233689006E126D /* Parser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
 		4C363A8528234FDE006E126D /* ImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
+		4C363A8728236948006E126D /* BlocksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlocksView.swift; sourceTree = "<group>"; };
+		4C363A8928236B57006E126D /* MentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MentionView.swift; sourceTree = "<group>"; };
+		4C363A8B28236B92006E126D /* PubkeyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PubkeyView.swift; sourceTree = "<group>"; };
+		4C363A8D28236FE4006E126D /* NoteContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteContentView.swift; sourceTree = "<group>"; };
 		4C3BEFD12819DB9B00B3DE84 /* ProfileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileModel.swift; sourceTree = "<group>"; };
 		4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrKind.swift; sourceTree = "<group>"; };
 		4C3BEFD5281D995700B3DE84 /* ActionBarModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionBarModel.swift; sourceTree = "<group>"; };
@@ -189,6 +197,10 @@
 				4C0A3F94280F6C78000448DE /* ReplyQuoteView.swift */,
 				4C0A3F96280F8E02000448DE /* ThreadView.swift */,
 				4C8682862814DE470026224F /* ProfileView.swift */,
+				4C363A8728236948006E126D /* BlocksView.swift */,
+				4C363A8928236B57006E126D /* MentionView.swift */,
+				4C363A8B28236B92006E126D /* PubkeyView.swift */,
+				4C363A8D28236FE4006E126D /* NoteContentView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -430,7 +442,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C363A8A28236B57006E126D /* MentionView.swift in Sources */,
 				4CE4F8CD281352B30009DFBB /* Notifications.swift in Sources */,
+				4C363A8C28236B92006E126D /* PubkeyView.swift in Sources */,
 				4C363A8628234FDE006E126D /* ImageCache.swift in Sources */,
 				4C75EFB728049D990006080F /* RelayPool.swift in Sources */,
 				4CE6DEE927F7A08100C66700 /* ContentView.swift in Sources */,
@@ -454,6 +468,7 @@
 				4C3BEFD22819DB9B00B3DE84 /* ProfileModel.swift in Sources */,
 				4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */,
 				4CACA9DC280C38C000D9BBE8 /* Profiles.swift in Sources */,
+				4C363A8828236948006E126D /* BlocksView.swift in Sources */,
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
 				4C8682872814DE470026224F /* ProfileView.swift in Sources */,
 				4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */,
@@ -465,6 +480,7 @@
 				4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */,
 				4C0A3F95280F6C78000448DE /* ReplyQuoteView.swift in Sources */,
 				4C3BEFDA281DCA1400B3DE84 /* LikeCounter.swift in Sources */,
+				4C363A8E28236FE4006E126D /* NoteContentView.swift in Sources */,
 				4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */,
 				4C0A3F97280F8E02000448DE /* ThreadView.swift in Sources */,
 				4C75EFA427FA577B0006080F /* PostView.swift in Sources */,
