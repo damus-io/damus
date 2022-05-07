@@ -58,6 +58,8 @@ struct ContentView: View {
     @State var events: [NostrEvent] = []
     @State var friend_events: [NostrEvent] = []
     @State var notifications: [NostrEvent] = []
+    @State var active_profile: String? = nil
+    @State var profile_open: Bool = false
     
     // connect retry timer
     let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
@@ -146,6 +148,9 @@ struct ContentView: View {
     func MainContent(damus: DamusState) -> some View {
         NavigationView {
             VStack {
+                NavigationLink(destination: MaybeProfileView, isActive: $profile_open) {
+                    EmptyView()
+                }
                 switch selected_timeline {
                 case .home:
                     PostingTimelineView
@@ -168,8 +173,21 @@ struct ContentView: View {
                 }
             }
             .navigationBarTitle("Damus", displayMode: .inline)
+                            
         }
         .navigationViewStyle(.stack)
+    }
+    
+    var MaybeProfileView: some View {
+        Group {
+            if let pk = self.active_profile {
+                let profile_model = ProfileModel(pubkey: pk, damus: damus!)
+                ProfileView(damus: damus!, profile: profile_model)
+                    .environmentObject(profiles)
+            } else {
+                EmptyView()
+            }
+        }
     }
     
     var body: some View {
@@ -196,6 +214,25 @@ struct ContentView: View {
                 ReplyView(replying_to: event, damus: damus!)
                     .environmentObject(profiles)
             }
+        }
+        .onOpenURL { url in
+            guard let link = decode_nostr_uri(url.absoluteString) else {
+                return
+            }
+            
+            switch link {
+            case .ref(let ref):
+                if ref.key == "p" {
+                    active_profile = ref.ref_id
+                    profile_open = true
+                } else if ref.key == "e" {
+                    // TODO open event view
+                }
+            case .filter:
+                break
+                // TODO: handle filter searches?
+            }
+            
         }
         .onReceive(handle_notify(.boost)) { notif in
             let ev = notif.object as! NostrEvent
@@ -229,7 +266,7 @@ struct ContentView: View {
             switch post_res {
             case .post(let post):
                 print("post \(post.content)")
-                let new_ev = post.to_event(privkey: privkey, pubkey: pubkey)
+                let new_ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
                 self.damus?.pool.send(.event(new_ev))
             case .cancel:
                 active_sheet = nil

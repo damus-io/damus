@@ -7,9 +7,19 @@
 
 import Foundation
 
+
 enum MentionType {
     case pubkey
     case event
+    
+    var ref: String {
+        switch self {
+        case .pubkey:
+            return "p"
+        case .event:
+            return "e"
+        }
+    }
 }
 
 struct Mention {
@@ -42,38 +52,15 @@ enum Block {
     }
 }
 
-struct ParsedMentions {
-    let blocks: [Block]
-}
-
-class Parser {
-    var pos: Int
-    var str: String
-    
-    init(pos: Int, str: String) {
-        self.pos = pos
-        self.str = str
-    }
-}
-
-func consume_until(_ p: Parser, match: Character) -> Bool {
-    var i: Int = 0
-    let sub = substring(p.str, start: p.pos, end: p.str.count)
-    for c in sub {
-        if c == match {
-            p.pos += i
-            return true
+func render_blocks(blocks: [Block]) -> String {
+    return blocks.reduce("") { str, block in
+        switch block {
+        case .mention(let m):
+            return str + "#[\(m.index)]"
+        case .text(let txt):
+            return str + txt
         }
-        i += 1
     }
-    
-    return false
-}
-
-func substring(_ s: String, start: Int, end: Int) -> Substring {
-    let ind = s.index(s.startIndex, offsetBy: start)
-    let end = s.index(s.startIndex, offsetBy: end)
-    return s[ind..<end]
 }
 
 func parse_textblock(str: String, from: Int, to: Int) -> Block {
@@ -86,7 +73,7 @@ func parse_mentions(content: String, tags: [[String]]) -> [Block] {
     var starting_from: Int = 0
     
     while p.pos < content.count {
-        if (!consume_until(p, match: "#")) {
+        if (!consume_until(p, match: { $0 == "#" })) {
             blocks.append(parse_textblock(str: p.str, from: starting_from, to: p.str.count))
             return blocks
         }
@@ -140,5 +127,19 @@ func parse_mention(_ p: Parser, tags: [[String]]) -> Mention? {
     }
     
     return Mention(index: digit, type: kind, ref: ref)
+}
+
+func post_to_event(post: NostrPost, privkey: String, pubkey: String) -> NostrEvent {
+    let new_ev = NostrEvent(content: post.content, pubkey: pubkey)
+    for id in post.references {
+        var tag = [id.key, id.ref_id]
+        if let relay_id = id.relay_id {
+            tag.append(relay_id)
+        }
+        new_ev.tags.append(tag)
+    }
+    new_ev.calculate_id()
+    new_ev.sign(privkey: privkey)
+    return new_ev
 }
 

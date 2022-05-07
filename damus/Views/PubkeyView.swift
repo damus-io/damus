@@ -20,8 +20,8 @@ struct PubkeyView: View {
     }
 }
 
-func abbrev_pubkey(_ pubkey: String) -> String {
-    return pubkey.prefix(4) + ":" + pubkey.suffix(4)
+func abbrev_pubkey(_ pubkey: String, amount: Int = 8) -> String {
+    return pubkey.prefix(amount) + ":" + pubkey.suffix(amount)
 }
 
 /*

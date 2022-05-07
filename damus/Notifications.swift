@@ -32,6 +32,12 @@ extension Notification.Name {
 }
 
 extension Notification.Name {
+    static var profile_update: Notification.Name {
+        return Notification.Name("profile_update")
+    }
+}
+
+extension Notification.Name {
     static var switched_timeline: Notification.Name {
         return Notification.Name("switched_timeline")
     }
@@ -44,8 +50,8 @@ extension Notification.Name {
 }
 
 extension Notification.Name {
-    static var click_profile_pic: Notification.Name {
-        return Notification.Name("click_profile_pic")
+    static var open_profile: Notification.Name {
+        return Notification.Name("open_profile")
     }
 }
 

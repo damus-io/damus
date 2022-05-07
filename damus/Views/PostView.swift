@@ -12,26 +12,6 @@ enum NostrPostResult {
     case cancel
 }
 
-struct NostrPost {
-    let content: String
-    let references: [ReferencedId]
-    
-    public func to_event(privkey: String, pubkey: String) -> NostrEvent {
-        let new_ev = NostrEvent(content: content, pubkey: pubkey)
-        for id in references {
-            var tag = [id.key, id.ref_id]
-            if let relay_id = id.relay_id {
-                tag.append(relay_id)
-            }
-            new_ev.tags.append(tag)
-        }
-        new_ev.calculate_id()
-        new_ev.sign(privkey: privkey)
-        return new_ev
-    }
-}
-
-
 struct PostView: View {
     @State var post: String = ""
     @FocusState var focus: Bool

@@ -31,6 +31,10 @@ struct ProfileView: View {
                     ProfileName(pubkey: pubkey, profile: data)
                         .font(.title)
                         //.border(Color.green)
+                    Text("\(pubkey)")
+                        .textSelection(.enabled)
+                        .font(.footnote)
+                        .foregroundColor(id_to_color(pubkey))
                 }
                 Text(data?.about ?? "")
                     //.border(Color.red)

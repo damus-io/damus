@@ -14,7 +14,7 @@ struct Profile: Decodable {
     let picture: String?
     
     static func displayName(profile: Profile?, pubkey: String) -> String {
-        return profile?.name ?? String(pubkey.prefix(16))
+        return profile?.name ?? abbrev_pubkey(pubkey)
     }
 }
 

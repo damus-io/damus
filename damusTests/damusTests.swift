@@ -43,6 +43,127 @@ class damusTests: XCTestCase {
         XCTAssertTrue(parsed[2].is_text)
     }
     
+    func testEmptyPostReference() throws {
+        let parsed = parse_post_blocks(content: "")
+        XCTAssertEqual(parsed.count, 0)
+    }
+    
+    func testInvalidPostReference() throws {
+        let pk = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e24"
+        let content = "this is a @\(pk) mention"
+        let parsed = parse_post_blocks(content: content)
+        XCTAssertEqual(parsed.count, 1)
+        guard case .text(let txt) = parsed[0] else {
+            XCTAssert(false)
+            return
+        }
+        XCTAssertEqual(txt, content)
+    }
+    
+    func testInvalidPostReferenceEmptyAt() throws {
+        let content = "this is a @ mention"
+        let parsed = parse_post_blocks(content: content)
+        XCTAssertEqual(parsed.count, 1)
+        guard case .text(let txt) = parsed[0] else {
+            XCTAssert(false)
+            return
+        }
+        XCTAssertEqual(txt, content)
+    }
+    
+    func testParsePostUriReference() throws {
+        let id = "6fec2ee6cfff779fe8560976b3d9df782b74577f0caefa7a77c0ed4c3749b5de"
+        let parsed = parse_post_blocks(content: "this is a nostr:e:\(id) event mention")
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 3)
+        XCTAssertTrue(parsed[0].is_text)
+        XCTAssertTrue(parsed[1].is_ref)
+        XCTAssertTrue(parsed[2].is_text)
+        
+        guard case .ref(let ref) = parsed[1] else {
+            XCTAssertTrue(false)
+            return
+        }
+        XCTAssertEqual(ref.ref_id, id)
+        XCTAssertEqual(ref.key, "e")
+        XCTAssertNil(ref.relay_id)
+        
+        guard case .text(let t1) = parsed[0] else {
+            XCTAssertTrue(false)
+            return
+        }
+        XCTAssertEqual(t1, "this is a ")
+        
+        guard case .text(let t2) = parsed[2] else {
+            XCTAssertTrue(false)
+            return
+        }
+        XCTAssertEqual(t2, " event mention")
+    }
+    
+    func testParsePostEventReference() throws {
+        let pk = "6fec2ee6cfff779fe8560976b3d9df782b74577f0caefa7a77c0ed4c3749b5de"
+        let parsed = parse_post_blocks(content: "this is a &\(pk) event mention")
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 3)
+        XCTAssertTrue(parsed[0].is_text)
+        XCTAssertTrue(parsed[1].is_ref)
+        XCTAssertTrue(parsed[2].is_text)
+        
+        guard case .ref(let ref) = parsed[1] else {
+            XCTAssertTrue(false)
+            return
+        }
+        XCTAssertEqual(ref.ref_id, pk)
+        XCTAssertEqual(ref.key, "e")
+        XCTAssertNil(ref.relay_id)
+        
+        guard case .text(let t1) = parsed[0] else {
+            XCTAssertTrue(false)
+            return
+        }
+        XCTAssertEqual(t1, "this is a ")
+        
+        guard case .text(let t2) = parsed[2] else {
+            XCTAssertTrue(false)
+            return
+        }
+        XCTAssertEqual(t2, " event mention")
+    }
+    
+    func testParsePostPubkeyReference() throws {
+        let pk = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
+        let parsed = parse_post_blocks(content: "this is a @\(pk) mention")
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 3)
+        XCTAssertTrue(parsed[0].is_text)
+        XCTAssertTrue(parsed[1].is_ref)
+        XCTAssertTrue(parsed[2].is_text)
+        
+        guard case .ref(let ref) = parsed[1] else {
+            XCTAssertTrue(false)
+            return
+        }
+        XCTAssertEqual(ref.ref_id, pk)
+        XCTAssertEqual(ref.key, "p")
+        XCTAssertNil(ref.relay_id)
+        
+        guard case .text(let t1) = parsed[0] else {
+            XCTAssertTrue(false)
+            return
+        }
+        XCTAssertEqual(t1, "this is a ")
+        
+        guard case .text(let t2) = parsed[2] else {
+            XCTAssertTrue(false)
+            return
+        }
+        XCTAssertEqual(t2, " mention")
+    }
+    
     func testParseInvalidMention() throws {
         let parsed = parse_mentions(content: "this is #[0] a mention", tags: [])
         

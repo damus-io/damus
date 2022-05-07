@@ -7,46 +7,69 @@
 
 import SwiftUI
 
-func NoteContentView(_ ev: NostrEvent) -> some View {
-    let txt = parse_mentions(content: ev.content, tags: ev.tags)
-        .reduce("") { str, block in
-            switch block {
-            case .mention(let m):
-                return str + mention_str(m)
-            case .text(let txt):
-                return str + txt
-            }
+
+func render_note_content(ev: NostrEvent, profiles: Profiles) -> String {
+    return ev.blocks.reduce("") { str, block in
+        switch block {
+        case .mention(let m):
+            return str + mention_str(m, profiles: profiles)
+        case .text(let txt):
+            return str + txt
         }
-    
-    let md_opts: AttributedString.MarkdownParsingOptions =
-        .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-    
-    guard let txt = try? AttributedString(markdown: txt, options: md_opts) else {
-        return Text(ev.content)
     }
-    
-    return Text(txt)
 }
 
-func mention_str(_ m: Mention) -> String {
+struct NoteContentView: View {
+    let event: NostrEvent
+    let profiles: Profiles
+    
+    @State var content: String = ""
+    
+    func MainContent() -> some View {
+        let md_opts: AttributedString.MarkdownParsingOptions =
+            .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        
+        guard let txt = try? AttributedString(markdown: content, options: md_opts) else {
+            return Text(event.content)
+        }
+        
+        return Text(txt)
+    }
+    
+    var body: some View {
+        MainContent()
+            .onAppear() {
+                self.content = render_note_content(ev: event, profiles: profiles)
+            }
+            .onReceive(handle_notify(.profile_update)) { notif in
+                let profile = notif.object as! ProfileUpdate
+                for block in event.blocks {
+                    switch block {
+                    case .mention(let m):
+                        if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
+                            content = render_note_content(ev: event, profiles: profiles)
+                        }
+                    case .text:
+                        return
+                    }
+                }
+            }
+    }
+}
+
+func mention_str(_ m: Mention, profiles: Profiles) -> String {
     switch m.type {
     case .pubkey:
         let pk = m.ref.ref_id
-        return "[@\(abbrev_pubkey(pk))](nostr:\(encode_pubkey(m.ref)))"
+        let profile = profiles.lookup(id: pk)
+        let disp = Profile.displayName(profile: profile, pubkey: pk)
+        return "[@\(disp)](nostr:\(encode_pubkey_uri(m.ref)))"
     case .event:
         let evid = m.ref.ref_id
-        return "[*\(abbrev_pubkey(evid))](nostr:\(encode_event_id(m.ref)))"
+        return "[&\(abbrev_pubkey(evid))](nostr:\(encode_event_id_uri(m.ref)))"
     }
 }
 
-// TODO: bech32 and relay hints
-func encode_event_id(_ ref: ReferencedId) -> String {
-    return "e_" + ref.ref_id
-}
-
-func encode_pubkey(_ ref: ReferencedId) -> String {
-    return "p_" + ref.ref_id
-}
 
 /*
 struct NoteContentView_Previews: PreviewProvider {

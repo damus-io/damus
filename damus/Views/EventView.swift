@@ -74,7 +74,7 @@ struct EventView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                NoteContentView(event)
+                NoteContentView(event: event, profiles: profiles)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .textSelection(.enabled)
 

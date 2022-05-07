@@ -49,6 +49,10 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
     let kind: Int
     let content: String
     
+    lazy var blocks: [Block] = {
+        return parse_mentions(content: self.content, tags: self.tags)
+    }()
+    
     var description: String {
         let p = pow.map { String($0) } ?? "?"
         return "NostrEvent { id: \(id) pubkey \(pubkey) kind \(kind) tags \(tags) pow \(p) content '\(content)' }"
