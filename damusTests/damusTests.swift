@@ -71,6 +71,85 @@ class damusTests: XCTestCase {
         XCTAssertEqual(txt, content)
     }
     
+    func testFunnyUriReference() throws {
+        let id = "6fec2ee6cfff779fe8560976b3d9df782b74577f0caefa7a77c0ed4c3749b5de"
+        let content = "this is a nostr:&\(id):\(id) event mention"
+        let parsed = parse_post_blocks(content: content)
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 3)
+        XCTAssertTrue(parsed[0].is_text)
+        XCTAssertTrue(parsed[1].is_ref)
+        XCTAssertTrue(parsed[2].is_text)
+        
+        guard case .ref(let ref) = parsed[1] else {
+            XCTAssertTrue(false)
+            return
+        }
+        XCTAssertEqual(ref.ref_id, id)
+        XCTAssertEqual(ref.key, "e")
+        XCTAssertNil(ref.relay_id)
+        
+        guard case .text(let t1) = parsed[0] else {
+            XCTAssertTrue(false)
+            return
+        }
+        XCTAssertEqual(t1, "this is a nostr:")
+        
+        guard case .text(let t2) = parsed[2] else {
+            XCTAssertTrue(false)
+            return
+        }
+        XCTAssertEqual(t2, ":\(id) event mention")
+    }
+    
+    func testInvalidUriReference() throws {
+        let id = "6fec2ee6cfff779fe8560976b3d9df782b74577f0caefa7a77c0ed4c3749b5de"
+        let content = "this is a nostr:z:\(id) event mention"
+        let parsed = parse_post_blocks(content: content)
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 1)
+        
+        guard case .text(let txt) = parsed[0] else {
+            XCTAssertTrue(false)
+            return
+        }
+        
+        XCTAssertEqual(txt, content)
+    }
+    
+    func testParsePostUriPubkeyReference() throws {
+        let id = "6fec2ee6cfff779fe8560976b3d9df782b74577f0caefa7a77c0ed4c3749b5de"
+        let parsed = parse_post_blocks(content: "this is a nostr:p:\(id) event mention")
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 3)
+        XCTAssertTrue(parsed[0].is_text)
+        XCTAssertTrue(parsed[1].is_ref)
+        XCTAssertTrue(parsed[2].is_text)
+        
+        guard case .ref(let ref) = parsed[1] else {
+            XCTAssertTrue(false)
+            return
+        }
+        XCTAssertEqual(ref.ref_id, id)
+        XCTAssertEqual(ref.key, "p")
+        XCTAssertNil(ref.relay_id)
+        
+        guard case .text(let t1) = parsed[0] else {
+            XCTAssertTrue(false)
+            return
+        }
+        XCTAssertEqual(t1, "this is a ")
+        
+        guard case .text(let t2) = parsed[2] else {
+            XCTAssertTrue(false)
+            return
+        }
+        XCTAssertEqual(t2, " event mention")
+    }
+    
     func testParsePostUriReference() throws {
         let id = "6fec2ee6cfff779fe8560976b3d9df782b74577f0caefa7a77c0ed4c3749b5de"
         let parsed = parse_post_blocks(content: "this is a nostr:e:\(id) event mention")
