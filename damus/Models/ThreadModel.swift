@@ -130,8 +130,8 @@ class ThreadModel: ObservableObject {
             return
         }
         
-        if let reply_id = ev.find_direct_reply() {
-            self.replies.add(id: ev.id, reply_id: reply_id)
+        for reply in ev.direct_replies() {
+            self.replies.add(id: ev.id, reply_id: reply.ref_id)
         }
         
         self.events.append(ev)

@@ -33,6 +33,80 @@ class damusTests: XCTestCase {
         }
     }
     
+    func testMentionIsntReply() throws {
+        let content = "this is #[0] a mention"
+        let tags = [["e", "event_id"]]
+        let blocks = parse_mentions(content: content, tags: tags)
+        let event_refs = interpret_event_refs(blocks: blocks, tags: tags)
+        
+        XCTAssertEqual(event_refs.count, 1)
+        
+        let ref = event_refs[0]
+        
+        XCTAssertNil(ref.is_reply)
+        XCTAssertNil(ref.is_thread_id)
+        XCTAssertNil(ref.is_direct_reply)
+        XCTAssertEqual(ref.is_mention!.type, .event)
+        XCTAssertEqual(ref.is_mention!.ref.ref_id, "event_id")
+    }
+    
+    func testRootReplyWithMention() throws {
+        let content = "this is #[1] a mention"
+        let tags = [["e", "thread_id"], ["e", "mentioned_id"]]
+        let blocks = parse_mentions(content: content, tags: tags)
+        let event_refs = interpret_event_refs(blocks: blocks, tags: tags)
+        
+        XCTAssertEqual(event_refs.count, 2)
+        XCTAssertNotNil(event_refs[0].is_reply)
+        XCTAssertNotNil(event_refs[0].is_thread_id)
+        XCTAssertNotNil(event_refs[0].is_reply)
+        XCTAssertNotNil(event_refs[0].is_direct_reply)
+        XCTAssertEqual(event_refs[0].is_reply!.ref_id, "thread_id")
+        XCTAssertEqual(event_refs[0].is_thread_id!.ref_id, "thread_id")
+        XCTAssertNotNil(event_refs[1].is_mention)
+        XCTAssertEqual(event_refs[1].is_mention!.type, .event)
+        XCTAssertEqual(event_refs[1].is_mention!.ref.ref_id, "mentioned_id")
+    }
+    
+    func testThreadedReply() throws {
+        let content = "this is some content"
+        let tags = [["e", "thread_id"], ["e", "reply_id"]]
+        let blocks = parse_mentions(content: content, tags: tags)
+        let event_refs = interpret_event_refs(blocks: blocks, tags: tags)
+        
+        XCTAssertEqual(event_refs.count, 2)
+        let r1 = event_refs[0]
+        let r2 = event_refs[1]
+        
+        XCTAssertEqual(r1.is_thread_id!.ref_id, "thread_id")
+        XCTAssertEqual(r2.is_reply!.ref_id, "reply_id")
+        XCTAssertEqual(r2.is_direct_reply!.ref_id, "reply_id")
+        XCTAssertNil(r1.is_direct_reply)
+    }
+    
+    func testRootReply() throws {
+        let content = "this is a reply"
+        let tags = [["e", "thread_id"]]
+        let blocks = parse_mentions(content: content, tags: tags)
+        let event_refs = interpret_event_refs(blocks: blocks, tags: tags)
+        
+        XCTAssertEqual(event_refs.count, 1)
+        let r = event_refs[0]
+        
+        XCTAssertEqual(r.is_direct_reply!.ref_id, "thread_id")
+        XCTAssertEqual(r.is_reply!.ref_id, "thread_id")
+        XCTAssertEqual(r.is_thread_id!.ref_id, "thread_id")
+        XCTAssertNil(r.is_mention)
+    }
+    
+    func testNoReply() throws {
+        let content = "this is a #[0] reply"
+        let blocks = parse_mentions(content: content, tags: [])
+        let event_refs = interpret_event_refs(blocks: blocks, tags: [])
+        
+        XCTAssertEqual(event_refs.count, 0)
+    }
+    
     func testParseMention() throws {
         let parsed = parse_mentions(content: "this is #[0] a mention", tags: [["e", "event_id"]])
         

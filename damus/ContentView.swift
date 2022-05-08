@@ -67,7 +67,8 @@ struct ContentView: View {
     let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
     let sub_id = UUID().description
-    let pubkey = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
+    let pubkey = MY_PUBKEY
+    let privkey = MY_PRIVKEY 
     
     var NotificationTab: some View {
         ZStack(alignment: .center) {

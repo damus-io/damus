@@ -129,19 +129,27 @@ func make_reply_map(active: NostrEvent, events: [NostrEvent]) -> [String: ()]
         return is_reply
     }
     
-    let is_root = active.is_root_event()
-    
     for ev in events {
-        if is_root && ev.directly_references(active.id) {
-            is_reply[ev.id] = ()
-            start = i
-        } else if !is_root && ev.references(id: active.id, key: "e") {
-            is_reply[ev.id] = ()
-            start = i
-        } else if active.references(id: ev.id, key: "e") {
-            is_reply[ev.id] = ()
-            start = i
+        /// does this event reply to the active event?
+        for ev_ref in ev.event_refs {
+            if let reply = ev_ref.is_reply {
+                if reply.ref_id == active.id {
+                    is_reply[ev.id] = ()
+                    start = i
+                }
+            }
         }
+        
+        /// does the active event reply to this event?
+        for active_ref in active.event_refs {
+            if let reply = active_ref.is_reply {
+                if reply.ref_id == ev.id {
+                    is_reply[ev.id] = ()
+                    start = i
+                }
+            }
+        }
+        
         i += 1
     }
 
@@ -186,27 +194,6 @@ func determine_highlight(reply_map: [String: ()], current: NostrEvent, active: N
     } else {
         return .none
     }
-    
-    /*
-    if current.id == active.id {
-        return .main
-    }
-    if active.is_root_event() {
-        if active.directly_references(current.id) {
-            return .reply
-        } else if current.directly_references(active.id) {
-            return .reply
-        }
-    } else {
-        if active.references(id: current.id, key: "e") {
-            return .reply
-        } else if current.references(id: active.id, key: "e") {
-            return .reply
-        }
-    }
-    
-    return .none
-     */
 }
 
 func calculated_collapsed_events(collapsed: Bool, active: NostrEvent?, events: [NostrEvent]) -> [CollapsedEvent] {
