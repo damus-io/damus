@@ -123,8 +123,11 @@ func format_relative_time(_ created_at: Int64) -> String
 }
 
 func reply_desc(profiles: Profiles, event: NostrEvent) -> String {
-    let (pubkeys, n) = event.reply_description
-    if pubkeys.count == 0 {
+    let desc = make_reply_description(event.tags)
+    let pubkeys = desc.pubkeys
+    let n = desc.others
+    
+    if desc.pubkeys.count == 0 {
         return "Reply to self"
     }
     
