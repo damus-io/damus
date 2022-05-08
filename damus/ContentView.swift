@@ -377,7 +377,8 @@ struct ContentView: View {
     }
     
     func handle_boost_event(_ ev: NostrEvent) {
-        damus!.boosts.add_event(ev)
+        
+        //damus!.boosts.add_event(ev)
     }
     
     func handle_like_event(_ ev: NostrEvent) {
@@ -388,7 +389,7 @@ struct ContentView: View {
         
         // CHECK SIGS ON THESE
         
-        switch damus!.likes.add_event(ev) {
+        switch damus!.likes.add_event(ev, target: e.ref_id) {
         case .user_already_liked:
             break
         case .success(let n):

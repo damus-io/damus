@@ -23,31 +23,31 @@ class EventCounter {
         self.our_pubkey = our_pubkey
     }
     
-    func add_event(_ ev: NostrEvent) -> LikeResult {
+    func add_event(_ ev: NostrEvent, target: String) -> LikeResult {
         let pubkey = ev.pubkey
         
         if self.user_events[pubkey] == nil {
             self.user_events[pubkey] = Set()
         }
         
-        if user_events[pubkey]!.contains(ev.id) {
+        if user_events[pubkey]!.contains(target) {
             // don't double count
             return .user_already_liked
         }
         
-        user_events[pubkey]!.insert(ev.id)
+        user_events[pubkey]!.insert(target)
         
         if ev.pubkey == self.our_pubkey {
-            our_events[ev.id] = ev
+            our_events[target] = ev
         }
         
-        if counts[ev.id] == nil {
-            counts[ev.id] = 1
+        if counts[target] == nil {
+            counts[target] = 1
             return .success(1)
         }
         
-        counts[ev.id]! += 1
+        counts[target]! += 1
         
-        return .success(counts[ev.id]!)
+        return .success(counts[target]!)
     }
 }

@@ -101,9 +101,8 @@ class ThreadModel: ObservableObject {
     }
     
     func subscribe() {
-        let kinds: [Int] = [1, 5, 6, 7]
-        var ref_events = NostrFilter.filter_kinds(kinds)
-        var events_filter = NostrFilter.filter_kinds(kinds)
+        var ref_events = NostrFilter.filter_kinds([1,5,7])
+        var events_filter = NostrFilter.filter_kinds([1])
         //var likes_filter = NostrFilter.filter_kinds(7])
 
         // TODO: add referenced relays
