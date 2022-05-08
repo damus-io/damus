@@ -23,7 +23,7 @@ struct NoteContentView: View {
     let event: NostrEvent
     let profiles: Profiles
     
-    @State var content: String = ""
+    @State var content: String
     
     func MainContent() -> some View {
         let md_opts: AttributedString.MarkdownParsingOptions =

@@ -128,7 +128,7 @@ struct ChatView: View {
                         }
                     }
 
-                    NoteContentView(event: event, profiles: profiles)
+                    NoteContentView(event: event, profiles: profiles, content: event.content)
                     
                     if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
                         EventActionBar(event: event,
