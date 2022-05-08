@@ -359,6 +359,14 @@ func random_bytes(count: Int) -> Data {
     return data
 }
 
+func refid_to_tag(_ ref: ReferencedId) -> [String] {
+    var tag = [ref.key, ref.ref_id]
+    if let relay_id = ref.relay_id {
+        tag.append(relay_id)
+    }
+    return tag
+}
+
 func tag_to_refid(_ tag: [String]) -> ReferencedId? {
     if tag.count == 0 {
         return nil

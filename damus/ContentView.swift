@@ -59,7 +59,9 @@ struct ContentView: View {
     @State var friend_events: [NostrEvent] = []
     @State var notifications: [NostrEvent] = []
     @State var active_profile: String? = nil
+    @State var active_event_id: String? = nil
     @State var profile_open: Bool = false
+    @State var thread_open: Bool = false
     
     // connect retry timer
     let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
@@ -151,6 +153,9 @@ struct ContentView: View {
                 NavigationLink(destination: MaybeProfileView, isActive: $profile_open) {
                     EmptyView()
                 }
+                NavigationLink(destination: MaybeThreadView, isActive: $thread_open) {
+                    EmptyView()
+                }
                 switch selected_timeline {
                 case .home:
                     PostingTimelineView
@@ -176,6 +181,18 @@ struct ContentView: View {
                             
         }
         .navigationViewStyle(.stack)
+    }
+    
+    var MaybeThreadView: some View {
+        Group {
+            if let evid = self.active_event_id {
+                let thread_model = ThreadModel(evid: evid, pool: damus!.pool)
+                ThreadView(thread: thread_model, damus: damus!)
+                    .environmentObject(profiles)
+            } else {
+                EmptyView()
+            }
+        }
     }
     
     var MaybeProfileView: some View {
@@ -226,7 +243,8 @@ struct ContentView: View {
                     active_profile = ref.ref_id
                     profile_open = true
                 } else if ref.key == "e" {
-                    // TODO open event view
+                    active_event_id = ref.ref_id
+                    thread_open = true
                 }
             case .filter:
                 break

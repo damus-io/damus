@@ -102,7 +102,7 @@ struct EventView: View {
             }
             
             Button {
-                UIPasteboard.general.string = event.id
+                UIPasteboard.general.string = "&" + event.id
             } label: {
                 Label("Copy ID", systemImage: "tag")
             }

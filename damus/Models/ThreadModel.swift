@@ -7,24 +7,57 @@
 
 import Foundation
 
+enum InitialEvent {
+    case event(NostrEvent)
+    case event_id(String)
+    
+    var id: String {
+        switch self {
+        case .event(let ev):
+            return ev.id
+        case .event_id(let evid):
+            return evid
+        }
+    }
+}
+
 /// manages the lifetime of a thread
 class ThreadModel: ObservableObject {
-    @Published var event: NostrEvent
+    @Published var initial_event: InitialEvent
     @Published var events: [NostrEvent] = []
     @Published var event_map: [String: Int] = [:]
     var replies: ReplyMap = ReplyMap()
     
+    var event: NostrEvent? {
+        switch initial_event {
+        case .event(let ev):
+            return ev
+        case .event_id(let evid):
+            for event in events {
+                if event.id == evid {
+                    return event
+                }
+            }
+            return nil
+        }
+    }
+    
     let pool: RelayPool
     var sub_id = UUID().description
-    
-    init(ev: NostrEvent, pool: RelayPool) {
-        self.event = ev
+   
+    init(evid: String, pool: RelayPool) {
         self.pool = pool
+        self.initial_event = .event_id(evid)
+    }
+    
+    init(event: NostrEvent, pool: RelayPool) {
+        self.pool = pool
+        self.initial_event = .event(event)
     }
     
     func unsubscribe() {
         self.pool.unsubscribe(sub_id: sub_id)
-        print("unsubscribing from thread \(event.id) with sub_id \(sub_id)")
+        print("unsubscribing from thread \(initial_event.id) with sub_id \(sub_id)")
     }
     
     func reset_events() {
@@ -50,11 +83,10 @@ class ThreadModel: ObservableObject {
     func set_active_event(_ ev: NostrEvent) {
         if should_resubscribe(ev) {
             unsubscribe()
-            self.event = ev
-            add_event(ev)
+            self.initial_event = .event(ev)
             subscribe()
         } else {
-            self.event = ev
+            self.initial_event = .event(ev)
             if events.count == 0 {
                 add_event(ev)
             }
@@ -68,13 +100,20 @@ class ThreadModel: ObservableObject {
         //var likes_filter = NostrFilter.filter_kinds(7])
 
         // TODO: add referenced relays
-        ref_events.referenced_ids = event.referenced_ids.map { $0.ref_id }
-        ref_events.referenced_ids!.append(event.id)
+        switch self.initial_event {
+        case .event(let ev):
+            ref_events.referenced_ids = ev.referenced_ids.map { $0.ref_id }
+            ref_events.referenced_ids?.append(ev.id)
+            events_filter.ids = ref_events.referenced_ids!
+            events_filter.ids?.append(ev.id)
+        case .event_id(let evid):
+            events_filter.ids = [evid]
+            ref_events.referenced_ids = [evid]
+        }
 
         //likes_filter.ids = ref_events.referenced_ids!
-        events_filter.ids = ref_events.referenced_ids!
 
-        print("subscribing to thread \(event.id) with sub_id \(sub_id)")
+        print("subscribing to thread \(initial_event.id) with sub_id \(sub_id)")
         pool.register_handler(sub_id: sub_id, handler: handle_event)
         pool.send(.subscribe(.init(filters: [ref_events, events_filter], sub_id: sub_id)))
     }
@@ -97,6 +136,8 @@ class ThreadModel: ObservableObject {
         
         self.events.append(ev)
         self.events = self.events.sorted { $0.created_at < $1.created_at }
+        objectWillChange.send()
+        
         var i: Int = 0
         for ev in events {
             self.event_map[ev.id] = i

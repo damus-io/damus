@@ -37,7 +37,7 @@ struct TimelineView: View {
                             .environmentObject(profiles)
                          */
                         
-                        let tv = ThreadView(thread: ThreadModel(ev: ev, pool: damus.pool), damus: damus)
+                        let tv = ThreadView(thread: ThreadModel(event: ev, pool: damus.pool), damus: damus)
                             .environmentObject(profiles)
                         
                         NavigationLink(destination: tv) {

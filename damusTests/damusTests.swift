@@ -48,6 +48,31 @@ class damusTests: XCTestCase {
         XCTAssertEqual(parsed.count, 0)
     }
     
+    func testPostWithMentions() throws {
+        let evid = "0000000000000000000000000000000000000000000000000000000000000005"
+        let pk = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
+        let content = "this is a @\(pk) mention"
+        let reply_ref = ReferencedId(ref_id: evid, relay_id: nil, key: "e")
+        let post = NostrPost(content: content, references: [reply_ref])
+        let ev = post_to_event(post: post, privkey: evid, pubkey: pk)
+        
+        XCTAssertEqual(ev.tags.count, 2)
+        XCTAssertEqual(ev.content, "this is a #[1] mention")
+    }
+    
+    func testPostTags() throws {
+        let pk = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
+        let content = "this is a @\(pk) mention"
+        let parsed = parse_post_blocks(content: content)
+        let post_tags = make_post_tags(post_blocks: parsed, tags: [])
+        
+        XCTAssertEqual(post_tags.blocks.count, 3)
+        XCTAssertEqual(post_tags.tags.count, 1)
+        XCTAssertEqual(post_tags.tags[0].count, 2)
+        XCTAssertEqual(post_tags.tags[0][0], "p")
+        XCTAssertEqual(post_tags.tags[0][1], pk)
+    }
+    
     func testInvalidPostReference() throws {
         let pk = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e24"
         let content = "this is a @\(pk) mention"

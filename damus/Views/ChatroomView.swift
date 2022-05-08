@@ -24,7 +24,7 @@ struct ChatroomView: View {
                                  damus: damus
                         )
                         .onTapGesture {
-                            if thread.event.id == ev.id {
+                            if thread.initial_event.id == ev.id {
                                 //dismiss()
                                 toggle_thread_view()
                             } else {
@@ -37,13 +37,13 @@ struct ChatroomView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .select_quote)) { notif in
                 let ev = notif.object as! NostrEvent
-                if ev.id != thread.event.id {
+                if ev.id != thread.initial_event.id {
                     thread.set_active_event(ev)
                 }
                 scroll_to_event(scroller: scroller, id: ev.id, delay: 0, animate: true, anchor: .top)
             }
             .onAppear() {
-                scroll_to_event(scroller: scroller, id: thread.event.id, delay: 0.3, animate: true, anchor: .bottom)
+                scroll_to_event(scroller: scroller, id: thread.initial_event.id, delay: 0.3, animate: true, anchor: .bottom)
             }
         }
     }

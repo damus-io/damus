@@ -72,7 +72,7 @@ struct EventDetailView: View {
             case .event(let ev, let highlight):
                 EventView(event: ev, highlight: highlight, has_action_bar: true, damus: damus)
                     .onTapGesture {
-                        if thread.event.id == ev.id {
+                        if thread.initial_event.id == ev.id {
                             toggle_thread_view()
                         } else {
                             thread.set_active_event(ev)
