@@ -11,6 +11,13 @@ enum InitialEvent {
     case event(NostrEvent)
     case event_id(String)
     
+    var is_event_id: String? {
+        if case .event_id(let evid) = self {
+            return evid
+        }
+        return nil
+    }
+    
     var id: String {
         switch self {
         case .event(let ev):
@@ -136,13 +143,21 @@ class ThreadModel: ObservableObject {
         
         self.events.append(ev)
         self.events = self.events.sorted { $0.created_at < $1.created_at }
-        objectWillChange.send()
+        //objectWillChange.send()
         
         var i: Int = 0
         for ev in events {
             self.event_map[ev.id] = i
             i += 1
         }
+        
+        if let evid = self.initial_event.is_event_id {
+            if ev.id == evid {
+                // this should trigger a resubscribe...
+                set_active_event(ev)
+            }
+        }
+        
     }
 
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {

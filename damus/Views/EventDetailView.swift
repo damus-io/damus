@@ -61,7 +61,7 @@ struct EventDetailView: View {
         Group {
             switch cev {
             case .collapsed(let c):
-                Text("··· \(c.count) other replies ···")
+                Text("··· \(c.count) other notes ···")
                     .font(.footnote)
                     .foregroundColor(.gray)
                     .onTapGesture {
