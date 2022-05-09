@@ -132,6 +132,23 @@ class ReplyTests: XCTestCase {
         XCTAssertEqual(post_tags.tags[0][1], pk)
     }
     
+    func testReplyMentions() throws {
+        let privkey = "0fc2092231f958f8d57d66f5e238bb45b6a2571f44c0ce024bbc6f3a9c8a15fe"
+        let pubkey  = "30c6d1dc7f7c156794fa15055e651b758a61b99f50fcf759de59386050bf6ae2"
+        
+        let refs = [
+            ReferencedId(ref_id: "thread_id", relay_id: nil, key: "e"),
+            ReferencedId(ref_id: "reply_id", relay_id: nil, key: "e"),
+            ReferencedId(ref_id: pubkey, relay_id: nil, key: "p"),
+        ]
+        
+        let post = NostrPost(content: "this is a (@\(pubkey)) mention", references: refs)
+        let ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
+        
+        XCTAssertEqual(ev.content, "this is a (#[2]) mention")
+        XCTAssertEqual(ev.tags[2][1], pubkey)
+    }
+    
     func testInvalidPostReference() throws {
         let pk = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e24"
         let content = "this is a @\(pk) mention"

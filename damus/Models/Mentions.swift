@@ -137,7 +137,7 @@ func find_tag_ref(type: String, id: String, tags: [[String]]) -> Int? {
                 return i
             }
         }
-        i += i
+        i += 1
     }
     
     return nil
