@@ -248,6 +248,7 @@ struct ContentView: View {
                     thread_open = true
                 }
             case .filter:
+                
                 break
                 // TODO: handle filter searches?
             }

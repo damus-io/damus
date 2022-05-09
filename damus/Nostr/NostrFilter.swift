@@ -15,15 +15,21 @@ struct NostrFilter: Codable {
     var since: Int64?
     var until: Int64?
     var authors: [String]?
+    var hashtag: [String]? = nil
 
     private enum CodingKeys : String, CodingKey {
         case ids
         case kinds
         case referenced_ids = "#e"
         case pubkeys = "#p"
+        case hashtag = "#hashtag"
         case since
         case until
         case authors
+    }
+    
+    public static func filter_hashtag(_ htags: [String]) -> NostrFilter {
+        return NostrFilter(ids: nil, kinds: nil, referenced_ids: nil, pubkeys: nil, since: nil, until: nil, authors: nil, hashtag: htags)
     }
 
     public static var filter_text: NostrFilter {

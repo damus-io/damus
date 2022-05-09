@@ -92,5 +92,9 @@ func decode_nostr_uri(_ s: String) -> NostrLink? {
             return
         }
     
+    if parts.count >= 3 && parts[1] == "hashtag" {
+        return .filter(NostrFilter.filter_hashtag([parts[2]]))
+    }
+    
     return tag_to_refid(parts).map { .ref($0) }
 }
