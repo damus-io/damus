@@ -350,19 +350,9 @@ func get_referenced_ids(tags: [[String]], key: String) -> [ReferencedId] {
 
 
 func make_like_event(pubkey: String, liked: NostrEvent) -> NostrEvent? {
-    var tags: [[String]]
-    
-    if let refs = parse_reply_refs(tags: liked.tags) {
-        if refs.thread_id == refs.direct_reply {
-            tags = [["e", refs.thread_id], ["e", liked.id]]
-        } else {
-            tags = [["e", refs.thread_id], ["e", refs.direct_reply], ["e", liked.id]]
-        }
-    } else {
-        // root event
-        tags = [["e", liked.id]]
-    }
-    
+    var tags: [[String]] = liked.tags.filter { tag in tag.count >= 2 && (tag[0] == "e" || tag[0] == "p") }
+    tags.append(["e", liked.id])
+    tags.append(["p", liked.pubkey])
    
     return NostrEvent(content: "", pubkey: pubkey, kind: 7, tags: tags)
 }
