@@ -323,19 +323,6 @@ func tag_to_refid(_ tag: [String]) -> ReferencedId? {
     return ReferencedId(ref_id: tag[1], relay_id: relay_id, key: tag[0])
 }
 
-func parse_reply_refs(tags: [[String]]) -> ReplyRefs? {
-    let ids = get_referenced_ids(tags: tags, key: "e")
-    
-    if ids.count == 0 {
-        return nil
-    }
-    
-    let first = ids.first!
-    let last = ids.last!
-    
-    return ReplyRefs(thread_id: first.ref_id, direct_reply: last.ref_id)
-}
-    
 func get_referenced_ids(tags: [[String]], key: String) -> [ReferencedId] {
     return tags.reduce(into: []) { (acc, tag) in
         if tag.count >= 2 && tag[0] == key {
