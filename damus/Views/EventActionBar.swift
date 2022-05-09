@@ -21,7 +21,7 @@ struct EventActionBar: View {
     let event: NostrEvent
     let our_pubkey: String
     @State var sheet: ActionBarSheet? = nil
-    @EnvironmentObject var profiles: Profiles
+    let profiles: Profiles
     @StateObject var bar: ActionBarModel
     
     var body: some View {

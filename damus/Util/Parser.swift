@@ -51,6 +51,10 @@ func parse_str(_ p: Parser, _ s: String) -> Bool {
 }
 
 func parse_char(_ p: Parser, _ c: Character) -> Bool {
+    if p.pos >= p.str.count {
+        return false
+    }
+    
     let ind = p.str.index(p.str.startIndex, offsetBy: p.pos)
     
     if p.str[ind] == c {

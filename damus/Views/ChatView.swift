@@ -14,7 +14,6 @@ struct ChatView: View {
     
     let damus: DamusState
     
-    @EnvironmentObject var profiles: Profiles
     @EnvironmentObject var thread: ThreadModel
     
     var just_started: Bool {
@@ -72,7 +71,7 @@ struct ChatView: View {
     }
     
     var ReplyDescription: some View {
-        Text("\(reply_desc(profiles: profiles, event: event))")
+        Text("\(reply_desc(profiles: damus.profiles, event: event))")
             .font(.footnote)
             .foregroundColor(.gray)
             .frame(alignment: .leading)
@@ -84,8 +83,7 @@ struct ChatView: View {
         HStack {
             VStack {
                 if is_active || just_started {
-                    ProfilePicView(pubkey: event.pubkey, size: 32, highlight: is_active ? .main : .none, image_cache: damus.image_cache)
-                        .environmentObject(profiles)
+                    ProfilePicView(pubkey: event.pubkey, size: 32, highlight: is_active ? .main : .none, image_cache: damus.image_cache, profiles: damus.profiles)
                 }
 
                 Spacer()
@@ -96,7 +94,7 @@ struct ChatView: View {
                 VStack(alignment: .leading) {
                     if just_started {
                         HStack {
-                            ProfileName(pubkey: event.pubkey, profile: profiles.lookup(id: event.pubkey))
+                            ProfileName(pubkey: event.pubkey, profile: damus.profiles.lookup(id: event.pubkey))
                                 .foregroundColor(colorScheme == .dark ?  id_to_color(event.pubkey) : Color.black)
                                 //.shadow(color: Color.black, radius: 2)
                             Text("\(format_relative_time(event.created_at))")
@@ -106,21 +104,20 @@ struct ChatView: View {
                 
                     if let ref_id = thread.replies.lookup(event.id) {
                         if !is_reply_to_prev() {
-                            ReplyQuoteView(quoter: event, event_id: ref_id, image_cache: damus.image_cache)
+                            ReplyQuoteView(quoter: event, event_id: ref_id, image_cache: damus.image_cache, profiles: damus.profiles)
                                 .environmentObject(thread)
-                                .environmentObject(profiles)
                             ReplyDescription
                         }
                     }
 
-                    NoteContentView(event: event, profiles: profiles, content: event.content)
+                    NoteContentView(event: event, profiles: damus.profiles, content: event.content)
                     
                     if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
                         EventActionBar(event: event,
                                        our_pubkey: damus.pubkey,
+                                       profiles: damus.profiles,
                                        bar: make_actionbar_model(ev: event, counter: damus.likes)
                         )
-                            .environmentObject(profiles)
                     }
 
                     //Spacer()

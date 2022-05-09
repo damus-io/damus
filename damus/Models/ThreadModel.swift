@@ -140,9 +140,11 @@ class ThreadModel: ObservableObject {
             self.replies.add(id: ev.id, reply_id: reply.ref_id)
         }
         
-        self.events.append(ev)
-        self.events = self.events.sorted { $0.created_at < $1.created_at }
-        //objectWillChange.send()
+        if insert_uniq_sorted_event(events: &self.events, new_ev: ev) {
+            objectWillChange.send()
+        }
+        //self.events.append(ev)
+        //self.events = self.events.sorted { $0.created_at < $1.created_at }
         
         var i: Int = 0
         for ev in events {
@@ -160,24 +162,9 @@ class ThreadModel: ObservableObject {
     }
 
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
-        switch ev {
-        case .ws_event:
-            break
-        case .nostr_event(let res):
-            switch res {
-            case .event(let sub_id, let ev):
-                if sub_id == self.sub_id {
-                    if ev.known_kind == .text {
-                        add_event(ev)
-                    }
-                }
-
-            case .notice(let note):
-                if note.contains("Too many subscription filters") {
-                    // TODO: resend filters?
-                    pool.reconnect(to: [relay_id])
-                }
-                break
+        handle_subid_event(pool: pool, sub_id: sub_id, relay_id: relay_id, ev: ev) { ev in
+            if ev.known_kind == .text {
+                self.add_event(ev)
             }
         }
     }

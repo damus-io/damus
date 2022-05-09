@@ -42,19 +42,16 @@ struct EventView: View {
     let has_action_bar: Bool
     let damus: DamusState
 
-    @EnvironmentObject var profiles: Profiles
     @EnvironmentObject var action_bar: ActionBarModel
     
     var body: some View {
-        let profile = profiles.lookup(id: event.pubkey)
+        let profile = damus.profiles.lookup(id: event.pubkey)
         HStack {
             VStack {
                 let pv = ProfileView(damus: damus, profile: ProfileModel(pubkey: event.pubkey, damus: damus))
-                    .environmentObject(profiles)
                 
                 NavigationLink(destination: pv) {
-                    ProfilePicView(pubkey: event.pubkey, size: PFP_SIZE!, highlight: highlight, image_cache: damus.image_cache)
-                        .environmentObject(profiles)
+                    ProfilePicView(pubkey: event.pubkey, size: PFP_SIZE!, highlight: highlight, image_cache: damus.image_cache, profiles: damus.profiles)
                 }
 
                 Spacer()
@@ -69,21 +66,20 @@ struct EventView: View {
                 }
                 
                 if event.is_reply {
-                    Text("\(reply_desc(profiles: profiles, event: event))")
+                    Text("\(reply_desc(profiles: damus.profiles, event: event))")
                         .font(.footnote)
                         .foregroundColor(.gray)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                NoteContentView(event: event, profiles: profiles, content: event.content)
+                NoteContentView(event: event, profiles: damus.profiles, content: event.content)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .textSelection(.enabled)
 
                 Spacer()
 
                 if has_action_bar {
-                    EventActionBar(event: event, our_pubkey: damus.pubkey, bar: make_actionbar_model(ev: event, counter: damus.likes))
-                        .environmentObject(profiles)
+                    EventActionBar(event: event, our_pubkey: damus.pubkey, profiles: damus.profiles, bar: make_actionbar_model(ev: event, counter: damus.likes))
                 }
 
                 Divider()

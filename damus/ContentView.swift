@@ -43,7 +43,6 @@ enum Timeline: String, CustomStringConvertible {
 struct ContentView: View {
     @State var status: String = "Not connected"
     @State var active_sheet: Sheets? = nil
-    @State var profiles: Profiles = Profiles()
     @State var friends: [String: ()] = [:]
     @State var loading: Bool = true
     @State var damus: DamusState? = nil
@@ -59,9 +58,11 @@ struct ContentView: View {
     @State var friend_events: [NostrEvent] = []
     @State var notifications: [NostrEvent] = []
     @State var active_profile: String? = nil
+    @State var active_search: NostrFilter? = nil
     @State var active_event_id: String? = nil
     @State var profile_open: Bool = false
     @State var thread_open: Bool = false
+    @State var search_open: Bool = false
     
     // connect retry timer
     let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
@@ -142,7 +143,6 @@ struct ContentView: View {
         ZStack {
             if let damus = self.damus {
                 TimelineView(events: $friend_events, damus: damus)
-                    .environmentObject(profiles)
             }
             PostButtonContainer
         }
@@ -157,6 +157,9 @@ struct ContentView: View {
                 NavigationLink(destination: MaybeThreadView, isActive: $thread_open) {
                     EmptyView()
                 }
+                NavigationLink(destination: MaybeSearchView, isActive: $search_open) {
+                    EmptyView()
+                }
                 switch selected_timeline {
                 case .home:
                     PostingTimelineView
@@ -166,13 +169,11 @@ struct ContentView: View {
                     
                 case .notifications:
                     TimelineView(events: $notifications, damus: damus)
-                        .environmentObject(profiles)
                         .navigationTitle("Notifications")
                 
                 case .global:
                     
                     TimelineView(events: $events, damus: damus)
-                        .environmentObject(profiles)
                         .navigationTitle("Global")
                 case .none:
                     EmptyView()
@@ -184,12 +185,21 @@ struct ContentView: View {
         .navigationViewStyle(.stack)
     }
     
+    var MaybeSearchView: some View {
+        Group {
+            if let search = self.active_search {
+                SearchView(appstate: damus!, search: SearchModel(pool: damus!.pool, search: search))
+            } else {
+                EmptyView()
+            }
+        }
+    }
+    
     var MaybeThreadView: some View {
         Group {
             if let evid = self.active_event_id {
                 let thread_model = ThreadModel(evid: evid, pool: damus!.pool)
                 ThreadView(thread: thread_model, damus: damus!)
-                    .environmentObject(profiles)
             } else {
                 EmptyView()
             }
@@ -201,7 +211,6 @@ struct ContentView: View {
             if let pk = self.active_profile {
                 let profile_model = ProfileModel(pubkey: pk, damus: damus!)
                 ProfileView(damus: damus!, profile: profile_model)
-                    .environmentObject(profiles)
             } else {
                 EmptyView()
             }
@@ -230,7 +239,6 @@ struct ContentView: View {
                 PostView(references: [])
             case .reply(let event):
                 ReplyView(replying_to: event, damus: damus!)
-                    .environmentObject(profiles)
             }
         }
         .onOpenURL { url in
@@ -247,8 +255,9 @@ struct ContentView: View {
                     active_event_id = ref.ref_id
                     thread_open = true
                 }
-            case .filter:
-                
+            case .filter(let filt):
+                active_search = filt
+                search_open = true
                 break
                 // TODO: handle filter searches?
             }
@@ -340,10 +349,12 @@ struct ContentView: View {
     func add_relay(_ pool: RelayPool, _ relay: String) {
         //add_rw_relay(pool, "wss://nostr-pub.wellorder.net")
         add_rw_relay(pool, relay)
+        /*
         let profile = Profile(name: relay, about: nil, picture: nil)
         let ts = Int64(Date().timeIntervalSince1970)
         let tsprofile = TimestampedProfile(profile: profile, timestamp: ts)
-        self.profiles.add(id: relay, profile: tsprofile)
+        damus!.profiles.add(id: relay, profile: tsprofile)
+         */
     }
 
     func connect() {
@@ -361,7 +372,8 @@ struct ContentView: View {
         self.damus = DamusState(pool: pool, pubkey: pubkey,
                                 likes: EventCounter(our_pubkey: pubkey),
                                 boosts: EventCounter(our_pubkey: pubkey),
-                                image_cache: ImageCache()
+                                image_cache: ImageCache(),
+                                profiles: Profiles()
         )
         pool.connect()
     }
@@ -404,7 +416,7 @@ struct ContentView: View {
             return
         }
 
-        if let mprof = self.profiles.lookup_with_timestamp(id: ev.pubkey) {
+        if let mprof = damus!.profiles.lookup_with_timestamp(id: ev.pubkey) {
             if mprof.timestamp > ev.created_at {
                 // skip if we already have an newer profile
                 return
@@ -412,7 +424,9 @@ struct ContentView: View {
         }
 
         let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at)
-        self.profiles.add(id: ev.pubkey, profile: tprof)
+        damus!.profiles.add(id: ev.pubkey, profile: tprof)
+        
+        notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
     }
     
     func get_last_event_of_kind(relay_id: String, kind: Int) -> NostrEvent? {

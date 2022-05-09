@@ -36,8 +36,6 @@ struct EventDetailView: View {
     
     @StateObject var thread: ThreadModel
     @State var collapsed: Bool = true
-
-    @EnvironmentObject var profiles: Profiles
     
     func toggle_collapse_thread(scroller: ScrollViewProxy, id mid: String?, animate: Bool = true, anchor: UnitPoint = .center) {
         self.collapsed = !self.collapsed

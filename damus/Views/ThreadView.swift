@@ -13,7 +13,6 @@ struct ThreadView: View {
     @StateObject var thread: ThreadModel
     let damus: DamusState
     
-    @EnvironmentObject var profiles: Profiles
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -21,12 +20,10 @@ struct ThreadView: View {
             if is_chatroom {
                 ChatroomView(damus: damus)
                     .navigationBarTitle("Chat")
-                    .environmentObject(profiles)
                     .environmentObject(thread)
             } else {
                 EventDetailView(damus: damus, thread: thread)
                     .navigationBarTitle("Thread")
-                    .environmentObject(profiles)
                     .environmentObject(thread)
             }
             

@@ -11,8 +11,8 @@ struct ReplyQuoteView: View {
     let quoter: NostrEvent
     let event_id: String
     let image_cache: ImageCache
+    let profiles: Profiles
     
-    @EnvironmentObject var profiles: Profiles
     @EnvironmentObject var thread: ThreadModel
     
     func MainContent(event: NostrEvent) -> some View {
@@ -23,8 +23,7 @@ struct ReplyQuoteView: View {
             
             VStack(alignment: .leading) {
                 HStack(alignment: .top) {
-                    ProfilePicView(pubkey: event.pubkey, size: 16, highlight: .reply, image_cache: image_cache)
-                        .environmentObject(profiles)
+                    ProfilePicView(pubkey: event.pubkey, size: 16, highlight: .reply, image_cache: image_cache, profiles: profiles)
                     Text(Profile.displayName(profile: profiles.lookup(id: event.pubkey), pubkey: event.pubkey))
                         .foregroundColor(.accentColor)
                     Text("\(format_relative_time(event.created_at))")

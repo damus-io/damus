@@ -9,14 +9,12 @@ import SwiftUI
 
 struct MentionView: View {
     let mention: Mention
-    
-    @EnvironmentObject var profiles: Profiles
+    let profiles: Profiles
     
     var body: some View {
         switch mention.type {
         case .pubkey:
             PubkeyView(pubkey: mention.ref.ref_id, relay: mention.ref.relay_id)
-                .environmentObject(profiles)
         case .event:
             Text("< e >")
             //EventBlockView(pubkey: mention.ref.ref_id, relay: mention.ref.relay_id)

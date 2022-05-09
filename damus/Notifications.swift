@@ -32,8 +32,8 @@ extension Notification.Name {
 }
 
 extension Notification.Name {
-    static var profile_update: Notification.Name {
-        return Notification.Name("profile_update")
+    static var profile_updated: Notification.Name {
+        return Notification.Name("profile_updated")
     }
 }
 

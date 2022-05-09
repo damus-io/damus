@@ -43,7 +43,7 @@ struct NoteContentView: View {
             .onAppear() {
                 self.content = render_note_content(ev: event, profiles: profiles)
             }
-            .onReceive(handle_notify(.profile_update)) { notif in
+            .onReceive(handle_notify(.profile_updated)) { notif in
                 let profile = notif.object as! ProfileUpdate
                 for block in event.blocks {
                     switch block {

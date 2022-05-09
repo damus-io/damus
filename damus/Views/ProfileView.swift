@@ -19,14 +19,12 @@ struct ProfileView: View {
     @StateObject var profile: ProfileModel
     
     //@EnvironmentObject var profile: ProfileModel
-    @EnvironmentObject var profiles: Profiles
     
     var TopSection: some View {
         VStack(alignment: .leading) {
-            let data = profiles.lookup(id: profile.pubkey)
+            let data = damus.profiles.lookup(id: profile.pubkey)
             HStack(alignment: .top) {
-                ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE!, highlight: .custom(Color.black, 2), image_cache: damus.image_cache)
-                    .environmentObject(profiles)
+                ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE!, highlight: .custom(Color.black, 2), image_cache: damus.image_cache, profiles: damus.profiles)
                 
                 Spacer()
                 
@@ -56,7 +54,6 @@ struct ProfileView: View {
                 Divider()
                 
                 InnerTimelineView(events: $profile.events, damus: damus)
-                    .environmentObject(profiles)
             }
             .frame(maxHeight: .infinity, alignment: .topLeading)
         }

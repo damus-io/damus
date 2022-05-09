@@ -37,10 +37,10 @@ struct ProfilePicView: View {
     let size: CGFloat
     let highlight: Highlight
     let image_cache: ImageCache
+    let profiles: Profiles
     
+    @State var picture: String? = nil
     @State var img: Image? = nil
-    
-    @EnvironmentObject var profiles: Profiles
     
     var PlaceholderColor: Color {
         return id_to_color(pubkey)
@@ -76,7 +76,7 @@ struct ProfilePicView: View {
     
     var MainContent: some View {
         Group {
-            let picture = profiles.lookup(id: pubkey)?.picture
+            let picture = picture ?? profiles.lookup(id: pubkey)?.picture
             if let pic_url = picture.flatMap { URL(string: $0) } {
                 ProfilePic(pic_url)
             } else {
@@ -87,6 +87,16 @@ struct ProfilePicView: View {
     
     var body: some View {
         MainContent
+            .onReceive(handle_notify(.profile_updated)) { notif in
+                let updated = notif.object as! ProfileUpdate
+                if updated.pubkey != pubkey {
+                    return
+                }
+                
+                if updated.profile.picture != picture {
+                    picture = updated.profile.picture
+                }
+            }
     }
 }
 

@@ -10,12 +10,11 @@ import UIKit
 import Combine
 
 
-class Profiles: ObservableObject {
-    @Published var profiles: [String: TimestampedProfile] = [:]
+class Profiles {
+    var profiles: [String: TimestampedProfile] = [:]
     
     func add(id: String, profile: TimestampedProfile) {
         profiles[id] = profile
-        objectWillChange.send()
     }
     
     func lookup(id: String) -> Profile? {

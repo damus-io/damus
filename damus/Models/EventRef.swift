@@ -35,11 +35,11 @@ enum EventRef {
     
     var is_thread_id: ReferencedId? {
         switch self {
-        case .mention(let mention):
+        case .mention:
             return nil
         case .thread_id(let referencedId):
             return referencedId
-        case .reply(let referencedId):
+        case .reply:
             return nil
         case .reply_to_root(let referencedId):
             return referencedId

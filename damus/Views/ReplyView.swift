@@ -18,8 +18,6 @@ struct ReplyView: View {
     let replying_to: NostrEvent
     let damus: DamusState
     
-    @EnvironmentObject var profiles: Profiles
-    
     var body: some View {
         VStack {
             Text("Replying to:")
@@ -27,7 +25,7 @@ struct ReplyView: View {
                 let names = all_referenced_pubkeys(replying_to)
                     .map { pubkey in
                         let pk = pubkey.ref_id
-                        let prof = profiles.lookup(id: pk)
+                        let prof = damus.profiles.lookup(id: pk)
                         return Profile.displayName(profile: prof, pubkey: pk)
                     }
                     .joined(separator: ", ")
