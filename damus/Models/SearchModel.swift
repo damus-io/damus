@@ -11,7 +11,7 @@ import Foundation
 class SearchModel: ObservableObject {
     @Published var events: [NostrEvent] = []
     let pool: RelayPool
-    let search: NostrFilter
+    var search: NostrFilter
     let sub_id = UUID().description
     
     init(pool: RelayPool, search: NostrFilter) {
@@ -20,15 +20,15 @@ class SearchModel: ObservableObject {
     }
     
     func subscribe() {
-        // since 2 month
-        var filter = NostrFilter.copy(from: search)
-        filter.since = Int64(Date.now.timeIntervalSince1970) - 2629800 * 2
+        // since 1 month
+        search.since = Int64(Date.now.timeIntervalSince1970) - 2629800 * 1
+        search.kinds = [1,5,7]
 
         //likes_filter.ids = ref_events.referenced_ids!
 
-        print("subscribing to search '\(filter)' with sub_id \(sub_id)")
+        print("subscribing to search '\(search)' with sub_id \(sub_id)")
         pool.register_handler(sub_id: sub_id, handler: handle_event)
-        pool.send(.subscribe(.init(filters: [filter], sub_id: sub_id)))
+        pool.send(.subscribe(.init(filters: [search], sub_id: sub_id)))
     }
     
     func unsubscribe() {
@@ -37,6 +37,10 @@ class SearchModel: ObservableObject {
     }
     
     func add_event(_ ev: NostrEvent) {
+        if !event_matches_filter(ev, filter: search) {
+            return
+        }
+        
         if insert_uniq_sorted_event(events: &self.events, new_ev: ev) {
             objectWillChange.send()
         }
@@ -51,6 +55,23 @@ class SearchModel: ObservableObject {
     }
 }
 
+func event_matches_hashtag(_ ev: NostrEvent, hashtags: [String]) -> Bool {
+    for tag in ev.tags {
+        if tag.count >= 2 && tag[0] == "hashtag" {
+            if hashtags.contains(tag[1]) {
+                return true
+            }
+        }
+    }
+    return false
+}
+
+func event_matches_filter(_ ev: NostrEvent, filter: NostrFilter) -> Bool {
+    if let hashtags = filter.hashtag {
+        return event_matches_hashtag(ev, hashtags: hashtags)
+    }
+    return true
+}
 
 func handle_subid_event(pool: RelayPool, sub_id: String, relay_id: String, ev: NostrConnectionEvent, handle: (NostrEvent) -> ()) {
         switch ev {

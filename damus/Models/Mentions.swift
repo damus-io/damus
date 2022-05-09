@@ -68,7 +68,7 @@ func render_blocks(blocks: [Block]) -> String {
         case .text(let txt):
             return str + txt
         case .hashtag(let htag):
-            return "#" + htag
+            return str + "#" + htag
         }
     }
 }
@@ -236,6 +236,9 @@ func make_post_tags(post_blocks: [PostBlock], tags: [[String]]) -> PostTags {
                 let block = Block.mention(mention)
                 blocks.append(block)
             }
+        case .hashtag(let hashtag):
+            new_tags.append(["hashtag", hashtag])
+            blocks.append(.hashtag(hashtag))
         case .text(let txt):
             blocks.append(Block.text(txt))
         }

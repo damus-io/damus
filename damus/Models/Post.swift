@@ -57,6 +57,10 @@ func parse_post_blocks(content: String) -> [PostBlock] {
             blocks.append(parse_post_textblock(str: p.str, from: starting_from, to: pre_mention))
             blocks.append(.ref(reference))
             starting_from = p.pos
+        } else if let hashtag = parse_hashtag(p) {
+            blocks.append(parse_post_textblock(str: p.str, from: starting_from, to: pre_mention))
+            blocks.append(.hashtag(hashtag))
+            starting_from = p.pos
         } else {
             p.pos += 1
         }

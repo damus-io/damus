@@ -10,9 +10,17 @@ import Foundation
 enum PostBlock {
     case text(String)
     case ref(ReferencedId)
+    case hashtag(String)
     
     var is_text: Bool {
         if case .text = self {
+            return true
+        }
+        return false
+    }
+    
+    var is_hashtag: Bool {
+        if case .hashtag = self {
             return true
         }
         return false
