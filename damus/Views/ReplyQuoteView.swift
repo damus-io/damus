@@ -23,7 +23,8 @@ struct ReplyQuoteView: View {
             
             VStack(alignment: .leading) {
                 HStack(alignment: .top) {
-                    ProfilePicView(picture: profiles.lookup(id: event.pubkey)?.picture, size: 16, highlight: .reply, image_cache: image_cache)
+                    ProfilePicView(pubkey: event.pubkey, size: 16, highlight: .reply, image_cache: image_cache)
+                        .environmentObject(profiles)
                     Text(Profile.displayName(profile: profiles.lookup(id: event.pubkey), pubkey: event.pubkey))
                         .foregroundColor(.accentColor)
                     Text("\(format_relative_time(event.created_at))")

@@ -81,37 +81,22 @@ struct ChatView: View {
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        let profile = profiles.lookup(id: event.pubkey)
         HStack {
-            //ZStack {
-                //Rectangle()
-                    //.foregroundColor(Color.gray)
-                    //.frame(width: 2)
-                
-                VStack {
-                    if is_active || just_started {
-                        ProfilePicView(picture: profile?.picture, size: 32, highlight: is_active ? .main : .none, image_cache: damus.image_cache)
-                    }
-                    /*
-                    if just_started {
-                        ProfilePicView(picture: profile?.picture, size: 32, highlight: thread.event.id == event.id ? .main : .none)
-                    } else {
-                        Text("\(format_relative_time(event.created_at))")
-                            .font(.footnote)
-                            .foregroundColor(.gray.opacity(0.5))
-                    }
-                     */
-
-                    Spacer()
+            VStack {
+                if is_active || just_started {
+                    ProfilePicView(pubkey: event.pubkey, size: 32, highlight: is_active ? .main : .none, image_cache: damus.image_cache)
+                        .environmentObject(profiles)
                 }
-                .frame(maxWidth: 32)
-            //}
+
+                Spacer()
+            }
+            .frame(maxWidth: 32)
             
             Group {
                 VStack(alignment: .leading) {
                     if just_started {
                         HStack {
-                            ProfileName(pubkey: event.pubkey, profile: profile)
+                            ProfileName(pubkey: event.pubkey, profile: profiles.lookup(id: event.pubkey))
                                 .foregroundColor(colorScheme == .dark ?  id_to_color(event.pubkey) : Color.black)
                                 //.shadow(color: Color.black, radius: 2)
                             Text("\(format_relative_time(event.created_at))")

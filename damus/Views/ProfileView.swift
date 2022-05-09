@@ -22,55 +22,44 @@ struct ProfileView: View {
     @EnvironmentObject var profiles: Profiles
     
     var TopSection: some View {
-        HStack(alignment: .top) {
+        VStack{
             let data = profiles.lookup(id: profile.pubkey)
-            ProfilePicView(picture: data?.picture, size: PFP_SIZE!, highlight: .custom(Color.black, 4), image_cache: damus.image_cache)
-                //.border(Color.blue)
-            VStack(alignment: .leading) {
-                if let pubkey = profile.pubkey {
-                    ProfileName(pubkey: pubkey, profile: data)
-                        .font(.title)
-                        //.border(Color.green)
-                    Text("\(pubkey)")
-                        .textSelection(.enabled)
-                        .font(.footnote)
-                        .foregroundColor(id_to_color(pubkey))
+            HStack {
+                ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE!, highlight: .custom(Color.black, 2), image_cache: damus.image_cache)
+                    .environmentObject(profiles)
+                
+                Spacer()
+                
+                Button("Follow") {
+                    print("follow \(profile.pubkey)")
                 }
-                Text(data?.about ?? "")
-                    //.border(Color.red)
             }
-            //.border(Color.purple)
-            //Spacer()
+            
+            if let pubkey = profile.pubkey {
+                ProfileName(pubkey: pubkey, profile: data)
+                    .font(.title)
+                    //.border(Color.green)
+                Text("\(pubkey)")
+                    .textSelection(.enabled)
+                    .font(.footnote)
+                    .foregroundColor(id_to_color(pubkey))
+            }
+            Text(data?.about ?? "")
         }
-        //.border(Color.indigo)
     }
     
     var body: some View {
         VStack(alignment: .leading) {
-            TopSection
-            /*
-            Picker("", selection: $selected_tab) {
-                Text("Posts").tag(ProfileTab.posts)
-                Text("Following").tag(ProfileTab.following)
-            }
-            .pickerStyle(SegmentedPickerStyle())
-             */
-             
+            ScrollView {
+                TopSection
             
-            Divider()
-
-            Group {
-                switch(selected_tab) {
-                case .posts:
-                    TimelineView(events: $profile.events, damus: damus)
-                            .environmentObject(profiles)
-                case .following:
-                        Text("Following")
-                }
+                Divider()
+                
+                InnerTimelineView(events: $profile.events, damus: damus)
+                    .environmentObject(profiles)
             }
             .frame(maxHeight: .infinity, alignment: .topLeading)
         }
-        //.border(Color.white)
         .padding([.leading, .trailing], 6)
         .frame(maxWidth: .infinity, alignment: .topLeading)
         

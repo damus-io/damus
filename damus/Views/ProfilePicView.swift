@@ -33,7 +33,7 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
 }
 
 struct ProfilePicView: View {
-    let picture: String?
+    let pubkey: String
     let size: CGFloat
     let highlight: Highlight
     let image_cache: ImageCache
@@ -42,8 +42,12 @@ struct ProfilePicView: View {
     
     @EnvironmentObject var profiles: Profiles
     
+    var PlaceholderColor: Color {
+        return id_to_color(pubkey)
+    }
+    
     var Placeholder: some View {
-        Color.purple.opacity(0.2)
+        PlaceholderColor.opacity(0.5)
             .frame(width: size, height: size)
             .cornerRadius(CORNER_RADIUS)
             .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
@@ -72,6 +76,7 @@ struct ProfilePicView: View {
     
     var MainContent: some View {
         Group {
+            let picture = profiles.lookup(id: pubkey)?.picture
             if let pic_url = picture.flatMap { URL(string: $0) } {
                 ProfilePic(pic_url)
             } else {

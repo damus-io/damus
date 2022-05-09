@@ -12,6 +12,27 @@ enum TimelineAction {
     case navigating
 }
 
+struct InnerTimelineView: View {
+    @Binding var events: [NostrEvent]
+    @EnvironmentObject var profiles: Profiles
+    let damus: DamusState
+    
+    var body: some View {
+        LazyVStack {
+            ForEach(events, id: \.id) { (ev: NostrEvent) in
+                let tv = ThreadView(thread: ThreadModel(event: ev, pool: damus.pool), damus: damus)
+                    .environmentObject(profiles)
+                            
+                NavigationLink(destination: tv) {
+                    EventView(event: ev, highlight: .none, has_action_bar: true, damus: damus)
+                }
+                .isDetailLink(true)
+                .buttonStyle(PlainButtonStyle())
+            }
+        }
+    }
+}
+
 struct TimelineView: View {
     @Binding var events: [NostrEvent]
 
@@ -21,35 +42,15 @@ struct TimelineView: View {
     
     var body: some View {
         MainContent
-        .padding([.leading, .trailing], 6)
-        .environmentObject(profiles)
+            .padding([.leading, .trailing], 6)
+            .environmentObject(profiles)
     }
     
     var MainContent: some View {
         ScrollViewReader { scroller in
             ScrollView {
-                LazyVStack {
-                    ForEach(events, id: \.id) { (ev: NostrEvent) in
-                        /*
-                        let evdet = EventDetailView(thread: ThreadModel(event: ev, pool: pool))
-                            .navigationBarTitle("Thread")
-                            .padding([.leading, .trailing], 6)
-                            .environmentObject(profiles)
-                         */
-                        
-                        let tv = ThreadView(thread: ThreadModel(event: ev, pool: damus.pool), damus: damus)
-                            .environmentObject(profiles)
-                        
-                        NavigationLink(destination: tv) {
-                            EventView(event: ev, highlight: .none, has_action_bar: true, damus: damus)
-                        }
-                        .isDetailLink(true)
-                        .buttonStyle(PlainButtonStyle())
-                            //.onTapGesture {
-                                //NotificationCenter.default.post(name: .open_thread, object: ev)
-                            //}
-                    }
-                }
+                InnerTimelineView(events: $events, damus: damus)
+                    .environmentObject(profiles)
             }
             .onReceive(NotificationCenter.default.publisher(for: .scroll_to_top)) { _ in
                 guard let event = events.first else {
