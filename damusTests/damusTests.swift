@@ -61,7 +61,7 @@ class damusTests: XCTestCase {
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 1)
-        XCTAssertTrue(parsed[0].is_text)
+        XCTAssertNotNil(parsed[0].is_text)
     }
     
     func testParseMentionBlank() {
@@ -71,12 +71,31 @@ class damusTests: XCTestCase {
         XCTAssertEqual(parsed.count, 0)
     }
     
+    func testParseHashtag() {
+        let parsed = parse_mentions(content: "some hashtag #bitcoin derp", tags: [])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 3)
+        XCTAssertEqual(parsed[0].is_text!, "some hashtag ")
+        XCTAssertEqual(parsed[1].is_hashtag!, "bitcoin")
+        XCTAssertEqual(parsed[2].is_text!, " derp")
+    }
+    
+    func testParseHashtagEnd() {
+        let parsed = parse_mentions(content: "some hashtag #bitcoin", tags: [])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 2)
+        XCTAssertEqual(parsed[0].is_text!, "some hashtag ")
+        XCTAssertEqual(parsed[1].is_hashtag!, "bitcoin")
+    }
+    
     func testParseMentionOnlyText() {
         let parsed = parse_mentions(content: "there is no mention here", tags: [["e", "event_id"]])
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 1)
-        XCTAssertTrue(parsed[0].is_text)
+        XCTAssertEqual(parsed[0].is_text!, "there is no mention here")
         
         guard case .text(let txt) = parsed[0] else {
             XCTAssertTrue(false)

@@ -15,6 +15,8 @@ func render_note_content(ev: NostrEvent, profiles: Profiles) -> String {
             return str + mention_str(m, profiles: profiles)
         case .text(let txt):
             return str + txt
+        case .hashtag(let htag):
+            return str + hashtag_str(htag)
         }
     }
 }
@@ -49,12 +51,16 @@ struct NoteContentView: View {
                         if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
                             content = render_note_content(ev: event, profiles: profiles)
                         }
-                    case .text:
-                        return
+                    case .text: return
+                    case .hashtag: return
                     }
                 }
             }
     }
+}
+
+func hashtag_str(_ htag: String) -> String {
+    return "[#\(htag)](nostr:hashtag:\(htag))"
 }
 
 func mention_str(_ m: Mention, profiles: Profiles) -> String {

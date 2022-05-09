@@ -22,9 +22,9 @@ struct ProfileView: View {
     @EnvironmentObject var profiles: Profiles
     
     var TopSection: some View {
-        VStack{
+        VStack(alignment: .leading) {
             let data = profiles.lookup(id: profile.pubkey)
-            HStack {
+            HStack(alignment: .top) {
                 ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE!, highlight: .custom(Color.black, 2), image_cache: damus.image_cache)
                     .environmentObject(profiles)
                 

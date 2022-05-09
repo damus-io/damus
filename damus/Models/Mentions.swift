@@ -36,12 +36,20 @@ struct IdBlock: Identifiable {
 enum Block {
     case text(String)
     case mention(Mention)
+    case hashtag(String)
     
-    var is_text: Bool {
-        if case .text = self {
-            return true
+    var is_hashtag: String? {
+        if case .hashtag(let htag) = self {
+            return htag
         }
-        return false
+        return nil
+    }
+    
+    var is_text: String? {
+        if case .text(let txt) = self {
+            return txt
+        }
+        return nil
     }
     
     var is_mention: Bool {
@@ -59,6 +67,8 @@ func render_blocks(blocks: [Block]) -> String {
             return str + "#[\(m.index)]"
         case .text(let txt):
             return str + txt
+        case .hashtag(let htag):
+            return "#" + htag
         }
     }
 }
@@ -73,9 +83,8 @@ func parse_mentions(content: String, tags: [[String]]) -> [Block] {
     var starting_from: Int = 0
     
     while p.pos < content.count {
-        if (!consume_until(p, match: { $0 == "#" })) {
-            blocks.append(parse_textblock(str: p.str, from: starting_from, to: p.str.count))
-            return blocks
+        if !consume_until(p, match: { $0 == "#" }) {
+            break
         }
         
         let pre_mention = p.pos
@@ -83,12 +92,59 @@ func parse_mentions(content: String, tags: [[String]]) -> [Block] {
             blocks.append(parse_textblock(str: p.str, from: starting_from, to: pre_mention))
             blocks.append(.mention(mention))
             starting_from = p.pos
+        } else if let hashtag = parse_hashtag(p) {
+            blocks.append(parse_textblock(str: p.str, from: starting_from, to: pre_mention))
+            blocks.append(.hashtag(hashtag))
+            starting_from = p.pos
         } else {
             p.pos += 1
         }
     }
     
+    if p.str.count - starting_from > 0 {
+        blocks.append(parse_textblock(str: p.str, from: starting_from, to: p.str.count))
+    }
+    
     return blocks
+}
+
+func parse_while(_ p: Parser, match: (Character) -> Bool) -> String? {
+    var i: Int = 0
+    let sub = substring(p.str, start: p.pos, end: p.str.count)
+    let start = p.pos
+    for c in sub {
+        if match(c) {
+            p.pos += 1
+        } else {
+            break
+        }
+        i += 1
+    }
+    
+    let end = start + i
+    if start == end {
+        return nil
+    }
+    return String(substring(p.str, start: start, end: end))
+}
+
+func is_hashtag_char(_ c: Character) -> Bool {
+    return c.isLetter || c.isNumber
+}
+
+func parse_hashtag(_ p: Parser) -> String? {
+    let start = p.pos
+    
+    if !parse_char(p, "#") {
+        return nil
+    }
+    
+    guard let str = parse_while(p, match: is_hashtag_char) else {
+        p.pos = start
+        return nil
+    }
+    
+    return str
 }
 
 func parse_mention(_ p: Parser, tags: [[String]]) -> Mention? {

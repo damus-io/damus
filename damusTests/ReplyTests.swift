@@ -97,9 +97,9 @@ class ReplyTests: XCTestCase {
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
-        XCTAssertTrue(parsed[0].is_text)
-        XCTAssertTrue(parsed[1].is_mention)
-        XCTAssertTrue(parsed[2].is_text)
+        XCTAssertEqual(parsed[0].is_text!, "this is ")
+        XCTAssertNotNil(parsed[1].is_mention)
+        XCTAssertEqual(parsed[2].is_text!, " a mention")
     }
     
     func testEmptyPostReference() throws {
@@ -349,14 +349,7 @@ class ReplyTests: XCTestCase {
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 1)
-        XCTAssertTrue(parsed[0].is_text)
-        
-        guard case .text(let txt) = parsed[0] else {
-            XCTAssertTrue(false)
-            return
-        }
-        
-        XCTAssertEqual(txt, "this is #[0] a mention")
+        XCTAssertEqual(parsed[0].is_text!, "this is #[0] a mention")
     }
     
 
