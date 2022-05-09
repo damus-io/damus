@@ -354,3 +354,14 @@ func gather_reply_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
     }
     return ids
 }
+
+func event_to_json(ev: NostrEvent) -> String {
+    let encoder = JSONEncoder()
+    guard let res = try? encoder.encode(ev) else {
+        return "{}"
+    }
+    guard let str = String(data: res, encoding: .utf8) else {
+        return "{}"
+    }
+    return str
+}

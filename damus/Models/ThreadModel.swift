@@ -140,7 +140,7 @@ class ThreadModel: ObservableObject {
             self.replies.add(id: ev.id, reply_id: reply.ref_id)
         }
         
-        if insert_uniq_sorted_event(events: &self.events, new_ev: ev) {
+        if insert_uniq_sorted_event(events: &self.events, new_ev: ev, cmp: { $0.created_at < $1.created_at }) {
             objectWillChange.send()
         }
         //self.events.append(ev)

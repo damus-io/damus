@@ -8,7 +8,7 @@
 import Foundation
 
 
-func insert_uniq_sorted_event(events: inout [NostrEvent], new_ev: NostrEvent) -> Bool {
+func insert_uniq_sorted_event(events: inout [NostrEvent], new_ev: NostrEvent, cmp: (NostrEvent, NostrEvent) -> Bool) -> Bool {
     var i: Int = 0
     
     for event in events {
@@ -17,7 +17,7 @@ func insert_uniq_sorted_event(events: inout [NostrEvent], new_ev: NostrEvent) ->
             return false
         }
         
-        if new_ev.created_at < event.created_at {
+        if cmp(new_ev, event) {
             events.insert(new_ev, at: i)
             return true
         }

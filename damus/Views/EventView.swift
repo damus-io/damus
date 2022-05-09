@@ -95,13 +95,19 @@ struct EventView: View {
             Button {
                 UIPasteboard.general.string = event.content
             } label: {
-                Label("Copy", systemImage: "doc.on.doc")
+                Label("Copy Text", systemImage: "doc.on.doc")
             }
             
             Button {
                 UIPasteboard.general.string = "&" + event.id
             } label: {
                 Label("Copy ID", systemImage: "tag")
+            }
+            
+            Button {
+                UIPasteboard.general.string = event_to_json(ev: event)
+            } label: {
+                Label("Copy Note", systemImage: "note")
             }
             
             Button {
