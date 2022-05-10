@@ -99,7 +99,13 @@ extension Notification.Name {
 
 extension Notification.Name {
     static var boost: Notification.Name {
-        return Notification.Name("boost post")
+        return Notification.Name("boost")
+    }
+}
+
+extension Notification.Name {
+    static var boosted: Notification.Name {
+        return Notification.Name("boosted")
     }
 }
 

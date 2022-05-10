@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct Liked {
-    let like: NostrEvent
+struct Counted {
+    let event: NostrEvent
     let id: String
     let total: Int
 }

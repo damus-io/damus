@@ -12,9 +12,11 @@ class ActionBarModel: ObservableObject {
     @Published var our_like: NostrEvent?
     @Published var our_boost: NostrEvent?
     @Published var likes: Int
+    @Published var boosts: Int
     
-    init(likes: Int, our_like: NostrEvent?, our_boost: NostrEvent?) {
+    init(likes: Int, boosts: Int, our_like: NostrEvent?, our_boost: NostrEvent?) {
         self.likes = likes
+        self.boosts = boosts
         self.our_like = our_like
         self.our_boost = our_boost
     }

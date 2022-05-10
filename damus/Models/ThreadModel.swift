@@ -101,7 +101,7 @@ class ThreadModel: ObservableObject {
     }
     
     func subscribe() {
-        var ref_events = NostrFilter.filter_kinds([1,5,7])
+        var ref_events = NostrFilter.filter_kinds([1,5,6,7])
         var events_filter = NostrFilter.filter_kinds([1])
         //var likes_filter = NostrFilter.filter_kinds(7])
 

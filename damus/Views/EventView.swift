@@ -45,8 +45,28 @@ struct EventView: View {
     @EnvironmentObject var action_bar: ActionBarModel
     
     var body: some View {
-        let profile = damus.profiles.lookup(id: event.pubkey)
-        HStack {
+        return Group {
+            if event.known_kind == .boost, let inner_ev = event.inner_event {
+                VStack(alignment: .leading) {
+                    HStack {
+                        Label("", systemImage: "arrow.2.squarepath")
+                            .foregroundColor(Color.gray)
+                        ProfileName(pubkey: event.pubkey, profile: damus.profiles.lookup(id: event.pubkey))
+                            .foregroundColor(Color.gray)
+                        Text(" Boosted")
+                            .foregroundColor(Color.gray)
+                    }
+                    TextEvent(inner_ev)
+                }
+            } else {
+                TextEvent(event)
+            }
+        }
+    }
+    
+    func TextEvent(_ event: NostrEvent) -> some View {
+        return HStack {
+            let profile = damus.profiles.lookup(id: event.pubkey)
             VStack {
                 let pv = ProfileView(damus: damus, profile: ProfileModel(pubkey: event.pubkey, damus: damus))
                 
@@ -79,7 +99,8 @@ struct EventView: View {
                 Spacer()
 
                 if has_action_bar {
-                    EventActionBar(event: event, our_pubkey: damus.pubkey, profiles: damus.profiles, bar: make_actionbar_model(ev: event, counter: damus.likes))
+                    let bar = make_actionbar_model(ev: event, like_counter: damus.likes, boost_counter: damus.boosts)
+                    EventActionBar(event: event, our_pubkey: damus.pubkey, profiles: damus.profiles, bar: bar)
                 }
 
                 Divider()
@@ -159,10 +180,11 @@ func reply_others_desc(n: Int, n_pubkeys: Int) -> String {
 
 
 
-func make_actionbar_model(ev: NostrEvent, counter: EventCounter) -> ActionBarModel {
-    let likes = counter.counts[ev.id]
-    let our_like = counter.our_events[ev.id]
-    let our_boost: NostrEvent? = nil
+func make_actionbar_model(ev: NostrEvent, like_counter: EventCounter, boost_counter: EventCounter) -> ActionBarModel {
+    let likes = like_counter.counts[ev.id]
+    let boosts = boost_counter.counts[ev.id]
+    let our_like = like_counter.our_events[ev.id]
+    let our_boost = boost_counter.our_events[ev.id]
     
-    return ActionBarModel(likes: likes ?? 0, our_like: our_like, our_boost: our_boost)
+    return ActionBarModel(likes: likes ?? 0, boosts: boosts ?? 0, our_like: our_like, our_boost: our_boost)
 }

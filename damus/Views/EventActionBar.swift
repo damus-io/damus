@@ -42,7 +42,7 @@ struct EventActionBar: View {
             HStack(alignment: .bottom) {
                 Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
                     .font(.footnote)
-                    .foregroundColor(Color.gray)
+                    .foregroundColor(bar.liked ? Color.red : Color.gray)
                     
                 EventActionButton(img: bar.liked ? "heart.fill" : "heart", col: bar.liked ? Color.red : nil) {
                     if bar.liked {
@@ -54,23 +54,29 @@ struct EventActionBar: View {
             }
             .padding([.trailing], 40)
 
-            EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
-                if bar.boosted {
-                    notify(.delete, bar.our_boost)
-                } else {
-                    notify(.boost, event)
+            HStack(alignment: .bottom) {
+                Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
+                    .font(.footnote)
+                    .foregroundColor(bar.boosted ? Color.green : Color.gray)
+                
+                EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
+                    if bar.boosted {
+                        notify(.delete, bar.our_boost)
+                    } else {
+                        notify(.boost, event)
+                    }
                 }
             }
 
         }
         .onReceive(handle_notify(.liked)) { n in
-            let liked = n.object as! Liked
+            let liked = n.object as! Counted
             if liked.id != event.id {
                 return
             }
             self.bar.likes = liked.total
-            if liked.like.pubkey == our_pubkey {
-                self.bar.our_like = liked.like
+            if liked.event.pubkey == our_pubkey {
+                self.bar.our_like = liked.event
             }
         }
     }

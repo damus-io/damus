@@ -14,8 +14,8 @@ class EventCounter {
     var our_events: [String: NostrEvent] = [:]
     var our_pubkey: String
     
-    enum LikeResult {
-        case user_already_liked
+    enum CountResult {
+        case already_counted
         case success(Int)
     }
     
@@ -23,7 +23,7 @@ class EventCounter {
         self.our_pubkey = our_pubkey
     }
     
-    func add_event(_ ev: NostrEvent, target: String) -> LikeResult {
+    func add_event(_ ev: NostrEvent, target: String) -> CountResult {
         let pubkey = ev.pubkey
         
         if self.user_events[pubkey] == nil {
@@ -32,7 +32,7 @@ class EventCounter {
         
         if user_events[pubkey]!.contains(target) {
             // don't double count
-            return .user_already_liked
+            return .already_counted
         }
         
         user_events[pubkey]!.insert(target)

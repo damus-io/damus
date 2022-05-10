@@ -51,7 +51,6 @@ struct ContentView: View {
     @State var is_profile_open: Bool = false
     @State var last_event_of_kind: [String: [Int: NostrEvent]] = [:]
     @State var has_events: [String: ()] = [:]
-    @State var has_friend_event: [String: ()] = [:]
     @State var new_notifications: Bool = false
     @State var event: NostrEvent? = nil
     @State var events: [NostrEvent] = []
@@ -265,7 +264,7 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.boost)) { notif in
             let ev = notif.object as! NostrEvent
-            let boost = make_boost_event(ev, privkey: privkey, pubkey: pubkey)
+            let boost = make_boost_event(pubkey: pubkey, privkey: privkey, boosted: ev)
             self.damus?.pool.send(.event(boost))
         }
         .onReceive(handle_notify(.open_thread)) { obj in
@@ -277,13 +276,14 @@ struct ContentView: View {
             let ev = notif.object as! NostrEvent
             self.active_sheet = .reply(ev)
         }
+        .onReceive(handle_notify(.boost)) { boost in
+            let ev = boost.object as! NostrEvent
+            let boost_ev = make_boost_event(pubkey: pubkey, privkey: privkey, boosted: ev)
+            self.damus?.pool.send(.event(boost_ev))
+        }
         .onReceive(handle_notify(.like)) { like in
             let ev = like.object as! NostrEvent
-            guard let like_ev = make_like_event(pubkey: pubkey, liked: ev) else {
-                return
-            }
-            like_ev.calculate_id()
-            like_ev.sign(privkey: privkey)
+            let like_ev = make_like_event(pubkey: pubkey, privkey: privkey, liked: ev)
             self.damus?.pool.send(.event(like_ev))
         }
         .onReceive(handle_notify(.broadcast_event)) { obj in
@@ -390,8 +390,28 @@ struct ContentView: View {
     }
     
     func handle_boost_event(_ ev: NostrEvent) {
+        var boost_ev_id = ev.last_refid()?.ref_id
         
-        //damus!.boosts.add_event(ev)
+        // CHECK SIGS ON THESE
+        if var inner_ev = ev.inner_event {
+            boost_ev_id = inner_ev.id
+            
+            if inner_ev.kind == 1 {
+                handle_text_event(ev)
+            }
+        }
+        
+        guard let e = boost_ev_id else {
+            return
+        }
+        
+        switch damus!.boosts.add_event(ev, target: e) {
+        case .already_counted:
+            break
+        case .success(let n):
+            let boosted = Counted(event: ev, id: e, total: n)
+            notify(.boosted, boosted)
+        }
     }
     
     func handle_like_event(_ ev: NostrEvent) {
@@ -403,10 +423,10 @@ struct ContentView: View {
         // CHECK SIGS ON THESE
         
         switch damus!.likes.add_event(ev, target: e.ref_id) {
-        case .user_already_liked:
+        case .already_counted:
             break
         case .success(let n):
-            let liked = Liked(like: ev, id: e.ref_id, total: n)
+            let liked = Counted(event: ev, id: e.ref_id, total: n)
             notify(.liked, liked)
         }
     }
@@ -484,12 +504,12 @@ struct ContentView: View {
     }
     
     func handle_friend_event(_ ev: NostrEvent) {
-        if has_friend_event[ev.id] != nil || !is_friend_event(ev) {
+        if !is_friend_event(ev) {
             return
         }
-        self.has_friend_event[ev.id] = ()
-        self.friend_events.append(ev)
-        self.friend_events = self.friend_events.sorted { $0.created_at > $1.created_at }
+        if !insert_uniq_sorted_event(events: &self.friend_events, new_ev: ev, cmp: { $0.created_at > $1.created_at } ) {
+            return
+        }
     }
     
     func handle_text_event(_ ev: NostrEvent) {
@@ -497,8 +517,9 @@ struct ContentView: View {
             return
         }
         
-        self.events.append(ev)
-        self.events = self.events.sorted { $0.created_at > $1.created_at }
+        if !insert_uniq_sorted_event(events: &self.events, new_ev: ev, cmp: { $0.created_at > $1.created_at }) {
+            return
+        }
         
         handle_friend_event(ev)
         
@@ -521,6 +542,8 @@ struct ContentView: View {
             handle_text_event(ev)
         } else if ev.kind == 0 {
             handle_metadata_event(ev)
+        } else if ev.kind == 6 {
+            handle_boost_event(ev)
         } else if ev.kind == 7 {
             handle_like_event(ev)
         } else if ev.kind == 3 {
@@ -705,15 +728,6 @@ func get_last_notified() -> LastNotification? {
 func save_last_notified(_ ev: NostrEvent) {
     UserDefaults.standard.set(ev.id, forKey: "last_notification")
     UserDefaults.standard.set(String(ev.created_at), forKey: "last_notification_time")
-}
-
-
-
-func make_boost_event(_ ev: NostrEvent, privkey: String, pubkey: String) -> NostrEvent {
-    let boost = NostrEvent(content: "", pubkey: pubkey, kind: 6, tags: [["e", ev.id]])
-    boost.calculate_id()
-    boost.sign(privkey: privkey)
-    return boost
 }
 
 

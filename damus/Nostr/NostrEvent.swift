@@ -37,6 +37,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
     var id: String
     var sig: String
     var tags: [[String]]
+    var boosted_by: String?
 
     // cached field for pow calc
     var pow: Int?
@@ -51,6 +52,10 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
     
     lazy var blocks: [Block] = {
         return parse_mentions(content: self.content, tags: self.tags)
+    }()
+    
+    lazy var inner_event: NostrEvent? = {
+        return event_from_json(dat: self.content)
     }()
     
     lazy var event_refs: [EventRef] = {
@@ -335,13 +340,26 @@ func get_referenced_ids(tags: [[String]], key: String) -> [ReferencedId] {
     }
 }
 
+func make_boost_event(pubkey: String, privkey: String, boosted: NostrEvent) -> NostrEvent {
+    var tags: [[String]] = boosted.tags.filter { tag in tag.count >= 2 && (tag[0] == "e" || tag[0] == "p") }
+    tags.append(["e", boosted.id])
+    tags.append(["p", boosted.pubkey])
+    
+    let ev = NostrEvent(content: event_to_json(ev: boosted), pubkey: pubkey, kind: 6, tags: tags)
+    ev.calculate_id()
+    ev.sign(privkey: privkey)
+    return ev
+}
 
-func make_like_event(pubkey: String, liked: NostrEvent) -> NostrEvent? {
+func make_like_event(pubkey: String, privkey: String, liked: NostrEvent) -> NostrEvent {
     var tags: [[String]] = liked.tags.filter { tag in tag.count >= 2 && (tag[0] == "e" || tag[0] == "p") }
     tags.append(["e", liked.id])
     tags.append(["p", liked.pubkey])
+    let ev = NostrEvent(content: "", pubkey: pubkey, kind: 7, tags: tags)
+    ev.calculate_id()
+    ev.sign(privkey: privkey)
    
-    return NostrEvent(content: "", pubkey: pubkey, kind: 7, tags: tags)
+    return ev
 }
 
 func gather_reply_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
@@ -353,6 +371,10 @@ func gather_reply_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
         ids.append(ReferencedId(ref_id: from.pubkey, relay_id: nil, key: "p"))
     }
     return ids
+}
+
+func event_from_json(dat: String) -> NostrEvent? {
+    return try? JSONDecoder().decode(NostrEvent.self, from: Data(dat.utf8))
 }
 
 func event_to_json(ev: NostrEvent) -> String {

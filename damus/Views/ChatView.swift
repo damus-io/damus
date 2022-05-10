@@ -113,10 +113,11 @@ struct ChatView: View {
                     NoteContentView(event: event, profiles: damus.profiles, content: event.content)
                     
                     if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
+                        let bar = make_actionbar_model(ev: event, like_counter: damus.likes, boost_counter: damus.boosts)
                         EventActionBar(event: event,
                                        our_pubkey: damus.pubkey,
                                        profiles: damus.profiles,
-                                       bar: make_actionbar_model(ev: event, counter: damus.likes)
+                                       bar: bar
                         )
                     }
 
