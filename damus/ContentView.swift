@@ -360,6 +360,7 @@ struct ContentView: View {
     func connect() {
         let pool = RelayPool()
 
+        add_relay(pool, "wss://relay.damus.io")
         add_relay(pool, "wss://nostr-pub.wellorder.net")
         add_relay(pool, "wss://nostr.onsats.org")
         add_relay(pool, "wss://nostr.bitcoiner.social")
@@ -372,6 +373,7 @@ struct ContentView: View {
         self.damus = DamusState(pool: pool, pubkey: pubkey,
                                 likes: EventCounter(our_pubkey: pubkey),
                                 boosts: EventCounter(our_pubkey: pubkey),
+                                tips: TipCounter(our_pubkey: pubkey),
                                 image_cache: ImageCache(),
                                 profiles: Profiles()
         )
@@ -393,7 +395,7 @@ struct ContentView: View {
         var boost_ev_id = ev.last_refid()?.ref_id
         
         // CHECK SIGS ON THESE
-        if var inner_ev = ev.inner_event {
+        if let inner_ev = ev.inner_event {
             boost_ev_id = inner_ev.id
             
             if inner_ev.kind == 1 {
@@ -461,32 +463,21 @@ struct ContentView: View {
     func send_filters(relay_id: String) {
         // TODO: since times should be based on events from a specific relay
         // perhaps we could mark this in the relay pool somehow
-        let last_text_event = get_last_event_of_kind(relay_id: relay_id, kind: NostrKind.text.rawValue)
-        let since = get_since_time(last_event: last_text_event)
-        var since_filter = NostrFilter.filter_kinds([1,5,6])
-        since_filter.since = since
-        
-        let last_like_event = get_last_event_of_kind(relay_id: relay_id, kind: 7)
-        var like_filter = NostrFilter.filter_kinds([7])
-        like_filter.since = get_since_time(last_event: last_like_event)
-        //like_filter.ids = get_like_pow()
-
-        let last_metadata_event = get_last_event_of_kind(relay_id: relay_id, kind: NostrKind.metadata.rawValue)
-        var profile_filter = NostrFilter.filter_profiles
-        if let prof_since = get_metadata_since_time(last_metadata_event) {
-            profile_filter.since = prof_since
-        }
-        
-        /*
-        var notification_filter = NostrFilter.filter_text
-        notification_filter.since = since
-         */
-
+        let text_filter = NostrFilter.filter_kinds([1,5,6,7])
+        let profile_filter = NostrFilter.filter_profiles
         var contacts_filter = NostrFilter.filter_contacts
         contacts_filter.authors = [self.pubkey]
 
-        let filters = [since_filter, profile_filter, contacts_filter, like_filter]
-        print("connected to \(relay_id), refreshing from \(since)")
+        var filters = [text_filter, profile_filter, contacts_filter]
+
+        filters = update_filters_with_since(last_of_kind: last_event_of_kind[relay_id] ?? [:], filters: filters)
+        
+        print("connected to \(relay_id) with filters:")
+        for filter in filters {
+            print(filter)
+        }
+        print("-----")
+        
         self.damus?.pool.send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: [relay_id])
         //self.pool?.send(.subscribe(.init(filters: [notification_filter], sub_id: "notifications")))
     }
@@ -733,4 +724,41 @@ func save_last_notified(_ ev: NostrEvent) {
 
 func get_like_pow() -> [String] {
     return ["00000"] // 20 bits
+}
+
+
+func update_filters_with_since(last_of_kind: [Int: NostrEvent], filters: [NostrFilter]) -> [NostrFilter] {
+    let now = Int64(Date.now.timeIntervalSince1970)
+    
+    return filters.map { filter in
+        let kinds = filter.kinds ?? []
+        let initial: Int64? = nil
+        let earliest = kinds.reduce(initial) { earliest, kind in
+            let last = last_of_kind[kind]
+            var since: Int64? = nil
+            
+            if kind == 0 {
+                since = get_metadata_since_time(last)
+            } else {
+                since = get_since_time(last_event: last)
+            }
+            
+            if earliest == nil {
+                if since == nil {
+                    return nil
+                }
+                return since
+            }
+            
+            return since! < earliest! ? since! : earliest!
+        }
+        
+        if let earliest = earliest {
+            var with_since = NostrFilter.copy(from: filter)
+            with_since.since = earliest
+            return with_since
+        }
+        
+        return filter
+    }
 }

@@ -13,6 +13,7 @@ class SearchModel: ObservableObject {
     let pool: RelayPool
     var search: NostrFilter
     let sub_id = UUID().description
+    let limit: UInt32 = 500
     
     init(pool: RelayPool, search: NostrFilter) {
         self.pool = pool
@@ -21,7 +22,7 @@ class SearchModel: ObservableObject {
     
     func subscribe() {
         // since 1 month
-        search.since = Int64(Date.now.timeIntervalSince1970) - 2629800 * 1
+        search.limit = self.limit
         search.kinds = [1,5,7]
 
         //likes_filter.ids = ref_events.referenced_ids!

@@ -99,7 +99,7 @@ struct EventView: View {
                 Spacer()
 
                 if has_action_bar {
-                    let bar = make_actionbar_model(ev: event, like_counter: damus.likes, boost_counter: damus.boosts)
+                    let bar = make_actionbar_model(ev: event, damus: damus)
                     EventActionBar(event: event, our_pubkey: damus.pubkey, profiles: damus.profiles, bar: bar)
                 }
 
@@ -180,11 +180,19 @@ func reply_others_desc(n: Int, n_pubkeys: Int) -> String {
 
 
 
-func make_actionbar_model(ev: NostrEvent, like_counter: EventCounter, boost_counter: EventCounter) -> ActionBarModel {
-    let likes = like_counter.counts[ev.id]
-    let boosts = boost_counter.counts[ev.id]
-    let our_like = like_counter.our_events[ev.id]
-    let our_boost = boost_counter.our_events[ev.id]
+func make_actionbar_model(ev: NostrEvent, damus: DamusState) -> ActionBarModel {
+    let likes = damus.likes.counts[ev.id]
+    let boosts = damus.boosts.counts[ev.id]
+    let tips = damus.tips.tips[ev.id]
+    let our_like = damus.likes.our_events[ev.id]
+    let our_boost = damus.boosts.our_events[ev.id]
+    let our_tip = damus.tips.our_tips[ev.id]
     
-    return ActionBarModel(likes: likes ?? 0, boosts: boosts ?? 0, our_like: our_like, our_boost: our_boost)
+    return ActionBarModel(likes: likes ?? 0,
+                          boosts: boosts ?? 0,
+                          tips: tips ?? 0,
+                          our_like: our_like,
+                          our_boost: our_boost,
+                          our_tip: our_tip
+    )
 }

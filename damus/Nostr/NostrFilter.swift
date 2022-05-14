@@ -14,6 +14,7 @@ struct NostrFilter: Codable {
     var pubkeys: [String]?
     var since: Int64?
     var until: Int64?
+    var limit: UInt32?
     var authors: [String]?
     var hashtag: [String]? = nil
 
@@ -26,6 +27,7 @@ struct NostrFilter: Codable {
         case since
         case until
         case authors
+        case limit
     }
     
     public static func copy(from: NostrFilter) -> NostrFilter {

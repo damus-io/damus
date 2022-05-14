@@ -36,6 +36,7 @@ class ProfileModel: ObservableObject {
         
         var filter = NostrFilter.filter_authors([pubkey])
         filter.kinds = kinds
+        filter.limit = 500
         
         print("subscribing to profile \(pubkey) with sub_id \(sub_id)")
         damus.pool.subscribe(sub_id: sub_id, filters: [filter], handler: handle_event)
