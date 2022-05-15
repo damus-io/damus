@@ -44,7 +44,7 @@ struct ContentView: View {
     @State var status: String = "Not connected"
     @State var active_sheet: Sheets? = nil
     @State var loading: Bool = true
-    @State var damus: DamusState? = nil
+    @State var damus_state: DamusState? = nil
     @State var selected_timeline: Timeline? = .home
     @State var is_thread_open: Bool = false
     @State var is_profile_open: Bool = false
@@ -139,7 +139,7 @@ struct ContentView: View {
     
     var PostingTimelineView: some View {
         ZStack {
-            if let damus = self.damus {
+            if let damus = self.damus_state {
                 TimelineView(events: $friend_events, damus: damus)
             }
             PostButtonContainer
@@ -186,7 +186,7 @@ struct ContentView: View {
     var MaybeSearchView: some View {
         Group {
             if let search = self.active_search {
-                SearchView(appstate: damus!, search: SearchModel(pool: damus!.pool, search: search))
+                SearchView(appstate: damus_state!, search: SearchModel(pool: damus_state!.pool, search: search))
             } else {
                 EmptyView()
             }
@@ -196,8 +196,8 @@ struct ContentView: View {
     var MaybeThreadView: some View {
         Group {
             if let evid = self.active_event_id {
-                let thread_model = ThreadModel(evid: evid, pool: damus!.pool)
-                ThreadView(thread: thread_model, damus: damus!)
+                let thread_model = ThreadModel(evid: evid, pool: damus_state!.pool)
+                ThreadView(thread: thread_model, damus: damus_state!)
             } else {
                 EmptyView()
             }
@@ -207,9 +207,9 @@ struct ContentView: View {
     var MaybeProfileView: some View {
         Group {
             if let pk = self.active_profile {
-                let profile_model = ProfileModel(pubkey: pk, damus: damus!)
-                let fs = damus!.contacts.follow_state(pk)
-                ProfileView(damus: damus!, follow_state: fs, profile: profile_model)
+                let profile_model = ProfileModel(pubkey: pk, damus: damus_state!)
+                let fs = damus_state!.contacts.follow_state(pk)
+                ProfileView(damus: damus_state!, follow_state: fs, profile: profile_model)
             } else {
                 EmptyView()
             }
@@ -218,7 +218,7 @@ struct ContentView: View {
     
     var body: some View {
         VStack {
-            if let damus = self.damus {
+            if let damus = self.damus_state {
                 ZStack {
                     MainContent(damus: damus)
                         .padding([.bottom], -8.0)
@@ -237,7 +237,7 @@ struct ContentView: View {
             case .post:
                 PostView(references: [])
             case .reply(let event):
-                ReplyView(replying_to: event, damus: damus!)
+                ReplyView(replying_to: event, damus: damus_state!)
             }
         }
         .onOpenURL { url in
@@ -265,7 +265,7 @@ struct ContentView: View {
         .onReceive(handle_notify(.boost)) { notif in
             let ev = notif.object as! NostrEvent
             let boost = make_boost_event(pubkey: pubkey, privkey: privkey, boosted: ev)
-            self.damus?.pool.send(.event(boost))
+            self.damus_state?.pool.send(.event(boost))
         }
         .onReceive(handle_notify(.open_thread)) { obj in
             //let ev = obj.object as! NostrEvent
@@ -279,20 +279,20 @@ struct ContentView: View {
         .onReceive(handle_notify(.boost)) { boost in
             let ev = boost.object as! NostrEvent
             let boost_ev = make_boost_event(pubkey: pubkey, privkey: privkey, boosted: ev)
-            self.damus?.pool.send(.event(boost_ev))
+            self.damus_state?.pool.send(.event(boost_ev))
         }
         .onReceive(handle_notify(.like)) { like in
             let ev = like.object as! NostrEvent
             let like_ev = make_like_event(pubkey: pubkey, privkey: privkey, liked: ev)
-            self.damus?.pool.send(.event(like_ev))
+            self.damus_state?.pool.send(.event(like_ev))
         }
         .onReceive(handle_notify(.broadcast_event)) { obj in
             let ev = obj.object as! NostrEvent
-            self.damus?.pool.send(.event(ev))
+            self.damus_state?.pool.send(.event(ev))
         }
         .onReceive(handle_notify(.unfollow)) { notif in
             let pk = notif.object as! String
-            guard let damus = self.damus else {
+            guard let damus = self.damus_state else {
                 return
             }
             
@@ -308,7 +308,7 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.follow)) { notif in
             let pk = notif.object as! String
-            guard let damus = self.damus else {
+            guard let damus = self.damus_state else {
                 return
             }
             
@@ -327,41 +327,20 @@ struct ContentView: View {
             case .post(let post):
                 print("post \(post.content)")
                 let new_ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
-                self.damus?.pool.send(.event(new_ev))
+                self.damus_state?.pool.send(.event(new_ev))
             case .cancel:
                 active_sheet = nil
                 print("post cancelled")
             }
         }
         .onReceive(timer) { n in
-            self.damus?.pool.connect_to_disconnected()
-            self.loading = (self.damus?.pool.num_connecting ?? 0) != 0
+            self.damus_state?.pool.connect_to_disconnected()
+            self.loading = (self.damus_state?.pool.num_connecting ?? 0) != 0
         }
     }
     
     func is_friend_event(_ ev: NostrEvent) -> Bool {
-        // we should be able to see our own messages in our homefeed
-        if ev.pubkey == self.pubkey {
-            return true
-        }
-        
-        if damus!.contacts.is_friend(ev.pubkey) {
-            return true
-        }
-        
-        if ev.is_reply {
-            // show our replies?
-            if ev.pubkey == self.pubkey {
-                return true
-            }
-            for pk in ev.referenced_pubkeys {
-                if damus!.contacts.is_friend(pk.ref_id) {
-                    return true
-                }
-            }
-        }
-        
-        return false
+        return damus.is_friend_event(ev, our_pubkey: self.pubkey, contacts: self.damus_state!.contacts)
     }
 
     func switch_timeline(_ timeline: Timeline) {
@@ -398,11 +377,11 @@ struct ContentView: View {
         add_relay(pool, "wss://nostr.bitcoiner.social")
         add_relay(pool, "ws://monad.jb55.com:8080")
         add_relay(pool, "wss://nostr-relay.freeberty.net")
-        //add_relay(pool, "wss://nostr-relay.untethr.me")
+        add_relay(pool, "wss://nostr-relay.untethr.me")
 
         pool.register_handler(sub_id: sub_id, handler: handle_event)
 
-        self.damus = DamusState(pool: pool, pubkey: pubkey,
+        self.damus_state = DamusState(pool: pool, pubkey: pubkey,
                                 likes: EventCounter(our_pubkey: pubkey),
                                 boosts: EventCounter(our_pubkey: pubkey),
                                 contacts: Contacts(),
@@ -415,11 +394,11 @@ struct ContentView: View {
 
     func handle_contact_event(_ ev: NostrEvent) {
         if ev.pubkey == self.pubkey {
-            damus!.contacts.event = ev
+            damus_state!.contacts.event = ev
             // our contacts
             for tag in ev.tags {
                 if tag.count > 1 && tag[0] == "p" {
-                    damus!.contacts.friends.insert(tag[1])
+                    damus_state!.contacts.friends.insert(tag[1])
                 }
             }
         }
@@ -441,7 +420,7 @@ struct ContentView: View {
             return
         }
         
-        switch damus!.boosts.add_event(ev, target: e) {
+        switch damus_state!.boosts.add_event(ev, target: e) {
         case .already_counted:
             break
         case .success(let n):
@@ -458,7 +437,7 @@ struct ContentView: View {
         
         // CHECK SIGS ON THESE
         
-        switch damus!.likes.add_event(ev, target: e.ref_id) {
+        switch damus_state!.likes.add_event(ev, target: e.ref_id) {
         case .already_counted:
             break
         case .success(let n):
@@ -472,7 +451,7 @@ struct ContentView: View {
             return
         }
 
-        if let mprof = damus!.profiles.lookup_with_timestamp(id: ev.pubkey) {
+        if let mprof = damus_state!.profiles.lookup_with_timestamp(id: ev.pubkey) {
             if mprof.timestamp > ev.created_at {
                 // skip if we already have an newer profile
                 return
@@ -480,7 +459,7 @@ struct ContentView: View {
         }
 
         let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at)
-        damus!.profiles.add(id: ev.pubkey, profile: tprof)
+        damus_state!.profiles.add(id: ev.pubkey, profile: tprof)
         
         notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
     }
@@ -512,7 +491,7 @@ struct ContentView: View {
         }
         print("-----")
         
-        self.damus?.pool.send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: [relay_id])
+        self.damus_state?.pool.send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: [relay_id])
         //self.pool?.send(.subscribe(.init(filters: [notification_filter], sub_id: "notifications")))
     }
     
@@ -604,20 +583,20 @@ struct ContentView: View {
             case .error(let merr):
                 let desc = merr.debugDescription
                 if desc.contains("Software caused connection abort") {
-                    self.damus?.pool.reconnect(to: [relay_id])
+                    self.damus_state?.pool.reconnect(to: [relay_id])
                 }
             case .disconnected: fallthrough
             case .cancelled:
-                self.damus?.pool.reconnect(to: [relay_id])
+                self.damus_state?.pool.reconnect(to: [relay_id])
             case .reconnectSuggested(let t):
                 if t {
-                    self.damus?.pool.reconnect(to: [relay_id])
+                    self.damus_state?.pool.reconnect(to: [relay_id])
                 }
             default:
                 break
             }
             
-            self.loading = (self.damus?.pool.num_connecting ?? 0) != 0
+            self.loading = (self.damus_state?.pool.num_connecting ?? 0) != 0
 
             print("ws_event \(ev)")
 
@@ -794,4 +773,30 @@ func update_filters_with_since(last_of_kind: [Int: NostrEvent], filters: [NostrF
         
         return filter
     }
+}
+
+
+func is_friend_event(_ ev: NostrEvent, our_pubkey: String, contacts: Contacts) -> Bool
+{
+    if ev.pubkey == our_pubkey {
+        return true
+    }
+    
+    if contacts.is_friend(ev.pubkey) {
+        return true
+    }
+    
+    if ev.is_reply {
+        // show our replies?
+        if ev.pubkey == our_pubkey {
+            return true
+        }
+        for pk in ev.referenced_pubkeys {
+            if contacts.is_friend(pk.ref_id) {
+                return true
+            }
+        }
+    }
+    
+    return false
 }
