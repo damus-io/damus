@@ -340,7 +340,7 @@ struct ContentView: View {
     }
     
     func is_friend_event(_ ev: NostrEvent) -> Bool {
-        return damus.is_friend_event(ev, our_pubkey: self.pubkey, contacts: self.damus_state!.contacts)
+        return damus.is_friend_event(ev, our_pubkey: self.pubkey, friends: self.damus_state!.contacts.friends)
     }
 
     func switch_timeline(_ timeline: Timeline) {
@@ -775,28 +775,3 @@ func update_filters_with_since(last_of_kind: [Int: NostrEvent], filters: [NostrF
     }
 }
 
-
-func is_friend_event(_ ev: NostrEvent, our_pubkey: String, contacts: Contacts) -> Bool
-{
-    if ev.pubkey == our_pubkey {
-        return true
-    }
-    
-    if contacts.is_friend(ev.pubkey) {
-        return true
-    }
-    
-    if ev.is_reply {
-        // show our replies?
-        if ev.pubkey == our_pubkey {
-            return true
-        }
-        for pk in ev.referenced_pubkeys {
-            if contacts.is_friend(pk.ref_id) {
-                return true
-            }
-        }
-    }
-    
-    return false
-}

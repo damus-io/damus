@@ -120,3 +120,28 @@ func make_contact_relays(_ relays: [RelayDescriptor]) -> [String: RelayInfo] {
     }
 }
 
+
+func is_friend_event(_ ev: NostrEvent, our_pubkey: String, friends: Set<String>) -> Bool
+{
+    if ev.pubkey == our_pubkey {
+        return true
+    }
+    
+    if friends.contains(ev.pubkey) {
+        return true
+    }
+    
+    if ev.is_reply {
+        // show our replies?
+        if ev.pubkey == our_pubkey {
+            return true
+        }
+        for pk in ev.referenced_pubkeys {
+            if friends.contains(pk.ref_id) {
+                return true
+            }
+        }
+    }
+    
+    return false
+}
