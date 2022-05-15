@@ -43,7 +43,6 @@ enum Timeline: String, CustomStringConvertible {
 struct ContentView: View {
     @State var status: String = "Not connected"
     @State var active_sheet: Sheets? = nil
-    @State var friends: [String: ()] = [:]
     @State var loading: Bool = true
     @State var damus: DamusState? = nil
     @State var selected_timeline: Timeline? = .home
@@ -209,7 +208,8 @@ struct ContentView: View {
         Group {
             if let pk = self.active_profile {
                 let profile_model = ProfileModel(pubkey: pk, damus: damus!)
-                ProfileView(damus: damus!, profile: profile_model)
+                let fs = damus!.contacts.follow_state(pk)
+                ProfileView(damus: damus!, follow_state: fs, profile: profile_model)
             } else {
                 EmptyView()
             }
@@ -290,6 +290,37 @@ struct ContentView: View {
             let ev = obj.object as! NostrEvent
             self.damus?.pool.send(.event(ev))
         }
+        .onReceive(handle_notify(.unfollow)) { notif in
+            let pk = notif.object as! String
+            guard let damus = self.damus else {
+                return
+            }
+            
+            if unfollow_user(pool: damus.pool,
+                             our_contacts: damus.contacts.event,
+                             pubkey: damus.pubkey,
+                             privkey: privkey,
+                             unfollow: pk) {
+                notify(.unfollowed, pk)
+                damus.contacts.friends.remove(pk)
+                //friend_events = friend_events.filter { $0.pubkey != pk }
+            }
+        }
+        .onReceive(handle_notify(.follow)) { notif in
+            let pk = notif.object as! String
+            guard let damus = self.damus else {
+                return
+            }
+            
+            if follow_user(pool: damus.pool,
+                           our_contacts: damus.contacts.event,
+                           pubkey: damus.pubkey,
+                           privkey: privkey,
+                           follow: ReferencedId(ref_id: pk, relay_id: nil, key: "p")) {
+                notify(.followed, pk)
+                damus.contacts.friends.insert(pk)
+            }
+        }
         .onReceive(handle_notify(.post)) { obj in
             let post_res = obj.object as! NostrPostResult
             switch post_res {
@@ -308,12 +339,13 @@ struct ContentView: View {
         }
     }
     
-    func is_friend(pubkey: String) -> Bool {
-        return pubkey == self.pubkey || friends[pubkey] != nil
-    }
-    
     func is_friend_event(_ ev: NostrEvent) -> Bool {
-        if is_friend(pubkey: ev.pubkey) {
+        // we should be able to see our own messages in our homefeed
+        if ev.pubkey == self.pubkey {
+            return true
+        }
+        
+        if damus!.contacts.is_friend(ev.pubkey) {
             return true
         }
         
@@ -323,7 +355,7 @@ struct ContentView: View {
                 return true
             }
             for pk in ev.referenced_pubkeys {
-                if is_friend(pubkey: pk.ref_id) {
+                if damus!.contacts.is_friend(pk.ref_id) {
                     return true
                 }
             }
@@ -366,13 +398,14 @@ struct ContentView: View {
         add_relay(pool, "wss://nostr.bitcoiner.social")
         add_relay(pool, "ws://monad.jb55.com:8080")
         add_relay(pool, "wss://nostr-relay.freeberty.net")
-        add_relay(pool, "wss://nostr-relay.untethr.me")
+        //add_relay(pool, "wss://nostr-relay.untethr.me")
 
         pool.register_handler(sub_id: sub_id, handler: handle_event)
 
         self.damus = DamusState(pool: pool, pubkey: pubkey,
                                 likes: EventCounter(our_pubkey: pubkey),
                                 boosts: EventCounter(our_pubkey: pubkey),
+                                contacts: Contacts(),
                                 tips: TipCounter(our_pubkey: pubkey),
                                 image_cache: ImageCache(),
                                 profiles: Profiles()
@@ -382,10 +415,11 @@ struct ContentView: View {
 
     func handle_contact_event(_ ev: NostrEvent) {
         if ev.pubkey == self.pubkey {
+            damus!.contacts.event = ev
             // our contacts
             for tag in ev.tags {
                 if tag.count > 1 && tag[0] == "p" {
-                    self.friends[tag[1]] = ()
+                    damus!.contacts.friends.insert(tag[1])
                 }
             }
         }
@@ -728,7 +762,6 @@ func get_like_pow() -> [String] {
 
 
 func update_filters_with_since(last_of_kind: [Int: NostrEvent], filters: [NostrFilter]) -> [NostrFilter] {
-    let now = Int64(Date.now.timeIntervalSince1970)
     
     return filters.map { filter in
         let kinds = filter.kinds ?? []

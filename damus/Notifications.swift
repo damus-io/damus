@@ -109,6 +109,30 @@ extension Notification.Name {
     }
 }
 
+extension Notification.Name {
+    static var follow: Notification.Name {
+        return Notification.Name("follow")
+    }
+}
+
+extension Notification.Name {
+    static var unfollow: Notification.Name {
+        return Notification.Name("unfollow")
+    }
+}
+
+extension Notification.Name {
+    static var followed: Notification.Name {
+        return Notification.Name("followed")
+    }
+}
+
+extension Notification.Name {
+    static var unfollowed: Notification.Name {
+        return Notification.Name("unfollowed")
+    }
+}
+
 func handle_notify(_ name: Notification.Name) -> NotificationCenter.Publisher {
     return NotificationCenter.default.publisher(for: name)
 }

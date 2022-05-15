@@ -12,12 +12,14 @@ class ProfileModel: ObservableObject {
     let pubkey: String
     let damus: DamusState
     
+    @Published var following: Bool
     var seen_event: Set<String> = Set()
     var sub_id = UUID().description
     
     init(pubkey: String, damus: DamusState) {
         self.pubkey = pubkey
         self.damus = damus
+        self.following = damus.contacts.is_friend(pubkey)
     }
     
     func unsubscribe() {

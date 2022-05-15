@@ -227,6 +227,11 @@ func decode_nostr_event(txt: String) -> NostrResponse? {
     return decode_data(Data(txt.utf8))
 }
 
+func encode_json<T: Encodable>(_ val: T) -> String? {
+    let encoder = JSONEncoder()
+    return (try? encoder.encode(val)).map { String(decoding: $0, as: UTF8.self) }
+}
+
 func decode_data<T: Decodable>(_ data: Data) -> T? {
     let decoder = JSONDecoder()
     do {

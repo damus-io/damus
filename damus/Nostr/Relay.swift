@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct RelayInfo {
+struct RelayInfo: Codable {
     let read: Bool
     let write: Bool
 

@@ -68,7 +68,9 @@ struct EventView: View {
         return HStack {
             let profile = damus.profiles.lookup(id: event.pubkey)
             VStack {
-                let pv = ProfileView(damus: damus, profile: ProfileModel(pubkey: event.pubkey, damus: damus))
+                let pmodel = ProfileModel(pubkey: event.pubkey, damus: damus)
+                let fs = damus.contacts.follow_state(event.pubkey)
+                let pv = ProfileView(damus: damus, follow_state: fs, profile: pmodel)
                 
                 NavigationLink(destination: pv) {
                     ProfilePicView(pubkey: event.pubkey, size: PFP_SIZE!, highlight: highlight, image_cache: damus.image_cache, profiles: damus.profiles)
@@ -196,3 +198,5 @@ func make_actionbar_model(ev: NostrEvent, damus: DamusState) -> ActionBarModel {
                           our_tip: our_tip
     )
 }
+
+
