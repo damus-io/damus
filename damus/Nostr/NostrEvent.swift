@@ -19,10 +19,14 @@ struct KeyEvent {
     let relay_url: String
 }
 
-struct ReferencedId {
+struct ReferencedId: Identifiable {
     let ref_id: String
     let relay_id: String?
     let key: String
+    
+    var id: String {
+        return ref_id
+    }
 }
 
 struct EventId: Identifiable, CustomStringConvertible {

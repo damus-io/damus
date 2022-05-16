@@ -69,8 +69,7 @@ struct EventView: View {
             let profile = damus.profiles.lookup(id: event.pubkey)
             VStack {
                 let pmodel = ProfileModel(pubkey: event.pubkey, damus: damus)
-                let fs = damus.contacts.follow_state(event.pubkey)
-                let pv = ProfileView(damus: damus, follow_state: fs, profile: pmodel)
+                let pv = ProfileView(damus_state: damus, profile: pmodel)
                 
                 NavigationLink(destination: pv) {
                     ProfilePicView(pubkey: event.pubkey, size: PFP_SIZE!, highlight: highlight, image_cache: damus.image_cache, profiles: damus.profiles)
@@ -122,9 +121,15 @@ struct EventView: View {
             }
             
             Button {
+                UIPasteboard.general.string = "@" + event.pubkey
+            } label: {
+                Label("Copy User ID", systemImage: "tag")
+            }
+
+            Button {
                 UIPasteboard.general.string = "&" + event.id
             } label: {
-                Label("Copy ID", systemImage: "tag")
+                Label("Copy Note ID", systemImage: "tag")
             }
             
             Button {

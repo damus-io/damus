@@ -61,9 +61,8 @@ func perform_follow_btn_action(_ fs: FollowState, target: String) -> FollowState
 }
 
 struct ProfileView: View {
-    let damus: DamusState
+    let damus_state: DamusState
     
-    @State var follow_state: FollowState = .follows
     @State private var selected_tab: ProfileTab = .posts
     @StateObject var profile: ProfileModel
     
@@ -71,32 +70,13 @@ struct ProfileView: View {
     
     var TopSection: some View {
         VStack(alignment: .leading) {
-            let data = damus.profiles.lookup(id: profile.pubkey)
+            let data = damus_state.profiles.lookup(id: profile.pubkey)
             HStack(alignment: .top) {
-                ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE!, highlight: .custom(Color.black, 2), image_cache: damus.image_cache, profiles: damus.profiles)
+                ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE!, highlight: .custom(Color.black, 2), image_cache: damus_state.image_cache, profiles: damus_state.profiles)
                 
                 Spacer()
                 
-                Button("\(follow_btn_txt(follow_state))") {
-                    follow_state = perform_follow_btn_action(follow_state, target: profile.pubkey)
-                }
-                .buttonStyle(.bordered)
-                .onReceive(handle_notify(.followed)) { notif in
-                    let pk = notif.object as! String
-                    if pk != profile.pubkey {
-                        return
-                    }
-                    
-                    self.follow_state = .follows
-                }
-                .onReceive(handle_notify(.unfollowed)) { notif in
-                    let pk = notif.object as! String
-                    if pk != profile.pubkey {
-                        return
-                    }
-                    
-                    self.follow_state = .unfollows
-                }
+                FollowButtonView(pubkey: profile.pubkey, follow_state: damus_state.contacts.follow_state(profile.pubkey))
             }
             
             if let pubkey = profile.pubkey {
@@ -108,7 +88,21 @@ struct ProfileView: View {
                     .font(.footnote)
                     .foregroundColor(id_to_color(pubkey))
             }
+            
             Text(data?.about ?? "")
+            
+            if let contact = profile.contacts {
+                Divider()
+                
+                NavigationLink(destination: FollowingView(contact: contact, damus_state: damus_state)) {
+                    HStack {
+                        Text("\(profile.following)")
+                        Text("Following")
+                            .foregroundColor(.gray)
+                    }
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
         }
     }
     
@@ -119,7 +113,7 @@ struct ProfileView: View {
             
                 Divider()
                 
-                InnerTimelineView(events: $profile.events, damus: damus)
+                InnerTimelineView(events: $profile.events, damus: damus_state)
             }
             .frame(maxHeight: .infinity, alignment: .topLeading)
         }
@@ -128,7 +122,6 @@ struct ProfileView: View {
         
         .navigationBarTitle("Profile")
         .onAppear() {
-            follow_state = damus.contacts.follow_state(profile.pubkey)
             profile.subscribe()
         }
         .onDisappear {

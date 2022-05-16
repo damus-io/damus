@@ -9,17 +9,18 @@ import Foundation
 
 class ProfileModel: ObservableObject {
     @Published var events: [NostrEvent] = []
+    @Published var contacts: NostrEvent? = nil
+    @Published var following: Int = 0
+    
     let pubkey: String
     let damus: DamusState
     
-    @Published var following: Bool
     var seen_event: Set<String> = Set()
     var sub_id = UUID().description
     
     init(pubkey: String, damus: DamusState) {
         self.pubkey = pubkey
         self.damus = damus
-        self.following = damus.contacts.is_friend(pubkey)
     }
     
     func unsubscribe() {
@@ -44,13 +45,19 @@ class ProfileModel: ObservableObject {
         damus.pool.subscribe(sub_id: sub_id, filters: [filter], handler: handle_event)
     }
     
+    func handle_profile_contact_event(_ ev: NostrEvent) {
+        self.contacts = ev
+        self.following = count_pubkeys(ev.tags)
+    }
+    
     func add_event(_ ev: NostrEvent) {
         if seen_event.contains(ev.id) {
             return
         }
-        if ev.kind == 1 {
-            self.events.append(ev)
-            self.events = self.events.sorted { $0.created_at > $1.created_at }
+        if ev.known_kind == .text {
+            let _ = insert_uniq_sorted_event(events: &self.events, new_ev: ev, cmp: { $0.created_at > $1.created_at})
+        } else if ev.known_kind == .contacts {
+            handle_profile_contact_event(ev)
         }
         seen_event.insert(ev.id)
     }
@@ -71,4 +78,16 @@ class ProfileModel: ObservableObject {
             }
         }
     }
+}
+
+
+func count_pubkeys(_ tags: [[String]]) -> Int {
+    var c: Int = 0
+    for tag in tags {
+        if tag.count >= 2 && tag[0] == "p" {
+            c += 1
+        }
+    }
+    
+    return c
 }

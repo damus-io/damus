@@ -208,8 +208,7 @@ struct ContentView: View {
         Group {
             if let pk = self.active_profile {
                 let profile_model = ProfileModel(pubkey: pk, damus: damus_state!)
-                let fs = damus_state!.contacts.follow_state(pk)
-                ProfileView(damus: damus_state!, follow_state: fs, profile: profile_model)
+                ProfileView(damus_state: damus_state!, profile: profile_model)
             } else {
                 EmptyView()
             }
