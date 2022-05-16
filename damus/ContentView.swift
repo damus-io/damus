@@ -276,11 +276,6 @@ struct ContentView: View {
             let ev = notif.object as! NostrEvent
             self.active_sheet = .reply(ev)
         }
-        .onReceive(handle_notify(.boost)) { boost in
-            let ev = boost.object as! NostrEvent
-            let boost_ev = make_boost_event(pubkey: pubkey, privkey: privkey, boosted: ev)
-            self.damus_state?.pool.send(.event(boost_ev))
-        }
         .onReceive(handle_notify(.like)) { like in
             let ev = like.object as! NostrEvent
             let like_ev = make_like_event(pubkey: pubkey, privkey: privkey, liked: ev)
