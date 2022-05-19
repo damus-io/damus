@@ -67,43 +67,8 @@ struct ContentView: View {
 
     let sub_id = UUID().description
     let pubkey = MY_PUBKEY
-    let privkey = MY_PRIVKEY 
+    let privkey = MY_PRIVKEY
     
-    var NotificationTab: some View {
-        ZStack(alignment: .center) {
-            TabButton(timeline: .notifications, img: "bell")
-            
-            if new_notifications {
-                Circle()
-                    .size(CGSize(width: 8, height: 8))
-                    .frame(width: 10, height: 10, alignment: .topTrailing)
-                    .alignmentGuide(VerticalAlignment.center) { a in a.height + 2.0 }
-                    .alignmentGuide(HorizontalAlignment.center) { a in a.width - 12.0 }
-                    .foregroundColor(.accentColor)
-            }
-        }
-    }
-    
-    func TabButton(timeline: Timeline, img: String) -> some View {
-        Button(action: {switch_timeline(timeline)}) {
-            Label("", systemImage: selected_timeline == timeline ? "\(img).fill" : img)
-                .contentShape(Rectangle())
-                .frame(maxWidth: .infinity, minHeight: 30.0)
-        }
-        .foregroundColor(selected_timeline != timeline ? .gray : .primary)
-    }
-    
-    var TabBar: some View {
-        VStack {
-            Divider()
-            HStack {
-                TabButton(timeline: .home, img: "house")
-                NotificationTab
-                TabButton(timeline: .global, img: "globe.americas")
-            }
-        }
-    }
-
     var LoadingContainer: some View {
         VStack {
             HStack {
@@ -210,7 +175,7 @@ struct ContentView: View {
                 }
             }
             
-            TabBar
+            TabBar(new_notifications: $new_notifications, selected: $selected_timeline, action: switch_timeline)
         }
         .onAppear() {
             self.connect()
