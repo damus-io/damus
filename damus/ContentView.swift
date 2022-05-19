@@ -71,12 +71,7 @@ struct ContentView: View {
     
     var NotificationTab: some View {
         ZStack(alignment: .center) {
-            Button(action: {switch_timeline(.notifications)}) {
-                Label("", systemImage: selected_timeline == .notifications ? "bell.fill" : "bell")
-                    .contentShape(Rectangle())
-                    .frame(maxWidth: .infinity, minHeight: 30.0)
-            }
-            .foregroundColor(selected_timeline != .notifications ? .gray : .primary)
+            TabButton(timeline: .notifications, img: "bell")
             
             if new_notifications {
                 Circle()
