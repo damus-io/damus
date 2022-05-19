@@ -7,6 +7,18 @@
 
 import SwiftUI
 
+enum Timeline: String, CustomStringConvertible {
+    case home
+    case notifications
+    case global
+    case search
+    
+    var description: String {
+        return self.rawValue
+    }
+}
+
+
 struct MainTabView: View {
     var body: some View {
         Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
@@ -72,6 +84,7 @@ struct TabBar: View {
             Divider()
             HStack {
                 TabButton(timeline: .home, img: "house", selected: $selected, action: action)
+                TabButton(timeline: .search, img: "magnifyingglass.circle", selected: $selected, action: action)
                 NotificationsTab(new_notifications: $new_notifications, selected: $selected, action: action)
                 TabButton(timeline: .global, img: "globe.americas", selected: $selected, action: action)
             }

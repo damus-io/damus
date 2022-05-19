@@ -122,6 +122,12 @@ extension Notification.Name {
 }
 
 extension Notification.Name {
+    static var login: Notification.Name {
+        return Notification.Name("login")
+    }
+}
+
+extension Notification.Name {
     static var followed: Notification.Name {
         return Notification.Name("followed")
     }

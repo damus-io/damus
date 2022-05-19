@@ -30,16 +30,6 @@ enum ThreadState {
     case chatroom
 }
 
-enum Timeline: String, CustomStringConvertible {
-    case home
-    case notifications
-    case global
-    
-    var description: String {
-        return self.rawValue
-    }
-}
-
 struct ContentView: View {
     @State var status: String = "Not connected"
     @State var active_sheet: Sheets? = nil
@@ -108,11 +98,11 @@ struct ContentView: View {
                     EmptyView()
                 }
                 switch selected_timeline {
+                case .search:
+                    SearchHomeView()
+                    
                 case .home:
                     PostingTimelineView
-                        .onAppear() {
-                            //switch_timeline(.home)
-                        }
                     
                 case .notifications:
                     TimelineView(events: $notifications, damus: damus)
@@ -718,3 +708,28 @@ func update_filters_with_since(last_of_kind: [Int: NostrEvent], filters: [NostrF
     }
 }
 
+struct Keypair {
+    let pubkey: String
+    let privkey: String
+}
+
+func save_keypair(pubkey: String, privkey: String) {
+    UserDefaults.standard.set(pubkey, forKey: "pubkey")
+    UserDefaults.standard.set(privkey, forKey: "privkey")
+}
+
+func get_saved_keypair() -> Keypair? {
+    get_saved_pubkey().flatMap { pubkey in
+        get_saved_privkey().map { privkey in
+            return Keypair(pubkey: pubkey, privkey: privkey)
+        }
+    }
+}
+
+func get_saved_pubkey() -> String? {
+    return UserDefaults.standard.string(forKey: "pubkey")
+}
+
+func get_saved_privkey() -> String? {
+    return UserDefaults.standard.string(forKey: "privkey")
+}

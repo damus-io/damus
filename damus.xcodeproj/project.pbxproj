@@ -36,6 +36,7 @@
 		4C3AC79F2833115300E1F516 /* FollowButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3AC79E2833115300E1F516 /* FollowButtonView.swift */; };
 		4C3AC7A12835A81400E1F516 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3AC7A02835A81400E1F516 /* SetupView.swift */; };
 		4C3AC7A52836987600E1F516 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3AC7A42836987600E1F516 /* MainTabView.swift */; };
+		4C3AC7A728369BA200E1F516 /* SearchHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3AC7A628369BA200E1F516 /* SearchHomeView.swift */; };
 		4C3BEFD22819DB9B00B3DE84 /* ProfileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD12819DB9B00B3DE84 /* ProfileModel.swift */; };
 		4C3BEFD42819DE8F00B3DE84 /* NostrKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */; };
 		4C3BEFD6281D995700B3DE84 /* ActionBarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD5281D995700B3DE84 /* ActionBarModel.swift */; };
@@ -125,6 +126,7 @@
 		4C3AC79E2833115300E1F516 /* FollowButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowButtonView.swift; sourceTree = "<group>"; };
 		4C3AC7A02835A81400E1F516 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		4C3AC7A42836987600E1F516 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		4C3AC7A628369BA200E1F516 /* SearchHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHomeView.swift; sourceTree = "<group>"; };
 		4C3BEFD12819DB9B00B3DE84 /* ProfileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileModel.swift; sourceTree = "<group>"; };
 		4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrKind.swift; sourceTree = "<group>"; };
 		4C3BEFD5281D995700B3DE84 /* ActionBarModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionBarModel.swift; sourceTree = "<group>"; };
@@ -246,6 +248,7 @@
 				4C3AC79E2833115300E1F516 /* FollowButtonView.swift */,
 				4C3AC7A02835A81400E1F516 /* SetupView.swift */,
 				4C3AC7A42836987600E1F516 /* MainTabView.swift */,
+				4C3AC7A628369BA200E1F516 /* SearchHomeView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -272,6 +275,8 @@
 		4C7FF7D628233637009601DB /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				4CEE2AF4280B29E600AB5EEF /* TimeAgo.swift */,
+				4CE4F8CC281352B30009DFBB /* Notifications.swift */,
 				4C363A8328233689006E126D /* Parser.swift */,
 				4C363A8528234FDE006E126D /* ImageCache.swift */,
 				4C363AA728297703006E126D /* InsertSort.swift */,
@@ -313,8 +318,6 @@
 				4CE6DEE827F7A08100C66700 /* ContentView.swift */,
 				4CE6DEEA27F7A08200C66700 /* Assets.xcassets */,
 				4CE6DEEC27F7A08200C66700 /* Preview Content */,
-				4CEE2AF4280B29E600AB5EEF /* TimeAgo.swift */,
-				4CE4F8CC281352B30009DFBB /* Notifications.swift */,
 				4C363A9728283441006E126D /* TestingPrivate.swift */,
 			);
 			path = damus;
@@ -541,6 +544,7 @@
 				4CE6DEE727F7A08100C66700 /* damusApp.swift in Sources */,
 				4C363A962827096D006E126D /* PostBlock.swift in Sources */,
 				4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */,
+				4C3AC7A728369BA200E1F516 /* SearchHomeView.swift in Sources */,
 				4C363A922825FCF2006E126D /* ProfileUpdate.swift in Sources */,
 				4C0A3F95280F6C78000448DE /* ReplyQuoteView.swift in Sources */,
 				4C3BEFDA281DCA1400B3DE84 /* LikeCounter.swift in Sources */,
