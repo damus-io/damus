@@ -24,3 +24,15 @@ func PostButton(action: @escaping () -> ()) -> some View {
             x: 3,
             y: 3)
 }
+
+func PostButtonContainer(action: @escaping () -> ()) -> some View {
+    return VStack {
+        Spacer()
+
+        HStack {
+            Spacer()
+            PostButton(action: action)
+        }
+    }
+}
+    

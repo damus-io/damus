@@ -124,25 +124,14 @@ struct ContentView: View {
         }
     }
 
-    var PostButtonContainer: some View {
-        VStack {
-            Spacer()
-
-            HStack {
-                Spacer()
-                PostButton() {
-                    self.active_sheet = .post
-                }
-            }
-        }
-    }
-    
     var PostingTimelineView: some View {
         ZStack {
             if let damus = self.damus_state {
                 TimelineView(events: $friend_events, damus: damus)
             }
-            PostButtonContainer
+            PostButtonContainer {
+                self.active_sheet = .post
+            }
         }
     }
     
