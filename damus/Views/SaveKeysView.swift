@@ -9,9 +9,12 @@ import SwiftUI
 
 struct SaveKeysView: View {
     let account: CreateAccountModel
+    let pool: RelayPool = RelayPool()
     @State var is_done: Bool = false
     @State var pub_copied: Bool = false
     @State var priv_copied: Bool = false
+    @State var loading: Bool = false
+    @State var error: String? = nil
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -32,7 +35,7 @@ struct SaveKeysView: View {
                     .foregroundColor(.white)
                     .padding(.bottom, 10)
                 
-                Text("This is your account ID, you can give this to your friends so that they can follow you")
+                Text("This is your account ID, you can give this to your friends so that they can follow you. Click to copy.")
                     .foregroundColor(.white)
                     .padding(.bottom, 10)
                 
@@ -52,13 +55,65 @@ struct SaveKeysView: View {
                     .padding(.bottom, 10)
                 
                 if pub_copied && priv_copied {
-                    DamusWhiteButton("Let's go!") {
-                        save_keypair(pubkey: account.pubkey, privkey: account.privkey)
-                        notify(.login, ())
+                    if loading {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                    } else if let err = error {
+                        Text("Error: \(err)")
+                            .foregroundColor(.red)
+                        DamusWhiteButton("Retry") {
+                            complete_account_creation(account)
+                        }
+                    } else {
+                        DamusWhiteButton("Let's go!") {
+                            complete_account_creation(account)
+                        }
                     }
                 }
             }
             .padding(20)
+        }
+    }
+    
+    func complete_account_creation(_ account: CreateAccountModel) {
+        add_rw_relay(self.pool, "wss://relay.damus.io")
+        self.pool.register_handler(sub_id: "signup", handler: handle_event)
+        
+        self.loading = true
+        
+        self.pool.connect()
+    }
+    
+    func handle_event(relay: String, ev: NostrConnectionEvent) {
+        switch ev {
+        case .ws_event(let wsev):
+            switch wsev {
+            case .connected:
+                let metadata = create_account_to_metadata(account)
+                let metadata_ev = make_metadata_event(keypair: account.keypair, metadata: metadata)
+                let contacts_ev = make_first_contact_event(keypair: account.keypair)
+                
+                self.pool.send(.event(metadata_ev))
+                self.pool.send(.event(contacts_ev))
+                
+                save_keypair(pubkey: account.pubkey, privkey: account.privkey)
+                notify(.login, account.keypair)
+            case .error(let err):
+                self.loading = false
+                self.error = "\(err.debugDescription)"
+            default:
+                break
+            }
+        case .nostr_event(let resp):
+            switch resp {
+            case .notice(let msg):
+                // TODO handle message
+                self.loading = false
+                self.error = msg
+                print(msg)
+            case .event:
+                print("event in signup?")
+            }
         }
     }
 }

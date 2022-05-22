@@ -412,6 +412,7 @@ struct ContentView: View {
         let text_filter = NostrFilter.filter_kinds([1,5,6,7])
         let profile_filter = NostrFilter.filter_profiles
         var contacts_filter = NostrFilter.filter_contacts
+        
         contacts_filter.authors = [self.pubkey]
 
         var filters = [text_filter, profile_filter, contacts_filter]

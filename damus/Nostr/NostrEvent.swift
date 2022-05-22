@@ -349,6 +349,33 @@ func get_referenced_ids(tags: [[String]], key: String) -> [ReferencedId] {
     }
 }
 
+func make_first_contact_event(keypair: Keypair) -> NostrEvent {
+    let rw_relay_info = RelayInfo(read: true, write: true)
+    let damus_relay = "wss://relay.damus.io"
+    let relays: [String: RelayInfo] = ["wss://relay.damus.io": rw_relay_info]
+    let relay_json = encode_json(relays)!
+    let damus_pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
+    let ev = NostrEvent(content: relay_json,
+                        pubkey: keypair.pubkey,
+                        kind: NostrKind.contacts.rawValue,
+                        tags: [["p", damus_pubkey, damus_relay]])
+    ev.calculate_id()
+    ev.sign(privkey: keypair.privkey)
+    return ev
+}
+
+func make_metadata_event(keypair: Keypair, metadata: NostrMetadata) -> NostrEvent {
+    let metadata_json = encode_json(metadata)!
+    let ev = NostrEvent(content: metadata_json,
+                        pubkey: keypair.pubkey,
+                        kind: NostrKind.metadata.rawValue,
+                        tags: [])
+    
+    ev.calculate_id()
+    ev.sign(privkey: keypair.privkey)
+    return ev
+}
+
 func make_boost_event(pubkey: String, privkey: String, boosted: NostrEvent) -> NostrEvent {
     var tags: [[String]] = boosted.tags.filter { tag in tag.count >= 2 && (tag[0] == "e" || tag[0] == "p") }
     tags.append(["e", boosted.id])
