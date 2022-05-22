@@ -72,7 +72,7 @@ struct EventView: View {
                 let pv = ProfileView(damus_state: damus, profile: pmodel)
                 
                 NavigationLink(destination: pv) {
-                    ProfilePicView(pubkey: event.pubkey, size: PFP_SIZE!, highlight: highlight, image_cache: damus.image_cache, profiles: damus.profiles)
+                    ProfilePicView(pubkey: event.pubkey, size: PFP_SIZE, highlight: highlight, image_cache: damus.image_cache, profiles: damus.profiles)
                 }
 
                 Spacer()

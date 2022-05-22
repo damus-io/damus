@@ -21,21 +21,27 @@ struct damusApp: App {
 
 struct MainView: View {
     @State var needs_setup = true;
+    @State var keypair: Keypair? = nil;
     
     var body: some View {
-        if needs_setup {
-            SetupView()
-                .onReceive(handle_notify(.login)) { notif in
-                    needs_setup = false
-                }
-        } else {
-            ContentView()
+        Group {
+            if let kp = keypair, !needs_setup {
+                ContentView(pubkey: kp.pubkey, privkey: kp.privkey)
+            } else {
+                SetupView()
+                    .onReceive(handle_notify(.login)) { notif in
+                        needs_setup = false
+                        keypair = get_saved_keypair()
+                    }
+            }
+        }
+        .onAppear {
+            keypair = get_saved_keypair()
         }
     }
 }
 
-func needs_setup() -> Bool {
-    let _ = get_saved_privkey()
-    return true
+func needs_setup() -> Keypair? {
+    return get_saved_keypair()
 }
     

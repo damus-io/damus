@@ -72,7 +72,7 @@ struct ProfileView: View {
         VStack(alignment: .leading) {
             let data = damus_state.profiles.lookup(id: profile.pubkey)
             HStack(alignment: .top) {
-                ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE!, highlight: .custom(Color.black, 2), image_cache: damus_state.image_cache, profiles: damus_state.profiles)
+                ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .custom(Color.black, 2), image_cache: damus_state.image_cache, profiles: damus_state.profiles)
                 
                 Spacer()
                 

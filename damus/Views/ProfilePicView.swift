@@ -7,8 +7,7 @@
 
 import SwiftUI
 
-let PFP_SIZE: CGFloat? = 52.0
-let CORNER_RADIUS: CGFloat = 32
+let PFP_SIZE: CGFloat = 52.0
 
 func id_to_color(_ id: String) -> Color {
     return hex_to_rgb(id)
@@ -47,9 +46,9 @@ struct ProfilePicView: View {
     }
     
     var Placeholder: some View {
-        PlaceholderColor.opacity(0.5)
+        PlaceholderColor
             .frame(width: size, height: size)
-            .cornerRadius(CORNER_RADIUS)
+            .clipShape(Circle())
             .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
             .padding(2)
     }
@@ -100,14 +99,27 @@ struct ProfilePicView: View {
     }
 }
 
-/*
+func make_preview_profiles(_ pubkey: String) -> Profiles {
+    let profiles = Profiles()
+    let picture = "http://cdn.jb55.com/img/red-me.jpg"
+    let profile = Profile(name: "Will", about: "It's me", picture: picture)
+    let ts_profile = TimestampedProfile(profile: profile, timestamp: 0)
+    profiles.add(id: pubkey, profile: ts_profile)
+    return profiles
+}
+
 struct ProfilePicView_Previews: PreviewProvider {
+    static let pubkey = "ca48854ac6555fed8e439ebb4fa2d928410e0eef13fa41164ec45aaaa132d846"
+    
     static var previews: some View {
-        ProfilePicView(picture: "http://cdn.jb55.com/img/red-me.jpg", size: 64, highlight: .none)
+        ProfilePicView(
+            pubkey: pubkey,
+            size: 100,
+            highlight: .none,
+            image_cache: ImageCache(),
+            profiles: make_preview_profiles(pubkey))
     }
 }
- */
-    
 
 func hex_to_rgb(_ hex: String) -> Color {
     guard hex.count >= 6 else {

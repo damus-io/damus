@@ -56,9 +56,6 @@ struct PostView: View {
 
             HStack(alignment: .top) {
                 ZStack(alignment: .leading) {
-                    TextEditor(text: $post)
-                        .focused($focus)
-
                     if self.post == "" {
                         VStack {
                             Text("What's happening?")
@@ -67,6 +64,9 @@ struct PostView: View {
                             Spacer()
                         }
                     }
+                    
+                    TextEditor(text: $post)
+                        .focused($focus)
                 }
 
 

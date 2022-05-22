@@ -54,7 +54,7 @@ class ImageCache {
     
     func insert(_ image: UIImage?, for url: URL) {
         guard let image = image else { return remove(for: url) }
-        let decodedImage = image.decodedImage(Int(PFP_SIZE!))
+        let decodedImage = image.decodedImage(Int(PFP_SIZE))
         lock.lock(); defer { lock.unlock() }
         cache.setObject(decodedImage, forKey: url as AnyObject)
     }
