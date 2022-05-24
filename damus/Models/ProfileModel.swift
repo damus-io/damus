@@ -39,19 +39,14 @@ class ProfileModel: ObservableObject {
         var profile_filter = NostrFilter.filter_kinds([
             NostrKind.text.rawValue,
             NostrKind.boost.rawValue,
+            NostrKind.metadata.rawValue,
+            NostrKind.contacts.rawValue,
             NostrKind.like.rawValue
         ])
         profile_filter.authors = [pubkey]
-        
-        var contact_pks = (contacts?.referenced_pubkeys.map { $0.ref_id }) ?? []
-        contact_pks.append(pubkey)
-        
-        var contacts_filter = NostrFilter.filter_kinds([0,3])
-        contacts_filter.authors = contact_pks
-        
         profile_filter.limit = 1000
         
-        let filters = [profile_filter, contacts_filter]
+        let filters = [profile_filter]
         
         print("subscribing to profile \(pubkey) with sub_id \(sub_id)")
         print_filters(relay_id: "profile", filters: [filters])

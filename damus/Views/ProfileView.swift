@@ -79,7 +79,9 @@ struct ProfileView: View {
             if let contact = profile.contacts {
                 Divider()
                 
-                NavigationLink(destination: FollowingView(contact: contact, damus_state: damus_state)) {
+                let contacts = contact.referenced_pubkeys.map { $0.ref_id }
+                let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
+                NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model)) {
                     HStack {
                         Text("\(profile.following)")
                         Text("Following")

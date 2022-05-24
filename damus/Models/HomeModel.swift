@@ -69,8 +69,7 @@ class HomeModel: ObservableObject {
     }
     
     func handle_contact_event(sub_id: String, relay_id: String, ev: NostrEvent) {
-        load_our_contacts(contacts: self.damus_state.contacts, our_pubkey: self.damus_state.pubkey, ev: ev)
-        add_contact_if_friend(contacts: self.damus_state.contacts, ev: ev)
+        process_contact_event(contacts: damus_state.contacts, pubkey: damus_state.pubkey, ev: ev)
         
         if sub_id == init_subid {
             pool.send(.unsubscribe(init_subid), to: [relay_id])
@@ -246,21 +245,7 @@ class HomeModel: ObservableObject {
     }
     
     func handle_metadata_event(_ ev: NostrEvent) {
-        guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
-            return
-        }
-
-        if let mprof = damus_state.profiles.lookup_with_timestamp(id: ev.pubkey) {
-            if mprof.timestamp > ev.created_at {
-                // skip if we already have an newer profile
-                return
-            }
-        }
-
-        let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at)
-        damus_state.profiles.add(id: ev.pubkey, profile: tprof)
-        
-        notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+        process_metadata_event(profiles: damus_state.profiles, ev: ev)
     }
     
     func get_last_event_of_kind(relay_id: String, kind: Int) -> NostrEvent? {
@@ -391,4 +376,27 @@ func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
         }
     }
     print("-----")
+}
+
+func process_metadata_event(profiles: Profiles, ev: NostrEvent) {
+    guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
+        return
+    }
+
+    if let mprof = profiles.lookup_with_timestamp(id: ev.pubkey) {
+        if mprof.timestamp > ev.created_at {
+            // skip if we already have an newer profile
+            return
+        }
+    }
+
+    let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at)
+    profiles.add(id: ev.pubkey, profile: tprof)
+    
+    notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+}
+
+func process_contact_event(contacts: Contacts, pubkey: String, ev: NostrEvent) {
+    load_our_contacts(contacts: contacts, our_pubkey: pubkey, ev: ev)
+    add_contact_if_friend(contacts: contacts, ev: ev)
 }

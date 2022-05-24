@@ -36,16 +36,24 @@ struct FollowUserView: View {
 }
 
 struct FollowingView: View {
-    let contact: NostrEvent
     let damus_state: DamusState
+    
+    @StateObject var following: FollowingModel
+    
     
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading) {
-                ForEach(contact.referenced_pubkeys) { pk in
-                    FollowUserView(target: .pubkey(pk.ref_id), damus_state: damus_state)
+                ForEach(following.contacts, id: \.self) { pk in
+                    FollowUserView(target: .pubkey(pk), damus_state: damus_state)
                 }
             }
+        }
+        .onAppear {
+            following.subscribe()
+        }
+        .onDisappear {
+            following.unsubscribe()
         }
     }
 }
