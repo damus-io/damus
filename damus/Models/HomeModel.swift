@@ -11,13 +11,14 @@ import Foundation
 class HomeModel: ObservableObject {
     var damus_state: DamusState
     
-    var has_events: Set<String> = Set()
+    var has_event: [String: Set<String>] = [:]
     var last_event_of_kind: [String: [Int: NostrEvent]] = [:]
     var done_init: Bool = false
     
-    let damus_home_subid = UUID().description
-    let damus_contacts_subid = UUID().description
-    let damus_init_subid = UUID().description
+    let home_subid = UUID().description
+    let contacts_subid = UUID().description
+    let notifications_subid = UUID().description
+    let init_subid = UUID().description
     
     @Published var new_notifications: Bool = false
     @Published var notifications: [NostrEvent] = []
@@ -36,22 +37,30 @@ class HomeModel: ObservableObject {
         return damus_state.pool
     }
     
+    func has_sub_id_event(sub_id: String, ev_id: String) -> Bool {
+        if !has_event.keys.contains(sub_id) {
+            has_event[sub_id] = Set()
+            return false
+        }
+        
+        return has_event[sub_id]!.contains(ev_id)
+    }
+    
     func process_event(sub_id: String, relay_id: String, ev: NostrEvent) {
-        if has_events.contains(ev.id) {
+        if has_sub_id_event(sub_id: sub_id, ev_id: ev.id) {
             return
         }
         
-        has_events.insert(ev.id)
         let last_k = get_last_event_of_kind(relay_id: relay_id, kind: ev.kind)
         if last_k == nil || ev.created_at > last_k!.created_at {
             last_event_of_kind[relay_id]?[ev.kind] = ev
         }
         if ev.kind == 1 {
-            handle_text_event(ev)
+            handle_text_event(sub_id: sub_id, ev)
         } else if ev.kind == 0 {
             handle_metadata_event(ev)
         } else if ev.kind == 6 {
-            handle_boost_event(ev)
+            handle_boost_event(sub_id: sub_id, ev)
         } else if ev.kind == 7 {
             handle_like_event(ev)
         } else if ev.kind == 3 {
@@ -61,9 +70,10 @@ class HomeModel: ObservableObject {
     
     func handle_contact_event(sub_id: String, relay_id: String, ev: NostrEvent) {
         load_our_contacts(contacts: self.damus_state.contacts, our_pubkey: self.damus_state.pubkey, ev: ev)
+        add_contact_if_friend(contacts: self.damus_state.contacts, ev: ev)
         
-        if sub_id == damus_init_subid {
-            pool.send(.unsubscribe(damus_init_subid), to: [relay_id])
+        if sub_id == init_subid {
+            pool.send(.unsubscribe(init_subid), to: [relay_id])
             if !done_init {
                 done_init = true
                 send_home_filters(relay_id: nil)
@@ -71,7 +81,7 @@ class HomeModel: ObservableObject {
         }
     }
     
-    func handle_boost_event(_ ev: NostrEvent) {
+    func handle_boost_event(sub_id: String, _ ev: NostrEvent) {
         var boost_ev_id = ev.last_refid()?.ref_id
         
         // CHECK SIGS ON THESE
@@ -79,7 +89,7 @@ class HomeModel: ObservableObject {
             boost_ev_id = inner_ev.id
             
             if inner_ev.kind == 1 {
-                handle_text_event(ev)
+                handle_text_event(sub_id: sub_id, ev)
             }
         }
         
@@ -157,7 +167,7 @@ class HomeModel: ObservableObject {
             switch ev {
             case .event(let sub_id, let ev):
                 // globally handle likes
-                let always_process = sub_id == damus_contacts_subid || sub_id == damus_home_subid || sub_id == damus_init_subid || ev.known_kind == .like || ev.known_kind == .contacts || ev.known_kind == .metadata
+                let always_process = sub_id == notifications_subid || sub_id == contacts_subid || sub_id == home_subid || sub_id == init_subid || ev.known_kind == .like || ev.known_kind == .contacts || ev.known_kind == .metadata
                 if !always_process {
                     // TODO: other views like threads might have their own sub ids, so ignore those events... or should we?
                     return
@@ -178,7 +188,7 @@ class HomeModel: ObservableObject {
         filter.authors = [self.damus_state.pubkey]
         filter.limit = 1
         
-        pool.send(.subscribe(.init(filters: [filter], sub_id: damus_init_subid)), to: [relay_id])
+        pool.send(.subscribe(.init(filters: [filter], sub_id: init_subid)), to: [relay_id])
     }
     
     func send_home_filters(relay_id: String?) {
@@ -189,7 +199,10 @@ class HomeModel: ObservableObject {
         friends.append(damus_state.pubkey)
         
         var contacts_filter = NostrFilter.filter_kinds([0,3])
-        contacts_filter.authors = damus_state.contacts.get_friendosphere()
+        var friendosphere = damus_state.contacts.get_friendosphere()
+        friendosphere.append(damus_state.pubkey)
+        
+        contacts_filter.authors = friendosphere
         
         // TODO: separate likes?
         var home_filter = NostrFilter.filter_kinds([
@@ -200,21 +213,35 @@ class HomeModel: ObservableObject {
         // include our pubkey as well even if we're not technically a friend
         home_filter.authors = friends
         home_filter.limit = 1000
+        
+        var notifications_filter = NostrFilter.filter_kinds([
+            NostrKind.text.rawValue,
+            NostrKind.like.rawValue,
+            NostrKind.boost.rawValue,
+        ])
+        notifications_filter.pubkeys = [damus_state.pubkey]
+        notifications_filter.limit = 1000
 
         var home_filters = [home_filter]
+        var notifications_filters = [notifications_filter]
         var contacts_filters = [contacts_filter]
-        let last_of_k = relay_id.flatMap { last_event_of_kind[$0] } ?? [:]
-        home_filters = update_filters_with_since(last_of_kind: last_of_k, filters: home_filters)
-        contacts_filters = update_filters_with_since(last_of_kind: last_of_k, filters: contacts_filters)
         
-        print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters])
+        let last_of_kind = relay_id.flatMap { last_event_of_kind[$0] } ?? [:]
+        
+        home_filters = update_filters_with_since(last_of_kind: last_of_kind, filters: home_filters)
+        contacts_filters = update_filters_with_since(last_of_kind: last_of_kind, filters: contacts_filters)
+        notifications_filters = update_filters_with_since(last_of_kind: last_of_kind, filters: notifications_filters)
+        
+        print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters, notifications_filters])
         
         if let relay_id = relay_id {
-            pool.send(.subscribe(.init(filters: home_filters, sub_id: damus_home_subid)), to: [relay_id])
-            pool.send(.subscribe(.init(filters: contacts_filters, sub_id: damus_contacts_subid)), to: [relay_id])
+            pool.send(.subscribe(.init(filters: home_filters, sub_id: home_subid)), to: [relay_id])
+            pool.send(.subscribe(.init(filters: contacts_filters, sub_id: contacts_subid)), to: [relay_id])
+            pool.send(.subscribe(.init(filters: notifications_filters, sub_id: notifications_subid)), to: [relay_id])
         } else {
-            pool.send(.subscribe(.init(filters: home_filters, sub_id: damus_home_subid)))
-            pool.send(.subscribe(.init(filters: contacts_filters, sub_id: damus_contacts_subid)))
+            pool.send(.subscribe(.init(filters: home_filters, sub_id: home_subid)))
+            pool.send(.subscribe(.init(filters: contacts_filters, sub_id: contacts_subid)))
+            pool.send(.subscribe(.init(filters: notifications_filters, sub_id: notifications_subid)))
         }
     }
     
@@ -267,14 +294,14 @@ class HomeModel: ObservableObject {
         return false
     }
     
-    func handle_text_event(_ ev: NostrEvent) {
+    func handle_text_event(sub_id: String, _ ev: NostrEvent) {
         if should_hide_event(ev) {
             return
         }
         
-        let _ = insert_home_event(ev)
-        
-        if is_notification(ev: ev, pubkey: self.damus_state.pubkey) {
+        if sub_id == home_subid {
+            let _ = insert_home_event(ev)
+        } else if sub_id == notifications_subid {
             handle_notification(ev: ev)
         }
     }
@@ -291,6 +318,13 @@ func update_signal_from_pool(signal: SignalModel, pool: RelayPool) {
     }
 }
 
+func add_contact_if_friend(contacts: Contacts, ev: NostrEvent) {
+    if !contacts.is_friend(ev.pubkey) {
+        return
+    }
+    
+    contacts.add_friend_contact(ev)
+}
 
 func load_our_contacts(contacts: Contacts, our_pubkey: String, ev: NostrEvent) {
     if ev.pubkey != our_pubkey {
@@ -309,13 +343,51 @@ func load_our_contacts(contacts: Contacts, our_pubkey: String, ev: NostrEvent) {
 }
 
 
+func abbrev_ids(_ ids: [String]) -> String {
+    if ids.count > 5 {
+        let n = ids.count - 5
+        return "[" + ids[..<5].joined(separator: ",") + ", ... (\(n) more)]"
+    }
+    return "\(ids)"
+}
+
+func abbrev_field<T: CustomStringConvertible>(_ n: String, _ field: T?) -> String {
+    guard let field = field else {
+        return ""
+    }
+
+    return "\(n):\(field.description)"
+}
+
+func abbrev_ids_field(_ n: String, _ ids: [String]?) -> String {
+    guard let ids = ids else {
+        return ""
+    }
+
+    return "\(n): \(abbrev_ids(ids))"
+}
+
+func print_filter(_ f: NostrFilter) {
+    let fmt = [
+        abbrev_ids_field("ids", f.ids),
+        abbrev_field("kinds", f.kinds),
+        abbrev_ids_field("authors", f.authors),
+        abbrev_ids_field("referenced_ids", f.referenced_ids),
+        abbrev_ids_field("pubkeys", f.pubkeys),
+        abbrev_field("since", f.since),
+        abbrev_field("until", f.until),
+        abbrev_field("limit", f.limit)
+    ].filter({ !$0.isEmpty }).joined(separator: ",")
+    
+    print("Filter(\(fmt))")
+}
 
 func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
     let relays = relay_id ?? "relays"
     print("connected to \(relays) with filters:")
     for group in groups {
         for filter in group {
-            print(filter)
+            print_filter(filter)
         }
     }
     print("-----")

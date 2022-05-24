@@ -20,7 +20,7 @@ struct damusApp: App {
 }
 
 struct MainView: View {
-    @State var needs_setup = true;
+    @State var needs_setup = false;
     @State var keypair: Keypair? = nil;
     
     var body: some View {

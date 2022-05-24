@@ -37,8 +37,10 @@ class Contacts {
     
     func add_friend_contact(_ contact: NostrEvent) {
         friends.insert(contact.pubkey)
-        for friend in contact.referenced_pubkeys {
-            friend_of_friends.insert(friend.ref_id)
+        for tag in contact.tags {
+            if tag.count >= 2 && tag[0] == "p" {
+                friend_of_friends.insert(tag[1])
+            }
         }
     }
     

@@ -65,7 +65,6 @@ class RelayConnection: WebSocketDelegate {
             print("failed to encode nostr req: \(req)")
             return
         }
-        print("req: \(req)")
 
         socket.write(string: req)
     }

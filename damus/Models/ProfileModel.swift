@@ -36,25 +36,34 @@ class ProfileModel: ObservableObject {
     }
     
     func subscribe() {
-        let kinds: [Int] = [
+        var profile_filter = NostrFilter.filter_kinds([
             NostrKind.text.rawValue,
-            NostrKind.delete.rawValue,
-            NostrKind.contacts.rawValue,
-            NostrKind.metadata.rawValue,
-            NostrKind.boost.rawValue
-        ]
+            NostrKind.boost.rawValue,
+            NostrKind.like.rawValue
+        ])
+        profile_filter.authors = [pubkey]
         
-        var filter = NostrFilter.filter_authors([pubkey])
-        filter.kinds = kinds
-        filter.limit = 1000
+        var contact_pks = (contacts?.referenced_pubkeys.map { $0.ref_id }) ?? []
+        contact_pks.append(pubkey)
+        
+        var contacts_filter = NostrFilter.filter_kinds([0,3])
+        contacts_filter.authors = contact_pks
+        
+        profile_filter.limit = 1000
+        
+        let filters = [profile_filter, contacts_filter]
         
         print("subscribing to profile \(pubkey) with sub_id \(sub_id)")
-        damus.pool.subscribe(sub_id: sub_id, filters: [filter], handler: handle_event)
+        print_filters(relay_id: "profile", filters: [filters])
+        damus.pool.subscribe(sub_id: sub_id, filters: filters, handler: handle_event)
     }
     
     func handle_profile_contact_event(_ ev: NostrEvent) {
         self.contacts = ev
         self.following = count_pubkeys(ev.tags)
+        if damus.contacts.is_friend(ev.pubkey) {
+            self.damus.contacts.add_friend_contact(ev)
+        }
     }
     
     func add_event(_ ev: NostrEvent) {

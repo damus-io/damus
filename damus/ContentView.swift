@@ -364,20 +364,12 @@ struct ContentView_Previews: PreviewProvider {
  */
 
 
-func get_metadata_since_time(_ metadata_event: NostrEvent?) -> Int64? {
-    if metadata_event == nil {
-        return nil
-    }
-
-    return metadata_event!.created_at - 60 * 10
-}
-
 func get_since_time(last_event: NostrEvent?) -> Int64? {
-    if last_event == nil {
-        return nil
+    if let last_event = last_event {
+        return last_event.created_at - 60 * 10
     }
-
-    return last_event!.created_at - 60 * 10
+    
+    return nil
 }
 
 /*
@@ -479,13 +471,7 @@ func update_filters_with_since(last_of_kind: [Int: NostrEvent], filters: [NostrF
         let initial: Int64? = nil
         let earliest = kinds.reduce(initial) { earliest, kind in
             let last = last_of_kind[kind]
-            var since: Int64? = nil
-            
-            if kind == 0 {
-                since = get_metadata_since_time(last)
-            } else {
-                since = get_since_time(last_event: last)
-            }
+            let since: Int64? = get_since_time(last_event: last)
             
             if earliest == nil {
                 if since == nil {
@@ -494,7 +480,11 @@ func update_filters_with_since(last_of_kind: [Int: NostrEvent], filters: [NostrF
                 return since
             }
             
-            return earliest.flatMap { earliest in since.map { since in since < earliest ? since : earliest } }
+            if since == nil {
+                return earliest
+            }
+            
+            return since! < earliest! ? since! : earliest!
         }
         
         if let earliest = earliest {
