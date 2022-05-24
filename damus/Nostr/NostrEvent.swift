@@ -349,22 +349,33 @@ func get_referenced_ids(tags: [[String]], key: String) -> [ReferencedId] {
     }
 }
 
-func make_first_contact_event(keypair: Keypair) -> NostrEvent {
+func make_first_contact_event(keypair: Keypair) -> NostrEvent? {
+    guard let privkey = keypair.privkey else {
+        return nil
+    }
+    
     let rw_relay_info = RelayInfo(read: true, write: true)
-    let damus_relay = "wss://relay.damus.io"
     let relays: [String: RelayInfo] = ["wss://relay.damus.io": rw_relay_info]
     let relay_json = encode_json(relays)!
     let damus_pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
+    let tags = [
+        ["p", damus_pubkey],
+        ["p", keypair.pubkey] // you're a friend of yourself!
+    ]
     let ev = NostrEvent(content: relay_json,
                         pubkey: keypair.pubkey,
                         kind: NostrKind.contacts.rawValue,
-                        tags: [["p", damus_pubkey, damus_relay]])
+                        tags: tags)
     ev.calculate_id()
-    ev.sign(privkey: keypair.privkey)
+    ev.sign(privkey: privkey)
     return ev
 }
 
-func make_metadata_event(keypair: Keypair, metadata: NostrMetadata) -> NostrEvent {
+func make_metadata_event(keypair: Keypair, metadata: NostrMetadata) -> NostrEvent? {
+    guard let privkey = keypair.privkey else {
+        return nil
+    }
+    
     let metadata_json = encode_json(metadata)!
     let ev = NostrEvent(content: metadata_json,
                         pubkey: keypair.pubkey,
@@ -372,7 +383,7 @@ func make_metadata_event(keypair: Keypair, metadata: NostrMetadata) -> NostrEven
                         tags: [])
     
     ev.calculate_id()
-    ev.sign(privkey: keypair.privkey)
+    ev.sign(privkey: privkey)
     return ev
 }
 

@@ -75,6 +75,9 @@ func char_to_hex(_ c: UInt8) -> UInt8?
 
 func hex_decode(_ str: String) -> [UInt8]?
 {
+    if str.count == 0 {
+        return nil
+    }
     var ret: [UInt8] = []
     let chars = Array(str.utf8)
     var i: Int = 0

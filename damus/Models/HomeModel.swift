@@ -1,0 +1,322 @@
+//
+//  HomeModel.swift
+//  damus
+//
+//  Created by William Casarin on 2022-05-24.
+//
+
+import Foundation
+
+
+class HomeModel: ObservableObject {
+    var damus_state: DamusState
+    
+    var has_events: Set<String> = Set()
+    var last_event_of_kind: [String: [Int: NostrEvent]] = [:]
+    var done_init: Bool = false
+    
+    let damus_home_subid = UUID().description
+    let damus_contacts_subid = UUID().description
+    let damus_init_subid = UUID().description
+    
+    @Published var new_notifications: Bool = false
+    @Published var notifications: [NostrEvent] = []
+    @Published var events: [NostrEvent] = []
+    @Published var signal: SignalModel = SignalModel()
+    
+    init() {
+        self.damus_state = DamusState.empty
+    }
+    
+    init(damus_state: DamusState) {
+        self.damus_state = damus_state
+    }
+    
+    var pool: RelayPool {
+        return damus_state.pool
+    }
+    
+    func process_event(sub_id: String, relay_id: String, ev: NostrEvent) {
+        if has_events.contains(ev.id) {
+            return
+        }
+        
+        has_events.insert(ev.id)
+        let last_k = get_last_event_of_kind(relay_id: relay_id, kind: ev.kind)
+        if last_k == nil || ev.created_at > last_k!.created_at {
+            last_event_of_kind[relay_id]?[ev.kind] = ev
+        }
+        if ev.kind == 1 {
+            handle_text_event(ev)
+        } else if ev.kind == 0 {
+            handle_metadata_event(ev)
+        } else if ev.kind == 6 {
+            handle_boost_event(ev)
+        } else if ev.kind == 7 {
+            handle_like_event(ev)
+        } else if ev.kind == 3 {
+            handle_contact_event(sub_id: sub_id, relay_id: relay_id, ev: ev)
+        }
+    }
+    
+    func handle_contact_event(sub_id: String, relay_id: String, ev: NostrEvent) {
+        load_our_contacts(contacts: self.damus_state.contacts, our_pubkey: self.damus_state.pubkey, ev: ev)
+        
+        if sub_id == damus_init_subid {
+            pool.send(.unsubscribe(damus_init_subid), to: [relay_id])
+            if !done_init {
+                done_init = true
+                send_home_filters(relay_id: nil)
+            }
+        }
+    }
+    
+    func handle_boost_event(_ ev: NostrEvent) {
+        var boost_ev_id = ev.last_refid()?.ref_id
+        
+        // CHECK SIGS ON THESE
+        if let inner_ev = ev.inner_event {
+            boost_ev_id = inner_ev.id
+            
+            if inner_ev.kind == 1 {
+                handle_text_event(ev)
+            }
+        }
+        
+        guard let e = boost_ev_id else {
+            return
+        }
+        
+        switch self.damus_state.boosts.add_event(ev, target: e) {
+        case .already_counted:
+            break
+        case .success(let n):
+            let boosted = Counted(event: ev, id: e, total: n)
+            notify(.boosted, boosted)
+        }
+    }
+    
+    func handle_like_event(_ ev: NostrEvent) {
+        guard let e = ev.last_refid() else {
+            // no id ref? invalid like event
+            return
+        }
+        
+        // CHECK SIGS ON THESE
+        
+        switch damus_state.likes.add_event(ev, target: e.ref_id) {
+        case .already_counted:
+            break
+        case .success(let n):
+            let liked = Counted(event: ev, id: e.ref_id, total: n)
+            notify(.liked, liked)
+        }
+    }
+    
+    
+    func handle_event(relay_id: String, conn_event: NostrConnectionEvent) {
+        switch conn_event {
+        case .ws_event(let ev):
+
+            /*
+            if let wsev = ws_nostr_event(relay: relay_id, ev: ev) {
+                wsev.flags |= 1
+                self.events.insert(wsev, at: 0)
+            }
+             */
+            
+
+            switch ev {
+            case .connected:
+                if !done_init {
+                    send_initial_filters(relay_id: relay_id)
+                } else {
+                    send_home_filters(relay_id: relay_id)
+                }
+            case .error(let merr):
+                let desc = merr.debugDescription
+                if desc.contains("Software caused connection abort") {
+                    pool.reconnect(to: [relay_id])
+                }
+            case .disconnected: fallthrough
+            case .cancelled:
+                pool.reconnect(to: [relay_id])
+            case .reconnectSuggested(let t):
+                if t {
+                    pool.reconnect(to: [relay_id])
+                }
+            default:
+                break
+            }
+            
+            update_signal_from_pool(signal: self.signal, pool: self.pool)
+
+            print("ws_event \(ev)")
+
+        case .nostr_event(let ev):
+            switch ev {
+            case .event(let sub_id, let ev):
+                // globally handle likes
+                let always_process = sub_id == damus_contacts_subid || sub_id == damus_home_subid || sub_id == damus_init_subid || ev.known_kind == .like || ev.known_kind == .contacts || ev.known_kind == .metadata
+                if !always_process {
+                    // TODO: other views like threads might have their own sub ids, so ignore those events... or should we?
+                    return
+                }
+                
+                self.process_event(sub_id: sub_id, relay_id: relay_id, ev: ev)
+            case .notice(let msg):
+                //self.events.insert(NostrEvent(content: "NOTICE from \(relay_id): \(msg)", pubkey: "system"), at: 0)
+                print(msg)
+            }
+        }
+    }
+    
+    
+    /// Send the initial filters, just our contact list mostly
+    func send_initial_filters(relay_id: String) {
+        var filter = NostrFilter.filter_contacts
+        filter.authors = [self.damus_state.pubkey]
+        filter.limit = 1
+        
+        pool.send(.subscribe(.init(filters: [filter], sub_id: damus_init_subid)), to: [relay_id])
+    }
+    
+    func send_home_filters(relay_id: String?) {
+        // TODO: since times should be based on events from a specific relay
+        // perhaps we could mark this in the relay pool somehow
+        
+        var friends = damus_state.contacts.get_friend_list()
+        friends.append(damus_state.pubkey)
+        
+        var contacts_filter = NostrFilter.filter_kinds([0,3])
+        contacts_filter.authors = damus_state.contacts.get_friendosphere()
+        
+        // TODO: separate likes?
+        var home_filter = NostrFilter.filter_kinds([
+            NostrKind.text.rawValue,
+            NostrKind.like.rawValue,
+            NostrKind.boost.rawValue,
+        ])
+        // include our pubkey as well even if we're not technically a friend
+        home_filter.authors = friends
+        home_filter.limit = 1000
+
+        var home_filters = [home_filter]
+        var contacts_filters = [contacts_filter]
+        let last_of_k = relay_id.flatMap { last_event_of_kind[$0] } ?? [:]
+        home_filters = update_filters_with_since(last_of_kind: last_of_k, filters: home_filters)
+        contacts_filters = update_filters_with_since(last_of_kind: last_of_k, filters: contacts_filters)
+        
+        print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters])
+        
+        if let relay_id = relay_id {
+            pool.send(.subscribe(.init(filters: home_filters, sub_id: damus_home_subid)), to: [relay_id])
+            pool.send(.subscribe(.init(filters: contacts_filters, sub_id: damus_contacts_subid)), to: [relay_id])
+        } else {
+            pool.send(.subscribe(.init(filters: home_filters, sub_id: damus_home_subid)))
+            pool.send(.subscribe(.init(filters: contacts_filters, sub_id: damus_contacts_subid)))
+        }
+    }
+    
+    func handle_metadata_event(_ ev: NostrEvent) {
+        guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
+            return
+        }
+
+        if let mprof = damus_state.profiles.lookup_with_timestamp(id: ev.pubkey) {
+            if mprof.timestamp > ev.created_at {
+                // skip if we already have an newer profile
+                return
+            }
+        }
+
+        let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at)
+        damus_state.profiles.add(id: ev.pubkey, profile: tprof)
+        
+        notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+    }
+    
+    func get_last_event_of_kind(relay_id: String, kind: Int) -> NostrEvent? {
+        guard let m = last_event_of_kind[relay_id] else {
+            last_event_of_kind[relay_id] = [:]
+            return nil
+        }
+        
+        return m[kind]
+    }
+    
+    func handle_notification(ev: NostrEvent) {
+        if !insert_uniq_sorted_event(events: &notifications, new_ev: ev, cmp: { $0.created_at > $1.created_at }) {
+            return
+        }
+        
+        let last_notified = get_last_notified()
+        
+        if last_notified == nil || last_notified!.created_at < ev.created_at {
+            save_last_notified(ev)
+            new_notifications = true
+        }
+    }
+    
+    func insert_home_event(_ ev: NostrEvent) -> Bool {
+        let ok = insert_uniq_sorted_event(events: &self.events, new_ev: ev, cmp: { $0.created_at > $1.created_at })
+        return ok
+    }
+    
+    func should_hide_event(_ ev: NostrEvent) -> Bool {
+        return false
+    }
+    
+    func handle_text_event(_ ev: NostrEvent) {
+        if should_hide_event(ev) {
+            return
+        }
+        
+        let _ = insert_home_event(ev)
+        
+        if is_notification(ev: ev, pubkey: self.damus_state.pubkey) {
+            handle_notification(ev: ev)
+        }
+    }
+}
+
+
+func update_signal_from_pool(signal: SignalModel, pool: RelayPool) {
+    if signal.max_signal != pool.relays.count {
+        signal.max_signal = pool.relays.count
+    }
+    
+    if signal.signal != pool.num_connecting {
+        signal.signal = signal.max_signal - pool.num_connecting
+    }
+}
+
+
+func load_our_contacts(contacts: Contacts, our_pubkey: String, ev: NostrEvent) {
+    if ev.pubkey != our_pubkey {
+        return
+    }
+    
+    contacts.event = ev
+    
+    // our contacts
+    for tag in ev.tags {
+        if tag.count > 1 && tag[0] == "p" {
+            // TODO: validate pubkey?
+            contacts.add_friend_pubkey(tag[1])
+        }
+    }
+}
+
+
+
+func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
+    let relays = relay_id ?? "relays"
+    print("connected to \(relays) with filters:")
+    for group in groups {
+        for filter in group {
+            print(filter)
+        }
+    }
+    print("-----")
+}

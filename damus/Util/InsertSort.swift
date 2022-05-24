@@ -7,6 +7,16 @@
 
 import Foundation
 
+func insert_uniq<T: Equatable>(xs: inout [T], new_x: T) -> Bool {
+    for x in xs {
+        if x == new_x {
+            return false
+        }
+    }
+    
+    xs.append(new_x)
+    return true
+}
 
 func insert_uniq_sorted_event(events: inout [NostrEvent], new_ev: NostrEvent, cmp: (NostrEvent, NostrEvent) -> Bool) -> Bool {
     var i: Int = 0

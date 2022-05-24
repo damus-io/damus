@@ -18,6 +18,13 @@ class ProfileModel: ObservableObject {
     var seen_event: Set<String> = Set()
     var sub_id = UUID().description
     
+    func get_follow_target() -> FollowTarget {
+        if let contacts = contacts {
+            return .contact(contacts)
+        }
+        return .pubkey(pubkey)
+    }
+    
     init(pubkey: String, damus: DamusState) {
         self.pubkey = pubkey
         self.damus = damus
@@ -39,7 +46,7 @@ class ProfileModel: ObservableObject {
         
         var filter = NostrFilter.filter_authors([pubkey])
         filter.kinds = kinds
-        filter.limit = 500
+        filter.limit = 1000
         
         print("subscribing to profile \(pubkey) with sub_id \(sub_id)")
         damus.pool.subscribe(sub_id: sub_id, filters: [filter], handler: handle_event)

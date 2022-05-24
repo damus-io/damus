@@ -31,28 +31,30 @@ enum ThreadState {
 }
 
 struct ContentView: View {
-    let pubkey: String
-    let privkey: String
+    let keypair: Keypair
+    
+    var pubkey: String {
+        return keypair.pubkey
+    }
+    
+    var privkey: String? {
+        return keypair.privkey
+    }
+    
     @State var status: String = "Not connected"
     @State var active_sheet: Sheets? = nil
-    @State var loading: Bool = true
     @State var damus_state: DamusState? = nil
     @State var selected_timeline: Timeline? = .home
     @State var is_thread_open: Bool = false
     @State var is_profile_open: Bool = false
-    @State var last_event_of_kind: [String: [Int: NostrEvent]] = [:]
-    @State var has_events: [String: ()] = [:]
-    @State var new_notifications: Bool = false
     @State var event: NostrEvent? = nil
-    @State var events: [NostrEvent] = []
-    @State var friend_events: [NostrEvent] = []
-    @State var notifications: [NostrEvent] = []
     @State var active_profile: String? = nil
     @State var active_search: NostrFilter? = nil
     @State var active_event_id: String? = nil
     @State var profile_open: Bool = false
     @State var thread_open: Bool = false
     @State var search_open: Bool = false
+    @StateObject var home: HomeModel = HomeModel()
     
     // connect retry timer
     let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
@@ -64,9 +66,10 @@ struct ContentView: View {
             HStack {
                 Spacer()
         
-                if self.loading {
-                    ProgressView()
-                        .progressViewStyle(.circular)
+                if home.signal.signal != home.signal.max_signal {
+                    Text("\(home.signal.signal)/\(home.signal.max_signal)")
+                        .font(.callout)
+                        .foregroundColor(.gray)
                 }
             }
 
@@ -77,10 +80,12 @@ struct ContentView: View {
     var PostingTimelineView: some View {
         ZStack {
             if let damus = self.damus_state {
-                TimelineView(events: $friend_events, damus: damus)
+                TimelineView(events: $home.events, damus: damus)
             }
-            PostButtonContainer {
-                self.active_sheet = .post
+            if privkey != nil {
+                PostButtonContainer {
+                    self.active_sheet = .post
+                }
             }
         }
     }
@@ -105,13 +110,9 @@ struct ContentView: View {
                     PostingTimelineView
                     
                 case .notifications:
-                    TimelineView(events: $notifications, damus: damus)
+                    TimelineView(events: $home.notifications, damus: damus)
                         .navigationTitle("Notifications")
                 
-                case .global:
-                    
-                    TimelineView(events: $events, damus: damus)
-                        .navigationTitle("Global")
                 case .none:
                     EmptyView()
                 }
@@ -165,7 +166,7 @@ struct ContentView: View {
                 }
             }
             
-            TabBar(new_notifications: $new_notifications, selected: $selected_timeline, action: switch_timeline)
+            TabBar(new_notifications: $home.new_notifications, selected: $selected_timeline, action: switch_timeline)
         }
         .onAppear() {
             self.connect()
@@ -201,6 +202,10 @@ struct ContentView: View {
             
         }
         .onReceive(handle_notify(.boost)) { notif in
+            guard let privkey = self.privkey else {
+                return
+            }
+
             let ev = notif.object as! NostrEvent
             let boost = make_boost_event(pubkey: pubkey, privkey: privkey, boosted: ev)
             self.damus_state?.pool.send(.event(boost))
@@ -215,6 +220,9 @@ struct ContentView: View {
             self.active_sheet = .reply(ev)
         }
         .onReceive(handle_notify(.like)) { like in
+            guard let privkey = self.privkey else {
+                return
+            }
             let ev = like.object as! NostrEvent
             let like_ev = make_like_event(pubkey: pubkey, privkey: privkey, liked: ev)
             self.damus_state?.pool.send(.event(like_ev))
@@ -224,6 +232,10 @@ struct ContentView: View {
             self.damus_state?.pool.send(.event(ev))
         }
         .onReceive(handle_notify(.unfollow)) { notif in
+            guard let privkey = self.privkey else {
+                return
+            }
+            
             let pk = notif.object as! String
             guard let damus = self.damus_state else {
                 return
@@ -235,12 +247,16 @@ struct ContentView: View {
                              privkey: privkey,
                              unfollow: pk) {
                 notify(.unfollowed, pk)
-                damus.contacts.friends.remove(pk)
+                damus.contacts.remove_friend(pk)
                 //friend_events = friend_events.filter { $0.pubkey != pk }
             }
         }
         .onReceive(handle_notify(.follow)) { notif in
-            let pk = notif.object as! String
+            guard let privkey = self.privkey else {
+                return
+            }
+            
+            let fnotify = notif.object as! FollowTarget
             guard let damus = self.damus_state else {
                 return
             }
@@ -249,12 +265,22 @@ struct ContentView: View {
                            our_contacts: damus.contacts.event,
                            pubkey: damus.pubkey,
                            privkey: privkey,
-                           follow: ReferencedId(ref_id: pk, relay_id: nil, key: "p")) {
-                notify(.followed, pk)
-                damus.contacts.friends.insert(pk)
+                           follow: ReferencedId(ref_id: fnotify.pubkey, relay_id: nil, key: "p")) {
+                notify(.followed, fnotify.pubkey)
+                
+                switch fnotify {
+                case .pubkey(let pk):
+                    damus.contacts.add_friend_pubkey(pk)
+                case .contact(let ev):
+                    damus.contacts.add_friend_contact(ev)
+                }
             }
         }
         .onReceive(handle_notify(.post)) { obj in
+            guard let privkey = self.privkey else {
+                return
+            }
+            
             let post_res = obj.object as! NostrPostResult
             switch post_res {
             case .post(let post):
@@ -268,12 +294,11 @@ struct ContentView: View {
         }
         .onReceive(timer) { n in
             self.damus_state?.pool.connect_to_disconnected()
-            self.loading = (self.damus_state?.pool.num_connecting ?? 0) != 0
         }
     }
     
     func is_friend_event(_ ev: NostrEvent) -> Bool {
-        return damus.is_friend_event(ev, our_pubkey: self.pubkey, friends: self.damus_state!.contacts.friends)
+        return damus.is_friend_event(ev, our_pubkey: self.pubkey, contacts: self.damus_state!.contacts)
     }
 
     func switch_timeline(_ timeline: Timeline) {
@@ -283,7 +308,7 @@ struct ContentView: View {
         }
         
         if (timeline != .notifications && self.selected_timeline == .notifications) || timeline == .notifications {
-            new_notifications = false
+            home.new_notifications = false
         }
         self.selected_timeline = timeline
         NotificationCenter.default.post(name: .switched_timeline, object: timeline)
@@ -312,9 +337,9 @@ struct ContentView: View {
         add_relay(pool, "wss://nostr-relay.freeberty.net")
         add_relay(pool, "wss://nostr-relay.untethr.me")
 
-        pool.register_handler(sub_id: sub_id, handler: handle_event)
+        pool.register_handler(sub_id: sub_id, handler: home.handle_event)
 
-        self.damus_state = DamusState(pool: pool, pubkey: pubkey,
+        self.damus_state = DamusState(pool: pool, keypair: keypair,
                                 likes: EventCounter(our_pubkey: pubkey),
                                 boosts: EventCounter(our_pubkey: pubkey),
                                 contacts: Contacts(),
@@ -322,239 +347,12 @@ struct ContentView: View {
                                 image_cache: ImageCache(),
                                 profiles: Profiles()
         )
+        home.damus_state = self.damus_state!
+        
         pool.connect()
     }
 
-    func handle_contact_event(_ ev: NostrEvent) {
-        if ev.pubkey == self.pubkey {
-            damus_state!.contacts.event = ev
-            // our contacts
-            for tag in ev.tags {
-                if tag.count > 1 && tag[0] == "p" {
-                    damus_state!.contacts.friends.insert(tag[1])
-                }
-            }
-        }
-    }
     
-    func handle_boost_event(_ ev: NostrEvent) {
-        var boost_ev_id = ev.last_refid()?.ref_id
-        
-        // CHECK SIGS ON THESE
-        if let inner_ev = ev.inner_event {
-            boost_ev_id = inner_ev.id
-            
-            if inner_ev.kind == 1 {
-                handle_text_event(ev)
-            }
-        }
-        
-        guard let e = boost_ev_id else {
-            return
-        }
-        
-        switch damus_state!.boosts.add_event(ev, target: e) {
-        case .already_counted:
-            break
-        case .success(let n):
-            let boosted = Counted(event: ev, id: e, total: n)
-            notify(.boosted, boosted)
-        }
-    }
-    
-    func handle_like_event(_ ev: NostrEvent) {
-        guard let e = ev.last_refid() else {
-            // no id ref? invalid like event
-            return
-        }
-        
-        // CHECK SIGS ON THESE
-        
-        switch damus_state!.likes.add_event(ev, target: e.ref_id) {
-        case .already_counted:
-            break
-        case .success(let n):
-            let liked = Counted(event: ev, id: e.ref_id, total: n)
-            notify(.liked, liked)
-        }
-    }
-    
-    func handle_metadata_event(_ ev: NostrEvent) {
-        guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
-            return
-        }
-
-        if let mprof = damus_state!.profiles.lookup_with_timestamp(id: ev.pubkey) {
-            if mprof.timestamp > ev.created_at {
-                // skip if we already have an newer profile
-                return
-            }
-        }
-
-        let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at)
-        damus_state!.profiles.add(id: ev.pubkey, profile: tprof)
-        
-        notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-    }
-    
-    func get_last_event_of_kind(relay_id: String, kind: Int) -> NostrEvent? {
-        guard let m = last_event_of_kind[relay_id] else {
-            last_event_of_kind[relay_id] = [:]
-            return nil
-        }
-        
-        return m[kind]
-    }
-    
-    func send_filters(relay_id: String) {
-        // TODO: since times should be based on events from a specific relay
-        // perhaps we could mark this in the relay pool somehow
-        let text_filter = NostrFilter.filter_kinds([1,5,6,7])
-        let profile_filter = NostrFilter.filter_profiles
-        var contacts_filter = NostrFilter.filter_contacts
-        
-        contacts_filter.authors = [self.pubkey]
-
-        var filters = [text_filter, profile_filter, contacts_filter]
-
-        filters = update_filters_with_since(last_of_kind: last_event_of_kind[relay_id] ?? [:], filters: filters)
-        
-        print("connected to \(relay_id) with filters:")
-        for filter in filters {
-            print(filter)
-        }
-        print("-----")
-        
-        self.damus_state?.pool.send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: [relay_id])
-        //self.pool?.send(.subscribe(.init(filters: [notification_filter], sub_id: "notifications")))
-    }
-    
-    func handle_notification(ev: NostrEvent) {
-        notifications.append(ev)
-        notifications = notifications.sorted { $0.created_at > $1.created_at }
-        
-        let last_notified = get_last_notified()
-        
-        if last_notified == nil || last_notified!.created_at < ev.created_at {
-            save_last_notified(ev)
-            new_notifications = true
-        }
-    }
-    
-    func handle_friend_event(_ ev: NostrEvent) {
-        if !is_friend_event(ev) {
-            return
-        }
-        if !insert_uniq_sorted_event(events: &self.friend_events, new_ev: ev, cmp: { $0.created_at > $1.created_at } ) {
-            return
-        }
-    }
-    
-    func handle_text_event(_ ev: NostrEvent) {
-        if should_hide_event(ev) {
-            return
-        }
-        
-        if !insert_uniq_sorted_event(events: &self.events, new_ev: ev, cmp: { $0.created_at > $1.created_at }) {
-            return
-        }
-        
-        handle_friend_event(ev)
-        
-        if is_notification(ev: ev, pubkey: pubkey) {
-            handle_notification(ev: ev)
-        }
-    }
-    
-    func process_event(relay_id: String, ev: NostrEvent) {
-        if has_events[ev.id] != nil {
-            return
-        }
-        
-        has_events[ev.id] = ()
-        let last_k = get_last_event_of_kind(relay_id: relay_id, kind: ev.kind)
-        if last_k == nil || ev.created_at > last_k!.created_at {
-            last_event_of_kind[relay_id]?[ev.kind] = ev
-        }
-        if ev.kind == 1 {
-            handle_text_event(ev)
-        } else if ev.kind == 0 {
-            handle_metadata_event(ev)
-        } else if ev.kind == 6 {
-            handle_boost_event(ev)
-        } else if ev.kind == 7 {
-            handle_like_event(ev)
-        } else if ev.kind == 3 {
-            handle_contact_event(ev)
-            
-            if ev.pubkey == pubkey {
-                process_friend_events()
-            }
-        }
-    }
-    
-    func process_friend_events() {
-        for event in events {
-            handle_friend_event(event)
-        }
-    }
-    
-    func handle_event(relay_id: String, conn_event: NostrConnectionEvent) {
-        switch conn_event {
-        case .ws_event(let ev):
-
-            /*
-            if let wsev = ws_nostr_event(relay: relay_id, ev: ev) {
-                wsev.flags |= 1
-                self.events.insert(wsev, at: 0)
-            }
-             */
-            
-
-            switch ev {
-            case .connected:
-                send_filters(relay_id: relay_id)
-            case .error(let merr):
-                let desc = merr.debugDescription
-                if desc.contains("Software caused connection abort") {
-                    self.damus_state?.pool.reconnect(to: [relay_id])
-                }
-            case .disconnected: fallthrough
-            case .cancelled:
-                self.damus_state?.pool.reconnect(to: [relay_id])
-            case .reconnectSuggested(let t):
-                if t {
-                    self.damus_state?.pool.reconnect(to: [relay_id])
-                }
-            default:
-                break
-            }
-            
-            self.loading = (self.damus_state?.pool.num_connecting ?? 0) != 0
-
-            print("ws_event \(ev)")
-
-        case .nostr_event(let ev):
-            switch ev {
-            case .event(let sub_id, let ev):
-                // globally handle likes
-                let always_process = ev.known_kind == .like || ev.known_kind == .contacts || ev.known_kind == .metadata
-                if !always_process && sub_id != self.sub_id {
-                    // TODO: other views like threads might have their own sub ids, so ignore those events... or should we?
-                    return
-                }
-                
-                self.process_event(relay_id: relay_id, ev: ev)
-            case .notice(let msg):
-                self.events.insert(NostrEvent(content: "NOTICE from \(relay_id): \(msg)", pubkey: "system"), at: 0)
-                print(msg)
-            }
-        }
-    }
-
-    func should_hide_event(_ ev: NostrEvent) -> Bool {
-        return false
-    }
 }
 
 /*
@@ -574,9 +372,9 @@ func get_metadata_since_time(_ metadata_event: NostrEvent?) -> Int64? {
     return metadata_event!.created_at - 60 * 10
 }
 
-func get_since_time(last_event: NostrEvent?) -> Int64 {
+func get_since_time(last_event: NostrEvent?) -> Int64? {
     if last_event == nil {
-        return Int64(Date().timeIntervalSince1970) - (24 * 60 * 60 * 3)
+        return nil
     }
 
     return last_event!.created_at - 60 * 10
@@ -696,7 +494,7 @@ func update_filters_with_since(last_of_kind: [Int: NostrEvent], filters: [NostrF
                 return since
             }
             
-            return since! < earliest! ? since! : earliest!
+            return earliest.flatMap { earliest in since.map { since in since < earliest ? since : earliest } }
         }
         
         if let earliest = earliest {

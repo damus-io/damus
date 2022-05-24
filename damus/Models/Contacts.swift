@@ -9,9 +9,47 @@ import Foundation
 
 
 class Contacts {
-    var friends: Set<String> = Set()
+    private var friends: Set<String> = Set()
+    private var friend_of_friends: Set<String> = Set()
     var event: NostrEvent?
     
+    func get_friendosphere() -> [String] {
+        var fs = get_friend_list()
+        fs.append(contentsOf: get_friend_of_friend_list())
+        return fs
+    }
+    
+    func remove_friend(_ pubkey: String) {
+        friends.remove(pubkey)
+    }
+    
+    func get_friend_list() -> [String] {
+        return Array(friends)
+    }
+    
+    func get_friend_of_friend_list() -> [String] {
+        return Array(friend_of_friends)
+    }
+    
+    func add_friend_pubkey(_ pubkey: String) {
+        friends.insert(pubkey)
+    }
+    
+    func add_friend_contact(_ contact: NostrEvent) {
+        friends.insert(contact.pubkey)
+        for friend in contact.referenced_pubkeys {
+            friend_of_friends.insert(friend.ref_id)
+        }
+    }
+    
+    func is_friend_of_friend(_ pubkey: String) -> Bool {
+        return friend_of_friends.contains(pubkey)
+    }
+    
+    func is_in_friendosphere(_ pubkey: String) -> Bool {
+        return friends.contains(pubkey) || friend_of_friends.contains(pubkey)
+    }
+
     func is_friend(_ pubkey: String) -> Bool {
         return friends.contains(pubkey)
     }
@@ -121,9 +159,9 @@ func make_contact_relays(_ relays: [RelayDescriptor]) -> [String: RelayInfo] {
 }
 
 // TODO: tests for this
-func is_friend_event(_ ev: NostrEvent, our_pubkey: String, friends: Set<String>) -> Bool
+func is_friend_event(_ ev: NostrEvent, our_pubkey: String, contacts: Contacts) -> Bool
 {
-    if !friends.contains(ev.pubkey) {
+    if !contacts.is_friend(ev.pubkey) {
         return false
     }
     
@@ -133,7 +171,7 @@ func is_friend_event(_ ev: NostrEvent, our_pubkey: String, friends: Set<String>)
     
     // show our replies?
     for pk in ev.referenced_pubkeys {
-        if friends.contains(pk.ref_id) {
+        if contacts.is_friend(pk.ref_id) {
             return true
         }
     }

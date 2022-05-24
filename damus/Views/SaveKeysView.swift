@@ -39,20 +39,22 @@ struct SaveKeysView: View {
                     .foregroundColor(.white)
                     .padding(.bottom, 10)
                 
-                SaveKeyView(text: account.pubkey, is_copied: $pub_copied)
+                SaveKeyView(text: account.pubkey_bech32, is_copied: $pub_copied)
                     .padding(.bottom, 10)
                 
-                Text("Private Key")
-                    .font(.title2.bold())
-                    .foregroundColor(.white)
-                    .padding(.bottom, 10)
-                
-                Text("This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!")
-                    .foregroundColor(.white)
-                    .padding(.bottom, 10)
-                
-                SaveKeyView(text: account.privkey, is_copied: $priv_copied)
-                    .padding(.bottom, 10)
+                if pub_copied {
+                    Text("Private Key")
+                        .font(.title2.bold())
+                        .foregroundColor(.white)
+                        .padding(.bottom, 10)
+                    
+                    Text("This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!")
+                        .foregroundColor(.white)
+                        .padding(.bottom, 10)
+                    
+                    SaveKeyView(text: account.privkey_bech32, is_copied: $priv_copied)
+                        .padding(.bottom, 10)
+                }
                 
                 if pub_copied && priv_copied {
                     if loading {
@@ -73,6 +75,8 @@ struct SaveKeysView: View {
             }
             .padding(20)
         }
+        .navigationBarBackButtonHidden(true)
+        .navigationBarItems(leading: BackNav())
     }
     
     func complete_account_creation(_ account: CreateAccountModel) {
@@ -90,11 +94,15 @@ struct SaveKeysView: View {
             switch wsev {
             case .connected:
                 let metadata = create_account_to_metadata(account)
-                let metadata_ev = make_metadata_event(keypair: account.keypair, metadata: metadata)
-                let contacts_ev = make_first_contact_event(keypair: account.keypair)
+                let m_metadata_ev = make_metadata_event(keypair: account.keypair, metadata: metadata)
+                let m_contacts_ev = make_first_contact_event(keypair: account.keypair)
                 
-                self.pool.send(.event(metadata_ev))
-                self.pool.send(.event(contacts_ev))
+                if let metadata_ev = m_metadata_ev {
+                    self.pool.send(.event(metadata_ev))
+                }
+                if let contacts_ev = m_contacts_ev {
+                    self.pool.send(.event(contacts_ev))
+                }
                 
                 save_keypair(pubkey: account.pubkey, privkey: account.privkey)
                 notify(.login, account.keypair)

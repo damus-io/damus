@@ -12,32 +12,6 @@ struct CreateAccountView: View {
     @State var is_light: Bool = false
     @State var is_done: Bool = false
     
-    func FormTextInput(_ title: String, text: Binding<String>) -> some View {
-        return TextField("", text: text)
-            .placeholder(when: text.wrappedValue.isEmpty) {
-                Text(title).foregroundColor(.white.opacity(0.4))
-            }
-            .padding()
-            .background {
-                RoundedRectangle(cornerRadius: 4.0).opacity(0.2)
-            }
-            .foregroundColor(.white)
-            .font(.body.bold())
-    }
-    
-    func FormLabel(_ title: String, optional: Bool = false) -> some View {
-        return HStack {
-            Text(title)
-                    .bold()
-                    .foregroundColor(.white)
-            if optional {
-                Text("optional")
-                    .font(.callout)
-                    .foregroundColor(.white.opacity(0.5))
-            }
-        }
-    }
-    
     func SignupForm<FormContent: View>(@ViewBuilder content: () -> FormContent) -> some View {
         return VStack(alignment: .leading, spacing: 10.0, content: content)
     }
@@ -45,7 +19,7 @@ struct CreateAccountView: View {
     func regen_key() {
         let keypair = generate_new_keypair()
         self.account.pubkey = keypair.pubkey
-        self.account.privkey = keypair.privkey
+        self.account.privkey = keypair.privkey!
     }
     
     var body: some View {
@@ -89,7 +63,7 @@ struct CreateAccountView: View {
                                     regen_key()
                                 }
                             
-                            KeyInput($account.pubkey)
+                            KeyText($account.pubkey)
                                 .onTapGesture {
                                     regen_key()
                                 }
@@ -110,6 +84,20 @@ struct CreateAccountView: View {
             
         }
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .navigationBarItems(leading: BackNav())
+    }
+}
+
+struct BackNav: View {
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        Image(systemName: "chevron.backward")
+        .foregroundColor(.white)
+        .onTapGesture {
+            self.dismiss()
+        }
     }
 }
 
@@ -133,10 +121,38 @@ struct CreateAccountView_Previews: PreviewProvider {
     }
 }
 
-func KeyInput(_ text: Binding<String>) -> some View {
-    return Text("\(text.wrappedValue)")
+func KeyText(_ text: Binding<String>) -> some View {
+    let decoded = hex_decode(text.wrappedValue)!
+    let bechkey = bech32_encode(hrp: PUBKEY_HRP, decoded)
+    return Text(bechkey)
         .textSelection(.enabled)
         .font(.callout.monospaced())
         .foregroundColor(.white)
+}
+
+func FormTextInput(_ title: String, text: Binding<String>) -> some View {
+    return TextField("", text: text)
+        .placeholder(when: text.wrappedValue.isEmpty) {
+            Text(title).foregroundColor(.white.opacity(0.4))
+        }
+        .padding()
+        .background {
+            RoundedRectangle(cornerRadius: 4.0).opacity(0.2)
+        }
+        .foregroundColor(.white)
+        .font(.body.bold())
+}
+
+func FormLabel(_ title: String, optional: Bool = false) -> some View {
+    return HStack {
+        Text(title)
+                .bold()
+                .foregroundColor(.white)
+        if optional {
+            Text("optional")
+                .font(.callout)
+                .foregroundColor(.white.opacity(0.5))
+        }
+    }
 }
 

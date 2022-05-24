@@ -19,7 +19,7 @@ enum ActionBarSheet: Identifiable {
 
 struct EventActionBar: View {
     let event: NostrEvent
-    let our_pubkey: String
+    let keypair: Keypair
     @State var sheet: ActionBarSheet? = nil
     let profiles: Profiles
     @StateObject var bar: ActionBarModel
@@ -34,10 +34,12 @@ struct EventActionBar: View {
             Spacer()
             
              */
-            EventActionButton(img: "bubble.left", col: nil) {
-                notify(.reply, event)
+            if keypair.privkey != nil {
+                EventActionButton(img: "bubble.left", col: nil) {
+                    notify(.reply, event)
+                }
+                .padding([.trailing], 20)
             }
-            .padding([.trailing], 20)
 
             HStack(alignment: .bottom) {
                 Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
@@ -90,7 +92,7 @@ struct EventActionBar: View {
                 return
             }
             self.bar.likes = liked.total
-            if liked.event.pubkey == our_pubkey {
+            if liked.event.pubkey == keypair.pubkey {
                 self.bar.our_like = liked.event
             }
         }

@@ -15,6 +15,14 @@ class CreateAccountModel: ObservableObject {
     @Published var pubkey: String = ""
     @Published var privkey: String = ""
     
+    var pubkey_bech32: String {
+        return bech32_pubkey(self.pubkey) ?? ""
+    }
+    
+    var privkey_bech32: String {
+        return bech32_privkey(self.privkey) ?? ""
+    }
+    
     var rendered_name: String {
         if real_name.isEmpty {
             return nick_name
@@ -29,13 +37,13 @@ class CreateAccountModel: ObservableObject {
     init() {
         let keypair = generate_new_keypair()
         self.pubkey = keypair.pubkey
-        self.privkey = keypair.privkey
+        self.privkey = keypair.privkey!
     }
     
     init(real: String, nick: String, about: String) {
         let keypair = generate_new_keypair()
         self.pubkey = keypair.pubkey
-        self.privkey = keypair.privkey
+        self.privkey = keypair.privkey!
         
         self.real_name = real
         self.nick_name = nick

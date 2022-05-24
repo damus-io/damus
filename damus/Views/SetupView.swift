@@ -45,6 +45,9 @@ struct SetupView: View {
                     NavigationLink(destination: CreateAccountView(), tag: .create_account, selection: $state ) {
                         EmptyView()
                     }
+                    NavigationLink(destination: LoginView(), tag: .login, selection: $state ) {
+                        EmptyView()
+                    }
                     
                     Image("logo-nobg")
                         .resizable()
@@ -64,7 +67,7 @@ struct SetupView: View {
                     }
                     
                     Button("Login") {
-                        notify(.login, ())
+                        self.state = .login
                     }
                     .padding([.top, .bottom], 20)
                     .foregroundColor(.white)

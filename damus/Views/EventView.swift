@@ -101,7 +101,7 @@ struct EventView: View {
 
                 if has_action_bar {
                     let bar = make_actionbar_model(ev: event, damus: damus)
-                    EventActionBar(event: event, our_pubkey: damus.pubkey, profiles: damus.profiles, bar: bar)
+                    EventActionBar(event: event, keypair: damus.keypair, profiles: damus.profiles, bar: bar)
                 }
 
                 Divider()

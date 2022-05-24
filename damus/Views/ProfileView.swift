@@ -45,21 +45,6 @@ func follow_btn_enabled_state(_ fs: FollowState) -> Bool {
     }
 }
 
-func perform_follow_btn_action(_ fs: FollowState, target: String) -> FollowState {
-    switch fs {
-    case .follows:
-        notify(.unfollow, target)
-        return .following
-    case .following:
-        return .following
-    case .unfollowing:
-        return .following
-    case .unfollows:
-        notify(.follow, target)
-        return .unfollowing
-    }
-}
-
 struct ProfileView: View {
     let damus_state: DamusState
     
@@ -76,7 +61,7 @@ struct ProfileView: View {
                 
                 Spacer()
                 
-                FollowButtonView(pubkey: profile.pubkey, follow_state: damus_state.contacts.follow_state(profile.pubkey))
+                FollowButtonView(target: profile.get_follow_target(), follow_state: damus_state.contacts.follow_state(profile.pubkey))
             }
             
             if let pubkey = profile.pubkey {
