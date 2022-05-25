@@ -197,11 +197,8 @@ class HomeModel: ObservableObject {
         var friends = damus_state.contacts.get_friend_list()
         friends.append(damus_state.pubkey)
         
-        var contacts_filter = NostrFilter.filter_kinds([0,3])
-        var friendosphere = damus_state.contacts.get_friendosphere()
-        friendosphere.append(damus_state.pubkey)
-        
-        contacts_filter.authors = friendosphere
+        var contacts_filter = NostrFilter.filter_kinds([0])
+        contacts_filter.authors = friends
         
         // TODO: separate likes?
         var home_filter = NostrFilter.filter_kinds([
@@ -211,7 +208,7 @@ class HomeModel: ObservableObject {
         ])
         // include our pubkey as well even if we're not technically a friend
         home_filter.authors = friends
-        home_filter.limit = 1000
+        home_filter.limit = 500
         
         var notifications_filter = NostrFilter.filter_kinds([
             NostrKind.text.rawValue,
@@ -219,7 +216,7 @@ class HomeModel: ObservableObject {
             NostrKind.boost.rawValue,
         ])
         notifications_filter.pubkeys = [damus_state.pubkey]
-        notifications_filter.limit = 1000
+        notifications_filter.limit = 100
 
         var home_filters = [home_filter]
         var notifications_filters = [notifications_filter]

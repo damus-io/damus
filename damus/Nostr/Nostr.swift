@@ -10,6 +10,7 @@ import Foundation
 
 struct Profile: Decodable {
     let name: String?
+    let display_name: String?
     let about: String?
     let picture: String?
     

@@ -126,7 +126,7 @@ struct ChatView: View {
                 .padding(6)
             }
             .padding([.leading], 2)
-            .background(Color.secondary.opacity(0.1))
+            .background(colorScheme == .light ? Color.secondary.opacity(0.1) : Color.secondary.opacity(0.25))
             .cornerRadius(8.0)
             
             //.border(Color.red)

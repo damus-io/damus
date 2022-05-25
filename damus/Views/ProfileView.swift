@@ -56,26 +56,33 @@ struct ProfileView: View {
     var TopSection: some View {
         VStack(alignment: .leading) {
             let data = damus_state.profiles.lookup(id: profile.pubkey)
-            HStack(alignment: .top) {
+            
+            HStack(alignment: .center) {
                 ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .custom(Color.black, 2), image_cache: damus_state.image_cache, profiles: damus_state.profiles)
+                
+                if let real_name = data?.display_name {
+                    VStack(alignment: .leading) {
+                        Text(real_name)
+                            .font(.title)
+                        ProfileName(pubkey: profile.pubkey, profile: data, prefix: "@")
+                            .font(.callout)
+                            .foregroundColor(.gray)
+                    }
+                } else {
+                    ProfileName(pubkey: profile.pubkey, profile: data)
+                }
+                    //.border(Color.green)
                 
                 Spacer()
                 
                 FollowButtonView(target: profile.get_follow_target(), follow_state: damus_state.contacts.follow_state(profile.pubkey))
             }
             
-            if let pubkey = profile.pubkey {
-                ProfileName(pubkey: pubkey, profile: data)
-                    .font(.title)
-                    //.border(Color.green)
-                Text("\(pubkey)")
-                    .textSelection(.enabled)
-                    .font(.footnote)
-                    .foregroundColor(id_to_color(pubkey))
-            }
+            KeyView(pubkey: profile.pubkey)
+                .padding(.bottom, 10)
             
             Text(data?.about ?? "")
-            
+        
             if let contact = profile.contacts {
                 Divider()
                 
@@ -118,10 +125,42 @@ struct ProfileView: View {
     }
 }
 
-/*
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfileView()
+        let ds = test_damus_state()
+        let profile_model = ProfileModel(pubkey: ds.pubkey, damus: ds)
+        ProfileView(damus_state: ds, profile: profile_model)
     }
 }
- */
+
+
+func test_damus_state() -> DamusState {
+    let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
+    let damus = DamusState(pool: RelayPool(), keypair: Keypair(pubkey: pubkey, privkey: "privkey"), likes: EventCounter(our_pubkey: pubkey), boosts: EventCounter(our_pubkey: pubkey), contacts: Contacts(), tips: TipCounter(our_pubkey: pubkey), image_cache: ImageCache(), profiles: Profiles())
+    
+    let prof = Profile(name: "damus", display_name: "Damus", about: "iOS app!", picture: "https://damus.io/img/logo.png")
+    let tsprof = TimestampedProfile(profile: prof, timestamp: 0)
+    damus.profiles.add(id: pubkey, profile: tsprof)
+    return damus
+}
+
+struct KeyView: View {
+    let pubkey: String
+    
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        let col = id_to_color(pubkey)
+        
+        VStack {
+            Text("\(String(pubkey.prefix(32)))")
+                .foregroundColor(colorScheme == .light ? .black : col)
+                .font(.footnote.monospaced())
+            Text("\(String(pubkey.suffix(32)))")
+                .font(.footnote.monospaced())
+                .foregroundColor(colorScheme == .light ? .black : col)
+        }
+    }
+}
+
+        

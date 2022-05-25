@@ -38,7 +38,6 @@ struct EventActionBar: View {
                 EventActionButton(img: "bubble.left", col: nil) {
                     notify(.reply, event)
                 }
-                .padding([.trailing], 20)
             }
 
             HStack(alignment: .bottom) {
@@ -54,7 +53,6 @@ struct EventActionBar: View {
                     }
                 }
             }
-            .padding([.trailing], 20)
 
             HStack(alignment: .bottom) {
                 Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
@@ -69,7 +67,6 @@ struct EventActionBar: View {
                     }
                 }
             }
-            .padding([.trailing], 20)
             
             HStack(alignment: .bottom) {
                 Text("\(bar.tips > 0 ? "\(bar.tips)" : "")")
@@ -78,13 +75,12 @@ struct EventActionBar: View {
                 
                 EventActionButton(img: bar.tipped ? "bitcoinsign.circle.fill" : "bitcoinsign.circle", col: bar.tipped ? Color.orange : nil) {
                     if bar.tipped {
-                        notify(.delete, bar.our_tip)
+                        //notify(.delete, bar.our_tip)
                     } else {
-                        notify(.boost, event)
+                        //notify(.boost, event)
                     }
                 }
             }
-
         }
         .onReceive(handle_notify(.liked)) { n in
             let liked = n.object as! Counted
@@ -104,6 +100,7 @@ func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> 
     Button(action: action) {
         Label("", systemImage: img)
             .font(.footnote)
+            .frame(maxWidth: .infinity)
             .foregroundColor(col == nil ? Color.gray : col!)
     }
 }

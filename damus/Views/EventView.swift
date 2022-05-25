@@ -78,12 +78,11 @@ struct EventView: View {
                 Spacer()
             }
 
-            VStack {
-                HStack {
+            VStack(alignment: .leading) {
+                HStack(alignment: .center) {
                     ProfileName(pubkey: event.pubkey, profile: profile)
                     Text("\(format_relative_time(event.created_at))")
                         .foregroundColor(.gray)
-                    Spacer()
                 }
                 
                 if event.is_reply {
@@ -96,8 +95,6 @@ struct EventView: View {
                 NoteContentView(event: event, profiles: damus.profiles, content: event.content)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .textSelection(.enabled)
-
-                Spacer()
 
                 if has_action_bar {
                     let bar = make_actionbar_model(ev: event, damus: damus)
