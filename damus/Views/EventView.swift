@@ -69,7 +69,7 @@ struct EventView: View {
             let profile = damus.profiles.lookup(id: event.pubkey)
             VStack {
                 let pmodel = ProfileModel(pubkey: event.pubkey, damus: damus)
-                let pv = ProfileView(damus_state: damus, profile: pmodel)
+                let pv = ProfileView(damus_state: damus, profile: pmodel, followers: FollowersModel(damus_state: damus, target: event.pubkey))
                 
                 NavigationLink(destination: pv) {
                     ProfilePicView(pubkey: event.pubkey, size: PFP_SIZE, highlight: highlight, image_cache: damus.image_cache, profiles: damus.profiles)

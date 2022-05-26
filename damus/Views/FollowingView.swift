@@ -14,7 +14,8 @@ struct FollowUserView: View {
     var body: some View {
         HStack(alignment: .top) {
             let pmodel = ProfileModel(pubkey: target.pubkey, damus: damus_state)
-            let pv = ProfileView(damus_state: damus_state, profile: pmodel)
+            let followers = FollowersModel(damus_state: damus_state, target: target.pubkey)
+            let pv = ProfileView(damus_state: damus_state, profile: pmodel, followers: followers)
             
             NavigationLink(destination: pv) {
                 ProfilePicView(pubkey: target.pubkey, size: PFP_SIZE, highlight: .none, image_cache: damus_state.image_cache, profiles: damus_state.profiles)
@@ -35,11 +36,27 @@ struct FollowUserView: View {
     }
 }
 
+struct FollowersView: View {
+    let damus_state: DamusState
+    
+    @EnvironmentObject var followers: FollowersModel
+    
+    var body: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading) {
+                ForEach(followers.contacts, id: \.self) { pk in
+                    FollowUserView(target: .pubkey(pk), damus_state: damus_state)
+                }
+            }
+        }
+    }
+    
+}
+
 struct FollowingView: View {
     let damus_state: DamusState
     
-    @StateObject var following: FollowingModel
-    
+    let following: FollowingModel
     
     var body: some View {
         ScrollView {

@@ -148,7 +148,8 @@ struct ContentView: View {
         Group {
             if let pk = self.active_profile {
                 let profile_model = ProfileModel(pubkey: pk, damus: damus_state!)
-                ProfileView(damus_state: damus_state!, profile: profile_model)
+                let followers = FollowersModel(damus_state: damus_state!, target: pk)
+                ProfileView(damus_state: damus_state!, profile: profile_model, followers: followers)
             } else {
                 EmptyView()
             }
@@ -355,13 +356,11 @@ struct ContentView: View {
     
 }
 
-/*
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView(keypair: Keypair(pubkey: "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681", privkey: nil))
     }
 }
- */
 
 
 func get_since_time(last_event: NostrEvent?) -> Int64? {
@@ -371,26 +370,6 @@ func get_since_time(last_event: NostrEvent?) -> Int64? {
     
     return nil
 }
-
-/*
-func fetch_profiles(relay: URL, pubkeys: [String]) {
-    return NostrFilter(ids: nil, kinds: 3, event_ids: nil, pubkeys: pubkeys, since: nil, until: nil, authors: pubkeys)
-}
-
-
-func nostr_req(relays: [URL], filter: NostrFilter) {
-    if relays.count == 0 {
-        return
-    }
-    let conn = NostrConnection(url: relay) {
-    }
-}
-
-
-func get_profiles()
-
-*/
-
 
 func ws_nostr_event(relay: String, ev: WebSocketEvent) -> NostrEvent? {
     switch ev {

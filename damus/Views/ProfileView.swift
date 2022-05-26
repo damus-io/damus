@@ -50,6 +50,7 @@ struct ProfileView: View {
     
     @State private var selected_tab: ProfileTab = .posts
     @StateObject var profile: ProfileModel
+    @StateObject var followers: FollowersModel
     
     //@EnvironmentObject var profile: ProfileModel
     
@@ -88,14 +89,27 @@ struct ProfileView: View {
                 
                 let contacts = contact.referenced_pubkeys.map { $0.ref_id }
                 let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
-                NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model)) {
-                    HStack {
-                        Text("\(profile.following)")
-                        Text("Following")
-                            .foregroundColor(.gray)
+                HStack {
+                    NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model)) {
+                        HStack {
+                            Text("\(profile.following)")
+                            Text("Following")
+                                .foregroundColor(.gray)
+                        }
                     }
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    let fview = FollowersView(damus_state: damus_state)
+                        .environmentObject(followers)
+                    NavigationLink(destination: fview) {
+                        HStack {
+                            Text("\(followers.contacts.count)")
+                            Text("Followers")
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .buttonStyle(PlainButtonStyle())
             }
         }
     }
@@ -117,9 +131,11 @@ struct ProfileView: View {
         .navigationBarTitle("Profile")
         .onAppear() {
             profile.subscribe()
+            followers.subscribe()
         }
         .onDisappear {
             profile.unsubscribe()
+            followers.unsubscribe()
             // our profilemodel needs a bit more help
         }
     }
@@ -128,8 +144,9 @@ struct ProfileView: View {
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state()
+        let followers = FollowersModel(damus_state: ds, target: ds.pubkey)
         let profile_model = ProfileModel(pubkey: ds.pubkey, damus: ds)
-        ProfileView(damus_state: ds, profile: profile_model)
+        ProfileView(damus_state: ds, profile: profile_model, followers: followers)
     }
 }
 
