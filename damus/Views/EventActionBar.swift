@@ -100,8 +100,19 @@ func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> 
     Button(action: action) {
         Label("", systemImage: img)
             .font(.footnote)
-            .frame(maxWidth: .infinity)
             .foregroundColor(col == nil ? Color.gray : col!)
     }
+    .padding(.trailing, 40)
 }
 
+
+struct EventActionBar_Previews: PreviewProvider {
+    static var previews: some View {
+        let pk = "pubkey"
+        let kp = Keypair(pubkey: pk, privkey: nil)
+        let ds = test_damus_state()
+        let bar = ActionBarModel(likes: 0, boosts: 0, tips: 0, our_like: nil, our_boost: nil, our_tip: nil)
+        let ev = NostrEvent(content: "hi", pubkey: pk)
+        EventActionBar(event: ev, keypair: kp, profiles: ds.profiles, bar: bar)
+    }
+}

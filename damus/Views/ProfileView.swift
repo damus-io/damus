@@ -90,7 +90,7 @@ struct ProfileView: View {
                 let contacts = contact.referenced_pubkeys.map { $0.ref_id }
                 let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
                 HStack {
-                    NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model)) {
+                    NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model, whos: profile.pubkey)) {
                         HStack {
                             Text("\(profile.following)")
                             Text("Following")
@@ -99,7 +99,7 @@ struct ProfileView: View {
                     }
                     .buttonStyle(PlainButtonStyle())
                     
-                    let fview = FollowersView(damus_state: damus_state)
+                    let fview = FollowersView(damus_state: damus_state, whos: profile.pubkey)
                         .environmentObject(followers)
                     NavigationLink(destination: fview) {
                         HStack {
