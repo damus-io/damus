@@ -17,7 +17,7 @@ extension UIImage {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         //let cgsize = CGSize(width: size, height: size)
         
-        let context = CGContext(data: nil, width: Int(pix_size), height: Int(pix_size), bitsPerComponent: 8, bytesPerRow: cgImage.bytesPerRow, space: colorSpace, bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue)
+        let context = CGContext(data: nil, width: Int(pix_size), height: Int(pix_size), bitsPerComponent: 8, bytesPerRow: cgImage.bytesPerRow, space: colorSpace, bitmapInfo: cgImage.bitmapInfo.rawValue)
         
         //UIGraphicsBeginImageContextWithOptions(cgsize, true, 0)
         context?.draw(cgImage, in: CGRect(x: 0, y: 0, width: pix_size, height: pix_size))
