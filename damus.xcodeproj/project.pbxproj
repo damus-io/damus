@@ -29,7 +29,6 @@
 		4C363A922825FCF2006E126D /* ProfileUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A912825FCF2006E126D /* ProfileUpdate.swift */; };
 		4C363A94282704FA006E126D /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A93282704FA006E126D /* Post.swift */; };
 		4C363A962827096D006E126D /* PostBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A952827096D006E126D /* PostBlock.swift */; };
-		4C363A9828283441006E126D /* TestingPrivate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A9728283441006E126D /* TestingPrivate.swift */; };
 		4C363A9A28283854006E126D /* Reply.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A9928283854006E126D /* Reply.swift */; };
 		4C363A9C282838B9006E126D /* EventRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A9B282838B9006E126D /* EventRef.swift */; };
 		4C363A9E2828A822006E126D /* ReplyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A9D2828A822006E126D /* ReplyTests.swift */; };
@@ -135,7 +134,6 @@
 		4C363A912825FCF2006E126D /* ProfileUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileUpdate.swift; sourceTree = "<group>"; };
 		4C363A93282704FA006E126D /* Post.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
 		4C363A952827096D006E126D /* PostBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostBlock.swift; sourceTree = "<group>"; };
-		4C363A9728283441006E126D /* TestingPrivate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingPrivate.swift; sourceTree = "<group>"; };
 		4C363A9928283854006E126D /* Reply.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reply.swift; sourceTree = "<group>"; };
 		4C363A9B282838B9006E126D /* EventRef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRef.swift; sourceTree = "<group>"; };
 		4C363A9D2828A822006E126D /* ReplyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyTests.swift; sourceTree = "<group>"; };
@@ -365,7 +363,6 @@
 				4CE6DEE827F7A08100C66700 /* ContentView.swift */,
 				4CE6DEEA27F7A08200C66700 /* Assets.xcassets */,
 				4CE6DEEC27F7A08200C66700 /* Preview Content */,
-				4C363A9728283441006E126D /* TestingPrivate.swift */,
 			);
 			path = damus;
 			sourceTree = "<group>";
@@ -562,7 +559,6 @@
 				4C7FF7D52823313F009601DB /* Mentions.swift in Sources */,
 				4C633350283D40E500B1C9C3 /* HomeModel.swift in Sources */,
 				4C987B57283FD07F0042CE38 /* FollowersModel.swift in Sources */,
-				4C363A9828283441006E126D /* TestingPrivate.swift in Sources */,
 				4C363A9028247A1D006E126D /* NostrLink.swift in Sources */,
 				4C0A3F8C280F5FCA000448DE /* ChatroomView.swift in Sources */,
 				4C477C9E282C3A4800033AA3 /* TipCounter.swift in Sources */,
