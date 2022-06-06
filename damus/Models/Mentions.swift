@@ -159,30 +159,37 @@ func parse_mention(_ p: Parser, tags: [[String]]) -> Mention? {
         return nil
     }
     
+    var ind = digit
+    
+    if let d2 = parse_digit(p) {
+        ind = digit * 10
+        ind += d2
+    }
+    
     if !parse_char(p, "]") {
         return nil
     }
     
     var kind: MentionType = .pubkey
-    if digit > tags.count - 1 {
+    if ind > tags.count - 1 {
         return nil
     }
     
-    if tags[digit].count == 0 {
+    if tags[ind].count == 0 {
         return nil
     }
     
-    switch tags[digit][0] {
+    switch tags[ind][0] {
     case "e": kind = .event
     case "p": kind = .pubkey
     default: return nil
     }
     
-    guard let ref = tag_to_refid(tags[digit]) else {
+    guard let ref = tag_to_refid(tags[ind]) else {
         return nil
     }
     
-    return Mention(index: digit, type: kind, ref: ref)
+    return Mention(index: ind, type: kind, ref: ref)
 }
 
 func find_tag_ref(type: String, id: String, tags: [[String]]) -> Int? {

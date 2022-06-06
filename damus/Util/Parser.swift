@@ -76,7 +76,7 @@ func parse_digit(_ p: Parser) -> Int? {
         }
     }
     
-    return 0
+    return nil
 }
 
 

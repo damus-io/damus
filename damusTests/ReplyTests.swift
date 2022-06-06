@@ -53,6 +53,48 @@ class ReplyTests: XCTestCase {
         XCTAssertEqual(event_refs[1].is_mention!.ref.ref_id, "mentioned_id")
     }
     
+    func testEmptyMention() throws {
+        let content = "this is some & content"
+        let tags: [[String]] = []
+        let blocks = parse_mentions(content: content, tags: tags)
+        let post_blocks = parse_post_blocks(content: content)
+        let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
+        let event_refs = interpret_event_refs(blocks: blocks, tags: tags)
+        
+        XCTAssertEqual(event_refs.count, 0)
+        XCTAssertEqual(post_tags.blocks.count, 1)
+        XCTAssertEqual(post_tags.tags.count, 0)
+        XCTAssertEqual(post_blocks.count, 1)
+    }
+    
+    func testManyPostMentions() throws {
+        let content = """
+@38bc54a8f675564058b987056fc27fe3d40ca34404586933a115d9e0baeaccb9
+@774734fad6c318799149c35008c356352b8bfc1791d9e41c803bd412b23143be
+@d64266d4bbf3cbcb773d074ee5ffe9ae557425cce0521e102dfde88a7223fb4c
+@9f936cfb57374c95c4b8f2d5e640d978e4c59ccbe7783d434f434a8cc69bfa07
+@29080a53a6cef22b28dd8c9a25684cb9c2691f8f0c98651d20c65e1a2cd5cef1
+@dcdc52ec631c4034b0766a49865ec2e7fc0cdb2ba071aff4050eba343e7ba0fe
+@136f15a6e4c5f046a71ddaf014bbca51408041d5d0ec2a0154be4b089e6f0249
+@5d994e704a4d3edf0163a708f69cb821f5a9caefeb79c17c1507e11e8a238f36
+@d76951e648f1b00715fe55003fcfb6fe91a7bf73fca5b6fd3e5bbe6845a5a0b1
+@3e999f94e2cb34ef44a64b351141ac4e51b5121b2d31aed4a6c84602a1144692
+"""
+        //let tags: [[String]] = []
+        let blocks = parse_post_blocks(content: content)
+        
+        let mentions = blocks.filter { $0.is_ref }
+        XCTAssertEqual(mentions.count, 10)
+    }
+    
+    func testManyMentions() throws {
+        let content = "#[10]"
+        let tags: [[String]] = [[],[],[],[],[],[],[],[],[],[],["p", "3e999f94e2cb34ef44a64b351141ac4e51b5121b2d31aed4a6c84602a1144692"]]
+        let blocks = parse_mentions(content: content, tags: tags)
+        let mentions = blocks.filter { $0.is_mention }
+        XCTAssertEqual(mentions.count, 1)
+    }
+    
     func testThreadedReply() throws {
         let content = "this is some content"
         let tags = [["e", "thread_id"], ["e", "reply_id"]]
