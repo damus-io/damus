@@ -92,6 +92,32 @@ func bech32_checksum(hrp: String, data: [UInt8]) -> [UInt8] {
     return result.map { UInt8($0) }
 }
 
+func bech32_convert_bits(outbits: Int, input: Data, inbits: Int, pad: Int) -> Data? {
+    let maxv: UInt32 = ((UInt32(1)) << outbits) - 1;
+    var val: UInt32 = 0
+    var bits: Int = 0
+    var out = Data()
+    
+    for i in (0..<input.count) {
+        val = (val << inbits) | UInt32(input[i])
+        bits += inbits;
+        while bits >= outbits {
+            bits -= outbits;
+            out.append(UInt8((val >> bits) & maxv))
+        }
+    }
+    
+    if pad != 0 {
+        if bits != 0 {
+            out.append(UInt8(val << (outbits - bits) & maxv))
+        }
+    } else if 0 != ((val << (outbits - bits)) & maxv) || bits >= inbits {
+        return nil
+    }
+    
+    return out
+}
+
 func eightToFiveBits(_ input: [UInt8]) -> [UInt8] {
     guard !input.isEmpty else { return [] }
     
@@ -117,7 +143,7 @@ func eightToFiveBits(_ input: [UInt8]) -> [UInt8] {
 }
     
     /// Decode Bech32 string
-public func bech32_decode(_ str: String) throws -> (hrp: String, data: Data) {
+public func bech32_decode(_ str: String) throws -> (hrp: String, data: Data)? {
     guard let strBytes = str.data(using: .utf8) else {
         throw Bech32Error.nonUTF8String
     }
@@ -167,7 +193,11 @@ public func bech32_decode(_ str: String) throws -> (hrp: String, data: Data) {
     guard bech32_verify(hrp: hrp, checksum: values) else {
         throw Bech32Error.checksumMismatch
     }
-    return (hrp, Data(values[..<(vSize-6)]))
+    let out = Data(values[..<(vSize-6)])
+    guard let converted = bech32_convert_bits(outbits: 8, input: out, inbits: 5, pad: 0) else {
+        return nil
+    }
+    return (hrp, converted)
 }
 
 public enum Bech32Error: LocalizedError {
