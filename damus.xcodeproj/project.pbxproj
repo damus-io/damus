@@ -49,6 +49,8 @@
 		4C3BEFDC281DCE6100B3DE84 /* Liked.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFDB281DCE6100B3DE84 /* Liked.swift */; };
 		4C3BEFE0281DE1ED00B3DE84 /* DamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFDF281DE1ED00B3DE84 /* DamusState.swift */; };
 		4C477C9E282C3A4800033AA3 /* TipCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C477C9D282C3A4800033AA3 /* TipCounter.swift */; };
+		4C5C7E68284ED36500A22DF5 /* SearchHomeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5C7E67284ED36500A22DF5 /* SearchHomeModel.swift */; };
+		4C5C7E6A284EDE2E00A22DF5 /* SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5C7E69284EDE2E00A22DF5 /* SearchResultsView.swift */; };
 		4C5F9114283D694D0052CD1C /* FollowTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5F9113283D694D0052CD1C /* FollowTarget.swift */; };
 		4C5F9116283D855D0052CD1C /* EventsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5F9115283D855D0052CD1C /* EventsModel.swift */; };
 		4C5F9118283D88E40052CD1C /* FollowingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5F9117283D88E40052CD1C /* FollowingModel.swift */; };
@@ -154,6 +156,8 @@
 		4C3BEFDB281DCE6100B3DE84 /* Liked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Liked.swift; sourceTree = "<group>"; };
 		4C3BEFDF281DE1ED00B3DE84 /* DamusState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusState.swift; sourceTree = "<group>"; };
 		4C477C9D282C3A4800033AA3 /* TipCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipCounter.swift; sourceTree = "<group>"; };
+		4C5C7E67284ED36500A22DF5 /* SearchHomeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHomeModel.swift; sourceTree = "<group>"; };
+		4C5C7E69284EDE2E00A22DF5 /* SearchResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsView.swift; sourceTree = "<group>"; };
 		4C5F9113283D694D0052CD1C /* FollowTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowTarget.swift; sourceTree = "<group>"; };
 		4C5F9115283D855D0052CD1C /* EventsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsModel.swift; sourceTree = "<group>"; };
 		4C5F9117283D88E40052CD1C /* FollowingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowingModel.swift; sourceTree = "<group>"; };
@@ -254,6 +258,7 @@
 				4C5F9115283D855D0052CD1C /* EventsModel.swift */,
 				4C5F9117283D88E40052CD1C /* FollowingModel.swift */,
 				4C987B56283FD07F0042CE38 /* FollowersModel.swift */,
+				4C5C7E67284ED36500A22DF5 /* SearchHomeModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -291,6 +296,7 @@
 				4C285C892838B985008A31F1 /* ProfilePictureSelector.swift */,
 				4C285C8D28399BFD008A31F1 /* SaveKeysView.swift */,
 				4C90BD17283A9EE5008EE7EF /* LoginView.swift */,
+				4C5C7E69284EDE2E00A22DF5 /* SearchResultsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -549,6 +555,7 @@
 				4C285C86283892E7008A31F1 /* CreateAccountModel.swift in Sources */,
 				4C363A8C28236B92006E126D /* PubkeyView.swift in Sources */,
 				4C363A8628234FDE006E126D /* ImageCache.swift in Sources */,
+				4C5C7E68284ED36500A22DF5 /* SearchHomeModel.swift in Sources */,
 				4C75EFB728049D990006080F /* RelayPool.swift in Sources */,
 				4CE6DEE927F7A08100C66700 /* ContentView.swift in Sources */,
 				4CEE2AF5280B29E600AB5EEF /* TimeAgo.swift in Sources */,
@@ -591,6 +598,7 @@
 				4C363A9C282838B9006E126D /* EventRef.swift in Sources */,
 				4C8682872814DE470026224F /* ProfileView.swift in Sources */,
 				4C5F9114283D694D0052CD1C /* FollowTarget.swift in Sources */,
+				4C5C7E6A284EDE2E00A22DF5 /* SearchResultsView.swift in Sources */,
 				4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */,
 				4C3BEFD6281D995700B3DE84 /* ActionBarModel.swift in Sources */,
 				4C363AA428296DEE006E126D /* SearchModel.swift in Sources */,

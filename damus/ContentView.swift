@@ -104,7 +104,7 @@ struct ContentView: View {
                 }
                 switch selected_timeline {
                 case .search:
-                    SearchHomeView()
+                    SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(pool: damus_state!.pool) )
                     
                 case .home:
                     PostingTimelineView
