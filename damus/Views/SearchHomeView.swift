@@ -53,6 +53,9 @@ struct SearchHomeView: View {
             
             MainContent
         }
+        .onChange(of: search) { s in
+            print("search change 1")
+        }
         .onAppear {
             model.subscribe()
         }

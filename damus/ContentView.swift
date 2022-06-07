@@ -332,11 +332,10 @@ struct ContentView: View {
 
         add_relay(pool, "wss://relay.damus.io")
         add_relay(pool, "wss://nostr-pub.wellorder.net")
-        add_relay(pool, "wss://nostr.onsats.org")
-        add_relay(pool, "wss://nostr.bitcoiner.social")
+        //add_relay(pool, "wss://nostr.bitcoiner.social")
         add_relay(pool, "ws://monad.jb55.com:8080")
-        add_relay(pool, "wss://nostr-relay.freeberty.net")
-        add_relay(pool, "wss://nostr-relay.untethr.me")
+        //add_relay(pool, "wss://nostr-relay.freeberty.net")
+        //add_relay(pool, "wss://nostr-relay.untethr.me")
 
         pool.register_handler(sub_id: sub_id, handler: home.handle_event)
 

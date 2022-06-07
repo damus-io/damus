@@ -84,12 +84,12 @@ struct ProfileView: View {
             
             Text(data?.about ?? "")
         
-            if let contact = profile.contacts {
-                Divider()
+            Divider()
                 
-                let contacts = contact.referenced_pubkeys.map { $0.ref_id }
-                let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
-                HStack {
+            HStack {
+                if let contact = profile.contacts {
+                    let contacts = contact.referenced_pubkeys.map { $0.ref_id }
+                    let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
                     NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model, whos: profile.pubkey)) {
                         HStack {
                             Text("\(profile.following)")
@@ -98,18 +98,17 @@ struct ProfileView: View {
                         }
                     }
                     .buttonStyle(PlainButtonStyle())
-                    
-                    let fview = FollowersView(damus_state: damus_state, whos: profile.pubkey)
-                        .environmentObject(followers)
-                    NavigationLink(destination: fview) {
-                        HStack {
-                            Text("\(followers.contacts.count)")
-                            Text("Followers")
-                                .foregroundColor(.gray)
-                        }
-                    }
-                    .buttonStyle(PlainButtonStyle())
                 }
+                let fview = FollowersView(damus_state: damus_state, whos: profile.pubkey)
+                    .environmentObject(followers)
+                NavigationLink(destination: fview) {
+                    HStack {
+                        Text("\(followers.contacts.count)")
+                        Text("Followers")
+                            .foregroundColor(.gray)
+                    }
+                }
+                .buttonStyle(PlainButtonStyle())
             }
         }
     }

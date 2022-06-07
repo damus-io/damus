@@ -13,7 +13,7 @@ class SearchHomeModel: ObservableObject {
     @Published var events: [NostrEvent] = []
     let pool: RelayPool
     let sub_id = UUID().description
-    let limit: UInt32 = 1000
+    let limit: UInt32 = 250
     
     init(pool: RelayPool) {
         self.pool = pool
@@ -42,9 +42,6 @@ class SearchHomeModel: ObservableObject {
             switch event {
             case .event(let sub_id, let ev):
                 guard sub_id == self.sub_id else {
-                    return
-                }
-                guard self.events.count <= limit else {
                     return
                 }
                 if ev.kind == NostrKind.text.rawValue {

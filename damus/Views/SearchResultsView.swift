@@ -17,11 +17,12 @@ struct SearchResultsView: View {
     }
     
     var MainContent: some View {
-        VStack {
-            ForEach(results, id: \.0) { prof in
-                ProfileSearchResult(pk: prof.0, res: prof.1)
+        ScrollView {
+            LazyVStack {
+                ForEach(results, id: \.0) { prof in
+                    ProfileSearchResult(pk: prof.0, res: prof.1)
+                }
             }
-            Spacer()
         }
     }
     
@@ -32,9 +33,11 @@ struct SearchResultsView: View {
             let prof = els.element.value.profile
             let lowname = prof.name.map { $0.lowercased() }
             let lowdisp = prof.display_name.map { $0.lowercased() }
-            let ok = new == pk || String(new.dropFirst()) == pk
+            let ok = new.count == 1 ?
+            ((lowname?.starts(with: new) ?? false) ||
+             (lowdisp?.starts(with: new) ?? false)) : (pk.starts(with: new) || String(new.dropFirst()) == pk
                 || lowname?.contains(new) ?? false
-                || lowdisp?.contains(new) ?? false
+                || lowdisp?.contains(new) ?? false)
             if ok {
                 acc.append((pk, prof))
             }
@@ -45,13 +48,19 @@ struct SearchResultsView: View {
     var body: some View {
         MainContent
             .frame(maxHeight: .infinity)
-            .onChange(of: search) { new in search_changed(new) }
+            .onAppear {
+                search_changed(search)
+            }
+            .onChange(of: search) { new in
+                search_changed(new)
+            }
     }
 }
 
+/*
 struct SearchResultsView_Previews: PreviewProvider {
     static var previews: some View {
-        let search = Binding<String>.init(get: { "jb55" }, set: { _ in })
-        SearchResultsView(damus_state: test_damus_state(), search: search)
+        SearchResultsView(damus_state: test_damus_state(), s)
     }
 }
+ */
