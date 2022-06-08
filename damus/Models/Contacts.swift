@@ -133,6 +133,11 @@ func follow_user_event(our_contacts: NostrEvent?, our_pubkey: String, follow: Re
     return ev
 }
 
+
+func decode_json_relays(_ content: String) -> [String: RelayInfo]? {
+    return decode_json(content)
+}
+
 /*
 func ensure_relay_info(relays: [RelayDescriptor], content: String) -> [String: RelayInfo] {
     guard let relay_info = decode_json_relays(content) else {

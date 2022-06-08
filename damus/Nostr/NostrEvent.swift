@@ -236,6 +236,10 @@ func encode_json<T: Encodable>(_ val: T) -> String? {
     return (try? encoder.encode(val)).map { String(decoding: $0, as: UTF8.self) }
 }
 
+func decode_json<T: Decodable>(_ val: String) -> T? {
+    return try? JSONDecoder().decode(T.self, from: Data(val.utf8))
+}
+
 func decode_data<T: Decodable>(_ data: Data) -> T? {
     let decoder = JSONDecoder()
     do {

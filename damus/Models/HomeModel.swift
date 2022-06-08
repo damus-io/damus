@@ -69,7 +69,7 @@ class HomeModel: ObservableObject {
     }
     
     func handle_contact_event(sub_id: String, relay_id: String, ev: NostrEvent) {
-        process_contact_event(contacts: damus_state.contacts, pubkey: damus_state.pubkey, ev: ev)
+        process_contact_event(pool: damus_state.pool, contacts: damus_state.contacts, pubkey: damus_state.pubkey, ev: ev)
         
         if sub_id == init_subid {
             pool.send(.unsubscribe(init_subid), to: [relay_id])
@@ -309,7 +309,7 @@ func add_contact_if_friend(contacts: Contacts, ev: NostrEvent) {
 }
 
 func load_our_contacts(contacts: Contacts, our_pubkey: String, ev: NostrEvent) {
-    if ev.pubkey != our_pubkey {
+    guard ev.pubkey == our_pubkey else {
         return
     }
     
@@ -393,7 +393,22 @@ func process_metadata_event(profiles: Profiles, ev: NostrEvent) {
     notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
 }
 
-func process_contact_event(contacts: Contacts, pubkey: String, ev: NostrEvent) {
+func process_contact_event(pool: RelayPool, contacts: Contacts, pubkey: String, ev: NostrEvent) {
     load_our_contacts(contacts: contacts, our_pubkey: pubkey, ev: ev)
+    load_our_relays(pool: pool, ev: ev)
     add_contact_if_friend(contacts: contacts, ev: ev)
+}
+
+func load_our_relays(pool: RelayPool, ev: NostrEvent) {
+    guard let decoded = decode_json_relays(ev.content) else {
+        return
+    }
+    
+    for key in decoded.keys {
+        if let url = URL(string: key) {
+            if let _ = try? pool.add_relay(url, info: decoded[key]!) {
+                pool.connect(to: [key])
+            }
+        }
+    }
 }
