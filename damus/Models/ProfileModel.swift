@@ -17,6 +17,7 @@ class ProfileModel: ObservableObject {
     
     var seen_event: Set<String> = Set()
     var sub_id = UUID().description
+    var prof_subid = UUID().description
     
     func get_follow_target() -> FollowTarget {
         if let contacts = contacts {
@@ -33,24 +34,30 @@ class ProfileModel: ObservableObject {
     func unsubscribe() {
         print("unsubscribing from profile \(pubkey) with sub_id \(sub_id)")
         damus.pool.unsubscribe(sub_id: sub_id)
+        damus.pool.unsubscribe(sub_id: prof_subid)
     }
     
     func subscribe() {
+        var text_filter = NostrFilter.filter_kinds([
+            NostrKind.text.rawValue
+        ])
+        
         var profile_filter = NostrFilter.filter_kinds([
-            NostrKind.text.rawValue,
-            NostrKind.boost.rawValue,
-            NostrKind.metadata.rawValue,
             NostrKind.contacts.rawValue,
+            NostrKind.metadata.rawValue,
+            NostrKind.boost.rawValue,
             NostrKind.like.rawValue
         ])
-        profile_filter.authors = [pubkey]
-        profile_filter.limit = 1000
         
-        let filters = [profile_filter]
+        profile_filter.authors = [pubkey]
+        
+        text_filter.authors = [pubkey]
+        text_filter.limit = 1000
         
         print("subscribing to profile \(pubkey) with sub_id \(sub_id)")
-        print_filters(relay_id: "profile", filters: [filters])
-        damus.pool.subscribe(sub_id: sub_id, filters: filters, handler: handle_event)
+        print_filters(relay_id: "profile", filters: [[text_filter], [profile_filter]])
+        damus.pool.subscribe(sub_id: sub_id, filters: [text_filter], handler: handle_event)
+        damus.pool.subscribe(sub_id: prof_subid, filters: [profile_filter], handler: handle_event)
     }
     
     func handle_profile_contact_event(_ ev: NostrEvent) {
@@ -86,6 +93,8 @@ class ProfileModel: ObservableObject {
                 add_event(ev)
             case .notice(let notice):
                 notify(.notice, notice)
+            case .eose:
+                break
             }
         }
     }

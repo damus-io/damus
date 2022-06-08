@@ -64,6 +64,8 @@ class FollowersModel: ObservableObject {
                 }
             case .notice(let msg):
                 print("followingmodel notice: \(msg)")
+            case .eose:
+                break
             }
         }
     }

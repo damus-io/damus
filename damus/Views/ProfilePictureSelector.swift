@@ -13,11 +13,13 @@ struct ProfilePictureSelector: View {
     var body: some View {
         let highlight: Highlight = .custom(Color.white, 2.0)
         ZStack {
-            ProfilePicView(pubkey: pubkey, size: 80.0, highlight: highlight, image_cache: ImageCache(), profiles: Profiles())
-            
+            /*
             Image(systemName: "camera")
                 .font(.title)
                 .foregroundColor(.white)
+             */
+            
+            ProfilePicView(pubkey: pubkey, size: 80.0, highlight: highlight, image_cache: ImageCache(), profiles: Profiles())
         }
     }
 }

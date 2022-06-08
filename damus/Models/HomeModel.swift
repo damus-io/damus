@@ -176,6 +176,9 @@ class HomeModel: ObservableObject {
             case .notice(let msg):
                 //self.events.insert(NostrEvent(content: "NOTICE from \(relay_id): \(msg)", pubkey: "system"), at: 0)
                 print(msg)
+                
+            case .eose:
+                break
             }
         }
     }
@@ -395,11 +398,15 @@ func process_metadata_event(profiles: Profiles, ev: NostrEvent) {
 
 func process_contact_event(pool: RelayPool, contacts: Contacts, pubkey: String, ev: NostrEvent) {
     load_our_contacts(contacts: contacts, our_pubkey: pubkey, ev: ev)
-    load_our_relays(pool: pool, ev: ev)
+    load_our_relays(our_pubkey: pubkey, pool: pool, ev: ev)
     add_contact_if_friend(contacts: contacts, ev: ev)
 }
 
-func load_our_relays(pool: RelayPool, ev: NostrEvent) {
+func load_our_relays(our_pubkey: String, pool: RelayPool, ev: NostrEvent) {
+    guard ev.pubkey == our_pubkey else {
+        return
+    }
+    
     guard let decoded = decode_json_relays(ev.content) else {
         return
     }

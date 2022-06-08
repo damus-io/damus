@@ -10,6 +10,7 @@ import Foundation
 enum NostrResponse: Decodable {
     case event(String, NostrEvent)
     case notice(String)
+    case eose
 
     init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
@@ -31,6 +32,9 @@ enum NostrResponse: Decodable {
         } else if typ == "NOTICE" {
             let msg = try container.decode(String.self)
             self = .notice(msg)
+            return
+        } else if typ == "EOSE" {
+            self = .eose
             return
         }
 

@@ -91,6 +91,9 @@ func handle_subid_event(pool: RelayPool, sub_id: String, relay_id: String, ev: N
                     pool.reconnect(to: [relay_id])
                 }
                 break
+                
+            case .eose:
+                break
             }
         }
 }

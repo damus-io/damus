@@ -51,6 +51,8 @@ class SearchHomeModel: ObservableObject {
                 }
             case .notice(let msg):
                 print("search home notice: \(msg)")
+            case .eose:
+                break
             }
         }
     }

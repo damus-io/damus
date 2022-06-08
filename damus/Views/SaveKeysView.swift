@@ -121,6 +121,8 @@ struct SaveKeysView: View {
                 print(msg)
             case .event:
                 print("event in signup?")
+            case .eose:
+                break
             }
         }
     }
