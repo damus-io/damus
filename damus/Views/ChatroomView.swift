@@ -23,6 +23,7 @@ struct ChatroomView: View {
                                  next_ev: ind == count-1 ? nil : thread.events[ind+1],
                                  damus: damus
                         )
+                        .event_context_menu(ev)
                         .onTapGesture {
                             if thread.initial_event.id == ev.id {
                                 //dismiss()
@@ -56,12 +57,13 @@ struct ChatroomView: View {
 
 
 
-/*
 struct ChatroomView_Previews: PreviewProvider {
     @State var events = [NostrEvent(content: "hello", pubkey: "pubkey")]
     
     static var previews: some View {
-        ChatroomView(events: events)
+        let state = test_damus_state()
+        ChatroomView(damus: state)
+            .environmentObject(ThreadModel(evid: "&849ab9bb263ed2819db06e05f1a1a3b72878464e8c7146718a2fc1bf1912f893", pool: state.pool))
+        
     }
 }
- */

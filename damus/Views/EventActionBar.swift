@@ -82,6 +82,7 @@ struct EventActionBar: View {
                 }
             }
         }
+        .padding(.top, 1)
         .onReceive(handle_notify(.liked)) { n in
             let liked = n.object as! Counted
             if liked.id != event.id {

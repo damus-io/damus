@@ -65,7 +65,7 @@ struct EventView: View {
     }
     
     func TextEvent(_ event: NostrEvent) -> some View {
-        return HStack {
+        return HStack(alignment: .top) {
             let profile = damus.profiles.lookup(id: event.pubkey)
             VStack {
                 let pmodel = ProfileModel(pubkey: event.pubkey, damus: damus)
@@ -110,7 +110,13 @@ struct EventView: View {
         .id(event.id)
         .frame(minHeight: PFP_SIZE)
         .padding([.bottom], 4)
-        .contextMenu {
+        .event_context_menu(event)
+    }
+}
+
+extension View {
+    func event_context_menu(_ event: NostrEvent) -> some View {
+        return self.contextMenu {
             Button {
                 UIPasteboard.general.string = event.content
             } label: {
@@ -141,9 +147,9 @@ struct EventView: View {
                 Label("Broadcast", systemImage: "globe")
             }
         }
+    
     }
 }
-
 
 func format_relative_time(_ created_at: Int64) -> String
 {

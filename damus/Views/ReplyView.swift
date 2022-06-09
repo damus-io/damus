@@ -21,7 +21,7 @@ struct ReplyView: View {
     var body: some View {
         VStack {
             Text("Replying to:")
-            HStack {
+            HStack(alignment: .top) {
                 let names = all_referenced_pubkeys(replying_to)
                     .map { pubkey in
                         let pk = pubkey.ref_id
@@ -35,8 +35,6 @@ struct ReplyView: View {
             }
             EventView(event: replying_to, highlight: .none, has_action_bar: false, damus: damus)
             PostView(references: gather_reply_ids(our_pubkey: damus.pubkey, from: replying_to))
-            
-            Spacer()
         }
         .padding()
         
@@ -45,10 +43,8 @@ struct ReplyView: View {
     
 }
 
-/*
 struct ReplyView_Previews: PreviewProvider {
     static var previews: some View {
-        ReplyView()
+        ReplyView(replying_to: NostrEvent(content: "hi", pubkey: "pubkey"), damus: test_damus_state())
     }
 }
- */

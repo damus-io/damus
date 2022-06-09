@@ -81,7 +81,8 @@ func parse_nostr_ref_uri(_ p: Parser) -> ReferencedId? {
 }
 
 func decode_nostr_uri(_ s: String) -> NostrLink? {
-    let uri = s.replacingOccurrences(of: "nostr:", with: "")
+    var uri = s.replacingOccurrences(of: "nostr://", with: "")
+    uri = uri.replacingOccurrences(of: "nostr:", with: "")
     
     let parts = uri.split(separator: ":")
         .reduce(into: Array<String>()) { acc, str in
@@ -93,7 +94,7 @@ func decode_nostr_uri(_ s: String) -> NostrLink? {
         }
     
     if parts.count >= 2 && parts[0] == "hashtag" {
-        return .filter(NostrFilter.filter_hashtag([parts[1]]))
+        return .filter(NostrFilter.filter_hashtag([parts[1].lowercased()]))
     }
     
     return tag_to_refid(parts).map { .ref($0) }

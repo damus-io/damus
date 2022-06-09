@@ -54,26 +54,8 @@ struct PostView: View {
             }
             .padding([.top, .bottom], 4)
 
-            HStack(alignment: .top) {
-                ZStack(alignment: .leading) {
-                    if self.post == "" {
-                        VStack {
-                            Text("What's happening?")
-                                .foregroundColor(.gray)
-                                .padding(6)
-                            Spacer()
-                        }
-                    }
-                    
-                    TextEditor(text: $post)
-                        .focused($focus)
-                }
-
-
-                Spacer()
-            }
-
-            Spacer()
+            TextEditor(text: $post)
+                .focused($focus)
         }
         .onAppear() {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

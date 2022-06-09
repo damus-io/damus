@@ -17,7 +17,8 @@ struct ReplyQuoteView: View {
     
     func MainContent(event: NostrEvent) -> some View {
         HStack(alignment: .top) {
-            Rectangle().frame(width: 2)
+            Rectangle()
+                .frame(width: 2)
                 .padding([.leading], 4)
                 .foregroundColor(.accentColor)
             
@@ -30,9 +31,9 @@ struct ReplyQuoteView: View {
                         .foregroundColor(.gray)
                 }
                 
-                Text(event.content)
-                    //.frame(maxWidth: .infinity, alignment: .leading)
-                    .textSelection(.enabled)
+                NoteContentView(event: event, profiles: profiles, content: event.content)
+                    .font(.callout)
+                    .foregroundColor(.accentColor)
                 
                 //Spacer()
             }
@@ -46,7 +47,7 @@ struct ReplyQuoteView: View {
             if let event = thread.lookup(event_id) {
                 MainContent(event: event)
                 .padding(4)
-                .frame(maxHeight: 100)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
                 .onTapGesture {
                     NotificationCenter.default.post(name: .select_quote, object: event)
@@ -59,10 +60,11 @@ struct ReplyQuoteView: View {
     }
 }
 
-/*
-struct SwiftUIView_Previews: PreviewProvider {
+struct ReplyQuoteView_Previews: PreviewProvider {
     static var previews: some View {
-        SwiftUIView()
+        let s = test_damus_state()
+        let quoter = NostrEvent(content: "a\nb\nc", pubkey: "pubkey")
+        ReplyQuoteView(quoter: quoter, event_id: "pubkey2", image_cache: s.image_cache, profiles: s.profiles)
+            .environmentObject(ThreadModel(event: quoter, pool: s.pool))
     }
 }
- */

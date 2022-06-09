@@ -26,7 +26,7 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
     switch h {
     case .reply: return 0
     case .none: return 0
-    case .main: return 2
+    case .main: return 3
     case .custom(_, let lw): return CGFloat(lw)
     }
 }
@@ -58,6 +58,7 @@ struct ProfilePicView: View {
         return Group {
             if let img = self.img {
                 img
+                    .resizable()
                     .frame(width: size, height: size)
                     .clipShape(Circle())
                     .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))

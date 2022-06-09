@@ -46,7 +46,6 @@ class ProfileModel: ObservableObject {
             NostrKind.contacts.rawValue,
             NostrKind.metadata.rawValue,
             NostrKind.boost.rawValue,
-            NostrKind.like.rawValue
         ])
         
         profile_filter.authors = [pubkey]
@@ -72,7 +71,7 @@ class ProfileModel: ObservableObject {
         if seen_event.contains(ev.id) {
             return
         }
-        if ev.known_kind == .text {
+        if ev.known_kind == .text || ev.known_kind == .boost {
             let _ = insert_uniq_sorted_event(events: &self.events, new_ev: ev, cmp: { $0.created_at > $1.created_at})
         } else if ev.known_kind == .contacts {
             handle_profile_contact_event(ev)
@@ -87,7 +86,7 @@ class ProfileModel: ObservableObject {
         case .nostr_event(let resp):
             switch resp {
             case .event(let sid, let ev):
-                if sid != self.sub_id {
+                if sid != self.sub_id && sid != self.prof_subid {
                     return
                 }
                 add_event(ev)
