@@ -63,7 +63,7 @@ struct ContentView: View {
     
     var LoadingContainer: some View {
         VStack {
-            HStack {
+            HStack(alignment: .center) {
                 Spacer()
         
                 if home.signal.signal != home.signal.max_signal {
@@ -71,6 +71,11 @@ struct ContentView: View {
                         .font(.callout)
                         .foregroundColor(.gray)
                 }
+                
+                NavigationLink(destination: ConfigView(state: damus_state!)) {
+                    Label("", systemImage: "gear")
+                }
+                .buttonStyle(PlainButtonStyle())
             }
 
             Spacer()
@@ -91,36 +96,32 @@ struct ContentView: View {
     }
     
     func MainContent(damus: DamusState) -> some View {
-        NavigationView {
-            VStack {
-                NavigationLink(destination: MaybeProfileView, isActive: $profile_open) {
-                    EmptyView()
-                }
-                NavigationLink(destination: MaybeThreadView, isActive: $thread_open) {
-                    EmptyView()
-                }
-                NavigationLink(destination: MaybeSearchView, isActive: $search_open) {
-                    EmptyView()
-                }
-                switch selected_timeline {
-                case .search:
-                    SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(pool: damus_state!.pool) )
-                    
-                case .home:
-                    PostingTimelineView
-                    
-                case .notifications:
-                    TimelineView(events: $home.notifications, damus: damus)
-                        .navigationTitle("Notifications")
-                
-                case .none:
-                    EmptyView()
-                }
+        VStack {
+            NavigationLink(destination: MaybeProfileView, isActive: $profile_open) {
+                EmptyView()
             }
-            .navigationBarTitle("Damus", displayMode: .inline)
-                            
+            NavigationLink(destination: MaybeThreadView, isActive: $thread_open) {
+                EmptyView()
+            }
+            NavigationLink(destination: MaybeSearchView, isActive: $search_open) {
+                EmptyView()
+            }
+            switch selected_timeline {
+            case .search:
+                SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(pool: damus_state!.pool) )
+                
+            case .home:
+                PostingTimelineView
+                
+            case .notifications:
+                TimelineView(events: $home.notifications, damus: damus)
+                    .navigationTitle("Notifications")
+            
+            case .none:
+                EmptyView()
+            }
         }
-        .navigationViewStyle(.stack)
+        .navigationBarTitle("Damus", displayMode: .inline)
     }
     
     var MaybeSearchView: some View {
@@ -159,12 +160,13 @@ struct ContentView: View {
     var body: some View {
         VStack {
             if let damus = self.damus_state {
-                ZStack {
+                NavigationView {
                     MainContent(damus: damus)
-                        .padding([.bottom], -8.0)
-                    
-                    LoadingContainer
+                        .toolbar {
+                            LoadingContainer
+                        }
                 }
+                .navigationViewStyle(.stack)
             }
             
             TabBar(new_notifications: $home.new_notifications, selected: $selected_timeline, action: switch_timeline)

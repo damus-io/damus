@@ -165,7 +165,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
     public var is_local: Bool {
         return (self.flags & 1) != 0
     }
-
+    
     init(content: String, pubkey: String, kind: Int = 1, tags: [[String]] = []) {
         self.id = ""
         self.sig = ""
@@ -175,6 +175,17 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
         self.kind = kind
         self.tags = tags
         self.created_at = Int64(Date().timeIntervalSince1970)
+    }
+    
+    init(from: NostrEvent) {
+        self.id = from.id
+        self.sig = from.sig
+
+        self.content = from.content
+        self.pubkey = from.pubkey
+        self.kind = from.kind
+        self.tags = from.tags
+        self.created_at = from.created_at
     }
 
     func calculate_id() {

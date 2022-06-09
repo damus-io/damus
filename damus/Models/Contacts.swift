@@ -138,14 +138,52 @@ func decode_json_relays(_ content: String) -> [String: RelayInfo]? {
     return decode_json(content)
 }
 
-/*
+func remove_relay(ev: NostrEvent, privkey: String, relay: String) -> NostrEvent? {
+    let damus_relay = RelayDescriptor(url: URL(string: "wss://relay.damus.io")!, info: .rw)
+    
+    var relays = ensure_relay_info(relays: [damus_relay], content: ev.content)
+    guard relays.index(forKey: relay) != nil else {
+        return nil
+    }
+    
+    relays.removeValue(forKey: relay)
+    
+    guard let content = encode_json(relays) else {
+        return nil
+    }
+    
+    let new_ev = NostrEvent(content: content, pubkey: ev.pubkey, kind: 3, tags: ev.tags)
+    new_ev.calculate_id()
+    new_ev.sign(privkey: privkey)
+    return new_ev
+}
+
+func add_relay(ev: NostrEvent, privkey: String, relay: String, info: RelayInfo) -> NostrEvent? {
+    let damus_relay = RelayDescriptor(url: URL(string: "wss://relay.damus.io")!, info: .rw)
+    
+    var relays = ensure_relay_info(relays: [damus_relay], content: ev.content)
+    guard relays.index(forKey: relay) == nil else {
+        return nil
+    }
+    
+    relays[relay] = info
+    
+    guard let content = encode_json(relays) else {
+        return nil
+    }
+    
+    let new_ev = NostrEvent(content: content, pubkey: ev.pubkey, kind: 3, tags: ev.tags)
+    new_ev.calculate_id()
+    new_ev.sign(privkey: privkey)
+    return new_ev
+}
+
 func ensure_relay_info(relays: [RelayDescriptor], content: String) -> [String: RelayInfo] {
     guard let relay_info = decode_json_relays(content) else {
         return make_contact_relays(relays)
     }
     return relay_info
 }
- */
 
 func follow_with_existing_contacts(our_pubkey: String, our_contacts: NostrEvent, follow: ReferencedId) -> NostrEvent? {
     // don't update if we're already following
