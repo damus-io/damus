@@ -300,10 +300,6 @@ struct ContentView: View {
         }
     }
     
-    func is_friend_event(_ ev: NostrEvent) -> Bool {
-        return damus.is_friend_event(ev, our_pubkey: self.pubkey, contacts: self.damus_state!.contacts)
-    }
-
     func switch_timeline(_ timeline: Timeline) {
         if timeline == self.selected_timeline {
             NotificationCenter.default.post(name: .scroll_to_top, object: nil)
