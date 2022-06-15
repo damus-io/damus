@@ -13,7 +13,7 @@ struct SearchView: View {
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        TimelineView(events: $search.events, damus: appstate)
+        TimelineView(events: $search.events, loading: $search.loading, damus: appstate)
             .navigationBarTitle(describe_search(search.search))
             .padding([.leading, .trailing], 6)
             .onReceive(handle_notify(.switched_timeline)) { obj in

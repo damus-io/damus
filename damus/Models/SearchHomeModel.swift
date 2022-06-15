@@ -11,6 +11,8 @@ import Foundation
 /// The data model for the SearchHome view, typically something global-like
 class SearchHomeModel: ObservableObject {
     @Published var events: [NostrEvent] = []
+    @Published var loading: Bool = false
+
     let pool: RelayPool
     let sub_id = UUID().description
     let limit: UInt32 = 250
@@ -27,10 +29,12 @@ class SearchHomeModel: ObservableObject {
     }
     
     func subscribe() {
+        loading = true
         pool.subscribe(sub_id: sub_id, filters: [get_base_filter()], handler: handle_event)
     }
 
     func unsubscribe() {
+        loading = false
         pool.unsubscribe(sub_id: sub_id)
     }
     
@@ -52,6 +56,7 @@ class SearchHomeModel: ObservableObject {
             case .notice(let msg):
                 print("search home notice: \(msg)")
             case .eose:
+                loading = false
                 break
             }
         }

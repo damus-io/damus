@@ -33,6 +33,7 @@ struct InnerTimelineView: View {
 
 struct TimelineView: View {
     @Binding var events: [NostrEvent]
+    @Binding var loading: Bool
 
     let damus: DamusState
     
@@ -44,6 +45,10 @@ struct TimelineView: View {
     var MainContent: some View {
         ScrollViewReader { scroller in
             ScrollView {
+                if loading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                }
                 InnerTimelineView(events: $events, damus: damus)
             }
             .onReceive(NotificationCenter.default.publisher(for: .scroll_to_top)) { _ in

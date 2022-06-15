@@ -33,6 +33,8 @@ class ThreadModel: ObservableObject {
     @Published var initial_event: InitialEvent
     @Published var events: [NostrEvent] = []
     @Published var event_map: [String: Int] = [:]
+    @Published var loading: Bool = false
+    
     var replies: ReplyMap = ReplyMap()
     
     var event: NostrEvent? {
@@ -121,6 +123,7 @@ class ThreadModel: ObservableObject {
 
         print("subscribing to thread \(initial_event.id) with sub_id \(sub_id)")
         pool.register_handler(sub_id: sub_id, handler: handle_event)
+        loading = true
         pool.send(.subscribe(.init(filters: [ref_events, events_filter], sub_id: sub_id)))
     }
     
@@ -162,10 +165,14 @@ class ThreadModel: ObservableObject {
     }
 
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
-        handle_subid_event(pool: pool, sub_id: sub_id, relay_id: relay_id, ev: ev) { ev in
+        let done = handle_subid_event(pool: pool, sub_id: sub_id, relay_id: relay_id, ev: ev) { ev in
             if ev.known_kind == .text {
                 self.add_event(ev)
             }
+        }
+        
+        if done {
+            loading = false
         }
     }
 

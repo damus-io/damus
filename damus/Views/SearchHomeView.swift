@@ -30,7 +30,7 @@ struct SearchHomeView: View {
     }
     
     var GlobalContent: some View {
-        TimelineView(events: $model.events, damus: damus_state)
+        TimelineView(events: $model.events, loading: $model.loading, damus: damus_state)
     }
     
     var SearchContent: some View {

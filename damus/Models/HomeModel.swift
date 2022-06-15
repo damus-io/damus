@@ -23,6 +23,7 @@ class HomeModel: ObservableObject {
     @Published var new_notifications: Bool = false
     @Published var notifications: [NostrEvent] = []
     @Published var events: [NostrEvent] = []
+    @Published var loading: Bool = false
     @Published var signal: SignalModel = SignalModel()
     
     init() {
@@ -138,8 +139,10 @@ class HomeModel: ObservableObject {
             switch ev {
             case .connected:
                 if !done_init {
+                    self.loading = true
                     send_initial_filters(relay_id: relay_id)
                 } else {
+                    self.loading = true
                     send_home_filters(relay_id: relay_id)
                 }
             case .error(let merr):
@@ -178,6 +181,7 @@ class HomeModel: ObservableObject {
                 print(msg)
                 
             case .eose:
+                self.loading = false
                 break
             }
         }
