@@ -289,7 +289,9 @@ class HomeModel: ObservableObject {
         }
         
         if sub_id == home_subid {
-            let _ = insert_home_event(ev)
+            if is_friend_event(ev, our_pubkey: damus_state.pubkey, contacts: damus_state.contacts) {
+                let _ = insert_home_event(ev)
+            }
         } else if sub_id == notifications_subid {
             handle_notification(ev: ev)
         }

@@ -214,9 +214,17 @@ func is_friend_event(_ ev: NostrEvent, our_pubkey: String, contacts: Contacts) -
         return true
     }
     
+    let pks = ev.referenced_pubkeys
+    
+    // allow reply-to-self-or-friend case
+    if pks.count == 1 && contacts.is_friend(pks[0].ref_id) {
+        return true
+    }
+    
     // show our replies?
-    for pk in ev.referenced_pubkeys {
-        if contacts.is_friend(pk.ref_id) {
+    for pk in pks {
+        // don't count self mentions here
+        if pk.ref_id != ev.pubkey && contacts.is_friend(pk.ref_id) {
             return true
         }
     }
