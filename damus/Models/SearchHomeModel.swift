@@ -13,6 +13,7 @@ class SearchHomeModel: ObservableObject {
     @Published var events: [NostrEvent] = []
     @Published var loading: Bool = false
 
+    var seen_pubkey: Set<String> = Set()
     let pool: RelayPool
     let sub_id = UUID().description
     let limit: UInt32 = 250
@@ -49,6 +50,10 @@ class SearchHomeModel: ObservableObject {
                     return
                 }
                 if ev.kind == NostrKind.text.rawValue {
+                    if seen_pubkey.contains(ev.pubkey) {
+                        return
+                    }
+                    seen_pubkey.insert(ev.pubkey)
                     let _ = insert_uniq_sorted_event(events: &events, new_ev: ev) {
                         $0.created_at > $1.created_at
                     }
