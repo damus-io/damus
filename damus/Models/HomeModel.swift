@@ -142,7 +142,7 @@ class HomeModel: ObservableObject {
                     self.loading = true
                     send_initial_filters(relay_id: relay_id)
                 } else {
-                    self.loading = true
+                    //remove_bootstrap_nodes(damus_state)
                     send_home_filters(relay_id: relay_id)
                 }
             case .error(let merr):
@@ -422,6 +422,30 @@ func load_our_relays(our_pubkey: String, pool: RelayPool, ev: NostrEvent) {
             if let _ = try? pool.add_relay(url, info: decoded[key]!) {
                 pool.connect(to: [key])
             }
+        }
+    }
+}
+
+
+func remove_bootstrap_nodes(_ damus_state: DamusState) {
+    guard let contacts = damus_state.contacts.event else {
+        return
+    }
+    
+    guard let relays = decode_json_relays(contacts.content) else {
+        return
+    }
+    
+    let descriptors = relays.reduce(into: []) { arr, kv in
+        guard let url = URL(string: kv.key) else {
+            return
+        }
+        arr.append(RelayDescriptor(url: url, info: kv.value))
+    }
+
+    for relay in BOOTSTRAP_RELAYS {
+        if !(descriptors.contains { ($0 as! RelayDescriptor).url.absoluteString == relay }) {
+            damus_state.pool.remove_relay(relay)
         }
     }
 }

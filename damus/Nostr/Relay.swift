@@ -14,7 +14,7 @@ struct RelayInfo: Codable {
     static let rw = RelayInfo(read: true, write: true)
 }
 
-struct RelayDescriptor {
+struct RelayDescriptor: Codable {
     let url: URL
     let info: RelayInfo
 }

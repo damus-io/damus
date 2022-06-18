@@ -45,9 +45,25 @@ class RelayPool {
     }
 
     func register_handler(sub_id: String, handler: @escaping (String, NostrConnectionEvent) -> ()) {
+        
         self.handlers.append(RelayHandler(sub_id: sub_id, callback: handler))
     }
-
+    
+    func remove_relay(_ relay_id: String) {
+        var i: Int = 0
+        
+        self.disconnect(to: [relay_id])
+        
+        for relay in relays {
+            if relay.id == relay_id {
+                relays.remove(at: i)
+                break
+            }
+            
+            i += 1
+        }
+    }
+    
     func add_relay(_ url: URL, info: RelayInfo) throws {
         let relay_id = get_relay_id(url)
         if get_relay(relay_id) != nil {
