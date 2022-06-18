@@ -114,11 +114,7 @@ struct ChatView: View {
                     
                     if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
                         let bar = make_actionbar_model(ev: event, damus: damus)
-                        EventActionBar(event: event,
-                                       keypair: damus.keypair,
-                                       profiles: damus.profiles,
-                                       bar: bar
-                        )
+                        EventActionBar(damus_state: damus, event: event, bar: bar)
                     }
 
                     //Spacer()

@@ -18,10 +18,10 @@ enum ActionBarSheet: Identifiable {
 }
 
 struct EventActionBar: View {
+    let damus_state: DamusState
     let event: NostrEvent
-    let keypair: Keypair
     @State var sheet: ActionBarSheet? = nil
-    let profiles: Profiles
+    @State var confirm_boost: Bool = false
     @StateObject var bar: ActionBarModel
     
     var body: some View {
@@ -34,7 +34,7 @@ struct EventActionBar: View {
             Spacer()
             
              */
-            if keypair.privkey != nil {
+            if damus_state.keypair.privkey != nil {
                 EventActionButton(img: "bubble.left", col: nil) {
                     notify(.reply, event)
                 }
@@ -49,7 +49,7 @@ struct EventActionBar: View {
                     if bar.liked {
                         notify(.delete, bar.our_like)
                     } else {
-                        notify(.like, event)
+                        send_like()
                     }
                 }
             }
@@ -63,7 +63,7 @@ struct EventActionBar: View {
                     if bar.boosted {
                         notify(.delete, bar.our_boost)
                     } else {
-                        notify(.boost, event)
+                        self.confirm_boost = true
                     }
                 }
             }
@@ -83,16 +83,50 @@ struct EventActionBar: View {
             }
         }
         .padding(.top, 1)
+        .alert("Boost", isPresented: $confirm_boost) {
+            Button("Boost") {
+                send_boost()
+            }
+            Button("Cancel") {
+                confirm_boost = false
+            }
+        } message: {
+            Text("Are you sure you want to boost this post?")
+        }
         .onReceive(handle_notify(.liked)) { n in
             let liked = n.object as! Counted
             if liked.id != event.id {
                 return
             }
             self.bar.likes = liked.total
-            if liked.event.pubkey == keypair.pubkey {
+            if liked.event.pubkey == damus_state.keypair.pubkey {
                 self.bar.our_like = liked.event
             }
         }
+    }
+    
+    func send_boost() {
+        guard let privkey = self.damus_state.keypair.privkey else {
+            return
+        }
+
+        let boost = make_boost_event(pubkey: damus_state.keypair.pubkey, privkey: privkey, boosted: self.event)
+        
+        self.bar.our_boost = boost
+        
+        damus_state.pool.send(.event(boost))
+    }
+    
+    func send_like() {
+        guard let privkey = damus_state.keypair.privkey else {
+            return
+        }
+        
+        let like_ev = make_like_event(pubkey: damus_state.pubkey, privkey: privkey, liked: event)
+        
+        self.bar.our_like = like_ev
+        
+        damus_state.pool.send(.event(like_ev))
     }
 }
 
@@ -110,10 +144,9 @@ func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> 
 struct EventActionBar_Previews: PreviewProvider {
     static var previews: some View {
         let pk = "pubkey"
-        let kp = Keypair(pubkey: pk, privkey: nil)
         let ds = test_damus_state()
         let bar = ActionBarModel(likes: 0, boosts: 0, tips: 0, our_like: nil, our_boost: nil, our_tip: nil)
         let ev = NostrEvent(content: "hi", pubkey: pk)
-        EventActionBar(event: ev, keypair: kp, profiles: ds.profiles, bar: bar)
+        EventActionBar(damus_state: ds, event: ev, bar: bar)
     }
 }
