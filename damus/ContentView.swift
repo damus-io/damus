@@ -11,8 +11,6 @@ import Starscream
 let BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
     "wss://nostr-pub.wellorder.net",
-    "wss://nostr-relay.freeberty.net",
-    "wss://nostr-relay.untethr.me",
 ]
 
 struct TimestampedProfile {
