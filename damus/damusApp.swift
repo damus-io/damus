@@ -35,6 +35,9 @@ struct MainView: View {
                     }
             }
         }
+        .onReceive(handle_notify(.logout)) { _ in
+            keypair = nil
+        }
         .onAppear {
             keypair = get_saved_keypair()
         }

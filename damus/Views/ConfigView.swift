@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct ConfigView: View {
     let state: DamusState
     @Environment(\.dismiss) var dismiss
     @State var show_add_relay: Bool = false
+    @State var confirm_logout: Bool = false
     @State var new_relay: String = ""
     
     func Relay(_ ev: NostrEvent, relay: String) -> some View {
@@ -45,6 +47,32 @@ struct ConfigView: View {
                         
                     }
                 }
+                
+                Section("Public Account ID") {
+                    Text(state.keypair.pubkey_bech32)
+                        .textSelection(.enabled)
+                        .onTapGesture {
+                            UIPasteboard.general.string = state.keypair.pubkey_bech32
+                            AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+                        }
+                }
+                    
+                if let sec = state.keypair.privkey_bech32 {
+                    Section("Secret Account Login Key") {
+                        Text(sec)
+                            .textSelection(.enabled)
+                            .onTapGesture {
+                                UIPasteboard.general.string = sec
+                                AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+                            }
+                    }
+                }
+                    
+                Section("Reset") {
+                    Button("Logout") {
+                        confirm_logout = true
+                    }
+                }
             }
             
             VStack {
@@ -63,6 +91,16 @@ struct ConfigView: View {
         }
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.large)
+        .alert("Logout", isPresented: $confirm_logout) {
+            Button("Logout") {
+                notify(.logout, ())
+            }
+            Button("Cancel") {
+                confirm_logout = false
+            }
+        } message: {
+            Text("Make sure your nsec account key is saved before you logout or you will lose access to this account")
+        }
         .sheet(isPresented: $show_add_relay) {
             AddRelayView(show_add_relay: $show_add_relay, relay: $new_relay) { _ in
                 guard let url = URL(string: new_relay) else {

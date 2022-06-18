@@ -128,6 +128,12 @@ extension Notification.Name {
 }
 
 extension Notification.Name {
+    static var logout: Notification.Name {
+        return Notification.Name("logout")
+    }
+}
+
+extension Notification.Name {
     static var followed: Notification.Name {
         return Notification.Name("followed")
     }
