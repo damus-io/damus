@@ -19,7 +19,7 @@ struct KeyEvent {
     let relay_url: String
 }
 
-struct ReferencedId: Identifiable {
+struct ReferencedId: Identifiable, Hashable {
     let ref_id: String
     let relay_id: String?
     let key: String
@@ -360,6 +360,18 @@ func get_referenced_ids(tags: [[String]], key: String) -> [ReferencedId] {
                 relay_id = tag[2]
             }
             acc.append(ReferencedId(ref_id: tag[1], relay_id: relay_id, key: key))
+        }
+    }
+}
+
+func get_referenced_id_set(tags: [[String]], key: String) -> Set<ReferencedId> {
+    return tags.reduce(into: Set()) { (acc, tag) in
+        if tag.count >= 2 && tag[0] == key {
+            var relay_id: String? = nil
+            if tag.count >= 3 {
+                relay_id = tag[2]
+            }
+            acc.insert(ReferencedId(ref_id: tag[1], relay_id: relay_id, key: key))
         }
     }
 }

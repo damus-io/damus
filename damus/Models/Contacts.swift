@@ -214,10 +214,15 @@ func is_friend_event(_ ev: NostrEvent, our_pubkey: String, contacts: Contacts) -
         return true
     }
     
-    let pks = ev.referenced_pubkeys
+    let pks = get_referenced_id_set(tags: ev.tags, key: "p")
+    
+    // reply to self
+    if pks.count == 0 {
+        return true
+    }
     
     // allow reply-to-self-or-friend case
-    if pks.count == 1 && contacts.is_friend(pks[0].ref_id) {
+    if pks.count == 1 && contacts.is_friend(pks.first!.ref_id) {
         return true
     }
     
