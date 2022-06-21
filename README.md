@@ -1,7 +1,7 @@
 
 # damus
 
-A twitter-like [nostr](nostr) client for iPhone, iPad and MacOS.
+A twitter-like [nostr][nostr] client for iPhone, iPad and MacOS.
 
 [nostr]: https://github.com/fiatjaf/nostr
 
@@ -9,10 +9,10 @@ A twitter-like [nostr](nostr) client for iPhone, iPad and MacOS.
 
 damus implements the following [Nostr Implementation Possibilities](nips)
 
-- [NIP-01: Basic protocol flow](nip01)
-- [NIP-08: Mentions](nip08)
-- [NIP-10: Reply conventions](nip10)
-- [NIP-12: Generic tag queries (hashtags)](nip12)
+- [NIP-01: Basic protocol flow][nip01]
+- [NIP-08: Mentions][nip08]
+- [NIP-10: Reply conventions][nip10]
+- [NIP-12: Generic tag queries (hashtags)][nip12]
 
 [nips]: https://github.com/nostr-protocol/nips
 [nip01]: https://github.com/nostr-protocol/nips/blob/master/01.md
@@ -22,7 +22,7 @@ damus implements the following [Nostr Implementation Possibilities](nips)
 
 ## Contributing
 
-Contributors welcome! [Email patches](git-send-email) to jb55@jb55.com are preferred, but I accept PRs on github as well.
+Contributors welcome! [Email patches][git-send-email] to jb55@jb55.com are preferred, but I accept PRs on github as well.
 
 [git-send-email]: http://git-send-email.io
 
