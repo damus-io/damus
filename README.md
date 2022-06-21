@@ -7,7 +7,7 @@ A twitter-like [nostr][nostr] client for iPhone, iPad and MacOS.
 
 ## Spec Compliance
 
-damus implements the following [Nostr Implementation Possibilities](nips)
+damus implements the following [Nostr Implementation Possibilities][nips]
 
 - [NIP-01: Basic protocol flow][nip01]
 - [NIP-08: Mentions][nip08]
