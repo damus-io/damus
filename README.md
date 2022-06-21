@@ -3,6 +3,8 @@
 
 A twitter-like [nostr][nostr] client for iPhone, iPad and MacOS.
 
+![](./ss.png)
+
 [nostr]: https://github.com/fiatjaf/nostr
 
 ## Spec Compliance
