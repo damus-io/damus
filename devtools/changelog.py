@@ -67,7 +67,7 @@ def get_log_entries(commitrange):
 
         url = 'https://api.github.com/repos/{repo}/commits/{commit}/pulls'.format(repo=repo, commit=commit)
         content = requests.get(url, headers=headers).json()
-        if content.get(0) is not None:
+        if content and content.get(0) is not None:
             pullreq = content[0]['number']
         else:
             pullreq = None
@@ -81,11 +81,12 @@ def get_log_entries(commitrange):
 def linkify(entries):
     links = []
     for e in entries:
-        links.append(Link(
-            ref='#{}'.format(e.pullreq),
-            content=e.content,
-            url="https://github.com/{repo}/pull/{pullreq}".format(repo=repo, pullreq=e.pullreq)
-        ))
+        if e.pullreq is not None:
+            links.append(Link(
+                ref='#{}'.format(e.pullreq),
+                content=e.content,
+                url="https://github.com/{repo}/pull/{pullreq}".format(repo=repo, pullreq=e.pullreq)
+            ))
     return list(set(links))
 
 
@@ -118,12 +119,9 @@ template = Template("""<%def name="group(entries)">
 
 </%def><%def name="group_links(entries)">
 % for e in entries:
-[${e.pullreq}]: https://github.com/{repo}/pull/${e.pullreq}
+[${e.pullreq}]: https://github.com/${repo}/pull/${e.pullreq}
 % endfor
 </%def>
-<!--
-TODO: Insert version codename, and username of the contributor that named the release.
--->
 
 ${h2} [${version}] - ${date.strftime("%Y-%m-%d")}
 
@@ -135,7 +133,7 @@ ${group(groups[section]) | trim}
 % for l in links:
 [${l.ref}]: ${l.url}
 % endfor
-[${version}]: https://github.com/{repo}/releases/tag/v${version}""")
+[${version}]: https://github.com/${repo}/releases/tag/v${version}""")
 
 
 if __name__ == "__main__":
