@@ -3,7 +3,7 @@
 
 A twitter-like [nostr][nostr] client for iPhone, iPad and MacOS.
 
-<img src="./ss.png" width="50%" height="50%" />
+<p align="center"><img src="./ss.png" width="50%" height="50%" /></p>
 
 [nostr]: https://github.com/fiatjaf/nostr
 
