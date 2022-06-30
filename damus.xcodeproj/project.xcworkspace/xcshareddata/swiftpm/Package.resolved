@@ -3,10 +3,9 @@
     {
       "identity" : "secp256k1.swift",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/GigaBitcoin/secp256k1.swift",
+      "location" : "https://github.com/jb55/secp256k1.swift",
       "state" : {
-        "revision" : "abe7c8232970c1fd57f4c77590bce2c868df7137",
-        "version" : "0.5.0"
+        "revision" : "40b4b38b3b1c83f7088c76189a742870e0ca06a9"
       }
     },
     {

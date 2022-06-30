@@ -204,13 +204,13 @@ func make_contact_relays(_ relays: [RelayDescriptor]) -> [String: RelayInfo] {
 }
 
 // TODO: tests for this
-func is_friend_event(_ ev: NostrEvent, our_pubkey: String, contacts: Contacts) -> Bool
+func is_friend_event(_ ev: NostrEvent, keypair: Keypair, contacts: Contacts) -> Bool
 {
     if !contacts.is_friend(ev.pubkey) {
         return false
     }
     
-    if !ev.is_reply {
+    if ev.is_reply(keypair.privkey) {
         return true
     }
     

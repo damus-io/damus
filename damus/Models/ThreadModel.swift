@@ -30,6 +30,8 @@ enum InitialEvent {
 
 /// manages the lifetime of a thread
 class ThreadModel: ObservableObject {
+    let privkey: String?
+    let kind: Int
     @Published var initial_event: InitialEvent
     @Published var events: [NostrEvent] = []
     @Published var event_map: [String: Int] = [:]
@@ -54,14 +56,25 @@ class ThreadModel: ObservableObject {
     let pool: RelayPool
     var sub_id = UUID().description
    
-    init(evid: String, pool: RelayPool) {
+    init(evid: String, pool: RelayPool, privkey: String?) {
         self.pool = pool
         self.initial_event = .event_id(evid)
+        self.privkey = privkey
+        self.kind = NostrKind.text.rawValue
     }
     
-    init(event: NostrEvent, pool: RelayPool) {
+    init(event: NostrEvent, pool: RelayPool, privkey: String?) {
         self.pool = pool
         self.initial_event = .event(event)
+        self.privkey = privkey
+        self.kind = NostrKind.text.rawValue
+    }
+    
+    init(event: NostrEvent, pool: RelayPool, privkey: String?, kind: Int) {
+        self.pool = pool
+        self.initial_event = .event(event)
+        self.privkey = privkey
+        self.kind = kind
     }
     
     func unsubscribe() {
@@ -89,7 +102,7 @@ class ThreadModel: ObservableObject {
         return true
     }
     
-    func set_active_event(_ ev: NostrEvent) {
+    func set_active_event(_ ev: NostrEvent, privkey: String?) {
         if should_resubscribe(ev) {
             unsubscribe()
             self.initial_event = .event(ev)
@@ -97,14 +110,14 @@ class ThreadModel: ObservableObject {
         } else {
             self.initial_event = .event(ev)
             if events.count == 0 {
-                add_event(ev)
+                add_event(ev, privkey: privkey)
             }
         }
     }
     
     func subscribe() {
-        var ref_events = NostrFilter.filter_kinds([1,5,6,7])
-        var events_filter = NostrFilter.filter_kinds([1])
+        var ref_events = NostrFilter.filter_kinds([self.kind,5,6,7])
+        var events_filter = NostrFilter.filter_kinds([self.kind])
         //var likes_filter = NostrFilter.filter_kinds(7])
 
         // TODO: add referenced relays
@@ -134,12 +147,12 @@ class ThreadModel: ObservableObject {
         return nil
     }
     
-    func add_event(_ ev: NostrEvent) {
+    func add_event(_ ev: NostrEvent, privkey: String?) {
         if event_map[ev.id] != nil {
             return
         }
         
-        for reply in ev.direct_replies() {
+        for reply in ev.direct_replies(privkey) {
             self.replies.add(id: ev.id, reply_id: reply.ref_id)
         }
         
@@ -158,7 +171,7 @@ class ThreadModel: ObservableObject {
         if let evid = self.initial_event.is_event_id {
             if ev.id == evid {
                 // this should trigger a resubscribe...
-                set_active_event(ev)
+                set_active_event(ev, privkey: privkey)
             }
         }
         
@@ -167,7 +180,7 @@ class ThreadModel: ObservableObject {
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
         let done = handle_subid_event(pool: pool, sub_id: sub_id, relay_id: relay_id, ev: ev) { ev in
             if ev.known_kind == .text {
-                self.add_event(ev)
+                self.add_event(ev, privkey: self.privkey)
             }
         }
         

@@ -45,6 +45,27 @@ func follow_btn_enabled_state(_ fs: FollowState) -> Bool {
     }
 }
 
+struct ProfileNameView: View {
+    let pubkey: String
+    let profile: Profile?
+    
+    var body: some View {
+        Group {
+            if let real_name = profile?.display_name {
+                VStack(alignment: .leading) {
+                    Text(real_name)
+                        .font(.title)
+                    ProfileName(pubkey: pubkey, profile: profile, prefix: "@")
+                        .font(.callout)
+                        .foregroundColor(.gray)
+                }
+            } else {
+                ProfileName(pubkey: pubkey, profile: profile)
+            }
+        }
+    }
+}
+
 struct ProfileView: View {
     let damus_state: DamusState
     
@@ -60,19 +81,8 @@ struct ProfileView: View {
             
             HStack(alignment: .center) {
                 ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .custom(Color.black, 2), image_cache: damus_state.image_cache, profiles: damus_state.profiles)
-                
-                if let real_name = data?.display_name {
-                    VStack(alignment: .leading) {
-                        Text(real_name)
-                            .font(.title)
-                        ProfileName(pubkey: profile.pubkey, profile: data, prefix: "@")
-                            .font(.callout)
-                            .foregroundColor(.gray)
-                    }
-                } else {
-                    ProfileName(pubkey: profile.pubkey, profile: data)
-                }
-                    //.border(Color.green)
+        
+                ProfileNameView(pubkey: profile.pubkey, profile: data)
                 
                 Spacer()
                 

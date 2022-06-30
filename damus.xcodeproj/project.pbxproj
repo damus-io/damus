@@ -13,6 +13,9 @@
 		4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F92280F66F5000448DE /* ReplyMap.swift */; };
 		4C0A3F95280F6C78000448DE /* ReplyQuoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F94280F6C78000448DE /* ReplyQuoteView.swift */; };
 		4C0A3F97280F8E02000448DE /* ThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F96280F8E02000448DE /* ThreadView.swift */; };
+		4C216F32286E388800040376 /* DMChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F31286E388800040376 /* DMChatView.swift */; };
+		4C216F34286F5ACD00040376 /* DMView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F33286F5ACD00040376 /* DMView.swift */; };
+		4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F352870A9A700040376 /* InputDismissKeyboard.swift */; };
 		4C285C8228385570008A31F1 /* CarouselView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C285C8128385570008A31F1 /* CarouselView.swift */; };
 		4C285C8428385690008A31F1 /* CreateAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C285C8328385690008A31F1 /* CreateAccountView.swift */; };
 		4C285C86283892E7008A31F1 /* CreateAccountModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C285C85283892E7008A31F1 /* CreateAccountModel.swift */; };
@@ -57,6 +60,9 @@
 		4C633350283D40E500B1C9C3 /* HomeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C63334F283D40E500B1C9C3 /* HomeModel.swift */; };
 		4C633352283D419F00B1C9C3 /* SignalModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C633351283D419F00B1C9C3 /* SignalModel.swift */; };
 		4C649844285A952100EAE2B3 /* LocalUserConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C649843285A952100EAE2B3 /* LocalUserConfig.swift */; };
+		4C64987C286D03E000EAE2B3 /* DirectMessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C64987B286D03E000EAE2B3 /* DirectMessagesView.swift */; };
+		4C64987E286D082C00EAE2B3 /* DirectMessagesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C64987D286D082C00EAE2B3 /* DirectMessagesModel.swift */; };
+		4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */ = {isa = PBXBuildFile; productRef = 4C649880286E0EE300EAE2B3 /* secp256k1 */; };
 		4C75EFA427FA577B0006080F /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFA327FA577B0006080F /* PostView.swift */; };
 		4C75EFA627FF87A20006080F /* Nostr.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFA527FF87A20006080F /* Nostr.swift */; };
 		4C75EFAD28049CFB0006080F /* PostButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFAC28049CFB0006080F /* PostButton.swift */; };
@@ -90,7 +96,6 @@
 		4CE6DF0427F7A08200C66700 /* damusUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF0327F7A08200C66700 /* damusUITestsLaunchTests.swift */; };
 		4CE6DF1227F7A2B300C66700 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = 4CE6DF1127F7A2B300C66700 /* Starscream */; };
 		4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */; };
-		4CEE2AEB2805AEA300AB5EEF /* secp256k1 in Frameworks */ = {isa = PBXBuildFile; productRef = 4CEE2AEA2805AEA300AB5EEF /* secp256k1 */; };
 		4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */; };
 		4CEE2AF1280B216B00AB5EEF /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */; };
 		4CEE2AF3280B25C500AB5EEF /* ProfilePicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF2280B25C500AB5EEF /* ProfilePicView.swift */; };
@@ -124,6 +129,9 @@
 		4C0A3F92280F66F5000448DE /* ReplyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyMap.swift; sourceTree = "<group>"; };
 		4C0A3F94280F6C78000448DE /* ReplyQuoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyQuoteView.swift; sourceTree = "<group>"; };
 		4C0A3F96280F8E02000448DE /* ThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadView.swift; sourceTree = "<group>"; };
+		4C216F31286E388800040376 /* DMChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMChatView.swift; sourceTree = "<group>"; };
+		4C216F33286F5ACD00040376 /* DMView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMView.swift; sourceTree = "<group>"; };
+		4C216F352870A9A700040376 /* InputDismissKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputDismissKeyboard.swift; sourceTree = "<group>"; };
 		4C285C8128385570008A31F1 /* CarouselView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarouselView.swift; sourceTree = "<group>"; };
 		4C285C8328385690008A31F1 /* CreateAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAccountView.swift; sourceTree = "<group>"; };
 		4C285C85283892E7008A31F1 /* CreateAccountModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAccountModel.swift; sourceTree = "<group>"; };
@@ -168,6 +176,8 @@
 		4C63334F283D40E500B1C9C3 /* HomeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeModel.swift; sourceTree = "<group>"; };
 		4C633351283D419F00B1C9C3 /* SignalModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalModel.swift; sourceTree = "<group>"; };
 		4C649843285A952100EAE2B3 /* LocalUserConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalUserConfig.swift; sourceTree = "<group>"; };
+		4C64987B286D03E000EAE2B3 /* DirectMessagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectMessagesView.swift; sourceTree = "<group>"; };
+		4C64987D286D082C00EAE2B3 /* DirectMessagesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectMessagesModel.swift; sourceTree = "<group>"; };
 		4C75EFA327FA577B0006080F /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
 		4C75EFA527FF87A20006080F /* Nostr.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Nostr.swift; sourceTree = "<group>"; };
 		4C75EFA72804823E0006080F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -219,8 +229,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4CEE2AEB2805AEA300AB5EEF /* secp256k1 in Frameworks */,
 				4CE6DF1227F7A2B300C66700 /* Starscream in Frameworks */,
+				4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -268,6 +278,7 @@
 				4C987B56283FD07F0042CE38 /* FollowersModel.swift */,
 				4C5C7E67284ED36500A22DF5 /* SearchHomeModel.swift */,
 				4C649843285A952100EAE2B3 /* LocalUserConfig.swift */,
+				4C64987D286D082C00EAE2B3 /* DirectMessagesModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -308,6 +319,9 @@
 				4C5C7E69284EDE2E00A22DF5 /* SearchResultsView.swift */,
 				4CE4F9DD2852768D00C00DD9 /* ConfigView.swift */,
 				4CE4F9E228528C5200C00DD9 /* AddRelayView.swift */,
+				4C64987B286D03E000EAE2B3 /* DirectMessagesView.swift */,
+				4C216F31286E388800040376 /* DMChatView.swift */,
+				4C216F33286F5ACD00040376 /* DMView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -343,6 +357,7 @@
 				4C477C9D282C3A4800033AA3 /* TipCounter.swift */,
 				4C285C8B28398BC6008A31F1 /* Keys.swift */,
 				4C90BD19283AA67F008EE7EF /* Bech32.swift */,
+				4C216F352870A9A700040376 /* InputDismissKeyboard.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -447,7 +462,7 @@
 			name = damus;
 			packageProductDependencies = (
 				4CE6DF1127F7A2B300C66700 /* Starscream */,
-				4CEE2AEA2805AEA300AB5EEF /* secp256k1 */,
+				4C649880286E0EE300EAE2B3 /* secp256k1 */,
 			);
 			productName = damus;
 			productReference = 4CE6DEE327F7A08100C66700 /* damus.app */;
@@ -523,7 +538,7 @@
 			mainGroup = 4CE6DEDA27F7A08100C66700;
 			packageReferences = (
 				4CE6DF1027F7A2B300C66700 /* XCRemoteSwiftPackageReference "Starscream" */,
-				4CEE2AE92805AEA300AB5EEF /* XCRemoteSwiftPackageReference "secp256k1" */,
+				4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -571,9 +586,11 @@
 				4C363A8A28236B57006E126D /* MentionView.swift in Sources */,
 				4CE4F8CD281352B30009DFBB /* Notifications.swift in Sources */,
 				4C285C8428385690008A31F1 /* CreateAccountView.swift in Sources */,
+				4C216F34286F5ACD00040376 /* DMView.swift in Sources */,
 				4CE4F9E1285287B800C00DD9 /* TextFieldAlert.swift in Sources */,
 				4C363AA828297703006E126D /* InsertSort.swift in Sources */,
 				4C285C86283892E7008A31F1 /* CreateAccountModel.swift in Sources */,
+				4C64987C286D03E000EAE2B3 /* DirectMessagesView.swift in Sources */,
 				4C363A8C28236B92006E126D /* PubkeyView.swift in Sources */,
 				4C363A8628234FDE006E126D /* ImageCache.swift in Sources */,
 				4C5C7E68284ED36500A22DF5 /* SearchHomeModel.swift in Sources */,
@@ -591,6 +608,7 @@
 				4C0A3F8C280F5FCA000448DE /* ChatroomView.swift in Sources */,
 				4C477C9E282C3A4800033AA3 /* TipCounter.swift in Sources */,
 				4C0A3F91280F6528000448DE /* ChatView.swift in Sources */,
+				4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */,
 				4C75EFA627FF87A20006080F /* Nostr.swift in Sources */,
 				4CE4F9DE2852768D00C00DD9 /* ConfigView.swift in Sources */,
 				4C285C8E28399BFE008A31F1 /* SaveKeysView.swift in Sources */,
@@ -617,6 +635,8 @@
 				4CACA9DC280C38C000D9BBE8 /* Profiles.swift in Sources */,
 				4C633352283D419F00B1C9C3 /* SignalModel.swift in Sources */,
 				4C363A94282704FA006E126D /* Post.swift in Sources */,
+				4C216F32286E388800040376 /* DMChatView.swift in Sources */,
+				4C64987E286D082C00EAE2B3 /* DirectMessagesModel.swift in Sources */,
 				4C363A8828236948006E126D /* BlocksView.swift in Sources */,
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
 				4C363A9C282838B9006E126D /* EventRef.swift in Sources */,
@@ -991,6 +1011,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jb55/secp256k1.swift";
+			requirement = {
+				kind = revision;
+				revision = 40b4b38b3b1c83f7088c76189a742870e0ca06a9;
+			};
+		};
 		4CE6DF1027F7A2B300C66700 /* XCRemoteSwiftPackageReference "Starscream" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/daltoniam/Starscream";
@@ -999,26 +1027,18 @@
 				minimumVersion = 4.0.0;
 			};
 		};
-		4CEE2AE92805AEA300AB5EEF /* XCRemoteSwiftPackageReference "secp256k1" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/GigaBitcoin/secp256k1.swift";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.5.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		4C649880286E0EE300EAE2B3 /* secp256k1 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
+			productName = secp256k1;
+		};
 		4CE6DF1127F7A2B300C66700 /* Starscream */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4CE6DF1027F7A2B300C66700 /* XCRemoteSwiftPackageReference "Starscream" */;
 			productName = Starscream;
-		};
-		4CEE2AEA2805AEA300AB5EEF /* secp256k1 */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4CEE2AE92805AEA300AB5EEF /* XCRemoteSwiftPackageReference "secp256k1" */;
-			productName = secp256k1;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
