@@ -17,38 +17,12 @@ enum Timeline: String, CustomStringConvertible {
     }
 }
 
-
-struct MainTabView: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
-}
-
-struct MainTabView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainTabView()
-    }
-}
-
-struct NotificationsTab: View {
-    @Binding var new_notifications: Bool
-    @Binding var selected: Timeline?
-    
-    let action: (Timeline) -> ()
-    
-    var body: some View {
-        ZStack(alignment: .center) {
-            TabButton(timeline: .notifications, img: "bell", selected: $selected, action: action)
-            
-            if new_notifications {
-                Circle()
-                    .size(CGSize(width: 8, height: 8))
-                    .frame(width: 10, height: 10, alignment: .topTrailing)
-                    .alignmentGuide(VerticalAlignment.center) { a in a.height + 2.0 }
-                    .alignmentGuide(HorizontalAlignment.center) { a in a.width - 12.0 }
-                    .foregroundColor(.accentColor)
-            }
-        }
+func timeline_bit(_ timeline: Timeline) -> Int {
+    switch timeline {
+    case .home: return 1 << 0
+    case .notifications: return 1 << 1
+    case .search: return 1 << 2
+    case .dms: return 1 << 3
     }
 }
 
@@ -58,11 +32,30 @@ struct TabButton: View {
     let img: String
     
     @Binding var selected: Timeline?
+    @Binding var new_events: NewEventsBits
     
     let action: (Timeline) -> ()
     
     var body: some View {
-        Button(action: {action(timeline)}) {
+        ZStack(alignment: .center) {
+            Tab
+            
+            if new_events.is_set(timeline) {
+                Circle()
+                    .size(CGSize(width: 8, height: 8))
+                    .frame(width: 10, height: 10, alignment: .topTrailing)
+                    .alignmentGuide(VerticalAlignment.center) { a in a.height + 2.0 }
+                    .alignmentGuide(HorizontalAlignment.center) { a in a.width - 12.0 }
+                    .foregroundColor(.accentColor)
+            }
+        }
+    }
+    
+    var Tab: some View {
+        Button(action: {
+            action(timeline)
+            new_events = NewEventsBits(prev: new_events, unsetting: timeline)
+        }) {
             Label("", systemImage: selected == timeline ? "\(img).fill" : img)
                 .contentShape(Rectangle())
                 .frame(maxWidth: .infinity, minHeight: 30.0)
@@ -73,7 +66,7 @@ struct TabButton: View {
     
 
 struct TabBar: View {
-    @Binding var new_notifications: Bool
+    @Binding var new_events: NewEventsBits
     @Binding var selected: Timeline?
     
     let action: (Timeline) -> ()
@@ -82,9 +75,9 @@ struct TabBar: View {
         VStack {
             Divider()
             HStack {
-                TabButton(timeline: .home, img: "house", selected: $selected, action: action)
-                TabButton(timeline: .search, img: "magnifyingglass.circle", selected: $selected, action: action)
-                NotificationsTab(new_notifications: $new_notifications, selected: $selected, action: action)
+                TabButton(timeline: .home, img: "house", selected: $selected, new_events: $new_events, action: action)
+                TabButton(timeline: .search, img: "magnifyingglass.circle", selected: $selected, new_events: $new_events, action: action)
+                TabButton(timeline: .notifications, img: "bell", selected: $selected, new_events: $new_events, action: action)
             }
         }
     }

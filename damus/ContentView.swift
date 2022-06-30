@@ -174,7 +174,7 @@ struct ContentView: View {
                 .navigationViewStyle(.stack)
             }
             
-            TabBar(new_notifications: $home.new_notifications, selected: $selected_timeline, action: switch_timeline)
+            TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
         }
         .onAppear() {
             self.connect()
@@ -305,9 +305,6 @@ struct ContentView: View {
             return
         }
         
-        if (timeline != .notifications && self.selected_timeline == .notifications) || timeline == .notifications {
-            home.new_notifications = false
-        }
         self.selected_timeline = timeline
         NotificationCenter.default.post(name: .switched_timeline, object: timeline)
         //self.selected_timeline = timeline
@@ -413,9 +410,10 @@ struct LastNotification {
     let created_at: Int64
 }
 
-func get_last_notified() -> LastNotification? {
-    let last = UserDefaults.standard.string(forKey: "last_notification")
-    let last_created = UserDefaults.standard.string(forKey: "last_notification_time")
+func get_last_event(_ timeline: Timeline) -> LastNotification? {
+    let str = timeline.rawValue
+    let last = UserDefaults.standard.string(forKey: "last_\(str)")
+    let last_created = UserDefaults.standard.string(forKey: "last_\(str)_time")
         .flatMap { Int64($0) }
     
     return last.flatMap { id in
@@ -425,9 +423,10 @@ func get_last_notified() -> LastNotification? {
     }
 }
 
-func save_last_notified(_ ev: NostrEvent) {
-    UserDefaults.standard.set(ev.id, forKey: "last_notification")
-    UserDefaults.standard.set(String(ev.created_at), forKey: "last_notification_time")
+func save_last_event(_ ev: NostrEvent, timeline: Timeline) {
+    let str = timeline.rawValue
+    UserDefaults.standard.set(ev.id, forKey: "last_\(str)")
+    UserDefaults.standard.set(String(ev.created_at), forKey: "last_\(str)_time")
 }
 
 

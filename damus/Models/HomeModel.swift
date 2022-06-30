@@ -7,6 +7,27 @@
 
 import Foundation
 
+struct NewEventsBits {
+    let bits: Int
+    
+    init() {
+        bits = 0
+    }
+    
+    init (prev: NewEventsBits, setting: Timeline) {
+        self.bits = prev.bits | timeline_bit(setting)
+    }
+    
+    init (prev: NewEventsBits, unsetting: Timeline) {
+        self.bits = prev.bits & ~timeline_bit(unsetting)
+    }
+    
+    func is_set(_ timeline: Timeline) -> Bool {
+        let notification_bit = timeline_bit(timeline)
+        return (bits & notification_bit) == notification_bit
+    }
+    
+}
 
 class HomeModel: ObservableObject {
     var damus_state: DamusState
@@ -18,9 +39,10 @@ class HomeModel: ObservableObject {
     let home_subid = UUID().description
     let contacts_subid = UUID().description
     let notifications_subid = UUID().description
+    let dms_subid = UUID().description
     let init_subid = UUID().description
     
-    @Published var new_notifications: Bool = false
+    @Published var new_events: NewEventsBits = NewEventsBits()
     @Published var notifications: [NostrEvent] = []
     @Published var events: [NostrEvent] = []
     @Published var loading: Bool = false
@@ -261,21 +283,28 @@ class HomeModel: ObservableObject {
         return m[kind]
     }
     
+    func handle_last_event(ev: NostrEvent, timeline: Timeline) {
+        let last_ev = get_last_event(timeline)
+        
+        if last_ev == nil || last_ev!.created_at < ev.created_at {
+            save_last_event(ev, timeline: timeline)
+            new_events = NewEventsBits(prev: new_events, setting: timeline)
+        }
+    }
+    
     func handle_notification(ev: NostrEvent) {
         if !insert_uniq_sorted_event(events: &notifications, new_ev: ev, cmp: { $0.created_at > $1.created_at }) {
             return
         }
         
-        let last_notified = get_last_notified()
-        
-        if last_notified == nil || last_notified!.created_at < ev.created_at {
-            save_last_notified(ev)
-            new_notifications = true
-        }
+        handle_last_event(ev: ev, timeline: .notifications)
     }
     
     func insert_home_event(_ ev: NostrEvent) -> Bool {
         let ok = insert_uniq_sorted_event(events: &self.events, new_ev: ev, cmp: { $0.created_at > $1.created_at })
+        if ok {
+            handle_last_event(ev: ev, timeline: .home)
+        }
         return ok
     }
     
