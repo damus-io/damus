@@ -102,8 +102,13 @@ struct ConfigView: View {
             Text("Make sure your nsec account key is saved before you logout or you will lose access to this account")
         }
         .sheet(isPresented: $show_add_relay) {
-            AddRelayView(show_add_relay: $show_add_relay, relay: $new_relay) { _ in
-                guard let url = URL(string: new_relay) else {
+            AddRelayView(show_add_relay: $show_add_relay, relay: $new_relay) { m_relay in
+                
+                guard let relay = m_relay else {
+                    return
+                }
+                
+                guard let url = URL(string: relay) else {
                     return
                 }
                 
