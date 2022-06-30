@@ -8,6 +8,8 @@
 import Foundation
 import CommonCrypto
 import secp256k1
+import secp256k1_implementation
+import CryptoKit
 
 struct OtherEvent {
     let event_id: String
@@ -23,7 +25,7 @@ struct ReferencedId: Identifiable, Hashable {
     let ref_id: String
     let relay_id: String?
     let key: String
-    
+
     var id: String {
         return ref_id
     }
@@ -53,24 +55,74 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
     let created_at: Int64
     let kind: Int
     let content: String
-    
-    lazy var blocks: [Block] = {
-        return parse_mentions(content: self.content, tags: self.tags)
-    }()
-    
+
+    private var _blocks: [Block]? = nil
+    func blocks(_ privkey: String?) -> [Block] {
+        if let bs = _blocks {
+            return bs
+        }
+        let blocks = parse_mentions(content: self.get_content(privkey), tags: self.tags)
+        self._blocks = blocks
+        return blocks
+    }
+
     lazy var inner_event: NostrEvent? = {
         return event_from_json(dat: self.content)
     }()
-    
-    lazy var event_refs: [EventRef] = {
-        return interpret_event_refs(blocks: self.blocks, tags: self.tags)
-    }()
-    
+
+    private var _event_refs: [EventRef]? = nil
+    func event_refs(_ privkey: String?) -> [EventRef] {
+        if let rs = _event_refs {
+            return rs
+        }
+        let refs = interpret_event_refs(blocks: self.blocks(privkey), tags: self.tags)
+        self._event_refs = refs
+        return refs
+    }
+
+    var decrypted_content: String? = nil
+
+    func decrypted(privkey: String?) -> String? {
+        if let decrypted_content = decrypted_content {
+            return decrypted_content
+        }
+
+        guard let key = privkey else {
+            return nil
+        }
+        
+        guard let our_pubkey = privkey_to_pubkey(privkey: key) else {
+            return nil
+        }
+        
+        var pubkey = self.pubkey
+        // This is our DM, we need to use the pubkey of the person we're talking to instead
+        if our_pubkey == pubkey {
+            guard let refkey = self.referenced_pubkeys.first else {
+                return nil
+            }
+            
+            pubkey = refkey.ref_id
+        }
+
+        let dec = decrypt_dm(key, pubkey: pubkey, content: self.content)
+        self.decrypted_content = dec
+
+        return dec
+    }
+
+    func get_content(_ privkey: String?) -> String {
+        if known_kind == .dm {
+            return decrypted(privkey: privkey) ?? "*failed to decrypt content*"
+        }
+        return content
+    }
+
     var description: String {
         let p = pow.map { String($0) } ?? "?"
         return "NostrEvent { id: \(id) pubkey \(pubkey) kind \(kind) tags \(tags) pow \(p) content '\(content)' }"
     }
-    
+
     var known_kind: NostrKind? {
         return NostrKind.init(rawValue: kind)
     }
@@ -82,7 +134,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
     private func get_referenced_ids(key: String) -> [ReferencedId] {
         return damus.get_referenced_ids(tags: self.tags, key: key)
     }
-    
+
     public func is_root_event() -> Bool {
         for tag in tags {
             if tag.count >= 1 && tag[0] == "e" {
@@ -91,15 +143,15 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
         }
         return true
     }
-    
-    public func direct_replies() -> [ReferencedId] {
-        return event_refs.reduce(into: []) { acc, evref in
+
+    public func direct_replies(_ privkey: String?) -> [ReferencedId] {
+        return event_refs(privkey).reduce(into: []) { acc, evref in
             if let direct_reply = evref.is_direct_reply {
                 acc.append(direct_reply)
             }
         }
     }
-    
+
     public func last_refid() -> ReferencedId? {
         var mlast: Int? = nil
         var i: Int = 0
@@ -109,14 +161,14 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
             }
             i += 1
         }
-        
+
         guard let last = mlast else {
             return nil
         }
-        
+
         return tag_to_refid(tags[last])
     }
-    
+
     public func references(id: String, key: String) -> Bool {
         for tag in tags {
             if tag.count >= 2 && tag[0] == key {
@@ -129,18 +181,18 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
         return false
     }
 
-    public var is_reply: Bool {
-        return event_is_reply(self)
+    func is_reply(_ privkey: String?) -> Bool {
+        return event_is_reply(self, privkey: privkey)
     }
-    
+
     public var referenced_ids: [ReferencedId] {
         return get_referenced_ids(key: "e")
     }
-    
+
     public func count_ids() -> Int {
         return count_refs("e")
     }
-    
+
     public func count_refs(_ type: String) -> Int {
         var count: Int = 0
         for tag in tags {
@@ -150,7 +202,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
         }
         return count
     }
-    
+
     public var referenced_pubkeys: [ReferencedId] {
         return get_referenced_ids(key: "p")
     }
@@ -165,7 +217,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
     public var is_local: Bool {
         return (self.flags & 1) != 0
     }
-    
+
     init(content: String, pubkey: String, kind: Int = 1, tags: [[String]] = []) {
         self.id = ""
         self.sig = ""
@@ -176,12 +228,12 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
         self.tags = tags
         self.created_at = Int64(Date().timeIntervalSince1970)
     }
-    
-    init(from: NostrEvent) {
+
+    init(from: NostrEvent, content: String? = nil) {
         self.id = from.id
         self.sig = from.sig
 
-        self.content = from.content
+        self.content = content ?? from.content
         self.pubkey = from.pubkey
         self.kind = from.kind
         self.tags = from.tags
@@ -224,13 +276,13 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
 }
 
 func sign_event(privkey: String, ev: NostrEvent) -> String {
-    let priv_key_bytes = try! privkey.byteArray()
+    let priv_key_bytes = try! privkey.bytes
     let key = try! secp256k1.Signing.PrivateKey(rawRepresentation: priv_key_bytes)
 
     // Extra params for custom signing
 
     var aux_rand = random_bytes(count: 64)
-    var digest = try! ev.id.byteArray()
+    var digest = try! ev.id.bytes
 
     // API allows for signing variable length messages
     let signature = try! key.schnorr.signature(message: &digest, auxiliaryRand: &aux_rand)
@@ -343,12 +395,12 @@ func tag_to_refid(_ tag: [String]) -> ReferencedId? {
     if tag.count == 1 {
         return nil
     }
-    
+
     var relay_id: String? = nil
     if tag.count > 2 {
         relay_id = tag[2]
     }
-    
+
     return ReferencedId(ref_id: tag[1], relay_id: relay_id, key: tag[0])
 }
 
@@ -380,7 +432,7 @@ func make_first_contact_event(keypair: Keypair) -> NostrEvent? {
     guard let privkey = keypair.privkey else {
         return nil
     }
-    
+
     let rw_relay_info = RelayInfo(read: true, write: true)
     let relays: [String: RelayInfo] = ["wss://relay.damus.io": rw_relay_info]
     let relay_json = encode_json(relays)!
@@ -402,13 +454,13 @@ func make_metadata_event(keypair: Keypair, metadata: NostrMetadata) -> NostrEven
     guard let privkey = keypair.privkey else {
         return nil
     }
-    
+
     let metadata_json = encode_json(metadata)!
     let ev = NostrEvent(content: metadata_json,
                         pubkey: keypair.pubkey,
                         kind: NostrKind.metadata.rawValue,
                         tags: [])
-    
+
     ev.calculate_id()
     ev.sign(privkey: privkey)
     return ev
@@ -418,7 +470,7 @@ func make_boost_event(pubkey: String, privkey: String, boosted: NostrEvent) -> N
     var tags: [[String]] = boosted.tags.filter { tag in tag.count >= 2 && (tag[0] == "e" || tag[0] == "p") }
     tags.append(["e", boosted.id])
     tags.append(["p", boosted.pubkey])
-    
+
     let ev = NostrEvent(content: event_to_json(ev: boosted), pubkey: pubkey, kind: 6, tags: tags)
     ev.calculate_id()
     ev.sign(privkey: privkey)
@@ -432,13 +484,13 @@ func make_like_event(pubkey: String, privkey: String, liked: NostrEvent) -> Nost
     let ev = NostrEvent(content: "", pubkey: pubkey, kind: 7, tags: tags)
     ev.calculate_id()
     ev.sign(privkey: privkey)
-   
+
     return ev
 }
 
 func gather_reply_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
     var ids = get_referenced_ids(tags: from.tags, key: "e").first.map { [$0] } ?? []
-    
+
     ids.append(ReferencedId(ref_id: from.id, relay_id: nil, key: "e"))
     ids.append(contentsOf: from.referenced_pubkeys.filter { $0.ref_id != our_pubkey })
     if from.pubkey != our_pubkey {
@@ -461,3 +513,152 @@ func event_to_json(ev: NostrEvent) -> String {
     }
     return str
 }
+
+func decrypt_dm(_ privkey: String?, pubkey: String, content: String) -> String? {
+    guard let privkey = privkey else {
+        return nil
+    }
+    guard let shared_sec = get_shared_secret(privkey: privkey, pubkey: pubkey) else {
+        return nil
+    }
+    guard let dat = decode_dm_base64(content) else {
+        return nil
+    }
+    guard let dat = aes_decrypt(data: dat.content, iv: dat.iv, shared_sec: shared_sec) else {
+        return nil
+    }
+    return String(data: dat, encoding: .utf8)
+}
+
+
+func get_shared_secret(privkey: String, pubkey: String) -> [UInt8]? {
+    guard let privkey_bytes = try? privkey.bytes else {
+        return nil
+    }
+    guard var pk_bytes = try? pubkey.bytes else {
+        return nil
+    }
+    pk_bytes.insert(2, at: 0)
+    
+    var publicKey = secp256k1_pubkey()
+    var shared_secret = [UInt8](repeating: 0, count: 32)
+
+    var ok =
+        secp256k1_ec_pubkey_parse(
+            secp256k1.Context.raw,
+            &publicKey,
+            pk_bytes,
+            pk_bytes.count) != 0
+
+    if !ok {
+        return nil
+    }
+
+    ok = secp256k1_ecdh(
+        secp256k1.Context.raw,
+        &shared_secret,
+        &publicKey,
+        privkey_bytes, {(output,x32,_,_) in
+            memcpy(output,x32,32)
+            return 1
+        }, nil) != 0
+
+    if !ok {
+        return nil
+    }
+
+    return shared_secret
+}
+
+struct DirectMessageBase64 {
+    let content: [UInt8]
+    let iv: [UInt8]
+}
+
+func encode_dm_base64(content: [UInt8], iv: [UInt8]) -> String {
+    let content_b64 = base64_encode(content)
+    let iv_b64 = base64_encode(iv)
+    return content_b64 + "?iv=" + iv_b64
+}
+
+func decode_dm_base64(_ all: String) -> DirectMessageBase64? {
+    let splits = Array(all.split(separator: "?"))
+
+    if splits.count != 2 {
+        return nil
+    }
+
+    guard let content = base64_decode(String(splits[0])) else {
+        return nil
+    }
+
+    var sec = String(splits[1])
+    if !sec.hasPrefix("iv=") {
+        return nil
+    }
+
+    sec = String(sec.dropFirst(3))
+    guard let iv = base64_decode(sec) else {
+        return nil
+    }
+
+    return DirectMessageBase64(content: content, iv: iv)
+}
+
+func base64_encode(_ content: [UInt8]) -> String {
+    return Data(content).base64EncodedString()
+}
+
+func base64_decode(_ content: String) -> [UInt8]? {
+    guard let dat = Data(base64Encoded: content) else {
+        return nil
+    }
+    return dat.bytes
+}
+
+func aes_decrypt(data: [UInt8], iv: [UInt8], shared_sec: [UInt8]) -> Data? {
+    return aes_operation(operation: CCOperation(kCCDecrypt), data: data, iv: iv, shared_sec: shared_sec)
+}
+
+func aes_encrypt(data: [UInt8], iv: [UInt8], shared_sec: [UInt8]) -> Data? {
+    return aes_operation(operation: CCOperation(kCCEncrypt), data: data, iv: iv, shared_sec: shared_sec)
+}
+
+func aes_operation(operation: CCOperation, data: [UInt8], iv: [UInt8], shared_sec: [UInt8]) -> Data? {
+    let data_len = data.count
+    let bsize = kCCBlockSizeAES128
+    let len = Int(data_len) + bsize
+    var decrypted_data = [UInt8](repeating: 0, count: len)
+
+    let key_length = size_t(kCCKeySizeAES256)
+    if shared_sec.count != key_length {
+        assert(false, "unexpected shared_sec len: \(shared_sec.count) != 32")
+        return nil
+    }
+
+    let algorithm: CCAlgorithm = UInt32(kCCAlgorithmAES128)
+    let options:   CCOptions   = UInt32(kCCOptionPKCS7Padding)
+
+    var num_bytes_decrypted :size_t = 0
+
+    let status = CCCrypt(operation,  /*op:*/
+                         algorithm,  /*alg:*/
+                         options,    /*options:*/
+                         shared_sec, /*key:*/
+                         key_length, /*keyLength:*/
+                         iv,         /*iv:*/
+                         data,       /*dataIn:*/
+                         data_len, /*dataInLength:*/
+                         &decrypted_data,/*dataOut:*/
+                         len,/*dataOutAvailable:*/
+                         &num_bytes_decrypted/*dataOutMoved:*/
+    )
+
+    if UInt32(status) != UInt32(kCCSuccess) {
+        return nil
+    }
+
+    return Data(bytes: decrypted_data, count: num_bytes_decrypted)
+
+}
+

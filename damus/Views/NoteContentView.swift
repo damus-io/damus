@@ -8,8 +8,9 @@
 import SwiftUI
 
 
-func render_note_content(ev: NostrEvent, profiles: Profiles) -> String {
-    return ev.blocks.reduce("") { str, block in
+func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -> String {
+    let blocks = ev.blocks(privkey)
+    return blocks.reduce("") { str, block in
         switch block {
         case .mention(let m):
             return str + mention_str(m, profiles: profiles)
@@ -22,6 +23,7 @@ func render_note_content(ev: NostrEvent, profiles: Profiles) -> String {
 }
 
 struct NoteContentView: View {
+    let privkey: String?
     let event: NostrEvent
     let profiles: Profiles
     
@@ -31,8 +33,8 @@ struct NoteContentView: View {
         let md_opts: AttributedString.MarkdownParsingOptions =
             .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
         
-        guard let txt = try? AttributedString(markdown: content, options: md_opts) else {
-            return Text(event.content)
+        guard var txt = try? AttributedString(markdown: content, options: md_opts) else {
+            return Text(content)
         }
         
         return Text(txt)
@@ -41,15 +43,16 @@ struct NoteContentView: View {
     var body: some View {
         MainContent()
             .onAppear() {
-                self.content = render_note_content(ev: event, profiles: profiles)
+                self.content = render_note_content(ev: event, profiles: profiles, privkey: privkey)
             }
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let profile = notif.object as! ProfileUpdate
-                for block in event.blocks {
+                let blocks = event.blocks(privkey)
+                for block in blocks {
                     switch block {
                     case .mention(let m):
                         if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
-                            content = render_note_content(ev: event, profiles: profiles)
+                            content = render_note_content(ev: event, profiles: profiles, privkey: privkey)
                         }
                     case .text: return
                     case .hashtag: return

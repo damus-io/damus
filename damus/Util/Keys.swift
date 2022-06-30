@@ -61,7 +61,7 @@ func bech32_pubkey(_ pubkey: String) -> String? {
 func generate_new_keypair() -> Keypair {
     let key = try! secp256k1.Signing.PrivateKey()
     let privkey = hex_encode(key.rawRepresentation)
-    let pubkey = hex_encode(Data(key.publicKey.xonlyKeyBytes))
+    let pubkey = hex_encode(Data(key.publicKey.xonly.bytes))
     print("generating privkey:\(privkey) pubkey:\(pubkey)")
     return Keypair(pubkey: pubkey, privkey: privkey)
 }
@@ -73,7 +73,7 @@ func privkey_to_pubkey(privkey: String) -> String? {
     guard let key = try? secp256k1.Signing.PrivateKey(rawRepresentation: sec) else {
         return nil
     }
-    return hex_encode(Data(key.publicKey.xonlyKeyBytes))
+    return hex_encode(Data(key.publicKey.xonly.bytes))
 }
 
 func save_pubkey(pubkey: String) {

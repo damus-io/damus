@@ -12,7 +12,7 @@ struct ChatView: View {
     let prev_ev: NostrEvent?
     let next_ev: NostrEvent?
     
-    let damus: DamusState
+    let damus_state: DamusState
     
     @EnvironmentObject var thread: ThreadModel
     
@@ -45,16 +45,7 @@ struct ChatView: View {
     }
     
     func prev_reply_is_same() -> String? {
-        if let prev = prev_ev {
-            if let prev_reply_id = thread.replies.lookup(prev.id) {
-                if let cur_reply_id = thread.replies.lookup(event.id) {
-                    if prev_reply_id != cur_reply_id {
-                        return cur_reply_id
-                    }
-                }
-            }
-        }
-        return nil
+        return damus.prev_reply_is_same(event: event, prev_ev: prev_ev, replies: thread.replies)
     }
     
     func reply_is_new() -> String? {
@@ -71,7 +62,7 @@ struct ChatView: View {
     }
     
     var ReplyDescription: some View {
-        Text("\(reply_desc(profiles: damus.profiles, event: event))")
+        Text("\(reply_desc(profiles: damus_state.profiles, event: event))")
             .font(.footnote)
             .foregroundColor(.gray)
             .frame(alignment: .leading)
@@ -83,7 +74,7 @@ struct ChatView: View {
         HStack {
             VStack {
                 if is_active || just_started {
-                    ProfilePicView(pubkey: event.pubkey, size: 32, highlight: is_active ? .main : .none, image_cache: damus.image_cache, profiles: damus.profiles)
+                    ProfilePicView(pubkey: event.pubkey, size: 32, highlight: is_active ? .main : .none, image_cache: damus_state.image_cache, profiles: damus_state.profiles)
                 }
 
                 Spacer()
@@ -94,7 +85,7 @@ struct ChatView: View {
                 VStack(alignment: .leading) {
                     if just_started {
                         HStack {
-                            ProfileName(pubkey: event.pubkey, profile: damus.profiles.lookup(id: event.pubkey))
+                            ProfileName(pubkey: event.pubkey, profile: damus_state.profiles.lookup(id: event.pubkey))
                                 .foregroundColor(colorScheme == .dark ?  id_to_color(event.pubkey) : Color.black)
                                 //.shadow(color: Color.black, radius: 2)
                             Text("\(format_relative_time(event.created_at))")
@@ -104,17 +95,17 @@ struct ChatView: View {
                 
                     if let ref_id = thread.replies.lookup(event.id) {
                         if !is_reply_to_prev() {
-                            ReplyQuoteView(quoter: event, event_id: ref_id, image_cache: damus.image_cache, profiles: damus.profiles)
+                            ReplyQuoteView(privkey: damus_state.keypair.privkey, quoter: event, event_id: ref_id, image_cache: damus_state.image_cache, profiles: damus_state.profiles)
                                 .environmentObject(thread)
                             ReplyDescription
                         }
                     }
 
-                    NoteContentView(event: event, profiles: damus.profiles, content: event.content)
+                    NoteContentView(privkey: damus_state.keypair.privkey, event: event, profiles: damus_state.profiles, content: event.content)
                     
                     if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
-                        let bar = make_actionbar_model(ev: event, damus: damus)
-                        EventActionBar(damus_state: damus, event: event, bar: bar)
+                        let bar = make_actionbar_model(ev: event, damus: damus_state)
+                        EventActionBar(damus_state: damus_state, event: event, bar: bar)
                     }
 
                     //Spacer()
@@ -154,3 +145,16 @@ struct ChatView_Previews: PreviewProvider {
 */
 
 
+func prev_reply_is_same(event: NostrEvent, prev_ev: NostrEvent?, replies: ReplyMap) -> String? {
+    if let prev = prev_ev {
+        if let prev_reply_id = replies.lookup(prev.id) {
+            if let cur_reply_id = replies.lookup(event.id) {
+                if prev_reply_id != cur_reply_id {
+                    return cur_reply_id
+                }
+            }
+        }
+    }
+    return nil
+}
+    

@@ -21,7 +21,7 @@ struct ChatroomView: View {
                         ChatView(event: thread.events[ind],
                                  prev_ev: ind > 0 ? thread.events[ind-1] : nil,
                                  next_ev: ind == count-1 ? nil : thread.events[ind+1],
-                                 damus: damus
+                                 damus_state: damus
                         )
                         .event_context_menu(ev)
                         .onTapGesture {
@@ -29,7 +29,7 @@ struct ChatroomView: View {
                                 //dismiss()
                                 toggle_thread_view()
                             } else {
-                                thread.set_active_event(ev)
+                                thread.set_active_event(ev, privkey: damus.keypair.privkey)
                             }
                         }
                         .environmentObject(thread)
@@ -39,7 +39,7 @@ struct ChatroomView: View {
             .onReceive(NotificationCenter.default.publisher(for: .select_quote)) { notif in
                 let ev = notif.object as! NostrEvent
                 if ev.id != thread.initial_event.id {
-                    thread.set_active_event(ev)
+                    thread.set_active_event(ev, privkey: damus.keypair.privkey)
                 }
                 scroll_to_event(scroller: scroller, id: ev.id, delay: 0, animate: true, anchor: .top)
             }
@@ -63,7 +63,7 @@ struct ChatroomView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
         ChatroomView(damus: state)
-            .environmentObject(ThreadModel(evid: "&849ab9bb263ed2819db06e05f1a1a3b72878464e8c7146718a2fc1bf1912f893", pool: state.pool))
+            .environmentObject(ThreadModel(evid: "&849ab9bb263ed2819db06e05f1a1a3b72878464e8c7146718a2fc1bf1912f893", pool: state.pool, privkey: state.keypair.privkey))
         
     }
 }

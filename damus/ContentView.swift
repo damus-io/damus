@@ -121,6 +121,9 @@ struct ContentView: View {
             case .notifications:
                 TimelineView(events: $home.notifications, loading: $home.loading, damus: damus)
                     .navigationTitle("Notifications")
+                
+            case .dms:
+                DirectMessagesView(damus_state: damus_state!, dms: $home.dms)
             
             case .none:
                 EmptyView()
@@ -142,7 +145,7 @@ struct ContentView: View {
     var MaybeThreadView: some View {
         Group {
             if let evid = self.active_event_id {
-                let thread_model = ThreadModel(evid: evid, pool: damus_state!.pool)
+                let thread_model = ThreadModel(evid: evid, pool: damus_state!.pool, privkey: damus_state!.keypair.privkey)
                 ThreadView(thread: thread_model, damus: damus_state!)
             } else {
                 EmptyView()
@@ -163,7 +166,7 @@ struct ContentView: View {
     }
     
     var body: some View {
-        VStack {
+        VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
                 NavigationView {
                     MainContent(damus: damus)

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ReplyQuoteView: View {
+    let privkey: String?
     let quoter: NostrEvent
     let event_id: String
     let image_cache: ImageCache
@@ -31,7 +32,7 @@ struct ReplyQuoteView: View {
                         .foregroundColor(.gray)
                 }
                 
-                NoteContentView(event: event, profiles: profiles, content: event.content)
+                NoteContentView(privkey: privkey, event: event, profiles: profiles, content: event.content)
                     .font(.callout)
                     .foregroundColor(.accentColor)
                 
@@ -64,7 +65,7 @@ struct ReplyQuoteView_Previews: PreviewProvider {
     static var previews: some View {
         let s = test_damus_state()
         let quoter = NostrEvent(content: "a\nb\nc", pubkey: "pubkey")
-        ReplyQuoteView(quoter: quoter, event_id: "pubkey2", image_cache: s.image_cache, profiles: s.profiles)
-            .environmentObject(ThreadModel(event: quoter, pool: s.pool))
+        ReplyQuoteView(privkey: s.keypair.privkey, quoter: quoter, event_id: "pubkey2", image_cache: s.image_cache, profiles: s.profiles)
+            .environmentObject(ThreadModel(event: quoter, pool: s.pool, privkey: s.keypair.privkey))
     }
 }

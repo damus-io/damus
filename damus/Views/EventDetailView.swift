@@ -73,7 +73,7 @@ struct EventDetailView: View {
                         if thread.initial_event.id == ev.id {
                             toggle_thread_view()
                         } else {
-                            thread.set_active_event(ev)
+                            thread.set_active_event(ev, privkey: damus.keypair.privkey)
                         }
                     }
                     .onAppear() {
@@ -88,7 +88,12 @@ struct EventDetailView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                let collapsed_events = calculated_collapsed_events(collapsed: self.collapsed, active: thread.event, events: thread.events)
+                let collapsed_events = calculated_collapsed_events(
+                    privkey: damus.keypair.privkey,
+                    collapsed: self.collapsed,
+                    active: thread.event,
+                    events: thread.events
+                )
                 ForEach(collapsed_events, id: \.id) { cev in
                     CollapsedEventView(cev, scroller: proxy)
                 }
@@ -112,7 +117,7 @@ struct EventDetailView_Previews: PreviewProvider {
  */
 
 /// Find the entire reply path for the active event
-func make_reply_map(active: NostrEvent, events: [NostrEvent]) -> [String: ()]
+func make_reply_map(active: NostrEvent, events: [NostrEvent], privkey: String?) -> [String: ()]
 {
     let event_map: [String: Int] = zip(events,0...events.count).reduce(into: [:]) { (acc, arg1) in
         let (ev, i) = arg1
@@ -129,7 +134,8 @@ func make_reply_map(active: NostrEvent, events: [NostrEvent]) -> [String: ()]
     
     for ev in events {
         /// does this event reply to the active event?
-        for ev_ref in ev.event_refs {
+        let ev_refs = ev.event_refs(privkey)
+        for ev_ref in ev_refs {
             if let reply = ev_ref.is_reply {
                 if reply.ref_id == active.id {
                     is_reply[ev.id] = ()
@@ -139,7 +145,8 @@ func make_reply_map(active: NostrEvent, events: [NostrEvent]) -> [String: ()]
         }
         
         /// does the active event reply to this event?
-        for active_ref in active.event_refs {
+        let active_refs = active.event_refs(privkey)
+        for active_ref in active_refs {
             if let reply = active_ref.is_reply {
                 if reply.ref_id == ev.id {
                     is_reply[ev.id] = ()
@@ -194,14 +201,14 @@ func determine_highlight(reply_map: [String: ()], current: NostrEvent, active: N
     }
 }
 
-func calculated_collapsed_events(collapsed: Bool, active: NostrEvent?, events: [NostrEvent]) -> [CollapsedEvent] {
+func calculated_collapsed_events(privkey: String?, collapsed: Bool, active: NostrEvent?, events: [NostrEvent]) -> [CollapsedEvent] {
     var count: Int = 0
     
     guard let active = active else {
         return []
     }
     
-    let reply_map = make_reply_map(active: active, events: events)
+    let reply_map = make_reply_map(active: active, events: events, privkey: privkey)
     
     if !collapsed {
         return events.reduce(into: []) { acc, ev in

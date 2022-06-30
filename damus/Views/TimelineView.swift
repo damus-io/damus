@@ -19,7 +19,7 @@ struct InnerTimelineView: View {
     var body: some View {
         LazyVStack {
             ForEach(events, id: \.id) { (ev: NostrEvent) in
-                let tv = ThreadView(thread: ThreadModel(event: ev, pool: damus.pool), damus: damus)
+                let tv = ThreadView(thread: ThreadModel(event: ev, pool: damus.pool, privkey: damus.keypair.privkey), damus: damus)
                             
                 NavigationLink(destination: tv) {
                     EventView(event: ev, highlight: .none, has_action_bar: true, damus: damus)
