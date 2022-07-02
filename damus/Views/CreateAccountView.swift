@@ -101,6 +101,17 @@ struct BackNav: View {
     }
 }
 
+struct BackNavBasic: View {
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        Image(systemName: "chevron.backward")
+        .onTapGesture {
+            self.dismiss()
+        }
+    }
+}
+
 extension View {
     func placeholder<Content: View>(
         when shouldShow: Bool,

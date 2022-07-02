@@ -147,6 +147,8 @@ struct ProfileView: View {
             followers.unsubscribe()
             // our profilemodel needs a bit more help
         }
+        .navigationBarBackButtonHidden(true)
+        .navigationBarItems(leading: BackNavBasic())
     }
 }
 
