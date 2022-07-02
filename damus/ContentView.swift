@@ -238,10 +238,12 @@ struct ContentView: View {
                 return
             }
             
-            let pk = notif.object as! String
             guard let damus = self.damus_state else {
                 return
             }
+            
+            let target = notif.object as! FollowTarget
+            let pk = target.pubkey
             
             if unfollow_user(pool: damus.pool,
                              our_contacts: damus.contacts.event,
