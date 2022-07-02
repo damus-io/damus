@@ -248,12 +248,14 @@ struct ContentView: View {
             let target = notif.object as! FollowTarget
             let pk = target.pubkey
             
-            if unfollow_user(pool: damus.pool,
+            if let ev = unfollow_user(pool: damus.pool,
                              our_contacts: damus.contacts.event,
                              pubkey: damus.pubkey,
                              privkey: privkey,
                              unfollow: pk) {
                 notify(.unfollowed, pk)
+                
+                damus.contacts.event = ev
                 damus.contacts.remove_friend(pk)
                 //friend_events = friend_events.filter { $0.pubkey != pk }
             }
@@ -268,12 +270,14 @@ struct ContentView: View {
                 return
             }
             
-            if follow_user(pool: damus.pool,
+            if let ev = follow_user(pool: damus.pool,
                            our_contacts: damus.contacts.event,
                            pubkey: damus.pubkey,
                            privkey: privkey,
                            follow: ReferencedId(ref_id: fnotify.pubkey, relay_id: nil, key: "p")) {
                 notify(.followed, fnotify.pubkey)
+                
+                damus_state?.contacts.event = ev
                 
                 switch fnotify {
                 case .pubkey(let pk):

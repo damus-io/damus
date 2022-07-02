@@ -79,22 +79,23 @@ func create_contacts_content(_ relays: [RelayDescriptor]) -> String? {
 }
 
 
-func follow_user(pool: RelayPool, our_contacts: NostrEvent?, pubkey: String, privkey: String, follow: ReferencedId) -> Bool {
+func follow_user(pool: RelayPool, our_contacts: NostrEvent?, pubkey: String, privkey: String, follow: ReferencedId) -> NostrEvent? {
     guard let ev = follow_user_event(our_contacts: our_contacts, our_pubkey: pubkey, follow: follow) else {
-        return false
+        return nil
     }
     
     ev.calculate_id()
     ev.sign(privkey: privkey)
     
+    
     pool.send(.event(ev))
     
-    return true
+    return ev
 }
 
-func unfollow_user(pool: RelayPool, our_contacts: NostrEvent?, pubkey: String, privkey: String, unfollow: String) -> Bool {
+func unfollow_user(pool: RelayPool, our_contacts: NostrEvent?, pubkey: String, privkey: String, unfollow: String) -> NostrEvent? {
     guard let cs = our_contacts else {
-        return false
+        return nil
     }
     
     let ev = unfollow_user_event(our_contacts: cs, our_pubkey: pubkey, unfollow: unfollow)
@@ -103,7 +104,7 @@ func unfollow_user(pool: RelayPool, our_contacts: NostrEvent?, pubkey: String, p
     
     pool.send(.event(ev))
     
-    return true
+    return ev
 }
 
 func unfollow_user_event(our_contacts: NostrEvent, our_pubkey: String, unfollow: String) -> NostrEvent {
