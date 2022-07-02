@@ -49,14 +49,14 @@ struct DMChatView: View {
 
     var InputField: some View {
         TextField("New Message", text: $message)
-            .padding([.leading], 12)
+            .padding([.leading, .trailing], 12)
             .padding([.top, .bottom], 8)
             .background {
                 InputBackground()
             }
             .foregroundColor(Color.primary)
             .cornerRadius(20)
-            .padding([.leading, .top, .bottom], 8)
+            .padding(8)
     }
 
     @Environment(\.colorScheme) var colorScheme
@@ -81,12 +81,14 @@ struct DMChatView: View {
         ZStack {
             BackgroundColor()
 
-            HStack {
+            HStack(spacing: 0) {
                 InputField
 
-                Button(role: .none, action: send_message) {
-                    Label("", systemImage: "arrow.right.circle")
-                        .font(.title)
+                if !message.isEmpty {
+                    Button(role: .none, action: send_message) {
+                        Label("", systemImage: "arrow.right.circle")
+                            .font(.title)
+                    }
                 }
             }
         }
