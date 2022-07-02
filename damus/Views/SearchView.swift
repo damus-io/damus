@@ -25,8 +25,6 @@ struct SearchView: View {
             .onDisappear() {
                 search.unsubscribe()
             }
-            .navigationBarBackButtonHidden(true)
-            .navigationBarItems(leading: BackNavBasic())
     }
 }
 

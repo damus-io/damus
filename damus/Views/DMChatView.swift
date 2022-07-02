@@ -119,8 +119,6 @@ struct DMChatView: View {
             }
         }
         .toolbar { Header }
-        .navigationBarBackButtonHidden(true)
-        .navigationBarItems(leading: BackNavBasic())
     }
 }
 
