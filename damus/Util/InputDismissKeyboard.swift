@@ -24,16 +24,17 @@ public struct DismissKeyboardOnTap: ViewModifier {
     }
 
     private var tapGesture: some Gesture {
-        TapGesture().onEnded(endEditing)
+        TapGesture().onEnded(end_editing)
     }
 
-    private func endEditing() {
-        UIApplication.shared.connectedScenes
-            .filter {$0.activationState == .foregroundActive}
-            .map {$0 as? UIWindowScene}
-            .compactMap({$0})
-            .first?.windows
-            .filter {$0.isKeyWindow}
-            .first?.endEditing(true)
-    }
+}
+
+func end_editing() {
+    UIApplication.shared.connectedScenes
+      .filter {$0.activationState == .foregroundActive}
+      .map {$0 as? UIWindowScene}
+      .compactMap({$0})
+      .first?.windows
+      .filter {$0.isKeyWindow}
+      .first?.endEditing(true)
 }
