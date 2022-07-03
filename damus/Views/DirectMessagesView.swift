@@ -9,22 +9,29 @@ import SwiftUI
 
 struct DirectMessagesView: View {
     let damus_state: DamusState
-    @Binding var dms: [(String, [NostrEvent])]
+    @EnvironmentObject var model: DirectMessagesModel
     
     var MainContent: some View {
         ScrollView {
             VStack {
-                ForEach(dms, id: \.0) { tup in
-                    let evs = Binding<[NostrEvent]>.init(
-                        get: { tup.1 },
-                        set: { _ in }
-                    )
-                    let chat = DMChatView(damus_state: damus_state, pubkey: tup.0, events: evs)
-                    NavigationLink(destination: chat) {
-                        EventView(damus: damus_state, event: tup.1.last!, pubkey: tup.0)
-                    }
-                    .buttonStyle(PlainButtonStyle())
+                ForEach(model.dms, id: \.0) { tup in
+                    MaybeEvent(tup)
                 }
+            }
+        }
+    }
+    
+    func MaybeEvent(_ tup: (String, DirectMessageModel)) -> some View {
+        Group {
+            if let ev = tup.1.events.last {
+                let chat = DMChatView(damus_state: damus_state, pubkey: tup.0)
+                    .environmentObject(tup.1)
+                NavigationLink(destination: chat) {
+                    EventView(damus: damus_state, event: ev, pubkey: tup.0)
+                }
+                .buttonStyle(PlainButtonStyle())
+            } else {
+                EmptyView()
             }
         }
     }
@@ -41,12 +48,8 @@ struct DirectMessagesView_Previews: PreviewProvider {
                                pubkey: "pubkey",
                                kind: 4,
                                tags: [])
-        let dms = Binding<[(String, [NostrEvent])]>.init(
-            get: {
-                return [ ("pubkey", [ ev ]) ]
-            },
-            set: { _ in }
-        )
-        DirectMessagesView(damus_state: test_damus_state(), dms: dms)
+        let model = DirectMessageModel(events: [ev])
+        DirectMessagesView(damus_state: test_damus_state())
+            .environmentObject(model)
     }
 }

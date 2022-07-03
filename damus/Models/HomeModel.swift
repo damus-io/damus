@@ -44,7 +44,7 @@ class HomeModel: ObservableObject {
 
     @Published var new_events: NewEventsBits = NewEventsBits()
     @Published var notifications: [NostrEvent] = []
-    @Published var dms: [(String, [NostrEvent])] = []
+    @Published var dms: DirectMessagesModel = DirectMessagesModel()
     @Published var events: [NostrEvent] = []
     @Published var loading: Bool = false
     @Published var signal: SignalModel = SignalModel()
@@ -372,10 +372,10 @@ class HomeModel: ObservableObject {
             }
         }
 
-        for (pk, _) in dms {
+        for (pk, _) in dms.dms {
             if pk == the_pk {
                 found = true
-                inserted = insert_uniq_sorted_event(events: &(dms[i].1), new_ev: ev) {
+                inserted = insert_uniq_sorted_event(events: &(dms.dms[i].1.events), new_ev: ev) {
                     $0.created_at < $1.created_at
                 }
 
@@ -386,14 +386,18 @@ class HomeModel: ObservableObject {
 
         if !found {
             inserted = true
-            dms.append((the_pk, [ev]))
+            let model = DirectMessageModel(events: [ev])
+            dms.dms.append((the_pk, model))
         }
 
         if inserted {
             handle_last_event(ev: ev, timeline: .dms)
 
-            dms = dms.sorted { a, b in
-                a.1.last!.created_at > b.1.last!.created_at
+            dms.dms = dms.dms.sorted { a, b in
+                if a.1.events.count > 0 && b.1.events.count > 0 {
+                    return a.1.events.last!.created_at > b.1.events.last!.created_at
+                }
+                return true
             }
         }
     }

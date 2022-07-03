@@ -75,6 +75,16 @@ struct ProfileView: View {
     
     //@EnvironmentObject var profile: ProfileModel
     
+    var DMButton: some View {
+        let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
+        let dmview = DMChatView(damus_state: damus_state, pubkey: profile.pubkey)
+            .environmentObject(dm_model)
+        return NavigationLink(destination: dmview) {
+            Label("", systemImage: "text.bubble")
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
     var TopSection: some View {
         VStack(alignment: .leading) {
             let data = damus_state.profiles.lookup(id: profile.pubkey)
@@ -85,6 +95,9 @@ struct ProfileView: View {
                 ProfileNameView(pubkey: profile.pubkey, profile: data)
                 
                 Spacer()
+                
+                DMButton
+                    .padding([.trailing], 20)
                 
                 FollowButtonView(target: profile.get_follow_target(), follow_state: damus_state.contacts.follow_state(profile.pubkey))
             }
@@ -162,7 +175,7 @@ struct ProfileView_Previews: PreviewProvider {
 
 func test_damus_state() -> DamusState {
     let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
-    let damus = DamusState(pool: RelayPool(), keypair: Keypair(pubkey: pubkey, privkey: "privkey"), likes: EventCounter(our_pubkey: pubkey), boosts: EventCounter(our_pubkey: pubkey), contacts: Contacts(), tips: TipCounter(our_pubkey: pubkey), image_cache: ImageCache(), profiles: Profiles())
+    let damus = DamusState(pool: RelayPool(), keypair: Keypair(pubkey: pubkey, privkey: "privkey"), likes: EventCounter(our_pubkey: pubkey), boosts: EventCounter(our_pubkey: pubkey), contacts: Contacts(), tips: TipCounter(our_pubkey: pubkey), image_cache: ImageCache(), profiles: Profiles(), dms: DirectMessagesModel())
     
     let prof = Profile(name: "damus", display_name: "Damus", about: "iOS app!", picture: "https://damus.io/img/logo.png")
     let tsprof = TimestampedProfile(profile: prof, timestamp: 0)

@@ -33,7 +33,7 @@ struct NoteContentView: View {
         let md_opts: AttributedString.MarkdownParsingOptions =
             .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
         
-        guard var txt = try? AttributedString(markdown: content, options: md_opts) else {
+        guard let txt = try? AttributedString(markdown: content, options: md_opts) else {
             return Text(content)
         }
         

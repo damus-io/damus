@@ -16,6 +16,7 @@
 		4C216F32286E388800040376 /* DMChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F31286E388800040376 /* DMChatView.swift */; };
 		4C216F34286F5ACD00040376 /* DMView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F33286F5ACD00040376 /* DMView.swift */; };
 		4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F352870A9A700040376 /* InputDismissKeyboard.swift */; };
+		4C216F382871EDE300040376 /* DirectMessageModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F372871EDE300040376 /* DirectMessageModel.swift */; };
 		4C285C8228385570008A31F1 /* CarouselView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C285C8128385570008A31F1 /* CarouselView.swift */; };
 		4C285C8428385690008A31F1 /* CreateAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C285C8328385690008A31F1 /* CreateAccountView.swift */; };
 		4C285C86283892E7008A31F1 /* CreateAccountModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C285C85283892E7008A31F1 /* CreateAccountModel.swift */; };
@@ -132,6 +133,7 @@
 		4C216F31286E388800040376 /* DMChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMChatView.swift; sourceTree = "<group>"; };
 		4C216F33286F5ACD00040376 /* DMView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMView.swift; sourceTree = "<group>"; };
 		4C216F352870A9A700040376 /* InputDismissKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputDismissKeyboard.swift; sourceTree = "<group>"; };
+		4C216F372871EDE300040376 /* DirectMessageModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectMessageModel.swift; sourceTree = "<group>"; };
 		4C285C8128385570008A31F1 /* CarouselView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarouselView.swift; sourceTree = "<group>"; };
 		4C285C8328385690008A31F1 /* CreateAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAccountView.swift; sourceTree = "<group>"; };
 		4C285C85283892E7008A31F1 /* CreateAccountModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAccountModel.swift; sourceTree = "<group>"; };
@@ -279,6 +281,7 @@
 				4C5C7E67284ED36500A22DF5 /* SearchHomeModel.swift */,
 				4C649843285A952100EAE2B3 /* LocalUserConfig.swift */,
 				4C64987D286D082C00EAE2B3 /* DirectMessagesModel.swift */,
+				4C216F372871EDE300040376 /* DirectMessageModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -609,6 +612,7 @@
 				4C477C9E282C3A4800033AA3 /* TipCounter.swift in Sources */,
 				4C0A3F91280F6528000448DE /* ChatView.swift in Sources */,
 				4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */,
+				4C216F382871EDE300040376 /* DirectMessageModel.swift in Sources */,
 				4C75EFA627FF87A20006080F /* Nostr.swift in Sources */,
 				4CE4F9DE2852768D00C00DD9 /* ConfigView.swift in Sources */,
 				4C285C8E28399BFE008A31F1 /* SaveKeysView.swift in Sources */,

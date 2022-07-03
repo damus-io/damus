@@ -123,7 +123,8 @@ struct ContentView: View {
                     .navigationTitle("Notifications")
                 
             case .dms:
-                DirectMessagesView(damus_state: damus_state!, dms: $home.dms)
+                DirectMessagesView(damus_state: damus_state!)
+                    .environmentObject(home.dms)
             
             case .none:
                 EmptyView()
@@ -345,7 +346,8 @@ struct ContentView: View {
                                 contacts: Contacts(),
                                 tips: TipCounter(our_pubkey: pubkey),
                                 image_cache: ImageCache(),
-                                profiles: Profiles()
+                                profiles: Profiles(),
+                                dms: home.dms
         )
         home.damus_state = self.damus_state!
         
