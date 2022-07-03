@@ -48,7 +48,7 @@ struct DMChatView: View {
     }
 
     var InputField: some View {
-        TextField("New Message", text: $message)
+        TextField("New Encrypted Message", text: $message)
             .padding([.leading, .trailing], 12)
             .padding([.top, .bottom], 8)
             .background {
