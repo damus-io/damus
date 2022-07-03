@@ -73,23 +73,30 @@ struct EventView: View {
         return Group {
             if event.known_kind == .boost, let inner_ev = event.inner_event {
                 VStack(alignment: .leading) {
-                    HStack {
-                        Label("", systemImage: "arrow.2.squarepath")
-                            .foregroundColor(Color.gray)
-                        ProfileName(pubkey: pubkey, profile: damus.profiles.lookup(id: pubkey))
-                            .foregroundColor(Color.gray)
-                        Text(" Boosted")
-                            .foregroundColor(Color.gray)
+                    let prof_model = ProfileModel(pubkey: event.pubkey, damus: damus)
+                    let follow_model = FollowersModel(damus_state: damus, target: event.pubkey)
+                    let booster_profile = ProfileView(damus_state: damus, profile: prof_model, followers: follow_model)
+                    
+                    NavigationLink(destination: booster_profile) {
+                        HStack {
+                            Label("", systemImage: "arrow.2.squarepath")
+                                .foregroundColor(Color.gray)
+                            ProfileName(pubkey: event.pubkey, profile: damus.profiles.lookup(id: event.pubkey))
+                                .foregroundColor(Color.gray)
+                            Text(" Boosted")
+                                .foregroundColor(Color.gray)
+                        }
                     }
-                    TextEvent(inner_ev)
+                    .buttonStyle(PlainButtonStyle())
+                    TextEvent(inner_ev, pubkey: inner_ev.pubkey)
                 }
             } else {
-                TextEvent(event)
+                TextEvent(event, pubkey: pubkey)
             }
         }
     }
 
-    func TextEvent(_ event: NostrEvent) -> some View {
+    func TextEvent(_ event: NostrEvent, pubkey: String) -> some View {
         let content = event.get_content(damus.keypair.privkey)
         return HStack(alignment: .top) {
             let profile = damus.profiles.lookup(id: pubkey)
