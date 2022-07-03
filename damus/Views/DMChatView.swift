@@ -118,6 +118,7 @@ struct DMChatView: View {
                 Footer
             }
         }
+        .navigationTitle("DM")
         .toolbar { Header }
     }
 }
