@@ -143,15 +143,15 @@ struct EventView: View {
         .id(event.id)
         .frame(minHeight: PFP_SIZE)
         .padding([.bottom], 4)
-        .event_context_menu(event)
+        .event_context_menu(event, privkey: damus.keypair.privkey)
     }
 }
 
 extension View {
-    func event_context_menu(_ event: NostrEvent) -> some View {
+    func event_context_menu(_ event: NostrEvent, privkey: String?) -> some View {
         return self.contextMenu {
             Button {
-                UIPasteboard.general.string = event.content
+                UIPasteboard.general.string = event.get_content(privkey)
             } label: {
                 Label("Copy Text", systemImage: "doc.on.doc")
             }

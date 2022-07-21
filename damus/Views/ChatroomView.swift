@@ -23,7 +23,7 @@ struct ChatroomView: View {
                                  next_ev: ind == count-1 ? nil : thread.events[ind+1],
                                  damus_state: damus
                         )
-                        .event_context_menu(ev)
+                        .event_context_menu(ev, privkey: damus.keypair.privkey)
                         .onTapGesture {
                             if thread.initial_event.id == ev.id {
                                 //dismiss()
