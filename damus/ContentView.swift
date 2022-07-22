@@ -182,6 +182,7 @@ struct ContentView: View {
         }
         .onAppear() {
             self.connect()
+            setup_notifications()
         }
         .sheet(item: $active_sheet) { item in
             switch item {
@@ -479,3 +480,20 @@ func update_filters_with_since(last_of_kind: [Int: NostrEvent], filters: [NostrF
     }
 }
 
+
+
+func setup_notifications() {
+    
+    UIApplication.shared.registerForRemoteNotifications()
+    let center = UNUserNotificationCenter.current()
+    
+    center.getNotificationSettings { settings in
+        guard settings.authorizationStatus == .authorized else {
+            center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+                
+            }
+            
+            return
+        }
+    }
+}
