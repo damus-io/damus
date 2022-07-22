@@ -48,24 +48,22 @@ struct DMChatView: View {
     }
 
     var InputField: some View {
-        TextField("New Encrypted Message", text: $message)
-            .padding([.leading, .trailing], 12)
-            .padding([.top, .bottom], 8)
-            .background {
+        TextEditor(text: $message)
+            .textEditorBackground {
                 InputBackground()
             }
-            .foregroundColor(Color.primary)
             .cornerRadius(20)
-            .padding(8)
+            .padding(16)
+            .foregroundColor(Color.primary)
     }
 
     @Environment(\.colorScheme) var colorScheme
 
-    func InputBackground() -> some View {
-        if colorScheme == .dark {
-            return Color.black.brightness(0.1)
+    func InputBackground() -> Color {
+        if colorScheme == .light {
+            return Color.init(.sRGB, red: 0.9, green: 0.9, blue: 0.9, opacity: 1.0)
         } else {
-            return Color.gray.brightness(0.35)
+            return Color.init(.sRGB, red: 0.1, green: 0.1, blue: 0.1, opacity: 1.0)
         }
     }
 
@@ -92,7 +90,21 @@ struct DMChatView: View {
                 }
             }
         }
-        .frame(height: 70)
+        .frame(height: 50 + 20 * CGFloat(text_lines))
+    }
+
+    var text_lines: Int {
+        var lines = 1
+        for c in message {
+            if lines > 4 {
+                return lines
+            }
+            if c.isNewline {
+                lines += 1
+            }
+        }
+
+        return lines
     }
 
     func send_message() {
@@ -128,7 +140,7 @@ struct DMChatView_Previews: PreviewProvider {
         let ev = NostrEvent(content: "hi", pubkey: "pubkey", kind: 1, tags: [])
 
         let model = DirectMessageModel(events: [ev])
-        
+
         DMChatView(damus_state: test_damus_state(), pubkey: "pubkey")
             .environmentObject(model)
     }
@@ -155,4 +167,15 @@ func create_dm(_ message: String, to_pk: String, keypair: Keypair) -> NostrEvent
     ev.calculate_id()
     ev.sign(privkey: privkey)
     return ev
+}
+
+extension View {
+/// Layers the given views behind this ``TextEditor``.
+    func textEditorBackground<V>(@ViewBuilder _ content: () -> V) -> some View where V : View {
+        self
+            .onAppear {
+                UITextView.appearance().backgroundColor = .clear
+            }
+            .background(content())
+    }
 }
