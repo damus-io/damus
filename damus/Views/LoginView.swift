@@ -139,12 +139,12 @@ func process_login(_ key: ParsedKey, is_pubkey: Bool) -> Bool {
         save_pubkey(pubkey: pk)
         
     case .pub(let pub):
-        clear_privkey()
+        clear_saved_privkey()
         save_pubkey(pubkey: pub)
     
     case .hex(let hexstr):
         if is_pubkey {
-            clear_privkey()
+            clear_saved_privkey()
             save_pubkey(pubkey: hexstr)
         } else {
             save_privkey(privkey: hexstr)

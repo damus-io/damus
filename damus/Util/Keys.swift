@@ -84,13 +84,22 @@ func save_privkey(privkey: String) {
     UserDefaults.standard.set(privkey, forKey: "privkey")
 }
 
-func clear_privkey() {
+func clear_saved_privkey() {
     UserDefaults.standard.removeObject(forKey: "privkey")
+}
+
+func clear_saved_pubkey() {
+    UserDefaults.standard.removeObject(forKey: "pubkey")
 }
 
 func save_keypair(pubkey: String, privkey: String) {
     save_pubkey(pubkey: pubkey)
     save_privkey(privkey: privkey)
+}
+
+func clear_keypair() {
+    clear_saved_privkey()
+    clear_saved_pubkey()
 }
 
 func get_saved_keypair() -> Keypair? {
