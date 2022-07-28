@@ -35,6 +35,46 @@ class ReplyTests: XCTestCase {
         XCTAssertEqual(ref.is_mention!.ref.ref_id, "event_id")
     }
     
+    func testUrlAnchorsAreNotHashtags() {
+        let content = "this is my link: https://jb55.com/index.html#buybitcoin this is not a hashtag!"
+        let blocks = parse_post_blocks(content: content)
+        
+        XCTAssertEqual(blocks.count, 1)
+        XCTAssertEqual(blocks[0].is_text != nil, true)
+    }
+
+    func testHashtagsInQuote() {
+        let content = "This is my \"#awesome post\""
+        let blocks = parse_post_blocks(content: content)
+        
+        XCTAssertEqual(blocks.count, 3)
+        XCTAssertEqual(blocks[0].is_text, "This is my \"")
+        XCTAssertEqual(blocks[1].is_hashtag, "awesome")
+        XCTAssertEqual(blocks[2].is_text, " post\"")
+    }
+    
+    func testHashtagAtStartWorks() {
+        let content = "#hashtag"
+        let blocks = parse_post_blocks(content: content)
+        XCTAssertEqual(blocks.count, 3)
+        XCTAssertEqual(blocks[1].is_hashtag, "hashtag")
+    }
+    
+    func testGroupOfHashtags() {
+        let content = "#hashtag#what#nope"
+        let blocks = parse_post_blocks(content: content)
+        XCTAssertEqual(blocks.count, 3)
+        XCTAssertEqual(blocks[1].is_hashtag, "hashtag")
+        XCTAssertEqual(blocks[2].is_text, "#what#nope")
+        
+        switch blocks[1] {
+        case .hashtag(let htag):
+            XCTAssertEqual(htag, "hashtag")
+        default:
+            break
+        }
+    }
+    
     func testRootReplyWithMention() throws {
         let content = "this is #[1] a mention"
         let tags = [["e", "thread_id"], ["e", "mentioned_id"]]
@@ -83,7 +123,7 @@ class ReplyTests: XCTestCase {
         //let tags: [[String]] = []
         let blocks = parse_post_blocks(content: content)
         
-        let mentions = blocks.filter { $0.is_ref }
+        let mentions = blocks.filter { $0.is_ref != nil }
         XCTAssertEqual(mentions.count, 10)
     }
     
@@ -221,9 +261,9 @@ class ReplyTests: XCTestCase {
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
-        XCTAssertTrue(parsed[0].is_text)
-        XCTAssertTrue(parsed[1].is_ref)
-        XCTAssertTrue(parsed[2].is_text)
+        XCTAssertEqual(parsed[0].is_text, "this is a nostr:")
+        XCTAssertTrue(parsed[1].is_ref != nil)
+        XCTAssertEqual(parsed[2].is_text, ":\(id) event mention")
         
         guard case .ref(let ref) = parsed[1] else {
             XCTAssertTrue(false)
@@ -268,9 +308,9 @@ class ReplyTests: XCTestCase {
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
-        XCTAssertTrue(parsed[0].is_text)
-        XCTAssertTrue(parsed[1].is_ref)
-        XCTAssertTrue(parsed[2].is_text)
+        XCTAssertEqual(parsed[0].is_text, "this is a ")
+        XCTAssertNotNil(parsed[1].is_ref)
+        XCTAssertEqual(parsed[2].is_text, " event mention")
         
         guard case .ref(let ref) = parsed[1] else {
             XCTAssertTrue(false)
@@ -299,9 +339,9 @@ class ReplyTests: XCTestCase {
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
-        XCTAssertTrue(parsed[0].is_text)
-        XCTAssertTrue(parsed[1].is_ref)
-        XCTAssertTrue(parsed[2].is_text)
+        XCTAssertEqual(parsed[0].is_text, "this is a ")
+        XCTAssertNotNil(parsed[1].is_ref)
+        XCTAssertEqual(parsed[2].is_text, " event mention")
         
         guard case .ref(let ref) = parsed[1] else {
             XCTAssertTrue(false)
@@ -330,9 +370,9 @@ class ReplyTests: XCTestCase {
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
-        XCTAssertTrue(parsed[0].is_text)
-        XCTAssertTrue(parsed[1].is_ref)
-        XCTAssertTrue(parsed[2].is_text)
+        XCTAssertEqual(parsed[0].is_text, "this is a ")
+        XCTAssertNotNil(parsed[1].is_ref)
+        XCTAssertEqual(parsed[2].is_text, " event mention")
         
         guard case .ref(let ref) = parsed[1] else {
             XCTAssertTrue(false)
@@ -361,9 +401,9 @@ class ReplyTests: XCTestCase {
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
-        XCTAssertTrue(parsed[0].is_text)
-        XCTAssertTrue(parsed[1].is_ref)
-        XCTAssertTrue(parsed[2].is_text)
+        XCTAssertEqual(parsed[0].is_text, "this is a ")
+        XCTAssertNotNil(parsed[1].is_ref)
+        XCTAssertEqual(parsed[2].is_text, " mention")
         
         guard case .ref(let ref) = parsed[1] else {
             XCTAssertTrue(false)

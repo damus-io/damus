@@ -12,25 +12,25 @@ enum PostBlock {
     case ref(ReferencedId)
     case hashtag(String)
     
-    var is_text: Bool {
-        if case .text = self {
-            return true
+    var is_text: String? {
+        if case .text(let txt) = self {
+            return txt
         }
-        return false
+        return nil
     }
     
-    var is_hashtag: Bool {
-        if case .hashtag = self {
-            return true
+    var is_hashtag: String? {
+        if case .hashtag(let ht) = self {
+            return ht
         }
-        return false
+        return nil
     }
     
-    var is_ref: Bool {
-        if case .ref = self {
-            return true
+    var is_ref: ReferencedId? {
+        if case .ref(let ref) = self {
+            return ref
         }
-        return false
+        return nil
     }
 }
 

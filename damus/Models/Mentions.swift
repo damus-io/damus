@@ -132,11 +132,31 @@ func is_hashtag_char(_ c: Character) -> Bool {
     return c.isLetter || c.isNumber
 }
 
+func prev_char(_ p: Parser, n: Int) -> Character? {
+    if p.pos - n < 0 {
+        return nil
+    }
+    
+    let ind = p.str.index(p.str.startIndex, offsetBy: p.pos - n)
+    return p.str[ind]
+}
+
+func is_punctuation(_ c: Character) -> Bool {
+    return c.isWhitespace || c.isPunctuation
+}
+
 func parse_hashtag(_ p: Parser) -> String? {
     let start = p.pos
     
     if !parse_char(p, "#") {
         return nil
+    }
+    
+    if let prev = prev_char(p, n: 2) {
+        // we don't allow adjacent hashtags
+        if !is_punctuation(prev) {
+            return nil
+        }
     }
     
     guard let str = parse_while(p, match: is_hashtag_char) else {
