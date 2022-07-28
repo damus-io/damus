@@ -37,6 +37,10 @@ struct PostView: View {
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
         dismiss()
     }
+    
+    var is_post_empty: Bool {
+        return post.allSatisfy { $0.isWhitespace }
+    }
 
     var body: some View {
         VStack {
@@ -48,8 +52,10 @@ struct PostView: View {
 
                 Spacer()
 
-                Button("Post") {
-                    self.send_post()
+                if !is_post_empty {
+                    Button("Post") {
+                        self.send_post()
+                    }
                 }
             }
             .padding([.top, .bottom], 4)
