@@ -8,7 +8,7 @@
 import Foundation
 import CommonCrypto
 import secp256k1
-import secp256k1_implementation
+import secp256k1_bindings
 import CryptoKit
 
 struct OtherEvent {
