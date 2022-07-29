@@ -55,6 +55,7 @@ struct SearchHomeView: View {
         }
         .onChange(of: search) { s in
             print("search change 1")
+            search = search.lowercased()
         }
         .onAppear {
             model.subscribe()
