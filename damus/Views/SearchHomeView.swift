@@ -85,6 +85,7 @@ struct SearchHomeView: View {
         }
         .onChange(of: search) { s in
             print("search change 1")
+            search = search.lowercased()
         }
         .onReceive(handle_notify(.new_mutes)) { _ in
             self.model.filter_muted()
