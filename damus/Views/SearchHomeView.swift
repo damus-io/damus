@@ -19,6 +19,7 @@ struct SearchHomeView: View {
                 .padding(5)
                 .padding(.leading, 35)
                 .textInputAutocapitalization(.never)
+                .disableAutocorrection(true)
             Label("", systemImage: "magnifyingglass")
                 .padding(.leading, 10)
         }
