@@ -83,9 +83,6 @@ struct SearchHomeView: View {
             }
             .background(colorScheme == .dark ? Color.black : Color.white)
         }
-        .onChange(of: search) { s in
-            print("search change 1")
-        }
         .onReceive(handle_notify(.new_mutes)) { _ in
             self.model.filter_muted()
         }

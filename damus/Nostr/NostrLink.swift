@@ -137,7 +137,7 @@ func decode_nostr_uri(_ s: String) -> NostrLink? {
         }
     
     if tag_is_hashtag(parts) {
-        return .filter(NostrFilter.filter_hashtag([parts[1].lowercased()]))
+        return .filter(NostrFilter.filter_hashtag([parts[1]]))
     }
     
     if let rid = tag_to_refid(parts) {
