@@ -70,7 +70,7 @@ struct SearchHomeView_Previews: PreviewProvider {
         let state = test_damus_state()
         SearchHomeView(
             damus_state: state,
-            model: SearchHomeModel(pool: state.pool)
+            model: SearchHomeModel(pool: state.pool, profiles: state.profiles)
         )
     }
 }

@@ -107,7 +107,7 @@ class RelayPool {
         }
     }
     
-    func unsubscribe(sub_id: String) {
+    func unsubscribe(sub_id: String, to: [String]? = nil) {
         self.remove_handler(sub_id: sub_id)
         self.send(.unsubscribe(sub_id))
     }
@@ -115,6 +115,11 @@ class RelayPool {
     func subscribe(sub_id: String, filters: [NostrFilter], handler: @escaping (String, NostrConnectionEvent) -> ()) {
         register_handler(sub_id: sub_id, handler: handler)
         send(.subscribe(.init(filters: filters, sub_id: sub_id)))
+    }
+    
+    func subscribe_to(sub_id: String, filters: [NostrFilter], to: [String]?, handler: @escaping (String, NostrConnectionEvent) -> ()) {
+        register_handler(sub_id: sub_id, handler: handler)
+        send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
     }
     
     func send(_ req: NostrRequest, to: [String]? = nil) {
