@@ -52,7 +52,7 @@ class SearchModel: ObservableObject {
     
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
         let done = handle_subid_event(pool: pool, sub_id: sub_id, relay_id: relay_id, ev: ev) { ev in
-            if ev.known_kind == .text {
+            if ev.known_kind == .text && ev.should_show_event {
                 self.add_event(ev)
             }
         }

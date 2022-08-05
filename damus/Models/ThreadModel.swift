@@ -148,6 +148,10 @@ class ThreadModel: ObservableObject {
     }
     
     func add_event(_ ev: NostrEvent, privkey: String?) {
+        guard ev.should_show_event else {
+            return
+        }
+        
         if event_map[ev.id] != nil {
             return
         }

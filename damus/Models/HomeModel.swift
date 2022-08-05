@@ -338,7 +338,7 @@ class HomeModel: ObservableObject {
     }
 
     func should_hide_event(_ ev: NostrEvent) -> Bool {
-        return false
+        return !ev.should_show_event
     }
 
     func handle_text_event(sub_id: String, _ ev: NostrEvent) {

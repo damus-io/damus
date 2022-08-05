@@ -68,6 +68,10 @@ class ProfileModel: ObservableObject {
     }
     
     func add_event(_ ev: NostrEvent) {
+        guard ev.should_show_event else {
+            return
+        }
+
         if seen_event.contains(ev.id) {
             return
         }

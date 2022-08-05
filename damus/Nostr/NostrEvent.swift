@@ -55,6 +55,18 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
     let created_at: Int64
     let kind: Int
     let content: String
+    
+    var is_textlike: Bool {
+        return kind == 1 || kind == 42
+    }
+    
+    var too_big: Bool {
+        return self.content.count > 32000
+    }
+    
+    var should_show_event: Bool {
+        return !too_big
+    }
 
     private var _blocks: [Block]? = nil
     func blocks(_ privkey: String?) -> [Block] {
