@@ -9,41 +9,81 @@ import Foundation
 import SwiftUI
 import Combine
 
-extension UIImage {
-    func decodedImage(_ size: Int) -> UIImage {
-        guard let cgImage = cgImage else { return self }
-        let scale = UIScreen.main.scale
-        let pix_size = CGFloat(size) * scale
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        //let cgsize = CGSize(width: size, height: size)
-        
-        let context = CGContext(data: nil, width: Int(pix_size), height: Int(pix_size), bitsPerComponent: 8, bytesPerRow: cgImage.bytesPerRow, space: colorSpace, bitmapInfo: cgImage.bitmapInfo.rawValue)
-        
-        //UIGraphicsBeginImageContextWithOptions(cgsize, true, 0)
-        context?.draw(cgImage, in: CGRect(x: 0, y: 0, width: pix_size, height: pix_size))
-        //UIGraphicsEndImageContext()
-
-        guard let decodedImage = context?.makeImage() else { return self }
-        return UIImage(cgImage: decodedImage, scale: scale, orientation: .up)
-    }
+enum ImageProcessingStatus {
+    case processing
+    case done
 }
 
 class ImageCache {
     private let lock = NSLock()
+    private var state: [String: ImageProcessingStatus] = [:]
+        
+    private func get_state(_ key: String) -> ImageProcessingStatus? {
+        lock.lock(); defer { lock.unlock() }
+        
+        return state[key]
+    }
     
-    lazy var cache: NSCache<AnyObject, AnyObject> = {
-        let cache = NSCache<AnyObject, AnyObject>()
+    private func set_state(_ key: String, new_state: ImageProcessingStatus) {
+        lock.lock(); defer { lock.unlock() }
+        
+        state[key] = new_state
+    }
+    
+    lazy var cache: NSCache<AnyObject, UIImage> = {
+        let cache = NSCache<AnyObject, UIImage>()
         cache.totalCostLimit = 1024 * 1024 * 100 // 100MB
         return cache
     }()
     
-    func lookup(for url: URL) -> UIImage? {
-        lock.lock(); defer { lock.unlock() }
+    // simple polling until I can figure out a better way to do this
+    func wait_for_image(_ url: URL) async {
+        while true {
+            let why_would_this_happen: ()? = try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+            if why_would_this_happen == nil {
+                return
+            }
+            if get_state(url.absoluteString) == .done {
+                return
+            }
+        }
+    }
+    
+    func lookup_sync(for url: URL) -> UIImage? {
+        let status = get_state(url.absoluteString)
         
-        if let decoded = cache.object(forKey: url as AnyObject) as? UIImage {
-            return decoded
+        switch status {
+        case .done:
+            break
+        case .processing:
+            return nil
+        case .none:
+            return nil
         }
         
+        if let decoded = cache.object(forKey: url as AnyObject) {
+            return decoded
+        }
+            
+        return nil
+    }
+    
+    func lookup(for url: URL) async -> UIImage? {
+        let status = get_state(url.absoluteString)
+        
+        switch status {
+        case .done:
+            break
+        case .processing:
+            await wait_for_image(url)
+        case .none:
+            return nil
+        }
+        
+        if let decoded = cache.object(forKey: url as AnyObject) {
+            return decoded
+        }
+            
         return nil
     }
     
@@ -52,35 +92,37 @@ class ImageCache {
         cache.removeObject(forKey: url as AnyObject)
     }
     
-    func insert(_ image: UIImage?, for url: URL) {
-        guard let image = image else { return remove(for: url) }
-        let decodedImage = image.decodedImage(Int(PFP_SIZE))
-        lock.lock(); defer { lock.unlock() }
-        cache.setObject(decodedImage, forKey: url as AnyObject)
-    }
-    
-    subscript(_ key: URL) -> UIImage? {
-        get {
-            return lookup(for: key)
-        }
-        set {
-            return insert(newValue, for: key)
-        }
+    func insert(_ image: UIImage, for url: URL) async -> UIImage? {
+        let scale = await UIScreen.main.scale
+        let size = CGSize(width: PFP_SIZE * scale, height: PFP_SIZE * scale)
+        
+        let key = url.absoluteString
+        
+        set_state(key, new_state: .processing)
+        
+        let decoded_image = await image.byPreparingThumbnail(ofSize: size)
+        
+        lock.lock()
+        cache.setObject(decoded_image ?? UIImage(), forKey: url as AnyObject)
+        state[key] = .done
+        lock.unlock()
+        
+        return decoded_image
     }
 }
 
-func load_image(cache: ImageCache, from url: URL) -> AnyPublisher<UIImage?, Never> {
-    if let image = cache[url] {
-        return Just(image).eraseToAnyPublisher()
+func load_image(cache: ImageCache, from url: URL) async -> UIImage? {
+    if let image = await cache.lookup(for: url) {
+        return image
     }
-    return URLSession.shared.dataTaskPublisher(for: url)
-        .map { (data, response) -> UIImage? in return UIImage(data: data) }
-        .catch { error in return Just(nil) }
-        .handleEvents(receiveOutput: { image in
-            guard let image = image else { return }
-            cache[url] = image
-        })
-        .subscribe(on: DispatchQueue.global(qos: .background))
-        .receive(on: RunLoop.main)
-        .eraseToAnyPublisher()
+    
+    guard let (data, _) = try? await URLSession.shared.data(from: url) else {
+        return nil
+    }
+    
+    guard let img = UIImage(data: data) else {
+        return nil
+    }
+    
+    return await cache.insert(img, for: url)
 }

@@ -54,7 +54,6 @@ struct ProfilePicView: View {
     }
     
     func ProfilePic(_ url: URL) -> some View {
-        let pub = load_image(cache: image_cache, from: url)
         return Group {
             if let img = self.img {
                 img
@@ -67,9 +66,10 @@ struct ProfilePicView: View {
                 Placeholder
             }
         }
-        .onReceive(pub) { mimg in
-            if let img = mimg {
-                self.img = Image(uiImage: img)
+        .task {
+            let ui_img = await load_image(cache: image_cache, from: url)
+            if let ui_img = ui_img {
+                self.img = Image(uiImage: ui_img)
             }
         }
     }
@@ -89,12 +89,17 @@ struct ProfilePicView: View {
         MainContent
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let updated = notif.object as! ProfileUpdate
-                if updated.pubkey != pubkey {
+
+                guard updated.pubkey == self.pubkey else {
                     return
                 }
                 
-                if updated.profile.picture != picture {
-                    picture = updated.profile.picture
+                if let pic = updated.profile.picture {
+                    if let url = URL(string: pic) {
+                        if let ui_img = image_cache.lookup_sync(for: url) {
+                            self.img = Image(uiImage: ui_img)
+                        }
+                    }
                 }
             }
     }
