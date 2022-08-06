@@ -76,7 +76,7 @@ struct ProfilePicView: View {
     
     var MainContent: some View {
         Group {
-            let picture = picture ?? profiles.lookup(id: pubkey)?.picture ?? "https://robohash.org/\(pubkey).png"
+            let picture = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
             if let pic_url = URL(string: picture) {
                 ProfilePic(pic_url)
             } else {

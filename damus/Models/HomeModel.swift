@@ -506,7 +506,7 @@ func process_metadata_event(image_cache: ImageCache, profiles: Profiles, ev: Nos
     profiles.add(id: ev.pubkey, profile: tprof)
     
     // load pfps asap
-    let picture = tprof.profile.picture ?? "https://robohash.org/\(ev.pubkey)"
+    let picture = tprof.profile.picture ?? robohash(ev.pubkey)
     if let url = URL(string: picture) {
         Task<UIImage?, Never>.init(priority: .background) {
             let res = await load_image(cache: image_cache, from: url)
@@ -518,6 +518,10 @@ func process_metadata_event(image_cache: ImageCache, profiles: Profiles, ev: Nos
     }
     
     notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+}
+
+func robohash(_ pk: String) -> String {
+    return "https://robohash.org/" + pk
 }
 
 func process_contact_event(pool: RelayPool, contacts: Contacts, pubkey: String, ev: NostrEvent) {
