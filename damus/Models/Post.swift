@@ -70,13 +70,11 @@ func parse_post_bech32_mention(_ p: Parser) -> ReferencedId? {
         return nil
     }
     
-    var end = p.pos
-    if consume_until(p, match: { c in !is_bech32_char(c) }) {
-        end = p.pos
-    } else {
-        p.pos = start
+    guard consume_until(p, match: { c in !is_bech32_char(c) }, end_ok: true) else {
         return nil
     }
+    
+    let end = p.pos
     
     let sliced = String(substring(p.str, start: start, end: end))
     guard let decoded = try? bech32_decode(sliced) else {

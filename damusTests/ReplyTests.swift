@@ -189,6 +189,32 @@ class ReplyTests: XCTestCase {
         XCTAssertEqual(parsed.count, 0)
     }
     
+    func testBech32MentionAtStart() throws {
+        let pk = "npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s"
+        let hex_pk = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
+        let content = "@\(pk) hello there"
+        let blocks = parse_post_blocks(content: content)
+        
+        XCTAssertEqual(blocks.count, 3)
+        XCTAssertEqual(blocks[0].is_text, "")
+        XCTAssertEqual(blocks[1].is_ref, ReferencedId(ref_id: hex_pk, relay_id: nil, key: "p"))
+        XCTAssertEqual(blocks[2].is_text, " hello there")
+        
+    }
+    
+    func testBech32MentionAtEnd() throws {
+        let pk = "npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s"
+        let hex_pk = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
+        let content = "this is a @\(pk)"
+        let blocks = parse_post_blocks(content: content)
+        
+        XCTAssertEqual(blocks.count, 3)
+        XCTAssertEqual(blocks[1].is_ref, ReferencedId(ref_id: hex_pk, relay_id: nil, key: "p"))
+        XCTAssertEqual(blocks[0].is_text, "this is a ")
+        XCTAssertEqual(blocks[2].is_text, "")
+        
+    }
+    
     func testNpubMention() throws {
         let evid = "0000000000000000000000000000000000000000000000000000000000000005"
         let pk = "npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s"

@@ -17,17 +17,22 @@ class Parser {
     }
 }
 
-func consume_until(_ p: Parser, match: (Character) -> Bool) -> Bool {
-    var i: Int = 0
+func consume_until(_ p: Parser, match: (Character) -> Bool, end_ok: Bool = false) -> Bool {
     let sub = substring(p.str, start: p.pos, end: p.str.count)
+    let start = p.pos
+    
     for c in sub {
         if match(c) {
-            p.pos += i
             return true
         }
-        i += 1
+        p.pos += 1
     }
     
+    if end_ok {
+        return true
+    }
+    
+    p.pos = start
     return false
 }
 
