@@ -65,12 +65,13 @@ def get_log_entries(commitrange):
         if os.environ.get('GH_TOKEN'):
             headers['Authorization'] = 'token ' + os.environ.get('GH_TOKEN')
 
-        url = 'https://api.github.com/repos/{repo}/commits/{commit}/pulls'.format(repo=repo, commit=commit)
-        content = requests.get(url, headers=headers).json()
-        if content and content.get(0) is not None:
-            pullreq = content[0]['number']
-        else:
-            pullreq = None
+        #url = 'https://api.github.com/repos/{repo}/commits/{commit}/pulls'.format(repo=repo, commit=commit)
+        #content = requests.get(url, headers=headers).json()
+        #if content and content.get(0) is not None:
+        #    pullreq = content[0]['number']
+        #else:
+        #    pullreq = None
+        pullreq = None
 
         e = Entry(commit, pullreq, m.group(2), m.group(1).lower())
         entries.append(e)
