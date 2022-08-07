@@ -509,7 +509,8 @@ func process_metadata_event(image_cache: ImageCache, profiles: Profiles, ev: Nos
     let picture = tprof.profile.picture ?? robohash(ev.pubkey)
     if let url = URL(string: picture) {
         Task<UIImage?, Never>.init(priority: .background) {
-            let res = await load_image(cache: image_cache, from: url)
+            let pfp_key = pfp_cache_key(url: url)
+            let res = await image_cache.lookup_or_load_image(key: pfp_key, url: url)
             DispatchQueue.main.async {
                 notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
             }

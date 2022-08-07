@@ -53,8 +53,8 @@ struct ProfilePicView: View {
             .padding(2)
     }
     
-    func ProfilePic(_ url: URL) -> some View {
-        return Group {
+    var MainContent: some View {
+        Group {
             if let img = self.img {
                 img
                     .resizable()
@@ -66,27 +66,23 @@ struct ProfilePicView: View {
                 Placeholder
             }
         }
-        .task {
-            let ui_img = await load_image(cache: image_cache, from: url)
-            if let ui_img = ui_img {
-                self.img = Image(uiImage: ui_img)
-            }
-        }
-    }
-    
-    var MainContent: some View {
-        Group {
-            let picture = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
-            if let pic_url = URL(string: picture) {
-                ProfilePic(pic_url)
-            } else {
-                Placeholder
-            }
-        }
     }
     
     var body: some View {
         MainContent
+            .task {
+                let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
+                guard let url = URL(string: pic) else {
+                    return
+                }
+                let pfp_key = pfp_cache_key(url: url)
+                let ui_img = await image_cache.lookup_or_load_image(key: pfp_key, url: url)
+                
+                if let ui_img = ui_img {
+                    self.img = Image(uiImage: ui_img)
+                    return
+                }
+            }
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let updated = notif.object as! ProfileUpdate
 
@@ -96,7 +92,8 @@ struct ProfilePicView: View {
                 
                 if let pic = updated.profile.picture {
                     if let url = URL(string: pic) {
-                        if let ui_img = image_cache.lookup_sync(for: url) {
+                        let pfp_key = pfp_cache_key(url: url)
+                        if let ui_img = image_cache.lookup_sync(key: pfp_key) {
                             self.img = Image(uiImage: ui_img)
                         }
                     }
