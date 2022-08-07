@@ -101,8 +101,6 @@ class ImageCache {
         }
         
         save_to_memory_cache(key: key, img: img)
-
-        print("loaded \(key)\(suffix).png from file cache")
         
         return img
     }
