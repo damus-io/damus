@@ -189,6 +189,55 @@ class ReplyTests: XCTestCase {
         XCTAssertEqual(parsed.count, 0)
     }
     
+    func testNpubMention() throws {
+        let evid = "0000000000000000000000000000000000000000000000000000000000000005"
+        let pk = "npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s"
+        let hex_pk = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
+        let content = "this is a @\(pk) mention"
+        let reply_ref = ReferencedId(ref_id: evid, relay_id: nil, key: "e")
+        let blocks = parse_post_blocks(content: content)
+        let post = NostrPost(content: content, references: [reply_ref])
+        let ev = post_to_event(post: post, privkey: evid, pubkey: pk)
+        
+        XCTAssertEqual(ev.tags.count, 2)
+        XCTAssertEqual(blocks.count, 3)
+        XCTAssertEqual(blocks[1].is_ref, ReferencedId(ref_id: hex_pk, relay_id: nil, key: "p"))
+        XCTAssertEqual(ev.content, "this is a #[1] mention")
+    }
+    
+    func testNoteMention() throws {
+        let evid = "0000000000000000000000000000000000000000000000000000000000000005"
+        let pk = "note154fwmp6hdxqnmqdzkt5jeay8l4kxdsrpn02vw9kp4gylkxxur5fsq3ckpy"
+        let hex_note_id = "a552ed875769813d81a2b2e92cf487fd6c66c0619bd4c716c1aa09fb18dc1d13"
+        let content = "this is a @\(pk) &\(pk) mention"
+        let reply_ref = ReferencedId(ref_id: evid, relay_id: nil, key: "e")
+        let blocks = parse_post_blocks(content: content)
+        let post = NostrPost(content: content, references: [reply_ref])
+        let ev = post_to_event(post: post, privkey: evid, pubkey: pk)
+        
+        XCTAssertEqual(ev.tags.count, 3)
+        XCTAssertEqual(blocks.count, 5)
+        XCTAssertEqual(blocks[1].is_ref, ReferencedId(ref_id: hex_note_id, relay_id: nil, key: "e"))
+        XCTAssertEqual(blocks[3].is_ref, ReferencedId(ref_id: hex_note_id, relay_id: nil, key: "e"))
+        XCTAssertEqual(ev.content, "this is a #[1] #[2] mention")
+    }
+    
+    func testNsecMention() throws {
+        let evid = "0000000000000000000000000000000000000000000000000000000000000005"
+        let pk = "nsec1jmzdz7d0ldqctdxwm5fzue277ttng2pk28n2u8wntc2r4a0w96ssnyukg7"
+        let hex_pk = "ccf95d668650178defca5ac503693b6668eb77895f610178ff8ed9fe5cf9482e"
+        let content = "this is a @\(pk) mention"
+        let reply_ref = ReferencedId(ref_id: evid, relay_id: nil, key: "e")
+        let blocks = parse_post_blocks(content: content)
+        let post = NostrPost(content: content, references: [reply_ref])
+        let ev = post_to_event(post: post, privkey: evid, pubkey: pk)
+        
+        XCTAssertEqual(ev.tags.count, 2)
+        XCTAssertEqual(blocks.count, 3)
+        XCTAssertEqual(blocks[1].is_ref, ReferencedId(ref_id: hex_pk, relay_id: nil, key: "p"))
+        XCTAssertEqual(ev.content, "this is a #[1] mention")
+    }
+    
     func testPostWithMentions() throws {
         let evid = "0000000000000000000000000000000000000000000000000000000000000005"
         let pk = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"

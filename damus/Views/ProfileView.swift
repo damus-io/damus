@@ -104,6 +104,7 @@ struct ProfileView: View {
             
             KeyView(pubkey: profile.pubkey)
                 .padding(.bottom, 10)
+                .pubkey_context_menu(bech32_pubkey: bech32_pubkey(profile.pubkey) ?? profile.pubkey)
             
             Text(data?.about ?? "")
         
@@ -190,12 +191,14 @@ struct KeyView: View {
     
     var body: some View {
         let col = id_to_color(pubkey)
+        let bech32 = bech32_pubkey(pubkey) ?? pubkey
+        let half = bech32.count / 2
         
         VStack {
-            Text("\(String(pubkey.prefix(32)))")
+            Text("\(String(bech32.prefix(half)))")
                 .foregroundColor(colorScheme == .light ? .black : col)
                 .font(.footnote.monospaced())
-            Text("\(String(pubkey.suffix(32)))")
+            Text("\(String(bech32.suffix(half)))")
                 .font(.footnote.monospaced())
                 .foregroundColor(colorScheme == .light ? .black : col)
         }

@@ -148,6 +148,16 @@ struct EventView: View {
 }
 
 extension View {
+    func pubkey_context_menu(bech32_pubkey: String) -> some View {
+        return self.contextMenu {
+            Button {
+                    UIPasteboard.general.string = bech32_pubkey
+            } label: {
+                Label("Copy Account ID", systemImage: "doc.on.doc")
+            }
+        }
+    }
+    
     func event_context_menu(_ event: NostrEvent, privkey: String?) -> some View {
         return self.contextMenu {
             Button {
@@ -157,13 +167,13 @@ extension View {
             }
 
             Button {
-                UIPasteboard.general.string = "@" + event.pubkey
+                UIPasteboard.general.string = bech32_pubkey(event.pubkey) ?? event.pubkey
             } label: {
                 Label("Copy User ID", systemImage: "tag")
             }
 
             Button {
-                UIPasteboard.general.string = "&" + event.id
+                UIPasteboard.general.string = bech32_note_id(event.id) ?? event.id
             } label: {
                 Label("Copy Note ID", systemImage: "tag")
             }

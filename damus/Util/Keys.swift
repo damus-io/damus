@@ -58,6 +58,13 @@ func bech32_pubkey(_ pubkey: String) -> String? {
     return bech32_encode(hrp: "npub", bytes)
 }
 
+func bech32_note_id(_ evid: String) -> String? {
+    guard let bytes = hex_decode(evid) else {
+        return nil
+    }
+    return bech32_encode(hrp: "note", bytes)
+}
+
 func generate_new_keypair() -> Keypair {
     let key = try! secp256k1.Signing.PrivateKey()
     let privkey = hex_encode(key.rawRepresentation)
