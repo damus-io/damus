@@ -11,6 +11,12 @@ import secp256k1
 import secp256k1_implementation
 import CryptoKit
 
+enum ValidationResult: Decodable {
+    case ok
+    case bad_id
+    case bad_sig
+}
+
 struct OtherEvent {
     let event_id: String
     let relay_url: String
@@ -67,7 +73,19 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
     var should_show_event: Bool {
         return !too_big
     }
-
+    
+    var is_valid_id: Bool {
+        return calculate_event_id(ev: self) == self.id
+    }
+    
+    var is_valid: Bool {
+        return validity == .ok
+    }
+    
+    lazy var validity: ValidationResult = {
+        return validate_event(ev: self)
+    }()
+    
     private var _blocks: [Block]? = nil
     func blocks(_ privkey: String?) -> [Block] {
         if let bs = _blocks {
@@ -127,7 +145,15 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
         if known_kind == .dm {
             return decrypted(privkey: privkey) ?? "*failed to decrypt content*"
         }
-        return content
+        
+        switch validity {
+        case .ok:
+            return content
+        case .bad_id:
+            return content + "\n\n*WARNING: invalid note id, could be forged!*"
+        case .bad_sig:
+            return content + "\n\n*WARNING: invalid signature, could be forged!*"
+        }
     }
 
     var description: String {
@@ -336,7 +362,7 @@ func event_commitment(ev: NostrEvent, tags: String) -> String {
     return commit
 }
 
-func calculate_event_id(ev: NostrEvent) -> String {
+func calculate_event_commitment(ev: NostrEvent) -> Data {
     let tags_encoder = JSONEncoder()
     tags_encoder.outputFormatting = .withoutEscapingSlashes
     let tags_data = try! tags_encoder.encode(ev.tags)
@@ -344,7 +370,12 @@ func calculate_event_id(ev: NostrEvent) -> String {
 
     let target = event_commitment(ev: ev, tags: tags)
     let target_data = target.data(using: .utf8)!
-    let hash = sha256(target_data)
+    return target_data
+}
+
+func calculate_event_id(ev: NostrEvent) -> String {
+    let commitment = calculate_event_commitment(ev: ev)
+    let hash = sha256(commitment)
 
     return hex_encode(hash)
 }
@@ -674,3 +705,33 @@ func aes_operation(operation: CCOperation, data: [UInt8], iv: [UInt8], shared_se
 
 }
 
+
+
+func validate_event(ev: NostrEvent) -> ValidationResult {
+    let raw_id = sha256(calculate_event_commitment(ev: ev))
+    let id = hex_encode(raw_id)
+    
+    if id != ev.id {
+        return .bad_id
+    }
+
+    // TODO: implement verify
+    guard var sig64 = hex_decode(ev.sig)?.bytes else {
+        return .bad_sig
+    }
+    
+    guard var ev_pubkey = hex_decode(ev.pubkey)?.bytes else {
+        return .bad_sig
+    }
+    
+    let ctx = secp256k1.Context.raw
+    var xonly_pubkey = secp256k1_xonly_pubkey.init()
+    var ok = secp256k1_xonly_pubkey_parse(ctx, &xonly_pubkey, &ev_pubkey) != 0
+    if !ok {
+        return .bad_sig
+    }
+    var raw_id_bytes = raw_id.bytes
+    
+    ok = secp256k1_schnorrsig_verify(ctx, &sig64, &raw_id_bytes, raw_id.count, &xonly_pubkey) > 0
+    return ok ? .ok : .bad_sig
+}

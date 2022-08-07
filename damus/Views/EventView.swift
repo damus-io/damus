@@ -140,10 +140,24 @@ struct EventView: View {
             .padding([.leading], 2)
         }
         .contentShape(Rectangle())
+        .background(event_validity_color(event.validity))
         .id(event.id)
         .frame(minHeight: PFP_SIZE)
         .padding([.bottom], 4)
         .event_context_menu(event, privkey: damus.keypair.privkey)
+    }
+}
+
+func event_validity_color(_ validation: ValidationResult) -> some View {
+    Group {
+        switch validation {
+        case .ok:
+            EmptyView()
+        case .bad_id:
+            Color.orange.opacity(0.4)
+        case .bad_sig:
+            Color.red.opacity(0.4)
+        }
     }
 }
 
