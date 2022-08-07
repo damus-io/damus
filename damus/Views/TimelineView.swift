@@ -39,7 +39,6 @@ struct TimelineView: View {
     
     var body: some View {
         MainContent
-            .padding([.leading, .trailing], 6)
     }
     
     var MainContent: some View {
