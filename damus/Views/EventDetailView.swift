@@ -52,7 +52,7 @@ struct EventDetailView: View {
         print("uncollapsing section at \(c.start) '\(ev.content.prefix(12))...'")
         let start_id = ev.id
         
-        toggle_collapse_thread(scroller: scroller, id: start_id, animate: true, anchor: .top)
+        toggle_collapse_thread(scroller: scroller, id: start_id, animate: false, anchor: .top)
     }
     
     func CollapsedEventView(_ cev: CollapsedEvent, scroller: ScrollViewProxy) -> some View {
