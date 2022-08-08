@@ -108,7 +108,11 @@ struct DMChatView: View {
     }
 
     func send_message() {
-        guard let dm = create_dm(message, to_pk: pubkey, keypair: damus_state.keypair) else {
+        let post_blocks = parse_post_blocks(content: message)
+        let post_tags = make_post_tags(post_blocks: post_blocks, tags: [])
+        let content = render_blocks(blocks: post_tags.blocks)
+        
+        guard let dm = create_dm(content, to_pk: pubkey, keypair: damus_state.keypair) else {
             print("error creating dm")
             return
         }
