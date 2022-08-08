@@ -52,7 +52,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
     var boosted_by: String?
 
     // cached field for pow calc
-    var pow: Int?
+    //var pow: Int?
 
     // custom flags for internal use
     var flags: Int = 0
@@ -157,8 +157,8 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
     }
 
     var description: String {
-        let p = pow.map { String($0) } ?? "?"
-        return "NostrEvent { id: \(id) pubkey \(pubkey) kind \(kind) tags \(tags) pow \(p) content '\(content)' }"
+        //let p = pow.map { String($0) } ?? "?"
+        return "NostrEvent { id: \(id) pubkey \(pubkey) kind \(kind) tags \(tags) content '\(content)' }"
     }
 
     var known_kind: NostrKind? {
@@ -280,7 +280,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible {
 
     func calculate_id() {
         self.id = calculate_event_id(ev: self)
-        self.pow = count_hash_leading_zero_bits(self.id)
+        //self.pow = count_hash_leading_zero_bits(self.id)
     }
 
     // TODO: timeout

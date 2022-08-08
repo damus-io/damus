@@ -26,7 +26,7 @@ enum NostrResponse: Decodable {
                 print(error)
                 throw error
             }
-            ev.pow = count_hash_leading_zero_bits(ev.id)
+            //ev.pow = count_hash_leading_zero_bits(ev.id)
             self = .event(sub_id, ev)
             return
         } else if typ == "NOTICE" {
