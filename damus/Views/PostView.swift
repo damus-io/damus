@@ -65,8 +65,13 @@ struct PostView: View {
                 .foregroundColor(self.post == "Type your post here..." ? .gray : .primary)
                 .focused($focus)
                 .onTapGesture {
-                    if self.post == "Type your post here..."{
-                        self.post = ""
+                    if self.post.contains("Type your post here..."){
+                        self.post = self.post.replacingOccurrences(of: "Type your post here...", with: "")
+                    }
+                }
+                .onChange(of: post) { value in
+                    if self.post.contains("Type your post here..."){
+                        self.post = self.post.replacingOccurrences(of: "Type your post here...", with: "")
                     }
                 }
     
