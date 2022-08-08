@@ -44,7 +44,7 @@ struct ChatroomView: View {
                 scroll_to_event(scroller: scroller, id: ev.id, delay: 0, animate: true, anchor: .top)
             }
             .onAppear() {
-                scroll_to_event(scroller: scroller, id: thread.initial_event.id, delay: 0.3, animate: true, anchor: .bottom)
+                scroll_to_event(scroller: scroller, id: thread.initial_event.id, delay: 0.3, animate: false, anchor: .bottom)
             }
         }
     }
