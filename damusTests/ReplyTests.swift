@@ -43,6 +43,16 @@ class ReplyTests: XCTestCase {
         XCTAssertEqual(blocks[0].is_text != nil, true)
     }
 
+    func testLinkIsNotAHashtag() {
+        let link = "https://github.com/damus-io/damus/blob/b7513f28fa1d31c2747865067256ad1d7cf43aac/damus/Nostr/NostrEvent.swift#L560"
+        
+        let content = "my \(link) link"
+        let blocks = parse_post_blocks(content: content)
+        
+        XCTAssertEqual(blocks.count, 1)
+        XCTAssertEqual(blocks[0].is_text, content)
+    }
+    
     func testHashtagsInQuote() {
         let content = "This is my \"#awesome post\""
         let blocks = parse_post_blocks(content: content)
