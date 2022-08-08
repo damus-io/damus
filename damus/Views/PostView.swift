@@ -13,7 +13,7 @@ enum NostrPostResult {
 }
 
 struct PostView: View {
-    @State var post: String = ""
+    @State var post: String = "Type your post here..."
     @FocusState var focus: Bool
     let references: [ReferencedId]
     
@@ -59,9 +59,17 @@ struct PostView: View {
                 }
             }
             .padding([.top, .bottom], 4)
-
+            
+            
             TextEditor(text: $post)
+                .foregroundColor(self.post == "Type your post here..." ? .gray : .primary)
                 .focused($focus)
+                .onTapGesture {
+                    if self.post == "Type your post here..."{
+                        self.post = ""
+                    }
+                }
+    
         }
         .onAppear() {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
