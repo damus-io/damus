@@ -28,3 +28,11 @@ Contributors welcome! [Email patches][git-send-email] to jb55@jb55.com are prefe
 
 [git-send-email]: http://git-send-email.io
 
+### Awards 
+
+There may be nostr badges awarded for contributors in the future... :)
+
+First contributors:
+
+1. @randymcmillan
+2. @jcarucci27
