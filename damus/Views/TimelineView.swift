@@ -15,6 +15,7 @@ enum TimelineAction {
 struct InnerTimelineView: View {
     @Binding var events: [NostrEvent]
     let damus: DamusState
+    let show_friend_icon: Bool
     
     var body: some View {
         LazyVStack {
@@ -22,7 +23,7 @@ struct InnerTimelineView: View {
                 let tv = ThreadView(thread: ThreadModel(event: ev, pool: damus.pool, privkey: damus.keypair.privkey), damus: damus, is_chatroom: has_hashtag(ev.tags, hashtag: "chat"))
                             
                 NavigationLink(destination: tv) {
-                    EventView(event: ev, highlight: .none, has_action_bar: true, damus: damus)
+                    EventView(event: ev, highlight: .none, has_action_bar: true, damus: damus, show_friend_icon: show_friend_icon)
                 }
                 .isDetailLink(true)
                 .buttonStyle(PlainButtonStyle())
@@ -36,6 +37,7 @@ struct TimelineView: View {
     @Binding var loading: Bool
 
     let damus: DamusState
+    let show_friend_icon: Bool
     
     var body: some View {
         MainContent
@@ -48,7 +50,7 @@ struct TimelineView: View {
                     ProgressView()
                         .progressViewStyle(.circular)
                 }
-                InnerTimelineView(events: $events, damus: damus)
+                InnerTimelineView(events: $events, damus: damus, show_friend_icon: show_friend_icon)
             }
             .onReceive(NotificationCenter.default.publisher(for: .scroll_to_top)) { _ in
                 guard let event = events.first else {

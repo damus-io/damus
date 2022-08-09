@@ -10,6 +10,7 @@ import SwiftUI
 struct ProfileFullName: View {
     let pubkey: String
     let profile: Profile?
+    let contacts: Contacts
     
     @State var display_name: String?
     
@@ -18,11 +19,11 @@ struct ProfileFullName: View {
             if let real_name = profile?.display_name {
                 Text(real_name)
                     .bold()
-                ProfileName(pubkey: pubkey, profile: profile, prefix: "@")
+                ProfileName(pubkey: pubkey, profile: profile, prefix: "@", contacts: contacts, show_friend_confirmed: true)
                     .font(.footnote)
                     .foregroundColor(.gray)
             } else {
-                ProfileName(pubkey: pubkey, profile: profile)
+                ProfileName(pubkey: pubkey, profile: profile, contacts: contacts, show_friend_confirmed: true)
             }
         }
     }
@@ -31,20 +32,43 @@ struct ProfileFullName: View {
 struct ProfileName: View {
     let pubkey: String
     let profile: Profile?
+    let contacts: Contacts
     let prefix: String
+    
+    let show_friend_confirmed: Bool
     
     @State var display_name: String?
     
-    init(pubkey: String, profile: Profile?) {
+    init(pubkey: String, profile: Profile?, contacts: Contacts, show_friend_confirmed: Bool) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = ""
+        self.contacts = contacts
+        self.show_friend_confirmed = show_friend_confirmed
     }
     
-    init(pubkey: String, profile: Profile?, prefix: String) {
+    init(pubkey: String, profile: Profile?, prefix: String, contacts: Contacts, show_friend_confirmed: Bool) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = prefix
+        self.contacts = contacts
+        self.show_friend_confirmed = show_friend_confirmed
+    }
+    
+    var friend_icon: String? {
+        if !show_friend_confirmed {
+            return nil
+        }
+        
+        if self.contacts.is_friend(self.pubkey) {
+            return "person.fill.checkmark"
+        }
+        
+        if self.contacts.is_friend_of_friend(self.pubkey) {
+            return "person.fill.and.arrow.left.and.arrow.right"
+        }
+        
+        return nil
     }
     
     var body: some View {
@@ -52,6 +76,11 @@ struct ProfileName: View {
             Text(prefix + String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
                 //.foregroundColor(hex_to_rgb(pubkey))
                 .fontWeight(prefix == "@" ? .none : .bold)
+            if let frend = friend_icon {
+                Label("", systemImage: frend)
+                    .foregroundColor(.gray)
+                    .font(.footnote)
+            }
         }
         .onReceive(handle_notify(.profile_updated)) { notif in
             let update = notif.object as! ProfileUpdate

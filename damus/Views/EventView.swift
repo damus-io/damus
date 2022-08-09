@@ -42,31 +42,35 @@ struct EventView: View {
     let has_action_bar: Bool
     let damus: DamusState
     let pubkey: String
+    let show_friend_icon: Bool
 
     @EnvironmentObject var action_bar: ActionBarModel
 
-    init(event: NostrEvent, highlight: Highlight, has_action_bar: Bool, damus: DamusState) {
+    init(event: NostrEvent, highlight: Highlight, has_action_bar: Bool, damus: DamusState, show_friend_icon: Bool) {
         self.event = event
         self.highlight = highlight
         self.has_action_bar = has_action_bar
         self.damus = damus
         self.pubkey = event.pubkey
+        self.show_friend_icon = show_friend_icon
     }
 
-    init(damus: DamusState, event: NostrEvent) {
+    init(damus: DamusState, event: NostrEvent, show_friend_icon: Bool) {
         self.event = event
         self.highlight = .none
         self.has_action_bar = false
         self.damus = damus
         self.pubkey = event.pubkey
+        self.show_friend_icon = show_friend_icon
     }
 
-    init(damus: DamusState, event: NostrEvent, pubkey: String) {
+    init(damus: DamusState, event: NostrEvent, pubkey: String, show_friend_icon: Bool) {
         self.event = event
         self.highlight = .none
         self.has_action_bar = false
         self.damus = damus
         self.pubkey = pubkey
+        self.show_friend_icon = show_friend_icon
     }
 
     var body: some View {
@@ -81,7 +85,7 @@ struct EventView: View {
                         HStack {
                             Label("", systemImage: "arrow.2.squarepath")
                                 .foregroundColor(Color.gray)
-                            ProfileName(pubkey: event.pubkey, profile: damus.profiles.lookup(id: event.pubkey))
+                            ProfileName(pubkey: event.pubkey, profile: damus.profiles.lookup(id: event.pubkey), contacts: damus.contacts, show_friend_confirmed: show_friend_icon)
                                 .foregroundColor(Color.gray)
                             Text(" Boosted")
                                 .foregroundColor(Color.gray)
@@ -113,7 +117,7 @@ struct EventView: View {
 
             VStack(alignment: .leading) {
                 HStack(alignment: .center) {
-                    ProfileName(pubkey: pubkey, profile: profile)
+                    ProfileName(pubkey: pubkey, profile: profile, contacts: damus.contacts, show_friend_confirmed: show_friend_icon)
                     Text("\(format_relative_time(event.created_at))")
                         .foregroundColor(.gray)
                 }

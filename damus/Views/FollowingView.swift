@@ -22,7 +22,7 @@ struct FollowUserView: View {
             
                 VStack(alignment: .leading) {
                     let profile = damus_state.profiles.lookup(id: target.pubkey)
-                    ProfileName(pubkey: target.pubkey, profile: profile)
+                    ProfileName(pubkey: target.pubkey, profile: profile, contacts: damus_state.contacts, show_friend_confirmed: false)
                     if let about = profile.flatMap { $0.about } {
                         Text(about)
                     }

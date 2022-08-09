@@ -48,6 +48,7 @@ func follow_btn_enabled_state(_ fs: FollowState) -> Bool {
 struct ProfileNameView: View {
     let pubkey: String
     let profile: Profile?
+    let contacts: Contacts
     
     var body: some View {
         Group {
@@ -55,12 +56,12 @@ struct ProfileNameView: View {
                 VStack(alignment: .leading) {
                     Text(real_name)
                         .font(.title)
-                    ProfileName(pubkey: pubkey, profile: profile, prefix: "@")
+                    ProfileName(pubkey: pubkey, profile: profile, prefix: "@", contacts: contacts, show_friend_confirmed: true)
                         .font(.callout)
                         .foregroundColor(.gray)
                 }
             } else {
-                ProfileName(pubkey: pubkey, profile: profile)
+                ProfileName(pubkey: pubkey, profile: profile, contacts: contacts, show_friend_confirmed: true)
             }
         }
     }
@@ -94,7 +95,7 @@ struct ProfileView: View {
             HStack(alignment: .center) {
                 ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .custom(Color.black, 2), image_cache: damus_state.image_cache, profiles: damus_state.profiles)
         
-                ProfileNameView(pubkey: profile.pubkey, profile: data)
+                ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
                 
                 Spacer()
                 
@@ -146,7 +147,7 @@ struct ProfileView: View {
             
                 Divider()
                 
-                InnerTimelineView(events: $profile.events, damus: damus_state)
+                InnerTimelineView(events: $profile.events, damus: damus_state, show_friend_icon: false)
             }
             .frame(maxHeight: .infinity, alignment: .topLeading)
         }

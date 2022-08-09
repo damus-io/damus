@@ -33,7 +33,7 @@ struct ReplyView: View {
                     .foregroundColor(.gray)
                     .font(.footnote)
             }
-            EventView(event: replying_to, highlight: .none, has_action_bar: false, damus: damus)
+            EventView(event: replying_to, highlight: .none, has_action_bar: false, damus: damus, show_friend_icon: true)
             PostView(references: gather_reply_ids(our_pubkey: damus.pubkey, from: replying_to))
         }
         .padding()

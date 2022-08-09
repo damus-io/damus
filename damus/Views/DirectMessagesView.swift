@@ -27,7 +27,7 @@ struct DirectMessagesView: View {
                 let chat = DMChatView(damus_state: damus_state, pubkey: tup.0)
                     .environmentObject(tup.1)
                 NavigationLink(destination: chat) {
-                    EventView(damus: damus_state, event: ev, pubkey: tup.0)
+                    EventView(damus: damus_state, event: ev, pubkey: tup.0, show_friend_icon: true)
                 }
                 .buttonStyle(PlainButtonStyle())
             } else {

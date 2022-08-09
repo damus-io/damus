@@ -90,7 +90,7 @@ struct ContentView: View {
     var PostingTimelineView: some View {
         ZStack {
             if let damus = self.damus_state {
-                TimelineView(events: $home.events, loading: $home.loading, damus: damus)
+                TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false)
             }
             if privkey != nil {
                 PostButtonContainer {
@@ -119,7 +119,7 @@ struct ContentView: View {
                 PostingTimelineView
                 
             case .notifications:
-                TimelineView(events: $home.notifications, loading: $home.loading, damus: damus)
+                TimelineView(events: $home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true)
                     .navigationTitle("Notifications")
                 
             case .dms:
