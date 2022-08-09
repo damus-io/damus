@@ -43,7 +43,7 @@ struct PostView: View {
     }
 
     var is_post_empty: Bool {
-        return post.allSatisfy { $0.isWhitespace }
+        return post == POST_PLACEHOLDER || post.allSatisfy { $0.isWhitespace }
     }
 
     var body: some View {
