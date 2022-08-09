@@ -15,16 +15,25 @@ struct SearchHomeView: View {
     
     var SearchInput: some View {
         ZStack(alignment: .leading) {
-            TextField("", text: $search)
-                .padding(5)
-                .padding(.leading, 35)
-                .textInputAutocapitalization(.never)
+            HStack{
+                TextField("", text: $search)
+                    .padding(5)
+                    .padding(.leading, 35)
+                    .textInputAutocapitalization(.never)
+                Label("", systemImage: "xmark.square")
+                    .padding(EdgeInsets(top: 0.0, leading: 0.0, bottom: 0.0, trailing: 10.0))
+                    .opacity((search == "") ? 0.0 : 1.0)
+                    .onTapGesture {
+                        self.search = ""
+                    }
+            }
+                
             Label("", systemImage: "magnifyingglass")
                 .padding(.leading, 10)
         }
         .background {
             RoundedRectangle(cornerRadius: 20)
-                .foregroundColor(.gray.opacity(0.2))
+            .foregroundColor(.gray.opacity(0.2))
         }
         .padding()
     }
