@@ -106,11 +106,12 @@ struct DMChatView: View {
     }
 
     func send_message() {
+        let tags = [["p", pubkey]]
         let post_blocks = parse_post_blocks(content: message)
-        let post_tags = make_post_tags(post_blocks: post_blocks, tags: [])
+        let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
         let content = render_blocks(blocks: post_tags.blocks)
         
-        guard let dm = create_dm(content, to_pk: pubkey, keypair: damus_state.keypair) else {
+        guard let dm = create_dm(content, to_pk: pubkey, tags: post_tags.tags, keypair: damus_state.keypair) else {
             print("error creating dm")
             return
         }
@@ -149,13 +150,12 @@ struct DMChatView_Previews: PreviewProvider {
 }
 
 
-func create_dm(_ message: String, to_pk: String, keypair: Keypair) -> NostrEvent?
+func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair) -> NostrEvent?
 {
     guard let privkey = keypair.privkey else {
         return nil
     }
 
-    let tags = [["p", to_pk]]
     let iv = random_bytes(count: 16).bytes
     guard let shared_sec = get_shared_secret(privkey: privkey, pubkey: to_pk) else {
         return nil
