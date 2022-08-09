@@ -132,6 +132,12 @@ struct DMChatView: View {
 
                 Footer
             }
+            Text("Send a message to start the conversation...")
+            .lineLimit(nil)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 40)
+            .opacity(((dms.events.count == 0) ? 1.0 : 0.0))
+            .foregroundColor(.gray)
         }
         .navigationTitle("DM")
         .toolbar { Header }
