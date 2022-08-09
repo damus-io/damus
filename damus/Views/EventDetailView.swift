@@ -60,11 +60,14 @@ struct EventDetailView: View {
             switch cev {
             case .collapsed(let c):
                 Text("··· \(c.count) other notes ···")
+                    .padding([.top,.bottom], 10)
                     .font(.footnote)
                     .foregroundColor(.gray)
                     .onTapGesture {
                         //self.uncollapse_section(scroller: proxy, c: c)
                         //self.toggle_collapse_thread(scroller: proxy, id: nil)
+                        let ev = thread.events[c.start]
+                        thread.set_active_event(ev, privkey: damus.keypair.privkey)
                         toggle_thread_view()
                     }
             case .event(let ev, let highlight):

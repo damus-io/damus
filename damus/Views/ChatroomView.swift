@@ -37,7 +37,7 @@ struct ChatroomView: View {
                     
                 }
                 
-                EndBlock()
+                EndBlock(height: 500)
             }
             .onReceive(NotificationCenter.default.publisher(for: .select_quote)) { notif in
                 let ev = notif.object as! NostrEvent
