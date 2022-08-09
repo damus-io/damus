@@ -311,13 +311,15 @@ struct ContentView: View {
     }
     
     func switch_timeline(_ timeline: Timeline) {
+        NotificationCenter.default.post(name: .switched_timeline, object: timeline)
+        
         if timeline == self.selected_timeline {
             NotificationCenter.default.post(name: .scroll_to_top, object: nil)
             return
         }
         
         self.selected_timeline = timeline
-        NotificationCenter.default.post(name: .switched_timeline, object: timeline)
+        //NotificationCenter.default.post(name: .switched_timeline, object: timeline)
         //self.selected_timeline = timeline
     }
     

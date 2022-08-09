@@ -73,6 +73,8 @@ struct ProfileView: View {
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
     
+    @Environment(\.dismiss) var dismiss
+    
     //@EnvironmentObject var profile: ProfileModel
     
     var DMButton: some View {
@@ -150,8 +152,10 @@ struct ProfileView: View {
         }
         .padding([.leading, .trailing], 6)
         .frame(maxWidth: .infinity, alignment: .topLeading)
-        
         .navigationBarTitle("Profile")
+        .onReceive(handle_notify(.switched_timeline)) { _ in
+            dismiss()
+        }
         .onAppear() {
             profile.subscribe()
             followers.subscribe()
