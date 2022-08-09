@@ -189,7 +189,9 @@ class ThreadModel: ObservableObject {
         }
         
         if done {
-            loading = false
+            if (events.contains { ev in ev.id == initial_event.id }) {
+                loading = false
+            }
         }
     }
 

@@ -14,7 +14,7 @@ struct ChatroomView: View {
     
     var body: some View {
         ScrollViewReader { scroller in
-            ScrollView {
+            ScrollView(.vertical) {
                 LazyVStack(alignment: .leading) {
                     let count = thread.events.count
                     ForEach(Array(zip(thread.events, thread.events.indices)), id: \.0.id) { (ev, ind) in
@@ -34,17 +34,20 @@ struct ChatroomView: View {
                         }
                         .environmentObject(thread)
                     }
+                    
                 }
+                
+                EndBlock()
             }
             .onReceive(NotificationCenter.default.publisher(for: .select_quote)) { notif in
                 let ev = notif.object as! NostrEvent
                 if ev.id != thread.initial_event.id {
                     thread.set_active_event(ev, privkey: damus.keypair.privkey)
                 }
-                scroll_to_event(scroller: scroller, id: ev.id, delay: 0, animate: true, anchor: .top)
+                scroll_to_event(scroller: scroller, id: ev.id, delay: 0, animate: true)
             }
             .onAppear() {
-                scroll_to_event(scroller: scroller, id: thread.initial_event.id, delay: 0.3, animate: false, anchor: .bottom)
+                scroll_to_event(scroller: scroller, id: thread.initial_event.id, delay: 0.1, animate: false)
             }
         }
     }
