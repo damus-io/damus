@@ -45,7 +45,11 @@ struct EventId: Identifiable, CustomStringConvertible {
     }
 }
 
-class NostrEvent: Codable, Identifiable, CustomStringConvertible {
+class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable {
+    static func == (lhs: NostrEvent, rhs: NostrEvent) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     var id: String
     var sig: String
     var tags: [[String]]

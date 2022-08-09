@@ -147,7 +147,7 @@ struct ContentView: View {
         Group {
             if let evid = self.active_event_id {
                 let thread_model = ThreadModel(evid: evid, pool: damus_state!.pool, privkey: damus_state!.keypair.privkey)
-                ThreadView(thread: thread_model, damus: damus_state!)
+                ThreadView(thread: thread_model, damus: damus_state!, is_chatroom: false)
             } else {
                 EmptyView()
             }

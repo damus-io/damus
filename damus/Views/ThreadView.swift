@@ -9,9 +9,10 @@ import SwiftUI
 
 
 struct ThreadView: View {
-    @State var is_chatroom: Bool = false
     @StateObject var thread: ThreadModel
     let damus: DamusState
+    @State var is_chatroom: Bool
+    @State var seen_first: Bool = false
     
     @Environment(\.dismiss) var dismiss
     
@@ -41,6 +42,15 @@ struct ThreadView: View {
             is_chatroom = !is_chatroom
             //print("is_chatroom: \(is_chatroom)")
         }
+        .onChange(of: thread.events) { val in
+            if seen_first {
+                return
+            }
+            if let ev = thread.events.first {
+                seen_first = true
+                is_chatroom = has_hashtag(ev.tags, hashtag: "chat")
+            }
+        }
         .onAppear() {
             thread.subscribe()
         }
@@ -57,3 +67,13 @@ struct ThreadView_Previews: PreviewProvider {
     }
 }
 */
+
+func has_hashtag(_ tags: [[String]], hashtag: String) -> Bool {
+    for tag in tags {
+        if tag.count >= 2 && tag[0] == "hashtag" && tag[1] == hashtag {
+            return true
+        }
+    }
+    
+    return false
+}
