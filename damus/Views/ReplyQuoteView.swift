@@ -50,9 +50,6 @@ struct ReplyQuoteView: View {
                 .padding(4)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
-                .onTapGesture {
-                    NotificationCenter.default.post(name: .select_quote, object: event)
-                }
             } else {
                 ProgressView()
                     .progressViewStyle(.circular)

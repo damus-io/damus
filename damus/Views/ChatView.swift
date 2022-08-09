@@ -14,6 +14,7 @@ struct ChatView: View {
     
     let damus_state: DamusState
     
+    @State var expand_reply: Bool = false
     @EnvironmentObject var thread: ThreadModel
     
     var just_started: Bool {
@@ -96,8 +97,11 @@ struct ChatView: View {
                     if let ref_id = thread.replies.lookup(event.id) {
                         if !is_reply_to_prev() {
                             ReplyQuoteView(privkey: damus_state.keypair.privkey, quoter: event, event_id: ref_id, image_cache: damus_state.image_cache, profiles: damus_state.profiles)
-                                .frame(maxHeight: 100)
+                                .frame(maxHeight: expand_reply ? nil : 100)
                                 .environmentObject(thread)
+                                .onTapGesture {
+                                    expand_reply = !expand_reply
+                                }
                             ReplyDescription
                         }
                     }

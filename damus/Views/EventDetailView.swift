@@ -66,8 +66,9 @@ struct EventDetailView: View {
                     .onTapGesture {
                         //self.uncollapse_section(scroller: proxy, c: c)
                         //self.toggle_collapse_thread(scroller: proxy, id: nil)
-                        let ev = thread.events[c.start]
-                        thread.set_active_event(ev, privkey: damus.keypair.privkey)
+                        if let ev = thread.events[safe: c.start] {
+                            thread.set_active_event(ev, privkey: damus.keypair.privkey)
+                        }
                         toggle_thread_view()
                     }
             case .event(let ev, let highlight):
@@ -333,3 +334,12 @@ func scroll_to_event(scroller: ScrollViewProxy, id: String, delay: Double, anima
         }
     }
      */
+
+
+extension Collection {
+
+    /// Returns the element at the specified index if it is within bounds, otherwise nil.
+    subscript (safe index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
+}
