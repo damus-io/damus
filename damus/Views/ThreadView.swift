@@ -47,6 +47,9 @@ struct ThreadView: View {
                 return
             }
             if let ev = thread.events.first {
+                guard ev.is_root_event() else {
+                    return
+                }
                 seen_first = true
                 is_chatroom = has_hashtag(ev.tags, hashtag: "chat")
             }
