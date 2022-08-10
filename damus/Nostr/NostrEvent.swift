@@ -101,9 +101,13 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable {
     }
 
     lazy var inner_event: NostrEvent? = {
-        return event_from_json(dat: self.content)
+        // don't try to deserialize an inner event if we know there won't be one
+        if self.known_kind == .boost {
+            return event_from_json(dat: self.content)
+        }
+        return nil
     }()
-
+    
     private var _event_refs: [EventRef]? = nil
     func event_refs(_ privkey: String?) -> [EventRef] {
         if let rs = _event_refs {
@@ -738,4 +742,13 @@ func validate_event(ev: NostrEvent) -> ValidationResult {
     
     ok = secp256k1_schnorrsig_verify(ctx, &sig64, &raw_id_bytes, raw_id.count, &xonly_pubkey) > 0
     return ok ? .ok : .bad_sig
+}
+
+
+func inner_event_or_self(ev: NostrEvent) -> NostrEvent {
+    guard let inner_ev = ev.inner_event else {
+        return ev
+    }
+    
+    return inner_ev
 }

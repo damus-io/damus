@@ -20,7 +20,9 @@ struct InnerTimelineView: View {
     var body: some View {
         LazyVStack {
             ForEach(events, id: \.id) { (ev: NostrEvent) in
-                let tv = ThreadView(thread: ThreadModel(event: ev, pool: damus.pool, privkey: damus.keypair.privkey), damus: damus, is_chatroom: has_hashtag(ev.tags, hashtag: "chat"))
+                let tm = ThreadModel(event: inner_event_or_self(ev: ev), pool: damus.pool, privkey: damus.keypair.privkey)
+                let is_chatroom = has_hashtag(ev.tags, hashtag: "chat")
+                let tv = ThreadView(thread: tm, damus: damus, is_chatroom: is_chatroom)
                             
                 NavigationLink(destination: tv) {
                     EventView(event: ev, highlight: .none, has_action_bar: true, damus: damus, show_friend_icon: show_friend_icon)
@@ -80,3 +82,4 @@ struct NavigationLazyView<Content: View>: View {
         build()
     }
 }
+
