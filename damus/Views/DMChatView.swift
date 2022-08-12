@@ -21,7 +21,7 @@ struct DMChatView: View {
                         DMView(event: dms.events[ind], damus_state: damus_state)
                             .event_context_menu(ev, privkey: damus_state.keypair.privkey)
                     }
-                    EndBlock()
+                    EndBlock(height: 80)
                 }
             }
             .onAppear {
