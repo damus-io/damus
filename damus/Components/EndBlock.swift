@@ -11,7 +11,7 @@ struct EndBlock: View {
     let height: CGFloat
     
     init () {
-        self.height = 80.0
+        self.height = 10.0
     }
     
     init (height: Float) {

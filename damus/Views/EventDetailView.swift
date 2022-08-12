@@ -101,7 +101,7 @@ struct EventDetailView: View {
                     CollapsedEventView(cev, scroller: proxy)
                 }
                 
-                EndBlock(height: 600)
+                EndBlock()
             }
             .onChange(of: thread.loading) { val in
                 scroll_after_load(proxy)
@@ -295,10 +295,10 @@ func scroll_to_event(scroller: ScrollViewProxy, id: String, delay: Double, anima
     DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
         if animate {
             withAnimation {
-                scroller.scrollTo(id, anchor: .top)
+                scroller.scrollTo(id, anchor: .bottom)
             }
         } else {
-            scroller.scrollTo(id, anchor: .top)
+            scroller.scrollTo(id, anchor: .bottom)
         }
     }
 }
