@@ -424,7 +424,7 @@ func add_contact_if_friend(contacts: Contacts, ev: NostrEvent) {
 }
 
 func load_our_contacts(contacts: Contacts, our_pubkey: String, ev: NostrEvent) {
-    guard ev.pubkey == our_pubkey else {
+    guard should_process_our_contact_event(ev, contacts: contacts, our_pubkey: our_pubkey) else {
         return
     }
 
@@ -504,7 +504,7 @@ func process_metadata_event(image_cache: ImageCache, profiles: Profiles, ev: Nos
 
     let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at)
     profiles.add(id: ev.pubkey, profile: tprof)
-    
+
     // load pfps asap
     let picture = tprof.profile.picture ?? robohash(ev.pubkey)
     if let url = URL(string: picture) {
@@ -517,7 +517,7 @@ func process_metadata_event(image_cache: ImageCache, profiles: Profiles, ev: Nos
             return res
         }
     }
-    
+
     notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
 }
 
@@ -527,12 +527,27 @@ func robohash(_ pk: String) -> String {
 
 func process_contact_event(pool: RelayPool, contacts: Contacts, pubkey: String, ev: NostrEvent) {
     load_our_contacts(contacts: contacts, our_pubkey: pubkey, ev: ev)
-    load_our_relays(our_pubkey: pubkey, pool: pool, ev: ev)
+    load_our_relays(our_pubkey: pubkey, contacts: contacts, pool: pool, ev: ev)
     add_contact_if_friend(contacts: contacts, ev: ev)
 }
 
-func load_our_relays(our_pubkey: String, pool: RelayPool, ev: NostrEvent) {
+func should_process_our_contact_event(_ ev: NostrEvent, contacts: Contacts, our_pubkey: String) -> Bool {
     guard ev.pubkey == our_pubkey else {
+        return false
+    }
+
+    if let contacts_ev = contacts.event {
+        guard ev.created_at > contacts_ev.created_at else {
+            // this is an older contacts event, ignore
+            return false
+        }
+    }
+
+    return true
+}
+
+func load_our_relays(our_pubkey: String, contacts: Contacts, pool: RelayPool, ev: NostrEvent) {
+    guard should_process_our_contact_event(ev, contacts: contacts, our_pubkey: our_pubkey) else {
         return
     }
 
