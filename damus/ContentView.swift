@@ -59,8 +59,6 @@ struct ContentView: View {
     @State var profile_open: Bool = false
     @State var thread_open: Bool = false
     @State var search_open: Bool = false
-    @State var filters_showing : Bool = false
-    @State var should_show_replies : Bool = true
     @StateObject var home: HomeModel = HomeModel()
     
     // connect retry timer
@@ -88,52 +86,18 @@ struct ContentView: View {
             Spacer()
         }
     }
-    
-    var FiltersView: some View {
-        VStack{
-            HStack{
-                Toggle("Show Replies", isOn: $should_show_replies)
-                .toggleStyle(SwitchToggleStyle(tint: .purple))
-                .padding(.leading,30)
-                .padding(.trailing,30)
-                
-            }
-        }
-    }
 
     var PostingTimelineView: some View {
-        VStack{
-            Label("", systemImage: "line.3.horizontal.decrease.circle.fill")
-                .padding(.leading, 10)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .onTapGesture {
-                    print("Filtering")
-                    self.filters_showing = !self.filters_showing
-                }
-            if(filters_showing){
-                FiltersView
+        ZStack {
+            if let damus = self.damus_state {
+                TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false)
             }
-            ZStack {
-                if let damus = self.damus_state {
-                    TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter_event)
-                    //TODO: Add filter function to the events to keep out replies if should_show_replies is false!
-                }
-                if privkey != nil {
-                    PostButtonContainer {
-                        self.active_sheet = .post
-                    }
+            if privkey != nil {
+                PostButtonContainer {
+                    self.active_sheet = .post
                 }
             }
         }
-        
-    }
-    
-    func filter_event(_ ev: NostrEvent) -> Bool {
-        if !should_show_replies {
-            return !ev.is_reply(nil)
-        }
-        
-        return true
     }
     
     func MainContent(damus: DamusState) -> some View {
@@ -155,7 +119,7 @@ struct ContentView: View {
                 PostingTimelineView
                 
             case .notifications:
-                TimelineView(events: $home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
+                TimelineView(events: $home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true)
                     .navigationTitle("Notifications")
                 
             case .dms:
