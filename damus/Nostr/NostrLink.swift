@@ -93,7 +93,7 @@ func decode_nostr_uri(_ s: String) -> NostrLink? {
             return
         }
     
-    if parts.count >= 2 && parts[0] == "hashtag" {
+    if tag_is_hashtag(parts) {
         return .filter(NostrFilter.filter_hashtag([parts[1].lowercased()]))
     }
     

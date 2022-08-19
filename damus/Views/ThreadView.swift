@@ -79,9 +79,13 @@ func should_show_chatroom(_ ev: NostrEvent) -> Bool {
     return has_hashtag(ev.tags, hashtag: "chat")
 }
 
+func tag_is_hashtag(_ tag: [String]) -> Bool {
+    return tag.count >= 2 && (tag[0] == "hashtag" || tag[0] == "t")
+}
+
 func has_hashtag(_ tags: [[String]], hashtag: String) -> Bool {
     for tag in tags {
-        if tag.count >= 2 && (tag[0] == "hashtag" || tag[0] == "t") && tag[1] == hashtag {
+        if tag_is_hashtag(tag) && tag[1] == hashtag {
             return true
         }
     }

@@ -65,10 +65,8 @@ class SearchModel: ObservableObject {
 
 func event_matches_hashtag(_ ev: NostrEvent, hashtags: [String]) -> Bool {
     for tag in ev.tags {
-        if tag.count >= 2 && tag[0] == "hashtag" {
-            if hashtags.contains(tag[1]) {
-                return true
-            }
+        if tag_is_hashtag(tag) && hashtags.contains(tag[1]) {
+            return true
         }
     }
     return false
