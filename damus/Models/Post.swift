@@ -8,8 +8,21 @@
 import Foundation
 
 struct NostrPost {
+    let kind: NostrKind
     let content: String
     let references: [ReferencedId]
+    
+    init (content: String, references: [ReferencedId]) {
+        self.content = content
+        self.references = references
+        self.kind = .text
+    }
+    
+    init (content: String, references: [ReferencedId], kind: NostrKind) {
+        self.content = content
+        self.references = references
+        self.kind = kind
+    }
 }
 
 // TODO: parse nostr:{e,p}:pubkey uris as well

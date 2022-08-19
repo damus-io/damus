@@ -21,7 +21,7 @@ struct InnerTimelineView: View {
         LazyVStack {
             ForEach(events, id: \.id) { (ev: NostrEvent) in
                 let tm = ThreadModel(event: inner_event_or_self(ev: ev), pool: damus.pool, privkey: damus.keypair.privkey)
-                let is_chatroom = has_hashtag(ev.tags, hashtag: "chat")
+                let is_chatroom = should_show_chatroom(ev)
                 let tv = ThreadView(thread: tm, damus: damus, is_chatroom: is_chatroom)
                             
                 NavigationLink(destination: tv) {

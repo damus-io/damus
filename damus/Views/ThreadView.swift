@@ -51,7 +51,7 @@ struct ThreadView: View {
                     return
                 }
                 seen_first = true
-                is_chatroom = has_hashtag(ev.tags, hashtag: "chat")
+                is_chatroom = should_show_chatroom(ev) 
             }
         }
         .onAppear() {
@@ -71,9 +71,17 @@ struct ThreadView_Previews: PreviewProvider {
 }
 */
 
+func should_show_chatroom(_ ev: NostrEvent) -> Bool {
+    if ev.known_kind == .chat {
+        return true
+    }
+    
+    return has_hashtag(ev.tags, hashtag: "chat")
+}
+
 func has_hashtag(_ tags: [[String]], hashtag: String) -> Bool {
     for tag in tags {
-        if tag.count >= 2 && tag[0] == "hashtag" && tag[1] == hashtag {
+        if tag.count >= 2 && (tag[0] == "hashtag" || tag[0] == "t") && tag[1] == hashtag {
             return true
         }
     }

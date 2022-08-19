@@ -279,7 +279,7 @@ func post_to_event(post: NostrPost, privkey: String, pubkey: String) -> NostrEve
     let post_blocks = parse_post_blocks(content: post.content)
     let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
     let content = render_blocks(blocks: post_tags.blocks)
-    let new_ev = NostrEvent(content: content, pubkey: pubkey, kind: 1, tags: post_tags.tags)
+    let new_ev = NostrEvent(content: content, pubkey: pubkey, kind: post.kind.rawValue, tags: post_tags.tags)
     new_ev.calculate_id()
     new_ev.sign(privkey: privkey)
     return new_ev

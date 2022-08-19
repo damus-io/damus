@@ -187,7 +187,7 @@ struct ContentView: View {
         .sheet(item: $active_sheet) { item in
             switch item {
             case .post:
-                PostView(references: [])
+                PostView(replying_to: nil, references: [])
             case .reply(let event):
                 ReplyView(replying_to: event, damus: damus_state!)
             }

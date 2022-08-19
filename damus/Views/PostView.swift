@@ -18,6 +18,7 @@ struct PostView: View {
     @State var post: String = POST_PLACEHOLDER
     @State var new: Bool = true
 
+    let replying_to: NostrEvent?
     @FocusState var focus: Bool
     let references: [ReferencedId]
 
@@ -37,7 +38,12 @@ struct PostView: View {
     }
 
     func send_post() {
-        let new_post = NostrPost(content: self.post, references: references)
+        var kind: NostrKind = .text
+        if replying_to?.known_kind == .chat {
+            kind = .chat
+        }
+        let new_post = NostrPost(content: self.post, references: references, kind: kind)
+
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
         dismiss()
     }

@@ -86,6 +86,7 @@ class HomeModel: ObservableObject {
         }
 
         switch kind {
+        case .chat: fallthrough
         case .text:
             handle_text_event(sub_id: sub_id, ev)
         case .contacts:
