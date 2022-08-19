@@ -79,9 +79,9 @@ class damusTests: XCTestCase {
         
         XCTAssertEqual(ev.tags.count, 2)
         XCTAssertEqual(ev.content, "#damus some content #bitcoin derp")
-        XCTAssertEqual(ev.tags[0][0], "hashtag")
+        XCTAssertEqual(ev.tags[0][0], "t")
         XCTAssertEqual(ev.tags[0][1], "damus")
-        XCTAssertEqual(ev.tags[1][0], "hashtag")
+        XCTAssertEqual(ev.tags[1][0], "t")
         XCTAssertEqual(ev.tags[1][1], "bitcoin")
         
     }

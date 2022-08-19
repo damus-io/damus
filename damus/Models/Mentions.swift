@@ -264,7 +264,7 @@ func make_post_tags(post_blocks: [PostBlock], tags: [[String]]) -> PostTags {
                 blocks.append(block)
             }
         case .hashtag(let hashtag):
-            new_tags.append(["hashtag", hashtag.lowercased()])
+            new_tags.append(["t", hashtag.lowercased()])
             blocks.append(.hashtag(hashtag))
         case .text(let txt):
             blocks.append(Block.text(txt))

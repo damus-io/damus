@@ -80,6 +80,7 @@ func should_show_chatroom(_ ev: NostrEvent) -> Bool {
 }
 
 func tag_is_hashtag(_ tag: [String]) -> Bool {
+    // "hashtag" is deprecated, will remove in the future
     return tag.count >= 2 && (tag[0] == "hashtag" || tag[0] == "t")
 }
 

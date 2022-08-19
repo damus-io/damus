@@ -23,7 +23,7 @@ struct NostrFilter: Codable {
         case kinds
         case referenced_ids = "#e"
         case pubkeys = "#p"
-        case hashtag = "#hashtag"
+        case hashtag = "#t"
         case since
         case until
         case authors

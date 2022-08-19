@@ -63,7 +63,7 @@ struct NoteContentView: View {
 }
 
 func hashtag_str(_ htag: String) -> String {
-    return "[#\(htag)](nostr:hashtag:\(htag))"
+    return "[#\(htag)](nostr:t:\(htag))"
 }
 
 func mention_str(_ m: Mention, profiles: Profiles) -> String {
