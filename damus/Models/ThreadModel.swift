@@ -116,8 +116,8 @@ class ThreadModel: ObservableObject {
     }
     
     func subscribe() {
-        var ref_events = NostrFilter.filter_kinds([self.kind,5,6,7])
-        var events_filter = NostrFilter.filter_kinds([self.kind])
+        var ref_events = NostrFilter()
+        var events_filter = NostrFilter()
         //var likes_filter = NostrFilter.filter_kinds(7])
 
         // TODO: add referenced relays
@@ -183,7 +183,7 @@ class ThreadModel: ObservableObject {
 
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
         let done = handle_subid_event(pool: pool, sub_id: sub_id, relay_id: relay_id, ev: ev) { ev in
-            if ev.known_kind == .text {
+            if ev.is_textlike {
                 self.add_event(ev, privkey: self.privkey)
             }
         }
