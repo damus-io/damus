@@ -35,6 +35,11 @@ enum ThreadState {
     case chatroom
 }
 
+enum FilterState : Int {
+    case posts_and_replies = 1
+    case posts = 0
+}
+
 struct ContentView: View {
     let keypair: Keypair
     
@@ -59,6 +64,7 @@ struct ContentView: View {
     @State var profile_open: Bool = false
     @State var thread_open: Bool = false
     @State var search_open: Bool = false
+    @State var filter_state : FilterState = .posts_and_replies
     @StateObject var home: HomeModel = HomeModel()
     
     // connect retry timer
@@ -88,16 +94,37 @@ struct ContentView: View {
     }
 
     var PostingTimelineView: some View {
-        ZStack {
-            if let damus = self.damus_state {
-                TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false)
-            }
-            if privkey != nil {
-                PostButtonContainer {
-                    self.active_sheet = .post
+        VStack{
+            FiltersView
+            ZStack {
+                if let damus = self.damus_state {
+                    TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter_event)
+                }
+                if privkey != nil {
+                    PostButtonContainer {
+                        self.active_sheet = .post
+                    }
                 }
             }
         }
+    }
+    
+    var FiltersView: some View {
+        VStack{
+            Picker("Filter State", selection: $filter_state) {
+                Text("Posts").tag(FilterState.posts)
+                Text("Posts & Replies").tag(FilterState.posts_and_replies)
+            }
+            .pickerStyle(.segmented)
+        }
+    }
+    
+    func filter_event(_ ev: NostrEvent) -> Bool {
+        if self.filter_state == .posts {
+            return !ev.is_reply(nil)
+        }
+        
+        return true
     }
     
     func MainContent(damus: DamusState) -> some View {
@@ -119,7 +146,7 @@ struct ContentView: View {
                 PostingTimelineView
                 
             case .notifications:
-                TimelineView(events: $home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true)
+                TimelineView(events: $home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
                     .navigationTitle("Notifications")
                 
             case .dms:
