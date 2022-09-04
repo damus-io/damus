@@ -16,10 +16,11 @@ struct InnerTimelineView: View {
     @Binding var events: [NostrEvent]
     let damus: DamusState
     let show_friend_icon: Bool
+    let filter: (NostrEvent) -> Bool
     
     var body: some View {
         LazyVStack {
-            ForEach(events, id: \.id) { (ev: NostrEvent) in
+            ForEach(events.filter(filter), id: \.id) { (ev: NostrEvent) in
                 let tm = ThreadModel(event: inner_event_or_self(ev: ev), damus_state: damus)
                 let is_chatroom = should_show_chatroom(ev)
                 let tv = ThreadView(thread: tm, damus: damus, is_chatroom: is_chatroom)
@@ -40,6 +41,7 @@ struct TimelineView: View {
 
     let damus: DamusState
     let show_friend_icon: Bool
+    let filter: (NostrEvent) -> Bool
     
     var body: some View {
         MainContent
@@ -52,7 +54,7 @@ struct TimelineView: View {
                     ProgressView()
                         .progressViewStyle(.circular)
                 }
-                InnerTimelineView(events: $events, damus: damus, show_friend_icon: show_friend_icon)
+                InnerTimelineView(events: $events, damus: damus, show_friend_icon: show_friend_icon, filter: filter)
             }
             .onReceive(NotificationCenter.default.publisher(for: .scroll_to_top)) { _ in
                 guard let event = events.first else {

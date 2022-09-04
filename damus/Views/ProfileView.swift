@@ -147,7 +147,7 @@ struct ProfileView: View {
             
                 Divider()
                 
-                InnerTimelineView(events: $profile.events, damus: damus_state, show_friend_icon: false)
+                InnerTimelineView(events: $profile.events, damus: damus_state, show_friend_icon: false, filter: { _ in true })
             }
             .frame(maxHeight: .infinity, alignment: .topLeading)
         }
