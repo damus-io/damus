@@ -96,6 +96,7 @@ struct ContentView: View {
     var PostingTimelineView: some View {
         VStack{
             FiltersView
+                .padding([.bottom], 8)
             ZStack {
                 if let damus = self.damus_state {
                     TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter_event)
