@@ -124,12 +124,11 @@ struct ChatView: View {
         }
         .contentShape(Rectangle())
         .id(event.id)
-        .frame(minHeight: just_started ? PFP_SIZE : 0)
-        .padding([.bottom], next_ev == nil ? 30 : 0)
+        //.frame(minHeight: just_started ? PFP_SIZE : 0)
+        .padding([.bottom], 6)
         //.border(Color.green)
         
     }
-    
 }
 
 extension Notification.Name {

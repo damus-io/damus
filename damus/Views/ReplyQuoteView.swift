@@ -50,9 +50,6 @@ struct ReplyQuoteView: View {
                 .padding(4)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
-            } else {
-                ProgressView()
-                    .progressViewStyle(.circular)
             }
         }
     }
@@ -63,6 +60,6 @@ struct ReplyQuoteView_Previews: PreviewProvider {
         let s = test_damus_state()
         let quoter = NostrEvent(content: "a\nb\nc", pubkey: "pubkey")
         ReplyQuoteView(privkey: s.keypair.privkey, quoter: quoter, event_id: "pubkey2", image_cache: s.image_cache, profiles: s.profiles)
-            .environmentObject(ThreadModel(event: quoter, pool: s.pool, privkey: s.keypair.privkey))
+            .environmentObject(ThreadModel(event: quoter, damus_state: s))
     }
 }

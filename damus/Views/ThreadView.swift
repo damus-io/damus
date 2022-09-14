@@ -12,6 +12,7 @@ struct ThreadView: View {
     @StateObject var thread: ThreadModel
     let damus: DamusState
     @State var is_chatroom: Bool
+    @State var metadata: ChatroomMetadata? = nil
     @State var seen_first: Bool = false
     
     @Environment(\.dismiss) var dismiss
@@ -20,11 +21,11 @@ struct ThreadView: View {
         Group {
             if is_chatroom {
                 ChatroomView(damus: damus)
-                    .navigationBarTitle("Chat")
+                    .navigationBarTitle(metadata?.name ?? "Chat")
                     .environmentObject(thread)
             } else {
                 EventDetailView(damus: damus, thread: thread)
-                    .navigationBarTitle("Thread")
+                    .navigationBarTitle(metadata?.name ?? "Thread")
                     .environmentObject(thread)
             }
             
@@ -35,12 +36,16 @@ struct ThreadView: View {
              */
         }
         .padding([.leading, .trailing], 6)
-        .onReceive(NotificationCenter.default.publisher(for: .switched_timeline)) { n in
+        .onReceive(handle_notify(.switched_timeline)) { n in
             dismiss()
         }
-        .onReceive(NotificationCenter.default.publisher(for: .toggle_thread_view)) { _ in
+        .onReceive(handle_notify(.toggle_thread_view)) { _ in
             is_chatroom = !is_chatroom
             //print("is_chatroom: \(is_chatroom)")
+        }
+        .onReceive(handle_notify(.chatroom_meta)) { n in
+            let meta = n.object as! ChatroomMetadata
+            self.metadata = meta
         }
         .onChange(of: thread.events) { val in
             if seen_first {
@@ -72,7 +77,7 @@ struct ThreadView_Previews: PreviewProvider {
 */
 
 func should_show_chatroom(_ ev: NostrEvent) -> Bool {
-    if ev.known_kind == .chat {
+    if ev.known_kind == .chat || ev.known_kind == .channel_create {
         return true
     }
     

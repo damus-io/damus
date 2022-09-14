@@ -132,7 +132,7 @@ class ImageCache {
     func insert(_ image: UIImage, key: String) async -> UIImage? {
         let scale = await UIScreen.main.scale
         let size = CGSize(width: PFP_SIZE * scale, height: PFP_SIZE * scale)
-        
+      
         set_state(key, new_state: .processing)
         
         let decoded_image = await image.byPreparingThumbnail(ofSize: size)

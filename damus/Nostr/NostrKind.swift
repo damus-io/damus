@@ -16,5 +16,7 @@ enum NostrKind: Int {
     case delete = 5
     case boost = 6
     case like = 7
+    case channel_create = 40
+    case channel_meta = 41
     case chat = 42
 }

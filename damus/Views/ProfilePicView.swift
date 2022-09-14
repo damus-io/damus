@@ -126,14 +126,14 @@ struct ProfilePicView_Previews: PreviewProvider {
 
 func hex_to_rgb(_ hex: String) -> Color {
     guard hex.count >= 6 else {
-        return Color.black
+        return Color.white
     }
     
     let arr = Array(hex.utf8)
     var rgb: [UInt8] = []
-    var i: Int = 0
+    var i: Int = arr.count - 12
     
-    while i < 6 {
+    while i < arr.count {
         let cs1 = arr[i]
         let cs2 = arr[i+1]
         

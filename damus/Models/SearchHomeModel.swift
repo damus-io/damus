@@ -40,16 +40,6 @@ class SearchHomeModel: ObservableObject {
         damus_state.pool.unsubscribe(sub_id: base_subid)
     }
     
-    func load_profiles(relay_id: String) {
-        var filter = NostrFilter.filter_profiles
-        let authors = find_profiles_to_fetch(profiles: damus_state.profiles, events: events)
-        filter.authors = authors
-        
-        if !authors.isEmpty {
-            damus_state.pool.subscribe(sub_id: profiles_subid, filters: [filter], handler: handle_event)
-        }
-    }
-    
     func handle_event(relay_id: String, conn_ev: NostrConnectionEvent) {
         switch conn_ev {
         case .ws_event:
@@ -68,8 +58,6 @@ class SearchHomeModel: ObservableObject {
                     let _ = insert_uniq_sorted_event(events: &events, new_ev: ev) {
                         $0.created_at > $1.created_at
                     }
-                } else if ev.known_kind == .metadata {
-                    process_metadata_event(image_cache: damus_state.image_cache, profiles: damus_state.profiles, ev: ev)
                 }
             case .notice(let msg):
                 print("search home notice: \(msg)")
@@ -77,9 +65,7 @@ class SearchHomeModel: ObservableObject {
                 loading = false
                 
                 if sub_id == self.base_subid {
-                    load_profiles(relay_id: relay_id)
-                } else if sub_id == self.profiles_subid {
-                    damus_state.pool.unsubscribe(sub_id: self.profiles_subid)
+                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: events, damus_state: damus_state)
                 }
                 
                 break
@@ -115,3 +101,33 @@ func find_profiles_to_fetch(profiles: Profiles, events: [NostrEvent]) -> [String
     
     return Array(pubkeys)
 }
+
+func load_profiles(profiles_subid: String, relay_id: String, events: [NostrEvent], damus_state: DamusState) {
+    var filter = NostrFilter.filter_profiles
+    let authors = find_profiles_to_fetch(profiles: damus_state.profiles, events: events)
+    filter.authors = authors
+    
+    if !authors.isEmpty {
+        print("loading \(authors.count) profiles from \(relay_id)")
+        damus_state.pool.subscribe_to(sub_id: profiles_subid, filters: [filter], to: [relay_id]) { sub_id, conn_ev in
+            let (sid, done) = handle_subid_event(pool: damus_state.pool, relay_id: relay_id, ev: conn_ev) { sub_id, ev in
+                guard sub_id == profiles_subid else {
+                    return
+                }
+                
+                if ev.known_kind == .metadata {
+                    process_metadata_event(image_cache: damus_state.image_cache, profiles: damus_state.profiles, ev: ev)
+                }
+                
+            }
+            
+            guard done && sid == profiles_subid else {
+                return
+            }
+                
+            print("done loading \(authors.count) profiles from \(relay_id)")
+            damus_state.pool.unsubscribe(sub_id: profiles_subid, to: [relay_id])
+        }
+    }
+}
+

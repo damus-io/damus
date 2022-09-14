@@ -10,12 +10,13 @@ import SwiftUI
 struct ChatroomView: View {
     @EnvironmentObject var thread: ThreadModel
     @Environment(\.dismiss) var dismiss
+    @State var once: Bool = false
     let damus: DamusState
     
     var body: some View {
         ScrollViewReader { scroller in
             ScrollView(.vertical) {
-                LazyVStack(alignment: .leading) {
+                VStack(alignment: .leading) {
                     let count = thread.events.count
                     ForEach(Array(zip(thread.events, thread.events.indices)), id: \.0.id) { (ev, ind) in
                         ChatView(event: thread.events[ind],
@@ -46,6 +47,13 @@ struct ChatroomView: View {
                 }
                 scroll_to_event(scroller: scroller, id: ev.id, delay: 0, animate: true)
             }
+            .onChange(of: thread.loading) { _ in
+                guard !thread.loading && !once else {
+                    return
+                }
+                scroll_after_load(thread: thread, proxy: scroller)
+                once = true
+            }
             .onAppear() {
                 scroll_to_event(scroller: scroller, id: thread.initial_event.id, delay: 0.1, animate: false)
             }
@@ -66,7 +74,7 @@ struct ChatroomView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
         ChatroomView(damus: state)
-            .environmentObject(ThreadModel(evid: "&849ab9bb263ed2819db06e05f1a1a3b72878464e8c7146718a2fc1bf1912f893", pool: state.pool, privkey: state.keypair.privkey))
+            .environmentObject(ThreadModel(evid: "&849ab9bb263ed2819db06e05f1a1a3b72878464e8c7146718a2fc1bf1912f893", damus_state: state))
         
     }
 }

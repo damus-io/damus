@@ -140,6 +140,12 @@ extension Notification.Name {
 }
 
 extension Notification.Name {
+    static var chatroom_meta: Notification.Name {
+        return Notification.Name("chatroom_meta")
+    }
+}
+
+extension Notification.Name {
     static var unfollowed: Notification.Name {
         return Notification.Name("unfollowed")
     }

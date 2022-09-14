@@ -104,27 +104,28 @@ struct EventDetailView: View {
                 EndBlock()
             }
             .onChange(of: thread.loading) { val in
-                scroll_after_load(proxy)
+                scroll_after_load(thread: thread, proxy: proxy)
             }
             .onAppear() {
-                scroll_after_load(proxy)
+                scroll_after_load(thread: thread, proxy: proxy)
             }
         }
         .navigationBarTitle("Thread")
 
     }
     
-    func scroll_after_load(_ proxy: ScrollViewProxy) {
-        if !thread.loading {
-            let id = thread.initial_event.id
-            scroll_to_event(scroller: proxy, id: id, delay: 0.1, animate: false)
-        }
-    }
-
     func toggle_thread_view() {
         NotificationCenter.default.post(name: .toggle_thread_view, object: nil)
     }
 }
+
+func scroll_after_load(thread: ThreadModel, proxy: ScrollViewProxy) {
+    if !thread.loading {
+        let id = thread.initial_event.id
+        scroll_to_event(scroller: proxy, id: id, delay: 0.1, animate: false)
+    }
+}
+
 
 /*
 struct EventDetailView_Previews: PreviewProvider {

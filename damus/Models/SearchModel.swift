@@ -11,6 +11,8 @@ import Foundation
 class SearchModel: ObservableObject {
     @Published var events: [NostrEvent] = []
     @Published var loading: Bool = false
+    @Published var channel_name: String? = nil
+    
     let pool: RelayPool
     var search: NostrFilter
     let sub_id = UUID().description
@@ -50,10 +52,24 @@ class SearchModel: ObservableObject {
         }
     }
     
+    func handle_channel_create(_ ev: NostrEvent) {
+        self.channel_name = ev.content
+        return
+    }
+    
+    func handle_channel_meta(_ ev: NostrEvent) {
+        self.channel_name = ev.content
+        return
+    }
+    
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
-        let done = handle_subid_event(pool: pool, sub_id: sub_id, relay_id: relay_id, ev: ev) { ev in
-            if ev.known_kind == .text && ev.should_show_event {
+        let (_, done) = handle_subid_event(pool: pool, relay_id: relay_id, ev: ev) { sub_id, ev in
+            if ev.is_textlike && ev.should_show_event {
                 self.add_event(ev)
+            } else if ev.known_kind == .channel_create {
+                handle_channel_create(ev)
+            } else if ev.known_kind == .channel_meta {
+                handle_channel_meta(ev)
             }
         }
         
@@ -79,29 +95,26 @@ func event_matches_filter(_ ev: NostrEvent, filter: NostrFilter) -> Bool {
     return true
 }
 
-func handle_subid_event(pool: RelayPool, sub_id: String, relay_id: String, ev: NostrConnectionEvent, handle: (NostrEvent) -> ()) -> Bool {
+func handle_subid_event(pool: RelayPool, relay_id: String, ev: NostrConnectionEvent, handle: (String, NostrEvent) -> ()) -> (String?, Bool) {
     switch ev {
     case .ws_event:
-        break
+        return (nil, false)
+        
     case .nostr_event(let res):
         switch res {
         case .event(let ev_subid, let ev):
-            if ev_subid == sub_id {
-                handle(ev)
-            }
-            break
+            handle(ev_subid, ev)
+            return (ev_subid, false)
 
         case .notice(let note):
             if note.contains("Too many subscription filters") {
                 // TODO: resend filters?
                 pool.reconnect(to: [relay_id])
             }
-            break
+            return (nil, false)
             
-        case .eose:
-            return true
+        case .eose(let subid):
+            return (subid, true)
         }
     }
-    
-    return false
 }

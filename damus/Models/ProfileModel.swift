@@ -39,7 +39,8 @@ class ProfileModel: ObservableObject {
     
     func subscribe() {
         var text_filter = NostrFilter.filter_kinds([
-            NostrKind.text.rawValue
+            NostrKind.text.rawValue,
+            NostrKind.chat.rawValue,
         ])
         
         var profile_filter = NostrFilter.filter_kinds([
@@ -75,7 +76,7 @@ class ProfileModel: ObservableObject {
         if seen_event.contains(ev.id) {
             return
         }
-        if ev.known_kind == .text || ev.known_kind == .boost {
+        if ev.is_textlike || ev.known_kind == .boost {
             let _ = insert_uniq_sorted_event(events: &self.events, new_ev: ev, cmp: { $0.created_at > $1.created_at})
         } else if ev.known_kind == .contacts {
             handle_profile_contact_event(ev)

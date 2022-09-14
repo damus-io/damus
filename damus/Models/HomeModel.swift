@@ -34,6 +34,8 @@ class HomeModel: ObservableObject {
     var damus_state: DamusState
 
     var has_event: [String: Set<String>] = [:]
+    var deleted_events: Set<String> = Set()
+    var channels: [String: NostrEvent] = [:]
     var last_event_of_kind: [String: [Int: NostrEvent]] = [:]
     var done_init: Bool = false
 
@@ -100,8 +102,31 @@ class HomeModel: ObservableObject {
         case .dm:
             handle_dm(ev)
         case .delete:
-            break
+            handle_delete_event(ev)
+        case .channel_create:
+            handle_channel_create(ev)
+        case .channel_meta:
+            handle_channel_meta(ev)
         }
+    }
+    
+    func handle_channel_create(_ ev: NostrEvent) {
+        guard ev.is_valid else {
+            return
+        }
+        
+        self.channels[ev.id] = ev
+    }
+    
+    func handle_channel_meta(_ ev: NostrEvent) {
+    }
+    
+    func handle_delete_event(_ ev: NostrEvent) {
+        guard ev.is_valid else {
+            return
+        }
+        
+        self.deleted_events.insert(ev.id)
     }
 
     func handle_contact_event(sub_id: String, relay_id: String, ev: NostrEvent) {
@@ -119,11 +144,14 @@ class HomeModel: ObservableObject {
     func handle_boost_event(sub_id: String, _ ev: NostrEvent) {
         var boost_ev_id = ev.last_refid()?.ref_id
 
-        // CHECK SIGS ON THESE
         if let inner_ev = ev.inner_event {
             boost_ev_id = inner_ev.id
+            
+            guard inner_ev.is_valid else {
+                return
+            }
 
-            if inner_ev.kind == 1 {
+            if inner_ev.is_textlike {
                 handle_text_event(sub_id: sub_id, ev)
             }
         }
@@ -259,6 +287,7 @@ class HomeModel: ObservableObject {
         // TODO: separate likes?
         var home_filter = NostrFilter.filter_kinds([
             NostrKind.text.rawValue,
+            NostrKind.chat.rawValue,
             NostrKind.like.rawValue,
             NostrKind.boost.rawValue,
         ])
@@ -268,6 +297,7 @@ class HomeModel: ObservableObject {
 
         var notifications_filter = NostrFilter.filter_kinds([
             NostrKind.text.rawValue,
+            NostrKind.chat.rawValue,
             NostrKind.like.rawValue,
             NostrKind.boost.rawValue,
         ])

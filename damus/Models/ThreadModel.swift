@@ -30,13 +30,13 @@ enum InitialEvent {
 
 /// manages the lifetime of a thread
 class ThreadModel: ObservableObject {
-    let privkey: String?
     let kind: Int
+    
     @Published var initial_event: InitialEvent
     @Published var events: [NostrEvent] = []
     @Published var event_map: [String: Int] = [:]
     @Published var loading: Bool = false
-    
+
     var replies: ReplyMap = ReplyMap()
     
     var event: NostrEvent? {
@@ -53,33 +53,32 @@ class ThreadModel: ObservableObject {
         }
     }
     
-    let pool: RelayPool
-    var sub_id = UUID().description
+    let damus_state: DamusState
+    
+    let profiles_subid = UUID().description
+    var base_subid = UUID().description
    
-    init(evid: String, pool: RelayPool, privkey: String?) {
-        self.pool = pool
+    init(evid: String, damus_state: DamusState) {
+        self.damus_state = damus_state
         self.initial_event = .event_id(evid)
-        self.privkey = privkey
         self.kind = NostrKind.text.rawValue
     }
     
-    init(event: NostrEvent, pool: RelayPool, privkey: String?) {
-        self.pool = pool
+    init(event: NostrEvent, damus_state: DamusState) {
+        self.damus_state = damus_state
         self.initial_event = .event(event)
-        self.privkey = privkey
         self.kind = NostrKind.text.rawValue
     }
     
-    init(event: NostrEvent, pool: RelayPool, privkey: String?, kind: Int) {
-        self.pool = pool
+    init(event: NostrEvent, damus_state: DamusState, kind: Int) {
+        self.damus_state = damus_state
         self.initial_event = .event(event)
-        self.privkey = privkey
         self.kind = kind
     }
     
     func unsubscribe() {
-        self.pool.unsubscribe(sub_id: sub_id)
-        print("unsubscribing from thread \(initial_event.id) with sub_id \(sub_id)")
+        self.damus_state.pool.unsubscribe(sub_id: base_subid)
+        print("unsubscribing from thread \(initial_event.id) with sub_id \(base_subid)")
     }
     
     func reset_events() {
@@ -125,19 +124,23 @@ class ThreadModel: ObservableObject {
         case .event(let ev):
             ref_events.referenced_ids = ev.referenced_ids.map { $0.ref_id }
             ref_events.referenced_ids?.append(ev.id)
+            ref_events.limit = 50
             events_filter.ids = ref_events.referenced_ids!
+            events_filter.limit = 100
             events_filter.ids?.append(ev.id)
         case .event_id(let evid):
             events_filter.ids = [evid]
+            events_filter.limit = 100
             ref_events.referenced_ids = [evid]
+            ref_events.limit = 50
         }
 
         //likes_filter.ids = ref_events.referenced_ids!
 
-        print("subscribing to thread \(initial_event.id) with sub_id \(sub_id)")
-        pool.register_handler(sub_id: sub_id, handler: handle_event)
+        print("subscribing to thread \(initial_event.id) with sub_id \(base_subid)")
+        damus_state.pool.register_handler(sub_id: base_subid, handler: handle_event)
         loading = true
-        pool.send(.subscribe(.init(filters: [ref_events, events_filter], sub_id: sub_id)))
+        damus_state.pool.send(.subscribe(.init(filters: [ref_events, events_filter], sub_id: base_subid)))
     }
     
     func lookup(_ event_id: String) -> NostrEvent? {
@@ -180,18 +183,41 @@ class ThreadModel: ObservableObject {
         }
         
     }
-
+    
+    func handle_channel_meta(_ ev: NostrEvent) {
+        guard let meta: ChatroomMetadata = decode_json(ev.content) else {
+            return
+        }
+        
+        notify(.chatroom_meta, meta)
+    }
+    
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
-        let done = handle_subid_event(pool: pool, sub_id: sub_id, relay_id: relay_id, ev: ev) { ev in
-            if ev.is_textlike {
-                self.add_event(ev, privkey: self.privkey)
+        
+        let (sub_id, done) = handle_subid_event(pool: damus_state.pool, relay_id: relay_id, ev: ev) { sid, ev in
+            guard sid == base_subid || sid == profiles_subid else {
+                return
+            }
+            
+            if ev.known_kind == .metadata {
+                process_metadata_event(image_cache: damus_state.image_cache, profiles: damus_state.profiles, ev: ev)
+            } else if ev.is_textlike {
+                self.add_event(ev, privkey: self.damus_state.keypair.privkey)
+            } else if ev.known_kind == .channel_meta || ev.known_kind == .channel_create {
+                handle_channel_meta(ev)
             }
         }
         
-        if done {
-            if (events.contains { ev in ev.id == initial_event.id }) {
-                loading = false
-            }
+        guard done && (sub_id == base_subid || sub_id == profiles_subid) else {
+            return
+        }
+        
+        if (events.contains { ev in ev.id == initial_event.id }) {
+            loading = false
+        }
+        
+        if sub_id == self.base_subid {
+            load_profiles(profiles_subid: self.profiles_subid, relay_id: relay_id, events: events, damus_state: damus_state)
         }
     }
 
