@@ -7,10 +7,18 @@
 
 import SwiftUI
 
+enum Search {
+    case profiles([(String, Profile)])
+    case hashtag(String)
+    case profile(String)
+    case note(String)
+    case hex(String)
+}
+
 struct SearchResultsView: View {
     let damus_state: DamusState
     @Binding var search: String
-    @State var results: [(String, Profile)] = []
+    @State var result: Search? = nil
     
     func ProfileSearchResult(pk: String, res: Profile) -> some View {
         FollowUserView(target: .pubkey(pk), damus_state: damus_state)
@@ -18,17 +26,90 @@ struct SearchResultsView: View {
     
     var MainContent: some View {
         ScrollView {
-            LazyVStack {
-                ForEach(results, id: \.0) { prof in
-                    ProfileSearchResult(pk: prof.0, res: prof.1)
+            Group {
+                switch result {
+                case .profiles(let results):
+                    LazyVStack {
+                        ForEach(results, id: \.0) { prof in
+                            ProfileSearchResult(pk: prof.0, res: prof.1)
+                        }
+                    }
+                case .hashtag(let ht):
+                    let search_model = SearchModel(pool: damus_state.pool, search: .filter_hashtag([ht]))
+                    let dst = SearchView(appstate: damus_state, search: search_model)
+                    NavigationLink(destination: dst) {
+                        Text("Search hashtag: #\(ht)")
+                    }
+                case .profile(let prof):
+                    let decoded = try? bech32_decode(prof)
+                    let hex = hex_encode(decoded!.data)
+                    let prof_model = ProfileModel(pubkey: hex, damus: damus_state)
+                    let f = FollowersModel(damus_state: damus_state, target: prof)
+                    let dst = ProfileView(damus_state: damus_state, profile: prof_model, followers: f)
+                    NavigationLink(destination: dst) {
+                        Text("Goto profile \(prof)")
+                    }
+                case .hex(let h):
+                    let prof_model = ProfileModel(pubkey: h, damus: damus_state)
+                    let f = FollowersModel(damus_state: damus_state, target: h)
+                    let prof_view = ProfileView(damus_state: damus_state, profile: prof_model, followers: f)
+                    let thread_model = ThreadModel(evid: h, damus_state: damus_state)
+                    let ev_view = ThreadView(thread: thread_model, damus: damus_state, is_chatroom: false)
+                    VStack(spacing: 50) {
+                        NavigationLink(destination: prof_view) {
+                            Text("Goto profile \(h)")
+                        }
+                        NavigationLink(destination: ev_view) {
+                            Text("Goto post \(h)")
+                        }
+                    }
+                case .note(let nid):
+                    let decoded = try? bech32_decode(nid)
+                    let hex = hex_encode(decoded!.data)
+                    let thread_model = ThreadModel(evid: hex, damus_state: damus_state)
+                    let ev_view = ThreadView(thread: thread_model, damus: damus_state, is_chatroom: false)
+                    NavigationLink(destination: ev_view) {
+                        Text("Goto post \(nid)")
+                    }
+                case .none:
+                    Text("none")
                 }
             }
         }
     }
     
     func search_changed(_ new: String) {
+        guard new.count != 0 else {
+            return
+        }
+        
+        if new.first! == "#" {
+            let ht = String(new.dropFirst())
+            self.result = .hashtag(ht)
+            return
+        }
+        
+        if let _ = hex_decode(new), new.count == 64 {
+            self.result = .hex(new)
+            return
+        }
+        
+        if new.starts(with: "npub") {
+            if let _ = try? bech32_decode(new) {
+                self.result = .profile(new)
+                return
+            }
+        }
+        
+        if new.starts(with: "note") {
+            if let _ = try? bech32_decode(new) {
+                self.result = .note(new)
+                return
+            }
+        }
+        
         let profs = damus_state.profiles.profiles.enumerated()
-        self.results = profs.reduce(into: []) { acc, els in
+        let results: [(String, Profile)] = profs.reduce(into: []) { acc, els in
             let pk = els.element.key
             let prof = els.element.value.profile
             let lowname = prof.name.map { $0.lowercased() }
@@ -43,6 +124,7 @@ struct SearchResultsView: View {
             }
         }
             
+        self.result = .profiles(results)
     }
     
     var body: some View {

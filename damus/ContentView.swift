@@ -73,23 +73,17 @@ struct ContentView: View {
     let sub_id = UUID().description
     
     var LoadingContainer: some View {
-        VStack {
-            HStack(alignment: .center) {
-                Spacer()
-        
-                if home.signal.signal != home.signal.max_signal {
-                    Text("\(home.signal.signal)/\(home.signal.max_signal)")
-                        .font(.callout)
-                        .foregroundColor(.gray)
-                }
-                
-                NavigationLink(destination: ConfigView(state: damus_state!)) {
-                    Label("", systemImage: "gear")
-                }
-                .buttonStyle(PlainButtonStyle())
+        HStack(alignment: .center) {
+            if home.signal.signal != home.signal.max_signal {
+                Text("\(home.signal.signal)/\(home.signal.max_signal)")
+                    .font(.callout)
+                    .foregroundColor(.gray)
             }
-
-            Spacer()
+            
+            NavigationLink(destination: ConfigView(state: damus_state!)) {
+                Label("", systemImage: "gear")
+            }
+            .buttonStyle(PlainButtonStyle())
         }
     }
 

@@ -30,8 +30,6 @@ enum InitialEvent {
 
 /// manages the lifetime of a thread
 class ThreadModel: ObservableObject {
-    let kind: Int
-    
     @Published var initial_event: InitialEvent
     @Published var events: [NostrEvent] = []
     @Published var event_map: [String: Int] = [:]
@@ -61,19 +59,11 @@ class ThreadModel: ObservableObject {
     init(evid: String, damus_state: DamusState) {
         self.damus_state = damus_state
         self.initial_event = .event_id(evid)
-        self.kind = NostrKind.text.rawValue
     }
     
     init(event: NostrEvent, damus_state: DamusState) {
         self.damus_state = damus_state
         self.initial_event = .event(event)
-        self.kind = NostrKind.text.rawValue
-    }
-    
-    init(event: NostrEvent, damus_state: DamusState, kind: Int) {
-        self.damus_state = damus_state
-        self.initial_event = .event(event)
-        self.kind = kind
     }
     
     func unsubscribe() {
@@ -129,10 +119,10 @@ class ThreadModel: ObservableObject {
             events_filter.limit = 100
             events_filter.ids?.append(ev.id)
         case .event_id(let evid):
-            events_filter.ids = [evid]
-            events_filter.limit = 100
             ref_events.referenced_ids = [evid]
             ref_events.limit = 50
+            events_filter.ids = [evid]
+            events_filter.limit = 100
         }
 
         //likes_filter.ids = ref_events.referenced_ids!
