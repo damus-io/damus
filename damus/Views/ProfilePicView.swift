@@ -67,6 +67,7 @@ struct ProfilePicView: View {
                 .scaleFactor(UIScreen.main.scale)
                 .loadDiskFileSynchronously()
                 .fade(duration: 0.1)
+                .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
         }
     }
     

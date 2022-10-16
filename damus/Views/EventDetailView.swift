@@ -60,7 +60,7 @@ struct EventDetailView: View {
             switch cev {
             case .collapsed(let c):
                 Text("··· \(c.count) other notes ···")
-                    .padding([.top,.bottom], 10)
+                    .padding([.top,.bottom], 8)
                     .font(.footnote)
                     .foregroundColor(.gray)
                     .onTapGesture {
