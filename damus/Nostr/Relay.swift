@@ -19,10 +19,31 @@ struct RelayDescriptor: Codable {
     let info: RelayInfo
 }
 
-struct Relay: Identifiable {
+enum RelayFlags: Int {
+    case none = 0
+    case broken = 1
+}
+
+class Relay: Identifiable {
     let descriptor: RelayDescriptor
     let connection: RelayConnection
-
+    
+    var flags: Int
+    
+    init(descriptor: RelayDescriptor, connection: RelayConnection) {
+        self.flags = 0
+        self.descriptor = descriptor
+        self.connection = connection
+    }
+    
+    func mark_broken() {
+        flags |= RelayFlags.broken.rawValue
+    }
+    
+    var is_broken: Bool {
+        return (flags & RelayFlags.broken.rawValue) == RelayFlags.broken.rawValue
+    }
+    
     var id: String {
         return get_relay_id(descriptor.url)
     }

@@ -80,16 +80,26 @@ class RelayPool {
     /// This is used to retry dead connections
     func connect_to_disconnected() {
         for relay in relays {
-            if !relay.connection.isConnected && !relay.connection.isConnecting {
-                relay.connection.connect()
+            let c = relay.connection
+            if relay.is_broken || c.isReconnecting || c.isConnecting || c.isConnected {
+                continue
             }
+            
+            relay.connection.reconnect()
         }
     }
     
     func reconnect(to: [String]? = nil) {
         let relays = to.map{ get_relays($0) } ?? self.relays
         for relay in relays {
+            // don't try to reconnect to broken relays
             relay.connection.reconnect()
+        }
+    }
+    
+    func mark_broken(_ relay_id: String) {
+        for relay in relays {
+            relay.mark_broken()
         }
     }
 
