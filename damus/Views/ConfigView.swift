@@ -15,25 +15,6 @@ struct ConfigView: View {
     @State var confirm_logout: Bool = false
     @State var new_relay: String = ""
     
-    func Relay(_ ev: NostrEvent, relay: String) -> some View {
-        return Text(relay)
-            .swipeActions {
-                if let privkey = state.keypair.privkey {
-                    Button {
-                        guard let new_ev = remove_relay( ev: ev, privkey: privkey, relay: relay) else {
-                            return
-                        }
-                        
-                        state.contacts.event = new_ev
-                        state.pool.send(.event(new_ev))
-                    } label: {
-                        Label("Delete", systemImage: "trash")
-                    }
-                    .tint(.red)
-                }
-            }
-    }
-    
     var body: some View {
         ZStack(alignment: .leading) {
             Form {
@@ -41,7 +22,7 @@ struct ConfigView: View {
                     Section("Relays") {
                         if let relays = decode_json_relays(ev.content) {
                             List(Array(relays.keys.sorted()), id: \.self) { relay in
-                                Relay(ev, relay: relay)
+                                RelayView(state: state, ev: ev, relay: relay)
                             }
                         }
                         
