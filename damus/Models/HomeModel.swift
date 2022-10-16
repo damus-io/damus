@@ -321,7 +321,7 @@ class HomeModel: ObservableObject {
     }
 
     func handle_metadata_event(_ ev: NostrEvent) {
-        process_metadata_event(image_cache: damus_state.image_cache, profiles: damus_state.profiles, ev: ev)
+        process_metadata_event(profiles: damus_state.profiles, ev: ev)
     }
 
     func get_last_event_of_kind(relay_id: String, kind: Int) -> NostrEvent? {
@@ -510,7 +510,7 @@ func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
     print("-----")
 }
 
-func process_metadata_event(image_cache: ImageCache, profiles: Profiles, ev: NostrEvent) {
+func process_metadata_event(profiles: Profiles, ev: NostrEvent) {
     guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
         return
     }
@@ -527,14 +527,9 @@ func process_metadata_event(image_cache: ImageCache, profiles: Profiles, ev: Nos
     
     // load pfps asap
     let picture = tprof.profile.picture ?? robohash(ev.pubkey)
-    if let url = URL(string: picture) {
-        Task<UIImage?, Never>.init(priority: .background) {
-            let pfp_key = pfp_cache_key(url: url)
-            let res = await image_cache.lookup_or_load_image(key: pfp_key, url: url)
-            DispatchQueue.main.async {
-                notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-            }
-            return res
+    if let _ = URL(string: picture) {
+        DispatchQueue.main.async {
+            notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
         }
     }
     

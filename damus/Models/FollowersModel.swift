@@ -79,7 +79,7 @@ class FollowersModel: ObservableObject {
                 if ev.known_kind == .contacts {
                     handle_contact_event(ev)
                 } else if ev.known_kind == .metadata {
-                    process_metadata_event(image_cache: damus_state.image_cache, profiles: damus_state.profiles, ev: ev)
+                    process_metadata_event(profiles: damus_state.profiles, ev: ev)
                 }
                 
             case .notice(let msg):

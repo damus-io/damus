@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Starscream
+//import Kingfisher
 
 let BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
@@ -204,6 +205,7 @@ struct ContentView: View {
         }
         .onAppear() {
             self.connect()
+            //KingfisherManager.shared.cache.clearDiskCache()
             setup_notifications()
         }
         .sheet(item: $active_sheet) { item in
@@ -371,7 +373,6 @@ struct ContentView: View {
                                 boosts: EventCounter(our_pubkey: pubkey),
                                 contacts: Contacts(),
                                 tips: TipCounter(our_pubkey: pubkey),
-                                image_cache: ImageCache(),
                                 profiles: Profiles(),
                                 dms: home.dms
         )

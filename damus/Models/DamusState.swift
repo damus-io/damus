@@ -14,7 +14,6 @@ struct DamusState {
     let boosts: EventCounter
     let contacts: Contacts
     let tips: TipCounter
-    let image_cache: ImageCache
     let profiles: Profiles
     let dms: DirectMessagesModel
     
@@ -23,6 +22,6 @@ struct DamusState {
     }
     
     static var empty: DamusState {
-        return DamusState.init(pool: RelayPool(), keypair: Keypair(pubkey: "", privkey: ""), likes: EventCounter(our_pubkey: ""), boosts: EventCounter(our_pubkey: ""), contacts: Contacts(), tips: TipCounter(our_pubkey: ""), image_cache: ImageCache(), profiles: Profiles(), dms: DirectMessagesModel())
+        return DamusState.init(pool: RelayPool(), keypair: Keypair(pubkey: "", privkey: ""), likes: EventCounter(our_pubkey: ""), boosts: EventCounter(our_pubkey: ""), contacts: Contacts(), tips: TipCounter(our_pubkey: ""), profiles: Profiles(), dms: DirectMessagesModel())
     }
 }

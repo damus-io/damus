@@ -26,7 +26,6 @@
 		4C285C8C28398BC7008A31F1 /* Keys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C285C8B28398BC6008A31F1 /* Keys.swift */; };
 		4C285C8E28399BFE008A31F1 /* SaveKeysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C285C8D28399BFD008A31F1 /* SaveKeysView.swift */; };
 		4C363A8428233689006E126D /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8328233689006E126D /* Parser.swift */; };
-		4C363A8628234FDE006E126D /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8528234FDE006E126D /* ImageCache.swift */; };
 		4C363A8828236948006E126D /* BlocksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8728236948006E126D /* BlocksView.swift */; };
 		4C363A8A28236B57006E126D /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8928236B57006E126D /* MentionView.swift */; };
 		4C363A8C28236B92006E126D /* PubkeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8B28236B92006E126D /* PubkeyView.swift */; };
@@ -146,7 +145,6 @@
 		4C285C8B28398BC6008A31F1 /* Keys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keys.swift; sourceTree = "<group>"; };
 		4C285C8D28399BFD008A31F1 /* SaveKeysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveKeysView.swift; sourceTree = "<group>"; };
 		4C363A8328233689006E126D /* Parser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
-		4C363A8528234FDE006E126D /* ImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
 		4C363A8728236948006E126D /* BlocksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlocksView.swift; sourceTree = "<group>"; };
 		4C363A8928236B57006E126D /* MentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MentionView.swift; sourceTree = "<group>"; };
 		4C363A8B28236B92006E126D /* PubkeyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PubkeyView.swift; sourceTree = "<group>"; };
@@ -366,7 +364,6 @@
 				4CEE2AF4280B29E600AB5EEF /* TimeAgo.swift */,
 				4CE4F8CC281352B30009DFBB /* Notifications.swift */,
 				4C363A8328233689006E126D /* Parser.swift */,
-				4C363A8528234FDE006E126D /* ImageCache.swift */,
 				4C363AA728297703006E126D /* InsertSort.swift */,
 				4C477C9D282C3A4800033AA3 /* TipCounter.swift */,
 				4C285C8B28398BC6008A31F1 /* Keys.swift */,
@@ -610,7 +607,6 @@
 				4C285C86283892E7008A31F1 /* CreateAccountModel.swift in Sources */,
 				4C64987C286D03E000EAE2B3 /* DirectMessagesView.swift in Sources */,
 				4C363A8C28236B92006E126D /* PubkeyView.swift in Sources */,
-				4C363A8628234FDE006E126D /* ImageCache.swift in Sources */,
 				4C5C7E68284ED36500A22DF5 /* SearchHomeModel.swift in Sources */,
 				4C75EFB728049D990006080F /* RelayPool.swift in Sources */,
 				4CE6DEE927F7A08100C66700 /* ContentView.swift in Sources */,

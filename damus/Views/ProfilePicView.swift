@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 let PFP_SIZE: CGFloat = 52.0
 
@@ -35,11 +36,9 @@ struct ProfilePicView: View {
     let pubkey: String
     let size: CGFloat
     let highlight: Highlight
-    let image_cache: ImageCache
     let profiles: Profiles
     
     @State var picture: String? = nil
-    @State var img: Image? = nil
     
     var PlaceholderColor: Color {
         return id_to_color(pubkey)
@@ -55,34 +54,24 @@ struct ProfilePicView: View {
     
     var MainContent: some View {
         Group {
-            if let img = self.img {
-                img
-                    .resizable()
-                    .frame(width: size, height: size)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
-                    .padding(2)
-            } else {
-                Placeholder
-            }
+            let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
+            let url = URL(string: pic)
+            let processor = /*DownsamplingImageProcessor(size: CGSize(width: size, height: size))
+                         |>*/ ResizingImageProcessor(referenceSize: CGSize(width: size, height: size))
+                         |> RoundCornerImageProcessor(cornerRadius: 20)
+            KFImage.url(url)
+                .placeholder { _ in
+                    Placeholder
+                }
+                .setProcessor(processor)
+                .scaleFactor(UIScreen.main.scale)
+                .loadDiskFileSynchronously()
+                .fade(duration: 0.1)
         }
     }
     
     var body: some View {
         MainContent
-            .task {
-                let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
-                guard let url = URL(string: pic) else {
-                    return
-                }
-                let pfp_key = pfp_cache_key(url: url)
-                let ui_img = await image_cache.lookup_or_load_image(key: pfp_key, url: url)
-                
-                if let ui_img = ui_img {
-                    self.img = Image(uiImage: ui_img)
-                    return
-                }
-            }
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let updated = notif.object as! ProfileUpdate
 
@@ -91,12 +80,7 @@ struct ProfilePicView: View {
                 }
                 
                 if let pic = updated.profile.picture {
-                    if let url = URL(string: pic) {
-                        let pfp_key = pfp_cache_key(url: url)
-                        if let ui_img = image_cache.lookup_sync(key: pfp_key) {
-                            self.img = Image(uiImage: ui_img)
-                        }
-                    }
+                    self.picture = pic
                 }
             }
     }
@@ -119,7 +103,6 @@ struct ProfilePicView_Previews: PreviewProvider {
             pubkey: pubkey,
             size: 100,
             highlight: .none,
-            image_cache: ImageCache(),
             profiles: make_preview_profiles(pubkey))
     }
 }

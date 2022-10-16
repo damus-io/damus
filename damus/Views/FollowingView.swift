@@ -18,7 +18,7 @@ struct FollowUserView: View {
             let pv = ProfileView(damus_state: damus_state, profile: pmodel, followers: followers)
             
             NavigationLink(destination: pv) {
-                ProfilePicView(pubkey: target.pubkey, size: PFP_SIZE, highlight: .none, image_cache: damus_state.image_cache, profiles: damus_state.profiles)
+                ProfilePicView(pubkey: target.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
             
                 VStack(alignment: .leading) {
                     let profile = damus_state.profiles.lookup(id: target.pubkey)
