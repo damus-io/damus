@@ -68,7 +68,7 @@ struct ContentView: View {
     @StateObject var home: HomeModel = HomeModel()
     
     // connect retry timer
-    let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
+    let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
 
     let sub_id = UUID().description
     
@@ -329,6 +329,7 @@ struct ContentView: View {
         }
         .onReceive(timer) { n in
             self.damus_state?.pool.connect_to_disconnected()
+            update_signal_from_pool(signal: self.home.signal, pool: self.damus_state!.pool)
         }
     }
     

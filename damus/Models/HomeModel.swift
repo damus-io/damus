@@ -190,15 +190,6 @@ class HomeModel: ObservableObject {
     func handle_event(relay_id: String, conn_event: NostrConnectionEvent) {
         switch conn_event {
         case .ws_event(let ev):
-
-            /*
-            if let wsev = ws_nostr_event(relay: relay_id, ev: ev) {
-                wsev.flags |= 1
-                self.events.insert(wsev, at: 0)
-            }
-             */
-
-
             switch ev {
             case .connected:
                 if !done_init {
@@ -223,8 +214,6 @@ class HomeModel: ObservableObject {
             default:
                 break
             }
-
-            update_signal_from_pool(signal: self.signal, pool: self.pool)
 
             print("ws_event \(ev)")
 
@@ -603,3 +592,4 @@ func remove_bootstrap_nodes(_ damus_state: DamusState) {
         }
     }
 }
+
