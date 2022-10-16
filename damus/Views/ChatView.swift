@@ -106,7 +106,7 @@ struct ChatView: View {
                         }
                     }
                     
-                    NoteContentView(privkey: damus_state.keypair.privkey, event: event, profiles: damus_state.profiles, content: event.content)
+                    NoteContentView(privkey: damus_state.keypair.privkey, event: event, profiles: damus_state.profiles, show_images: true, content: event.content)
 
                     if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
                         let bar = make_actionbar_model(ev: event, damus: damus_state)

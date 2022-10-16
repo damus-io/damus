@@ -56,9 +56,8 @@ struct ProfilePicView: View {
         Group {
             let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
             let url = URL(string: pic)
-            let processor = /*DownsamplingImageProcessor(size: CGSize(width: size, height: size))
-                         |>*/ ResizingImageProcessor(referenceSize: CGSize(width: size, height: size))
-                         |> RoundCornerImageProcessor(cornerRadius: 20)
+            let processor = ResizingImageProcessor(referenceSize: CGSize(width: size, height: size))
+            
             KFImage.url(url)
                 .placeholder { _ in
                     Placeholder
@@ -67,6 +66,7 @@ struct ProfilePicView: View {
                 .scaleFactor(UIScreen.main.scale)
                 .loadDiskFileSynchronously()
                 .fade(duration: 0.1)
+                .clipShape(Circle())
                 .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
         }
     }

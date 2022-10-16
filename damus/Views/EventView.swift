@@ -129,9 +129,8 @@ struct EventView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, content: content)
+                NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, show_images: true, content: content)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .textSelection(.enabled)
 
                 if has_action_bar {
                     let bar = make_actionbar_model(ev: event, damus: damus)
@@ -146,7 +145,7 @@ struct EventView: View {
         .contentShape(Rectangle())
         .background(event_validity_color(event.validity))
         .id(event.id)
-        .frame(minHeight: PFP_SIZE)
+        .frame(maxWidth: .infinity, minHeight: PFP_SIZE)
         .padding([.bottom], 4)
         .event_context_menu(event, privkey: damus.keypair.privkey)
     }
@@ -269,3 +268,8 @@ func make_actionbar_model(ev: NostrEvent, damus: DamusState) -> ActionBarModel {
 }
 
 
+struct EventView_Previews: PreviewProvider {
+    static var previews: some View {
+        EventView(damus: test_damus_state(), event: NostrEvent(content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool", pubkey: "pk"), show_friend_icon: true)
+    }
+}

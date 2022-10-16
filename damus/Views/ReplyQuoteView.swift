@@ -31,7 +31,7 @@ struct ReplyQuoteView: View {
                         .foregroundColor(.gray)
                 }
                 
-                NoteContentView(privkey: privkey, event: event, profiles: profiles, content: event.content)
+                NoteContentView(privkey: privkey, event: event, profiles: profiles, show_images: false, content: event.content)
                     .font(.callout)
                     .foregroundColor(.accentColor)
                 

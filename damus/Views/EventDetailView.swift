@@ -127,13 +127,13 @@ func scroll_after_load(thread: ThreadModel, proxy: ScrollViewProxy) {
 }
 
 
-/*
 struct EventDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        EventDetailView(event: NostrEvent(content: "Hello", pubkey: "Guy"), profile: nil)
+        let state = test_damus_state()
+        let tm = ThreadModel(evid: "4da698ceac09a16cdb439276fa3d13ef8f6620ffb45d11b76b3f103483c2d0b0", damus_state: state)
+        EventDetailView(damus: state, thread: tm)
     }
 }
- */
 
 /// Find the entire reply path for the active event
 func make_reply_map(active: NostrEvent, events: [NostrEvent], privkey: String?) -> [String: ()]

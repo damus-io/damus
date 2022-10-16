@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4C06670128FC7C5900038D2A /* RelayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670028FC7C5900038D2A /* RelayView.swift */; };
 		4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 4C06670328FC7EC500038D2A /* Kingfisher */; };
+		4C06670628FCB08600038D2A /* ImageCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670528FCB08600038D2A /* ImageCarousel.swift */; };
 		4C0A3F8C280F5FCA000448DE /* ChatroomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F8B280F5FCA000448DE /* ChatroomView.swift */; };
 		4C0A3F8F280F640A000448DE /* ThreadModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F8E280F640A000448DE /* ThreadModel.swift */; };
 		4C0A3F91280F6528000448DE /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F90280F6528000448DE /* ChatView.swift */; };
@@ -128,6 +129,7 @@
 
 /* Begin PBXFileReference section */
 		4C06670028FC7C5900038D2A /* RelayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayView.swift; sourceTree = "<group>"; };
+		4C06670528FCB08600038D2A /* ImageCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCarousel.swift; sourceTree = "<group>"; };
 		4C0A3F8B280F5FCA000448DE /* ChatroomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatroomView.swift; sourceTree = "<group>"; };
 		4C0A3F8E280F640A000448DE /* ThreadModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadModel.swift; sourceTree = "<group>"; };
 		4C0A3F90280F6528000448DE /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
@@ -378,6 +380,7 @@
 			children = (
 				4CE4F9E0285287B800C00DD9 /* TextFieldAlert.swift */,
 				4CD7641A28A1641400B6928F /* EndBlock.swift */,
+				4C06670528FCB08600038D2A /* ImageCarousel.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -654,6 +657,7 @@
 				4C216F32286E388800040376 /* DMChatView.swift in Sources */,
 				4C64987E286D082C00EAE2B3 /* DirectMessagesModel.swift in Sources */,
 				4C363A8828236948006E126D /* BlocksView.swift in Sources */,
+				4C06670628FCB08600038D2A /* ImageCarousel.swift in Sources */,
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
 				4C363A9C282838B9006E126D /* EventRef.swift in Sources */,
 				4CD7641B28A1641400B6928F /* EndBlock.swift in Sources */,

@@ -7,7 +7,7 @@
 
 import SwiftUI
 import Starscream
-//import Kingfisher
+import Kingfisher
 
 let BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",

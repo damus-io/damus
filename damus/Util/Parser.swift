@@ -55,6 +55,15 @@ func parse_str(_ p: Parser, _ s: String) -> Bool {
     return false
 }
 
+func peek_char(_ p: Parser, _ i: Int) -> Character? {
+    let offset = p.pos + i
+    if offset < 0 || offset > p.str.count {
+        return nil
+    }
+    let ind = p.str.index(p.str.startIndex, offsetBy: offset)
+    return p.str[ind]
+}
+
 func parse_char(_ p: Parser, _ c: Character) -> Bool {
     if p.pos >= p.str.count {
         return false

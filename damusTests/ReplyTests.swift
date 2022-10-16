@@ -31,8 +31,8 @@ class ReplyTests: XCTestCase {
         XCTAssertNil(ref.is_reply)
         XCTAssertNil(ref.is_thread_id)
         XCTAssertNil(ref.is_direct_reply)
-        XCTAssertEqual(ref.is_mention!.type, .event)
-        XCTAssertEqual(ref.is_mention!.ref.ref_id, "event_id")
+        XCTAssertEqual(ref.is_mention?.type, .event)
+        XCTAssertEqual(ref.is_mention?.ref.ref_id, "event_id")
     }
     
     func testUrlAnchorsAreNotHashtags() {
@@ -96,11 +96,11 @@ class ReplyTests: XCTestCase {
         XCTAssertNotNil(event_refs[0].is_thread_id)
         XCTAssertNotNil(event_refs[0].is_reply)
         XCTAssertNotNil(event_refs[0].is_direct_reply)
-        XCTAssertEqual(event_refs[0].is_reply!.ref_id, "thread_id")
-        XCTAssertEqual(event_refs[0].is_thread_id!.ref_id, "thread_id")
+        XCTAssertEqual(event_refs[0].is_reply?.ref_id, "thread_id")
+        XCTAssertEqual(event_refs[0].is_thread_id?.ref_id, "thread_id")
         XCTAssertNotNil(event_refs[1].is_mention)
-        XCTAssertEqual(event_refs[1].is_mention!.type, .event)
-        XCTAssertEqual(event_refs[1].is_mention!.ref.ref_id, "mentioned_id")
+        XCTAssertEqual(event_refs[1].is_mention?.type, .event)
+        XCTAssertEqual(event_refs[1].is_mention?.ref.ref_id, "mentioned_id")
     }
     
     func testEmptyMention() throws {

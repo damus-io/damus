@@ -37,11 +37,20 @@ enum Block {
     case text(String)
     case mention(Mention)
     case hashtag(String)
+    case url(URL)
     
     var is_hashtag: String? {
         if case .hashtag(let htag) = self {
             return htag
         }
+        return nil
+    }
+    
+    var is_url: URL? {
+        if case .url(let url) = self {
+            return url
+        }
+        
         return nil
     }
     
@@ -69,6 +78,8 @@ func render_blocks(blocks: [Block]) -> String {
             return str + txt
         case .hashtag(let htag):
             return str + "#" + htag
+        case .url(let url):
+            return str + url.absoluteString
         }
     }
 }
@@ -83,21 +94,43 @@ func parse_mentions(content: String, tags: [[String]]) -> [Block] {
     var starting_from: Int = 0
     
     while p.pos < content.count {
-        if !consume_until(p, match: { $0 == "#" }) {
+        if !consume_until(p, match: { !$0.isWhitespace}) {
             break
         }
         
         let pre_mention = p.pos
-        if let mention = parse_mention(p, tags: tags) {
-            blocks.append(parse_textblock(str: p.str, from: starting_from, to: pre_mention))
-            blocks.append(.mention(mention))
-            starting_from = p.pos
-        } else if let hashtag = parse_hashtag(p) {
-            blocks.append(parse_textblock(str: p.str, from: starting_from, to: pre_mention))
-            blocks.append(.hashtag(hashtag))
-            starting_from = p.pos
+        
+        let c = peek_char(p, 0)
+        let pr = peek_char(p, -1)
+        
+        if c == "#" {
+            if let mention = parse_mention(p, tags: tags) {
+                blocks.append(parse_textblock(str: p.str, from: starting_from, to: pre_mention))
+                blocks.append(.mention(mention))
+                starting_from = p.pos
+            } else if let hashtag = parse_hashtag(p) {
+                blocks.append(parse_textblock(str: p.str, from: starting_from, to: pre_mention))
+                blocks.append(.hashtag(hashtag))
+                starting_from = p.pos
+            } else {
+                if !consume_until(p, match: { $0.isWhitespace }) {
+                    break
+                }
+            }
+        } else if c == "h" && (pr == nil || pr!.isWhitespace) {
+            if let url = parse_url(p) {
+                blocks.append(parse_textblock(str: p.str, from: starting_from, to: pre_mention))
+                blocks.append(.url(url))
+                starting_from = p.pos
+            } else {
+                if !consume_until(p, match: { $0.isWhitespace }) {
+                    break
+                }
+            }
         } else {
-            p.pos += 1
+            if !consume_until(p, match: { $0.isWhitespace }) {
+                break
+            }
         }
     }
     
@@ -143,6 +176,37 @@ func prev_char(_ p: Parser, n: Int) -> Character? {
 
 func is_punctuation(_ c: Character) -> Bool {
     return c.isWhitespace || c.isPunctuation
+}
+
+func parse_url(_ p: Parser) -> URL? {
+    let start = p.pos
+    
+    if !parse_str(p, "http") {
+        return nil
+    }
+    
+    if parse_char(p, "s") {
+        if !parse_str(p, "://") {
+            return nil
+        }
+    } else {
+        if !parse_str(p, "://") {
+            return nil
+        }
+    }
+    
+    if !consume_until(p, match: { c in c.isWhitespace }, end_ok: true) {
+        p.pos = start
+        return nil
+    }
+    
+    let url_str = String(substring(p.str, start: start, end: p.pos))
+    guard let url = URL(string: url_str) else {
+        p.pos = start
+        return nil
+    }
+    
+    return url
 }
 
 func parse_hashtag(_ p: Parser) -> String? {

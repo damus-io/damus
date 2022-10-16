@@ -39,6 +39,20 @@ struct EventActionBar: View {
                     notify(.reply, event)
                 }
             }
+            
+            HStack(alignment: .bottom) {
+                Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
+                    .font(.footnote)
+                    .foregroundColor(bar.boosted ? Color.green : Color.gray)
+                
+                EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
+                    if bar.boosted {
+                        notify(.delete, bar.our_boost)
+                    } else {
+                        self.confirm_boost = true
+                    }
+                }
+            }
 
             HStack(alignment: .bottom) {
                 Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
@@ -53,21 +67,8 @@ struct EventActionBar: View {
                     }
                 }
             }
-
-            HStack(alignment: .bottom) {
-                Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
-                    .font(.footnote)
-                    .foregroundColor(bar.boosted ? Color.green : Color.gray)
-                
-                EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
-                    if bar.boosted {
-                        notify(.delete, bar.our_boost)
-                    } else {
-                        self.confirm_boost = true
-                    }
-                }
-            }
             
+            /*
             HStack(alignment: .bottom) {
                 Text("\(bar.tips > 0 ? "\(bar.tips)" : "")")
                     .font(.footnote)
@@ -81,6 +82,7 @@ struct EventActionBar: View {
                     }
                 }
             }
+             */
         }
         .padding(.top, 1)
         .alert("Boost", isPresented: $confirm_boost) {
