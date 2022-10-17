@@ -28,6 +28,10 @@ Contributors welcome! [Email patches][git-send-email] to jb55@jb55.com are prefe
 
 [git-send-email]: http://git-send-email.io
 
+## git log bot
+
+npub1fjtdwclt9lspjy8huu3qklr7eklp5uq90u6yh8mec290pqxraccqlufnas
+
 ### Awards 
 
 There may be nostr badges awarded for contributors in the future... :)
