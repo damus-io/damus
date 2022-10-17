@@ -10,6 +10,8 @@
 		4C06670128FC7C5900038D2A /* RelayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670028FC7C5900038D2A /* RelayView.swift */; };
 		4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 4C06670328FC7EC500038D2A /* Kingfisher */; };
 		4C06670628FCB08600038D2A /* ImageCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670528FCB08600038D2A /* ImageCarousel.swift */; };
+		4C06670B28FDE64700038D2A /* damus.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670A28FDE64700038D2A /* damus.c */; };
+		4C06670E28FDEAA000038D2A /* utf8.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670D28FDEAA000038D2A /* utf8.c */; };
 		4C0A3F8C280F5FCA000448DE /* ChatroomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F8B280F5FCA000448DE /* ChatroomView.swift */; };
 		4C0A3F8F280F640A000448DE /* ThreadModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F8E280F640A000448DE /* ThreadModel.swift */; };
 		4C0A3F91280F6528000448DE /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F90280F6528000448DE /* ChatView.swift */; };
@@ -130,6 +132,11 @@
 /* Begin PBXFileReference section */
 		4C06670028FC7C5900038D2A /* RelayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayView.swift; sourceTree = "<group>"; };
 		4C06670528FCB08600038D2A /* ImageCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCarousel.swift; sourceTree = "<group>"; };
+		4C06670828FDE64700038D2A /* damus-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "damus-Bridging-Header.h"; sourceTree = "<group>"; };
+		4C06670928FDE64700038D2A /* damus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = damus.h; sourceTree = "<group>"; };
+		4C06670A28FDE64700038D2A /* damus.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = damus.c; sourceTree = "<group>"; };
+		4C06670C28FDEAA000038D2A /* utf8.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = utf8.h; sourceTree = "<group>"; };
+		4C06670D28FDEAA000038D2A /* utf8.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = utf8.c; sourceTree = "<group>"; };
 		4C0A3F8B280F5FCA000448DE /* ChatroomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatroomView.swift; sourceTree = "<group>"; };
 		4C0A3F8E280F640A000448DE /* ThreadModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadModel.swift; sourceTree = "<group>"; };
 		4C0A3F90280F6528000448DE /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
@@ -262,6 +269,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4C06670728FDE62900038D2A /* damus-c */ = {
+			isa = PBXGroup;
+			children = (
+				4C06670928FDE64700038D2A /* damus.h */,
+				4C06670A28FDE64700038D2A /* damus.c */,
+				4C06670828FDE64700038D2A /* damus-Bridging-Header.h */,
+				4C06670C28FDEAA000038D2A /* utf8.h */,
+				4C06670D28FDEAA000038D2A /* utf8.c */,
+			);
+			path = "damus-c";
+			sourceTree = "<group>";
+		};
 		4C0A3F8D280F63FF000448DE /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -388,6 +407,7 @@
 		4CE6DEDA27F7A08100C66700 = {
 			isa = PBXGroup;
 			children = (
+				4C06670728FDE62900038D2A /* damus-c */,
 				4CE6DEE527F7A08100C66700 /* damus */,
 				4CE6DEF627F7A08200C66700 /* damusTests */,
 				4CE6DF0027F7A08200C66700 /* damusUITests */,
@@ -533,6 +553,7 @@
 				TargetAttributes = {
 					4CE6DEE227F7A08100C66700 = {
 						CreatedOnToolsVersion = 13.3;
+						LastSwiftMigration = 1400;
 					};
 					4CE6DEF227F7A08200C66700 = {
 						CreatedOnToolsVersion = 13.3;
@@ -674,6 +695,7 @@
 				4C363A962827096D006E126D /* PostBlock.swift in Sources */,
 				4C5F9116283D855D0052CD1C /* EventsModel.swift in Sources */,
 				4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */,
+				4C06670E28FDEAA000038D2A /* utf8.c in Sources */,
 				4C3AC7A728369BA200E1F516 /* SearchHomeView.swift in Sources */,
 				4C363A922825FCF2006E126D /* ProfileUpdate.swift in Sources */,
 				4C0A3F95280F6C78000448DE /* ReplyQuoteView.swift in Sources */,
@@ -684,6 +706,7 @@
 				4C90BD1A283AA67F008EE7EF /* Bech32.swift in Sources */,
 				4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */,
 				4C0A3F97280F8E02000448DE /* ThreadView.swift in Sources */,
+				4C06670B28FDE64700038D2A /* damus.c in Sources */,
 				4C99737B28C92A9200E53835 /* ChatroomMetadata.swift in Sources */,
 				4C75EFA427FA577B0006080F /* PostView.swift in Sources */,
 				4C75EFB528049D790006080F /* Relay.swift in Sources */,
@@ -850,6 +873,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = damus/damus.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
@@ -876,6 +900,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "damus-c/damus-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -886,6 +912,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = damus/damus.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
@@ -912,6 +939,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "damus-c/damus-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

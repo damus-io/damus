@@ -189,9 +189,9 @@ class ReplyTests: XCTestCase {
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
-        XCTAssertEqual(parsed[0].is_text!, "this is ")
+        XCTAssertEqual(parsed[0].is_text, "this is ")
         XCTAssertNotNil(parsed[1].is_mention)
-        XCTAssertEqual(parsed[2].is_text!, " a mention")
+        XCTAssertEqual(parsed[2].is_text, " a mention")
     }
     
     func testEmptyPostReference() throws {
@@ -515,8 +515,10 @@ class ReplyTests: XCTestCase {
         let parsed = parse_mentions(content: "this is #[0] a mention", tags: [])
         
         XCTAssertNotNil(parsed)
-        XCTAssertEqual(parsed.count, 1)
-        XCTAssertEqual(parsed[0].is_text!, "this is #[0] a mention")
+        XCTAssertEqual(parsed.count, 3)
+        XCTAssertEqual(parsed[0].is_text, "this is ")
+        XCTAssertEqual(parsed[1].is_text, "#[0]")
+        XCTAssertEqual(parsed[2].is_text, " a mention")
     }
     
 

@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 enum MentionType {
     case pubkey
     case event
@@ -89,6 +88,87 @@ func parse_textblock(str: String, from: Int, to: Int) -> Block {
 }
 
 func parse_mentions(content: String, tags: [[String]]) -> [Block] {
+    var out: [Block] = []
+    
+    var bs = blocks()
+    bs.num_blocks = 0;
+    
+    blocks_init(&bs)
+    
+    let bytes = content.utf8CString
+    bytes.withUnsafeBufferPointer { p in
+        damus_parse_content(&bs, p.baseAddress)
+    }
+    
+    var i = 0
+    while (i < bs.num_blocks) {
+        let block = bs.blocks[i]
+        
+        if let converted = convert_block(block, tags: tags) {
+            out.append(converted)
+        }
+        
+        i += 1
+    }
+    
+    blocks_free(&bs)
+    
+    return out
+}
+
+func strblock_to_string(_ s: str_block_t) -> String? {
+    let len = s.end - s.start
+    let bytes = Data(bytes: s.start, count: len)
+    return String(bytes: bytes, encoding: .utf8)
+}
+
+func convert_block(_ b: block_t, tags: [[String]]) -> Block? {
+    if b.type == BLOCK_HASHTAG {
+        guard let str = strblock_to_string(b.block.str) else {
+            return nil
+        }
+        return .hashtag(str)
+    } else if b.type == BLOCK_TEXT {
+        guard let str = strblock_to_string(b.block.str) else {
+            return nil
+        }
+        return .text(str)
+    } else if b.type == BLOCK_MENTION {
+        return convert_mention_block(ind: b.block.mention, tags: tags)
+    } else if b.type == BLOCK_URL {
+        guard let str = strblock_to_string(b.block.str) else {
+            return nil
+        }
+        guard let url = URL(string: str) else {
+            return .text(str)
+        }
+        return .url(url)
+    }
+    
+    return nil
+}
+
+func convert_mention_block(ind: Int32, tags: [[String]]) -> Block?
+{
+    let ind = Int(ind)
+    
+    if ind < 0 || (ind + 1 > tags.count) || tags[ind].count < 2 {
+        return .text("#[\(ind)]")
+    }
+        
+    let tag = tags[ind]
+    guard let mention_type = parse_mention_type(tag[0]) else {
+        return .text("#[\(ind)]")
+    }
+    
+    guard let ref = tag_to_refid(tag) else {
+        return .text("#[\(ind)]")
+    }
+    
+    return .mention(Mention(index: ind, type: mention_type, ref: ref))
+}
+
+func parse_mentions_old(content: String, tags: [[String]]) -> [Block] {
     let p = Parser(pos: 0, str: content)
     var blocks: [Block] = []
     var starting_from: Int = 0

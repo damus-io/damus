@@ -87,7 +87,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable {
     }
     
     lazy var validity: ValidationResult = {
-        return validate_event(ev: self)
+        return .ok //validate_event(ev: self)
     }()
     
     private var _blocks: [Block]? = nil
