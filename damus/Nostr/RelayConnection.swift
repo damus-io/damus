@@ -35,12 +35,12 @@ class RelayConnection: WebSocketDelegate {
             self.disconnect()
         } else {
             // we're already disconnected, so just connect
-            self.connect()
+            self.connect(force: true)
         }
     }
 
-    func connect(){
-        if self.isConnected || self.isConnecting {
+    func connect(force: Bool = false){
+        if !force && (self.isConnected || self.isConnecting) {
             return
         }
 

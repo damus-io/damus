@@ -81,11 +81,18 @@ class RelayPool {
     func connect_to_disconnected() {
         for relay in relays {
             let c = relay.connection
-            if relay.is_broken || c.isReconnecting || c.isConnecting || c.isConnected {
+            
+            let is_connecting = c.isReconnecting || c.isConnecting
+            
+            if is_connecting && (Date.now.timeIntervalSince1970 - c.last_connection_attempt) > 10 {
+                print("stale connection detected (\(relay.descriptor.url.absoluteString)). retrying...")
+                relay.connection.connect(force: true)
+            } else if relay.is_broken || is_connecting || c.isConnected {
                 continue
+            } else {
+                relay.connection.reconnect()
             }
             
-            relay.connection.reconnect()
         }
     }
     
