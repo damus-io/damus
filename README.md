@@ -30,7 +30,7 @@ Contributors welcome! [Email patches][git-send-email] to jb55@jb55.com are prefe
 
 ## git log bot
 
-npub1fjtdwclt9lspjy8huu3qklr7eklp5uq90u6yh8mec290pqxraccqlufnas
+@damus-git npub1fjtdwclt9lspjy8huu3qklr7eklp5uq90u6yh8mec290pqxraccqlufnas
 
 ### Awards 
 
