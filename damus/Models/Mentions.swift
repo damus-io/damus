@@ -32,11 +32,28 @@ struct IdBlock: Identifiable {
     let block: Block
 }
 
+struct Invoice {
+    let description: String
+    let amount: Int64
+    let string: String
+    let expiry: UInt64
+    let payment_hash: Data
+    let created_at: UInt64
+}
+
 enum Block {
     case text(String)
     case mention(Mention)
     case hashtag(String)
     case url(URL)
+    case invoice(Invoice)
+    
+    var is_invoice: Invoice? {
+        if case .invoice(let invoice) = self {
+            return invoice
+        }
+        return nil
+    }
     
     var is_hashtag: String? {
         if case .hashtag(let htag) = self {
@@ -79,6 +96,8 @@ func render_blocks(blocks: [Block]) -> String {
             return str + "#" + htag
         case .url(let url):
             return str + url.absoluteString
+        case .invoice(let inv):
+            return str + inv.string
         }
     }
 }
@@ -136,16 +155,51 @@ func convert_block(_ b: block_t, tags: [[String]]) -> Block? {
     } else if b.type == BLOCK_MENTION {
         return convert_mention_block(ind: b.block.mention, tags: tags)
     } else if b.type == BLOCK_URL {
-        guard let str = strblock_to_string(b.block.str) else {
-            return nil
-        }
-        guard let url = URL(string: str) else {
-            return .text(str)
-        }
-        return .url(url)
+        return convert_url_block(b.block.str)
+    } else if b.type == BLOCK_INVOICE {
+        return convert_invoice_block(b.block.invoice)
     }
     
     return nil
+}
+
+func convert_url_block(_ b: str_block) -> Block? {
+    guard let str = strblock_to_string(b) else {
+        return nil
+    }
+    guard let url = URL(string: str) else {
+        return .text(str)
+    }
+    return .url(url)
+}
+
+func maybe_pointee<T>(_ p: UnsafeMutablePointer<T>!) -> T? {
+    guard p != nil else {
+        return nil
+    }
+    return p.pointee
+}
+
+func convert_invoice_block(_ b: invoice_block) -> Block? {
+    guard let invstr = strblock_to_string(b.invstr) else {
+        return nil
+    }
+    
+    guard var b11 = maybe_pointee(b.bolt11) else {
+        return nil
+    }
+    
+    let description = String(cString: b11.description)
+    guard let msat = maybe_pointee(b11.msat) else {
+        return nil
+    }
+    let amount = Int64(msat.millisatoshis)
+    let payment_hash = Data(bytes: &b11.payment_hash, count: 32)
+    let hex = hex_encode(payment_hash)
+    let created_at = b11.timestamp
+    
+    tal_free(b.bolt11)
+    return .invoice(Invoice(description: description, amount: amount, string: invstr, expiry: b11.expiry, payment_hash: payment_hash, created_at: created_at))
 }
 
 func convert_mention_block(ind: Int32, tags: [[String]]) -> Block?

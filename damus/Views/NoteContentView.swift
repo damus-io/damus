@@ -7,9 +7,19 @@
 
 import SwiftUI
 
+struct NoteArtifacts {
+    let content: String
+    let images: [URL]
+    let invoices: [Invoice]
+    
+    static func just_content(_ content: String) -> NoteArtifacts {
+        NoteArtifacts(content: content, images: [], invoices: [])
+    }
+}
 
-func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -> (String, [URL]) {
+func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -> NoteArtifacts {
     let blocks = ev.blocks(privkey)
+    var invoices: [Invoice] = []
     var img_urls: [URL] = []
     let txt = blocks.reduce("") { str, block in
         switch block {
@@ -19,6 +29,9 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
             return str + txt
         case .hashtag(let htag):
             return str + hashtag_str(htag)
+        case .invoice(let invoice):
+            invoices.append(invoice)
+            return str
         case .url(let url):
             if is_image_url(url) {
                 img_urls.append(url)
@@ -27,7 +40,7 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
         }
     }
     
-    return (txt, img_urls)
+    return NoteArtifacts(content: txt, images: img_urls, invoices: invoices)
 }
 
 func is_image_url(_ url: URL) -> Bool {
@@ -42,21 +55,24 @@ struct NoteContentView: View {
     
     let show_images: Bool
     
-    @State var content: String
-    @State var images: [URL] = []
+    @State var artifacts: NoteArtifacts
     
     func MainContent() -> some View {
         let md_opts: AttributedString.MarkdownParsingOptions =
             .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
         
         return VStack(alignment: .leading) {
-            if let txt = try? AttributedString(markdown: content, options: md_opts) {
+            if let txt = try? AttributedString(markdown: artifacts.content, options: md_opts) {
                 Text(txt)
             } else {
-                Text(content)
+                Text(artifacts.content)
             }
-            if show_images && images.count > 0 {
-                ImageCarousel(urls: images)
+            if show_images && artifacts.images.count > 0 {
+                ImageCarousel(urls: artifacts.images)
+            }
+            if artifacts.invoices.count > 0 {
+                InvoicesView(invoices: artifacts.invoices)
+                    .frame(width: 200)
             }
         }
     }
@@ -64,9 +80,7 @@ struct NoteContentView: View {
     var body: some View {
         MainContent()
             .onAppear() {
-                let (txt, images) = render_note_content(ev: event, profiles: profiles, privkey: privkey)
-                self.content = txt
-                self.images = images
+                self.artifacts = render_note_content(ev: event, profiles: profiles, privkey: privkey)
             }
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let profile = notif.object as! ProfileUpdate
@@ -75,13 +89,12 @@ struct NoteContentView: View {
                     switch block {
                     case .mention(let m):
                         if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
-                            let (txt, images) = render_note_content(ev: event, profiles: profiles, privkey: privkey)
-                            self.content = txt
-                            self.images = images
+                            self.artifacts = render_note_content(ev: event, profiles: profiles, privkey: privkey)
                         }
                     case .text: return
                     case .hashtag: return
                     case .url: return
+                    case .invoice: return
                     }
                 }
             }
@@ -110,6 +123,7 @@ struct NoteContentView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
         let content = "hi there https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
-        NoteContentView(privkey: "", event: NostrEvent(content: content, pubkey: "pk"), profiles: state.profiles, show_images: true, content: content)
+        let artifacts = NoteArtifacts(content: content, images: [], invoices: [])
+        NoteContentView(privkey: "", event: NostrEvent(content: content, pubkey: "pk"), profiles: state.profiles, show_images: true, artifacts: artifacts)
     }
 }

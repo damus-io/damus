@@ -520,6 +520,5 @@ class ReplyTests: XCTestCase {
         XCTAssertEqual(parsed[1].is_text, "#[0]")
         XCTAssertEqual(parsed[2].is_text, " a mention")
     }
-    
 
 }

@@ -129,7 +129,7 @@ struct EventView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, show_images: true, content: content)
+                NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, show_images: true, artifacts: .just_content(content))
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 if has_action_bar {

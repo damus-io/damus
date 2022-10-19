@@ -17,6 +17,7 @@ enum block_type {
     BLOCK_TEXT = 2,
     BLOCK_MENTION = 3,
     BLOCK_URL = 4,
+    BLOCK_INVOICE = 5,
 };
 
 typedef struct str_block {
@@ -24,10 +25,18 @@ typedef struct str_block {
     const char *end;
 } str_block_t;
 
+typedef struct invoice_block {
+    struct str_block invstr;
+    union {
+        struct bolt11 *bolt11;
+    };
+} invoice_block_t;
+
 typedef struct block {
     enum block_type type;
     union {
         struct str_block str;
+        struct invoice_block invoice;
         int mention;
     } block;
 } block_t;

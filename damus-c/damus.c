@@ -6,6 +6,7 @@
 //
 
 #include "damus.h"
+#include "bolt11.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -194,11 +195,60 @@ static int parse_url(struct cursor *cur, struct block *block) {
     return 1;
 }
 
+static int parse_invoice(struct cursor *cur, struct block *block) {
+    const u8 *start, *end;
+    char *fail;
+    struct bolt11 *bolt11;
+    start = cur->p;
+    
+    if (!parse_str(cur, "lnbc"))
+        return 0;
+    
+    if (!consume_until_whitespace(cur, 1)) {
+        cur->p = start;
+        return 0;
+    }
+    
+    end = cur->p;
+    
+    char str[end - start + 1];
+    str[end - start] = 0;
+    memcpy(str, start, end - start);
+    
+    if (!(bolt11 = bolt11_decode(NULL, str, &fail))) {
+        cur->p = start;
+        return 0;
+    }
+    
+    block->type = BLOCK_INVOICE;
+    
+    block->block.invoice.invstr.start = (const char*)start;
+    block->block.invoice.invstr.end = (const char*)end;
+    block->block.invoice.bolt11 = bolt11;
+    
+    cur->p += end - start;
+    
+    return 1;
+}
+
+static int add_text_then_block(struct cursor *cur, struct blocks *blocks, struct block block, u8 **start, u8 *pre_mention)
+{
+    if (!add_text_block(blocks, *start, pre_mention))
+        return 0;
+    
+    *start = (u8*)cur->p;
+    
+    if (!add_block(blocks, block))
+        return 0;
+    
+    return 1;
+}
+
 int damus_parse_content(struct blocks *blocks, const char *content) {
     int cp, c;
     struct cursor cur;
     struct block block;
-    const u8 *start, *pre_mention;
+    u8 *start, *pre_mention;
     
     blocks->num_blocks = 0;
     make_cursor(&cur, (const u8*)content, strlen(content));
@@ -211,24 +261,16 @@ int damus_parse_content(struct blocks *blocks, const char *content) {
         pre_mention = cur.p;
         if (cp == -1 || is_whitespace(cp)) {
             if (c == '#' && (parse_mention(&cur, &block) || parse_hashtag(&cur, &block))) {
-                if (!add_text_block(blocks, start, pre_mention))
+                if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;
-                
-                start = cur.p;
-                
-                if (!add_block(blocks, block))
-                    return 0;
-                
                 continue;
             } else if (c == 'h' && parse_url(&cur, &block)) {
-                if (!add_text_block(blocks, start, pre_mention))
+                if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;
-                
-                start = cur.p;
-                
-                if (!add_block(blocks, block))
+                continue;
+            } else if (c == 'l' && parse_invoice(&cur, &block)) {
+                if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;
-                
                 continue;
             }
         }

@@ -56,6 +56,22 @@
 		4C3BEFDA281DCA1400B3DE84 /* LikeCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD9281DCA1400B3DE84 /* LikeCounter.swift */; };
 		4C3BEFDC281DCE6100B3DE84 /* Liked.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFDB281DCE6100B3DE84 /* Liked.swift */; };
 		4C3BEFE0281DE1ED00B3DE84 /* DamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFDF281DE1ED00B3DE84 /* DamusState.swift */; };
+		4C3EA63D28FF52D600C48A62 /* bolt11.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA63C28FF52D600C48A62 /* bolt11.c */; };
+		4C3EA64128FF553900C48A62 /* hash_u5.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64028FF553900C48A62 /* hash_u5.c */; };
+		4C3EA64428FF558100C48A62 /* sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64328FF558100C48A62 /* sha256.c */; };
+		4C3EA64928FF597700C48A62 /* bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64828FF597700C48A62 /* bech32.c */; };
+		4C3EA64C28FF59AC00C48A62 /* bech32_util.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64B28FF59AC00C48A62 /* bech32_util.c */; };
+		4C3EA64F28FF59F200C48A62 /* tal.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64E28FF59F200C48A62 /* tal.c */; };
+		4C3EA66028FF5E7700C48A62 /* node_id.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA65F28FF5E7700C48A62 /* node_id.c */; };
+		4C3EA66528FF5F6800C48A62 /* mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA66428FF5F6800C48A62 /* mem.c */; };
+		4C3EA66828FF5F9900C48A62 /* hex.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA66728FF5F9900C48A62 /* hex.c */; };
+		4C3EA66D28FF782800C48A62 /* amount.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA66C28FF782800C48A62 /* amount.c */; };
+		4C3EA67528FF7A5A00C48A62 /* take.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67428FF7A5A00C48A62 /* take.c */; };
+		4C3EA67728FF7A9800C48A62 /* talstr.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67628FF7A9800C48A62 /* talstr.c */; };
+		4C3EA67928FF7ABF00C48A62 /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67828FF7ABF00C48A62 /* list.c */; };
+		4C3EA67B28FF7B3900C48A62 /* InvoiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67A28FF7B3900C48A62 /* InvoiceTests.swift */; };
+		4C3EA67D28FFBBA300C48A62 /* InvoicesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67C28FFBBA200C48A62 /* InvoicesView.swift */; };
+		4C3EA67F28FFC01D00C48A62 /* InvoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67E28FFC01D00C48A62 /* InvoiceView.swift */; };
 		4C477C9E282C3A4800033AA3 /* TipCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C477C9D282C3A4800033AA3 /* TipCounter.swift */; };
 		4C5C7E68284ED36500A22DF5 /* SearchHomeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5C7E67284ED36500A22DF5 /* SearchHomeModel.swift */; };
 		4C5C7E6A284EDE2E00A22DF5 /* SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5C7E69284EDE2E00A22DF5 /* SearchResultsView.swift */; };
@@ -181,6 +197,51 @@
 		4C3BEFD9281DCA1400B3DE84 /* LikeCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikeCounter.swift; sourceTree = "<group>"; };
 		4C3BEFDB281DCE6100B3DE84 /* Liked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Liked.swift; sourceTree = "<group>"; };
 		4C3BEFDF281DE1ED00B3DE84 /* DamusState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusState.swift; sourceTree = "<group>"; };
+		4C3EA63B28FF52D600C48A62 /* bolt11.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bolt11.h; sourceTree = "<group>"; };
+		4C3EA63C28FF52D600C48A62 /* bolt11.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bolt11.c; sourceTree = "<group>"; };
+		4C3EA63E28FF54BD00C48A62 /* short_types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = short_types.h; sourceTree = "<group>"; };
+		4C3EA63F28FF553900C48A62 /* hash_u5.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hash_u5.h; sourceTree = "<group>"; };
+		4C3EA64028FF553900C48A62 /* hash_u5.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hash_u5.c; sourceTree = "<group>"; };
+		4C3EA64228FF558100C48A62 /* sha256.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sha256.h; sourceTree = "<group>"; };
+		4C3EA64328FF558100C48A62 /* sha256.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = sha256.c; sourceTree = "<group>"; };
+		4C3EA64528FF56D300C48A62 /* config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
+		4C3EA64628FF570F00C48A62 /* node_id.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = node_id.h; sourceTree = "<group>"; };
+		4C3EA64728FF597700C48A62 /* bech32.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bech32.h; sourceTree = "<group>"; };
+		4C3EA64828FF597700C48A62 /* bech32.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bech32.c; sourceTree = "<group>"; };
+		4C3EA64A28FF59AC00C48A62 /* bech32_util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bech32_util.h; sourceTree = "<group>"; };
+		4C3EA64B28FF59AC00C48A62 /* bech32_util.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bech32_util.c; sourceTree = "<group>"; };
+		4C3EA64D28FF59F200C48A62 /* tal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tal.h; sourceTree = "<group>"; };
+		4C3EA64E28FF59F200C48A62 /* tal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = tal.c; sourceTree = "<group>"; };
+		4C3EA65028FF5A5500C48A62 /* list.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = list.h; sourceTree = "<group>"; };
+		4C3EA65328FF5A8600C48A62 /* str.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = str.h; sourceTree = "<group>"; };
+		4C3EA65428FF5AAE00C48A62 /* container_of.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = container_of.h; sourceTree = "<group>"; };
+		4C3EA65528FF5AC300C48A62 /* check_type.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = check_type.h; sourceTree = "<group>"; };
+		4C3EA65628FF5B0200C48A62 /* compiler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = compiler.h; sourceTree = "<group>"; };
+		4C3EA65728FF5B1E00C48A62 /* likely.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = likely.h; sourceTree = "<group>"; };
+		4C3EA65828FF5B3700C48A62 /* typesafe_cb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = typesafe_cb.h; sourceTree = "<group>"; };
+		4C3EA65928FF5B5100C48A62 /* take.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = take.h; sourceTree = "<group>"; };
+		4C3EA65A28FF5BC900C48A62 /* alignof.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = alignof.h; sourceTree = "<group>"; };
+		4C3EA65B28FF5C7E00C48A62 /* str_debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = str_debug.h; sourceTree = "<group>"; };
+		4C3EA65C28FF5CAF00C48A62 /* endian.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = endian.h; sourceTree = "<group>"; };
+		4C3EA65D28FF5CF300C48A62 /* talstr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = talstr.h; sourceTree = "<group>"; };
+		4C3EA65E28FF5DA400C48A62 /* amount.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = amount.h; sourceTree = "<group>"; };
+		4C3EA65F28FF5E7700C48A62 /* node_id.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = node_id.c; sourceTree = "<group>"; };
+		4C3EA66128FF5EA800C48A62 /* array_size.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = array_size.h; sourceTree = "<group>"; };
+		4C3EA66228FF5EBC00C48A62 /* build_assert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = build_assert.h; sourceTree = "<group>"; };
+		4C3EA66328FF5F6800C48A62 /* mem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mem.h; sourceTree = "<group>"; };
+		4C3EA66428FF5F6800C48A62 /* mem.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mem.c; sourceTree = "<group>"; };
+		4C3EA66628FF5F9900C48A62 /* hex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hex.h; sourceTree = "<group>"; };
+		4C3EA66728FF5F9900C48A62 /* hex.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hex.c; sourceTree = "<group>"; };
+		4C3EA66C28FF782800C48A62 /* amount.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = amount.c; sourceTree = "<group>"; };
+		4C3EA66E28FF787100C48A62 /* overflows.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = overflows.h; sourceTree = "<group>"; };
+		4C3EA67228FF79F600C48A62 /* structeq.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = structeq.h; sourceTree = "<group>"; };
+		4C3EA67328FF7A2600C48A62 /* cppmagic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cppmagic.h; sourceTree = "<group>"; };
+		4C3EA67428FF7A5A00C48A62 /* take.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = take.c; sourceTree = "<group>"; };
+		4C3EA67628FF7A9800C48A62 /* talstr.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = talstr.c; sourceTree = "<group>"; };
+		4C3EA67828FF7ABF00C48A62 /* list.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = list.c; sourceTree = "<group>"; };
+		4C3EA67A28FF7B3900C48A62 /* InvoiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvoiceTests.swift; sourceTree = "<group>"; };
+		4C3EA67C28FFBBA200C48A62 /* InvoicesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvoicesView.swift; sourceTree = "<group>"; };
+		4C3EA67E28FFC01D00C48A62 /* InvoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvoiceView.swift; sourceTree = "<group>"; };
 		4C477C9D282C3A4800033AA3 /* TipCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TipCounter.swift; sourceTree = "<group>"; };
 		4C4A3A5A288A1B2200453788 /* damus.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = damus.entitlements; sourceTree = "<group>"; };
 		4C5C7E67284ED36500A22DF5 /* SearchHomeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHomeModel.swift; sourceTree = "<group>"; };
@@ -277,6 +338,48 @@
 				4C06670828FDE64700038D2A /* damus-Bridging-Header.h */,
 				4C06670C28FDEAA000038D2A /* utf8.h */,
 				4C06670D28FDEAA000038D2A /* utf8.c */,
+				4C3EA63B28FF52D600C48A62 /* bolt11.h */,
+				4C3EA63C28FF52D600C48A62 /* bolt11.c */,
+				4C3EA63E28FF54BD00C48A62 /* short_types.h */,
+				4C3EA63F28FF553900C48A62 /* hash_u5.h */,
+				4C3EA64028FF553900C48A62 /* hash_u5.c */,
+				4C3EA64228FF558100C48A62 /* sha256.h */,
+				4C3EA64328FF558100C48A62 /* sha256.c */,
+				4C3EA64528FF56D300C48A62 /* config.h */,
+				4C3EA64628FF570F00C48A62 /* node_id.h */,
+				4C3EA64728FF597700C48A62 /* bech32.h */,
+				4C3EA64828FF597700C48A62 /* bech32.c */,
+				4C3EA64A28FF59AC00C48A62 /* bech32_util.h */,
+				4C3EA64B28FF59AC00C48A62 /* bech32_util.c */,
+				4C3EA64D28FF59F200C48A62 /* tal.h */,
+				4C3EA64E28FF59F200C48A62 /* tal.c */,
+				4C3EA65028FF5A5500C48A62 /* list.h */,
+				4C3EA65328FF5A8600C48A62 /* str.h */,
+				4C3EA65428FF5AAE00C48A62 /* container_of.h */,
+				4C3EA65528FF5AC300C48A62 /* check_type.h */,
+				4C3EA65628FF5B0200C48A62 /* compiler.h */,
+				4C3EA65728FF5B1E00C48A62 /* likely.h */,
+				4C3EA65828FF5B3700C48A62 /* typesafe_cb.h */,
+				4C3EA65928FF5B5100C48A62 /* take.h */,
+				4C3EA65A28FF5BC900C48A62 /* alignof.h */,
+				4C3EA65B28FF5C7E00C48A62 /* str_debug.h */,
+				4C3EA65C28FF5CAF00C48A62 /* endian.h */,
+				4C3EA65D28FF5CF300C48A62 /* talstr.h */,
+				4C3EA65E28FF5DA400C48A62 /* amount.h */,
+				4C3EA65F28FF5E7700C48A62 /* node_id.c */,
+				4C3EA66128FF5EA800C48A62 /* array_size.h */,
+				4C3EA66228FF5EBC00C48A62 /* build_assert.h */,
+				4C3EA66328FF5F6800C48A62 /* mem.h */,
+				4C3EA66428FF5F6800C48A62 /* mem.c */,
+				4C3EA66628FF5F9900C48A62 /* hex.h */,
+				4C3EA66728FF5F9900C48A62 /* hex.c */,
+				4C3EA66C28FF782800C48A62 /* amount.c */,
+				4C3EA66E28FF787100C48A62 /* overflows.h */,
+				4C3EA67228FF79F600C48A62 /* structeq.h */,
+				4C3EA67328FF7A2600C48A62 /* cppmagic.h */,
+				4C3EA67428FF7A5A00C48A62 /* take.c */,
+				4C3EA67628FF7A9800C48A62 /* talstr.c */,
+				4C3EA67828FF7ABF00C48A62 /* list.c */,
 			);
 			path = "damus-c";
 			sourceTree = "<group>";
@@ -400,6 +503,8 @@
 				4CE4F9E0285287B800C00DD9 /* TextFieldAlert.swift */,
 				4CD7641A28A1641400B6928F /* EndBlock.swift */,
 				4C06670528FCB08600038D2A /* ImageCarousel.swift */,
+				4C3EA67C28FFBBA200C48A62 /* InvoicesView.swift */,
+				4C3EA67E28FFC01D00C48A62 /* InvoiceView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -459,6 +564,7 @@
 				4C363A9F2828A8DD006E126D /* LikeTests.swift */,
 				4C363A9D2828A822006E126D /* ReplyTests.swift */,
 				4CE6DEF727F7A08200C66700 /* damusTests.swift */,
+				4C3EA67A28FF7B3900C48A62 /* InvoiceTests.swift */,
 			);
 			path = damusTests;
 			sourceTree = "<group>";
@@ -626,6 +732,7 @@
 				4CE4F8CD281352B30009DFBB /* Notifications.swift in Sources */,
 				4C285C8428385690008A31F1 /* CreateAccountView.swift in Sources */,
 				4C216F34286F5ACD00040376 /* DMView.swift in Sources */,
+				4C3EA64428FF558100C48A62 /* sha256.c in Sources */,
 				4CE4F9E1285287B800C00DD9 /* TextFieldAlert.swift in Sources */,
 				4C363AA828297703006E126D /* InsertSort.swift in Sources */,
 				4C285C86283892E7008A31F1 /* CreateAccountModel.swift in Sources */,
@@ -633,6 +740,7 @@
 				4C363A8C28236B92006E126D /* PubkeyView.swift in Sources */,
 				4C5C7E68284ED36500A22DF5 /* SearchHomeModel.swift in Sources */,
 				4C75EFB728049D990006080F /* RelayPool.swift in Sources */,
+				4C3EA67728FF7A9800C48A62 /* talstr.c in Sources */,
 				4CE6DEE927F7A08100C66700 /* ContentView.swift in Sources */,
 				4CEE2AF5280B29E600AB5EEF /* TimeAgo.swift in Sources */,
 				4C75EFAD28049CFB0006080F /* PostButton.swift in Sources */,
@@ -658,17 +766,21 @@
 				4CE4F9E328528C5200C00DD9 /* AddRelayView.swift in Sources */,
 				4C363A9A28283854006E126D /* Reply.swift in Sources */,
 				4C90BD18283A9EE5008EE7EF /* LoginView.swift in Sources */,
+				4C3EA66828FF5F9900C48A62 /* hex.c in Sources */,
 				4C3BEFDC281DCE6100B3DE84 /* Liked.swift in Sources */,
 				4C75EFB128049D510006080F /* NostrResponse.swift in Sources */,
 				4CEE2AF7280B2DEA00AB5EEF /* ProfileName.swift in Sources */,
 				4C285C8228385570008A31F1 /* CarouselView.swift in Sources */,
+				4C3EA67F28FFC01D00C48A62 /* InvoiceView.swift in Sources */,
 				4CEE2B02280B39E800AB5EEF /* EventActionBar.swift in Sources */,
 				4C3BEFE0281DE1ED00B3DE84 /* DamusState.swift in Sources */,
 				4C0A3F8F280F640A000448DE /* ThreadModel.swift in Sources */,
 				4C3AC79F2833115300E1F516 /* FollowButtonView.swift in Sources */,
 				4C3BEFD22819DB9B00B3DE84 /* ProfileModel.swift in Sources */,
 				4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */,
+				4C3EA64928FF597700C48A62 /* bech32.c in Sources */,
 				4C90BD162839DB54008EE7EF /* NostrMetadata.swift in Sources */,
+				4C3EA67528FF7A5A00C48A62 /* take.c in Sources */,
 				4C3AC7A12835A81400E1F516 /* SetupView.swift in Sources */,
 				4C06670128FC7C5900038D2A /* RelayView.swift in Sources */,
 				4C285C8C28398BC7008A31F1 /* Keys.swift in Sources */,
@@ -676,12 +788,17 @@
 				4C633352283D419F00B1C9C3 /* SignalModel.swift in Sources */,
 				4C363A94282704FA006E126D /* Post.swift in Sources */,
 				4C216F32286E388800040376 /* DMChatView.swift in Sources */,
+				4C3EA67928FF7ABF00C48A62 /* list.c in Sources */,
 				4C64987E286D082C00EAE2B3 /* DirectMessagesModel.swift in Sources */,
 				4C363A8828236948006E126D /* BlocksView.swift in Sources */,
 				4C06670628FCB08600038D2A /* ImageCarousel.swift in Sources */,
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
+				4C3EA64C28FF59AC00C48A62 /* bech32_util.c in Sources */,
 				4C363A9C282838B9006E126D /* EventRef.swift in Sources */,
 				4CD7641B28A1641400B6928F /* EndBlock.swift in Sources */,
+				4C3EA66528FF5F6800C48A62 /* mem.c in Sources */,
+				4C3EA64128FF553900C48A62 /* hash_u5.c in Sources */,
+				4C3EA64F28FF59F200C48A62 /* tal.c in Sources */,
 				4C8682872814DE470026224F /* ProfileView.swift in Sources */,
 				4C5F9114283D694D0052CD1C /* FollowTarget.swift in Sources */,
 				4C5C7E6A284EDE2E00A22DF5 /* SearchResultsView.swift in Sources */,
@@ -691,17 +808,21 @@
 				4CEE2AF3280B25C500AB5EEF /* ProfilePicView.swift in Sources */,
 				4CEE2AF9280B2EAC00AB5EEF /* PowView.swift in Sources */,
 				4C3BEFD42819DE8F00B3DE84 /* NostrKind.swift in Sources */,
+				4C3EA66028FF5E7700C48A62 /* node_id.c in Sources */,
 				4CE6DEE727F7A08100C66700 /* damusApp.swift in Sources */,
 				4C363A962827096D006E126D /* PostBlock.swift in Sources */,
 				4C5F9116283D855D0052CD1C /* EventsModel.swift in Sources */,
 				4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */,
 				4C06670E28FDEAA000038D2A /* utf8.c in Sources */,
+				4C3EA66D28FF782800C48A62 /* amount.c in Sources */,
 				4C3AC7A728369BA200E1F516 /* SearchHomeView.swift in Sources */,
 				4C363A922825FCF2006E126D /* ProfileUpdate.swift in Sources */,
 				4C0A3F95280F6C78000448DE /* ReplyQuoteView.swift in Sources */,
 				4C3BEFDA281DCA1400B3DE84 /* LikeCounter.swift in Sources */,
 				4C3AC79B28306D7B00E1F516 /* Contacts.swift in Sources */,
+				4C3EA63D28FF52D600C48A62 /* bolt11.c in Sources */,
 				4C5F9118283D88E40052CD1C /* FollowingModel.swift in Sources */,
+				4C3EA67D28FFBBA300C48A62 /* InvoicesView.swift in Sources */,
 				4C363A8E28236FE4006E126D /* NoteContentView.swift in Sources */,
 				4C90BD1A283AA67F008EE7EF /* Bech32.swift in Sources */,
 				4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */,
@@ -720,6 +841,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C3EA67B28FF7B3900C48A62 /* InvoiceTests.swift in Sources */,
 				4C363A9E2828A822006E126D /* ReplyTests.swift in Sources */,
 				4C363AA02828A8DD006E126D /* LikeTests.swift in Sources */,
 				4C90BD1C283AC38E008EE7EF /* Bech32Tests.swift in Sources */,
