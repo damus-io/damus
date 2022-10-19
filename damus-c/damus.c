@@ -79,17 +79,26 @@ static int parse_digit(struct cursor *cur, int *digit) {
 }
 
 static int parse_str(struct cursor *cur, const char *str) {
-    unsigned long len = strlen(str);
+    int i;
+    char c, cs;
+    unsigned long len;
+    
+    len = strlen(str);
     
     if (cur->p + len >= cur->end)
         return 0;
     
-    if (!memcmp(cur->p, str, len)) {
-        cur->p += len;
-        return 1;
+    for (i = 0; i < len; i++) {
+        c = tolower(cur->p[i]);
+        cs = tolower(str[i]);
+        
+        if (c != cs)
+            return 0;
     }
     
-    return 0;
+    cur->p += len;
+    
+    return 1;
 }
 
 static int parse_mention(struct cursor *cur, struct block *block) {
@@ -158,6 +167,9 @@ static int add_text_block(struct blocks *blocks, const u8 *start, const u8 *end)
 {
     struct block b;
     
+    if (start == end)
+        return 1;
+    
     b.type = BLOCK_TEXT;
     b.block.str.start = (const char*)start;
     b.block.str.end = (const char*)end;
@@ -171,7 +183,7 @@ static int parse_url(struct cursor *cur, struct block *block) {
     if (!parse_str(cur, "http"))
         return 0;
     
-    if (parse_char(cur, 's')) {
+    if (parse_char(cur, 's') || parse_char(cur, 'S')) {
         if (!parse_str(cur, "://")) {
             cur->p = start;
             return 0;
@@ -231,7 +243,7 @@ static int parse_invoice(struct cursor *cur, struct block *block) {
     return 1;
 }
 
-static int add_text_then_block(struct cursor *cur, struct blocks *blocks, struct block block, u8 **start, u8 *pre_mention)
+static int add_text_then_block(struct cursor *cur, struct blocks *blocks, struct block block, const u8 **start, const u8 *pre_mention)
 {
     if (!add_text_block(blocks, *start, pre_mention))
         return 0;
@@ -248,7 +260,7 @@ int damus_parse_content(struct blocks *blocks, const char *content) {
     int cp, c;
     struct cursor cur;
     struct block block;
-    u8 *start, *pre_mention;
+    const u8 *start, *pre_mention;
     
     blocks->num_blocks = 0;
     make_cursor(&cur, (const u8*)content, strlen(content));
@@ -264,11 +276,11 @@ int damus_parse_content(struct blocks *blocks, const char *content) {
                 if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;
                 continue;
-            } else if (c == 'h' && parse_url(&cur, &block)) {
+            } else if ((c == 'h' || c == 'H') && parse_url(&cur, &block)) {
                 if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;
                 continue;
-            } else if (c == 'l' && parse_invoice(&cur, &block)) {
+            } else if ((c == 'l' || c == 'L') && parse_invoice(&cur, &block)) {
                 if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;
                 continue;

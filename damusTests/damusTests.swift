@@ -64,6 +64,14 @@ class damusTests: XCTestCase {
         XCTAssertNotNil(parsed[0].is_text)
     }
     
+    func testParseUrlUpper() {
+        let parsed = parse_mentions(content: "a HTTPS://jb55.COM b", tags: [])
+
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 3)
+        XCTAssertEqual(parsed[1].is_url?.absoluteString, "HTTPS://jb55.COM")
+    }
+    
     func testParseUrl() {
         let parsed = parse_mentions(content: "a https://jb55.com b", tags: [])
 
@@ -85,10 +93,9 @@ class damusTests: XCTestCase {
         let parsed = parse_mentions(content: "https://jb55.com br", tags: [])
 
         XCTAssertNotNil(parsed)
-        XCTAssertEqual(parsed.count, 3)
-        XCTAssertEqual(parsed[0].is_text, "")
-        XCTAssertEqual(parsed[1].is_url?.absoluteString, "https://jb55.com")
-        XCTAssertEqual(parsed[2].is_text, " br")
+        XCTAssertEqual(parsed.count, 2)
+        XCTAssertEqual(parsed[0].is_url?.absoluteString, "https://jb55.com")
+        XCTAssertEqual(parsed[1].is_text, " br")
     }
     
     func testParseMentionBlank() {
