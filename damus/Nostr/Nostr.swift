@@ -18,15 +18,7 @@ struct Profile: Decodable {
     let lud16: String?
     
     var lightning_uri: URL? {
-        if let url = (self.lud06.flatMap { URL(string: "lightning:" + $0) }) {
-            return url
-        }
-        
-        if let url = (self.lud16.flatMap { URL(string: "lightning:" + $0) }) {
-            return url
-        }
-        
-        return nil
+        return make_ln_url(self.lud06) ?? make_ln_url(self.lud16)
     }
     
     static func displayName(profile: Profile?, pubkey: String) -> String {
@@ -34,9 +26,8 @@ struct Profile: Decodable {
     }
 }
 
-enum NostrTag {
-    case other_event(OtherEvent)
-    case key_event(KeyEvent)
+func make_ln_url(_ str: String?) -> URL? {
+    return str.flatMap { URL(string: "lightning:" + $0) }
 }
 
 struct NostrSubscription {
