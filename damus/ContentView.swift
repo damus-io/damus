@@ -332,7 +332,6 @@ struct ContentView: View {
         }
         .onReceive(timer) { n in
             self.damus_state?.pool.connect_to_disconnected()
-            update_signal_from_pool(signal: self.home.signal, pool: self.damus_state!.pool)
         }
     }
     

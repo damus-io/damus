@@ -214,6 +214,8 @@ class HomeModel: ObservableObject {
             default:
                 break
             }
+            
+            update_signal_from_pool(signal: signal, pool: damus_state.pool)
 
             print("ws_event \(ev)")
 
