@@ -78,6 +78,15 @@ struct ProfileView: View {
     
     //@EnvironmentObject var profile: ProfileModel
     
+    func LNButton(_ url: URL) -> some View {
+        Button(action: {
+            UIApplication.shared.open(url)
+        }) {
+            Label("", systemImage: "bolt.fill")
+                .foregroundColor(.orange)
+        }
+    }
+    
     var DMButton: some View {
         let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
         let dmview = DMChatView(damus_state: damus_state, pubkey: profile.pubkey)
@@ -98,6 +107,11 @@ struct ProfileView: View {
                 ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
                 
                 Spacer()
+                
+                if let lnuri = data?.lightning_uri {
+                    LNButton(lnuri)
+                        .padding([.trailing], 20)
+                }
                 
                 DMButton
                     .padding([.trailing], 20)
@@ -183,7 +197,7 @@ func test_damus_state() -> DamusState {
     let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
     let damus = DamusState(pool: RelayPool(), keypair: Keypair(pubkey: pubkey, privkey: "privkey"), likes: EventCounter(our_pubkey: pubkey), boosts: EventCounter(our_pubkey: pubkey), contacts: Contacts(), tips: TipCounter(our_pubkey: pubkey), profiles: Profiles(), dms: DirectMessagesModel())
     
-    let prof = Profile(name: "damus", display_name: "Damus", about: "iOS app!", picture: "https://damus.io/img/logo.png")
+    let prof = Profile(name: "damus", display_name: "Damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol")
     let tsprof = TimestampedProfile(profile: prof, timestamp: 0)
     damus.profiles.add(id: pubkey, profile: tsprof)
     return damus
