@@ -11,7 +11,8 @@ import Kingfisher
 
 let BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
-    "wss://nostr-pub.wellorder.net",
+    "wss://nostr-relay.wlvs.space",
+    "wss://nostr.oxtr.dev",
 ]
 
 struct TimestampedProfile {
