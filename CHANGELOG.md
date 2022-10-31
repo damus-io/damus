@@ -1,4 +1,23 @@
 
+## [0.1.6] - 2022-10-30
+
+### Added
+
+     - Add lightning tipping button for lud06 profiles
+     - Display bolt11 invoice widgets on posts
+     - Added inline image loading
+     - Show relay connection status in config
+     - Search hashtags, profiles, events
+
+### Changed
+
+     - Use an optimized library for image loading
+
+### Fixed
+
+     - Damus will now stay connected at all times
+
+
 ## [0.1.3] - 2022-08-19
 
 ### Added
