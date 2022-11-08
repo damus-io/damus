@@ -74,6 +74,7 @@ struct PostView: View {
             TextEditor(text: $post)
                 .foregroundColor(self.post == POST_PLACEHOLDER ? .gray : .primary)
                 .focused($focus)
+                .textInputAutocapitalization(.sentences)
                 .onTapGesture {
                     handle_post_placeholder()
                 }
