@@ -68,26 +68,11 @@ struct ContentView: View {
     @State var search_open: Bool = false
     @State var filter_state : FilterState = .posts_and_replies
     @StateObject var home: HomeModel = HomeModel()
-    
+
     // connect retry timer
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
 
     let sub_id = UUID().description
-    
-    var LoadingContainer: some View {
-        HStack(alignment: .center) {
-            if home.signal.signal != home.signal.max_signal {
-                Text("\(home.signal.signal)/\(home.signal.max_signal)")
-                    .font(.callout)
-                    .foregroundColor(.gray)
-            }
-            
-            NavigationLink(destination: ConfigView(state: damus_state!)) {
-                Label("", systemImage: "gear")
-            }
-            .buttonStyle(PlainButtonStyle())
-        }
-    }
 
     var PostingTimelineView: some View {
         VStack{
@@ -189,19 +174,43 @@ struct ContentView: View {
             }
         }
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
                 NavigationView {
                     MainContent(damus: damus)
                         .toolbar {
-                            LoadingContainer
+                            ToolbarItem(placement: .navigationBarLeading) {
+                                let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
+                                let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
+                                let prof_dest = ProfileView(damus_state: damus_state!, profile: profile_model, followers: followers_model)
+
+                                NavigationLink(destination: prof_dest) {
+                                    ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+
+                            ToolbarItem(placement: .navigationBarTrailing) {
+                                HStack(alignment: .center) {
+                                    if home.signal.signal != home.signal.max_signal {
+                                        Text("\(home.signal.signal)/\(home.signal.max_signal)")
+                                            .font(.callout)
+                                            .foregroundColor(.gray)
+                                    }
+
+                                    NavigationLink(destination: ConfigView(state: damus_state!)) {
+                                        Label("", systemImage: "gear")
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
                         }
                 }
                 .navigationViewStyle(.stack)
             }
-            
+
             TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
         }
         .onAppear() {
