@@ -42,7 +42,8 @@ struct PostView: View {
         if replying_to?.known_kind == .chat {
             kind = .chat
         }
-        let new_post = NostrPost(content: self.post, references: references, kind: kind)
+        let content = self.post.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        let new_post = NostrPost(content: content, references: references, kind: kind)
 
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
         dismiss()
