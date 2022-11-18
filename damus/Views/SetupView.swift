@@ -60,8 +60,6 @@ struct SetupView: View {
                     
                     CarouselView()
                     
-                    Spacer()
-                    
                     DamusWhiteButton("Create Account") {
                         self.state = .create_account
                     }
@@ -71,11 +69,8 @@ struct SetupView: View {
                     }
                     .padding([.top, .bottom], 20)
                     .foregroundColor(.white)
-                    
-                    Spacer()
                 }
             }
-            .padding(.top, -80)
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationViewStyle(StackNavigationViewStyle())
