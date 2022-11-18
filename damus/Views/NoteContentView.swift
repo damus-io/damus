@@ -11,7 +11,7 @@ struct NoteArtifacts {
     let content: String
     let images: [URL]
     let invoices: [Invoice]
-    
+
     static func just_content(_ content: String) -> NoteArtifacts {
         NoteArtifacts(content: content, images: [], invoices: [])
     }
@@ -39,7 +39,7 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
             return str + url.absoluteString
         }
     }
-    
+
     return NoteArtifacts(content: txt, images: img_urls, invoices: invoices)
 }
 
@@ -52,21 +52,15 @@ struct NoteContentView: View {
     let privkey: String?
     let event: NostrEvent
     let profiles: Profiles
-    
+
     let show_images: Bool
-    
+
     @State var artifacts: NoteArtifacts
-    
+
     func MainContent() -> some View {
-        let md_opts: AttributedString.MarkdownParsingOptions =
-            .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        
         return VStack(alignment: .leading) {
-            if let txt = try? AttributedString(markdown: artifacts.content, options: md_opts) {
-                Text(txt)
-            } else {
-                Text(artifacts.content)
-            }
+            Text(artifacts.content)
+
             if show_images && artifacts.images.count > 0 {
                 ImageCarousel(urls: artifacts.images)
             }
@@ -76,7 +70,7 @@ struct NoteContentView: View {
             }
         }
     }
-    
+
     var body: some View {
         MainContent()
             .onAppear() {
