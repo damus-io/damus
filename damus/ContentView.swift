@@ -9,7 +9,7 @@ import SwiftUI
 import Starscream
 import Kingfisher
 
-let BOOTSTRAP_RELAYS = [
+var BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
     "wss://nostr-relay.wlvs.space",
     "wss://nostr.oxtr.dev",
