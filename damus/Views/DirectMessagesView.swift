@@ -13,7 +13,7 @@ struct DirectMessagesView: View {
     
     var MainContent: some View {
         ScrollView {
-            VStack {
+            LazyVStack {
                 ForEach(model.dms, id: \.0) { tup in
                     MaybeEvent(tup)
                 }
