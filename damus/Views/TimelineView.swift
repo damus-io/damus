@@ -57,7 +57,7 @@ struct TimelineView: View {
                 InnerTimelineView(events: $events, damus: damus, show_friend_icon: show_friend_icon, filter: filter)
             }
             .onReceive(NotificationCenter.default.publisher(for: .scroll_to_top)) { _ in
-                guard let event = events.first else {
+                guard let event = events.filter(self.filter).first else {
                     return
                 }
                 scroll_to_event(scroller: scroller, id: event.id, delay: 0.0, animate: true)
