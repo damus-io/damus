@@ -226,7 +226,7 @@ func get_nip05_pubkey(id: String) async -> NIP05User? {
 
     var relays: [String] = []
     if let rs = json.relays {
-        if let rs = rs[user] {
+        if let rs = rs[pubkey] {
             relays = rs
         }
     }
