@@ -519,7 +519,8 @@ func make_metadata_event(keypair: Keypair, metadata: NostrMetadata) -> NostrEven
 
 func make_boost_event(pubkey: String, privkey: String, boosted: NostrEvent) -> NostrEvent {
     var tags: [[String]] = boosted.tags.filter { tag in tag.count >= 2 && (tag[0] == "e" || tag[0] == "p") }
-    tags.append(["e", boosted.id])
+    
+    tags.append(["e", boosted.id, "", "root"])
     tags.append(["p", boosted.pubkey])
 
     let ev = NostrEvent(content: event_to_json(ev: boosted), pubkey: pubkey, kind: 6, tags: tags)
