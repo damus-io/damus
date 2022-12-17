@@ -37,6 +37,8 @@ struct ChatroomView: View {
                     }
                     
                 }
+                .padding(.horizontal)
+                .padding(.top)
                 
                 EndBlock()
             }

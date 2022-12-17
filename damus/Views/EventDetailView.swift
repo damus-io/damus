@@ -91,15 +91,19 @@ struct EventDetailView: View {
             }
             
             ScrollView(.vertical) {
-                let collapsed_events = calculated_collapsed_events(
-                    privkey: damus.keypair.privkey,
-                    collapsed: self.collapsed,
-                    active: thread.event,
-                    events: thread.events
-                )
-                ForEach(collapsed_events, id: \.id) { cev in
-                    CollapsedEventView(cev, scroller: proxy)
+                LazyVStack {
+                    let collapsed_events = calculated_collapsed_events(
+                        privkey: damus.keypair.privkey,
+                        collapsed: self.collapsed,
+                        active: thread.event,
+                        events: thread.events
+                    )
+                    ForEach(collapsed_events, id: \.id) { cev in
+                        CollapsedEventView(cev, scroller: proxy)
+                    }
                 }
+                .padding(.horizontal)
+                .padding(.top)
                 
                 EndBlock()
             }

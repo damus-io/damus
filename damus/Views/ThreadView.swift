@@ -35,7 +35,6 @@ struct ThreadView: View {
             }
              */
         }
-        .padding([.leading, .trailing], 6)
         .onReceive(handle_notify(.switched_timeline)) { n in
             dismiss()
         }

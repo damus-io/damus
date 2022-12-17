@@ -22,6 +22,8 @@ struct DirectMessagesView: View {
                     }
                 }
             }
+            .padding(.horizontal)
+            .padding(.top)
         }
     }
     
