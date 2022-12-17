@@ -18,6 +18,8 @@ struct DirectMessagesView: View {
                     MaybeEvent(tup)
                 }
             }
+            .padding(.horizontal)
+            .padding(.top)
         }
     }
     

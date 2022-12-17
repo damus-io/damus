@@ -32,6 +32,7 @@ struct InnerTimelineView: View {
                 .buttonStyle(PlainButtonStyle())
             }
         }
+        .padding(.horizontal)
     }
 }
 

@@ -23,6 +23,7 @@ struct DMChatView: View {
                     }
                     EndBlock(height: 80)
                 }
+                .padding(.horizontal)
             }
             .onAppear {
                 scroller.scrollTo("endblock")
@@ -50,7 +51,12 @@ struct DMChatView: View {
             .textEditorBackground {
                 InputBackground()
             }
-            .cornerRadius(20)
+            .cornerRadius(8)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(style: .init(lineWidth: 2))
+                    .foregroundColor(.secondary.opacity(0.2))
+            )
             .padding(16)
             .foregroundColor(Color.primary)
     }
@@ -76,7 +82,7 @@ struct DMChatView: View {
     var Footer: some View {
         ZStack {
             BackgroundColor()
-
+            
             HStack(spacing: 0) {
                 InputField
 
@@ -119,12 +125,12 @@ struct DMChatView: View {
         message = ""
 
         damus_state.pool.send(.event(dm))
+        end_editing()
     }
 
     var body: some View {
         ZStack {
             Messages
-                .padding([.top, .leading, .trailing], 10)
                 .dismissKeyboardOnTap()
 
             VStack {

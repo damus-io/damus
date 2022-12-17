@@ -73,11 +73,11 @@ struct ContentView: View {
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
 
     let sub_id = UUID().description
+    
+    @Environment(\.colorScheme) var colorScheme
 
     var PostingTimelineView: some View {
         VStack{
-            FiltersView
-                .padding([.bottom], 8)
             ZStack {
                 if let damus = self.damus_state {
                     TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter_event)
@@ -88,6 +88,16 @@ struct ContentView: View {
                     }
                 }
             }
+        }
+        .safeAreaInset(edge: .top) {
+            VStack(spacing: 0) {
+                FiltersView
+                    //.frame(maxWidth: 275)
+                    .padding()
+                Divider()
+                    .frame(height: 1)
+            }
+            .background(colorScheme == .dark ? Color.black : Color.white)
         }
     }
     
@@ -139,7 +149,7 @@ struct ContentView: View {
                 EmptyView()
             }
         }
-        .navigationBarTitle("Damus", displayMode: .inline)
+        .navigationBarTitle(selected_timeline == .home ?  "Home" : "Global", displayMode: .inline)
     }
     
     var MaybeSearchView: some View {
