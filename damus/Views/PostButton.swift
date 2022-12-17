@@ -18,6 +18,7 @@ func PostButton(action: @escaping () -> ()) -> some View {
     })
     .background(Color.blue)
     .cornerRadius(38.5)
+    .padding(.bottom)
     .shadow(color: Color.black.opacity(0.3),
             radius: 3,
             x: 3,
