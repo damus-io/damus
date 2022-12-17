@@ -197,7 +197,13 @@ struct ContentView: View {
                                 let prof_dest = ProfileView(damus_state: damus_state!, profile: profile_model, followers: followers_model)
 
                                 NavigationLink(destination: prof_dest) {
-                                    ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles)
+                                    /// Verify that the user has a profile picture, if not display a generic SF Symbol
+                                    /// (Resolves an in-app error where ``Robohash`` pictures are not generated so the button dissapears
+                                    if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
+                                        ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
+                                    } else {
+                                        Image(systemName: "person.fill")
+                                    }
                                 }
                                 .buttonStyle(PlainButtonStyle())
                             }
