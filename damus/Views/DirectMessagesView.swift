@@ -14,8 +14,12 @@ struct DirectMessagesView: View {
     var MainContent: some View {
         ScrollView {
             LazyVStack {
-                ForEach(model.dms, id: \.0) { tup in
-                    MaybeEvent(tup)
+                if model.dms.isEmpty, !model.loading {
+                    EmptyTimelineView()
+                } else {
+                    ForEach(model.dms, id: \.0) { tup in
+                        MaybeEvent(tup)
+                    }
                 }
             }
             .padding(.horizontal)
