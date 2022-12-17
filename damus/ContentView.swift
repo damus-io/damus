@@ -180,6 +180,7 @@ struct ContentView: View {
             if let damus = self.damus_state {
                 NavigationView {
                     MainContent(damus: damus)
+                        .padding()
                         .toolbar {
                             ToolbarItem(placement: .navigationBarLeading) {
                                 let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
