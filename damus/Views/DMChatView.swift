@@ -12,12 +12,6 @@ struct DMChatView: View {
     let pubkey: String
     @EnvironmentObject var dms: DirectMessageModel
     @State var message: String = ""
-    
-    init(damus_state: DamusState, pubkey: String) {
-        self.damus_state = damus_state
-        self.pubkey = pubkey
-        UITextView.appearance().backgroundColor = .clear
-    }
 
     var Messages: some View {
         ScrollViewReader { scroller in
@@ -29,6 +23,7 @@ struct DMChatView: View {
                     }
                     EndBlock(height: 80)
                 }
+                .padding(.horizontal)
             }
             .onAppear {
                 scroller.scrollTo("endblock")
@@ -53,9 +48,16 @@ struct DMChatView: View {
 
     var InputField: some View {
         TextEditor(text: $message)
-            .cornerRadius(20)
-            .padding(8)
-            .background(InputBackground().cornerRadius(20))
+            .textEditorBackground {
+                InputBackground()
+            }
+            .cornerRadius(8)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(style: .init(lineWidth: 2))
+                    .foregroundColor(.secondary.opacity(0.2))
+            )
+            .padding(16)
             .foregroundColor(Color.primary)
     }
 
@@ -63,9 +65,9 @@ struct DMChatView: View {
 
     func InputBackground() -> Color {
         if colorScheme == .light {
-            return Color.init(.sRGB, red: 0.8, green: 0.8, blue: 0.8, opacity: 1.0)
+            return Color.init(.sRGB, red: 0.9, green: 0.9, blue: 0.9, opacity: 1.0)
         } else {
-            return Color.init(.sRGB, red: 0.2, green: 0.2, blue: 0.2, opacity: 1.0)
+            return Color.init(.sRGB, red: 0.1, green: 0.1, blue: 0.1, opacity: 1.0)
         }
     }
 
@@ -78,21 +80,21 @@ struct DMChatView: View {
     }
 
     var Footer: some View {
-        //ZStack {
-            //BackgroundColor()
+        ZStack {
+            BackgroundColor()
+            
+            HStack(spacing: 0) {
+                InputField
 
-        HStack(spacing: 0) {
-            InputField
-
-            if !message.isEmpty {
-                Button(role: .none, action: send_message) {
-                    Label("", systemImage: "arrow.right.circle")
-                        .font(.title)
+                if !message.isEmpty {
+                    Button(role: .none, action: send_message) {
+                        Label("", systemImage: "arrow.right.circle")
+                            .font(.title)
+                    }
                 }
             }
         }
         .frame(height: 50 + 20 * CGFloat(text_lines))
-        //}
     }
 
     var text_lines: Int {
@@ -123,12 +125,12 @@ struct DMChatView: View {
         message = ""
 
         damus_state.pool.send(.event(dm))
+        end_editing()
     }
 
     var body: some View {
         ZStack {
             Messages
-                .padding([.top, .leading, .trailing], 10)
                 .dismissKeyboardOnTap()
 
             VStack {

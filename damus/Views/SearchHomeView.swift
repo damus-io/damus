@@ -17,7 +17,7 @@ struct SearchHomeView: View {
         ZStack(alignment: .leading) {
             HStack{
                 TextField("", text: $search)
-                    .padding(5)
+                    .padding(8)
                     .padding(.leading, 35)
                     .textInputAutocapitalization(.never)
                 Label("", systemImage: "xmark.square")
@@ -32,10 +32,10 @@ struct SearchHomeView: View {
                 .padding(.leading, 10)
         }
         .background {
-            RoundedRectangle(cornerRadius: 20)
-            .foregroundColor(.gray.opacity(0.2))
+            RoundedRectangle(cornerRadius: 8)
+                .foregroundColor(.secondary.opacity(0.2))
         }
-        .padding()
+        //.padding()
     }
     
     var GlobalContent: some View {
@@ -56,11 +56,21 @@ struct SearchHomeView: View {
         }
     }
     
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
         VStack {
-            SearchInput
-            
             MainContent
+        }
+        .safeAreaInset(edge: .top) {
+            VStack(spacing: 0) {
+                SearchInput
+                    //.frame(maxWidth: 275)
+                    .padding()
+                Divider()
+                    .frame(height: 1)
+            }
+            .background(colorScheme == .dark ? Color.black : Color.white)
         }
         .onChange(of: search) { s in
             print("search change 1")
