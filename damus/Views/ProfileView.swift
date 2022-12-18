@@ -82,8 +82,10 @@ struct ProfileView: View {
         Button(action: {
             UIApplication.shared.open(url)
         }) {
-            Label("", systemImage: "bolt.fill")
-                .foregroundColor(.orange)
+            Image(systemName: "bolt.circle")
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(.black, .gray)
+                .font(.system(size: 27).weight(.thin))
         }
     }
     
@@ -92,9 +94,11 @@ struct ProfileView: View {
         let dmview = DMChatView(damus_state: damus_state, pubkey: profile.pubkey)
             .environmentObject(dm_model)
         return NavigationLink(destination: dmview) {
-            Label("", systemImage: "text.bubble")
+            Image(systemName: "bubble.left.circle")
+                .symbolRenderingMode(.palette)
+                .font(.system(size: 29).weight(.thin))
+                .foregroundStyle(.black, .gray)
         }
-        .buttonStyle(PlainButtonStyle())
     }
     
     var TopSection: some View {
@@ -106,23 +110,20 @@ struct ProfileView: View {
                 
                 Spacer()
                 
+                KeyView(pubkey: profile.pubkey)
+                    .pubkey_context_menu(bech32_pubkey: bech32_pubkey(profile.pubkey) ?? profile.pubkey)
+                
                 if let lnuri = data?.lightning_uri {
                     LNButton(lnuri)
-                        .padding([.trailing], 20)
                 }
                 
                 DMButton
-                    .padding([.trailing], 20)
                 
                 FollowButtonView(target: profile.get_follow_target(), follow_state: damus_state.contacts.follow_state(profile.pubkey))
             }
             
             ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
                 .padding(.bottom)
-            
-            KeyView(pubkey: profile.pubkey)
-                .padding(.bottom, 10)
-                .pubkey_context_menu(bech32_pubkey: bech32_pubkey(profile.pubkey) ?? profile.pubkey)
             
             Text(data?.about ?? "")
         
@@ -209,18 +210,20 @@ struct KeyView: View {
     
     @Environment(\.colorScheme) var colorScheme
     
+    @State private var isCopied = false
+    
     var body: some View {
         let col = id_to_color(pubkey)
         let bech32 = bech32_pubkey(pubkey) ?? pubkey
-        let half = bech32.count / 2
         
-        VStack {
-            Text("\(String(bech32.prefix(half)))")
-                .foregroundColor(colorScheme == .light ? .black : col)
-                .font(.footnote.monospaced())
-            Text("\(String(bech32.suffix(half)))")
-                .font(.footnote.monospaced())
-                .foregroundColor(colorScheme == .light ? .black : col)
+        Button {
+            UIPasteboard.general.string = bech32
+            isCopied = true
+        } label: {
+            Label(isCopied ? "Copied" : "", systemImage: "key.fill")
+                .font(isCopied ? .caption : .system(size: 15).weight(.light))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundColor(isCopied ? .gray : col)
         }
     }
 }

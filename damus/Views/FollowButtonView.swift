@@ -12,10 +12,21 @@ struct FollowButtonView: View {
     @State var follow_state: FollowState
     
     var body: some View {
-        Button("\(follow_btn_txt(follow_state))") {
+        Button {
             follow_state = perform_follow_btn_action(follow_state, target: target)
+        } label: {
+            Text(follow_btn_txt(follow_state))
+                .padding(.horizontal, 20)
+                .padding(.vertical, 7)
+                .font(.caption.weight(.bold))
+                .foregroundColor(follow_state == .unfollows ? .white : .black)
+                .background(follow_state == .unfollows ?  .black : .white)
+                .cornerRadius(20)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(follow_state == .unfollows ? .white : .gray, lineWidth: 1)
+                }
         }
-        .buttonStyle(.bordered)
         .onReceive(handle_notify(.followed)) { notif in
             let pk = notif.object as! String
             if pk != target.pubkey {
