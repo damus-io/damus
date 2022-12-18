@@ -54,14 +54,24 @@ struct ProfileNameView: View {
         Group {
             if let real_name = profile?.display_name {
                 VStack(alignment: .leading) {
-                    Text(real_name)
-                        .font(.title3.weight(.bold))
+                    HStack {
+                        Text(real_name)
+                            .font(.title3.weight(.bold))
+                        
+                        KeyView(pubkey: pubkey)
+                            .pubkey_context_menu(bech32_pubkey: pubkey)
+                    }
                     ProfileName(pubkey: pubkey, profile: profile, prefix: "@", contacts: contacts, show_friend_confirmed: true)
                         .font(.callout)
                         .foregroundColor(.gray)
                 }
             } else {
-                ProfileName(pubkey: pubkey, profile: profile, contacts: contacts, show_friend_confirmed: true)
+                HStack {
+                    ProfileName(pubkey: pubkey, profile: profile, contacts: contacts, show_friend_confirmed: true)
+                    
+                    KeyView(pubkey: pubkey)
+                        .pubkey_context_menu(bech32_pubkey: pubkey)
+                }
             }
         }
     }
@@ -109,9 +119,6 @@ struct ProfileView: View {
                 ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .custom(Color.black, 2), profiles: damus_state.profiles)
                 
                 Spacer()
-                
-                KeyView(pubkey: profile.pubkey)
-                    .pubkey_context_menu(bech32_pubkey: bech32_pubkey(profile.pubkey) ?? profile.pubkey)
                 
                 if let lnuri = data?.lightning_uri {
                     LNButton(lnuri)
@@ -169,7 +176,6 @@ struct ProfileView: View {
             .frame(maxHeight: .infinity, alignment: .topLeading)
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
-        .navigationBarTitle("Profile")
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
         }
