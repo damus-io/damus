@@ -55,7 +55,7 @@ struct ProfileNameView: View {
             if let real_name = profile?.display_name {
                 VStack(alignment: .leading) {
                     Text(real_name)
-                        .font(.title)
+                        .font(.title3.weight(.bold))
                     ProfileName(pubkey: pubkey, profile: profile, prefix: "@", contacts: contacts, show_friend_confirmed: true)
                         .font(.callout)
                         .foregroundColor(.gray)
@@ -103,8 +103,6 @@ struct ProfileView: View {
             
             HStack(alignment: .center) {
                 ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .custom(Color.black, 2), profiles: damus_state.profiles)
-        
-                ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
                 
                 Spacer()
                 
@@ -118,6 +116,9 @@ struct ProfileView: View {
                 
                 FollowButtonView(target: profile.get_follow_target(), follow_state: damus_state.contacts.follow_state(profile.pubkey))
             }
+            
+            ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
+                .padding(.bottom)
             
             KeyView(pubkey: profile.pubkey)
                 .padding(.bottom, 10)
@@ -158,6 +159,7 @@ struct ProfileView: View {
         VStack(alignment: .leading) {
             ScrollView {
                 TopSection
+                    .padding(.horizontal)
             
                 Divider()
                 
@@ -165,7 +167,6 @@ struct ProfileView: View {
             }
             .frame(maxHeight: .infinity, alignment: .topLeading)
         }
-        .padding([.leading, .trailing], 6)
         .frame(maxWidth: .infinity, alignment: .topLeading)
         .navigationBarTitle("Profile")
         .onReceive(handle_notify(.switched_timeline)) { _ in
