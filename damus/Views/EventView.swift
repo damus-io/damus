@@ -93,9 +93,11 @@ struct EventView: View {
                     }
                     .buttonStyle(PlainButtonStyle())
                     TextEvent(inner_ev, pubkey: inner_ev.pubkey)
+                        .padding([.top], 2)
                 }
             } else {
                 TextEvent(event, pubkey: pubkey)
+                    .padding([.top], 6)
             }
         }
     }
@@ -146,7 +148,7 @@ struct EventView: View {
         .background(event_validity_color(event.validity))
         .id(event.id)
         .frame(maxWidth: .infinity, minHeight: PFP_SIZE)
-        .padding([.bottom], 4)
+        .padding([.bottom], 2)
         .event_context_menu(event, privkey: damus.keypair.privkey)
     }
 }
