@@ -9,65 +9,9 @@ import SwiftUI
 import Starscream
 import Kingfisher
 
-var BOOTSTRAP_RELAYS = [
-    "wss://relay.damus.io",
-    "wss://nostr-relay.wlvs.space",
-    "wss://nostr.oxtr.dev",
-]
-
-struct TimestampedProfile {
-    let profile: Profile
-    let timestamp: Int64
-}
-
-enum Sheets: Identifiable {
-    case post
-    case reply(NostrEvent)
-
-    var id: String {
-        switch self {
-        case .post: return "post"
-        case .reply(let ev): return "reply-" + ev.id
-        }
-    }
-}
-
-enum ThreadState {
-    case event_details
-    case chatroom
-}
-
-enum FilterState : Int {
-    case posts_and_replies = 1
-    case posts = 0
-}
-
 struct ContentView: View {
-    let keypair: Keypair
     
-    var pubkey: String {
-        return keypair.pubkey
-    }
-    
-    var privkey: String? {
-        return keypair.privkey
-    }
-    
-    @State var status: String = "Not connected"
-    @State var active_sheet: Sheets? = nil
-    @State var damus_state: DamusState? = nil
-    @State var selected_timeline: Timeline? = .home
-    @State var is_thread_open: Bool = false
-    @State var is_profile_open: Bool = false
-    @State var event: NostrEvent? = nil
-    @State var active_profile: String? = nil
-    @State var active_search: NostrFilter? = nil
-    @State var active_event_id: String? = nil
-    @State var profile_open: Bool = false
-    @State var thread_open: Bool = false
-    @State var search_open: Bool = false
-    @State var filter_state : FilterState = .posts_and_replies
-    @StateObject var home: HomeModel = HomeModel()
+    @EnvironmentObject var viewModel: DamusViewModel
 
     // connect retry timer
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
@@ -80,9 +24,9 @@ struct ContentView: View {
         VStack{
             ZStack {
                 if let damus = self.damus_state {
-                    TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter_event)
+                    TimelineView(events: viewModel.$home.events, loading: viewModel.$home.loading, damus: damus, show_friend_icon: false, filter: filter_event)
                 }
-                if privkey != nil {
+                if viewModel.privkey != nil {
                     PostButtonContainer {
                         self.active_sheet = .post
                     }
@@ -103,7 +47,7 @@ struct ContentView: View {
     
     var FiltersView: some View {
         VStack{
-            Picker("Filter State", selection: $filter_state) {
+            Picker("Filter State", selection: $viewModel.filter_state) {
                 Text("Posts").tag(FilterState.posts)
                 Text("Posts & Replies").tag(FilterState.posts_and_replies)
             }
@@ -112,7 +56,7 @@ struct ContentView: View {
     }
     
     func filter_event(_ ev: NostrEvent) -> Bool {
-        if self.filter_state == .posts {
+        if viewModel.filter_state == .posts {
             return !ev.is_reply(nil)
         }
         
@@ -121,18 +65,18 @@ struct ContentView: View {
     
     func MainContent(damus: DamusState) -> some View {
         VStack {
-            NavigationLink(destination: MaybeProfileView, isActive: $profile_open) {
+            NavigationLink(destination: MaybeProfileView, isActive: $viewModel.profile_open) {
                 EmptyView()
             }
-            NavigationLink(destination: MaybeThreadView, isActive: $thread_open) {
+            NavigationLink(destination: MaybeThreadView, isActive: $viewModel.thread_open) {
                 EmptyView()
             }
-            NavigationLink(destination: MaybeSearchView, isActive: $search_open) {
+            NavigationLink(destination: MaybeSearchView, isActive: $viewModel.search_open) {
                 EmptyView()
             }
             switch selected_timeline {
             case .search:
-                SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
+                SearchHomeView(damus_state: viewModel.state!, model: SearchHomeModel(damus_state: damus_state!))
                 
             case .home:
                 PostingTimelineView
@@ -209,18 +153,16 @@ struct ContentView: View {
                             }
 
                             ToolbarItem(placement: .navigationBarTrailing) {
-                                HStack(alignment: .center) {
-                                    if home.signal.signal != home.signal.max_signal {
-                                        Text("\(home.signal.signal)/\(home.signal.max_signal)")
-                                            .font(.callout)
-                                            .foregroundColor(.gray)
-                                    }
-
                                     NavigationLink(destination: ConfigView(state: damus_state!)) {
-                                        Label("", systemImage: "gear")
+                                        if #available(iOS 16.0, *) {
+                                            Image(systemName: "chart.bar.fill", variableValue: Double(home.signal.signal) / Double(home.signal.max_signal))
+                                                .font(.body.weight(.ultraLight))
+                                                .symbolRenderingMode(.hierarchical)
+                                        } else {
+                                            // Fallback on earlier versions
+                                        }
                                     }
                                     .buttonStyle(PlainButtonStyle())
-                                }
                             }
                         }
                 }
@@ -359,54 +301,6 @@ struct ContentView: View {
             self.damus_state?.pool.connect_to_disconnected()
         }
     }
-    
-    func switch_timeline(_ timeline: Timeline) {
-        NotificationCenter.default.post(name: .switched_timeline, object: timeline)
-        
-        if timeline == self.selected_timeline {
-            NotificationCenter.default.post(name: .scroll_to_top, object: nil)
-            return
-        }
-        
-        self.selected_timeline = timeline
-        //NotificationCenter.default.post(name: .switched_timeline, object: timeline)
-        //self.selected_timeline = timeline
-    }
-    
-    func add_relay(_ pool: RelayPool, _ relay: String) {
-        //add_rw_relay(pool, "wss://nostr-pub.wellorder.net")
-        add_rw_relay(pool, relay)
-        /*
-        let profile = Profile(name: relay, about: nil, picture: nil)
-        let ts = Int64(Date().timeIntervalSince1970)
-        let tsprofile = TimestampedProfile(profile: profile, timestamp: ts)
-        damus!.profiles.add(id: relay, profile: tsprofile)
-         */
-    }
-
-    func connect() {
-        let pool = RelayPool()
-        
-        for relay in BOOTSTRAP_RELAYS {
-            add_relay(pool, relay)
-        }
-        
-        pool.register_handler(sub_id: sub_id, handler: home.handle_event)
-
-        self.damus_state = DamusState(pool: pool, keypair: keypair,
-                                likes: EventCounter(our_pubkey: pubkey),
-                                boosts: EventCounter(our_pubkey: pubkey),
-                                contacts: Contacts(),
-                                tips: TipCounter(our_pubkey: pubkey),
-                                profiles: Profiles(),
-                                dms: home.dms
-        )
-        home.damus_state = self.damus_state!
-        
-        pool.connect()
-    }
-
-    
 }
 
 struct ContentView_Previews: PreviewProvider {
@@ -422,31 +316,6 @@ func get_since_time(last_event: NostrEvent?) -> Int64? {
     }
     
     return nil
-}
-
-func ws_nostr_event(relay: String, ev: WebSocketEvent) -> NostrEvent? {
-    switch ev {
-    case .binary(let dat):
-        return NostrEvent(content: "binary data? \(dat.count) bytes", pubkey: relay)
-    case .cancelled:
-        return NostrEvent(content: "cancelled", pubkey: relay)
-    case .connected:
-        return NostrEvent(content: "connected", pubkey: relay)
-    case .disconnected:
-        return NostrEvent(content: "disconnected", pubkey: relay)
-    case .error(let err):
-        return NostrEvent(content: "error \(err.debugDescription)", pubkey: relay)
-    case .text(let txt):
-        return NostrEvent(content: "text \(txt)", pubkey: relay)
-    case .pong:
-        return NostrEvent(content: "pong", pubkey: relay)
-    case .ping:
-        return NostrEvent(content: "ping", pubkey: relay)
-    case .viabilityChanged(let b):
-        return NostrEvent(content: "viabilityChanged \(b)", pubkey: relay)
-    case .reconnectSuggested(let b):
-        return NostrEvent(content: "reconnectSuggested \(b)", pubkey: relay)
-    }
 }
 
 func is_notification(ev: NostrEvent, pubkey: String) -> Bool {
@@ -466,11 +335,6 @@ extension UINavigationController: UIGestureRecognizerDelegate {
     public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         return viewControllers.count > 1
     }
-}
-
-struct LastNotification {
-    let id: String
-    let created_at: Int64
 }
 
 func get_last_event(_ timeline: Timeline) -> LastNotification? {
