@@ -98,7 +98,7 @@ struct ProfileView: View {
             Image(systemName: "bolt.circle")
                 .symbolRenderingMode(.palette)
                 .font(.system(size: 34).weight(.thin))
-                .foregroundStyle(colorScheme == .light ? .black : .white, colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.1))
+                .foregroundStyle(colorScheme == .light ? .black : .white, colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2))
         }
     }
     
@@ -110,7 +110,7 @@ struct ProfileView: View {
             Image(systemName: "bubble.left.circle")
                 .symbolRenderingMode(.palette)
                 .font(.system(size: 34).weight(.thin))
-                .foregroundStyle(colorScheme == .light ? .black : .white, colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.1))
+                .foregroundStyle(colorScheme == .light ? .black : .white, colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2))
         }
     }
     

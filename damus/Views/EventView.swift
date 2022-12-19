@@ -83,17 +83,22 @@ struct EventView: View {
                     
                     NavigationLink(destination: booster_profile) {
                         HStack {
-                            Label("", systemImage: "arrow.2.squarepath")
+                            Image(systemName: "arrow.2.squarepath")
+                                .font(.footnote.weight(.bold))
                                 .foregroundColor(Color.gray)
-                            ProfileName(pubkey: event.pubkey, profile: damus.profiles.lookup(id: event.pubkey), contacts: damus.contacts, show_friend_confirmed: show_friend_icon)
-                                .foregroundColor(Color.gray)
-                            Text(" Boosted")
+                            if let prof = damus.profiles.lookup(id: event.pubkey) {
+                                Text(Profile.displayName(profile: prof, pubkey: event.pubkey))
+                                    .font(.footnote.weight(.bold))
+                                    .foregroundColor(Color.gray)
+                            }
+                            Text("Boosted")
+                                .font(.footnote.weight(.bold))
                                 .foregroundColor(Color.gray)
                         }
                     }
                     .buttonStyle(PlainButtonStyle())
                     TextEvent(inner_ev, pubkey: inner_ev.pubkey)
-                        .padding([.top], 2)
+                        .padding([.top], 1)
                 }
             } else {
                 TextEvent(event, pubkey: pubkey)
