@@ -69,7 +69,6 @@ func generate_new_keypair() -> Keypair {
     let key = try! secp256k1.Signing.PrivateKey()
     let privkey = hex_encode(key.rawRepresentation)
     let pubkey = hex_encode(Data(key.publicKey.xonly.bytes))
-    print("generating privkey:\(privkey) pubkey:\(pubkey)")
     return Keypair(pubkey: pubkey, privkey: privkey)
 }
 
