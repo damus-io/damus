@@ -10,6 +10,7 @@
 		3169CAEB294FCABA00EE4006 /* Shimmer in Frameworks */ = {isa = PBXBuildFile; productRef = 3169CAEA294FCABA00EE4006 /* Shimmer */; };
 		3169CAED294FCCFC00EE4006 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAEC294FCCFC00EE4006 /* Constants.swift */; };
 		3169CAEF294FD4C400EE4006 /* DamusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAEE294FD4C400EE4006 /* DamusViewModel.swift */; };
+		3169CAE6294E69C000EE4006 /* EmptyTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAE5294E69C000EE4006 /* EmptyTimelineView.swift */; };
 		4C06670128FC7C5900038D2A /* RelayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670028FC7C5900038D2A /* RelayView.swift */; };
 		4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 4C06670328FC7EC500038D2A /* Kingfisher */; };
 		4C06670628FCB08600038D2A /* ImageCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670528FCB08600038D2A /* ImageCarousel.swift */; };
@@ -151,6 +152,7 @@
 /* Begin PBXFileReference section */
 		3169CAEC294FCCFC00EE4006 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Constants.swift; path = damus/Util/Constants.swift; sourceTree = SOURCE_ROOT; };
 		3169CAEE294FD4C400EE4006 /* DamusViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusViewModel.swift; sourceTree = "<group>"; };
+		3169CAE5294E69C000EE4006 /* EmptyTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyTimelineView.swift; sourceTree = "<group>"; };
 		4C06670028FC7C5900038D2A /* RelayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayView.swift; sourceTree = "<group>"; };
 		4C06670528FCB08600038D2A /* ImageCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCarousel.swift; sourceTree = "<group>"; };
 		4C06670828FDE64700038D2A /* damus-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "damus-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -336,6 +338,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3169CAE4294E699400EE4006 /* Empty Views */ = {
+			isa = PBXGroup;
+			children = (
+				3169CAE5294E69C000EE4006 /* EmptyTimelineView.swift */,
+			);
+			path = "Empty Views";
+			sourceTree = "<group>";
+		};
 		4C06670728FDE62900038D2A /* damus-c */ = {
 			isa = PBXGroup;
 			children = (
@@ -427,6 +437,7 @@
 		4C75EFA227FA576C0006080F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				3169CAE4294E699400EE4006 /* Empty Views */,
 				4C75EFA327FA577B0006080F /* PostView.swift */,
 				4C75EFAC28049CFB0006080F /* PostButton.swift */,
 				4C75EFB82804A2740006080F /* EventView.swift */,
@@ -789,6 +800,7 @@
 				4C3AC79F2833115300E1F516 /* FollowButtonView.swift in Sources */,
 				4C3BEFD22819DB9B00B3DE84 /* ProfileModel.swift in Sources */,
 				4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */,
+				3169CAE6294E69C000EE4006 /* EmptyTimelineView.swift in Sources */,
 				4C3EA64928FF597700C48A62 /* bech32.c in Sources */,
 				4C90BD162839DB54008EE7EF /* NostrMetadata.swift in Sources */,
 				4C3EA67528FF7A5A00C48A62 /* take.c in Sources */,

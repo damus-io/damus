@@ -21,7 +21,7 @@ struct DMView: View {
                 Spacer()
             }
             
-            NoteContentView(privkey: damus_state.keypair.privkey, event: event, profiles: damus_state.profiles, show_images: true, artifacts: .just_content(event.get_content(damus_state.keypair.privkey)))
+            NoteContentView(privkey: damus_state.keypair.privkey, event: event, profiles: damus_state.profiles, show_images: should_show_images(contacts: damus_state.contacts, ev: event), artifacts: .just_content(event.get_content(damus_state.keypair.privkey)))
                 .foregroundColor(is_ours ? Color.white : Color.primary)
                 .padding(10)
                 .background(is_ours ? Color.accentColor : Color.secondary.opacity(0.15))

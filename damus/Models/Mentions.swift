@@ -189,7 +189,11 @@ func convert_invoice_block(_ b: invoice_block) -> Block? {
         return nil
     }
     
-    let description = String(cString: b11.description)
+    var description = ""
+    if b11.description != nil {
+        description = String(cString: b11.description)
+    }
+    
     guard let msat = maybe_pointee(b11.msat) else {
         return nil
     }

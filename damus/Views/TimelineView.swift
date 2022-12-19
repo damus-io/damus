@@ -21,16 +21,20 @@ struct InnerTimelineView: View {
     
     var body: some View {
         LazyVStack {
-            ForEach(events.filter(filter), id: \.id) { (ev: NostrEvent) in
-                let tm = ThreadModel(event: inner_event_or_self(ev: ev), damus_state: damus)
-                let is_chatroom = should_show_chatroom(ev)
-                let tv = ThreadView(thread: tm, damus: damus, is_chatroom: is_chatroom)
-                            
-                NavigationLink(destination: tv) {
-                    EventView(event: ev, highlight: .none, has_action_bar: true, damus: damus, show_friend_icon: show_friend_icon)
+            if events.isEmpty {
+                EmptyTimelineView()
+            } else {
+                ForEach(events.filter(filter), id: \.id) { (ev: NostrEvent) in
+                    let tm = ThreadModel(event: inner_event_or_self(ev: ev), damus_state: damus)
+                    let is_chatroom = should_show_chatroom(ev)
+                    let tv = ThreadView(thread: tm, damus: damus, is_chatroom: is_chatroom)
+                                
+                    NavigationLink(destination: tv) {
+                        EventView(event: ev, highlight: .none, has_action_bar: true, damus: damus, show_friend_icon: show_friend_icon)
+                    }
+                    .isDetailLink(true)
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .isDetailLink(true)
-                .buttonStyle(PlainButtonStyle())
             }
         }
         .padding(.horizontal)
@@ -76,8 +80,11 @@ struct TimelineView: View {
             ScrollView {
                 if loading {
                     InnerTimelineRedactedView(events: Constants.EXAMPLE_EVENTS, damus: damus, show_friend_icon: true)
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                } else {
+                    InnerTimelineView(events: $events, damus: damus, show_friend_icon: show_friend_icon, filter: filter)
                 }
-                InnerTimelineView(events: $events, damus: damus, show_friend_icon: show_friend_icon, filter: filter)
             }
             .onReceive(NotificationCenter.default.publisher(for: .scroll_to_top)) { _ in
                 guard let event = events.filter(self.filter).first else {

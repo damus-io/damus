@@ -80,7 +80,10 @@ struct SaveKeysView: View {
     }
     
     func complete_account_creation(_ account: CreateAccountModel) {
-        add_rw_relay(self.pool, "wss://relay.damus.io")
+        for relay in BOOTSTRAP_RELAYS {
+            add_rw_relay(self.pool, relay)
+        }
+
         self.pool.register_handler(sub_id: "signup", handler: handle_event)
         
         self.loading = true
