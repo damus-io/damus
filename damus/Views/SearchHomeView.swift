@@ -39,11 +39,19 @@ struct SearchHomeView: View {
     }
     
     var GlobalContent: some View {
-        TimelineView(events: $model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: { _ in true })
+        return TimelineView(events: $model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: { _ in true })
+            .refreshable {
+                // Fetch new information by resubscribing to the relay
+                model.subscribe()
+            }
     }
     
     var SearchContent: some View {
         SearchResultsView(damus_state: damus_state, search: $search)
+            .refreshable {
+                // Fetch new information by resubscribing to the relay
+                model.subscribe()
+            }
     }
     
     var MainContent: some View {

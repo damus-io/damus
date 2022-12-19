@@ -34,9 +34,6 @@ struct InnerTimelineView: View {
             }
         }
         .padding(.horizontal)
-        .refreshable {
-            print("Hello World")
-        }
     }
 }
 
@@ -60,6 +57,9 @@ struct InnerTimelineRedactedView: View {
 }
 
 struct TimelineView: View {
+    
+    @EnvironmentObject var viewModel: DamusViewModel
+    
     @Binding var events: [NostrEvent]
     @Binding var loading: Bool
 
