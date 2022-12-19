@@ -85,6 +85,7 @@ struct ProfileView: View {
     @StateObject var followers: FollowersModel
     
     @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) var colorScheme
     
     //@EnvironmentObject var profile: ProfileModel
     
@@ -94,7 +95,7 @@ struct ProfileView: View {
         }) {
             Image(systemName: "bolt.circle")
                 .symbolRenderingMode(.palette)
-                .foregroundStyle(.black, .gray)
+                .foregroundStyle(colorScheme == .dark ? .white : .black, .gray)
                 .font(.system(size: 27).weight(.thin))
         }
     }
@@ -107,7 +108,7 @@ struct ProfileView: View {
             Image(systemName: "bubble.left.circle")
                 .symbolRenderingMode(.palette)
                 .font(.system(size: 29).weight(.thin))
-                .foregroundStyle(.black, .gray)
+                .foregroundStyle(colorScheme == .dark ? .white : .black, .gray)
         }
     }
     
