@@ -131,7 +131,7 @@ struct EventView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, show_images: true, artifacts: .just_content(content))
+                NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, show_images: should_show_images(contacts: damus.contacts, ev: event), artifacts: .just_content(content))
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 if has_action_bar {
@@ -151,6 +151,14 @@ struct EventView: View {
         .padding([.bottom], 2)
         .event_context_menu(event, privkey: damus.keypair.privkey)
     }
+}
+
+// blame the porn bots for this code
+func should_show_images(contacts: Contacts, ev: NostrEvent) -> Bool {
+    if contacts.is_friend(ev.pubkey) {
+        return true
+    }
+    return false
 }
 
 func event_validity_color(_ validation: ValidationResult) -> some View {
