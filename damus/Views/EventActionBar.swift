@@ -37,7 +37,7 @@ struct EventActionBar: View {
             if damus_state.keypair.privkey != nil {
                 EventActionButton(img: "bubble.left", col: nil) {
                     notify(.reply, event)
-                }
+                }.frame(maxWidth: .infinity)
             }
             
             HStack(alignment: .bottom) {
@@ -52,7 +52,7 @@ struct EventActionBar: View {
                         self.confirm_boost = true
                     }
                 }
-            }
+            }.frame(maxWidth: .infinity)
 
             HStack(alignment: .bottom) {
                 Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
@@ -66,7 +66,7 @@ struct EventActionBar: View {
                         send_like()
                     }
                 }
-            }
+            }.frame(maxWidth: .infinity)
             
             /*
             HStack(alignment: .bottom) {
@@ -139,7 +139,7 @@ func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> 
             .font(.footnote)
             .foregroundColor(col == nil ? Color.gray : col!)
     }
-    .padding(.trailing, 40)
+    
 }
 
 
