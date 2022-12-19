@@ -83,6 +83,7 @@ struct CreateAccountView: View {
             .padding(.trailing, 20.0)
             
         }
+        .dismissKeyboardOnTap()
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackNav())
