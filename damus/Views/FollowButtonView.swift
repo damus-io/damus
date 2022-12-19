@@ -27,7 +27,7 @@ struct FollowButtonView: View {
                 .cornerRadius(20)
                 .overlay {
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(follow_state == .unfollows ? borderColor() : fillColor(), lineWidth: 1)
+                        .stroke(follow_state == .unfollows ? .clear : borderColor(), lineWidth: 1)
                 }
         }
         .onReceive(handle_notify(.followed)) { notif in
@@ -57,7 +57,7 @@ struct FollowButtonView: View {
     }
     
     func borderColor() -> Color {
-        colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.1)
+        colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2)
     }
 }
 
