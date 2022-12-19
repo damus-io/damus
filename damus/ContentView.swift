@@ -151,16 +151,18 @@ struct ContentView: View {
                             }
 
                             ToolbarItem(placement: .navigationBarTrailing) {
-                                NavigationLink(destination: ConfigView(state: viewModel.state!)) {
-                                        if #available(iOS 16.0, *) {
-                                            Image(systemName: "chart.bar.fill", variableValue: Double(viewModel.home.signal.signal) / Double(viewModel.home.signal.max_signal))
-                                                .font(.body.weight(.ultraLight))
-                                                .symbolRenderingMode(.hierarchical)
-                                        } else {
-                                            // Fallback on earlier versions
-                                        }
+                                HStack(alignment: .center) {
+                                    if viewModel.home.signal.signal != viewModel.home.signal.max_signal {
+                                        Text("\(viewModel.home.signal.signal)/\(viewModel.home.signal.max_signal)")
+                                            .font(.callout)
+                                            .foregroundColor(.gray)
+                                    }
+
+                                    NavigationLink(destination: ConfigView(state: viewModel.state!)) {
+                                        Image(systemName: "gear")
                                     }
                                     .buttonStyle(PlainButtonStyle())
+                                }
                             }
                         }
                 }

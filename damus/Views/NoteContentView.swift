@@ -64,8 +64,10 @@ struct NoteContentView: View {
         return VStack(alignment: .leading) {
             if let txt = try? AttributedString(markdown: artifacts.content, options: md_opts) {
                 Text(txt)
+                    .font(.subheadline)
             } else {
                 Text(artifacts.content)
+                    .font(.subheadline)
             }
             if show_images && artifacts.images.count > 0 {
                 ImageCarousel(urls: artifacts.images)

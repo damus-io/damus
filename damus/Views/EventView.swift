@@ -119,11 +119,12 @@ struct EventView: View {
 
             VStack(alignment: .leading) {
                 HStack(alignment: .center) {
-                    ProfileName(pubkey: pubkey, profile: profile, contacts: damus.contacts, show_friend_confirmed: show_friend_icon)
+                    EventProfileName(pubkey: pubkey, profile: profile, contacts: damus.contacts, show_friend_confirmed: show_friend_icon)
                     Text("\(format_relative_time(event.created_at))")
+                        .font(.subheadline)
                         .foregroundColor(.gray)
                 }
-
+                
                 if event.is_reply(damus.keypair.privkey) {
                     Text("\(reply_desc(profiles: damus.profiles, event: event))")
                         .font(.footnote)

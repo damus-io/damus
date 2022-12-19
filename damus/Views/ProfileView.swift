@@ -78,6 +78,9 @@ struct ProfileNameView: View {
 }
 
 struct ProfileView: View {
+    
+    @Environment(\.colorScheme) var colorScheme
+    
     let damus_state: DamusState
     
     @State private var selected_tab: ProfileTab = .posts
@@ -94,8 +97,8 @@ struct ProfileView: View {
         }) {
             Image(systemName: "bolt.circle")
                 .symbolRenderingMode(.palette)
-                .foregroundStyle(.black, .gray)
-                .font(.system(size: 27).weight(.thin))
+                .font(.system(size: 34).weight(.thin))
+                .foregroundStyle(colorScheme == .light ? .black : .white, colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.1))
         }
     }
     
@@ -106,8 +109,8 @@ struct ProfileView: View {
         return NavigationLink(destination: dmview) {
             Image(systemName: "bubble.left.circle")
                 .symbolRenderingMode(.palette)
-                .font(.system(size: 29).weight(.thin))
-                .foregroundStyle(.black, .gray)
+                .font(.system(size: 34).weight(.thin))
+                .foregroundStyle(colorScheme == .light ? .black : .white, colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.1))
         }
     }
     
@@ -133,6 +136,7 @@ struct ProfileView: View {
                 .padding(.bottom)
             
             Text(data?.about ?? "")
+                .font(.subheadline)
         
             Divider()
                 
