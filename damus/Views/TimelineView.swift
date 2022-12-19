@@ -35,7 +35,7 @@ struct InnerTimelineView: View {
         }
         .padding(.horizontal)
         .refreshable {
-            <#code#>
+            print("Hello World")
         }
     }
 }

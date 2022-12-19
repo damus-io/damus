@@ -9,12 +9,21 @@ import SwiftUI
 import Starscream
 import Kingfisher
 
+/// Default relays to be used when setting up the user's account.
+var BOOTSTRAP_RELAYS = [
+    "wss://relay.damus.io",
+    "wss://nostr-relay.wlvs.space",
+    "wss://nostr.oxtr.dev",
+]
+
 class DamusViewModel: ObservableObject {
     
     // MARK: Constants and Variables
     
+    let sub_id = UUID().description
+    
     /// User Keypair object
-    let keypair: Keypair
+    var keypair: Keypair
     
     var pubkey: String {
         return keypair.pubkey
@@ -24,13 +33,6 @@ class DamusViewModel: ObservableObject {
         return keypair.privkey
     }
     
-    /// Default relays to be used when setting up the user's account.
-    var BOOTSTRAP_RELAYS = [
-        "wss://relay.damus.io",
-        "wss://nostr-relay.wlvs.space",
-        "wss://nostr.oxtr.dev",
-    ]
-    
     @Published var status: String = "Not connected"
     @Published var state: DamusState? = nil
     @Published var active_sheet: Sheets? = nil
@@ -39,13 +41,18 @@ class DamusViewModel: ObservableObject {
     @Published var is_profile_open: Bool = false
     @Published var event: NostrEvent? = nil
     @Published var active_profile: String? = nil
-    @Published var active_search: String? = nil
+    @Published var active_search: NostrFilter? = nil
     @Published var active_event_id: String? = nil
     @Published var profile_open: Bool = false
     @Published var thread_open: Bool = false
     @Published var search_open: Bool = false
     @Published var filter_state: FilterState = .posts_and_replies
     @Published var home: HomeModel = HomeModel()
+    
+    // MARK: Initializer
+    init(with key: Keypair) {
+        self.keypair = key
+    }
     
     // MARK: Functionality
     

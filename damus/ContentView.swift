@@ -15,20 +15,18 @@ struct ContentView: View {
 
     // connect retry timer
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
-
-    let sub_id = UUID().description
     
     @Environment(\.colorScheme) var colorScheme
 
     var PostingTimelineView: some View {
         VStack{
             ZStack {
-                if let damus = self.damus_state {
-                    TimelineView(events: viewModel.$home.events, loading: viewModel.$home.loading, damus: damus, show_friend_icon: false, filter: filter_event)
+                if let damus = viewModel.state {
+                    TimelineView(events: $viewModel.home.events, loading: $viewModel.home.loading, damus: damus, show_friend_icon: false, filter: filter_event)
                 }
                 if viewModel.privkey != nil {
                     PostButtonContainer {
-                        self.active_sheet = .post
+                        viewModel.active_sheet = .post
                     }
                 }
             }
@@ -74,32 +72,32 @@ struct ContentView: View {
             NavigationLink(destination: MaybeSearchView, isActive: $viewModel.search_open) {
                 EmptyView()
             }
-            switch selected_timeline {
+            switch viewModel.selected_timeline {
             case .search:
-                SearchHomeView(damus_state: viewModel.state!, model: SearchHomeModel(damus_state: damus_state!))
+                SearchHomeView(damus_state: viewModel.state!, model: SearchHomeModel(damus_state: viewModel.state!))
                 
             case .home:
                 PostingTimelineView
                 
             case .notifications:
-                TimelineView(events: $home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
+                TimelineView(events: $viewModel.home.notifications, loading: $viewModel.home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
                     .navigationTitle("Notifications")
                 
             case .dms:
-                DirectMessagesView(damus_state: damus_state!)
-                    .environmentObject(home.dms)
+                DirectMessagesView(damus_state: viewModel.state!)
+                    .environmentObject(viewModel.home.dms)
             
             case .none:
                 EmptyView()
             }
         }
-        .navigationBarTitle(selected_timeline == .home ?  "Home" : "Global", displayMode: .inline)
+        .navigationBarTitle(viewModel.selected_timeline == .home ?  "Home" : "Global", displayMode: .inline)
     }
     
     var MaybeSearchView: some View {
         Group {
-            if let search = self.active_search {
-                SearchView(appstate: damus_state!, search: SearchModel(pool: damus_state!.pool, search: search))
+            if let search = viewModel.active_search {
+                SearchView(appstate: viewModel.state!, search: SearchModel(pool: viewModel.state!.pool, search: search))
             } else {
                 EmptyView()
             }
@@ -108,9 +106,9 @@ struct ContentView: View {
     
     var MaybeThreadView: some View {
         Group {
-            if let evid = self.active_event_id {
-                let thread_model = ThreadModel(evid: evid, damus_state: damus_state!)
-                ThreadView(thread: thread_model, damus: damus_state!, is_chatroom: false)
+            if let evid = viewModel.active_event_id {
+                let thread_model = ThreadModel(evid: evid, damus_state: viewModel.state!)
+                ThreadView(thread: thread_model, damus: viewModel.state!, is_chatroom: false)
             } else {
                 EmptyView()
             }
@@ -119,10 +117,10 @@ struct ContentView: View {
     
     var MaybeProfileView: some View {
         Group {
-            if let pk = self.active_profile {
-                let profile_model = ProfileModel(pubkey: pk, damus: damus_state!)
-                let followers = FollowersModel(damus_state: damus_state!, target: pk)
-                ProfileView(damus_state: damus_state!, profile: profile_model, followers: followers)
+            if let pk = viewModel.active_profile {
+                let profile_model = ProfileModel(pubkey: pk, damus: viewModel.state!)
+                let followers = FollowersModel(damus_state: viewModel.state!, target: pk)
+                ProfileView(damus_state: viewModel.state!, profile: profile_model, followers: followers)
             } else {
                 EmptyView()
             }
@@ -131,20 +129,20 @@ struct ContentView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if let damus = self.damus_state {
+            if let damus = viewModel.state {
                 NavigationView {
                     MainContent(damus: damus)
                         .toolbar {
                             ToolbarItem(placement: .navigationBarLeading) {
-                                let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
-                                let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
-                                let prof_dest = ProfileView(damus_state: damus_state!, profile: profile_model, followers: followers_model)
+                                let profile_model = ProfileModel(pubkey: viewModel.state!.pubkey, damus: viewModel.state!)
+                                let followers_model = FollowersModel(damus_state: viewModel.state!, target: viewModel.state!.pubkey)
+                                let prof_dest = ProfileView(damus_state: viewModel.state!, profile: profile_model, followers: followers_model)
 
                                 NavigationLink(destination: prof_dest) {
                                     /// Verify that the user has a profile picture, if not display a generic SF Symbol
                                     /// (Resolves an in-app error where ``Robohash`` pictures are not generated so the button dissapears
-                                    if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
-                                        ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
+                                    if let picture = viewModel.state?.profiles.lookup(id: viewModel.pubkey)?.picture {
+                                        ProfilePicView(pubkey: viewModel.state!.pubkey, size: 32, highlight: .none, profiles: viewModel.state!.profiles, picture: picture)
                                     } else {
                                         Image(systemName: "person.fill")
                                     }
@@ -153,9 +151,9 @@ struct ContentView: View {
                             }
 
                             ToolbarItem(placement: .navigationBarTrailing) {
-                                    NavigationLink(destination: ConfigView(state: damus_state!)) {
+                                NavigationLink(destination: ConfigView(state: viewModel.state!)) {
                                         if #available(iOS 16.0, *) {
-                                            Image(systemName: "chart.bar.fill", variableValue: Double(home.signal.signal) / Double(home.signal.max_signal))
+                                            Image(systemName: "chart.bar.fill", variableValue: Double(viewModel.home.signal.signal) / Double(viewModel.home.signal.max_signal))
                                                 .font(.body.weight(.ultraLight))
                                                 .symbolRenderingMode(.hierarchical)
                                         } else {
@@ -169,19 +167,19 @@ struct ContentView: View {
                 .navigationViewStyle(.stack)
             }
 
-            TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
+            TabBar(new_events: $viewModel.home.new_events, selected: $viewModel.selected_timeline, action: viewModel.switch_timeline)
         }
         .onAppear() {
-            self.connect()
+            viewModel.connect()
             //KingfisherManager.shared.cache.clearDiskCache()
             setup_notifications()
         }
-        .sheet(item: $active_sheet) { item in
+        .sheet(item: $viewModel.active_sheet) { item in
             switch item {
             case .post:
                 PostView(replying_to: nil, references: [])
             case .reply(let event):
-                ReplyView(replying_to: event, damus: damus_state!)
+                ReplyView(replying_to: event, damus: viewModel.state!)
             }
         }
         .onOpenURL { url in
@@ -192,28 +190,28 @@ struct ContentView: View {
             switch link {
             case .ref(let ref):
                 if ref.key == "p" {
-                    active_profile = ref.ref_id
-                    profile_open = true
+                    viewModel.active_profile = ref.ref_id
+                    viewModel.profile_open = true
                 } else if ref.key == "e" {
-                    active_event_id = ref.ref_id
-                    thread_open = true
+                    viewModel.active_event_id = ref.ref_id
+                    viewModel.thread_open = true
                 }
             case .filter(let filt):
-                active_search = filt
-                search_open = true
+                viewModel.active_search = filt
+                viewModel.search_open = true
                 break
                 // TODO: handle filter searches?
             }
             
         }
         .onReceive(handle_notify(.boost)) { notif in
-            guard let privkey = self.privkey else {
+            guard let privkey = viewModel.privkey else {
                 return
             }
 
             let ev = notif.object as! NostrEvent
-            let boost = make_boost_event(pubkey: pubkey, privkey: privkey, boosted: ev)
-            self.damus_state?.pool.send(.event(boost))
+            let boost = make_boost_event(pubkey: viewModel.pubkey, privkey: privkey, boosted: ev)
+            viewModel.state?.pool.send(.event(boost))
         }
         .onReceive(handle_notify(.open_thread)) { obj in
             //let ev = obj.object as! NostrEvent
@@ -222,20 +220,20 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.reply)) { notif in
             let ev = notif.object as! NostrEvent
-            self.active_sheet = .reply(ev)
+            viewModel.active_sheet = .reply(ev)
         }
         .onReceive(handle_notify(.like)) { like in
         }
         .onReceive(handle_notify(.broadcast_event)) { obj in
             let ev = obj.object as! NostrEvent
-            self.damus_state?.pool.send(.event(ev))
+            viewModel.state?.pool.send(.event(ev))
         }
         .onReceive(handle_notify(.unfollow)) { notif in
-            guard let privkey = self.privkey else {
+            guard let privkey = viewModel.privkey else {
                 return
             }
             
-            guard let damus = self.damus_state else {
+            guard let damus = viewModel.state else {
                 return
             }
             
@@ -255,12 +253,12 @@ struct ContentView: View {
             }
         }
         .onReceive(handle_notify(.follow)) { notif in
-            guard let privkey = self.privkey else {
+            guard let privkey = viewModel.privkey else {
                 return
             }
             
             let fnotify = notif.object as! FollowTarget
-            guard let damus = self.damus_state else {
+            guard let damus = viewModel.state else {
                 return
             }
             
@@ -271,7 +269,7 @@ struct ContentView: View {
                            follow: ReferencedId(ref_id: fnotify.pubkey, relay_id: nil, key: "p")) {
                 notify(.followed, fnotify.pubkey)
                 
-                damus_state?.contacts.event = ev
+                viewModel.state?.contacts.event = ev
                 
                 switch fnotify {
                 case .pubkey(let pk):
@@ -282,7 +280,7 @@ struct ContentView: View {
             }
         }
         .onReceive(handle_notify(.post)) { obj in
-            guard let privkey = self.privkey else {
+            guard let privkey = viewModel.privkey else {
                 return
             }
             
@@ -290,22 +288,23 @@ struct ContentView: View {
             switch post_res {
             case .post(let post):
                 print("post \(post.content)")
-                let new_ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
-                self.damus_state?.pool.send(.event(new_ev))
+                let new_ev = post_to_event(post: post, privkey: privkey, pubkey: viewModel.pubkey)
+                viewModel.state?.pool.send(.event(new_ev))
             case .cancel:
-                active_sheet = nil
+                viewModel.active_sheet = nil
                 print("post cancelled")
             }
         }
         .onReceive(timer) { n in
-            self.damus_state?.pool.connect_to_disconnected()
+            viewModel.state?.pool.connect_to_disconnected()
         }
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(keypair: Keypair(pubkey: "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681", privkey: nil))
+        ContentView()
+            .environmentObject(DamusViewModel(with: Keypair(pubkey: "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681", privkey: nil)))
     }
 }
 
