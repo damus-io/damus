@@ -147,7 +147,9 @@ struct ProfileView: View {
                     NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model, whos: profile.pubkey)) {
                         HStack {
                             Text("\(profile.following)")
+                                .font(.subheadline.weight(.medium))
                             Text("Following")
+                                .font(.subheadline)
                                 .foregroundColor(.gray)
                         }
                     }
@@ -158,7 +160,9 @@ struct ProfileView: View {
                 NavigationLink(destination: fview) {
                     HStack {
                         Text("\(followers.contacts.count)")
+                            .font(.subheadline.weight(.medium))
                         Text("Followers")
+                            .font(.subheadline)
                             .foregroundColor(.gray)
                     }
                 }

@@ -147,7 +147,6 @@ struct EventProfileName: View {
                     .font(.subheadline)
             } else {
                 Text(String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
-                    .foregroundColor(.black)
                     .font(.subheadline)
                     .fontWeight(.bold)
             }
