@@ -213,6 +213,9 @@ static int parse_invoice(struct cursor *cur, struct block *block) {
     struct bolt11 *bolt11;
     start = cur->p;
     
+    // optional
+    parse_str(cur, "lightning:");
+    
     if (!parse_str(cur, "lnbc"))
         return 0;
     
