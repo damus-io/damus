@@ -4,7 +4,6 @@
 //
 //  Created by William Casarin on 2022-06-09.
 //
-
 import AVFoundation
 import SwiftUI
 
@@ -14,7 +13,13 @@ struct ConfigView: View {
     @State var show_add_relay: Bool = false
     @State var confirm_logout: Bool = false
     @State var new_relay: String = ""
-    @State var isHidden: Bool = true
+    @State var showPrivateKey: Bool = false
+    @State var privateKey: String
+    
+    init(state: DamusState) {
+        self.state = state
+        _privateKey = State(initialValue: self.state.keypair.privkey_bech32 ?? "")
+    }
     
     var body: some View {
         ZStack(alignment: .leading) {
@@ -47,7 +52,10 @@ struct ConfigView: View {
                 
                 if let sec = state.keypair.privkey_bech32 {
                     Section("Secret Account Login Key") {
-                        if isHidden == false {
+                        if showPrivateKey == false {
+                            SecureField("PrivateKey", text: $privateKey)
+                                .disabled(true)
+                        } else {
                             Text(sec)
                                 .textSelection(.enabled)
                                 .onTapGesture {
@@ -62,14 +70,8 @@ struct ConfigView: View {
                                         }
                                 )
                         }
-                        
-                        if isHidden == true {
-                            Text("*******")
-                        }
    
-                        Button("Show/Hide Key") {
-                            isHidden.toggle()
-                        }
+                        Toggle("Show PrivateKey", isOn: $showPrivateKey)
                     }
                 }
                     
