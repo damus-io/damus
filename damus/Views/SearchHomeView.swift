@@ -19,6 +19,7 @@ struct SearchHomeView: View {
                 TextField("", text: $search)
                     .padding(8)
                     .padding(.leading, 35)
+                    .autocorrectionDisabled(true)
                     .textInputAutocapitalization(.never)
                 Label("", systemImage: "xmark.square")
                     .padding(EdgeInsets(top: 0.0, leading: 0.0, bottom: 0.0, trailing: 10.0))

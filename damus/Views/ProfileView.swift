@@ -88,6 +88,7 @@ struct ProfileView: View {
     @StateObject var followers: FollowersModel
     
     @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) var colorScheme
     
     //@EnvironmentObject var profile: ProfileModel
     
