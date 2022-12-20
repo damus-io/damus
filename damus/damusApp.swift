@@ -26,8 +26,7 @@ struct MainView: View {
     var body: some View {
         Group {
             if let kp = keypair, !needs_setup {
-                ContentView()
-                    .environmentObject(DamusViewModel(with: kp))
+                ContentView(keypair: kp)
             } else {
                 SetupView()
                     .onReceive(handle_notify(.login)) { notif in
