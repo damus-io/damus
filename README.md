@@ -70,7 +70,7 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 
 #### 👤 Change Your Profile (PFP) and Bio
 - Currently you can't change your pfp on the Damus app (coming soon!). Here's how to do it on other clients (do at your own risk)
-1. Get the [Alby](https://getalby.com/) or [nos2x](https://chrome.google.com/webstore/detail/nos2x/kpgefcfmnafjgpblomihpgmejjdanjjp) browser extension (Chrome, Brave)
+1. Get the [Alby](https://getalby.com/) (Chrome, Brave, Firefox) or [nos2x](https://chrome.google.com/webstore/detail/nos2x/kpgefcfmnafjgpblomihpgmejjdanjjp) browser extension (Chrome, Brave)
 2. Go to https://damus.io/key to convert your nsec key (secret key in ⚙️ Settings) into a hex version
 	i. For Alby, right-click the extension, select Options and scroll to the Nostr section to enter your secret hex key
 	ii.  For nos2x, right-click the extension, select Options, then and add the relay `wss://relay.damus.io` and select both read and write, click Save, then enter your secret hex key and click save
@@ -81,8 +81,8 @@ damus implements the following [Nostr Implementation Possibilities][nips]
     (Sats or Satoshis are the smallest denomination of bitcoin)
 	
 **Alby (browser extension)**
-- Get the [Alby](https://getalby.com/) browser extension and create your Alby address [yourname]@getalby.com 
-- Convert your Damus secret key from nsec to hex at https://damus.io/key then go to Settings in Alby and under the Nostr section at the bottom of the page add your private hex key
+- Get the [Alby](https://getalby.com/) browser extension and create your Alby address [yourname]@getalby.com or connect your existing Lightning wallet
+- Convert your Damus secret key from nsec to hex at https://damus.io/key then go to Settings in Alby and under the Nostr section at the bottom of the page add your private hex key. You can also generate new address in the extension
 - Click the Alby extension > click Receive > enter the amount of Sats > click Get Invoice > click Copy > then paste into Damus
 - Note: On Damus Web it will appear as a string of characters but on Damus iOS it will appear as a clickable image
 
