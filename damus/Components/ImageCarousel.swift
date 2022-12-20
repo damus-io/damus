@@ -17,11 +17,14 @@ struct ImageViewer: View {
                 VStack{
                     Text(url.lastPathComponent)
                     
-                    KFImage(url)
+                    KFAnimatedImage(url)
+                        .configure { view in
+                            view.framePreloadCount = 3
+                        }
+                        .cacheOriginalImage()
                         .loadDiskFileSynchronously()
                         .scaleFactor(UIScreen.main.scale)
                         .fade(duration: 0.1)
-                        .resizable()
                         .aspectRatio(contentMode: .fit)
                         .tabItem {
                             Text(url.absoluteString)
