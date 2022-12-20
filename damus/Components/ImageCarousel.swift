@@ -21,6 +21,8 @@ struct ImageViewer: View {
                         .loadDiskFileSynchronously()
                         .scaleFactor(UIScreen.main.scale)
                         .fade(duration: 0.1)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
                         .tabItem {
                             Text(url.absoluteString)
                         }
@@ -45,6 +47,8 @@ struct ImageCarousel: View {
                     .loadDiskFileSynchronously()
                     .scaleFactor(UIScreen.main.scale)
                     .fade(duration: 0.1)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .tabItem {
                         Text(url.absoluteString)
                     }
