@@ -5,8 +5,8 @@
 //  Created by William Casarin on 2022-06-09.
 //
 
-import SwiftUI
 import AVFoundation
+import SwiftUI
 
 struct ConfigView: View {
     let state: DamusState
@@ -14,6 +14,7 @@ struct ConfigView: View {
     @State var show_add_relay: Bool = false
     @State var confirm_logout: Bool = false
     @State var new_relay: String = ""
+    @State var isHidden: Bool = true
     
     var body: some View {
         ZStack(alignment: .leading) {
@@ -25,7 +26,6 @@ struct ConfigView: View {
                                 RelayView(state: state, ev: ev, relay: relay)
                             }
                         }
-                        
                     }
                 }
                 
@@ -37,15 +37,25 @@ struct ConfigView: View {
                             AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
                         }
                 }
-                    
+                
                 if let sec = state.keypair.privkey_bech32 {
                     Section("Secret Account Login Key") {
-                        Text(sec)
-                            .textSelection(.enabled)
-                            .onTapGesture {
-                                UIPasteboard.general.string = sec
-                                AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
-                            }
+                        if isHidden == false {
+                            Text(sec)
+                                .textSelection(.enabled)
+                                .onTapGesture {
+                                    UIPasteboard.general.string = sec
+                                    AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+                                }
+                        }
+                        
+                        if isHidden == true {
+                            Text("*******")
+                        }
+   
+                        Button("Show/Hide Key") {
+                            isHidden.toggle()
+                        }
                     }
                 }
                     
