@@ -15,8 +15,7 @@ enum NostrPostResult {
 let POST_PLACEHOLDER = "Type your post here..."
 
 struct PostView: View {
-    @State var post: String = POST_PLACEHOLDER
-    @State var new: Bool = true
+    @State var post: String = ""
 
     let replying_to: NostrEvent?
     @FocusState var focus: Bool
@@ -50,7 +49,7 @@ struct PostView: View {
     }
 
     var is_post_empty: Bool {
-        return post == POST_PLACEHOLDER || post.allSatisfy { $0.isWhitespace }
+        return post.allSatisfy { $0.isWhitespace }
     }
 
     var body: some View {
@@ -71,18 +70,17 @@ struct PostView: View {
             }
             .padding([.top, .bottom], 4)
 
-
-            TextEditor(text: $post)
-                .foregroundColor(self.post == POST_PLACEHOLDER ? .gray : .primary)
-                .focused($focus)
-                .textInputAutocapitalization(.sentences)
-                .onTapGesture {
-                    handle_post_placeholder()
+            ZStack(alignment: .topLeading) {
+                TextEditor(text: $post)
+                    .focused($focus)
+                    .textInputAutocapitalization(.sentences)
+                if post.isEmpty {
+                    Text(POST_PLACEHOLDER)
+                        .padding(.top, 8)
+                        .padding(.leading, 10)
+                        .foregroundColor(Color(uiColor: .placeholderText))
                 }
-                .onChange(of: post) { value in
-                    handle_post_placeholder()
-                }
-
+            }
         }
         .onAppear() {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -90,15 +88,6 @@ struct PostView: View {
             }
         }
         .padding()
-    }
-
-    func handle_post_placeholder()  {
-        guard new else {
-            return
-        }
-
-        new = false
-        post = post.replacingOccurrences(of: POST_PLACEHOLDER, with: "")
     }
 }
 
