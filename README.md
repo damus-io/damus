@@ -72,22 +72,22 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 - Currently you can't change your pfp on the Damus app (coming soon!). Here's how to do it on other clients (do at your own risk)
 1. Get the [Alby](https://getalby.com/) or [nos2x](https://chrome.google.com/webstore/detail/nos2x/kpgefcfmnafjgpblomihpgmejjdanjjp) browser extension (Chrome, Brave)
 2. Go to https://damus.io/key to convert your nsec key (secret key in ⚙️ Settings) into a hex version
-3.1 For Alby, right-click the extension, select Options and scroll to the Nostr section to enter your secret hex key
-3.2 For nos2x, right-click the extension, select Options, then and add the relay `wss://relay.damus.io` and select both read and write, click Save, then enter your secret hex key and click save
-4. Visit https://metadata.nostr.com and your profile data should auto-populate from the extension. If not click the extension or refresh the page
-5. Add your image using a hosting site like imgbb.com
+	i. For Alby, right-click the extension, select Options and scroll to the Nostr section to enter your secret hex key
+	ii.  For nos2x, right-click the extension, select Options, then and add the relay `wss://relay.damus.io` and select both read and write, click Save, then enter your secret hex key and click save
+3. Visit https://metadata.nostr.com and your profile data should auto-populate from the extension. If not click the extension or refresh the page
+4. Add your image using a hosting site like imgbb.com
 
 #### ⚡️ Request Sats 
     (Sats or Satoshis are the smallest denomination of bitcoin)
 	
 **Alby (browser extension)**
-- Get the Alby browser extension: https://getalby.com and create your Alby address [yourname]@getalby.com 
-- Convert your Damus private key from nsec to hex at https://metadata.nostr.com then go to Settings in Alby and under the Nostr section at the bottom of the page add your private hex key
+- Get the [Alby](https://getalby.com/) browser extension and create your Alby address [yourname]@getalby.com 
+- Convert your Damus secret key from nsec to hex at https://damus.io/key then go to Settings in Alby and under the Nostr section at the bottom of the page add your private hex key
 - Click the Alby extension > click Receive > enter the amount of Sats > click Get Invoice > click Copy > then paste into Damus
 - Note: On Damus Web it will appear as a string of characters but on Damus iOS it will appear as a clickable image
 
 **Zeus (mobile app)**
-- Download Zeus app https://zeusln.app/ (iOS, Google, APK)
+- Download [Zeus](https://zeusln.app/) app (iOS, Google, APK)
 - Tap Get Started button > tap Connect a node > click on + sign (top right) > select Indhub > press Scan Lndhub QR > (from the Alby browser extension… click your account on the top left > click Manage Accounts > click 3-dot menu to right of your account and click Export Account to get a QR code then go back to Zeus app) > scan the QR Code and tap Save Node Config button
 - To create an invoice tap Lightning > tap Receive > type in amount > tap Create Invoice > tap Copy Invoice > paste into a new Damus note
 
