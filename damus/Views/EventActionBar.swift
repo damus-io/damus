@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 enum ActionBarSheet: Identifiable {
     case reply
@@ -20,6 +21,7 @@ enum ActionBarSheet: Identifiable {
 struct EventActionBar: View {
     let damus_state: DamusState
     let event: NostrEvent
+    let generator = UIImpactFeedbackGenerator(style: .light)
     @State var sheet: ActionBarSheet? = nil
     @State var confirm_boost: Bool = false
     @StateObject var bar: ActionBarModel
@@ -127,6 +129,8 @@ struct EventActionBar: View {
         let like_ev = make_like_event(pubkey: damus_state.pubkey, privkey: privkey, liked: event)
         
         self.bar.our_like = like_ev
+
+        generator.impactOccurred()
         
         damus_state.pool.send(.event(like_ev))
     }
