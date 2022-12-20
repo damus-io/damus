@@ -18,7 +18,7 @@ struct AddRelayView: View {
             Form {
                 Section("Add Relay") {
                     TextField("wss://some.relay.com", text: $relay)
-                        .autocorrectionDisabled(true)
+                        .disableAutocorrection(true)
                         .textInputAutocapitalization(.never)
                 }
             }
