@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Shimmer
 
 enum TimelineAction {
     case chillin
