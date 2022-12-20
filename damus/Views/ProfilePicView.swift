@@ -67,7 +67,7 @@ struct ProfilePicView: View {
                 .loadDiskFileSynchronously()
                 .fade(duration: 0.1)
                 .clipShape(Circle())
-                .shadow(color: .gray, radius: 5, x: 0, y: 5)
+                .shadow(color: Color(UIColor.darkGray), radius: 5, x: 0, y: 2)
                 .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
         }
     }
