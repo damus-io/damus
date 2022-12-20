@@ -126,7 +126,7 @@ struct EventView: View {
                 HStack(alignment: .center) {
                     EventProfileName(pubkey: pubkey, profile: profile, contacts: damus.contacts, show_friend_confirmed: show_friend_icon)
                     Text("\(format_relative_time(event.created_at))")
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundColor(.gray)
                 }
                 

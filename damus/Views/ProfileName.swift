@@ -75,7 +75,7 @@ struct ProfileName: View {
         HStack {
             
             Text(prefix + String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
-                .font(.subheadline)
+                .font(.body)
                 .fontWeight(prefix == "@" ? .none : .bold)
             if let frend = friend_icon {
                 Label("", systemImage: frend)
@@ -140,14 +140,14 @@ struct EventProfileName: View {
         HStack {
             if let real_name = profile?.display_name {
                 Text(real_name)
-                    .font(.subheadline.weight(.bold))
+                    .font(.body.weight(.bold))
                 
                 Text("@" + String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
                     .foregroundColor(.gray)
-                    .font(.subheadline)
+                    .font(.body)
             } else {
                 Text(String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
-                    .font(.subheadline)
+                    .font(.body)
                     .fontWeight(.bold)
             }
             
