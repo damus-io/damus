@@ -36,6 +36,13 @@ struct ConfigView: View {
                             UIPasteboard.general.string = state.keypair.pubkey_bech32
                             AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
                         }
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                        .gesture(
+                            LongPressGesture(minimumDuration: 1.0)
+                                .onEnded { _ in
+                                    UIPasteboard.general.string = state.keypair.pubkey_bech32
+                                }
+                        )
                 }
                 
                 if let sec = state.keypair.privkey_bech32 {
@@ -47,6 +54,13 @@ struct ConfigView: View {
                                     UIPasteboard.general.string = sec
                                     AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
                                 }
+                                .clipShape(RoundedRectangle(cornerRadius: 5))
+                                .gesture(
+                                    LongPressGesture(minimumDuration: 1.0)
+                                        .onEnded { _ in
+                                            UIPasteboard.general.string = sec
+                                        }
+                                )
                         }
                         
                         if isHidden == true {
