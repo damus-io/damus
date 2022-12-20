@@ -1,7 +1,14 @@
-- [ ] delete boost
+- [ ] delete boost 
+  - https://github.com/damus-io/damus/issues/35
 - [ ] delete like
+  - https://github.com/damus-io/damus/issues/36
 - [ ] block user
+  - https://github.com/damus-io/damus/issues/37
 - [ ] set avatar image
+  - https://github.com/damus-io/damus/issues/38
 - [ ] summarized like notifications
+  - https://github.com/damus-io/damus/issues/39
 - [ ] summarized boost notifications
+  - https://github.com/damus-io/damus/issues/40
 - [ ] bolt11 anyamount not rendering
+  - https://github.com/damus-io/damus/issues/41
