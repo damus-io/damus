@@ -15,7 +15,7 @@ enum NostrPostResult {
 let POST_PLACEHOLDER = "Type your post here..."
 
 struct PostView: View {
-    @State var post: String = POST_PLACEHOLDER
+    @State var post: String = ""
     @State var new: Bool = true
 
     let replying_to: NostrEvent?
@@ -25,7 +25,7 @@ struct PostView: View {
     @Environment(\.presentationMode) var presentationMode
 
     enum FocusField: Hashable {
-      case post
+        case post
     }
 
     func cancel() {
@@ -34,7 +34,7 @@ struct PostView: View {
     }
 
     func dismiss() {
-        self.presentationMode.wrappedValue.dismiss()
+        presentationMode.wrappedValue.dismiss()
     }
 
     func send_post() {
@@ -42,15 +42,11 @@ struct PostView: View {
         if replying_to?.known_kind == .chat {
             kind = .chat
         }
-        let content = self.post.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        let content = post.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         let new_post = NostrPost(content: content, references: references, kind: kind)
 
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
         dismiss()
-    }
-
-    var is_post_empty: Bool {
-        return post == POST_PLACEHOLDER || post.allSatisfy { $0.isWhitespace }
     }
 
     var body: some View {
@@ -63,7 +59,7 @@ struct PostView: View {
 
                 Spacer()
 
-                if !is_post_empty {
+                if !post.isEmpty {
                     Button("Post") {
                         self.send_post()
                     }
@@ -71,34 +67,34 @@ struct PostView: View {
             }
             .padding([.top, .bottom], 4)
 
-
-            TextEditor(text: $post)
-                .foregroundColor(self.post == POST_PLACEHOLDER ? .gray : .primary)
-                .focused($focus)
-                .textInputAutocapitalization(.sentences)
-                .onTapGesture {
-                    handle_post_placeholder()
+            ZStack(alignment: .leading) {
+                if post.isEmpty {
+                    VStack {
+                        Text(POST_PLACEHOLDER)
+                            .padding(.top, 10)
+                            .padding(.leading, 6)
+                            .foregroundColor(.primary)
+                            .focused($focus)
+                        Spacer()
+                    }
                 }
-                .onChange(of: post) { value in
-                    handle_post_placeholder()
-                }
 
+                VStack {
+                    TextEditor(text: $post)
+                        .frame(minHeight: 150, maxHeight: 300)
+                        .opacity(post.isEmpty ? 0.7 : 1)
+                        .focused($focus)
+                        .foregroundColor(.primary)
+                        .textInputAutocapitalization(.sentences)
+                    Spacer()
+                }
+            }
         }
-        .onAppear() {
+        .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 self.focus = true
             }
         }
         .padding()
     }
-
-    func handle_post_placeholder()  {
-        guard new else {
-            return
-        }
-
-        new = false
-        post = post.replacingOccurrences(of: POST_PLACEHOLDER, with: "")
-    }
 }
-
