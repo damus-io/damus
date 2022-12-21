@@ -34,8 +34,9 @@ struct EditAccountView: View {
                     }
                     
                     Section(header: Text("Details")) {
-                        TextField("Username", text: $account.real_name)
-                        TextField("Personal Name", text: $account.nick_name)
+                        TextField("Real Name", text: $account.real_name)
+                        TextField("Username", text: $account.nick_name)
+                            .autocorrectionDisabled(true)
                         TextEditor(text: $account.about)
                             .frame(height: 150)
                         
