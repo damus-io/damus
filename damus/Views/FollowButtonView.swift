@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct FollowButtonView: View {
+    
+    @Environment(\.colorScheme) var colorScheme
+    
     let target: FollowTarget
     @State var follow_state: FollowState
     
@@ -16,15 +19,15 @@ struct FollowButtonView: View {
             follow_state = perform_follow_btn_action(follow_state, target: target)
         } label: {
             Text(follow_btn_txt(follow_state))
-                .padding(.horizontal, 20)
-                .padding(.vertical, 7)
+                .padding(.horizontal, 25)
+                .padding(.vertical, 10)
                 .font(.caption.weight(.bold))
-                .foregroundColor(follow_state == .unfollows ? .white : .black)
-                .background(follow_state == .unfollows ?  .black : .white)
+                .foregroundColor(follow_state == .unfollows ? emptyColor() : fillColor())
+                .background(follow_state == .unfollows ?  fillColor() : emptyColor())
                 .cornerRadius(20)
                 .overlay {
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(follow_state == .unfollows ? .white : .gray, lineWidth: 1)
+                        .stroke(follow_state == .unfollows ? .clear : borderColor(), lineWidth: 1)
                 }
         }
         .onReceive(handle_notify(.followed)) { notif in
@@ -43,6 +46,18 @@ struct FollowButtonView: View {
             
             self.follow_state = .unfollows
         }
+    }
+    
+    func fillColor() -> Color {
+        colorScheme == .light ? .black : .white
+    }
+    
+    func emptyColor() -> Color {
+        colorScheme == .light ? .white : .black
+    }
+    
+    func borderColor() -> Color {
+        colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2)
     }
 }
 

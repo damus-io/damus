@@ -44,7 +44,7 @@ struct EventActionBar: View {
             
             HStack(alignment: .bottom) {
                 Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
-                    .font(.footnote)
+                    .font(.footnote.weight(.medium))
                     .foregroundColor(bar.boosted ? Color.green : Color.gray)
                 
                 EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
@@ -58,7 +58,7 @@ struct EventActionBar: View {
 
             HStack(alignment: .bottom) {
                 Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
-                    .font(.footnote)
+                    .font(.footnote.weight(.medium))
                     .foregroundColor(bar.liked ? Color.red : Color.gray)
                     
                 EventActionButton(img: bar.liked ? "heart.fill" : "heart", col: bar.liked ? Color.red : nil) {
@@ -140,7 +140,7 @@ struct EventActionBar: View {
 func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> some View {
     Button(action: action) {
         Label("", systemImage: img)
-            .font(.footnote)
+            .font(.footnote.weight(.medium))
             .foregroundColor(col == nil ? Color.gray : col!)
     }
     .padding(.trailing, 40)

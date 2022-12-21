@@ -95,8 +95,8 @@ struct ProfileView: View {
         }) {
             Image(systemName: "bolt.circle")
                 .symbolRenderingMode(.palette)
-                .foregroundStyle(colorScheme == .dark ? .white : .black, .gray)
-                .font(.system(size: 27).weight(.thin))
+                .font(.system(size: 34).weight(.thin))
+                .foregroundStyle(colorScheme == .light ? .black : .white, colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2))
         }
     }
     
@@ -107,8 +107,8 @@ struct ProfileView: View {
         return NavigationLink(destination: dmview) {
             Image(systemName: "bubble.left.circle")
                 .symbolRenderingMode(.palette)
-                .font(.system(size: 29).weight(.thin))
-                .foregroundStyle(colorScheme == .dark ? .white : .black, .gray)
+                .font(.system(size: 34).weight(.thin))
+                .foregroundStyle(colorScheme == .light ? .black : .white, colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2))
         }
     }
     
@@ -134,6 +134,7 @@ struct ProfileView: View {
                 .padding(.bottom)
             
             Text(data?.about ?? "")
+                .font(.subheadline)
         
             Divider()
                 
@@ -144,7 +145,9 @@ struct ProfileView: View {
                     NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model, whos: profile.pubkey)) {
                         HStack {
                             Text("\(profile.following)")
+                                .font(.subheadline.weight(.medium))
                             Text("Following")
+                                .font(.subheadline)
                                 .foregroundColor(.gray)
                         }
                     }
@@ -155,7 +158,9 @@ struct ProfileView: View {
                 NavigationLink(destination: fview) {
                     HStack {
                         Text("\(followers.contacts.count)")
+                            .font(.subheadline.weight(.medium))
                         Text("Followers")
+                            .font(.subheadline)
                             .foregroundColor(.gray)
                     }
                 }

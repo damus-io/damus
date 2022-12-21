@@ -40,7 +40,27 @@ struct InnerTimelineView: View {
     }
 }
 
+struct InnerTimelineRedactedView: View {
+    let events: [NostrEvent]
+    let damus: DamusState
+    let show_friend_icon: Bool
+    
+    var body: some View {
+        VStack {
+            ForEach(events, id: \.id) { event in
+                EventView(event: event, highlight: .none, has_action_bar: true, damus: damus, show_friend_icon: show_friend_icon)
+                    .buttonStyle(PlainButtonStyle())
+            }
+        }
+        .shimmer()
+        .redacted(reason: .placeholder)
+        .padding(.horizontal)
+        .disabled(true)
+    }
+}
+
 struct TimelineView: View {
+    
     @Binding var events: [NostrEvent]
     @Binding var loading: Bool
 
@@ -56,6 +76,7 @@ struct TimelineView: View {
         ScrollViewReader { scroller in
             ScrollView {
                 if loading {
+                    InnerTimelineRedactedView(events: Constants.EXAMPLE_EVENTS, damus: damus, show_friend_icon: true)
                     ProgressView()
                         .progressViewStyle(.circular)
                 } else {
@@ -72,13 +93,11 @@ struct TimelineView: View {
     }
 }
 
-/*
 struct TimelineView_Previews: PreviewProvider {
     static var previews: some View {
-        TimelineView()
+        TimelineView(events: .constant(Constants.EXAMPLE_EVENTS), loading: .constant(true), damus: Constants.EXAMPLE_DEMOS, show_friend_icon: true, filter: { _ in true })
     }
 }
- */
 
 
 struct NavigationLazyView<Content: View>: View {
@@ -90,4 +109,3 @@ struct NavigationLazyView<Content: View>: View {
         build()
     }
 }
-
