@@ -47,7 +47,7 @@ struct ImageContextMenuModifier: ViewModifier {
                 Button {
                     UIPasteboard.general.image = someImage
                 } label: {
-                    Label("Copy Image", systemImage: "doc.on.doc")
+                    Label("Copy Image", systemImage: "photo.on.rectangle")
                 }
             }
             Button {
