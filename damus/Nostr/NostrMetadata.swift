@@ -13,8 +13,9 @@ struct NostrMetadata: Codable {
     let name: String?
     let about: String?
     let website: String?
+    let picture: String?
 }
 
-func create_account_to_metadata(_ model: CreateAccountModel) -> NostrMetadata {
-    return NostrMetadata(display_name: model.real_name, name: model.nick_name, about: model.about, website: nil)
+func account_to_metadata(_ model: AccountModel) -> NostrMetadata {
+    return NostrMetadata(display_name: model.real_name, name: model.nick_name, about: model.about, website: model.picture, picture: model.picture)
 }

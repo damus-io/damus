@@ -127,7 +127,11 @@ struct ProfileView: View {
                 
                 DMButton
                 
-                FollowButtonView(target: profile.get_follow_target(), follow_state: damus_state.contacts.follow_state(profile.pubkey))
+                if damus_state.pubkey == profile.pubkey {
+                    EditAccountButton()
+                } else {
+                    FollowButtonView(target: profile.get_follow_target(), follow_state: damus_state.contacts.follow_state(profile.pubkey))
+                }
             }
             
             ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
