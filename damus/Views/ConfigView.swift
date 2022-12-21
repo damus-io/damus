@@ -13,12 +13,29 @@ struct ConfigView: View {
     @State var show_add_relay: Bool = false
     @State var confirm_logout: Bool = false
     @State var new_relay: String = ""
-    @State var showPrivateKey: Bool = false
-    @State var privateKey: String
+    @State var show_privkey: Bool = false
+    @State var privkey: String
+    @State var privkey_copied: Bool = false
+    @State var pubkey_copied: Bool = false
+    
+    let generator = UIImpactFeedbackGenerator(style: .light)
     
     init(state: DamusState) {
         self.state = state
-        _privateKey = State(initialValue: self.state.keypair.privkey_bech32 ?? "")
+        _privkey = State(initialValue: self.state.keypair.privkey_bech32 ?? "")
+    }
+    
+    // TODO: (jb55) could be more general but not gonna worry about it atm
+    func CopyButton(is_pk: Bool) -> some View {
+        return Button(action: {
+            UIPasteboard.general.string = is_pk ? self.state.keypair.pubkey_bech32 : self.privkey
+            self.privkey_copied = !is_pk
+            self.pubkey_copied = is_pk
+            generator.impactOccurred()
+        }) {
+            let copied = is_pk ? self.pubkey_copied : self.privkey_copied
+            Image(systemName: copied ? "checkmark.circle" : "doc.on.doc")
+        }
     }
     
     var body: some View {
@@ -35,43 +52,29 @@ struct ConfigView: View {
                 }
                 
                 Section("Public Account ID") {
-                    Text(state.keypair.pubkey_bech32)
-                        .textSelection(.enabled)
-                        .onTapGesture {
-                            UIPasteboard.general.string = state.keypair.pubkey_bech32
-                            AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
-                        }
-                        .clipShape(RoundedRectangle(cornerRadius: 5))
-                        .gesture(
-                            LongPressGesture(minimumDuration: 1.0)
-                                .onEnded { _ in
-                                    UIPasteboard.general.string = state.keypair.pubkey_bech32
-                                }
-                        )
+                    HStack {
+                        Text(state.keypair.pubkey_bech32)
+                        
+                        CopyButton(is_pk: true)
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 5))
                 }
                 
                 if let sec = state.keypair.privkey_bech32 {
                     Section("Secret Account Login Key") {
-                        if showPrivateKey == false {
-                            SecureField("PrivateKey", text: $privateKey)
-                                .disabled(true)
-                        } else {
-                            Text(sec)
-                                .textSelection(.enabled)
-                                .onTapGesture {
-                                    UIPasteboard.general.string = sec
-                                    AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
-                                }
-                                .clipShape(RoundedRectangle(cornerRadius: 5))
-                                .gesture(
-                                    LongPressGesture(minimumDuration: 1.0)
-                                        .onEnded { _ in
-                                            UIPasteboard.general.string = sec
-                                        }
-                                )
+                        HStack {
+                            if show_privkey == false {
+                                SecureField("PrivateKey", text: $privkey)
+                                    .disabled(true)
+                            } else {
+                                Text(sec)
+                                    .clipShape(RoundedRectangle(cornerRadius: 5))
+                            }
+                            
+                            CopyButton(is_pk: false)
                         }
    
-                        Toggle("Show PrivateKey", isOn: $showPrivateKey)
+                        Toggle("Show", isOn: $show_privkey)
                     }
                 }
                     
