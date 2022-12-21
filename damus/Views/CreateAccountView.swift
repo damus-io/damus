@@ -47,6 +47,7 @@ struct CreateAccountView: View {
                                     .padding(.leading, -25.0)
                                 
                                 FormTextInput("satoshi", text: $account.nick_name)
+                                    .autocorrectionDisabled(true)
                                     .textInputAutocapitalization(.never)
                                 
                             }
