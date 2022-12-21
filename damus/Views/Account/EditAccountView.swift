@@ -9,6 +9,8 @@ import SwiftUI
 
 struct EditAccountView: View {
     
+    @Environment(\.colorScheme) var scheme
+    
     @EnvironmentObject var viewModel: DamusViewModel
     @Environment(\.dismiss) var dismiss
     
@@ -22,7 +24,7 @@ struct EditAccountView: View {
                 Form {
                     HStack {
                         Spacer()
-                        ProfilePicView(pubkey: state.pubkey, size: 100, highlight: .none, profiles: state.profiles)
+                        ProfilePicView(pubkey: state.pubkey, size: 100, highlight: .custom(scheme == .light ? .white : .black, 3), profiles: state.profiles)
                         Spacer()
                     }
                     .listRowBackground(Color.clear)
