@@ -35,9 +35,9 @@ class SearchHomeModel: ObservableObject {
         damus_state.pool.subscribe(sub_id: base_subid, filters: [get_base_filter()], handler: handle_event)
     }
 
-    func unsubscribe() {
+    func unsubscribe(to: String? = nil) {
         loading = false
-        damus_state.pool.unsubscribe(sub_id: base_subid)
+        damus_state.pool.unsubscribe(sub_id: base_subid, to: to.map { [$0] })
     }
     
     func handle_event(relay_id: String, conn_ev: NostrConnectionEvent) {
@@ -65,8 +65,13 @@ class SearchHomeModel: ObservableObject {
                 loading = false
                 
                 if sub_id == self.base_subid {
+                    // Make sure we unsubscribe after we've fetched the global events
+                    // global events are not realtime
+                    unsubscribe(to: relay_id)
+                    
                     load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: events, damus_state: damus_state)
                 }
+                
                 
                 break
             }

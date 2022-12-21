@@ -85,7 +85,11 @@ struct SearchHomeView: View {
             print("search change 1")
         }
         .onAppear {
-            model.subscribe()
+            // TODO: This will always be empty when switching between tabs
+            // We'll need to store these in
+            if model.events.isEmpty {
+                model.subscribe()
+            }
         }
         .onDisappear {
             model.unsubscribe()
