@@ -22,7 +22,7 @@ struct EditAccountView: View {
                 Form {
                     HStack {
                         Spacer()
-                        ProfilePicView(pubkey: state.pubkey, size: 100, highlight: .main, profiles: state.profiles)
+                        ProfilePicView(pubkey: state.pubkey, size: 100, highlight: .none, profiles: state.profiles)
                         Spacer()
                     }
                     .listRowBackground(Color.clear)
@@ -37,11 +37,6 @@ struct EditAccountView: View {
                         TextEditor(text: $account.about)
                             .frame(height: 150)
                         
-                    }
-                    
-                    Section(header: Text("Keys")) {
-                        TextField("Public Key", text: .constant(account.keypair.pubkey))
-                        TextField("Secret Key", text: .constant(account.keypair.privkey ?? ""))
                     }
                 }
                 .toolbar {
