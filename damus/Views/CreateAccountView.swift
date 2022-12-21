@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CreateAccountView: View {
-    @StateObject var account: CreateAccountModel = CreateAccountModel()
+    @StateObject var account: AccountModel = AccountModel()
     @State var is_light: Bool = false
     @State var is_done: Bool = false
     
@@ -117,7 +117,7 @@ extension View {
 
 struct CreateAccountView_Previews: PreviewProvider {
     static var previews: some View {
-        let model = CreateAccountModel(real: "", nick: "jb55", about: "")
+        let model = AccountModel(real: "", nick: "jb55", about: "")
         return CreateAccountView(account: model)
     }
 }

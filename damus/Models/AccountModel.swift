@@ -8,12 +8,13 @@
 import Foundation
 
 
-class CreateAccountModel: ObservableObject {
+class AccountModel: ObservableObject {
     @Published var real_name: String = ""
     @Published var nick_name: String = ""
     @Published var about: String = ""
     @Published var pubkey: String = ""
     @Published var privkey: String = ""
+    @Published var picture: String = ""
     
     var pubkey_bech32: String {
         return bech32_pubkey(self.pubkey) ?? ""
@@ -48,5 +49,14 @@ class CreateAccountModel: ObservableObject {
         self.real_name = real
         self.nick_name = nick
         self.about = about
+    }
+    
+    init(keys: Keypair, real: String, user: String, about: String, picture: String) {
+        self.pubkey = keys.pubkey
+        self.privkey = keys.privkey ?? ""
+        self.real_name = real
+        self.nick_name = user
+        self.about = about
+        self.picture = picture
     }
 }

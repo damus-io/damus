@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SaveKeysView: View {
-    let account: CreateAccountModel
+    let account: AccountModel
     let pool: RelayPool = RelayPool()
     @State var is_done: Bool = false
     @State var pub_copied: Bool = false
@@ -79,7 +79,7 @@ struct SaveKeysView: View {
         .navigationBarItems(leading: BackNav())
     }
     
-    func complete_account_creation(_ account: CreateAccountModel) {
+    func complete_account_creation(_ account: AccountModel) {
         for relay in BOOTSTRAP_RELAYS {
             add_rw_relay(self.pool, relay)
         }
@@ -96,7 +96,7 @@ struct SaveKeysView: View {
         case .ws_event(let wsev):
             switch wsev {
             case .connected:
-                let metadata = create_account_to_metadata(account)
+                let metadata = account_to_metadata(account)
                 let m_metadata_ev = make_metadata_event(keypair: account.keypair, metadata: metadata)
                 let m_contacts_ev = make_first_contact_event(keypair: account.keypair)
                 
@@ -175,7 +175,7 @@ struct SaveKeyView: View {
 
 struct SaveKeysView_Previews: PreviewProvider {
     static var previews: some View {
-        let model = CreateAccountModel(real: "William", nick: "jb55", about: "I'm me")
+        let model = AccountModel(real: "William", nick: "jb55", about: "I'm me")
         SaveKeysView(account: model)
     }
 }

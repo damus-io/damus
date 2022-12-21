@@ -23,10 +23,13 @@ struct MainView: View {
     @State var needs_setup = false;
     @State var keypair: Keypair? = nil;
     
+    @ObservedObject var viewModel: DamusViewModel = DamusViewModel()
+    
     var body: some View {
         Group {
             if let kp = keypair, !needs_setup {
                 ContentView(keypair: kp)
+                    .environmentObject(viewModel)
             } else {
                 SetupView()
                     .onReceive(handle_notify(.login)) { notif in
