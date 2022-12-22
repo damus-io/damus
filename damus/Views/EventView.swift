@@ -227,9 +227,8 @@ extension View {
     }
 }
 
-func format_relative_time(_ created_at: Int64) -> String
-{
-    return time_ago_since(Date(timeIntervalSince1970: Double(created_at)))
+func format_relative_time(_ created_at: Int64) -> String {
+    Date(timeIntervalSince1970: Double(created_at)).timeAgo()
 }
 
 func reply_desc(profiles: Profiles, event: NostrEvent) -> String {
