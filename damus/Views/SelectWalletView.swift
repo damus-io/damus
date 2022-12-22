@@ -19,18 +19,32 @@ struct SelectWalletView: View {
     @Binding var show_select_wallet: Bool
     @Binding var invoice: String
     @Environment(\.openURL) private var openURL
+    @State var invoice_copied: Bool = false
+    
+    let generator = UIImpactFeedbackGenerator(style: .light)
     
     let walletItems = try! JSONDecoder().decode([WalletItem].self, from: Constants.WALLETS)
     
     var body: some View {
         NavigationView {
             VStack(alignment: .leading) {
+                Section("Invoice") {
+                    HStack {
+                        Text(invoice)
+                        
+                        Image(systemName: self.invoice_copied ? "checkmark.circle" : "doc.on.doc")
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 5)).onTapGesture {
+                        UIPasteboard.general.string = invoice
+                        self.invoice_copied = true
+                        generator.impactOccurred()
+                    }
+                }
                 ForEach(walletItems) { wallet in
                    HStack(spacing: 20) {
                        Image(wallet.image)
                          .resizable()
-                         .scaledToFit()
-                         .aspectRatio(contentMode: .fit)
+                         .frame(width: 32.0, height: 32.0,alignment: .center)
                          .cornerRadius(5)
                        Text("\(wallet.name)")
                    }.onTapGesture {
@@ -51,8 +65,7 @@ struct SelectWalletView: View {
                 }) {
                     Text("Done").bold()
                 })
-        }
-
+        }.padding([.leading, .trailing], 6)
     }
 }
 
