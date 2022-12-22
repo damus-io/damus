@@ -12,6 +12,7 @@ struct WalletItem : Decodable, Identifiable {
     var name : String
     var link : String
     var appStoreLink : String
+    var image: String
 }
 
 struct SelectWalletView: View {
@@ -25,6 +26,11 @@ struct SelectWalletView: View {
         VStack(alignment: .leading) {
             ForEach(walletItems) { wallet in
                HStack(spacing: 20) {
+                   Image(wallet.image)
+                     .resizable()
+                     .scaledToFit()
+                     .aspectRatio(contentMode: .fit)
+                     .cornerRadius(5)
                    Button("\(wallet.name)"){
                        if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
                            openURL(url)

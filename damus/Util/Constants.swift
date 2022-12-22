@@ -25,14 +25,14 @@ public class Constants {
     
     static let WALLETS = """
         [
-            {"id": 0, "name": "Strike", "link": "strike:lightning", "appStoreLink": "https://apps.apple.com/us/app/strike-bitcoin-payments/id1488724463"},
-            {"id": 1, "name": "Cash App", "link": "squarecash://", "appStoreLink": "https://apps.apple.com/us/app/cash-app/id711923939"},
-            {"id": 2, "name": "Muun", "link": "muun:", "appStoreLink": "https://apps.apple.com/us/app/muun-wallet/id1482037683"},
-            {"id": 3, "name": "Blue Wallet", "link": "bluewallet:lightning", "appStoreLink": "https://apps.apple.com/us/app/bluewallet-bitcoin-wallet/id1376878040"},
-            {"id": 4, "name": "Wallet Of Satoshi", "link": "walletofsatoshi:lightning", "appStoreLink": "https://apps.apple.com/us/app/wallet-of-satoshi/id1438599608"},
-            {"id": 5, "name": "Breez", "link": "breez:lightning", "appStoreLink": "https://testflight.apple.com/join/wPju2Du7"},
-            {"id": 6, "name": "Zebedee", "link": "zebedee:lightning", "appStoreLink": "https://apps.apple.com/us/app/zebedee-wallet/id1484394401"},
-            {"id": 7, "name": "Zeus LN", "link": "zeusln:lightning", "appStoreLink": "https://apps.apple.com/us/app/zeus-ln/id1456038895"},
+            {"id": 0, "name": "Strike", "link": "strike:lightning", "appStoreLink": "https://apps.apple.com/us/app/strike-bitcoin-payments/id1488724463", "image": "strike"},
+            {"id": 1, "name": "Cash App", "link": "squarecash://", "appStoreLink": "https://apps.apple.com/us/app/cash-app/id711923939", "image": "cashapp"},
+            {"id": 2, "name": "Muun", "link": "muun:", "appStoreLink": "https://apps.apple.com/us/app/muun-wallet/id1482037683", "image": "muun"},
+            {"id": 3, "name": "Blue Wallet", "link": "bluewallet:lightning", "appStoreLink": "https://apps.apple.com/us/app/bluewallet-bitcoin-wallet/id1376878040", "image": "bluewallet"},
+            {"id": 4, "name": "Wallet Of Satoshi", "link": "walletofsatoshi:lightning", "appStoreLink": "https://apps.apple.com/us/app/wallet-of-satoshi/id1438599608", "image": "walletofsatoshi"},
+            {"id": 5, "name": "Breez", "link": "breez:lightning", "appStoreLink": "https://testflight.apple.com/join/wPju2Du7", "image": "breez"},
+            {"id": 6, "name": "Zebedee", "link": "zebedee:lightning", "appStoreLink": "https://apps.apple.com/us/app/zebedee-wallet/id1484394401", "image": "zebedee"},
+            {"id": 7, "name": "Zeus LN", "link": "zeusln:lightning", "appStoreLink": "https://apps.apple.com/us/app/zeus-ln/id1456038895", "image": "zeusln"},
         ]
         """.data(using: .utf8)!
 }
