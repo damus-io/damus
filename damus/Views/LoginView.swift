@@ -52,14 +52,24 @@ struct LoginView: View {
     func process_login(_ key: ParsedKey, is_pubkey: Bool) -> Bool {
         switch key {
         case .priv(let priv):
-            save_privkey(privkey: priv)
+            do {
+                try save_privkey(privkey: priv)
+            } catch {
+                return false
+            }
+            
             guard let pk = privkey_to_pubkey(privkey: priv) else {
                 return false
             }
             save_pubkey(pubkey: pk)
 
         case .pub(let pub):
-            clear_saved_privkey()
+            do {
+                try clear_saved_privkey()
+            } catch {
+                return false
+            }
+            
             save_pubkey(pubkey: pub)
 
         case .nip05(let id):
@@ -82,10 +92,20 @@ struct LoginView: View {
 
         case .hex(let hexstr):
             if is_pubkey {
-                clear_saved_privkey()
+                do {
+                    try clear_saved_privkey()
+                } catch {
+                    return false
+                }
+                
                 save_pubkey(pubkey: hexstr)
             } else {
-                save_privkey(privkey: hexstr)
+                do {
+                    try save_privkey(privkey: hexstr)
+                } catch {
+                    return false
+                }
+                
                 guard let pk = privkey_to_pubkey(privkey: hexstr) else {
                     return false
                 }
