@@ -27,45 +27,59 @@ struct SelectWalletView: View {
     
     var body: some View {
         NavigationView {
-            VStack(alignment: .leading) {
-                Section("Invoice") {
-                    HStack {
-                        Text(invoice)
-                        
-                        Image(systemName: self.invoice_copied ? "checkmark.circle" : "doc.on.doc")
-                    }
-                    .clipShape(RoundedRectangle(cornerRadius: 5)).onTapGesture {
-                        UIPasteboard.general.string = invoice
-                        self.invoice_copied = true
-                        generator.impactOccurred()
-                    }
+            Form {
+                VStack(alignment: .leading) {
+                        Text("Copy invoice")
+                            .bold()
+                            .font(.title3)
+                            .multilineTextAlignment(.center)
+                            .padding([.bottom, .top], 8)
+                        HStack {
+                            Text(invoice).font(.body)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(3)
+                                .truncationMode(.tail)
+                            
+                            Image(systemName: self.invoice_copied ? "checkmark.circle" : "doc.on.doc")
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: 5)).onTapGesture {
+                            UIPasteboard.general.string = invoice
+                            self.invoice_copied = true
+                            generator.impactOccurred()
+                        }
+                    Spacer()
+                        Text("Select a lightning wallet")
+                            .bold()
+                            .font(.title3)
+                            .multilineTextAlignment(.center)
+                            .padding([.bottom], 8)
+                        ForEach(walletItems) { wallet in
+                            HStack(spacing: 20) {
+                                Image(wallet.image)
+                                    .resizable()
+                                    .frame(width: 32.0, height: 32.0,alignment: .center)
+                                    .cornerRadius(5)
+                                Text("\(wallet.name)")
+                            }.onTapGesture {
+                                if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
+                                    openURL(url)
+                                } else {
+                                    if let url = URL(string: wallet.appStoreLink), UIApplication.shared.canOpenURL(url) {
+                                        openURL(url)
+                                    }
+                                }
+                            }
+                            Divider()
+                        }
                 }
-                ForEach(walletItems) { wallet in
-                   HStack(spacing: 20) {
-                       Image(wallet.image)
-                         .resizable()
-                         .frame(width: 32.0, height: 32.0,alignment: .center)
-                         .cornerRadius(5)
-                       Text("\(wallet.name)")
-                   }.onTapGesture {
-                       if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
-                           openURL(url)
-                       } else {
-                           if let url = URL(string: wallet.appStoreLink), UIApplication.shared.canOpenURL(url) {
-                               openURL(url)
-                           }
-                       }
-                   }
-                    Divider()
-                }
-            }
-            .navigationBarTitle(Text("Select Wallet"), displayMode: .inline)
+                .navigationBarTitle(Text("Pay the lightning invoice"), displayMode: .inline)
                 .navigationBarItems(trailing: Button(action: {
                     self.show_select_wallet = false
                 }) {
                     Text("Done").bold()
                 })
-        }.padding([.leading, .trailing], 6)
+            }
+        }
     }
 }
 
