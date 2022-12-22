@@ -77,8 +77,9 @@ struct PostView: View {
                 if post.isEmpty {
                     Text(POST_PLACEHOLDER)
                         .padding(.top, 8)
-                        .padding(.leading, 10)
+                        .padding(.leading, 4)
                         .foregroundColor(Color(uiColor: .placeholderText))
+                        .allowsHitTesting(false)
                 }
             }
         }
