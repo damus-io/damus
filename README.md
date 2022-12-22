@@ -28,7 +28,8 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 1) Get the Damus app on Testflight: https://testflight.apple.com/join/CLwjLxWl
 
 #### ⚙️ Settings (gear icon, top right)
-- Relays: You can add more relays to send your notes to by tapping the "+". 
+- Relays: You can add more relays to send your notes to by tapping the "+"
+  - To delete a relay swipe left
   - Find more relays to add: https://nostr.info/relays/ 
 - Public Key (pubkey): Your public, personal address and how people can find and tag you
  - Secret Key: Your *private* key unique to you. Never share your private key publically and share with other clients at your own risk!
@@ -45,10 +46,10 @@ damus implements the following [Nostr Implementation Possibilities][nips]
   1. Search their username in the search bar at the top of the 🔍 Global Feed and click their profile
   2. Tap the 🔑 icon which will copy their pubkey to your clipboard
   3. Go back to your 🏠 Personal Feed and tap the blue + button to compose your Note
-  4. Add @ direcly followed by the pubkey (e.g., `@npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s`)
+  4. Add @ directly followed by the pubkey (e.g., `@npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s`)
 - You can also long-press a Note to grab their User ID aka pubkey or Note ID to link directly to a Note.
-- Currently you can't delete your Notes in the iOS app
-- Share images by pasting the image url which you can grab from imgbb, imgur, etc. (i.e., `(https://i.ibb.co/2SHZbwm/alpha60.jpg)`). Currently images only load for people you follow in the 🏠 Personal Feed. Images are not automatically loaded in 🔍 Global Feed
+- Currently, you can't delete your Notes in the iOS app
+- Share images by pasting the image url which you can grab from imgbb, imgur, etc. (i.e., `(https://i.ibb.co/2SHZbwm/alpha60.jpg)`). Currently, images only load for people you follow in the 🏠 Personal and 🔍 Global Feeds. Images from accounts not being followed are not automatically loaded in 🔍 Global Feed
 - Engaging with Notes
   - 💬 Replying to a Note: Tap the chat icon underneath the note. This will show up in the users’ notifications and in your 🏠 Personal and 🔍 Global Feeds
   - ♺ Reposts: Tap the repost icon which will show up in your 🏠 Personal and 🔍 Global Feeds
@@ -58,38 +59,45 @@ damus implements the following [Nostr Implementation Possibilities][nips]
   - Bold: 2 asterisk `**bold**`
   - Strikethrough: 2 tildes `~~strikethrough~~`
   - Code: 1 back-tick ``code``
+- If you start a post with #chat it will auto-open into the chat view
 
 #### 💬 Encrypted DMs (chat app, bottom navigation)
 - Tap the chat icon and you'll notice there's nothing to see at first. Go to a user profile and tap the 💬 chat icon next to the follow button to begin a DM
 
 #### 🔍 Global Feed (magnify glass, bottom navigation)
-- View the Global Feed from all the relays you've added in ⚙️ Settings. Currently you can only search hashtags and user names and pubkeys
+- View the Global Feed from all the relays you've added in ⚙️ Settings. Currently, you can only search hashtags and user names and pubkeys
 
 #### 🔔 Notifications
 - All your notifications except 💬 DMs
 
 #### 👤 Change Your Profile (PFP) and Bio
-- Currently you can't change your pfp on the Damus app (coming soon!). Here's how to do it on other clients (do at your own risk)
-1. Get the [Alby](https://getalby.com/) (Chrome, Brave, Firefox) or [nos2x](https://chrome.google.com/webstore/detail/nos2x/kpgefcfmnafjgpblomihpgmejjdanjjp) browser extension (Chrome, Brave)
+- Currently, you can't change your pfp on the Damus app (coming soon!). Here's how to do it on other clients (do at your own risk)
+1. Get the [Alby](https://getalby.com/) or [nos2x](https://chrome.google.com/webstore/detail/nos2x/kpgefcfmnafjgpblomihpgmejjdanjjp) browser extension (Chrome, Firefox, Brave)
 2. Go to https://damus.io/key to convert your nsec key (secret key in ⚙️ Settings) into a hex version
-	i. For Alby, right-click the extension, select Options and scroll to the Nostr section to enter your secret hex key
-	ii.  For nos2x, right-click the extension, select Options, then and add the relay `wss://relay.damus.io` and select both read and write, click Save, then enter your secret hex key and click save
+	i. For Alby, right-click the extension, select Options, and scroll to the Nostr section to enter your secret hex key
+	ii.  For nos2x, right-click the extension, select Options, then add the relay `wss://relay.damus.io` and select both read and write, click Save, then enter your secret hex key and click save
 3. Visit https://metadata.nostr.com and your profile data should auto-populate from the extension. If not click the extension or refresh the page
 4. Add your image using a hosting site like imgbb.com
 
 #### ⚡️ Request Sats 
-    (Sats or Satoshis are the smallest denomination of bitcoin)
+    (Sats are the smallest denomination of bitcoin)
 	
 **Alby (browser extension)**
-- Get the [Alby](https://getalby.com/) browser extension and create your Alby address [yourname]@getalby.com or connect your existing Lightning wallet
-- Convert your Damus secret key from nsec to hex at https://damus.io/key then go to Settings in Alby and under the Nostr section at the bottom of the page add your private hex key. You can also generate new address in the extension
+- Get the [Alby](https://getalby.com/) browser extension and create your Alby address [yourname]@getalby.com 
+- Convert your Damus secret key from nsec to hex at https://damus.io/key then go to Settings in Alby and under the Nostr section at the bottom of the page add your private hex key
 - Click the Alby extension > click Receive > enter the amount of Sats > click Get Invoice > click Copy > then paste into Damus
 - Note: On Damus Web it will appear as a string of characters but on Damus iOS it will appear as a clickable image
 
 **Zeus (mobile app)**
 - Download [Zeus](https://zeusln.app/) app (iOS, Google, APK)
-- Tap Get Started button > tap Connect a node > click on + sign (top right) > select Indhub > press Scan Lndhub QR > (from the Alby browser extension… click your account on the top left > click Manage Accounts > click 3-dot menu to right of your account and click Export Account to get a QR code then go back to Zeus app) > scan the QR Code and tap Save Node Config button
-- To create an invoice tap Lightning > tap Receive > type in amount > tap Create Invoice > tap Copy Invoice > paste into a new Damus note
+- Tap Get Started button > tap Connect a node > click on + sign (top right) > select Indhub > press Scan Lndhub QR > (from the Alby browser extension… click your account on the top left > click Manage Accounts > click 3-dot menu to the right of your account and click Export Account to get a QR code then go back to Zeus app) > scan the QR Code and tap Save Node Config button
+- To create an invoice tap Lightning > tap Receive > type in amount > tap Create Invoice > tap Copy Invoice > paste into a new Damus note (make sure to remove the word “lightning:” from the beginning)
+
+#### More Stuff
+- Icons by your username
+ - ←👤→ someone you follow follows that person
+ - 👤✔️ you follow them
+
 
 ## Contributing
 
