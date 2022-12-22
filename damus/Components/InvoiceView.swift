@@ -9,13 +9,13 @@ import SwiftUI
 
 struct InvoiceView: View {
     let invoice: Invoice
+    @State var show_select_wallet: Bool = false
+    @State var inv: String = ""
     
     var PayButton: some View {
         Button("Pay") {
-            guard let url = URL(string: "lightning:" + invoice.string) else {
-                return
-            }
-            UIApplication.shared.open(url)
+            inv = invoice.string
+            show_select_wallet = true
         }
         .buttonStyle(.bordered)
     }
@@ -39,6 +39,8 @@ struct InvoiceView: View {
                     .zIndex(5.0)
             }
             .padding()
+        }        .sheet(isPresented: $show_select_wallet, onDismiss: {show_select_wallet = false}) {
+            SelectWalletView(show_select_wallet: $show_select_wallet, invoice: $inv)
         }
     }
 }

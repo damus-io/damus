@@ -129,6 +129,7 @@
 		4CEE2AF7280B2DEA00AB5EEF /* ProfileName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF6280B2DEA00AB5EEF /* ProfileName.swift */; };
 		4CEE2AF9280B2EAC00AB5EEF /* PowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF8280B2EAC00AB5EEF /* PowView.swift */; };
 		4CEE2B02280B39E800AB5EEF /* EventActionBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2B01280B39E800AB5EEF /* EventActionBar.swift */; };
+		BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -306,6 +307,7 @@
 		4CEE2AF6280B2DEA00AB5EEF /* ProfileName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileName.swift; sourceTree = "<group>"; };
 		4CEE2AF8280B2EAC00AB5EEF /* PowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowView.swift; sourceTree = "<group>"; };
 		4CEE2B01280B39E800AB5EEF /* EventActionBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventActionBar.swift; sourceTree = "<group>"; };
+		BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectWalletView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -473,6 +475,7 @@
 				4C216F31286E388800040376 /* DMChatView.swift */,
 				4C216F33286F5ACD00040376 /* DMView.swift */,
 				4C06670028FC7C5900038D2A /* RelayView.swift */,
+				BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -797,6 +800,7 @@
 				4C3AC79F2833115300E1F516 /* FollowButtonView.swift in Sources */,
 				4C3BEFD22819DB9B00B3DE84 /* ProfileModel.swift in Sources */,
 				4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */,
+				BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */,
 				3169CAE6294E69C000EE4006 /* EmptyTimelineView.swift in Sources */,
 				4C3EA64928FF597700C48A62 /* bech32.c in Sources */,
 				4C90BD162839DB54008EE7EF /* NostrMetadata.swift in Sources */,
