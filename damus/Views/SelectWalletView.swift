@@ -23,15 +23,17 @@ struct SelectWalletView: View {
     let walletItems = try! JSONDecoder().decode([WalletItem].self, from: Constants.WALLETS)
     
     var body: some View {
-        VStack(alignment: .leading) {
-            ForEach(walletItems) { wallet in
-               HStack(spacing: 20) {
-                   Image(wallet.image)
-                     .resizable()
-                     .scaledToFit()
-                     .aspectRatio(contentMode: .fit)
-                     .cornerRadius(5)
-                   Button("\(wallet.name)"){
+        NavigationView {
+            VStack(alignment: .leading) {
+                ForEach(walletItems) { wallet in
+                   HStack(spacing: 20) {
+                       Image(wallet.image)
+                         .resizable()
+                         .scaledToFit()
+                         .aspectRatio(contentMode: .fit)
+                         .cornerRadius(5)
+                       Text("\(wallet.name)")
+                   }.onTapGesture {
                        if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
                            openURL(url)
                        } else {
@@ -39,11 +41,18 @@ struct SelectWalletView: View {
                                openURL(url)
                            }
                        }
-                   }.buttonStyle(.borderedProminent)
-                       .contentShape(Rectangle())
-               }
+                   }
+                    Divider()
+                }
             }
+            .navigationBarTitle(Text("Select Wallet"), displayMode: .inline)
+                .navigationBarItems(trailing: Button(action: {
+                    self.show_select_wallet = false
+                }) {
+                    Text("Done").bold()
+                })
         }
+
     }
 }
 
