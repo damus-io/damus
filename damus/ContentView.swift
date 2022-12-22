@@ -82,13 +82,15 @@ struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
 
     var PostingTimelineView: some View {
-        TabView(selection: $filter_state) {
-            ContentTimelineView
-                .tag(FilterState.posts)
-            ContentTimelineView
-                .tag(FilterState.posts_and_replies)
+        VStack {
+            TabView(selection: $filter_state) {
+                ContentTimelineView
+                    .tag(FilterState.posts)
+                ContentTimelineView
+                    .tag(FilterState.posts_and_replies)
+            }
+            .tabViewStyle(.page)
         }
-        .tabViewStyle(.page)
         .safeAreaInset(edge: .top) {
             VStack(spacing: 0) {
                 FiltersView
