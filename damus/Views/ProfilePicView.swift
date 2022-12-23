@@ -5,8 +5,8 @@
 //  Created by William Casarin on 2022-04-16.
 //
 
-import SwiftUI
 import Kingfisher
+import SwiftUI
 
 let PFP_SIZE: CGFloat = 52.0
 
@@ -37,13 +37,15 @@ struct ProfilePicView: View {
     let size: CGFloat
     let highlight: Highlight
     let profiles: Profiles
-    
+
     @State var picture: String? = nil
-    
+    @State var is_zoomed: Bool = false
+    @State var imageTag: Int?
+
     var PlaceholderColor: Color {
         return id_to_color(pubkey)
     }
-    
+
     var Placeholder: some View {
         PlaceholderColor
             .frame(width: size, height: size)
@@ -51,29 +53,62 @@ struct ProfilePicView: View {
             .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
             .padding(2)
     }
-    
+
     var MainContent: some View {
         Group {
             let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
             let url = URL(string: pic)
-            
-            KFAnimatedImage(url)
-                .configure { view in
-                    view.framePreloadCount = 1
+
+            if let tag = self.imageTag {
+                if tag == 1 {
+                    KFAnimatedImage(url)
+                        .configure { view in
+                            view.framePreloadCount = 1
+                        }
+                        .placeholder { _ in
+                            Placeholder
+                        }
+                        .cacheOriginalImage()
+                        .scaleFactor(UIScreen.main.scale)
+                        .loadDiskFileSynchronously()
+                        .fade(duration: 0.1)
+                        .frame(width: size, height: size)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
+                        .onTapGesture {
+                            self.is_zoomed.toggle()
+                        }
+                        .sheet(isPresented: $is_zoomed) {
+                            KFAnimatedImage(url)
+                                .cacheOriginalImage()
+                                .loadDiskFileSynchronously()
+                                .tag(2)
+                                .clipShape(Circle())
+                                .frame(width: 300, height: 300, alignment: .center)
+                                .onTapGesture {
+                                    self.is_zoomed.toggle()
+                                }
+                        }
                 }
-                .placeholder { _ in
-                    Placeholder
-                }
-                .cacheOriginalImage()
-                .scaleFactor(UIScreen.main.scale)
-                .loadDiskFileSynchronously()
-                .fade(duration: 0.1)
-                .frame(width: size, height: size)
-                .clipShape(Circle())
-                .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
+            } else {
+                KFAnimatedImage(url)
+                    .configure { view in
+                        view.framePreloadCount = 1
+                    }
+                    .placeholder { _ in
+                        Placeholder
+                    }
+                    .cacheOriginalImage()
+                    .scaleFactor(UIScreen.main.scale)
+                    .loadDiskFileSynchronously()
+                    .fade(duration: 0.1)
+                    .frame(width: size, height: size)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
+            }
         }
     }
-    
+
     var body: some View {
         MainContent
             .onReceive(handle_notify(.profile_updated)) { notif in
@@ -82,7 +117,7 @@ struct ProfilePicView: View {
                 guard updated.pubkey == self.pubkey else {
                     return
                 }
-                
+
                 if let pic = updated.profile.picture {
                     self.picture = pic
                 }
@@ -101,13 +136,14 @@ func make_preview_profiles(_ pubkey: String) -> Profiles {
 
 struct ProfilePicView_Previews: PreviewProvider {
     static let pubkey = "ca48854ac6555fed8e439ebb4fa2d928410e0eef13fa41164ec45aaaa132d846"
-    
+
     static var previews: some View {
         ProfilePicView(
             pubkey: pubkey,
             size: 100,
             highlight: .none,
-            profiles: make_preview_profiles(pubkey))
+            profiles: make_preview_profiles(pubkey)
+        )
     }
 }
 
@@ -115,15 +151,15 @@ func hex_to_rgb(_ hex: String) -> Color {
     guard hex.count >= 6 else {
         return Color.white
     }
-    
+
     let arr = Array(hex.utf8)
     var rgb: [UInt8] = []
     var i: Int = arr.count - 12
-    
+
     while i < arr.count {
         let cs1 = arr[i]
-        let cs2 = arr[i+1]
-        
+        let cs2 = arr[i + 1]
+
         guard let c1 = char_to_hex(cs1) else {
             return Color.black
         }
@@ -131,16 +167,16 @@ func hex_to_rgb(_ hex: String) -> Color {
         guard let c2 = char_to_hex(cs2) else {
             return Color.black
         }
-        
+
         rgb.append((c1 << 4) | c2)
         i += 2
     }
 
-    return Color.init(
+    return Color(
         .sRGB,
         red: Double(rgb[0]) / 255,
         green: Double(rgb[1]) / 255,
-        blue:  Double(rgb[2]) / 255,
+        blue: Double(rgb[2]) / 255,
         opacity: 1
     )
 }

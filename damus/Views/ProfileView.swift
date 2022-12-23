@@ -41,7 +41,7 @@ func follow_btn_enabled_state(_ fs: FollowState) -> Bool {
     case .unfollowing:
         return false
     case .unfollows:
-       return true
+        return true
     }
 }
 
@@ -87,7 +87,7 @@ struct ProfileView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
     
-    //@EnvironmentObject var profile: ProfileModel
+    // @EnvironmentObject var profile: ProfileModel
     
     func LNButton(_ url: URL) -> some View {
         Button(action: {
@@ -117,7 +117,7 @@ struct ProfileView: View {
             let data = damus_state.profiles.lookup(id: profile.pubkey)
             
             HStack(alignment: .center) {
-                ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .custom(Color.black, 2), profiles: damus_state.profiles)
+                ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .custom(Color.black, 2), profiles: damus_state.profiles, imageTag: 1)
                 
                 Spacer()
                 
@@ -189,7 +189,7 @@ struct ProfileView: View {
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
         }
-        .onAppear() {
+        .onAppear {
             profile.subscribe()
             followers.subscribe()
         }
@@ -209,7 +209,6 @@ struct ProfileView_Previews: PreviewProvider {
         ProfileView(damus_state: ds, profile: profile_model, followers: followers)
     }
 }
-
 
 func test_damus_state() -> DamusState {
     let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
@@ -243,5 +242,3 @@ struct KeyView: View {
         }
     }
 }
-
-        
