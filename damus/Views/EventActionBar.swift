@@ -21,7 +21,7 @@ enum ActionBarSheet: Identifiable {
 struct EventActionBar: View {
     let damus_state: DamusState
     let event: NostrEvent
-    let generator = UIImpactFeedbackGenerator(style: .light)
+    let generator = UIImpactFeedbackGenerator(style: .medium)
     @State var sheet: ActionBarSheet? = nil
     @State var confirm_boost: Bool = false
     @StateObject var bar: ActionBarModel
