@@ -16,7 +16,7 @@ func isHttpsUrl(_ string: String) -> Bool {
 }
 
 func isImage(_ urlString: String) -> Bool {
-    let imageTypes = ["image/jpg", "image/jpeg", "image/png", "image/gif", "image/tiff", "image/bmp"]
+    let imageTypes = ["image/jpg", "image/jpeg", "image/png", "image/gif", "image/tiff", "image/bmp", "image/webp"]
 
     guard let url = URL(string: urlString) else {
         return false
