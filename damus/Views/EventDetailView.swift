@@ -308,39 +308,6 @@ func scroll_to_event(scroller: ScrollViewProxy, id: String, delay: Double, anima
     }
 }
 
-    
-    /*
-    func OldEventView(proxy: ScrollViewProxy, ev: NostrEvent, highlight: Highlight, collapsed_events: [CollapsedEvent]) -> some View {
-        Group {
-            if ev.id == thread.event.id {
-                EventView(event: ev, highlight: .main, has_action_bar: true)
-                    .onAppear() {
-                        scroll_to_event(scroller: proxy, id: ev.id, delay: 0.5, animate: true)
-                    }
-                    .onTapGesture {
-                        print_event(ev)
-                        let any = any_collapsed(collapsed_events)
-                        if (collapsed && any) || (!collapsed && !any) {
-                            toggle_collapse_thread(scroller: proxy, id: ev.id)
-                        }
-                    }
-            } else {
-                if !(self.collapsed && highlight.is_none) {
-                    EventView(event: ev, highlight: collapsed ? .none : highlight, has_action_bar: true)
-                        .onTapGesture {
-                            print_event(ev)
-                            if !collapsed {
-                                toggle_collapse_thread(scroller: proxy, id: ev.id)
-                            }
-                            thread.event = ev
-                        }
-                }
-            }
-        }
-    }
-     */
-
-
 extension Collection {
 
     /// Returns the element at the specified index if it is within bounds, otherwise nil.
