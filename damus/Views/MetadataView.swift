@@ -107,7 +107,7 @@ struct MetadataView: View {
                             self.timer?.invalidate()
                             self.timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
                                 profiles = Profiles()
-                                let tmp_profile = Profile(name: "0", display_name: "0", about: "0", picture: isHttpsUrl(picture) && isImage(picture) ? picture : nil, website: nil, nip05: "", lud06: nil, lud16: nil)
+                                let tmp_profile = Profile(name: "0", display_name: "0", about: "0", picture: isHttpsUrl(picture) && isImage(picture) ? picture : nil, website: nil, lud06: "", lud16: nil, nip05: nil)
                                 let ts_profile = TimestampedProfile(profile: tmp_profile, timestamp: 0)
                                 profiles.add(id: "0", profile: ts_profile)
                             }
