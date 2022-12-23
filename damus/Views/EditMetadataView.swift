@@ -53,25 +53,32 @@ func isImage(_ urlString: String) -> Bool {
 
 struct EditMetadataView: View {
     let damus_state: DamusState
-    @State var name: String = ""
-    @State var about: String = ""
-    @State var picture: String = ""
-    @State var nip05: String = ""
-    @State var nickname: String = ""
-    @State var lud06: String = ""
-    @State var lud16: String = ""
+    @State var display_name: String
+    @State var about: String
+    @State var picture: String
+    @State var nip05: String
+    @State var name: String
+    @State var lud06: String
+    @State var lud16: String
     @State private var showAlert = false
     
-    // Image preview
-    @State var profiles = Profiles()
-    @State private var timer: Timer?
-    
-    @StateObject var profileModel: ProfileModel
+    init (damus_state: DamusState) {
+        self.damus_state = damus_state
+        let data = damus_state.profiles.lookup(id: damus_state.pubkey)
+        
+        name = data?.name ?? ""
+        display_name = data?.display_name ?? ""
+        about = data?.about ?? ""
+        picture = data?.picture ?? ""
+        nip05 = data?.nip05 ?? ""
+        lud06 = data?.lud06 ?? ""
+        lud16 = data?.lud16 ?? ""
+    }
     
     func save() {
         let metadata = NostrMetadata(
-            display_name: name,
-            name: nickname,
+            display_name: display_name,
+            name: name,
             about: about,
             website: nil,
             nip05: nip05.isEmpty ? nil : nip05,
@@ -89,54 +96,67 @@ struct EditMetadataView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
+            HStack {
+                Spacer()
+                ProfilePicView(pubkey: damus_state.pubkey, size: PPM_SIZE, highlight: .none, profiles: damus_state.profiles, picture: picture)
+                Spacer()
+            }
+            .padding([.top], 30)
             Form {
-                HStack {
-                    Spacer()
-                    ProfilePicView(pubkey: "0", size: PPM_SIZE, highlight: .none, profiles: profiles)
-                    Spacer()
-                }
-                Section("Your Nostr Profile") {
-                    TextField("Your username", text: $name)
-                        .textInputAutocapitalization(.never)
-                    TextField("Your @", text: $nickname)
-                        .textInputAutocapitalization(.never)
-                    TextField("Profile Picture Url", text: $picture)
-                        .autocorrectionDisabled(true)
-                        .textInputAutocapitalization(.never)
-                        .onChange(of: picture) { newValue in
-                            self.timer?.invalidate()
-                            self.timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
-                                profiles = Profiles()
-                                let tmp_profile = Profile(name: "0", display_name: "0", about: "0", picture: isHttpsUrl(picture) && isImage(picture) ? picture : nil, website: nil, lud06: "", lud16: nil, nip05: nil)
-                                let ts_profile = TimestampedProfile(profile: tmp_profile, timestamp: 0)
-                                profiles.add(id: "0", profile: ts_profile)
-                            }
-                        }
-                    TextField("NIP-05 Verification Domain (eg: example.com)", text: $nip05)
+                Section("Your Name") {
+                    TextField("Satoshi Nakamoto", text: $display_name)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }
                 
-                Section("Description") {
+                Section("Username") {
+                    TextField("satoshi", text: $name)
+                        .autocorrectionDisabled(true)
+                        .textInputAutocapitalization(.never)
+
+                }
+                
+                Section ("Profile Picture") {
+                    TextField("https://example.com/pic.jpg", text: $picture)
+                        .autocorrectionDisabled(true)
+                        .textInputAutocapitalization(.never)
+
+                }
+                
+                Section("About Me") {
                     ZStack(alignment: .topLeading) {
                         TextEditor(text: $about)
                             .textInputAutocapitalization(.sentences)
                         if about.isEmpty {
-                            Text("Type your description here...")
+                            Text("Absolute boss")
                                 .offset(x: 0, y: 7)
                                 .foregroundColor(Color(uiColor: .placeholderText))
                         }
                     }
                 }
                 
-                Section("Advanced") {
+                Section(content: {
+                    TextField("Lightning Address", text: $lud16)
+                        .autocorrectionDisabled(true)
+                        .textInputAutocapitalization(.never)
                     TextField("LNURL", text: $lud06)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
-                    TextField("LN Address", text: $lud16)
+                }, header: {
+                    Text("Bitcoin Lightning Tips")
+                }, footer: {
+                    Text("Only one needs to be set")
+                })
+                                
+                Section(content: {
+                    TextField("example.com", text: $nip05)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
-                }
+                }, header: {
+                    Text("NIP-05 Verification")
+                }, footer: {
+                    Text("\(name)@\(nip05) will be used for verification")
+                })
                 
                 Button("Save") {
                     save()
@@ -146,29 +166,11 @@ struct EditMetadataView: View {
                 }
             }
         }
-        .onAppear() {
-            profileModel.subscribe()
-            
-            let data = damus_state.profiles.lookup(id: profileModel.pubkey)
-            
-            name = data?.display_name ?? name
-            nickname = data?.name ?? name
-            about = data?.about ?? about
-            picture = data?.picture ?? picture
-            nip05 = data?.nip05 ?? nip05
-            lud06 = data?.lud06 ?? lud06
-            lud16 = data?.lud16 ?? lud16
-        }
-        .onDisappear {
-            profileModel.unsubscribe()
-        }
     }
 }
 
 struct EditMetadataView_Previews: PreviewProvider {
     static var previews: some View {
-        let ds = test_damus_state()
-        let profile_model = ProfileModel(pubkey: ds.pubkey, damus: ds)
-        EditMetadataView(damus_state: ds, profileModel: profile_model)
+        EditMetadataView(damus_state: test_damus_state())
     }
 }
