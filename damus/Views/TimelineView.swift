@@ -40,25 +40,6 @@ struct InnerTimelineView: View {
     }
 }
 
-struct InnerTimelineRedactedView: View {
-    let events: [NostrEvent]
-    let damus: DamusState
-    let show_friend_icon: Bool
-    
-    var body: some View {
-        VStack {
-            ForEach(events, id: \.id) { event in
-                EventView(event: event, highlight: .none, has_action_bar: true, damus: damus, show_friend_icon: show_friend_icon)
-                    .buttonStyle(PlainButtonStyle())
-            }
-        }
-        .shimmer()
-        .redacted(reason: .placeholder)
-        .padding(.horizontal)
-        .disabled(true)
-    }
-}
-
 struct TimelineView: View {
     
     @Binding var events: [NostrEvent]
@@ -75,13 +56,10 @@ struct TimelineView: View {
     var MainContent: some View {
         ScrollViewReader { scroller in
             ScrollView {
-                if loading {
-                    InnerTimelineRedactedView(events: Constants.EXAMPLE_EVENTS, damus: damus, show_friend_icon: true)
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                } else {
-                    InnerTimelineView(events: $events, damus: damus, show_friend_icon: show_friend_icon, filter: filter)
-                }
+                InnerTimelineView(events: loading ? .constant(Constants.EXAMPLE_EVENTS) : $events, damus: damus, show_friend_icon: show_friend_icon, filter: loading ? { _ in true } : filter)
+                    .redacted(reason: loading ? .placeholder : [])
+                    .shimmer(loading)
+                    .disabled(loading)
             }
             .onReceive(NotificationCenter.default.publisher(for: .scroll_to_top)) { _ in
                 guard let event = events.filter(self.filter).first else {

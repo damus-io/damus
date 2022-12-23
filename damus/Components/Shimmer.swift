@@ -41,6 +41,7 @@ struct ShimmeringView<Content: View>: View {
         _startPoint = .init(wrappedValue: configuration.initialLocation.start)
         _endPoint = .init(wrappedValue: configuration.initialLocation.end)
     }
+    
     var body: some View {
         ZStack {
             content()
@@ -71,7 +72,12 @@ public struct ShimmerModifier: ViewModifier {
 
 
 public extension View {
-    func shimmer(configuration: ShimmerConfiguration = .default) -> some View {
-        modifier(ShimmerModifier(configuration: configuration))
+    
+    @ViewBuilder func shimmer(configuration: ShimmerConfiguration = .default, _ loading: Bool) -> some View {
+        if loading {
+            modifier(ShimmerModifier(configuration: configuration))
+        } else {
+            self
+        }
     }
 }

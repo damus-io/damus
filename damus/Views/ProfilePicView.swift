@@ -33,10 +33,14 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
 }
 
 struct ProfilePicView: View {
+    
+    @Environment(\.redactionReasons) private var reasons
+    
     let pubkey: String
     let size: CGFloat
     let highlight: Highlight
     let profiles: Profiles
+    let isPlaceholder: Bool = false
     
     @State var picture: String? = nil
     
@@ -57,21 +61,25 @@ struct ProfilePicView: View {
             let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
             let url = URL(string: pic)
             
-            KFAnimatedImage(url)
-                .configure { view in
-                    view.framePreloadCount = 1
-                }
-                .placeholder { _ in
-                    Placeholder
-                }
-                .cacheOriginalImage()
-                .scaleFactor(UIScreen.main.scale)
-                .loadDiskFileSynchronously()
-                .fade(duration: 0.1)
-                .frame(width: size, height: size)
-                .clipShape(Circle())
-                .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
+            if reasons.isEmpty {
+                KFAnimatedImage(url)
+                    .configure { view in
+                        view.framePreloadCount = 1
+                    }
+                    .placeholder { _ in
+                        Placeholder
+                    }
+                    .cacheOriginalImage()
+                    .scaleFactor(UIScreen.main.scale)
+                    .loadDiskFileSynchronously()
+                    .fade(duration: 0.1)
+            } else {
+                KFImage(url)
+            }
         }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+        .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
     }
     
     var body: some View {
