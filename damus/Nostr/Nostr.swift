@@ -8,12 +8,13 @@
 import Foundation
 
 
-struct Profile: Decodable {
+struct Profile: Decodable, Equatable {
     let name: String?
     let display_name: String?
     let about: String?
     let picture: String?
     let website: String?
+    let nip05: String?
     let lud06: String?
     let lud16: String?
     
@@ -34,6 +35,3 @@ struct NostrSubscription {
     let sub_id: String
     let filter: NostrFilter
 }
-
-
-

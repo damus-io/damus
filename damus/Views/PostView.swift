@@ -79,6 +79,7 @@ struct PostView: View {
                         .padding(.top, 8)
                         .padding(.leading, 10)
                         .foregroundColor(Color(uiColor: .placeholderText))
+                        .allowsHitTesting(false)
                 }
             }
         }
