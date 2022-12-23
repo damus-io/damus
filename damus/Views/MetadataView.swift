@@ -17,7 +17,6 @@ struct MetadataView: View {
     @State var lud06: String = ""
     @State var lud16: String = ""
     @State private var showAlert = false
-    @State private var isFocused = false
     
     @StateObject var profileModel: ProfileModel
     
