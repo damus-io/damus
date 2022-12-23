@@ -88,7 +88,7 @@ struct ProfileView: View {
     @State private var selected_tab: ProfileTab = .posts
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
-    @State private var showingSheet = false
+    @State private var showingEditProfile = false
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
@@ -137,10 +137,10 @@ struct ProfileView: View {
                 FollowButtonView(
                     target: profile.get_follow_target(),
                     follow_state: profile.pubkey == damus_state.pubkey ? .edit : damus_state.contacts.follow_state(profile.pubkey),
-                    perform: profile.pubkey == damus_state.pubkey ? { showingSheet.toggle() } : nil
+                    perform: profile.pubkey == damus_state.pubkey ? { showingEditProfile.toggle() } : nil
                 )
                 
-            }.sheet(isPresented: $showingSheet) {
+            }.sheet(isPresented: $showingEditProfile) {
                 MetadataView(damus_state: damus_state, profileModel: profile)
             }
             
