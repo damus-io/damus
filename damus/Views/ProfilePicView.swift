@@ -101,7 +101,7 @@ struct ProfilePicView: View {
 func make_preview_profiles(_ pubkey: String) -> Profiles {
     let profiles = Profiles()
     let picture = "http://cdn.jb55.com/img/red-me.jpg"
-    let profile = Profile(name: "jb55", display_name: "William Casarin", about: "It's me", picture: picture, website: "https://jb55.com", lud06: nil, lud16: nil)
+    let profile = Profile(name: "jb55", display_name: "William Casarin", about: "It's me", picture: picture, website: "https://jb55.com", lud06: nil, lud16: nil, nip05: "jb55.com")
     let ts_profile = TimestampedProfile(profile: profile, timestamp: 0)
     profiles.add(id: pubkey, profile: ts_profile)
     return profiles

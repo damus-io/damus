@@ -10,7 +10,7 @@ import Foundation
 struct Profile: Codable {
     var value: [String: String]
     
-    init (name: String?, display_name: String?, about: String?, picture: String?, website: String?, lud06: String?, lud16: String?) {
+    init (name: String?, display_name: String?, about: String?, picture: String?, website: String?, lud06: String?, lud16: String?, nip05: String?) {
         self.value = [:]
         self.name = name
         self.display_name = display_name
@@ -19,6 +19,7 @@ struct Profile: Codable {
         self.website = website
         self.lud06 = lud06
         self.lud16 = lud16
+        self.nip05 = nip05
     }
     
     var display_name: String? {
@@ -54,6 +55,11 @@ struct Profile: Codable {
     var lud16: String? {
         get { return value["lud16"]; }
         set(s) { value["lud16"] = s }
+    }
+    
+    var nip05: String? {
+        get { return value["nip05"]; }
+        set(s) { value["nip05"] = s }
     }
     
     var lightning_uri: URL? {
