@@ -78,14 +78,6 @@ struct ConfigView: View {
                     }
                 }
                 
-                Section("Account settings") {
-                    NavigationLink {
-                        EditMetadataView(damus_state: state, profileModel: ProfileModel(pubkey: state.pubkey, damus: state))
-                    } label: {
-                        Text("Profile metadata")
-                    }
-                }
-                
                 Section("Reset") {
                     Button("Logout") {
                         confirm_logout = true
