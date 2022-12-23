@@ -7,6 +7,50 @@
 
 import SwiftUI
 
+let PPM_SIZE: CGFloat = 80.0
+
+func isHttpsUrl(_ string: String) -> Bool {
+    let urlRegEx = "^https://.*$"
+    let urlTest = NSPredicate(format:"SELF MATCHES %@", urlRegEx)
+    return urlTest.evaluate(with: string)
+}
+
+func isImage(_ urlString: String) -> Bool {
+    let imageTypes = ["image/jpg", "image/jpeg", "image/png", "image/gif", "image/tiff", "image/bmp"]
+
+    guard let url = URL(string: urlString) else {
+        return false
+    }
+
+    var result = false
+    let semaphore = DispatchSemaphore(value: 0)
+
+    let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        if let error = error {
+            print(error)
+            semaphore.signal()
+            return
+        }
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              let contentType = httpResponse.allHeaderFields["Content-Type"] as? String else {
+            semaphore.signal()
+            return
+        }
+
+        if imageTypes.contains(contentType.lowercased()) {
+            result = true
+        }
+
+        semaphore.signal()
+    }
+
+    task.resume()
+    semaphore.wait()
+
+    return result
+}
+
 struct MetadataView: View {
     let damus_state: DamusState
     @State var name: String = ""
@@ -17,6 +61,10 @@ struct MetadataView: View {
     @State var lud06: String = ""
     @State var lud16: String = ""
     @State private var showAlert = false
+    
+    // Image preview
+    @State var profiles = Profiles()
+    @State private var timer: Timer?
     
     @StateObject var profileModel: ProfileModel
     
@@ -42,6 +90,11 @@ struct MetadataView: View {
     var body: some View {
         VStack(alignment: .leading) {
             Form {
+                HStack {
+                    Spacer()
+                    ProfilePicView(pubkey: "0", size: PPM_SIZE, highlight: .none, profiles: profiles)
+                    Spacer()
+                }
                 Section("Your Nostr Profile") {
                     TextField("Your username", text: $name)
                         .textInputAutocapitalization(.never)
@@ -50,6 +103,15 @@ struct MetadataView: View {
                     TextField("Profile Picture Url", text: $picture)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
+                        .onChange(of: picture) { newValue in
+                            self.timer?.invalidate()
+                            self.timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
+                                profiles = Profiles()
+                                let tmp_profile = Profile(name: "0", display_name: "0", about: "0", picture: isHttpsUrl(picture) && isImage(picture) ? picture : nil, website: nil, nip05: "", lud06: nil, lud16: nil)
+                                let ts_profile = TimestampedProfile(profile: tmp_profile, timestamp: 0)
+                                profiles.add(id: "0", profile: ts_profile)
+                            }
+                        }
                     TextField("NIP 05 (@)", text: $nip05)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
@@ -68,10 +130,10 @@ struct MetadataView: View {
                 }
                 
                 Section("Advanced") {
-                    TextField("Lud06", text: $lud06)
+                    TextField("LNURL", text: $lud06)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
-                    TextField("Lud16", text: $lud16)
+                    TextField("LN Address", text: $lud16)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }
