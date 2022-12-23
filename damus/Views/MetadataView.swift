@@ -112,7 +112,7 @@ struct MetadataView: View {
                                 profiles.add(id: "0", profile: ts_profile)
                             }
                         }
-                    TextField("NIP 05 (@)", text: $nip05)
+                    TextField("NIP-05 Verification Domain (eg: example.com)", text: $nip05)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }
