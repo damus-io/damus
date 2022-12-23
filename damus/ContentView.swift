@@ -85,7 +85,7 @@ struct ContentView: View {
                 ContentTimelineView
                     .tag(FilterState.posts_and_replies)
             }
-            .tabViewStyle(.page)
+            .tabViewStyle(.page(indexDisplayMode: .never))
         }
         .safeAreaInset(edge: .top) {
             VStack(spacing: 0) {
