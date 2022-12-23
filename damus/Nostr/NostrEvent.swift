@@ -274,6 +274,20 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable {
         self.tags = tags
         self.created_at = Int64(Date().timeIntervalSince1970)
     }
+    
+    /// Intiialization statement used to specificy ID
+    ///
+    /// This is mainly used for contant and testing data
+    init(id: String, content: String, pubkey: String, kind: Int = 1, tags: [[String]] = []) {
+        self.id = id
+        self.sig = ""
+
+        self.content = content
+        self.pubkey = pubkey
+        self.kind = kind
+        self.tags = tags
+        self.created_at = Int64(Date().timeIntervalSince1970)
+    }
 
     init(from: NostrEvent, content: String? = nil) {
         self.id = from.id
