@@ -58,8 +58,7 @@ struct EditMetadataView: View {
     @State var picture: String = ""
     @State var nip05: String = ""
     @State var nickname: String = ""
-    @State var lud06: String = ""
-    @State var lud16: String = ""
+    @State var ln: String = ""
     @State private var showAlert = false
     
     // Image preview
@@ -76,8 +75,8 @@ struct EditMetadataView: View {
             website: nil,
             nip05: nip05.isEmpty ? nil : nip05,
             picture: picture.isEmpty ? nil : picture,
-            lud06: lud06.isEmpty ? nil : lud06,
-            lud16: lud16.isEmpty ? nil : lud16
+            lud06: ln.contains("@") ? ln : nil,
+            lud16: ln.contains("@") ? nil : ln
         );
         
         let m_metadata_ev = make_metadata_event(keypair: damus_state.keypair, metadata: metadata)
@@ -130,10 +129,7 @@ struct EditMetadataView: View {
                 }
                 
                 Section("Advanced") {
-                    TextField("LNURL", text: $lud06)
-                        .autocorrectionDisabled(true)
-                        .textInputAutocapitalization(.never)
-                    TextField("LN Address", text: $lud16)
+                    TextField("LN Address / LNURL", text: $ln)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }
@@ -156,8 +152,7 @@ struct EditMetadataView: View {
             about = data?.about ?? about
             picture = data?.picture ?? picture
             nip05 = data?.nip05 ?? nip05
-            lud06 = data?.lud06 ?? lud06
-            lud16 = data?.lud16 ?? lud16
+            ln = data?.lud06 ?? data?.lud16 ?? ln
         }
         .onDisappear {
             profileModel.unsubscribe()
