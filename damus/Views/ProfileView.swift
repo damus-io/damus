@@ -17,7 +17,6 @@ enum FollowState {
     case following
     case unfollowing
     case unfollows
-    case edit
 }
 
 func follow_btn_txt(_ fs: FollowState) -> String {
@@ -30,8 +29,6 @@ func follow_btn_txt(_ fs: FollowState) -> String {
         return "Unfollowing..."
     case .unfollows:
         return "Follow"
-    case .edit:
-        return "Edit"
     }
 }
 
@@ -44,8 +41,6 @@ func follow_btn_enabled_state(_ fs: FollowState) -> Bool {
     case .unfollowing:
         return false
     case .unfollows:
-       return true
-    case .edit:
        return true
     }
 }
@@ -79,6 +74,40 @@ struct ProfileNameView: View {
                 }
             }
         }
+    }
+}
+
+struct EditButton: View {
+    let damus_state: DamusState
+    
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
+            Text("Edit")
+                .padding(.horizontal, 25)
+                .padding(.vertical, 10)
+                .font(.caption.weight(.bold))
+                .foregroundColor(fillColor())
+                .background(emptyColor())
+                .cornerRadius(20)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(borderColor(), lineWidth: 1)
+                }
+        }
+    }
+    
+    func fillColor() -> Color {
+        colorScheme == .light ? .black : .white
+    }
+    
+    func emptyColor() -> Color {
+        colorScheme == .light ? .white : .black
+    }
+    
+    func borderColor() -> Color {
+        colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2)
     }
 }
 
@@ -134,14 +163,17 @@ struct ProfileView: View {
                 DMButton
                 
                 
-                FollowButtonView(
-                    target: profile.get_follow_target(),
-                    follow_state: profile.pubkey == damus_state.pubkey ? .edit : damus_state.contacts.follow_state(profile.pubkey),
-                    perform: profile.pubkey == damus_state.pubkey ? { showingEditProfile.toggle() } : nil
-                )
+                if profile.pubkey != damus_state.pubkey {
+                    FollowButtonView(
+                        target: profile.get_follow_target(),
+                        follow_state: damus_state.contacts.follow_state(profile.pubkey)
+                    )
+                } else {
+                    NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
+                        EditButton(damus_state: damus_state)
+                    }
+                }
                 
-            }.sheet(isPresented: $showingEditProfile) {
-                EditMetadataView(damus_state: damus_state)
             }
             
             ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
@@ -201,11 +233,11 @@ struct ProfileView: View {
         }
         .onAppear() {
             profile.subscribe()
-            followers.subscribe()
+            //followers.subscribe()
         }
         .onDisappear {
             profile.unsubscribe()
-            followers.unsubscribe()
+            //followers.unsubscribe()
             // our profilemodel needs a bit more help
         }
     }

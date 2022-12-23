@@ -58,21 +58,22 @@ struct EditMetadataView: View {
     @State var picture: String
     @State var nip05: String
     @State var name: String
-    @State var lud06: String
-    @State var lud16: String
-    @State private var showAlert = false
+    @State var ln: String
+    @State var website: String
+    
+    @Environment(\.dismiss) var dismiss
     
     init (damus_state: DamusState) {
         self.damus_state = damus_state
         let data = damus_state.profiles.lookup(id: damus_state.pubkey)
         
-        name = data?.name ?? ""
-        display_name = data?.display_name ?? ""
-        about = data?.about ?? ""
-        picture = data?.picture ?? ""
-        nip05 = data?.nip05 ?? ""
-        lud06 = data?.lud06 ?? ""
-        lud16 = data?.lud16 ?? ""
+        _name = State(initialValue: data?.name ?? "")
+        _display_name = State(initialValue: data?.display_name ?? "")
+        _about = State(initialValue: data?.about ?? "")
+        _website = State(initialValue: data?.website ?? "")
+        _picture = State(initialValue: data?.picture ?? "")
+        _nip05 = State(initialValue: data?.nip05 ?? "")
+        _ln = State(initialValue: data?.lud16 ?? data?.lud06 ?? "")
     }
     
     func save() {
@@ -80,11 +81,11 @@ struct EditMetadataView: View {
             display_name: display_name,
             name: name,
             about: about,
-            website: nil,
+            website: website,
             nip05: nip05.isEmpty ? nil : nip05,
             picture: picture.isEmpty ? nil : picture,
-            lud06: lud06.isEmpty ? nil : lud06,
-            lud16: lud16.isEmpty ? nil : lud16
+            lud06: ln.contains("@") ? ln : nil,
+            lud16: ln.contains("@") ? nil : ln
         );
         
         let m_metadata_ev = make_metadata_event(keypair: damus_state.keypair, metadata: metadata)
@@ -98,10 +99,9 @@ struct EditMetadataView: View {
         VStack(alignment: .leading) {
             HStack {
                 Spacer()
-                ProfilePicView(pubkey: damus_state.pubkey, size: PPM_SIZE, highlight: .none, profiles: damus_state.profiles, picture: picture)
+                InnerProfilePicView(url: URL(string: picture), pubkey: damus_state.pubkey, size: PPM_SIZE, highlight: .none)
                 Spacer()
             }
-            .padding([.top], 30)
             Form {
                 Section("Your Name") {
                     TextField("Satoshi Nakamoto", text: $display_name)
@@ -120,7 +120,12 @@ struct EditMetadataView: View {
                     TextField("https://example.com/pic.jpg", text: $picture)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
-
+                }
+                
+                Section("Website") {
+                    TextField("https://jb55.com", text: $website)
+                        .autocorrectionDisabled(true)
+                        .textInputAutocapitalization(.never)
                 }
                 
                 Section("About Me") {
@@ -135,18 +140,11 @@ struct EditMetadataView: View {
                     }
                 }
                 
-                Section(content: {
-                    TextField("Lightning Address", text: $lud16)
+                Section("Bitcoin Lightning Tips") {
+                    TextField("Lightning Address or LNURL", text: $ln)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
-                    TextField("LNURL", text: $lud06)
-                        .autocorrectionDisabled(true)
-                        .textInputAutocapitalization(.never)
-                }, header: {
-                    Text("Bitcoin Lightning Tips")
-                }, footer: {
-                    Text("Only one needs to be set")
-                })
+                }
                                 
                 Section(content: {
                     TextField("example.com", text: $nip05)
@@ -160,12 +158,11 @@ struct EditMetadataView: View {
                 
                 Button("Save") {
                     save()
-                    showAlert = true
-                }.alert(isPresented: $showAlert) {
-                    Alert(title: Text("Saved"), message: Text("Your metadata has been saved."), dismissButton: .default(Text("OK")))
+                    dismiss()
                 }
             }
         }
+        .navigationTitle("Edit Profile")
     }
 }
 

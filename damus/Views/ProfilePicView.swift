@@ -32,17 +32,13 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
     }
 }
 
-struct ProfilePicView: View {
-    
+struct InnerProfilePicView: View {
     @Environment(\.redactionReasons) private var reasons
     
+    let url: URL?
     let pubkey: String
     let size: CGFloat
     let highlight: Highlight
-    let profiles: Profiles
-    let isPlaceholder: Bool = false
-    
-    @State var picture: String? = nil
     
     var PlaceholderColor: Color {
         return id_to_color(pubkey)
@@ -56,11 +52,8 @@ struct ProfilePicView: View {
             .padding(2)
     }
     
-    var MainContent: some View {
+    var body: some View {
         Group {
-            let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
-            let url = URL(string: pic)
-            
             if reasons.isEmpty {
                 KFAnimatedImage(url)
                     .configure { view in
@@ -82,8 +75,27 @@ struct ProfilePicView: View {
         .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
     }
     
+}
+
+struct ProfilePicView: View {
+    
+    let pubkey: String
+    let size: CGFloat
+    let highlight: Highlight
+    let profiles: Profiles
+    
+    @State var picture: String?
+    
+    init (pubkey: String, size: CGFloat, highlight: Highlight, profiles: Profiles, picture: String? = nil) {
+        self.pubkey = pubkey
+        self.profiles = profiles
+        self.size = size
+        self.highlight = highlight
+        self._picture = State(initialValue: picture)
+    }
+    
     var body: some View {
-        MainContent
+        InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), pubkey: pubkey, size: size, highlight: highlight)
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let updated = notif.object as! ProfileUpdate
 
@@ -96,6 +108,14 @@ struct ProfilePicView: View {
                 }
             }
     }
+}
+
+func get_profile_url(picture: String?, pubkey: String, profiles: Profiles) -> URL {
+    let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
+    if let url = URL(string: pic) {
+        return url
+    }
+    return URL(string: robohash(pubkey))!
 }
 
 func make_preview_profiles(_ pubkey: String) -> Profiles {

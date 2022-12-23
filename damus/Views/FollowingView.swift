@@ -32,7 +32,7 @@ struct FollowUserView: View {
             }
             .buttonStyle(PlainButtonStyle())
             
-            FollowButtonView(target: target, follow_state: damus_state.contacts.follow_state(target.pubkey), perform: nil)
+            FollowButtonView(target: target, follow_state: damus_state.contacts.follow_state(target.pubkey))
         }
     }
 }
@@ -53,6 +53,12 @@ struct FollowersView: View {
             }
         }
         .navigationBarTitle("\(Profile.displayName(profile: profile, pubkey: whos))'s Followers")
+        .onAppear {
+            followers.subscribe()
+        }
+        .onDisappear {
+            followers.unsubscribe()
+        }
     }
     
 }
