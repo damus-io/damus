@@ -47,7 +47,7 @@ struct FollowersView: View {
         let profile = damus_state.profiles.lookup(id: whos)
         ScrollView {
             LazyVStack(alignment: .leading) {
-                ForEach(followers.contacts, id: \.self) { pk in
+                ForEach(followers.contacts ?? [], id: \.self) { pk in
                     FollowUserView(target: .pubkey(pk), damus_state: damus_state)
                 }
             }

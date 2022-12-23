@@ -12,11 +12,18 @@ class FollowersModel: ObservableObject {
     let target: String
     var needs_sub: Bool = true
     
-    @Published var contacts: [String] = []
+    @Published var contacts: [String]? = nil
     var has_contact: Set<String> = Set()
     
     let sub_id: String = UUID().description
     let profiles_id: String = UUID().description
+    
+    var count_display: String {
+        guard let contacts = self.contacts else {
+            return "?"
+        }
+        return "\(contacts.count)";
+    }
     
     init(damus_state: DamusState, target: String) {
         self.damus_state = damus_state
@@ -49,13 +56,13 @@ class FollowersModel: ObservableObject {
             contacts: damus_state.contacts,
             pubkey: damus_state.pubkey, ev: ev
         )
-        contacts.append(ev.pubkey)
+        contacts?.append(ev.pubkey)
         has_contact.insert(ev.pubkey)
     }
     
     func load_profiles(relay_id: String) {
         var filter = NostrFilter.filter_profiles
-        let authors = find_profiles_to_fetch_pk(profiles: damus_state.profiles, event_pubkeys: contacts)
+        let authors = find_profiles_to_fetch_pk(profiles: damus_state.profiles, event_pubkeys: contacts ?? [])
         if authors.isEmpty {
             return
         }

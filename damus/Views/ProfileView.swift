@@ -201,17 +201,30 @@ struct ProfileView: View {
                 }
                 let fview = FollowersView(damus_state: damus_state, whos: profile.pubkey)
                     .environmentObject(followers)
-                NavigationLink(destination: fview) {
-                    HStack {
-                        Text("\(followers.contacts.count)")
-                            .font(.subheadline.weight(.medium))
-                        Text("Followers")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
+                if followers.contacts != nil {
+                    NavigationLink(destination: fview) {
+                        FollowersCount
                     }
+                    .buttonStyle(PlainButtonStyle())
+                } else {
+                    FollowersCount
+                        .onTapGesture {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            followers.contacts = []
+                            followers.subscribe()
+                        }
                 }
-                .buttonStyle(PlainButtonStyle())
             }
+        }
+    }
+    
+    var FollowersCount: some View {
+        HStack {
+            Text("\(followers.count_display)")
+                .font(.subheadline.weight(.medium))
+            Text("Followers")
+                .font(.subheadline)
+                .foregroundColor(.gray)
         }
     }
     
@@ -237,7 +250,7 @@ struct ProfileView: View {
         }
         .onDisappear {
             profile.unsubscribe()
-            //followers.unsubscribe()
+            followers.unsubscribe()
             // our profilemodel needs a bit more help
         }
     }
