@@ -13,9 +13,14 @@ struct FollowButtonView: View {
     
     let target: FollowTarget
     @State var follow_state: FollowState
+    let perform: (() -> Void)?
     
     var body: some View {
         Button {
+            if perform != nil {
+                perform!()
+            }
+            
             follow_state = perform_follow_btn_action(follow_state, target: target)
         } label: {
             Text(follow_btn_txt(follow_state))
@@ -66,16 +71,19 @@ struct FollowButtonPreviews: View {
     var body: some View {
         VStack {
             Text("Unfollows")
-            FollowButtonView(target: target, follow_state: .unfollows)
+            FollowButtonView(target: target, follow_state: .unfollows, perform: nil)
             
             Text("Following")
-            FollowButtonView(target: target, follow_state: .following)
+            FollowButtonView(target: target, follow_state: .following, perform: nil)
             
             Text("Follows")
-            FollowButtonView(target: target, follow_state: .follows)
+            FollowButtonView(target: target, follow_state: .follows, perform: nil)
             
             Text("Unfollowing")
-            FollowButtonView(target: target, follow_state: .unfollowing)
+            FollowButtonView(target: target, follow_state: .unfollowing, perform: nil)
+            
+            Text("Edit")
+            FollowButtonView(target: target, follow_state: .edit, perform: nil)
         }
     }
 }
@@ -98,6 +106,8 @@ func perform_follow_btn_action(_ fs: FollowState, target: FollowTarget) -> Follo
     case .unfollows:
         notify(.follow, target)
         return .unfollowing
+    case .edit:
+        return .edit
     }
 }
 

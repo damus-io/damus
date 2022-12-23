@@ -32,7 +32,7 @@ struct FollowUserView: View {
             }
             .buttonStyle(PlainButtonStyle())
             
-            FollowButtonView(target: target, follow_state: damus_state.contacts.follow_state(target.pubkey))
+            FollowButtonView(target: target, follow_state: damus_state.contacts.follow_state(target.pubkey), perform: nil)
         }
     }
 }

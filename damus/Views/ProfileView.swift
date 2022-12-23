@@ -17,6 +17,7 @@ enum FollowState {
     case following
     case unfollowing
     case unfollows
+    case edit
 }
 
 func follow_btn_txt(_ fs: FollowState) -> String {
@@ -29,6 +30,8 @@ func follow_btn_txt(_ fs: FollowState) -> String {
         return "Unfollowing..."
     case .unfollows:
         return "Follow"
+    case .edit:
+        return "Edit"
     }
 }
 
@@ -41,6 +44,8 @@ func follow_btn_enabled_state(_ fs: FollowState) -> Bool {
     case .unfollowing:
         return false
     case .unfollows:
+       return true
+    case .edit:
        return true
     }
 }
@@ -83,6 +88,7 @@ struct ProfileView: View {
     @State private var selected_tab: ProfileTab = .posts
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
+    @State private var showingSheet = false
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
@@ -127,7 +133,15 @@ struct ProfileView: View {
                 
                 DMButton
                 
-                FollowButtonView(target: profile.get_follow_target(), follow_state: damus_state.contacts.follow_state(profile.pubkey))
+                
+                FollowButtonView(
+                    target: profile.get_follow_target(),
+                    follow_state: profile.pubkey == damus_state.pubkey ? .edit : damus_state.contacts.follow_state(profile.pubkey),
+                    perform: profile.pubkey == damus_state.pubkey ? { showingSheet.toggle() } : nil
+                )
+                
+            }.sheet(isPresented: $showingSheet) {
+                MetadataView(damus_state: damus_state, profileModel: profile)
             }
             
             ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
@@ -211,7 +225,7 @@ func test_damus_state() -> DamusState {
     let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
     let damus = DamusState(pool: RelayPool(), keypair: Keypair(pubkey: pubkey, privkey: "privkey"), likes: EventCounter(our_pubkey: pubkey), boosts: EventCounter(our_pubkey: pubkey), contacts: Contacts(), tips: TipCounter(our_pubkey: pubkey), profiles: Profiles(), dms: DirectMessagesModel())
     
-    let prof = Profile(name: "damus", display_name: "Damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", website: "https://damus.io", nip05: "jb@damus.io", lud06: nil, lud16: "jb55@sendsats.lol")
+    let prof = Profile(name: "damus", display_name: "Damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", website: "https://damus.io", nip05: nil, lud06: nil, lud16: "jb55@sendsats.lol")
     let tsprof = TimestampedProfile(profile: prof, timestamp: 0)
     damus.profiles.add(id: pubkey, profile: tsprof)
     return damus
