@@ -80,7 +80,7 @@ struct ConfigView: View {
                 
                 Section("Account settings") {
                     NavigationLink {
-                        MetadataView(damus_state: state, profileModel: ProfileModel(pubkey: state.pubkey, damus: state))
+                        EditMetadataView(damus_state: state, profileModel: ProfileModel(pubkey: state.pubkey, damus: state))
                     } label: {
                         Text("Profile metadata")
                     }

@@ -1,5 +1,5 @@
 //
-//  MetadataView.swift
+//  EditMetadataView.swift
 //  damus
 //
 //  Created by Thomas Tastet on 23/12/2022.
@@ -51,7 +51,7 @@ func isImage(_ urlString: String) -> Bool {
     return result
 }
 
-struct MetadataView: View {
+struct EditMetadataView: View {
     let damus_state: DamusState
     @State var name: String = ""
     @State var about: String = ""
@@ -165,10 +165,10 @@ struct MetadataView: View {
     }
 }
 
-struct MetadataView_Previews: PreviewProvider {
+struct EditMetadataView_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state()
         let profile_model = ProfileModel(pubkey: ds.pubkey, damus: ds)
-        MetadataView(damus_state: ds, profileModel: profile_model)
+        EditMetadataView(damus_state: ds, profileModel: profile_model)
     }
 }

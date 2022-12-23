@@ -129,7 +129,7 @@
 		4CEE2AF7280B2DEA00AB5EEF /* ProfileName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF6280B2DEA00AB5EEF /* ProfileName.swift */; };
 		4CEE2AF9280B2EAC00AB5EEF /* PowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF8280B2EAC00AB5EEF /* PowView.swift */; };
 		4CEE2B02280B39E800AB5EEF /* EventActionBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2B01280B39E800AB5EEF /* EventActionBar.swift */; };
-		E990020F2955F837003BBC5A /* MetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E990020E2955F837003BBC5A /* MetadataView.swift */; };
+		E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E990020E2955F837003BBC5A /* EditMetadataView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -307,7 +307,7 @@
 		4CEE2AF6280B2DEA00AB5EEF /* ProfileName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileName.swift; sourceTree = "<group>"; };
 		4CEE2AF8280B2EAC00AB5EEF /* PowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowView.swift; sourceTree = "<group>"; };
 		4CEE2B01280B39E800AB5EEF /* EventActionBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventActionBar.swift; sourceTree = "<group>"; };
-		E990020E2955F837003BBC5A /* MetadataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataView.swift; sourceTree = "<group>"; };
+		E990020E2955F837003BBC5A /* EditMetadataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMetadataView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -475,7 +475,7 @@
 				4C216F31286E388800040376 /* DMChatView.swift */,
 				4C216F33286F5ACD00040376 /* DMView.swift */,
 				4C06670028FC7C5900038D2A /* RelayView.swift */,
-				E990020E2955F837003BBC5A /* MetadataView.swift */,
+				E990020E2955F837003BBC5A /* EditMetadataView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -848,7 +848,7 @@
 				4C3EA67D28FFBBA300C48A62 /* InvoicesView.swift in Sources */,
 				4C363A8E28236FE4006E126D /* NoteContentView.swift in Sources */,
 				4C90BD1A283AA67F008EE7EF /* Bech32.swift in Sources */,
-				E990020F2955F837003BBC5A /* MetadataView.swift in Sources */,
+				E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */,
 				4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */,
 				4C0A3F97280F8E02000448DE /* ThreadView.swift in Sources */,
 				4C06670B28FDE64700038D2A /* damus.c in Sources */,

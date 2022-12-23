@@ -141,7 +141,7 @@ struct ProfileView: View {
                 )
                 
             }.sheet(isPresented: $showingEditProfile) {
-                MetadataView(damus_state: damus_state, profileModel: profile)
+                EditMetadataView(damus_state: damus_state, profileModel: profile)
             }
             
             ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
