@@ -91,26 +91,42 @@ struct EditMetadataView: View {
             Form {
                 HStack {
                     Spacer()
-                    ProfilePicView(pubkey: "0", size: PPM_SIZE, highlight: .none, profiles: profiles)
+                    VStack {
+                        ProfilePicView(pubkey: "0", size: PPM_SIZE, highlight: .none, profiles: profiles)
+                        
+                        if picture.contains("http://") {
+                            Text("Preview cannot load image due to insecure URL. Please change to HTTPS")
+                                .font(.callout)
+                                .foregroundColor(.orange)
+                        }
+                    }
                     Spacer()
-                }
+                }.padding()
                 Section("Your Nostr Profile") {
                     TextField("Your username", text: $name)
                         .textInputAutocapitalization(.never)
                     TextField("Your @", text: $nickname)
                         .textInputAutocapitalization(.never)
-                    TextField("Profile Picture Url", text: $picture)
-                        .autocorrectionDisabled(true)
-                        .textInputAutocapitalization(.never)
-                        .onChange(of: picture) { newValue in
-                            self.timer?.invalidate()
-                            self.timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
-                                profiles = Profiles()
-                                let tmp_profile = Profile(name: "0", display_name: "0", about: "0", picture: isHttpsUrl(picture) && isImage(picture) ? picture : nil, website: nil, lud06: "", lud16: nil, nip05: nil)
-                                let ts_profile = TimestampedProfile(profile: tmp_profile, timestamp: 0)
-                                profiles.add(id: "0", profile: ts_profile)
-                            }
+                    
+                    VStack {
+                        if picture.contains("http://") {
+                            Text("HTTPS is recommended")
+                                .foregroundColor(.orange)
                         }
+                        
+                        TextField("Profile Picture Url", text: $picture)
+                            .autocorrectionDisabled(true)
+                            .textInputAutocapitalization(.never)
+                            .onChange(of: picture) { newValue in
+                                self.timer?.invalidate()
+                                self.timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
+                                    profiles = Profiles()
+                                    let tmp_profile = Profile(name: "0", display_name: "0", about: "0", picture: isHttpsUrl(picture) && isImage(picture) ? picture : nil, website: nil, lud06: "", lud16: nil, nip05: nil)
+                                    let ts_profile = TimestampedProfile(profile: tmp_profile, timestamp: 0)
+                                    profiles.add(id: "0", profile: ts_profile)
+                                }
+                            }
+                    }
                     TextField("NIP-05 Verification Domain (eg: example.com)", text: $nip05)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
