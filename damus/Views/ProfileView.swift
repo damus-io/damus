@@ -118,6 +118,7 @@ struct ProfileView: View {
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
     @State private var showingEditProfile = false
+    @State private var showingWalletPicker = false
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
@@ -126,12 +127,15 @@ struct ProfileView: View {
     
     func LNButton(_ url: URL) -> some View {
         Button(action: {
-            UIApplication.shared.open(url)
+            showingWalletPicker.toggle()
         }) {
             Image(systemName: "bolt.circle")
                 .symbolRenderingMode(.palette)
                 .font(.system(size: 34).weight(.thin))
                 .foregroundStyle(colorScheme == .light ? .black : .white, colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2))
+        }
+        .sheet(isPresented: $showingWalletPicker) {
+            WalletPickerView(url: url)
         }
     }
     

@@ -129,6 +129,7 @@
 		4CEE2AF7280B2DEA00AB5EEF /* ProfileName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF6280B2DEA00AB5EEF /* ProfileName.swift */; };
 		4CEE2AF9280B2EAC00AB5EEF /* PowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF8280B2EAC00AB5EEF /* PowView.swift */; };
 		4CEE2B02280B39E800AB5EEF /* EventActionBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2B01280B39E800AB5EEF /* EventActionBar.swift */; };
+		9BBE7D96295793D5006CAD6A /* WalletPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BBE7D95295793D5006CAD6A /* WalletPickerView.swift */; };
 		E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E990020E2955F837003BBC5A /* EditMetadataView.swift */; };
 /* End PBXBuildFile section */
 
@@ -307,6 +308,7 @@
 		4CEE2AF6280B2DEA00AB5EEF /* ProfileName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileName.swift; sourceTree = "<group>"; };
 		4CEE2AF8280B2EAC00AB5EEF /* PowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowView.swift; sourceTree = "<group>"; };
 		4CEE2B01280B39E800AB5EEF /* EventActionBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventActionBar.swift; sourceTree = "<group>"; };
+		9BBE7D95295793D5006CAD6A /* WalletPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletPickerView.swift; sourceTree = "<group>"; };
 		E990020E2955F837003BBC5A /* EditMetadataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMetadataView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -532,6 +534,7 @@
 		4CE6DEDA27F7A08100C66700 = {
 			isa = PBXGroup;
 			children = (
+				9BBE7D95295793D5006CAD6A /* WalletPickerView.swift */,
 				4C06670728FDE62900038D2A /* damus-c */,
 				4CE6DEE527F7A08100C66700 /* damus */,
 				4CE6DEF627F7A08200C66700 /* damusTests */,
@@ -751,6 +754,7 @@
 				4C3AC79D2833036D00E1F516 /* FollowingView.swift in Sources */,
 				4C363A8A28236B57006E126D /* MentionView.swift in Sources */,
 				4CE4F8CD281352B30009DFBB /* Notifications.swift in Sources */,
+				9BBE7D96295793D5006CAD6A /* WalletPickerView.swift in Sources */,
 				4C285C8428385690008A31F1 /* CreateAccountView.swift in Sources */,
 				4C216F34286F5ACD00040376 /* DMView.swift in Sources */,
 				4C3EA64428FF558100C48A62 /* sha256.c in Sources */,
