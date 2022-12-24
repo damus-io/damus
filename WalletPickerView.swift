@@ -8,11 +8,12 @@
 import Foundation
 import SwiftUI
 
-func WalletButton(url: URL, wallet_name: String, dismiss: DismissAction) -> some View {
+func WalletButton(url: URL, wallet_name: String, image_name: String, dismiss: DismissAction) -> some View {
     HStack {
-        Image(systemName: "bolt.circle")
+        Image(image_name)
             .resizable()
-            .frame(width: 30, height: 30)
+            .frame(width: 40, height: 40)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
         Text(wallet_name)
         Spacer()
     }
@@ -57,15 +58,15 @@ struct WalletPickerView: View {
                     }
                     .buttonStyle(BorderlessButtonStyle())
                 }
-                WalletButton(url: self.url, wallet_name: "Breez", dismiss: dismiss)
-                WalletButton(url: self.url, wallet_name: "Muun", dismiss: dismiss)
-                WalletButton(url: self.url, wallet_name: "Phoenix", dismiss: dismiss)
-                WalletButton(url: self.url, wallet_name: "Wallet of Satoshi", dismiss: dismiss)
-                WalletButton(url: self.url, wallet_name: "Bitcoin Beach", dismiss: dismiss)
-                WalletButton(url: self.url, wallet_name: "Bitcoin Jungle", dismiss: dismiss)
-                WalletButton(url: self.url, wallet_name: "Zeus", dismiss: dismiss)
-                WalletButton(url: self.url, wallet_name: "Strike", dismiss: dismiss)
-                WalletButton(url: self.url, wallet_name: "Cash App", dismiss: dismiss)
+                WalletButton(url: self.url, wallet_name: "Breez", image_name: "breez", dismiss: dismiss)
+                WalletButton(url: self.url, wallet_name: "Muun", image_name: "muun", dismiss: dismiss)
+                WalletButton(url: self.url, wallet_name: "Phoenix", image_name: "phoenix", dismiss: dismiss)
+                WalletButton(url: self.url, wallet_name: "Wallet of Satoshi", image_name: "wos", dismiss: dismiss)
+                WalletButton(url: self.url, wallet_name: "Bitcoin Beach", image_name: "bbw", dismiss: dismiss)
+                WalletButton(url: self.url, wallet_name: "Bitcoin Jungle", image_name: "bj", dismiss: dismiss)
+                WalletButton(url: self.url, wallet_name: "Zeus", image_name: "zeusln", dismiss: dismiss)
+                WalletButton(url: self.url, wallet_name: "Strike", image_name: "strike", dismiss: dismiss)
+                WalletButton(url: self.url, wallet_name: "Cash App", image_name: "cashapp", dismiss: dismiss)
             }
             .navigationTitle("Select a Lightning Wallet")
             
