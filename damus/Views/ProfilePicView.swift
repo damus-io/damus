@@ -129,8 +129,9 @@ struct ProfilePicView: View {
 
 func get_profile_url(picture: String?, pubkey: String, profiles: Profiles) -> URL {
     var pic: String
-    let remote_image_policy = UserDefaults.standard.string(forKey: "remote_image_policy")
-    if remote_image_policy == "restricted" || (remote_image_policy == "friends" && !contacts.is_friend(pubkey)) {
+    let remote_image_policy: RemoteImagePolicy = RemoteImagePolicy(rawValue: UserDefaults.standard.string(forKey: "remote_image_policy")!) ?? .everyone
+    
+    if remote_image_policy == .restricted || (remote_image_policy == .friendsOnly && !contacts.is_friend(pubkey)) {
         pic = robohash(pubkey)
     } else {
         pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)

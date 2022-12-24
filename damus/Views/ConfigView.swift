@@ -8,6 +8,23 @@ import AVFoundation
 import Kingfisher
 import SwiftUI
 
+enum RemoteImagePolicy: String, CaseIterable {
+    case everyone
+    case friendsOnly
+    case restricted
+}
+
+func remoteImagePolicyText(_ fs: RemoteImagePolicy) -> String {
+    switch fs {
+    case .everyone:
+        return "Everyone"
+    case .friendsOnly:
+        return "Friends Only"
+    case .restricted:
+        return "Restricted (no remote image)"
+    }
+}
+
 struct ConfigView: View {
     let state: DamusState
     @Environment(\.dismiss) var dismiss
@@ -19,8 +36,8 @@ struct ConfigView: View {
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
     @State var delete_text: String = ""
-    @ObservedObject var settings: UserSettingsStore
-    @AppStorage("remote_image_policy") var remote_image_policy: String = "everyone"
+    @EnvironmentObject var user_settings: UserSettingsStore
+    @AppStorage("remote_image_policy") var remote_image_policy: RemoteImagePolicy = .everyone
     
     let generator = UIImpactFeedbackGenerator(style: .light)
     
@@ -133,22 +150,22 @@ struct ConfigView: View {
                 Section("Profile Image Loading Policy") {
                     Menu {
                         Button {
-                            UserDefaults.standard.set("everyone", forKey:"remote_image_policy")
+                            self.remote_image_policy = .everyone
                         } label: {
-                            Text("Everyone")
+                            Text(remoteImagePolicyText(.everyone))
                         }
                         Button {
-                            UserDefaults.standard.set("friends", forKey:"remote_image_policy")
+                            self.remote_image_policy = .friendsOnly
                         } label: {
-                            Text("Friends Only")
+                            Text(remoteImagePolicyText(.friendsOnly))
                         }
                         Button {
-                            UserDefaults.standard.set("restricted", forKey:"remote_image_policy")
+                            self.remote_image_policy = .restricted
                         } label: {
-                            Text("Restricted")
+                            Text(remoteImagePolicyText(.restricted))
                         }
                     } label: {
-                        Text("\(convertImageLoadPolicyTxt(policy:remote_image_policy))")
+                        Text("\(remoteImagePolicyText(remote_image_policy))")
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
@@ -196,17 +213,6 @@ struct ConfigView: View {
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
         }
-    }
-}
-
-func convertImageLoadPolicyTxt(policy: String) -> String {
-    switch policy {
-    case "restricted":
-        return "Restricted"
-    case "friends":
-        return "Friends Only"
-    default:
-        return "Everyone"
     }
 }
 
