@@ -73,11 +73,11 @@ struct ConfigView: View {
                             
                             CopyButton(is_pk: false)
                         }
-   
+                        
                         Toggle("Show", isOn: $show_privkey)
                     }
                 }
-                    
+                
                 Section("Reset") {
                     Button("Logout") {
                         confirm_logout = true
@@ -129,7 +129,7 @@ struct ConfigView: View {
                 guard let privkey = state.keypair.privkey else {
                     return
                 }
-
+                
                 let info = RelayInfo.rw
                 
                 guard (try? state.pool.add_relay(url, info: info)) != nil else {
@@ -154,6 +154,8 @@ struct ConfigView: View {
 
 struct ConfigView_Previews: PreviewProvider {
     static var previews: some View {
-        ConfigView(state: test_damus_state())
+        NavigationView {
+            ConfigView(state: test_damus_state())
+        }
     }
 }

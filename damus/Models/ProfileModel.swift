@@ -7,7 +7,7 @@
 
 import Foundation
 
-class ProfileModel: ObservableObject {
+class ProfileModel: ObservableObject, Equatable {
     @Published var events: [NostrEvent] = []
     @Published var contacts: NostrEvent? = nil
     @Published var following: Int = 0
@@ -29,6 +29,14 @@ class ProfileModel: ObservableObject {
     init(pubkey: String, damus: DamusState) {
         self.pubkey = pubkey
         self.damus = damus
+    }
+    
+    static func == (lhs: ProfileModel, rhs: ProfileModel) -> Bool {
+        return lhs.pubkey == rhs.pubkey
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(pubkey)
     }
     
     func unsubscribe() {

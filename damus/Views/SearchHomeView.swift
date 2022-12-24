@@ -42,7 +42,8 @@ struct SearchHomeView: View {
     var GlobalContent: some View {
         return TimelineView(events: $model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: { _ in true })
             .refreshable {
-                // Fetch new information by resubscribing to the relay
+                // Fetch new information by unsubscribing and resubscribing to the relay
+                model.unsubscribe()
                 model.subscribe()
             }
     }
@@ -50,7 +51,8 @@ struct SearchHomeView: View {
     var SearchContent: some View {
         SearchResultsView(damus_state: damus_state, search: $search)
             .refreshable {
-                // Fetch new information by resubscribing to the relay
+                // Fetch new information by unsubscribing and resubscribing to the relay
+                model.unsubscribe()
                 model.subscribe()
             }
     }
@@ -68,9 +70,7 @@ struct SearchHomeView: View {
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        VStack {
-            MainContent
-        }
+        MainContent
         .safeAreaInset(edge: .top) {
             VStack(spacing: 0) {
                 SearchInput

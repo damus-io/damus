@@ -32,13 +32,13 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
     }
 }
 
-struct ProfilePicView: View {
+struct InnerProfilePicView: View {
+    @Environment(\.redactionReasons) private var reasons
+    
+    let url: URL?
     let pubkey: String
     let size: CGFloat
     let highlight: Highlight
-    let profiles: Profiles
-    
-    @State var picture: String? = nil
     
     var PlaceholderColor: Color {
         return id_to_color(pubkey)
@@ -52,30 +52,50 @@ struct ProfilePicView: View {
             .padding(2)
     }
     
-    var MainContent: some View {
+    var body: some View {
         Group {
-            let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
-            let url = URL(string: pic)
-            
-            KFAnimatedImage(url)
-                .configure { view in
-                    view.framePreloadCount = 1
-                }
-                .placeholder { _ in
-                    Placeholder
-                }
-                .cacheOriginalImage()
-                .scaleFactor(UIScreen.main.scale)
-                .loadDiskFileSynchronously()
-                .fade(duration: 0.1)
-                .frame(width: size, height: size)
-                .clipShape(Circle())
-                .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
+            if reasons.isEmpty {
+                KFAnimatedImage(url)
+                    .configure { view in
+                        view.framePreloadCount = 1
+                    }
+                    .placeholder { _ in
+                        Placeholder
+                    }
+                    .cacheOriginalImage()
+                    .scaleFactor(UIScreen.main.scale)
+                    .loadDiskFileSynchronously()
+                    .fade(duration: 0.1)
+            } else {
+                KFImage(url)
+            }
         }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+        .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
+    }
+    
+}
+
+struct ProfilePicView: View {
+    
+    let pubkey: String
+    let size: CGFloat
+    let highlight: Highlight
+    let profiles: Profiles
+    
+    @State var picture: String?
+    
+    init (pubkey: String, size: CGFloat, highlight: Highlight, profiles: Profiles, picture: String? = nil) {
+        self.pubkey = pubkey
+        self.profiles = profiles
+        self.size = size
+        self.highlight = highlight
+        self._picture = State(initialValue: picture)
     }
     
     var body: some View {
-        MainContent
+        InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), pubkey: pubkey, size: size, highlight: highlight)
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let updated = notif.object as! ProfileUpdate
 
@@ -90,10 +110,18 @@ struct ProfilePicView: View {
     }
 }
 
+func get_profile_url(picture: String?, pubkey: String, profiles: Profiles) -> URL {
+    let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
+    if let url = URL(string: pic) {
+        return url
+    }
+    return URL(string: robohash(pubkey))!
+}
+
 func make_preview_profiles(_ pubkey: String) -> Profiles {
     let profiles = Profiles()
     let picture = "http://cdn.jb55.com/img/red-me.jpg"
-    let profile = Profile(name: "jb55", display_name: "William Casarin", about: "It's me", picture: picture, website: "https://jb55.com", lud06: nil, lud16: nil)
+    let profile = Profile(name: "jb55", display_name: "William Casarin", about: "It's me", picture: picture, website: "https://jb55.com", lud06: nil, lud16: nil, nip05: "jb55.com")
     let ts_profile = TimestampedProfile(profile: profile, timestamp: 0)
     profiles.add(id: pubkey, profile: ts_profile)
     return profiles

@@ -1,4 +1,65 @@
 
+## [0.1.9] - 2022-12-23
+
+### Added
+
+     - Added profile edit view
+
+### Changed
+
+     - Increase like boop intensity
+     - Don't auto-load follower count
+     - Don't fetch followers right away
+
+### Fixed
+
+     - Fix crash on some bolt11 invoices
+     - Fixed issues when refreshing global view
+
+
+## [0.1.8] - 2022-12-21
+
+### Changed
+
+     - Lots of overall design polish (Sam DuBois)
+     - Added loading shimmering effect (Sam DuBois)
+     - Show real name next to username in timelines (Sam DuBois)
+
+### Added
+
+     - Animated gif are now shown inline and in profile pictures (@futurepaul)
+     - Added ability to copy and share image (@futurepaul)
+     - Haptic feedback when liking for that sweet dopamine hit (radixrat)
+     - Hide private key in config, make it easier to copy keys (Nitesh Balusu)
+
+### Fixed
+
+     - Disable autocorrection for username when creating account
+     - Fixed issues with the post placeholder
+     - Disable autocorrection on search
+     - Disable autocorrection on add relay field
+     - Parse lightning: prefixes on lightning invoice
+     - Resize images to fill the space
+
+
+## [0.1.7] - 2022-12-21
+
+### Changed
+
+     - Only show inline images from your friends
+     - Improved look of profile view
+
+
+### Fixed
+
+     - Added ability to dismiss keyboard during account creation
+     - Fixed crashed on lightning invoices with empty descriptions
+     - Make dm chat area visible again
+
+
+
+[0.1.7]: https://github.com/damus-io/damus/releases/tag/v0.1.7
+
 ## [0.1.6] - 2022-10-30
 
 ### Added
@@ -77,4 +138,3 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-

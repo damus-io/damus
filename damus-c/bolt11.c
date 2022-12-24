@@ -553,7 +553,7 @@ struct bolt11 *bolt11_decode_nosig(const tal_t *ctx, const char *str, u5 **sig, 
         case 'n':
             problem = decode_n(b11, &hu5, &data,
                        &data_len, data_length,
-                       have_n);
+                       &have_n);
             break;
 
         case 'x':

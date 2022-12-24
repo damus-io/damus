@@ -77,12 +77,47 @@ struct ProfileNameView: View {
     }
 }
 
+struct EditButton: View {
+    let damus_state: DamusState
+    
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
+            Text("Edit")
+                .padding(.horizontal, 25)
+                .padding(.vertical, 10)
+                .font(.caption.weight(.bold))
+                .foregroundColor(fillColor())
+                .background(emptyColor())
+                .cornerRadius(20)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(borderColor(), lineWidth: 1)
+                }
+        }
+    }
+    
+    func fillColor() -> Color {
+        colorScheme == .light ? .black : .white
+    }
+    
+    func emptyColor() -> Color {
+        colorScheme == .light ? .white : .black
+    }
+    
+    func borderColor() -> Color {
+        colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2)
+    }
+}
+
 struct ProfileView: View {
     let damus_state: DamusState
     
     @State private var selected_tab: ProfileTab = .posts
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
+    @State private var showingEditProfile = false
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
@@ -127,7 +162,18 @@ struct ProfileView: View {
                 
                 DMButton
                 
-                FollowButtonView(target: profile.get_follow_target(), follow_state: damus_state.contacts.follow_state(profile.pubkey))
+                
+                if profile.pubkey != damus_state.pubkey {
+                    FollowButtonView(
+                        target: profile.get_follow_target(),
+                        follow_state: damus_state.contacts.follow_state(profile.pubkey)
+                    )
+                } else {
+                    NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
+                        EditButton(damus_state: damus_state)
+                    }
+                }
+                
             }
             
             ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
@@ -155,17 +201,30 @@ struct ProfileView: View {
                 }
                 let fview = FollowersView(damus_state: damus_state, whos: profile.pubkey)
                     .environmentObject(followers)
-                NavigationLink(destination: fview) {
-                    HStack {
-                        Text("\(followers.contacts.count)")
-                            .font(.subheadline.weight(.medium))
-                        Text("Followers")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
+                if followers.contacts != nil {
+                    NavigationLink(destination: fview) {
+                        FollowersCount
                     }
+                    .buttonStyle(PlainButtonStyle())
+                } else {
+                    FollowersCount
+                        .onTapGesture {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            followers.contacts = []
+                            followers.subscribe()
+                        }
                 }
-                .buttonStyle(PlainButtonStyle())
             }
+        }
+    }
+    
+    var FollowersCount: some View {
+        HStack {
+            Text("\(followers.count_display)")
+                .font(.subheadline.weight(.medium))
+            Text("Followers")
+                .font(.subheadline)
+                .foregroundColor(.gray)
         }
     }
     
@@ -187,7 +246,7 @@ struct ProfileView: View {
         }
         .onAppear() {
             profile.subscribe()
-            followers.subscribe()
+            //followers.subscribe()
         }
         .onDisappear {
             profile.unsubscribe()
@@ -211,7 +270,7 @@ func test_damus_state() -> DamusState {
     let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
     let damus = DamusState(pool: RelayPool(), keypair: Keypair(pubkey: pubkey, privkey: "privkey"), likes: EventCounter(our_pubkey: pubkey), boosts: EventCounter(our_pubkey: pubkey), contacts: Contacts(), tips: TipCounter(our_pubkey: pubkey), profiles: Profiles(), dms: DirectMessagesModel())
     
-    let prof = Profile(name: "damus", display_name: "Damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol")
+    let prof = Profile(name: "damus", display_name: "Damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io")
     let tsprof = TimestampedProfile(profile: prof, timestamp: 0)
     damus.profiles.add(id: pubkey, profile: tsprof)
     return damus
