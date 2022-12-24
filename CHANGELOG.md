@@ -1,4 +1,23 @@
 
+## [0.1.9] - 2022-12-23
+
+### Added
+
+     - Added profile edit view
+
+### Changed
+
+     - Increase like boop intensity
+     - Don't auto-load follower count
+     - Add swipe gesture between posts and post & replies
+     - Don't fetch followers right away
+
+### Fixed
+
+     - Fix crash on some bolt11 invoices
+     - Fixed issues when refreshing global view
+
+
 ## [0.1.8] - 2022-12-21
 
 ### Changed
@@ -120,5 +139,3 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
-
