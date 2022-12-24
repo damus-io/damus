@@ -11,6 +11,7 @@ struct ProfileZoomView: View {
     @Environment(\.presentationMode) var presentationMode
     let pubkey: String
     let profiles: Profiles
+    let contacts: Contacts
 
     @GestureState private var scaleState: CGFloat = 1
     @GestureState private var offsetState = CGSize.zero
@@ -68,7 +69,7 @@ struct ProfileZoomView: View {
 
                 Spacer()
                 
-                ProfilePicView(pubkey: pubkey, size: 200.0, highlight: .none, profiles: profiles)
+                ProfilePicView(pubkey: pubkey, size: 200.0, highlight: .none, profiles: profiles, contacts: contacts)
                     .padding(100)
                     .scaledToFit()
                     .scaleEffect(self.scale * scaleState)
@@ -92,6 +93,8 @@ struct ProfileZoomView_Previews: PreviewProvider {
     static var previews: some View {
         ProfileZoomView(
             pubkey: pubkey,
-            profiles: make_preview_profiles(pubkey))
+            profiles: make_preview_profiles(pubkey),
+            contacts: Contacts(our_pubkey: pubkey)
+        )
     }
 }

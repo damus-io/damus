@@ -11,6 +11,7 @@ import SwiftUI
 enum RemoteImagePolicy: String, CaseIterable {
     case everyone
     case friendsOnly
+    case friendsOfFriends
     case restricted
 }
 
@@ -20,8 +21,10 @@ func remoteImagePolicyText(_ fs: RemoteImagePolicy) -> String {
         return "Everyone"
     case .friendsOnly:
         return "Friends Only"
+    case .friendsOfFriends:
+        return "Friends of Friends"
     case .restricted:
-        return "Restricted (no remote image)"
+        return "Block Images"
     }
 }
 
@@ -36,8 +39,8 @@ struct ConfigView: View {
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
     @State var delete_text: String = ""
-    @EnvironmentObject var user_settings: UserSettingsStore
-    @AppStorage("remote_image_policy") var remote_image_policy: RemoteImagePolicy = .everyone
+    @ObservedObject var settings: UserSettingsStore
+    @AppStorage("remote_image_policy") var remote_image_policy: RemoteImagePolicy = .friendsOfFriends
     
     let generator = UIImpactFeedbackGenerator(style: .light)
     
@@ -147,12 +150,17 @@ struct ConfigView: View {
                     }
                 }
                 
-                Section("Profile Image Loading Policy") {
+                Section(NSLocalizedString("Remote Image Loading Policy", comment: "Section title for remote image loading policy")) {
                     Menu {
                         Button {
                             self.remote_image_policy = .everyone
                         } label: {
                             Text(remoteImagePolicyText(.everyone))
+                        }
+                        Button {
+                            self.remote_image_policy = .friendsOfFriends
+                        } label: {
+                            Text(remoteImagePolicyText(.friendsOfFriends))
                         }
                         Button {
                             self.remote_image_policy = .friendsOnly
