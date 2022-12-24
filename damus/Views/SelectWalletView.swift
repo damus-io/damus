@@ -66,7 +66,7 @@ struct SelectWalletView: View {
                                             .truncationMode(.tail)
                                     }.padding([.bottom], 4)
                                 }.buttonStyle(.plain)
-                                wallet.id != 6 ? Divider().padding([.bottom], -6) : nil
+                                wallet.id != 7 ? Divider().padding([.bottom], -6) : nil
                             }
                         } header: {
                             Text("Select a lightning wallet")

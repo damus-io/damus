@@ -34,6 +34,7 @@ public class Constants {
             {"id": 4, "name": "Wallet Of Satoshi", "link": "walletofsatoshi:lightning:", "appStoreLink": "https://apps.apple.com/us/app/wallet-of-satoshi/id1438599608", "image": "walletofsatoshi"},
             {"id": 5, "name": "Zebedee", "link": "zebedee:lightning:", "appStoreLink": "https://apps.apple.com/us/app/zebedee-wallet/id1484394401", "image": "zebedee"},
             {"id": 6, "name": "Zeus LN", "link": "zeusln:lightning:", "appStoreLink": "https://apps.apple.com/us/app/zeus-ln/id1456038895", "image": "zeusln"},
+            {"id": 7, "name": "LNLink", "link": "lnlink://", "appStoreLink": "https://testflight.apple.com/join/aNY4yuuZ", "image": "lnlink"},
         ]
         """.data(using: .utf8)!
 }
