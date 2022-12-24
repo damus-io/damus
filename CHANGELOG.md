@@ -9,7 +9,6 @@
 
      - Increase like boop intensity
      - Don't auto-load follower count
-     - Add swipe gesture between posts and post & replies
      - Don't fetch followers right away
 
 ### Fixed
