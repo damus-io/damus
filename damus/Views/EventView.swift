@@ -169,8 +169,10 @@ struct EventView: View {
                 if has_action_bar {
                     if size == .selected {
                         Text("\(format_date(event.created_at))")
+                            .padding(.top, 10)
                             .font(eventviewsize_to_font(size))
                             .foregroundColor(.gray)
+                        Divider()
                     }
                     
                     let bar = make_actionbar_model(ev: event, damus: damus)
