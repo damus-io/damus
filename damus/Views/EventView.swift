@@ -162,7 +162,7 @@ struct EventView: View {
                             }
                             
                             Spacer()
-                        }.padding(.bottom, 10)
+                        }
                     }
                     
                     EventProfileName(pubkey: pubkey, profile: profile, contacts: damus.contacts, show_friend_confirmed: show_friend_icon, size: size)
@@ -171,7 +171,7 @@ struct EventView: View {
                             .font(eventviewsize_to_font(size))
                             .foregroundColor(.gray)
                     }
-                }
+                }.padding(.bottom, 10)
                 
                 if event.is_reply(damus.keypair.privkey) {
                     Text("\(reply_desc(profiles: damus.profiles, event: event))")
