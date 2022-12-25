@@ -36,6 +36,23 @@ enum Highlight {
     }
 }
 
+enum EventViewSize {
+    case small
+    case normal
+    case big
+}
+
+func eventviewsize_to_font(_ size: EventViewSize) -> Font {
+    switch size {
+    case .small:
+        return .caption
+    case .normal:
+        return .body
+    case .big:
+        return .headline
+    }
+}
+
 struct EventView: View {
     let event: NostrEvent
     let highlight: Highlight
@@ -43,34 +60,38 @@ struct EventView: View {
     let damus: DamusState
     let pubkey: String
     let show_friend_icon: Bool
+    let size: EventViewSize
 
     @EnvironmentObject var action_bar: ActionBarModel
 
-    init(event: NostrEvent, highlight: Highlight, has_action_bar: Bool, damus: DamusState, show_friend_icon: Bool) {
+    init(event: NostrEvent, highlight: Highlight, has_action_bar: Bool, damus: DamusState, show_friend_icon: Bool, size: EventViewSize = .normal) {
         self.event = event
         self.highlight = highlight
         self.has_action_bar = has_action_bar
         self.damus = damus
         self.pubkey = event.pubkey
         self.show_friend_icon = show_friend_icon
+        self.size = size
     }
 
-    init(damus: DamusState, event: NostrEvent, show_friend_icon: Bool) {
+    init(damus: DamusState, event: NostrEvent, show_friend_icon: Bool, size: EventViewSize = .normal) {
         self.event = event
         self.highlight = .none
         self.has_action_bar = false
         self.damus = damus
         self.pubkey = event.pubkey
         self.show_friend_icon = show_friend_icon
+        self.size = size
     }
 
-    init(damus: DamusState, event: NostrEvent, pubkey: String, show_friend_icon: Bool) {
+    init(damus: DamusState, event: NostrEvent, pubkey: String, show_friend_icon: Bool, size: EventViewSize = .normal) {
         self.event = event
         self.highlight = .none
         self.has_action_bar = false
         self.damus = damus
         self.pubkey = pubkey
         self.show_friend_icon = show_friend_icon
+        self.size = size
     }
 
     var body: some View {
@@ -124,9 +145,9 @@ struct EventView: View {
 
             VStack(alignment: .leading) {
                 HStack(alignment: .center) {
-                    EventProfileName(pubkey: pubkey, profile: profile, contacts: damus.contacts, show_friend_confirmed: show_friend_icon)
+                    EventProfileName(pubkey: pubkey, profile: profile, contacts: damus.contacts, show_friend_confirmed: show_friend_icon, size: size)
                     Text("\(format_relative_time(event.created_at))")
-                        .font(.body)
+                        .font(eventviewsize_to_font(size))
                         .foregroundColor(.gray)
                 }
                 
@@ -137,7 +158,7 @@ struct EventView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, show_images: should_show_images(contacts: damus.contacts, ev: event), artifacts: .just_content(content))
+                NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, show_images: should_show_images(contacts: damus.contacts, ev: event), artifacts: .just_content(content), size: self.size)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 if has_action_bar {
@@ -286,6 +307,10 @@ func make_actionbar_model(ev: NostrEvent, damus: DamusState) -> ActionBarModel {
 
 struct EventView_Previews: PreviewProvider {
     static var previews: some View {
-        EventView(damus: test_damus_state(), event: NostrEvent(content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool", pubkey: "pk"), show_friend_icon: true)
+        VStack {
+            EventView(damus: test_damus_state(), event: NostrEvent(content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool", pubkey: "pk"), show_friend_icon: true, size: .small)
+            EventView(damus: test_damus_state(), event: NostrEvent(content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool", pubkey: "pk"), show_friend_icon: true, size: .normal)
+            EventView(damus: test_damus_state(), event: NostrEvent(content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool", pubkey: "pk"), show_friend_icon: true, size: .big)
+        }
     }
 }
