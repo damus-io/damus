@@ -7,6 +7,7 @@
 
 import Foundation
 import secp256k1
+import Vault
 
 let PUBKEY_HRP = "npub"
 let PRIVKEY_HRP = "nsec"
@@ -27,6 +28,12 @@ struct Keypair {
 enum Bech32Key {
     case pub(String)
     case sec(String)
+}
+
+struct DamusKeychainConfiguration: KeychainConfiguration {
+    var serviceName = "damus"
+    var accessGroup: String? = nil
+    var accountName = "privkey"
 }
 
 func decode_bech32_key(_ key: String) -> Bech32Key? {
@@ -86,32 +93,38 @@ func save_pubkey(pubkey: String) {
     UserDefaults.standard.set(pubkey, forKey: "pubkey")
 }
 
-func save_privkey(privkey: String) {
-    UserDefaults.standard.set(privkey, forKey: "privkey")
+func save_privkey(privkey: String) throws {
+    try Vault.savePrivateKey(privkey, keychainConfiguration: DamusKeychainConfiguration())
 }
 
-func clear_saved_privkey() {
-    UserDefaults.standard.removeObject(forKey: "privkey")
+func clear_saved_privkey() throws {
+    try Vault.deletePrivateKey(keychainConfiguration: DamusKeychainConfiguration())
 }
 
 func clear_saved_pubkey() {
     UserDefaults.standard.removeObject(forKey: "pubkey")
 }
 
-func save_keypair(pubkey: String, privkey: String) {
+func save_keypair(pubkey: String, privkey: String) throws {
     save_pubkey(pubkey: pubkey)
-    save_privkey(privkey: privkey)
+    try save_privkey(privkey: privkey)
 }
 
-func clear_keypair() {
-    clear_saved_privkey()
+func clear_keypair() throws {
+    try clear_saved_privkey()
     clear_saved_pubkey()
 }
 
 func get_saved_keypair() -> Keypair? {
-    get_saved_pubkey().flatMap { pubkey in
-        let privkey = get_saved_privkey()
-        return Keypair(pubkey: pubkey, privkey: privkey)
+    do {
+        try removePrivateKeyFromUserDefaults()
+        
+        return get_saved_pubkey().flatMap { pubkey in
+            let privkey = get_saved_privkey()
+            return Keypair(pubkey: pubkey, privkey: privkey)
+        }
+    } catch {
+        return nil
     }
 }
 
@@ -120,5 +133,11 @@ func get_saved_pubkey() -> String? {
 }
 
 func get_saved_privkey() -> String? {
-    return UserDefaults.standard.string(forKey: "privkey")
+    try? Vault.getPrivateKey(keychainConfiguration: DamusKeychainConfiguration())
+}
+
+fileprivate func removePrivateKeyFromUserDefaults() throws {
+    guard let privKey = UserDefaults.standard.string(forKey: "privkey") else { return }
+    try save_privkey(privkey: privKey)
+    UserDefaults.standard.removeObject(forKey: "privkey")
 }
