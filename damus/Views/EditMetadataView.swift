@@ -135,7 +135,6 @@ struct EditMetadataView: View {
                             .textInputAutocapitalization(.sentences)
                             .frame(minHeight: 20, alignment: .leading)
                             .multilineTextAlignment(.leading)
-                            .cornerRadius(6.0)
                         Text(about.isEmpty ? placeholder : about)
                             .padding(.leading, 4)
                             .opacity(about.isEmpty ? 1 : 0)
