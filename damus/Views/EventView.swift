@@ -144,18 +144,17 @@ struct EventView: View {
                     let bar = make_actionbar_model(ev: event, damus: damus)
                     EventActionBar(damus_state: damus, event: event, bar: bar)
                 }
-
-                Divider()
-                    .padding([.top], 4)
             }
             .padding([.leading], 2)
+            .padding([.bottom], 4)
         }
         .contentShape(Rectangle())
         .background(event_validity_color(event.validity))
         .id(event.id)
         .frame(maxWidth: .infinity, minHeight: PFP_SIZE)
-        .padding([.bottom], 2)
+        .padding([.bottom], 5)
         .event_context_menu(event, privkey: damus.keypair.privkey)
+        .overlay(VStack{Divider()}, alignment: .bottom)
     }
 }
 
