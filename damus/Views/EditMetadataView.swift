@@ -129,14 +129,16 @@ struct EditMetadataView: View {
                 }
                 
                 Section("About Me") {
+                    let placeholder = "Absolute Boss"
                     ZStack(alignment: .topLeading) {
                         TextEditor(text: $about)
                             .textInputAutocapitalization(.sentences)
-                        if about.isEmpty {
-                            Text("Absolute boss")
-                                .offset(x: 0, y: 7)
-                                .foregroundColor(Color(uiColor: .placeholderText))
-                        }
+                            .frame(minHeight: 20, alignment: .leading)
+                            .multilineTextAlignment(.leading)
+                        Text(about.isEmpty ? placeholder : about)
+                            .padding(.leading, 4)
+                            .opacity(about.isEmpty ? 1 : 0)
+                            .foregroundColor(Color(uiColor: .placeholderText))
                     }
                 }
                 
