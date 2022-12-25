@@ -28,27 +28,23 @@ struct SelectWalletView: View {
     var body: some View {
         NavigationView {
             Form {
-                VStack(alignment: .leading) {
-                    Text("Copy invoice")
-                        .bold()
-                        .font(.title3)
-                        .multilineTextAlignment(.center)
-                        .padding([.bottom, .top], 8)
+                Section("Copy invoice") {
                     HStack {
                         Text(invoice).font(.body)
                             .lineLimit(2)
                             .truncationMode(.tail)
                         
+                        Spacer()
+                        
                         Image(systemName: self.invoice_copied ? "checkmark.circle" : "doc.on.doc")
-                    }
-                    .clipShape(RoundedRectangle(cornerRadius: 5)).onTapGesture {
+                    }.clipShape(RoundedRectangle(cornerRadius: 5)).onTapGesture {
                         UIPasteboard.general.string = invoice
                         self.invoice_copied = true
                         generator.impactOccurred()
                     }
-                    Spacer()
-                    List {
-                        Section{
+                }
+                    Section("Select a lightning wallet"){
+                        List{
                             ForEach(walletItems, id: \.self) { wallet in
                                 Button() {
                                     if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
@@ -62,21 +58,11 @@ struct SelectWalletView: View {
                                     HStack {
                                         Image(wallet.image).resizable().frame(width: 32.0, height: 32.0,alignment: .center).cornerRadius(5)
                                         Text(wallet.name).font(.body)
-                                            .lineLimit(2)
-                                            .truncationMode(.tail)
-                                    }.padding([.bottom], 4)
+                                    }
                                 }.buttonStyle(.plain)
-                                wallet.id != 7 ? Divider().padding([.bottom], -6) : nil
                             }
-                        } header: {
-                            Text("Select a lightning wallet")
-                                .bold()
-                                .font(.title3)
-                                .multilineTextAlignment(.center)
-                                .padding([.bottom, .top], 8)
-                        }
+                        }.padding(.vertical, 2.5)
                     }
-                }
             }.navigationBarTitle(Text("Pay the lightning invoice"), displayMode: .inline).navigationBarItems(trailing: Button(action: {
                 self.showingSelectWallet = false
             }) {
