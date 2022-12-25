@@ -36,12 +36,15 @@ struct EventActionBar: View {
             Spacer()
             
              */
-            if damus_state.keypair.privkey != nil {
-                EventActionButton(img: "bubble.left", col: nil) {
-                    notify(.reply, event)
+            HStack(alignment: .bottom) {
+                if damus_state.keypair.privkey != nil {
+                    EventActionButton(img: "bubble.left", col: nil) {
+                        notify(.reply, event)
+                    }
                 }
             }
-            
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+
             HStack(alignment: .bottom) {
                 Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
                     .font(.footnote.weight(.medium))
@@ -55,6 +58,8 @@ struct EventActionBar: View {
                     }
                 }
             }
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+
 
             HStack(alignment: .bottom) {
                 Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
@@ -69,6 +74,8 @@ struct EventActionBar: View {
                     }
                 }
             }
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+
             
             /*
             HStack(alignment: .bottom) {
@@ -86,7 +93,7 @@ struct EventActionBar: View {
             }
              */
         }
-        .padding(.top, 1)
+        .padding([.bottom, .top], 3)
         .alert("Boost", isPresented: $confirm_boost) {
             Button("Boost") {
                 send_boost()
@@ -151,7 +158,7 @@ struct EventActionBar_Previews: PreviewProvider {
     static var previews: some View {
         let pk = "pubkey"
         let ds = test_damus_state()
-        let bar = ActionBarModel(likes: 0, boosts: 0, tips: 0, our_like: nil, our_boost: nil, our_tip: nil)
+        let bar = ActionBarModel(likes: 145, boosts: 25, tips: 0, our_like: nil, our_boost: nil, our_tip: nil)
         let ev = NostrEvent(content: "hi", pubkey: pk)
         EventActionBar(damus_state: ds, event: ev, bar: bar)
     }
