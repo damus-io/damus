@@ -133,21 +133,38 @@ struct EventView: View {
 
     func TextEvent(_ event: NostrEvent, pubkey: String) -> some View {
         let content = event.get_content(damus.keypair.privkey)
+        
         return HStack(alignment: .top) {
             let profile = damus.profiles.lookup(id: pubkey)
-            VStack {
-                let pmodel = ProfileModel(pubkey: pubkey, damus: damus)
-                let pv = ProfileView(damus_state: damus, profile: pmodel, followers: FollowersModel(damus_state: damus, target: pubkey))
-
-                NavigationLink(destination: pv) {
-                    ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: highlight, profiles: damus.profiles)
+            
+            if size != .selected {
+                VStack {
+                    let pmodel = ProfileModel(pubkey: pubkey, damus: damus)
+                    let pv = ProfileView(damus_state: damus, profile: pmodel, followers: FollowersModel(damus_state: damus, target: pubkey))
+                    
+                    NavigationLink(destination: pv) {
+                        ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: highlight, profiles: damus.profiles)
+                    }
+                    
+                    Spacer()
                 }
-
-                Spacer()
             }
 
             VStack(alignment: .leading) {
                 HStack(alignment: .center) {
+                    if size == .selected {
+                        VStack {
+                            let pmodel = ProfileModel(pubkey: pubkey, damus: damus)
+                            let pv = ProfileView(damus_state: damus, profile: pmodel, followers: FollowersModel(damus_state: damus, target: pubkey))
+                            
+                            NavigationLink(destination: pv) {
+                                ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: highlight, profiles: damus.profiles)
+                            }
+                            
+                            Spacer()
+                        }.padding(.bottom, 10)
+                    }
+                    
                     EventProfileName(pubkey: pubkey, profile: profile, contacts: damus.contacts, show_friend_confirmed: show_friend_icon, size: size)
                     if size != .selected {
                         Text("\(format_relative_time(event.created_at))")
