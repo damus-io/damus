@@ -161,7 +161,7 @@ struct EventView: View {
 
 // blame the porn bots for this code
 func should_show_images(contacts: Contacts, ev: NostrEvent) -> Bool {
-    if contacts.is_friend(ev.pubkey) {
+    if contacts.is_in_friendosphere(ev.pubkey) {
         return true
     }
     return false
