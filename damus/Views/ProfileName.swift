@@ -103,20 +103,24 @@ struct EventProfileName: View {
     
     @State var display_name: String?
     
-    init(pubkey: String, profile: Profile?, contacts: Contacts, show_friend_confirmed: Bool) {
+    let size: EventViewKind
+    
+    init(pubkey: String, profile: Profile?, contacts: Contacts, show_friend_confirmed: Bool, size: EventViewKind = .normal) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = ""
         self.contacts = contacts
         self.show_friend_confirmed = show_friend_confirmed
+        self.size = size
     }
     
-    init(pubkey: String, profile: Profile?, prefix: String, contacts: Contacts, show_friend_confirmed: Bool) {
+    init(pubkey: String, profile: Profile?, prefix: String, contacts: Contacts, show_friend_confirmed: Bool, size: EventViewKind = .normal) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = prefix
         self.contacts = contacts
         self.show_friend_confirmed = show_friend_confirmed
+        self.size = size
     }
     
     var friend_icon: String? {
@@ -143,10 +147,10 @@ struct EventProfileName: View {
                 
                 Text("@" + String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
                     .foregroundColor(.gray)
-                    .font(.body)
+                    .font(eventviewsize_to_font(size))
             } else {
                 Text(String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
-                    .font(.body)
+                    .font(eventviewsize_to_font(size))
                     .fontWeight(.bold)
             }
             

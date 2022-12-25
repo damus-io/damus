@@ -57,6 +57,8 @@ struct NoteContentView: View {
     
     @State var artifacts: NoteArtifacts
     
+    let size: EventViewKind
+    
     func MainContent() -> some View {
         let md_opts: AttributedString.MarkdownParsingOptions =
             .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
@@ -64,10 +66,10 @@ struct NoteContentView: View {
         return VStack(alignment: .leading) {
             if let txt = try? AttributedString(markdown: artifacts.content, options: md_opts) {
                 Text(txt)
-                    .font(.body)
+                    .font(eventviewsize_to_font(size))
             } else {
                 Text(artifacts.content)
-                    .font(.body)
+                    .font(eventviewsize_to_font(size))
             }
             if show_images && artifacts.images.count > 0 {
                 ImageCarousel(urls: artifacts.images)
@@ -126,6 +128,6 @@ struct NoteContentView_Previews: PreviewProvider {
         let state = test_damus_state()
         let content = "hi there https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
         let artifacts = NoteArtifacts(content: content, images: [], invoices: [])
-        NoteContentView(privkey: "", event: NostrEvent(content: content, pubkey: "pk"), profiles: state.profiles, show_images: true, artifacts: artifacts)
+        NoteContentView(privkey: "", event: NostrEvent(content: content, pubkey: "pk"), profiles: state.profiles, show_images: true, artifacts: artifacts, size: .normal)
     }
 }

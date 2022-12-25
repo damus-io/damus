@@ -53,8 +53,11 @@ struct SearchResultsView: View {
                     let prof_model = ProfileModel(pubkey: h, damus: damus_state)
                     let f = FollowersModel(damus_state: damus_state, target: h)
                     let prof_view = ProfileView(damus_state: damus_state, profile: prof_model, followers: f)
-                    let thread_model = ThreadModel(evid: h, damus_state: damus_state)
-                    let ev_view = ThreadView(thread: thread_model, damus: damus_state, is_chatroom: false)
+                    let ev_view = BuildThreadV2View(
+                        damus: damus_state,
+                        event_id: h
+                    )
+
                     VStack(spacing: 50) {
                         NavigationLink(destination: prof_view) {
                             Text("Goto profile \(h)")
@@ -66,8 +69,10 @@ struct SearchResultsView: View {
                 case .note(let nid):
                     let decoded = try? bech32_decode(nid)
                     let hex = hex_encode(decoded!.data)
-                    let thread_model = ThreadModel(evid: hex, damus_state: damus_state)
-                    let ev_view = ThreadView(thread: thread_model, damus: damus_state, is_chatroom: false)
+                    let ev_view = BuildThreadV2View(
+                        damus: damus_state,
+                        event_id: hex
+                    )
                     NavigationLink(destination: ev_view) {
                         Text("Goto post \(nid)")
                     }
