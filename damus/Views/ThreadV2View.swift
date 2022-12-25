@@ -24,8 +24,10 @@ struct ThreadV2View: View {
                 VStack {
                     ForEach(thread.parentEvents, id: \.id) { event in
                         EventView(
-                            damus: damus,
                             event: event,
+                            highlight: .none,
+                            has_action_bar: true,
+                            damus: damus,
                             show_friend_icon: true, // TODO: change it
                             size: .small
                         )
@@ -44,17 +46,21 @@ struct ThreadV2View: View {
                 
                 // MARK: - Actual event view
                 EventView(
-                    damus: damus,
                     event: thread.current,
+                    highlight: .none,
+                    has_action_bar: true,
+                    damus: damus,
                     show_friend_icon: true, // TODO: change it
-                    size: .big
+                    size: .selected
                 )
                 
                 // MARK: - Responses of the actual event view
                 ForEach(thread.childEvents, id: \.id) { event in
                     EventView(
-                        damus: damus,
                         event: event,
+                        highlight: .none,
+                        has_action_bar: true,
+                        damus: damus,
                         show_friend_icon: true, // TODO: change it
                         size: .small
                     )

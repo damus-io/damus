@@ -104,9 +104,9 @@ struct EventProfileName: View {
     
     @State var display_name: String?
     
-    let size: EventViewSize
+    let size: EventViewKind
     
-    init(pubkey: String, profile: Profile?, contacts: Contacts, show_friend_confirmed: Bool, size: EventViewSize = .normal) {
+    init(pubkey: String, profile: Profile?, contacts: Contacts, show_friend_confirmed: Bool, size: EventViewKind = .normal) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = ""
@@ -115,7 +115,7 @@ struct EventProfileName: View {
         self.size = size
     }
     
-    init(pubkey: String, profile: Profile?, prefix: String, contacts: Contacts, show_friend_confirmed: Bool, size: EventViewSize = .normal) {
+    init(pubkey: String, profile: Profile?, prefix: String, contacts: Contacts, show_friend_confirmed: Bool, size: EventViewKind = .normal) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = prefix

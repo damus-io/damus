@@ -57,7 +57,7 @@ struct NoteContentView: View {
     
     @State var artifacts: NoteArtifacts
     
-    let size: EventViewSize
+    let size: EventViewKind
     
     func MainContent() -> some View {
         let md_opts: AttributedString.MarkdownParsingOptions =
