@@ -133,7 +133,8 @@ func get_saved_pubkey() -> String? {
 }
 
 func get_saved_privkey() -> String? {
-    try? Vault.getPrivateKey(keychainConfiguration: DamusKeychainConfiguration())
+    let mkey = try? Vault.getPrivateKey(keychainConfiguration: DamusKeychainConfiguration());
+    return mkey.map { $0.trimmingCharacters(in: .whitespaces) }
 }
 
 fileprivate func removePrivateKeyFromUserDefaults() throws {
