@@ -118,20 +118,29 @@ struct ProfileView: View {
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
     @State private var showingEditProfile = false
+    @State var showingSelectWallet: Bool = false
+    @State var inv: String = ""
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
     
     //@EnvironmentObject var profile: ProfileModel
     
-    func LNButton(_ url: URL) -> some View {
+    func LNButton(lud06: String?, lud16: String?) -> some View {
         Button(action: {
-            UIApplication.shared.open(url)
+            if let l = lud06 {
+                inv = l
+            } else {
+                inv = lud16 ?? ""
+            }
+            showingSelectWallet = true
         }) {
             Image(systemName: "bolt.circle")
                 .symbolRenderingMode(.palette)
                 .font(.system(size: 34).weight(.thin))
                 .foregroundStyle(colorScheme == .light ? .black : .white, colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2))
+        }.sheet(isPresented: $showingSelectWallet, onDismiss: {showingSelectWallet = false}) {
+            SelectWalletView(showingSelectWallet: $showingSelectWallet, invoice: $inv)
         }
     }
     
@@ -156,8 +165,8 @@ struct ProfileView: View {
                 
                 Spacer()
                 
-                if let lnuri = data?.lightning_uri {
-                    LNButton(lnuri)
+                if (data != nil) && (data?.lud06 != nil || data?.lud16 != nil) {
+                    LNButton(lud06: data?.lud06, lud16: data?.lud16)
                 }
                 
                 DMButton

@@ -16,7 +16,7 @@ struct WalletItem : Decodable, Identifiable, Hashable {
 }
 
 struct SelectWalletView: View {
-    @Binding var show_select_wallet: Bool
+    @Binding var showingSelectWallet: Bool
     @Binding var invoice: String
     @Environment(\.openURL) private var openURL
     @State var invoice_copied: Bool = false
@@ -78,7 +78,7 @@ struct SelectWalletView: View {
                     }
                 }
             }.navigationBarTitle(Text("Pay the lightning invoice"), displayMode: .inline).navigationBarItems(trailing: Button(action: {
-                self.show_select_wallet = false
+                self.showingSelectWallet = false
             }) {
                 Text("Done").bold()
             })
@@ -91,6 +91,6 @@ struct SelectWalletView_Previews: PreviewProvider {
     @State static var invoice: String = ""
     
     static var previews: some View {
-        SelectWalletView(show_select_wallet: $show, invoice: $invoice)
+        SelectWalletView(showingSelectWallet: $show, invoice: $invoice)
     }
 }
