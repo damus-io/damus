@@ -34,16 +34,18 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
 
 struct InnerProfilePicView: View {
     @Environment(\.redactionReasons) private var reasons
-    
+
     let url: URL?
     let pubkey: String
     let size: CGFloat
     let highlight: Highlight
-    
+
+    @State var is_zoomed: Bool = false
+
     var PlaceholderColor: Color {
         return id_to_color(pubkey)
     }
-    
+
     var Placeholder: some View {
         PlaceholderColor
             .frame(width: size, height: size)
@@ -51,7 +53,7 @@ struct InnerProfilePicView: View {
             .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
             .padding(2)
     }
-    
+
     var body: some View {
         Group {
             if reasons.isEmpty {
@@ -73,8 +75,18 @@ struct InnerProfilePicView: View {
         .frame(width: size, height: size)
         .clipShape(Circle())
         .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
+        .onTapGesture(count: 2) {
+            is_zoomed.toggle()
+        }
+        .sheet(isPresented: $is_zoomed) {
+            KFAnimatedImage(url)
+                .cacheOriginalImage()
+                .loadDiskFileSynchronously()
+                .tag(2)
+                .clipShape(Circle())
+                .frame(width: 300, height: 300, alignment: .center)
+        }
     }
-    
 }
 
 struct ProfilePicView: View {
