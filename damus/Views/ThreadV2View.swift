@@ -33,11 +33,11 @@ struct ThreadV2View: View {
                         )
                     }
                 }.background(GeometryReader { geometry in
-                    // définition de la hauteur et de la largeur de la vue EventView
+                    // get the height and width of the EventView view
                     let eventHeight = geometry.frame(in: .global).height
-                    let eventWidth = geometry.frame(in: .global).width
+//                    let eventWidth = geometry.frame(in: .global).width
 
-                    // trait gris vertical en arrière-plan
+                    // vertical gray line in the background
                     Rectangle()
                         .fill(Color.gray.opacity(0.5))
                         .frame(width: 2, height: eventHeight)
