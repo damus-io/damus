@@ -11,22 +11,30 @@ struct ThreadV2 {
     var parentEvents: [NostrEvent]
     var current: NostrEvent
     var childEvents: [NostrEvent]
+    
+    mutating func clean() {
+        // remove duplicates
+        self.parentEvents = Array(Set(self.parentEvents))
+        self.childEvents = Array(Set(self.childEvents))
+        
+        // remove empty contents
+        self.parentEvents = self.parentEvents.filter { event in
+            return !event.content.isEmpty
+        }
+        self.childEvents = self.childEvents.filter { event in
+            return !event.content.isEmpty
+        }
+        
+        // sort events by publication date
+        self.parentEvents = self.parentEvents.sorted { event1, event2 in
+            return event1 < event2
+        }
+        self.childEvents = self.childEvents.sorted { event1, event2 in
+            return event1 < event2
+        }
+    }
 }
 
-//class ThreadV2: ObservableObject {
-//    @Published var initial_event: NostrEvent
-//    @Published var parentEvents: [NostrEvent]
-//    @Published var current: NostrEvent
-//    @Published var childEvents: [NostrEvent]
-//    @Published var loading: Bool = false
-//
-//    let damus_state: DamusState
-//
-//    init(initial_event: NostrEvent, damus_state: DamusState) {
-//        self.damus_state = damus_state
-//        self.initial_event = initial_event
-//    }
-//}
 
 struct BuildThreadV2View: View {
     let damus: DamusState
@@ -54,12 +62,12 @@ struct BuildThreadV2View: View {
             return
         }
         
-        guard case .event(_, let nostr_event) = nostr_response else {
+        guard case .event(let id, let nostr_event) = nostr_response else {
             return
         }
         
         // Is current event
-        if nostr_event.id == event_id {
+        if id == current_events_uuid {
             if current_event != nil {
                 return
             }
@@ -79,25 +87,44 @@ struct BuildThreadV2View: View {
               return tag[1]
             }
             
-            // Ask for parents
-            var parents_events = NostrFilter(
-                ids: parents_ids,
-                limit: UInt32(parents_ids.count)
-            )
-            damus.pool.send(.subscribe(.init(filters: [parents_events], sub_id: parents_events_uuid)))
+            print("ThreadV2View: Parents list: (\(parents_ids)")
+            
+            if parents_ids.count > 0 {
+                // Ask for parents
+                let parents_events = NostrFilter(
+                    ids: parents_ids,
+                    limit: UInt32(parents_ids.count)
+                )
+                print("ThreadV2View: Ask for parents (\(parents_events))")
+                damus.pool.send(.subscribe(.init(filters: [parents_events], sub_id: parents_events_uuid)))
+            }
             
             // Ask for children
-            var childs_events = NostrFilter(
+            let childs_events = NostrFilter(
                 referenced_ids: [self.event_id],
                 limit: 50
             )
+            print("ThreadV2View: Ask for children (\(childs_events)")
             damus.pool.send(.subscribe(.init(filters: [childs_events], sub_id: childs_events_uuid)))
             
             return
         }
         
-        print("event!")
-        print(nostr_event.description)
+        if id == parents_events_uuid {
+            // We are filtering this later
+            thread!.parentEvents.append(nostr_event)
+            
+            thread!.clean()
+            return
+        }
+        
+        if id == childs_events_uuid {
+            // We are filtering this later
+            thread!.childEvents.append(nostr_event)
+            
+            thread!.clean()
+            return
+        }
     }
 
     

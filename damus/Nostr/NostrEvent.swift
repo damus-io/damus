@@ -45,9 +45,17 @@ struct EventId: Identifiable, CustomStringConvertible {
     }
 }
 
-class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable {
+class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Hashable, Comparable {
     static func == (lhs: NostrEvent, rhs: NostrEvent) -> Bool {
         return lhs.id == rhs.id
+    }
+    
+    static func < (lhs: NostrEvent, rhs: NostrEvent) -> Bool {
+        return lhs.created_at < rhs.created_at
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
     
     var id: String
