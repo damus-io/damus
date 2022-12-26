@@ -214,11 +214,55 @@ struct ThreadV2View: View {
     let thread: ThreadV2
     
     var body: some View {
-        ScrollView {
-            VStack {
-                // MARK: - Parents events view
+        ScrollViewReader { reader in
+            ScrollView {
                 VStack {
-                    ForEach(thread.parentEvents, id: \.id) { event in
+                    // MARK: - Parents events view
+                    VStack {
+                        ForEach(thread.parentEvents, id: \.id) { event in
+                            NavigationLink(destination: BuildThreadV2View(
+                                damus: damus,
+                                event_id: event.id
+                            )){
+                                EventView(
+                                    event: event,
+                                    highlight: .none,
+                                    has_action_bar: true,
+                                    damus: damus,
+                                    show_friend_icon: true, // TODO: change it
+                                    size: .small
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .onAppear {
+                                // TODO: find another solution to prevent layout shifting and layout blocking on large responses
+                                reader.scrollTo("main", anchor: .center)
+                            }
+                        }
+                    }.background(GeometryReader { geometry in
+                        // get the height and width of the EventView view
+                        let eventHeight = geometry.frame(in: .global).height
+                        //                    let eventWidth = geometry.frame(in: .global).width
+                        
+                        // vertical gray line in the background
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.5))
+                            .frame(width: 2, height: eventHeight)
+                            .offset(x: 25, y: 40)
+                    })
+                    
+                    // MARK: - Actual event view
+                    EventView(
+                        event: thread.current,
+                        highlight: .none,
+                        has_action_bar: true,
+                        damus: damus,
+                        show_friend_icon: true, // TODO: change it
+                        size: .selected
+                    ).id("main")
+                    
+                    // MARK: - Responses of the actual event view
+                    ForEach(thread.childEvents, id: \.id) { event in
                         NavigationLink(destination: BuildThreadV2View(
                             damus: damus,
                             event_id: event.id
@@ -233,46 +277,9 @@ struct ThreadV2View: View {
                             )
                         }.buttonStyle(.plain)
                     }
-                }.background(GeometryReader { geometry in
-                    // get the height and width of the EventView view
-                    let eventHeight = geometry.frame(in: .global).height
-//                    let eventWidth = geometry.frame(in: .global).width
-
-                    // vertical gray line in the background
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.5))
-                        .frame(width: 2, height: eventHeight)
-                        .offset(x: 25, y: 40)
-                })
-                
-                // MARK: - Actual event view
-                EventView(
-                    event: thread.current,
-                    highlight: .none,
-                    has_action_bar: true,
-                    damus: damus,
-                    show_friend_icon: true, // TODO: change it
-                    size: .selected
-                )
-                
-                // MARK: - Responses of the actual event view
-                ForEach(thread.childEvents, id: \.id) { event in
-                    NavigationLink(destination: BuildThreadV2View(
-                        damus: damus,
-                        event_id: event.id
-                    )){
-                        EventView(
-                            event: event,
-                            highlight: .none,
-                            has_action_bar: true,
-                            damus: damus,
-                            show_friend_icon: true, // TODO: change it
-                            size: .small
-                        )
-                    }.buttonStyle(.plain)
                 }
-            }
-        }.padding().navigationBarTitle("Thread")
+            }.padding().navigationBarTitle("Thread")
+        }
     }
 }
 
