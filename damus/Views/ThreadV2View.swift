@@ -50,6 +50,8 @@ struct BuildThreadV2View: View {
     @State var childs_events_uuid: String = ""
     @State var parents_events_uuids: [String] = []
     
+    @State var subscriptions_uuids: [String] = []
+    
     @Environment(\.dismiss) var dismiss
     
     init(damus: DamusState, event_id: String) {
@@ -59,12 +61,27 @@ struct BuildThreadV2View: View {
     
     func unsubscribe_all() {
         print("ThreadV2View: Unsubscribe all..")
-        damus.pool.unsubscribe(sub_id: event_id)
-        damus.pool.unsubscribe(sub_id: childs_events_uuid)
         
-        for id in parents_events_uuids {
-            damus.pool.unsubscribe(sub_id: id)
+        for subscriptions in subscriptions_uuids {
+            unsubscribe(subscriptions)
         }
+    }
+    
+    func unsubscribe(_ sub_id: String) {
+        if subscriptions_uuids.contains(sub_id) {
+            damus.pool.unsubscribe(sub_id: sub_id)
+            
+            subscriptions_uuids.remove(at: subscriptions_uuids.firstIndex(of: sub_id)!)
+        }
+    }
+    
+    func subscribe(filters: [NostrFilter], sub_id: String = UUID().description) -> String {
+        damus.pool.register_handler(sub_id: sub_id, handler: handle_event)
+        damus.pool.send(.subscribe(.init(filters: filters, sub_id: sub_id)))
+        
+        subscriptions_uuids.append(sub_id)
+        
+        return sub_id
     }
     
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
@@ -106,12 +123,9 @@ struct BuildThreadV2View: View {
                     limit: UInt32(parents_ids.count)
                 )
                 
-                let uuid = UUID().description
+                let uuid = subscribe(filters: [parents_events])
                 parents_events_uuids.append(uuid)
                 print("ThreadV2View: Ask for parents (\(uuid)) (\(parents_events))")
-                damus.pool.register_handler(sub_id: uuid, handler: handle_event)
-                //OK
-                damus.pool.send(.subscribe(.init(filters: [parents_events], sub_id: uuid)))
             }
             
             // Ask for children
@@ -119,11 +133,8 @@ struct BuildThreadV2View: View {
                 referenced_ids: [self.event_id],
                 limit: 50
             )
-            childs_events_uuid = UUID().description
+            childs_events_uuid = subscribe(filters: [childs_events])
             print("ThreadV2View: Ask for children (\(childs_events) (\(childs_events_uuid))")
-            damus.pool.register_handler(sub_id: childs_events_uuid, handler: handle_event)
-            //OK
-            damus.pool.send(.subscribe(.init(filters: [childs_events], sub_id: childs_events_uuid)))
             
             return
         }
@@ -152,16 +163,13 @@ struct BuildThreadV2View: View {
                     ids: local_parents_ids,
                     limit: UInt32(local_parents_ids.count)
                 )
-                let uuid = UUID().description
+                let uuid = subscribe(filters: [parents_events])
                 parents_events_uuids.append(uuid)
                 print("ThreadV2View: Ask for sub_parents (\(local_parents_ids)) \(uuid)")
-                damus.pool.register_handler(sub_id: uuid, handler: handle_event)
-                //OK
-                damus.pool.send(.subscribe(.init(filters: [parents_events], sub_id: uuid)))
             }
             
             thread!.clean()
-            damus.pool.unsubscribe(sub_id: id)
+            // damus.pool.unsubscribe(sub_id: id)
             return
         }
         
@@ -182,14 +190,14 @@ struct BuildThreadV2View: View {
         print("ThreadV2View: Reload!")
         
         // Get the current event
-        current_events_uuid = UUID().description
+        current_events_uuid = subscribe(filters: [
+            NostrFilter(
+                ids: [self.event_id],
+                limit: 1
+            )
+        ])
         damus.pool.register_handler(sub_id: current_events_uuid, handler: handle_event)
         print("subscribing to threadV2 \(event_id) with sub_id \(current_events_uuid)")
-        let current_events = NostrFilter(
-            ids: [self.event_id],
-            limit: 1
-        )
-        damus.pool.send(.subscribe(.init(filters: [current_events], sub_id: current_events_uuid)))
     }
     
     var body: some View {
