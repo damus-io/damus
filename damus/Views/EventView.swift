@@ -171,7 +171,7 @@ struct EventView: View {
                             .font(eventviewsize_to_font(size))
                             .foregroundColor(.gray)
                     }
-                }.padding(.bottom, 10)
+                }.padding(.bottom, size == .selected ? 10 : 1)
                 
                 if event.is_reply(damus.keypair.privkey) {
                     Text("\(reply_desc(profiles: damus.profiles, event: event))")
