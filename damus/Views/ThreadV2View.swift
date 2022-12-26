@@ -110,6 +110,7 @@ struct BuildThreadV2View: View {
                 parents_events_uuids.append(uuid)
                 print("ThreadV2View: Ask for parents (\(uuid)) (\(parents_events))")
                 damus.pool.register_handler(sub_id: uuid, handler: handle_event)
+                //OK
                 damus.pool.send(.subscribe(.init(filters: [parents_events], sub_id: uuid)))
             }
             
@@ -121,6 +122,7 @@ struct BuildThreadV2View: View {
             childs_events_uuid = UUID().description
             print("ThreadV2View: Ask for children (\(childs_events) (\(childs_events_uuid))")
             damus.pool.register_handler(sub_id: childs_events_uuid, handler: handle_event)
+            //OK
             damus.pool.send(.subscribe(.init(filters: [childs_events], sub_id: childs_events_uuid)))
             
             return
@@ -154,6 +156,7 @@ struct BuildThreadV2View: View {
                 parents_events_uuids.append(uuid)
                 print("ThreadV2View: Ask for sub_parents (\(local_parents_ids)) \(uuid)")
                 damus.pool.register_handler(sub_id: uuid, handler: handle_event)
+                //OK
                 damus.pool.send(.subscribe(.init(filters: [parents_events], sub_id: uuid)))
             }
             
@@ -176,6 +179,7 @@ struct BuildThreadV2View: View {
 
     func reload() {
         self.unsubscribe_all()
+        print("ThreadV2View: Reload!")
         
         // Get the current event
         current_events_uuid = UUID().description
@@ -192,18 +196,19 @@ struct BuildThreadV2View: View {
         VStack {
             if thread == nil {
                 ProgressView()
-                    .onAppear {
-                        if self.thread == nil {
-                            self.reload()
-                        }
-                    }
-                    .onDisappear {
-                        self.unsubscribe_all()
-                    }
             } else {
                 ThreadV2View(damus: damus, thread: thread!)
             }
-        }.onReceive(handle_notify(.switched_timeline)) { n in
+        }
+        .onAppear {
+            if self.thread == nil {
+                self.reload()
+            }
+        }
+        .onDisappear {
+            self.unsubscribe_all()
+        }
+        .onReceive(handle_notify(.switched_timeline)) { n in
             dismiss()
         }
     }
