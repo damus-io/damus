@@ -84,8 +84,8 @@ struct EditMetadataView: View {
             website: website,
             nip05: nip05.isEmpty ? nil : nip05,
             picture: picture.isEmpty ? nil : picture,
-            lud06: ln.contains("@") ? ln : nil,
-            lud16: ln.contains("@") ? nil : ln
+            lud06: ln.contains("@") ? nil : ln,
+            lud16: ln.contains("@") ? ln : nil
         );
         
         let m_metadata_ev = make_metadata_event(keypair: damus_state.keypair, metadata: metadata)
