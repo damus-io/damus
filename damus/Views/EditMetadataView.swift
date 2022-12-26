@@ -84,8 +84,8 @@ struct EditMetadataView: View {
             website: website,
             nip05: nip05.isEmpty ? nil : nip05,
             picture: picture.isEmpty ? nil : picture,
-            lud06: ln.contains("@") ? ln : nil,
-            lud16: ln.contains("@") ? nil : ln
+            lud06: ln.contains("@") ? nil : ln,
+            lud16: ln.contains("@") ? ln : nil
         );
         
         let m_metadata_ev = make_metadata_event(keypair: damus_state.keypair, metadata: metadata)
@@ -129,14 +129,16 @@ struct EditMetadataView: View {
                 }
                 
                 Section("About Me") {
+                    let placeholder = "Absolute Boss"
                     ZStack(alignment: .topLeading) {
                         TextEditor(text: $about)
                             .textInputAutocapitalization(.sentences)
-                        if about.isEmpty {
-                            Text("Absolute boss")
-                                .offset(x: 0, y: 7)
-                                .foregroundColor(Color(uiColor: .placeholderText))
-                        }
+                            .frame(minHeight: 20, alignment: .leading)
+                            .multilineTextAlignment(.leading)
+                        Text(about.isEmpty ? placeholder : about)
+                            .padding(.leading, 4)
+                            .opacity(about.isEmpty ? 1 : 0)
+                            .foregroundColor(Color(uiColor: .placeholderText))
                     }
                 }
                 

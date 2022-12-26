@@ -68,6 +68,8 @@ struct ContentView: View {
     @State var thread_open: Bool = false
     @State var search_open: Bool = false
     @State var filter_state : FilterState = .posts_and_replies
+    
+    @StateObject var search: SearchHomeModel = SearchHomeModel()
     @StateObject var home: HomeModel = HomeModel()
 
     // connect retry timer
@@ -133,7 +135,7 @@ struct ContentView: View {
             }
             switch selected_timeline {
             case .search:
-                SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
+                SearchHomeView(damus_state: damus_state!, model: search)
                 
             case .home:
                 PostingTimelineView
@@ -403,6 +405,7 @@ struct ContentView: View {
                                 dms: home.dms
         )
         home.damus_state = self.damus_state!
+        search.damus_state = self.damus_state!
         
         pool.connect()
     }

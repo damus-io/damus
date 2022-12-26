@@ -124,7 +124,7 @@ struct ProfileView: View {
     
     //@EnvironmentObject var profile: ProfileModel
     
-    func LNButton(_ url: URL) -> some View {
+    func LNButton(_ url: URL, profile: Profile) -> some View {
         Button(action: {
             UIApplication.shared.open(url)
         }) {
@@ -132,6 +132,13 @@ struct ProfileView: View {
                 .symbolRenderingMode(.palette)
                 .font(.system(size: 34).weight(.thin))
                 .foregroundStyle(colorScheme == .light ? .black : .white, colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2))
+                .contextMenu {
+                    Button {
+                        UIPasteboard.general.string = profile.lnurl ?? ""
+                    } label: {
+                        Label("Copy LNUrl", systemImage: "doc.on.doc")
+                    }
+                }
         }
     }
     
@@ -156,8 +163,10 @@ struct ProfileView: View {
                 
                 Spacer()
                 
-                if let lnuri = data?.lightning_uri {
-                    LNButton(lnuri)
+                if let profile = data {
+                    if let lnuri = profile.lightning_uri {
+                        LNButton(lnuri, profile: profile)
+                    }
                 }
                 
                 DMButton

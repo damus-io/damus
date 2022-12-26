@@ -10,7 +10,7 @@ import CryptoKit
 
 struct SearchHomeView: View {
     let damus_state: DamusState
-    @StateObject var model: SearchHomeModel
+    @ObservedObject var model: SearchHomeModel
     @State var search: String = ""
     
     var SearchInput: some View {
@@ -85,8 +85,6 @@ struct SearchHomeView: View {
             print("search change 1")
         }
         .onAppear {
-            // TODO: This will always be empty when switching between tabs
-            // We'll need to store these in
             if model.events.isEmpty {
                 model.subscribe()
             }
@@ -97,12 +95,15 @@ struct SearchHomeView: View {
     }
 }
 
+/*
 struct SearchHomeView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
         SearchHomeView(
             damus_state: state,
-            model: SearchHomeModel(damus_state: state)
+            model: SearchHomeModel()
         )
     }
 }
+
+*/
