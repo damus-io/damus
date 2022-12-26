@@ -160,7 +160,6 @@ struct ProfileView: View {
                     }
                     .sheet(isPresented: $is_zoomed) {
                         ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .custom(Color.black, 2), profiles: damus_state.profiles)
-                            .clipShape(Circle())
                     }
                 
                 Spacer()
