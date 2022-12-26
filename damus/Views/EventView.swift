@@ -189,7 +189,11 @@ struct EventView: View {
                             .padding(.top, 10)
                             .font(.body)
                             .foregroundColor(.gray)
+                        
                         Divider()
+                            .padding([.bottom], 4)
+                    } else {
+                        Rectangle().frame(height: 2).opacity(0)
                     }
                     
                     let bar = make_actionbar_model(ev: event, damus: damus)
