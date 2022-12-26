@@ -214,7 +214,7 @@ extension View {
             Button {
                 UIPasteboard.general.string = event_to_json(ev: event)
             } label: {
-                Label("Copy Note", systemImage: "note")
+                Label("Copy Note JSON", systemImage: "note")
             }
 
             Button {
