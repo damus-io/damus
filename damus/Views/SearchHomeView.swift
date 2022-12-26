@@ -70,7 +70,9 @@ struct SearchHomeView: View {
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        MainContent
+        VStack {
+            MainContent
+        }
         .safeAreaInset(edge: .top) {
             VStack(spacing: 0) {
                 SearchInput
