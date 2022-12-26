@@ -36,7 +36,7 @@ struct SelectWalletView: View {
                         
                         Spacer()
                         
-                        Image(systemName: self.invoice_copied ? "checkmark.circle" : "doc.on.doc")
+                        Image(systemName: self.invoice_copied ? "checkmark.circle" : "doc.on.doc").foregroundColor(.blue)
                     }.clipShape(RoundedRectangle(cornerRadius: 5)).onTapGesture {
                         UIPasteboard.general.string = invoice
                         self.invoice_copied = true
@@ -45,6 +45,15 @@ struct SelectWalletView: View {
                 }
                     Section("Select a lightning wallet"){
                         List{
+                            Button() {
+                                if let url = URL(string: "lightning:\(invoice)"), UIApplication.shared.canOpenURL(url) {
+                                    openURL(url)
+                                }
+                            } label: {
+                                HStack {
+                                    Text("Default Wallet").font(.body).foregroundColor(.blue)
+                                }
+                            }.buttonStyle(.plain)
                             ForEach(walletItems, id: \.self) { wallet in
                                 Button() {
                                     if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
