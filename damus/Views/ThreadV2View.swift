@@ -53,9 +53,19 @@ struct BuildThreadV2View: View {
         self.parents_ids = []
     }
     
+    @State var parents_events_uuids: [String] = []
+    
     let current_events_uuid = UUID().description
-    let parents_events_uuid = UUID().description
     let childs_events_uuid = UUID().description
+    
+    func unsubscribe_all() {
+        damus.pool.unsubscribe(sub_id: event_id)
+        damus.pool.unsubscribe(sub_id: childs_events_uuid)
+        
+        for id in parents_events_uuids {
+            damus.pool.unsubscribe(sub_id: id)
+        }
+    }
     
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
         guard case .nostr_event(let nostr_response) = ev else {
@@ -96,7 +106,9 @@ struct BuildThreadV2View: View {
                     limit: UInt32(parents_ids.count)
                 )
                 print("ThreadV2View: Ask for parents (\(parents_events))")
-                damus.pool.send(.subscribe(.init(filters: [parents_events], sub_id: parents_events_uuid)))
+                let uuid = UUID().description
+                parents_events_uuids.append(uuid)
+                damus.pool.send(.subscribe(.init(filters: [parents_events], sub_id: uuid)))
             }
             
             // Ask for children
@@ -110,9 +122,35 @@ struct BuildThreadV2View: View {
             return
         }
         
-        if id == parents_events_uuid {
+        if parents_events_uuids.contains(id) {
             // We are filtering this later
             thread!.parentEvents.append(nostr_event)
+            
+            // Get parents of parents
+            let local_parents_ids = current_event!.tags.filter { tag in
+              return tag.count == 2 && tag[0] == "e"
+            }.map { tag in
+              return tag[1]
+            }.filter { tag_id in
+                return !parents_ids.contains(tag_id)
+            }
+            
+            // Expand new parents id
+            parents_ids.append(contentsOf: local_parents_ids)
+            
+            print("ThreadV2View: Sub Parents list: (\(local_parents_ids))")
+            
+            if local_parents_ids.count > 0 {
+                // Ask for parents
+                let parents_events = NostrFilter(
+                    ids: local_parents_ids,
+                    limit: UInt32(local_parents_ids.count)
+                )
+                let uuid = UUID().description
+                parents_events_uuids.append(uuid)
+                print("ThreadV2View: Ask for sub_parents (\(parents_events)) \(uuid)")
+                damus.pool.send(.subscribe(.init(filters: [parents_events], sub_id: uuid)))
+            }
             
             thread!.clean()
             return
@@ -125,6 +163,8 @@ struct BuildThreadV2View: View {
             thread!.clean()
             return
         }
+        
+        print("ThreadV2View: Unknown event id: \(id)")
     }
 
     
@@ -147,6 +187,9 @@ struct BuildThreadV2View: View {
                     if self.thread == nil {
                         self.reload()
                     }
+                }
+                .onDisappear {
+                    self.unsubscribe_all()
                 }
         } else {
             ThreadV2View(damus: damus, thread: thread!)
