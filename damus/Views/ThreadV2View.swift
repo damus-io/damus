@@ -169,7 +169,7 @@ struct BuildThreadV2View: View {
             }
             
             thread!.clean()
-            // damus.pool.unsubscribe(sub_id: id)
+            unsubscribe(id)
             return
         }
         
