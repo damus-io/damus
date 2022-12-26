@@ -24,9 +24,9 @@ struct InnerTimelineView: View {
                 EmptyTimelineView()
             } else {
                 ForEach(events.filter(filter), id: \.id) { (ev: NostrEvent) in
-                    let tm = ThreadModel(event: inner_event_or_self(ev: ev), damus_state: damus)
-                    let is_chatroom = should_show_chatroom(ev)
-                    let tv = ThreadView(thread: tm, damus: damus, is_chatroom: is_chatroom)
+                    //let tm = ThreadModel(event: inner_event_or_self(ev: ev), damus_state: damus)
+                    //let is_chatroom = should_show_chatroom(ev)
+                    //let tv = ThreadView(thread: tm, damus: damus, is_chatroom: is_chatroom)
                                 
                     NavigationLink(destination: BuildThreadV2View(
                         damus: damus,

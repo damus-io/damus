@@ -219,14 +219,19 @@ struct ThreadV2View: View {
                 // MARK: - Parents events view
                 VStack {
                     ForEach(thread.parentEvents, id: \.id) { event in
-                        EventView(
-                            event: event,
-                            highlight: .none,
-                            has_action_bar: true,
+                        NavigationLink(destination: BuildThreadV2View(
                             damus: damus,
-                            show_friend_icon: true, // TODO: change it
-                            size: .small
-                        )
+                            event_id: event.id
+                        )){
+                            EventView(
+                                event: event,
+                                highlight: .none,
+                                has_action_bar: true,
+                                damus: damus,
+                                show_friend_icon: true, // TODO: change it
+                                size: .small
+                            )
+                        }.buttonStyle(.plain)
                     }
                 }.background(GeometryReader { geometry in
                     // get the height and width of the EventView view
@@ -252,14 +257,19 @@ struct ThreadV2View: View {
                 
                 // MARK: - Responses of the actual event view
                 ForEach(thread.childEvents, id: \.id) { event in
-                    EventView(
-                        event: event,
-                        highlight: .none,
-                        has_action_bar: true,
+                    NavigationLink(destination: BuildThreadV2View(
                         damus: damus,
-                        show_friend_icon: true, // TODO: change it
-                        size: .small
-                    )
+                        event_id: event.id
+                    )){
+                        EventView(
+                            event: event,
+                            highlight: .none,
+                            has_action_bar: true,
+                            damus: damus,
+                            show_friend_icon: true, // TODO: change it
+                            size: .small
+                        )
+                    }.buttonStyle(.plain)
                 }
             }
         }.padding().navigationBarTitle("Thread")
