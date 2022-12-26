@@ -13,6 +13,35 @@ struct ThreadV2 {
     var childEvents: [NostrEvent]
 }
 
+struct BuildThreadV2View: View {
+    let damus: DamusState
+    let event_id: String
+    
+    @State var thread: ThreadV2?
+    
+    init(damus: DamusState, event_id: String, thread: ThreadV2? = nil) {
+        self.damus = damus
+        self.event_id = event_id
+        self.thread = thread
+        
+        if self.thread == nil {
+            self.reload()
+        }
+    }
+    
+    func reload() {
+        // TODO: construct the thread
+    }
+    
+    var body: some View {
+        if thread == nil {
+            ProgressView()
+        } else {
+            ThreadV2View(damus: damus, thread: thread!)
+        }
+    }
+}
+
 struct ThreadV2View: View {
     let damus: DamusState
     let thread: ThreadV2
@@ -72,6 +101,7 @@ struct ThreadV2View: View {
 
 struct ThreadV2View_Previews: PreviewProvider {
     static var previews: some View {
+        BuildThreadV2View(damus: test_damus_state(), event_id: "ac9fd97b53b0c1d22b3aea2a3d62e11ae393960f5f91ee1791987d60151339a7")
         ThreadV2View(
             damus: test_damus_state(),
             thread: ThreadV2(
