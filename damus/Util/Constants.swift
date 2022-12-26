@@ -35,6 +35,7 @@ public class Constants {
             {"id": 5, "name": "Zebedee", "link": "zebedee:lightning:", "appStoreLink": "https://apps.apple.com/us/app/zebedee-wallet/id1484394401", "image": "zebedee"},
             {"id": 6, "name": "Zeus LN", "link": "zeusln:lightning:", "appStoreLink": "https://apps.apple.com/us/app/zeus-ln/id1456038895", "image": "zeusln"},
             {"id": 7, "name": "LNLink", "link": "lnlink://", "appStoreLink": "https://testflight.apple.com/join/aNY4yuuZ", "image": "lnlink"},
+            {"id": 8, "name": "Phoenix", "link": "phoenix://", "appStoreLink": "https://apps.apple.com/us/app/phoenix-wallet/id1544097028", "image": "phoenix"},
         ]
         """.data(using: .utf8)!
 }
