@@ -139,12 +139,13 @@ struct ProfileView: View {
                 .symbolRenderingMode(.palette)
                 .font(.system(size: 34).weight(.thin))
                 .foregroundStyle(colorScheme == .light ? .black : .white, colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2))
-        }.contextMenu {
-            Button {
-                UIPasteboard.general.string = profile.lnurl ?? ""
-            } label: {
-                Label("Copy LNUrl", systemImage: "doc.on.doc")
-            }
+                .contextMenu {
+                    Button {
+                        UIPasteboard.general.string = profile.lnurl ?? ""
+                    } label: {
+                        Label("Copy LNUrl", systemImage: "doc.on.doc")
+                    }
+                }
         }.sheet(isPresented: $showingSelectWallet, onDismiss: {showingSelectWallet = false}) {
             SelectWalletView(showingSelectWallet: $showingSelectWallet, invoice: $inv)
         }
@@ -172,8 +173,8 @@ struct ProfileView: View {
                 Spacer()
 
                 if let profile = data {
-                    if (profile?.lud06 != nil || profile?.lud16 != nil) {
-                        LNButton(lud06: data?.lud06, lud16: data?.lud16,, profile: profile)
+                    if (profile.lud06 != nil || profile.lud16 != nil) {
+                        LNButton(lud06: profile.lud06, lud16: profile.lud16, profile: profile)
                     }
                 }
                 
