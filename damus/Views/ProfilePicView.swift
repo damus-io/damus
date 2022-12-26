@@ -40,8 +40,6 @@ struct InnerProfilePicView: View {
     let size: CGFloat
     let highlight: Highlight
 
-    @State var is_zoomed: Bool = false
-
     var PlaceholderColor: Color {
         return id_to_color(pubkey)
     }
@@ -75,17 +73,6 @@ struct InnerProfilePicView: View {
         .frame(width: size, height: size)
         .clipShape(Circle())
         .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
-        .onTapGesture(count: 2) {
-            is_zoomed.toggle()
-        }
-        .sheet(isPresented: $is_zoomed) {
-            KFAnimatedImage(url)
-                .cacheOriginalImage()
-                .loadDiskFileSynchronously()
-                .tag(2)
-                .clipShape(Circle())
-                .frame(width: 300, height: 300, alignment: .center)
-        }
     }
 }
 
