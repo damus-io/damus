@@ -106,7 +106,7 @@ struct BuildThreadV2View: View {
         
         // Get the current event
         print("subscribing to threadV2 \(event_id) with sub_id \(current_events_uuid)")
-        var current_events = NostrFilter(
+        let current_events = NostrFilter(
             ids: [self.event_id],
             limit: 1
         )
