@@ -81,9 +81,7 @@ struct TabBar: View {
                 TabButton(timeline: .search, img: "magnifyingglass.circle", selected: $selected, new_events: $new_events, action: action)
                 TabButton(timeline: .notifications, img: "bell", selected: $selected, new_events: $new_events, action: action)
             }
+            Divider()
         }
     }
 }
-
-
-
