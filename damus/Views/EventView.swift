@@ -187,7 +187,7 @@ struct EventView: View {
                     if size == .selected {
                         Text("\(format_date(event.created_at))")
                             .padding(.top, 10)
-                            .font(.body)
+                            .font(.footnote)
                             .foregroundColor(.gray)
                         
                         Divider()
