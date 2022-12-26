@@ -39,24 +39,23 @@ struct ThreadV2 {
 struct BuildThreadV2View: View {
     let damus: DamusState
     
-    @State var parents_ids: [String]
+    @State var parents_ids: [String] = []
     let event_id: String
     
     @State var current_event: NostrEvent? = nil
     
-    @State var thread: ThreadV2?
+    @State var thread: ThreadV2? = nil
     
     @State var current_events_uuid: String = ""
     @State var childs_events_uuid: String = ""
+    @State var parents_events_uuids: [String] = []
     
-    init(damus: DamusState, event_id: String, thread: ThreadV2? = nil) {
+    @Environment(\.dismiss) var dismiss
+    
+    init(damus: DamusState, event_id: String) {
         self.damus = damus
         self.event_id = event_id
-        self.thread = thread
-        self.parents_ids = []
     }
-    
-    @State var parents_events_uuids: [String] = []
     
     func unsubscribe_all() {
         print("ThreadV2View: Unsubscribe all..")
@@ -190,18 +189,22 @@ struct BuildThreadV2View: View {
     }
     
     var body: some View {
-        if thread == nil {
-            ProgressView()
-                .onAppear {
-                    if self.thread == nil {
-                        self.reload()
+        VStack {
+            if thread == nil {
+                ProgressView()
+                    .onAppear {
+                        if self.thread == nil {
+                            self.reload()
+                        }
                     }
-                }
-                .onDisappear {
-                    self.unsubscribe_all()
-                }
-        } else {
-            ThreadV2View(damus: damus, thread: thread!)
+                    .onDisappear {
+                        self.unsubscribe_all()
+                    }
+            } else {
+                ThreadV2View(damus: damus, thread: thread!)
+            }
+        }.onReceive(handle_notify(.switched_timeline)) { n in
+            dismiss()
         }
     }
 }
