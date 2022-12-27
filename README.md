@@ -69,13 +69,11 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 - All your notifications except 💬 DMs
 
 #### 👤 Change Your Profile (PFP) and Bio
-- Currently you can't change your pfp on the Damus app (coming soon!). Here's how to do it on other clients (do at your own risk)
-1. Get the [Alby](https://getalby.com/) (Chrome, Brave, Firefox) or [nos2x](https://chrome.google.com/webstore/detail/nos2x/kpgefcfmnafjgpblomihpgmejjdanjjp) browser extension (Chrome, Brave)
-2. Go to https://damus.io/key to convert your nsec key (secret key in ⚙️ Settings) into a hex version
-	i. For Alby, right-click the extension, select Options and scroll to the Nostr section to enter your secret hex key
-	ii.  For nos2x, right-click the extension, select Options, then and add the relay `wss://relay.damus.io` and select both read and write, click Save, then enter your secret hex key and click save
-3. Visit https://metadata.nostr.com and your profile data should auto-populate from the extension. If not click the extension or refresh the page
-4. Add your image using a hosting site like imgbb.com
+1. Go to your Profile Page on Damus app
+2. Tap on Edit button at the top
+3. You will see text fields to update your information and bio
+4. For PFP, insert a URL containing your image (support video: https://cdn.jb55.com/vid/pfp-editor.mp4)
+5. Save
 
 #### ⚡️ Request Sats 
     (Sats or Satoshis are the smallest denomination of bitcoin)

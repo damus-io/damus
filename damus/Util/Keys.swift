@@ -15,13 +15,14 @@ let PRIVKEY_HRP = "nsec"
 struct Keypair {
     let pubkey: String
     let privkey: String?
+    let pubkey_bech32: String
+    let privkey_bech32: String?
     
-    var pubkey_bech32: String {
-        return bech32_pubkey(pubkey)!
-    }
-    
-    var privkey_bech32: String? {
-        return privkey.flatMap { bech32_privkey($0) }
+    init(pubkey: String, privkey: String?) {
+        self.pubkey = pubkey
+        self.privkey = privkey
+        self.pubkey_bech32 = bech32_pubkey(pubkey) ?? pubkey
+        self.privkey_bech32 = privkey.flatMap { bech32_privkey($0) }
     }
 }
 

@@ -113,6 +113,7 @@ struct EditButton: View {
 
 struct ProfileView: View {
     let damus_state: DamusState
+    let zoom_size: CGFloat = 350
     
     @State private var selected_tab: ProfileTab = .posts
     @StateObject var profile: ProfileModel
@@ -120,6 +121,7 @@ struct ProfileView: View {
     @State private var showingEditProfile = false
     @State var showingSelectWallet: Bool = false
     @State var inv: String = ""
+    @State var is_zoomed: Bool = false
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
@@ -169,6 +171,12 @@ struct ProfileView: View {
             
             HStack(alignment: .center) {
                 ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .custom(Color.black, 2), profiles: damus_state.profiles)
+                    .onTapGesture {
+                        is_zoomed.toggle()
+                    }
+                    .sheet(isPresented: $is_zoomed) {
+                        ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .custom(Color.black, 2), profiles: damus_state.profiles)
+                    }
                 
                 Spacer()
 

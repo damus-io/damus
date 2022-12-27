@@ -15,6 +15,11 @@ func isHttpsUrl(_ string: String) -> Bool {
     return urlTest.evaluate(with: string)
 }
 
+struct NIP05 {
+    let username: String
+    let host: String
+}
+
 func isImage(_ urlString: String) -> Bool {
     let imageTypes = ["image/jpg", "image/jpeg", "image/png", "image/gif", "image/tiff", "image/bmp", "image/webp"]
 
@@ -95,6 +100,14 @@ struct EditMetadataView: View {
         }
     }
     
+    var nip05_parts: NIP05? {
+        let parts = nip05.split(separator: "@")
+        guard parts.count == 2 else {
+            return nil
+        }
+        return NIP05(username: String(parts[0]), host: String(parts[1]))
+    }
+    
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
@@ -149,13 +162,17 @@ struct EditMetadataView: View {
                 }
                                 
                 Section(content: {
-                    TextField("example.com", text: $nip05)
+                    TextField("jb55@jb55.com", text: $nip05)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }, header: {
                     Text("NIP-05 Verification")
                 }, footer: {
-                    Text("\(name)@\(nip05) will be used for verification")
+                    if let parts = nip05_parts {
+                        Text("'\(parts.username)' at '\(parts.host)' will be used for verification")
+                    } else {
+                        Text("'\(nip05)' is an invalid nip05 identifier. It should look like an email.")
+                    }
                 })
                 
                 Button("Save") {

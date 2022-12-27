@@ -41,12 +41,19 @@ class RelayPool {
     }
 
     func remove_handler(sub_id: String) {
-        handlers = handlers.filter { $0.sub_id != sub_id }
+        self.handlers = handlers.filter { $0.sub_id != sub_id }
+        print("removing \(sub_id) handler, current: \(handlers.count)")
     }
 
     func register_handler(sub_id: String, handler: @escaping (String, NostrConnectionEvent) -> ()) {
-        
+        for handler in handlers {
+            // don't add duplicate handlers
+            if handler.sub_id == sub_id {
+                return
+            }
+        }
         self.handlers.append(RelayHandler(sub_id: sub_id, callback: handler))
+        print("registering \(sub_id) handler, current: \(self.handlers.count)")
     }
     
     func remove_relay(_ relay_id: String) {
@@ -125,8 +132,10 @@ class RelayPool {
     }
     
     func unsubscribe(sub_id: String, to: [String]? = nil) {
-        self.remove_handler(sub_id: sub_id)
-        self.send(.unsubscribe(sub_id))
+        if to == nil {
+            self.remove_handler(sub_id: sub_id)
+        }
+        self.send(.unsubscribe(sub_id), to: to)
     }
     
     func subscribe(sub_id: String, filters: [NostrFilter], handler: @escaping (String, NostrConnectionEvent) -> ()) {

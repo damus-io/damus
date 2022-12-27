@@ -1,5 +1,30 @@
+## [0.1.8-4] - 2022-12-26
 
-## [0.1.9] - 2022-12-23
+### Added
+
+     - Long press lightning tip button to copy lnurl
+
+
+### Changed
+
+     - Only reload global view on pulldown refresh
+     - Save privkey in keychain instead of user defaults
+     - Also show inline images from friend-of-friends
+     - Show rounded corners on inline images
+
+
+### Fixed
+
+     - Fix bug where typing the first character in the search box defocuses
+     - Fixed nip05 identifier format in profile editor
+     - Fix profile and event loading in global view
+     - Fix lightning tip button sometimes not working
+     - Make about me multi-line in profile editor
+
+
+[0.1.8-4]: https://github.com/damus-io/damus/releases/tag/v0.1.8-4
+
+## [0.1.8-3] - 2022-12-23
 
 ### Added
 
@@ -138,3 +163,5 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
+
+
