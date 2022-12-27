@@ -170,12 +170,12 @@ struct ProfileView: View {
             let data = damus_state.profiles.lookup(id: profile.pubkey)
             
             HStack(alignment: .center) {
-                ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .custom(Color.black, 2), profiles: damus_state.profiles)
+                ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
                     .onTapGesture {
                         is_zoomed.toggle()
                     }
                     .sheet(isPresented: $is_zoomed) {
-                        ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .custom(Color.black, 2), profiles: damus_state.profiles)
+                        ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .none, profiles: damus_state.profiles)
                     }
                 
                 Spacer()

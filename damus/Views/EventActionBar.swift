@@ -86,7 +86,6 @@ struct EventActionBar: View {
             }
              */
         }
-        .padding(.top, 1)
         .alert("Boost", isPresented: $confirm_boost) {
             Button("Cancel") {
                 confirm_boost = false
@@ -139,7 +138,7 @@ struct EventActionBar: View {
 
 func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> some View {
     Button(action: action) {
-        Label("", systemImage: img)
+        Label("&nbsp;", systemImage: img)
             .font(.footnote.weight(.medium))
             .foregroundColor(col == nil ? Color.gray : col!)
     }

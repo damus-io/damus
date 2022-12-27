@@ -45,9 +45,17 @@ struct EventId: Identifiable, CustomStringConvertible {
     }
 }
 
-class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable {
+class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Hashable, Comparable {
     static func == (lhs: NostrEvent, rhs: NostrEvent) -> Bool {
         return lhs.id == rhs.id
+    }
+    
+    static func < (lhs: NostrEvent, rhs: NostrEvent) -> Bool {
+        return lhs.created_at < rhs.created_at
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
     
     var id: String
@@ -264,7 +272,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable {
         return (self.flags & 1) != 0
     }
 
-    init(content: String, pubkey: String, kind: Int = 1, tags: [[String]] = []) {
+    init(content: String, pubkey: String, kind: Int = 1, tags: [[String]] = [], createdAt: Int64 = Int64(Date().timeIntervalSince1970)) {
         self.id = ""
         self.sig = ""
 
@@ -272,7 +280,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable {
         self.pubkey = pubkey
         self.kind = kind
         self.tags = tags
-        self.created_at = Int64(Date().timeIntervalSince1970)
+        self.created_at = createdAt
     }
     
     /// Intiialization statement used to specificy ID
