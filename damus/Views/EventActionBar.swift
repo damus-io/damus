@@ -88,11 +88,11 @@ struct EventActionBar: View {
         }
         .padding(.top, 1)
         .alert("Boost", isPresented: $confirm_boost) {
-            Button("Boost") {
-                send_boost()
-            }
             Button("Cancel") {
                 confirm_boost = false
+            }
+            Button("Boost") {
+                send_boost()
             }
         } message: {
             Text("Are you sure you want to boost this post?")
