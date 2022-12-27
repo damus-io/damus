@@ -12,6 +12,7 @@ struct SearchHomeView: View {
     let damus_state: DamusState
     @ObservedObject var model: SearchHomeModel
     @State var search: String = ""
+    @State var filteredEvents: [NostrEvent] = []
     
     var SearchInput: some View {
         ZStack(alignment: .leading) {
@@ -40,7 +41,7 @@ struct SearchHomeView: View {
     }
     
     var GlobalContent: some View {
-        return TimelineView(events: $model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: { _ in true })
+        return TimelineView(events: $filteredEvents, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: { _ in true })
             .refreshable {
                 // Fetch new information by unsubscribing and resubscribing to the relay
                 model.unsubscribe()
@@ -73,6 +74,15 @@ struct SearchHomeView: View {
         VStack {
             MainContent
         }
+        .onReceive(model.$events) { events in
+                // Update the filteredEvents array in response to changes in the model
+                filteredEvents = events.filter { event in
+                    let filteredTags = event.tags.filter { tag in
+                        return tag[0] == "e"
+                    }
+                    return filteredTags.isEmpty
+                }
+            }
         .safeAreaInset(edge: .top) {
             VStack(spacing: 0) {
                 SearchInput
