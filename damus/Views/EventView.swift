@@ -249,6 +249,7 @@ struct EventView: View {
 
                 NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, show_images: should_show_images(contacts: damus.contacts, ev: event), artifacts: .just_content(content), size: self.size)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .allowsHitTesting(!embedded)
                 
                 if !embedded {
                     let blocks = event.blocks(damus.keypair.privkey).filter { block in
