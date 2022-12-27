@@ -53,7 +53,7 @@ struct FollowersView: View {
                     FollowUserView(target: .pubkey(pk), damus_state: damus_state)
                 }
             }
-            .padding(.horizontal)
+            .padding()
         }
         .navigationBarTitle("\(Profile.displayName(profile: profile, pubkey: whos))'s Followers")
         .onAppear {
@@ -81,7 +81,7 @@ struct FollowingView: View {
                     FollowUserView(target: .pubkey(pk), damus_state: damus_state)
                 }
             }
-            .padding(.horizontal)
+            .padding()
         }
         .onAppear {
             following.subscribe()
