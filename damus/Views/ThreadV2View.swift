@@ -108,10 +108,10 @@ struct BuildThreadV2View: View {
             )
             
             // Get parents
-            parents_ids = current_event!.tags.filter { tag in
-              return tag.count == 2 && tag[0] == "e"
+            parents_ids = current_event!.tags.enumerated().filter { (index, tag) in
+                return tag.count >= 2 && tag[0] == "e" && !current_event!.content.contains("#[\(index)]")
             }.map { tag in
-              return tag[1]
+                return tag.1[1]
             }
             
             print("ThreadV2View: Parents list: (\(parents_ids)")
@@ -144,10 +144,10 @@ struct BuildThreadV2View: View {
             thread!.parentEvents.append(nostr_event)
             
             // Get parents of parents
-            let local_parents_ids = nostr_event.tags.filter { tag in
-              return tag.count >= 2 && tag[0] == "e"
+            let local_parents_ids = nostr_event.tags.enumerated().filter { (index, tag) in
+                return tag.count >= 2 && tag[0] == "e" && !nostr_event.content.contains("#[\(index)]")
             }.map { tag in
-              return tag[1]
+                return tag.1[1]
             }.filter { tag_id in
                 return !parents_ids.contains(tag_id)
             }
