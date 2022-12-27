@@ -27,12 +27,17 @@ struct InnerTimelineView: View {
                     let tm = ThreadModel(event: inner_event_or_self(ev: ev), damus_state: damus)
                     let is_chatroom = should_show_chatroom(ev)
                     let tv = ThreadView(thread: tm, damus: damus, is_chatroom: is_chatroom)
-                                
-                    NavigationLink(destination: tv) {
-                        EventView(event: ev, highlight: .none, has_action_bar: true, damus: damus, show_friend_icon: show_friend_icon)
+                    let filteredTags = ev.tags.filter { subarray in
+                        return subarray[0] == "e"
                     }
-                    .isDetailLink(true)
-                    .buttonStyle(PlainButtonStyle())
+                    
+                    if filteredTags.isEmpty {
+                        NavigationLink(destination: tv) {
+                            EventView(event: ev, highlight: .none, has_action_bar: true, damus: damus, show_friend_icon: show_friend_icon)
+                        }
+                        .isDetailLink(true)
+                        .buttonStyle(PlainButtonStyle())
+                    }
                 }
             }
         }
