@@ -10,7 +10,7 @@ import CryptoKit
 
 struct SearchHomeView: View {
     let damus_state: DamusState
-    @ObservedObject var model: SearchHomeModel
+    @StateObject var model: SearchHomeModel
     @State var search: String = ""
     
     var SearchInput: some View {
@@ -97,15 +97,12 @@ struct SearchHomeView: View {
     }
 }
 
-/*
 struct SearchHomeView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
         SearchHomeView(
             damus_state: state,
-            model: SearchHomeModel()
+            model: SearchHomeModel(damus_state: state)
         )
     }
 }
-
-*/
