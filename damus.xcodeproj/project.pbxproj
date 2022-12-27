@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3165648B295B70D500C64604 /* LinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3165648A295B70D500C64604 /* LinkView.swift */; };
 		3169CAE6294E69C000EE4006 /* EmptyTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAE5294E69C000EE4006 /* EmptyTimelineView.swift */; };
 		3169CAED294FCCFC00EE4006 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAEC294FCCFC00EE4006 /* Constants.swift */; };
 		31D2E847295218AF006D67F8 /* Shimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D2E846295218AF006D67F8 /* Shimmer.swift */; };
@@ -151,6 +152,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3165648A295B70D500C64604 /* LinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkView.swift; sourceTree = "<group>"; };
 		3169CAE5294E69C000EE4006 /* EmptyTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyTimelineView.swift; sourceTree = "<group>"; };
 		3169CAEC294FCCFC00EE4006 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Constants.swift; path = damus/Util/Constants.swift; sourceTree = SOURCE_ROOT; };
 		31D2E846295218AF006D67F8 /* Shimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shimmer.swift; sourceTree = "<group>"; };
@@ -514,6 +516,7 @@
 				4C90BD19283AA67F008EE7EF /* Bech32.swift */,
 				4C216F352870A9A700040376 /* InputDismissKeyboard.swift */,
 				3169CAEC294FCCFC00EE4006 /* Constants.swift */,
+				3165648A295B70D500C64604 /* LinkView.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -834,6 +837,7 @@
 				4C363AA428296DEE006E126D /* SearchModel.swift in Sources */,
 				4CEE2AF3280B25C500AB5EEF /* ProfilePicView.swift in Sources */,
 				4CEE2AF9280B2EAC00AB5EEF /* PowView.swift in Sources */,
+				3165648B295B70D500C64604 /* LinkView.swift in Sources */,
 				4C3BEFD42819DE8F00B3DE84 /* NostrKind.swift in Sources */,
 				4C3EA66028FF5E7700C48A62 /* node_id.c in Sources */,
 				4CE6DEE727F7A08100C66700 /* damusApp.swift in Sources */,
