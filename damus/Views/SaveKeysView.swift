@@ -107,8 +107,13 @@ struct SaveKeysView: View {
                     self.pool.send(.event(contacts_ev))
                 }
                 
-                save_keypair(pubkey: account.pubkey, privkey: account.privkey)
-                notify(.login, account.keypair)
+                do {
+                    try save_keypair(pubkey: account.pubkey, privkey: account.privkey)
+                    notify(.login, account.keypair)
+                } catch {
+                    self.error = "Failed to save keys"
+                }
+                
             case .error(let err):
                 self.loading = false
                 self.error = "\(err.debugDescription)"

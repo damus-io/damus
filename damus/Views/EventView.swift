@@ -79,6 +79,7 @@ struct EventView: View {
                 VStack(alignment: .leading) {
                     let prof_model = ProfileModel(pubkey: event.pubkey, damus: damus)
                     let follow_model = FollowersModel(damus_state: damus, target: event.pubkey)
+                    let prof = damus.profiles.lookup(id: event.pubkey)
                     let booster_profile = ProfileView(damus_state: damus, profile: prof_model, followers: follow_model)
                     
                     NavigationLink(destination: booster_profile) {
@@ -86,11 +87,9 @@ struct EventView: View {
                             Image(systemName: "arrow.2.squarepath")
                                 .font(.footnote.weight(.bold))
                                 .foregroundColor(Color.gray)
-                            if let prof = damus.profiles.lookup(id: event.pubkey) {
-                                Text(Profile.displayName(profile: prof, pubkey: event.pubkey))
+                            ProfileName(pubkey: event.pubkey, profile: prof, contacts: damus.contacts, show_friend_confirmed: true)
                                     .font(.footnote.weight(.bold))
                                     .foregroundColor(Color.gray)
-                            }
                             Text("Boosted")
                                 .font(.footnote.weight(.bold))
                                 .foregroundColor(Color.gray)
@@ -161,7 +160,7 @@ struct EventView: View {
 
 // blame the porn bots for this code
 func should_show_images(contacts: Contacts, ev: NostrEvent) -> Bool {
-    if contacts.is_friend(ev.pubkey) {
+    if contacts.is_in_friendosphere(ev.pubkey) {
         return true
     }
     return false
@@ -214,7 +213,7 @@ extension View {
             Button {
                 UIPasteboard.general.string = event_to_json(ev: event)
             } label: {
-                Label("Copy Note", systemImage: "note")
+                Label("Copy Note JSON", systemImage: "note")
             }
 
             Button {

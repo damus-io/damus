@@ -121,21 +121,25 @@ struct ImageCarousel: View {
     var body: some View {
         TabView {
             ForEach(urls, id: \.absoluteString) { url in
-                KFAnimatedImage(url)
-                    .configure { view in
-                        view.framePreloadCount = 3
+                Rectangle()
+                    .overlay {
+                        KFAnimatedImage(url)
+                            .configure { view in
+                                view.framePreloadCount = 3
+                            }
+                            .cacheOriginalImage()
+                            .loadDiskFileSynchronously()
+                            .scaleFactor(UIScreen.main.scale)
+                            .fade(duration: 0.1)
+                            .aspectRatio(contentMode: .fill)
+                            .tabItem {
+                                Text(url.absoluteString)
+                            }
+                            .id(url.absoluteString)
                     }
-                    .cacheOriginalImage()
-                    .loadDiskFileSynchronously()
-                    .scaleFactor(UIScreen.main.scale)
-                    .fade(duration: 0.1)
-                    .aspectRatio(contentMode: .fit)
-                    .tabItem {
-                        Text(url.absoluteString)
-                    }
-                    .id(url.absoluteString)
             }
         }
+        .cornerRadius(10)
         .sheet(isPresented: $open_sheet) {
             ImageViewer(urls: urls)
         }

@@ -15,6 +15,11 @@ func isHttpsUrl(_ string: String) -> Bool {
     return urlTest.evaluate(with: string)
 }
 
+struct NIP05 {
+    let username: String
+    let host: String
+}
+
 func isImage(_ urlString: String) -> Bool {
     let imageTypes = ["image/jpg", "image/jpeg", "image/png", "image/gif", "image/tiff", "image/bmp", "image/webp"]
 
@@ -84,8 +89,8 @@ struct EditMetadataView: View {
             website: website,
             nip05: nip05.isEmpty ? nil : nip05,
             picture: picture.isEmpty ? nil : picture,
-            lud06: ln.contains("@") ? ln : nil,
-            lud16: ln.contains("@") ? nil : ln
+            lud06: ln.contains("@") ? nil : ln,
+            lud16: ln.contains("@") ? ln : nil
         );
         
         let m_metadata_ev = make_metadata_event(keypair: damus_state.keypair, metadata: metadata)
@@ -93,6 +98,14 @@ struct EditMetadataView: View {
         if let metadata_ev = m_metadata_ev {
             damus_state.pool.send(.event(metadata_ev))
         }
+    }
+    
+    var nip05_parts: NIP05? {
+        let parts = nip05.split(separator: "@")
+        guard parts.count == 2 else {
+            return nil
+        }
+        return NIP05(username: String(parts[0]), host: String(parts[1]))
     }
     
     var body: some View {
@@ -129,14 +142,16 @@ struct EditMetadataView: View {
                 }
                 
                 Section("About Me") {
+                    let placeholder = "Absolute Boss"
                     ZStack(alignment: .topLeading) {
                         TextEditor(text: $about)
                             .textInputAutocapitalization(.sentences)
-                        if about.isEmpty {
-                            Text("Absolute boss")
-                                .offset(x: 0, y: 7)
-                                .foregroundColor(Color(uiColor: .placeholderText))
-                        }
+                            .frame(minHeight: 20, alignment: .leading)
+                            .multilineTextAlignment(.leading)
+                        Text(about.isEmpty ? placeholder : about)
+                            .padding(.leading, 4)
+                            .opacity(about.isEmpty ? 1 : 0)
+                            .foregroundColor(Color(uiColor: .placeholderText))
                     }
                 }
                 
@@ -147,13 +162,17 @@ struct EditMetadataView: View {
                 }
                                 
                 Section(content: {
-                    TextField("example.com", text: $nip05)
+                    TextField("jb55@jb55.com", text: $nip05)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }, header: {
                     Text("NIP-05 Verification")
                 }, footer: {
-                    Text("\(name)@\(nip05) will be used for verification")
+                    if let parts = nip05_parts {
+                        Text("'\(parts.username)' at '\(parts.host)' will be used for verification")
+                    } else {
+                        Text("'\(nip05)' is an invalid nip05 identifier. It should look like an email.")
+                    }
                 })
                 
                 Button("Save") {
