@@ -159,8 +159,6 @@ struct EventView: View {
                             NavigationLink(destination: pv) {
                                 ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: highlight, profiles: damus.profiles)
                             }
-                            
-                            Spacer()
                         }
                     }
                     
