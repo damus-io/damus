@@ -255,7 +255,7 @@ struct ThreadV2View: View {
                         
                         // vertical gray line in the background
                         Rectangle()
-                            .fill(Color.gray.opacity(0.5))
+                            .fill(Color.gray.opacity(0.25))
                             .frame(width: 2, height: eventHeight)
                             .offset(x: 25, y: 40)
                     })
