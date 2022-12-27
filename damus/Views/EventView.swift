@@ -46,13 +46,13 @@ enum EventViewKind {
 func eventviewsize_to_font(_ size: EventViewKind) -> Font {
     switch size {
     case .small:
-        return .caption
+        return .body
     case .normal:
         return .body
     case .big:
         return .headline
     case .selected:
-        return .headline
+        return .custom("selected", size: 21.0)
     }
 }
 
