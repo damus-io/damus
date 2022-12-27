@@ -136,6 +136,11 @@ struct ImageCarousel: View {
                                 Text(url.absoluteString)
                             }
                             .id(url.absoluteString)
+                            .contextMenu {
+                                Button("Copy Image") {
+                                    UIPasteboard.general.string = url.absoluteString
+                                }
+                            }
                     }
             }
         }
