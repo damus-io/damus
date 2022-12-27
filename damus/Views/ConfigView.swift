@@ -102,11 +102,11 @@ struct ConfigView: View {
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.large)
         .alert("Logout", isPresented: $confirm_logout) {
-            Button("Logout") {
-                notify(.logout, ())
-            }
             Button("Cancel") {
                 confirm_logout = false
+            }
+            Button("Logout") {
+                notify(.logout, ())
             }
         } message: {
             Text("Make sure your nsec account key is saved before you logout or you will lose access to this account")
