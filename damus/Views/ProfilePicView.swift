@@ -34,16 +34,16 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
 
 struct InnerProfilePicView: View {
     @Environment(\.redactionReasons) private var reasons
-    
+
     let url: URL?
     let pubkey: String
     let size: CGFloat
     let highlight: Highlight
-    
+
     var PlaceholderColor: Color {
         return id_to_color(pubkey)
     }
-    
+
     var Placeholder: some View {
         PlaceholderColor
             .frame(width: size, height: size)
@@ -51,7 +51,7 @@ struct InnerProfilePicView: View {
             .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
             .padding(2)
     }
-    
+
     var body: some View {
         Group {
             if reasons.isEmpty {
@@ -74,7 +74,6 @@ struct InnerProfilePicView: View {
         .clipShape(Circle())
         .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
     }
-    
 }
 
 struct ProfilePicView: View {

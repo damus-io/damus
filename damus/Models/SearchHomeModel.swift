@@ -10,18 +10,17 @@ import Foundation
 
 /// The data model for the SearchHome view, typically something global-like
 class SearchHomeModel: ObservableObject {
-    @Published var events: [NostrEvent]
+    @Published var events: [NostrEvent] = []
     @Published var loading: Bool = false
 
     var seen_pubkey: Set<String> = Set()
-    var damus_state: DamusState
+    let damus_state: DamusState
     let base_subid = UUID().description
     let profiles_subid = UUID().description
     let limit: UInt32 = 250
     
-    init() {
-        self.events = []
-        self.damus_state = .empty
+    init(damus_state: DamusState) {
+        self.damus_state = damus_state
     }
     
     func get_base_filter() -> NostrFilter {
