@@ -23,6 +23,7 @@ func PostButton(action: @escaping () -> ()) -> some View {
             radius: 3,
             x: 3,
             y: 3)
+    .keyboardShortcut("n", modifiers: [.command, .shift])
 }
 
 func PostButtonContainer(action: @escaping () -> ()) -> some View {

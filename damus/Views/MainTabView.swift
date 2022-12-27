@@ -76,14 +76,11 @@ struct TabBar: View {
         VStack {
             Divider()
             HStack {
-                TabButton(timeline: .home, img: "house", selected: $selected, new_events: $new_events, action: action)
-                TabButton(timeline: .dms, img: "bubble.left.and.bubble.right", selected: $selected, new_events: $new_events, action: action)
-                TabButton(timeline: .search, img: "magnifyingglass.circle", selected: $selected, new_events: $new_events, action: action)
-                TabButton(timeline: .notifications, img: "bell", selected: $selected, new_events: $new_events, action: action)
+                TabButton(timeline: .home, img: "house", selected: $selected, new_events: $new_events, action: action).keyboardShortcut("1")
+                TabButton(timeline: .dms, img: "bubble.left.and.bubble.right", selected: $selected, new_events: $new_events, action: action).keyboardShortcut("2")
+                TabButton(timeline: .search, img: "magnifyingglass.circle", selected: $selected, new_events: $new_events, action: action).keyboardShortcut("3")
+                TabButton(timeline: .notifications, img: "bell", selected: $selected, new_events: $new_events, action: action).keyboardShortcut("4")
             }
         }
     }
 }
-
-
-
