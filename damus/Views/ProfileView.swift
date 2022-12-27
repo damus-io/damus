@@ -138,7 +138,7 @@ struct ProfileView: View {
                     Button {
                         UIPasteboard.general.string = profile.lnurl ?? ""
                     } label: {
-                        Label("Copy LNUrl", systemImage: "doc.on.doc")
+                        Label("Copy LNURL", systemImage: "doc.on.doc")
                     }
                 }
         }
