@@ -115,8 +115,8 @@ func mention_str(_ m: Mention, profiles: Profiles) -> String {
         let disp = Profile.displayName(profile: profile, pubkey: pk)
         return "[@\(disp)](nostr:\(encode_pubkey_uri(m.ref)))"
     case .event:
-        let evid = m.ref.ref_id
-        return "[&\(abbrev_pubkey(evid))](nostr:\(encode_event_id_uri(m.ref)))"
+        let bevid = bech32_note_id(m.ref.ref_id) ?? m.ref.ref_id
+        return "[@\(abbrev_pubkey(bevid))](nostr:\(encode_event_id_uri(m.ref)))"
     }
 }
 

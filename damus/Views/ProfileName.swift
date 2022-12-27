@@ -73,7 +73,6 @@ struct ProfileName: View {
     
     var body: some View {
         HStack {
-            
             Text(prefix + String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
                 .font(.body)
                 .fontWeight(prefix == "@" ? .none : .bold)
