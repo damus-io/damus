@@ -56,6 +56,70 @@ func eventviewsize_to_font(_ size: EventViewKind) -> Font {
     }
 }
 
+struct BuilderEventView: View {
+    let damus: DamusState
+    let event_id: String
+    @State var event: NostrEvent?
+    @State var subscription_uuid: String = UUID().description
+    
+    func unsubscribe() {
+        damus.pool.unsubscribe(sub_id: subscription_uuid)
+    }
+    
+    func subscribe(filters: [NostrFilter]) {
+        damus.pool.register_handler(sub_id: subscription_uuid, handler: handle_event)
+        damus.pool.send(.subscribe(.init(filters: filters, sub_id: subscription_uuid)))
+    }
+    
+    func handle_event(relay_id: String, ev: NostrConnectionEvent) {
+        guard case .nostr_event(let nostr_response) = ev else {
+            return
+        }
+        
+        guard case .event(let id, let nostr_event) = nostr_response else {
+            return
+        }
+        
+        // Is current event
+        if id == subscription_uuid {
+            if event != nil {
+                return
+            }
+            
+            event = nostr_event
+            
+            unsubscribe()
+        }
+    }
+    
+    func load() {
+        subscribe(filters: [
+            NostrFilter(
+                ids: [self.event_id],
+                limit: 1
+            )
+        ])
+    }
+    
+    var body: some View {
+        VStack {
+            if event == nil {
+                ProgressView().padding()
+            } else {
+                NavigationLink(destination: BuildThreadV2View(damus: damus, event_id: event!.id)) {
+                    EventView(damus: damus, event: event!, show_friend_icon: true, size: .small, embedded: true)
+                }.buttonStyle(.plain)
+            }
+        }
+        .frame(minWidth: 0, maxWidth: .infinity)
+        .border(Color.gray.opacity(0.2), width: 1)
+        .cornerRadius(2)
+        .onAppear {
+            self.load()
+        }
+    }
+}
+
 struct EventView: View {
     let event: NostrEvent
     let highlight: Highlight
@@ -64,10 +128,11 @@ struct EventView: View {
     let pubkey: String
     let show_friend_icon: Bool
     let size: EventViewKind
+    let embedded: Bool
 
     @EnvironmentObject var action_bar: ActionBarModel
 
-    init(event: NostrEvent, highlight: Highlight, has_action_bar: Bool, damus: DamusState, show_friend_icon: Bool, size: EventViewKind = .normal) {
+    init(event: NostrEvent, highlight: Highlight, has_action_bar: Bool, damus: DamusState, show_friend_icon: Bool, size: EventViewKind = .normal, embedded: Bool = false) {
         self.event = event
         self.highlight = highlight
         self.has_action_bar = has_action_bar
@@ -75,9 +140,10 @@ struct EventView: View {
         self.pubkey = event.pubkey
         self.show_friend_icon = show_friend_icon
         self.size = size
+        self.embedded = embedded
     }
 
-    init(damus: DamusState, event: NostrEvent, show_friend_icon: Bool, size: EventViewKind = .normal) {
+    init(damus: DamusState, event: NostrEvent, show_friend_icon: Bool, size: EventViewKind = .normal, embedded: Bool = false) {
         self.event = event
         self.highlight = .none
         self.has_action_bar = false
@@ -85,9 +151,10 @@ struct EventView: View {
         self.pubkey = event.pubkey
         self.show_friend_icon = show_friend_icon
         self.size = size
+        self.embedded = embedded
     }
 
-    init(damus: DamusState, event: NostrEvent, pubkey: String, show_friend_icon: Bool, size: EventViewKind = .normal) {
+    init(damus: DamusState, event: NostrEvent, pubkey: String, show_friend_icon: Bool, size: EventViewKind = .normal, embedded: Bool = false) {
         self.event = event
         self.highlight = .none
         self.has_action_bar = false
@@ -95,6 +162,7 @@ struct EventView: View {
         self.pubkey = pubkey
         self.show_friend_icon = show_friend_icon
         self.size = size
+        self.embedded = embedded
     }
 
     var body: some View {
@@ -141,8 +209,10 @@ struct EventView: View {
                     let pmodel = ProfileModel(pubkey: pubkey, damus: damus)
                     let pv = ProfileView(damus_state: damus, profile: pmodel, followers: FollowersModel(damus_state: damus, target: pubkey))
                     
-                    NavigationLink(destination: pv) {
-                        ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: highlight, profiles: damus.profiles)
+                    if !embedded {
+                        NavigationLink(destination: pv) {
+                            ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: highlight, profiles: damus.profiles)
+                        }
                     }
                     
                     Spacer()
@@ -179,26 +249,52 @@ struct EventView: View {
 
                 NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, show_images: should_show_images(contacts: damus.contacts, ev: event), artifacts: .just_content(content), size: self.size)
                     .frame(maxWidth: .infinity, alignment: .leading)
-
-                if has_action_bar {
-                    if size == .selected {
-                        Text("\(format_date(event.created_at))")
-                            .padding(.top, 10)
-                            .font(.footnote)
-                            .foregroundColor(.gray)
+                
+                if !embedded {
+                    let blocks = event.blocks(damus.keypair.privkey).filter { block in
+                        guard case .mention(let mention) = block else {
+                            return false
+                        }
                         
-                        Divider()
-                            .padding([.bottom], 4)
-                    } else {
-                        Rectangle().frame(height: 2).opacity(0)
+                        guard case .event = mention.type else {
+                            return false
+                        }
+                        
+                        if mention.ref.key != "e" {
+                            return false
+                        }
+                        
+                        
+                        return true
                     }
                     
-                    let bar = make_actionbar_model(ev: event, damus: damus)
-                    EventActionBar(damus_state: damus, event: event, bar: bar)
+                    /// MARK: - Preview
+                    if let firstBlock = blocks.first, case .mention(let mention) = firstBlock, mention.ref.key == "e" {
+                        BuilderEventView(damus: damus, event_id: mention.ref.id)
+                    }
                 }
 
-                Divider()
-                    .padding([.top], 4)
+                if !embedded {
+                    if has_action_bar {
+                        if size == .selected {
+                            Text("\(format_date(event.created_at))")
+                                .padding(.top, 10)
+                                .font(.footnote)
+                                .foregroundColor(.gray)
+                            
+                            Divider()
+                                .padding([.bottom], 4)
+                        } else {
+                            Rectangle().frame(height: 2).opacity(0)
+                        }
+                        
+                        let bar = make_actionbar_model(ev: event, damus: damus)
+                        EventActionBar(damus_state: damus, event: event, bar: bar)
+                    }
+
+                    Divider()
+                        .padding([.top], 4)
+                }
             }
             .padding([.leading], 2)
         }

@@ -180,9 +180,6 @@ struct BuildThreadV2View: View {
             thread!.clean()
             return
         }
-        
-//        print("ThreadV2View: Unknown event id: \(id)")
-//        print(nostr_event.content)
     }
 
     func reload() {
@@ -196,7 +193,6 @@ struct BuildThreadV2View: View {
                 limit: 1
             )
         ])
-        damus.pool.register_handler(sub_id: current_events_uuid, handler: handle_event)
         print("subscribing to threadV2 \(event_id) with sub_id \(current_events_uuid)")
     }
     
