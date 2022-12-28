@@ -115,6 +115,8 @@ struct ImageViewer: View {
 struct ImageCarousel: View {
     var urls: [URL]
     
+    @Environment(\.colorScheme) var colorScheme
+
     @State var open_sheet: Bool = false
     @State var current_url: URL? = nil
     
@@ -122,6 +124,7 @@ struct ImageCarousel: View {
         TabView {
             ForEach(urls, id: \.absoluteString) { url in
                 Rectangle()
+                    .foregroundColor(colorScheme == .light ? Color.white : Color.black)
                     .overlay {
                         KFAnimatedImage(url)
                             .configure { view in
