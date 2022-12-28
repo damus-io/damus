@@ -113,18 +113,20 @@ struct EditButton: View {
 
 struct ProfileView: View {
     let damus_state: DamusState
+    let zoom_size: CGFloat = 350
     
     @State private var selected_tab: ProfileTab = .posts
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
     @State private var showingEditProfile = false
+    @State var is_zoomed: Bool = false
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
     
     //@EnvironmentObject var profile: ProfileModel
     
-    func LNButton(_ url: URL) -> some View {
+    func LNButton(_ url: URL, profile: Profile) -> some View {
         Button(action: {
             UIApplication.shared.open(url)
         }) {
@@ -132,6 +134,13 @@ struct ProfileView: View {
                 .symbolRenderingMode(.palette)
                 .font(.system(size: 34).weight(.thin))
                 .foregroundStyle(colorScheme == .light ? .black : .white, colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2))
+                .contextMenu {
+                    Button {
+                        UIPasteboard.general.string = profile.lnurl ?? ""
+                    } label: {
+                        Label("Copy LNUrl", systemImage: "doc.on.doc")
+                    }
+                }
         }
     }
     
@@ -152,12 +161,20 @@ struct ProfileView: View {
             let data = damus_state.profiles.lookup(id: profile.pubkey)
             
             HStack(alignment: .center) {
-                ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .custom(Color.black, 2), profiles: damus_state.profiles)
+                ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
+                    .onTapGesture {
+                        is_zoomed.toggle()
+                    }
+                    .sheet(isPresented: $is_zoomed) {
+                        ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .none, profiles: damus_state.profiles)
+                    }
                 
                 Spacer()
                 
-                if let lnuri = data?.lightning_uri {
-                    LNButton(lnuri)
+                if let profile = data {
+                    if let lnuri = profile.lightning_uri {
+                        LNButton(lnuri, profile: profile)
+                    }
                 }
                 
                 DMButton

@@ -166,8 +166,7 @@ struct ContentView: View {
     var MaybeThreadView: some View {
         Group {
             if let evid = self.active_event_id {
-                let thread_model = ThreadModel(evid: evid, damus_state: damus_state!)
-                ThreadView(thread: thread_model, damus: damus_state!, is_chatroom: false)
+                BuildThreadV2View(damus: damus_state!, event_id: evid)
             } else {
                 EmptyView()
             }

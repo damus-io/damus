@@ -57,13 +57,25 @@ struct Profile: Codable {
         set(s) { value["lud16"] = s }
     }
     
+    var lnurl: String? {
+        guard let addr = lud06 ?? lud16 else {
+            return nil;
+        }
+        
+        if addr.contains("@") {
+            return lnaddress_to_lnurl(addr);
+        }
+        
+        return addr;
+    }
+    
     var nip05: String? {
         get { return value["nip05"]; }
         set(s) { value["nip05"] = s }
     }
     
     var lightning_uri: URL? {
-        return make_ln_url(self.lud06) ?? make_ln_url(self.lud16)
+        return make_ln_url(self.lnurl)
     }
     
     init(from decoder: Decoder) throws {
@@ -77,7 +89,8 @@ struct Profile: Codable {
     }
     
     static func displayName(profile: Profile?, pubkey: String) -> String {
-        return profile?.name ?? abbrev_pubkey(pubkey)
+        let pk = bech32_nopre_pubkey(pubkey) ?? pubkey
+        return profile?.name ?? abbrev_pubkey(pk)
     }
 }
 
@@ -109,4 +122,18 @@ func make_ln_url(_ str: String?) -> URL? {
 struct NostrSubscription {
     let sub_id: String
     let filter: NostrFilter
+}
+
+func lnaddress_to_lnurl(_ lnaddr: String) -> String? {
+    let parts = lnaddr.split(separator: "@")
+    guard parts.count == 2 else {
+        return nil
+    }
+    
+    let url = "https://\(parts[1])/.well-known/lnurlp/\(parts[0])";
+    guard let dat = url.data(using: .utf8) else {
+        return nil
+    }
+    
+    return bech32_encode(hrp: "lnurl", Array(dat))
 }
