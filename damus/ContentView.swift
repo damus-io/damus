@@ -349,7 +349,9 @@ struct ContentView: View {
             switch post_res {
             case .post(let post):
                 print("post \(post.content)")
-                let new_ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
+                let pow_policy: ProofOfWorkPolicy = ProofOfWorkPolicy(rawValue: UserDefaults.standard.integer(forKey: "proof_of_work_policy")) ?? .disabled
+                
+                let new_ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey, powLevel: pow_policy.rawValue)
                 self.damus_state?.pool.send(.event(new_ev))
             case .cancel:
                 active_sheet = nil

@@ -476,13 +476,67 @@ func make_post_tags(post_blocks: [PostBlock], tags: [[String]]) -> PostTags {
     return PostTags(blocks: blocks, tags: new_tags)
 }
 
-func post_to_event(post: NostrPost, privkey: String, pubkey: String) -> NostrEvent {
+func hexStringToByteArray(hexString: String) -> [UInt8] {
+    var bytes = [UInt8]()
+    bytes.reserveCapacity(hexString.count / 2)
+    var index = hexString.startIndex
+    for _ in 0..<(hexString.count / 2) {
+        let nextIndex = hexString.index(index, offsetBy: 2)
+        if let byte = UInt8(hexString[index..<nextIndex], radix: 16) {
+            bytes.append(byte)
+        } else {
+            fatalError("Invalid hex string")
+        }
+        index = nextIndex
+    }
+    return bytes
+}
+
+func countLeadingZeros(_ data: [UInt8]) -> Int {
+    var count = 0
+    for byte in data {
+        if byte == 0 {
+            count += 8
+        } else {
+            var mask: UInt8 = 0x80
+            while (byte & mask) == 0 {
+                count += 1
+                mask >>= 1
+            }
+            break
+        }
+    }
+    return count
+}
+
+func post_to_event(post: NostrPost, privkey: String, pubkey: String, powLevel: Int = 0) -> NostrEvent {
     let tags = post.references.map(refid_to_tag)
     let post_blocks = parse_post_blocks(content: post.content)
     let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
     let content = render_blocks(blocks: post_tags.blocks)
+    
     let new_ev = NostrEvent(content: content, pubkey: pubkey, kind: post.kind.rawValue, tags: post_tags.tags)
-    new_ev.calculate_id()
+    
+    if powLevel == 0 {
+        new_ev.calculate_id()
+    } else {
+        var last_pow = 0
+        while last_pow < powLevel {
+            let nonce = Int.random(in: 0..<999999)
+            
+            new_ev.tags.append(["nonce", "\(nonce)", "\(powLevel)"])
+            new_ev.calculate_id()
+            let hex = hexStringToByteArray(hexString: new_ev.id)
+            let leadingZeros = countLeadingZeros(hex)
+            
+            last_pow = leadingZeros
+            
+            if last_pow < powLevel {
+                _ = new_ev.tags.popLast()
+            }
+        }
+    }
+    
     new_ev.sign(privkey: privkey)
     return new_ev
 }

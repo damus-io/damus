@@ -11,7 +11,7 @@ enum ProofOfWorkPolicy: Int, CaseIterable {
     case disabled = 0
     case level1 = 5
     case level2 = 10
-    case level3 = 25
+    case level3 = 15
 }
 
 func proofOfWorkPolicyText(_ policy: ProofOfWorkPolicy) -> String {
@@ -19,11 +19,11 @@ func proofOfWorkPolicyText(_ policy: ProofOfWorkPolicy) -> String {
      case .disabled:
          return "No PoW"
      case .level1:
-         return "PoW level 1 (5)"
+         return "PoW level 1 (\(ProofOfWorkPolicy.level1.rawValue))"
      case .level2:
-         return "PoW level 2 (10)"
+         return "PoW level 2 (\(ProofOfWorkPolicy.level2.rawValue))"
      case .level3:
-         return "PoW level 3 (25)"
+         return "PoW level 3 (\(ProofOfWorkPolicy.level3.rawValue))"
      }
  }
 
