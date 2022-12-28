@@ -245,7 +245,7 @@ struct ThreadV2View: View {
                             .buttonStyle(.plain)
                             .onAppear {
                                 // TODO: find another solution to prevent layout shifting and layout blocking on large responses
-                                reader.scrollTo("main", anchor: .center)
+                                reader.scrollTo("main", anchor: .bottom)
                             }
                         }
                     }.background(GeometryReader { geometry in
