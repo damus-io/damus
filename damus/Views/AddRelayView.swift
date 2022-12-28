@@ -36,10 +36,9 @@ struct AddRelayView: View {
                         
                         Label("", systemImage: "doc.on.clipboard")
                             .padding(.leading, -10)
-                        .onTapGesture {
+                            .onTapGesture {
                             if let pastedrelay = UIPasteboard.general.string {
                                 self.relay = pastedrelay
-//                                hideKeyboard()
                             }
                         }
                     }
