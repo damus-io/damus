@@ -57,6 +57,7 @@ struct SelectWalletView: View {
                             ForEach(walletItems, id: \.self) { wallet in
                                 Button() {
                                     if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
+                                        print("opening wallet url \(url)")
                                         openURL(url)
                                     } else {
                                         if let url = URL(string: wallet.appStoreLink), UIApplication.shared.canOpenURL(url) {
