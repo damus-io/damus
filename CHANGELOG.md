@@ -1,3 +1,27 @@
+## [0.1.8-5] - 2022-12-27
+
+### Added
+
+     - Added the ability to zoom profile pic on profile page
+
+
+### Changed
+
+     - Improve visual composition of threads
+     - Show npub abbreviations instead of old-style hex
+     - Added search placeholder and larger cancel button
+     - Swap order of Boost and Cancel alert buttons
+     - Rename "Copy Note" to "Copy Note JSON"
+
+
+### Fixed
+
+     - Don't cutoff gifs
+     - Fixed bug where booster's names are not displayed
+
+
+
+[0.1.8-5]: https://github.com/damus-io/damus/releases/tag/v0.1.8-5
 ## [0.1.8-4] - 2022-12-26
 
 ### Added

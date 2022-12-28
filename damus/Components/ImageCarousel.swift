@@ -131,7 +131,7 @@ struct ImageCarousel: View {
                             .loadDiskFileSynchronously()
                             .scaleFactor(UIScreen.main.scale)
                             .fade(duration: 0.1)
-                            .aspectRatio(contentMode: .fill)
+                            .aspectRatio(contentMode: .fit)
                             .tabItem {
                                 Text(url.absoluteString)
                             }

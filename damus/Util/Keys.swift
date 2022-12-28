@@ -66,6 +66,13 @@ func bech32_pubkey(_ pubkey: String) -> String? {
     return bech32_encode(hrp: "npub", bytes)
 }
 
+func bech32_nopre_pubkey(_ pubkey: String) -> String? {
+    guard let bytes = hex_decode(pubkey) else {
+        return nil
+    }
+    return bech32_encode(hrp: "", bytes)
+}
+
 func bech32_note_id(_ evid: String) -> String? {
     guard let bytes = hex_decode(evid) else {
         return nil
