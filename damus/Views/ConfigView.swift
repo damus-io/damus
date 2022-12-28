@@ -9,10 +9,24 @@ import SwiftUI
 
 enum ProofOfWorkPolicy: Int, CaseIterable {
     case disabled = 0
-    case little = 5
-    case middle = 10
-    case max = 25
+    case level1 = 5
+    case level2 = 10
+    case level3 = 25
 }
+
+func proofOfWorkPolicyText(_ policy: ProofOfWorkPolicy) -> String {
+     switch policy {
+     case .disabled:
+         return "No PoW"
+     case .level1:
+         return "PoW level 1 (5)"
+     case .level2:
+         return "PoW level 2 (10)"
+     case .level3:
+         return "PoW level 3 (25)"
+     }
+ }
+
 
 struct ConfigView: View {
     let state: DamusState
@@ -24,6 +38,8 @@ struct ConfigView: View {
     @State var privkey: String
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
+    
+    @AppStorage("proof_of_work_policy") var proof_of_work_policy: ProofOfWorkPolicy = .disabled
     
     let generator = UIImpactFeedbackGenerator(style: .light)
     
@@ -84,6 +100,35 @@ struct ConfigView: View {
                         Toggle("Show", isOn: $show_privkey)
                     }
                 }
+                
+                Section("Proof of work Policy") {
+                    Menu {
+                        Button {
+                            self.proof_of_work_policy = .disabled
+                        } label: {
+                            Text(proofOfWorkPolicyText(.disabled))
+                        }
+                        Button {
+                            self.proof_of_work_policy = .level1
+                        } label: {
+                            Text(proofOfWorkPolicyText(.level1))
+                        }
+                        Button {
+                            self.proof_of_work_policy = .level2
+                        } label: {
+                            Text(proofOfWorkPolicyText(.level2))
+                        }
+                        Button {
+                            self.proof_of_work_policy = .level3
+                        } label: {
+                            Text(proofOfWorkPolicyText(.level3))
+                        }
+                    } label: {
+                        Text("\(proofOfWorkPolicyText(proof_of_work_policy))")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+
                 
                 Section("Reset") {
                     Button("Logout") {
