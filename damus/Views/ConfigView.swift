@@ -7,6 +7,13 @@
 import AVFoundation
 import SwiftUI
 
+enum ProofOfWorkPolicy: Int, CaseIterable {
+    case disabled = 0
+    case little = 5
+    case middle = 10
+    case max = 25
+}
+
 struct ConfigView: View {
     let state: DamusState
     @Environment(\.dismiss) var dismiss
