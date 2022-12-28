@@ -1,3 +1,33 @@
+## [0.1.8-6] - 2022-12-28
+
+### Added
+
+- Lightning wallet selector (Suhail Saqan)
+- Cmd-{1,2,3,4} to switch between tabs on MacOS (Jonathan Milligan)
+- Shift-Cmd-N to create a post on MacOS (Jonathan Milligan)
+- Link Previews! (Sam DuBois)
+- Added paste and delete buttons to add relay field (Suhail Saqan)
+
+
+### Changed
+
+- Blur and opaque non-friend images rather than only display the link (Sam DuBois)
+- Remove URLs in content text when image is displayed (Sam DuBois)
+- Show non-image URLs as clickable link views (Sam DuBois)
+- Adjusted Pay button on invoices. (Sam DuBois)
+
+
+### Fixed
+
+- Fix crash with @ sign in some posts (Pablo Fernandez)
+- Swapped order of Logout and Cancel alert buttons (Terry Yiu)
+- Fixed padding issue on tabbar on some devices (Sam DuBois)
+- Fix post button moving after selecting from search result (OlegAba)
+- Don't show white background on images in dark mode (William Casarin)
+
+
+
+[0.1.8-6]: https://github.com/damus-io/damus/releases/tag/v0.1.8-6
 ## [0.1.8-5] - 2022-12-27
 
 ### Added
