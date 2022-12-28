@@ -18,6 +18,9 @@ struct InvoiceView: View {
             showingSelectWallet = true
         }
         .buttonStyle(.bordered)
+        .onTapGesture {
+            // Temporary solution so that the "pay" button can be clicked (Yes we need an empty tap gesture)
+        }
     }
     
     var body: some View {
