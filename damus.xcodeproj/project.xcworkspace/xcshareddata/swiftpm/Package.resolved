@@ -40,8 +40,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SparrowTek/Vault",
       "state" : {
-        "revision" : "87db56c3c8b6421c65b0745f73e08b0dc56f79d4",
-        "version" : "1.0.3"
+        "revision" : "f5707fac23f4a17b3e5ed32dd444f502773615ae",
+        "version" : "1.0.2"
       }
     }
   ],

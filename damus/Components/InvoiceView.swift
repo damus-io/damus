@@ -8,24 +8,34 @@
 import SwiftUI
 
 struct InvoiceView: View {
+    
+    @Environment(\.colorScheme) var colorScheme
+    
     let invoice: Invoice
     
     var PayButton: some View {
-        Button("Pay") {
+        Button {
             guard let url = URL(string: "lightning:" + invoice.string) else {
                 return
             }
             UIApplication.shared.open(url)
+        } label: {
+            RoundedRectangle(cornerRadius: 20)
+                .foregroundColor(colorScheme == .light ? .black : .white)
+                .overlay {
+                    Text("Pay")
+                        .fontWeight(.medium)
+                        .foregroundColor(colorScheme == .light ? .white : .black)
+                }
         }
-        .buttonStyle(.bordered)
     }
     
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: 10)
                 .foregroundColor(.secondary.opacity(0.1))
             
-            VStack(alignment: .trailing, spacing: 12) {
+            VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Label("", systemImage: "bolt.fill")
                         .foregroundColor(.orange)

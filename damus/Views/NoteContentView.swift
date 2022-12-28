@@ -6,14 +6,16 @@
 //
 
 import SwiftUI
+import LinkPresentation
 
 struct NoteArtifacts {
     let content: String
     let images: [URL]
     let invoices: [Invoice]
+    let links: [URL]
     
     static func just_content(_ content: String) -> NoteArtifacts {
-        NoteArtifacts(content: content, images: [], invoices: [])
+        NoteArtifacts(content: content, images: [], invoices: [], links: [])
     }
 }
 
@@ -21,6 +23,7 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
     let blocks = ev.blocks(privkey)
     var invoices: [Invoice] = []
     var img_urls: [URL] = []
+    var link_urls: [URL] = []
     let txt = blocks.reduce("") { str, block in
         switch block {
         case .mention(let m):
@@ -33,14 +36,20 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
             invoices.append(invoice)
             return str
         case .url(let url):
+            
+            // Handle Image URLs
             if is_image_url(url) {
+                // Append Image
                 img_urls.append(url)
+            } else {
+                link_urls.append(url)
             }
-            return str + url.absoluteString
+            
+            return str
         }
     }
     
-    return NoteArtifacts(content: txt, images: img_urls, invoices: invoices)
+    return NoteArtifacts(content: txt, images: img_urls, invoices: invoices, links: link_urls)
 }
 
 func is_image_url(_ url: URL) -> Bool {
@@ -57,6 +66,7 @@ struct NoteContentView: View {
     
     @State var artifacts: NoteArtifacts
     
+    @State var metaData: [LPLinkMetadata] = []
     let size: EventViewKind
     
     func MainContent() -> some View {
@@ -73,10 +83,34 @@ struct NoteContentView: View {
             }
             if show_images && artifacts.images.count > 0 {
                 ImageCarousel(urls: artifacts.images)
+            } else if !show_images && artifacts.images.count > 0 {
+                ImageCarousel(urls: artifacts.images)
+                    .blur(radius: 10)
+                    .overlay {
+                        Rectangle()
+                            .opacity(0.50)
+                    }
+                    .cornerRadius(10)
             }
             if artifacts.invoices.count > 0 {
                 InvoicesView(invoices: artifacts.invoices)
-                    .frame(width: 200)
+            }
+            
+            ForEach(artifacts.links, id:\.self) { link in
+                LinkViewRepresentable(url: link)
+                    .frame(height: 50)
+            }
+        }
+    }
+    
+    func getMetaData() async {
+        let provider = LPMetadataProvider()
+        
+        if artifacts.links.count > 0 {
+            if let metaData = try? await provider.startFetchingMetadata(for: artifacts.links.first!) {
+                DispatchQueue.main.async {
+                    self.metaData.append(metaData)
+                }
             }
         }
     }
@@ -127,7 +161,7 @@ struct NoteContentView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
         let content = "hi there https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
-        let artifacts = NoteArtifacts(content: content, images: [], invoices: [])
+        let artifacts = NoteArtifacts(content: content, images: [], invoices: [], links: [])
         NoteContentView(privkey: "", event: NostrEvent(content: content, pubkey: "pk"), profiles: state.profiles, show_images: true, artifacts: artifacts, size: .normal)
     }
 }
