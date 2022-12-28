@@ -66,7 +66,7 @@ struct NoteContentView: View {
     
     @State var artifacts: NoteArtifacts
     
-    @State var metaData: [LPLinkMetadata] = []
+    @State var metaData: LPLinkMetadata? = nil
     let size: EventViewKind
     
     func MainContent() -> some View {
@@ -96,20 +96,12 @@ struct NoteContentView: View {
                 InvoicesView(invoices: artifacts.invoices)
             }
             
-            ForEach(artifacts.links, id:\.self) { link in
-                LinkViewRepresentable(url: link)
-                    .frame(height: 50)
-            }
-        }
-    }
-    
-    func getMetaData() async {
-        let provider = LPMetadataProvider()
-        
-        if artifacts.links.count > 0 {
-            if let metaData = try? await provider.startFetchingMetadata(for: artifacts.links.first!) {
-                DispatchQueue.main.async {
-                    self.metaData.append(metaData)
+            if show_images, self.metaData != nil {
+                LinkViewRepresentable(metadata: self.metaData)
+            } else {
+                ForEach(artifacts.links, id:\.self) { link in
+                    LinkViewRepresentable(url: link)
+                        .frame(height: 50)
                 }
             }
         }
@@ -117,6 +109,7 @@ struct NoteContentView: View {
     
     var body: some View {
         MainContent()
+            .animation(.easeInOut, value: metaData)
             .onAppear() {
                 self.artifacts = render_note_content(ev: event, profiles: profiles, privkey: privkey)
             }
@@ -136,6 +129,21 @@ struct NoteContentView: View {
                     }
                 }
             }
+            .task {
+                if show_images, artifacts.links.count == 1 {
+                    self.metaData = await getMetaData(for: artifacts.links.first!)
+                }
+            }
+    }
+    
+    func getMetaData(for url: URL) async -> LPLinkMetadata? {
+        let provider = LPMetadataProvider()
+        
+        do {
+            return try await provider.startFetchingMetadata(for: url)
+        } catch {
+            return nil
+        }
     }
 }
 
