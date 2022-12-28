@@ -12,13 +12,13 @@ struct InvoiceView: View {
     @Environment(\.colorScheme) var colorScheme
     
     let invoice: Invoice
+    @State var showingSelectWallet: Bool = false
+    @State var inv: String = ""
     
     var PayButton: some View {
         Button {
-            guard let url = URL(string: "lightning:" + invoice.string) else {
-                return
-            }
-            UIApplication.shared.open(url)
+            inv = invoice.string
+            showingSelectWallet = true
         } label: {
             RoundedRectangle(cornerRadius: 20)
                 .foregroundColor(colorScheme == .light ? .black : .white)
@@ -27,6 +27,10 @@ struct InvoiceView: View {
                         .fontWeight(.medium)
                         .foregroundColor(colorScheme == .light ? .white : .black)
                 }
+        }
+        .buttonStyle(.bordered)
+        .onTapGesture {
+            // Temporary solution so that the "pay" button can be clicked (Yes we need an empty tap gesture)
         }
     }
     
@@ -49,6 +53,8 @@ struct InvoiceView: View {
                     .zIndex(5.0)
             }
             .padding()
+        }.sheet(isPresented: $showingSelectWallet, onDismiss: {showingSelectWallet = false}) {
+            SelectWalletView(showingSelectWallet: $showingSelectWallet, invoice: $inv)
         }
     }
 }
