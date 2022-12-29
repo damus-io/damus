@@ -13,6 +13,7 @@ var BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
     "wss://nostr-relay.wlvs.space",
     "wss://nostr.fmt.wiz.biz",
+    "wss://relay.nostr.bg",
     "wss://nostr.oxtr.dev",
 ]
 
