@@ -247,7 +247,9 @@ struct EventView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, show_images: should_show_images(contacts: damus.contacts, ev: event), artifacts: .just_content(content), size: self.size)
+                let should_show_img = should_show_images(contacts: damus.contacts, ev: event, our_pubkey: damus.pubkey)
+                
+                NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, show_images: should_show_img, artifacts: .just_content(content), size: self.size)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .allowsHitTesting(!embedded)
                 
@@ -309,7 +311,10 @@ struct EventView: View {
 }
 
 // blame the porn bots for this code
-func should_show_images(contacts: Contacts, ev: NostrEvent) -> Bool {
+func should_show_images(contacts: Contacts, ev: NostrEvent, our_pubkey: String) -> Bool {
+    if ev.pubkey == our_pubkey {
+        return true
+    }
     if contacts.is_in_friendosphere(ev.pubkey) {
         return true
     }

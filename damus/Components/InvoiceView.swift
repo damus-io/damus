@@ -28,7 +28,7 @@ struct InvoiceView: View {
                         .foregroundColor(colorScheme == .light ? .white : .black)
                 }
         }
-        .buttonStyle(.bordered)
+        //.buttonStyle(.bordered)
         .onTapGesture {
             // Temporary solution so that the "pay" button can be clicked (Yes we need an empty tap gesture)
         }
@@ -50,10 +50,12 @@ struct InvoiceView: View {
                 Text("\(invoice.amount / 1000) sats")
                     .font(.title)
                 PayButton
-                    .zIndex(5.0)
+                    .frame(height: 50)
+                    .zIndex(10.0)
             }
-            .padding()
-        }.sheet(isPresented: $showingSelectWallet, onDismiss: {showingSelectWallet = false}) {
+            .padding(30)
+        }
+        .sheet(isPresented: $showingSelectWallet, onDismiss: {showingSelectWallet = false}) {
             SelectWalletView(showingSelectWallet: $showingSelectWallet, invoice: $inv)
         }
     }
