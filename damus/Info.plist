@@ -17,6 +17,7 @@
 	</array>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
+		<string>river</string>
 		<string>muun</string>
 		<string>zeusln</string>
 		<string>zebedee</string>

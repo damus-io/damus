@@ -37,6 +37,7 @@ public class Constants {
             {"id": 6, "name": "Zeus LN", "link": "zeusln:lightning:", "appStoreLink": "https://apps.apple.com/us/app/zeus-ln/id1456038895", "image": "zeusln"},
             {"id": 7, "name": "LNLink", "link": "lnlink:lightning:", "appStoreLink": "https://testflight.apple.com/join/aNY4yuuZ", "image": "lnlink"},
             {"id": 8, "name": "Phoenix", "link": "phoenix://", "appStoreLink": "https://apps.apple.com/us/app/phoenix-wallet/id1544097028", "image": "phoenix"},
+            {"id": 9, "name": "River", "link": "river://", "appStoreLink": "https://apps.apple.com/us/app/river-buy-mine-bitcoin/id1536176542", "image": "river"},
         ]
         """.data(using: .utf8)!
 }
