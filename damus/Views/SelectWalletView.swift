@@ -51,18 +51,20 @@ struct SelectWalletView: View {
                 if let recentWalletItem = recentWalletItem {
                     Section("Most Recent Wallet") {
                         Button() {
-                            if let url = URL(string: "lightning:\(invoice)"), UIApplication.shared.canOpenURL(url) {
+                            if let url = URL(string: "\(recentWalletItem.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
                                 openURL(url)
                             }
                         } label: {
                             HStack {
-                                Image(recentWalletItem.image).resizable().frame(width: 32.0, height: 32.0,alignment: .center).cornerRadius(5)
+                                Image(recentWalletItem.image)
+                                    .resizable()
+                                    .frame(width: 32.0, height: 32.0,alignment: .center)
+                                    .cornerRadius(5)
                                 Text(recentWalletItem.name).font(.body)
                                 Spacer()
                             }.contentShape(Rectangle())
                         }.buttonStyle(.plain)
                             .padding(.vertical, 2.5)
-                            .contentShape(Rectangle())
                     }
                 }
                 
@@ -87,6 +89,22 @@ struct SelectWalletView: View {
                                 }.contentShape(Rectangle())
                             }.buttonStyle(.plain)
                         }
+                        Button() {
+                            if let url = URL(string: "lightning:\(invoice)"), UIApplication.shared.canOpenURL(url) {
+                                openURL(url)
+                            }
+                        } label: {
+                            HStack {
+                                Image(systemName: "bolt.square")
+                                    .resizable()
+                                    .frame(width: 32.0, height: 32.0, alignment: .center)
+                                    .cornerRadius(5)
+                                Text("System Default Lightning Wallet")
+                                    .font(.body)
+                                Spacer()
+                            }.contentShape(Rectangle())
+                        }.buttonStyle(.plain)
+                            .padding(.vertical, 2.5)
                     }.padding(.vertical, 2.5)
                 }
             }.navigationBarTitle(Text("Pay the lightning invoice"), displayMode: .inline).navigationBarItems(trailing: Button(action: {
