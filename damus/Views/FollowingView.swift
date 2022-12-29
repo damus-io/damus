@@ -14,7 +14,7 @@ struct FollowUserView: View {
     static let markdown = Markdown()
 
     var body: some View {
-        HStack(alignment: .top) {
+        HStack {
             let pmodel = ProfileModel(pubkey: target.pubkey, damus: damus_state)
             let followers = FollowersModel(damus_state: damus_state, target: target.pubkey)
             let pv = ProfileView(damus_state: damus_state, profile: pmodel, followers: followers)
@@ -27,6 +27,8 @@ struct FollowUserView: View {
                     ProfileName(pubkey: target.pubkey, profile: profile, contacts: damus_state.contacts, show_friend_confirmed: false)
                     if let about = profile?.about {
                         Text(FollowUserView.markdown.process(about))
+                            .lineLimit(3)
+                            .font(.footnote)
                     }
                 }
                 
@@ -53,6 +55,7 @@ struct FollowersView: View {
                     FollowUserView(target: .pubkey(pk), damus_state: damus_state)
                 }
             }
+            .padding()
         }
         .navigationBarTitle("\(Profile.displayName(profile: profile, pubkey: whos))'s Followers")
         .onAppear {
@@ -80,6 +83,7 @@ struct FollowingView: View {
                     FollowUserView(target: .pubkey(pk), damus_state: damus_state)
                 }
             }
+            .padding()
         }
         .onAppear {
             following.subscribe()

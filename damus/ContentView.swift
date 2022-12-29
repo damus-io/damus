@@ -88,7 +88,7 @@ struct ContentView: View {
                         self.active_sheet = .post
                     }
                 }
-            }
+            }.ignoresSafeArea(.keyboard, edges: .bottom)
         }
         .safeAreaInset(edge: .top) {
             VStack(spacing: 0) {
@@ -228,6 +228,7 @@ struct ContentView: View {
             }
 
             TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
+                .padding()
         }
         .onAppear() {
             self.connect()

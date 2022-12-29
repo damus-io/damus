@@ -122,6 +122,7 @@ struct ImageCarousel: View {
         TabView {
             ForEach(urls, id: \.absoluteString) { url in
                 Rectangle()
+                    .foregroundColor(Color.clear)
                     .overlay {
                         KFAnimatedImage(url)
                             .configure { view in
@@ -136,6 +137,11 @@ struct ImageCarousel: View {
                                 Text(url.absoluteString)
                             }
                             .id(url.absoluteString)
+                            .contextMenu {
+                                Button("Copy Image") {
+                                    UIPasteboard.general.string = url.absoluteString
+                                }
+                            }
                     }
             }
         }
