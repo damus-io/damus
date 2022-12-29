@@ -7,23 +7,15 @@
 
 import SwiftUI
 
-struct WalletItem : Decodable, Identifiable, Hashable {
-    var id: Int
-    var name : String
-    var link : String
-    var appStoreLink : String
-    var image: String
-}
-
 struct SelectWalletView: View {
     @Binding var showingSelectWallet: Bool
     @Binding var invoice: String
     @Environment(\.openURL) private var openURL
     @State var invoice_copied: Bool = false
+    @EnvironmentObject var user_settings: UserSettingsStore
     
     let generator = UIImpactFeedbackGenerator(style: .light)
-    
-    let walletItems = try! JSONDecoder().decode([WalletItem].self, from: Constants.WALLETS)
+    let walletItems: [WalletItem] = get_wallet_list()
     
     var body: some View {
         NavigationView {
@@ -46,8 +38,13 @@ struct SelectWalletView: View {
                     Section("Select a lightning wallet"){
                         List{
                             Button() {
-                                if let url = URL(string: "lightning:\(invoice)"), UIApplication.shared.canOpenURL(url) {
+                                let wallet = get_default_wallet(user_settings.defaultwallet.rawValue)
+                                if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
                                     openURL(url)
+                                } else {
+                                    if let url = URL(string: wallet.appStoreLink), UIApplication.shared.canOpenURL(url) {
+                                        openURL(url)
+                                    }
                                 }
                             } label: {
                                 HStack {
@@ -55,21 +52,22 @@ struct SelectWalletView: View {
                                 }
                             }.buttonStyle(.plain)
                             ForEach(walletItems, id: \.self) { wallet in
-                                Button() {
-                                    if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
-                                        print("opening wallet url \(url)")
-                                        openURL(url)
-                                    } else {
-                                        if let url = URL(string: wallet.appStoreLink), UIApplication.shared.canOpenURL(url) {
+                                if (wallet.id >= 0){
+                                    Button() {
+                                        if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
                                             openURL(url)
+                                        } else {
+                                            if let url = URL(string: wallet.appStoreLink), UIApplication.shared.canOpenURL(url) {
+                                                openURL(url)
+                                            }
                                         }
-                                    }
-                                } label: {
-                                    HStack {
-                                        Image(wallet.image).resizable().frame(width: 32.0, height: 32.0,alignment: .center).cornerRadius(5)
-                                        Text(wallet.name).font(.body)
-                                    }
-                                }.buttonStyle(.plain)
+                                    } label: {
+                                        HStack {
+                                            Image(wallet.image).resizable().frame(width: 32.0, height: 32.0,alignment: .center).cornerRadius(5)
+                                            Text(wallet.name).font(.body)
+                                        }
+                                    }.buttonStyle(.plain)
+                                }
                             }
                         }.padding(.vertical, 2.5)
                     }

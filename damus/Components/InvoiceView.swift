@@ -10,15 +10,28 @@ import SwiftUI
 struct InvoiceView: View {
     
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.openURL) private var openURL
     
     let invoice: Invoice
     @State var showingSelectWallet: Bool = false
     @State var inv: String = ""
+    @StateObject var user_settings = UserSettingsStore()
     
     var PayButton: some View {
         Button {
             inv = invoice.string
-            showingSelectWallet = true
+            if (user_settings.showwalletselector){
+                showingSelectWallet = true
+            } else {
+                let wallet = get_default_wallet(user_settings.defaultwallet.rawValue)
+                if let url = URL(string: "\(wallet.link)\(inv)"), UIApplication.shared.canOpenURL(url) {
+                    openURL(url)
+                } else {
+                    if let url = URL(string: wallet.appStoreLink), UIApplication.shared.canOpenURL(url) {
+                        openURL(url)
+                    }
+                }
+            }
         } label: {
             RoundedRectangle(cornerRadius: 20)
                 .foregroundColor(colorScheme == .light ? .black : .white)
@@ -56,7 +69,7 @@ struct InvoiceView: View {
             .padding(30)
         }
         .sheet(isPresented: $showingSelectWallet, onDismiss: {showingSelectWallet = false}) {
-            SelectWalletView(showingSelectWallet: $showingSelectWallet, invoice: $inv)
+            SelectWalletView(showingSelectWallet: $showingSelectWallet, invoice: $inv).environmentObject(user_settings)
         }
     }
 }

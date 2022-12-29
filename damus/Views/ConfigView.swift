@@ -17,7 +17,10 @@ struct ConfigView: View {
     @State var privkey: String
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
-    
+    @EnvironmentObject var user_settings: UserSettingsStore
+
+    let walletItems: [WalletItem] = get_wallet_list()
+
     let generator = UIImpactFeedbackGenerator(style: .light)
     
     init(state: DamusState) {
@@ -75,6 +78,17 @@ struct ConfigView: View {
                         }
                         
                         Toggle("Show", isOn: $show_privkey)
+                    }
+                }
+                
+                Section("Wallet Selector") {
+                    Toggle("Show wallet selector", isOn: $user_settings.showwalletselector).toggleStyle(.switch)
+                    if walletItems != [] {
+                        Picker(selection: $user_settings.defaultwallet, label: Text("Select default wallet"), content: {
+                            ForEach(walletItems, id: \.self) { wallet in
+                                Text(wallet.name).tag(get_wallet_tag(wallet.tag))
+                            }
+                        })
                     }
                 }
                 
