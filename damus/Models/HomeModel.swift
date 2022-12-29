@@ -260,6 +260,9 @@ class HomeModel: ObservableObject {
 
         var contacts_filter = NostrFilter.filter_kinds([0])
         contacts_filter.authors = friends
+        
+        var our_contacts_filter = NostrFilter.filter_kinds([3, 0])
+        our_contacts_filter.authors = [damus_state.pubkey]
 
         var dms_filter = NostrFilter.filter_kinds([
             NostrKind.dm.rawValue,
@@ -297,7 +300,7 @@ class HomeModel: ObservableObject {
 
         var home_filters = [home_filter]
         var notifications_filters = [notifications_filter]
-        var contacts_filters = [contacts_filter]
+        var contacts_filters = [contacts_filter, our_contacts_filter]
         var dms_filters = [dms_filter, our_dms_filter]
 
         let last_of_kind = relay_id.flatMap { last_event_of_kind[$0] } ?? [:]
@@ -447,14 +450,43 @@ func load_our_contacts(contacts: Contacts, our_pubkey: String, ev: NostrEvent) {
     guard ev.pubkey == our_pubkey else {
         return
     }
-
+    
+    // only use new stuff
+    if let current_ev = contacts.event {
+        guard ev.created_at > current_ev.created_at else {
+            return
+        }
+    }
+    
+    let m_old_ev = contacts.event
     contacts.event = ev
-
+    
+    var new_pks = Set<String>()
     // our contacts
     for tag in ev.tags {
-        if tag.count > 1 && tag[0] == "p" {
-            // TODO: validate pubkey?
-            contacts.add_friend_pubkey(tag[1])
+        if tag.count >= 2 && tag[0] == "p" {
+            new_pks.insert(tag[1])
+        }
+    }
+    
+    var old_pks = Set<String>()
+    // find removed contacts
+    if let old_ev = m_old_ev {
+        for tag in old_ev.tags {
+            if tag.count >= 2 && tag[0] == "p" {
+                old_pks.insert(tag[1])
+            }
+        }
+    }
+    
+    let diff = new_pks.symmetricDifference(old_pks)
+    for pk in diff {
+        if new_pks.contains(pk) {
+            notify(.followed, pk)
+            contacts.add_friend_pubkey(pk)
+        } else {
+            notify(.unfollowed, pk)
+            contacts.remove_friend(pk)
         }
     }
 }
@@ -542,13 +574,20 @@ func robohash(_ pk: String) -> String {
 
 func process_contact_event(pool: RelayPool, contacts: Contacts, pubkey: String, ev: NostrEvent) {
     load_our_contacts(contacts: contacts, our_pubkey: pubkey, ev: ev)
-    load_our_relays(our_pubkey: pubkey, pool: pool, ev: ev)
+    load_our_relays(contacts: contacts, our_pubkey: pubkey, pool: pool, ev: ev)
     add_contact_if_friend(contacts: contacts, ev: ev)
 }
 
-func load_our_relays(our_pubkey: String, pool: RelayPool, ev: NostrEvent) {
+func load_our_relays(contacts: Contacts, our_pubkey: String, pool: RelayPool, ev: NostrEvent) {
     guard ev.pubkey == our_pubkey else {
         return
+    }
+    
+    // only load new stuff
+    if let old_contacts = contacts.event {
+        guard ev.created_at > old_contacts.created_at else {
+            return
+        }
     }
 
     guard let decoded = decode_json_relays(ev.content) else {
