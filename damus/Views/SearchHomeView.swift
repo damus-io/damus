@@ -55,7 +55,7 @@ struct SearchHomeView: View {
                 // Fetch new information by unsubscribing and resubscribing to the relay
                 model.unsubscribe()
                 model.subscribe()
-            }
+            }.padding(.horizontal)
     }
     
     var MainContent: some View {

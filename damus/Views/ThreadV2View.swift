@@ -287,8 +287,8 @@ struct ThreadV2View: View {
                             )
                         }.buttonStyle(.plain)
                     }
-                }
-            }.padding().navigationBarTitle("Thread")
+                }.padding()
+            }.navigationBarTitle("Thread")
         }
     }
 }
