@@ -1049,7 +1049,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
-				DEVELOPMENT_TEAM = S5U94G8XN2;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = damus/Info.plist;
@@ -1068,7 +1068,7 @@
 					"$(PROJECT_DIR)",
 				);
 				MARKETING_VERSION = 0.1.8;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.hakes.damus2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "damus-c/damus-Bridging-Header.h";
@@ -1088,7 +1088,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
-				DEVELOPMENT_TEAM = S5U94G8XN2;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = damus/Info.plist;
@@ -1107,7 +1107,7 @@
 					"$(PROJECT_DIR)",
 				);
 				MARKETING_VERSION = 0.1.8;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.hakes.damus2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "damus-c/damus-Bridging-Header.h";
