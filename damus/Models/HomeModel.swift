@@ -446,21 +446,7 @@ func add_contact_if_friend(contacts: Contacts, ev: NostrEvent) {
     contacts.add_friend_contact(ev)
 }
 
-func load_our_contacts(contacts: Contacts, our_pubkey: String, ev: NostrEvent) {
-    guard ev.pubkey == our_pubkey else {
-        return
-    }
-    
-    // only use new stuff
-    if let current_ev = contacts.event {
-        guard ev.created_at > current_ev.created_at else {
-            return
-        }
-    }
-    
-    let m_old_ev = contacts.event
-    contacts.event = ev
-    
+func load_our_contacts(contacts: Contacts, our_pubkey: String, m_old_ev: NostrEvent?, ev: NostrEvent) {
     var new_pks = Set<String>()
     // our contacts
     for tag in ev.tags {
@@ -572,34 +558,67 @@ func robohash(_ pk: String) -> String {
     return "https://robohash.org/" + pk
 }
 
-func process_contact_event(pool: RelayPool, contacts: Contacts, pubkey: String, ev: NostrEvent) {
-    load_our_contacts(contacts: contacts, our_pubkey: pubkey, ev: ev)
-    load_our_relays(contacts: contacts, our_pubkey: pubkey, pool: pool, ev: ev)
-    add_contact_if_friend(contacts: contacts, ev: ev)
-}
-
-func load_our_relays(contacts: Contacts, our_pubkey: String, pool: RelayPool, ev: NostrEvent) {
-    guard ev.pubkey == our_pubkey else {
+func load_our_stuff(pool: RelayPool, contacts: Contacts, pubkey: String, ev: NostrEvent) {
+    guard ev.pubkey == pubkey else {
         return
     }
     
-    // only load new stuff
-    if let old_contacts = contacts.event {
-        guard ev.created_at > old_contacts.created_at else {
+    // only use new stuff
+    if let current_ev = contacts.event {
+        guard ev.created_at > current_ev.created_at else {
             return
         }
     }
+    
+    let m_old_ev = contacts.event
+    contacts.event = ev
 
+    load_our_contacts(contacts: contacts, our_pubkey: pubkey, m_old_ev: m_old_ev, ev: ev)
+    load_our_relays(contacts: contacts, our_pubkey: pubkey, pool: pool, m_old_ev: m_old_ev, ev: ev)
+}
+
+func process_contact_event(pool: RelayPool, contacts: Contacts, pubkey: String, ev: NostrEvent) {
+    load_our_stuff(pool: pool, contacts: contacts, pubkey: pubkey, ev: ev)
+    add_contact_if_friend(contacts: contacts, ev: ev)
+}
+
+func load_our_relays(contacts: Contacts, our_pubkey: String, pool: RelayPool, m_old_ev: NostrEvent?, ev: NostrEvent) {
+    let bootstrap_dict: [String: RelayInfo] = [:]
+    let old_decoded = m_old_ev.flatMap { decode_json_relays($0.content) } ?? BOOTSTRAP_RELAYS.reduce(into: bootstrap_dict) { (d, r) in
+        d[r] = .rw
+    }
+    
     guard let decoded = decode_json_relays(ev.content) else {
         return
     }
-
+    
+    var changed = false
+    
+    var new = Set<String>()
     for key in decoded.keys {
-        if let url = URL(string: key) {
-            if let _ = try? pool.add_relay(url, info: decoded[key]!) {
-                pool.connect(to: [key])
+        new.insert(key)
+    }
+    
+    var old = Set<String>()
+    for key in old_decoded.keys {
+        old.insert(key)
+    }
+    
+    let diff = old.symmetricDifference(new)
+    
+    for d in diff {
+        changed = true
+        if new.contains(d) {
+            if let url = URL(string: d) {
+                try? pool.add_relay(url, info: decoded[d] ?? .rw)
             }
+        } else {
+            pool.remove_relay(d)
         }
+    }
+    
+    if changed {
+        notify(.relays_changed, ())
     }
 }
 

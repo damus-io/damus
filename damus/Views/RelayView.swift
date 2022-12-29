@@ -9,7 +9,6 @@ import SwiftUI
 
 struct RelayView: View {
     let state: DamusState
-    let ev: NostrEvent
     let relay: String
     
     let timer = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
@@ -46,7 +45,12 @@ struct RelayView: View {
         .swipeActions {
             if let privkey = state.keypair.privkey {
                 Button {
-                    guard let new_ev = remove_relay( ev: ev, privkey: privkey, relay: relay) else {
+                    guard let ev = state.contacts.event else {
+                        return
+                    }
+                    
+                    let descriptors = state.pool.descriptors
+                    guard let new_ev = remove_relay( ev: ev, current_relays: descriptors, privkey: privkey, relay: relay) else {
                         return
                     }
                     
@@ -64,6 +68,6 @@ struct RelayView: View {
 
 struct RelayView_Previews: PreviewProvider {
     static var previews: some View {
-        RelayView(state: test_damus_state(), ev: NostrEvent(content: "content", pubkey: "pk"), relay: "wss://relay.damus.io", conn_color: .red)
+        RelayView(state: test_damus_state(), relay: "wss://relay.damus.io", conn_color: .red)
     }
 }

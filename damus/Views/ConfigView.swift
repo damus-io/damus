@@ -41,13 +41,9 @@ struct ConfigView: View {
     var body: some View {
         ZStack(alignment: .leading) {
             Form {
-                if let ev = state.contacts.event {
-                    Section("Relays") {
-                        if let relays = decode_json_relays(ev.content) {
-                            List(Array(relays.keys.sorted()), id: \.self) { relay in
-                                RelayView(state: state, ev: ev, relay: relay)
-                            }
-                        }
+                Section("Relays") {
+                    List(Array(state.pool.relays), id: \.descriptor.url) { relay in
+                        RelayView(state: state, relay: relay.descriptor.url.absoluteString)
                     }
                 }
                 
@@ -113,7 +109,6 @@ struct ConfigView: View {
         }
         .sheet(isPresented: $show_add_relay) {
             AddRelayView(show_add_relay: $show_add_relay, relay: $new_relay) { m_relay in
-                
                 guard let relay = m_relay else {
                     return
                 }

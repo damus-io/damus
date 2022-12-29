@@ -28,12 +28,14 @@ class Relay: Identifiable {
     let descriptor: RelayDescriptor
     let connection: RelayConnection
     
+    var last_pong: UInt32
     var flags: Int
     
     init(descriptor: RelayDescriptor, connection: RelayConnection) {
         self.flags = 0
         self.descriptor = descriptor
         self.connection = connection
+        self.last_pong = 0
     }
     
     func mark_broken() {

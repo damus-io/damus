@@ -179,8 +179,23 @@ class RelayPool {
 
         return nil
     }
-
+    
+    func record_last_pong(relay_id: String, event: NostrConnectionEvent) {
+        if case .ws_event(let ws_event) = event {
+            if case .pong = ws_event {
+                for relay in relays {
+                    if relay.id == relay_id {
+                        relay.last_pong = UInt32(Date.now.timeIntervalSince1970)
+                        return
+                    }
+                }
+            }
+        }
+    }
+    
     func handle_event(relay_id: String, event: NostrConnectionEvent) {
+        record_last_pong(relay_id: relay_id, event: event)
+        
         // handle reconnect logic, etc?
         for handler in handlers {
             handler.callback(relay_id, event)
@@ -192,4 +207,5 @@ func add_rw_relay(_ pool: RelayPool, _ url: String) {
     let url_ = URL(string: url)!
     try? pool.add_relay(url_, info: RelayInfo.rw)
 }
+
 
