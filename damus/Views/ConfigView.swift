@@ -83,8 +83,9 @@ struct ConfigView: View {
                 
                 Section("Wallet Selector") {
                     Toggle("Show wallet selector", isOn: $user_settings.showWalletSelector).toggleStyle(.switch)
-                    Picker(selection: $user_settings.defaultWallet, label: Text("Select default wallet"), content: {
-                        List($walletModels) { $wallet in
+                    Picker(selection: $user_settings.defaultWallet,
+                           label: Text("Select default wallet"), content: {
+                        ForEach(walletModels) { wallet in
                             Text(wallet.displayName)
                                 .tag(wallet.tag)
                         }
