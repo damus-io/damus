@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct WalletItem : Decodable, Identifiable, Hashable {
+struct WalletItem: Decodable, Identifiable, Hashable {
     var id: Int
     var name : String
     var link : String
@@ -27,6 +27,10 @@ struct SelectWalletView: View {
     
     var body: some View {
         NavigationView {
+            let mostRecentWalletName = DamusUserDefaults.mostRecentWalletName
+            let recentWalletItem: WalletItem? = walletItems.first(where: { $0.name == mostRecentWalletName })
+            let otherWalletItems: [WalletItem] = walletItems.filter { $0.name != mostRecentWalletName }
+            
             Form {
                 Section("Copy invoice") {
                     HStack {
@@ -43,35 +47,52 @@ struct SelectWalletView: View {
                         generator.impactOccurred()
                     }
                 }
-                    Section("Select a lightning wallet"){
-                        List{
-                            Button() {
-                                if let url = URL(string: "lightning:\(invoice)"), UIApplication.shared.canOpenURL(url) {
+                
+                if let recentWalletItem = recentWalletItem {
+                    Section("Most Recent Wallet") {
+                        Button() {
+                            if let url = URL(string: "\(recentWalletItem.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
+                                openURL(url)
+                            } else {
+                                if let url = URL(string: recentWalletItem.appStoreLink), UIApplication.shared.canOpenURL(url) {
                                     openURL(url)
+                                }
+                            }
+                        } label: {
+                            HStack {
+                                Image(recentWalletItem.image).resizable().frame(width: 32.0, height: 32.0,alignment: .center).cornerRadius(5)
+                                Text(recentWalletItem.name).font(.body)
+                                Spacer()
+                            }.contentShape(Rectangle())
+                        }.buttonStyle(.plain)
+                            .padding(.vertical, 2.5)
+                            .contentShape(Rectangle())
+                    }
+                }
+                
+                Section("Other Wallets"){
+                    List{
+                        ForEach(otherWalletItems, id: \.self) { wallet in
+                            Button() {
+                                if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
+                                    openURL(url)
+                                    DamusUserDefaults.saveMostRecentWallet(name: wallet.name)
+                                } else {
+                                    if let url = URL(string: wallet.appStoreLink), UIApplication.shared.canOpenURL(url) {
+                                        openURL(url)
+                                        DamusUserDefaults.saveMostRecentWallet(name: wallet.name)
+                                    }
                                 }
                             } label: {
                                 HStack {
-                                    Text("Default Wallet").font(.body).foregroundColor(.blue)
-                                }
+                                    Image(wallet.image).resizable().frame(width: 32.0, height: 32.0,alignment: .center).cornerRadius(5)
+                                    Text(wallet.name).font(.body)
+                                    Spacer()
+                                }.contentShape(Rectangle())
                             }.buttonStyle(.plain)
-                            ForEach(walletItems, id: \.self) { wallet in
-                                Button() {
-                                    if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
-                                        openURL(url)
-                                    } else {
-                                        if let url = URL(string: wallet.appStoreLink), UIApplication.shared.canOpenURL(url) {
-                                            openURL(url)
-                                        }
-                                    }
-                                } label: {
-                                    HStack {
-                                        Image(wallet.image).resizable().frame(width: 32.0, height: 32.0,alignment: .center).cornerRadius(5)
-                                        Text(wallet.name).font(.body)
-                                    }
-                                }.buttonStyle(.plain)
-                            }
-                        }.padding(.vertical, 2.5)
-                    }
+                        }
+                    }.padding(.vertical, 2.5)
+                }
             }.navigationBarTitle(Text("Pay the lightning invoice"), displayMode: .inline).navigationBarItems(trailing: Button(action: {
                 self.showingSelectWallet = false
             }) {
