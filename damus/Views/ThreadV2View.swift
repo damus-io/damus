@@ -22,7 +22,11 @@ struct ThreadV2 {
             return !event.content.isEmpty
         }
         self.childEvents = self.childEvents.filter { event in
-            return !event.content.isEmpty
+            let check_tags = event.tags.filter { tag in
+                return tag[0] == "e" && event.content.contains(tag[1])
+            }
+            
+            return check_tags.isEmpty && !event.content.isEmpty
         }
         
         // sort events by publication date
