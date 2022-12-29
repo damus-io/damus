@@ -131,12 +131,19 @@ struct NoteContentView: View {
             }
             .task {
                 if show_images, artifacts.links.count == 1 {
+                    
                     self.metaData = await getMetaData(for: artifacts.links.first!)
                 }
             }
     }
     
+    
     func getMetaData(for url: URL) async -> LPLinkMetadata? {
+        // iOS 15 is crashing for some reason
+        guard #available(iOS 16, *) else {
+            return nil
+        }
+        
         let provider = LPMetadataProvider()
         
         do {
