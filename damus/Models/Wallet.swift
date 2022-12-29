@@ -7,8 +7,8 @@
 
 import Foundation
 
-// New url prefixes needed to be added to LSApplicationQueriesSchemes
-enum Wallet: String, CaseIterable {
+enum Wallet: String, CaseIterable, Identifiable {
+    var id: String { self.rawValue }
     
     struct Model: Identifiable, Hashable {
         var id: String { self.tag }
@@ -20,6 +20,7 @@ enum Wallet: String, CaseIterable {
         var image: String
     }
     
+    // New url prefixes needed to be added to LSApplicationQueriesSchemes
     case systemdefaultwallet
     case strike
     case cashapp
