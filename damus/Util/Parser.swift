@@ -97,6 +97,12 @@ func parse_digit(_ p: Parser) -> Int? {
 func parse_hex_char(_ p: Parser) -> Character? {
     let ind = p.str.index(p.str.startIndex, offsetBy: p.pos)
     
+    // Check that we're within the bounds of p.str's length
+    if p.pos >= p.str.count {
+        return nil
+    }
+
+    
     if let c = p.str[ind].unicodeScalars.first {
         // hex chars
         let d = c.value

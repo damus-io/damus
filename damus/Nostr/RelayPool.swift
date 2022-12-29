@@ -190,6 +190,6 @@ class RelayPool {
 
 func add_rw_relay(_ pool: RelayPool, _ url: String) {
     let url_ = URL(string: url)!
-    try! pool.add_relay(url_, info: RelayInfo.rw)
+    try? pool.add_relay(url_, info: RelayInfo.rw)
 }
 

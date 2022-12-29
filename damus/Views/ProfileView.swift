@@ -119,6 +119,8 @@ struct ProfileView: View {
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
     @State private var showingEditProfile = false
+    @State var showingSelectWallet: Bool = false
+    @State var inv: String = ""
     @State var is_zoomed: Bool = false
     
     @Environment(\.dismiss) var dismiss
@@ -126,9 +128,14 @@ struct ProfileView: View {
     
     //@EnvironmentObject var profile: ProfileModel
     
-    func LNButton(_ url: URL, profile: Profile) -> some View {
+    func LNButton(lud06: String?, lud16: String?, profile: Profile) -> some View {
         Button(action: {
-            UIApplication.shared.open(url)
+            if let l = lud06 {
+                inv = l
+            } else {
+                inv = lud16 ?? ""
+            }
+            showingSelectWallet = true
         }) {
             Image(systemName: "bolt.circle")
                 .symbolRenderingMode(.palette)
@@ -141,6 +148,8 @@ struct ProfileView: View {
                         Label("Copy LNURL", systemImage: "doc.on.doc")
                     }
                 }
+        }.sheet(isPresented: $showingSelectWallet, onDismiss: {showingSelectWallet = false}) {
+            SelectWalletView(showingSelectWallet: $showingSelectWallet, invoice: $inv)
         }
     }
     
@@ -170,10 +179,10 @@ struct ProfileView: View {
                     }
                 
                 Spacer()
-                
+
                 if let profile = data {
-                    if let lnuri = profile.lightning_uri {
-                        LNButton(lnuri, profile: profile)
+                    if (profile.lud06 != nil || profile.lud16 != nil) {
+                        LNButton(lud06: profile.lud06, lud16: profile.lud16, profile: profile)
                     }
                 }
                 
