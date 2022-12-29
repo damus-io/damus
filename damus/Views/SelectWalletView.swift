@@ -51,12 +51,8 @@ struct SelectWalletView: View {
                 if let recentWalletItem = recentWalletItem {
                     Section("Most Recent Wallet") {
                         Button() {
-                            if let url = URL(string: "\(recentWalletItem.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
+                            if let url = URL(string: "lightning:\(invoice)"), UIApplication.shared.canOpenURL(url) {
                                 openURL(url)
-                            } else {
-                                if let url = URL(string: recentWalletItem.appStoreLink), UIApplication.shared.canOpenURL(url) {
-                                    openURL(url)
-                                }
                             }
                         } label: {
                             HStack {
