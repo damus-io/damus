@@ -60,17 +60,10 @@ struct NoteContentView: View {
     let size: EventViewKind
     
     func MainContent() -> some View {
-        let md_opts: AttributedString.MarkdownParsingOptions =
-            .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        
         return VStack(alignment: .leading) {
-            if let txt = try? AttributedString(markdown: artifacts.content, options: md_opts) {
-                Text(txt)
-                    .font(eventviewsize_to_font(size))
-            } else {
-                Text(artifacts.content)
-                    .font(eventviewsize_to_font(size))
-            }
+            Text(Markdown.parse(content: artifacts.content))
+                .font(eventviewsize_to_font(size))
+
             if show_images && artifacts.images.count > 0 {
                 ImageCarousel(urls: artifacts.images)
             }
