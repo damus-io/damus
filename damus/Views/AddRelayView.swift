@@ -58,6 +58,7 @@ struct AddRelayView: View {
                     Button("Add") {
                         show_add_relay = false
                         action(relay)
+                        relay = ""
                     }
                     .buttonStyle(.borderedProminent)
                     .contentShape(Rectangle())
