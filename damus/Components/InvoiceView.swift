@@ -15,12 +15,12 @@ struct InvoiceView: View {
     let invoice: Invoice
     @State var showingSelectWallet: Bool = false
     @State var inv: String = ""
-    @StateObject var user_settings = UserSettingsStore()
+    @ObservedObject var user_settings = UserSettingsStore()
     
     var PayButton: some View {
         Button {
             inv = invoice.string
-            if (user_settings.showWalletSelector){
+            if user_settings.showWalletSelector {
                 showingSelectWallet = true
             } else {
                 let walletModel = user_settings.defaultWallet.model
