@@ -14,6 +14,12 @@ extension Notification.Name {
 }
 
 extension Notification.Name {
+    static var relays_changed: Notification.Name {
+        return Notification.Name("relays_changed")
+    }
+}
+
+extension Notification.Name {
     static var select_event: Notification.Name {
         return Notification.Name("select_event")
     }

@@ -130,6 +130,7 @@ struct BuildThreadV2View: View {
             
             // Ask for children
             let childs_events = NostrFilter(
+                kinds: [1],
                 referenced_ids: [self.event_id],
                 limit: 50
             )

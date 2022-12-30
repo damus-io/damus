@@ -139,16 +139,12 @@ func decode_json_relays(_ content: String) -> [String: RelayInfo]? {
     return decode_json(content)
 }
 
-func remove_relay(ev: NostrEvent, privkey: String, relay: String) -> NostrEvent? {
-    let damus_relay = RelayDescriptor(url: URL(string: "wss://relay.damus.io")!, info: .rw)
-    
-    var relays = ensure_relay_info(relays: [damus_relay], content: ev.content)
-    guard relays.index(forKey: relay) != nil else {
-        return nil
-    }
+func remove_relay(ev: NostrEvent, current_relays: [RelayDescriptor], privkey: String, relay: String) -> NostrEvent? {
+    var relays = ensure_relay_info(relays: current_relays, content: ev.content)
     
     relays.removeValue(forKey: relay)
     
+    print("remove_relay \(relays)")
     guard let content = encode_json(relays) else {
         return nil
     }
@@ -159,10 +155,9 @@ func remove_relay(ev: NostrEvent, privkey: String, relay: String) -> NostrEvent?
     return new_ev
 }
 
-func add_relay(ev: NostrEvent, privkey: String, relay: String, info: RelayInfo) -> NostrEvent? {
-    let damus_relay = RelayDescriptor(url: URL(string: "wss://relay.damus.io")!, info: .rw)
+func add_relay(ev: NostrEvent, privkey: String, current_relays: [RelayDescriptor], relay: String, info: RelayInfo) -> NostrEvent? {
+    var relays = ensure_relay_info(relays: current_relays, content: ev.content)
     
-    var relays = ensure_relay_info(relays: [damus_relay], content: ev.content)
     guard relays.index(forKey: relay) == nil else {
         return nil
     }

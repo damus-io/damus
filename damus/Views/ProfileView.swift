@@ -242,6 +242,17 @@ struct ProfileView: View {
                             followers.subscribe()
                         }
                 }
+                
+                if let relays = profile.relays {
+                    NavigationLink(destination: UserRelaysView(state: damus_state, pubkey: profile.pubkey, relays: Array(relays.keys).sorted())) {
+                        Text("\(relays.keys.count)")
+                            .font(.subheadline.weight(.medium))
+                        Text("Relays")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
             }
         }
     }

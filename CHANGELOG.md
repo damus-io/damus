@@ -1,3 +1,18 @@
+## [0.1.8-9] - 2022-12-29
+
+### Changed
+
+- Show recommended relays in config. Currently just a fixed set. (William Casarin)
+- Ensure contact relay list is kept in sync with internal relay pool (William Casarin)
+
+### Fixed
+
+- Fixed issue where contact list would sometimes revert to an older version (William Casarin)
+- Don't show boosts in threads (Thomas)
+
+
+[0.1.8-9]: https://github.com/damus-io/damus/releases/tag/v0.1.8-9
+
 ## [0.1.8-6] - 2022-12-28
 
 ### Added
@@ -217,5 +232,4 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
 
