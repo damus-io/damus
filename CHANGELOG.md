@@ -1,5 +1,9 @@
 ## [0.1.8-9] - 2022-12-29
 
+### Added
+
+- Relay list on user profiles
+
 ### Changed
 
 - Show recommended relays in config. Currently just a fixed set. (William Casarin)
