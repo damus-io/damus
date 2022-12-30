@@ -137,7 +137,6 @@ struct SaveKeysView: View {
 }
 
 struct SaveKeyView: View {
-    let minor = CGFloat(0), major = CGFloat(0) /// spacer-block dimensions - 'major' sets key Text's aspect ratio
     let text: String
     @Binding var is_copied: Bool
     
@@ -150,7 +149,7 @@ struct SaveKeyView: View {
         HStack {
             Spacer()
             VStack {
-                spacerBlock(width: 10, height: minor)
+                spacerBlock(width: 0, height: 0)
                 Button(action: copy_text) {
                     Label("", systemImage: is_copied ? "checkmark.circle.fill" : "doc.on.doc")
                         .foregroundColor(is_copied ? .green : .white)
@@ -180,12 +179,12 @@ struct SaveKeyView: View {
                     copy_text()
                 }
             
-            spacerBlock(width: major, height: minor)
+            spacerBlock(width: 0, height: 0) /// set a 'width' > 0 here to vary key Text's aspect ratio
         }
     }
     
     @ViewBuilder private func spacerBlock(width: CGFloat, height: CGFloat) -> some View {
-        Color.orange.opacity(Double(1))
+        Color.orange.opacity(1)
             .frame(width: width, height: height)
     }
 }
