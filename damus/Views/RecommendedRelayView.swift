@@ -10,12 +10,25 @@ import SwiftUI
 struct RecommendedRelayView: View {
     let damus: DamusState
     let relay: String
+    let add_button: Bool
+    
+    init(damus: DamusState, relay: String) {
+        self.damus = damus
+        self.relay = relay
+        self.add_button = true
+    }
+    
+    init(damus: DamusState, relay: String, add_button: Bool) {
+        self.damus = damus
+        self.relay = relay
+        self.add_button = add_button
+    }
     
     var body: some View {
         HStack {
             Text(relay)
             Spacer()
-            if let ev = damus.contacts.event {
+            if let ev = damus.contacts.event, add_button {
                 if let privkey = damus.keypair.privkey {
                     Button("Add") {
                         guard let ev = add_relay(ev: ev, privkey: privkey, current_relays: damus.pool.descriptors, relay: relay, info: .rw) else {
