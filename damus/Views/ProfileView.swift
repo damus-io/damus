@@ -118,6 +118,7 @@ struct ProfileView: View {
     @State private var selected_tab: ProfileTab = .posts
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
+    @StateObject var user_settings = UserSettingsStore()
     @State private var showingEditProfile = false
     @State var showingSelectWallet: Bool = false
     @State var inv: String = ""
@@ -150,6 +151,7 @@ struct ProfileView: View {
                 }
         }.sheet(isPresented: $showingSelectWallet, onDismiss: {showingSelectWallet = false}) {
             SelectWalletView(showingSelectWallet: $showingSelectWallet, invoice: $inv)
+                .environmentObject(user_settings)
         }
     }
     
