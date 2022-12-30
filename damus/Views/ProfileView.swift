@@ -150,7 +150,8 @@ struct ProfileView: View {
                     }
                 }
         }.sheet(isPresented: $showingSelectWallet, onDismiss: {showingSelectWallet = false}) {
-            SelectWalletView(showingSelectWallet: $showingSelectWallet, invoice: $inv).environmentObject(user_settings)
+            SelectWalletView(showingSelectWallet: $showingSelectWallet, invoice: $inv)
+                .environmentObject(user_settings)
         }
     }
     
