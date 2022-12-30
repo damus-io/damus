@@ -160,7 +160,9 @@ struct SaveKeyView: View {
                                     .frame(width: 25, height: 25, alignment: .center)
                                     .padding(.leading, -8)
                                     .padding(.top, 1)
-                            } else { EmptyView() }
+                            } else {
+                                EmptyView()
+                            }
                         }
                 }
             }
@@ -182,7 +184,7 @@ struct SaveKeyView: View {
     }
     
     @ViewBuilder private func spacerBlock(width: CGFloat, height: CGFloat) -> some View {
-        let isTransparent = true
+        let isTransparent = false
         let opacity = isTransparent ? 0 : 1
         Color.orange.opacity(Double(opacity))
             .frame(width: width, height: height)
