@@ -163,7 +163,6 @@ struct SaveKeyView: View {
                             } else { EmptyView() }
                         }
                 }
-                spacerBlock(width: 10, height: 1)
             }
           
             Text(text)
@@ -183,8 +182,8 @@ struct SaveKeyView: View {
     }
     
     @ViewBuilder private func spacerBlock(width: CGFloat, height: CGFloat) -> some View {
-        let spacerIsTransparent = true
-        let opacity = spacerIsTransparent ? 0 : 1
+        let isTransparent = true
+        let opacity = isTransparent ? 0 : 1
         Color.orange.opacity(Double(opacity))
             .frame(width: width, height: height)
     }
