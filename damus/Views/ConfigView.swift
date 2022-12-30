@@ -54,9 +54,18 @@ struct ConfigView: View {
     var body: some View {
         ZStack(alignment: .leading) {
             Form {
-                Section("Relays") {
+                Section {
                     List(Array(relays), id: \.url) { relay in
                         RelayView(state: state, relay: relay.url.absoluteString)
+                    }
+                } header: {
+                    HStack {
+                        Text("Relays")
+                        Spacer()
+                        Button(action: { show_add_relay = true }) {
+                            Image(systemName: "plus")
+                                .foregroundColor(.accentColor)
+                        }
                     }
                 }
                 
@@ -98,20 +107,6 @@ struct ConfigView: View {
                         confirm_logout = true
                     }
                 }
-            }
-            
-            VStack {
-                HStack {
-                    Spacer()
-                    
-                    Button(action: { show_add_relay = true }) {
-                        Label("", systemImage: "plus")
-                            .foregroundColor(.accentColor)
-                            .padding()
-                    }
-                }
-                
-                Spacer()
             }
         }
         .navigationTitle("Settings")
