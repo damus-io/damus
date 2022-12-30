@@ -147,20 +147,23 @@ struct SaveKeyView: View {
     
     var body: some View {
         HStack {
-            Button(action: copy_text) {
-                Label("", systemImage: is_copied ? "checkmark.circle.fill" : "doc.on.doc")
-                    .foregroundColor(is_copied ? .green : .white)
-                    .background {
-                        if is_copied {
-                            Circle()
-                                .foregroundColor(.white)
-                                .frame(width: 25, height: 25, alignment: .center)
-                                .padding(.leading, -8)
-                                .padding(.top, 1)
-                        } else {
-                            EmptyView()
+            Spacer()
+            VStack {
+                spacerBlock(width: 10, height: 1)
+                Button(action: copy_text) {
+                    Label("", systemImage: is_copied ? "checkmark.circle.fill" : "doc.on.doc")
+                        .foregroundColor(is_copied ? .green : .white)
+                        .background {
+                            if is_copied {
+                                Circle()
+                                    .foregroundColor(.white)
+                                    .frame(width: 25, height: 25, alignment: .center)
+                                    .padding(.leading, -8)
+                                    .padding(.top, 1)
+                            } else { EmptyView() }
                         }
-                    }
+                }
+                spacerBlock(width: 10, height: 1)
             }
           
             Text(text)
@@ -174,7 +177,16 @@ struct SaveKeyView: View {
                 .onTapGesture {
                     copy_text()
                 }
+            
+            spacerBlock(width: 1, height: 10)
         }
+    }
+    
+    @ViewBuilder private func spacerBlock(width: CGFloat, height: CGFloat) -> some View {
+        let spacerIsTransparent = true
+        let opacity = spacerIsTransparent ? 0 : 1
+        Color.orange.opacity(Double(opacity))
+            .frame(width: width, height: height)
     }
 }
 
