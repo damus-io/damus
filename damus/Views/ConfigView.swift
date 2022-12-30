@@ -18,8 +18,8 @@ struct ConfigView: View {
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
     @EnvironmentObject var user_settings: UserSettingsStore
-    
-    @State var allWallets: [Wallet] = Wallet.allCases
+
+    let walletItems: [WalletItem] = get_wallet_list()
 
     let generator = UIImpactFeedbackGenerator(style: .light)
     
@@ -82,13 +82,13 @@ struct ConfigView: View {
                 }
                 
                 Section("Wallet Selector") {
-                    Toggle("Show wallet selector", isOn: $user_settings.showWalletSelector).toggleStyle(.switch)
-                    Picker("Select default wallet",
-                           selection: $user_settings.defaultWallet) {
-                        ForEach(allWallets, id: \.self) { wallet in
-                            Text(wallet.model.displayName)
-                                .tag(wallet.model.tag)
-                        }
+                    Toggle("Show wallet selector", isOn: $user_settings.showwalletselector).toggleStyle(.switch)
+                    if walletItems != [] {
+                        Picker(selection: $user_settings.defaultwallet, label: Text("Select default wallet"), content: {
+                            ForEach(walletItems, id: \.self) { wallet in
+                                Text(wallet.name).tag(get_wallet_tag(wallet.tag))
+                            }
+                        })
                     }
                 }
                 
