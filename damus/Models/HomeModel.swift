@@ -623,26 +623,3 @@ func load_our_relays(contacts: Contacts, our_pubkey: String, pool: RelayPool, m_
 }
 
 
-func remove_bootstrap_nodes(_ damus_state: DamusState) {
-    guard let contacts = damus_state.contacts.event else {
-        return
-    }
-
-    guard let relays = decode_json_relays(contacts.content) else {
-        return
-    }
-
-    let descriptors = relays.reduce(into: []) { arr, kv in
-        guard let url = URL(string: kv.key) else {
-            return
-        }
-        arr.append(RelayDescriptor(url: url, info: kv.value))
-    }
-
-    for relay in BOOTSTRAP_RELAYS {
-        if !(descriptors.contains { ($0 as! RelayDescriptor).url.absoluteString == relay }) {
-            damus_state.pool.remove_relay(relay)
-        }
-    }
-}
-

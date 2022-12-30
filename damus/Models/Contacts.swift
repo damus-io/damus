@@ -144,6 +144,7 @@ func remove_relay(ev: NostrEvent, current_relays: [RelayDescriptor], privkey: St
     
     relays.removeValue(forKey: relay)
     
+    print("remove_relay \(relays)")
     guard let content = encode_json(relays) else {
         return nil
     }
@@ -154,10 +155,9 @@ func remove_relay(ev: NostrEvent, current_relays: [RelayDescriptor], privkey: St
     return new_ev
 }
 
-func add_relay(ev: NostrEvent, privkey: String, relay: String, info: RelayInfo) -> NostrEvent? {
-    let damus_relay = RelayDescriptor(url: URL(string: "wss://relay.damus.io")!, info: .rw)
+func add_relay(ev: NostrEvent, privkey: String, current_relays: [RelayDescriptor], relay: String, info: RelayInfo) -> NostrEvent? {
+    var relays = ensure_relay_info(relays: current_relays, content: ev.content)
     
-    var relays = ensure_relay_info(relays: [damus_relay], content: ev.content)
     guard relays.index(forKey: relay) == nil else {
         return nil
     }

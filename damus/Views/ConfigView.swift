@@ -18,11 +18,14 @@ struct ConfigView: View {
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
     
+    @State var relays: [RelayDescriptor]
+    
     let generator = UIImpactFeedbackGenerator(style: .light)
     
     init(state: DamusState) {
         self.state = state
         _privkey = State(initialValue: self.state.keypair.privkey_bech32 ?? "")
+        _relays = State(initialValue: state.pool.descriptors)
     }
     
     // TODO: (jb55) could be more general but not gonna worry about it atm
@@ -38,12 +41,28 @@ struct ConfigView: View {
         }
     }
     
+    var recommended: [RelayDescriptor] {
+        let rs: [RelayDescriptor] = []
+        return BOOTSTRAP_RELAYS.reduce(into: rs) { (xs, x) in
+            if let _ = state.pool.get_relay(x) {
+            } else {
+                xs.append(RelayDescriptor(url: URL(string: x)!, info: .rw))
+            }
+        }
+    }
+    
     var body: some View {
         ZStack(alignment: .leading) {
             Form {
                 Section("Relays") {
-                    List(Array(state.pool.relays), id: \.descriptor.url) { relay in
-                        RelayView(state: state, relay: relay.descriptor.url.absoluteString)
+                    List(Array(relays), id: \.url) { relay in
+                        RelayView(state: state, relay: relay.url.absoluteString)
+                    }
+                }
+                
+                Section("Recommended Relays") {
+                    List(recommended, id: \.url) { r in
+                        RecommendedRelayView(damus: state, relay: r.url.absoluteString)
                     }
                 }
                 
@@ -133,16 +152,20 @@ struct ConfigView: View {
                 
                 state.pool.connect(to: [new_relay])
                 
-                guard let new_ev = add_relay(ev: ev, privkey: privkey, relay: new_relay, info: info) else {
+                guard let new_ev = add_relay(ev: ev, privkey: privkey, current_relays: state.pool.descriptors, relay: new_relay, info: info) else {
                     return
                 }
                 
-                state.contacts.event = new_ev
+                process_contact_event(pool: state.pool, contacts: state.contacts, pubkey: state.pubkey, ev: ev)
+                
                 state.pool.send(.event(new_ev))
             }
         }
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
+        }
+        .onReceive(handle_notify(.relays_changed)) { _ in
+            self.relays = state.pool.descriptors
         }
     }
 }
