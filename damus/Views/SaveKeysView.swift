@@ -137,7 +137,7 @@ struct SaveKeysView: View {
 }
 
 struct SaveKeyView: View {
-    let minor = CGFloat(0), major = CGFloat(20) /// spacer-block dimensions - 'major' sets key Text's aspect ratio
+    let minor = CGFloat(0), major = CGFloat(0) /// spacer-block dimensions - 'major' sets key Text's aspect ratio
     let text: String
     @Binding var is_copied: Bool
     
