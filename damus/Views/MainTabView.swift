@@ -57,11 +57,24 @@ struct TabButton: View {
             action(timeline)
             new_events = NewEventsBits(prev: new_events, unsetting: timeline)
         }) {
-            Label("", systemImage: selected == timeline ? "\(img).fill" : img)
+            if selected == timeline {
+                // Show the selected item as highlighted
+                LinearGradient(gradient: Gradient(colors: [
+                    Color(red: 0.8, green: 0.263, blue: 0.773),
+                    Color(red: 0.224, green: 0.302, blue: 0.886)
+                ]), startPoint: .topTrailing, endPoint: .bottomTrailing)
+                    .mask(Image(img)
+                        .contentShape(Rectangle())
+                        .frame(width: 24, height: 24)
+                )
                 .contentShape(Rectangle())
-                .frame(maxWidth: .infinity, minHeight: 30.0)
+                .frame(width: 24, height: 24)
+            } else {
+                Image(img)
+                    .contentShape(Rectangle())
+                    .frame(width: 24, height: 24)
+            }
         }
-        .foregroundColor(selected != timeline ? .gray : .primary)
     }
 }
     
@@ -76,10 +89,16 @@ struct TabBar: View {
         VStack {
             Divider()
             HStack {
-                TabButton(timeline: .home, img: "house", selected: $selected, new_events: $new_events, action: action).keyboardShortcut("1")
-                TabButton(timeline: .dms, img: "bubble.left.and.bubble.right", selected: $selected, new_events: $new_events, action: action).keyboardShortcut("2")
-                TabButton(timeline: .search, img: "magnifyingglass.circle", selected: $selected, new_events: $new_events, action: action).keyboardShortcut("3")
-                TabButton(timeline: .notifications, img: "bell", selected: $selected, new_events: $new_events, action: action).keyboardShortcut("4")
+                // Might want to consider using TabView and NavigationView.tabItem's here
+                Spacer()
+                TabButton(timeline: .home, img: "ic-home", selected: $selected, new_events: $new_events, action: action).keyboardShortcut("1")
+                Spacer()
+                TabButton(timeline: .dms, img: "ic-messages", selected: $selected, new_events: $new_events, action: action).keyboardShortcut("2")
+                Spacer()
+                TabButton(timeline: .search, img: "ic-search", selected: $selected, new_events: $new_events, action: action).keyboardShortcut("3")
+                Spacer()
+                TabButton(timeline: .notifications, img: "ic-notifications", selected: $selected, new_events: $new_events, action: action).keyboardShortcut("4")
+                Spacer()
             }
         }
     }

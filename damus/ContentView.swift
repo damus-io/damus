@@ -241,7 +241,10 @@ struct ContentView: View {
                                     }
 
                                     NavigationLink(destination: ConfigView(state: damus_state!).environmentObject(user_settings)) {
-                                        Label("", systemImage: "gear")
+                                        Label {
+                                            Text("Settings")
+                                        } icon: { Image("ic-settings") }
+                                            .labelStyle(IconOnlyLabelStyle())
                                     }
                                     .buttonStyle(PlainButtonStyle())
                                 }
