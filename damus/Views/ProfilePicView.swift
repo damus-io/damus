@@ -54,21 +54,17 @@ struct InnerProfilePicView: View {
 
     var body: some View {
         Group {
-            if reasons.isEmpty {
-                KFAnimatedImage(url)
-                    .configure { view in
-                        view.framePreloadCount = 1
-                    }
-                    .placeholder { _ in
-                        Placeholder
-                    }
-                    .cacheOriginalImage()
-                    .scaleFactor(UIScreen.main.scale)
-                    .loadDiskFileSynchronously()
-                    .fade(duration: 0.1)
-            } else {
-                KFImage(url)
-            }
+            KFAnimatedImage(url)
+                .configure { view in
+                    view.framePreloadCount = 1
+                }
+                .placeholder { _ in
+                    Placeholder
+                }
+                .cacheOriginalImage()
+                .scaleFactor(UIScreen.main.scale)
+                .loadDiskFileSynchronously()
+                .fade(duration: 0.1)
         }
         .frame(width: size, height: size)
         .clipShape(Circle())
