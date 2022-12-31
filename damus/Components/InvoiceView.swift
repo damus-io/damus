@@ -7,30 +7,30 @@
 
 import SwiftUI
 
+func open_with_wallet(wallet: Wallet.Model, invoice: String) {
+    if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
+        UIApplication.shared.open(url)
+    } else {
+        if let url = URL(string: wallet.appStoreLink), UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
+        }
+    }
+}
+
 struct InvoiceView: View {
-    
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.openURL) private var openURL
     
     let invoice: Invoice
-    @State var showingSelectWallet: Bool = false
-    @State var inv: String = ""
+    @State var showing_select_wallet: Bool = false
     @ObservedObject var user_settings = UserSettingsStore()
     
     var PayButton: some View {
         Button {
-            inv = invoice.string
-            if user_settings.showWalletSelector {
-                showingSelectWallet = true
+            if user_settings.show_wallet_selector {
+                showing_select_wallet = true
             } else {
-                let walletModel = user_settings.defaultWallet.model
-                if let url = URL(string: "\(walletModel.link)\(inv)"), UIApplication.shared.canOpenURL(url) {
-                    openURL(url)
-                } else {
-                    if let url = URL(string: walletModel.appStoreLink), UIApplication.shared.canOpenURL(url) {
-                        openURL(url)
-                    }
-                }
+                open_with_wallet(wallet: user_settings.default_wallet.model, invoice: invoice.string)
             }
         } label: {
             RoundedRectangle(cornerRadius: 20)
@@ -68,8 +68,8 @@ struct InvoiceView: View {
             }
             .padding(30)
         }
-        .sheet(isPresented: $showingSelectWallet, onDismiss: {showingSelectWallet = false}) {
-            SelectWalletView(showingSelectWallet: $showingSelectWallet, invoice: $inv).environmentObject(user_settings)
+        .sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
+            SelectWalletView(showingSelectWallet: $showing_select_wallet, invoice: invoice.string).environmentObject(user_settings)
         }
     }
 }

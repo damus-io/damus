@@ -8,25 +8,25 @@
 import Foundation
 
 class UserSettingsStore: ObservableObject {
-    @Published var defaultWallet: Wallet {
+    @Published var default_wallet: Wallet {
         didSet {
-            UserDefaults.standard.set(defaultWallet.rawValue, forKey: "default_wallet")
+            UserDefaults.standard.set(default_wallet.rawValue, forKey: "default_wallet")
         }
     }
     
-    @Published var showWalletSelector: Bool {
+    @Published var show_wallet_selector: Bool {
         didSet {
-            UserDefaults.standard.set(showWalletSelector, forKey: "show_wallet_selector")
+            UserDefaults.standard.set(show_wallet_selector, forKey: "show_wallet_selector")
         }
     }
 
     init() {
         if let defaultWalletName = UserDefaults.standard.string(forKey: "default_wallet"),
-           let defaultWallet = Wallet(rawValue: defaultWalletName) {
-            self.defaultWallet = defaultWallet
+           let default_wallet = Wallet(rawValue: defaultWalletName) {
+            self.default_wallet = default_wallet
         } else {
-            self.defaultWallet = .systemdefaultwallet
+            self.default_wallet = .system_default_wallet
         }
-        self.showWalletSelector = UserDefaults.standard.object(forKey: "show_wallet_selector") as? Bool ?? true
+        self.show_wallet_selector = UserDefaults.standard.object(forKey: "show_wallet_selector") as? Bool ?? true
     }
 }

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SelectWalletView: View {
     @Binding var showingSelectWallet: Bool
-    @Binding var invoice: String
+    let invoice: String
     @Environment(\.openURL) private var openURL
     @State var invoice_copied: Bool = false
     @EnvironmentObject var user_settings: UserSettingsStore
@@ -38,7 +38,7 @@ struct SelectWalletView: View {
                 Section("Select a lightning wallet"){
                     List{
                         Button() {
-                            let walletModel = user_settings.defaultWallet.model
+                            let walletModel = user_settings.default_wallet.model
                             if let url = URL(string: "\(walletModel.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
                                 openURL(url)
                             } else {
@@ -85,6 +85,6 @@ struct SelectWalletView_Previews: PreviewProvider {
     @State static var invoice: String = ""
     
     static var previews: some View {
-        SelectWalletView(showingSelectWallet: $show, invoice: $invoice)
+        SelectWalletView(showingSelectWallet: $show, invoice: "")
     }
 }

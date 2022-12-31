@@ -21,7 +21,7 @@ enum Wallet: String, CaseIterable, Identifiable {
     }
     
     // New url prefixes needed to be added to LSApplicationQueriesSchemes
-    case systemdefaultwallet
+    case system_default_wallet
     case strike
     case cashapp
     case muun
@@ -34,7 +34,7 @@ enum Wallet: String, CaseIterable, Identifiable {
     
     var model: Model {
         switch self {
-        case .systemdefaultwallet:
+        case .system_default_wallet:
             return .init(index: -1, tag: "systemdefaultwallet", displayName: "Local default",
                          link: "lightning:", appStoreLink: "lightning:", image: "")
         case .strike:

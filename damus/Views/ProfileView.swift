@@ -118,25 +118,23 @@ struct ProfileView: View {
     @State private var selected_tab: ProfileTab = .posts
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
-    @StateObject var user_settings = UserSettingsStore()
     @State private var showingEditProfile = false
-    @State var showingSelectWallet: Bool = false
-    @State var inv: String = ""
+    @State var showing_select_wallet: Bool = false
     @State var is_zoomed: Bool = false
+    @StateObject var user_settings = UserSettingsStore()
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
     
     //@EnvironmentObject var profile: ProfileModel
     
-    func LNButton(lud06: String?, lud16: String?, profile: Profile) -> some View {
+    func LNButton(lnurl: String, profile: Profile) -> some View {
         Button(action: {
-            if let l = lud06 {
-                inv = l
+            if user_settings.show_wallet_selector  {
+                showing_select_wallet = true
             } else {
-                inv = lud16 ?? ""
+                open_with_wallet(wallet: user_settings.default_wallet.model, invoice: lnurl)
             }
-            showingSelectWallet = true
         }) {
             Image(systemName: "bolt.circle")
                 .symbolRenderingMode(.palette)
@@ -149,8 +147,8 @@ struct ProfileView: View {
                         Label("Copy LNURL", systemImage: "doc.on.doc")
                     }
                 }
-        }.sheet(isPresented: $showingSelectWallet, onDismiss: {showingSelectWallet = false}) {
-            SelectWalletView(showingSelectWallet: $showingSelectWallet, invoice: $inv)
+        }.sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
+            SelectWalletView(showingSelectWallet: $showing_select_wallet, invoice: lnurl)
                 .environmentObject(user_settings)
         }
     }
@@ -183,8 +181,8 @@ struct ProfileView: View {
                 Spacer()
 
                 if let profile = data {
-                    if (profile.lud06 != nil || profile.lud16 != nil) {
-                        LNButton(lud06: profile.lud06, lud16: profile.lud16, profile: profile)
+                    if let lnurl = profile.lnurl {
+                        LNButton(lnurl: lnurl, profile: profile)
                     }
                 }
                 

@@ -17,7 +17,6 @@ struct ConfigView: View {
     @State var privkey: String
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
-    @State var allWallets: [Wallet] = Wallet.allCases
     @State var relays: [RelayDescriptor]
     @EnvironmentObject var user_settings: UserSettingsStore
     
@@ -95,10 +94,10 @@ struct ConfigView: View {
                 }
                 
                 Section("Wallet Selector") {
-                    Toggle("Show wallet selector", isOn: $user_settings.showWalletSelector).toggleStyle(.switch)
+                    Toggle("Show wallet selector", isOn: $user_settings.show_wallet_selector).toggleStyle(.switch)
                     Picker("Select default wallet",
-                           selection: $user_settings.defaultWallet) {
-                        ForEach(allWallets, id: \.self) { wallet in
+                           selection: $user_settings.default_wallet) {
+                        ForEach(Wallet.allCases, id: \.self) { wallet in
                             Text(wallet.model.displayName)
                                 .tag(wallet.model.tag)
                         }
