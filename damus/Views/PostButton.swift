@@ -9,20 +9,17 @@ import Foundation
 import SwiftUI
 
 func PostButton(action: @escaping () -> ()) -> some View {
-    return Button(action: action, label: {
-        Text("+")
-            .font(.system(.largeTitle))
-            .frame(width: 57, height: 50)
-            .foregroundColor(Color.white)
-            .padding(.bottom, 7)
-    })
-    .background(Color.blue)
-    .cornerRadius(38.5)
-    .padding()
-    .shadow(color: Color.black.opacity(0.3),
-            radius: 3,
-            x: 3,
-            y: 3)
+    return Button(action: action) {
+        Label {
+            Text("+")
+        } icon: {
+            Image("ic-add")
+            .contentShape(Circle())
+            .frame(width: 60, height: 60)
+        }
+        .labelStyle(IconOnlyLabelStyle())
+    }
+    //.padding()
     .keyboardShortcut("n", modifiers: [.command, .shift])
 }
 
@@ -36,4 +33,3 @@ func PostButtonContainer(action: @escaping () -> ()) -> some View {
         }
     }
 }
-    
