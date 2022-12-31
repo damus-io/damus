@@ -142,7 +142,7 @@ struct EditMetadataView: View {
                 }
                 
                 Section("About Me") {
-                    let placeholder = "Absolute Boss"
+                    let placeholder = NSLocalizedString("Absolute Boss", comment: "Placeholder text for About Me description.")
                     ZStack(alignment: .topLeading) {
                         TextEditor(text: $about)
                             .textInputAutocapitalization(.sentences)
@@ -169,9 +169,9 @@ struct EditMetadataView: View {
                     Text("NIP-05 Verification")
                 }, footer: {
                     if let parts = nip05_parts {
-                        Text("'\(parts.username)' at '\(parts.host)' will be used for verification")
+                        Text(String.localizedStringWithFormat("'%@' at '%@' will be used for verification", parts.username, parts.host))
                     } else {
-                        Text("'\(nip05)' is an invalid nip05 identifier. It should look like an email.")
+                        Text(String.localizedStringWithFormat("'%@' is an invalid nip05 identifier. It should look like an email.", nip05))
                     }
                 })
                 

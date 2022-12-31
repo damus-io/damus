@@ -40,26 +40,26 @@ struct CreateAccountView: View {
                     }
                     VStack {
                         SignupForm {
-                            FormLabel("Username")
+                            FormLabel(NSLocalizedString("Username", comment: "Label to prompt username entry."))
                             HStack(spacing: 0.0) {
                                 Text("@")
                                     .foregroundColor(.white)
                                     .padding(.leading, -25.0)
                                 
-                                FormTextInput("satoshi", text: $account.nick_name)
+                                FormTextInput(NSLocalizedString("satoshi", comment: "Example username of Bitcoin creator(s), Satoshi Nakamoto."), text: $account.nick_name)
                                     .autocorrectionDisabled(true)
                                     .textInputAutocapitalization(.never)
                                 
                             }
                             
-                            FormLabel("Display Name", optional: true)
-                            FormTextInput("Satoshi Nakamoto", text: $account.real_name)
+                            FormLabel(NSLocalizedString("Display Name", comment: "Label to prompt display name entry."), optional: true)
+                            FormTextInput(NSLocalizedString("Satoshi Nakamoto", comment: "Name of Bitcoin creator(s)."), text: $account.real_name)
                                 .textInputAutocapitalization(.words)
                             
-                            FormLabel("About", optional: true)
-                            FormTextInput("Creator(s) of Bitcoin. Absolute legend.", text: $account.about)
+                            FormLabel(NSLocalizedString("About", comment: "Label to prompt for about text entry for user to describe about themself."), optional: true)
+                            FormTextInput(NSLocalizedString("Creator(s) of Bitcoin. Absolute legend.", comment: "Example description about Bitcoin creator(s), Satoshi Nakamoto."), text: $account.about)
                             
-                            FormLabel("Account ID")
+                            FormLabel(NSLocalizedString("Account ID", comment: "Label to indicate the public ID of the account."))
                                 .onTapGesture {
                                     regen_key()
                                 }
@@ -75,7 +75,7 @@ struct CreateAccountView: View {
                 NavigationLink(destination: SaveKeysView(account: account), isActive: $is_done) {
                     EmptyView()
                 }
-                DamusWhiteButton("Create") {
+                DamusWhiteButton(NSLocalizedString("Create", comment: "Button to create account.")) {
                     self.is_done = true
                 }
                 .padding()

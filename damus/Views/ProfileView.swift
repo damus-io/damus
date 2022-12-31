@@ -22,13 +22,13 @@ enum FollowState {
 func follow_btn_txt(_ fs: FollowState) -> String {
     switch fs {
     case .follows:
-        return "Unfollow"
+        return NSLocalizedString("Unfollow", comment: "Button to unfollow a user.")
     case .following:
-        return "Following..."
+        return NSLocalizedString("Following...", comment: "Label to indicate that the user is in the process of following another user.")
     case .unfollowing:
-        return "Unfollowing..."
+        return NSLocalizedString("Unfollowing...", comment: "Label to indicate that the user is in the process of unfollowing another user.")
     case .unfollows:
-        return "Follow"
+        return NSLocalizedString("Follow", comment: "Button to follow a user.")
     }
 }
 
