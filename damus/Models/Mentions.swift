@@ -199,7 +199,6 @@ func convert_invoice_block(_ b: invoice_block) -> Block? {
     }
     let amount = Int64(msat.millisatoshis)
     let payment_hash = Data(bytes: &b11.payment_hash, count: 32)
-    let hex = hex_encode(payment_hash)
     let created_at = b11.timestamp
     
     tal_free(b.bolt11)
