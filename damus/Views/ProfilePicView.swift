@@ -33,8 +33,6 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
 }
 
 struct InnerProfilePicView: View {
-    @Environment(\.redactionReasons) private var reasons
-
     let url: URL?
     let pubkey: String
     let size: CGFloat
