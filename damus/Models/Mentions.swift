@@ -115,7 +115,7 @@ func parse_mentions(content: String, tags: [[String]]) -> [Block] {
     blocks_init(&bs)
     
     let bytes = content.utf8CString
-    bytes.withUnsafeBufferPointer { p in
+    let _ = bytes.withUnsafeBufferPointer { p in
         damus_parse_content(&bs, p.baseAddress)
     }
     
