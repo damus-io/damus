@@ -15,6 +15,19 @@
 			</array>
 		</dict>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>muun</string>
+		<string>zeusln</string>
+		<string>zebedee</string>
+		<string>lightning</string>
+		<string>squarecash</string>
+		<string>phoenix</string>
+		<string>lnlink</string>
+		<string>strike</string>
+		<string>bluewallet</string>
+		<string>walletofsatoshi</string>
+	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

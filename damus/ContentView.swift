@@ -13,7 +13,10 @@ var BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
     "wss://nostr-relay.wlvs.space",
     "wss://nostr.fmt.wiz.biz",
+    "wss://relay.nostr.bg",
     "wss://nostr.oxtr.dev",
+    "wss://nostr.v0l.io",
+    "wss://nostr-2.zebedee.cloud",
 ]
 
 struct TimestampedProfile {
@@ -88,7 +91,7 @@ struct ContentView: View {
                         self.active_sheet = .post
                     }
                 }
-            }
+            }.ignoresSafeArea(.keyboard, edges: .bottom)
         }
         .safeAreaInset(edge: .top) {
             VStack(spacing: 0) {
@@ -228,6 +231,7 @@ struct ContentView: View {
             }
 
             TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
+                .padding([.bottom], 8)
         }
         .onAppear() {
             self.connect()

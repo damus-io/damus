@@ -17,9 +17,31 @@ struct AddRelayView: View {
         VStack(alignment: .leading) {
             Form {
                 Section("Add Relay") {
-                    TextField("wss://some.relay.com", text: $relay)
-                        .autocorrectionDisabled(true)
-                        .textInputAutocapitalization(.never)
+                    ZStack(alignment: .leading) {
+                        HStack{
+                            TextField("wss://some.relay.com", text: $relay)
+                                .padding(2)
+                                .padding(.leading, 25)
+                                .autocorrectionDisabled(true)
+                                .textInputAutocapitalization(.never)
+                            
+                            Label("", systemImage: "xmark.circle.fill")
+                                .foregroundColor(.blue)
+                                .padding(.trailing, -25.0)
+                                .opacity((relay == "") ? 0.0 : 1.0)
+                                .onTapGesture {
+                                    self.relay = ""
+                                }
+                        }
+                        
+                        Label("", systemImage: "doc.on.clipboard")
+                            .padding(.leading, -10)
+                            .onTapGesture {
+                            if let pastedrelay = UIPasteboard.general.string {
+                                self.relay = pastedrelay
+                            }
+                        }
+                    }
                 }
             }
             

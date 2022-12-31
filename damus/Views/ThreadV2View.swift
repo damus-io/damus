@@ -130,6 +130,7 @@ struct BuildThreadV2View: View {
             
             // Ask for children
             let childs_events = NostrFilter(
+                kinds: [1],
                 referenced_ids: [self.event_id],
                 limit: 50
             )
@@ -245,7 +246,7 @@ struct ThreadV2View: View {
                             .buttonStyle(.plain)
                             .onAppear {
                                 // TODO: find another solution to prevent layout shifting and layout blocking on large responses
-                                reader.scrollTo("main", anchor: .center)
+                                reader.scrollTo("main", anchor: .bottom)
                             }
                         }
                     }.background(GeometryReader { geometry in

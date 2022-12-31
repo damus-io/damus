@@ -11,6 +11,7 @@ class ProfileModel: ObservableObject, Equatable {
     @Published var events: [NostrEvent] = []
     @Published var contacts: NostrEvent? = nil
     @Published var following: Int = 0
+    @Published var relays: [String: RelayInfo]? = nil
     
     let pubkey: String
     let damus: DamusState
@@ -71,6 +72,7 @@ class ProfileModel: ObservableObject, Equatable {
     func handle_profile_contact_event(_ ev: NostrEvent) {
         self.contacts = ev
         self.following = count_pubkeys(ev.tags)
+        self.relays = decode_json_relays(ev.content)
         if damus.contacts.is_friend(ev.pubkey) {
             self.damus.contacts.add_friend_contact(ev)
         }
