@@ -21,6 +21,7 @@ func PostButton(action: @escaping () -> ()) -> some View {
     }
     //.padding()
     .keyboardShortcut("n", modifiers: [.command, .shift])
+    .offset(x: -10, y: -10)
 }
 
 func PostButtonContainer(action: @escaping () -> ()) -> some View {
