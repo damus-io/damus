@@ -8,7 +8,7 @@
 import SwiftUI
 import Kingfisher
 
-let PFP_SIZE: CGFloat = 52.0
+let PFP_SIZE: CGFloat = 63.0
 
 func id_to_color(_ id: String) -> Color {
     return hex_to_rgb(id)
