@@ -60,7 +60,7 @@ struct SetupView: View {
                     
                     CarouselView()
                     
-                    DamusWhiteButton("Create Account") {
+                    DamusWhiteButton(NSLocalizedString("Create Account", comment: "Button to create an account.")) {
                         self.state = .create_account
                     }
                     

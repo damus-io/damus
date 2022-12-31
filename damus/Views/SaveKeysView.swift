@@ -67,7 +67,7 @@ struct SaveKeysView: View {
                             complete_account_creation(account)
                         }
                     } else {
-                        DamusWhiteButton("Let's go!") {
+                        DamusWhiteButton(NSLocalizedString("Let's go!", comment: "Button to complete account creation and start using the app.")) {
                             complete_account_creation(account)
                         }
                     }
