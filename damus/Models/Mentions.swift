@@ -34,7 +34,7 @@ struct IdBlock: Identifiable {
 
 struct Invoice {
     let description: String
-    let amount: Int64
+    let amount: Amount
     let string: String
     let expiry: UInt64
     let payment_hash: Data
@@ -180,6 +180,23 @@ func maybe_pointee<T>(_ p: UnsafeMutablePointer<T>!) -> T? {
     return p.pointee
 }
 
+enum Amount: Equatable {
+    case any
+    case specific(Int64)
+    
+    func amount_sats_str() -> String {
+        switch self {
+        case .any:
+            return "Any"
+        case .specific(let amt):
+            if amt < 1000 {
+                return "\(Double(amt) / 1000.0) sats"
+            }
+            return "\(amt / 1000) sats"
+        }
+    }
+}
+
 func convert_invoice_block(_ b: invoice_block) -> Block? {
     guard let invstr = strblock_to_string(b.invstr) else {
         return nil
@@ -194,10 +211,7 @@ func convert_invoice_block(_ b: invoice_block) -> Block? {
         description = String(cString: b11.description)
     }
     
-    guard let msat = maybe_pointee(b11.msat) else {
-        return nil
-    }
-    let amount = Int64(msat.millisatoshis)
+    let amount: Amount = maybe_pointee(b11.msat).map { .specific(Int64($0.millisatoshis)) } ?? .any
     let payment_hash = Data(bytes: &b11.payment_hash, count: 32)
     let created_at = b11.timestamp
     
