@@ -30,7 +30,7 @@ void hash_u5(struct hash_u5 *hu5, const u8 *u5, size_t len)
             u5++;
 
         if (hu5->num_bits >= 32) {
-            be32 be32 = cpu_to_be32(hu5->buf >> (hu5->num_bits-32));
+            be32 be32 = cpu_to_be32((u32)(hu5->buf >> (hu5->num_bits-32)));
             sha256_update(&hu5->hash, &be32, sizeof(be32));
             hu5->num_bits -= 32;
         }
@@ -40,7 +40,7 @@ void hash_u5(struct hash_u5 *hu5, const u8 *u5, size_t len)
 void hash_u5_done(struct hash_u5 *hu5, struct sha256 *res)
 {
     if (hu5->num_bits) {
-        be32 be32 = cpu_to_be32(hu5->buf << (32 - hu5->num_bits));
+        be32 be32 = cpu_to_be32((u32)(hu5->buf << (32 - hu5->num_bits)));
 
         sha256_update(&hu5->hash, &be32, (hu5->num_bits + 7) / 8);
     }

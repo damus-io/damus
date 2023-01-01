@@ -70,17 +70,10 @@ struct NoteContentView: View {
     let size: EventViewKind
     
     func MainContent() -> some View {
-        let md_opts: AttributedString.MarkdownParsingOptions =
-            .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        
         return VStack(alignment: .leading) {
-            if let txt = try? AttributedString(markdown: artifacts.content, options: md_opts) {
-                Text(txt)
-                    .font(eventviewsize_to_font(size))
-            } else {
-                Text(artifacts.content)
-                    .font(eventviewsize_to_font(size))
-            }
+            Text(Markdown.parse(content: artifacts.content))
+                .font(eventviewsize_to_font(size))
+
             if show_images && artifacts.images.count > 0 {
                 ImageCarousel(urls: artifacts.images)
             } else if !show_images && artifacts.images.count > 0 {
@@ -131,12 +124,19 @@ struct NoteContentView: View {
             }
             .task {
                 if show_images, artifacts.links.count == 1 {
+                    
                     self.metaData = await getMetaData(for: artifacts.links.first!)
                 }
             }
     }
     
+    
     func getMetaData(for url: URL) async -> LPLinkMetadata? {
+        // iOS 15 is crashing for some reason
+        guard #available(iOS 16, *) else {
+            return nil
+        }
+        
         let provider = LPMetadataProvider()
         
         do {

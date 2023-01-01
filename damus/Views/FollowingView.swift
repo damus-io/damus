@@ -10,7 +10,9 @@ import SwiftUI
 struct FollowUserView: View {
     let target: FollowTarget
     let damus_state: DamusState
-    
+
+    static let markdown = Markdown()
+
     var body: some View {
         HStack {
             let pmodel = ProfileModel(pubkey: target.pubkey, damus: damus_state)
@@ -23,8 +25,8 @@ struct FollowUserView: View {
                 VStack(alignment: .leading) {
                     let profile = damus_state.profiles.lookup(id: target.pubkey)
                     ProfileName(pubkey: target.pubkey, profile: profile, contacts: damus_state.contacts, show_friend_confirmed: false)
-                    if let about = profile.flatMap { $0.about } {
-                        Text(about)
+                    if let about = profile?.about {
+                        Text(FollowUserView.markdown.process(about))
                             .lineLimit(3)
                             .font(.footnote)
                     }

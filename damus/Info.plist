@@ -17,7 +17,12 @@
 	</array>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
+<<<<<<< HEAD
 		<string>river</string>
+=======
+		<string>bitcoinbeach</string>
+		<string>breez</string>
+>>>>>>> master
 		<string>muun</string>
 		<string>zeusln</string>
 		<string>zebedee</string>

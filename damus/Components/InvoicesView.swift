@@ -23,13 +23,14 @@ struct InvoicesView: View {
                 .id(invoice.string)
             }
         }
-        .frame(height: 200)
+        .frame(height: 240)
         .tabViewStyle(PageTabViewStyle())
     }
 }
 
 struct InvoicesView_Previews: PreviewProvider {
     static var previews: some View {
-        InvoicesView(invoices: [Invoice.init(description: "description", amount: 10000, string: "invstr", expiry: 100000, payment_hash: Data(), created_at: 1000000)])
+        InvoicesView(invoices: [Invoice.init(description: "description", amount: .specific(10000), string: "invstr", expiry: 100000, payment_hash: Data(), created_at: 1000000)])
+            .frame(width: 300)
     }
 }

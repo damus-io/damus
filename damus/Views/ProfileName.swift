@@ -76,10 +76,9 @@ struct ProfileName: View {
             Text(prefix + String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
                 .font(.body)
                 .fontWeight(prefix == "@" ? .none : .bold)
-            if let frend = friend_icon {
-                Label("", systemImage: frend)
+            if let friend = friend_icon {
+                Image(systemName: friend)
                     .foregroundColor(.gray)
-                    .font(.footnote)
             }
         }
         .onReceive(handle_notify(.profile_updated)) { notif in

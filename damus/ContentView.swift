@@ -13,7 +13,10 @@ var BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
     "wss://nostr-relay.wlvs.space",
     "wss://nostr.fmt.wiz.biz",
+    "wss://relay.nostr.bg",
     "wss://nostr.oxtr.dev",
+    "wss://nostr.v0l.io",
+    "wss://nostr-2.zebedee.cloud",
 ]
 
 struct TimestampedProfile {
@@ -69,6 +72,7 @@ struct ContentView: View {
     @State var search_open: Bool = false
     @State var filter_state : FilterState = .posts_and_replies
     @StateObject var home: HomeModel = HomeModel()
+    @StateObject var user_settings = UserSettingsStore()
 
     // connect retry timer
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
@@ -216,7 +220,7 @@ struct ContentView: View {
                                             .foregroundColor(.gray)
                                     }
 
-                                    NavigationLink(destination: ConfigView(state: damus_state!)) {
+                                    NavigationLink(destination: ConfigView(state: damus_state!).environmentObject(user_settings)) {
                                         Label("", systemImage: "gear")
                                     }
                                     .buttonStyle(PlainButtonStyle())
@@ -228,7 +232,7 @@ struct ContentView: View {
             }
 
             TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
-                .padding()
+                .padding([.bottom], 8)
         }
         .onAppear() {
             self.connect()
