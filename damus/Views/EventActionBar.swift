@@ -59,9 +59,9 @@ struct EventActionBar: View {
             HStack(alignment: .bottom) {
                 Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
                     .font(.footnote.weight(.medium))
-                    .foregroundColor(bar.liked ? Color.red : Color.gray)
+                    .foregroundColor(bar.liked ? Color.orange : Color.gray)
                     
-                EventActionButton(img: bar.liked ? "heart.fill" : "heart", col: bar.liked ? Color.red : nil) {
+                LikeButton(liked: bar.liked) {
                     if bar.liked {
                         notify(.delete, bar.our_like)
                     } else {
@@ -143,6 +143,23 @@ func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> 
             .foregroundColor(col == nil ? Color.gray : col!)
     }
     .padding(.trailing, 40)
+}
+
+struct LikeButton: View {
+    let liked: Bool
+    let action: () -> ()
+    
+    @Environment(\.colorScheme) var colorScheme
+    
+    var default_emoji: String {
+        return colorScheme == .dark ? "🤙🏿" : "🤙🏻"
+    }
+    
+    var body: some View {
+        Button(action: action) {
+            Text(liked ? "🤙" : default_emoji)
+        }
+    }
 }
 
 
