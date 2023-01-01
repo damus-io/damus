@@ -151,13 +151,15 @@ struct LikeButton: View {
     
     @Environment(\.colorScheme) var colorScheme
     
-    var default_emoji: String {
-        return colorScheme == .dark ? "🤙🏿" : "🤙🏻"
-    }
-    
     var body: some View {
         Button(action: action) {
-            Text(liked ? "🤙" : default_emoji)
+            if liked {
+                Text("🤙")
+            } else {
+                Label("&nbsp;", systemImage: "hand.thumbsup")
+                    .font(.footnote.weight(.medium))
+                    .foregroundColor(Color.gray)
+            }
         }
     }
 }
