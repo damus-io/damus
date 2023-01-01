@@ -151,7 +151,9 @@ struct ProfileView: View {
                 .environmentObject(user_settings)
         }
     }
-    
+
+    static let markdown = Markdown()
+
     var DMButton: some View {
         let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
         let dmview = DMChatView(damus_state: damus_state, pubkey: profile.pubkey)

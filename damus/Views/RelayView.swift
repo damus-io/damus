@@ -48,9 +48,19 @@ struct RelayView: View {
             }
         }
         .contextMenu {
+            CopyAction(relay: relay)
+            
             if let privkey = state.keypair.privkey {
                 RemoveAction(privkey: privkey)
             }
+        }
+    }
+    
+    func CopyAction(relay: String) -> some View {
+        Button {
+            UIPasteboard.general.setValue(relay, forPasteboardType: "public.plain-text")
+        } label: {
+            Label("Copy", systemImage: "doc.on.doc")
         }
     }
     
@@ -72,11 +82,6 @@ struct RelayView: View {
         }
         .tint(.red)
     }
-    
-}
-
-fileprivate func remove_action() {
-    
 }
 
 struct RelayView_Previews: PreviewProvider {

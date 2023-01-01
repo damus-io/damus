@@ -338,12 +338,14 @@ class HomeModel: ObservableObject {
         return m[kind]
     }
 
-    func handle_last_event(ev: NostrEvent, timeline: Timeline) {
+    func handle_last_event(ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) {
         let last_ev = get_last_event(timeline)
 
         if last_ev == nil || last_ev!.created_at < ev.created_at {
             save_last_event(ev, timeline: timeline)
-            new_events = NewEventsBits(prev: new_events, setting: timeline)
+            if shouldNotify {
+                new_events = NewEventsBits(prev: new_events, setting: timeline)
+            }
         }
     }
 
@@ -415,7 +417,7 @@ class HomeModel: ObservableObject {
         }
 
         if inserted {
-            handle_last_event(ev: ev, timeline: .dms)
+            handle_last_event(ev: ev, timeline: .dms, shouldNotify: !ours)
 
             dms.dms = dms.dms.sorted { a, b in
                 if a.1.events.count > 0 && b.1.events.count > 0 {
