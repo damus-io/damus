@@ -423,7 +423,7 @@ class HomeModel: ObservableObject {
                 if a.1.events.count > 0 && b.1.events.count > 0 {
                     return a.1.events.last!.created_at > b.1.events.last!.created_at
                 }
-                return true
+                return false
             }
         }
     }
