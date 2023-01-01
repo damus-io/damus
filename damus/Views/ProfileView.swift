@@ -176,6 +176,8 @@ struct ProfileView: View {
     
     var TopSection: some View {
         ZStack(alignment: .top) {
+            let data = damus_state.profiles.lookup(id: profile.pubkey)
+            
             GeometryReader { geo in
                 Image("profile-banner")
                     .resizable()
@@ -200,7 +202,9 @@ struct ProfileView: View {
                     
                     if let profile = data {
                         if let lnurl = profile.lnurl {
-                            LNButton(lnurl: lnurl, profile: profile)
+                            if lnurl != "" {
+                                LNButton(lnurl: lnurl, profile: profile)
+                            }
                         }
                     }
                     
@@ -216,14 +220,13 @@ struct ProfileView: View {
                             EditButton(damus_state: damus_state)
                         }
                     }
-                    
                 }
                 
                 ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
                     //.padding(.bottom)
                     .padding(.top,-25)
                 
-                Text(data?.about ?? "")
+                Text(ProfileView.markdown.process(data?.about ?? ""))
                     .font(.subheadline)
                 
                 Divider()
@@ -279,8 +282,12 @@ struct ProfileView: View {
     
     var FollowersCount: some View {
         HStack {
-            Text("\(followers.count_display)")
-                .font(.subheadline.weight(.medium))
+            if followers.count_display == "?" {
+                Image(systemName: "square.and.arrow.down")
+            } else {
+                Text("\(followers.count_display)")
+                    .font(.subheadline.weight(.medium))
+            }
             Text("Followers")
                 .font(.subheadline)
                 .foregroundColor(.gray)
