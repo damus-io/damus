@@ -33,6 +33,7 @@ enum Wallet: String, CaseIterable, Identifiable {
     case phoenix
     case breez
     case bitcoinbeach
+    case blixtwallet
     case river
     
     var model: Model {
@@ -72,8 +73,11 @@ enum Wallet: String, CaseIterable, Identifiable {
         case .bitcoinbeach:
             return .init(index: 10, tag: "bitcoinbeach", displayName: "Bitcoin Beach", link: "bitcoinbeach://",
                          appStoreLink: "https://apps.apple.com/sv/app/bitcoin-beach-wallet/id1531383905", image: "bbw")
+        case .blixtwallet:
+            return .init(index: 11, tag: "blixtwallet", displayName: "Blixt Wallet", link: "blixtwallet:lightning:",
+                         appStoreLink: "null", image: "blixt-wallet")
         case .river:
-            return .init(index: 11, tag: "river", displayName: "River", link: "river://",
+            return .init(index: 12, tag: "river", displayName: "River", link: "river://",
                          appStoreLink: "https://apps.apple.com/us/app/river-buy-mine-bitcoin/id1536176542", image: "river")
         }
     }
