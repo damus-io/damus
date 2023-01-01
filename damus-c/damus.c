@@ -241,7 +241,7 @@ static int parse_invoice(struct cursor *cur, struct block *block) {
     block->block.invoice.invstr.end = (const char*)end;
     block->block.invoice.bolt11 = bolt11;
     
-    cur->p += end - start;
+    cur->p = end;
     
     return 1;
 }
