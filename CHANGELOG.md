@@ -1,3 +1,32 @@
+## [1.0.0] - 2023-01-01
+
+### Added
+
+- Parse links in profiles (William Casarin)
+- Added Breez wallet to wallet selector (Lee Salminen)
+- Added Bitcoin Beach wallet to wallet selector (Lee Salminen)
+- Added ability to copy relay urls (Matt Ward)
+- Added option to choose default wallet (Suhail Saqan)
+
+
+### Changed
+
+- Switch like from ❤️  to 🤙 (William Casarin)
+- Internationalize relative dates (Terry Yiu)
+
+
+### Fixed
+
+- Fix but where text was not showing after invoices (William Casarin)
+- Load profiles in DMs and notifications (William Casarin)
+- Fix expanding profile picture (nosestr bug) (Joel Klabo)
+- Fix padding on threads and search results views (OlegAba)
+- Don't badge DMs if sent by you (Joel Klabo)
+- Reset relay in Add Relay view after adding (Joel Klabo)
+
+
+[1.0.0]: https://github.com/damus-io/damus/releases/tag/v1.0.0
+
 ## [0.1.8-9] - 2022-12-29
 
 ### Added
