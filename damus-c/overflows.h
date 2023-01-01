@@ -37,7 +37,7 @@ static inline bool assign_overflow_u16(u16 *dst, uint64_t v)
 
 static inline bool assign_overflow_u32(u32 *dst, uint64_t v)
 {
-    *dst = v;
+    *dst = (u32)v;
     return *dst == v;
 }
 #endif /* LIGHTNING_COMMON_OVERFLOWS_H */
