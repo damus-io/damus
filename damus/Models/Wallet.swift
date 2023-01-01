@@ -33,6 +33,7 @@ enum Wallet: String, CaseIterable, Identifiable {
     case phoenix
     case breez
     case bitcoinbeach
+    case blixtwallet
     
     var model: Model {
         switch self {
@@ -71,6 +72,9 @@ enum Wallet: String, CaseIterable, Identifiable {
         case .bitcoinbeach:
             return .init(index: 10, tag: "bitcoinbeach", displayName: "Bitcoin Beach", link: "bitcoinbeach://",
                          appStoreLink: "https://apps.apple.com/sv/app/bitcoin-beach-wallet/id1531383905", image: "bbw")
+        case .blixtwallet:
+            return .init(index: 11, tag: "blixtwallet", displayName: "Blixt Wallet", link: "blixtwallet:lightning:",
+                         appStoreLink: "null", image: "blixt-wallet")
         }
     }
     

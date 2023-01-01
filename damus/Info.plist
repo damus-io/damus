@@ -29,6 +29,7 @@
 		<string>strike</string>
 		<string>bluewallet</string>
 		<string>walletofsatoshi</string>
+		<string>blixtwallet</string>
 	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
