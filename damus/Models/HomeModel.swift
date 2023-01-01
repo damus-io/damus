@@ -44,6 +44,7 @@ class HomeModel: ObservableObject {
     let notifications_subid = UUID().description
     let dms_subid = UUID().description
     let init_subid = UUID().description
+    let profiles_subid = UUID().description
 
     @Published var new_events: NewEventsBits = NewEventsBits()
     @Published var notifications: [NostrEvent] = []
@@ -234,7 +235,15 @@ class HomeModel: ObservableObject {
                 //self.events.insert(NostrEvent(content: "NOTICE from \(relay_id): \(msg)", pubkey: "system"), at: 0)
                 print(msg)
 
-            case .eose:
+            case .eose(let sub_id):
+                
+                if sub_id == dms_subid {
+                    let dms = dms.dms.flatMap { $0.1.events }
+                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: dms, damus_state: damus_state)
+                } else if sub_id == notifications_subid {
+                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: notifications, damus_state: damus_state)
+                }
+                
                 self.loading = false
                 break
             }
