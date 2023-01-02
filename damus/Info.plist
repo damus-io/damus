@@ -17,6 +17,8 @@
 	</array>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
+		<string>bitcoinbeach</string>
+		<string>breez</string>
 		<string>muun</string>
 		<string>zeusln</string>
 		<string>zebedee</string>

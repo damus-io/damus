@@ -72,6 +72,7 @@ struct ContentView: View {
     @State var search_open: Bool = false
     @State var filter_state : FilterState = .posts_and_replies
     @StateObject var home: HomeModel = HomeModel()
+    @StateObject var user_settings = UserSettingsStore()
 
     // connect retry timer
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
@@ -219,7 +220,7 @@ struct ContentView: View {
                                             .foregroundColor(.gray)
                                     }
 
-                                    NavigationLink(destination: ConfigView(state: damus_state!)) {
+                                    NavigationLink(destination: ConfigView(state: damus_state!).environmentObject(user_settings)) {
                                         Label("", systemImage: "gear")
                                     }
                                     .buttonStyle(PlainButtonStyle())

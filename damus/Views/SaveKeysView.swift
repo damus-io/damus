@@ -147,20 +147,24 @@ struct SaveKeyView: View {
     
     var body: some View {
         HStack {
-            Button(action: copy_text) {
-                Label("", systemImage: is_copied ? "checkmark.circle.fill" : "doc.on.doc")
-                    .foregroundColor(is_copied ? .green : .white)
-                    .background {
-                        if is_copied {
-                            Circle()
-                                .foregroundColor(.white)
-                                .frame(width: 25, height: 25, alignment: .center)
-                                .padding(.leading, -8)
-                                .padding(.top, 1)
-                        } else {
-                            EmptyView()
+            Spacer()
+            VStack {
+                spacerBlock(width: 0, height: 0)
+                Button(action: copy_text) {
+                    Label("", systemImage: is_copied ? "checkmark.circle.fill" : "doc.on.doc")
+                        .foregroundColor(is_copied ? .green : .white)
+                        .background {
+                            if is_copied {
+                                Circle()
+                                    .foregroundColor(.white)
+                                    .frame(width: 25, height: 25, alignment: .center)
+                                    .padding(.leading, -8)
+                                    .padding(.top, 1)
+                            } else {
+                                EmptyView()
+                            }
                         }
-                    }
+                }
             }
           
             Text(text)
@@ -174,7 +178,14 @@ struct SaveKeyView: View {
                 .onTapGesture {
                     copy_text()
                 }
+            
+            spacerBlock(width: 0, height: 0) /// set a 'width' > 0 here to vary key Text's aspect ratio
         }
+    }
+    
+    @ViewBuilder private func spacerBlock(width: CGFloat, height: CGFloat) -> some View {
+        Color.orange.opacity(1)
+            .frame(width: width, height: height)
     }
 }
 

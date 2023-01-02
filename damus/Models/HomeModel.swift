@@ -44,6 +44,7 @@ class HomeModel: ObservableObject {
     let notifications_subid = UUID().description
     let dms_subid = UUID().description
     let init_subid = UUID().description
+    let profiles_subid = UUID().description
 
     @Published var new_events: NewEventsBits = NewEventsBits()
     @Published var notifications: [NostrEvent] = []
@@ -234,7 +235,15 @@ class HomeModel: ObservableObject {
                 //self.events.insert(NostrEvent(content: "NOTICE from \(relay_id): \(msg)", pubkey: "system"), at: 0)
                 print(msg)
 
-            case .eose:
+            case .eose(let sub_id):
+                
+                if sub_id == dms_subid {
+                    let dms = dms.dms.flatMap { $0.1.events }
+                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: dms, damus_state: damus_state)
+                } else if sub_id == notifications_subid {
+                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: notifications, damus_state: damus_state)
+                }
+                
                 self.loading = false
                 break
             }
@@ -338,12 +347,14 @@ class HomeModel: ObservableObject {
         return m[kind]
     }
 
-    func handle_last_event(ev: NostrEvent, timeline: Timeline) {
+    func handle_last_event(ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) {
         let last_ev = get_last_event(timeline)
 
         if last_ev == nil || last_ev!.created_at < ev.created_at {
             save_last_event(ev, timeline: timeline)
-            new_events = NewEventsBits(prev: new_events, setting: timeline)
+            if shouldNotify {
+                new_events = NewEventsBits(prev: new_events, setting: timeline)
+            }
         }
     }
 
@@ -415,13 +426,13 @@ class HomeModel: ObservableObject {
         }
 
         if inserted {
-            handle_last_event(ev: ev, timeline: .dms)
+            handle_last_event(ev: ev, timeline: .dms, shouldNotify: !ours)
 
             dms.dms = dms.dms.sorted { a, b in
                 if a.1.events.count > 0 && b.1.events.count > 0 {
                     return a.1.events.last!.created_at > b.1.events.last!.created_at
                 }
-                return true
+                return false
             }
         }
     }
