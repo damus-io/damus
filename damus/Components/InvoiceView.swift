@@ -11,9 +11,20 @@ func open_with_wallet(wallet: Wallet.Model, invoice: String) {
     if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
         UIApplication.shared.open(url)
     } else {
-        if let url = URL(string: wallet.appStoreLink), UIApplication.shared.canOpenURL(url) {
-            UIApplication.shared.open(url)
+        guard let store_link = wallet.appStoreLink else {
+            // TODO: do something here if we don't have an appstore link
+            return
         }
+        
+        guard let url = URL(string: store_link) else {
+            return
+        }
+        
+        guard UIApplication.shared.canOpenURL(url) else {
+            return
+        }
+        
+        UIApplication.shared.open(url)
     }
 }
 
