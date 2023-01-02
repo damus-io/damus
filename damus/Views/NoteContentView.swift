@@ -41,11 +41,11 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
             if is_image_url(url) {
                 // Append Image
                 img_urls.append(url)
+                return str
             } else {
                 link_urls.append(url)
+                return str + url.absoluteString
             }
-            
-            return str
         }
     }
     
