@@ -68,7 +68,7 @@ struct ProfileNameView: View {
                         .font(.title3.weight(.bold))
                     KeyView(pubkey: pubkey)
                         .pubkey_context_menu(bech32_pubkey: pubkey)
-             //   }
+                }
             }
         }
     }
@@ -119,6 +119,16 @@ struct ProfileView: View {
     @Environment(\.colorScheme) var colorScheme
     
     //@EnvironmentObject var profile: ProfileModel
+    
+    // We just want to have a white "< Home" text here, however,
+    // setting the initialiser is causing issues, and it's late.
+    // Ref: https://blog.techchee.com/navigation-bar-title-style-color-and-custom-back-button-in-swiftui/
+    /*
+    init(damus_state: DamusState, zoom_size: CGFloat = 350) {
+        self.damus_state = damus_state
+        self.zoom_size = zoom_size
+        Theme.navigationBarColors(background: nil, titleColor: .white, tintColor: nil)
+    }*/
     
     func fillColor() -> Color {
         colorScheme == .light ? Color("DamusLightGrey") : Color("DamusDarkGrey")
@@ -182,9 +192,9 @@ struct ProfileView: View {
             GeometryReader { geo in
                 Image("profile-banner")
                     .resizable()
+                    .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: 150)
                     .clipped()
-                    .aspectRatio(contentMode: .fill)
             }
             VStack(alignment: .leading) {
                 let data = damus_state.profiles.lookup(id: profile.pubkey)
@@ -198,6 +208,8 @@ struct ProfileView: View {
                             ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .none, profiles: damus_state.profiles)
                         }
                         .offset(y: -30)
+                        //.padding()
+                        //.border(fillColor(), width: 5)
                     
                     Spacer()
                     
@@ -294,8 +306,9 @@ struct ProfileView: View {
                 .foregroundColor(.gray)
         }
     }
-    
+        
     var body: some View {
+        
         VStack(alignment: .leading) {
             ScrollView {
                 TopSection

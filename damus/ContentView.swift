@@ -229,7 +229,6 @@ struct ContentView: View {
                         }
                 }
                 .navigationViewStyle(.stack)
-                .accentColor(Color.white)
             }
 
             TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
