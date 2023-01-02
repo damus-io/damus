@@ -17,6 +17,7 @@
 	</array>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
+		<string>river</string>
 		<string>bitcoinbeach</string>
 		<string>breez</string>
 		<string>muun</string>
@@ -29,6 +30,7 @@
 		<string>strike</string>
 		<string>bluewallet</string>
 		<string>walletofsatoshi</string>
+		<string>blixtwallet</string>
 	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
