@@ -103,7 +103,6 @@ struct NoteContentView: View {
     
     var body: some View {
         MainContent()
-            .animation(.easeInOut, value: metaData)
             .onAppear() {
                 self.artifacts = render_note_content(ev: event, profiles: profiles, privkey: privkey)
             }

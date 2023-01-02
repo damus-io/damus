@@ -73,7 +73,6 @@ struct InnerProfilePicView: View {
 }
 
 struct ProfilePicView: View {
-    
     let pubkey: String
     let size: CGFloat
     let highlight: Highlight
