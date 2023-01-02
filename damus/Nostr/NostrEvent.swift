@@ -448,7 +448,7 @@ func hex_encode(_ data: Data) -> String {
 func random_bytes(count: Int) -> Data {
     var data = Data(count: count)
     _ = data.withUnsafeMutableBytes { mutableBytes in
-        SecRandomCopyBytes(kSecRandomDefault, count, mutableBytes)
+        SecRandomCopyBytes(kSecRandomDefault, count, mutableBytes.baseAddress!)
     }
     return data
 }
