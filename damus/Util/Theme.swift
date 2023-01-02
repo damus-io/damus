@@ -2,7 +2,7 @@
 //  Theme.swift
 //  damus
 //
-//  Created by user232838 on 1/1/23.
+//  Created by Ben Weeks on 1/1/23.
 //
 
 import Foundation
