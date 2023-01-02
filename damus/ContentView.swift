@@ -82,17 +82,14 @@ struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
 
     var PostingTimelineView: some View {
-        VStack{
-            ZStack {
-                if let damus = self.damus_state {
-                    TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter_event)
-                }
-                if privkey != nil {
-                    PostButtonContainer {
-                        self.active_sheet = .post
-                    }
-                }
-            }.ignoresSafeArea(.keyboard, edges: .bottom)
+        VStack {
+            TabView(selection: $filter_state) {
+                ContentTimelineView
+                    .tag(FilterState.posts)
+                ContentTimelineView
+                    .tag(FilterState.posts_and_replies)
+            }
+            .tabViewStyle(.page(indexDisplayMode: .never))
         }
         .safeAreaInset(edge: .top) {
             VStack(spacing: 0) {
@@ -103,6 +100,19 @@ struct ContentView: View {
                     .frame(height: 1)
             }
             .background(colorScheme == .dark ? Color.black : Color.white)
+        }
+    }
+    
+    var ContentTimelineView: some View {
+        ZStack {
+            if let damus = self.damus_state {
+                TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter_event)
+            }
+            if privkey != nil {
+                PostButtonContainer {
+                    self.active_sheet = .post
+                }
+            }
         }
     }
     
