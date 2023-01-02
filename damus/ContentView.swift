@@ -423,7 +423,8 @@ struct ContentView: View {
                                 contacts: Contacts(),
                                 tips: TipCounter(our_pubkey: pubkey),
                                 profiles: Profiles(),
-                                dms: home.dms
+                                dms: home.dms,
+                                previews: PreviewCache()
         )
         home.damus_state = self.damus_state!
         

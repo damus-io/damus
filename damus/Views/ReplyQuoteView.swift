@@ -12,6 +12,7 @@ struct ReplyQuoteView: View {
     let quoter: NostrEvent
     let event_id: String
     let profiles: Profiles
+    let previews: PreviewCache
     
     @EnvironmentObject var thread: ThreadModel
     
@@ -31,7 +32,7 @@ struct ReplyQuoteView: View {
                         .foregroundColor(.gray)
                 }
                 
-                NoteContentView(privkey: privkey, event: event, profiles: profiles, show_images: false, artifacts: .just_content(event.content), size: .normal)
+                NoteContentView(privkey: privkey, event: event, profiles: profiles, previews: previews, show_images: false, artifacts: .just_content(event.content), size: .normal)
                     .font(.callout)
                     .foregroundColor(.accentColor)
                 
@@ -58,7 +59,7 @@ struct ReplyQuoteView_Previews: PreviewProvider {
     static var previews: some View {
         let s = test_damus_state()
         let quoter = NostrEvent(content: "a\nb\nc", pubkey: "pubkey")
-        ReplyQuoteView(privkey: s.keypair.privkey, quoter: quoter, event_id: "pubkey2", profiles: s.profiles)
+        ReplyQuoteView(privkey: s.keypair.privkey, quoter: quoter, event_id: "pubkey2", profiles: s.profiles, previews: PreviewCache())
             .environmentObject(ThreadModel(event: quoter, damus_state: s))
     }
 }

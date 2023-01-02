@@ -96,7 +96,7 @@ struct ChatView: View {
                 
                     if let ref_id = thread.replies.lookup(event.id) {
                         if !is_reply_to_prev() {
-                            ReplyQuoteView(privkey: damus_state.keypair.privkey, quoter: event, event_id: ref_id, profiles: damus_state.profiles)
+                            ReplyQuoteView(privkey: damus_state.keypair.privkey, quoter: event, event_id: ref_id, profiles: damus_state.profiles, previews: damus_state.previews)
                                 .frame(maxHeight: expand_reply ? nil : 100)
                                 .environmentObject(thread)
                                 .onTapGesture {
@@ -106,7 +106,7 @@ struct ChatView: View {
                         }
                     }
                     
-                    NoteContentView(privkey: damus_state.keypair.privkey, event: event, profiles: damus_state.profiles, show_images: should_show_images(contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey), artifacts: .just_content(event.content), size: .normal)
+                    NoteContentView(privkey: damus_state.keypair.privkey, event: event, profiles: damus_state.profiles, previews: damus_state.previews, show_images: should_show_images(contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey), artifacts: .just_content(event.content), size: .normal)
 
                     if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
                         let bar = make_actionbar_model(ev: event, damus: damus_state)

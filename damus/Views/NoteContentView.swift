@@ -61,12 +61,13 @@ struct NoteContentView: View {
     let privkey: String?
     let event: NostrEvent
     let profiles: Profiles
+    let previews: PreviewCache
     
     let show_images: Bool
     
     @State var artifacts: NoteArtifacts
     
-    @State var metaData: LPLinkMetadata? = nil
+    @State var preview: LinkViewRepresentable? = nil
     let size: EventViewKind
     
     func MainContent() -> some View {
@@ -89,8 +90,8 @@ struct NoteContentView: View {
                 InvoicesView(invoices: artifacts.invoices)
             }
             
-            if show_images, self.metaData != nil {
-                LinkViewRepresentable(metadata: self.metaData)
+            if show_images, self.preview != nil {
+                self.preview
             } else {
                 ForEach(artifacts.links, id:\.self) { link in
                     LinkViewRepresentable(url: link)
@@ -123,9 +124,22 @@ struct NoteContentView: View {
                 }
             }
             .task {
+                if let preview = previews.lookup(self.event.id) {
+                    switch preview {
+                    case .value(let view):
+                        self.preview = view
+                    case .failed:
+                        // don't try to refetch meta if we've failed
+                        return
+                    }
+                }
+                
                 if show_images, artifacts.links.count == 1 {
+                    let meta = await getMetaData(for: artifacts.links.first!)
                     
-                    self.metaData = await getMetaData(for: artifacts.links.first!)
+                    let view = LinkViewRepresentable(metadata: meta)
+                    previews.store(evid: self.event.id, preview: view)
+                    self.preview = view
                 }
             }
     }
@@ -170,6 +184,6 @@ struct NoteContentView_Previews: PreviewProvider {
         let state = test_damus_state()
         let content = "hi there https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
         let artifacts = NoteArtifacts(content: content, images: [], invoices: [], links: [])
-        NoteContentView(privkey: "", event: NostrEvent(content: content, pubkey: "pk"), profiles: state.profiles, show_images: true, artifacts: artifacts, size: .normal)
+        NoteContentView(privkey: "", event: NostrEvent(content: content, pubkey: "pk"), profiles: state.profiles, previews: PreviewCache(), show_images: true, artifacts: artifacts, size: .normal)
     }
 }
