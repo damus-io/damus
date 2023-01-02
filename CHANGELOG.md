@@ -2,7 +2,7 @@
 
 ### Added
 
-- Parse links in profiles (William Casarin)
+- Parse links in profiles (Lionello Lunesu)
 - Added Breez wallet to wallet selector (Lee Salminen)
 - Added Bitcoin Beach wallet to wallet selector (Lee Salminen)
 - Added ability to copy relay urls (Matt Ward)
