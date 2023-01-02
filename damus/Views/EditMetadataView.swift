@@ -175,11 +175,9 @@ struct EditMetadataView: View {
                     }
                 })
 
-                if damus_state.keypair.privkey != nil {
-                    Button("Save") {
-                        save()
-                        dismiss()
-                    }
+                Button("Save") {
+                    save()
+                    dismiss()
                 }
             }
         }

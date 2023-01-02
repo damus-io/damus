@@ -196,8 +196,10 @@ struct ProfileView: View {
                         follow_state: damus_state.contacts.follow_state(profile.pubkey)
                     )
                 } else {
-                    NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
-                        EditButton(damus_state: damus_state)
+                    if damus_state.keypair.privkey != nil {
+                        NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
+                            EditButton(damus_state: damus_state)
+                        }
                     }
                 }
                 
