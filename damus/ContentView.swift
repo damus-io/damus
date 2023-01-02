@@ -16,7 +16,7 @@ var BOOTSTRAP_RELAYS = [
     "wss://relay.nostr.bg",
     "wss://nostr.oxtr.dev",
     "wss://nostr.v0l.io",
-    "wss://nostr-2.zebedee.cloud",
+    "wss://brb.io",
 ]
 
 struct TimestampedProfile {
