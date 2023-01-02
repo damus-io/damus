@@ -134,6 +134,10 @@ struct ProfileView: View {
         colorScheme == .light ? Color("DamusLightGrey") : Color("DamusDarkGrey")
     }
     
+    func imageBorderColor() -> Color {
+        colorScheme == .light ? Color("DamusWhite") : Color("DamusBlack")
+    }
+    
     func LNButton(lnurl: String, profile: Profile) -> some View {
         Button(action: {
             if user_settings.show_wallet_selector  {
@@ -200,16 +204,19 @@ struct ProfileView: View {
                 let data = damus_state.profiles.lookup(id: profile.pubkey)
                 
                 HStack(alignment: .center) {
-                    ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
-                        .onTapGesture {
-                            is_zoomed.toggle()
+                    Circle()
+                        .frame(width:60, height: 60) // Increase this to see a frame.
+                        .foregroundColor(imageBorderColor())
+                        .overlay{
+                            ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
+                                .onTapGesture {
+                                    is_zoomed.toggle()
+                                }
+                                .sheet(isPresented: $is_zoomed) {
+                                    ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .none, profiles: damus_state.profiles)
+                                }
                         }
-                        .sheet(isPresented: $is_zoomed) {
-                            ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .none, profiles: damus_state.profiles)
-                        }
-                        .offset(y: -30)
-                        //.padding()
-                        //.border(fillColor(), width: 5)
+                        .offset(y: -30) // Increase if set a frame
                     
                     Spacer()
                     
