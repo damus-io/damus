@@ -44,6 +44,15 @@ enum ThreadState {
 enum FilterState : Int {
     case posts_and_replies = 1
     case posts = 0
+    
+    func filter(privkey: String?, ev: NostrEvent) -> Bool {
+        switch self {
+        case .posts:
+            return !ev.is_reply(privkey)
+        case .posts_and_replies:
+            return true
+        }
+    }
 }
 
 struct ContentView: View {
