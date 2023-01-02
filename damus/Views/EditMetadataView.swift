@@ -174,10 +174,12 @@ struct EditMetadataView: View {
                         Text("'\(nip05)' is an invalid nip05 identifier. It should look like an email.")
                     }
                 })
-                
-                Button("Save") {
-                    save()
-                    dismiss()
+
+                if damus_state.keypair.privkey != nil {
+                    Button("Save") {
+                        save()
+                        dismiss()
+                    }
                 }
             }
         }
