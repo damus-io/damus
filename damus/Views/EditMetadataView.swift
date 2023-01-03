@@ -174,7 +174,7 @@ struct EditMetadataView: View {
                         Text(String.localizedStringWithFormat("'%@' is an invalid nip05 identifier. It should look like an email.", nip05))
                     }
                 })
-                
+
                 Button("Save") {
                     save()
                     dismiss()
