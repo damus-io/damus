@@ -15,8 +15,8 @@ public struct Markdown {
         return url.contains("://") ? url : "https://" + url
     }
 
+    /// Parse a string with markdown into an `AttributedString`, if possible, or else return it as regular text.
     public static func parse(content: String) -> AttributedString {
-        // Similar to the parsing in NoteContentView
         let md_opts: AttributedString.MarkdownParsingOptions =
             .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
 
@@ -33,9 +33,12 @@ public struct Markdown {
         var output = input
         // Start with the last match, because replacing the first would invalidate all subsequent indices
         for match in matches.reversed() {
-            guard let range = Range(match.range, in: input) else { continue }
-            let url = input[range]
-            output.replaceSubrange(range, with: "[\(url)](\(Markdown.withScheme(url)))")
+            guard let range = Range(match.range, in: input)
+                , let url = match.url else { continue }
+            let text = input[range]
+            // Use the absoluteString from the matched URL, except when it defaults to http (since we default to https)
+            let uri = url.scheme == "http" ? Markdown.withScheme(text) : url.absoluteString
+            output.replaceSubrange(range, with: "[\(text)](\(uri))")
         }
         // TODO: escape unintentional markdown
         return Markdown.parse(content: output)

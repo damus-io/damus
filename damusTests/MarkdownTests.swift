@@ -40,4 +40,26 @@ class MarkdownTests: XCTestCase {
         let expected = try AttributedString(markdown: "prologue [damus.io](https://damus.io) [https://nostr.build](https://nostr.build) epilogue", options: md_opts)
         XCTAssertEqual(md, expected)
     }
+
+    func test_convert_http() throws {
+        let helper = Markdown()
+        let md = helper.process("prologue http://example.com epilogue")
+        let expected = try AttributedString(markdown: "prologue [http://example.com](http://example.com) epilogue", options: md_opts)
+        XCTAssertEqual(md, expected)
+    }
+
+    func test_convert_mailto() throws {
+        let helper = Markdown()
+        let md = helper.process("prologue test@example.com epilogue")
+        let expected = try AttributedString(markdown: "prologue [test@example.com](mailto:test@example.com) epilogue", options: md_opts)
+        XCTAssertEqual(md, expected)
+    }
+
+    func test_convert_mailto_implicit() throws {
+        let helper = Markdown()
+        let md = helper.process("prologue mailto:test@example.com epilogue")
+        let expected = try AttributedString(markdown: "prologue [mailto:test@example.com](mailto:test@example.com) epilogue", options: md_opts)
+        XCTAssertEqual(md, expected)
+    }
+
 }
