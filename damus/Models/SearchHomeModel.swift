@@ -41,40 +41,40 @@ class SearchHomeModel: ObservableObject {
     }
     
     func handle_event(relay_id: String, conn_ev: NostrConnectionEvent) {
-        switch conn_ev {
-        case .ws_event:
-            break
-        case .nostr_event(let event):
-            switch event {
-            case .event(let sub_id, let ev):
-                guard sub_id == self.base_subid || sub_id == self.profiles_subid else {
+        guard case .nostr_event(let event) = conn_ev else {
+            return
+        }
+        
+        switch event {
+        case .event(let sub_id, let ev):
+            guard sub_id == self.base_subid || sub_id == self.profiles_subid else {
+                return
+            }
+            if ev.is_textlike && ev.should_show_event {
+                if seen_pubkey.contains(ev.pubkey) {
                     return
                 }
-                if ev.is_textlike && ev.should_show_event {
-                    if seen_pubkey.contains(ev.pubkey) {
-                        return
-                    }
-                    seen_pubkey.insert(ev.pubkey)
-                    let _ = insert_uniq_sorted_event(events: &events, new_ev: ev) {
-                        $0.created_at > $1.created_at
-                    }
+                seen_pubkey.insert(ev.pubkey)
+                
+                let _ = insert_uniq_sorted_event(events: &events, new_ev: ev) {
+                    $0.created_at > $1.created_at
                 }
-            case .notice(let msg):
-                print("search home notice: \(msg)")
-            case .eose(let sub_id):
-                loading = false
-                
-                if sub_id == self.base_subid {
-                    // Make sure we unsubscribe after we've fetched the global events
-                    // global events are not realtime
-                    unsubscribe(to: relay_id)
-                    
-                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: events, damus_state: damus_state)
-                }
-                
-                
-                break
             }
+        case .notice(let msg):
+            print("search home notice: \(msg)")
+        case .eose(let sub_id):
+            loading = false
+            
+            if sub_id == self.base_subid {
+                // Make sure we unsubscribe after we've fetched the global events
+                // global events are not realtime
+                unsubscribe(to: relay_id)
+                
+                load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: events, damus_state: damus_state)
+            }
+            
+            
+            break
         }
     }
 }
