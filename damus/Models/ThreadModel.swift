@@ -115,7 +115,7 @@ class ThreadModel: ObservableObject {
             ref_events.referenced_ids = ev.referenced_ids.map { $0.ref_id }
             ref_events.referenced_ids?.append(ev.id)
             ref_events.limit = 50
-            events_filter.ids = ref_events.referenced_ids!
+            events_filter.ids = ref_events.referenced_ids ?? []
             events_filter.limit = 100
             events_filter.ids?.append(ev.id)
         case .event_id(let evid):

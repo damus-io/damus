@@ -103,12 +103,13 @@ struct BuilderEventView: View {
     
     var body: some View {
         VStack {
-            if event == nil {
-                ProgressView().padding()
-            } else {
-                NavigationLink(destination: BuildThreadV2View(damus: damus, event_id: event!.id)) {
-                    EventView(damus: damus, event: event!, show_friend_icon: true, size: .small)
+            if let event = event {
+                let ev = event.inner_event ?? event
+                NavigationLink(destination: BuildThreadV2View(damus: damus, event_id: ev.id)) {
+                    EventView(damus: damus, event: event, show_friend_icon: true, size: .small)
                 }.buttonStyle(.plain)
+            } else {
+                ProgressView().padding()
             }
         }
         .frame(minWidth: 0, maxWidth: .infinity)
