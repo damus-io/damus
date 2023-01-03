@@ -30,7 +30,7 @@ struct InnerTimelineView: View {
                                 
                     NavigationLink(destination: BuildThreadV2View(
                         damus: damus,
-                        event_id: ev.id
+                        event_id: (ev.inner_event ?? ev).id
                     )) {
                         EventView(event: ev, highlight: .none, has_action_bar: true, damus: damus, show_friend_icon: show_friend_icon)
                     }
