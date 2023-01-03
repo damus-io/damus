@@ -79,7 +79,7 @@ struct SearchResultsView: View {
                 case .none:
                     Text("none")
                 }
-            }
+            }.padding(.horizontal)
         }
     }
     
