@@ -191,8 +191,6 @@ struct ProfileView: View {
     
     var TopSection: some View {
         ZStack(alignment: .top) {
-            let data = damus_state.profiles.lookup(id: profile.pubkey)
-            
             GeometryReader { geo in
                 Image("profile-banner")
                     .resizable()
@@ -202,13 +200,14 @@ struct ProfileView: View {
             }
             VStack(alignment: .leading) {
                 let data = damus_state.profiles.lookup(id: profile.pubkey)
+                let pfp_size: CGFloat = 90.0
                 
                 HStack(alignment: .center) {
                     Circle()
-                        .frame(width:60, height: 60) // Increase this to see a frame.
+                        .frame(width: pfp_size, height: pfp_size) // Increase this to see a frame.
                         .foregroundColor(imageBorderColor())
                         .overlay{
-                            ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
+                            ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(.black, 4.0), profiles: damus_state.profiles)
                                 .onTapGesture {
                                     is_zoomed.toggle()
                                 }
@@ -216,7 +215,7 @@ struct ProfileView: View {
                                     ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .none, profiles: damus_state.profiles)
                                 }
                         }
-                        .offset(y: -30) // Increase if set a frame
+                        .offset(y: -(pfp_size/2.0)) // Increase if set a frame
                     
                     Spacer()
                     
@@ -244,7 +243,7 @@ struct ProfileView: View {
                 
                 ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
                     //.padding(.bottom)
-                    .padding(.top,-25)
+                    .padding(.top,-(pfp_size/2.0))
                 
                 Text(ProfileView.markdown.process(data?.about ?? ""))
                     .font(.subheadline)
@@ -379,7 +378,6 @@ struct KeyView: View {
     }
     
     var body: some View {
-        let col = id_to_color(pubkey)
         let bech32 = bech32_pubkey(pubkey) ?? pubkey
         
         HStack {
@@ -390,6 +388,7 @@ struct KeyView: View {
                     HStack {
                         Button {
                             UIPasteboard.general.string = bech32
+                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                             isCopied = true
                             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                                 isCopied = false
@@ -406,7 +405,7 @@ struct KeyView: View {
                             .symbolRenderingMode(.hierarchical)
                         }
                         .padding(.leading,4)
-                        Text(bech32)
+                        Text(abbrev_pubkey(bech32, amount: 16))
                             .font(.footnote)
                             .foregroundColor(keyColor())
                             .offset(x:-3) // Not sure why this is needed.
@@ -415,6 +414,7 @@ struct KeyView: View {
             if isCopied != true {
                 Button {
                     UIPasteboard.general.string = bech32
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                     isCopied = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                         isCopied = false
