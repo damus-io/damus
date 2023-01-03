@@ -94,8 +94,10 @@ struct NoteContentView: View {
                 self.preview
             } else {
                 ForEach(artifacts.links, id:\.self) { link in
-                    LinkViewRepresentable(url: link)
-                        .frame(height: 50)
+                    if let url = link {
+                        LinkViewRepresentable(meta: .url(url))
+                            .frame(height: 50)
+                    }
                 }
             }
         }
@@ -136,7 +138,7 @@ struct NoteContentView: View {
                 if show_images, artifacts.links.count == 1 {
                     let meta = await getMetaData(for: artifacts.links.first!)
                     
-                    let view = LinkViewRepresentable(metadata: meta)
+                    let view = meta.map { LinkViewRepresentable(meta: .linkmeta($0)) }
                     previews.store(evid: self.event.id, preview: view)
                     self.preview = view
                 }
