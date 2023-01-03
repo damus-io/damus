@@ -59,6 +59,13 @@ struct BuildThreadV2View: View {
         self.event_id = event_id
     }
     
+    init(damus: DamusState, event: NostrEvent) {
+        self.damus = damus
+        self.event_id = event.id
+        self._current_event = State(initialValue: event)
+        handle_current_events(ev: event)
+    }
+    
     func unsubscribe_all() {
         print("ThreadV2View: Unsubscribe all..")
         
@@ -242,7 +249,7 @@ struct ThreadV2View: View {
                         ForEach(thread.parentEvents, id: \.id) { event in
                             NavigationLink(destination: BuildThreadV2View(
                                 damus: damus,
-                                event_id: event.id
+                                event: event
                             )){
                                 EventView(
                                     event: event,
@@ -285,7 +292,7 @@ struct ThreadV2View: View {
                     ForEach(thread.childEvents, id: \.id) { event in
                         NavigationLink(destination: BuildThreadV2View(
                             damus: damus,
-                            event_id: event.id
+                            event: event
                         )){
                             EventView(
                                 event: event,
