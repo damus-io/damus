@@ -50,7 +50,7 @@ class SearchHomeModel: ObservableObject {
             guard sub_id == self.base_subid || sub_id == self.profiles_subid else {
                 return
             }
-            if ev.is_textlike && ev.should_show_event {
+            if ev.is_textlike && ev.should_show_event && !ev.is_reply(nil) {
                 if seen_pubkey.contains(ev.pubkey) {
                     return
                 }
