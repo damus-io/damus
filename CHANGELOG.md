@@ -1,3 +1,35 @@
+## [1.0.0-2] - 2023-01-03
+
+### Added
+
+- Cache link previews (William Casarin)
+- Added brb.io to recommended relay list (William Casarin)
+- Add Blixt Wallet to Wallet Selector (Benjamin Hakes)
+- Add River Wallet to Wallet Selector (Benjamin Hakes)
+
+
+### Changed
+
+- Added muted shaka images instead of thumbs up (CutClout)
+- Updated profile page look and feel (Ben Weeks)
+- Filter replies from global feed (Nitesh Balusu)
+- Show non-image links inline (William Casarin)
+- Add swipe gesture to switch between tabs (Thomas Rademaker)
+- Parse links in profiles (Lionello Lunesu) (Lio李歐)
+
+
+### Fixed
+
+- Fix detection of email addresses in profiles (Lionello Lunesu)
+- Fix padding on search results view (OlegAba)
+- Fix home view moving after selecting from search result (OlegAba)
+- Fix bug where boost event is loaded in the thread instead of the boosted event (William Casarin)
+- Hide edit button on profile page when no private key (Swift)
+- Fixed follows and relays getting out of sync on profile pages (William Casarin)
+
+
+
+[1.0.0-2]: https://github.com/damus-io/damus/releases/tag/v1.0.0-2
 ## [1.0.0] - 2023-01-01
 
 ### Added
@@ -265,4 +297,5 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
+
 
