@@ -110,6 +110,7 @@ struct ContentView: View {
             }
             .background(colorScheme == .dark ? Color.black : Color.white)
         }
+        .ignoresSafeArea(.keyboard)
     }
     
     var ContentTimelineView: some View {
