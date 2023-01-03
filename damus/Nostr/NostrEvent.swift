@@ -446,11 +446,13 @@ func hex_encode(_ data: Data) -> String {
 
 
 func random_bytes(count: Int) -> Data {
-    var data = Data(count: count)
-    _ = data.withUnsafeMutableBytes { mutableBytes in
-        SecRandomCopyBytes(kSecRandomDefault, count, mutableBytes.baseAddress!)
+    var bytes = [Int8](repeating: 0, count: count)
+    guard
+        SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes) == errSecSuccess
+    else {
+        fatalError("can't copy secure random data")
     }
-    return data
+    return Data(bytes: bytes, count: count)
 }
 
 func refid_to_tag(_ ref: ReferencedId) -> [String] {
