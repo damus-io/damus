@@ -8,6 +8,8 @@
 import SwiftUI
 import UIKit
 
+let ICON_SIZE: CGFloat = 15
+
 enum ActionBarSheet: Identifiable {
     case reply
 
@@ -29,25 +31,27 @@ struct EventActionBar: View {
     var body: some View {
         HStack {
             /*
-            EventActionButton(img: "square.and.arrow.up") {
+            EventActionButton(img: "ic-share") {
                 print("share")
             }
-
-            Spacer()
+            */
             
-             */
+            //Spacer()
+            
             if damus_state.keypair.privkey != nil {
-                EventActionButton(img: "bubble.left", col: nil) {
+                EventActionButton(img: "ic-reply", highlighted: false) {
                     notify(.reply, event)
                 }
             }
             
+            Spacer()
+            
             HStack(alignment: .bottom) {
                 Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
                     .font(.footnote.weight(.medium))
-                    .foregroundColor(bar.boosted ? Color.green : Color.gray)
+                    .foregroundColor(bar.boosted ? .accentColor : nil)
                 
-                EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
+                EventActionButton(img: "ic-boost", highlighted: bar.boosted ? true : false) {
                     if bar.boosted {
                         notify(.delete, bar.our_boost)
                     } else {
@@ -55,11 +59,13 @@ struct EventActionBar: View {
                     }
                 }
             }
+            
+            Spacer()
 
             HStack(alignment: .bottom) {
                 Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
                     .font(.footnote.weight(.medium))
-                    .foregroundColor(bar.liked ? Color.orange : Color.gray)
+                    .foregroundColor(bar.liked ? .accentColor : nil)
                     
                 LikeButton(liked: bar.liked) {
                     if bar.liked {
@@ -70,13 +76,15 @@ struct EventActionBar: View {
                 }
             }
             
+            Spacer()
+            
             /*
             HStack(alignment: .bottom) {
                 Text("\(bar.tips > 0 ? "\(bar.tips)" : "")")
                     .font(.footnote)
-                    .foregroundColor(bar.tipped ? Color.orange : Color.gray)
+                    .foregroundColor(bar.tipped ? .accentColor : nil)
                 
-                EventActionButton(img: bar.tipped ? "bitcoinsign.circle.fill" : "bitcoinsign.circle", col: bar.tipped ? Color.orange : nil) {
+                EventActionButton(img: "ic-lightning", highlighted: bar.tipped ? true : false) {
                     if bar.tipped {
                         //notify(.delete, bar.our_tip)
                     } else {
@@ -84,8 +92,12 @@ struct EventActionBar: View {
                     }
                 }
             }
-             */
+            
+            Spacer()
+            */
+            
         }
+        .padding(.bottom, 5)
         .alert("Boost", isPresented: $confirm_boost) {
             Button("Cancel") {
                 confirm_boost = false
@@ -136,13 +148,28 @@ struct EventActionBar: View {
 }
 
 
-func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> some View {
+func EventActionButton(img: String, highlighted: Bool, action: @escaping () -> ()) -> some View {
     Button(action: action) {
-        Label("&nbsp;", systemImage: img)
-            .font(.footnote.weight(.medium))
-            .foregroundColor(col == nil ? Color.gray : col!)
-    }
-    .padding(.trailing, 40)
+        if highlighted {
+            // Show the selected item as highlighted
+            LinearGradient(gradient: Gradient(colors: [
+                Color(red: 0.8, green: 0.263, blue: 0.773),
+                Color(red: 0.224, green: 0.302, blue: 0.886)
+            ]), startPoint: .topTrailing, endPoint: .bottomTrailing)
+                .mask(Image(img)
+                    .resizable()
+                    .contentShape(Rectangle())
+                    .frame(width: ICON_SIZE, height: ICON_SIZE)
+            )
+            .contentShape(Rectangle())
+            .frame(width: ICON_SIZE, height: ICON_SIZE)
+        } else {
+            Image(img)
+                .resizable()
+                .contentShape(Rectangle())
+                .frame(width: ICON_SIZE, height: ICON_SIZE)
+        }    }
+    //.padding(.trailing, 40)
 }
 
 struct LikeButton: View {
@@ -154,11 +181,23 @@ struct LikeButton: View {
     var body: some View {
         Button(action: action) {
             if liked {
-                Text("🤙")
+                // Show the selected item as highlighted
+                LinearGradient(gradient: Gradient(colors: [
+                    Color(red: 0.8, green: 0.263, blue: 0.773),
+                    Color(red: 0.224, green: 0.302, blue: 0.886)
+                ]), startPoint: .topTrailing, endPoint: .bottomTrailing)
+                    .mask(Image("ic-like")
+                        .resizable()
+                        .contentShape(Rectangle())
+                        .frame(width: ICON_SIZE, height: ICON_SIZE)
+                )
+                .contentShape(Rectangle())
+                .frame(width: ICON_SIZE, height: ICON_SIZE)
             } else {
-                Label("&nbsp;", systemImage: "hand.thumbsup")
-                    .font(.footnote.weight(.medium))
-                    .foregroundColor(Color.gray)
+                Image("ic-like")
+                    .resizable()
+                    .contentShape(Rectangle())
+                    .frame(width: ICON_SIZE, height: ICON_SIZE)
             }
         }
     }
