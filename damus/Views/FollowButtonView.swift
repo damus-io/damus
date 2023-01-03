@@ -19,10 +19,11 @@ struct FollowButtonView: View {
             follow_state = perform_follow_btn_action(follow_state, target: target)
         } label: {
             Text(follow_btn_txt(follow_state))
+                .frame(height: 30)
                 .padding(.horizontal, 25)
-                .padding(.vertical, 10)
+                //.padding(.vertical, 10)
                 .font(.caption.weight(.bold))
-                .foregroundColor(follow_state == .unfollows ? emptyColor() : fillColor())
+                .foregroundColor(follow_state == .unfollows ? filledTextColor() : borderColor())
                 .background(follow_state == .unfollows ?  fillColor() : emptyColor())
                 .cornerRadius(20)
                 .overlay {
@@ -48,16 +49,20 @@ struct FollowButtonView: View {
         }
     }
     
+    func filledTextColor() -> Color {
+        colorScheme == .light ? Color("DamusWhite") : Color("DamusBlack")
+    }
+    
     func fillColor() -> Color {
-        colorScheme == .light ? .black : .white
+        colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite")
     }
     
     func emptyColor() -> Color {
-        colorScheme == .light ? .white : .black
+        Color.black.opacity(0)
     }
     
     func borderColor() -> Color {
-        colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2)
+        colorScheme == .light ? Color("DamusDarkGrey") : Color("DamusLightGrey")
     }
 }
 

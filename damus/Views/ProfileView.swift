@@ -54,21 +54,18 @@ struct ProfileNameView: View {
         Group {
             if let real_name = profile?.display_name {
                 VStack(alignment: .leading) {
-                    HStack {
-                        Text(real_name)
-                            .font(.title3.weight(.bold))
-                        
-                        KeyView(pubkey: pubkey)
-                            .pubkey_context_menu(bech32_pubkey: pubkey)
-                    }
+                    Text(real_name)
+                        .font(.title3.weight(.bold))
                     ProfileName(pubkey: pubkey, profile: profile, prefix: "@", contacts: contacts, show_friend_confirmed: true)
                         .font(.callout)
                         .foregroundColor(.gray)
+                    KeyView(pubkey: pubkey)
+                        .pubkey_context_menu(bech32_pubkey: pubkey)
                 }
             } else {
-                HStack {
+                VStack(alignment: .leading) {
                     ProfileName(pubkey: pubkey, profile: profile, contacts: contacts, show_friend_confirmed: true)
-                    
+                        .font(.title3.weight(.bold))
                     KeyView(pubkey: pubkey)
                         .pubkey_context_menu(bech32_pubkey: pubkey)
                 }
@@ -85,29 +82,24 @@ struct EditButton: View {
     var body: some View {
         NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
             Text("Edit")
-                .padding(.horizontal, 25)
-                .padding(.vertical, 10)
+                .frame(height: 30)
+                .padding(.horizontal,25)
                 .font(.caption.weight(.bold))
                 .foregroundColor(fillColor())
-                .background(emptyColor())
-                .cornerRadius(20)
+                .cornerRadius(24)
                 .overlay {
-                    RoundedRectangle(cornerRadius: 16)
+                    RoundedRectangle(cornerRadius: 24)
                         .stroke(borderColor(), lineWidth: 1)
                 }
         }
     }
     
     func fillColor() -> Color {
-        colorScheme == .light ? .black : .white
-    }
-    
-    func emptyColor() -> Color {
-        colorScheme == .light ? .white : .black
+        colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite")
     }
     
     func borderColor() -> Color {
-        colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2)
+        colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite")
     }
 }
 
@@ -128,6 +120,24 @@ struct ProfileView: View {
     
     //@EnvironmentObject var profile: ProfileModel
     
+    // We just want to have a white "< Home" text here, however,
+    // setting the initialiser is causing issues, and it's late.
+    // Ref: https://blog.techchee.com/navigation-bar-title-style-color-and-custom-back-button-in-swiftui/
+    /*
+    init(damus_state: DamusState, zoom_size: CGFloat = 350) {
+        self.damus_state = damus_state
+        self.zoom_size = zoom_size
+        Theme.navigationBarColors(background: nil, titleColor: .white, tintColor: nil)
+    }*/
+    
+    func fillColor() -> Color {
+        colorScheme == .light ? Color("DamusLightGrey") : Color("DamusDarkGrey")
+    }
+    
+    func imageBorderColor() -> Color {
+        colorScheme == .light ? Color("DamusWhite") : Color("DamusBlack")
+    }
+    
     func LNButton(lnurl: String, profile: Profile) -> some View {
         Button(action: {
             if user_settings.show_wallet_selector  {
@@ -136,18 +146,22 @@ struct ProfileView: View {
                 open_with_wallet(wallet: user_settings.default_wallet.model, invoice: lnurl)
             }
         }) {
-            Image(systemName: "bolt.circle")
+            Image("ic-lightning")
+                .frame(width:44,height:30)
                 .symbolRenderingMode(.palette)
                 .font(.system(size: 34).weight(.thin))
-                .foregroundStyle(colorScheme == .light ? .black : .white, colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2))
                 .contextMenu {
                     Button {
                         UIPasteboard.general.string = profile.lnurl ?? ""
                     } label: {
-                        Label("Copy LNURL", systemImage: "doc.on.doc")
+                        Label("Copy LNUrl", systemImage: "doc.on.doc")
                     }
                 }
-        }.sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
+            
+        }
+        .background(fillColor())
+        .cornerRadius(24)
+        .sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
             SelectWalletView(showingSelectWallet: $showing_select_wallet, invoice: lnurl)
                 .environmentObject(user_settings)
         }
@@ -160,119 +174,151 @@ struct ProfileView: View {
         let dmview = DMChatView(damus_state: damus_state, pubkey: profile.pubkey)
             .environmentObject(dm_model)
         return NavigationLink(destination: dmview) {
-            Image(systemName: "bubble.left.circle")
-                .symbolRenderingMode(.palette)
-                .font(.system(size: 34).weight(.thin))
-                .foregroundStyle(colorScheme == .light ? .black : .white, colorScheme == .light ? .black.opacity(0.1) : .white.opacity(0.2))
+            RoundedRectangle(cornerRadius: 24)
+                .fill(fillColor())
+                .frame(width:44,height:30)
+                .overlay{
+                    Image("ic-message")
+                        //.background(Color("DamusBlack"))
+                        //.foregroundStyle(Color("DamusBlack"))
+                        .cornerRadius(24)
+                        .frame(width:44,height:30)
+                        .symbolRenderingMode(.palette)
+                        .font(.system(size: 34).weight(.thin))
+                }
         }
     }
     
     var TopSection: some View {
-        VStack(alignment: .leading) {
+        ZStack(alignment: .top) {
             let data = damus_state.profiles.lookup(id: profile.pubkey)
             
-            HStack(alignment: .center) {
-                ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
-                    .onTapGesture {
-                        is_zoomed.toggle()
-                    }
-                    .sheet(isPresented: $is_zoomed) {
-                        ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .none, profiles: damus_state.profiles)
-                    }
+            GeometryReader { geo in
+                Image("profile-banner")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: geo.size.width, height: 150)
+                    .clipped()
+            }
+            VStack(alignment: .leading) {
+                let data = damus_state.profiles.lookup(id: profile.pubkey)
                 
-                Spacer()
-
-                if let profile = data {
-                    if let lnurl = profile.lnurl {
-                        LNButton(lnurl: lnurl, profile: profile)
+                HStack(alignment: .center) {
+                    Circle()
+                        .frame(width:60, height: 60) // Increase this to see a frame.
+                        .foregroundColor(imageBorderColor())
+                        .overlay{
+                            ProfilePicView(pubkey: profile.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
+                                .onTapGesture {
+                                    is_zoomed.toggle()
+                                }
+                                .sheet(isPresented: $is_zoomed) {
+                                    ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .none, profiles: damus_state.profiles)
+                                }
+                        }
+                        .offset(y: -30) // Increase if set a frame
+                    
+                    Spacer()
+                    
+                    if let profile = data {
+                        if let lnurl = profile.lnurl {
+                            if lnurl != "" {
+                                LNButton(lnurl: lnurl, profile: profile)
+                            }
+                        }
                     }
-                }
-                
-                DMButton
-                
-                if profile.pubkey != damus_state.pubkey {
-                    FollowButtonView(
-                        target: profile.get_follow_target(),
-                        follow_state: damus_state.contacts.follow_state(profile.pubkey)
-                    )
-                } else {
-                    if damus_state.keypair.privkey != nil {
+                    
+                    DMButton
+                    
+                    if profile.pubkey != damus_state.pubkey {
+                        FollowButtonView(
+                            target: profile.get_follow_target(),
+                            follow_state: damus_state.contacts.follow_state(profile.pubkey)
+                        )
+                    } else {
                         NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
                             EditButton(damus_state: damus_state)
                         }
                     }
                 }
                 
-            }
-            
-            ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
-                .padding(.bottom)
-            
-            Text(ProfileView.markdown.process(data?.about ?? ""))
-                .font(.subheadline)
-        
-            Divider()
+                ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
+                    //.padding(.bottom)
+                    .padding(.top,-25)
                 
-            HStack {
-                if let contact = profile.contacts {
-                    let contacts = contact.referenced_pubkeys.map { $0.ref_id }
-                    let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
-                    NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model, whos: profile.pubkey)) {
-                        HStack {
-                            Text("\(profile.following)")
+                Text(ProfileView.markdown.process(data?.about ?? ""))
+                    .font(.subheadline)
+                
+                Divider()
+                
+                HStack {
+                    if let contact = profile.contacts {
+                        let contacts = contact.referenced_pubkeys.map { $0.ref_id }
+                        let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
+                        NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model, whos: profile.pubkey)) {
+                            HStack {
+                                Text("\(profile.following)")
+                                    .font(.subheadline.weight(.medium))
+                                Text("Following")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                    let fview = FollowersView(damus_state: damus_state, whos: profile.pubkey)
+                        .environmentObject(followers)
+                    if followers.contacts != nil {
+                        NavigationLink(destination: fview) {
+                            FollowersCount
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    } else {
+                        FollowersCount
+                            .onTapGesture {
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                followers.contacts = []
+                                followers.subscribe()
+                            }
+                    }
+                    
+                    if let relays = profile.relays {
+                        NavigationLink(destination: UserRelaysView(state: damus_state, pubkey: profile.pubkey, relays: Array(relays.keys).sorted())) {
+                            Text("\(relays.keys.count)")
                                 .font(.subheadline.weight(.medium))
-                            Text("Following")
+                            Text("Relays")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                         }
+                        .buttonStyle(PlainButtonStyle())
                     }
-                    .buttonStyle(PlainButtonStyle())
-                }
-                let fview = FollowersView(damus_state: damus_state, whos: profile.pubkey)
-                    .environmentObject(followers)
-                if followers.contacts != nil {
-                    NavigationLink(destination: fview) {
-                        FollowersCount
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                } else {
-                    FollowersCount
-                        .onTapGesture {
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            followers.contacts = []
-                            followers.subscribe()
-                        }
-                }
-                
-                if let relays = profile.relays {
-                    NavigationLink(destination: UserRelaysView(state: damus_state, pubkey: profile.pubkey, relays: Array(relays.keys).sorted())) {
-                        Text("\(relays.keys.count)")
-                            .font(.subheadline.weight(.medium))
-                        Text("Relays")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                    }
-                    .buttonStyle(PlainButtonStyle())
                 }
             }
+            .padding(.horizontal,18)
+            //.offset(y:120)
+            .padding(.top,150)
         }
     }
     
     var FollowersCount: some View {
         HStack {
-            Text("\(followers.count_display)")
-                .font(.subheadline.weight(.medium))
+            if followers.count_display == "?" {
+                Image(systemName: "square.and.arrow.down")
+            } else {
+                Text("\(followers.count_display)")
+                    .font(.subheadline.weight(.medium))
+            }
             Text("Followers")
                 .font(.subheadline)
                 .foregroundColor(.gray)
         }
     }
-    
+        
     var body: some View {
+        
         VStack(alignment: .leading) {
             ScrollView {
                 TopSection
-                    .padding(.horizontal)
             
                 Divider()
                 
@@ -293,6 +339,7 @@ struct ProfileView: View {
             followers.unsubscribe()
             // our profilemodel needs a bit more help
         }
+        .ignoresSafeArea()
     }
 }
 
@@ -308,8 +355,9 @@ struct ProfileView_Previews: PreviewProvider {
 
 func test_damus_state() -> DamusState {
     let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
-    let damus: DamusState = .empty
-    let prof = Profile(name: "damus", display_name: "Damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io")
+    let damus = DamusState(pool: RelayPool(), keypair: Keypair(pubkey: pubkey, privkey: "privkey"), likes: EventCounter(our_pubkey: pubkey), boosts: EventCounter(our_pubkey: pubkey), contacts: Contacts(), tips: TipCounter(our_pubkey: pubkey), profiles: Profiles(), dms: DirectMessagesModel(), previews: PreviewCache())
+    
+    let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io")
     let tsprof = TimestampedProfile(profile: prof, timestamp: 0)
     damus.profiles.add(id: pubkey, profile: tsprof)
     return damus
@@ -322,20 +370,75 @@ struct KeyView: View {
     
     @State private var isCopied = false
     
+    func fillColor() -> Color {
+        colorScheme == .light ? Color("DamusLightGrey") : Color("DamusDarkGrey")
+    }
+    
+    func keyColor() -> Color {
+        colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite")
+    }
+    
     var body: some View {
         let col = id_to_color(pubkey)
         let bech32 = bech32_pubkey(pubkey) ?? pubkey
         
-        Button {
-            UIPasteboard.general.string = bech32
-            isCopied = true
-        } label: {
-            Label(isCopied ? "Copied" : "", systemImage: "key.fill")
-                .font(isCopied ? .caption : .system(size: 15).weight(.light))
-                .symbolRenderingMode(.hierarchical)
-                .foregroundColor(isCopied ? .gray : col)
+        HStack {
+            RoundedRectangle(cornerRadius: 24)
+                .frame(width: 275, height:22)
+                .foregroundColor(fillColor())
+                .overlay(
+                    HStack {
+                        Button {
+                            UIPasteboard.general.string = bech32
+                            isCopied = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                isCopied = false
+                            }
+                        } label: {
+                            Label {
+                                Text("Public key")
+                            } icon: {
+                                Image("ic-key")
+                                    .contentShape(Rectangle())
+                                    .frame(width: 16, height: 16)
+                            }
+                            .labelStyle(IconOnlyLabelStyle())
+                            .symbolRenderingMode(.hierarchical)
+                        }
+                        .padding(.leading,4)
+                        Text(bech32)
+                            .font(.footnote)
+                            .foregroundColor(keyColor())
+                            .offset(x:-3) // Not sure why this is needed.
+                    }
+                )
+            if isCopied != true {
+                Button {
+                    UIPasteboard.general.string = bech32
+                    isCopied = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        isCopied = false
+                    }
+                } label: {
+                    Label {
+                        Text("Public key")
+                    } icon: {
+                        Image("ic-copy")
+                            .contentShape(Rectangle())
+                            .frame(width: 20, height: 20)
+                    }
+                    .labelStyle(IconOnlyLabelStyle())
+                    .symbolRenderingMode(.hierarchical)
+                }
+            } else {
+                HStack {
+                    Image("ic-tick")
+                        .frame(width: 20, height: 20)
+                    Text("Copied")
+                        .font(.footnote)
+                        .foregroundColor(Color("DamusGreen"))
+                }
+            }
         }
     }
 }
-
-        
