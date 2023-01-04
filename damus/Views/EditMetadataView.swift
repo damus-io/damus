@@ -15,19 +15,6 @@ func isHttpsUrl(_ string: String) -> Bool {
     return urlTest.evaluate(with: string)
 }
 
-struct NIP05 {
-    let username: String
-    let host: String
-    
-    static func parse(_ nip05: String) -> NIP05? {
-        let parts = nip05.split(separator: "@")
-        guard parts.count == 2 else {
-            return nil
-        }
-        return NIP05(username: String(parts[0]), host: String(parts[1]))
-    }
-}
-
 func isImage(_ urlString: String) -> Bool {
     let imageTypes = ["image/jpg", "image/jpeg", "image/png", "image/gif", "image/tiff", "image/bmp", "image/webp"]
 

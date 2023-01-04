@@ -7,28 +7,6 @@
 
 import SwiftUI
 
-struct ProfileFullName: View {
-    let pubkey: String
-    let profile: Profile?
-    let contacts: Contacts
-    
-    @State var display_name: String?
-    
-    var body: some View {
-        HStack {
-            if let real_name = profile?.display_name {
-                Text(real_name)
-                    .bold()
-                ProfileName(pubkey: pubkey, profile: profile, prefix: "@", contacts: contacts, show_friend_confirmed: true)
-                    .font(.footnote)
-                    .foregroundColor(.gray)
-            } else {
-//                ProfileName(pubkey: pubkey, profile: profile, contacts: contacts, show_friend_confirmed: true)
-            }
-        }
-    }
-}
-
 struct ProfileName: View {
     let pubkey: String
     let profile: Profile?
@@ -36,23 +14,27 @@ struct ProfileName: View {
     let prefix: String
     
     let show_friend_confirmed: Bool
+    let profiles: Profiles
     
     @State var display_name: String?
+    @State var nip05: NIP05?
     
-    init(pubkey: String, profile: Profile?, contacts: Contacts, show_friend_confirmed: Bool) {
+    init(pubkey: String, profile: Profile?, contacts: Contacts, show_friend_confirmed: Bool, profiles: Profiles) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = ""
         self.contacts = contacts
         self.show_friend_confirmed = show_friend_confirmed
+        self.profiles = profiles
     }
     
-    init(pubkey: String, profile: Profile?, prefix: String, contacts: Contacts, show_friend_confirmed: Bool) {
+    init(pubkey: String, profile: Profile?, prefix: String, contacts: Contacts, show_friend_confirmed: Bool, profiles: Profiles) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = prefix
         self.contacts = contacts
         self.show_friend_confirmed = show_friend_confirmed
+        self.profiles = profiles
     }
     
     var friend_icon: String? {
@@ -71,12 +53,26 @@ struct ProfileName: View {
         return nil
     }
     
+    var nip05_color: Color {
+        contacts.is_friend(pubkey) ? .blue : .yellow
+    }
+    
+    var current_nip05: NIP05? {
+        nip05 ?? profiles.is_validated(pubkey)
+    }
+    
     var body: some View {
-        HStack {
+        HStack(spacing: 2) {
             Text(prefix + String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
                 .font(.body)
                 .fontWeight(prefix == "@" ? .none : .bold)
-            if let friend = friend_icon {
+            if let nip05 = current_nip05 {
+                Image(systemName: "checkmark.seal.fill")
+                    .foregroundColor(nip05_color)
+                Text(nip05.host)
+                    .foregroundColor(nip05_color)
+            }
+            if let friend = friend_icon, current_nip05 == nil {
                 Image(systemName: friend)
                     .foregroundColor(.gray)
             }
@@ -87,6 +83,7 @@ struct ProfileName: View {
                 return
             }
             display_name = Profile.displayName(profile: update.profile, pubkey: pubkey)
+            nip05 = profiles.is_validated(pubkey)
         }
     }
 }
@@ -99,27 +96,31 @@ struct EventProfileName: View {
     let prefix: String
     
     let show_friend_confirmed: Bool
+    let profiles: Profiles
     
     @State var display_name: String?
+    @State var nip05: NIP05?
     
     let size: EventViewKind
     
-    init(pubkey: String, profile: Profile?, contacts: Contacts, show_friend_confirmed: Bool, size: EventViewKind = .normal) {
+    init(pubkey: String, profile: Profile?, contacts: Contacts, show_friend_confirmed: Bool, profiles: Profiles, size: EventViewKind = .normal) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = ""
         self.contacts = contacts
         self.show_friend_confirmed = show_friend_confirmed
         self.size = size
+        self.profiles = profiles
     }
     
-    init(pubkey: String, profile: Profile?, prefix: String, contacts: Contacts, show_friend_confirmed: Bool, size: EventViewKind = .normal) {
+    init(pubkey: String, profile: Profile?, prefix: String, contacts: Contacts, show_friend_confirmed: Bool, profiles: Profiles, size: EventViewKind = .normal) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = prefix
         self.contacts = contacts
         self.show_friend_confirmed = show_friend_confirmed
         self.size = size
+        self.profiles = profiles
     }
     
     var friend_icon: String? {
@@ -137,12 +138,21 @@ struct EventProfileName: View {
         
         return nil
     }
+
+    var nip05_color: Color {
+        contacts.is_friend(pubkey) ? .blue : .yellow
+    }
     
+    var current_nip05: NIP05? {
+        nip05 ?? profiles.is_validated(pubkey)
+    }
+   
     var body: some View {
-        HStack {
+        HStack(spacing: 2) {
             if let real_name = profile?.display_name {
                 Text(real_name)
                     .font(.body.weight(.bold))
+                    .padding([.trailing], 4)
                 
                 Text("@" + String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
                     .foregroundColor(.gray)
@@ -153,7 +163,16 @@ struct EventProfileName: View {
                     .fontWeight(.bold)
             }
             
-            if let frend = friend_icon {
+            if let nip05 = current_nip05 {
+                Image(systemName: "checkmark.seal.fill")
+                    .foregroundColor(nip05_color)
+                if !contacts.is_friend(pubkey) {
+                    Text(nip05.host)
+                        .foregroundColor(nip05_color)
+                }
+            }
+            
+            if let frend = friend_icon, current_nip05 == nil {
                 Label("", systemImage: frend)
                     .foregroundColor(.gray)
                     .font(.footnote)
@@ -165,6 +184,7 @@ struct EventProfileName: View {
                 return
             }
             display_name = Profile.displayName(profile: update.profile, pubkey: pubkey)
+            nip05 = profiles.is_validated(pubkey)
         }
     }
 }
