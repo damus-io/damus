@@ -21,7 +21,7 @@ public struct Markdown {
             .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
 
         // TODO: escape unintentional markdown
-        var escaped = content.replacingOccurrences(of: "\\_", with: "\\\\\\_")
+        let escaped = content.replacingOccurrences(of: "\\_", with: "\\\\\\_")
         if let txt = try? AttributedString(markdown: escaped, options: md_opts) {
             return txt
         } else {
