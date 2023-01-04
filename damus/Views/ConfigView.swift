@@ -20,6 +20,10 @@ struct ConfigView: View {
     @State var relays: [RelayDescriptor]
     @EnvironmentObject var user_settings: UserSettingsStore
     
+    /// True = poll will display votes from everyone, false = poll will display votes from friends only (and friends of friends)
+    /// This option is included because of the potential problem with bots.
+    @AppStorage("poll_results_everyone") var poll_results_everyone: Bool = false
+    
     let generator = UIImpactFeedbackGenerator(style: .light)
     
     init(state: DamusState) {
@@ -100,6 +104,10 @@ struct ConfigView: View {
                         
                         Toggle("Show", isOn: $show_privkey)
                     }
+                }
+                
+                Section("Poll feature") {
+                    Toggle("See everyone votes", isOn: $poll_results_everyone)
                 }
                 
                 Section("Wallet Selector") {
