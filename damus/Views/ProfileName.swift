@@ -7,6 +7,11 @@
 
 import SwiftUI
 
+let LINEAR_GRADIENT = LinearGradient(gradient: Gradient(colors: [
+    Color("DamusPurple"),
+    Color("DamusBlue")
+]), startPoint: .topTrailing, endPoint: .bottomTrailing)
+
 func get_friend_icon(contacts: Contacts, pubkey: String, show_confirmed: Bool) -> String? {
     if !show_confirmed {
         return nil
@@ -33,6 +38,10 @@ struct ProfileName: View {
     
     @State var display_name: String?
     @State var nip05: NIP05?
+    
+    @Environment(\.colorScheme) var colorScheme
+    
+    @State var isNIPCollapsed = false
     
     init(pubkey: String, profile: Profile?, damus: DamusState, show_friend_confirmed: Bool) {
         self.pubkey = pubkey
@@ -62,21 +71,52 @@ struct ProfileName: View {
         return get_nip05_color(pubkey: pubkey, contacts: damus_state.contacts)
     }
     
+    func nip05fillColor() -> Color {
+        colorScheme == .light ? Color("DamusLightGrey") : Color("DamusDarkGrey")
+    }
+    
     var body: some View {
+        
         HStack(spacing: 2) {
+            
             Text(prefix + String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
                 .font(.body)
                 .fontWeight(prefix == "@" ? .none : .bold)
+            
             if let nip05 = current_nip05 {
-                Image(systemName: "checkmark.seal.fill")
-                    .foregroundColor(nip05_color)
-                Text(nip05.host)
-                    .foregroundColor(nip05_color)
+                ZStack(alignment: .leading) {
+                    Image(systemName: "checkmark.seal.fill")
+                        .foregroundColor(nip05_color)
+                        .onTapGesture {
+                            withAnimation {
+                                self.isNIPCollapsed.toggle()
+                            }
+                        }
+                    if !isNIPCollapsed {
+                        Text(nip05.host)
+                            .foregroundColor(nip05_color)
+                            //.font(.footnote)
+                            .scaledToFit()
+                        
+                        RoundedRectangle(cornerRadius: 24)
+                            .padding(.leading, 5)
+                            .frame(height:20)
+                            .foregroundColor(nip05fillColor())
+                            //.overlay(
+                            //
+                            //)
+                            //.transition(.push(from: .leading))
+                            .frame(width: isNIPCollapsed ? 0 : nil) // Was hoping for more of a slide out TBH
+                            .clipped()
+                    }
+                }
             }
+            /*
             if let friend = friend_icon, current_nip05 == nil {
                 Image(systemName: friend)
                     .foregroundColor(.gray)
             }
+            */
         }
         .onReceive(handle_notify(.profile_updated)) { notif in
             let update = notif.object as! ProfileUpdate
