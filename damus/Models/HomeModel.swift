@@ -544,7 +544,9 @@ func process_metadata_event(profiles: Profiles, ev: NostrEvent) {
         return
     }
 
+    var old_nip05: String? = nil
     if let mprof = profiles.lookup_with_timestamp(id: ev.pubkey) {
+        old_nip05 = mprof.profile.nip05
         if mprof.timestamp > ev.created_at {
             // skip if we already have an newer profile
             return
@@ -553,6 +555,20 @@ func process_metadata_event(profiles: Profiles, ev: NostrEvent) {
 
     let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at)
     profiles.add(id: ev.pubkey, profile: tprof)
+    
+    if let nip05 = profile.nip05, old_nip05 != profile.nip05 {
+        Task.detached(priority: .background) {
+            let validated = await validate_nip05(pubkey: ev.pubkey, nip05_str: nip05)
+            if validated != nil {
+                print("validated nip05 for '\(nip05)'")
+            }
+            
+            DispatchQueue.main.async {
+                profiles.validated[ev.pubkey] = validated
+                notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+            }
+        }
+    }
     
     // load pfps asap
     let picture = tprof.profile.picture ?? robohash(ev.pubkey)

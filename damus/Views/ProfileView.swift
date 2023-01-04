@@ -49,6 +49,7 @@ struct ProfileNameView: View {
     let pubkey: String
     let profile: Profile?
     let contacts: Contacts
+    let profiles: Profiles
     
     var body: some View {
         Group {
@@ -56,7 +57,7 @@ struct ProfileNameView: View {
                 VStack(alignment: .leading) {
                     Text(real_name)
                         .font(.title3.weight(.bold))
-                    ProfileName(pubkey: pubkey, profile: profile, prefix: "@", contacts: contacts, show_friend_confirmed: true)
+                    ProfileName(pubkey: pubkey, profile: profile, prefix: "@", contacts: contacts, show_friend_confirmed: true, profiles: profiles)
                         .font(.callout)
                         .foregroundColor(.gray)
                     KeyView(pubkey: pubkey)
@@ -64,7 +65,7 @@ struct ProfileNameView: View {
                 }
             } else {
                 VStack(alignment: .leading) {
-                    ProfileName(pubkey: pubkey, profile: profile, contacts: contacts, show_friend_confirmed: true)
+                    ProfileName(pubkey: pubkey, profile: profile, contacts: contacts, show_friend_confirmed: true, profiles: profiles)
                         .font(.title3.weight(.bold))
                     KeyView(pubkey: pubkey)
                         .pubkey_context_menu(bech32_pubkey: pubkey)
@@ -146,7 +147,7 @@ struct ProfileView: View {
         }) {
             Image(systemName: "bolt.circle")
                 .symbolRenderingMode(.palette)
-                .foregroundStyle(colorScheme == .dark ? .white : .black, .black)
+                .foregroundStyle(colorScheme == .dark ? .white : .black, colorScheme == .dark ? .white : .black)
                 .font(.system(size: 32).weight(.thin))
                 .contextMenu {
                     Button {
@@ -174,7 +175,7 @@ struct ProfileView: View {
             Image(systemName: "bubble.left.circle")
                 .symbolRenderingMode(.palette)
                 .font(.system(size: 32).weight(.thin))
-                .foregroundStyle(colorScheme == .dark ? .white : .black, .black)
+                .foregroundStyle(colorScheme == .dark ? .white : .black, colorScheme == .dark ? .white : .black)
         }
     }
     
@@ -227,7 +228,7 @@ struct ProfileView: View {
                     .offset(y: -15.0) // Increase if set a frame
                 }
                 
-                ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
+                ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts, profiles: damus_state.profiles)
                     //.padding(.bottom)
                     .padding(.top,-(pfp_size/2.0))
                 
