@@ -198,6 +198,12 @@ struct EventView: View {
     func TextEvent(_ event: NostrEvent, pubkey: String) -> some View {
         let content = event.get_content(damus.keypair.privkey)
         
+        let poll_choices = event.tags.filter { value in
+            return value.count >= 2 && value[0] == "poll" && !value[1].isEmpty
+        }.prefix(4).map { value in
+            return value[1]
+        }
+        
         return HStack(alignment: .top) {
             let profile = damus.profiles.lookup(id: pubkey)
             
@@ -247,6 +253,49 @@ struct EventView: View {
                 NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, previews: damus.previews, show_images: should_show_img, artifacts: .just_content(content), size: self.size)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
+                // MARK: - Poll
+                if poll_choices.count >= 2 {
+                    VStack(alignment: .leading, spacing: 15) {
+                        ForEach(0 ..< poll_choices.count, id: \.self) { index in
+                            HStack {
+                                Button {
+                                    
+                                } label: {
+                                    Text(poll_choices[index])
+                                        .frame(minWidth: 0, maxWidth: .infinity)
+                                            .padding(12)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .stroke(Color.gray.opacity(0.4), lineWidth: 2)
+                                            )
+                                            .cornerRadius(10)
+                                }
+                            }
+                        }
+                        
+                        Button {
+                            
+                        } label: {
+                            Label("Show result", systemImage: "number.circle")
+                                .frame(minWidth: 0, maxWidth: .infinity)
+                                    .padding(12)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(Color.gray.opacity(0.4), lineWidth: 2)
+                                    )
+                                    .cornerRadius(10)
+                        }
+                    }
+                    .frame(minWidth: 0, maxWidth: .infinity)
+                    .padding()
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray.opacity(0.4), lineWidth: 2)
+                    )
+                    .cornerRadius(10)
+                }
+                
+                // MARK: - Action bar
                 if has_action_bar {
                     if size == .selected {
                         Text("\(format_date(event.created_at))")
@@ -411,6 +460,20 @@ func make_actionbar_model(ev: NostrEvent, damus: DamusState) -> ActionBarModel {
 
 struct EventView_Previews: PreviewProvider {
     static var previews: some View {
+        EventView(
+            event: NostrEvent(
+                content: "jb55.com/red-me.jb55 cool",
+                pubkey: "pk",
+                tags: [["random", "kind"], ["poll", "yes"], ["poll", "no"]],
+                createdAt: Int64(Date().timeIntervalSince1970 - 100)
+            ),
+            highlight: .none,
+            has_action_bar: true,
+            damus: test_damus_state(),
+            show_friend_icon: true,
+            size: .selected
+        )
+        
         VStack {
             EventView(damus: test_damus_state(), event: NostrEvent(content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool", pubkey: "pk"), show_friend_icon: true, size: .small)
             EventView(damus: test_damus_state(), event: NostrEvent(content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool", pubkey: "pk"), show_friend_icon: true, size: .normal)
