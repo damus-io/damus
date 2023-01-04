@@ -343,7 +343,7 @@ struct EventView: View {
                                                 minWidth: 0,
                                                 maxWidth: show_poll_results == .none
                                                     ? 0
-                                                : CGFloat(this_choice_count / total_count) * geometry.size.width
+                                                : CGFloat(this_choice_count) / CGFloat(total_count) * geometry.size.width
                                             )
                                     }
                                 }
