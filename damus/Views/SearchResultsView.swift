@@ -118,11 +118,14 @@ struct SearchResultsView: View {
             let pk = els.element.key
             let prof = els.element.value.profile
             let lowname = prof.name.map { $0.lowercased() }
+            let lownip05 = damus_state.profiles.is_validated(pk).map { $0.host.lowercased() }
             let lowdisp = prof.display_name.map { $0.lowercased() }
             let ok = new.count == 1 ?
             ((lowname?.starts(with: new) ?? false) ||
+             (lownip05?.starts(with: new) ?? false) ||
              (lowdisp?.starts(with: new) ?? false)) : (pk.starts(with: new) || String(new.dropFirst()) == pk
                 || lowname?.contains(new) ?? false
+                || lownip05?.contains(new) ?? false
                 || lowdisp?.contains(new) ?? false)
             if ok {
                 acc.append((pk, prof))
