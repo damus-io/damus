@@ -121,6 +121,12 @@ struct BuilderEventView: View {
     }
 }
 
+enum PollResultsDisplay {
+    case none
+    case friends
+    case everyone
+}
+
 struct EventView: View {
     let event: NostrEvent
     let highlight: Highlight
@@ -132,6 +138,7 @@ struct EventView: View {
 
     @EnvironmentObject var action_bar: ActionBarModel
     
+    @State var show_poll_results: PollResultsDisplay = .none
     @State var subscription_poll_uuid: String = UUID().description
     
     // String = user pubkey and int is the choice
@@ -182,6 +189,11 @@ struct EventView: View {
                 return
             }
             
+            // If the pubkey is our, display the results
+            if nostr_event.pubkey == damus.pubkey {
+                show_poll_results = .everyone
+            }
+            
             // Check if the choice is already submitted by the pubkey
             if choices.contains(where: { $0.0 == nostr_event.pubkey }) {
                 return
@@ -189,7 +201,7 @@ struct EventView: View {
             
             // Check the choice
             if let match = nostr_event.content.range(of: "^p:([0-9]+)$", options: .regularExpression) {
-                let digit = Int(String(nostr_event.content[match]))!
+                let digit = Int(String(nostr_event.content[match]).replacingOccurrences(of: "p:", with: ""))!
                 
                 choices.append((nostr_event.pubkey, digit))
             }
@@ -309,31 +321,53 @@ struct EventView: View {
                         ForEach(0 ..< poll_choices.count, id: \.self) { index in
                             HStack {
                                 Button {
-                                    send_poll_choice(index)
+                                    if show_poll_results == .none {
+                                        send_poll_choice(index)
+                                        show_poll_results = .everyone
+                                    }
                                 } label: {
                                     Text(poll_choices[index])
                                         .frame(minWidth: 0, maxWidth: .infinity)
                                             .padding(12)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 10)
-                                                    .stroke(Color.gray.opacity(0.4), lineWidth: 2)
-                                            )
-                                            .cornerRadius(10)
                                 }
                             }
+                            .background(alignment: .leading) {
+                                let total_count = choices.count == 0 ? 1 : choices.count
+                                let this_choice_count = choices.filter({ $0.1 == index }).count
+                                
+                                GeometryReader { geometry in
+                                    withAnimation {
+                                        Rectangle()
+                                            .foregroundColor(.accentColor.opacity(0.2))
+                                            .frame(
+                                                minWidth: 0,
+                                                maxWidth: show_poll_results == .none
+                                                    ? 0
+                                                : CGFloat(this_choice_count / total_count) * geometry.size.width
+                                            )
+                                    }
+                                }
+                            }
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.gray.opacity(0.4), lineWidth: 2)
+                            )
+                            .cornerRadius(10)
                         }
                         
-                        Button {
-                            
-                        } label: {
-                            Label("Show result", systemImage: "number.circle")
-                                .frame(minWidth: 0, maxWidth: .infinity)
-                                    .padding(12)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color.gray.opacity(0.4), lineWidth: 2)
-                                    )
-                                    .cornerRadius(10)
+                        if show_poll_results == .none {
+                            Button {
+                                show_poll_results = .everyone
+                            } label: {
+                                Label("Show result", systemImage: "number.circle")
+                                    .frame(minWidth: 0, maxWidth: .infinity)
+                                        .padding(12)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(Color.gray.opacity(0.4), lineWidth: 2)
+                                        )
+                                        .cornerRadius(10)
+                            }
                         }
                     }
                     .frame(minWidth: 0, maxWidth: .infinity)
@@ -343,6 +377,12 @@ struct EventView: View {
                             .stroke(Color.gray.opacity(0.4), lineWidth: 2)
                     )
                     .cornerRadius(10)
+                    .onAppear {
+                        subscribe_poll()
+                    }
+                    .onDisappear {
+                        unsubscribe_poll()
+                    }
                 }
                 
                 // MARK: - Action bar
@@ -384,8 +424,6 @@ struct EventView: View {
         guard let privkey = damus.keypair.privkey else {
             return
         }
-        
-        // TODO: Check if a choice is already sent
         
         let choice_ev = make_poll_choice_event(pubkey: damus.pubkey, privkey: privkey, event: event, choice_index: choice)
         
