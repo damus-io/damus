@@ -118,8 +118,6 @@ struct ProfileView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
     
-    //@EnvironmentObject var profile: ProfileModel
-    
     // We just want to have a white "< Home" text here, however,
     // setting the initialiser is causing issues, and it's late.
     // Ref: https://blog.techchee.com/navigation-bar-title-style-color-and-custom-back-button-in-swiftui/
@@ -146,10 +144,10 @@ struct ProfileView: View {
                 open_with_wallet(wallet: user_settings.default_wallet.model, invoice: lnurl)
             }
         }) {
-            Image("ic-lightning")
-                .frame(width:44,height:30)
+            Image(systemName: "bolt.circle")
                 .symbolRenderingMode(.palette)
-                .font(.system(size: 34).weight(.thin))
+                .foregroundStyle(colorScheme == .dark ? .white : .black, .black)
+                .font(.system(size: 32).weight(.thin))
                 .contextMenu {
                     Button {
                         UIPasteboard.general.string = profile.lnurl ?? ""
@@ -159,7 +157,6 @@ struct ProfileView: View {
                 }
             
         }
-        .background(fillColor())
         .cornerRadius(24)
         .sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
             SelectWalletView(showingSelectWallet: $showing_select_wallet, invoice: lnurl)
@@ -174,18 +171,10 @@ struct ProfileView: View {
         let dmview = DMChatView(damus_state: damus_state, pubkey: profile.pubkey)
             .environmentObject(dm_model)
         return NavigationLink(destination: dmview) {
-            RoundedRectangle(cornerRadius: 24)
-                .fill(fillColor())
-                .frame(width:44,height:30)
-                .overlay{
-                    Image("ic-message")
-                        //.background(Color("DamusBlack"))
-                        //.foregroundStyle(Color("DamusBlack"))
-                        .cornerRadius(24)
-                        .frame(width:44,height:30)
-                        .symbolRenderingMode(.palette)
-                        .font(.system(size: 34).weight(.thin))
-                }
+            Image(systemName: "bubble.left.circle")
+                .symbolRenderingMode(.palette)
+                .font(.system(size: 32).weight(.thin))
+                .foregroundStyle(colorScheme == .dark ? .white : .black, .black)
         }
     }
     
@@ -220,10 +209,8 @@ struct ProfileView: View {
                     Spacer()
                     
                     if let profile = data {
-                        if let lnurl = profile.lnurl {
-                            if lnurl != "" {
-                                LNButton(lnurl: lnurl, profile: profile)
-                            }
+                        if let lnurl = profile.lnurl, lnurl != "" {
+                            LNButton(lnurl: lnurl, profile: profile)
                         }
                     }
                     
