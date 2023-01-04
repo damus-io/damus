@@ -7,58 +7,59 @@
 
 import SwiftUI
 
+func get_friend_icon(contacts: Contacts, pubkey: String, show_confirmed: Bool) -> String? {
+    if !show_confirmed {
+        return nil
+    }
+    
+    if contacts.is_friend_or_self(pubkey) {
+        return "person.fill.checkmark"
+    }
+    
+    if contacts.is_friend_of_friend(pubkey) {
+        return "person.fill.and.arrow.left.and.arrow.right"
+    }
+    
+    return nil
+}
+
 struct ProfileName: View {
+    let damus_state: DamusState
     let pubkey: String
     let profile: Profile?
-    let contacts: Contacts
     let prefix: String
     
     let show_friend_confirmed: Bool
-    let profiles: Profiles
     
     @State var display_name: String?
     @State var nip05: NIP05?
     
-    init(pubkey: String, profile: Profile?, contacts: Contacts, show_friend_confirmed: Bool, profiles: Profiles) {
+    init(pubkey: String, profile: Profile?, damus: DamusState, show_friend_confirmed: Bool) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = ""
-        self.contacts = contacts
         self.show_friend_confirmed = show_friend_confirmed
-        self.profiles = profiles
+        self.damus_state = damus
     }
     
-    init(pubkey: String, profile: Profile?, prefix: String, contacts: Contacts, show_friend_confirmed: Bool, profiles: Profiles) {
+    init(pubkey: String, profile: Profile?, prefix: String, damus: DamusState, show_friend_confirmed: Bool) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = prefix
-        self.contacts = contacts
+        self.damus_state = damus
         self.show_friend_confirmed = show_friend_confirmed
-        self.profiles = profiles
     }
     
     var friend_icon: String? {
-        if !show_friend_confirmed {
-            return nil
-        }
-        
-        if self.contacts.is_friend(self.pubkey) {
-            return "person.fill.checkmark"
-        }
-        
-        if self.contacts.is_friend_of_friend(self.pubkey) {
-            return "person.fill.and.arrow.left.and.arrow.right"
-        }
-        
-        return nil
-    }
-    
-    var nip05_color: Color {
-        contacts.is_friend(pubkey) ? .blue : .yellow
+        return get_friend_icon(contacts: damus_state.contacts, pubkey: pubkey, show_confirmed: show_friend_confirmed)
     }
     
     var current_nip05: NIP05? {
-        nip05 ?? profiles.is_validated(pubkey)
+        nip05 ?? damus_state.profiles.is_validated(pubkey)
+    }
+    
+    var nip05_color: Color {
+        return get_nip05_color(pubkey: pubkey, contacts: damus_state.contacts)
     }
     
     var body: some View {
@@ -83,68 +84,49 @@ struct ProfileName: View {
                 return
             }
             display_name = Profile.displayName(profile: update.profile, pubkey: pubkey)
-            nip05 = profiles.is_validated(pubkey)
+            nip05 = damus_state.profiles.is_validated(pubkey)
         }
     }
 }
 
 /// Profile Name used when displaying an event in the timeline
 struct EventProfileName: View {
+    let damus_state: DamusState
     let pubkey: String
     let profile: Profile?
-    let contacts: Contacts
     let prefix: String
     
     let show_friend_confirmed: Bool
-    let profiles: Profiles
     
     @State var display_name: String?
     @State var nip05: NIP05?
     
     let size: EventViewKind
     
-    init(pubkey: String, profile: Profile?, contacts: Contacts, show_friend_confirmed: Bool, profiles: Profiles, size: EventViewKind = .normal) {
+    init(pubkey: String, profile: Profile?, damus: DamusState, show_friend_confirmed: Bool, size: EventViewKind = .normal) {
+        self.damus_state = damus
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = ""
-        self.contacts = contacts
         self.show_friend_confirmed = show_friend_confirmed
         self.size = size
-        self.profiles = profiles
     }
     
-    init(pubkey: String, profile: Profile?, prefix: String, contacts: Contacts, show_friend_confirmed: Bool, profiles: Profiles, size: EventViewKind = .normal) {
+    init(pubkey: String, profile: Profile?, prefix: String, damus: DamusState, show_friend_confirmed: Bool, size: EventViewKind = .normal) {
+        self.damus_state = damus
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = prefix
-        self.contacts = contacts
         self.show_friend_confirmed = show_friend_confirmed
         self.size = size
-        self.profiles = profiles
     }
     
     var friend_icon: String? {
-        if !show_friend_confirmed {
-            return nil
-        }
-        
-        if self.contacts.is_friend(self.pubkey) {
-            return "person.fill.checkmark"
-        }
-        
-        if self.contacts.is_friend_of_friend(self.pubkey) {
-            return "person.fill.and.arrow.left.and.arrow.right"
-        }
-        
-        return nil
-    }
-
-    var nip05_color: Color {
-        contacts.is_friend(pubkey) ? .blue : .yellow
+        return get_friend_icon(contacts: damus_state.contacts, pubkey: pubkey, show_confirmed: show_friend_confirmed)
     }
     
     var current_nip05: NIP05? {
-        nip05 ?? profiles.is_validated(pubkey)
+        nip05 ?? damus_state.profiles.is_validated(pubkey)
     }
    
     var body: some View {
@@ -165,7 +147,7 @@ struct EventProfileName: View {
             
             if let _ = current_nip05 {
                 Image(systemName: "checkmark.seal.fill")
-                    .foregroundColor(nip05_color)
+                    .foregroundColor(get_nip05_color(pubkey: pubkey, contacts: damus_state.contacts))
             }
             
             if let frend = friend_icon, current_nip05 == nil {
@@ -180,7 +162,11 @@ struct EventProfileName: View {
                 return
             }
             display_name = Profile.displayName(profile: update.profile, pubkey: pubkey)
-            nip05 = profiles.is_validated(pubkey)
+            nip05 = damus_state.profiles.is_validated(pubkey)
         }
     }
+}
+
+func get_nip05_color(pubkey: String, contacts: Contacts) -> Color {
+    return contacts.is_friend_or_self(pubkey) ? .accentColor : .yellow
 }

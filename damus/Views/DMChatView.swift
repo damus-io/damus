@@ -40,7 +40,7 @@ struct DMChatView: View {
             HStack {
                 ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles)
 
-                ProfileName(pubkey: pubkey, profile: profile, contacts: damus_state.contacts, show_friend_confirmed: true, profiles: damus_state.profiles)
+                ProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_friend_confirmed: true)
             }
         }
         .buttonStyle(PlainButtonStyle())
