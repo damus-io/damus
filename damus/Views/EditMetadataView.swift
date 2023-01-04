@@ -18,6 +18,14 @@ func isHttpsUrl(_ string: String) -> Bool {
 struct NIP05 {
     let username: String
     let host: String
+    
+    static func parse(_ nip05: String) -> NIP05? {
+        let parts = nip05.split(separator: "@")
+        guard parts.count == 2 else {
+            return nil
+        }
+        return NIP05(username: String(parts[0]), host: String(parts[1]))
+    }
 }
 
 func isImage(_ urlString: String) -> Bool {
@@ -101,11 +109,7 @@ struct EditMetadataView: View {
     }
     
     var nip05_parts: NIP05? {
-        let parts = nip05.split(separator: "@")
-        guard parts.count == 2 else {
-            return nil
-        }
-        return NIP05(username: String(parts[0]), host: String(parts[1]))
+        return NIP05.parse(nip05)
     }
     
     var body: some View {
