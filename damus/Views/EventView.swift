@@ -320,9 +320,13 @@ struct EventView: View {
                 // MARK: - Poll
                 if poll_choices.count >= 2 {
                     let filtered_choices = choices.filter({ poll_results_everyone ? true : damus.contacts.is_in_friendosphere($0.0) })
+                    let total_count = filtered_choices.count == 0 ? 1 : filtered_choices.count
                     
                     VStack(alignment: .leading, spacing: 15) {
                         ForEach(0 ..< poll_choices.count, id: \.self) { index in
+                            let this_choice_count = filtered_choices.filter({ $0.1 == index }).count
+                            let percent = CGFloat(this_choice_count) / CGFloat(total_count)
+                            
                             HStack {
                                 Button {
                                     if show_poll_results == .none {
@@ -336,9 +340,6 @@ struct EventView: View {
                                 }
                             }
                             .background(alignment: .leading) {
-                                let total_count = filtered_choices.count == 0 ? 1 : filtered_choices.count
-                                let this_choice_count = filtered_choices.filter({ $0.1 == index }).count
-                                
                                 GeometryReader { geometry in
                                     withAnimation {
                                         Rectangle()
@@ -347,7 +348,7 @@ struct EventView: View {
                                                 minWidth: 0,
                                                 maxWidth: show_poll_results == .none
                                                     ? 0
-                                                : CGFloat(this_choice_count) / CGFloat(total_count) * geometry.size.width
+                                                : percent * geometry.size.width
                                             )
                                     }
                                 }
