@@ -55,6 +55,7 @@ struct InnerProfilePicView: View {
             KFAnimatedImage(url)
                 .callbackQueue(.dispatch(.global(qos: .background)))
                 .processingQueue(.dispatch(.global(qos: .background)))
+                .appendProcessor(LargeImageProcessor())
                 .configure { view in
                     view.framePreloadCount = 1
                 }
@@ -101,6 +102,30 @@ struct ProfilePicView: View {
                     self.picture = pic
                 }
             }
+    }
+}
+
+struct LargeImageProcessor: ImageProcessor {
+    
+    let identifier: String = "com.damus.largeimageprocessor"
+    let maxSize: Int = 1000000
+    let downsampleSize = CGSize(width: 200, height: 200)
+    
+    func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
+        let downsamplingImageProcessor = DownsamplingImageProcessor(size: downsampleSize)
+        
+        switch item {
+        case .image(let image):
+            if image.cacheCost > maxSize {
+                return downsamplingImageProcessor.process(item: item, options: options)
+            }
+            return image
+        case .data(let data):
+            if data.count > maxSize {
+                return downsamplingImageProcessor.process(item: item, options: options)
+            }
+            return KFCrossPlatformImage(data: data)
+        }
     }
 }
 
