@@ -177,6 +177,12 @@ class HomeModel: ObservableObject {
         }
 
         // CHECK SIGS ON THESE
+        
+        let likes_content = ["👍", "+", "🤙"]
+        
+        if !likes_content.contains(ev.content) {
+            return
+        }
 
         switch damus_state.likes.add_event(ev, target: e.ref_id) {
         case .already_counted:
