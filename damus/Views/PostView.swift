@@ -16,6 +16,8 @@ let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Tex
 
 struct PostView: View {
     @State var post: String = ""
+    @State var displayPolls: Bool = true
+    @State var polls: [String] = ["", ""]
 
     let replying_to: NostrEvent?
     @FocusState var focus: Bool
@@ -69,7 +71,57 @@ struct PostView: View {
                 }
             }
             .padding([.top, .bottom], 4)
-
+            
+             
+            if displayPolls {
+                VStack(alignment: .leading) {
+                    ForEach(0 ..< polls.count, id: \.self) { index in
+                        HStack {
+                            TextField("Choice \(index + 1)", text: self.$polls[index])
+                                .padding()
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color.gray.opacity(0.4), lineWidth: 2)
+                                )
+                                .cornerRadius(10)
+                            Button(action: {
+                                self.polls.remove(at: index)
+                            }) {
+                                Image(systemName: "minus.circle.fill")
+                                    .font(.title)
+                                    .foregroundColor(.red.opacity(self.polls.count <= 2 ? 0.5 : 1))
+                            }
+                            .disabled(self.polls.count <= 2)
+                        }
+                        .padding(.vertical, 10)
+                    }
+                    
+                    if self.polls.count <= 3 {
+                        HStack {
+                            Button(action: {
+                                self.polls.append("")
+                            }) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.title)
+                            }
+                            .padding(.trailing, 10)
+                            Text("Add choice")
+                                .font(.body)
+                                .foregroundColor(.primary)
+                        }
+                    }
+                }
+                .padding()
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.gray.opacity(0.4), lineWidth: 2)
+                )
+                .cornerRadius(10)
+//                .background(Color(.secondarySystemBackground))
+//                .cornerRadius(10)
+            }
+            
+            
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $post)
                     .focused($focus)
@@ -82,6 +134,22 @@ struct PostView: View {
                         .allowsHitTesting(false)
                 }
             }
+            
+            VStack {
+                Divider()
+                HStack(alignment: .firstTextBaseline) {
+                    Button {
+                        withAnimation {
+                            displayPolls.toggle()
+                        }
+                    } label: {
+                        Label("&nbsp;", systemImage: "filemenu.and.selection")
+                            .font(.title2)
+                    }
+                }
+                .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                .padding([.top, .bottom], 5)
+            }
         }
         .onAppear() {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -92,3 +160,8 @@ struct PostView: View {
     }
 }
 
+struct PostView_Previews: PreviewProvider {
+    static var previews: some View {
+        PostView(replying_to: nil, references: [])
+    }
+}
