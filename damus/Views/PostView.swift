@@ -16,7 +16,7 @@ let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Tex
 
 struct PostView: View {
     @State var post: String = ""
-    @State var displayPolls: Bool = true
+    @State var displayPolls: Bool = false
     @State var polls: [String] = ["", ""]
 
     let replying_to: NostrEvent?
