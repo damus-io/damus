@@ -122,13 +122,16 @@ struct ProfileView: View {
     // We just want to have a white "< Home" text here, however,
     // setting the initialiser is causing issues, and it's late.
     // Ref: https://blog.techchee.com/navigation-bar-title-style-color-and-custom-back-button-in-swiftui/
-    /*
-    init(damus_state: DamusState, zoom_size: CGFloat = 350) {
+    init(damus_state: DamusState, profile: ProfileModel, followers: FollowersModel) {
         self.damus_state = damus_state
-        self.zoom_size = zoom_size
-        Theme.navigationBarColors(background: nil, titleColor: .white, tintColor: nil)
-    }*/
-    
+        // init(pubkey: String, damus: DamusState) {
+        _profile = StateObject(wrappedValue: ProfileModel(pubkey: profile.pubkey, damus: damus_state))
+        // init(damus_state: DamusState, target: String) {
+        _followers = StateObject(wrappedValue: FollowersModel(damus_state: damus_state, target: damus_state.pubkey))
+        //ProfileView(damus_state: ds, profile: profile_model, followers: followers)
+        Theme.barButtonColors(titleColor: UIColor.white, shadow: true)
+    }
+        
     func fillColor() -> Color {
         colorScheme == .light ? Color("DamusLightGrey") : Color("DamusDarkGrey")
     }
