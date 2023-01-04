@@ -8,16 +8,33 @@
 import Foundation
 import SwiftUI
 
+let BUTTON_SIZE: CGFloat = 60
+let LINEAR_GRADIENT = LinearGradient(gradient: Gradient(colors: [
+    Color("DamusPurple"),
+    Color("DamusBlue")
+]), startPoint: .topTrailing, endPoint: .bottomTrailing)
+
 func PostButton(action: @escaping () -> ()) -> some View {
+
     return Button(action: action, label: {
-        Text("+")
-            .font(.system(.largeTitle))
-            .frame(width: 57, height: 50)
-            .foregroundColor(Color.white)
-            .padding(.bottom, 7)
+        ZStack(alignment: .center) {
+            Circle()
+                .stroke(LINEAR_GRADIENT, lineWidth: 2)
+                .frame(width: BUTTON_SIZE, height: BUTTON_SIZE)
+                .rotationEffect(.degrees(45))
+                 
+            Circle()
+                .fill(LINEAR_GRADIENT)
+                .frame(width: BUTTON_SIZE - 8, height: BUTTON_SIZE - 8)
+                .rotationEffect(.degrees(45))
+
+            Text("+")
+                .font(.system(.largeTitle))
+                .foregroundColor(Color.white)
+                .padding(.bottom, 7)
+                .frame(width: BUTTON_SIZE, height: BUTTON_SIZE)
+        }
     })
-    .background(Color.accentColor)
-    .cornerRadius(38.5)
     .padding()
     .shadow(color: Color.black.opacity(0.3),
             radius: 3,
@@ -36,4 +53,3 @@ func PostButtonContainer(action: @escaping () -> ()) -> some View {
         }
     }
 }
-    
