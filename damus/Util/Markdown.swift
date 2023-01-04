@@ -20,7 +20,9 @@ public struct Markdown {
         let md_opts: AttributedString.MarkdownParsingOptions =
             .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
 
-        if let txt = try? AttributedString(markdown: content, options: md_opts) {
+        // TODO: escape unintentional markdown
+        let escaped = content.replacingOccurrences(of: "\\_", with: "\\\\\\_")
+        if let txt = try? AttributedString(markdown: escaped, options: md_opts) {
             return txt
         } else {
             return AttributedString(stringLiteral: content)
@@ -40,7 +42,6 @@ public struct Markdown {
             let uri = url.scheme == "http" ? Markdown.withScheme(text) : url.absoluteString
             output.replaceSubrange(range, with: "[\(text)](\(uri))")
         }
-        // TODO: escape unintentional markdown
         return Markdown.parse(content: output)
     }
 }

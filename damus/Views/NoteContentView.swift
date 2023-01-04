@@ -183,7 +183,7 @@ func mention_str(_ m: Mention, profiles: Profiles) -> String {
 struct NoteContentView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
-        let content = "hi there https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
+        let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
         let artifacts = NoteArtifacts(content: content, images: [], invoices: [], links: [])
         NoteContentView(privkey: "", event: NostrEvent(content: content, pubkey: "pk"), profiles: state.profiles, previews: PreviewCache(), show_images: true, artifacts: artifacts, size: .normal)
     }
