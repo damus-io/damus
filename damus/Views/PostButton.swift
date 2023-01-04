@@ -10,19 +10,18 @@ import SwiftUI
 
 func PostButton(action: @escaping () -> ()) -> some View {
     return Button(action: action, label: {
-        Text("+")
-            .font(.system(.largeTitle))
-            .frame(width: 57, height: 50)
+        Image(systemName: "plus")
+            .font(.system(.title2))
             .foregroundColor(Color.white)
-            .padding(.bottom, 7)
+            .frame(width: 57, height: 57, alignment: .center)
+            .background(Color.accentColor)
+            .cornerRadius(38.5)
+            .padding()
+            .shadow(color: Color.black.opacity(0.3),
+                    radius: 3,
+                    x: 3,
+                    y: 3)
     })
-    .background(Color.accentColor)
-    .cornerRadius(38.5)
-    .padding()
-    .shadow(color: Color.black.opacity(0.3),
-            radius: 3,
-            x: 3,
-            y: 3)
     .keyboardShortcut("n", modifiers: [.command, .shift])
 }
 
