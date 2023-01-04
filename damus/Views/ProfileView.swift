@@ -192,20 +192,15 @@ struct ProfileView: View {
                 let pfp_size: CGFloat = 90.0
                 
                 HStack(alignment: .center) {
-                    Circle()
-                        .frame(width: pfp_size, height: pfp_size) // Increase this to see a frame.
-                        .foregroundColor(imageBorderColor())
-                        .overlay{
-                            ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(.black, 4.0), profiles: damus_state.profiles)
-                                .onTapGesture {
-                                    is_zoomed.toggle()
-                                }
-                                .sheet(isPresented: $is_zoomed) {
-                                    ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .none, profiles: damus_state.profiles)
-                                }
+                    ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles)
+                        .onTapGesture {
+                            is_zoomed.toggle()
+                        }
+                        .sheet(isPresented: $is_zoomed) {
+                            ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .none, profiles: damus_state.profiles)
                         }
                         .offset(y: -(pfp_size/2.0)) // Increase if set a frame
-                    
+                        
                     Spacer()
                     
                     if let profile = data {
