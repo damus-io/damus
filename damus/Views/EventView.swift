@@ -422,10 +422,6 @@ struct EventView: View {
         .event_context_menu(event, privkey: damus.keypair.privkey)
     }
     
-    func fetch_poll_choices() {
-        // TODO: get all choices
-    }
-    
     func send_poll_choice(_ choice: Int) {
         guard let privkey = damus.keypair.privkey else {
             return
