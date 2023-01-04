@@ -138,11 +138,11 @@ struct EventView: View {
 
     @EnvironmentObject var action_bar: ActionBarModel
     
-    @State var show_poll_results: PollResultsDisplay = .none
+    @State var show_poll_results: Bool = false
     @State var subscription_poll_uuid: String = UUID().description
     
     // String = user pubkey and int is the choice
-    @State var choices: [(String, Int)] = [("z39BsWbVLfVT1pAnhVozSf", 0), ("z39BsWbVLfVT1pAnhVozSfdd", 1), ("z39BsWbVLfVT1pAnhVozSfdr", 0), ("z39BsWbVLfVT1pAnhVozSfdp", 0)]
+    @State var choices: [(String, Int)] = []
     
     @AppStorage("poll_results_everyone") var poll_results_everyone: Bool = false
 
@@ -193,7 +193,7 @@ struct EventView: View {
             
             // If the pubkey is our, display the results
             if nostr_event.pubkey == damus.pubkey {
-                show_poll_results = .everyone
+                show_poll_results = true
             }
             
             // Check if the choice is already submitted by the pubkey
@@ -328,41 +328,55 @@ struct EventView: View {
                             let percent = CGFloat(this_choice_count) / CGFloat(total_count)
                             
                             HStack {
-                                Button {
-                                    if show_poll_results == .none {
-                                        send_poll_choice(index)
-                                        show_poll_results = .everyone
-                                    }
-                                } label: {
-                                    Text(poll_choices[index])
-                                        .frame(minWidth: 0, maxWidth: .infinity)
-                                            .padding(12)
+                                if show_poll_results {
+                                    /// Placeholder text for the size
+                                    Text("100%")
+                                        .font(.caption)
+                                        .opacity(0)
+                                        .overlay {
+                                            Text("\(Int(floor(percent * 100)))%")
+                                                .font(.caption)
+                                        }
                                 }
-                            }
-                            .background(alignment: .leading) {
-                                GeometryReader { geometry in
-                                    withAnimation {
-                                        Rectangle()
-                                            .foregroundColor(.accentColor.opacity(0.2))
-                                            .frame(
-                                                minWidth: 0,
-                                                maxWidth: show_poll_results == .none
-                                                    ? 0
-                                                : percent * geometry.size.width
-                                            )
+                                
+                                HStack {
+                                    Button {
+                                        if !show_poll_results {
+                                            send_poll_choice(index)
+                                            show_poll_results = true
+                                        }
+                                    } label: {
+                                        Text(poll_choices[index])
+                                            .font(.caption)
+                                            .frame(minWidth: 0, maxWidth: .infinity)
+                                                .padding(12)
                                     }
                                 }
+                                .background(alignment: .leading) {
+                                    GeometryReader { geometry in
+                                        withAnimation {
+                                            Rectangle()
+                                                .foregroundColor(.accentColor.opacity(0.2))
+                                                .frame(
+                                                    minWidth: 0,
+                                                    maxWidth: show_poll_results
+                                                        ? percent * geometry.size.width
+                                                    : 0
+                                                )
+                                        }
+                                    }
+                                }
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color.gray.opacity(0.4), lineWidth: 2)
+                                )
+                                .cornerRadius(10)
                             }
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.gray.opacity(0.4), lineWidth: 2)
-                            )
-                            .cornerRadius(10)
                         }
                         
-                        if show_poll_results == .none {
+                        if !show_poll_results {
                             Button {
-                                show_poll_results = .everyone
+                                show_poll_results = true
                             } label: {
                                 Label("Show result", systemImage: "number.circle")
                                     .frame(minWidth: 0, maxWidth: .infinity)
