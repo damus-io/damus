@@ -203,24 +203,28 @@ struct ProfileView: View {
                         
                     Spacer()
                     
-                    if let profile = data {
-                        if let lnurl = profile.lnurl, lnurl != "" {
-                            LNButton(lnurl: lnurl, profile: profile)
+                    Group {
+                        
+                        if let profile = data {
+                            if let lnurl = profile.lnurl, lnurl != "" {
+                                LNButton(lnurl: lnurl, profile: profile)
+                            }
+                        }
+                        
+                        DMButton
+                        
+                        if profile.pubkey != damus_state.pubkey {
+                            FollowButtonView(
+                                target: profile.get_follow_target(),
+                                follow_state: damus_state.contacts.follow_state(profile.pubkey)
+                            )
+                        } else {
+                            NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
+                                EditButton(damus_state: damus_state)
+                            }
                         }
                     }
-                    
-                    DMButton
-                    
-                    if profile.pubkey != damus_state.pubkey {
-                        FollowButtonView(
-                            target: profile.get_follow_target(),
-                            follow_state: damus_state.contacts.follow_state(profile.pubkey)
-                        )
-                    } else {
-                        NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
-                            EditButton(damus_state: damus_state)
-                        }
-                    }
+                    .offset(y: -15.0) // Increase if set a frame
                 }
                 
                 ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
