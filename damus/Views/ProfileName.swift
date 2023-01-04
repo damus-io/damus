@@ -168,5 +168,5 @@ struct EventProfileName: View {
 }
 
 func get_nip05_color(pubkey: String, contacts: Contacts) -> Color {
-    return contacts.is_friend_or_self(pubkey) ? .accentColor : .yellow
+    return contacts.is_friend_or_self(pubkey) ? .accentColor : .gray
 }
