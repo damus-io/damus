@@ -421,7 +421,7 @@ struct ContentView: View {
         self.damus_state = DamusState(pool: pool, keypair: keypair,
                                 likes: EventCounter(our_pubkey: pubkey),
                                 boosts: EventCounter(our_pubkey: pubkey),
-                                contacts: Contacts(),
+                                contacts: Contacts(our_pubkey: pubkey),
                                 tips: TipCounter(our_pubkey: pubkey),
                                 profiles: Profiles(),
                                 dms: home.dms,
