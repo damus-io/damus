@@ -369,6 +369,10 @@ struct EventView: View {
                                         .cornerRadius(10)
                             }
                         }
+                        
+                        Text("\(choices.count) vote\(choices.count >= 2 ? "s" : "")")
+                            .font(.footnote)
+                            .foregroundColor(.gray)
                     }
                     .frame(minWidth: 0, maxWidth: .infinity)
                     .padding()
