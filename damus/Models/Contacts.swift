@@ -11,7 +11,12 @@ import Foundation
 class Contacts {
     private var friends: Set<String> = Set()
     private var friend_of_friends: Set<String> = Set()
+    let our_pubkey: String
     var event: NostrEvent?
+    
+    init(our_pubkey: String) {
+        self.our_pubkey = our_pubkey
+    }
     
     func get_friendosphere() -> [String] {
         var fs = get_friend_list()
@@ -54,6 +59,10 @@ class Contacts {
 
     func is_friend(_ pubkey: String) -> Bool {
         return friends.contains(pubkey)
+    }
+    
+    func is_friend_or_self(_ pubkey: String) -> Bool {
+        return pubkey == our_pubkey || is_friend(pubkey)
     }
     
     func follow_state(_ pubkey: String) -> FollowState {

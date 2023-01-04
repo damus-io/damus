@@ -1,3 +1,24 @@
+## [1.0.0-4] - 2023-01-04
+
+### Added
+
+- Added NIP05 Verification (William Casarin)
+- Downscale images if they are unreasonably large (OlegAba)
+
+
+### Changed
+
+- Revert to old style ln/dm buttons (William Casarin)
+
+
+### Fixed
+
+- Fix ascii shrug guy (Lionello Lunesu)
+- Fix navigation popping in threads (William Casarin)
+
+
+[1.0.0-4]: https://github.com/damus-io/damus/releases/tag/v1.0.0-4
+
 ## [1.0.0-2] - 2023-01-03
 
 ### Added
