@@ -379,6 +379,7 @@ struct EventView: View {
                                 show_poll_results = true
                             } label: {
                                 Label("Show result", systemImage: "number.circle")
+                                    .font(.caption)
                                     .frame(minWidth: 0, maxWidth: .infinity)
                                         .padding(12)
                                         .overlay(
