@@ -152,7 +152,7 @@ struct EventProfileName: View {
             if let real_name = profile?.display_name {
                 Text(real_name)
                     .font(.body.weight(.bold))
-                    .padding([.trailing], 4)
+                    .padding([.trailing], 2)
                 
                 Text("@" + String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
                     .foregroundColor(.gray)
@@ -163,13 +163,9 @@ struct EventProfileName: View {
                     .fontWeight(.bold)
             }
             
-            if let nip05 = current_nip05 {
+            if let _ = current_nip05 {
                 Image(systemName: "checkmark.seal.fill")
                     .foregroundColor(nip05_color)
-                if !contacts.is_friend(pubkey) {
-                    Text(nip05.host)
-                        .foregroundColor(nip05_color)
-                }
             }
             
             if let frend = friend_icon, current_nip05 == nil {
