@@ -146,7 +146,7 @@ struct ProfileView: View {
         }) {
             Image(systemName: "bolt.circle")
                 .symbolRenderingMode(.palette)
-                .foregroundStyle(colorScheme == .dark ? .white : .black, .black)
+                .foregroundStyle(colorScheme == .dark ? .white : .black, colorScheme == .dark ? .white : .black)
                 .font(.system(size: 32).weight(.thin))
                 .contextMenu {
                     Button {
@@ -174,7 +174,7 @@ struct ProfileView: View {
             Image(systemName: "bubble.left.circle")
                 .symbolRenderingMode(.palette)
                 .font(.system(size: 32).weight(.thin))
-                .foregroundStyle(colorScheme == .dark ? .white : .black, .black)
+                .foregroundStyle(colorScheme == .dark ? .white : .black, colorScheme == .dark ? .white : .black)
         }
     }
     
