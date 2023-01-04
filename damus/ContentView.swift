@@ -16,7 +16,7 @@ var BOOTSTRAP_RELAYS = [
     "wss://relay.nostr.bg",
     "wss://nostr.oxtr.dev",
     "wss://nostr.v0l.io",
-    "wss://nostr-2.zebedee.cloud",
+    "wss://brb.io",
 ]
 
 struct TimestampedProfile {
@@ -44,6 +44,15 @@ enum ThreadState {
 enum FilterState : Int {
     case posts_and_replies = 1
     case posts = 0
+    
+    func filter(privkey: String?, ev: NostrEvent) -> Bool {
+        switch self {
+        case .posts:
+            return !ev.is_reply(privkey)
+        case .posts_and_replies:
+            return true
+        }
+    }
 }
 
 struct ContentView: View {
@@ -82,17 +91,14 @@ struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
 
     var PostingTimelineView: some View {
-        VStack{
-            ZStack {
-                if let damus = self.damus_state {
-                    TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter_event)
-                }
-                if privkey != nil {
-                    PostButtonContainer {
-                        self.active_sheet = .post
-                    }
-                }
-            }.ignoresSafeArea(.keyboard, edges: .bottom)
+        VStack {
+            TabView(selection: $filter_state) {
+                ContentTimelineView
+                    .tag(FilterState.posts)
+                ContentTimelineView
+                    .tag(FilterState.posts_and_replies)
+            }
+            .tabViewStyle(.page(indexDisplayMode: .never))
         }
         .safeAreaInset(edge: .top) {
             VStack(spacing: 0) {
@@ -103,6 +109,20 @@ struct ContentView: View {
                     .frame(height: 1)
             }
             .background(colorScheme == .dark ? Color.black : Color.white)
+        }
+        .ignoresSafeArea(.keyboard)
+    }
+    
+    var ContentTimelineView: some View {
+        ZStack {
+            if let damus = self.damus_state {
+                TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter_event)
+            }
+            if privkey != nil {
+                PostButtonContainer {
+                    self.active_sheet = .post
+                }
+            }
         }
     }
     
@@ -404,7 +424,8 @@ struct ContentView: View {
                                 contacts: Contacts(),
                                 tips: TipCounter(our_pubkey: pubkey),
                                 profiles: Profiles(),
-                                dms: home.dms
+                                dms: home.dms,
+                                previews: PreviewCache()
         )
         home.damus_state = self.damus_state!
         

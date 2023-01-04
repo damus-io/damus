@@ -156,9 +156,9 @@ struct LikeButton: View {
             if liked {
                 Text("🤙")
             } else {
-                Label("&nbsp;", systemImage: "hand.thumbsup")
-                    .font(.footnote.weight(.medium))
-                    .foregroundColor(Color.gray)
+                Image("shaka")
+                    .renderingMode(.template)
+                    .foregroundColor(.gray)
             }
         }
     }

@@ -7,9 +7,8 @@
 
 import Foundation
 
-public func time_ago_since(_ date: Date) -> String {
+public func time_ago_since(_ date: Date, _ calendar: Calendar = Calendar.current) -> String {
 
-    let calendar = Calendar.current
     let now = Date()
     let unitFlags: NSCalendar.Unit = [.second, .minute, .hour, .day, .weekOfMonth, .month, .year]
 

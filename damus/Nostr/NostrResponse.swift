@@ -11,6 +11,17 @@ enum NostrResponse: Decodable {
     case event(String, NostrEvent)
     case notice(String)
     case eose(String)
+    
+    var subid: String? {
+        switch self {
+        case .event(let sub_id, _):
+            return sub_id
+        case .eose(let sub_id):
+            return sub_id
+        case .notice:
+            return nil
+        }
+    }
 
     init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()

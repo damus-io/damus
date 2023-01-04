@@ -41,11 +41,11 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
             if is_image_url(url) {
                 // Append Image
                 img_urls.append(url)
+                return str
             } else {
                 link_urls.append(url)
+                return str + url.absoluteString
             }
-            
-            return str
         }
     }
     
@@ -61,12 +61,13 @@ struct NoteContentView: View {
     let privkey: String?
     let event: NostrEvent
     let profiles: Profiles
+    let previews: PreviewCache
     
     let show_images: Bool
     
     @State var artifacts: NoteArtifacts
     
-    @State var metaData: LPLinkMetadata? = nil
+    @State var preview: LinkViewRepresentable? = nil
     let size: EventViewKind
     
     func MainContent() -> some View {
@@ -89,12 +90,14 @@ struct NoteContentView: View {
                 InvoicesView(invoices: artifacts.invoices)
             }
             
-            if show_images, self.metaData != nil {
-                LinkViewRepresentable(metadata: self.metaData)
+            if show_images, self.preview != nil {
+                self.preview
             } else {
                 ForEach(artifacts.links, id:\.self) { link in
-                    LinkViewRepresentable(url: link)
-                        .frame(height: 50)
+                    if let url = link {
+                        LinkViewRepresentable(meta: .url(url))
+                            .frame(height: 50)
+                    }
                 }
             }
         }
@@ -102,7 +105,6 @@ struct NoteContentView: View {
     
     var body: some View {
         MainContent()
-            .animation(.easeInOut, value: metaData)
             .onAppear() {
                 self.artifacts = render_note_content(ev: event, profiles: profiles, privkey: privkey)
             }
@@ -123,9 +125,22 @@ struct NoteContentView: View {
                 }
             }
             .task {
+                if let preview = previews.lookup(self.event.id) {
+                    switch preview {
+                    case .value(let view):
+                        self.preview = view
+                    case .failed:
+                        // don't try to refetch meta if we've failed
+                        return
+                    }
+                }
+                
                 if show_images, artifacts.links.count == 1 {
+                    let meta = await getMetaData(for: artifacts.links.first!)
                     
-                    self.metaData = await getMetaData(for: artifacts.links.first!)
+                    let view = meta.map { LinkViewRepresentable(meta: .linkmeta($0)) }
+                    previews.store(evid: self.event.id, preview: view)
+                    self.preview = view
                 }
             }
     }
@@ -168,8 +183,8 @@ func mention_str(_ m: Mention, profiles: Profiles) -> String {
 struct NoteContentView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
-        let content = "hi there https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
+        let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
         let artifacts = NoteArtifacts(content: content, images: [], invoices: [], links: [])
-        NoteContentView(privkey: "", event: NostrEvent(content: content, pubkey: "pk"), profiles: state.profiles, show_images: true, artifacts: artifacts, size: .normal)
+        NoteContentView(privkey: "", event: NostrEvent(content: content, pubkey: "pk"), profiles: state.profiles, previews: PreviewCache(), show_images: true, artifacts: artifacts, size: .normal)
     }
 }

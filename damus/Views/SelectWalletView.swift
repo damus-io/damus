@@ -38,14 +38,8 @@ struct SelectWalletView: View {
                 Section("Select a lightning wallet"){
                     List{
                         Button() {
-                            let walletModel = user_settings.default_wallet.model
-                            if let url = URL(string: "\(walletModel.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
-                                openURL(url)
-                            } else {
-                                if let url = URL(string: walletModel.appStoreLink), UIApplication.shared.canOpenURL(url) {
-                                    openURL(url)
-                                }
-                            }
+                            let wallet_model = user_settings.default_wallet.model
+                            open_with_wallet(wallet: wallet_model, invoice: invoice)
                         } label: {
                             HStack {
                                 Text("Default Wallet").font(.body).foregroundColor(.blue)
@@ -54,13 +48,7 @@ struct SelectWalletView: View {
                         List($allWalletModels) { $wallet in
                             if wallet.index >= 0 {
                                 Button() {
-                                    if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
-                                        openURL(url)
-                                    } else {
-                                        if let url = URL(string: wallet.appStoreLink), UIApplication.shared.canOpenURL(url) {
-                                            openURL(url)
-                                        }
-                                    }
+                                    open_with_wallet(wallet: wallet, invoice: invoice)
                                 } label: {
                                     HStack {
                                         Image(wallet.image).resizable().frame(width: 32.0, height: 32.0,alignment: .center).cornerRadius(5)
