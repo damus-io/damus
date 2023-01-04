@@ -142,7 +142,7 @@ struct EventView: View {
     @State var subscription_poll_uuid: String = UUID().description
     
     // String = user pubkey and int is the choice
-    @State var choices: [(String, Int)] = []
+    @State var choices: [(String, Int)] = [("z39BsWbVLfVT1pAnhVozSf", 0), ("z39BsWbVLfVT1pAnhVozSfdd", 1), ("z39BsWbVLfVT1pAnhVozSfdr", 0), ("z39BsWbVLfVT1pAnhVozSfdp", 0)]
     
     @AppStorage("poll_results_everyone") var poll_results_everyone: Bool = false
 
@@ -319,6 +319,8 @@ struct EventView: View {
                 
                 // MARK: - Poll
                 if poll_choices.count >= 2 {
+                    let filtered_choices = choices.filter({ poll_results_everyone ? true : damus.contacts.is_in_friendosphere($0.0) })
+                    
                     VStack(alignment: .leading, spacing: 15) {
                         ForEach(0 ..< poll_choices.count, id: \.self) { index in
                             HStack {
@@ -334,8 +336,8 @@ struct EventView: View {
                                 }
                             }
                             .background(alignment: .leading) {
-                                let total_count = choices.filter({ poll_results_everyone ? true : damus.contacts.is_in_friendosphere($0.0) }).count == 0 ? 1 : choices.count
-                                let this_choice_count = choices.filter({ poll_results_everyone ? true : damus.contacts.is_in_friendosphere($0.0) }).filter({ $0.1 == index }).count
+                                let total_count = filtered_choices.count == 0 ? 1 : filtered_choices.count
+                                let this_choice_count = filtered_choices.filter({ $0.1 == index }).count
                                 
                                 GeometryReader { geometry in
                                     withAnimation {
@@ -372,7 +374,7 @@ struct EventView: View {
                             }
                         }
                         
-                        Text("\(choices.count) vote\(choices.filter({ poll_results_everyone ? true : damus.contacts.is_in_friendosphere($0.0) }).count >= 2 ? "s" : "")\(poll_results_everyone ? "" : " - close circle of friends votes only")")
+                        Text("\(filtered_choices.count) vote\(filtered_choices.count >= 2 ? "s" : "")\(poll_results_everyone ? "" : " - close circle of friends votes only")")
                             .font(.footnote)
                             .foregroundColor(.gray)
                     }
