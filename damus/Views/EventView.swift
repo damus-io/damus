@@ -131,6 +131,11 @@ struct EventView: View {
     let size: EventViewKind
 
     @EnvironmentObject var action_bar: ActionBarModel
+    
+    @State var subscription_poll_uuid: String = UUID().description
+    
+    // String = user pubkey and int is the choice
+    @State var choices: [(String, Int)] = []
 
     init(event: NostrEvent, highlight: Highlight, has_action_bar: Bool, damus: DamusState, show_friend_icon: Bool, size: EventViewKind = .normal) {
         self.event = event
@@ -160,6 +165,51 @@ struct EventView: View {
         self.pubkey = pubkey
         self.show_friend_icon = show_friend_icon
         self.size = size
+    }
+    
+    func handle_event(relay_id: String, ev: NostrConnectionEvent) {
+        guard case .nostr_event(let nostr_response) = ev else {
+            return
+        }
+        
+        guard case .event(let id, let nostr_event) = nostr_response else {
+            return
+        }
+        
+        // Is current event
+        if id == subscription_poll_uuid {
+            if nostr_event.kind != 7 {
+                return
+            }
+            
+            // Check if the choice is already submitted by the pubkey
+            if choices.contains(where: { $0.0 == nostr_event.pubkey }) {
+                return
+            }
+            
+            // Check the choice
+            if let match = nostr_event.content.range(of: "^p:([0-9]+)$", options: .regularExpression) {
+                let digit = Int(String(nostr_event.content[match]))!
+                
+                choices.append((nostr_event.pubkey, digit))
+            }
+        }
+    }
+    
+    func unsubscribe_poll() {
+        damus.pool.unsubscribe(sub_id: subscription_poll_uuid)
+    }
+    
+    func subscribe_poll() {
+        let filters: [NostrFilter] = [
+            NostrFilter(
+                kinds: [7],
+                referenced_ids: [event.id]
+            )
+        ]
+        
+        damus.pool.register_handler(sub_id: subscription_poll_uuid, handler: handle_event)
+        damus.pool.send(.subscribe(.init(filters: filters, sub_id: subscription_poll_uuid)))
     }
 
     var body: some View {
@@ -259,7 +309,7 @@ struct EventView: View {
                         ForEach(0 ..< poll_choices.count, id: \.self) { index in
                             HStack {
                                 Button {
-                                    
+                                    send_poll_choice(index)
                                 } label: {
                                     Text(poll_choices[index])
                                         .frame(minWidth: 0, maxWidth: .infinity)
@@ -324,6 +374,22 @@ struct EventView: View {
         .frame(maxWidth: .infinity, minHeight: PFP_SIZE)
         .padding([.bottom], 2)
         .event_context_menu(event, privkey: damus.keypair.privkey)
+    }
+    
+    func fetch_poll_choices() {
+        // TODO: get all choices
+    }
+    
+    func send_poll_choice(_ choice: Int) {
+        guard let privkey = damus.keypair.privkey else {
+            return
+        }
+        
+        // TODO: Check if a choice is already sent
+        
+        let choice_ev = make_poll_choice_event(pubkey: damus.pubkey, privkey: privkey, event: event, choice_index: choice)
+        
+        damus.pool.send(.event(choice_ev))
     }
 }
 

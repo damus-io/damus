@@ -567,6 +567,17 @@ func make_like_event(pubkey: String, privkey: String, liked: NostrEvent) -> Nost
     return ev
 }
 
+func make_poll_choice_event(pubkey: String, privkey: String, event: NostrEvent, choice_index: Int) -> NostrEvent {
+    var tags: [[String]] = event.tags.filter { tag in tag.count >= 2 && (tag[0] == "e" || tag[0] == "p") }
+    tags.append(["e", event.id])
+    tags.append(["p", event.pubkey])
+    let ev = NostrEvent(content: "p:\(choice_index)", pubkey: pubkey, kind: 7, tags: tags)
+    ev.calculate_id()
+    ev.sign(privkey: privkey)
+
+    return ev
+}
+
 func gather_reply_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
     var ids = get_referenced_ids(tags: from.tags, key: "e").first.map { [$0] } ?? []
 
