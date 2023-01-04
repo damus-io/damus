@@ -8,13 +8,20 @@
 import Foundation
 import SwiftUI
 
+let BUTTON_SIZE = 57.0
+let LINEAR_GRADIENT = LinearGradient(gradient: Gradient(colors: [
+    Color("DamusPurple"),
+    Color("DamusBlue")
+]), startPoint: .topTrailing, endPoint: .bottomTrailing)
+
+
 func PostButton(action: @escaping () -> ()) -> some View {
     return Button(action: action, label: {
         Image(systemName: "plus")
             .font(.system(.title2))
             .foregroundColor(Color.white)
-            .frame(width: 57, height: 57, alignment: .center)
-            .background(Color.accentColor)
+            .frame(width: BUTTON_SIZE, height: BUTTON_SIZE, alignment: .center)
+            .background(LINEAR_GRADIENT)
             .cornerRadius(38.5)
             .padding()
             .shadow(color: Color.black.opacity(0.3),
