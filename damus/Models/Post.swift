@@ -12,16 +12,20 @@ struct NostrPost {
     let content: String
     let references: [ReferencedId]
     
-    init (content: String, references: [ReferencedId]) {
+    let tags: [[String]]
+    
+    init (content: String, references: [ReferencedId], tags: [[String]] = []) {
         self.content = content
         self.references = references
         self.kind = .text
+        self.tags = tags
     }
     
-    init (content: String, references: [ReferencedId], kind: NostrKind) {
+    init (content: String, references: [ReferencedId], kind: NostrKind, tags: [[String]] = []) {
         self.content = content
         self.references = references
         self.kind = kind
+        self.tags = tags
     }
 }
 

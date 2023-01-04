@@ -16,7 +16,7 @@ let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Tex
 
 struct PostView: View {
     @State var post: String = ""
-    @State var displayPolls: Bool = true
+    @State var displayPolls: Bool = false
     @State var polls: [String] = ["", ""]
 
     let replying_to: NostrEvent?
@@ -44,7 +44,12 @@ struct PostView: View {
             kind = .chat
         }
         let content = self.post.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-        let new_post = NostrPost(content: content, references: references, kind: kind)
+        let new_post = NostrPost(content: content, references: references, kind: kind, tags: self.displayPolls ? self.polls.map { value in
+            return [
+                "poll",
+                value
+            ]
+        } : [])
 
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
         dismiss()
