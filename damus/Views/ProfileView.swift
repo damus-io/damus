@@ -191,18 +191,47 @@ struct ProfileView: View {
                 .foregroundStyle(colorScheme == .dark ? .white : .black, colorScheme == .dark ? .white : .black)
         }
     }
+
+    private func getScrollOffset(_ geometry: GeometryProxy) -> CGFloat {
+        geometry.frame(in: .global).minY
+    }
+
+    private func getHeightForHeaderImage(_ geometry: GeometryProxy) -> CGFloat {
+        let offset = getScrollOffset(geometry)
+        let imageHeight = 150.0
+
+        if offset > 0 {
+            return imageHeight + offset
+        }
+
+        return imageHeight
+    }
+
+    private func getOffsetForHeaderImage(_ geometry: GeometryProxy) -> CGFloat {
+        let offset = getScrollOffset(geometry)
+
+        // Image was pulled down
+        if offset > 0 {
+            return -offset
+        }
+
+        return 0
+    }
     
     var TopSection: some View {
         ZStack(alignment: .top) {
-            GeometryReader { geo in
+            GeometryReader { geometry in
                 BannerImageView(pubkey: profile.pubkey, profiles: damus_state.profiles)
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: geo.size.width, height: BANNER_HEIGHT)
+                    .frame(width: geometry.size.width, height: self.getHeightForHeaderImage(geometry))
                     .clipped()
+                    .offset(x: 0, y: self.getOffsetForHeaderImage(geometry))
                 
                 ShareButton
-                    .offset(x: geo.size.width - 80.0, y: 50.0 )
+                    .offset(x: geometry.size.width - 80.0, y: 50.0 )
+
             }.frame(height: BANNER_HEIGHT)
+            
             VStack(alignment: .leading, spacing: 8.0) {
                 let data = damus_state.profiles.lookup(id: profile.pubkey)
                 let pfp_size: CGFloat = 90.0
