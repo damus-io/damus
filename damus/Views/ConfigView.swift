@@ -6,6 +6,7 @@
 //
 import AVFoundation
 import SwiftUI
+import Kingfisher
 
 struct ConfigView: View {
     let state: DamusState
@@ -110,6 +111,14 @@ struct ConfigView: View {
                             Text(wallet.model.displayName)
                                 .tag(wallet.model.tag)
                         }
+                    }
+                }
+                
+                Section("Clear Cache") {
+                    Button("Clear") {
+                        KingfisherManager.shared.cache.clearMemoryCache()
+                        KingfisherManager.shared.cache.clearDiskCache()
+                        KingfisherManager.shared.cache.cleanExpiredDiskCache()
                     }
                 }
                 
