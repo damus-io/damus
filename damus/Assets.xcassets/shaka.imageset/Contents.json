@@ -14,52 +14,7 @@
       "filename" : "nostr-hello-outline-black@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
-    },
-    {
-      "filename" : "nostr-hello-outline-white.png",
-      "idiom" : "universal",
-      "scale" : "1x"
-    },
-    {
-      "filename" : "nostr-hello-outline-white@2x.png",
-      "idiom" : "universal",
-      "scale" : "2x"
-    },
-    {
-      "filename" : "nostr-hello-outline-white@3x.png",
-      "idiom" : "universal",
-      "scale" : "3x"
-    },
-    {
-      "filename" : "nostr-hello-solid-black.png",
-      "idiom" : "universal",
-      "scale" : "1x"
-    },
-    {
-      "filename" : "nostr-hello-solid-black@2x.png",
-      "idiom" : "universal",
-      "scale" : "2x"
-    },
-    {
-      "filename" : "nostr-hello-solid-black@3x.png",
-      "idiom" : "universal",
-      "scale" : "3x"
-    },
-    {
-      "filename" : "nostr-hello-solid-white.png",
-      "idiom" : "universal",
-      "scale" : "1x"
-    },
-    {
-      "filename" : "nostr-hello-solid-white@2x.png",
-      "idiom" : "universal",
-      "scale" : "2x"
-    },
-    {
-      "filename" : "nostr-hello-solid-white@3x.png",
-      "idiom" : "universal",
-      "scale" : "3x"
-    }	    
+    }
   ],
   "info" : {
     "author" : "xcode",
