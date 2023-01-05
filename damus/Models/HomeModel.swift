@@ -591,9 +591,11 @@ func load_our_stuff(pool: RelayPool, contacts: Contacts, pubkey: String, ev: Nos
     }
     
     // only use new stuff
-    if let current_ev = contacts.event {
-        guard ev.created_at > current_ev.created_at else {
-            return
+    if contacts.event != nil {
+        if let current_ev = contacts.event {
+            guard ev.created_at > current_ev.created_at else {
+                return
+            }
         }
     }
     
