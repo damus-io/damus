@@ -188,16 +188,42 @@ struct ProfileView: View {
                 }
         }
     }
+
+    private func getScrollOffset(_ geometry: GeometryProxy) -> CGFloat {
+        geometry.frame(in: .global).minY
+    }
+
+    private func getHeightForHeaderImage(_ geometry: GeometryProxy) -> CGFloat {
+        let offset = getScrollOffset(geometry)
+        let imageHeight = geometry.size.height
+
+        if offset > 0 {
+            return imageHeight + offset
+        }
+
+        return imageHeight
+    }
+
+    private func getOffsetForHeaderImage(_ geometry: GeometryProxy) -> CGFloat {
+        let offset = getScrollOffset(geometry)
+
+        // Image was pulled down
+        if offset > 0 {
+            return -offset
+        }
+
+        return 0
+    }
     
     var TopSection: some View {
         ZStack(alignment: .top) {
-            GeometryReader { geo in
+            GeometryReader { geometry in
                 Image("profile-banner")
                     .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: geo.size.width, height: 150)
-                    .clipped()
-            }
+                    .scaledToFill()
+                    .frame(width: geometry.size.width, height: self.getHeightForHeaderImage(geometry))
+                    .offset(x: 0, y: self.getOffsetForHeaderImage(geometry))
+            }.frame(height: 150)
             VStack(alignment: .leading) {
                 let data = damus_state.profiles.lookup(id: profile.pubkey)
                 let pfp_size: CGFloat = 90.0
