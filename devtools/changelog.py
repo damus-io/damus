@@ -24,7 +24,7 @@ sections = [
 
 repo = 'damus-io/damus'
 
-Entry = namedtuple("Entry", ["commit", "pullreq", "content", "section"])
+Entry = namedtuple("Entry", ["commit", "pullreq", "content", "section", "author"])
 Link = namedtuple("Link", ["ref", "content", "url"])
 
 
@@ -46,14 +46,20 @@ def get_log_entries(commitrange):
     commit = None
     logs = git("log {commitrange}".format(commitrange=commitrange))
     entries = []
+    author = ""
 
     for l in logs.split('\n'):
         m = re.match(r'^commit ([A-Fa-f0-9]{40})$', l)
+        a = re.match(r'^Author: ([^<]+)<.*$', l)
         if m:
             commit = m.group(1)
 
+        if a:
+            author = "(" + a.group(1)[:-1] + ")"
+
         m = re.match(
             r'^\s+Changelog-({}): (.*)$'.format("|".join(sections)), l, re.IGNORECASE)
+
         if not m:
             continue
 
@@ -73,7 +79,7 @@ def get_log_entries(commitrange):
         #    pullreq = None
         pullreq = None
 
-        e = Entry(commit, pullreq, m.group(2), m.group(1).lower())
+        e = Entry(commit, pullreq, m.group(2), m.group(1).lower(), author)
         entries.append(e)
 
     return entries
@@ -112,9 +118,9 @@ def commit_date(commitsha):
 template = Template("""<%def name="group(entries)">
 % for e in entries:
  % if e.pullreq is not None:
-     - ${e.content} ([#${e.pullreq}])
+- ${e.content} ([#${e.pullreq}])
  % else:
-     - ${e.content}
+- ${e.content} ${e.author}
  % endif
 % endfor
 

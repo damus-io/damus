@@ -151,7 +151,7 @@ static bool from_numbers(u64 *res,
         return false;
 
     if (!from_number(&p1, s1, len1, tens_factor)
-        || !from_number(&p2, s2, len2, tens_factor - len2))
+        || !from_number(&p2, s2, len2, tens_factor - (int)len2))
         return false;
 
     if (add_overflows_u64(p1, p2))
@@ -453,7 +453,7 @@ bool amount_msat_to_u32(struct amount_msat msat, u32 *millisatoshis)
 {
     if (amount_msat_greater_eq(msat, AMOUNT_MSAT(0x100000000)))
         return false;
-    *millisatoshis = msat.millisatoshis;
+    *millisatoshis = (u32)msat.millisatoshis;
     return true;
 }
 

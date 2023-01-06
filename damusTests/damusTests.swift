@@ -33,6 +33,13 @@ class damusTests: XCTestCase {
         }
     }
     
+    func testRandomBytes() {
+        let bytes = random_bytes(count: 32)
+        
+        print("testRandomBytes \(hex_encode(bytes))")
+        XCTAssertEqual(bytes.count, 32)
+    }
+    
     func testParseMentionWithMarkdown() {
         let md = """
         Testing markdown in damus

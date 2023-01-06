@@ -6,14 +6,16 @@
 //
 
 import SwiftUI
+import LinkPresentation
 
 struct NoteArtifacts {
     let content: String
     let images: [URL]
     let invoices: [Invoice]
+    let links: [URL]
     
     static func just_content(_ content: String) -> NoteArtifacts {
-        NoteArtifacts(content: content, images: [], invoices: [])
+        NoteArtifacts(content: content, images: [], invoices: [], links: [])
     }
 }
 
@@ -21,6 +23,7 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
     let blocks = ev.blocks(privkey)
     var invoices: [Invoice] = []
     var img_urls: [URL] = []
+    var link_urls: [URL] = []
     let txt = blocks.reduce("") { str, block in
         switch block {
         case .mention(let m):
@@ -33,50 +36,69 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
             invoices.append(invoice)
             return str
         case .url(let url):
+            
+            // Handle Image URLs
             if is_image_url(url) {
+                // Append Image
                 img_urls.append(url)
+                return str
+            } else {
+                link_urls.append(url)
+                return str + url.absoluteString
             }
-            return str + url.absoluteString
         }
     }
     
-    return NoteArtifacts(content: txt, images: img_urls, invoices: invoices)
+    return NoteArtifacts(content: txt, images: img_urls, invoices: invoices, links: link_urls)
 }
 
 func is_image_url(_ url: URL) -> Bool {
     let str = url.lastPathComponent
-    return str.hasSuffix("png") || str.hasSuffix("jpg") || str.hasSuffix("jpeg") || str.hasSuffix("gif")
+    return str.lowercased().hasSuffix("png") || str.lowercased().hasSuffix("jpg") || str.lowercased().hasSuffix("jpeg") || str.lowercased().hasSuffix("gif")
 }
 
 struct NoteContentView: View {
     let privkey: String?
     let event: NostrEvent
     let profiles: Profiles
+    let previews: PreviewCache
     
     let show_images: Bool
     
     @State var artifacts: NoteArtifacts
     
+    @State var preview: LinkViewRepresentable? = nil
     let size: EventViewKind
     
     func MainContent() -> some View {
-        let md_opts: AttributedString.MarkdownParsingOptions =
-            .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        
         return VStack(alignment: .leading) {
-            if let txt = try? AttributedString(markdown: artifacts.content, options: md_opts) {
-                Text(txt)
-                    .font(eventviewsize_to_font(size))
-            } else {
-                Text(artifacts.content)
-                    .font(eventviewsize_to_font(size))
-            }
+            Text(Markdown.parse(content: artifacts.content))
+                .font(eventviewsize_to_font(size))
+
             if show_images && artifacts.images.count > 0 {
                 ImageCarousel(urls: artifacts.images)
+            } else if !show_images && artifacts.images.count > 0 {
+                ImageCarousel(urls: artifacts.images)
+                    .blur(radius: 10)
+                    .overlay {
+                        Rectangle()
+                            .opacity(0.50)
+                    }
+                    .cornerRadius(10)
             }
             if artifacts.invoices.count > 0 {
                 InvoicesView(invoices: artifacts.invoices)
-                    .frame(width: 200)
+            }
+            
+            if show_images, self.preview != nil {
+                self.preview
+            } else {
+                ForEach(artifacts.links, id:\.self) { link in
+                    if let url = link {
+                        LinkViewRepresentable(meta: .url(url))
+                            .frame(height: 50)
+                    }
+                }
             }
         }
     }
@@ -102,6 +124,41 @@ struct NoteContentView: View {
                     }
                 }
             }
+            .task {
+                if let preview = previews.lookup(self.event.id) {
+                    switch preview {
+                    case .value(let view):
+                        self.preview = view
+                    case .failed:
+                        // don't try to refetch meta if we've failed
+                        return
+                    }
+                }
+                
+                if show_images, artifacts.links.count == 1 {
+                    let meta = await getMetaData(for: artifacts.links.first!)
+                    
+                    let view = meta.map { LinkViewRepresentable(meta: .linkmeta($0)) }
+                    previews.store(evid: self.event.id, preview: view)
+                    self.preview = view
+                }
+            }
+    }
+    
+    
+    func getMetaData(for url: URL) async -> LPLinkMetadata? {
+        // iOS 15 is crashing for some reason
+        guard #available(iOS 16, *) else {
+            return nil
+        }
+        
+        let provider = LPMetadataProvider()
+        
+        do {
+            return try await provider.startFetchingMetadata(for: url)
+        } catch {
+            return nil
+        }
     }
 }
 
@@ -126,8 +183,8 @@ func mention_str(_ m: Mention, profiles: Profiles) -> String {
 struct NoteContentView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
-        let content = "hi there https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
-        let artifacts = NoteArtifacts(content: content, images: [], invoices: [])
-        NoteContentView(privkey: "", event: NostrEvent(content: content, pubkey: "pk"), profiles: state.profiles, show_images: true, artifacts: artifacts, size: .normal)
+        let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
+        let artifacts = NoteArtifacts(content: content, images: [], invoices: [], links: [])
+        NoteContentView(privkey: "", event: NostrEvent(content: content, pubkey: "pk"), profiles: state.profiles, previews: PreviewCache(), show_images: true, artifacts: artifacts, size: .normal)
     }
 }

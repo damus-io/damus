@@ -2,9 +2,8 @@
 //  ProfileZoomView.swift
 //  damus
 //
-//  Created by Swift on 12/27/22.
+//  Created by scoder1747 on 12/27/22.
 //
-
 import SwiftUI
 
 struct ProfileZoomView: View {
@@ -12,7 +11,6 @@ struct ProfileZoomView: View {
     @Environment(\.presentationMode) var presentationMode
     let pubkey: String
     let profiles: Profiles
-
 
     @GestureState private var scaleState: CGFloat = 1
     @GestureState private var offsetState = CGSize.zero
@@ -24,7 +22,6 @@ struct ProfileZoomView: View {
         self.offset = CGSize.zero
         self.scale = 1
     }
-
 
     var zoomGesture: some Gesture {
         MagnificationGesture()
@@ -54,10 +51,9 @@ struct ProfileZoomView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-
-            LinearGradient(gradient: Gradient(colors: [.blue, .purple]), startPoint: .top, endPoint: .bottom)
+            Color("DamusDarkGrey") // Or Color("DamusBlack")
                 .edgesIgnoringSafeArea(.all)
-
+            
             HStack() {
                 Button {
                     presentationMode.wrappedValue.dismiss()
@@ -85,5 +81,15 @@ struct ProfileZoomView: View {
 
             }
         }
+    }
+}
+
+struct ProfileZoomView_Previews: PreviewProvider {
+    static let pubkey = "ca48854ac6555fed8e439ebb4fa2d928410e0eef13fa41164ec45aaaa132d846"
+    
+    static var previews: some View {
+        ProfileZoomView(
+            pubkey: pubkey,
+            profiles: make_preview_profiles(pubkey))
     }
 }

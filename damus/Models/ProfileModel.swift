@@ -11,6 +11,7 @@ class ProfileModel: ObservableObject, Equatable {
     @Published var events: [NostrEvent] = []
     @Published var contacts: NostrEvent? = nil
     @Published var following: Int = 0
+    @Published var relays: [String: RelayInfo]? = nil
     
     let pubkey: String
     let damus: DamusState
@@ -60,7 +61,7 @@ class ProfileModel: ObservableObject, Equatable {
         profile_filter.authors = [pubkey]
         
         text_filter.authors = [pubkey]
-        text_filter.limit = 1000
+        text_filter.limit = 500
         
         print("subscribing to profile \(pubkey) with sub_id \(sub_id)")
         print_filters(relay_id: "profile", filters: [[text_filter], [profile_filter]])
@@ -69,11 +70,18 @@ class ProfileModel: ObservableObject, Equatable {
     }
     
     func handle_profile_contact_event(_ ev: NostrEvent) {
+        process_contact_event(pool: damus.pool, contacts: damus.contacts, pubkey: damus.pubkey, ev: ev)
+        
+        // only use new stuff
+        if let current_ev = self.contacts {
+            guard ev.created_at > current_ev.created_at else {
+                return
+            }
+        }
+        
         self.contacts = ev
         self.following = count_pubkeys(ev.tags)
-        if damus.contacts.is_friend(ev.pubkey) {
-            self.damus.contacts.add_friend_contact(ev)
-        }
+        self.relays = decode_json_relays(ev.content)
     }
     
     func add_event(_ ev: NostrEvent) {
@@ -88,6 +96,8 @@ class ProfileModel: ObservableObject, Equatable {
             let _ = insert_uniq_sorted_event(events: &self.events, new_ev: ev, cmp: { $0.created_at > $1.created_at})
         } else if ev.known_kind == .contacts {
             handle_profile_contact_event(ev)
+        } else if ev.known_kind == .metadata {
+            process_metadata_event(profiles: damus.profiles, ev: ev)
         }
         seen_event.insert(ev.id)
     }

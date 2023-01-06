@@ -9,10 +9,19 @@ import SwiftUI
 
 struct DirectMessagesView: View {
     let damus_state: DamusState
+    
+    @State var open_dm: Bool = false
+    @State var pubkey: String = ""
+    @State var active_model: DirectMessageModel = DirectMessageModel()
     @EnvironmentObject var model: DirectMessagesModel
     
     var MainContent: some View {
         ScrollView {
+            let chat = DMChatView(damus_state: damus_state, pubkey: pubkey)
+                .environmentObject(active_model)
+            NavigationLink(destination: chat, isActive: $open_dm) {
+                EmptyView()
+            }
             LazyVStack {
                 if model.dms.isEmpty, !model.loading {
                     EmptyTimelineView()
@@ -30,12 +39,12 @@ struct DirectMessagesView: View {
     func MaybeEvent(_ tup: (String, DirectMessageModel)) -> some View {
         Group {
             if let ev = tup.1.events.last {
-                let chat = DMChatView(damus_state: damus_state, pubkey: tup.0)
-                    .environmentObject(tup.1)
-                NavigationLink(destination: chat) {
-                    EventView(damus: damus_state, event: ev, pubkey: tup.0, show_friend_icon: true)
-                }
-                .buttonStyle(PlainButtonStyle())
+                EventView(damus: damus_state, event: ev, pubkey: tup.0, show_friend_icon: true)
+                    .onTapGesture {
+                        pubkey = tup.0
+                        active_model = tup.1
+                        open_dm = true
+                    }
             } else {
                 EmptyView()
             }

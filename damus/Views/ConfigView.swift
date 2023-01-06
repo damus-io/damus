@@ -6,6 +6,7 @@
 //
 import AVFoundation
 import SwiftUI
+import Kingfisher
 
 struct ConfigView: View {
     let state: DamusState
@@ -17,12 +18,15 @@ struct ConfigView: View {
     @State var privkey: String
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
+    @State var relays: [RelayDescriptor]
+    @EnvironmentObject var user_settings: UserSettingsStore
     
     let generator = UIImpactFeedbackGenerator(style: .light)
     
     init(state: DamusState) {
         self.state = state
         _privkey = State(initialValue: self.state.keypair.privkey_bech32 ?? "")
+        _relays = State(initialValue: state.pool.descriptors)
     }
     
     // TODO: (jb55) could be more general but not gonna worry about it atm
@@ -38,16 +42,37 @@ struct ConfigView: View {
         }
     }
     
+    var recommended: [RelayDescriptor] {
+        let rs: [RelayDescriptor] = []
+        return BOOTSTRAP_RELAYS.reduce(into: rs) { (xs, x) in
+            if let _ = state.pool.get_relay(x) {
+            } else {
+                xs.append(RelayDescriptor(url: URL(string: x)!, info: .rw))
+            }
+        }
+    }
+    
     var body: some View {
         ZStack(alignment: .leading) {
             Form {
-                if let ev = state.contacts.event {
-                    Section("Relays") {
-                        if let relays = decode_json_relays(ev.content) {
-                            List(Array(relays.keys.sorted()), id: \.self) { relay in
-                                RelayView(state: state, ev: ev, relay: relay)
-                            }
+                Section {
+                    List(Array(relays), id: \.url) { relay in
+                        RelayView(state: state, relay: relay.url.absoluteString)
+                    }
+                } header: {
+                    HStack {
+                        Text("Relays")
+                        Spacer()
+                        Button(action: { show_add_relay = true }) {
+                            Image(systemName: "plus")
+                                .foregroundColor(.accentColor)
                         }
+                    }
+                }
+                
+                Section("Recommended Relays") {
+                    List(recommended, id: \.url) { r in
+                        RecommendedRelayView(damus: state, relay: r.url.absoluteString)
                     }
                 }
                 
@@ -78,50 +103,58 @@ struct ConfigView: View {
                     }
                 }
                 
+                Section("Wallet Selector") {
+                    Toggle("Show wallet selector", isOn: $user_settings.show_wallet_selector).toggleStyle(.switch)
+                    Picker("Select default wallet",
+                           selection: $user_settings.default_wallet) {
+                        ForEach(Wallet.allCases, id: \.self) { wallet in
+                            Text(wallet.model.displayName)
+                                .tag(wallet.model.tag)
+                        }
+                    }
+                }
+                
+                Section("Clear Cache") {
+                    Button("Clear") {
+                        KingfisherManager.shared.cache.clearMemoryCache()
+                        KingfisherManager.shared.cache.clearDiskCache()
+                        KingfisherManager.shared.cache.cleanExpiredDiskCache()
+                    }
+                }
+                
                 Section("Reset") {
                     Button("Logout") {
                         confirm_logout = true
                     }
                 }
             }
-            
-            VStack {
-                HStack {
-                    Spacer()
-                    
-                    Button(action: { show_add_relay = true }) {
-                        Label("", systemImage: "plus")
-                            .foregroundColor(.accentColor)
-                            .padding()
-                    }
-                }
-                
-                Spacer()
-            }
         }
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.large)
         .alert("Logout", isPresented: $confirm_logout) {
-            Button("Logout") {
-                notify(.logout, ())
-            }
             Button("Cancel") {
                 confirm_logout = false
+            }
+            Button("Logout") {
+                notify(.logout, ())
             }
         } message: {
             Text("Make sure your nsec account key is saved before you logout or you will lose access to this account")
         }
         .sheet(isPresented: $show_add_relay) {
             AddRelayView(show_add_relay: $show_add_relay, relay: $new_relay) { m_relay in
-                
-                guard let relay = m_relay else {
+                guard var relay = m_relay else {
                     return
+                }
+                
+                if relay.starts(with: "wss://") == false {
+                    relay = "wss://" + relay
                 }
                 
                 guard let url = URL(string: relay) else {
                     return
                 }
-                
+                                
                 guard let ev = state.contacts.event else {
                     return
                 }
@@ -136,18 +169,22 @@ struct ConfigView: View {
                     return
                 }
                 
-                state.pool.connect(to: [new_relay])
+                state.pool.connect(to: [relay])
                 
-                guard let new_ev = add_relay(ev: ev, privkey: privkey, relay: new_relay, info: info) else {
+                guard let new_ev = add_relay(ev: ev, privkey: privkey, current_relays: state.pool.descriptors, relay: relay, info: info) else {
                     return
                 }
                 
-                state.contacts.event = new_ev
+                process_contact_event(pool: state.pool, contacts: state.contacts, pubkey: state.pubkey, ev: ev)
+                
                 state.pool.send(.event(new_ev))
             }
         }
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
+        }
+        .onReceive(handle_notify(.relays_changed)) { _ in
+            self.relays = state.pool.descriptors
         }
     }
 }

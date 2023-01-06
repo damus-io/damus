@@ -11,7 +11,12 @@ import Foundation
 class Contacts {
     private var friends: Set<String> = Set()
     private var friend_of_friends: Set<String> = Set()
+    let our_pubkey: String
     var event: NostrEvent?
+    
+    init(our_pubkey: String) {
+        self.our_pubkey = our_pubkey
+    }
     
     func get_friendosphere() -> [String] {
         var fs = get_friend_list()
@@ -54,6 +59,10 @@ class Contacts {
 
     func is_friend(_ pubkey: String) -> Bool {
         return friends.contains(pubkey)
+    }
+    
+    func is_friend_or_self(_ pubkey: String) -> Bool {
+        return pubkey == our_pubkey || is_friend(pubkey)
     }
     
     func follow_state(_ pubkey: String) -> FollowState {
@@ -139,16 +148,12 @@ func decode_json_relays(_ content: String) -> [String: RelayInfo]? {
     return decode_json(content)
 }
 
-func remove_relay(ev: NostrEvent, privkey: String, relay: String) -> NostrEvent? {
-    let damus_relay = RelayDescriptor(url: URL(string: "wss://relay.damus.io")!, info: .rw)
-    
-    var relays = ensure_relay_info(relays: [damus_relay], content: ev.content)
-    guard relays.index(forKey: relay) != nil else {
-        return nil
-    }
+func remove_relay(ev: NostrEvent, current_relays: [RelayDescriptor], privkey: String, relay: String) -> NostrEvent? {
+    var relays = ensure_relay_info(relays: current_relays, content: ev.content)
     
     relays.removeValue(forKey: relay)
     
+    print("remove_relay \(relays)")
     guard let content = encode_json(relays) else {
         return nil
     }
@@ -159,10 +164,9 @@ func remove_relay(ev: NostrEvent, privkey: String, relay: String) -> NostrEvent?
     return new_ev
 }
 
-func add_relay(ev: NostrEvent, privkey: String, relay: String, info: RelayInfo) -> NostrEvent? {
-    let damus_relay = RelayDescriptor(url: URL(string: "wss://relay.damus.io")!, info: .rw)
+func add_relay(ev: NostrEvent, privkey: String, current_relays: [RelayDescriptor], relay: String, info: RelayInfo) -> NostrEvent? {
+    var relays = ensure_relay_info(relays: current_relays, content: ev.content)
     
-    var relays = ensure_relay_info(relays: [damus_relay], content: ev.content)
     guard relays.index(forKey: relay) == nil else {
         return nil
     }

@@ -84,6 +84,86 @@ struct BuildThreadV2View: View {
         return sub_id
     }
     
+    func handle_current_events(ev: NostrEvent) {
+        if current_event != nil {
+            return
+        }
+        
+        current_event = ev
+        
+        thread = ThreadV2(
+            parentEvents: [],
+            current: current_event!,
+            childEvents: []
+        )
+        
+        // Get parents
+        parents_ids = current_event!.tags.enumerated().filter { (index, tag) in
+            return tag.count >= 2 && tag[0] == "e" && !current_event!.content.contains("#[\(index)]")
+        }.map { tag in
+            return tag.1[1]
+        }
+        
+        print("ThreadV2View: Parents list: (\(parents_ids)")
+        
+        if parents_ids.count > 0 {
+            // Ask for parents
+            let parents_events = NostrFilter(
+                ids: parents_ids,
+                limit: UInt32(parents_ids.count)
+            )
+            
+            let uuid = subscribe(filters: [parents_events])
+            parents_events_uuids.append(uuid)
+            print("ThreadV2View: Ask for parents (\(uuid)) (\(parents_events))")
+        }
+        
+        // Ask for children
+        let childs_events = NostrFilter(
+            kinds: [1],
+            referenced_ids: [self.event_id],
+            limit: 50
+        )
+        childs_events_uuid = subscribe(filters: [childs_events])
+        print("ThreadV2View: Ask for children (\(childs_events) (\(childs_events_uuid))")
+    }
+    
+    func handle_parent_events(sub_id: String, nostr_event: NostrEvent) {
+    
+        // We are filtering this later
+        thread!.parentEvents.append(nostr_event)
+        
+        // Get parents of parents
+        let local_parents_ids = nostr_event.tags.enumerated().filter { (index, tag) in
+            return tag.count >= 2 && tag[0] == "e" && !nostr_event.content.contains("#[\(index)]")
+        }.map { tag in
+            return tag.1[1]
+        }.filter { tag_id in
+            return !parents_ids.contains(tag_id)
+        }
+        
+        print("ThreadV2View: Sub Parents list: (\(local_parents_ids))")
+        
+        // Expand new parents id
+        parents_ids.append(contentsOf: local_parents_ids)
+        
+        if local_parents_ids.count > 0 {
+            // Ask for parents
+            let parents_events = NostrFilter(
+                ids: local_parents_ids,
+                limit: UInt32(local_parents_ids.count)
+            )
+            let uuid = subscribe(filters: [parents_events])
+            parents_events_uuids.append(uuid)
+            print("ThreadV2View: Ask for sub_parents (\(local_parents_ids)) \(uuid)")
+        }
+        
+        thread!.clean()
+        unsubscribe(sub_id)
+        return
+    
+    }
+    
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
         guard case .nostr_event(let nostr_response) = ev else {
             return
@@ -95,81 +175,12 @@ struct BuildThreadV2View: View {
         
         // Is current event
         if id == current_events_uuid {
-            if current_event != nil {
-                return
-            }
-            
-            current_event = nostr_event
-            
-            thread = ThreadV2(
-                parentEvents: [],
-                current: current_event!,
-                childEvents: []
-            )
-            
-            // Get parents
-            parents_ids = current_event!.tags.enumerated().filter { (index, tag) in
-                return tag.count >= 2 && tag[0] == "e" && !current_event!.content.contains("#[\(index)]")
-            }.map { tag in
-                return tag.1[1]
-            }
-            
-            print("ThreadV2View: Parents list: (\(parents_ids)")
-            
-            if parents_ids.count > 0 {
-                // Ask for parents
-                let parents_events = NostrFilter(
-                    ids: parents_ids,
-                    limit: UInt32(parents_ids.count)
-                )
-                
-                let uuid = subscribe(filters: [parents_events])
-                parents_events_uuids.append(uuid)
-                print("ThreadV2View: Ask for parents (\(uuid)) (\(parents_events))")
-            }
-            
-            // Ask for children
-            let childs_events = NostrFilter(
-                referenced_ids: [self.event_id],
-                limit: 50
-            )
-            childs_events_uuid = subscribe(filters: [childs_events])
-            print("ThreadV2View: Ask for children (\(childs_events) (\(childs_events_uuid))")
-            
+            handle_current_events(ev: nostr_event)
             return
         }
         
         if parents_events_uuids.contains(id) {
-            // We are filtering this later
-            thread!.parentEvents.append(nostr_event)
-            
-            // Get parents of parents
-            let local_parents_ids = nostr_event.tags.enumerated().filter { (index, tag) in
-                return tag.count >= 2 && tag[0] == "e" && !nostr_event.content.contains("#[\(index)]")
-            }.map { tag in
-                return tag.1[1]
-            }.filter { tag_id in
-                return !parents_ids.contains(tag_id)
-            }
-            
-            print("ThreadV2View: Sub Parents list: (\(local_parents_ids))")
-            
-            // Expand new parents id
-            parents_ids.append(contentsOf: local_parents_ids)
-            
-            if local_parents_ids.count > 0 {
-                // Ask for parents
-                let parents_events = NostrFilter(
-                    ids: local_parents_ids,
-                    limit: UInt32(local_parents_ids.count)
-                )
-                let uuid = subscribe(filters: [parents_events])
-                parents_events_uuids.append(uuid)
-                print("ThreadV2View: Ask for sub_parents (\(local_parents_ids)) \(uuid)")
-            }
-            
-            thread!.clean()
-            unsubscribe(id)
+            handle_parent_events(sub_id: id, nostr_event: nostr_event)
             return
         }
         
@@ -221,31 +232,44 @@ struct BuildThreadV2View: View {
 struct ThreadV2View: View {
     let damus: DamusState
     let thread: ThreadV2
+    @State var nav_target: String? = nil
+    @State var navigating: Bool = false
+    
+    var MaybeBuildThreadView: some View {
+        Group {
+            if let evid = nav_target {
+                BuildThreadV2View(damus: damus, event_id: evid)
+            } else {
+                EmptyView()
+            }
+        }
+    }
     
     var body: some View {
+        NavigationLink(destination: MaybeBuildThreadView, isActive: $navigating) {
+            EmptyView()
+        }
         ScrollViewReader { reader in
             ScrollView {
                 VStack {
                     // MARK: - Parents events view
                     VStack {
                         ForEach(thread.parentEvents, id: \.id) { event in
-                            NavigationLink(destination: BuildThreadV2View(
+                            EventView(
+                                event: event,
+                                highlight: .none,
+                                has_action_bar: true,
                                 damus: damus,
-                                event_id: event.id
-                            )){
-                                EventView(
-                                    event: event,
-                                    highlight: .none,
-                                    has_action_bar: true,
-                                    damus: damus,
-                                    show_friend_icon: true, // TODO: change it
-                                    size: .small
-                                )
+                                show_friend_icon: true, // TODO: change it
+                                size: .small
+                            )
+                            .onTapGesture {
+                                nav_target = event.id
+                                navigating = true
                             }
-                            .buttonStyle(.plain)
                             .onAppear {
                                 // TODO: find another solution to prevent layout shifting and layout blocking on large responses
-                                reader.scrollTo("main", anchor: .center)
+                                reader.scrollTo("main", anchor: .bottom)
                             }
                         }
                     }.background(GeometryReader { geometry in
@@ -272,22 +296,21 @@ struct ThreadV2View: View {
                     
                     // MARK: - Responses of the actual event view
                     ForEach(thread.childEvents, id: \.id) { event in
-                        NavigationLink(destination: BuildThreadV2View(
+                        EventView(
+                            event: event,
+                            highlight: .none,
+                            has_action_bar: true,
                             damus: damus,
-                            event_id: event.id
-                        )){
-                            EventView(
-                                event: event,
-                                highlight: .none,
-                                has_action_bar: true,
-                                damus: damus,
-                                show_friend_icon: true, // TODO: change it
-                                size: .small
-                            )
-                        }.buttonStyle(.plain)
+                            show_friend_icon: true, // TODO: change it
+                            size: .small
+                        )
+                        .onTapGesture {
+                            nav_target = event.id
+                            navigating = true
+                        }
                     }
-                }
-            }.padding().navigationBarTitle("Thread")
+                }.padding()
+            }.navigationBarTitle("Thread")
         }
     }
 }

@@ -33,8 +33,6 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
 }
 
 struct InnerProfilePicView: View {
-    @Environment(\.redactionReasons) private var reasons
-
     let url: URL?
     let pubkey: String
     let size: CGFloat
@@ -54,21 +52,19 @@ struct InnerProfilePicView: View {
 
     var body: some View {
         Group {
-            if reasons.isEmpty {
-                KFAnimatedImage(url)
-                    .configure { view in
-                        view.framePreloadCount = 1
-                    }
-                    .placeholder { _ in
-                        Placeholder
-                    }
-                    .cacheOriginalImage()
-                    .scaleFactor(UIScreen.main.scale)
-                    .loadDiskFileSynchronously()
-                    .fade(duration: 0.1)
-            } else {
-                KFImage(url)
-            }
+            KFAnimatedImage(url)
+                .callbackQueue(.dispatch(.global(qos: .background)))
+                .processingQueue(.dispatch(.global(qos: .background)))
+                .appendProcessor(LargeImageProcessor())
+                .configure { view in
+                    view.framePreloadCount = 1
+                }
+                .placeholder { _ in
+                    Placeholder
+                }
+                .scaleFactor(UIScreen.main.scale)
+                .loadDiskFileSynchronously()
+                .fade(duration: 0.1)
         }
         .frame(width: size, height: size)
         .clipShape(Circle())
@@ -77,7 +73,6 @@ struct InnerProfilePicView: View {
 }
 
 struct ProfilePicView: View {
-    
     let pubkey: String
     let size: CGFloat
     let highlight: Highlight
@@ -106,6 +101,33 @@ struct ProfilePicView: View {
                     self.picture = pic
                 }
             }
+    }
+}
+
+struct LargeImageProcessor: ImageProcessor {
+    
+    let identifier: String = "com.damus.largeimageprocessor"
+    let maxSize: Int = 1000000
+    let downsampleSize = CGSize(width: 200, height: 200)
+    
+    func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
+        
+        switch item {
+        case .image(let image):
+            guard let data = image.kf.data(format: .unknown) else {
+                return nil
+            }
+            
+            if data.count > maxSize {
+                return KingfisherWrapper.downsampledImage(data: data, to: downsampleSize, scale: options.scaleFactor)
+            }
+            return image
+        case .data(let data):
+            if data.count > maxSize {
+                return KingfisherWrapper.downsampledImage(data: data, to: downsampleSize, scale: options.scaleFactor)
+            }
+            return KFCrossPlatformImage(data: data)
+        }
     }
 }
 

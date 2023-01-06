@@ -103,12 +103,13 @@ struct BuilderEventView: View {
     
     var body: some View {
         VStack {
-            if event == nil {
-                ProgressView().padding()
-            } else {
-                NavigationLink(destination: BuildThreadV2View(damus: damus, event_id: event!.id)) {
-                    EventView(damus: damus, event: event!, show_friend_icon: true, size: .small, embedded: true)
+            if let event = event {
+                let ev = event.inner_event ?? event
+                NavigationLink(destination: BuildThreadV2View(damus: damus, event_id: ev.id)) {
+                    EventView(damus: damus, event: event, show_friend_icon: true, size: .small)
                 }.buttonStyle(.plain)
+            } else {
+                ProgressView().padding()
             }
         }
         .frame(minWidth: 0, maxWidth: .infinity)
@@ -128,11 +129,10 @@ struct EventView: View {
     let pubkey: String
     let show_friend_icon: Bool
     let size: EventViewKind
-    let embedded: Bool
 
     @EnvironmentObject var action_bar: ActionBarModel
 
-    init(event: NostrEvent, highlight: Highlight, has_action_bar: Bool, damus: DamusState, show_friend_icon: Bool, size: EventViewKind = .normal, embedded: Bool = false) {
+    init(event: NostrEvent, highlight: Highlight, has_action_bar: Bool, damus: DamusState, show_friend_icon: Bool, size: EventViewKind = .normal) {
         self.event = event
         self.highlight = highlight
         self.has_action_bar = has_action_bar
@@ -140,10 +140,9 @@ struct EventView: View {
         self.pubkey = event.pubkey
         self.show_friend_icon = show_friend_icon
         self.size = size
-        self.embedded = embedded
     }
 
-    init(damus: DamusState, event: NostrEvent, show_friend_icon: Bool, size: EventViewKind = .normal, embedded: Bool = false) {
+    init(damus: DamusState, event: NostrEvent, show_friend_icon: Bool, size: EventViewKind = .normal) {
         self.event = event
         self.highlight = .none
         self.has_action_bar = false
@@ -151,7 +150,6 @@ struct EventView: View {
         self.pubkey = event.pubkey
         self.show_friend_icon = show_friend_icon
         self.size = size
-        self.embedded = embedded
     }
 
     init(damus: DamusState, event: NostrEvent, pubkey: String, show_friend_icon: Bool, size: EventViewKind = .normal, embedded: Bool = false) {
@@ -162,7 +160,6 @@ struct EventView: View {
         self.pubkey = pubkey
         self.show_friend_icon = show_friend_icon
         self.size = size
-        self.embedded = embedded
     }
 
     var body: some View {
@@ -179,7 +176,7 @@ struct EventView: View {
                             Image(systemName: "arrow.2.squarepath")
                                 .font(.footnote.weight(.bold))
                                 .foregroundColor(Color.gray)
-                            ProfileName(pubkey: event.pubkey, profile: prof, contacts: damus.contacts, show_friend_confirmed: true)
+                            ProfileName(pubkey: event.pubkey, profile: prof, damus: damus, show_friend_confirmed: true)
                                     .font(.footnote.weight(.bold))
                                     .foregroundColor(Color.gray)
                             Text("Boosted")
@@ -209,10 +206,8 @@ struct EventView: View {
                     let pmodel = ProfileModel(pubkey: pubkey, damus: damus)
                     let pv = ProfileView(damus_state: damus, profile: pmodel, followers: FollowersModel(damus_state: damus, target: pubkey))
                     
-                    if !embedded {
-                        NavigationLink(destination: pv) {
-                            ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: highlight, profiles: damus.profiles)
-                        }
+                    NavigationLink(destination: pv) {
+                        ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: highlight, profiles: damus.profiles)
                     }
                     
                     Spacer()
@@ -232,7 +227,7 @@ struct EventView: View {
                         }
                     }
                     
-                    EventProfileName(pubkey: pubkey, profile: profile, contacts: damus.contacts, show_friend_confirmed: show_friend_icon, size: size)
+                    EventProfileName(pubkey: pubkey, profile: profile, damus: damus, show_friend_confirmed: show_friend_icon, size: size)
                     if size != .selected {
                         Text("\(format_relative_time(event.created_at))")
                             .font(eventviewsize_to_font(size))
@@ -247,55 +242,30 @@ struct EventView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, show_images: should_show_images(contacts: damus.contacts, ev: event), artifacts: .just_content(content), size: self.size)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .allowsHitTesting(!embedded)
+                let should_show_img = should_show_images(contacts: damus.contacts, ev: event, our_pubkey: damus.pubkey)
                 
-                if !embedded {
-                    let blocks = event.blocks(damus.keypair.privkey).filter { block in
-                        guard case .mention(let mention) = block else {
-                            return false
-                        }
+                NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, previews: damus.previews, show_images: should_show_img, artifacts: .just_content(content), size: self.size)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                if has_action_bar {
+                    if size == .selected {
+                        Text("\(format_date(event.created_at))")
+                            .padding(.top, 10)
+                            .font(.footnote)
+                            .foregroundColor(.gray)
                         
-                        guard case .event = mention.type else {
-                            return false
-                        }
-                        
-                        if mention.ref.key != "e" {
-                            return false
-                        }
-                        
-                        
-                        return true
+                        Divider()
+                            .padding([.bottom], 4)
+                    } else {
+                        Rectangle().frame(height: 2).opacity(0)
                     }
                     
-                    /// MARK: - Preview
-                    if let firstBlock = blocks.first, case .mention(let mention) = firstBlock, mention.ref.key == "e" {
-                        BuilderEventView(damus: damus, event_id: mention.ref.id)
-                    }
+                    let bar = make_actionbar_model(ev: event, damus: damus)
+                    EventActionBar(damus_state: damus, event: event, bar: bar)
                 }
 
-                if !embedded {
-                    if has_action_bar {
-                        if size == .selected {
-                            Text("\(format_date(event.created_at))")
-                                .padding(.top, 10)
-                                .font(.footnote)
-                                .foregroundColor(.gray)
-                            
-                            Divider()
-                                .padding([.bottom], 4)
-                        } else {
-                            Rectangle().frame(height: 2).opacity(0)
-                        }
-                        
-                        let bar = make_actionbar_model(ev: event, damus: damus)
-                        EventActionBar(damus_state: damus, event: event, bar: bar)
-                    }
-
-                    Divider()
-                        .padding([.top], 4)
-                }
+                Divider()
+                    .padding([.top], 4)
             }
             .padding([.leading], 2)
         }
@@ -309,7 +279,10 @@ struct EventView: View {
 }
 
 // blame the porn bots for this code
-func should_show_images(contacts: Contacts, ev: NostrEvent) -> Bool {
+func should_show_images(contacts: Contacts, ev: NostrEvent, our_pubkey: String) -> Bool {
+    if ev.pubkey == our_pubkey {
+        return true
+    }
     if contacts.is_in_friendosphere(ev.pubkey) {
         return true
     }
@@ -396,7 +369,7 @@ func reply_desc(profiles: Profiles, event: NostrEvent) -> String {
     let n = desc.others
 
     if desc.pubkeys.count == 0 {
-        return "Reply to self"
+        return NSLocalizedString("Reply to self", comment: "Label to indicate that the user is replying to themself.")
     }
 
     let names: [String] = pubkeys.map {
@@ -406,20 +379,14 @@ func reply_desc(profiles: Profiles, event: NostrEvent) -> String {
 
     if names.count == 2 {
         if n > 2 {
-            let and_other = reply_others_desc(n: n, n_pubkeys: pubkeys.count)
-            return "Replying to \(names[0]), \(names[1])\(and_other)"
+            let othersCount = n - pubkeys.count
+            return String(format: NSLocalizedString("replying_to_two_and_others", comment: "Label to indicate that the user is replying to 2 users and others."), othersCount, names[0], names[1])
         }
-        return "Replying to \(names[0]) & \(names[1])"
+        return String.localizedStringWithFormat("Replying to %@ & %@", names[0], names[1])
     }
 
-    let and_other = reply_others_desc(n: n, n_pubkeys: pubkeys.count)
-    return "Replying to \(names[0])\(and_other)"
-}
-
-func reply_others_desc(n: Int, n_pubkeys: Int) -> String {
-    let other = n - n_pubkeys
-    let plural = other == 1 ? "" : "s"
-    return n > 1 ? " & \(other) other\(plural)" : ""
+    let othersCount = n - pubkeys.count
+    return String(format: NSLocalizedString("replying_to_one_and_others", comment: "Label to indicate that the user is replying to 1 user and others."), othersCount, names[0])
 }
 
 

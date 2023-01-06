@@ -12,7 +12,7 @@ enum NostrPostResult {
     case cancel
 }
 
-let POST_PLACEHOLDER = "Type your post here..."
+let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Text box prompt to ask user to type their post.")
 
 struct PostView: View {
     @State var post: String = ""

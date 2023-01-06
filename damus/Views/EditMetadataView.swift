@@ -15,11 +15,6 @@ func isHttpsUrl(_ string: String) -> Bool {
     return urlTest.evaluate(with: string)
 }
 
-struct NIP05 {
-    let username: String
-    let host: String
-}
-
 func isImage(_ urlString: String) -> Bool {
     let imageTypes = ["image/jpg", "image/jpeg", "image/png", "image/gif", "image/tiff", "image/bmp", "image/webp"]
 
@@ -101,11 +96,7 @@ struct EditMetadataView: View {
     }
     
     var nip05_parts: NIP05? {
-        let parts = nip05.split(separator: "@")
-        guard parts.count == 2 else {
-            return nil
-        }
-        return NIP05(username: String(parts[0]), host: String(parts[1]))
+        return NIP05.parse(nip05)
     }
     
     var body: some View {
@@ -142,7 +133,7 @@ struct EditMetadataView: View {
                 }
                 
                 Section("About Me") {
-                    let placeholder = "Absolute Boss"
+                    let placeholder = NSLocalizedString("Absolute Boss", comment: "Placeholder text for About Me description.")
                     ZStack(alignment: .topLeading) {
                         TextEditor(text: $about)
                             .textInputAutocapitalization(.sentences)
@@ -169,12 +160,12 @@ struct EditMetadataView: View {
                     Text("NIP-05 Verification")
                 }, footer: {
                     if let parts = nip05_parts {
-                        Text("'\(parts.username)' at '\(parts.host)' will be used for verification")
+                        Text(String.localizedStringWithFormat("'%@' at '%@' will be used for verification", parts.username, parts.host))
                     } else {
-                        Text("'\(nip05)' is an invalid nip05 identifier. It should look like an email.")
+                        Text(String.localizedStringWithFormat("'%@' is an invalid nip05 identifier. It should look like an email.", nip05))
                     }
                 })
-                
+
                 Button("Save") {
                     save()
                     dismiss()
