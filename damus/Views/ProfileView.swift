@@ -405,15 +405,11 @@ struct KeyView: View {
                                 isCopied = false
                             }
                         } label: {
-                            Label {
-                                Text("Public key")
-                            } icon: {
-                                Image("ic-key")
-                                    .contentShape(Rectangle())
-                                    .frame(width: 16, height: 16)
-                            }
-                            .labelStyle(IconOnlyLabelStyle())
-                            .symbolRenderingMode(.hierarchical)
+                            Label("Public Key", systemImage: "key.fill")
+                                .font(.custom("key", size: 12.0))
+                                .labelStyle(IconOnlyLabelStyle())
+                                .foregroundStyle(hex_to_rgb(pubkey))
+                                .symbolRenderingMode(.palette)
                         }
                         .padding(.leading,4)
                         Text(abbrev_pubkey(bech32, amount: 16))
