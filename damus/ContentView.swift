@@ -94,9 +94,9 @@ struct ContentView: View {
     var PostingTimelineView: some View {
         VStack {
             TabView(selection: $filter_state) {
-                ContentTimelineView
+                contentTimelineView(filter: posts_filter_event)
                     .tag(FilterState.posts)
-                ContentTimelineView
+                contentTimelineView(filter: posts_and_replies_filter_event)
                     .tag(FilterState.posts_and_replies)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
@@ -114,10 +114,10 @@ struct ContentView: View {
         .ignoresSafeArea(.keyboard)
     }
     
-    var ContentTimelineView: some View {
+    func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
         ZStack {
             if let damus = self.damus_state {
-                TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter_event)
+                TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter)
             }
             if privkey != nil {
                 PostButtonContainer {
@@ -125,6 +125,14 @@ struct ContentView: View {
                 }
             }
         }
+    }
+    
+    func posts_and_replies_filter_event(_ ev: NostrEvent) -> Bool {
+        return true
+    }
+    
+    func posts_filter_event(_ ev: NostrEvent) -> Bool {
+        return !ev.is_reply(nil)
     }
     
     var FiltersView: some View {
@@ -135,14 +143,6 @@ struct ContentView: View {
             }
             .pickerStyle(.segmented)
         }
-    }
-    
-    func filter_event(_ ev: NostrEvent) -> Bool {
-        if self.filter_state == .posts {
-            return !ev.is_reply(nil)
-        }
-        
-        return true
     }
     
     func MainContent(damus: DamusState) -> some View {

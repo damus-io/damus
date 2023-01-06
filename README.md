@@ -56,7 +56,7 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 - Formatting Notes (may not format as intended in other web clients)
   - Italics: 1 asterisk `*italic*`
   - Bold: 2 asterisk `**bold**`
-  - Strikethrough: 2 tildes `~~strikethrough~~`
+  - Strikethrough: 1 tildes `~strikethrough~`
   - Code: 1 back-tick ``code``
 
 #### 💬 Encrypted DMs (chat app, bottom navigation)
