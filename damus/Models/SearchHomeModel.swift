@@ -112,27 +112,30 @@ func load_profiles(profiles_subid: String, relay_id: String, events: [NostrEvent
     let authors = find_profiles_to_fetch(profiles: damus_state.profiles, events: events)
     filter.authors = authors
     
-    if !authors.isEmpty {
-        print("loading \(authors.count) profiles from \(relay_id)")
-        damus_state.pool.subscribe_to(sub_id: profiles_subid, filters: [filter], to: [relay_id]) { sub_id, conn_ev in
-            let (sid, done) = handle_subid_event(pool: damus_state.pool, relay_id: relay_id, ev: conn_ev) { sub_id, ev in
-                guard sub_id == profiles_subid else {
-                    return
-                }
-                
-                if ev.known_kind == .metadata {
-                    process_metadata_event(profiles: damus_state.profiles, ev: ev)
-                }
-                
-            }
-            
-            guard done && sid == profiles_subid else {
+    guard !authors.isEmpty else {
+        return
+    }
+    
+    print("loading \(authors.count) profiles from \(relay_id)")
+    
+    damus_state.pool.subscribe_to(sub_id: profiles_subid, filters: [filter], to: [relay_id]) { sub_id, conn_ev in
+        let (sid, done) = handle_subid_event(pool: damus_state.pool, relay_id: relay_id, ev: conn_ev) { sub_id, ev in
+            guard sub_id == profiles_subid else {
                 return
             }
-                
-            print("done loading \(authors.count) profiles from \(relay_id)")
-            damus_state.pool.unsubscribe(sub_id: profiles_subid, to: [relay_id])
+            
+            if ev.known_kind == .metadata {
+                process_metadata_event(profiles: damus_state.profiles, ev: ev)
+            }
+            
         }
+        
+        guard done && sid == profiles_subid else {
+            return
+        }
+            
+        print("done loading \(authors.count) profiles from \(relay_id)")
+        damus_state.pool.unsubscribe(sub_id: profiles_subid, to: [relay_id])
     }
 }
 

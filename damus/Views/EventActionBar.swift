@@ -24,6 +24,7 @@ struct EventActionBar: View {
     let generator = UIImpactFeedbackGenerator(style: .medium)
     @State var sheet: ActionBarSheet? = nil
     @State var confirm_boost: Bool = false
+    @State var show_share_sheet: Bool = false
     @StateObject var bar: ActionBarModel
     
     var body: some View {
@@ -40,6 +41,7 @@ struct EventActionBar: View {
                 EventActionButton(img: "bubble.left", col: nil) {
                     notify(.reply, event)
                 }
+                .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
             }
             
             HStack(alignment: .bottom) {
@@ -55,6 +57,7 @@ struct EventActionBar: View {
                     }
                 }
             }
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
 
             HStack(alignment: .bottom) {
                 Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
@@ -69,6 +72,12 @@ struct EventActionBar: View {
                     }
                 }
             }
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+
+            EventActionButton(img: "square.and.arrow.up", col: Color.gray) {
+                show_share_sheet = true
+            }
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
             
             /*
             HStack(alignment: .bottom) {
@@ -85,6 +94,13 @@ struct EventActionBar: View {
                 }
             }
              */
+        }
+        .sheet(isPresented: $show_share_sheet) {
+            if let note_id = bech32_note_id(event.id) {
+                if let url = URL(string: "https://damus.io/" + note_id) {
+                    ShareSheet(activityItems: [url])
+                }
+            }
         }
         .alert("Boost", isPresented: $confirm_boost) {
             Button("Cancel") {
@@ -142,7 +158,6 @@ func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> 
             .font(.footnote.weight(.medium))
             .foregroundColor(col == nil ? Color.gray : col!)
     }
-    .padding(.trailing, 40)
 }
 
 struct LikeButton: View {
