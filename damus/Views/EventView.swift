@@ -176,7 +176,7 @@ struct EventView: View {
                             Image(systemName: "arrow.2.squarepath")
                                 .font(.footnote.weight(.bold))
                                 .foregroundColor(Color.gray)
-                            ProfileName(pubkey: event.pubkey, profile: prof, contacts: damus.contacts, show_friend_confirmed: true, profiles: damus.profiles)
+                            ProfileName(pubkey: event.pubkey, profile: prof, damus: damus, show_friend_confirmed: true)
                                     .font(.footnote.weight(.bold))
                                     .foregroundColor(Color.gray)
                             Text("Boosted")
@@ -227,7 +227,7 @@ struct EventView: View {
                         }
                     }
                     
-                    EventProfileName(pubkey: pubkey, profile: profile, contacts: damus.contacts, show_friend_confirmed: show_friend_icon, profiles: damus.profiles, size: size)
+                    EventProfileName(pubkey: pubkey, profile: profile, damus: damus, show_friend_confirmed: show_friend_icon, size: size)
                     if size != .selected {
                         Text("\(format_relative_time(event.created_at))")
                             .font(eventviewsize_to_font(size))

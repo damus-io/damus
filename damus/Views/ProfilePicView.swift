@@ -62,7 +62,6 @@ struct InnerProfilePicView: View {
                 .placeholder { _ in
                     Placeholder
                 }
-                .cacheOriginalImage()
                 .scaleFactor(UIScreen.main.scale)
                 .loadDiskFileSynchronously()
                 .fade(duration: 0.1)
@@ -112,17 +111,20 @@ struct LargeImageProcessor: ImageProcessor {
     let downsampleSize = CGSize(width: 200, height: 200)
     
     func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
-        let downsamplingImageProcessor = DownsamplingImageProcessor(size: downsampleSize)
         
         switch item {
         case .image(let image):
-            if image.cacheCost > maxSize {
-                return downsamplingImageProcessor.process(item: item, options: options)
+            guard let data = image.kf.data(format: .unknown) else {
+                return nil
+            }
+            
+            if data.count > maxSize {
+                return KingfisherWrapper.downsampledImage(data: data, to: downsampleSize, scale: options.scaleFactor)
             }
             return image
         case .data(let data):
             if data.count > maxSize {
-                return downsamplingImageProcessor.process(item: item, options: options)
+                return KingfisherWrapper.downsampledImage(data: data, to: downsampleSize, scale: options.scaleFactor)
             }
             return KFCrossPlatformImage(data: data)
         }
