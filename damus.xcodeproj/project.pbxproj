@@ -754,7 +754,6 @@
 				4CE6DF1027F7A2B300C66700 /* XCRemoteSwiftPackageReference "Starscream" */,
 				4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */,
 				4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */,
-				3169CAE9294FCABA00EE4006 /* XCRemoteSwiftPackageReference "Shimmer" */,
 				6C7DE41D2955169800E66263 /* XCRemoteSwiftPackageReference "Vault" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
@@ -1294,14 +1293,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		3169CAE9294FCABA00EE4006 /* XCRemoteSwiftPackageReference "Shimmer" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/joshuajhomann/Shimmer";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
 		4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/onevcat/Kingfisher";
