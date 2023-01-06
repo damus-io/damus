@@ -11,13 +11,20 @@ struct SideMenuView: View {
     let damus_state: DamusState
     @Binding var isSidebarVisible: Bool
 
+    @State var confirm_logout: Bool = false
+    @StateObject var user_settings = UserSettingsStore()
+    
+    @Environment(\.colorScheme) var colorScheme
+    
     var sideBarWidth = UIScreen.main.bounds.size.width * 0.7
-    var bgColor: Color =
-          Color(.init(
-                  red: 52 / 255,
-                  green: 70 / 255,
-                  blue: 182 / 255,
-                  alpha: 1))
+    
+    func fillColor() -> Color {
+        colorScheme == .light ? Color("DamusWhite") : Color("DamusBlack")
+    }
+    
+    func textColor() -> Color {
+        colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite")
+    }
     
     var body: some View {
         if isSidebarVisible {
@@ -25,7 +32,7 @@ struct SideMenuView: View {
                 GeometryReader { _ in
                     EmptyView()
                 }
-                .background(.black.opacity(0.6))
+                .background(.gray.opacity(0.6))
                 .opacity(isSidebarVisible ? 1 : 0)
                 .animation(.easeInOut.delay(0.2), value: isSidebarVisible)
                 .onTapGesture {
@@ -40,7 +47,7 @@ struct SideMenuView: View {
     var content: some View {
         HStack(alignment: .top) {
             ZStack(alignment: .top) {
-                Color("DamusBlack")
+                fillColor()
 
                 VStack(alignment: .leading, spacing: 20) {
                     let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
@@ -50,14 +57,16 @@ struct SideMenuView: View {
                     } else {
                         Image(systemName: "person.fill")
                     }
-                    if let display_name = profile?.display_name {
-                        VStack(alignment: .leading) {
+                    VStack(alignment: .leading) {
+                        if let display_name = profile?.display_name {
                             Text(display_name)
-                                .foregroundColor(Color("DamusWhite"))
-                                .font(.headline)
-                            ProfileName(pubkey: damus_state.pubkey, profile: profile, prefix: "@", damus: damus_state, show_friend_confirmed: false)
-                                .font(.callout)
-                                .foregroundColor(.gray)
+                                .foregroundColor(textColor())
+                                .font(.title)
+                        }
+                        if let name = profile?.name {
+                            Text("@" + name)
+                                .foregroundColor(Color("DamusMediumGrey"))
+                                .font(.body)
                         }
                     }
                     
@@ -80,7 +89,7 @@ struct SideMenuView: View {
                             .foregroundColor(.accentColor)
                     }
                     
-                    NavigationLink(destination: ConfigView(state: damus_state)) {
+                    NavigationLink(destination: ConfigView(state: damus_state).environmentObject(user_settings)) {
                         Label("App Settings", systemImage: "xserve")
                             .font(.title2)
                             .foregroundColor(.accentColor)
@@ -90,20 +99,30 @@ struct SideMenuView: View {
                     
                     Button(action: {
                         //ConfigView(state: damus_state)
-                        notify(.logout, ())
+                        confirm_logout = true
                     }, label: {
-                        Label("Sign out", systemImage: "exit")
+                        Label("Sign out", systemImage: "pip.exit")
                             .font(.title3)
-                            .foregroundColor(Color("DamusWhite"))
+                            .foregroundColor(textColor())
                     })
                 }
                 .padding(.top, 50)
                 .padding(.bottom, 50)
-                .padding(.horizontal, 20)
+                .padding(.leading, 40)
             }
             .frame(width: sideBarWidth)
             .offset(x: isSidebarVisible ? 0 : -sideBarWidth)
             .animation(.default, value: isSidebarVisible)
+            .alert("Logout", isPresented: $confirm_logout) {
+                Button("Cancel") {
+                    confirm_logout = false
+                }
+                Button("Logout") {
+                    notify(.logout, ())
+                }
+            } message: {
+                Text("Make sure your nsec account key is saved before you logout or you will lose access to this account")
+            }
 
             Spacer()
         }

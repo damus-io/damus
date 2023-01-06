@@ -137,7 +137,7 @@ struct EventProfileName: View {
                     .padding([.trailing], 2)
                 
                 Text("@" + String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color("DamusMediumGrey"))
                     .font(eventviewsize_to_font(size))
             } else {
                 Text(String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))

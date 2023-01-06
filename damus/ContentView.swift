@@ -211,197 +211,207 @@ struct ContentView: View {
     }
 
     var body: some View {
-            //ZStack {
+        ZStack {
+            if let damus = self.damus_state {
+                                
                 VStack(alignment: .leading, spacing: 0) {
-                    if let damus = self.damus_state {
                     NavigationView {
-                        SideMenuView(damus_state: damus_state!, isSidebarVisible: $isSideBarOpened)
-                        MainContent(damus: damus)
-                            .toolbar {
-                                ToolbarItem(placement: .navigationBarLeading) {
-                                    let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
-                                    let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
-                                    let prof_dest = ProfileView(damus_state: damus_state!, profile: profile_model, followers: followers_model)
-                                    
-                                    Button {
-                                        isSideBarOpened.toggle()
-                                    } label: {
+
+                        SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened).zIndex(1)
+                        
+                        VStack(alignment: .leading, spacing: 0) {
+                            
+                            MainContent(damus: damus)
+                                .toolbar {
+                                    ToolbarItem(placement: .navigationBarLeading) {
                                         let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
                                         let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
                                         let prof_dest = ProfileView(damus_state: damus_state!, profile: profile_model, followers: followers_model)
                                         
-                                        if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
-                                            ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
-                                        } else {
-                                            Image(systemName: "person.fill")
-                                        }
-                                    }
-                                    
-                                    NavigationLink(destination: prof_dest) {
-                                        /// Verify that the user has a profile picture, if not display a generic SF Symbol
-                                        /// (Resolves an in-app error where ``Robohash`` pictures are not generated so the button dissapears
-                                        if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
-                                            ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
-                                        } else {
-                                            Image(systemName: "person.fill")
-                                        }
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
-                                    
-                                }
-                                
-                                ToolbarItem(placement: .navigationBarTrailing) {
-                                    HStack(alignment: .center) {
-                                        if home.signal.signal != home.signal.max_signal {
-                                            Text("\(home.signal.signal)/\(home.signal.max_signal)")
-                                                .font(.callout)
-                                                .foregroundColor(.gray)
+                                        Button {
+                                            isSideBarOpened.toggle()
+                                        } label: {
+                                            let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
+                                            let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
+                                            let prof_dest = ProfileView(damus_state: damus_state!, profile: profile_model, followers: followers_model)
+                                            
+                                            if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
+                                                ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
+                                            } else {
+                                                Image(systemName: "person.fill")
+                                            }
                                         }
                                         
-                                        NavigationLink(destination: ConfigView(state: damus_state!).environmentObject(user_settings)) {
-                                            Label("", systemImage: "gear")
+                                        NavigationLink(destination: prof_dest) {
+                                            /// Verify that the user has a profile picture, if not display a generic SF Symbol
+                                            /// (Resolves an in-app error where ``Robohash`` pictures are not generated so the button dissapears
+                                            if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
+                                                ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
+                                            } else {
+                                                Image(systemName: "person.fill")
+                                            }
                                         }
                                         .buttonStyle(PlainButtonStyle())
+                                        
+                                    }
+                                    
+                                    ToolbarItem(placement: .navigationBarTrailing) {
+                                        HStack(alignment: .center) {
+                                            if home.signal.signal != home.signal.max_signal {
+                                                Text("\(home.signal.signal)/\(home.signal.max_signal)")
+                                                    .font(.callout)
+                                                    .foregroundColor(.gray)
+                                            }
+                                            
+                                            /*
+                                             NavigationLink(destination: ConfigView(state: damus_state!).environmentObject(user_settings)) {
+                                             Label("", systemImage: "gear")
+                                             }
+                                             .buttonStyle(PlainButtonStyle())
+                                             */
+                                        }
                                     }
                                 }
-                            }
-                    }
-                    .navigationViewStyle(.stack)
-                }
-                
-                TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
-                    .padding([.bottom], 8)
-            }
-            .onAppear() {
-                self.connect()
-                //KingfisherManager.shared.cache.clearDiskCache()
-                setup_notifications()
-            }
-            .sheet(item: $active_sheet) { item in
-                switch item {
-                case .post:
-                    PostView(replying_to: nil, references: [])
-                case .reply(let event):
-                    ReplyView(replying_to: event, damus: damus_state!)
-                }
-            }
-            .onOpenURL { url in
-                guard let link = decode_nostr_uri(url.absoluteString) else {
-                    return
-                }
-                
-                switch link {
-                case .ref(let ref):
-                    if ref.key == "p" {
-                        active_profile = ref.ref_id
-                        profile_open = true
-                    } else if ref.key == "e" {
-                        active_event_id = ref.ref_id
-                        thread_open = true
-                    }
-                case .filter(let filt):
-                    active_search = filt
-                    search_open = true
-                    break
-                    // TODO: handle filter searches?
-                }
-                
-            }
-            .onReceive(handle_notify(.boost)) { notif in
-                guard let privkey = self.privkey else {
-                    return
-                }
-                
-                let ev = notif.object as! NostrEvent
-                let boost = make_boost_event(pubkey: pubkey, privkey: privkey, boosted: ev)
-                self.damus_state?.pool.send(.event(boost))
-            }
-            .onReceive(handle_notify(.open_thread)) { obj in
-                //let ev = obj.object as! NostrEvent
-                //thread.set_active_event(ev)
-                //is_thread_open = true
-            }
-            .onReceive(handle_notify(.reply)) { notif in
-                let ev = notif.object as! NostrEvent
-                self.active_sheet = .reply(ev)
-            }
-            .onReceive(handle_notify(.like)) { like in
-            }
-            .onReceive(handle_notify(.broadcast_event)) { obj in
-                let ev = obj.object as! NostrEvent
-                self.damus_state?.pool.send(.event(ev))
-            }
-            .onReceive(handle_notify(.unfollow)) { notif in
-                guard let privkey = self.privkey else {
-                    return
-                }
-                
-                guard let damus = self.damus_state else {
-                    return
-                }
-                
-                let target = notif.object as! FollowTarget
-                let pk = target.pubkey
-                
-                if let ev = unfollow_user(pool: damus.pool,
-                                          our_contacts: damus.contacts.event,
-                                          pubkey: damus.pubkey,
-                                          privkey: privkey,
-                                          unfollow: pk) {
-                    notify(.unfollowed, pk)
+                        }
+                    }.navigationViewStyle(.stack)
                     
-                    damus.contacts.event = ev
-                    damus.contacts.remove_friend(pk)
-                    //friend_events = friend_events.filter { $0.pubkey != pk }
+                    TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
+                            .padding([.bottom], 8)
                 }
             }
-            .onReceive(handle_notify(.follow)) { notif in
-                guard let privkey = self.privkey else {
-                    return
+        }
+        .onAppear() {
+            self.connect()
+            //KingfisherManager.shared.cache.clearDiskCache()
+            setup_notifications()
+        }
+        .sheet(item: $active_sheet) { item in
+            switch item {
+            case .post:
+                PostView(replying_to: nil, references: [])
+            case .reply(let event):
+                ReplyView(replying_to: event, damus: damus_state!)
+            }
+        }
+        .onOpenURL { url in
+            guard let link = decode_nostr_uri(url.absoluteString) else {
+                return
+            }
+            
+            switch link {
+            case .ref(let ref):
+                if ref.key == "p" {
+                    active_profile = ref.ref_id
+                    profile_open = true
+                } else if ref.key == "e" {
+                    active_event_id = ref.ref_id
+                    thread_open = true
                 }
+            case .filter(let filt):
+                active_search = filt
+                search_open = true
+                break
+                // TODO: handle filter searches?
+            }
+            
+        }
+        .onReceive(handle_notify(.boost)) { notif in
+            guard let privkey = self.privkey else {
+                return
+            }
+            
+            let ev = notif.object as! NostrEvent
+            let boost = make_boost_event(pubkey: pubkey, privkey: privkey, boosted: ev)
+            self.damus_state?.pool.send(.event(boost))
+        }
+        .onReceive(handle_notify(.open_thread)) { obj in
+            //let ev = obj.object as! NostrEvent
+            //thread.set_active_event(ev)
+            //is_thread_open = true
+        }
+        .onReceive(handle_notify(.reply)) { notif in
+            let ev = notif.object as! NostrEvent
+            self.active_sheet = .reply(ev)
+        }
+        .onReceive(handle_notify(.like)) { like in
+        }
+        .onReceive(handle_notify(.broadcast_event)) { obj in
+            let ev = obj.object as! NostrEvent
+            self.damus_state?.pool.send(.event(ev))
+        }
+        .onReceive(handle_notify(.unfollow)) { notif in
+            guard let privkey = self.privkey else {
+                return
+            }
+            
+            guard let damus = self.damus_state else {
+                return
+            }
+            
+            let target = notif.object as! FollowTarget
+            let pk = target.pubkey
+            
+            if let ev = unfollow_user(pool: damus.pool,
+                                      our_contacts: damus.contacts.event,
+                                      pubkey: damus.pubkey,
+                                      privkey: privkey,
+                                      unfollow: pk) {
+                notify(.unfollowed, pk)
                 
-                let fnotify = notif.object as! FollowTarget
-                guard let damus = self.damus_state else {
-                    return
-                }
+                damus.contacts.event = ev
+                damus.contacts.remove_friend(pk)
+                //friend_events = friend_events.filter { $0.pubkey != pk }
+            }
+        }
+        .onReceive(handle_notify(.follow)) { notif in
+            guard let privkey = self.privkey else {
+                return
+            }
+            
+            let fnotify = notif.object as! FollowTarget
+            guard let damus = self.damus_state else {
+                return
+            }
+            
+            if let ev = follow_user(pool: damus.pool,
+                                    our_contacts: damus.contacts.event,
+                                    pubkey: damus.pubkey,
+                                    privkey: privkey,
+                                    follow: ReferencedId(ref_id: fnotify.pubkey, relay_id: nil, key: "p")) {
+                notify(.followed, fnotify.pubkey)
                 
-                if let ev = follow_user(pool: damus.pool,
-                                        our_contacts: damus.contacts.event,
-                                        pubkey: damus.pubkey,
-                                        privkey: privkey,
-                                        follow: ReferencedId(ref_id: fnotify.pubkey, relay_id: nil, key: "p")) {
-                    notify(.followed, fnotify.pubkey)
-                    
-                    damus_state?.contacts.event = ev
-                    
-                    switch fnotify {
-                    case .pubkey(let pk):
-                        damus.contacts.add_friend_pubkey(pk)
-                    case .contact(let ev):
-                        damus.contacts.add_friend_contact(ev)
-                    }
-                }
-            }
-            .onReceive(handle_notify(.post)) { obj in
-                guard let privkey = self.privkey else {
-                    return
-                }
+                damus_state?.contacts.event = ev
                 
-                let post_res = obj.object as! NostrPostResult
-                switch post_res {
-                case .post(let post):
-                    print("post \(post.content)")
-                    let new_ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
-                    self.damus_state?.pool.send(.event(new_ev))
-                case .cancel:
-                    active_sheet = nil
-                    print("post cancelled")
+                switch fnotify {
+                case .pubkey(let pk):
+                    damus.contacts.add_friend_pubkey(pk)
+                case .contact(let ev):
+                    damus.contacts.add_friend_contact(ev)
                 }
             }
-            .onReceive(timer) { n in
-                self.damus_state?.pool.connect_to_disconnected()
+        }
+        .onReceive(handle_notify(.post)) { obj in
+            guard let privkey = self.privkey else {
+                return
             }
-        //}
+            
+            let post_res = obj.object as! NostrPostResult
+            switch post_res {
+            case .post(let post):
+                print("post \(post.content)")
+                let new_ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
+                self.damus_state?.pool.send(.event(new_ev))
+            case .cancel:
+                active_sheet = nil
+                print("post cancelled")
+            }
+        }
+        .onReceive(timer) { n in
+            self.damus_state?.pool.connect_to_disconnected()
+        }
+    
+            
+
     }
     
     func switch_timeline(_ timeline: Timeline) {
@@ -459,7 +469,6 @@ struct ContentView_Previews: PreviewProvider {
         ContentView(keypair: Keypair(pubkey: "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681", privkey: nil))
     }
 }
-
 
 func get_since_time(last_event: NostrEvent?) -> Int64? {
     if let last_event = last_event {
