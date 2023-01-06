@@ -82,6 +82,8 @@ struct ContentView: View {
     @State var filter_state : FilterState = .posts_and_replies
     @StateObject var home: HomeModel = HomeModel()
     @StateObject var user_settings = UserSettingsStore()
+    @State var deeplinkTarget: DeeplinkManager.DeeplinkTarget?
+
 
     // connect retry timer
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
@@ -208,7 +210,7 @@ struct ContentView: View {
             }
         }
     }
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
@@ -268,26 +270,31 @@ struct ContentView: View {
             }
         }
         .onOpenURL { url in
-            guard let link = decode_nostr_uri(url.absoluteString) else {
-                return
-            }
+            print(url)
+            // Ref: https://www.createwithswift.com/creating-a-custom-app-launch-experience-in-swiftui-with-deep-linking/
+            let deeplinkManager = DeeplinkManager()
+            let deeplink = deeplinkManager.manage(url: url)
+            self.deeplinkTarget = deeplink
             
-            switch link {
-            case .ref(let ref):
-                if ref.key == "p" {
-                    active_profile = ref.ref_id
-                    profile_open = true
-                } else if ref.key == "e" {
-                    active_event_id = ref.ref_id
-                    thread_open = true
-                }
-            case .filter(let filt):
-                active_search = filt
-                search_open = true
+            switch self.deeplinkTarget {
+            case .home:
+                // Do nothing
                 break
-                // TODO: handle filter searches?
+            case .profile(let pubkey):
+                active_profile = pubkey
+                profile_open = true
+            case .event(let eventID):
+                active_event_id = eventID
+                thread_open = true
+                break
+            case .filter(let filter):
+                // Not yet implemented
+                //active_search = filter
+                //search_open = true
+                break
+            case .none:
+                break
             }
-            
         }
         .onReceive(handle_notify(.boost)) { notif in
             guard let privkey = self.privkey else {

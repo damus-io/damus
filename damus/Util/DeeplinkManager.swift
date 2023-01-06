@@ -13,6 +13,8 @@ class DeeplinkManager {
     enum DeeplinkTarget: Equatable {
         case home
         case profile(pubkey: String)
+        case event(eventid: String)
+        case filter(filter: String)
     }
     
     class DeepLinkConstants {
@@ -41,9 +43,14 @@ class DeeplinkManager {
         
         if (url.scheme != "nostr") { return .home }
         //guard let pubkey = url.path else { return .home }
-        var pubkey = url.path.replacingOccurrences(of: "/", with: "")
+        var path = url.path.replacingOccurrences(of: "/", with: "")
         //guard let pubkey = url.path else { return .home }
-        if !pubkey.lowercased().starts(with: "npub") { return .home }
-        return .profile(pubkey: pubkey)
+        if path.lowercased().starts(with: "npub") {
+            return .profile(pubkey: path)
+        } else if path.lowercased().starts(with: "note") {
+            return .event(eventid: path)
+        } else {
+            return .home
+        }
     }
 }
