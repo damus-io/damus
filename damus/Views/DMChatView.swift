@@ -27,6 +27,10 @@ struct DMChatView: View {
             }
             .onAppear {
                 scroller.scrollTo("endblock")
+            }.onChange(of: dms.events.count) { _ in
+                withAnimation {
+                    scroller.scrollTo("endblock")
+                }
             }
         }
     }
