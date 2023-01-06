@@ -113,6 +113,7 @@ struct ProfileView: View {
     @State private var showingEditProfile = false
     @State var showing_select_wallet: Bool = false
     @State var is_zoomed: Bool = false
+    @State var show_share_sheet: Bool = false
     @StateObject var user_settings = UserSettingsStore()
     
     @Environment(\.dismiss) var dismiss
@@ -165,7 +166,19 @@ struct ProfileView: View {
     }
 
     static let markdown = Markdown()
-
+    
+    var ShareButton: some View {
+        Button(action: {
+            show_share_sheet = true
+        }) {
+            Image(systemName: "square.and.arrow.up.circle.fill")
+                .symbolRenderingMode(.palette)
+                .font(.system(size: 32))
+                .padding()
+                .foregroundStyle(.white, .black, .black.opacity(0.8))
+        }
+    }
+    
     var DMButton: some View {
         let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
         let dmview = DMChatView(damus_state: damus_state, pubkey: profile.pubkey)
@@ -186,6 +199,9 @@ struct ProfileView: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: 150)
                     .clipped()
+                
+                ShareButton
+                    .offset(x: geo.size.width - 80.0, y: 50.0 )
             }
             VStack(alignment: .leading) {
                 let data = damus_state.profiles.lookup(id: profile.pubkey)
@@ -200,7 +216,7 @@ struct ProfileView: View {
                             ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .none, profiles: damus_state.profiles)
                         }
                         .offset(y: -(pfp_size/2.0)) // Increase if set a frame
-                        
+                    
                     Spacer()
                     
                     Group {
@@ -223,10 +239,12 @@ struct ProfileView: View {
                                 EditButton(damus_state: damus_state)
                             }
                         }
+                        
                     }
                     .offset(y: -15.0) // Increase if set a frame
+                    
                 }
-                
+                               
                 ProfileNameView(pubkey: profile.pubkey, profile: data, damus: damus_state)
                     //.padding(.bottom)
                     .padding(.top,-(pfp_size/2.0))
@@ -323,6 +341,13 @@ struct ProfileView: View {
             profile.unsubscribe()
             followers.unsubscribe()
             // our profilemodel needs a bit more help
+        }
+        .sheet(isPresented: $show_share_sheet) {
+            if let npub = bech32_pubkey(profile.pubkey) {
+                if let url = URL(string: "https://damus.io/" + npub) {
+                    ShareSheet(activityItems: [url])
+                }
+            }
         }
         .ignoresSafeArea()
     }
