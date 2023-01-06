@@ -1,0 +1,12 @@
+/* 
+  Localizable.strings
+  damus
+
+  Created by Joel Klabo on 1/5/23.
+  
+*/
+
+// Add Relay View
+"Add Relay" = "Agregar relé";
+"Cancel" = "Cancelar";
+"Add" = "Agregar";
