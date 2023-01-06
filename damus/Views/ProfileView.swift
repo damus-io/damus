@@ -48,7 +48,7 @@ func follow_btn_enabled_state(_ fs: FollowState) -> Bool {
 struct ProfileNameView: View {
     let pubkey: String
     let profile: Profile?
-    let contacts: Contacts
+    let damus: DamusState
     
     var body: some View {
         Group {
@@ -56,7 +56,7 @@ struct ProfileNameView: View {
                 VStack(alignment: .leading) {
                     Text(real_name)
                         .font(.title3.weight(.bold))
-                    ProfileName(pubkey: pubkey, profile: profile, prefix: "@", contacts: contacts, show_friend_confirmed: true)
+                    ProfileName(pubkey: pubkey, profile: profile, prefix: "@", damus: damus, show_friend_confirmed: true)
                         .font(.callout)
                         .foregroundColor(.gray)
                     KeyView(pubkey: pubkey)
@@ -64,7 +64,7 @@ struct ProfileNameView: View {
                 }
             } else {
                 VStack(alignment: .leading) {
-                    ProfileName(pubkey: pubkey, profile: profile, contacts: contacts, show_friend_confirmed: true)
+                    ProfileName(pubkey: pubkey, profile: profile, damus: damus, show_friend_confirmed: true)
                         .font(.title3.weight(.bold))
                     KeyView(pubkey: pubkey)
                         .pubkey_context_menu(bech32_pubkey: pubkey)
@@ -146,7 +146,7 @@ struct ProfileView: View {
         }) {
             Image(systemName: "bolt.circle")
                 .symbolRenderingMode(.palette)
-                .foregroundStyle(colorScheme == .dark ? .white : .black, .black)
+                .foregroundStyle(colorScheme == .dark ? .white : .black, colorScheme == .dark ? .white : .black)
                 .font(.system(size: 32).weight(.thin))
                 .contextMenu {
                     Button {
@@ -174,7 +174,7 @@ struct ProfileView: View {
             Image(systemName: "bubble.left.circle")
                 .symbolRenderingMode(.palette)
                 .font(.system(size: 32).weight(.thin))
-                .foregroundStyle(colorScheme == .dark ? .white : .black, .black)
+                .foregroundStyle(colorScheme == .dark ? .white : .black, colorScheme == .dark ? .white : .black)
         }
     }
     
@@ -218,7 +218,7 @@ struct ProfileView: View {
                                 target: profile.get_follow_target(),
                                 follow_state: damus_state.contacts.follow_state(profile.pubkey)
                             )
-                        } else {
+                        } else if damus_state.keypair.privkey != nil {
                             NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
                                 EditButton(damus_state: damus_state)
                             }
@@ -227,7 +227,7 @@ struct ProfileView: View {
                     .offset(y: -15.0) // Increase if set a frame
                 }
                 
-                ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
+                ProfileNameView(pubkey: profile.pubkey, profile: data, damus: damus_state)
                     //.padding(.bottom)
                     .padding(.top,-(pfp_size/2.0))
                 
@@ -340,7 +340,7 @@ struct ProfileView_Previews: PreviewProvider {
 
 func test_damus_state() -> DamusState {
     let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
-    let damus = DamusState(pool: RelayPool(), keypair: Keypair(pubkey: pubkey, privkey: "privkey"), likes: EventCounter(our_pubkey: pubkey), boosts: EventCounter(our_pubkey: pubkey), contacts: Contacts(), tips: TipCounter(our_pubkey: pubkey), profiles: Profiles(), dms: DirectMessagesModel(), previews: PreviewCache())
+    let damus = DamusState(pool: RelayPool(), keypair: Keypair(pubkey: pubkey, privkey: "privkey"), likes: EventCounter(our_pubkey: pubkey), boosts: EventCounter(our_pubkey: pubkey), contacts: Contacts(our_pubkey: pubkey), tips: TipCounter(our_pubkey: pubkey), profiles: Profiles(), dms: DirectMessagesModel(), previews: PreviewCache())
     
     let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io")
     let tsprof = TimestampedProfile(profile: prof, timestamp: 0)

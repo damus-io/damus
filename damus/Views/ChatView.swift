@@ -86,7 +86,7 @@ struct ChatView: View {
                 VStack(alignment: .leading) {
                     if just_started {
                         HStack {
-                            ProfileName(pubkey: event.pubkey, profile: damus_state.profiles.lookup(id: event.pubkey), contacts: damus_state.contacts, show_friend_confirmed: true)
+                            ProfileName(pubkey: event.pubkey, profile: damus_state.profiles.lookup(id: event.pubkey), damus: damus_state, show_friend_confirmed: true)
                                 .foregroundColor(colorScheme == .dark ?  id_to_color(event.pubkey) : Color.black)
                                 //.shadow(color: Color.black, radius: 2)
                             Text("\(format_relative_time(event.created_at))")
