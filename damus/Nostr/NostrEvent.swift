@@ -568,10 +568,8 @@ func make_like_event(pubkey: String, privkey: String, liked: NostrEvent) -> Nost
 }
 
 func make_poll_choice_event(pubkey: String, privkey: String, event: NostrEvent, choice_index: Int) -> NostrEvent {
-    var tags: [[String]] = event.tags.filter { tag in tag.count >= 2 && (tag[0] == "e" || tag[0] == "p") }
-    tags.append(["e", event.id])
-    tags.append(["p", event.pubkey])
-    let ev = NostrEvent(content: "p:\(choice_index)", pubkey: pubkey, kind: 7, tags: tags)
+    var tags: [[String]] = [["e", event.id]]
+    let ev = NostrEvent(content: "\(choice_index)", pubkey: pubkey, kind: 8, tags: tags)
     ev.calculate_id()
     ev.sign(privkey: privkey)
 

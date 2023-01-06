@@ -187,7 +187,7 @@ struct EventView: View {
         
         // Is current event
         if id == subscription_poll_uuid {
-            if nostr_event.kind != 7 {
+            if nostr_event.kind != 8 {
                 return
             }
             
@@ -202,11 +202,11 @@ struct EventView: View {
             }
             
             // Check the choice
-            if let match = nostr_event.content.range(of: "^p:([0-9]+)$", options: .regularExpression) {
-                let digit = Int(String(nostr_event.content[match]).replacingOccurrences(of: "p:", with: ""))!
-                
-                choices.append((nostr_event.pubkey, digit))
+            guard let choice_int = Int(nostr_event.content) else {
+                return
             }
+
+            choices.append((nostr_event.pubkey, choice_int))
         }
     }
     
@@ -217,7 +217,7 @@ struct EventView: View {
     func subscribe_poll() {
         let filters: [NostrFilter] = [
             NostrFilter(
-                kinds: [7],
+                kinds: [8],
                 referenced_ids: [event.id]
             )
         ]
