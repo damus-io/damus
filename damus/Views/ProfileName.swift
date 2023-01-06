@@ -30,26 +30,29 @@ struct ProfileName: View {
     let prefix: String
     
     let show_friend_confirmed: Bool
+    let show_nip5_domain: Bool
     
     @State var display_name: String?
     @State var nip05: NIP05?
     
     @Environment(\.openURL) var openURL
-    
-    init(pubkey: String, profile: Profile?, damus: DamusState, show_friend_confirmed: Bool) {
+
+    init(pubkey: String, profile: Profile?, damus: DamusState, show_friend_confirmed: Bool, show_nip5_domain: Bool = true) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = ""
         self.show_friend_confirmed = show_friend_confirmed
+        self.show_nip5_domain = show_nip5_domain
         self.damus_state = damus
     }
     
-    init(pubkey: String, profile: Profile?, prefix: String, damus: DamusState, show_friend_confirmed: Bool) {
+    init(pubkey: String, profile: Profile?, prefix: String, damus: DamusState, show_friend_confirmed: Bool, show_nip5_domain: Bool = true) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = prefix
         self.damus_state = damus
         self.show_friend_confirmed = show_friend_confirmed
+        self.show_nip5_domain = show_nip5_domain
     }
     
     var friend_icon: String? {
@@ -72,13 +75,16 @@ struct ProfileName: View {
             if let nip05 = current_nip05 {
                 Image(systemName: "checkmark.seal.fill")
                     .foregroundColor(nip05_color)
-                Text(nip05.host)
-                    .foregroundColor(nip05_color)
-                    .onTapGesture {
-                        if let nip5url = nip05.siteUrl {
-                            openURL(nip5url)
+                
+                if show_nip5_domain {
+                    Text(nip05.host)
+                        .foregroundColor(nip05_color)
+                        .onTapGesture {
+                            if let nip5url = nip05.siteUrl {
+                                openURL(nip5url)
+                            }
                         }
-                    }
+                }
             }
             if let friend = friend_icon, current_nip05 == nil {
                 Image(systemName: friend)
