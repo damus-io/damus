@@ -114,6 +114,16 @@ struct ConfigView: View {
                     }
                 }
                 
+                Section("Default Image Host") {
+                    Picker("Select image host",
+                           selection: $user_settings.default_image_host) {
+                        ForEach(ImageHost.allCases, id: \.self) { image_host in
+                            Text(image_host.model.displayName)
+                                .tag(image_host.model.tag)
+                        }
+                    }
+                }
+                
                 Section("Clear Cache") {
                     Button("Clear") {
                         KingfisherManager.shared.cache.clearMemoryCache()

@@ -19,6 +19,12 @@ class UserSettingsStore: ObservableObject {
             UserDefaults.standard.set(show_wallet_selector, forKey: "show_wallet_selector")
         }
     }
+    
+    @Published var default_image_host: ImageHost {
+        didSet {
+            UserDefaults.standard.set(default_image_host.rawValue, forKey: "default_image_host")
+        }
+    }
 
     init() {
         if let defaultWalletName = UserDefaults.standard.string(forKey: "default_wallet"),
@@ -26,6 +32,12 @@ class UserSettingsStore: ObservableObject {
             self.default_wallet = default_wallet
         } else {
             self.default_wallet = .system_default_wallet
+        }
+        if let defaultImageHostName = UserDefaults.standard.string(forKey: "default_image_host"),
+           let default_image_host = ImageHost(rawValue: defaultImageHostName) {
+            self.default_image_host = default_image_host
+        } else {
+            self.default_image_host = .nostrimg
         }
         self.show_wallet_selector = UserDefaults.standard.object(forKey: "show_wallet_selector") as? Bool ?? true
     }
