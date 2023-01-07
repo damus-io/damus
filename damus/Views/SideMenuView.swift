@@ -16,7 +16,7 @@ struct SideMenuView: View {
     
     @Environment(\.colorScheme) var colorScheme
     
-    var sideBarWidth = UIScreen.main.bounds.size.width * 0.7
+    var sideBarWidth = UIScreen.main.bounds.size.width * 0.65
     
     func fillColor() -> Color {
         colorScheme == .light ? Color("DamusWhite") : Color("DamusBlack")
@@ -27,21 +27,20 @@ struct SideMenuView: View {
     }
     
     var body: some View {
-        if isSidebarVisible {
-            ZStack {
-                GeometryReader { _ in
-                    EmptyView()
-                }
-                .background(.gray.opacity(0.6))
-                .opacity(isSidebarVisible ? 1 : 0)
-                .animation(.easeInOut.delay(0.2), value: isSidebarVisible)
-                .onTapGesture {
-                    isSidebarVisible.toggle()
-                }
-                content
+        ZStack {
+            GeometryReader { _ in
+                EmptyView()
             }
-            .edgesIgnoringSafeArea(.all)
+            .background(.gray.opacity(0.6))
+            .opacity(isSidebarVisible ? 1 : 0)
+            .animation(.easeInOut.delay(0.2), value: isSidebarVisible)
+            .onTapGesture {
+                isSidebarVisible.toggle()
+            }
+            content
         }
+        .edgesIgnoringSafeArea(.all)
+
     }
     
     var content: some View {
@@ -109,8 +108,8 @@ struct SideMenuView: View {
                             .foregroundColor(textColor())
                     })
                 }
-                .padding(.top, 50)
-                .padding(.bottom, 50)
+                .padding(.top, 60)
+                .padding(.bottom, 40)
                 .padding(.leading, 40)
             }
             .frame(width: sideBarWidth)
