@@ -14,20 +14,22 @@ let LINEAR_GRADIENT = LinearGradient(gradient: Gradient(colors: [
     Color("DamusBlue")
 ]), startPoint: .topTrailing, endPoint: .bottomTrailing)
 
-
 func PostButton(action: @escaping () -> ()) -> some View {
     return Button(action: action, label: {
-        Image(systemName: "plus")
-            .font(.system(.title2))
-            .foregroundColor(Color.white)
-            .frame(width: BUTTON_SIZE, height: BUTTON_SIZE, alignment: .center)
-            .background(LINEAR_GRADIENT)
-            .cornerRadius(38.5)
-            .padding()
-            .shadow(color: Color.black.opacity(0.3),
-                    radius: 3,
-                    x: 3,
-                    y: 3)
+        ZStack(alignment: .center) {
+            Circle()
+                .fill(LINEAR_GRADIENT)
+                .frame(width: BUTTON_SIZE, height: BUTTON_SIZE, alignment: .center)
+                .rotationEffect(.degrees(20))
+                .padding()
+                .shadow(color: Color.black.opacity(0.3),
+                        radius: 3,
+                        x: 3,
+                        y: 3)
+            Image(systemName: "plus")
+                .font(.system(.title2))
+                .foregroundColor(Color.white)
+        }
     })
     .keyboardShortcut("n", modifiers: [.command, .shift])
 }

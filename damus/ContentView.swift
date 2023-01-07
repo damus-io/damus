@@ -45,10 +45,10 @@ enum FilterState : Int {
     case posts_and_replies = 1
     case posts = 0
     
-    func filter(privkey: String?, ev: NostrEvent) -> Bool {
+    func filter(ev: NostrEvent) -> Bool {
         switch self {
         case .posts:
-            return !ev.is_reply(privkey)
+            return !ev.is_reply(nil)
         case .posts_and_replies:
             return true
         }
@@ -93,10 +93,12 @@ struct ContentView: View {
     var PostingTimelineView: some View {
         VStack {
             TabView(selection: $filter_state) {
-                ContentTimelineView
+                contentTimelineView(filter: FilterState.posts.filter)
                     .tag(FilterState.posts)
-                ContentTimelineView
+                    .id(FilterState.posts)
+                contentTimelineView(filter: FilterState.posts_and_replies.filter)
                     .tag(FilterState.posts_and_replies)
+                    .id(FilterState.posts_and_replies)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
@@ -113,10 +115,10 @@ struct ContentView: View {
         .ignoresSafeArea(.keyboard)
     }
     
-    var ContentTimelineView: some View {
+    func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
         ZStack {
             if let damus = self.damus_state {
-                TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter_event)
+                TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter)
             }
             if privkey != nil {
                 PostButtonContainer(userSettings: user_settings) {
@@ -134,14 +136,6 @@ struct ContentView: View {
             }
             .pickerStyle(.segmented)
         }
-    }
-    
-    func filter_event(_ ev: NostrEvent) -> Bool {
-        if self.filter_state == .posts {
-            return !ev.is_reply(nil)
-        }
-        
-        return true
     }
     
     func MainContent(damus: DamusState) -> some View {
