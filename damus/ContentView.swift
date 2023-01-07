@@ -205,50 +205,33 @@ struct ContentView: View {
     }
 
     var body: some View {
-        ZStack {
+        VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
-                               
-                VStack(alignment: .leading, spacing: 0) {
-                    NavigationView {
-                        
-                        SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened)
-                        
-                        VStack(alignment: .leading, spacing: 0) {
-                            
-                            MainContent(damus: damus)
-                                .toolbar {
+                NavigationView {
+                    ZStack {
+                        MainContent(damus: damus)
+                            .toolbar() {
                                     ToolbarItem(placement: .navigationBarLeading) {
-                                        let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
-                                        let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
-                                        let prof_dest = ProfileView(damus_state: damus_state!, profile: profile_model, followers: followers_model)
-                                        
-                                        Button {
-                                            isSideBarOpened.toggle()
-                                        } label: {
+
                                             let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
                                             let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
                                             let prof_dest = ProfileView(damus_state: damus_state!, profile: profile_model, followers: followers_model)
                                             
-                                            if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
-                                                ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
-                                            } else {
-                                                Image(systemName: "person.fill")
+                                            Button {
+                                                isSideBarOpened.toggle()
+                                            } label: {
+                                                let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
+                                                let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
+                                                let prof_dest = ProfileView(damus_state: damus_state!, profile: profile_model, followers: followers_model)
+                                                
+                                                if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
+                                                    ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
+                                                } else {
+                                                    Image(systemName: "person.fill")
+                                                }
                                             }
                                         }
-                                        
-                                        NavigationLink(destination: prof_dest) {
-                                            /// Verify that the user has a profile picture, if not display a generic SF Symbol
-                                            /// (Resolves an in-app error where ``Robohash`` pictures are not generated so the button dissapears
-                                            if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
-                                                ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
-                                            } else {
-                                                Image(systemName: "person.fill")
-                                            }
-                                        }
-                                        .buttonStyle(PlainButtonStyle())
-                                        
-                                    }
-                                    
+                    
                                     ToolbarItem(placement: .navigationBarTrailing) {
                                         HStack(alignment: .center) {
                                             if home.signal.signal != home.signal.max_signal {
@@ -265,13 +248,19 @@ struct ContentView: View {
                                              */
                                         }
                                     }
-                                }
-                        }
-                    }.navigationViewStyle(.stack)
-                    
-                    TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
-                            .padding([.bottom], 8)
+                            }
+                        
+                        Color.clear
+                        .overlay(
+                            SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened)
+                        )
+                    }
+                    .navigationBarHidden(isSideBarOpened ? true: false) // Would prefer a different way of doing this.
                 }
+                .navigationViewStyle(.stack)
+                
+                TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
+                    .padding([.bottom], 8)
             }
         }
         .onAppear() {
@@ -403,9 +392,6 @@ struct ContentView: View {
         .onReceive(timer) { n in
             self.damus_state?.pool.connect_to_disconnected()
         }
-    
-            
-
     }
     
     func switch_timeline(_ timeline: Timeline) {

@@ -84,11 +84,13 @@ struct SideMenuView: View {
                             .foregroundColor(textColor())
                     }
                     
+                    /*
                     NavigationLink(destination: EmptyView()) {
                         Label("Relays", systemImage: "xserve")
                             .font(.title2)
                             .foregroundColor(textColor())
                     }
+                    */
                     
                     NavigationLink(destination: ConfigView(state: damus_state).environmentObject(user_settings)) {
                         Label("App settings", systemImage: "gear")
