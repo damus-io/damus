@@ -71,6 +71,7 @@ struct SideMenuView: View {
                     }
                     
                     Divider()
+                        .padding(.trailing,40)
                     
                     //NavigationView {
                     let followers = FollowersModel(damus_state: damus_state, target: damus_state.pubkey)
@@ -80,19 +81,19 @@ struct SideMenuView: View {
                     ) {
                         Label("Profile", systemImage: "person")
                             .font(.title2)
-                            .foregroundColor(.accentColor)
+                            .foregroundColor(textColor())
                     }
                     
                     NavigationLink(destination: EmptyView()) {
-                        Label("Relays", systemImage: "gear")
+                        Label("Relays", systemImage: "xserve")
                             .font(.title2)
-                            .foregroundColor(.accentColor)
+                            .foregroundColor(textColor())
                     }
                     
                     NavigationLink(destination: ConfigView(state: damus_state).environmentObject(user_settings)) {
-                        Label("App Settings", systemImage: "xserve")
+                        Label("App settings", systemImage: "gear")
                             .font(.title2)
-                            .foregroundColor(.accentColor)
+                            .foregroundColor(textColor())
                     }
                     
                     Spacer()
