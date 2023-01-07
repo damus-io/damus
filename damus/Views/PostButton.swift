@@ -32,10 +32,8 @@ func PostButton(action: @escaping () -> ()) -> some View {
     .keyboardShortcut("n", modifiers: [.command, .shift])
 }
 
-func PostButtonContainer(action: @escaping () -> Void) -> some View {
-    // if left_handed is true, put the post button on the left side
-    @StateObject var user_settings = UserSettingsStore()  // initialize user_settings
-    let is_left_handed = user_settings.left_handed.self
+func PostButtonContainer(userSettings: UserSettingsStore, action: @escaping () -> Void) -> some View {
+    let is_left_handed = userSettings.left_handed.self
     return VStack {
         Spacer()
 

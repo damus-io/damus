@@ -119,7 +119,7 @@ struct ContentView: View {
                 TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter_event)
             }
             if privkey != nil {
-                PostButtonContainer {
+                PostButtonContainer(userSettings: user_settings) {
                     self.active_sheet = .post
                 }
             }
