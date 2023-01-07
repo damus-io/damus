@@ -62,4 +62,14 @@ class MarkdownTests: XCTestCase {
         XCTAssertEqual(md, expected)
     }
 
+    func test_parse_shrug() throws {
+        let md = Markdown.parse(content: "¯\\_(ツ)_/¯")
+        XCTAssertEqual(NSMutableAttributedString(md).string, "¯\\_(ツ)_/¯")
+    }
+
+    func test_parse_backslash() throws {
+        let md = Markdown.parse(content: "\\a")
+        XCTAssertEqual(NSMutableAttributedString(md).string, "\\a")
+    }
+
 }

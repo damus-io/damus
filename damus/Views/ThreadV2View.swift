@@ -232,28 +232,41 @@ struct BuildThreadV2View: View {
 struct ThreadV2View: View {
     let damus: DamusState
     let thread: ThreadV2
+    @State var nav_target: String? = nil
+    @State var navigating: Bool = false
+    
+    var MaybeBuildThreadView: some View {
+        Group {
+            if let evid = nav_target {
+                BuildThreadV2View(damus: damus, event_id: evid)
+            } else {
+                EmptyView()
+            }
+        }
+    }
     
     var body: some View {
+        NavigationLink(destination: MaybeBuildThreadView, isActive: $navigating) {
+            EmptyView()
+        }
         ScrollViewReader { reader in
             ScrollView {
                 VStack {
                     // MARK: - Parents events view
                     VStack {
                         ForEach(thread.parentEvents, id: \.id) { event in
-                            NavigationLink(destination: BuildThreadV2View(
+                            EventView(
+                                event: event,
+                                highlight: .none,
+                                has_action_bar: true,
                                 damus: damus,
-                                event_id: event.id
-                            )){
-                                EventView(
-                                    event: event,
-                                    highlight: .none,
-                                    has_action_bar: true,
-                                    damus: damus,
-                                    show_friend_icon: true, // TODO: change it
-                                    size: .small
-                                )
+                                show_friend_icon: true, // TODO: change it
+                                size: .small
+                            )
+                            .onTapGesture {
+                                nav_target = event.id
+                                navigating = true
                             }
-                            .buttonStyle(.plain)
                             .onAppear {
                                 // TODO: find another solution to prevent layout shifting and layout blocking on large responses
                                 reader.scrollTo("main", anchor: .bottom)
@@ -283,19 +296,18 @@ struct ThreadV2View: View {
                     
                     // MARK: - Responses of the actual event view
                     ForEach(thread.childEvents, id: \.id) { event in
-                        NavigationLink(destination: BuildThreadV2View(
+                        EventView(
+                            event: event,
+                            highlight: .none,
+                            has_action_bar: true,
                             damus: damus,
-                            event_id: event.id
-                        )){
-                            EventView(
-                                event: event,
-                                highlight: .none,
-                                has_action_bar: true,
-                                damus: damus,
-                                show_friend_icon: true, // TODO: change it
-                                size: .small
-                            )
-                        }.buttonStyle(.plain)
+                            show_friend_icon: true, // TODO: change it
+                            size: .small
+                        )
+                        .onTapGesture {
+                            nav_target = event.id
+                            navigating = true
+                        }
                     }
                 }.padding()
             }.navigationBarTitle("Thread")

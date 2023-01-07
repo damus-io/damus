@@ -49,6 +49,11 @@ struct ImageContextMenuModifier: ViewModifier {
                 } label: {
                     Label("Copy Image", systemImage: "photo.on.rectangle")
                 }
+                Button {
+                    UIImageWriteToSavedPhotosAlbum(someImage, nil, nil, nil)
+                } label: {
+                    Label("Save Image", systemImage: "square.and.arrow.down")
+                }
             }
             Button {
                 showShareSheet = true

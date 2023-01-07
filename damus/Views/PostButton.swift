@@ -8,21 +8,29 @@
 import Foundation
 import SwiftUI
 
+let BUTTON_SIZE = 57.0
+let LINEAR_GRADIENT = LinearGradient(gradient: Gradient(colors: [
+    Color("DamusPurple"),
+    Color("DamusBlue")
+]), startPoint: .topTrailing, endPoint: .bottomTrailing)
+
 func PostButton(action: @escaping () -> ()) -> some View {
     return Button(action: action, label: {
-        Text("+")
-            .font(.system(.largeTitle))
-            .frame(width: 57, height: 50)
-            .foregroundColor(Color.white)
-            .padding(.bottom, 7)
+        ZStack(alignment: .center) {
+            Circle()
+                .fill(LINEAR_GRADIENT)
+                .frame(width: BUTTON_SIZE, height: BUTTON_SIZE, alignment: .center)
+                .rotationEffect(.degrees(20))
+                .padding()
+                .shadow(color: Color.black.opacity(0.3),
+                        radius: 3,
+                        x: 3,
+                        y: 3)
+            Image(systemName: "plus")
+                .font(.system(.title2))
+                .foregroundColor(Color.white)
+        }
     })
-    .background(Color.blue)
-    .cornerRadius(38.5)
-    .padding()
-    .shadow(color: Color.black.opacity(0.3),
-            radius: 3,
-            x: 3,
-            y: 3)
     .keyboardShortcut("n", modifiers: [.command, .shift])
 }
 

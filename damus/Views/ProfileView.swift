@@ -48,7 +48,7 @@ func follow_btn_enabled_state(_ fs: FollowState) -> Bool {
 struct ProfileNameView: View {
     let pubkey: String
     let profile: Profile?
-    let contacts: Contacts
+    let damus: DamusState
     
     var body: some View {
         Group {
@@ -56,7 +56,7 @@ struct ProfileNameView: View {
                 VStack(alignment: .leading) {
                     Text(real_name)
                         .font(.title3.weight(.bold))
-                    ProfileName(pubkey: pubkey, profile: profile, prefix: "@", contacts: contacts, show_friend_confirmed: true)
+                    ProfileName(pubkey: pubkey, profile: profile, prefix: "@", damus: damus, show_friend_confirmed: true)
                         .font(.callout)
                         .foregroundColor(.gray)
                     KeyView(pubkey: pubkey)
@@ -64,7 +64,7 @@ struct ProfileNameView: View {
                 }
             } else {
                 VStack(alignment: .leading) {
-                    ProfileName(pubkey: pubkey, profile: profile, contacts: contacts, show_friend_confirmed: true)
+                    ProfileName(pubkey: pubkey, profile: profile, damus: damus, show_friend_confirmed: true)
                         .font(.title3.weight(.bold))
                     KeyView(pubkey: pubkey)
                         .pubkey_context_menu(bech32_pubkey: pubkey)
@@ -118,8 +118,6 @@ struct ProfileView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
     
-    //@EnvironmentObject var profile: ProfileModel
-    
     // We just want to have a white "< Home" text here, however,
     // setting the initialiser is causing issues, and it's late.
     // Ref: https://blog.techchee.com/navigation-bar-title-style-color-and-custom-back-button-in-swiftui/
@@ -146,10 +144,10 @@ struct ProfileView: View {
                 open_with_wallet(wallet: user_settings.default_wallet.model, invoice: lnurl)
             }
         }) {
-            Image("ic-lightning")
-                .frame(width:44,height:30)
+            Image(systemName: "bolt.circle")
                 .symbolRenderingMode(.palette)
-                .font(.system(size: 34).weight(.thin))
+                .foregroundStyle(colorScheme == .dark ? .white : .black, colorScheme == .dark ? .white : .black)
+                .font(.system(size: 32).weight(.thin))
                 .contextMenu {
                     Button {
                         UIPasteboard.general.string = profile.lnurl ?? ""
@@ -159,7 +157,6 @@ struct ProfileView: View {
                 }
             
         }
-        .background(fillColor())
         .cornerRadius(24)
         .sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
             SelectWalletView(showingSelectWallet: $showing_select_wallet, invoice: lnurl)
@@ -174,18 +171,10 @@ struct ProfileView: View {
         let dmview = DMChatView(damus_state: damus_state, pubkey: profile.pubkey)
             .environmentObject(dm_model)
         return NavigationLink(destination: dmview) {
-            RoundedRectangle(cornerRadius: 24)
-                .fill(fillColor())
-                .frame(width:44,height:30)
-                .overlay{
-                    Image("ic-message")
-                        //.background(Color("DamusBlack"))
-                        //.foregroundStyle(Color("DamusBlack"))
-                        .cornerRadius(24)
-                        .frame(width:44,height:30)
-                        .symbolRenderingMode(.palette)
-                        .font(.system(size: 34).weight(.thin))
-                }
+            Image(systemName: "bubble.left.circle")
+                .symbolRenderingMode(.palette)
+                .font(.system(size: 32).weight(.thin))
+                .foregroundStyle(colorScheme == .dark ? .white : .black, colorScheme == .dark ? .white : .black)
         }
     }
 
@@ -229,45 +218,42 @@ struct ProfileView: View {
                 let pfp_size: CGFloat = 90.0
                 
                 HStack(alignment: .center) {
-                    Circle()
-                        .frame(width: pfp_size, height: pfp_size) // Increase this to see a frame.
-                        .foregroundColor(imageBorderColor())
-                        .overlay{
-                            ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(.black, 4.0), profiles: damus_state.profiles)
-                                .onTapGesture {
-                                    is_zoomed.toggle()
-                                }
-                                .sheet(isPresented: $is_zoomed) {
-                                    ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .none, profiles: damus_state.profiles)
-                                }
+                    ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles)
+                        .onTapGesture {
+                            is_zoomed.toggle()
+                        }
+                        .sheet(isPresented: $is_zoomed) {
+                            ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .none, profiles: damus_state.profiles)
                         }
                         .offset(y: -(pfp_size/2.0)) // Increase if set a frame
-                    
+                        
                     Spacer()
                     
-                    if let profile = data {
-                        if let lnurl = profile.lnurl {
-                            if lnurl != "" {
+                    Group {
+                        
+                        if let profile = data {
+                            if let lnurl = profile.lnurl, lnurl != "" {
                                 LNButton(lnurl: lnurl, profile: profile)
                             }
                         }
-                    }
-                    
-                    DMButton
-                    
-                    if profile.pubkey != damus_state.pubkey {
-                        FollowButtonView(
-                            target: profile.get_follow_target(),
-                            follow_state: damus_state.contacts.follow_state(profile.pubkey)
-                        )
-                    } else {
-                        NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
-                            EditButton(damus_state: damus_state)
+                        
+                        DMButton
+                        
+                        if profile.pubkey != damus_state.pubkey {
+                            FollowButtonView(
+                                target: profile.get_follow_target(),
+                                follow_state: damus_state.contacts.follow_state(profile.pubkey)
+                            )
+                        } else if damus_state.keypair.privkey != nil {
+                            NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
+                                EditButton(damus_state: damus_state)
+                            }
                         }
                     }
+                    .offset(y: -15.0) // Increase if set a frame
                 }
                 
-                ProfileNameView(pubkey: profile.pubkey, profile: data, contacts: damus_state.contacts)
+                ProfileNameView(pubkey: profile.pubkey, profile: data, damus: damus_state)
                     //.padding(.bottom)
                     .padding(.top,-(pfp_size/2.0))
                 
@@ -380,7 +366,7 @@ struct ProfileView_Previews: PreviewProvider {
 
 func test_damus_state() -> DamusState {
     let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
-    let damus = DamusState(pool: RelayPool(), keypair: Keypair(pubkey: pubkey, privkey: "privkey"), likes: EventCounter(our_pubkey: pubkey), boosts: EventCounter(our_pubkey: pubkey), contacts: Contacts(), tips: TipCounter(our_pubkey: pubkey), profiles: Profiles(), dms: DirectMessagesModel(), previews: PreviewCache())
+    let damus = DamusState(pool: RelayPool(), keypair: Keypair(pubkey: pubkey, privkey: "privkey"), likes: EventCounter(our_pubkey: pubkey), boosts: EventCounter(our_pubkey: pubkey), contacts: Contacts(our_pubkey: pubkey), tips: TipCounter(our_pubkey: pubkey), profiles: Profiles(), dms: DirectMessagesModel(), previews: PreviewCache())
     
     let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io")
     let tsprof = TimestampedProfile(profile: prof, timestamp: 0)

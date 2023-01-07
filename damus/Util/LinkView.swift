@@ -12,26 +12,24 @@ class CustomLinkView: LPLinkView {
     override var intrinsicContentSize: CGSize { CGSize(width: 0, height: super.intrinsicContentSize.height) }
 }
 
+enum Metadata {
+    case linkmeta(LPLinkMetadata)
+    case url(URL)
+}
+
 struct LinkViewRepresentable: UIViewRepresentable {
  
     typealias UIViewType = CustomLinkView
     
-    var metadata: LPLinkMetadata?
-    var url: URL?
+    let meta: Metadata
  
     func makeUIView(context: Context) -> CustomLinkView {
-        
-        if let metadata {
-            let linkView = CustomLinkView(metadata: metadata)
-            return linkView
+        switch meta {
+        case .linkmeta(let linkmeta):
+            return CustomLinkView(metadata: linkmeta)
+        case .url(let url):
+            return CustomLinkView(url: url)
         }
-        
-        if let url {
-            let linkView = CustomLinkView(url: url)
-            return linkView
-        }
-        
-        return CustomLinkView()
     }
  
     func updateUIView(_ uiView: CustomLinkView, context: Context) {

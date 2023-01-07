@@ -17,8 +17,23 @@ struct InnerTimelineView: View {
     let damus: DamusState
     let show_friend_icon: Bool
     let filter: (NostrEvent) -> Bool
+    @State var nav_target: NostrEvent? = nil
+    @State var navigating: Bool = false
+    
+    var MaybeBuildThreadView: some View {
+        Group {
+            if let ev = nav_target {
+                BuildThreadV2View(damus: damus, event_id: (ev.inner_event ?? ev).id)
+            } else {
+                EmptyView()
+            }
+        }
+    }
     
     var body: some View {
+        NavigationLink(destination: MaybeBuildThreadView, isActive: $navigating) {
+            EmptyView()
+        }
         LazyVStack {
             if events.isEmpty {
                 EmptyTimelineView()
@@ -28,14 +43,11 @@ struct InnerTimelineView: View {
                     //let is_chatroom = should_show_chatroom(ev)
                     //let tv = ThreadView(thread: tm, damus: damus, is_chatroom: is_chatroom)
                                 
-                    NavigationLink(destination: BuildThreadV2View(
-                        damus: damus,
-                        event_id: (ev.inner_event ?? ev).id
-                    )) {
-                        EventView(event: ev, highlight: .none, has_action_bar: true, damus: damus, show_friend_icon: show_friend_icon)
-                    }
-                    .isDetailLink(true)
-                    .buttonStyle(PlainButtonStyle())
+                    EventView(event: ev, highlight: .none, has_action_bar: true, damus: damus, show_friend_icon: show_friend_icon)
+                        .onTapGesture {
+                            nav_target = ev
+                            navigating = true
+                        }
                 }
             }
         }

@@ -94,8 +94,10 @@ struct NoteContentView: View {
                 self.preview
             } else {
                 ForEach(artifacts.links, id:\.self) { link in
-                    LinkViewRepresentable(url: link)
-                        .frame(height: 50)
+                    if let url = link {
+                        LinkViewRepresentable(meta: .url(url))
+                            .frame(height: 50)
+                    }
                 }
             }
         }
@@ -136,7 +138,7 @@ struct NoteContentView: View {
                 if show_images, artifacts.links.count == 1 {
                     let meta = await getMetaData(for: artifacts.links.first!)
                     
-                    let view = LinkViewRepresentable(metadata: meta)
+                    let view = meta.map { LinkViewRepresentable(meta: .linkmeta($0)) }
                     previews.store(evid: self.event.id, preview: view)
                     self.preview = view
                 }
@@ -181,7 +183,7 @@ func mention_str(_ m: Mention, profiles: Profiles) -> String {
 struct NoteContentView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
-        let content = "hi there https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
+        let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
         let artifacts = NoteArtifacts(content: content, images: [], invoices: [], links: [])
         NoteContentView(privkey: "", event: NostrEvent(content: content, pubkey: "pk"), profiles: state.profiles, previews: PreviewCache(), show_images: true, artifacts: artifacts, size: .normal)
     }
