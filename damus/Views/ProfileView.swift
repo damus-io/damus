@@ -184,7 +184,7 @@ struct ProfileView: View {
 
     private func getHeightForHeaderImage(_ geometry: GeometryProxy) -> CGFloat {
         let offset = getScrollOffset(geometry)
-        let imageHeight = geometry.size.height
+        let imageHeight = 150.0
 
         if offset > 0 {
             return imageHeight + offset
@@ -209,10 +209,11 @@ struct ProfileView: View {
             GeometryReader { geometry in
                 Image("profile-banner")
                     .resizable()
-                    .scaledToFill()
+                    .aspectRatio(contentMode: .fill)
                     .frame(width: geometry.size.width, height: self.getHeightForHeaderImage(geometry))
+                    .clipped()
                     .offset(x: 0, y: self.getOffsetForHeaderImage(geometry))
-            }.frame(height: 150)
+            }
             VStack(alignment: .leading) {
                 let data = damus_state.profiles.lookup(id: profile.pubkey)
                 let pfp_size: CGFloat = 90.0
