@@ -171,9 +171,8 @@ struct LikeButton: View {
             if liked {
                 Text("🤙", comment: "Button with emoji to like an event.")
             } else {
-                Image("shaka")
-                    .renderingMode(.template)
-                    .foregroundColor(.gray)
+                Text("🤙")
+                    .grayscale(1)
             }
         }
     }
