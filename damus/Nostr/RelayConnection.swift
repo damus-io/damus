@@ -38,7 +38,7 @@ class RelayConnection: WebSocketDelegate {
             self.connect(force: true)
         }
     }
-
+    
     func connect(force: Bool = false){
         if !force && (self.isConnected || self.isConnecting) {
             return
