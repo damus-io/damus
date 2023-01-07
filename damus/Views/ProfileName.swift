@@ -34,6 +34,8 @@ struct ProfileName: View {
     @State var display_name: String?
     @State var nip05: NIP05?
     
+    @Environment(\.openURL) var openURL
+    
     init(pubkey: String, profile: Profile?, damus: DamusState, show_friend_confirmed: Bool) {
         self.pubkey = pubkey
         self.profile = profile
@@ -72,6 +74,11 @@ struct ProfileName: View {
                     .foregroundColor(nip05_color)
                 Text(nip05.host)
                     .foregroundColor(nip05_color)
+                    .onTapGesture {
+                        if let nip5url = nip05.siteUrl {
+                            openURL(nip5url)
+                        }
+                    }
             }
             if let friend = friend_icon, current_nip05 == nil {
                 Image(systemName: friend)
