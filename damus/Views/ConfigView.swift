@@ -115,7 +115,12 @@ struct ConfigView: View {
                         }
                     }
                 }
-                
+
+                Section(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen")) {
+                    Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $user_settings.left_handed)
+                        .toggleStyle(.switch)
+                }
+
                 Section(NSLocalizedString("Clear Cache", comment: "Section title for clearing cached data.")) {
                     Button(NSLocalizedString("Clear", comment: "Button for clearing cached data.")) {
                         KingfisherManager.shared.cache.clearMemoryCache()
@@ -123,7 +128,7 @@ struct ConfigView: View {
                         KingfisherManager.shared.cache.cleanExpiredDiskCache()
                     }
                 }
-                
+
                 Section(NSLocalizedString("Reset", comment: "Section title for resetting the user")) {
                     Button(NSLocalizedString("Logout", comment: "Button to logout the user.")) {
                         confirm_logout = true

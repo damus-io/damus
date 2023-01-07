@@ -20,13 +20,22 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
+    @Published var left_handed: Bool {
+        didSet {
+            UserDefaults.standard.set(left_handed, forKey: "left_handed")
+        }
+    }
+
     init() {
         if let defaultWalletName = UserDefaults.standard.string(forKey: "default_wallet"),
-           let default_wallet = Wallet(rawValue: defaultWalletName) {
+           let default_wallet = Wallet(rawValue: defaultWalletName)
+        {
             self.default_wallet = default_wallet
         } else {
-            self.default_wallet = .system_default_wallet
+            default_wallet = .system_default_wallet
         }
-        self.show_wallet_selector = UserDefaults.standard.object(forKey: "show_wallet_selector") as? Bool ?? true
+        show_wallet_selector = UserDefaults.standard.object(forKey: "show_wallet_selector") as? Bool ?? true
+
+        left_handed = UserDefaults.standard.object(forKey: "left_handed") as? Bool ?? false
     }
 }
