@@ -35,14 +35,14 @@ struct CreateAccountView: View {
                 
                 HStack(alignment: .top) {
                     VStack {
-                        Text("   ")
+                        Text("   ", comment: "Blank space to separate profile picture from profile editor form.")
                             .foregroundColor(.white)
                     }
                     VStack {
                         SignupForm {
                             FormLabel(NSLocalizedString("Username", comment: "Label to prompt username entry."))
                             HStack(spacing: 0.0) {
-                                Text("@")
+                                Text("@", comment: "Prefix character to username.")
                                     .foregroundColor(.white)
                                     .padding(.leading, -25.0)
                                 
@@ -151,7 +151,7 @@ func FormLabel(_ title: String, optional: Bool = false) -> some View {
                 .bold()
                 .foregroundColor(.white)
         if optional {
-            Text("optional")
+            Text("optional", comment: "Label indicating that a form input is optional.")
                 .font(.callout)
                 .foregroundColor(.white.opacity(0.5))
         }

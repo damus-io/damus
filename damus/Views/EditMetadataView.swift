@@ -107,32 +107,32 @@ struct EditMetadataView: View {
                 Spacer()
             }
             Form {
-                Section("Your Name") {
+                Section(NSLocalizedString("Your Name", comment: "Label for Your Name section of user profile form.")) {
                     TextField("Satoshi Nakamoto", text: $display_name)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }
                 
-                Section("Username") {
+                Section(NSLocalizedString("Username", comment: "Label for Username section of user profile form.")) {
                     TextField("satoshi", text: $name)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
 
                 }
                 
-                Section ("Profile Picture") {
-                    TextField("https://example.com/pic.jpg", text: $picture)
+                Section (NSLocalizedString("Profile Picture", comment: "Label for Profile Picture section of user profile form.")) {
+                    TextField(NSLocalizedString("https://example.com/pic.jpg", comment: "Placeholder example text for profile picture URL."), text: $picture)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }
                 
-                Section("Website") {
-                    TextField("https://jb55.com", text: $website)
+                Section(NSLocalizedString("Website", comment: "Label for Website section of user profile form.")) {
+                    TextField(NSLocalizedString("https://jb55.com", comment: "Placeholder example text for website URL for user profile."), text: $website)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }
                 
-                Section("About Me") {
+                Section(NSLocalizedString("About Me", comment: "Label for About Me section of user profile form.")) {
                     let placeholder = NSLocalizedString("Absolute Boss", comment: "Placeholder text for About Me description.")
                     ZStack(alignment: .topLeading) {
                         TextEditor(text: $about)
@@ -146,18 +146,18 @@ struct EditMetadataView: View {
                     }
                 }
                 
-                Section("Bitcoin Lightning Tips") {
-                    TextField("Lightning Address or LNURL", text: $ln)
+                Section(NSLocalizedString("Bitcoin Lightning Tips", comment: "Label for Bitcoin Lightning Tips section of user profile form.")) {
+                    TextField(NSLocalizedString("Lightning Address or LNURL", comment: "Placeholder text for entry of Lightning Address or LNURL."), text: $ln)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }
                                 
                 Section(content: {
-                    TextField("jb55@jb55.com", text: $nip05)
+                    TextField(NSLocalizedString("jb55@jb55.com", comment: "Placeholder example text for identifier used for NIP-05 verification."), text: $nip05)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }, header: {
-                    Text("NIP-05 Verification")
+                    Text("NIP-05 Verification", comment: "Label for NIP-05 Verification section of user profile form.")
                 }, footer: {
                     if let parts = nip05_parts {
                         Text("'\(parts.username)' at '\(parts.host)' will be used for verification", comment: "Description of how the nip05 identifier would be used for verification.")
@@ -166,13 +166,13 @@ struct EditMetadataView: View {
                     }
                 })
 
-                Button("Save") {
+                Button(NSLocalizedString("Save", comment: "Button for saving profile.")) {
                     save()
                     dismiss()
                 }
             }
         }
-        .navigationTitle("Edit Profile")
+        .navigationTitle(NSLocalizedString("Edit Profile", comment: "Title of navigation view for Edit Profile."))
     }
 }
 

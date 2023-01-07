@@ -20,7 +20,7 @@ struct SelectWalletView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section("Copy invoice") {
+                Section(NSLocalizedString("Copy invoice", comment: "Title of section for copying a Lightning invoice identifier.")) {
                     HStack {
                         Text(invoice).font(.body)
                             .lineLimit(2)
@@ -35,14 +35,14 @@ struct SelectWalletView: View {
                         generator.impactOccurred()
                     }
                 }
-                Section("Select a lightning wallet"){
+                Section(NSLocalizedString("Select a Lightning wallet", comment: "Title of section for selecting a Lightning wallet to pay a Lightning invoice.")) {
                     List{
                         Button() {
                             let wallet_model = user_settings.default_wallet.model
                             open_with_wallet(wallet: wallet_model, invoice: invoice)
                         } label: {
                             HStack {
-                                Text("Default Wallet").font(.body).foregroundColor(.blue)
+                                Text("Default Wallet", comment: "Button to pay a Lightning invoice with the user's default Lightning wallet.").font(.body).foregroundColor(.blue)
                             }
                         }.buttonStyle(.plain)
                         List($allWalletModels) { $wallet in
@@ -59,10 +59,10 @@ struct SelectWalletView: View {
                         }
                     }.padding(.vertical, 2.5)
                 }
-            }.navigationBarTitle(Text("Pay the lightning invoice"), displayMode: .inline).navigationBarItems(trailing: Button(action: {
+            }.navigationBarTitle(Text("Pay the Lightning invoice", comment: "Navigation bar title for view to pay Lightning invoice."), displayMode: .inline).navigationBarItems(trailing: Button(action: {
                 self.showingSelectWallet = false
             }) {
-                Text("Done").bold()
+                Text("Done", comment: "Button to dismiss wallet selection view for paying Lightning invoice.").bold()
             })
         }
     }

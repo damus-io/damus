@@ -47,7 +47,7 @@ struct InvoiceView: View {
             RoundedRectangle(cornerRadius: 20)
                 .foregroundColor(colorScheme == .light ? .black : .white)
                 .overlay {
-                    Text("Pay")
+                    Text("Pay", comment: "Button to pay a Lightning invoice.")
                         .fontWeight(.medium)
                         .foregroundColor(colorScheme == .light ? .white : .black)
                 }
@@ -67,7 +67,7 @@ struct InvoiceView: View {
                 HStack {
                     Label("", systemImage: "bolt.fill")
                         .foregroundColor(.orange)
-                    Text("Lightning Invoice")
+                    Text("Lightning Invoice", comment: "Indicates that the view is for paying a Lightning invoice.")
                 }
                 Divider()
                 Text(invoice.description)

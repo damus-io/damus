@@ -59,7 +59,7 @@ struct EventDetailView: View {
         Group {
             switch cev {
             case .collapsed(let c):
-                Text("··· \(c.count) other notes ···")
+                Text(String(format: NSLocalizedString("collapsed_event_view_other_notes", comment: "Text to indicate that the thread was collapsed and that there are other notes to view if tapped."), c.count))
                     .padding([.top,.bottom], 8)
                     .font(.footnote)
                     .foregroundColor(.gray)
@@ -114,7 +114,7 @@ struct EventDetailView: View {
                 scroll_after_load(thread: thread, proxy: proxy)
             }
         }
-        .navigationBarTitle("Thread")
+        .navigationBarTitle(NSLocalizedString("Thread", comment: "Navigation bar title for note thread."))
 
     }
     

@@ -16,12 +16,12 @@ struct SearchHomeView: View {
     var SearchInput: some View {
         ZStack(alignment: .leading) {
             HStack{
-                TextField("Search...", text: $search)
+                TextField(NSLocalizedString("Search...", comment: "Placeholder text to prompt entry of search query."), text: $search)
                     .padding(8)
                     .padding(.leading, 35)
                     .autocorrectionDisabled(true)
                     .textInputAutocapitalization(.never)
-                Text("Cancel")
+                Text("Cancel", comment: "Cancel out of search view.")
                     .foregroundColor(.blue)
                     .padding(EdgeInsets(top: 0.0, leading: 0.0, bottom: 0.0, trailing: 10.0))
                     .opacity((search == "") ? 0.0 : 1.0)

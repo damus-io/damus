@@ -30,7 +30,7 @@ struct RecommendedRelayView: View {
             Spacer()
             if let ev = damus.contacts.event, add_button {
                 if let privkey = damus.keypair.privkey {
-                    Button("Add") {
+                    Button(NSLocalizedString("Add", comment: "Button to add recommended relay server.")) {
                         guard let ev = add_relay(ev: ev, privkey: privkey, current_relays: damus.pool.descriptors, relay: relay, info: .rw) else {
                             return
                         }

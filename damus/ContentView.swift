@@ -130,9 +130,9 @@ struct ContentView: View {
     
     var FiltersView: some View {
         VStack{
-            Picker("Filter State", selection: $filter_state) {
-                Text("Posts").tag(FilterState.posts)
-                Text("Posts & Replies").tag(FilterState.posts_and_replies)
+            Picker(NSLocalizedString("Filter State", comment: "Filter state for seeing either only posts, or posts & replies."), selection: $filter_state) {
+                Text("Posts", comment: "Label for filter for seeing only posts (instead of posts and replies).").tag(FilterState.posts)
+                Text("Posts & Replies", comment: "Label for filter for seeing posts and replies (instead of only posts).").tag(FilterState.posts_and_replies)
             }
             .pickerStyle(.segmented)
         }
@@ -158,7 +158,7 @@ struct ContentView: View {
                 
             case .notifications:
                 TimelineView(events: $home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
-                    .navigationTitle("Notifications")
+                    .navigationTitle(NSLocalizedString("Notifications", comment: "Navigation title for notifications."))
                 
             case .dms:
                 DirectMessagesView(damus_state: damus_state!)
@@ -168,7 +168,7 @@ struct ContentView: View {
                 EmptyView()
             }
         }
-        .navigationBarTitle(selected_timeline == .home ?  "Home" : "Global", displayMode: .inline)
+        .navigationBarTitle(selected_timeline == .home ?  NSLocalizedString("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.") : NSLocalizedString("Global", comment: "Navigation bar title for Global view where posts from all connected relay servers appear."), displayMode: .inline)
     }
     
     var MaybeSearchView: some View {
@@ -229,7 +229,7 @@ struct ContentView: View {
                             ToolbarItem(placement: .navigationBarTrailing) {
                                 HStack(alignment: .center) {
                                     if home.signal.signal != home.signal.max_signal {
-                                        Text("\(home.signal.signal)/\(home.signal.max_signal)")
+                                        Text("\(home.signal.signal)/\(home.signal.max_signal)", comment: "Fraction of how many of the user's relay servers that are operational.")
                                             .font(.callout)
                                             .foregroundColor(.gray)
                                     }

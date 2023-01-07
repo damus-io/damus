@@ -61,7 +61,7 @@ struct ConfigView: View {
                     }
                 } header: {
                     HStack {
-                        Text("Relays")
+                        Text("Relays", comment: "Header text for relay server list for configuration.")
                         Spacer()
                         Button(action: { show_add_relay = true }) {
                             Image(systemName: "plus")
@@ -70,13 +70,13 @@ struct ConfigView: View {
                     }
                 }
                 
-                Section("Recommended Relays") {
+                Section(NSLocalizedString("Recommended Relays", comment: "Section title for recommend relay servers that could be added as part of configuration")) {
                     List(recommended, id: \.url) { r in
                         RecommendedRelayView(damus: state, relay: r.url.absoluteString)
                     }
                 }
                 
-                Section("Public Account ID") {
+                Section(NSLocalizedString("Public Account ID", comment: "Section title for the user's public account ID.")) {
                     HStack {
                         Text(state.keypair.pubkey_bech32)
                         
@@ -86,10 +86,10 @@ struct ConfigView: View {
                 }
                 
                 if let sec = state.keypair.privkey_bech32 {
-                    Section("Secret Account Login Key") {
+                    Section(NSLocalizedString("Secret Account Login Key", comment: "Section title for user's secret account login key.")) {
                         HStack {
                             if show_privkey == false {
-                                SecureField("PrivateKey", text: $privkey)
+                                SecureField(NSLocalizedString("PrivateKey", comment: "Title of the secure field that holds the user's private key."), text: $privkey)
                                     .disabled(true)
                             } else {
                                 Text(sec)
@@ -99,13 +99,13 @@ struct ConfigView: View {
                             CopyButton(is_pk: false)
                         }
                         
-                        Toggle("Show", isOn: $show_privkey)
+                        Toggle(NSLocalizedString("Show", comment: "Toggle to show or hide user's secret account login key."), isOn: $show_privkey)
                     }
                 }
                 
-                Section("Wallet Selector") {
-                    Toggle("Show wallet selector", isOn: $user_settings.show_wallet_selector).toggleStyle(.switch)
-                    Picker("Select default wallet",
+                Section(NSLocalizedString("Wallet Selector", comment: "Section title for selection of wallet.")) {
+                    Toggle(NSLocalizedString("Show wallet selector", comment: "Toggle to show or hide selection of wallet."), isOn: $user_settings.show_wallet_selector).toggleStyle(.switch)
+                    Picker(NSLocalizedString("Select default wallet", comment: "Prompt selection of user's default wallet"),
                            selection: $user_settings.default_wallet) {
                         ForEach(Wallet.allCases, id: \.self) { wallet in
                             Text(wallet.model.displayName)
@@ -114,32 +114,32 @@ struct ConfigView: View {
                     }
                 }
                 
-                Section("Clear Cache") {
-                    Button("Clear") {
+                Section(NSLocalizedString("Clear Cache", comment: "Section title for clearing cached data.")) {
+                    Button(NSLocalizedString("Clear", comment: "Button for clearing cached data.")) {
                         KingfisherManager.shared.cache.clearMemoryCache()
                         KingfisherManager.shared.cache.clearDiskCache()
                         KingfisherManager.shared.cache.cleanExpiredDiskCache()
                     }
                 }
                 
-                Section("Reset") {
-                    Button("Logout") {
+                Section(NSLocalizedString("Reset", comment: "Section title for resetting the user")) {
+                    Button(NSLocalizedString("Logout", comment: "Button to logout the user.")) {
                         confirm_logout = true
                     }
                 }
             }
         }
-        .navigationTitle("Settings")
+        .navigationTitle(NSLocalizedString("Settings", comment: "Navigation title for Settings view."))
         .navigationBarTitleDisplayMode(.large)
-        .alert("Logout", isPresented: $confirm_logout) {
-            Button("Cancel") {
+        .alert(NSLocalizedString("Logout", comment: "Alert for logging out the user."), isPresented: $confirm_logout) {
+            Button(NSLocalizedString("Cancel", comment: "Cancel out of logging out the user.")) {
                 confirm_logout = false
             }
-            Button("Logout") {
+                   Button(NSLocalizedString("Logout", comment: "Button for logging out the user.")) {
                 notify(.logout, ())
             }
         } message: {
-            Text("Make sure your nsec account key is saved before you logout or you will lose access to this account")
+                Text("Make sure your nsec account key is saved before you logout or you will lose access to this account", comment: "Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.")
         }
         .sheet(isPresented: $show_add_relay) {
             AddRelayView(show_add_relay: $show_add_relay, relay: $new_relay) { m_relay in
