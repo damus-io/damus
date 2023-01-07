@@ -51,7 +51,9 @@ struct InnerProfilePicView: View {
     }
 
     var body: some View {
-        Group {
+        ZStack {
+            Color(uiColor: .systemBackground)
+            
             KFAnimatedImage(url)
                 .callbackQueue(.dispatch(.global(qos: .background)))
                 .processingQueue(.dispatch(.global(qos: .background)))
