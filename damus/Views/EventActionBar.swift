@@ -168,12 +168,8 @@ struct LikeButton: View {
     
     var body: some View {
         Button(action: action) {
-            if liked {
-                Text("🤙", comment: "Button with emoji to like an event.")
-            } else {
-                Text("🤙")
-                    .grayscale(1)
-            }
+            Image(liked ? "shaka-full" : "shaka-line")
+                .foregroundColor(liked ? .orange : .gray)
         }
     }
 }
