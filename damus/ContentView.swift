@@ -211,41 +211,21 @@ struct ContentView: View {
                     ZStack {
                         MainContent(damus: damus)
                             .toolbar() {
-                                    ToolbarItem(placement: .navigationBarLeading) {
+                                ToolbarItem(placement: .navigationBarLeading) {
 
+                                        let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
+                                        let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
+                                        Button {
+                                            isSideBarOpened.toggle()
+                                        } label: {
                                             let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
                                             let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
-                                            let prof_dest = ProfileView(damus_state: damus_state!, profile: profile_model, followers: followers_model)
-                                            
-                                            Button {
-                                                isSideBarOpened.toggle()
-                                            } label: {
-                                                let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
-                                                let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
-                                                let prof_dest = ProfileView(damus_state: damus_state!, profile: profile_model, followers: followers_model)
-                                                
-                                                if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
-                                                    ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
-                                                } else {
-                                                    Image(systemName: "person.fill")
-                                                }
+                            
+                                            if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
+                                                ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
+                                            } else {
+                                                Image(systemName: "person.fill")
                                             }
-                                        }
-                    
-                                    ToolbarItem(placement: .navigationBarTrailing) {
-                                        HStack(alignment: .center) {
-                                            if home.signal.signal != home.signal.max_signal {
-                                                Text("\(home.signal.signal)/\(home.signal.max_signal)")
-                                                    .font(.callout)
-                                                    .foregroundColor(.gray)
-                                            }
-                                            
-                                            /*
-                                             NavigationLink(destination: ConfigView(state: damus_state!).environmentObject(user_settings)) {
-                                             Label("", systemImage: "gear")
-                                             }
-                                             .buttonStyle(PlainButtonStyle())
-                                             */
                                         }
                                     }
                             }
