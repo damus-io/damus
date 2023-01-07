@@ -45,10 +45,10 @@ enum FilterState : Int {
     case posts_and_replies = 1
     case posts = 0
     
-    func filter(privkey: String?, ev: NostrEvent) -> Bool {
+    func filter(ev: NostrEvent) -> Bool {
         switch self {
         case .posts:
-            return !ev.is_reply(privkey)
+            return !ev.is_reply(nil)
         case .posts_and_replies:
             return true
         }
@@ -94,10 +94,12 @@ struct ContentView: View {
     var PostingTimelineView: some View {
         VStack {
             TabView(selection: $filter_state) {
-                contentTimelineView(filter: posts_filter_event)
+                contentTimelineView(filter: FilterState.posts.filter)
                     .tag(FilterState.posts)
-                contentTimelineView(filter: posts_and_replies_filter_event)
+                    .id(FilterState.posts)
+                contentTimelineView(filter: FilterState.posts_and_replies.filter)
                     .tag(FilterState.posts_and_replies)
+                    .id(FilterState.posts_and_replies)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
@@ -125,14 +127,6 @@ struct ContentView: View {
                 }
             }
         }
-    }
-    
-    func posts_and_replies_filter_event(_ ev: NostrEvent) -> Bool {
-        return true
-    }
-    
-    func posts_filter_event(_ ev: NostrEvent) -> Bool {
-        return !ev.is_reply(nil)
     }
     
     var FiltersView: some View {
