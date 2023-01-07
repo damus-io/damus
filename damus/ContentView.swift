@@ -213,11 +213,11 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             if let damus = self.damus_state {
-                                
+                               
                 VStack(alignment: .leading, spacing: 0) {
                     NavigationView {
-
-                        SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened).zIndex(1)
+                        
+                        SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened)
                         
                         VStack(alignment: .leading, spacing: 0) {
                             
