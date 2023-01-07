@@ -19,15 +19,15 @@ struct ConfigView: View {
     @State var pubkey_copied: Bool = false
     @State var relays: [RelayDescriptor]
     @EnvironmentObject var user_settings: UserSettingsStore
-    
+
     let generator = UIImpactFeedbackGenerator(style: .light)
-    
+
     init(state: DamusState) {
         self.state = state
         _privkey = State(initialValue: self.state.keypair.privkey_bech32 ?? "")
         _relays = State(initialValue: state.pool.descriptors)
     }
-    
+
     // TODO: (jb55) could be more general but not gonna worry about it atm
     func CopyButton(is_pk: Bool) -> some View {
         return Button(action: {
@@ -68,22 +68,22 @@ struct ConfigView: View {
                         }
                     }
                 }
-                
+
                 Section("Recommended Relays") {
                     List(recommended, id: \.url) { r in
                         RecommendedRelayView(damus: state, relay: r.url.absoluteString)
                     }
                 }
-                
+
                 Section("Public Account ID") {
                     HStack {
                         Text(state.keypair.pubkey_bech32)
-                        
+
                         CopyButton(is_pk: true)
                     }
                     .clipShape(RoundedRectangle(cornerRadius: 5))
                 }
-                
+
                 if let sec = state.keypair.privkey_bech32 {
                     Section("Secret Account Login Key") {
                         HStack {
@@ -94,14 +94,14 @@ struct ConfigView: View {
                                 Text(sec)
                                     .clipShape(RoundedRectangle(cornerRadius: 5))
                             }
-                            
+
                             CopyButton(is_pk: false)
                         }
-                        
+
                         Toggle("Show", isOn: $show_privkey)
                     }
                 }
-                
+
                 Section("Wallet Selector") {
                     Toggle("Show wallet selector", isOn: $user_settings.show_wallet_selector).toggleStyle(.switch)
                     Picker("Select default wallet",
@@ -112,7 +112,12 @@ struct ConfigView: View {
                         }
                     }
                 }
-                
+
+                Section("Left Handed") {
+                    Toggle("Left Handed", isOn: $user_settings.left_handed)
+                        .toggleStyle(.switch)
+                }
+
                 Section("Reset") {
                     Button("Logout") {
                         confirm_logout = true
@@ -137,33 +142,33 @@ struct ConfigView: View {
                 guard let relay = m_relay else {
                     return
                 }
-                
+
                 guard let url = URL(string: relay) else {
                     return
                 }
-                
+
                 guard let ev = state.contacts.event else {
                     return
                 }
-                
+
                 guard let privkey = state.keypair.privkey else {
                     return
                 }
-                
+
                 let info = RelayInfo.rw
-                
+
                 guard (try? state.pool.add_relay(url, info: info)) != nil else {
                     return
                 }
-                
+
                 state.pool.connect(to: [new_relay])
-                
+
                 guard let new_ev = add_relay(ev: ev, privkey: privkey, current_relays: state.pool.descriptors, relay: new_relay, info: info) else {
                     return
                 }
-                
+
                 process_contact_event(pool: state.pool, contacts: state.contacts, pubkey: state.pubkey, ev: ev)
-                
+
                 state.pool.send(.event(new_ev))
             }
         }
