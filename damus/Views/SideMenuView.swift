@@ -72,12 +72,26 @@ struct SideMenuView: View {
                     Divider()
                         .padding(.trailing,40)
                     
-                    //NavigationView {
+                    /*
+                    HStack(alignment: .bottom) {
+                        Text("69,420")
+                            .foregroundColor(.accentColor)
+                            .font(.largeTitle)
+                        Text("SATS")
+                            .font(.caption)
+                            .padding(.bottom,6)
+                    }
+                    
+                    Divider()
+                        .padding(.trailing,40)
+                     */
+                    
+                    // THERE IS A LIMIT OF 10 NAVIGATIONLINKS!!! (Consider some in other views)
+                    
                     let followers = FollowersModel(damus_state: damus_state, target: damus_state.pubkey)
                     let profile_model = ProfileModel(pubkey: damus_state.pubkey, damus: damus_state)
-                        
-                    NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)
-                    ) {
+
+                    NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
                         Label("Profile", systemImage: "person")
                             .font(.title2)
                             .foregroundColor(textColor())
@@ -92,10 +106,21 @@ struct SideMenuView: View {
                             .font(.title2)
                             .foregroundColor(textColor())
                     }
-                     .simultaneousGesture(TapGesture().onEnded {
-                         isSidebarVisible.toggle()
-                     })
+                    .simultaneousGesture(TapGesture().onEnded {
+                        isSidebarVisible.toggle()
+                    })
                     */
+                    
+                    /*
+                    NavigationLink(destination: EmptyView()) {
+                        Label("Wallet", systemImage: "bolt")
+                            .font(.title2)
+                            .foregroundColor(textColor())
+                    }
+                    .simultaneousGesture(TapGesture().onEnded {
+                        isSidebarVisible.toggle()
+                    })
+                     */
                     
                     NavigationLink(destination: ConfigView(state: damus_state).environmentObject(user_settings)) {
                         Label("App settings", systemImage: "gear")
