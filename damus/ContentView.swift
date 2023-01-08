@@ -268,7 +268,7 @@ struct ContentView: View {
             case .filter:
                 if #available(iOS 16.0, *) {
                     RelayFilterView(state: damus_state!)
-                        .presentationDetents([.medium])
+                        .presentationDetents([.height(550)])
                         .presentationDragIndicator(.visible)
                 } else {
                     // Fallback on earlier versions

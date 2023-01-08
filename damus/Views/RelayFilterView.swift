@@ -19,6 +19,11 @@ struct RelayFilterView: View {
     }
     
     var body: some View {
+        Text("To filter your feed, please choose applicable relays from the list below:")
+            .padding()
+            .padding(.top, 20)
+            .padding(.bottom, 0)
+        
         Section {
             List(Array(relays), id: \.url) { relay in
                 //RelayView(state: state, relay: relay.url.absoluteString)
@@ -26,6 +31,7 @@ struct RelayFilterView: View {
                     .toggleStyle(SwitchToggleStyle(tint: .accentColor))
             }
         }
+        .padding()
     }
 }
 
