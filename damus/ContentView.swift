@@ -229,10 +229,6 @@ struct ContentView: View {
                                         }
                                     }
                                 }
-                         
-                            TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
-                                .padding([.bottom], 8)
-                            
                         }
                         
                         Color.clear
@@ -243,8 +239,9 @@ struct ContentView: View {
                     .navigationBarHidden(isSideBarOpened ? true: false) // Would prefer a different way of doing this.
                 }
                 .navigationViewStyle(.stack)
-                
-
+            
+                TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
+                    .padding([.bottom], 8)
             }
         }
         .onAppear() {
