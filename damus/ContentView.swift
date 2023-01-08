@@ -240,7 +240,7 @@ struct ContentView: View {
                 }
                 .navigationViewStyle(.stack)
             
-                TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
+                TabBar(new_events: $home.new_events, selected: $selected_timeline, isSidebarVisible: $isSideBarOpened, action: switch_timeline)
                     .padding([.bottom], 8)
             }
         }
@@ -283,7 +283,6 @@ struct ContentView: View {
             guard let privkey = self.privkey else {
                 return
             }
-            
             let ev = notif.object as! NostrEvent
             let boost = make_boost_event(pubkey: pubkey, privkey: privkey, boosted: ev)
             self.damus_state?.pool.send(.event(boost))
