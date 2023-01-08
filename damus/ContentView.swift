@@ -209,9 +209,10 @@ struct ContentView: View {
             if let damus = self.damus_state {
                 NavigationView {
                     ZStack {
-                        MainContent(damus: damus)
-                            .toolbar() {
-                                ToolbarItem(placement: .navigationBarLeading) {
+                        VStack {
+                            MainContent(damus: damus)
+                                .toolbar() {
+                                    ToolbarItem(placement: .navigationBarLeading) {
                                         let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
                                         let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
                                         Button {
@@ -219,7 +220,7 @@ struct ContentView: View {
                                         } label: {
                                             let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
                                             let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
-                            
+                                            
                                             if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
                                                 ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
                                             } else {
@@ -227,7 +228,12 @@ struct ContentView: View {
                                             }
                                         }
                                     }
-                            }
+                                }
+                         
+                            TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
+                                .padding([.bottom], 8)
+                            
+                        }
                         
                         Color.clear
                         .overlay(
@@ -238,8 +244,7 @@ struct ContentView: View {
                 }
                 .navigationViewStyle(.stack)
                 
-                TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
-                    .padding([.bottom], 8)
+
             }
         }
         .onAppear() {
