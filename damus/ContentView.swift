@@ -27,11 +27,13 @@ struct TimestampedProfile {
 enum Sheets: Identifiable {
     case post
     case reply(NostrEvent)
+    case filter
 
     var id: String {
         switch self {
         case .post: return "post"
         case .reply(let ev): return "reply-" + ev.id
+        case .filter: return "filter"
         }
     }
 }
@@ -228,16 +230,20 @@ struct ContentView: View {
 
                             ToolbarItem(placement: .navigationBarTrailing) {
                                 HStack(alignment: .center) {
-                                    if home.signal.signal != home.signal.max_signal {
+                                    //if home.signal.signal != home.signal.max_signal {
                                         Text("\(home.signal.signal)/\(home.signal.max_signal)")
                                             .font(.callout)
-                                            .foregroundColor(.gray)
+                                            .foregroundColor(Color("DamusMediumGrey"))
+                                    //}
+                                    Button(action: {
+                                        //isFilterVisible.toggle()
+                                        self.active_sheet = .filter
+                                    }) {
+                                        // checklist, checklist.checked, lisdt.bullet, list.bullet.circle, line.3.horizontal.decrease...,  line.3.horizontail.decrease
+                                        Label("Filter", systemImage: "line.3.horizontal.decrease")
+                                            .foregroundColor(colorScheme == .dark ? Color("DamusWhite") : Color("DamusBlack"))
+                                            //.contentShape(Rectangle())
                                     }
-
-                                    NavigationLink(destination: ConfigView(state: damus_state!).environmentObject(user_settings)) {
-                                        Label("", systemImage: "gear")
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
                                 }
                             }
                         }
@@ -259,6 +265,14 @@ struct ContentView: View {
                 PostView(replying_to: nil, references: [])
             case .reply(let event):
                 ReplyView(replying_to: event, damus: damus_state!)
+            case .filter:
+                if #available(iOS 16.0, *) {
+                    RelayFilterView(state: damus_state!)
+                        .presentationDetents([.medium])
+                        .presentationDragIndicator(.visible)
+                } else {
+                    // Fallback on earlier versions
+                }
             }
         }
         .onOpenURL { url in
