@@ -7,11 +7,6 @@
 
 import SwiftUI
 
-let LINEAR_GRADIENT = LinearGradient(gradient: Gradient(colors: [
-    Color("DamusPurple"),
-    Color("DamusBlue")
-]), startPoint: .topTrailing, endPoint: .bottomTrailing)
-
 func get_friend_icon(contacts: Contacts, pubkey: String, show_confirmed: Bool) -> String? {
     if !show_confirmed {
         return nil
@@ -38,10 +33,9 @@ struct ProfileName: View {
     
     @State var display_name: String?
     @State var nip05: NIP05?
+    @State private var isNIP05HostVisible = false
     
     @Environment(\.colorScheme) var colorScheme
-    
-    @State var isNIPCollapsed = false
     
     init(pubkey: String, profile: Profile?, damus: DamusState, show_friend_confirmed: Bool) {
         self.pubkey = pubkey
@@ -67,12 +61,16 @@ struct ProfileName: View {
         nip05 ?? damus_state.profiles.is_validated(pubkey)
     }
     
+    var nip05_colorgradient: LinearGradient {
+        return get_nip05_colorgradient(pubkey: pubkey, contacts: damus_state.contacts)
+    }
+    
     var nip05_color: Color {
         return get_nip05_color(pubkey: pubkey, contacts: damus_state.contacts)
     }
     
     func nip05fillColor() -> Color {
-        colorScheme == .light ? Color("DamusLightGrey") : Color("DamusDarkGrey")
+        colorScheme == .light ? .accentColor : .accentColor
     }
     
     var body: some View {
@@ -84,39 +82,39 @@ struct ProfileName: View {
                 .fontWeight(prefix == "@" ? .none : .bold)
             
             if let nip05 = current_nip05 {
+                
                 ZStack(alignment: .leading) {
-                    Image(systemName: "checkmark.seal.fill")
-                        .foregroundColor(nip05_color)
-                        .onTapGesture {
-                            withAnimation {
-                                self.isNIPCollapsed.toggle()
-                            }
-                        }
-                    if !isNIPCollapsed {
-                        Text(nip05.host)
-                            .foregroundColor(nip05_color)
-                            //.font(.footnote)
-                            .scaledToFit()
-                        
-                        RoundedRectangle(cornerRadius: 24)
-                            .padding(.leading, 5)
-                            .frame(height:20)
-                            .foregroundColor(nip05fillColor())
-                            //.overlay(
-                            //
-                            //)
-                            //.transition(.push(from: .leading))
-                            .frame(width: isNIPCollapsed ? 0 : nil) // Was hoping for more of a slide out TBH
-                            .clipped()
+                    RoundedRectangle(cornerRadius: 10)
+                        .foregroundColor(nip05fillColor())
+                        .frame(width: isNIP05HostVisible ? 150 : 0, height: 15)
+                        .animation(.default, value: isNIP05HostVisible)
+                        .scaledToFit()
+                        .clipped()
+                        .padding(.leading, 20)
+                        .overlay(
+                            Text(nip05.host)
+                                .font(.caption2)
+                                .padding(.leading, 20)
+                                .foregroundColor(Color("DamusDarkGrey"))
+                                .scaledToFit()
+                                .clipped()
+                            )
+                    
+                    nip05_colorgradient.mask(
+                        Image(systemName: "checkmark.seal.fill")
+                            .contentShape(Circle())
+                            .frame(width: 50, height: 50)
+                    )
+                    .shadow(color: Color("DamusBlack"), radius: 1, x: 1, y: 1)
+                    .frame(width: 50, height: 50)
+                    .onTapGesture {
+                        //withAnimation {
+                        //    self.isNIPCollapsed.toggle()
+                        //}
+                        isNIP05HostVisible.toggle()
                     }
                 }
             }
-            /*
-            if let friend = friend_icon, current_nip05 == nil {
-                Image(systemName: friend)
-                    .foregroundColor(.gray)
-            }
-            */
         }
         .onReceive(handle_notify(.profile_updated)) { notif in
             let update = notif.object as! ProfileUpdate
@@ -168,6 +166,10 @@ struct EventProfileName: View {
     var current_nip05: NIP05? {
         nip05 ?? damus_state.profiles.is_validated(pubkey)
     }
+    
+    var nip05_colorgradient: LinearGradient {
+        return get_nip05_colorgradient(pubkey: pubkey, contacts: damus_state.contacts)
+    }
    
     var body: some View {
         HStack(spacing: 2) {
@@ -186,8 +188,22 @@ struct EventProfileName: View {
             }
             
             if let _ = current_nip05 {
-                Image(systemName: "checkmark.seal.fill")
-                    .foregroundColor(get_nip05_color(pubkey: pubkey, contacts: damus_state.contacts))
+                nip05_colorgradient.mask(
+                    Image(systemName: "checkmark.seal.fill")
+                        .contentShape(Circle())
+                        .frame(width: 24, height: 24)
+                )
+                .contentShape(Circle())
+                .frame(width: 24, height: 24)
+                /*
+                nip05_colorgradient.mask(
+                    Image(systemName: "checkmark.seal.fill")
+                        .contentShape(Circle())
+                        .frame(width: 24, height: 24)
+                )
+                .contentShape(Circle())
+                .frame(width: 24, height: 24)
+                 */
             }
             
             if let frend = friend_icon, current_nip05 == nil {
@@ -208,5 +224,18 @@ struct EventProfileName: View {
 }
 
 func get_nip05_color(pubkey: String, contacts: Contacts) -> Color {
-    return contacts.is_friend_or_self(pubkey) ? .accentColor : .gray
+    return contacts.is_friend_or_self(pubkey) ? .accentColor : Color("DamusMediumGrey")
+}
+
+func get_nip05_colorgradient(pubkey: String, contacts: Contacts) -> LinearGradient {
+    return contacts.is_friend_or_self(pubkey) ?
+        LinearGradient(gradient: Gradient(colors: [
+            Color("DamusPurple"),
+            Color("DamusBlue")
+        ]), startPoint: .topTrailing, endPoint: .bottomTrailing)
+     :
+        LinearGradient(gradient: Gradient(colors: [
+            Color("DamusMediumGrey"),
+            Color("DamusLightGrey")
+        ]), startPoint: .topTrailing, endPoint: .bottomTrailing)
 }
