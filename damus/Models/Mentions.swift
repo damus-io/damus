@@ -187,12 +187,22 @@ enum Amount: Equatable {
     func amount_sats_str() -> String {
         switch self {
         case .any:
-            return "Any"
+            return NSLocalizedString("Any", comment: "Any amount of sats")
         case .specific(let amt):
-            if amt < 1000 {
-                return "\(Double(amt) / 1000.0) sats"
+            let numberFormatter = NumberFormatter()
+            numberFormatter.numberStyle = .decimal
+            numberFormatter.minimumFractionDigits = 0
+            numberFormatter.maximumFractionDigits = 3
+            numberFormatter.roundingMode = .down
+
+            let sats = NSNumber(value: (Double(amt) / 1000.0))
+            let formattedSats = numberFormatter.string(from: sats) ?? sats.stringValue
+
+            if formattedSats == numberFormatter.string(from: 1) {
+                return NSLocalizedString("\(formattedSats) sat", comment: "Amount of 1 sat.")
             }
-            return "\(amt / 1000) sats"
+
+            return NSLocalizedString("\(formattedSats) sats", comment: "Amount of sats.")
         }
     }
 }
