@@ -212,7 +212,6 @@ struct ContentView: View {
                         MainContent(damus: damus)
                             .toolbar() {
                                 ToolbarItem(placement: .navigationBarLeading) {
-
                                         let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
                                         let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
                                         Button {

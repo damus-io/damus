@@ -31,7 +31,7 @@ struct SideMenuView: View {
             GeometryReader { _ in
                 EmptyView()
             }
-            .background(.gray.opacity(0.6))
+            .background(Color("DamusDarkGrey").opacity(0.6))
             .opacity(isSidebarVisible ? 1 : 0)
             .animation(.easeInOut.delay(0.2), value: isSidebarVisible)
             .onTapGesture {
@@ -82,6 +82,9 @@ struct SideMenuView: View {
                             .font(.title2)
                             .foregroundColor(textColor())
                     }
+                    .simultaneousGesture(TapGesture().onEnded {
+                        isSidebarVisible = false
+                    })
                     
                     /*
                     NavigationLink(destination: EmptyView()) {
@@ -89,6 +92,9 @@ struct SideMenuView: View {
                             .font(.title2)
                             .foregroundColor(textColor())
                     }
+                     .simultaneousGesture(TapGesture().onEnded {
+                         isSidebarVisible.toggle()
+                     })
                     */
                     
                     NavigationLink(destination: ConfigView(state: damus_state).environmentObject(user_settings)) {
@@ -96,6 +102,9 @@ struct SideMenuView: View {
                             .font(.title2)
                             .foregroundColor(textColor())
                     }
+                    .simultaneousGesture(TapGesture().onEnded {
+                        isSidebarVisible = false
+                    })
                     
                     Spacer()
                     
@@ -115,6 +124,9 @@ struct SideMenuView: View {
             .frame(width: sideBarWidth)
             .offset(x: isSidebarVisible ? 0 : -sideBarWidth)
             .animation(.default, value: isSidebarVisible)
+            .onTapGesture {
+                isSidebarVisible.toggle()
+            }
             .alert("Logout", isPresented: $confirm_logout) {
                 Button("Cancel") {
                     confirm_logout = false
