@@ -70,9 +70,11 @@ struct ConfigView: View {
                     }
                 }
                 
-                Section("Recommended Relays") {
-                    List(recommended, id: \.url) { r in
-                        RecommendedRelayView(damus: state, relay: r.url.absoluteString)
+                if recommended.count > 0 {
+                    Section("Recommended Relays") {
+                        List(recommended, id: \.url) { r in
+                            RecommendedRelayView(damus: state, relay: r.url.absoluteString)
+                        }
                     }
                 }
                 
