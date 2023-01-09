@@ -103,7 +103,7 @@ struct EditMetadataView: View {
         VStack(alignment: .leading) {
             HStack {
                 Spacer()
-                InnerProfilePicView(url: URL(string: picture), pubkey: damus_state.pubkey, size: PPM_SIZE, highlight: .none)
+                InnerProfilePicView(url: URL(string: picture), fallbackUrl: nil, pubkey: damus_state.pubkey, size: PPM_SIZE, highlight: .none)
                 Spacer()
             }
             Form {
