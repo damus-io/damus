@@ -1,3 +1,35 @@
+## [1.0.0-5] - 2023-01-06
+
+### Added
+
+- Added share button to profile (William Casarin)
+- Added universal link sharing of notes (William Casarin)
+- Added clear cache button to wipe pfp/image cache (OlegAba)
+- Allow Adding Relay Without wss:// Prefix (Joel Klabo)
+- Allow Saving Images to Library (Joel Klabo)
+
+
+### Changed
+
+- Added damus gradient to post button (Ben Weeks)
+- Center the Post Button (Thomas)
+- Switch yellow nip05 check to gray (William Casarin)
+- Switch from bluecheck to purplecheck (William Casarin)
+
+
+### Fixed
+
+- Add system background color to profile pics (OlegAba)
+- High res color pubkey on profile page (William Casarin)
+- Don't spin forever if we're temporarily disconnected (William Casarin)
+- Fixed a few issues with avatars not animating (OlegAba)
+- Scroll to bottom when new DM received (Aidan O'Loan)
+- Make reply view scrollable (Joel Klabo)
+- Hide profile edit button when logged in with pubkey (Swift)
+
+
+[1.0.0-5]: https://github.com/damus-io/damus/releases/tag/v1.0.0-5
+
 ## [1.0.0-4] - 2023-01-04
 
 ### Added
@@ -318,5 +350,6 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
+
 
 
