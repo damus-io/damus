@@ -5,8 +5,8 @@
 //  Created by William Casarin on 2022-06-09.
 //
 import AVFoundation
-import SwiftUI
 import Kingfisher
+import SwiftUI
 
 struct ConfigView: View {
     let state: DamusState
@@ -41,17 +41,17 @@ struct ConfigView: View {
             Image(systemName: copied ? "checkmark.circle" : "doc.on.doc")
         }
     }
-    
+
     var recommended: [RelayDescriptor] {
         let rs: [RelayDescriptor] = []
-        return BOOTSTRAP_RELAYS.reduce(into: rs) { (xs, x) in
+        return BOOTSTRAP_RELAYS.reduce(into: rs) { xs, x in
             if let _ = state.pool.get_relay(x) {
             } else {
                 xs.append(RelayDescriptor(url: URL(string: x)!, info: .rw))
             }
         }
     }
-    
+
     var body: some View {
         ZStack(alignment: .leading) {
             Form {
@@ -114,11 +114,11 @@ struct ConfigView: View {
                     }
                 }
 
-                Section("Left Handed") {
-                    Toggle("Left Handed", isOn: $user_settings.left_handed)
+                Section(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen")) {
+                    Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $user_settings.left_handed)
                         .toggleStyle(.switch)
                 }
-                
+
                 Section("Clear Cache") {
                     Button("Clear") {
                         KingfisherManager.shared.cache.clearMemoryCache()
@@ -126,7 +126,7 @@ struct ConfigView: View {
                         KingfisherManager.shared.cache.cleanExpiredDiskCache()
                     }
                 }
-                
+
                 Section("Reset") {
                     Button("Logout") {
                         confirm_logout = true
@@ -155,11 +155,11 @@ struct ConfigView: View {
                 if relay.starts(with: "wss://") == false {
                     relay = "wss://" + relay
                 }
-                
+
                 guard let url = URL(string: relay) else {
                     return
                 }
-                               
+
                 guard let ev = state.contacts.event else {
                     return
                 }
@@ -173,11 +173,10 @@ struct ConfigView: View {
                 guard (try? state.pool.add_relay(url, info: info)) != nil else {
                     return
                 }
-                
-                state.pool.connect(to: [relay])
-                
-                guard let new_ev = add_relay(ev: ev, privkey: privkey, current_relays: state.pool.descriptors, relay: relay, info: info) else {
 
+                state.pool.connect(to: [relay])
+
+                guard let new_ev = add_relay(ev: ev, privkey: privkey, current_relays: state.pool.descriptors, relay: relay, info: info) else {
                     return
                 }
 
