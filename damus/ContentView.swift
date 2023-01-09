@@ -168,7 +168,19 @@ struct ContentView: View {
                 EmptyView()
             }
         }
-        .navigationBarTitle(selected_timeline == .home ?  "Home" : "Global", displayMode: .inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                if selected_timeline == .home {
+                    HStack {
+                        Image("damus-home")
+                            .resizable()
+                            .frame(width:30,height:30)
+                    }
+                } else {
+                    Text("Global")
+                }
+            }
+        }
     }
     
     var MaybeSearchView: some View {
