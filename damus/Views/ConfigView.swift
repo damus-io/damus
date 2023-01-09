@@ -70,9 +70,11 @@ struct ConfigView: View {
                     }
                 }
                 
-                Section(NSLocalizedString("Recommended Relays", comment: "Section title for recommend relay servers that could be added as part of configuration")) {
-                    List(recommended, id: \.url) { r in
-                        RecommendedRelayView(damus: state, relay: r.url.absoluteString)
+                if recommended.count > 0 {
+                    Section(NSLocalizedString("Recommended Relays", comment: "Section title for recommend relay servers that could be added as part of configuration")) {
+                        List(recommended, id: \.url) { r in
+                            RecommendedRelayView(damus: state, relay: r.url.absoluteString)
+                        }
                     }
                 }
                 
