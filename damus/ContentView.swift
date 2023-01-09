@@ -168,18 +168,19 @@ struct ContentView: View {
                 EmptyView()
             }
         }
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
                 if selected_timeline == .home {
-                    HStack {
-                        Image("damus-home")
-                            .resizable()
-                            .frame(width:30,height:30)
-                    }
+                    Image("damus-home")
+                    .resizable()
+                    .frame(width:30,height:30)
+                    .shadow(color: Color("DamusPurple"), radius: 2)
                 } else {
                     Text("Global")
                 }
             }
+             
         }
     }
     
