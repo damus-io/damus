@@ -164,8 +164,6 @@ struct ProfileView: View {
                 .environmentObject(user_settings)
         }
     }
-
-    static let markdown = Markdown()
     
     var ShareButton: some View {
         Button(action: {
@@ -246,10 +244,9 @@ struct ProfileView: View {
                 }
                                
                 ProfileNameView(pubkey: profile.pubkey, profile: data, damus: damus_state)
-                    //.padding(.bottom)
                     .padding(.top,-(pfp_size/2.0))
                 
-                Text(ProfileView.markdown.process(data?.about ?? ""))
+                Text(Markdown.parse(content: data?.about ?? ""))
                     .font(.subheadline)
                 
                 Divider()
@@ -298,7 +295,6 @@ struct ProfileView: View {
                 }
             }
             .padding(.horizontal,18)
-            //.offset(y:120)
             .padding(.top,150)
         }
     }

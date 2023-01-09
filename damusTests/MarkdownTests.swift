@@ -21,44 +21,32 @@ class MarkdownTests: XCTestCase {
     }
 
     func test_convert_link() throws {
-        let helper = Markdown()
-        let md = helper.process("prologue https://nostr.build epilogue")
+        let md = Markdown.parse(content: "prologue https://nostr.build epilogue")
         let expected = try AttributedString(markdown: "prologue [https://nostr.build](https://nostr.build) epilogue", options: md_opts)
         XCTAssertEqual(md, expected)
     }
-
-    func test_convert_link_no_scheme() throws {
-        let helper = Markdown()
-        let md = helper.process("prologue damus.io epilogue")
-        let expected = try AttributedString(markdown: "prologue [damus.io](https://damus.io) epilogue", options: md_opts)
+    
+    func test_no_convert_markdown_link() throws {
+        let md = Markdown.parse(content: "prologue [link](https://nostr.build) epilogue")
+        let expected = try AttributedString(markdown: "prologue [link](https://nostr.build) epilogue", options: md_opts)
         XCTAssertEqual(md, expected)
     }
-
-    func test_convert_links() throws {
-        let helper = Markdown()
-        let md = helper.process("prologue damus.io https://nostr.build epilogue")
-        let expected = try AttributedString(markdown: "prologue [damus.io](https://damus.io) [https://nostr.build](https://nostr.build) epilogue", options: md_opts)
+    
+    func test_no_convert_with_emoji() throws {
+        let md = Markdown.parse(content: "test link w/ emoji ❤️ in a [string](https://nostr.build)")
+        let expected = try AttributedString(markdown: "test link w/ emoji ❤️ in a [string](https://nostr.build)", options: md_opts)
         XCTAssertEqual(md, expected)
     }
 
     func test_convert_http() throws {
-        let helper = Markdown()
-        let md = helper.process("prologue http://example.com epilogue")
+        let md = Markdown.parse(content: "prologue http://example.com epilogue")
         let expected = try AttributedString(markdown: "prologue [http://example.com](http://example.com) epilogue", options: md_opts)
         XCTAssertEqual(md, expected)
     }
 
     func test_convert_mailto() throws {
-        let helper = Markdown()
-        let md = helper.process("prologue test@example.com epilogue")
+        let md = Markdown.parse(content: "prologue test@example.com epilogue")
         let expected = try AttributedString(markdown: "prologue [test@example.com](mailto:test@example.com) epilogue", options: md_opts)
-        XCTAssertEqual(md, expected)
-    }
-
-    func test_convert_mailto_implicit() throws {
-        let helper = Markdown()
-        let md = helper.process("prologue mailto:test@example.com epilogue")
-        let expected = try AttributedString(markdown: "prologue [mailto:test@example.com](mailto:test@example.com) epilogue", options: md_opts)
         XCTAssertEqual(md, expected)
     }
 
