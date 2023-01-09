@@ -437,7 +437,7 @@ struct EventView: View {
         .id(event.id)
         .frame(maxWidth: .infinity, minHeight: PFP_SIZE)
         .padding([.bottom], 2)
-        .event_context_menu(event, privkey: damus.keypair.privkey)
+        .event_context_menu(event, pubkey: pubkey, privkey: damus.keypair.privkey)
     }
     
     func send_poll_choice(_ choice: Int) {
@@ -486,7 +486,7 @@ extension View {
         }
     }
     
-    func event_context_menu(_ event: NostrEvent, privkey: String?) -> some View {
+    func event_context_menu(_ event: NostrEvent, pubkey: String, privkey: String?) -> some View {
         return self.contextMenu {
             Button {
                 UIPasteboard.general.string = event.get_content(privkey)
@@ -495,7 +495,7 @@ extension View {
             }
 
             Button {
-                UIPasteboard.general.string = bech32_pubkey(event.pubkey) ?? event.pubkey
+                UIPasteboard.general.string = bech32_pubkey(pubkey) ?? pubkey
             } label: {
                 Label("Copy User ID", systemImage: "tag")
             }

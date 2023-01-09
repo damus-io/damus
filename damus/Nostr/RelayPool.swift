@@ -236,7 +236,7 @@ class RelayPool {
                 return
             }
             
-            print("running queueing request: \(req.req) for \(req.relay)")
+            print("running queueing request: \(req.req) for \(relay_id)")
             self.send(req.req, to: [relay_id])
         }
     }
