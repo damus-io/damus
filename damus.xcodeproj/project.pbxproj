@@ -116,8 +116,12 @@
 		4CB55EF3295E5D59007FD187 /* RecommendedRelayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB55EF2295E5D59007FD187 /* RecommendedRelayView.swift */; };
 		4CB55EF5295E679D007FD187 /* UserRelaysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB55EF4295E679D007FD187 /* UserRelaysView.swift */; };
 		4CB8838629656C8B00DC99E7 /* NIP05.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB8838529656C8B00DC99E7 /* NIP05.swift */; };
+		4CB88389296AF99A00DC99E7 /* EventDetailBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB88388296AF99A00DC99E7 /* EventDetailBar.swift */; };
 		4CB8838B296F6E1E00DC99E7 /* NIP05Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB8838A296F6E1E00DC99E7 /* NIP05Badge.swift */; };
 		4CB8838D296F710400DC99E7 /* Reposted.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB8838C296F710400DC99E7 /* Reposted.swift */; };
+		4CB8838F296F781C00DC99E7 /* ReactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB8838E296F781C00DC99E7 /* ReactionsView.swift */; };
+		4CB88393296F798300DC99E7 /* ReactionsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB88392296F798300DC99E7 /* ReactionsModel.swift */; };
+		4CB88396296F7F8B00DC99E7 /* ReactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB88395296F7F8B00DC99E7 /* ReactionView.swift */; };
 		4CD7641B28A1641400B6928F /* EndBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD7641A28A1641400B6928F /* EndBlock.swift */; };
 		4CE4F8CD281352B30009DFBB /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE4F8CC281352B30009DFBB /* Notifications.swift */; };
 		4CE4F9DE2852768D00C00DD9 /* ConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE4F9DD2852768D00C00DD9 /* ConfigView.swift */; };
@@ -310,8 +314,12 @@
 		4CB55EF2295E5D59007FD187 /* RecommendedRelayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendedRelayView.swift; sourceTree = "<group>"; };
 		4CB55EF4295E679D007FD187 /* UserRelaysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRelaysView.swift; sourceTree = "<group>"; };
 		4CB8838529656C8B00DC99E7 /* NIP05.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP05.swift; sourceTree = "<group>"; };
+		4CB88388296AF99A00DC99E7 /* EventDetailBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailBar.swift; sourceTree = "<group>"; };
 		4CB8838A296F6E1E00DC99E7 /* NIP05Badge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP05Badge.swift; sourceTree = "<group>"; };
 		4CB8838C296F710400DC99E7 /* Reposted.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reposted.swift; sourceTree = "<group>"; };
+		4CB8838E296F781C00DC99E7 /* ReactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactionsView.swift; sourceTree = "<group>"; };
+		4CB88392296F798300DC99E7 /* ReactionsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactionsModel.swift; sourceTree = "<group>"; };
+		4CB88395296F7F8B00DC99E7 /* ReactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactionView.swift; sourceTree = "<group>"; };
 		4CD7641A28A1641400B6928F /* EndBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndBlock.swift; sourceTree = "<group>"; };
 		4CE4F8CC281352B30009DFBB /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
 		4CE4F9DD2852768D00C00DD9 /* ConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigView.swift; sourceTree = "<group>"; };
@@ -469,6 +477,7 @@
 				4C99737A28C92A9200E53835 /* ChatroomMetadata.swift */,
 				BA693073295D649800ADDB87 /* UserSettingsStore.swift */,
 				4FE60CDC295E1C5E00105A1F /* Wallet.swift */,
+				4CB88392296F798300DC99E7 /* ReactionsModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -476,6 +485,8 @@
 		4C75EFA227FA576C0006080F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4CB88394296F7F8100DC99E7 /* Reactions */,
+				4CB88387296AF97C00DC99E7 /* ActionBar */,
 				4CE4F9E228528C5200C00DD9 /* AddRelayView.swift */,
 				4C363A8728236948006E126D /* BlocksView.swift */,
 				4C285C8128385570008A31F1 /* CarouselView.swift */,
@@ -488,7 +499,6 @@
 				4C216F33286F5ACD00040376 /* DMView.swift */,
 				E990020E2955F837003BBC5A /* EditMetadataView.swift */,
 				3169CAE4294E699400EE4006 /* Empty Views */,
-				4CEE2B01280B39E800AB5EEF /* EventActionBar.swift */,
 				4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */,
 				4C75EFB82804A2740006080F /* EventView.swift */,
 				4C3AC79E2833115300E1F516 /* FollowButtonView.swift */,
@@ -520,6 +530,7 @@
 				4CA2EF9F280E37AC0044ACD8 /* TimelineView.swift */,
 				4CB55EF4295E679D007FD187 /* UserRelaysView.swift */,
 				647D9A8C2968520300A295DE /* SideMenuView.swift */,
+				4CB8838E296F781C00DC99E7 /* ReactionsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -563,6 +574,23 @@
 				4CB8838529656C8B00DC99E7 /* NIP05.swift */,
 			);
 			path = Util;
+			sourceTree = "<group>";
+		};
+		4CB88387296AF97C00DC99E7 /* ActionBar */ = {
+			isa = PBXGroup;
+			children = (
+				4CEE2B01280B39E800AB5EEF /* EventActionBar.swift */,
+				4CB88388296AF99A00DC99E7 /* EventDetailBar.swift */,
+			);
+			path = ActionBar;
+			sourceTree = "<group>";
+		};
+		4CB88394296F7F8100DC99E7 /* Reactions */ = {
+			isa = PBXGroup;
+			children = (
+				4CB88395296F7F8B00DC99E7 /* ReactionView.swift */,
+			);
+			path = Reactions;
 			sourceTree = "<group>";
 		};
 		4CE4F9DF285287A000C00DD9 /* Components */ = {
@@ -840,6 +868,7 @@
 				4C75EFA627FF87A20006080F /* Nostr.swift in Sources */,
 				4CE4F9DE2852768D00C00DD9 /* ConfigView.swift in Sources */,
 				4C285C8E28399BFE008A31F1 /* SaveKeysView.swift in Sources */,
+				4CB8838F296F781C00DC99E7 /* ReactionsView.swift in Sources */,
 				4C649844285A952100EAE2B3 /* LocalUserConfig.swift in Sources */,
 				4C75EFB328049D640006080F /* NostrEvent.swift in Sources */,
 				4CA2EFA0280E37AC0044ACD8 /* TimelineView.swift in Sources */,
@@ -888,6 +917,8 @@
 				4C3EA66528FF5F6800C48A62 /* mem.c in Sources */,
 				4C3EA64128FF553900C48A62 /* hash_u5.c in Sources */,
 				4C3EA64F28FF59F200C48A62 /* tal.c in Sources */,
+				4CB88393296F798300DC99E7 /* ReactionsModel.swift in Sources */,
+				4CB88396296F7F8B00DC99E7 /* ReactionView.swift in Sources */,
 				4C8682872814DE470026224F /* ProfileView.swift in Sources */,
 				4C5F9114283D694D0052CD1C /* FollowTarget.swift in Sources */,
 				4CB8838629656C8B00DC99E7 /* NIP05.swift in Sources */,
@@ -910,6 +941,7 @@
 				4C363A922825FCF2006E126D /* ProfileUpdate.swift in Sources */,
 				4C0A3F95280F6C78000448DE /* ReplyQuoteView.swift in Sources */,
 				4C3BEFDA281DCA1400B3DE84 /* LikeCounter.swift in Sources */,
+				4CB88389296AF99A00DC99E7 /* EventDetailBar.swift in Sources */,
 				4C3AC79B28306D7B00E1F516 /* Contacts.swift in Sources */,
 				4C3EA63D28FF52D600C48A62 /* bolt11.c in Sources */,
 				4CB55EF3295E5D59007FD187 /* RecommendedRelayView.swift in Sources */,

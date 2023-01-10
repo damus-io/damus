@@ -216,7 +216,7 @@ struct ContentView: View {
             }
         }
     }
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
@@ -229,9 +229,6 @@ struct ContentView: View {
                                         Button {
                                             isSideBarOpened.toggle()
                                         } label: {
-                                            let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
-                                            let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
-                                            
                                             if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
                                                 ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
                                             } else {

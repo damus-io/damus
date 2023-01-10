@@ -29,14 +29,6 @@ struct EventActionBar: View {
     
     var body: some View {
         HStack {
-            /*
-            EventActionButton(img: "square.and.arrow.up") {
-                print("share")
-            }
-
-            Spacer()
-            
-             */
             if damus_state.keypair.privkey != nil {
                 EventActionButton(img: "bubble.left", col: nil) {
                     notify(.reply, event)

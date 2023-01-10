@@ -251,6 +251,13 @@ struct EventView: View {
                     }
                     
                     let bar = make_actionbar_model(ev: event, damus: damus)
+                    
+                    if size == .selected {
+                        EventDetailBar(state: damus, target: event.id, bar: bar)
+                        Divider()
+                            .padding([.bottom], 4)
+                    }
+                    
                     EventActionBar(damus_state: damus, event: event, bar: bar)
                 }
 
