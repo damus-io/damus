@@ -1,0 +1,17 @@
+name: Test
+on:
+  push:
+    branches:
+      - "master"
+  pull_request:
+    branches:
+      - "*"
+jobs:
+  test:
+    name: Run Tests
+    runs-on: macos-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v1
+    - name: Running Tests
+      run: xcodebuild test -scheme damus -project damus.xcodeproj -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.0' | xcpretty && exit ${PIPESTATUS[0]}
