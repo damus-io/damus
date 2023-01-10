@@ -123,7 +123,7 @@ struct SideMenuView: View {
                      */
                     
                     NavigationLink(destination: ConfigView(state: damus_state).environmentObject(user_settings)) {
-                        Label("App settings", systemImage: "gear")
+                        Label(NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), systemImage: "gear")
                             .font(.title2)
                             .foregroundColor(textColor())
                     }
