@@ -28,14 +28,17 @@ struct RecommendedRelayView: View {
         HStack {
             Text(relay)
             Spacer()
-            if let ev = damus.contacts.event, add_button {
+            if add_button {
                 if let privkey = damus.keypair.privkey {
                     Button(NSLocalizedString("Add", comment: "Button to add recommended relay server.")) {
-                        guard let ev = add_relay(ev: ev, privkey: privkey, current_relays: damus.pool.descriptors, relay: relay, info: .rw) else {
+                        guard let ev_before_add = damus.contacts.event else {
                             return
                         }
-                        process_contact_event(pool: damus.pool, contacts: damus.contacts, pubkey: damus.pubkey, ev: ev)
-                        damus.pool.send(.event(ev))
+                        guard let ev_after_add = add_relay(ev: ev_before_add, privkey: privkey, current_relays: damus.pool.descriptors, relay: relay, info: .rw) else {
+                            return
+                        }
+                        process_contact_event(pool: damus.pool, contacts: damus.contacts, pubkey: damus.pubkey, ev: ev_after_add)
+                        damus.pool.send(.event(ev_after_add))
                     }
                 }
             }
