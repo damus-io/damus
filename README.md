@@ -25,7 +25,7 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 ## Getting Started on Damus 
 
 ### Damus iOS
-1) Get the Damus app on Testflight: https://testflight.apple.com/join/CLwjLxWl
+1) Get the Damus app on TestFlight: https://testflight.apple.com/join/CLwjLxWl
 
 #### ⚙️ Settings (gear icon, top right)
 - Relays: You can add more relays to send your notes to by tapping the "+". 
