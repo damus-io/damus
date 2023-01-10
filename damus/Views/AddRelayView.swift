@@ -16,10 +16,10 @@ struct AddRelayView: View {
     var body: some View {
         VStack(alignment: .leading) {
             Form {
-                Section("Add Relay") {
+                Section(NSLocalizedString("Add Relay", comment: "Label for section for adding a relay server.")) {
                     ZStack(alignment: .leading) {
                         HStack{
-                            TextField("wss://some.relay.com", text: $relay)
+                            TextField(NSLocalizedString("wss://some.relay.com", comment: "Placeholder example for relay server address."), text: $relay)
                                 .padding(2)
                                 .padding(.leading, 25)
                                 .autocorrectionDisabled(true)
@@ -47,7 +47,7 @@ struct AddRelayView: View {
             
             VStack {
                 HStack {
-                    Button("Cancel") {
+                    Button(NSLocalizedString("Cancel", comment: "Button to cancel out of view adding user inputted relay.")) {
                         show_add_relay = false
                         action(nil)
                     }
@@ -55,7 +55,7 @@ struct AddRelayView: View {
                     
                     Spacer()
                     
-                    Button("Add") {
+                    Button(NSLocalizedString("Add", comment: "Button to confirm adding user inputted relay.")) {
                         show_add_relay = false
                         action(relay)
                         relay = ""

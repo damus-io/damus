@@ -179,7 +179,7 @@ struct EventView: View {
                             ProfileName(pubkey: event.pubkey, profile: prof, damus: damus, show_friend_confirmed: true)
                                     .font(.footnote.weight(.bold))
                                     .foregroundColor(Color.gray)
-                            Text("Boosted")
+                            Text("Boosted", comment: "Text indicating that the post was boosted (i.e. re-shared).")
                                 .font(.footnote.weight(.bold))
                                 .foregroundColor(Color.gray)
                         }
@@ -274,7 +274,7 @@ struct EventView: View {
         .id(event.id)
         .frame(maxWidth: .infinity, minHeight: PFP_SIZE)
         .padding([.bottom], 2)
-        .event_context_menu(event, privkey: damus.keypair.privkey)
+        .event_context_menu(event, pubkey: pubkey, privkey: damus.keypair.privkey)
     }
 }
 
@@ -308,41 +308,41 @@ extension View {
             Button {
                     UIPasteboard.general.string = bech32_pubkey
             } label: {
-                Label("Copy Account ID", systemImage: "doc.on.doc")
+                Label(NSLocalizedString("Copy Account ID", comment: "Context menu option for copying the ID of the account that created the note."), systemImage: "doc.on.doc")
             }
         }
     }
     
-    func event_context_menu(_ event: NostrEvent, privkey: String?) -> some View {
+    func event_context_menu(_ event: NostrEvent, pubkey: String, privkey: String?) -> some View {
         return self.contextMenu {
             Button {
                 UIPasteboard.general.string = event.get_content(privkey)
             } label: {
-                Label("Copy Text", systemImage: "doc.on.doc")
+                Label(NSLocalizedString("Copy Text", comment: "Context menu option for copying the text from an note."), systemImage: "doc.on.doc")
             }
 
             Button {
-                UIPasteboard.general.string = bech32_pubkey(event.pubkey) ?? event.pubkey
+                UIPasteboard.general.string = bech32_pubkey(pubkey) ?? pubkey
             } label: {
-                Label("Copy User ID", systemImage: "tag")
+                Label(NSLocalizedString("Copy User ID", comment: "Context menu option for copying the ID of the user who created the note."), systemImage: "tag")
             }
 
             Button {
                 UIPasteboard.general.string = bech32_note_id(event.id) ?? event.id
             } label: {
-                Label("Copy Note ID", systemImage: "tag")
+                Label(NSLocalizedString("Copy Note ID", comment: "Context menu option for copying the ID of the note."), systemImage: "tag")
             }
 
             Button {
                 UIPasteboard.general.string = event_to_json(ev: event)
             } label: {
-                Label("Copy Note JSON", systemImage: "note")
+                Label(NSLocalizedString("Copy Note JSON", comment: "Context menu option for copying the JSON text from the note."), systemImage: "note")
             }
 
             Button {
                 NotificationCenter.default.post(name: .broadcast_event, object: event)
             } label: {
-                Label("Broadcast", systemImage: "globe")
+                Label(NSLocalizedString("Broadcast", comment: "Context menu option for broadcasting the user's note to all of the user's connected relay servers."), systemImage: "globe")
             }
         }
 
@@ -380,13 +380,13 @@ func reply_desc(profiles: Profiles, event: NostrEvent) -> String {
     if names.count == 2 {
         if n > 2 {
             let othersCount = n - pubkeys.count
-            return String(format: NSLocalizedString("replying_to_two_and_others", comment: "Label to indicate that the user is replying to 2 users and others."), othersCount, names[0], names[1])
+            return String(format: NSLocalizedString("replying_to_two_and_others", comment: "Label to indicate that the user is replying to 2 users and others."), names[0], names[1], othersCount)
         }
-        return String.localizedStringWithFormat("Replying to %@ & %@", names[0], names[1])
+        return String(format: NSLocalizedString("Replying to %@ & %@", comment: "Label to indicate that the user is replying to 2 users."), names[0], names[1])
     }
 
     let othersCount = n - pubkeys.count
-    return String(format: NSLocalizedString("replying_to_one_and_others", comment: "Label to indicate that the user is replying to 1 user and others."), othersCount, names[0])
+    return String(format: NSLocalizedString("replying_to_one_and_others", comment: "Label to indicate that the user is replying to 1 user and others."), names[0], othersCount)
 }
 
 

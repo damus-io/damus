@@ -24,7 +24,7 @@ struct FollowUserView: View {
             
                 VStack(alignment: .leading) {
                     let profile = damus_state.profiles.lookup(id: target.pubkey)
-                    ProfileName(pubkey: target.pubkey, profile: profile, damus: damus_state, show_friend_confirmed: false)
+                    ProfileName(pubkey: target.pubkey, profile: profile, damus: damus_state, show_friend_confirmed: false, show_nip5_domain: false)
                     if let about = profile?.about {
                         Text(FollowUserView.markdown.process(about))
                             .lineLimit(3)
@@ -57,7 +57,7 @@ struct FollowersView: View {
             }
             .padding()
         }
-        .navigationBarTitle("\(Profile.displayName(profile: profile, pubkey: whos))'s Followers")
+        .navigationBarTitle(NSLocalizedString("\(Profile.displayName(profile: profile, pubkey: whos))'s Followers", comment: "Navigation bar title for view that shows who is following a user."))
         .onAppear {
             followers.subscribe()
         }
@@ -91,7 +91,7 @@ struct FollowingView: View {
         .onDisappear {
             following.unsubscribe()
         }
-        .navigationBarTitle("\(who) following")
+        .navigationBarTitle(NSLocalizedString("\(who) following", comment: "Navigation bar title for view that shows who a user is following."))
     }
 }
 
