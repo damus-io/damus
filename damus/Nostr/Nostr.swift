@@ -10,12 +10,13 @@ import Foundation
 struct Profile: Codable {
     var value: [String: String]
     
-    init (name: String?, display_name: String?, about: String?, picture: String?, website: String?, lud06: String?, lud16: String?, nip05: String?) {
+    init (name: String?, display_name: String?, about: String?, picture: String?, banner: String?, website: String?, lud06: String?, lud16: String?, nip05: String?) {
         self.value = [:]
         self.name = name
         self.display_name = display_name
         self.about = about
         self.picture = picture
+        self.banner = banner
         self.website = website
         self.lud06 = lud06
         self.lud16 = lud16
@@ -40,6 +41,11 @@ struct Profile: Codable {
     var picture: String? {
         get { return value["picture"]; }
         set(s) { value["picture"] = s }
+    }
+    
+    var banner: String? {
+        get { return value["banner"]; }
+        set(s) { value["banner"] = s }
     }
     
     var website: String? {
@@ -95,7 +101,7 @@ struct Profile: Codable {
 }
 
 func make_test_profile() -> Profile {
-    return Profile(name: "jb55", display_name: "Will", about: "Its a me", picture: "https://cdn.jb55.com/img/red-me.jpg", website: "jb55.com", lud06: "jb55@jb55.com", lud16: nil, nip05: "jb55@jb55.com")
+    return Profile(name: "jb55", display_name: "Will", about: "Its a me", picture: "https://cdn.jb55.com/img/red-me.jpg", banner: "https://pbs.twimg.com/profile_banners/9918032/1531711830/600x200",  website: "jb55.com", lud06: "jb55@jb55.com", lud16: nil, nip05: "jb55@jb55.com")
 }
 
 func make_ln_url(_ str: String?) -> URL? {

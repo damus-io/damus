@@ -578,6 +578,13 @@ func process_metadata_event(profiles: Profiles, ev: NostrEvent) {
         }
     }
     
+    let banner = tprof.profile.banner ?? ""
+    if let _ = URL(string: banner) {
+        DispatchQueue.main.async {
+            notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+        }
+    }
+    
     notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
 }
 
