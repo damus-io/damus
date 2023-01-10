@@ -1,0 +1,13 @@
+name: Damus Tests 
+on: [push]
+jobs:
+  run_tests:
+    runs-on: macos-latest
+    env:
+    steps:
+    - uses: actions/checkout@v1
+    - name: Select Xcode
+      run: sudo xcode-select -switch /Applications/Xcode_14.2.app && /usr/bin/xcodebuild -version
+    - name: Run Tests
+      run: xcodebuild test -scheme damus -project damus.xcodeproj -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.0'
+
