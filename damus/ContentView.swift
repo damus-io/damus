@@ -169,6 +169,19 @@ struct ContentView: View {
             }
         }
         .navigationBarTitle(selected_timeline == .home ?  NSLocalizedString("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.") : NSLocalizedString("Global", comment: "Navigation bar title for Global view where posts from all connected relay servers appear."), displayMode: .inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                if selected_timeline == .home {
+                    Image("damus-home")
+                    .resizable()
+                    .frame(width:30,height:30)
+                    .shadow(color: Color("DamusPurple"), radius: 2)
+                } else {
+                    Text("Global")
+                }
+            }
+             
+        }
     }
     
     var MaybeSearchView: some View {
