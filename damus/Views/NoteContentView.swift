@@ -168,7 +168,7 @@ struct NoteContentView: View {
 func hashtag_str(_ htag: String) -> AttributedString {
     var attributedString = AttributedString(stringLiteral: "#\(htag)")
     attributedString.link = URL(string: "nostr:t:\(htag)")
-    attributedString.foregroundColor = .red
+    attributedString.foregroundColor = .purple
     return attributedString
 }
 
@@ -178,17 +178,15 @@ func mention_str(_ m: Mention, profiles: Profiles) -> AttributedString {
         let pk = m.ref.ref_id
         let profile = profiles.lookup(id: pk)
         let disp = Profile.displayName(profile: profile, pubkey: pk)
-        
         var attributedString = AttributedString(stringLiteral: "@\(disp)")
         attributedString.link = URL(string: "nostr:\(encode_pubkey_uri(m.ref))")
-        attributedString.foregroundColor = .blue
-        
+        attributedString.foregroundColor = .purple
         return attributedString
     case .event:
         let bevid = bech32_note_id(m.ref.ref_id) ?? m.ref.ref_id
         var attributedString = AttributedString(stringLiteral: "@\(abbrev_pubkey(bevid))")
         attributedString.link = URL(string: "nostr:\(encode_event_id_uri(m.ref))")
-        attributedString.foregroundColor = .green
+        attributedString.foregroundColor = .purple
         return attributedString
     }
 }
@@ -199,6 +197,7 @@ struct NoteContentView_Previews: PreviewProvider {
         let state = test_damus_state()
         let content = AttributedString(stringLiteral: "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg")
         let artifacts = NoteArtifacts(content: content, images: [], invoices: [], links: [])
-        NoteContentView(privkey: "", event: NostrEvent(content: content.description, pubkey: "pk"), profiles: state.profiles, previews: PreviewCache(), show_images: true, artifacts: artifacts, size: .normal)
+        let event = NostrEvent(content: content.description, pubkey: "pk")
+        NoteContentView(privkey: "", event: event, profiles: state.profiles, previews: PreviewCache(), show_images: true, artifacts: artifacts, size: .normal)
     }
 }

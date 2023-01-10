@@ -21,7 +21,7 @@ public struct ContentParser {
             guard let url = linkMatch.url else { continue }
             guard let range = attributedString.range(of: url.absoluteString) else { continue }
             attributedString[range].link = url
-            attributedString[range].foregroundColor = .orange
+            attributedString[range].foregroundColor = .purple
         }
         
         return attributedString
