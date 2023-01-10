@@ -11,3 +11,4 @@ jobs:
     - name: Run Tests
       run: xcodebuild test -scheme damus -project damus.xcodeproj -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.0'
 
+# testing
