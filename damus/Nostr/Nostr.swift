@@ -10,12 +10,13 @@ import Foundation
 struct Profile: Codable {
     var value: [String: String]
     
-    init (name: String?, display_name: String?, about: String?, picture: String?, website: String?, lud06: String?, lud16: String?, nip05: String?) {
+    init (name: String?, display_name: String?, about: String?, picture: String?, banner: String?, website: String?, lud06: String?, lud16: String?, nip05: String?) {
         self.value = [:]
         self.name = name
         self.display_name = display_name
         self.about = about
         self.picture = picture
+        self.banner = banner
         self.website = website
         self.lud06 = lud06
         self.lud16 = lud16
@@ -40,6 +41,11 @@ struct Profile: Codable {
     var picture: String? {
         get { return value["picture"]; }
         set(s) { value["picture"] = s }
+    }
+    
+    var banner: String? {
+        get { return value["banner"]; }
+        set(s) { value["banner"] = s }
     }
     
     var website: String? {
@@ -100,6 +106,7 @@ struct Profile: Decodable {
     let display_name: String?
     let about: String?
     let picture: String?
+    let banner: String?
     let website: String?
     let nip05: String?
     let lud06: String?
