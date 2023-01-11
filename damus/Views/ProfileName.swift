@@ -73,18 +73,7 @@ struct ProfileName: View {
                 .font(.body)
                 .fontWeight(prefix == "@" ? .none : .bold)
             if let nip05 = current_nip05 {
-                Image(systemName: "checkmark.seal.fill")
-                    .foregroundColor(nip05_color)
-                
-                if show_nip5_domain {
-                    Text(nip05.host)
-                        .foregroundColor(nip05_color)
-                        .onTapGesture {
-                            if let nip5url = nip05.siteUrl {
-                                openURL(nip5url)
-                            }
-                        }
-                }
+                NIP05Badge(nip05: nip05, pubkey: pubkey, contacts: damus_state.contacts, show_domain: show_nip5_domain, clickable: true)
             }
             if let friend = friend_icon, current_nip05 == nil {
                 Image(systemName: friend)
@@ -158,9 +147,8 @@ struct EventProfileName: View {
                     .fontWeight(.bold)
             }
             
-            if let _ = current_nip05 {
-                Image(systemName: "checkmark.seal.fill")
-                    .foregroundColor(get_nip05_color(pubkey: pubkey, contacts: damus_state.contacts))
+            if let nip05 = current_nip05 {
+                NIP05Badge(nip05: nip05, pubkey: pubkey, contacts: damus_state.contacts, show_domain: false, clickable: false)
             }
             
             if let frend = friend_icon, current_nip05 == nil {
@@ -180,6 +168,3 @@ struct EventProfileName: View {
     }
 }
 
-func get_nip05_color(pubkey: String, contacts: Contacts) -> Color {
-    return contacts.is_friend_or_self(pubkey) ? .accentColor : .gray
-}
