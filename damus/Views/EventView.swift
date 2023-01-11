@@ -189,7 +189,7 @@ struct EventView: View {
         guard id == subscription_poll_uuid else {
             return
         }
-        guard nostr_event.kind == 8  else {
+        guard nostr_event.kind == 8 else {
             return
         }
 
