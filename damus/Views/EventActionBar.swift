@@ -60,16 +60,17 @@ struct EventActionBar: View {
             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
 
             HStack(alignment: .bottom) {
-                Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
-                    .font(.footnote.weight(.medium))
-                    .foregroundColor(bar.liked ? Color.orange : Color.gray)
-                    
                 LikeButton(liked: bar.liked) {
                     if bar.liked {
                         notify(.delete, bar.our_like)
                     } else {
                         send_like()
                     }
+                }.overlay {
+                    Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
+                        .offset(x: -22)
+                        .font(.footnote.weight(.medium))
+                        .foregroundColor(bar.liked ? Color.orange : Color.gray)
                 }
             }
             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
