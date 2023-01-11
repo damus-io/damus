@@ -6,8 +6,8 @@ git:
     source_file: damus Localizations/en-US.xcloc/Localized Contents/en-US.xliff
     translation_files_expression: damus Localizations/<lang>.xcloc/Localized Contents/<lang>.xliff
 
-  settings:
-    pr_branch_name: transifex/<br_unique_id>
-    language_mapping:
-      en_US: en-US
-      es_419: es-419
+settings:
+  pr_branch_name: transifex/<br_unique_id>
+  language_mapping:
+    en_US: en-US
+    es_419: es-419
