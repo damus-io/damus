@@ -55,7 +55,7 @@ struct PostView: View {
     var body: some View {
         VStack {
             HStack {
-                Button("Cancel") {
+                Button(NSLocalizedString("Cancel", comment: "Button to cancel out of posting a note.")) {
                     self.cancel()
                 }
                 .foregroundColor(.primary)
@@ -63,7 +63,7 @@ struct PostView: View {
                 Spacer()
 
                 if !is_post_empty {
-                    Button("Post") {
+                    Button(NSLocalizedString("Post", comment: "Button to post a note.")) {
                         self.send_post()
                     }
                 }

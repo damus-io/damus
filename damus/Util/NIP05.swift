@@ -15,6 +15,10 @@ struct NIP05 {
         URL(string: "https://\(host)/.well-known/nostr.json?name=\(username)")
     }
     
+    var siteUrl: URL? {
+        URL(string: "https://\(host)")
+    }
+    
     static func parse(_ nip05: String) -> NIP05? {
         let parts = nip05.split(separator: "@")
         guard parts.count == 2 else {

@@ -57,7 +57,7 @@ damus implements the following [Nostr Implementation Possibilities][nips]
   - Italics: 1 asterisk `*italic*`
   - Bold: 2 asterisk `**bold**`
   - Strikethrough: 1 tildes `~strikethrough~`
-  - Code: 1 back-tick ``code``
+  - Code: 1 back-tick `` `code` ``
 
 #### 💬 Encrypted DMs (chat app, bottom navigation)
 - Tap the chat icon and you'll notice there's nothing to see at first. Go to a user profile and tap the 💬 chat icon next to the follow button to begin a DM

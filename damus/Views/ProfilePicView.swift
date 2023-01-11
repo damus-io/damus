@@ -34,9 +34,12 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
 
 struct InnerProfilePicView: View {
     let url: URL?
+    let fallbackUrl: URL?
     let pubkey: String
     let size: CGFloat
     let highlight: Highlight
+    
+    @State private var refreshID = UUID().uuidString
 
     var PlaceholderColor: Color {
         return id_to_color(pubkey)
@@ -51,11 +54,13 @@ struct InnerProfilePicView: View {
     }
 
     var body: some View {
-        Group {
+        ZStack {
+            Color(uiColor: .systemBackground)
+    
             KFAnimatedImage(url)
                 .callbackQueue(.dispatch(.global(qos: .background)))
                 .processingQueue(.dispatch(.global(qos: .background)))
-                .appendProcessor(LargeImageProcessor())
+                .appendProcessor(LargeImageProcessor.shared)
                 .configure { view in
                     view.framePreloadCount = 1
                 }
@@ -65,10 +70,43 @@ struct InnerProfilePicView: View {
                 .scaleFactor(UIScreen.main.scale)
                 .loadDiskFileSynchronously()
                 .fade(duration: 0.1)
+                .onFailure { _ in
+                    setFallbackImage()
+                }
         }
         .frame(width: size, height: size)
         .clipShape(Circle())
         .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
+        .id(refreshID)
+    }
+    
+    func refreshView() -> Void {
+        refreshID = UUID().uuidString
+    }
+    
+    func setFallbackImage() -> Void {
+        
+        guard let url = url, let fallbackUrl = fallbackUrl else { return }
+
+        KingfisherManager.shared.downloader.downloadImage(with: fallbackUrl) { result in
+            
+            func fallbackImage() -> UIImage {
+                switch result {
+                case .success(let imageLoadingResult):
+                    return imageLoadingResult.image
+                case .failure(let error):
+                    print(error)
+                    return UIImage()
+                }
+            }
+            
+            // Kingfisher ID format for caching when using a custom processor
+            let processorIdentifier = "|>" + LargeImageProcessor.shared.identifier
+            
+            KingfisherManager.shared.cache.store(fallbackImage(), forKey: url.absoluteString, processorIdentifier: processorIdentifier) { _ in
+                refreshView()
+            }
+        }
     }
 }
 
@@ -89,7 +127,7 @@ struct ProfilePicView: View {
     }
     
     var body: some View {
-        InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), pubkey: pubkey, size: size, highlight: highlight)
+        InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: size, highlight: highlight)
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let updated = notif.object as! ProfileUpdate
 
@@ -106,7 +144,9 @@ struct ProfilePicView: View {
 
 struct LargeImageProcessor: ImageProcessor {
     
-    let identifier: String = "com.damus.largeimageprocessor"
+    static let shared = LargeImageProcessor()
+    
+    let identifier = "com.damus.largeimageprocessor"
     let maxSize: Int = 1000000
     let downsampleSize = CGSize(width: 200, height: 200)
     

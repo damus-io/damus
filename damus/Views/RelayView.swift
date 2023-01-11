@@ -60,7 +60,7 @@ struct RelayView: View {
         Button {
             UIPasteboard.general.setValue(relay, forPasteboardType: "public.plain-text")
         } label: {
-            Label("Copy", systemImage: "doc.on.doc")
+            Label(NSLocalizedString("Copy", comment: "Button to copy a relay server address."), systemImage: "doc.on.doc")
         }
     }
     
@@ -78,7 +78,7 @@ struct RelayView: View {
             process_contact_event(pool: state.pool, contacts: state.contacts, pubkey: state.pubkey, ev: new_ev)
             state.pool.send(.event(new_ev))
         } label: {
-            Label("Delete", systemImage: "trash")
+            Label(NSLocalizedString("Delete", comment: "Button to delete a relay server that the user connects to."), systemImage: "trash")
         }
         .tint(.red)
     }

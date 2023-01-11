@@ -20,7 +20,7 @@ struct ReplyView: View {
     
     var body: some View {
         VStack {
-            Text("Replying to:")
+            Text("Replying to:", comment: "Indicating that the user is replying to the following listed people.")
             HStack(alignment: .top) {
                 let names = all_referenced_pubkeys(replying_to)
                     .map { pubkey in

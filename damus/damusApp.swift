@@ -14,10 +14,7 @@ struct damusApp: App {
         WindowGroup {
             MainView()
         }
-        
     }
-    
-
 }
 
 struct MainView: View {

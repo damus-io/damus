@@ -18,15 +18,6 @@
       }
     },
     {
-      "identity" : "shimmer",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/joshuajhomann/Shimmer",
-      "state" : {
-        "branch" : "master",
-        "revision" : "2fde687b3f1d9c5409c53da095d3686361e41343"
-      }
-    },
-    {
       "identity" : "starscream",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/daltoniam/Starscream",

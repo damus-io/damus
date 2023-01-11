@@ -19,7 +19,7 @@ struct DMChatView: View {
                 VStack(alignment: .leading) {
                     ForEach(Array(zip(dms.events, dms.events.indices)), id: \.0.id) { (ev, ind) in
                         DMView(event: dms.events[ind], damus_state: damus_state)
-                            .event_context_menu(ev, privkey: damus_state.keypair.privkey)
+                            .event_context_menu(ev, pubkey: ev.pubkey, privkey: damus_state.keypair.privkey)
                     }
                     EndBlock(height: 80)
                 }
@@ -142,14 +142,14 @@ struct DMChatView: View {
 
                 Footer
             }
-            Text("Send a message to start the conversation...")
+            Text("Send a message to start the conversation...", comment: "Text prompt for user to send a message to the other user.")
             .lineLimit(nil)
             .multilineTextAlignment(.center)
             .padding(.horizontal, 40)
             .opacity(((dms.events.count == 0) ? 1.0 : 0.0))
             .foregroundColor(.gray)
         }
-        .navigationTitle("DM")
+        .navigationTitle(NSLocalizedString("DM", comment: "Navigation title for DM view, which is the English abbreviation for Direct Message."))
         .toolbar { Header }
     }
 }
