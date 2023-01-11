@@ -45,9 +45,6 @@ struct EventActionBar: View {
             }
             
             HStack(alignment: .bottom) {
-                Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
-                    .font(.footnote.weight(.medium))
-                    .foregroundColor(bar.boosted ? Color.green : Color.gray)
                 
                 EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
                     if bar.boosted {
@@ -55,6 +52,11 @@ struct EventActionBar: View {
                     } else {
                         self.confirm_boost = true
                     }
+                }.overlay {
+                    Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
+                        .offset(x: 22)
+                        .font(.footnote.weight(.medium))
+                        .foregroundColor(bar.boosted ? Color.green : Color.gray)
                 }
             }
             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
@@ -68,7 +70,7 @@ struct EventActionBar: View {
                     }
                 }.overlay {
                     Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
-                        .offset(x: -22)
+                        .offset(x: 22)
                         .font(.footnote.weight(.medium))
                         .foregroundColor(bar.liked ? Color.orange : Color.gray)
                 }
