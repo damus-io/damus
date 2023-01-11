@@ -186,28 +186,30 @@ struct EventView: View {
         }
         
         // Is current event
-        if id == subscription_poll_uuid {
-            if nostr_event.kind != 8 {
-                return
-            }
-            
-            // If the pubkey is our, display the results
-            if nostr_event.pubkey == damus.pubkey {
-                show_poll_results = true
-            }
-            
-            // Check if the choice is already submitted by the pubkey
-            if choices.contains(where: { $0.0 == nostr_event.pubkey }) {
-                return
-            }
-            
-            // Check the choice
-            guard let choice_int = Int(nostr_event.content) else {
-                return
-            }
-
-            choices.append((nostr_event.pubkey, choice_int))
+        guard id == subscription_poll_uuid else {
+            return
         }
+        guard nostr_event.kind == 8  else {
+            return
+        }
+
+        
+        // If the pubkey is our, display the results
+        if nostr_event.pubkey == damus.pubkey {
+            show_poll_results = true
+        }
+        
+        // Check if the choice is already submitted by the pubkey
+        if choices.contains(where: { $0.0 == nostr_event.pubkey }) {
+            return
+        }
+        
+        // Check the choice
+        guard let choice_int = Int(nostr_event.content) else {
+            return
+        }
+        
+        choices.append((nostr_event.pubkey, choice_int))
     }
     
     func unsubscribe_poll() {
