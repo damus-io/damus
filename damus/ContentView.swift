@@ -218,179 +218,179 @@ struct ContentView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            if let damus = self.damus_state {
-                NavigationView {
-                    ZStack {
-                        VStack {
-                            MainContent(damus: damus)
-                                .toolbar() {
-                                    ToolbarItem(placement: .navigationBarLeading) {
-                                        Button {
-                                            isSideBarOpened.toggle()
-                                        } label: {
-                                            if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
-                                                ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
-                                            } else {
-                                                Image(systemName: "person.fill")
+        ZStack {
+            VStack(alignment: .leading, spacing: 0) {
+                if let damus = self.damus_state {
+                    NavigationView {
+                        ZStack {
+                            VStack {
+                                MainContent(damus: damus)
+                                    .toolbar() {
+                                        ToolbarItem(placement: .navigationBarLeading) {
+                                            Button {
+                                                isSideBarOpened.toggle()
+                                            } label: {
+                                                if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
+                                                    ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
+                                                } else {
+                                                    Image(systemName: "person.fill")
+                                                }
+                                            }
+                                        }
+                                        
+                                        ToolbarItem(placement: .navigationBarTrailing) {
+                                            HStack(alignment: .center) {
+                                                if home.signal.signal != home.signal.max_signal {
+                                                    Text("\(home.signal.signal)/\(home.signal.max_signal)", comment: "Fraction of how many of the user's relay servers that are operational.")
+                                                        .font(.callout)
+                                                        .foregroundColor(.gray)
+                                                }
+
                                             }
                                         }
                                     }
-                                    
-                                    ToolbarItem(placement: .navigationBarTrailing) {
-                                        HStack(alignment: .center) {
-                                            if home.signal.signal != home.signal.max_signal {
-                                                Text("\(home.signal.signal)/\(home.signal.max_signal)", comment: "Fraction of how many of the user's relay servers that are operational.")
-                                                    .font(.callout)
-                                                    .foregroundColor(.gray)
-                                            }
 
-                                        }
-                                    }
-                                }
-
+                            }
                         }
-                        
-                        Color.clear
-                        .overlay(
-                            SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened)
-                        )
                     }
-                    .navigationBarHidden(isSideBarOpened ? true: false) // Would prefer a different way of doing this.
-                }
-                .navigationViewStyle(.stack)
-            
-                TabBar(new_events: $home.new_events, selected: $selected_timeline, isSidebarVisible: $isSideBarOpened, action: switch_timeline)
-                    .padding([.bottom], 8)
-            }
-        }
-        .onAppear() {
-            self.connect()
-            //KingfisherManager.shared.cache.clearDiskCache()
-            setup_notifications()
-        }
-        .sheet(item: $active_sheet) { item in
-            switch item {
-            case .post:
-                PostView(replying_to: nil, references: [])
-            case .reply(let event):
-                ReplyView(replying_to: event, damus: damus_state!)
-            }
-        }
-        .onOpenURL { url in
-            guard let link = decode_nostr_uri(url.absoluteString) else {
-                return
-            }
-            
-            switch link {
-            case .ref(let ref):
-                if ref.key == "p" {
-                    active_profile = ref.ref_id
-                    profile_open = true
-                } else if ref.key == "e" {
-                    active_event_id = ref.ref_id
-                    thread_open = true
-                }
-            case .filter(let filt):
-                active_search = filt
-                search_open = true
-                break
-                // TODO: handle filter searches?
-            }
-            
-        }
-        .onReceive(handle_notify(.boost)) { notif in
-            guard let privkey = self.privkey else {
-                return
-            }
-            let ev = notif.object as! NostrEvent
-            let boost = make_boost_event(pubkey: pubkey, privkey: privkey, boosted: ev)
-            self.damus_state?.pool.send(.event(boost))
-        }
-        .onReceive(handle_notify(.open_thread)) { obj in
-            //let ev = obj.object as! NostrEvent
-            //thread.set_active_event(ev)
-            //is_thread_open = true
-        }
-        .onReceive(handle_notify(.reply)) { notif in
-            let ev = notif.object as! NostrEvent
-            self.active_sheet = .reply(ev)
-        }
-        .onReceive(handle_notify(.like)) { like in
-        }
-        .onReceive(handle_notify(.broadcast_event)) { obj in
-            let ev = obj.object as! NostrEvent
-            self.damus_state?.pool.send(.event(ev))
-        }
-        .onReceive(handle_notify(.unfollow)) { notif in
-            guard let privkey = self.privkey else {
-                return
-            }
-            
-            guard let damus = self.damus_state else {
-                return
-            }
-            
-            let target = notif.object as! FollowTarget
-            let pk = target.pubkey
-            
-            if let ev = unfollow_user(pool: damus.pool,
-                                      our_contacts: damus.contacts.event,
-                                      pubkey: damus.pubkey,
-                                      privkey: privkey,
-                                      unfollow: pk) {
-                notify(.unfollowed, pk)
+                    .navigationViewStyle(.stack)
                 
-                damus.contacts.event = ev
-                damus.contacts.remove_friend(pk)
-                //friend_events = friend_events.filter { $0.pubkey != pk }
-            }
-        }
-        .onReceive(handle_notify(.follow)) { notif in
-            guard let privkey = self.privkey else {
-                return
-            }
-            
-            let fnotify = notif.object as! FollowTarget
-            guard let damus = self.damus_state else {
-                return
-            }
-            
-            if let ev = follow_user(pool: damus.pool,
-                                    our_contacts: damus.contacts.event,
-                                    pubkey: damus.pubkey,
-                                    privkey: privkey,
-                                    follow: ReferencedId(ref_id: fnotify.pubkey, relay_id: nil, key: "p")) {
-                notify(.followed, fnotify.pubkey)
-                
-                damus_state?.contacts.event = ev
-                
-                switch fnotify {
-                case .pubkey(let pk):
-                    damus.contacts.add_friend_pubkey(pk)
-                case .contact(let ev):
-                    damus.contacts.add_friend_contact(ev)
+                    TabBar(new_events: $home.new_events, selected: $selected_timeline, isSidebarVisible: $isSideBarOpened, action: switch_timeline)
+                        .padding([.bottom], 8)
                 }
             }
-        }
-        .onReceive(handle_notify(.post)) { obj in
-            guard let privkey = self.privkey else {
-                return
+            .onAppear() {
+                self.connect()
+                //KingfisherManager.shared.cache.clearDiskCache()
+                setup_notifications()
+            }
+            .sheet(item: $active_sheet) { item in
+                switch item {
+                case .post:
+                    PostView(replying_to: nil, references: [])
+                case .reply(let event):
+                    ReplyView(replying_to: event, damus: damus_state!)
+                }
+            }
+            .onOpenURL { url in
+                guard let link = decode_nostr_uri(url.absoluteString) else {
+                    return
+                }
+                
+                switch link {
+                case .ref(let ref):
+                    if ref.key == "p" {
+                        active_profile = ref.ref_id
+                        profile_open = true
+                    } else if ref.key == "e" {
+                        active_event_id = ref.ref_id
+                        thread_open = true
+                    }
+                case .filter(let filt):
+                    active_search = filt
+                    search_open = true
+                    break
+                    // TODO: handle filter searches?
+                }
+                
+            }
+            .onReceive(handle_notify(.boost)) { notif in
+                guard let privkey = self.privkey else {
+                    return
+                }
+                let ev = notif.object as! NostrEvent
+                let boost = make_boost_event(pubkey: pubkey, privkey: privkey, boosted: ev)
+                self.damus_state?.pool.send(.event(boost))
+            }
+            .onReceive(handle_notify(.open_thread)) { obj in
+                //let ev = obj.object as! NostrEvent
+                //thread.set_active_event(ev)
+                //is_thread_open = true
+            }
+            .onReceive(handle_notify(.reply)) { notif in
+                let ev = notif.object as! NostrEvent
+                self.active_sheet = .reply(ev)
+            }
+            .onReceive(handle_notify(.like)) { like in
+            }
+            .onReceive(handle_notify(.broadcast_event)) { obj in
+                let ev = obj.object as! NostrEvent
+                self.damus_state?.pool.send(.event(ev))
+            }
+            .onReceive(handle_notify(.unfollow)) { notif in
+                guard let privkey = self.privkey else {
+                    return
+                }
+                
+                guard let damus = self.damus_state else {
+                    return
+                }
+                
+                let target = notif.object as! FollowTarget
+                let pk = target.pubkey
+                
+                if let ev = unfollow_user(pool: damus.pool,
+                                          our_contacts: damus.contacts.event,
+                                          pubkey: damus.pubkey,
+                                          privkey: privkey,
+                                          unfollow: pk) {
+                    notify(.unfollowed, pk)
+                    
+                    damus.contacts.event = ev
+                    damus.contacts.remove_friend(pk)
+                    //friend_events = friend_events.filter { $0.pubkey != pk }
+                }
+            }
+            .onReceive(handle_notify(.follow)) { notif in
+                guard let privkey = self.privkey else {
+                    return
+                }
+                
+                let fnotify = notif.object as! FollowTarget
+                guard let damus = self.damus_state else {
+                    return
+                }
+                
+                if let ev = follow_user(pool: damus.pool,
+                                        our_contacts: damus.contacts.event,
+                                        pubkey: damus.pubkey,
+                                        privkey: privkey,
+                                        follow: ReferencedId(ref_id: fnotify.pubkey, relay_id: nil, key: "p")) {
+                    notify(.followed, fnotify.pubkey)
+                    
+                    damus_state?.contacts.event = ev
+                    
+                    switch fnotify {
+                    case .pubkey(let pk):
+                        damus.contacts.add_friend_pubkey(pk)
+                    case .contact(let ev):
+                        damus.contacts.add_friend_contact(ev)
+                    }
+                }
+            }
+            .onReceive(handle_notify(.post)) { obj in
+                guard let privkey = self.privkey else {
+                    return
+                }
+                
+                let post_res = obj.object as! NostrPostResult
+                switch post_res {
+                case .post(let post):
+                    print("post \(post.content)")
+                    let new_ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
+                    self.damus_state?.pool.send(.event(new_ev))
+                case .cancel:
+                    active_sheet = nil
+                    print("post cancelled")
+                }
+            }
+            .onReceive(timer) { n in
+                self.damus_state?.pool.connect_to_disconnected()
             }
             
-            let post_res = obj.object as! NostrPostResult
-            switch post_res {
-            case .post(let post):
-                print("post \(post.content)")
-                let new_ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
-                self.damus_state?.pool.send(.event(new_ev))
-            case .cancel:
-                active_sheet = nil
-                print("post cancelled")
+            if let damus = self.damus_state {
+                SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened)
             }
-        }
-        .onReceive(timer) { n in
-            self.damus_state?.pool.connect_to_disconnected()
         }
     }
     
