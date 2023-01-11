@@ -21,11 +21,11 @@ struct ThreadView: View {
         Group {
             if is_chatroom {
                 ChatroomView(damus: damus)
-                    .navigationBarTitle(metadata?.name ?? "Chat")
+                    .navigationBarTitle(metadata?.name ?? NSLocalizedString("Chat", comment: "Navigation bar title for Chatroom view."))
                     .environmentObject(thread)
             } else {
                 EventDetailView(damus: damus, thread: thread)
-                    .navigationBarTitle(metadata?.name ?? "Thread")
+                    .navigationBarTitle(metadata?.name ?? NSLocalizedString("Thread", comment: "Navigation bar title for threaded event detail view."))
                     .environmentObject(thread)
             }
             

@@ -80,6 +80,7 @@ struct ContentView: View {
     @State var thread_open: Bool = false
     @State var search_open: Bool = false
     @State var filter_state : FilterState = .posts_and_replies
+    @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
     @StateObject var user_settings = UserSettingsStore()
 
@@ -121,7 +122,7 @@ struct ContentView: View {
                 TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter)
             }
             if privkey != nil {
-                PostButtonContainer {
+                PostButtonContainer(userSettings: user_settings) {
                     self.active_sheet = .post
                 }
             }
@@ -130,9 +131,9 @@ struct ContentView: View {
     
     var FiltersView: some View {
         VStack{
-            Picker("Filter State", selection: $filter_state) {
-                Text("Posts").tag(FilterState.posts)
-                Text("Posts & Replies").tag(FilterState.posts_and_replies)
+            Picker(NSLocalizedString("Filter State", comment: "Filter state for seeing either only posts, or posts & replies."), selection: $filter_state) {
+                Text("Posts", comment: "Label for filter for seeing only posts (instead of posts and replies).").tag(FilterState.posts)
+                Text("Posts & Replies", comment: "Label for filter for seeing posts and replies (instead of only posts).").tag(FilterState.posts_and_replies)
             }
             .pickerStyle(.segmented)
         }
@@ -158,7 +159,7 @@ struct ContentView: View {
                 
             case .notifications:
                 TimelineView(events: $home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
-                    .navigationTitle("Notifications")
+                    .navigationTitle(NSLocalizedString("Notifications", comment: "Navigation title for notifications."))
                 
             case .dms:
                 DirectMessagesView(damus_state: damus_state!)
@@ -168,7 +169,20 @@ struct ContentView: View {
                 EmptyView()
             }
         }
-        .navigationBarTitle(selected_timeline == .home ?  "Home" : "Global", displayMode: .inline)
+        .navigationBarTitle(selected_timeline == .home ?  NSLocalizedString("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.") : NSLocalizedString("Global", comment: "Navigation bar title for Global view where posts from all connected relay servers appear."), displayMode: .inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                if selected_timeline == .home {
+                    Image("damus-home")
+                    .resizable()
+                    .frame(width:30,height:30)
+                    .shadow(color: Color("DamusPurple"), radius: 2)
+                } else {
+                    Text("Global")
+                }
+            }
+             
+        }
     }
     
     var MaybeSearchView: some View {
@@ -207,46 +221,51 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
                 NavigationView {
-                    MainContent(damus: damus)
-                        .toolbar {
-                            ToolbarItem(placement: .navigationBarLeading) {
-                                let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
-                                let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
-                                let prof_dest = ProfileView(damus_state: damus_state!, profile: profile_model, followers: followers_model)
+                    ZStack {
+                        VStack {
+                            MainContent(damus: damus)
+                                .toolbar() {
+                                    ToolbarItem(placement: .navigationBarLeading) {
+                                        Button {
+                                            isSideBarOpened.toggle()
+                                        } label: {
+                                            let profile_model = ProfileModel(pubkey: damus_state!.pubkey, damus: damus_state!)
+                                            let followers_model = FollowersModel(damus_state: damus_state!, target: damus_state!.pubkey)
+                                            
+                                            if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
+                                                ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
+                                            } else {
+                                                Image(systemName: "person.fill")
+                                            }
+                                        }
+                                    }
+                                    
+                                    ToolbarItem(placement: .navigationBarTrailing) {
+                                        HStack(alignment: .center) {
+                                            if home.signal.signal != home.signal.max_signal {
+                                                Text("\(home.signal.signal)/\(home.signal.max_signal)", comment: "Fraction of how many of the user's relay servers that are operational.")
+                                                    .font(.callout)
+                                                    .foregroundColor(.gray)
+                                            }
 
-                                NavigationLink(destination: prof_dest) {
-                                    /// Verify that the user has a profile picture, if not display a generic SF Symbol
-                                    /// (Resolves an in-app error where ``Robohash`` pictures are not generated so the button dissapears
-                                    if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
-                                        ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
-                                    } else {
-                                        Image(systemName: "person.fill")
+                                        }
                                     }
                                 }
-                                .buttonStyle(PlainButtonStyle())
-                            }
 
-                            ToolbarItem(placement: .navigationBarTrailing) {
-                                HStack(alignment: .center) {
-                                    if home.signal.signal != home.signal.max_signal {
-                                        Text("\(home.signal.signal)/\(home.signal.max_signal)")
-                                            .font(.callout)
-                                            .foregroundColor(.gray)
-                                    }
-
-                                    NavigationLink(destination: ConfigView(state: damus_state!).environmentObject(user_settings)) {
-                                        Label("", systemImage: "gear")
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
-                                }
-                            }
                         }
+                        
+                        Color.clear
+                        .overlay(
+                            SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened)
+                        )
+                    }
+                    .navigationBarHidden(isSideBarOpened ? true: false) // Would prefer a different way of doing this.
                 }
                 .navigationViewStyle(.stack)
+            
+                TabBar(new_events: $home.new_events, selected: $selected_timeline, isSidebarVisible: $isSideBarOpened, action: switch_timeline)
+                    .padding([.bottom], 8)
             }
-
-            TabBar(new_events: $home.new_events, selected: $selected_timeline, action: switch_timeline)
-                .padding([.bottom], 8)
         }
         .onAppear() {
             self.connect()
@@ -287,7 +306,6 @@ struct ContentView: View {
             guard let privkey = self.privkey else {
                 return
             }
-
             let ev = notif.object as! NostrEvent
             let boost = make_boost_event(pubkey: pubkey, privkey: privkey, boosted: ev)
             self.damus_state?.pool.send(.event(boost))
@@ -320,10 +338,10 @@ struct ContentView: View {
             let pk = target.pubkey
             
             if let ev = unfollow_user(pool: damus.pool,
-                             our_contacts: damus.contacts.event,
-                             pubkey: damus.pubkey,
-                             privkey: privkey,
-                             unfollow: pk) {
+                                      our_contacts: damus.contacts.event,
+                                      pubkey: damus.pubkey,
+                                      privkey: privkey,
+                                      unfollow: pk) {
                 notify(.unfollowed, pk)
                 
                 damus.contacts.event = ev
@@ -342,10 +360,10 @@ struct ContentView: View {
             }
             
             if let ev = follow_user(pool: damus.pool,
-                           our_contacts: damus.contacts.event,
-                           pubkey: damus.pubkey,
-                           privkey: privkey,
-                           follow: ReferencedId(ref_id: fnotify.pubkey, relay_id: nil, key: "p")) {
+                                    our_contacts: damus.contacts.event,
+                                    pubkey: damus.pubkey,
+                                    privkey: privkey,
+                                    follow: ReferencedId(ref_id: fnotify.pubkey, relay_id: nil, key: "p")) {
                 notify(.followed, fnotify.pubkey)
                 
                 damus_state?.contacts.event = ev
@@ -434,7 +452,6 @@ struct ContentView_Previews: PreviewProvider {
         ContentView(keypair: Keypair(pubkey: "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681", privkey: nil))
     }
 }
-
 
 func get_since_time(last_event: NostrEvent?) -> Int64? {
     if let last_event = last_event {

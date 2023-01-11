@@ -102,15 +102,15 @@ struct EventActionBar: View {
                 }
             }
         }
-        .alert("Boost", isPresented: $confirm_boost) {
+        .alert(NSLocalizedString("Boost", comment: "Title of alert for confirming to boost a post."), isPresented: $confirm_boost) {
             Button("Cancel") {
                 confirm_boost = false
             }
-            Button("Boost") {
+            Button(NSLocalizedString("Boost", comment: "Button to confirm boosting a post.")) {
                 send_boost()
             }
         } message: {
-            Text("Are you sure you want to boost this post?")
+            Text("Are you sure you want to boost this post?", comment: "Alert message to ask if user wants to boost a post.")
         }
         .onReceive(handle_notify(.liked)) { n in
             let liked = n.object as! Counted
@@ -169,7 +169,7 @@ struct LikeButton: View {
     var body: some View {
         Button(action: action) {
             if liked {
-                Text("🤙")
+                Text("🤙", comment: "Button with emoji to like an event.")
             } else {
                 Image("shaka")
                     .renderingMode(.template)

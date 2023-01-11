@@ -31,9 +31,9 @@ func timeline_bit(_ timeline: Timeline) -> Int {
 struct TabButton: View {
     let timeline: Timeline
     let img: String
-    
     @Binding var selected: Timeline?
     @Binding var new_events: NewEventsBits
+    @Binding var isSidebarVisible: Bool
     
     let action: (Timeline) -> ()
     
@@ -56,6 +56,7 @@ struct TabButton: View {
         Button(action: {
             action(timeline)
             new_events = NewEventsBits(prev: new_events, unsetting: timeline)
+            isSidebarVisible = false
         }) {
             Label("", systemImage: selected == timeline ? "\(img).fill" : img)
                 .contentShape(Rectangle())
@@ -69,6 +70,7 @@ struct TabButton: View {
 struct TabBar: View {
     @Binding var new_events: NewEventsBits
     @Binding var selected: Timeline?
+    @Binding var isSidebarVisible: Bool
     
     let action: (Timeline) -> ()
     
@@ -76,10 +78,10 @@ struct TabBar: View {
         VStack {
             Divider()
             HStack {
-                TabButton(timeline: .home, img: "house", selected: $selected, new_events: $new_events, action: action).keyboardShortcut("1")
-                TabButton(timeline: .dms, img: "bubble.left.and.bubble.right", selected: $selected, new_events: $new_events, action: action).keyboardShortcut("2")
-                TabButton(timeline: .search, img: "magnifyingglass.circle", selected: $selected, new_events: $new_events, action: action).keyboardShortcut("3")
-                TabButton(timeline: .notifications, img: "bell", selected: $selected, new_events: $new_events, action: action).keyboardShortcut("4")
+                TabButton(timeline: .home, img: "house", selected: $selected, new_events: $new_events, isSidebarVisible: $isSidebarVisible, action: action).keyboardShortcut("1")
+                TabButton(timeline: .dms, img: "bubble.left.and.bubble.right", selected: $selected, new_events: $new_events, isSidebarVisible: $isSidebarVisible, action: action).keyboardShortcut("2")
+                TabButton(timeline: .search, img: "magnifyingglass.circle", selected: $selected, new_events: $new_events, isSidebarVisible: $isSidebarVisible, action: action).keyboardShortcut("3")
+                TabButton(timeline: .notifications, img: "bell", selected: $selected, new_events: $new_events, isSidebarVisible: $isSidebarVisible, action: action).keyboardShortcut("4")
             }
         }
     }

@@ -41,24 +41,24 @@ struct ImageContextMenuModifier: ViewModifier {
             Button {
                 UIPasteboard.general.url = url
             } label: {
-                Label("Copy Image URL", systemImage: "doc.on.doc")
+                Label(NSLocalizedString("Copy Image URL", comment: "Context menu option to copy the URL of an image into clipboard."), systemImage: "doc.on.doc")
             }
             if let someImage = image {
                 Button {
                     UIPasteboard.general.image = someImage
                 } label: {
-                    Label("Copy Image", systemImage: "photo.on.rectangle")
+                    Label(NSLocalizedString("Copy Image", comment: "Context menu option to copy an image into clipboard."), systemImage: "photo.on.rectangle")
                 }
                 Button {
                     UIImageWriteToSavedPhotosAlbum(someImage, nil, nil, nil)
                 } label: {
-                    Label("Save Image", systemImage: "square.and.arrow.down")
+                    Label(NSLocalizedString("Save Image", comment: "Context menu option to save an image."), systemImage: "square.and.arrow.down")
                 }
             }
             Button {
                 showShareSheet = true
             } label: {
-                Label("Share", systemImage: "square.and.arrow.up")
+                Label(NSLocalizedString("Share", comment: "Button to share an image."), systemImage: "square.and.arrow.up")
             }
         }
     }
@@ -143,7 +143,7 @@ struct ImageCarousel: View {
                             }
                             .id(url.absoluteString)
                             .contextMenu {
-                                Button("Copy Image") {
+                                Button(NSLocalizedString("Copy Image", comment: "Context menu option to copy an image to clipboard.")) {
                                     UIPasteboard.general.string = url.absoluteString
                                 }
                             }
