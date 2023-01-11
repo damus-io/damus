@@ -34,8 +34,6 @@ struct ProfileName: View {
     
     @State var display_name: String?
     @State var nip05: NIP05?
-    
-    @Environment(\.openURL) var openURL
 
     init(pubkey: String, profile: Profile?, damus: DamusState, show_friend_confirmed: Bool, show_nip5_domain: Bool = true) {
         self.pubkey = pubkey

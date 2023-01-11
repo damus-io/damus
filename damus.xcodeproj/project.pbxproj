@@ -117,6 +117,7 @@
 		4CB55EF5295E679D007FD187 /* UserRelaysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB55EF4295E679D007FD187 /* UserRelaysView.swift */; };
 		4CB8838629656C8B00DC99E7 /* NIP05.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB8838529656C8B00DC99E7 /* NIP05.swift */; };
 		4CB8838B296F6E1E00DC99E7 /* NIP05Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB8838A296F6E1E00DC99E7 /* NIP05Badge.swift */; };
+		4CB8838D296F710400DC99E7 /* Reposted.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB8838C296F710400DC99E7 /* Reposted.swift */; };
 		4CD7641B28A1641400B6928F /* EndBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD7641A28A1641400B6928F /* EndBlock.swift */; };
 		4CE4F8CD281352B30009DFBB /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE4F8CC281352B30009DFBB /* Notifications.swift */; };
 		4CE4F9DE2852768D00C00DD9 /* ConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE4F9DD2852768D00C00DD9 /* ConfigView.swift */; };
@@ -310,6 +311,7 @@
 		4CB55EF4295E679D007FD187 /* UserRelaysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRelaysView.swift; sourceTree = "<group>"; };
 		4CB8838529656C8B00DC99E7 /* NIP05.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP05.swift; sourceTree = "<group>"; };
 		4CB8838A296F6E1E00DC99E7 /* NIP05Badge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP05Badge.swift; sourceTree = "<group>"; };
+		4CB8838C296F710400DC99E7 /* Reposted.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reposted.swift; sourceTree = "<group>"; };
 		4CD7641A28A1641400B6928F /* EndBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndBlock.swift; sourceTree = "<group>"; };
 		4CE4F8CC281352B30009DFBB /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
 		4CE4F9DD2852768D00C00DD9 /* ConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigView.swift; sourceTree = "<group>"; };
@@ -573,6 +575,7 @@
 				4C3EA67C28FFBBA200C48A62 /* InvoicesView.swift */,
 				4C3EA67E28FFC01D00C48A62 /* InvoiceView.swift */,
 				4CB8838A296F6E1E00DC99E7 /* NIP05Badge.swift */,
+				4CB8838C296F710400DC99E7 /* Reposted.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -815,6 +818,7 @@
 				4C363A8C28236B92006E126D /* PubkeyView.swift in Sources */,
 				4C5C7E68284ED36500A22DF5 /* SearchHomeModel.swift in Sources */,
 				4C75EFB728049D990006080F /* RelayPool.swift in Sources */,
+				4CB8838D296F710400DC99E7 /* Reposted.swift in Sources */,
 				4C3EA67728FF7A9800C48A62 /* talstr.c in Sources */,
 				4CE6DEE927F7A08100C66700 /* ContentView.swift in Sources */,
 				4CEE2AF5280B29E600AB5EEF /* TimeAgo.swift in Sources */,

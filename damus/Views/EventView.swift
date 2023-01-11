@@ -172,17 +172,7 @@ struct EventView: View {
                     let booster_profile = ProfileView(damus_state: damus, profile: prof_model, followers: follow_model)
                     
                     NavigationLink(destination: booster_profile) {
-                        HStack {
-                            Image(systemName: "arrow.2.squarepath")
-                                .font(.footnote.weight(.bold))
-                                .foregroundColor(Color.gray)
-                            ProfileName(pubkey: event.pubkey, profile: prof, damus: damus, show_friend_confirmed: true)
-                                    .font(.footnote.weight(.bold))
-                                    .foregroundColor(Color.gray)
-                            Text("Boosted", comment: "Text indicating that the post was boosted (i.e. re-shared).")
-                                .font(.footnote.weight(.bold))
-                                .foregroundColor(Color.gray)
-                        }
+                        Reposted(damus: damus, pubkey: event.pubkey, profile: prof)
                     }
                     .buttonStyle(PlainButtonStyle())
                     TextEvent(inner_ev, pubkey: inner_ev.pubkey)
