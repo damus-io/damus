@@ -64,7 +64,7 @@ struct EventActionBar: View {
                     Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
                         .offset(x: 22)
                         .font(.footnote.weight(.medium))
-                        .foregroundColor(bar.liked ? Color.orange : Color.gray)
+                        .foregroundColor(bar.liked ? Color.accentColor : Color.gray)
                 }
             }
             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
@@ -164,7 +164,7 @@ struct LikeButton: View {
     var body: some View {
         Button(action: action) {
             Image(liked ? "shaka-full" : "shaka-line")
-                .foregroundColor(liked ? .orange : .gray)
+                .foregroundColor(liked ? .accentColor : .gray)
         }
     }
 }
