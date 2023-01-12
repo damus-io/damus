@@ -16,10 +16,21 @@ struct InnerBannerImageView: View {
         ZStack {
             Color(uiColor: .systemBackground)
             
-            AsyncImage(url: url) { image in
-                image
-                    .resizable()
-            } placeholder: {
+            if (url != nil) {
+                KFAnimatedImage(url)
+                    .callbackQueue(.dispatch(.global(qos: .background)))
+                    .processingQueue(.dispatch(.global(qos: .background)))
+                    .appendProcessor(LargeImageProcessor.shared)
+                    .configure { view in
+                        view.framePreloadCount = 1
+                    }
+                    .placeholder { _ in
+                        Image("profile-banner").resizable()
+                    }
+                    .scaleFactor(UIScreen.main.scale)
+                    .loadDiskFileSynchronously()
+                    .fade(duration: 0.1)
+            } else {
                 Image("profile-banner").resizable()
             }
         }
@@ -54,12 +65,12 @@ struct BannerImageView: View {
     }
 }
 
-func get_banner_url(banner: String?, pubkey: String, profiles: Profiles) -> URL {
+func get_banner_url(banner: String?, pubkey: String, profiles: Profiles) -> URL? {
     let bannerUrlString = banner ?? profiles.lookup(id: pubkey)?.banner ?? ""
     if let url = URL(string: bannerUrlString) {
         return url
     }
-    return URL(string: "")!
+    return nil
 }
 
 struct BannerImageView_Previews: PreviewProvider {
