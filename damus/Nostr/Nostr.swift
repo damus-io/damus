@@ -100,26 +100,6 @@ struct Profile: Codable {
     }
 }
 
-/*
-struct Profile: Decodable {
-    let name: String?
-    let display_name: String?
-    let about: String?
-    let picture: String?
-    let banner: String?
-    let website: String?
-    let nip05: String?
-    let lud06: String?
-    let lud16: String?
-    
-    var lightning_uri: URL? {
-        return make_ln_url(self.lud06) ?? make_ln_url(self.lud16)
-    }
-    
-    static func displayName(profile: Profile?, pubkey: String) -> String {
-        return profile?.name ?? abbrev_pubkey(pubkey)
-    }
-
 func make_test_profile() -> Profile {
     return Profile(name: "jb55", display_name: "Will", about: "Its a me", picture: "https://cdn.jb55.com/img/red-me.jpg", banner: "https://pbs.twimg.com/profile_banners/9918032/1531711830/600x200",  website: "jb55.com", lud06: "jb55@jb55.com", lud16: nil, nip05: "jb55@jb55.com")
 }
@@ -146,3 +126,4 @@ func lnaddress_to_lnurl(_ lnaddr: String) -> String? {
     
     return bech32_encode(hrp: "lnurl", Array(dat))
 }
+

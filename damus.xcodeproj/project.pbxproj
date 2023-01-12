@@ -490,6 +490,7 @@
 				4CB88394296F7F8100DC99E7 /* Reactions */,
 				4CB88387296AF97C00DC99E7 /* ActionBar */,
 				4CE4F9E228528C5200C00DD9 /* AddRelayView.swift */,
+				9609F057296E220800069BF3 /* BannerImageView.swift */,
 				4C363A8728236948006E126D /* BlocksView.swift */,
 				4C285C8128385570008A31F1 /* CarouselView.swift */,
 				4C0A3F8B280F5FCA000448DE /* ChatroomView.swift */,
@@ -532,7 +533,6 @@
 				4CA2EF9F280E37AC0044ACD8 /* TimelineView.swift */,
 				4CB55EF4295E679D007FD187 /* UserRelaysView.swift */,
 				647D9A8C2968520300A295DE /* SideMenuView.swift */,
-				9609F057296E220800069BF3 /* BannerImageView.swift */,
 				4CB8838E296F781C00DC99E7 /* ReactionsView.swift */,
 			);
 			path = Views;

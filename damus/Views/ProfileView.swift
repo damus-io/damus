@@ -194,7 +194,7 @@ struct ProfileView: View {
     var TopSection: some View {
         ZStack(alignment: .top) {
             GeometryReader { geo in
-                BannerImageView(pubkey: damus_state.pubkey, profiles: damus_state.profiles)
+                BannerImageView(pubkey: profile.pubkey, profiles: damus_state.profiles)
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: BANNER_HEIGHT)
                     .clipped()
