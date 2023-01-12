@@ -12,12 +12,15 @@ class ReactionsModel: ObservableObject {
     let state: DamusState
     let target: String
     let sub_id: String
+    let profiles_id: String
+    
     @Published var reactions: [NostrEvent]
     
     init (state: DamusState, target: String) {
         self.state = state
         self.target = target
         self.sub_id = UUID().description
+        self.profiles_id = UUID().description
         self.reactions = []
     }
     
@@ -68,7 +71,7 @@ class ReactionsModel: ObservableObject {
         case .notice(_):
             break
         case .eose(_):
-            load_profiles(profiles_subid: UUID().description, relay_id: relay_id, events: reactions, damus_state: state)
+            load_profiles(profiles_subid: profiles_id, relay_id: relay_id, events: reactions, damus_state: state)
             break
         }
     }
