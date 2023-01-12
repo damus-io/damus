@@ -126,4 +126,3 @@ func lnaddress_to_lnurl(_ lnaddr: String) -> String? {
     
     return bech32_encode(hrp: "lnurl", Array(dat))
 }
-
