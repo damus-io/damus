@@ -37,9 +37,6 @@ struct EventActionBar: View {
             }
             
             HStack(alignment: .bottom) {
-                Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
-                    .font(.footnote.weight(.medium))
-                    .foregroundColor(bar.boosted ? Color.green : Color.gray)
                 
                 EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
                     if bar.boosted {
@@ -47,21 +44,27 @@ struct EventActionBar: View {
                     } else {
                         self.confirm_boost = true
                     }
+                }.overlay {
+                    Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
+                        .offset(x: 22)
+                        .font(.footnote.weight(.medium))
+                        .foregroundColor(bar.boosted ? Color.green : Color.gray)
                 }
             }
             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
 
             HStack(alignment: .bottom) {
-                Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
-                    .font(.footnote.weight(.medium))
-                    .foregroundColor(bar.liked ? Color.orange : Color.gray)
-                    
                 LikeButton(liked: bar.liked) {
                     if bar.liked {
                         notify(.delete, bar.our_like)
                     } else {
                         send_like()
                     }
+                }.overlay {
+                    Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
+                        .offset(x: 22)
+                        .font(.footnote.weight(.medium))
+                        .foregroundColor(bar.liked ? Color.orange : Color.gray)
                 }
             }
             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
@@ -160,13 +163,8 @@ struct LikeButton: View {
     
     var body: some View {
         Button(action: action) {
-            if liked {
-                Text("🤙", comment: "Button with emoji to like an event.")
-            } else {
-                Image("shaka")
-                    .renderingMode(.template)
-                    .foregroundColor(.gray)
-            }
+            Image(liked ? "shaka-full" : "shaka-line")
+                .foregroundColor(liked ? .orange : .gray)
         }
     }
 }
