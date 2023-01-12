@@ -245,16 +245,16 @@ struct ContentView: View {
                                                         .font(.callout)
                                                         .foregroundColor(.gray)
                                                 }
-
+                                                
                                             }
                                         }
                                     }
-
+                                
                             }
                         }
                     }
                     .navigationViewStyle(.stack)
-                
+                    
                     TabBar(new_events: $home.new_events, selected: $selected_timeline, isSidebarVisible: $isSideBarOpened, action: switch_timeline)
                         .padding([.bottom], 8)
                 }
@@ -386,6 +386,7 @@ struct ContentView: View {
             }
             .onReceive(timer) { n in
                 self.damus_state?.pool.connect_to_disconnected()
+                
             }
             
             if let damus = self.damus_state {
