@@ -119,8 +119,10 @@ struct Profile: Decodable {
     static func displayName(profile: Profile?, pubkey: String) -> String {
         return profile?.name ?? abbrev_pubkey(pubkey)
     }
+
+func make_test_profile() -> Profile {
+    return Profile(name: "jb55", display_name: "Will", about: "Its a me", picture: "https://cdn.jb55.com/img/red-me.jpg", website: "jb55.com", lud06: "jb55@jb55.com", lud16: nil, nip05: "jb55@jb55.com")
 }
- */
 
 func make_ln_url(_ str: String?) -> URL? {
     return str.flatMap { URL(string: "lightning:" + $0) }

@@ -772,6 +772,15 @@ func validate_event(ev: NostrEvent) -> ValidationResult {
     return ok ? .ok : .bad_sig
 }
 
+func last_etag(tags: [[String]]) -> String? {
+    var e: String? = nil
+    for tag in tags {
+        if tag.count >= 2 && tag[0] == "e" {
+            e = tag[1]
+        }
+    }
+    return e
+}
 
 func inner_event_or_self(ev: NostrEvent) -> NostrEvent {
     guard let inner_ev = ev.inner_event else {
