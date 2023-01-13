@@ -97,15 +97,15 @@ struct EventActionBar: View {
                 }
             }
         }
-        .alert(NSLocalizedString("Boost", comment: "Title of alert for confirming to boost a post."), isPresented: $confirm_boost) {
+        .alert(NSLocalizedString("Repost", comment: "Title of alert for confirming to repost a post."), isPresented: $confirm_boost) {
             Button("Cancel") {
                 confirm_boost = false
             }
-            Button(NSLocalizedString("Boost", comment: "Button to confirm boosting a post.")) {
+            Button(NSLocalizedString("Repost", comment: "Button to confirm reposting a post.")) {
                 send_boost()
             }
         } message: {
-            Text("Are you sure you want to boost this post?", comment: "Alert message to ask if user wants to boost a post.")
+            Text("Are you sure you want to repost this?", comment: "Alert message to ask if user wants to repost a post.")
         }
         .onReceive(handle_notify(.liked)) { n in
             let liked = n.object as! Counted
