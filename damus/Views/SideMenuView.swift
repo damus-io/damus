@@ -135,7 +135,11 @@ struct SideMenuView: View {
                     
                     Button(action: {
                         //ConfigView(state: damus_state)
-                        confirm_logout = true
+                        if damus_state.keypair.privkey == nil {
+                            notify(.logout, ())
+                        } else {
+                            confirm_logout = true
+                        }
                     }, label: {
                         Label(NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account."), systemImage: "pip.exit")
                             .font(.title3)
