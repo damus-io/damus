@@ -1,3 +1,35 @@
+## [1.0.0-6] - 2023-01-13
+
+### Added
+
+- Profile banner images (Jason Jōb)
+- Added Reactions View (William Casarin)
+- Left hand option for post button (Jonathan Milligan)
+- Damus icon at the top (Ben Weeks)
+- Make purple badges on profile page tappable (Joel Klabo)
+
+
+### Changed
+
+- Make Shaka button purple when liked (Joel Klabo)
+- Move counts to right side like Birdsite (Joel Klabo)
+- Use custom icon for shaka button (Joel Klabo)
+- Renamed boost to repost (William Casarin)
+- Removed nip05 domain from boosts/reposts (William Casarin)
+- Make DMs only take up 80% of screen width (Jonathan Milligan)
+- Hide Recommended Relays Section if Empty (Joel Klabo)
+
+
+### Fixed
+
+- Fixed shaka moving when you press it (Joel Klabo)
+- Fixed issue with relays not keeping in sync when adding (Fredrik Olofsson)
+
+
+
+[1.0.0-6]: https://github.com/damus-io/damus/releases/tag/v1.0.0-6
+
+
 ## [1.0.0-5] - 2023-01-06
 
 ### Added
