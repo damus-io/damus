@@ -14,20 +14,29 @@ struct EventDetailBar: View {
     
     var body: some View {
         HStack {
-            Text("\(bar.boosts)")
-                .font(.body.bold())
-            Text("Reposts")
-
-            NavigationLink(destination: ReactionsView(damus_state: state, model: ReactionsModel(state: state, target: target))) {
-                Text("\(bar.likes)")
+            if bar.boosts > 0 {
+                Text("\(bar.boosts)")
                     .font(.body.bold())
-                Text("Reactions")
+                Text("Reposts")
+                    .foregroundColor(.gray)
             }
-            .buttonStyle(PlainButtonStyle())
+
+            if bar.likes > 0 {
+                NavigationLink(destination: ReactionsView(damus_state: state, model: ReactionsModel(state: state, target: target))) {
+                    Text("\(bar.likes)")
+                        .font(.body.bold())
+                    Text("Reactions")
+                        .foregroundColor(.gray)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
             
-            Text("\(bar.tips)")
-                .font(.body.bold())
-            Text("Tips")
+            if bar.tips > 0 {
+                Text("\(bar.tips)")
+                    .font(.body.bold())
+                Text("Tips")
+                    .foregroundColor(.gray)
+            }
         }
     }
 }

@@ -29,6 +29,10 @@ class ActionBarModel: ObservableObject {
         self.our_tip = our_tip
     }
     
+    var is_empty: Bool {
+        return likes == 0 && boosts == 0 && tips == 0
+    }
+    
     var tipped: Bool {
         return our_tip != nil
     }
