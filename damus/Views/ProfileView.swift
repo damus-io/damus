@@ -81,7 +81,7 @@ struct EditButton: View {
     
     var body: some View {
         NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
-            Text("Edit")
+            Text("Edit", comment: "Button to edit user's profile.")
                 .frame(height: 30)
                 .padding(.horizontal,25)
                 .font(.caption.weight(.bold))
@@ -153,7 +153,7 @@ struct ProfileView: View {
                     Button {
                         UIPasteboard.general.string = profile.lnurl ?? ""
                     } label: {
-                        Label("Copy LNUrl", systemImage: "doc.on.doc")
+                        Label(NSLocalizedString("Copy LNURL", comment: "Context menu option for copying a user's Lightning URL."), systemImage: "doc.on.doc")
                     }
                 }
             
@@ -194,15 +194,14 @@ struct ProfileView: View {
     var TopSection: some View {
         ZStack(alignment: .top) {
             GeometryReader { geo in
-                Image("profile-banner")
-                    .resizable()
+                BannerImageView(pubkey: profile.pubkey, profiles: damus_state.profiles)
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: geo.size.width, height: 150)
+                    .frame(width: geo.size.width, height: BANNER_HEIGHT)
                     .clipped()
                 
                 ShareButton
                     .offset(x: geo.size.width - 80.0, y: 50.0 )
-            }
+            }.frame(height: BANNER_HEIGHT)
             VStack(alignment: .leading) {
                 let data = damus_state.profiles.lookup(id: profile.pubkey)
                 let pfp_size: CGFloat = 90.0
@@ -260,11 +259,7 @@ struct ProfileView: View {
                         let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
                         NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model, whos: profile.pubkey)) {
                             HStack {
-                                Text("\(profile.following)")
-                                    .font(.subheadline.weight(.medium))
-                                Text("Following")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
+                                Text("\(Text("\(profile.following)", comment: "Number of profiles a user is following.").font(.subheadline.weight(.medium))) \(Text("Following", comment: "Part of a larger sentence to describe how many profiles a user is following.").font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
                             }
                         }
                         .buttonStyle(PlainButtonStyle())
@@ -287,11 +282,7 @@ struct ProfileView: View {
                     
                     if let relays = profile.relays {
                         NavigationLink(destination: UserRelaysView(state: damus_state, pubkey: profile.pubkey, relays: Array(relays.keys).sorted())) {
-                            Text("\(relays.keys.count)")
-                                .font(.subheadline.weight(.medium))
-                            Text("Relays")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
+                            Text("\(Text("\(relays.keys.count)", comment: "Number of relay servers a user is connected.").font(.subheadline.weight(.medium))) \(Text("Relays", comment: "Part of a larger sentence to describe how many relay servers a user is connected.").font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relays'.")
                         }
                         .buttonStyle(PlainButtonStyle())
                     }
@@ -307,13 +298,12 @@ struct ProfileView: View {
         HStack {
             if followers.count_display == "?" {
                 Image(systemName: "square.and.arrow.down")
+                Text("Followers", comment: "Label describing followers of a user.")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
             } else {
-                Text("\(followers.count_display)")
-                    .font(.subheadline.weight(.medium))
+                Text("\(Text("\(followers.count_display)", comment: "Number of people following a user.").font(.subheadline.weight(.medium))) \(Text("Followers", comment: "Part of a larger sentence to describe how many people are following a user.").font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Followers'.")
             }
-            Text("Followers")
-                .font(.subheadline)
-                .foregroundColor(.gray)
         }
     }
         
@@ -367,7 +357,7 @@ func test_damus_state() -> DamusState {
     let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
     let damus = DamusState(pool: RelayPool(), keypair: Keypair(pubkey: pubkey, privkey: "privkey"), likes: EventCounter(our_pubkey: pubkey), boosts: EventCounter(our_pubkey: pubkey), contacts: Contacts(our_pubkey: pubkey), tips: TipCounter(our_pubkey: pubkey), profiles: Profiles(), dms: DirectMessagesModel(), previews: PreviewCache())
     
-    let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io")
+    let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", banner: "", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io")
     let tsprof = TimestampedProfile(profile: prof, timestamp: 0)
     damus.profiles.add(id: pubkey, profile: tsprof)
     return damus
@@ -405,7 +395,7 @@ struct KeyView: View {
                                 isCopied = false
                             }
                         } label: {
-                            Label("Public Key", systemImage: "key.fill")
+                            Label(NSLocalizedString("Public Key", comment: "Label indicating that the text is a user's public account key."), systemImage: "key.fill")
                                 .font(.custom("key", size: 12.0))
                                 .labelStyle(IconOnlyLabelStyle())
                                 .foregroundStyle(hex_to_rgb(pubkey))
@@ -428,7 +418,7 @@ struct KeyView: View {
                     }
                 } label: {
                     Label {
-                        Text("Public key")
+                        Text("Public key", comment: "Label indicating that the text is a user's public account key.")
                     } icon: {
                         Image("ic-copy")
                             .contentShape(Rectangle())
@@ -441,7 +431,7 @@ struct KeyView: View {
                 HStack {
                     Image("ic-tick")
                         .frame(width: 20, height: 20)
-                    Text("Copied")
+                    Text(NSLocalizedString("Copied", comment: "Label indicating that a user's key was copied."))
                         .font(.footnote)
                         .foregroundColor(Color("DamusGreen"))
                 }

@@ -38,7 +38,7 @@ struct SearchResultsView: View {
                     let search_model = SearchModel(pool: damus_state.pool, search: .filter_hashtag([ht]))
                     let dst = SearchView(appstate: damus_state, search: search_model)
                     NavigationLink(destination: dst) {
-                        Text("Search hashtag: #\(ht)")
+                        Text("Search hashtag: #\(ht)", comment: "Navigation link to search hashtag.")
                     }
                 case .profile(let prof):
                     let decoded = try? bech32_decode(prof)
@@ -47,7 +47,7 @@ struct SearchResultsView: View {
                     let f = FollowersModel(damus_state: damus_state, target: prof)
                     let dst = ProfileView(damus_state: damus_state, profile: prof_model, followers: f)
                     NavigationLink(destination: dst) {
-                        Text("Goto profile \(prof)")
+                        Text("Goto profile \(prof)", comment: "Navigation link to go to profile.")
                     }
                 case .hex(let h):
                     let prof_model = ProfileModel(pubkey: h, damus: damus_state)
@@ -60,10 +60,10 @@ struct SearchResultsView: View {
 
                     VStack(spacing: 50) {
                         NavigationLink(destination: prof_view) {
-                            Text("Goto profile \(h)")
+                            Text("Goto profile \(h)", comment: "Navigation link to go to profile referenced by hex code.")
                         }
                         NavigationLink(destination: ev_view) {
-                            Text("Goto post \(h)")
+                            Text("Goto post \(h)", comment: "Navigation link to go to post referenced by hex code.")
                         }
                     }
                 case .note(let nid):
@@ -74,10 +74,10 @@ struct SearchResultsView: View {
                         event_id: hex
                     )
                     NavigationLink(destination: ev_view) {
-                        Text("Goto post \(nid)")
+                        Text("Goto post \(nid)", comment: "Navigation link to go to post referenced by note ID.")
                     }
                 case .none:
-                    Text("none")
+                    Text("none", comment: "No search results.")
                 }
             }.padding(.horizontal)
         }

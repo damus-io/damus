@@ -1,3 +1,67 @@
+## [1.0.0-6] - 2023-01-13
+
+### Added
+
+- Profile banner images (Jason Jōb)
+- Added Reactions View (William Casarin)
+- Left hand option for post button (Jonathan Milligan)
+- Damus icon at the top (Ben Weeks)
+- Make purple badges on profile page tappable (Joel Klabo)
+
+
+### Changed
+
+- Make Shaka button purple when liked (Joel Klabo)
+- Move counts to right side like Birdsite (Joel Klabo)
+- Use custom icon for shaka button (Joel Klabo)
+- Renamed boost to repost (William Casarin)
+- Removed nip05 domain from boosts/reposts (William Casarin)
+- Make DMs only take up 80% of screen width (Jonathan Milligan)
+- Hide Recommended Relays Section if Empty (Joel Klabo)
+
+
+### Fixed
+
+- Fixed shaka moving when you press it (Joel Klabo)
+- Fixed issue with relays not keeping in sync when adding (Fredrik Olofsson)
+
+
+
+[1.0.0-6]: https://github.com/damus-io/damus/releases/tag/v1.0.0-6
+
+
+## [1.0.0-5] - 2023-01-06
+
+### Added
+
+- Added share button to profile (William Casarin)
+- Added universal link sharing of notes (William Casarin)
+- Added clear cache button to wipe pfp/image cache (OlegAba)
+- Allow Adding Relay Without wss:// Prefix (Joel Klabo)
+- Allow Saving Images to Library (Joel Klabo)
+
+
+### Changed
+
+- Added damus gradient to post button (Ben Weeks)
+- Center the Post Button (Thomas)
+- Switch yellow nip05 check to gray (William Casarin)
+- Switch from bluecheck to purplecheck (William Casarin)
+
+
+### Fixed
+
+- Add system background color to profile pics (OlegAba)
+- High res color pubkey on profile page (William Casarin)
+- Don't spin forever if we're temporarily disconnected (William Casarin)
+- Fixed a few issues with avatars not animating (OlegAba)
+- Scroll to bottom when new DM received (Aidan O'Loan)
+- Make reply view scrollable (Joel Klabo)
+- Hide profile edit button when logged in with pubkey (Swift)
+
+
+[1.0.0-5]: https://github.com/damus-io/damus/releases/tag/v1.0.0-5
+
 ## [1.0.0-4] - 2023-01-04
 
 ### Added
@@ -318,5 +382,6 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
+
 
 

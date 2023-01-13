@@ -53,7 +53,7 @@ struct SetupView: View {
                         .resizable()
                         .frame(width: 128.0, height: 128.0, alignment: .center)
                         .padding([.top], 20.0)
-                    Text("Damus")
+                    Text("Damus", comment: "Name of the app, shown on the first screen when user is not logged in.")
                         .font(Font.custom("Nunito", size: 50.0))
                         .kerning(-2)
                         .foregroundColor(.white)

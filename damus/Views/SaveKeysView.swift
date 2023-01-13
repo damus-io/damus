@@ -21,21 +21,21 @@ struct SaveKeysView: View {
             DamusGradient()
             
             VStack(alignment: .center) {
-                Text("Welcome, \(account.rendered_name)!")
+                Text("Welcome, \(account.rendered_name)!", comment: "Text to welcome user.")
                     .font(.title.bold())
                     .foregroundColor(.white)
                     .padding(.bottom, 10)
                 
-                Text("Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus.")
+                Text("Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus.", comment: "Reminder to user that they should save their account information.")
                     .foregroundColor(.white)
                     .padding(.bottom, 10)
                 
-                Text("Public Key")
+                Text("Public Key", comment: "Label to indicate that text below is the user's public key used by others to uniquely refer to the user.")
                     .font(.title2.bold())
                     .foregroundColor(.white)
                     .padding(.bottom, 10)
                 
-                Text("This is your account ID, you can give this to your friends so that they can follow you. Click to copy.")
+                Text("This is your account ID, you can give this to your friends so that they can follow you. Click to copy.", comment: "Label to describe that a public key is the user's account ID and what they can do with it.")
                     .foregroundColor(.white)
                     .padding(.bottom, 10)
                 
@@ -43,12 +43,12 @@ struct SaveKeysView: View {
                     .padding(.bottom, 10)
                 
                 if pub_copied {
-                    Text("Private Key")
+                    Text("Private Key", comment: "Label to indicate that the text below is the user's private key used by only the user themself as a secret to login to access their account.")
                         .font(.title2.bold())
                         .foregroundColor(.white)
                         .padding(.bottom, 10)
                     
-                    Text("This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!")
+                    Text("This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!", comment: "Label to describe that a private key is the user's secret account key and what they should do with it.")
                         .foregroundColor(.white)
                         .padding(.bottom, 10)
                     
@@ -61,7 +61,7 @@ struct SaveKeysView: View {
                         ProgressView()
                             .progressViewStyle(.circular)
                     } else if let err = error {
-                        Text("Error: \(err)")
+                        Text("Error: \(err)", comment: "Error message indicating why saving keys failed.")
                             .foregroundColor(.red)
                         DamusWhiteButton("Retry") {
                             complete_account_creation(account)

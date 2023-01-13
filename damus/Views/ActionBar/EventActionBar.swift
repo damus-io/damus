@@ -29,14 +29,6 @@ struct EventActionBar: View {
     
     var body: some View {
         HStack {
-            /*
-            EventActionButton(img: "square.and.arrow.up") {
-                print("share")
-            }
-
-            Spacer()
-            
-             */
             if damus_state.keypair.privkey != nil {
                 EventActionButton(img: "bubble.left", col: nil) {
                     notify(.reply, event)
@@ -45,9 +37,6 @@ struct EventActionBar: View {
             }
             
             HStack(alignment: .bottom) {
-                Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
-                    .font(.footnote.weight(.medium))
-                    .foregroundColor(bar.boosted ? Color.green : Color.gray)
                 
                 EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
                     if bar.boosted {
@@ -55,21 +44,27 @@ struct EventActionBar: View {
                     } else {
                         self.confirm_boost = true
                     }
+                }.overlay {
+                    Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
+                        .offset(x: 22)
+                        .font(.footnote.weight(.medium))
+                        .foregroundColor(bar.boosted ? Color.green : Color.gray)
                 }
             }
             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
 
             HStack(alignment: .bottom) {
-                Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
-                    .font(.footnote.weight(.medium))
-                    .foregroundColor(bar.liked ? Color.orange : Color.gray)
-                    
                 LikeButton(liked: bar.liked) {
                     if bar.liked {
                         notify(.delete, bar.our_like)
                     } else {
                         send_like()
                     }
+                }.overlay {
+                    Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
+                        .offset(x: 22)
+                        .font(.footnote.weight(.medium))
+                        .foregroundColor(bar.liked ? Color.accentColor : Color.gray)
                 }
             }
             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
@@ -102,15 +97,15 @@ struct EventActionBar: View {
                 }
             }
         }
-        .alert("Boost", isPresented: $confirm_boost) {
+        .alert(NSLocalizedString("Repost", comment: "Title of alert for confirming to repost a post."), isPresented: $confirm_boost) {
             Button("Cancel") {
                 confirm_boost = false
             }
-            Button("Boost") {
+            Button(NSLocalizedString("Repost", comment: "Button to confirm reposting a post.")) {
                 send_boost()
             }
         } message: {
-            Text("Are you sure you want to boost this post?")
+            Text("Are you sure you want to repost this?", comment: "Alert message to ask if user wants to repost a post.")
         }
         .onReceive(handle_notify(.liked)) { n in
             let liked = n.object as! Counted
@@ -168,13 +163,8 @@ struct LikeButton: View {
     
     var body: some View {
         Button(action: action) {
-            if liked {
-                Text("🤙")
-            } else {
-                Image("shaka")
-                    .renderingMode(.template)
-                    .foregroundColor(.gray)
-            }
+            Image(liked ? "shaka-full" : "shaka-line")
+                .foregroundColor(liked ? .accentColor : .gray)
         }
     }
 }
@@ -184,8 +174,19 @@ struct EventActionBar_Previews: PreviewProvider {
     static var previews: some View {
         let pk = "pubkey"
         let ds = test_damus_state()
-        let bar = ActionBarModel(likes: 0, boosts: 0, tips: 0, our_like: nil, our_boost: nil, our_tip: nil)
         let ev = NostrEvent(content: "hi", pubkey: pk)
-        EventActionBar(damus_state: ds, event: ev, bar: bar)
+        
+        let bar = ActionBarModel(likes: 0, boosts: 0, tips: 0, our_like: nil, our_boost: nil, our_tip: nil)
+        let likedbar = ActionBarModel(likes: 10, boosts: 0, tips: 0, our_like: nil, our_boost: nil, our_tip: nil)
+        let likedbar_ours = ActionBarModel(likes: 10, boosts: 0, tips: 0, our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: nil, our_tip: nil)
+        
+        VStack(spacing: 50) {
+            EventActionBar(damus_state: ds, event: ev, bar: bar)
+            
+            EventActionBar(damus_state: ds, event: ev, bar: likedbar)
+            
+            EventActionBar(damus_state: ds, event: ev, bar: likedbar_ours)
+        }
+        .padding(20)
     }
 }

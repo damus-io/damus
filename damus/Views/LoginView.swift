@@ -122,21 +122,21 @@ struct LoginView: View {
         ZStack(alignment: .top) {
             DamusGradient()
             VStack {
-                Text("Login")
+                Text("Login", comment: "Title of view to log into an account.")
                     .foregroundColor(.white)
                     .font(.title)
                     .padding()
 
-                Text("Enter your account key to login:")
+                Text("Enter your account key to login:", comment: "Prompt for user to enter an account key to login.")
                     .foregroundColor(.white)
                     .padding()
 
-                KeyInput("nsec1...", key: $key)
+                KeyInput(NSLocalizedString("nsec1...", comment: "Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key."), key: $key)
 
                 let parsed = parse_key(key)
 
                 if parsed?.is_hex ?? false {
-                    Text("This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key.")
+                    Text("This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key.", comment: "Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key.")
                         .font(.subheadline.bold())
                         .foregroundColor(.white)
                     PubkeySwitch(isOn: $is_pubkey)
@@ -150,15 +150,15 @@ struct LoginView: View {
                 }
 
                 if parsed?.is_pub ?? false {
-                    Text("This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective.")
+                    Text("This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective.", comment: "Warning that the inputted account key is a public key and the result of what happens because of it.")
                         .foregroundColor(.white)
                         .padding()
                 }
 
                 if let p = parsed {
-                    DamusWhiteButton("Login") {
+                    DamusWhiteButton(NSLocalizedString("Login", comment: "Button to log into account.")) {
                         if !process_login(p, is_pubkey: self.is_pubkey) {
-                            self.error = "Invalid key"
+                            self.error = NSLocalizedString("Invalid key", comment: "Error message indicating that an invalid account key was entered for login.")
                         }
                     }
                 }
@@ -175,7 +175,7 @@ struct PubkeySwitch: View {
     var body: some View {
         HStack {
             Toggle(isOn: $isOn) {
-                Text("Public Key?")
+                Text("Public Key?", comment: "Prompt to ask user if the key they entered is a public key.")
                     .foregroundColor(.white)
             }
         }

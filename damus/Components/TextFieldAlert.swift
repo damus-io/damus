@@ -20,7 +20,7 @@ struct TextFieldAlert<Presenting>: View where Presenting: View {
                     .disabled(isShowing)
                 VStack {
                     Text(self.title)
-                    TextField("Relay", text: self.$text)
+                    TextField(NSLocalizedString("Relay", comment: "Text field for relay server. Used for testing purposes."), text: self.$text)
                     Divider()
                     HStack {
                         Button(action: {
@@ -28,7 +28,7 @@ struct TextFieldAlert<Presenting>: View where Presenting: View {
                                 self.isShowing.toggle()
                             }
                         }) {
-                            Text("Dismiss")
+                            Text("Dismiss", comment: "Button to dismiss a text field alert.")
                         }
                     }
                 }

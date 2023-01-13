@@ -30,24 +30,27 @@ struct ProfileName: View {
     let prefix: String
     
     let show_friend_confirmed: Bool
+    let show_nip5_domain: Bool
     
     @State var display_name: String?
     @State var nip05: NIP05?
-    
-    init(pubkey: String, profile: Profile?, damus: DamusState, show_friend_confirmed: Bool) {
+
+    init(pubkey: String, profile: Profile?, damus: DamusState, show_friend_confirmed: Bool, show_nip5_domain: Bool = true) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = ""
         self.show_friend_confirmed = show_friend_confirmed
+        self.show_nip5_domain = show_nip5_domain
         self.damus_state = damus
     }
     
-    init(pubkey: String, profile: Profile?, prefix: String, damus: DamusState, show_friend_confirmed: Bool) {
+    init(pubkey: String, profile: Profile?, prefix: String, damus: DamusState, show_friend_confirmed: Bool, show_nip5_domain: Bool = true) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = prefix
         self.damus_state = damus
         self.show_friend_confirmed = show_friend_confirmed
+        self.show_nip5_domain = show_nip5_domain
     }
     
     var friend_icon: String? {
@@ -68,10 +71,7 @@ struct ProfileName: View {
                 .font(.body)
                 .fontWeight(prefix == "@" ? .none : .bold)
             if let nip05 = current_nip05 {
-                Image(systemName: "checkmark.seal.fill")
-                    .foregroundColor(nip05_color)
-                Text(nip05.host)
-                    .foregroundColor(nip05_color)
+                NIP05Badge(nip05: nip05, pubkey: pubkey, contacts: damus_state.contacts, show_domain: show_nip5_domain, clickable: true)
             }
             if let friend = friend_icon, current_nip05 == nil {
                 Image(systemName: friend)
@@ -137,7 +137,7 @@ struct EventProfileName: View {
                     .padding([.trailing], 2)
                 
                 Text("@" + String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color("DamusMediumGrey"))
                     .font(eventviewsize_to_font(size))
             } else {
                 Text(String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
@@ -145,9 +145,8 @@ struct EventProfileName: View {
                     .fontWeight(.bold)
             }
             
-            if let _ = current_nip05 {
-                Image(systemName: "checkmark.seal.fill")
-                    .foregroundColor(get_nip05_color(pubkey: pubkey, contacts: damus_state.contacts))
+            if let nip05 = current_nip05 {
+                NIP05Badge(nip05: nip05, pubkey: pubkey, contacts: damus_state.contacts, show_domain: false, clickable: false)
             }
             
             if let frend = friend_icon, current_nip05 == nil {
@@ -167,6 +166,3 @@ struct EventProfileName: View {
     }
 }
 
-func get_nip05_color(pubkey: String, contacts: Contacts) -> Color {
-    return contacts.is_friend_or_self(pubkey) ? .accentColor : .gray
-}
