@@ -92,7 +92,7 @@ struct SideMenuView: View {
                     let profile_model = ProfileModel(pubkey: damus_state.pubkey, damus: damus_state)
 
                     NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
-                        Label("Profile", systemImage: "person")
+                        Label(NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), systemImage: "person")
                             .font(.title2)
                             .foregroundColor(textColor())
                     }
@@ -102,7 +102,7 @@ struct SideMenuView: View {
                     
                     /*
                     NavigationLink(destination: EmptyView()) {
-                        Label("Relays", systemImage: "xserve")
+                        Label(NSLocalizedString("Relays", comment: "Sidebar menu label for Relay servers view"), systemImage: "xserve")
                             .font(.title2)
                             .foregroundColor(textColor())
                     }
@@ -113,7 +113,7 @@ struct SideMenuView: View {
                     
                     /*
                     NavigationLink(destination: EmptyView()) {
-                        Label("Wallet", systemImage: "bolt")
+                        Label(NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), systemImage: "bolt")
                             .font(.title2)
                             .foregroundColor(textColor())
                     }
@@ -137,7 +137,7 @@ struct SideMenuView: View {
                         //ConfigView(state: damus_state)
                         confirm_logout = true
                     }, label: {
-                        Label("Sign out", systemImage: "pip.exit")
+                        Label(NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account."), systemImage: "pip.exit")
                             .font(.title3)
                             .foregroundColor(textColor())
                     })
@@ -153,14 +153,14 @@ struct SideMenuView: View {
                 isSidebarVisible.toggle()
             }
             .alert("Logout", isPresented: $confirm_logout) {
-                Button("Cancel") {
+                Button(NSLocalizedString("Cancel", comment: "Cancel out of logging out the user.")) {
                     confirm_logout = false
                 }
-                Button("Logout") {
+                Button(NSLocalizedString("Logout", comment: "Button for logging out the user.")) {
                     notify(.logout, ())
                 }
             } message: {
-                Text("Make sure your nsec account key is saved before you logout or you will lose access to this account")
+                Text("Make sure your nsec account key is saved before you logout or you will lose access to this account", comment: "Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.")
             }
 
             Spacer()

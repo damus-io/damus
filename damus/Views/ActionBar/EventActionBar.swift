@@ -98,7 +98,7 @@ struct EventActionBar: View {
             }
         }
         .alert(NSLocalizedString("Repost", comment: "Title of alert for confirming to repost a post."), isPresented: $confirm_boost) {
-            Button("Cancel") {
+            Button(NSLocalizedString("Cancel", comment: "Button to cancel out of reposting a post.")) {
                 confirm_boost = false
             }
             Button(NSLocalizedString("Repost", comment: "Button to confirm reposting a post.")) {
@@ -149,7 +149,7 @@ struct EventActionBar: View {
 
 func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> some View {
     Button(action: action) {
-        Label("&nbsp;", systemImage: img)
+        Label(NSLocalizedString("\u{00A0}", comment: "Non-breaking space character to fill in blank space next to event action button icons."), systemImage: img)
             .font(.footnote.weight(.medium))
             .foregroundColor(col == nil ? Color.gray : col!)
     }

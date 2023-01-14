@@ -18,11 +18,11 @@ class FollowersModel: ObservableObject {
     let sub_id: String = UUID().description
     let profiles_id: String = UUID().description
     
-    var count_display: String {
+    var count: Int? {
         guard let contacts = self.contacts else {
-            return "?"
+            return nil
         }
-        return "\(contacts.count)";
+        return contacts.count
     }
     
     init(damus_state: DamusState, target: String) {

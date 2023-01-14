@@ -282,7 +282,7 @@ struct ProfileView: View {
                     
                     if let relays = profile.relays {
                         NavigationLink(destination: UserRelaysView(state: damus_state, pubkey: profile.pubkey, relays: Array(relays.keys).sorted())) {
-                            Text("\(Text("\(relays.keys.count)", comment: "Number of relay servers a user is connected.").font(.subheadline.weight(.medium))) \(Text("Relays", comment: "Part of a larger sentence to describe how many relay servers a user is connected.").font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relays'.")
+                            Text("\(Text("\(relays.keys.count)", comment: "Number of relay servers a user is connected.").font(.subheadline.weight(.medium))) \(Text(String(format: NSLocalizedString("relays_count", comment: "Part of a larger sentence to describe how many relay servers a user is connected."), relays.keys.count)).font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
                         }
                         .buttonStyle(PlainButtonStyle())
                     }
@@ -296,13 +296,14 @@ struct ProfileView: View {
     
     var FollowersCount: some View {
         HStack {
-            if followers.count_display == "?" {
+            if followers.count == nil {
                 Image(systemName: "square.and.arrow.down")
                 Text("Followers", comment: "Label describing followers of a user.")
                     .font(.subheadline)
                     .foregroundColor(.gray)
             } else {
-                Text("\(Text("\(followers.count_display)", comment: "Number of people following a user.").font(.subheadline.weight(.medium))) \(Text("Followers", comment: "Part of a larger sentence to describe how many people are following a user.").font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Followers'.")
+                let followerCount = followers.count!
+                Text("\(Text("\(followerCount)", comment: "Number of people following a user.").font(.subheadline.weight(.medium))) \(Text(String(format: NSLocalizedString("followers_count", comment: "Part of a larger sentence to describe how many people are following a user."), followerCount)).font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
             }
         }
     }

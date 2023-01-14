@@ -30,11 +30,13 @@
       </trans-unit>
       <trans-unit id="%@" xml:space="preserve">
         <source>%@</source>
-        <note>Number of people following a user.</note>
+        <note>Amount of time that has passed since reply quote event occurred.
+Abbreviated version of a nostr public key.</note>
       </trans-unit>
       <trans-unit id="%@ %@" xml:space="preserve">
         <source>%@ %@</source>
-        <note>Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.</note>
+        <note>Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
+Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.</note>
       </trans-unit>
       <trans-unit id="%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." xml:space="preserve">
         <source>%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction.</source>
@@ -50,15 +52,12 @@
       </trans-unit>
       <trans-unit id="%lld" xml:space="preserve">
         <source>%lld</source>
-        <note>Number of profiles a user is following.</note>
+        <note>Number of reposts.
+Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="%lld/%lld" xml:space="preserve">
         <source>%lld/%lld</source>
         <note>Fraction of how many of the user's relay servers that are operational.</note>
-      </trans-unit>
-      <trans-unit id="&amp;nbsp;" xml:space="preserve">
-        <source>&amp;nbsp;</source>
-        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="'%@' at '%@' will be used for verification" xml:space="preserve">
         <source>'%@' at '%@' will be used for verification</source>
@@ -121,9 +120,13 @@
         <source>Any</source>
         <note>Any amount of sats</note>
       </trans-unit>
-      <trans-unit id="Are you sure you want to boost this post?" xml:space="preserve">
-        <source>Are you sure you want to boost this post?</source>
-        <note>Alert message to ask if user wants to boost a post.</note>
+      <trans-unit id="Are you sure you want to repost this?" xml:space="preserve">
+        <source>Are you sure you want to repost this?</source>
+        <note>Alert message to ask if user wants to repost a post.</note>
+      </trans-unit>
+      <trans-unit id="Banner Image" xml:space="preserve">
+        <source>Banner Image</source>
+        <note>Label for Banner Image section of user profile form.</note>
       </trans-unit>
       <trans-unit id="Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." xml:space="preserve">
         <source>Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus.</source>
@@ -145,15 +148,6 @@
         <source>Blue Wallet</source>
         <note>Dropdown option label for Lightning wallet, Blue Wallet.</note>
       </trans-unit>
-      <trans-unit id="Boost" xml:space="preserve">
-        <source>Boost</source>
-        <note>Button to confirm boosting a post.
-   Title of alert for confirming to boost a post.</note>
-      </trans-unit>
-      <trans-unit id="Boosted" xml:space="preserve">
-        <source>Boosted</source>
-        <note>Text indicating that the post was boosted (i.e. re-shared).</note>
-      </trans-unit>
       <trans-unit id="Breez" xml:space="preserve">
         <source>Breez</source>
         <note>Dropdown option label for Lightning wallet, Breez.</note>
@@ -165,6 +159,7 @@
       <trans-unit id="Cancel" xml:space="preserve">
         <source>Cancel</source>
         <note>Button to cancel out of posting a note.
+   Button to cancel out of reposting a post.
    Button to cancel out of view adding user inputted relay.
    Cancel out of logging out the user.</note>
       </trans-unit>
@@ -277,10 +272,6 @@
         <source>Edit</source>
         <note>Button to edit user's profile.</note>
       </trans-unit>
-      <trans-unit id="Edit Profile" xml:space="preserve">
-        <source>Edit Profile</source>
-        <note>Title of navigation view for Edit Profile.</note>
-      </trans-unit>
       <trans-unit id="Encrypted" xml:space="preserve">
         <source>Encrypted</source>
         <note>Heading indicating that this application keeps private messaging end-to-end encrypted.</note>
@@ -346,6 +337,10 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>LNLink</source>
         <note>Dropdown option label for Lightning wallet, LNLink.</note>
       </trans-unit>
+      <trans-unit id="Left Handed" xml:space="preserve">
+        <source>Left Handed</source>
+        <note>Moves the post button to the left side of the screen</note>
+      </trans-unit>
       <trans-unit id="Let's go!" xml:space="preserve">
         <source>Let's go!</source>
         <note>Button to complete account creation and start using the app.</note>
@@ -364,7 +359,8 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Login" xml:space="preserve">
         <source>Login</source>
-        <note>Button to log into account.</note>
+        <note>Button to log into account.
+   Button to log into an account.</note>
       </trans-unit>
       <trans-unit id="Logout" xml:space="preserve">
         <source>Logout</source>
@@ -428,6 +424,10 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>PrivateKey</source>
         <note>Title of the secure field that holds the user's private key.</note>
       </trans-unit>
+      <trans-unit id="Profile" xml:space="preserve">
+        <source>Profile</source>
+        <note>Sidebar menu label for Profile view.</note>
+      </trans-unit>
       <trans-unit id="Profile Picture" xml:space="preserve">
         <source>Profile Picture</source>
         <note>Label for Profile Picture section of user profile form.</note>
@@ -448,6 +448,10 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Public key</source>
         <note>Label indicating that the text is a user's public account key.</note>
       </trans-unit>
+      <trans-unit id="Reactions" xml:space="preserve">
+        <source>Reactions</source>
+        <note>Navigation bar title for Reactions view.</note>
+      </trans-unit>
       <trans-unit id="Recommended Relays" xml:space="preserve">
         <source>Recommended Relays</source>
         <note>Section title for recommend relay servers that could be added as part of configuration</note>
@@ -458,8 +462,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Relays" xml:space="preserve">
         <source>Relays</source>
-        <note>Header text for relay server list for configuration.
-Part of a larger sentence to describe how many relay servers a user is connected.</note>
+        <note>Sidebar menu label for Relay servers view</note>
       </trans-unit>
       <trans-unit id="Reply to self" xml:space="preserve">
         <source>Reply to self</source>
@@ -473,9 +476,22 @@ Part of a larger sentence to describe how many relay servers a user is connected
         <source>Replying to:</source>
         <note>Indicating that the user is replying to the following listed people.</note>
       </trans-unit>
+      <trans-unit id="Repost" xml:space="preserve">
+        <source>Repost</source>
+        <note>Button to confirm reposting a post.
+   Title of alert for confirming to repost a post.</note>
+      </trans-unit>
+      <trans-unit id="Reposted" xml:space="preserve">
+        <source>Reposted</source>
+        <note>Text indicating that the post was reposted (i.e. re-shared).</note>
+      </trans-unit>
       <trans-unit id="Reset" xml:space="preserve">
         <source>Reset</source>
         <note>Section title for resetting the user</note>
+      </trans-unit>
+      <trans-unit id="Retry" xml:space="preserve">
+        <source>Retry</source>
+        <note>Button to retry completing account creation after an error occurred.</note>
       </trans-unit>
       <trans-unit id="River" xml:space="preserve">
         <source>River</source>
@@ -519,7 +535,8 @@ Part of a larger sentence to describe how many relay servers a user is connected
       </trans-unit>
       <trans-unit id="Settings" xml:space="preserve">
         <source>Settings</source>
-        <note>Navigation title for Settings view.</note>
+        <note>Navigation title for Settings view.
+   Sidebar menu label for accessing the app settings</note>
       </trans-unit>
       <trans-unit id="Share" xml:space="preserve">
         <source>Share</source>
@@ -532,6 +549,10 @@ Part of a larger sentence to describe how many relay servers a user is connected
       <trans-unit id="Show wallet selector" xml:space="preserve">
         <source>Show wallet selector</source>
         <note>Toggle to show or hide selection of wallet.</note>
+      </trans-unit>
+      <trans-unit id="Sign out" xml:space="preserve">
+        <source>Sign out</source>
+        <note>Sidebar menu label to sign out of the account.</note>
       </trans-unit>
       <trans-unit id="Strike" xml:space="preserve">
         <source>Strike</source>
@@ -583,6 +604,10 @@ Part of a larger sentence to describe how many relay servers a user is connected
         <note>Label for Username section of user profile form.
    Label to prompt username entry.</note>
       </trans-unit>
+      <trans-unit id="Wallet" xml:space="preserve">
+        <source>Wallet</source>
+        <note>Sidebar menu label for Wallet view.</note>
+      </trans-unit>
       <trans-unit id="Wallet Of Satoshi" xml:space="preserve">
         <source>Wallet Of Satoshi</source>
         <note>Dropdown option label for Lightning wallet, Wallet Of Satoshi.</note>
@@ -619,6 +644,10 @@ Part of a larger sentence to describe how many relay servers a user is connected
         <source>collapsed_event_view_other_notes</source>
         <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped. (Key in .stringsdict)</note>
       </trans-unit>
+      <trans-unit id="followers_count" translate="no" xml:space="preserve">
+        <source>followers_count</source>
+        <note>Part of a larger sentence to describe how many people are following a user. (Key in .stringsdict)</note>
+      </trans-unit>
       <trans-unit id="https://example.com/pic.jpg" xml:space="preserve">
         <source>https://example.com/pic.jpg</source>
         <note>Placeholder example text for profile picture URL.</note>
@@ -647,6 +676,14 @@ Part of a larger sentence to describe how many relay servers a user is connected
         <source>optional</source>
         <note>Label indicating that a form input is optional.</note>
       </trans-unit>
+      <trans-unit id="reactions_count" translate="no" xml:space="preserve">
+        <source>reactions_count</source>
+        <note>Part of a larger sentence to describe how many reactions there are on a post. (Key in .stringsdict)</note>
+      </trans-unit>
+      <trans-unit id="relays_count" translate="no" xml:space="preserve">
+        <source>relays_count</source>
+        <note>Part of a larger sentence to describe how many relay servers a user is connected. (Key in .stringsdict)</note>
+      </trans-unit>
       <trans-unit id="replying_to_one_and_others" translate="no" xml:space="preserve">
         <source>replying_to_one_and_others</source>
         <note>Label to indicate that the user is replying to 1 user and others. (Key in .stringsdict)</note>
@@ -655,9 +692,21 @@ Part of a larger sentence to describe how many relay servers a user is connected
         <source>replying_to_two_and_others</source>
         <note>Label to indicate that the user is replying to 2 users and others. (Key in .stringsdict)</note>
       </trans-unit>
+      <trans-unit id="reposts_count" translate="no" xml:space="preserve">
+        <source>reposts_count</source>
+        <note>Part of a larger sentence to describe how many reposts there are. (Key in .stringsdict)</note>
+      </trans-unit>
       <trans-unit id="satoshi" xml:space="preserve">
         <source>satoshi</source>
         <note>Example username of Bitcoin creator(s), Satoshi Nakamoto.</note>
+      </trans-unit>
+      <trans-unit id="tips_count" translate="no" xml:space="preserve">
+        <source>tips_count</source>
+        <note>Part of a larger sentence to describe how many tip payments there are on a post. (Key in .stringsdict)</note>
+      </trans-unit>
+      <trans-unit id="u{00A0}" xml:space="preserve">
+        <source>u{00A0}</source>
+        <note>Non-breaking space character to fill in blank space next to event action button icons.</note>
       </trans-unit>
       <trans-unit id="wss://some.relay.com" xml:space="preserve">
         <source>wss://some.relay.com</source>
@@ -666,10 +715,6 @@ Part of a larger sentence to describe how many relay servers a user is connected
       <trans-unit id="you" xml:space="preserve">
         <source>you</source>
         <note>You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself.</note>
-      </trans-unit>
-      <trans-unit id="🤙" xml:space="preserve">
-        <source>🤙</source>
-        <note>Button with emoji to like an event.</note>
       </trans-unit>
     </body>
   </file>
@@ -697,6 +742,54 @@ Part of a larger sentence to describe how many relay servers a user is connected
         <source>··· %#@NOTES@ ···</source>
         <target>··· %#@NOTES@ ···</target>
         <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped.</note>
+      </trans-unit>
+      <trans-unit id="/followers_count:dict/FOLLOWERS:dict/one:dict/:string" xml:space="preserve">
+        <source>Follower</source>
+        <note>Part of a larger sentence to describe how many people are following a user.</note>
+      </trans-unit>
+      <trans-unit id="/followers_count:dict/FOLLOWERS:dict/other:dict/:string" xml:space="preserve">
+        <source>Followers</source>
+        <note>Part of a larger sentence to describe how many people are following a user.</note>
+      </trans-unit>
+      <trans-unit id="/followers_count:dict/FOLLOWERS:dict/zero:dict/:string" xml:space="preserve">
+        <source>Followers</source>
+        <note>Part of a larger sentence to describe how many people are following a user.</note>
+      </trans-unit>
+      <trans-unit id="/followers_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@FOLLOWERS@</source>
+        <note>Part of a larger sentence to describe how many people are following a user.</note>
+      </trans-unit>
+      <trans-unit id="/reactions_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@REACTIONS@</source>
+        <note>Part of a larger sentence to describe how many reactions there are on a post.</note>
+      </trans-unit>
+      <trans-unit id="/reactions_count:dict/REACTIONS:dict/one:dict/:string" xml:space="preserve">
+        <source>Reaction</source>
+        <note>Part of a larger sentence to describe how many reactions there are on a post.</note>
+      </trans-unit>
+      <trans-unit id="/reactions_count:dict/REACTIONS:dict/other:dict/:string" xml:space="preserve">
+        <source>Reactions</source>
+        <note>Part of a larger sentence to describe how many reactions there are on a post.</note>
+      </trans-unit>
+      <trans-unit id="/reactions_count:dict/REACTIONS:dict/zero:dict/:string" xml:space="preserve">
+        <source>Reactions</source>
+        <note>Part of a larger sentence to describe how many reactions there are on a post.</note>
+      </trans-unit>
+      <trans-unit id="/relays_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@RELAYS@</source>
+        <note>Part of a larger sentence to describe how many relay servers a user is connected.</note>
+      </trans-unit>
+      <trans-unit id="/relays_count:dict/RELAYS:dict/one:dict/:string" xml:space="preserve">
+        <source>Relay</source>
+        <note>Part of a larger sentence to describe how many relay servers a user is connected.</note>
+      </trans-unit>
+      <trans-unit id="/relays_count:dict/RELAYS:dict/other:dict/:string" xml:space="preserve">
+        <source>Relays</source>
+        <note>Part of a larger sentence to describe how many relay servers a user is connected.</note>
+      </trans-unit>
+      <trans-unit id="/relays_count:dict/RELAYS:dict/zero:dict/:string" xml:space="preserve">
+        <source>Relays</source>
+        <note>Part of a larger sentence to describe how many relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="/replying_to_one_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>Replying to %@%#@OTHERS@</source>
@@ -737,6 +830,38 @@ Part of a larger sentence to describe how many relay servers a user is connected
         <source/>
         <target/>
         <note>Label to indicate that the user is replying to 2 users and others.</note>
+      </trans-unit>
+      <trans-unit id="/reposts_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@REPOSTS@</source>
+        <note>Part of a larger sentence to describe how many reposts there are.</note>
+      </trans-unit>
+      <trans-unit id="/reposts_count:dict/REPOSTS:dict/one:dict/:string" xml:space="preserve">
+        <source>Repost</source>
+        <note>Part of a larger sentence to describe how many reposts there are.</note>
+      </trans-unit>
+      <trans-unit id="/reposts_count:dict/REPOSTS:dict/other:dict/:string" xml:space="preserve">
+        <source>Reposts</source>
+        <note>Part of a larger sentence to describe how many reposts there are.</note>
+      </trans-unit>
+      <trans-unit id="/reposts_count:dict/REPOSTS:dict/zero:dict/:string" xml:space="preserve">
+        <source>Reposts</source>
+        <note>Part of a larger sentence to describe how many reposts there are.</note>
+      </trans-unit>
+      <trans-unit id="/tips_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@TIPS@</source>
+        <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
+      </trans-unit>
+      <trans-unit id="/tips_count:dict/TIPS:dict/one:dict/:string" xml:space="preserve">
+        <source>Tip</source>
+        <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
+      </trans-unit>
+      <trans-unit id="/tips_count:dict/TIPS:dict/other:dict/:string" xml:space="preserve">
+        <source>Tips</source>
+        <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
+      </trans-unit>
+      <trans-unit id="/tips_count:dict/TIPS:dict/zero:dict/:string" xml:space="preserve">
+        <source>Tips</source>
+        <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
       </trans-unit>
     </body>
   </file>

@@ -142,7 +142,7 @@ struct ConfigView: View {
             Button(NSLocalizedString("Cancel", comment: "Cancel out of logging out the user.")) {
                 confirm_logout = false
             }
-                   Button(NSLocalizedString("Logout", comment: "Button for logging out the user.")) {
+            Button(NSLocalizedString("Logout", comment: "Button for logging out the user.")) {
                 notify(.logout, ())
             }
         } message: {

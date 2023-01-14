@@ -64,7 +64,7 @@ struct SetupView: View {
                         self.state = .create_account
                     }
                     
-                    Button("Login") {
+                    Button(NSLocalizedString("Login", comment: "Button to log into an account.")) {
                         self.state = .login
                     }
                     .padding([.top, .bottom], 20)

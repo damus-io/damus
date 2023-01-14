@@ -28,7 +28,7 @@ struct ReplyQuoteView: View {
                     ProfilePicView(pubkey: event.pubkey, size: 16, highlight: .reply, profiles: profiles)
                     Text(Profile.displayName(profile: profiles.lookup(id: event.pubkey), pubkey: event.pubkey))
                         .foregroundColor(.accentColor)
-                    Text("\(format_relative_time(event.created_at))")
+                    Text("\(format_relative_time(event.created_at))", comment: "Amount of time that has passed since reply quote event occurred.")
                         .foregroundColor(.gray)
                 }
                 

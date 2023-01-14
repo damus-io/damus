@@ -2,6 +2,78 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>collapsed_event_view_other_notes</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>··· %#@NOTES@ ···</string>
+		<key>NOTES</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>0 other notes</string>
+			<key>one</key>
+			<string>1 other note</string>
+			<key>other</key>
+			<string>%d other notes</string>
+		</dict>
+	</dict>
+	<key>followers_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWERS@</string>
+		<key>FOLLOWERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>Followers</string>
+			<key>one</key>
+			<string>Follower</string>
+			<key>other</key>
+			<string>Followers</string>
+		</dict>
+	</dict>
+	<key>reactions_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTIONS@</string>
+		<key>REACTIONS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>Reactions</string>
+			<key>one</key>
+			<string>Reaction</string>
+			<key>other</key>
+			<string>Reactions</string>
+		</dict>
+	</dict>
+	<key>relays_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@RELAYS@</string>
+		<key>RELAYS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>Relays</string>
+			<key>one</key>
+			<string>Relay</string>
+			<key>other</key>
+			<string>Relays</string>
+		</dict>
+	</dict>
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -38,22 +110,40 @@
 			<string> &amp; %d others</string>
 		</dict>
 	</dict>
-	<key>collapsed_event_view_other_notes</key>
+	<key>reposts_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>··· %#@NOTES@ ···</string>
-		<key>NOTES</key>
+		<string>%#@REPOSTS@</string>
+		<key>REPOSTS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>zero</key>
-			<string>0 other notes</string>
+			<string>Reposts</string>
 			<key>one</key>
-			<string>1 other note</string>
+			<string>Repost</string>
 			<key>other</key>
-			<string>%d other notes</string>
+			<string>Reposts</string>
+		</dict>
+	</dict>
+	<key>tips_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@TIPS@</string>
+		<key>TIPS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>Tips</string>
+			<key>one</key>
+			<string>Tip</string>
+			<key>other</key>
+			<string>Tips</string>
 		</dict>
 	</dict>
 </dict>
