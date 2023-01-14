@@ -347,23 +347,18 @@ class HomeModel: ObservableObject {
         return m[kind]
     }
 
-    func handle_last_event(ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) {
-        let last_ev = get_last_event(timeline)
-
-        if last_ev == nil || last_ev!.created_at < ev.created_at {
-            save_last_event(ev, timeline: timeline)
-            if shouldNotify {
-                new_events = NewEventsBits(prev: new_events, setting: timeline)
-            }
-        }
-    }
-
     func handle_notification(ev: NostrEvent) {
         if !insert_uniq_sorted_event(events: &notifications, new_ev: ev, cmp: { $0.created_at > $1.created_at }) {
             return
         }
 
         handle_last_event(ev: ev, timeline: .notifications)
+    }
+    
+    func handle_last_event(ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) {
+        if let new_bits = handle_last_events(new_events: self.new_events, ev: ev, timeline: timeline, shouldNotify: shouldNotify) {
+            new_events = new_bits
+        }
     }
 
     func insert_home_event(_ ev: NostrEvent) -> Bool {
@@ -391,49 +386,8 @@ class HomeModel: ObservableObject {
     }
 
     func handle_dm(_ ev: NostrEvent) {
-
-        var inserted = false
-        var found = false
-        let ours = ev.pubkey == self.damus_state.pubkey
-        var i = 0
-
-        var the_pk = ev.pubkey
-        if ours {
-            if let ref_pk = ev.referenced_pubkeys.first {
-                the_pk = ref_pk.ref_id
-            } else {
-                // self dm!?
-                print("TODO: handle self dm?")
-            }
-        }
-
-        for (pk, _) in dms.dms {
-            if pk == the_pk {
-                found = true
-                inserted = insert_uniq_sorted_event(events: &(dms.dms[i].1.events), new_ev: ev) {
-                    $0.created_at < $1.created_at
-                }
-
-                break
-            }
-            i += 1
-        }
-
-        if !found {
-            inserted = true
-            let model = DirectMessageModel(events: [ev])
-            dms.dms.append((the_pk, model))
-        }
-
-        if inserted {
-            handle_last_event(ev: ev, timeline: .dms, shouldNotify: !ours)
-
-            dms.dms = dms.dms.sorted { a, b in
-                if a.1.events.count > 0 && b.1.events.count > 0 {
-                    return a.1.events.last!.created_at > b.1.events.last!.created_at
-                }
-                return false
-            }
+        if let notifs = handle_incoming_dm(prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, ev: ev) {
+            self.new_events = notifs
         }
     }
 }
@@ -656,4 +610,67 @@ func load_our_relays(contacts: Contacts, our_pubkey: String, pool: RelayPool, m_
     }
 }
 
+func handle_incoming_dm(prev_events: NewEventsBits, dms: DirectMessagesModel, our_pubkey: String, ev: NostrEvent) -> NewEventsBits? {
+    var inserted = false
+    var found = false
+    let ours = ev.pubkey == our_pubkey
+    var i = 0
+
+    var the_pk = ev.pubkey
+    if ours {
+        if let ref_pk = ev.referenced_pubkeys.first {
+            the_pk = ref_pk.ref_id
+        } else {
+            // self dm!?
+            print("TODO: handle self dm?")
+        }
+    }
+
+    for (pk, _) in dms.dms {
+        if pk == the_pk {
+            found = true
+            inserted = insert_uniq_sorted_event(events: &(dms.dms[i].1.events), new_ev: ev) {
+                $0.created_at < $1.created_at
+            }
+
+            break
+        }
+        i += 1
+    }
+
+    if !found {
+        inserted = true
+        let model = DirectMessageModel(events: [ev])
+        dms.dms.append((the_pk, model))
+    }
+
+    var new_events: NewEventsBits? = nil
+    if inserted {
+        new_events = handle_last_events(new_events: prev_events, ev: ev, timeline: .dms, shouldNotify: !ours)
+
+        dms.dms = dms.dms.sorted { a, b in
+            if a.1.events.count > 0 && b.1.events.count > 0 {
+                return a.1.events.last!.created_at > b.1.events.last!.created_at
+            }
+            return false
+        }
+    }
+    
+    return new_events
+}
+
+
+/// A helper to determine if we need to notify the user of new events
+func handle_last_events(new_events: NewEventsBits, ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) -> NewEventsBits? {
+    let last_ev = get_last_event(timeline)
+
+    if last_ev == nil || last_ev!.created_at < ev.created_at {
+        save_last_event(ev, timeline: timeline)
+        if shouldNotify {
+            return NewEventsBits(prev: new_events, setting: timeline)
+        }
+    }
+    
+    return nil
+}
 
