@@ -74,6 +74,7 @@ struct NoteContentView: View {
         return VStack(alignment: .leading) {
             Text(Markdown.parse(content: artifacts.content))
                 .font(eventviewsize_to_font(size))
+                .fixedSize(horizontal: false, vertical: true)
 
             if show_images && artifacts.images.count > 0 {
                 ImageCarousel(urls: artifacts.images)
