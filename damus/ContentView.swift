@@ -172,13 +172,20 @@ struct ContentView: View {
         .navigationBarTitle(selected_timeline == .home ?  NSLocalizedString("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.") : NSLocalizedString("Global", comment: "Navigation bar title for Global view where posts from all connected relay servers appear."), displayMode: .inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                if selected_timeline == .home {
+                switch selected_timeline {
+                case .home:
                     Image("damus-home")
                     .resizable()
                     .frame(width:30,height:30)
                     .shadow(color: Color("DamusPurple"), radius: 2)
-                } else {
-                    Text("Global")
+                case .dms:
+                    Text("DM", comment: "Toolbar label for DM view, which is the English abbreviation for Direct Message.")
+                case .notifications:
+                    Text("Notifications", comment: "Toolbar label for Notifications view.")
+                case .search:
+                    Text("Global", comment: "Toolbar label for Global view where posts from all connected relay servers appear.")
+                case .none:
+                    Text("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
                 }
             }
              
