@@ -85,16 +85,6 @@ Number of profiles a user is following.</note>
         <target>(Profile.displayName(profile: profile, pubkey: whos))'s Followers</target>
         <note>Navigation bar title for view that shows who is following a user.</note>
       </trans-unit>
-      <trans-unit id="(formattedSats) sat" xml:space="preserve">
-        <source>(formattedSats) sat</source>
-        <target>(formattedSats) sat</target>
-        <note>Amount of 1 sat.</note>
-      </trans-unit>
-      <trans-unit id="(formattedSats) sats" xml:space="preserve">
-        <source>(formattedSats) sats</source>
-        <target>(formattedSats) sats</target>
-        <note>Amount of sats.</note>
-      </trans-unit>
       <trans-unit id="(who) following" xml:space="preserve">
         <source>(who) following</source>
         <target>(who) following</target>
@@ -868,6 +858,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>satoshi</target>
         <note>Example username of Bitcoin creator(s), Satoshi Nakamoto.</note>
       </trans-unit>
+      <trans-unit id="sats_count" translate="no" xml:space="preserve">
+        <source>sats_count</source>
+        <target>sats_count</target>
+        <note>Amount of sats. (Key in .stringsdict)</note>
+      </trans-unit>
       <trans-unit id="tips_count" translate="no" xml:space="preserve">
         <source>tips_count</source>
         <target>tips_count</target>
@@ -896,18 +891,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
     </header>
     <body>
       <trans-unit id="/collapsed_event_view_other_notes:dict/NOTES:dict/one:dict/:string" xml:space="preserve">
-        <source>1 other note</source>
-        <target>1 other note</target>
+        <source>%d other note</source>
+        <target>%d other note</target>
         <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped.</note>
       </trans-unit>
       <trans-unit id="/collapsed_event_view_other_notes:dict/NOTES:dict/other:dict/:string" xml:space="preserve">
         <source>%d other notes</source>
         <target>%d other notes</target>
-        <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped.</note>
-      </trans-unit>
-      <trans-unit id="/collapsed_event_view_other_notes:dict/NOTES:dict/zero:dict/:string" xml:space="preserve">
-        <source>0 other notes</source>
-        <target>0 other notes</target>
         <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped.</note>
       </trans-unit>
       <trans-unit id="/collapsed_event_view_other_notes:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
@@ -921,11 +911,6 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <note>Part of a larger sentence to describe how many people are following a user.</note>
       </trans-unit>
       <trans-unit id="/followers_count:dict/FOLLOWERS:dict/other:dict/:string" xml:space="preserve">
-        <source>Followers</source>
-        <target>Followers</target>
-        <note>Part of a larger sentence to describe how many people are following a user.</note>
-      </trans-unit>
-      <trans-unit id="/followers_count:dict/FOLLOWERS:dict/zero:dict/:string" xml:space="preserve">
         <source>Followers</source>
         <target>Followers</target>
         <note>Part of a larger sentence to describe how many people are following a user.</note>
@@ -950,11 +935,6 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Reactions</target>
         <note>Part of a larger sentence to describe how many reactions there are on a post.</note>
       </trans-unit>
-      <trans-unit id="/reactions_count:dict/REACTIONS:dict/zero:dict/:string" xml:space="preserve">
-        <source>Reactions</source>
-        <target>Reactions</target>
-        <note>Part of a larger sentence to describe how many reactions there are on a post.</note>
-      </trans-unit>
       <trans-unit id="/relays_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@RELAYS@</source>
         <target>%#@RELAYS@</target>
@@ -970,19 +950,14 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Relays</target>
         <note>Part of a larger sentence to describe how many relay servers a user is connected.</note>
       </trans-unit>
-      <trans-unit id="/relays_count:dict/RELAYS:dict/zero:dict/:string" xml:space="preserve">
-        <source>Relays</source>
-        <target>Relays</target>
-        <note>Part of a larger sentence to describe how many relay servers a user is connected.</note>
-      </trans-unit>
       <trans-unit id="/replying_to_one_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>Replying to %@%#@OTHERS@</source>
         <target>Replying to %@%#@OTHERS@</target>
         <note>Label to indicate that the user is replying to 1 user and others.</note>
       </trans-unit>
       <trans-unit id="/replying_to_one_and_others:dict/OTHERS:dict/one:dict/:string" xml:space="preserve">
-        <source> &amp; 1 other</source>
-        <target> &amp; 1 other</target>
+        <source> &amp; %d other</source>
+        <target> &amp; %d other</target>
         <note>Label to indicate that the user is replying to 1 user and others.</note>
       </trans-unit>
       <trans-unit id="/replying_to_one_and_others:dict/OTHERS:dict/other:dict/:string" xml:space="preserve">
@@ -1001,8 +976,8 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <note>Label to indicate that the user is replying to 2 users and others.</note>
       </trans-unit>
       <trans-unit id="/replying_to_two_and_others:dict/OTHERS:dict/one:dict/:string" xml:space="preserve">
-        <source> &amp; 1 other</source>
-        <target> &amp; 1 other</target>
+        <source> &amp; %d other</source>
+        <target> &amp; %d other</target>
         <note>Label to indicate that the user is replying to 2 users and others.</note>
       </trans-unit>
       <trans-unit id="/replying_to_two_and_others:dict/OTHERS:dict/other:dict/:string" xml:space="preserve">
@@ -1030,10 +1005,20 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Reposts</target>
         <note>Part of a larger sentence to describe how many reposts there are.</note>
       </trans-unit>
-      <trans-unit id="/reposts_count:dict/REPOSTS:dict/zero:dict/:string" xml:space="preserve">
-        <source>Reposts</source>
-        <target>Reposts</target>
-        <note>Part of a larger sentence to describe how many reposts there are.</note>
+      <trans-unit id="/sats_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%1$#@SATS@</source>
+        <target>%1$#@SATS@</target>
+        <note>Amount of sats.</note>
+      </trans-unit>
+      <trans-unit id="/sats_count:dict/SATS:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ sat</source>
+        <target>%2$@ sat</target>
+        <note>Amount of sats.</note>
+      </trans-unit>
+      <trans-unit id="/sats_count:dict/SATS:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ sats</source>
+        <target>%2$@ sats</target>
+        <note>Amount of sats.</note>
       </trans-unit>
       <trans-unit id="/tips_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@TIPS@</source>
@@ -1046,11 +1031,6 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
       </trans-unit>
       <trans-unit id="/tips_count:dict/TIPS:dict/other:dict/:string" xml:space="preserve">
-        <source>Tips</source>
-        <target>Tips</target>
-        <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
-      </trans-unit>
-      <trans-unit id="/tips_count:dict/TIPS:dict/zero:dict/:string" xml:space="preserve">
         <source>Tips</source>
         <target>Tips</target>
         <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
