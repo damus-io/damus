@@ -175,7 +175,7 @@ struct EventView: View {
                         Reposted(damus: damus, pubkey: event.pubkey, profile: prof)
                     }
                     .buttonStyle(PlainButtonStyle())
-                    TextEvent(inner_ev, pubkey: inner_ev.pubkey)
+                    TextEvent(inner_ev, pubkey: inner_ev.pubkey, booster_pubkey: event.pubkey)
                         .padding([.top], 1)
                 }
             } else {
@@ -185,7 +185,7 @@ struct EventView: View {
         }
     }
 
-    func TextEvent(_ event: NostrEvent, pubkey: String) -> some View {
+    func TextEvent(_ event: NostrEvent, pubkey: String, booster_pubkey: String? = nil) -> some View {
         let content = event.get_content(damus.keypair.privkey)
         
         return HStack(alignment: .top) {
@@ -232,7 +232,7 @@ struct EventView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                let should_show_img = should_show_images(contacts: damus.contacts, ev: event, our_pubkey: damus.pubkey)
+                let should_show_img = should_show_images(contacts: damus.contacts, ev: event, our_pubkey: damus.pubkey, booster_pubkey: booster_pubkey)
                 
                 NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, previews: damus.previews, show_images: should_show_img, artifacts: .just_content(content), size: self.size)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -276,11 +276,14 @@ struct EventView: View {
 }
 
 // blame the porn bots for this code
-func should_show_images(contacts: Contacts, ev: NostrEvent, our_pubkey: String) -> Bool {
+func should_show_images(contacts: Contacts, ev: NostrEvent, our_pubkey: String, booster_pubkey: String? = nil) -> Bool {
     if ev.pubkey == our_pubkey {
         return true
     }
     if contacts.is_in_friendosphere(ev.pubkey) {
+        return true
+    }
+    if let boost_key = booster_pubkey, contacts.is_in_friendosphere(boost_key) {
         return true
     }
     return false
