@@ -30,7 +30,8 @@ func timeline_bit(_ timeline: Timeline) -> Int {
     
 struct TabButton: View {
     let timeline: Timeline
-    let img: String
+    let imageName: String
+    let fontSize: CGFloat
     @Binding var selected: Timeline?
     @Binding var new_events: NewEventsBits
     @Binding var isSidebarVisible: Bool
@@ -58,7 +59,8 @@ struct TabButton: View {
             new_events = NewEventsBits(prev: new_events, unsetting: timeline)
             isSidebarVisible = false
         }) {
-            Label("", systemImage: selected == timeline ? "\(img).fill" : img)
+            Image(systemName: selected == timeline ? "\(imageName).fill" : imageName)
+                .font(.system(size: fontSize, weight: .thin))
                 .contentShape(Rectangle())
                 .frame(maxWidth: .infinity, minHeight: 30.0)
         }
@@ -78,10 +80,42 @@ struct TabBar: View {
         VStack {
             Divider()
             HStack {
-                TabButton(timeline: .home, img: "house", selected: $selected, new_events: $new_events, isSidebarVisible: $isSidebarVisible, action: action).keyboardShortcut("1")
-                TabButton(timeline: .dms, img: "bubble.left.and.bubble.right", selected: $selected, new_events: $new_events, isSidebarVisible: $isSidebarVisible, action: action).keyboardShortcut("2")
-                TabButton(timeline: .search, img: "magnifyingglass.circle", selected: $selected, new_events: $new_events, isSidebarVisible: $isSidebarVisible, action: action).keyboardShortcut("3")
-                TabButton(timeline: .notifications, img: "bell", selected: $selected, new_events: $new_events, isSidebarVisible: $isSidebarVisible, action: action).keyboardShortcut("4")
+                TabButton(
+                    timeline: .home,
+                    imageName: "house",
+                    fontSize: 24,
+                    selected: $selected,
+                    new_events: $new_events,
+                    isSidebarVisible: $isSidebarVisible,
+                    action: action
+                ).keyboardShortcut("1")
+                TabButton(
+                    timeline: .dms,
+                    imageName: "bubble.left.and.bubble.right",
+                    fontSize: 23,
+                    selected: $selected,
+                    new_events: $new_events,
+                    isSidebarVisible: $isSidebarVisible,
+                    action: action
+                ).keyboardShortcut("2")
+                TabButton(
+                    timeline: .search,
+                    imageName: "magnifyingglass.circle",
+                    fontSize: 27,
+                    selected: $selected,
+                    new_events: $new_events,
+                    isSidebarVisible: $isSidebarVisible,
+                    action: action
+                ).keyboardShortcut("3")
+                TabButton(
+                    timeline: .notifications,
+                    imageName: "bell",
+                    fontSize: 25,
+                    selected: $selected,
+                    new_events: $new_events,
+                    isSidebarVisible: $isSidebarVisible,
+                    action: action
+                ).keyboardShortcut("4")
             }
         }
     }

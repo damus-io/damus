@@ -175,7 +175,7 @@ struct ContentView: View {
                 if selected_timeline == .home {
                     Image("damus-home")
                     .resizable()
-                    .frame(width:30,height:30)
+                    .frame(width:30, height:30)
                     .shadow(color: Color("DamusPurple"), radius: 2)
                 } else {
                     Text("Global")
