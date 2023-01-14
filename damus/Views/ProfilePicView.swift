@@ -33,13 +33,23 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
 }
 
 struct InnerProfilePicView: View {
-    let url: URL?
-    let fallbackUrl: URL?
     let pubkey: String
     let size: CGFloat
     let highlight: Highlight
     
-    @State private var refreshID = UUID().uuidString
+    @ObservedObject var imageModel: KFImageModel
+    
+    init(url: URL?, fallbackUrl: URL?, pubkey: String, size: CGFloat, highlight: Highlight) {
+        self.pubkey = pubkey
+        self.size = size
+        self.highlight = highlight
+        self.imageModel = KFImageModel(
+            url: url,
+            fallbackUrl: fallbackUrl,
+            maxByteSize: 1000000,
+            downsampleSize: CGSize(width: 200, height: 200)
+        )
+    }
 
     var PlaceholderColor: Color {
         return id_to_color(pubkey)
@@ -57,10 +67,12 @@ struct InnerProfilePicView: View {
         ZStack {
             Color(uiColor: .systemBackground)
     
-            KFAnimatedImage(url)
+            KFAnimatedImage(imageModel.url)
                 .callbackQueue(.dispatch(.global(qos: .background)))
                 .processingQueue(.dispatch(.global(qos: .background)))
-                .appendProcessor(LargeImageProcessor.shared)
+                .serialize(by: imageModel.serializer)
+                .setProcessor(imageModel.processor)
+                .cacheOriginalImage()
                 .configure { view in
                     view.framePreloadCount = 1
                 }
@@ -71,42 +83,13 @@ struct InnerProfilePicView: View {
                 .loadDiskFileSynchronously()
                 .fade(duration: 0.1)
                 .onFailure { _ in
-                    setFallbackImage()
+                    imageModel.downloadFailed()
                 }
+                .id(imageModel.refreshID)
         }
         .frame(width: size, height: size)
         .clipShape(Circle())
         .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
-        .id(refreshID)
-    }
-    
-    func refreshView() -> Void {
-        refreshID = UUID().uuidString
-    }
-    
-    func setFallbackImage() -> Void {
-        
-        guard let url = url, let fallbackUrl = fallbackUrl else { return }
-
-        KingfisherManager.shared.downloader.downloadImage(with: fallbackUrl) { result in
-            
-            func fallbackImage() -> UIImage {
-                switch result {
-                case .success(let imageLoadingResult):
-                    return imageLoadingResult.image
-                case .failure(let error):
-                    print(error)
-                    return UIImage()
-                }
-            }
-            
-            // Kingfisher ID format for caching when using a custom processor
-            let processorIdentifier = "|>" + LargeImageProcessor.shared.identifier
-            
-            KingfisherManager.shared.cache.store(fallbackImage(), forKey: url.absoluteString, processorIdentifier: processorIdentifier) { _ in
-                refreshView()
-            }
-        }
     }
 }
 
@@ -139,35 +122,6 @@ struct ProfilePicView: View {
                     self.picture = pic
                 }
             }
-    }
-}
-
-struct LargeImageProcessor: ImageProcessor {
-    
-    static let shared = LargeImageProcessor()
-    
-    let identifier = "com.damus.largeimageprocessor"
-    let maxSize: Int = 1000000
-    let downsampleSize = CGSize(width: 200, height: 200)
-    
-    func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
-        
-        switch item {
-        case .image(let image):
-            guard let data = image.kf.data(format: .unknown) else {
-                return nil
-            }
-            
-            if data.count > maxSize {
-                return KingfisherWrapper.downsampledImage(data: data, to: downsampleSize, scale: options.scaleFactor)
-            }
-            return image
-        case .data(let data):
-            if data.count > maxSize {
-                return KingfisherWrapper.downsampledImage(data: data, to: downsampleSize, scale: options.scaleFactor)
-            }
-            return KFCrossPlatformImage(data: data)
-        }
     }
 }
 
