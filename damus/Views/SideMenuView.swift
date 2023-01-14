@@ -50,9 +50,13 @@ struct SideMenuView: View {
 
                 VStack(alignment: .leading, spacing: 20) {
                     let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
+                    let followers = FollowersModel(damus_state: damus_state, target: damus_state.pubkey)
+                    let profile_model = ProfileModel(pubkey: damus_state.pubkey, damus: damus_state)
                     
                     if let picture = damus_state.profiles.lookup(id: damus_state.pubkey)?.picture {
-                        ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, picture: picture)
+                        NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
+                            ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, picture: picture)
+                        }
                     } else {
                         Image(systemName: "person.fill")
                     }
@@ -87,9 +91,6 @@ struct SideMenuView: View {
                      */
                     
                     // THERE IS A LIMIT OF 10 NAVIGATIONLINKS!!! (Consider some in other views)
-                    
-                    let followers = FollowersModel(damus_state: damus_state, target: damus_state.pubkey)
-                    let profile_model = ProfileModel(pubkey: damus_state.pubkey, damus: damus_state)
 
                     NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
                         Label(NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), systemImage: "person")
