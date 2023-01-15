@@ -12,7 +12,6 @@ struct ConfigView: View {
     let state: DamusState
     @Environment(\.dismiss) var dismiss
     @State var show_add_relay: Bool = false
-    @State var confirm_logout: Bool = false
     @State var new_relay: String = ""
     @State var show_privkey: Bool = false
     @State var privkey: String
@@ -128,26 +127,10 @@ struct ConfigView: View {
                         KingfisherManager.shared.cache.cleanExpiredDiskCache()
                     }
                 }
-
-                Section(NSLocalizedString("Reset", comment: "Section title for resetting the user")) {
-                    Button(NSLocalizedString("Logout", comment: "Button to logout the user.")) {
-                        confirm_logout = true
-                    }
-                }
             }
         }
         .navigationTitle(NSLocalizedString("Settings", comment: "Navigation title for Settings view."))
         .navigationBarTitleDisplayMode(.large)
-        .alert(NSLocalizedString("Logout", comment: "Alert for logging out the user."), isPresented: $confirm_logout) {
-            Button(NSLocalizedString("Cancel", comment: "Cancel out of logging out the user.")) {
-                confirm_logout = false
-            }
-            Button(NSLocalizedString("Logout", comment: "Button for logging out the user.")) {
-                notify(.logout, ())
-            }
-        } message: {
-                Text("Make sure your nsec account key is saved before you logout or you will lose access to this account", comment: "Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.")
-        }
         .sheet(isPresented: $show_add_relay) {
             AddRelayView(show_add_relay: $show_add_relay, relay: $new_relay) { m_relay in
                 guard var relay = m_relay else {

@@ -158,6 +158,9 @@ struct SideMenuView: View {
                 isSidebarVisible.toggle()
             }
             .alert("Logout", isPresented: $confirm_logout) {
+                Button(NSLocalizedString("Copy nsec key", comment: "Copy nsec account key.")) {
+                    UIPasteboard.general.string = damus_state.keypair.privkey_bech32
+                }
                 Button(NSLocalizedString("Cancel", comment: "Cancel out of logging out the user.")) {
                     confirm_logout = false
                 }
@@ -167,7 +170,7 @@ struct SideMenuView: View {
             } message: {
                 Text("Make sure your nsec account key is saved before you logout or you will lose access to this account", comment: "Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.")
             }
-
+            
             Spacer()
         }
     }
