@@ -91,8 +91,8 @@ struct NoteContentView: View {
                 InvoicesView(invoices: artifacts.invoices)
             }
             
-            if show_images, self.preview != nil {
-                self.preview
+            if let preview = self.preview, show_images {
+                preview
             } else {
                 ForEach(artifacts.links, id:\.self) { link in
                     if let url = link {
