@@ -103,7 +103,7 @@ struct ContentView: View {
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
-        .safeAreaInset(edge: .top) {
+        .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
                 FiltersView
                     //.frame(maxWidth: 275)
