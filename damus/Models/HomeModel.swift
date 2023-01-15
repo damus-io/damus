@@ -648,11 +648,8 @@ func handle_incoming_dm(prev_events: NewEventsBits, dms: DirectMessagesModel, ou
     if inserted {
         new_events = handle_last_events(new_events: prev_events, ev: ev, timeline: .dms, shouldNotify: !ours)
 
-        dms.dms = dms.dms.sorted { a, b in
-            if a.1.events.count > 0 && b.1.events.count > 0 {
-                return a.1.events.last!.created_at > b.1.events.last!.created_at
-            }
-            return false
+        dms.dms = dms.dms.filter({ $0.1.events.count > 0 }).sorted { a, b in
+            return a.1.events.last!.created_at > b.1.events.last!.created_at
         }
     }
     
