@@ -17,7 +17,7 @@ struct EventDetailBar: View {
             if bar.boosts > 0 {
                 Text("\(bar.boosts)")
                     .font(.body.bold())
-                Text("Reposts")
+                Text("Repost".conformPlurality(count: bar.boosts))
                     .foregroundColor(.gray)
             }
 
@@ -25,7 +25,7 @@ struct EventDetailBar: View {
                 NavigationLink(destination: ReactionsView(damus_state: state, model: ReactionsModel(state: state, target: target))) {
                     Text("\(bar.likes)")
                         .font(.body.bold())
-                    Text("Reactions")
+                    Text("Reaction".conformPlurality(count: bar.likes))
                         .foregroundColor(.gray)
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -34,7 +34,7 @@ struct EventDetailBar: View {
             if bar.tips > 0 {
                 Text("\(bar.tips)")
                     .font(.body.bold())
-                Text("Tips")
+                Text("Tip".conformPlurality(count: bar.tips))
                     .foregroundColor(.gray)
             }
         }
