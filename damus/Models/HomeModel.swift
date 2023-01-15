@@ -348,6 +348,10 @@ class HomeModel: ObservableObject {
     }
 
     func handle_notification(ev: NostrEvent) {
+        guard event_has_our_pubkey(ev, our_pubkey: self.damus_state.pubkey) else {
+            return
+        }
+        
         if !insert_uniq_sorted_event(events: &notifications, new_ev: ev, cmp: { $0.created_at > $1.created_at }) {
             return
         }
@@ -671,3 +675,14 @@ func handle_last_events(new_events: NewEventsBits, ev: NostrEvent, timeline: Tim
     return nil
 }
 
+
+/// Sometimes we get garbage in our notifications. Ensure we have our pubkey on this event
+func event_has_our_pubkey(_ ev: NostrEvent, our_pubkey: String) -> Bool {
+    for tag in ev.tags {
+        if tag.count >= 2 && tag[0] == "p" && tag[1] == our_pubkey {
+            return true
+        }
+    }
+    
+    return false
+}
