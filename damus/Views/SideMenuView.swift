@@ -61,13 +61,13 @@ struct SideMenuView: View {
                         Image(systemName: "person.fill")
                     }
                     VStack(alignment: .leading) {
-                   if let display_name = profile?.display_name {
+                        if let display_name = profile?.display_name {
                             NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
                                 Text(display_name)
                                     .foregroundColor(textColor())
                                     .font(.title)
                             }}
-                   if let name = profile?.name {
+                        if let name = profile?.name {
                             NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
                                 Text("@" + name)
                                     .foregroundColor(Color("DamusMediumGrey"))
