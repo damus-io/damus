@@ -166,7 +166,7 @@ struct DMChatView_Previews: PreviewProvider {
 }
 
 
-func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair) -> NostrEvent?
+func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair, created_at: Int64? = nil) -> NostrEvent?
 {
     guard let privkey = keypair.privkey else {
         return nil
@@ -181,7 +181,9 @@ func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keyp
         return nil
     }
     let enc_content = encode_dm_base64(content: enc_message.bytes, iv: iv)
-    let ev = NostrEvent(content: enc_content, pubkey: keypair.pubkey, kind: 4, tags: tags)
+    let created = created_at ?? Int64(Date().timeIntervalSince1970)
+    let ev = NostrEvent(content: enc_content, pubkey: keypair.pubkey, kind: 4, tags: tags, createdAt: created)
+    
     ev.calculate_id()
     ev.sign(privkey: privkey)
     return ev
