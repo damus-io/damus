@@ -561,7 +561,9 @@ struct ContentView: View {
                                 tips: TipCounter(our_pubkey: pubkey),
                                 profiles: Profiles(),
                                 dms: home.dms,
-                                previews: PreviewCache()
+                                previews: PreviewCache(),
+                                zaps: Zaps(our_pubkey: pubkey),
+                                lnurls: LNUrls()
         )
         home.damus_state = self.damus_state!
         

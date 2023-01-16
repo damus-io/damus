@@ -12,9 +12,18 @@ import UIKit
 class Profiles {
     var profiles: [String: TimestampedProfile] = [:]
     var validated: [String: NIP05] = [:]
+    var zappers: [String: String] = [:]
     
     func is_validated(_ pk: String) -> NIP05? {
         return validated[pk]
+    }
+    
+    func lookup_zapper(pubkey: String) -> String? {
+        if let zapper = zappers[pubkey] {
+            return zapper
+        }
+        
+        return nil
     }
     
     func add(id: String, profile: TimestampedProfile) {

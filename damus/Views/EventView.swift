@@ -72,10 +72,26 @@ struct EventView: View {
                     TextEvent(inner_ev, pubkey: inner_ev.pubkey, booster_pubkey: event.pubkey)
                         .padding([.top], 1)
                 }
+            } else if event.known_kind == .zap {
+                if let zap = damus.zaps.zaps[event.id] {
+                    VStack(alignment: .leading) {
+                        Text("⚡️ \(format_msats(zap.invoice.amount))")
+                            .font(.headline)
+                            .padding([.top], 2)
+
+                        TextEvent(zap.request.ev, pubkey: zap.request.ev.pubkey, booster_pubkey: nil)
+                            .padding([.top], 1)
+                    }
+                } else {
+                    EmptyView()
+                }
             } else {
                 TextEvent(event, pubkey: pubkey)
                     .padding([.top], 6)
             }
+            
+            Divider()
+                .padding([.top], 4)
         }
     }
 
@@ -197,17 +213,19 @@ func format_date(_ created_at: Int64) -> String {
 func make_actionbar_model(ev: NostrEvent, damus: DamusState) -> ActionBarModel {
     let likes = damus.likes.counts[ev.id]
     let boosts = damus.boosts.counts[ev.id]
-    let tips = damus.tips.tips[ev.id]
+    let zaps = damus.zaps.event_counts[ev.id]
+    let zap_total = damus.zaps.event_totals[ev.id]
     let our_like = damus.likes.our_events[ev.id]
     let our_boost = damus.boosts.our_events[ev.id]
-    let our_tip = damus.tips.our_tips[ev.id]
+    let our_zap = damus.zaps.our_zaps[ev.id]
 
     return ActionBarModel(likes: likes ?? 0,
                           boosts: boosts ?? 0,
-                          tips: tips ?? 0,
+                          zaps: zaps ?? 0,
+                          zap_total: zap_total ?? 0,
                           our_like: our_like,
                           our_boost: our_boost,
-                          our_tip: our_tip
+                          our_zap: our_zap?.first
     )
 }
 

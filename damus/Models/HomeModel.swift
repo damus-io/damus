@@ -112,7 +112,59 @@ class HomeModel: ObservableObject {
             handle_channel_create(ev)
         case .channel_meta:
             handle_channel_meta(ev)
+        case .zap:
+            handle_zap_event(ev)
         }
+    }
+    
+    func handle_zap_event_with_zapper(_ ev: NostrEvent, zapper: String) {
+        guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper) else {
+            return
+        }
+        
+        damus_state.zaps.add_zap(zap: zap)
+        
+        if !insert_uniq_sorted_event(events: &notifications, new_ev: ev, cmp: { $0.created_at > $1.created_at }) {
+            return
+        }
+        
+        handle_last_event(ev: ev, timeline: .notifications)
+        return
+    }
+    
+    func handle_zap_event(_ ev: NostrEvent) {
+        // These are zap notifications
+        guard let ptag = event_tag(ev, name: "p") else {
+            return
+        }
+        
+        guard ptag == damus_state.pubkey else {
+            return
+        }
+        
+        if let local_zapper = damus_state.profiles.lookup_zapper(pubkey: damus_state.pubkey) {
+            handle_zap_event_with_zapper(ev, zapper: local_zapper)
+            return
+        }
+        
+        guard let profile = damus_state.profiles.lookup(id: damus_state.pubkey) else {
+            return
+        }
+        
+        guard let lnurl = profile.lnurl else {
+            return
+        }
+        
+        Task {
+            guard let zapper = await fetch_zapper_from_lnurl(lnurl) else {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.handle_zap_event_with_zapper(ev, zapper: zapper)
+            }
+        }
+        
     }
     
     func handle_channel_create(_ ev: NostrEvent) {
@@ -317,6 +369,7 @@ class HomeModel: ObservableObject {
             NostrKind.chat.rawValue,
             NostrKind.like.rawValue,
             NostrKind.boost.rawValue,
+            NostrKind.zap.rawValue,
         ])
         notifications_filter.pubkeys = [damus_state.pubkey]
         notifications_filter.limit = 100
