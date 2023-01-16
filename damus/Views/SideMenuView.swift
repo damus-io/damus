@@ -61,16 +61,18 @@ struct SideMenuView: View {
                         Image(systemName: "person.fill")
                     }
                     VStack(alignment: .leading) {
-                        if let display_name = profile?.display_name {
-                            Text(display_name)
-                                .foregroundColor(textColor())
-                                .font(.title)
-                        }
-                        if let name = profile?.name {
-                            Text("@" + name)
-                                .foregroundColor(Color("DamusMediumGrey"))
-                                .font(.body)
-                        }
+                   if let display_name = profile?.display_name {
+                            NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
+                                Text(display_name)
+                                    .foregroundColor(textColor())
+                                    .font(.title)
+                            }}
+                   if let name = profile?.name {
+                            NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
+                                Text("@" + name)
+                                    .foregroundColor(Color("DamusMediumGrey"))
+                                    .font(.body)
+                            }}
                     }
                     
                     Divider()
