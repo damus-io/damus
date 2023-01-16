@@ -11,6 +11,8 @@ import secp256k1
 import secp256k1_implementation
 import CryptoKit
 
+
+
 enum ValidationResult: Decodable {
     case ok
     case bad_id
@@ -79,7 +81,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     }
     
     var too_big: Bool {
-        return self.content.count > 32000
+        return self.content.count > 16000
     }
     
     var should_show_event: Bool {
@@ -367,6 +369,10 @@ func encode_json<T: Encodable>(_ val: T) -> String? {
     return (try? encoder.encode(val)).map { String(decoding: $0, as: UTF8.self) }
 }
 
+func decode_nostr_event_json(json: String) -> NostrEvent? {
+    return decode_json(json)
+}
+
 func decode_json<T: Decodable>(_ val: String) -> T? {
     return try? JSONDecoder().decode(T.self, from: Data(val.utf8))
 }
@@ -564,6 +570,26 @@ func make_like_event(pubkey: String, privkey: String, liked: NostrEvent) -> Nost
     ev.calculate_id()
     ev.sign(privkey: privkey)
 
+    return ev
+}
+
+func zap_target_to_tags(_ target: ZapTarget) -> [[String]] {
+    switch target {
+    case .profile(let pk):
+        return [["p", pk]]
+    case .note(let note_target):
+        return [["e", note_target.note_id], ["p", note_target.author]]
+    }
+}
+
+func make_zap_request_event(pubkey: String, privkey: String, content: String, relays: [RelayDescriptor], target: ZapTarget) -> NostrEvent {
+    var tags = zap_target_to_tags(target)
+    var relay_tag = ["relays"]
+    relay_tag.append(contentsOf: relays.map { $0.url.absoluteString })
+    tags.append(relay_tag)
+    let ev = NostrEvent(content: content, pubkey: pubkey, kind: 9734, tags: tags)
+    ev.id = calculate_event_id(ev: ev)
+    ev.sig = sign_event(privkey: privkey, ev: ev)
     return ev
 }
 

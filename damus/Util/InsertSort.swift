@@ -38,6 +38,26 @@ func insert_uniq_by_pubkey(events: inout [NostrEvent], new_ev: NostrEvent, cmp: 
     return true
 }
 
+func insert_uniq_sorted_zap(zaps: inout [Zap], new_zap: Zap) -> Bool {
+    var i: Int = 0
+    
+    for zap in zaps {
+        // don't insert duplicate events
+        if new_zap.event.id == zap.event.id {
+            return false
+        }
+        
+        if new_zap.invoice.amount > zap.invoice.amount {
+            zaps.insert(new_zap, at: i)
+            return true
+        }
+        i += 1
+    }
+    
+    zaps.append(new_zap)
+    return true
+}
+
 func insert_uniq_sorted_event(events: inout [NostrEvent], new_ev: NostrEvent, cmp: (NostrEvent, NostrEvent) -> Bool) -> Bool {
     var i: Int = 0
     
