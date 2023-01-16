@@ -336,7 +336,7 @@ extension View {
             Button {
                 UIPasteboard.general.string = event_to_json(ev: event)
             } label: {
-                Label(NSLocalizedString("Copy Note JSON", comment: "Context menu option for copying the JSON text from the note."), systemImage: "magnifyingglass")
+                Label(NSLocalizedString("Copy Note JSON", comment: "Context menu option for copying the JSON text from the note."), systemImage: "j.square.on.square")
             }
 
             Button {
