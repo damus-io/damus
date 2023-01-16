@@ -7,6 +7,7 @@
 import AVFoundation
 import SwiftUI
 import Kingfisher
+import Combine
 
 struct ConfigView: View {
     let state: DamusState
@@ -16,10 +17,13 @@ struct ConfigView: View {
     @State var new_relay: String = ""
     @State var show_privkey: Bool = false
     @State var privkey: String
+    @State var reaction_icon: String = get_saved_reaction_icon()
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
     @State var relays: [RelayDescriptor]
     @EnvironmentObject var user_settings: UserSettingsStore
+
+    let reaction_char_limit: Int = 1
     
     let generator = UIImpactFeedbackGenerator(style: .light)
     
@@ -121,6 +125,12 @@ struct ConfigView: View {
                         .toggleStyle(.switch)
                 }
 
+                Section(NSLocalizedString("Custom Reaction", comment: "Allows user to change the reaction emoji on Reactions screen")) {
+
+                    TextField(NSLocalizedString("Customize your reaction", comment: "Allows user to change the reaction emoji on Reactions screen"), text: $reaction_icon)
+
+                }.onReceive(Just(reaction_icon)) { _ in limitText(reaction_char_limit) }
+
                 Section(NSLocalizedString("Clear Cache", comment: "Section title for clearing cached data.")) {
                     Button(NSLocalizedString("Clear", comment: "Button for clearing cached data.")) {
                         KingfisherManager.shared.cache.clearMemoryCache()
@@ -193,6 +203,23 @@ struct ConfigView: View {
         .onReceive(handle_notify(.relays_changed)) { _ in
             self.relays = state.pool.descriptors
         }
+        .onDisappear{
+            save_reaction_icon()
+        }
+    }
+
+    //Function to keep reaction characters length in limit
+    func limitText(_ upper: Int) {
+        if reaction_icon.count > upper {
+            reaction_icon = String(reaction_icon.prefix(upper))
+        }
+    }
+
+    func save_reaction_icon() {
+        if reaction_icon.isEmpty {
+            reaction_icon = "🤙"
+        }
+        UserDefaults.standard.set(reaction_icon, forKey: "reaction_icon")
     }
 }
 
