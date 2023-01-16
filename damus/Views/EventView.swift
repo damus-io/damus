@@ -324,19 +324,19 @@ extension View {
             Button {
                 UIPasteboard.general.string = bech32_pubkey(pubkey) ?? pubkey
             } label: {
-                Label(NSLocalizedString("Copy User ID", comment: "Context menu option for copying the ID of the user who created the note."), systemImage: "person")
+                Label(NSLocalizedString("Copy User ID", comment: "Context menu option for copying the ID of the user who created the note."), systemImage: "tag")
             }
 
             Button {
                 UIPasteboard.general.string = bech32_note_id(event.id) ?? event.id
             } label: {
-                Label(NSLocalizedString("Copy Note ID", comment: "Context menu option for copying the ID of the note."), systemImage: "note.text")
+                Label(NSLocalizedString("Copy Note ID", comment: "Context menu option for copying the ID of the note."), systemImage: "tag")
             }
 
             Button {
                 UIPasteboard.general.string = event_to_json(ev: event)
             } label: {
-                Label(NSLocalizedString("Copy Note JSON", comment: "Context menu option for copying the JSON text from the note."), systemImage: "magnifyingglass")
+                Label(NSLocalizedString("Copy Note JSON", comment: "Context menu option for copying the JSON text from the note."), systemImage: "note")
             }
 
             Button {
