@@ -53,23 +53,23 @@ struct SideMenuView: View {
                     let followers = FollowersModel(damus_state: damus_state, target: damus_state.pubkey)
                     let profile_model = ProfileModel(pubkey: damus_state.pubkey, damus: damus_state)
                     
-                    if let picture = damus_state.profiles.lookup(id: damus_state.pubkey)?.picture {
-                        NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
+                    NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
+                        if let picture = damus_state.profiles.lookup(id: damus_state.pubkey)?.picture {
                             ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, picture: picture)
+                        } else {
+                            Image(systemName: "person.fill")
                         }
-                    } else {
-                        Image(systemName: "person.fill")
-                    }
-                    VStack(alignment: .leading) {
-                        if let display_name = profile?.display_name {
-                            Text(display_name)
-                                .foregroundColor(textColor())
-                                .font(.title)
-                        }
-                        if let name = profile?.name {
-                            Text("@" + name)
-                                .foregroundColor(Color("DamusMediumGrey"))
-                                .font(.body)
+                        VStack(alignment: .leading) {
+                            if let display_name = profile?.display_name {
+                                Text(display_name)
+                                    .foregroundColor(textColor())
+                                    .font(.title)
+                            }
+                            if let name = profile?.name {
+                                Text("@" + name)
+                                    .foregroundColor(Color("DamusMediumGrey"))
+                                    .font(.body)
+                            }
                         }
                     }
                     
