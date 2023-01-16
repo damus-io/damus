@@ -75,7 +75,7 @@ enum Wallet: String, CaseIterable, Identifiable {
                          appStoreLink: "https://apps.apple.com/sv/app/bitcoin-beach-wallet/id1531383905", image: "bbw")
         case .blixtwallet:
             return .init(index: 11, tag: "blixtwallet", displayName: NSLocalizedString("Blixt Wallet", comment: "Dropdown option label for Lightning wallet, Blixt Wallet"), link: "blixtwallet:lightning:",
-                         appStoreLink: nil, image: "blixt-wallet")
+                         appStoreLink: "https://testflight.apple.com/join/EXvGhRzS", image: "blixt-wallet")
         case .river:
             return .init(index: 12, tag: "river", displayName: NSLocalizedString("River", comment: "Dropdown option label for Lightning wallet, River"), link: "river://",
                          appStoreLink: "https://apps.apple.com/us/app/river-buy-mine-bitcoin/id1536176542", image: "river")
