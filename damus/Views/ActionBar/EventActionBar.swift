@@ -41,7 +41,7 @@ struct EventActionBar: View {
                 EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
                     if bar.boosted {
                         notify(.delete, bar.our_boost)
-                    } else {
+                    } else if damus_state.is_privkey_user {
                         self.confirm_boost = true
                     }
                 }.overlay {
