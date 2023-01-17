@@ -22,6 +22,11 @@ struct DamusState {
     var pubkey: String {
         return keypair.pubkey
     }
+
+    var is_privkey_user: Bool {
+        keypair.privkey != nil
+    }
+
     
     static var empty: DamusState {
         return DamusState.init(pool: RelayPool(), keypair: Keypair(pubkey: "", privkey: ""), likes: EventCounter(our_pubkey: ""), boosts: EventCounter(our_pubkey: ""), contacts: Contacts(our_pubkey: ""), tips: TipCounter(our_pubkey: ""), profiles: Profiles(), dms: DirectMessagesModel(), previews: PreviewCache())
