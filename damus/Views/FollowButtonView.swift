@@ -19,8 +19,7 @@ struct FollowButtonView: View {
             follow_state = perform_follow_btn_action(follow_state, target: target)
         } label: {
             Text(follow_btn_txt(follow_state))
-                .frame(height: 30)
-                .padding(.horizontal, 25)
+                .frame(width: 105, height: 30)
                 //.padding(.vertical, 10)
                 .font(.caption.weight(.bold))
                 .foregroundColor(follow_state == .unfollows ? filledTextColor() : borderColor())
