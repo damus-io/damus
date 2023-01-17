@@ -16,7 +16,7 @@ struct SideMenuView: View {
     
     @Environment(\.colorScheme) var colorScheme
     
-    var sideBarWidth = UIScreen.main.bounds.size.width * 0.65
+    var sideBarWidth = min(UIScreen.main.bounds.size.width * 0.65, 400.0)
     
     func fillColor() -> Color {
         colorScheme == .light ? Color("DamusWhite") : Color("DamusBlack")
