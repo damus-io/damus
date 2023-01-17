@@ -113,7 +113,6 @@ struct ContentView: View {
             }
             .background(colorScheme == .dark ? Color.black : Color.white)
         }
-        .ignoresSafeArea(.keyboard)
     }
     
     func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
@@ -191,8 +190,8 @@ struct ContentView: View {
                     Text("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
                 }
             }
-             
         }
+        .ignoresSafeArea(.keyboard)
     }
     
     var MaybeSearchView: some View {
