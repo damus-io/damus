@@ -211,9 +211,8 @@ struct ProfileView: View {
                         .onTapGesture {
                             is_zoomed.toggle()
                         }
-                        .sheet(isPresented: $is_zoomed) {
-                            ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .none, profiles: damus_state.profiles)
-                        }
+                        .fullScreenCover(isPresented: $is_zoomed) {
+                            ProfileZoomView(pubkey: profile.pubkey, profiles: damus_state.profiles)                        }
                         .offset(y: -(pfp_size/2.0)) // Increase if set a frame
                     
                     Spacer()

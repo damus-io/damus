@@ -53,7 +53,7 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
 }
 
 func is_image_url(_ url: URL) -> Bool {
-    let str = url.lastPathComponent
+    let str = url.lastPathComponent.lowercased()
     return str.hasSuffix("png") || str.hasSuffix("jpg") || str.hasSuffix("jpeg") || str.hasSuffix("gif")
 }
 
