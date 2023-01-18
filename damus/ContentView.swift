@@ -180,10 +180,13 @@ struct ContentView: View {
                     .shadow(color: Color("DamusPurple"), radius: 2)
                 case .dms:
                     Text("DM", comment: "Toolbar label for DM view, which is the English abbreviation for Direct Message.")
+                        .bold()
                 case .notifications:
                     Text("Notifications", comment: "Toolbar label for Notifications view.")
+                        .bold()
                 case .search:
                     Text("Global", comment: "Toolbar label for Global view where posts from all connected relay servers appear.")
+                        .bold()
                 case .none:
                     Text("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
                 }
