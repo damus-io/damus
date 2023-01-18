@@ -78,6 +78,9 @@ struct ProfileZoomView: View {
                     .offset(x: offset.width + offsetState.width, y: offset.height + offsetState.height)
                     .gesture(SimultaneousGesture(zoomGesture, dragGesture))
                     .gesture(doubleTapGesture)
+                    .modifier(SwipeToDismissModifier(onDismiss: {
+                        presentationMode.wrappedValue.dismiss()
+                    }))
 
             }
         }
