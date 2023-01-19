@@ -17,9 +17,14 @@ let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Tex
 struct PostView: View {
     @State var post: String = ""
 
+    @State var tagWord: String = ""
     let replying_to: NostrEvent?
     @FocusState var focus: Bool
     let references: [ReferencedId]
+    let damus_state: DamusState
+    @State var pubkey: String? = nil
+    @StateObject var model: SearchHomeModel = SearchHomeModel.init(damus_state: .empty)
+    
 
     @Environment(\.presentationMode) var presentationMode
 
@@ -74,6 +79,7 @@ struct PostView: View {
                 TextEditor(text: $post)
                     .focused($focus)
                     .textInputAutocapitalization(.sentences)
+
                 if post.isEmpty {
                     Text(POST_PLACEHOLDER)
                         .padding(.top, 8)
@@ -82,6 +88,16 @@ struct PostView: View {
                         .allowsHitTesting(false)
                 }
             }
+
+            // This if-block observes @ for tagging
+            if let lastWord = post.components(separatedBy: .whitespaces).last,
+               lastWord.hasPrefix("@"),
+               lastWord.count > 1 {
+                VStack {
+                    Spacer()
+                    SearchContent
+                }.zIndex(1)
+            }
         }
         .onAppear() {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -89,6 +105,15 @@ struct PostView: View {
             }
         }
         .padding()
+    }
+
+    var SearchContent: some View {
+        SearchResultsView(damus_state: damus_state, search: $post, coming_from_post: true, tagString: $post)
+            .refreshable {
+                // Fetch new information by unsubscribing and resubscribing to the relay
+                model.unsubscribe()
+                model.subscribe()
+            }.padding(.horizontal)
     }
 }
 

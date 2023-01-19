@@ -18,10 +18,18 @@ enum Search {
 struct SearchResultsView: View {
     let damus_state: DamusState
     @Binding var search: String
+    let coming_from_post: Bool
     @State var result: Search? = nil
+    @Binding var tagString: String
     
     func ProfileSearchResult(pk: String, res: Profile) -> some View {
         FollowUserView(target: .pubkey(pk), damus_state: damus_state)
+            .onTapGesture {
+                if let index = tagString.lastIndex(of: "@"),
+                   let lastIndex = tagString.lastIndex(of: tagString.last!){
+                    tagString.replaceSubrange(index...lastIndex, with: "@\(bech32_pubkey(pk) ?? "") ")
+                }
+            }
     }
     
     var MainContent: some View {
@@ -115,6 +123,19 @@ struct SearchResultsView: View {
         
         let profs = damus_state.profiles.profiles.enumerated()
         let results: [(String, Profile)] = profs.reduce(into: []) { acc, els in
+
+            var new = new
+            // This if-block triggers when coming from Post or Reply in order to preprocess the string suitable for search
+            if coming_from_post {
+                if let lastWord = new.components(separatedBy: .whitespaces).last,
+                   lastWord.hasPrefix("@"),
+                   lastWord.count > 1 {
+                    new = String(lastWord.dropFirst())
+                } else {
+                    return
+                }
+            }
+
             let pk = els.element.key
             let prof = els.element.value.profile
             let lowname = prof.name.map { $0.lowercased() }
