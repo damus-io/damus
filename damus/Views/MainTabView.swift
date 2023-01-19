@@ -60,7 +60,7 @@ struct TabButton: View {
             isSidebarVisible = false
         }) {
             Image(systemName: selected == timeline ? "\(imageName).fill" : imageName)
-                .font(.system(size: fontSize, weight: .thin))
+                .font(.system(size: fontSize, weight: .regular))
                 .contentShape(Rectangle())
                 .frame(maxWidth: .infinity, minHeight: 30.0)
         }
@@ -83,7 +83,7 @@ struct TabBar: View {
                 TabButton(
                     timeline: .home,
                     imageName: "house",
-                    fontSize: 24,
+                    fontSize: 17,
                     selected: $selected,
                     new_events: $new_events,
                     isSidebarVisible: $isSidebarVisible,
@@ -92,7 +92,7 @@ struct TabBar: View {
                 TabButton(
                     timeline: .dms,
                     imageName: "bubble.left.and.bubble.right",
-                    fontSize: 23,
+                    fontSize: 16,
                     selected: $selected,
                     new_events: $new_events,
                     isSidebarVisible: $isSidebarVisible,
@@ -101,7 +101,7 @@ struct TabBar: View {
                 TabButton(
                     timeline: .search,
                     imageName: "magnifyingglass.circle",
-                    fontSize: 27,
+                    fontSize: 19,
                     selected: $selected,
                     new_events: $new_events,
                     isSidebarVisible: $isSidebarVisible,
@@ -110,7 +110,7 @@ struct TabBar: View {
                 TabButton(
                     timeline: .notifications,
                     imageName: "bell",
-                    fontSize: 25,
+                    fontSize: 18,
                     selected: $selected,
                     new_events: $new_events,
                     isSidebarVisible: $isSidebarVisible,
