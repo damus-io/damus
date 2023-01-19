@@ -20,6 +20,8 @@ struct ReplyView: View {
     
     @State var originalParticipants: [ReferencedId] = []
     @State var participants: [ReferencedId] = []
+    
+    @State var participantsShown: Bool = false
         
     var body: some View {
         VStack {
@@ -36,9 +38,14 @@ struct ReplyView: View {
                     .foregroundColor(.gray)
                     .font(.footnote)
             }
+            .onTapGesture {
+                participantsShown.toggle()
+            }
+            .sheet(isPresented: $participantsShown) {
+                ParticipantsView(damus: damus, participants: $participants, originalParticipants: $originalParticipants)
+            }
             ScrollView {
                 EventView(event: replying_to, highlight: .none, has_action_bar: false, damus: damus, show_friend_icon: true)
-                ParticipantsView(damus: damus, participants: $participants, originalParticipants: $originalParticipants)
             }
             PostView(replying_to: replying_to, references: participants)
         }

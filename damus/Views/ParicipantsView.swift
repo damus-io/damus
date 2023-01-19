@@ -16,23 +16,47 @@ struct ParticipantsView: View {
     
     var body: some View {
         VStack {
+            Text("Edit participants")
+            HStack {
+                Button {
+                    participants = []
+                } label: {
+                    Text("Remove all")
+                }
+                Button {
+                    participants = originalParticipants
+                } label: {
+                    Text("Add all")
+                }
+            }
             ForEach(originalParticipants) { participant in
-                ParticipantView(damus: damus, participant: participant) { participant, added in
-                    if added {
-                        participants.append(participant)
+                HStack {
+                    let pk = participant.ref_id
+                    let prof = damus.profiles.lookup(id: pk)
+                    Text(Profile.displayName(profile: prof, pubkey: pk))
+                    Spacer()
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(participants.contains(participant) ? .purple : .gray)
+                }
+                .onTapGesture {
+                    if participants.contains(participant) {
+                        participants = participants.filter {
+                            $0 != participant
+                        }
                     } else {
-                        participants = participants.filter { $0 != participant }
+                        participants.append(participant)
                     }
                 }
             }
+            Spacer()
         }
+        .padding()
     }
 }
 
 struct ParticipantView: View {
     let damus: DamusState
     let participant: ReferencedId
-    let onRemove: (ReferencedId, Bool) -> ()
     
     @State var isParticipating: Bool = true
     
@@ -47,7 +71,6 @@ struct ParticipantView: View {
         }
         .onTapGesture {
             isParticipating.toggle()
-            onRemove(participant, isParticipating)
         }
     }
 }
