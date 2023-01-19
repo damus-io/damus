@@ -18,11 +18,14 @@ struct ReplyView: View {
     let replying_to: NostrEvent
     let damus: DamusState
     
+    @State var originalParticipants: [ReferencedId] = []
+    @State var participants: [ReferencedId] = []
+        
     var body: some View {
         VStack {
             Text("Replying to:", comment: "Indicating that the user is replying to the following listed people.")
             HStack(alignment: .top) {
-                let names = all_referenced_pubkeys(replying_to)
+                let names = participants
                     .map { pubkey in
                         let pk = pubkey.ref_id
                         let prof = damus.profiles.lookup(id: pk)
@@ -34,12 +37,16 @@ struct ReplyView: View {
                     .font(.footnote)
             }
             ScrollView {
-                EventView(event: replying_to, highlight: .none, has_action_bar: false, damus: damus, show_friend_icon: true)                
+                EventView(event: replying_to, highlight: .none, has_action_bar: false, damus: damus, show_friend_icon: true)
+                ParticipantsView(damus: damus, participants: $participants, originalParticipants: $originalParticipants)
             }
-            PostView(replying_to: replying_to, references: gather_reply_ids(our_pubkey: damus.pubkey, from: replying_to))
+            PostView(replying_to: replying_to, references: participants)
+        }
+        .onAppear {
+            participants = all_referenced_pubkeys(replying_to)
+            originalParticipants = participants
         }
         .padding()
-        
     }
     
     
@@ -47,6 +54,6 @@ struct ReplyView: View {
 
 struct ReplyView_Previews: PreviewProvider {
     static var previews: some View {
-        ReplyView(replying_to: NostrEvent(content: "hi", pubkey: "pubkey"), damus: test_damus_state())
+        ReplyView(replying_to: NostrEvent(content: "hi", pubkey: "pubkey"), damus: test_damus_state(), participants: [])
     }
 }
