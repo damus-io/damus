@@ -30,23 +30,7 @@ struct ParticipantsView: View {
                 }
             }
             ForEach(originalParticipants) { participant in
-                HStack {
-                    let pk = participant.ref_id
-                    let prof = damus.profiles.lookup(id: pk)
-                    Text(Profile.displayName(profile: prof, pubkey: pk))
-                    Spacer()
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(participants.contains(participant) ? .purple : .gray)
-                }
-                .onTapGesture {
-                    if participants.contains(participant) {
-                        participants = participants.filter {
-                            $0 != participant
-                        }
-                    } else {
-                        participants.append(participant)
-                    }
-                }
+                ParticipantView(damus_state: damus, participant: participant, participants: $participants)
             }
             Spacer()
         }
@@ -54,23 +38,49 @@ struct ParticipantsView: View {
     }
 }
 
+
 struct ParticipantView: View {
-    let damus: DamusState
+    let damus_state: DamusState
     let participant: ReferencedId
     
-    @State var isParticipating: Bool = true
+    @Binding var participants: [ReferencedId]
+    @State var participating: Bool = true
+    
+    
+    var pubkey: String {
+        participant.id
+    }
     
     var body: some View {
         HStack {
-            let pk = participant.ref_id
-            let prof = damus.profiles.lookup(id: pk)
-            Text(Profile.displayName(profile: prof, pubkey: pk))
+            ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
+        
+            VStack(alignment: .leading) {
+                let profile = damus_state.profiles.lookup(id: pubkey)
+                ProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_friend_confirmed: false, show_nip5_domain: false)
+                if let about = profile?.about {
+                    Text(FollowUserView.markdown.process(about))
+                        .lineLimit(3)
+                        .font(.footnote)
+                }
+            }
+            
             Spacer()
+            
             Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(isParticipating ? .purple : .gray)
+                .font(.system(size: 30))
+                .foregroundColor(participating ? .purple : .gray)
         }
         .onTapGesture {
-            isParticipating.toggle()
+            if participants.contains(participant) {
+                participants = participants.filter {
+                    $0 != participant
+                }
+                participating = false
+            } else {
+                participants.append(participant)
+                participating = true
+            }
         }
     }
 }
