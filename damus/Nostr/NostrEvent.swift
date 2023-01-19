@@ -789,3 +789,21 @@ func inner_event_or_self(ev: NostrEvent) -> NostrEvent {
     
     return inner_ev
 }
+
+extension [ReferencedId] {
+    var pRefs: [ReferencedId] {
+        get {
+            self.filter { ref in
+                ref.key == "p"
+            }
+        }
+    }
+    
+    var eRefs: [ReferencedId] {
+        get {
+            self.filter { ref in
+                ref.key == "e"
+            }
+        }
+    }
+}

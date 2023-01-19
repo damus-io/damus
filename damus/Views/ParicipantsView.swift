@@ -11,66 +11,50 @@ struct ParticipantsView: View {
     
     let damus: DamusState
     
-    @Binding var participants: [ReferencedId]
-    @Binding var originalParticipants: [ReferencedId]
+    @Binding var references: [ReferencedId]
+    @Binding var originalReferences: [ReferencedId]
     
     var body: some View {
         VStack {
             Text("Edit participants")
             HStack {
                 Button {
-                    participants = []
+                    // Remove all "p" refs, keep "e" refs
+                    references = originalReferences.eRefs
                 } label: {
                     Text("Remove all")
                 }
                 Button {
-                    participants = originalParticipants
+                    references = originalReferences
                 } label: {
                     Text("Add all")
                 }
             }
-            ForEach(originalParticipants) { participant in
+            ForEach(originalReferences.pRefs) { participant in
                 HStack {
                     let pk = participant.ref_id
                     let prof = damus.profiles.lookup(id: pk)
                     Text(Profile.displayName(profile: prof, pubkey: pk))
                     Spacer()
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(participants.contains(participant) ? .purple : .gray)
+                        .foregroundColor(references.contains(participant) ? .purple : .gray)
                 }
                 .onTapGesture {
-                    if participants.contains(participant) {
-                        participants = participants.filter {
+                    if references.contains(participant) {
+                        references = references.filter {
                             $0 != participant
                         }
                     } else {
-                        participants.append(participant)
+                        if references.contains(participant) {
+                            // Don't add it twice
+                        } else {
+                            references.append(participant)                            
+                        }
                     }
                 }
             }
             Spacer()
         }
         .padding()
-    }
-}
-
-struct ParticipantView: View {
-    let damus: DamusState
-    let participant: ReferencedId
-    
-    @State var isParticipating: Bool = true
-    
-    var body: some View {
-        HStack {
-            let pk = participant.ref_id
-            let prof = damus.profiles.lookup(id: pk)
-            Text(Profile.displayName(profile: prof, pubkey: pk))
-            Spacer()
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(isParticipating ? .purple : .gray)
-        }
-        .onTapGesture {
-            isParticipating.toggle()
-        }
     }
 }

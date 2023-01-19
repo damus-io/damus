@@ -18,8 +18,8 @@ struct ReplyView: View {
     let replying_to: NostrEvent
     let damus: DamusState
     
-    @State var originalParticipants: [ReferencedId] = []
-    @State var participants: [ReferencedId] = []
+    @State var originalReferences: [ReferencedId] = []
+    @State var references: [ReferencedId] = []
     
     @State var participantsShown: Bool = false
         
@@ -27,7 +27,7 @@ struct ReplyView: View {
         VStack {
             Text("Replying to:", comment: "Indicating that the user is replying to the following listed people.")
             HStack(alignment: .top) {
-                let names = participants
+                let names = references.pRefs
                     .map { pubkey in
                         let pk = pubkey.ref_id
                         let prof = damus.profiles.lookup(id: pk)
@@ -42,16 +42,16 @@ struct ReplyView: View {
                 participantsShown.toggle()
             }
             .sheet(isPresented: $participantsShown) {
-                ParticipantsView(damus: damus, participants: $participants, originalParticipants: $originalParticipants)
+                ParticipantsView(damus: damus, references: $references, originalReferences: $originalReferences)
             }
             ScrollView {
                 EventView(event: replying_to, highlight: .none, has_action_bar: false, damus: damus, show_friend_icon: true)
             }
-            PostView(replying_to: replying_to, references: participants)
+            PostView(replying_to: replying_to, references: references)
         }
         .onAppear {
-            participants = all_referenced_pubkeys(replying_to)
-            originalParticipants = participants
+            references =  gather_reply_ids(our_pubkey: damus.pubkey, from: replying_to)
+            originalReferences = references
         }
         .padding()
     }
@@ -61,6 +61,6 @@ struct ReplyView: View {
 
 struct ReplyView_Previews: PreviewProvider {
     static var previews: some View {
-        ReplyView(replying_to: NostrEvent(content: "hi", pubkey: "pubkey"), damus: test_damus_state(), participants: [])
+        ReplyView(replying_to: NostrEvent(content: "hi", pubkey: "pubkey"), damus: test_damus_state(), references: [])
     }
 }
