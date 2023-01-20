@@ -65,9 +65,9 @@ struct ProfileZoomView: View {
             .zIndex(1)
 
             VStack(alignment: .center) {
-                Spacer()
-                    .frame(height: 120)
 
+                Spacer()
+                
                 ProfilePicView(pubkey: pubkey, size: 200.0, highlight: .none, profiles: profiles)
                     .padding(100)
                     .scaledToFit()
@@ -78,6 +78,8 @@ struct ProfileZoomView: View {
                     .modifier(SwipeToDismissModifier(minDistance: nil, onDismiss: {
                         presentationMode.wrappedValue.dismiss()
                     }))
+                
+                Spacer()
 
             }
         }
