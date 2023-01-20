@@ -157,6 +157,8 @@
 		9609F058296E220800069BF3 /* BannerImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9609F057296E220800069BF3 /* BannerImageView.swift */; };
 		BA693074295D649800ADDB87 /* UserSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA693073295D649800ADDB87 /* UserSettingsStore.swift */; };
 		BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
+		BD5B8081297B39FB009CEAE3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = BD5B8083297B39FB009CEAE3 /* Localizable.strings */; };
+		BD5B8086297B3AB5009CEAE3 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BD5B8088297B3AB5009CEAE3 /* InfoPlist.strings */; };
 		DD597CBD2963D85A00C64D32 /* MarkdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD597CBC2963D85A00C64D32 /* MarkdownTests.swift */; };
 		E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E990020E2955F837003BBC5A /* EditMetadataView.swift */; };
 		E9E4ED0B295867B900DD7078 /* ThreadV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E4ED0A295867B900DD7078 /* ThreadV2View.swift */; };
@@ -364,6 +366,9 @@
 		9609F057296E220800069BF3 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
 		BA693073295D649800ADDB87 /* UserSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsStore.swift; sourceTree = "<group>"; };
 		BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectWalletView.swift; sourceTree = "<group>"; };
+		BD5B807E297B3932009CEAE3 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = it; path = it.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
+		BD5B8082297B39FB009CEAE3 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
+		BD5B8087297B3AB5009CEAE3 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		DD597CBC2963D85A00C64D32 /* MarkdownTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkdownTests.swift; sourceTree = "<group>"; };
 		E990020E2955F837003BBC5A /* EditMetadataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMetadataView.swift; sourceTree = "<group>"; };
 		E9E4ED0A295867B900DD7078 /* ThreadV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadV2View.swift; sourceTree = "<group>"; };
@@ -662,7 +667,9 @@
 				4C75EFAB28049CC80006080F /* Nostr */,
 				4C75EFA72804823E0006080F /* Info.plist */,
 				3ACB685D297633BC00C46468 /* Localizable.strings */,
+				BD5B8083297B39FB009CEAE3 /* Localizable.strings */,
 				3ACB685A297633BC00C46468 /* InfoPlist.strings */,
+				BD5B8088297B3AB5009CEAE3 /* InfoPlist.strings */,
 				4C75EFA227FA576C0006080F /* Views */,
 				4CE6DEE627F7A08100C66700 /* damusApp.swift */,
 				4CE6DEE827F7A08100C66700 /* ContentView.swift */,
@@ -817,6 +824,7 @@
 				Base,
 				"es-419",
 				"en-US",
+				it,
 			);
 			mainGroup = 4CE6DEDA27F7A08100C66700;
 			packageReferences = (
@@ -843,6 +851,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				3ACB685F297633BC00C46468 /* Localizable.strings in Resources */,
+				BD5B8086297B3AB5009CEAE3 /* InfoPlist.strings in Resources */,
+				BD5B8081297B39FB009CEAE3 /* Localizable.strings in Resources */,
 				4CE6DEEE27F7A08200C66700 /* Preview Assets.xcassets in Resources */,
 				3ACB685C297633BC00C46468 /* InfoPlist.strings in Resources */,
 				4CE6DEEB27F7A08200C66700 /* Assets.xcassets in Resources */,
@@ -1052,6 +1062,7 @@
 			children = (
 				3A5C4575296A879E0032D398 /* es-419 */,
 				3A2B8B0A296A8982009CC16D /* en-US */,
+				BD5B807E297B3932009CEAE3 /* it */,
 			);
 			name = Localizable.stringsdict;
 			sourceTree = "<group>";
@@ -1070,6 +1081,22 @@
 				3ACB685E297633BC00C46468 /* es-419 */,
 			);
 			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		BD5B8083297B39FB009CEAE3 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BD5B8082297B39FB009CEAE3 /* it */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		BD5B8088297B3AB5009CEAE3 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BD5B8087297B3AB5009CEAE3 /* it */,
+			);
+			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
