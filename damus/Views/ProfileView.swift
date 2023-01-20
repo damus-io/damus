@@ -115,7 +115,7 @@ struct ProfileView: View {
     @State var is_zoomed: Bool = false
     @State var show_share_sheet: Bool = false
     @State var action_sheet_presented: Bool = false
-    @StateObject var user_settings = UserSettingsStore()
+    @EnvironmentObject var user_settings: UserSettingsStore
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme

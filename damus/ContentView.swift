@@ -292,6 +292,7 @@ struct ContentView: View {
                     .padding([.bottom], 8)
             }
         }
+        .environmentObject(user_settings)
         .onAppear() {
             self.connect()
             //KingfisherManager.shared.cache.clearDiskCache()

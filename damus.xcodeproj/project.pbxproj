@@ -18,6 +18,7 @@
 		3ACB685C297633BC00C46468 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3ACB685A297633BC00C46468 /* InfoPlist.strings */; };
 		3ACB685F297633BC00C46468 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3ACB685D297633BC00C46468 /* Localizable.strings */; };
 		3ACBCB78295FE5C70037388A /* TimeAgoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ACBCB77295FE5C70037388A /* TimeAgoTests.swift */; };
+		3AE45AF6297BB2E700C1D842 /* LibreTranslateServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE45AF5297BB2E700C1D842 /* LibreTranslateServer.swift */; };
 		4C06670128FC7C5900038D2A /* RelayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670028FC7C5900038D2A /* RelayView.swift */; };
 		4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 4C06670328FC7EC500038D2A /* Kingfisher */; };
 		4C06670628FCB08600038D2A /* ImageCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670528FCB08600038D2A /* ImageCarousel.swift */; };
@@ -236,6 +237,7 @@
 		3ACB685B297633BC00C46468 /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = "es-419.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		3ACB685E297633BC00C46468 /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = "es-419.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		3ACBCB77295FE5C70037388A /* TimeAgoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeAgoTests.swift; sourceTree = "<group>"; };
+		3AE45AF5297BB2E700C1D842 /* LibreTranslateServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibreTranslateServer.swift; sourceTree = "<group>"; };
 		3AEB8003297CCEA800713A25 /* tr-TR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "tr-TR"; path = "tr-TR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		3AEB8004297CCEA800713A25 /* tr-TR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "tr-TR"; path = "tr-TR.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		3AEB8005297CCEA900713A25 /* tr-TR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = "tr-TR"; path = "tr-TR.lproj/Localizable.stringsdict"; sourceTree = "<group>"; };
@@ -582,6 +584,7 @@
 				7C45AE70297353390031D7BC /* KFImageModel.swift */,
 				4CF0ABD32980996B00D66079 /* Report.swift */,
 				4CF0ABDD2981A69500D66079 /* MutelistModel.swift */,
+				3AE45AF5297BB2E700C1D842 /* LibreTranslateServer.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1171,6 +1174,7 @@
 				4C06670B28FDE64700038D2A /* damus.c in Sources */,
 				4FE60CDD295E1C5E00105A1F /* Wallet.swift in Sources */,
 				3AA247FF297E3D900090C62D /* RepostsView.swift in Sources */,
+				3AE45AF6297BB2E700C1D842 /* LibreTranslateServer.swift in Sources */,
 				4C99737B28C92A9200E53835 /* ChatroomMetadata.swift in Sources */,
 				4CC7AAF4297F18B400430951 /* ReplyDescription.swift in Sources */,
 				4C75EFA427FA577B0006080F /* PostView.swift in Sources */,

@@ -34,7 +34,7 @@ struct InvoiceView: View {
     
     let invoice: Invoice
     @State var showing_select_wallet: Bool = false
-    @ObservedObject var user_settings = UserSettingsStore()
+    @EnvironmentObject var user_settings: UserSettingsStore
     
     var PayButton: some View {
         Button {
