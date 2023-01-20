@@ -18,17 +18,22 @@ struct ParticipantsView: View {
         VStack {
             Text("Edit participants")
             HStack {
+                Spacer()
                 Button {
                     // Remove all "p" refs, keep "e" refs
                     references = originalReferences.eRefs
                 } label: {
                     Text("Remove all")
                 }
+                .buttonStyle(.borderedProminent)
+                Spacer()
                 Button {
                     references = originalReferences
                 } label: {
                     Text("Add all")
                 }
+                .buttonStyle(.borderedProminent)
+                Spacer()
             }
             ForEach(originalReferences.pRefs) { participant in
                 let pubkey = participant.id
