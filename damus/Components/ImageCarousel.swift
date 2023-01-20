@@ -225,6 +225,9 @@ struct ImageView: View {
                     }
                     .ignoresSafeArea()
                     .tag(index)
+                    .modifier(SwipeToDismissModifier(onDismiss: {
+                        presentationMode.wrappedValue.dismiss()
+                    }))
                 }
             }
             .ignoresSafeArea()

@@ -16,7 +16,7 @@ struct SwipeToDismissModifier: ViewModifier {
             .offset(y: offset.height)
             .animation(.interactiveSpring(), value: offset)
             .simultaneousGesture(
-                DragGesture()
+                DragGesture(minimumDistance: 50)
                     .onChanged { gesture in
                         if gesture.translation.width < 50 {
                             offset = gesture.translation
