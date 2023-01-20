@@ -105,6 +105,11 @@ Number of profiles a user is following.</note>
         <target>@</target>
         <note>Prefix character to username.</note>
       </trans-unit>
+      <trans-unit id="API Key (optional)" xml:space="preserve">
+        <source>API Key (optional)</source>
+        <target>API Key (optional)</target>
+        <note>Example URL to LibreTranslate server</note>
+      </trans-unit>
       <trans-unit id="About" xml:space="preserve">
         <source>About</source>
         <target>About</target>
@@ -344,6 +349,11 @@ Number of profiles a user is following.</note>
         <target>Creator(s) of Bitcoin. Absolute legend.</target>
         <note>Example description about Bitcoin creator(s), Satoshi Nakamoto.</note>
       </trans-unit>
+      <trans-unit id="Custom" xml:space="preserve">
+        <source>Custom</source>
+        <target>Custom</target>
+        <note>Dropdown option for selecting a custom translation server.</note>
+      </trans-unit>
       <trans-unit id="DM Type" xml:space="preserve">
         <source>DM Type</source>
         <target>DM Type</target>
@@ -472,6 +482,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Hide</target>
         <note>Button to hide a post from a user who has been blocked.</note>
       </trans-unit>
+      <trans-unit id="Hide API Key" xml:space="preserve">
+        <source>Hide API Key</source>
+        <target>Hide API Key</target>
+        <note>Button to hide the LibreTranslate server API key.</note>
+      </trans-unit>
       <trans-unit id="Home" xml:space="preserve">
         <source>Home</source>
         <target>Home</target>
@@ -506,6 +521,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Let's go!</source>
         <target>Let's go!</target>
         <note>Button to complete account creation and start using the app.</note>
+      </trans-unit>
+      <trans-unit id="LibreTranslate Translations" xml:space="preserve">
+        <source>LibreTranslate Translations</source>
+        <target>LibreTranslate Translations</target>
+        <note>Section title for selecting the server that hosts the LibreTranslate machine translation API.</note>
       </trans-unit>
       <trans-unit id="Lightning Address or LNURL" xml:space="preserve">
         <source>Lightning Address or LNURL</source>
@@ -554,6 +574,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>No block list found, create a new one? This will overwrite any previous block lists.</source>
         <target>No block list found, create a new one? This will overwrite any previous block lists.</target>
         <note>Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists.</note>
+      </trans-unit>
+      <trans-unit id="None" xml:space="preserve">
+        <source>None</source>
+        <target>None</target>
+        <note>Dropdown option for selecting no translation server.</note>
       </trans-unit>
       <trans-unit id="Nothing to see here. Check back later!" xml:space="preserve">
         <source>Nothing to see here. Check back later!</source>
@@ -792,6 +817,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Send a message to start the conversation...</target>
         <note>Text prompt for user to send a message to the other user.</note>
       </trans-unit>
+      <trans-unit id="Server" xml:space="preserve">
+        <source>Server</source>
+        <target>Server</target>
+        <note>Prompt selection of LibreTranslate server to perform machine translations on notes</note>
+      </trans-unit>
       <trans-unit id="Settings" xml:space="preserve">
         <source>Settings</source>
         <target>Settings</target>
@@ -809,6 +839,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Show</target>
         <note>Button to show a post from a user who has been blocked.
    Toggle to show or hide user's secret account login key.</note>
+      </trans-unit>
+      <trans-unit id="Show API Key" xml:space="preserve">
+        <source>Show API Key</source>
+        <target>Show API Key</target>
+        <note>Button to hide the LibreTranslate server API key.</note>
       </trans-unit>
       <trans-unit id="Show wallet selector" xml:space="preserve">
         <source>Show wallet selector</source>
@@ -861,10 +896,25 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <note>Navigation bar title for note thread.
    Navigation bar title for threaded event detail view.</note>
       </trans-unit>
+      <trans-unit id="Translate Note" xml:space="preserve">
+        <source>Translate Note</source>
+        <target>Translate Note</target>
+        <note>Button to translate note from different language.</note>
+      </trans-unit>
+      <trans-unit id="Translated from (languageName!)" xml:space="preserve">
+        <source>Translated from (languageName!)</source>
+        <target>Translated from (languageName!)</target>
+        <note>Button to indicate that the note has been translated from a different language.</note>
+      </trans-unit>
       <trans-unit id="Type your post here..." xml:space="preserve">
         <source>Type your post here...</source>
         <target>Type your post here...</target>
         <note>Text box prompt to ask user to type their post.</note>
+      </trans-unit>
+      <trans-unit id="URL" xml:space="preserve">
+        <source>URL</source>
+        <target>URL</target>
+        <note>Example URL to LibreTranslate server</note>
       </trans-unit>
       <trans-unit id="Unfollow" xml:space="preserve">
         <source>Unfollow</source>

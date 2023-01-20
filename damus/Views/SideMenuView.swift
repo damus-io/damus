@@ -12,7 +12,7 @@ struct SideMenuView: View {
     @Binding var isSidebarVisible: Bool
 
     @State var confirm_logout: Bool = false
-    @StateObject var user_settings = UserSettingsStore()
+    @EnvironmentObject var user_settings: UserSettingsStore
     
     @State private var showQRCode = false
     

@@ -16,6 +16,7 @@ struct ConfigView: View {
     @State var confirm_delete_account: Bool = false
     @State var new_relay: String = ""
     @State var show_privkey: Bool = false
+    @State var show_libretranslate_api_key: Bool = false
     @State var privkey: String
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
@@ -114,6 +115,39 @@ struct ConfigView: View {
                         ForEach(Wallet.allCases, id: \.self) { wallet in
                             Text(wallet.model.displayName)
                                 .tag(wallet.model.tag)
+                        }
+                    }
+                }
+
+                Section(NSLocalizedString("LibreTranslate Translations", comment: "Section title for selecting the server that hosts the LibreTranslate machine translation API.")) {
+                    Picker(NSLocalizedString("Server", comment: "Prompt selection of LibreTranslate server to perform machine translations on notes"), selection: $user_settings.libretranslate_server) {
+                        ForEach(LibreTranslateServer.allCases, id: \.self) { server in
+                            Text(server.model.displayName)
+                                .tag(server.model.tag)
+                        }
+                    }
+
+                    if user_settings.libretranslate_server != .none {
+                        TextField(NSLocalizedString("URL", comment: "Example URL to LibreTranslate server"), text: $user_settings.libretranslate_url)
+                            .disableAutocorrection(true)
+                            .disabled(user_settings.libretranslate_server != .custom)
+                            .autocapitalization(UITextAutocapitalizationType.none)
+                        HStack {
+                            if show_libretranslate_api_key {
+                                TextField(NSLocalizedString("API Key (optional)", comment: "Example URL to LibreTranslate server"), text: $user_settings.libretranslate_api_key)
+                                    .disableAutocorrection(true)
+                                    .autocapitalization(UITextAutocapitalizationType.none)
+                                Button(NSLocalizedString("Hide API Key", comment: "Button to hide the LibreTranslate server API key.")) {
+                                    show_libretranslate_api_key = false
+                                }
+                            } else {
+                                SecureField(NSLocalizedString("API Key (optional)", comment: "Example URL to LibreTranslate server"), text: $user_settings.libretranslate_api_key)
+                                    .disableAutocorrection(true)
+                                    .autocapitalization(UITextAutocapitalizationType.none)
+                                Button(NSLocalizedString("Show API Key", comment: "Button to hide the LibreTranslate server API key.")) {
+                                    show_libretranslate_api_key = true
+                                }
+                            }
                         }
                     }
                 }

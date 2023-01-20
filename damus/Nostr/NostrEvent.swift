@@ -103,9 +103,13 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         if let bs = _blocks {
             return bs
         }
-        let blocks = parse_mentions(content: self.get_content(privkey), tags: self.tags)
+        let blocks = get_blocks(content: self.get_content(privkey))
         self._blocks = blocks
         return blocks
+    }
+
+    func get_blocks(content: String) -> [Block] {
+        return parse_mentions(content: content, tags: self.tags)
     }
 
     lazy var inner_event: NostrEvent? = {

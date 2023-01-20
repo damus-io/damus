@@ -8,6 +8,10 @@
 import SwiftUI
 import LinkPresentation
 
+#if canImport(FoundationNetworking)
+    import FoundationNetworking
+#endif
+
 struct NoteArtifacts {
     let content: AttributedString
     let images: [URL]
@@ -21,6 +25,10 @@ struct NoteArtifacts {
 
 func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -> NoteArtifacts {
     let blocks = ev.blocks(privkey)
+    return render_blocks(blocks: blocks, profiles: profiles, privkey: privkey)
+}
+
+func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> NoteArtifacts {
     var invoices: [Invoice] = []
     var img_urls: [URL] = []
     var link_urls: [URL] = []
@@ -47,7 +55,7 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
             }
         }
     }
-    
+
     return NoteArtifacts(content: txt, images: img_urls, invoices: invoices, links: link_urls)
 }
 
@@ -64,16 +72,47 @@ struct NoteContentView: View {
     
     let show_images: Bool
     
+    @State var checkingTranslationStatus: Bool = false
+    @State var language: String? = nil
+    @State var translated_note: String? = nil
+    @State var show_translated_note: Bool = false
+    @State var translated_artifacts: NoteArtifacts? = nil
+
     @State var artifacts: NoteArtifacts
     
     @State var preview: LinkViewRepresentable? = nil
     let size: EventViewKind
+
+    @EnvironmentObject var user_settings: UserSettingsStore
     
     func MainContent() -> some View {
         return VStack(alignment: .leading) {
             Text(artifacts.content)
                 .font(eventviewsize_to_font(size))
                 .fixedSize(horizontal: false, vertical: true)
+
+            if size == .selected && language != nil && translated_artifacts != nil {
+                let languageName = Locale.current.localizedString(forLanguageCode: language!)
+                if show_translated_note {
+                    Button(NSLocalizedString("Translated from \(languageName!)", comment: "Button to indicate that the note has been translated from a different language.")) {
+                        show_translated_note = false
+                    }
+                    .font(.footnote)
+                    .contentShape(Rectangle())
+                    .padding(.top, 10)
+
+                    Text(translated_artifacts!.content)
+                        .font(eventviewsize_to_font(size))
+                        .fixedSize(horizontal: false, vertical: true)
+                } else {
+                    Button(NSLocalizedString("Translate Note", comment: "Button to translate note from different language.")) {
+                        show_translated_note = true
+                    }
+                    .font(.footnote)
+                    .contentShape(Rectangle())
+                    .padding(.top, 10)
+                }
+            }
 
             if show_images && artifacts.images.count > 0 {
                 ImageCarousel(urls: artifacts.images)
@@ -142,6 +181,35 @@ struct NoteContentView: View {
                     previews.store(evid: self.event.id, preview: view)
                     self.preview = view
                 }
+
+                if size == .selected && language == nil && !checkingTranslationStatus && user_settings.libretranslate_url != "" {
+                    checkingTranslationStatus = true
+
+                    let currentLanguage = Locale.current.languageCode ?? "en"
+                    let translator = Translator(user_settings.libretranslate_url, apiKey: user_settings.libretranslate_api_key)
+
+                    do {
+                        language = try await translator.detect(event.content)
+
+                        if language == nil {
+                            language = currentLanguage
+                            translated_note = nil
+                        } else if language != currentLanguage {
+                            translated_note = try await translator.translate(event.content, from: language!, to: currentLanguage)
+
+                            if translated_note != nil {
+                                let blocks = event.get_blocks(content: translated_note!)
+                                translated_artifacts = render_blocks(blocks: blocks, profiles: profiles, privkey: privkey)
+                            }
+                        }
+                    } catch {
+                        // If for whatever reason we're not able to figure out the language of the note, or translate the note, fail gracefully and do not retry. It's not the end of the world. Don't want to take down someone's translation server with an accidental denial of service attack.
+                        language = currentLanguage
+                        translated_note = nil
+                    }
+
+                    checkingTranslationStatus = false
+                }
             }
     }
     
@@ -192,6 +260,112 @@ func mention_str(_ m: Mention, profiles: Profiles) -> AttributedString {
         attributedString.link = URL(string: "nostr:\(encode_event_id_uri(m.ref))")
         attributedString.foregroundColor = .purple
         return attributedString
+    }
+}
+
+
+public struct Translator {
+    private let url: String
+    private let apiKey: String?
+    private let session = URLSession.shared
+    private let encoder = JSONEncoder()
+    private let decoder = JSONDecoder()
+
+    public init(_ url: String, apiKey: String? = nil) {
+        self.url = url
+        self.apiKey = apiKey
+    }
+
+    public func detect(_ text: String) async throws -> String? {
+        let url = try makeURL(path: "/detect")
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        struct RequestBody: Encodable {
+            let q: String
+            let api_key: String?
+        }
+        let body = RequestBody(q: text, api_key: apiKey)
+        request.httpBody = try encoder.encode(body)
+
+        struct Response: Decodable {
+            let confidence: Double
+            let language: String
+        }
+
+        let data = try await session.data(for: request)
+        let response = try decoder.decode([Response].self, from: data)
+        let language = response.first!
+
+        if language.confidence >= 80 {
+            return language.language
+        } else {
+            return nil
+        }
+    }
+
+    public func translate(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> String {
+        let url = try makeURL(path: "/translate")
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        struct RequestBody: Encodable {
+            let q: String
+            let source: String
+            let target: String
+            let api_key: String?
+        }
+        let body = RequestBody(q: text, source: sourceLanguage, target: targetLanguage, api_key: apiKey)
+        request.httpBody = try encoder.encode(body)
+
+        struct Response: Decodable {
+            let translatedText: String
+        }
+        let response: Response = try await decodedData(for: request)
+        return response.translatedText
+    }
+
+    private func makeURL(path: String) throws -> URL {
+        guard var components = URLComponents(string: url) else {
+            throw URLError(.badURL)
+        }
+        components.path = path
+        guard let url = components.url else {
+            throw URLError(.badURL)
+        }
+        return url
+    }
+
+    private func decodedData<Output: Decodable>(for request: URLRequest) async throws -> Output {
+        let data = try await session.data(for: request)
+        let result = try decoder.decode(Output.self, from: data)
+        return result
+    }
+}
+
+private extension URLSession {
+    func data(for request: URLRequest) async throws -> Data {
+        var task: URLSessionDataTask?
+        let onCancel = { task?.cancel() }
+        return try await withTaskCancellationHandler(
+            operation: {
+                try await withCheckedThrowingContinuation { continuation in
+                    task = dataTask(with: request) { data, _, error in
+                        guard let data = data else {
+                            let error = error ?? URLError(.badServerResponse)
+                            return continuation.resume(throwing: error)
+                        }
+                        continuation.resume(returning: data)
+                    }
+                    task?.resume()
+                }
+            },
+            onCancel: { onCancel() }
+        )
     }
 }
 
