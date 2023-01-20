@@ -158,6 +158,7 @@ struct EventActionBar_Previews: PreviewProvider {
         let bar = ActionBarModel(likes: 0, boosts: 0, tips: 0, our_like: nil, our_boost: nil, our_tip: nil)
         let likedbar = ActionBarModel(likes: 10, boosts: 10, tips: 0, our_like: nil, our_boost: nil, our_tip: nil)
         let likedbar_ours = ActionBarModel(likes: 100, boosts: 100, tips: 0, our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: nil, our_tip: nil)
+        let maxed_bar = ActionBarModel(likes: 999, boosts: 999, tips: 0, our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: NostrEvent(id: "", content: "", pubkey: ""), our_tip: nil)
         
         VStack(spacing: 50) {
             EventActionBar(damus_state: ds, event: ev, bar: bar)
@@ -165,6 +166,8 @@ struct EventActionBar_Previews: PreviewProvider {
             EventActionBar(damus_state: ds, event: ev, bar: likedbar)
             
             EventActionBar(damus_state: ds, event: ev, bar: likedbar_ours)
+            
+            EventActionBar(damus_state: ds, event: ev, bar: maxed_bar)
         }
         .padding(20)
     }
