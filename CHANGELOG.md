@@ -1,3 +1,37 @@
+## [1.0.0-7] - 2023-01-20
+
+### Added
+
+- Drastically improved image viewer (OlegAba)
+- Added pinch to zoom on images (Swift)
+- Add Latin American Spanish translations (William Casarin)
+- Added SVG profile picture support (OlegAba)
+
+
+### Changed
+
+- Makes both name and username clickable in sidebar to go to profile (Zach Hendel)
+- Clicking pfp in sidebar opens profile as well (radixrat)
+- Don't blur images if your friend boosted it (ericholguin)
+
+
+### Fixed
+
+- Fix ... when too many likes/reposts (Joel Klabo)
+- Don't show report alert if logged in as a pubkey (Swift)
+- Fix padding issue at top of home timeline (Ben Weeks)
+- Fix absurdly large sidebar on Mac/iPad (John Bethancourt)
+- Fix tab views moving after selecting from search result (OlegAba)
+- Make follow/unfollow button a consistent width (OlegAba)
+- Don't add events to notifications from buggy relays (William Casarin)
+- Fixed some crashes with large images (OlegAba)
+- Fix DM sorting on incoming messages (William Casarin)
+- Fix text getting truncated next to link previews (William Casarin)
+
+
+[1.0.0-7]: https://github.com/damus-io/damus/releases/tag/v1.0.0-7
+
+
 ## [1.0.0-6] - 2023-01-13
 
 ### Added
@@ -382,6 +416,5 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
 
 
