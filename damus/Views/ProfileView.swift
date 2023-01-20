@@ -212,7 +212,10 @@ struct ProfileView: View {
                             is_zoomed.toggle()
                         }
                         .fullScreenCover(isPresented: $is_zoomed) {
-                            ProfileZoomView(pubkey: profile.pubkey, profiles: damus_state.profiles)                        }
+                            let pictureURLString = damus_state.profiles.lookup(id: profile.pubkey)?.picture
+                            let url = get_profile_url(picture: pictureURLString, pubkey: profile.pubkey, profiles: damus_state.profiles)
+                            ImageView(urls: [url])
+                        }
                         .offset(y: -(pfp_size/2.0)) // Increase if set a frame
                     
                     Spacer()
