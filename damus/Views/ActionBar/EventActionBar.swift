@@ -33,10 +33,9 @@ struct EventActionBar: View {
                 EventActionButton(img: "bubble.left", col: nil) {
                     notify(.reply, event)
                 }
-                .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
             }
-            
-            HStack(alignment: .bottom) {
+            Spacer()
+            ZStack {
                 
                 EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
                     if bar.boosted {
@@ -44,51 +43,31 @@ struct EventActionBar: View {
                     } else if damus_state.is_privkey_user {
                         self.confirm_boost = true
                     }
-                }.overlay {
-                    Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
-                        .offset(x: 22)
-                        .font(.footnote.weight(.medium))
-                        .foregroundColor(bar.boosted ? Color.green : Color.gray)
                 }
+                Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
+                    .offset(x: 18)
+                    .font(.footnote.weight(.medium))
+                    .foregroundColor(bar.boosted ? Color.green : Color.gray)
             }
-            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-
-            HStack(alignment: .bottom) {
+            Spacer()
+            ZStack {
                 LikeButton(liked: bar.liked) {
                     if bar.liked {
                         notify(.delete, bar.our_like)
                     } else {
                         send_like()
                     }
-                }.overlay {
-                    Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
-                        .offset(x: 22)
-                        .font(.footnote.weight(.medium))
-                        .foregroundColor(bar.liked ? Color.accentColor : Color.gray)
                 }
+                Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
+                    .offset(x: 22)
+                    .font(.footnote.weight(.medium))
+                    .foregroundColor(bar.liked ? Color.accentColor : Color.gray)
+                
             }
-            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-
+            Spacer()
             EventActionButton(img: "square.and.arrow.up", col: Color.gray) {
                 show_share_sheet = true
             }
-            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-            
-            /*
-            HStack(alignment: .bottom) {
-                Text("\(bar.tips > 0 ? "\(bar.tips)" : "")")
-                    .font(.footnote)
-                    .foregroundColor(bar.tipped ? Color.orange : Color.gray)
-                
-                EventActionButton(img: bar.tipped ? "bitcoinsign.circle.fill" : "bitcoinsign.circle", col: bar.tipped ? Color.orange : nil) {
-                    if bar.tipped {
-                        //notify(.delete, bar.our_tip)
-                    } else {
-                        //notify(.boost, event)
-                    }
-                }
-            }
-             */
         }
         .sheet(isPresented: $show_share_sheet) {
             if let note_id = bech32_note_id(event.id) {
@@ -177,8 +156,8 @@ struct EventActionBar_Previews: PreviewProvider {
         let ev = NostrEvent(content: "hi", pubkey: pk)
         
         let bar = ActionBarModel(likes: 0, boosts: 0, tips: 0, our_like: nil, our_boost: nil, our_tip: nil)
-        let likedbar = ActionBarModel(likes: 10, boosts: 0, tips: 0, our_like: nil, our_boost: nil, our_tip: nil)
-        let likedbar_ours = ActionBarModel(likes: 10, boosts: 0, tips: 0, our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: nil, our_tip: nil)
+        let likedbar = ActionBarModel(likes: 10, boosts: 10, tips: 0, our_like: nil, our_boost: nil, our_tip: nil)
+        let likedbar_ours = ActionBarModel(likes: 100, boosts: 100, tips: 0, our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: nil, our_tip: nil)
         
         VStack(spacing: 50) {
             EventActionBar(damus_state: ds, event: ev, bar: bar)
