@@ -12,14 +12,14 @@ import Kingfisher
 struct ShareSheet: UIViewControllerRepresentable {
     typealias Callback = (_ activityType: UIActivity.ActivityType?, _ completed: Bool, _ returnedItems: [Any]?, _ error: Error?) -> Void
     
-    let activityItems: [URL]
+    let activityItems: [URL?]
     let callback: Callback? = nil
     let applicationActivities: [UIActivity]? = nil
     let excludedActivityTypes: [UIActivity.ActivityType]? = nil
     
     func makeUIViewController(context: Context) -> UIActivityViewController {
         let controller = UIActivityViewController(
-            activityItems: activityItems,
+            activityItems: activityItems as [Any],
             applicationActivities: applicationActivities)
         controller.excludedActivityTypes = excludedActivityTypes
         controller.completionWithItemsHandler = callback
@@ -32,7 +32,7 @@ struct ShareSheet: UIViewControllerRepresentable {
 }
 
 struct ImageContextMenuModifier: ViewModifier {
-    let url: URL
+    let url: URL?
     let image: UIImage?
     @Binding var showShareSheet: Bool
     
@@ -64,48 +64,20 @@ struct ImageContextMenuModifier: ViewModifier {
     }
 }
 
-struct ImageView: View {
-    let urls: [URL]
+private struct ImageContainerView: View {
     
-    @Environment(\.presentationMode) var presentationMode
-    //let pubkey: String
-    //let profiles: Profiles
-
-    @GestureState private var scaleState: CGFloat = 1
-    @GestureState private var offsetState = CGSize.zero
-
-    @State private var offset = CGSize.zero
-    @State private var scale: CGFloat = 1
-
-    func resetStatus(){
-        self.offset = CGSize.zero
-        self.scale = 1
-    }
-
-    var zoomGesture: some Gesture {
-        MagnificationGesture()
-            .updating($scaleState) { currentState, gestureState, _ in
-                gestureState = currentState
-            }
-            .onEnded { value in
-                scale *= value
-            }
-    }
-
-    var dragGesture: some Gesture {
-        DragGesture()
-            .updating($offsetState) { currentState, gestureState, _ in
-                gestureState = currentState.translation
-            }.onEnded { value in
-                offset.height += value.translation.height
-                offset.width += value.translation.width
-            }
-    }
-
-    var doubleTapGesture : some Gesture {
-        TapGesture(count: 2).onEnded { value in
-            resetStatus()
-        }
+    @ObservedObject var imageModel: KFImageModel
+    
+    @State private var image: UIImage?
+    @State private var showShareSheet = false
+    
+    init(url: URL?) {
+        self.imageModel = KFImageModel(
+            url: url,
+            fallbackUrl: nil,
+            maxByteSize: 2000000, // 2 MB
+            downsampleSize: CGSize(width: 400, height: 400)
+        )
     }
     
     private struct ImageHandler: ImageModifier {
@@ -116,79 +88,178 @@ struct ImageView: View {
             return image
         }
     }
-
-    @State private var image: UIImage?
-    @State private var showShareSheet = false
     
-    func onShared(completed: Bool) -> Void {
-        if (completed) {
-            showShareSheet = false
+    var body: some View {
+        
+        KFAnimatedImage(imageModel.url)
+            .callbackQueue(.dispatch(.global(qos: .background)))
+            .processingQueue(.dispatch(.global(qos: .background)))
+            .cacheOriginalImage()
+            .configure { view in
+                view.framePreloadCount = 1
+            }
+            .scaleFactor(UIScreen.main.scale)
+            .loadDiskFileSynchronously()
+            .fade(duration: 0.1)
+            .imageModifier(ImageHandler(handler: $image))
+            .onFailure { _ in
+                imageModel.downloadFailed()
+            }
+            .id(imageModel.refreshID)
+            .clipped()
+            .modifier(ImageContextMenuModifier(url: imageModel.url, image: image, showShareSheet: $showShareSheet))
+            .sheet(isPresented: $showShareSheet) {
+                ShareSheet(activityItems: [imageModel.url])
+            }
+        
+        // TODO: Update ImageCarousel with serializer and processor
+        // .serialize(by: imageModel.serializer)
+        // .setProcessor(imageModel.processor)
+        
+    }
+}
+
+struct ZoomableScrollView<Content: View>: UIViewRepresentable {
+    
+    private var content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    func makeUIView(context: Context) -> UIScrollView {
+        let scrollView = UIScrollView()
+        scrollView.delegate = context.coordinator
+        scrollView.maximumZoomScale = 20
+        scrollView.minimumZoomScale = 1
+        scrollView.bouncesZoom = true
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.showsHorizontalScrollIndicator = false
+
+        let hostedView = context.coordinator.hostingController.view!
+        hostedView.translatesAutoresizingMaskIntoConstraints = true
+        hostedView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        hostedView.frame = scrollView.bounds
+        hostedView.backgroundColor = .clear
+        scrollView.addSubview(hostedView)
+
+        return scrollView
+    }
+
+    func makeCoordinator() -> Coordinator {
+        return Coordinator(hostingController: UIHostingController(rootView: self.content))
+    }
+
+    func updateUIView(_ uiView: UIScrollView, context: Context) {
+        context.coordinator.hostingController.rootView = self.content
+        assert(context.coordinator.hostingController.view.superview == uiView)
+    }
+
+    class Coordinator: NSObject, UIScrollViewDelegate {
+        var hostingController: UIHostingController<Content>
+
+        init(hostingController: UIHostingController<Content>) {
+          self.hostingController = hostingController
         }
+
+        func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+          return hostingController.view
+        }
+    }
+}
+
+struct ImageView: View {
+    
+    let urls: [URL?]
+    
+    @Environment(\.presentationMode) var presentationMode
+    
+    @State private var selectedIndex = 0
+    @State var showMenu = true
+    
+    var navBarView: some View {
+        VStack {
+            HStack {
+                Text(urls[selectedIndex]?.lastPathComponent ?? "")
+                    .bold()
+                
+                Spacer()
+                
+                Button(action: {
+                    presentationMode.wrappedValue.dismiss()
+                }, label: {
+                    Image(systemName: "xmark")
+                })
+            }
+            .padding()
+            
+            Divider()
+                .ignoresSafeArea()
+        }
+        .background(.regularMaterial)
+    }
+    
+    var tabViewIndicator: some View {
+        HStack(spacing: 10) {
+            ForEach(urls.indices, id: \.self) { index in
+                Capsule()
+                    .fill(index == selectedIndex ? Color(UIColor.label) : Color.secondary)
+                    .frame(width: 7, height: 7)
+            }
+        }
+        .padding()
+        .background(.regularMaterial)
+        .clipShape(Capsule())
     }
     
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            Color("DamusDarkGrey") // Or Color("DamusBlack")
-                .edgesIgnoringSafeArea(.all)
+        ZStack {
+            Color(.systemBackground)
+                .ignoresSafeArea()
             
-            HStack() {
-                Button {
-                    presentationMode.wrappedValue.dismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .foregroundColor(.white)
-                        .font(.largeTitle)
-                        .frame(width: 40, height: 40)
-                        .padding(20)
+            TabView(selection: $selectedIndex) {
+                ForEach(urls.indices, id: \.self) { index in
+                    ZoomableScrollView {
+                        ImageContainerView(url: urls[index])
+                            .aspectRatio(contentMode: .fit)
+                    }
+                    .ignoresSafeArea()
+                    .tag(index)
+                    .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
+                        presentationMode.wrappedValue.dismiss()
+                    }))
                 }
             }
-            .zIndex(1)
-            
-            VStack(alignment: .center) {
-                //Spacer()
-                    //.frame(height: 120)
-                
-                TabView {
-                    ForEach(urls, id: \.absoluteString) { url in
-                        VStack{
-                            //Color("DamusDarkGrey")
-                            Text(url.lastPathComponent)
-                                .foregroundColor(Color("DamusWhite"))
-                            
-                            KFAnimatedImage(url)
-                                .configure { view in
-                                    view.framePreloadCount = 3
-                                }
-                                .cacheOriginalImage()
-                                .imageModifier(ImageHandler(handler: $image))
-                                .loadDiskFileSynchronously()
-                                .scaleFactor(UIScreen.main.scale)
-                                .fade(duration: 0.1)
-                                .aspectRatio(contentMode: .fit)
-                                .tabItem {
-                                    Text(url.absoluteString)
-                                }
-                                .id(url.absoluteString)
-                                .modifier(ImageContextMenuModifier(url: url, image: image, showShareSheet: $showShareSheet))
-                                .sheet(isPresented: $showShareSheet) {
-                                    ShareSheet(activityItems: [url])
-                                }
-                                //.padding(100)
-                                .scaledToFit()
-                                .scaleEffect(self.scale * scaleState)
-                                .offset(x: offset.width + offsetState.width, y: offset.height + offsetState.height)
-                                .gesture(SimultaneousGesture(zoomGesture, dragGesture))
-                                .gesture(doubleTapGesture)
-                                .modifier(SwipeToDismissModifier(onDismiss: {
-                                    presentationMode.wrappedValue.dismiss()
-                                }))
-                            
-                        }.padding(.bottom, 50) // Ensure carousel appears beneath
+            .ignoresSafeArea()
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+            .onChange(of: selectedIndex, perform: { _ in
+                showMenu = true
+            })
+            .onTapGesture {
+                showMenu.toggle()
+            }
+            .overlay(
+                VStack {
+                    if showMenu {
+                        navBarView
+                        Spacer()
+                        
+                        if (urls.count > 1) {
+                            tabViewIndicator
+                        }
                     }
                 }
-            }
+                .animation(.easeInOut, value: showMenu)
+                .padding(
+                    .bottom,
+                    UIApplication
+                        .shared
+                        .connectedScenes
+                        .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
+                        .first { $0.isKeyWindow }?.safeAreaInsets.bottom
+                )
+            )
         }
-        .tabViewStyle(PageTabViewStyle())
     }
 }
 
@@ -205,13 +276,15 @@ struct ImageCarousel: View {
                     .foregroundColor(Color.clear)
                     .overlay {
                         KFAnimatedImage(url)
-                            .configure { view in
-                                view.framePreloadCount = 3
-                            }
+                            .callbackQueue(.dispatch(.global(qos: .background)))
+                            .processingQueue(.dispatch(.global(qos: .background)))
                             .cacheOriginalImage()
                             .loadDiskFileSynchronously()
                             .scaleFactor(UIScreen.main.scale)
                             .fade(duration: 0.1)
+                            .configure { view in
+                                view.framePreloadCount = 3
+                            }
                             .aspectRatio(contentMode: .fit)
                             .tabItem {
                                 Text(url.absoluteString)
