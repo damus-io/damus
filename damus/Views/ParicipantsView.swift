@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ParticipantsView: View {
     
-    let damus: DamusState
+    let damus_state: DamusState
     
     @Binding var references: [ReferencedId]
     @Binding var originalReferences: [ReferencedId]
@@ -31,12 +31,24 @@ struct ParticipantsView: View {
                 }
             }
             ForEach(originalReferences.pRefs) { participant in
+                let pubkey = participant.id
                 HStack {
-                    let pk = participant.ref_id
-                    let prof = damus.profiles.lookup(id: pk)
-                    Text(Profile.displayName(profile: prof, pubkey: pk))
+                    ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
+                    
+                    VStack(alignment: .leading) {
+                        let profile = damus_state.profiles.lookup(id: pubkey)
+                        ProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_friend_confirmed: false, show_nip5_domain: false)
+                        if let about = profile?.about {
+                            Text(FollowUserView.markdown.process(about))
+                                .lineLimit(3)
+                                .font(.footnote)
+                        }
+                    }
+                    
                     Spacer()
+                    
                     Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 30))
                         .foregroundColor(references.contains(participant) ? .purple : .gray)
                 }
                 .onTapGesture {
