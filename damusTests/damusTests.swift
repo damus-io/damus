@@ -105,6 +105,14 @@ class damusTests: XCTestCase {
         XCTAssertEqual(parsed[1].is_text, " br")
     }
     
+    func testNoParseUrlWithOnlyWhitespace() {
+        let testString = "https:// "
+        let parsed = parse_mentions(content: testString, tags: [])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed[0].is_text, testString)
+    }
+    
     func testParseMentionBlank() {
         let parsed = parse_mentions(content: "", tags: [["e", "event_id"]])
         

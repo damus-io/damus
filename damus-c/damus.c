@@ -31,14 +31,16 @@ static void make_cursor(struct cursor *c, const u8 *content, size_t len)
 
 static int consume_until_whitespace(struct cursor *cur, int or_end) {
     char c;
+    bool consumedAtLeastOne = false;
     
     while (cur->p < cur->end) {
         c = *cur->p;
         
-        if (is_whitespace(c))
+        if (is_whitespace(c) && consumedAtLeastOne)
             return 1;
         
         cur->p++;
+        consumedAtLeastOne = true;
     }
     
     return or_end;
