@@ -3,4 +3,4 @@
 /* Bundle name */
 "CFBundleName" = "damus";
 /* Privacy - Photo Library Additions Usage Description */
-"NSPhotoLibraryAddUsageDescription" = "\"Granting Damus access to your photo library allows you to save photos.";
+"NSPhotoLibraryAddUsageDescription" = "Granting Damus access to your photos allows you to save images.";

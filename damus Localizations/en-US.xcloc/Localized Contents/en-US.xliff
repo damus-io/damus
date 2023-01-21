@@ -16,8 +16,8 @@
         <note>Bundle name</note>
       </trans-unit>
       <trans-unit id="NSPhotoLibraryAddUsageDescription" xml:space="preserve">
-        <source>"Granting Damus access to your photo library allows you to save photos.</source>
-        <target>"Granting Damus access to your photo library allows you to save photos.</target>
+        <source>Granting Damus access to your photos allows you to save images.</source>
+        <target>Granting Damus access to your photos allows you to save images.</target>
         <note>Privacy - Photo Library Additions Usage Description</note>
       </trans-unit>
     </body>
@@ -285,6 +285,16 @@ Number of profiles a user is following.</note>
         <target>DM</target>
         <note>Navigation title for DM view, which is the English abbreviation for Direct Message.</note>
       </trans-unit>
+      <trans-unit id="DM Type" xml:space="preserve">
+        <source>DM Type</source>
+        <target>DM Type</target>
+        <note>DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet.</note>
+      </trans-unit>
+      <trans-unit id="DMs" xml:space="preserve">
+        <source>DMs</source>
+        <target>DMs</target>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
       <trans-unit id="Damus" xml:space="preserve">
         <source>Damus</source>
         <target>Damus</target>
@@ -507,11 +517,6 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       <trans-unit id="Private Key" xml:space="preserve">
         <source>Private Key</source>
         <target>Private Key</target>
-        <note>Label to indicate that the text below is the user's private key used by only the user themself as a secret to login to access their account.</note>
-      </trans-unit>
-      <trans-unit id="PrivateKey" xml:space="preserve">
-        <source>PrivateKey</source>
-        <target>PrivateKey</target>
         <note>Title of the secure field that holds the user's private key.</note>
       </trans-unit>
       <trans-unit id="Profile" xml:space="preserve">
@@ -589,6 +594,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Reposted</source>
         <target>Reposted</target>
         <note>Text indicating that the post was reposted (i.e. re-shared).</note>
+      </trans-unit>
+      <trans-unit id="Requests" xml:space="preserve">
+        <source>Requests</source>
+        <target>Requests</target>
+        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Reset" xml:space="preserve">
         <source>Reset</source>
