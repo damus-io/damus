@@ -62,6 +62,7 @@ struct ProfileZoomView: View {
                     .font(.subheadline)
                     .padding(.leading, 20)
             }
+            .zIndex(1)
 
             VStack(alignment: .center) {
 
