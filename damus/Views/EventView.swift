@@ -245,30 +245,10 @@ struct EventView: View {
                     .allowsHitTesting(!embedded)
                 
                 if !embedded {
-                    let blocks = event.blocks(damus.keypair.privkey).filter { block in
-                        guard case .mention(let mention) = block else {
-                            return false
-                        }
-                        
-                        guard case .event = mention.type else {
-                            return false
-                        }
-                        
-                        if mention.ref.key != "e" {
-                            return false
-                        }
-                        
-                        
-                        return true
-                    }
-                    
-                    /// MARK: - Preview
-                    if let firstBlock = blocks.first, case .mention(let mention) = firstBlock, mention.ref.key == "e" {
+                    if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
                         BuilderEventView(damus: damus, event_id: mention.ref.id)
                     }
-                }
-
-                if !embedded {
+                    
                     if has_action_bar {
                         if size == .selected {
                             Text("\(format_date(event.created_at))")
