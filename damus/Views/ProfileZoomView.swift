@@ -54,18 +54,14 @@ struct ProfileZoomView: View {
             Color("DamusDarkGrey") // Or Color("DamusBlack")
                 .edgesIgnoringSafeArea(.all)
             
-            HStack() {
-                Button {
-                    presentationMode.wrappedValue.dismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .foregroundColor(.white)
-                        .font(.largeTitle)
-                        .frame(width: 40, height: 40)
-                        .padding(20)
-                }
+            Button {
+                presentationMode.wrappedValue.dismiss()
+            } label: {
+                Image(systemName: "xmark")
+                    .foregroundColor(.white)
+                    .font(.subheadline)
+                    .padding(.leading, 20)
             }
-            .zIndex(1)
 
             VStack(alignment: .center) {
 
