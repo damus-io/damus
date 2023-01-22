@@ -118,7 +118,8 @@ struct ProfileView: View {
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
-    
+    @Environment(\.openURL) var openURL
+
     // We just want to have a white "< Home" text here, however,
     // setting the initialiser is causing issues, and it's late.
     // Ref: https://blog.techchee.com/navigation-bar-title-style-color-and-custom-back-button-in-swiftui/
@@ -202,7 +203,7 @@ struct ProfileView: View {
                 ShareButton
                     .offset(x: geo.size.width - 80.0, y: 50.0 )
             }.frame(height: BANNER_HEIGHT)
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 8.0) {
                 let data = damus_state.profiles.lookup(id: profile.pubkey)
                 let pfp_size: CGFloat = 90.0
                 
@@ -249,6 +250,10 @@ struct ProfileView: View {
                 
                 Text(ProfileView.markdown.process(data?.about ?? ""))
                     .font(.subheadline)
+                
+                if let url = data?.website_url {
+                    WebsiteLink(url: url)
+                }
                 
                 Divider()
                 
