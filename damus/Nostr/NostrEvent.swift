@@ -790,6 +790,7 @@ func inner_event_or_self(ev: NostrEvent) -> NostrEvent {
     return inner_ev
 }
 
+<<<<<<< HEAD
 
 func first_eref_mention(ev: NostrEvent, privkey: String?) -> Mention? {
     let blocks = ev.blocks(privkey).filter { block in
@@ -814,4 +815,22 @@ func first_eref_mention(ev: NostrEvent, privkey: String?) -> Mention? {
     }
     
     return nil
+}
+
+extension [ReferencedId] {
+    var pRefs: [ReferencedId] {
+        get {
+            self.filter { ref in
+                ref.key == "p"
+            }
+        }
+    }
+    
+    var eRefs: [ReferencedId] {
+        get {
+            self.filter { ref in
+                ref.key == "e"
+            }
+        }
+    }
 }
