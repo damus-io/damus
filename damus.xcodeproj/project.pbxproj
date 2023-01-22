@@ -190,6 +190,9 @@
 		3ACB685B297633BC00C46468 /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = "es-419.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		3ACB685E297633BC00C46468 /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = "es-419.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		3ACBCB77295FE5C70037388A /* TimeAgoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeAgoTests.swift; sourceTree = "<group>"; };
+		3AEABD20297CCFA8003F2975 /* de-DE */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "de-DE"; path = "de-DE.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		3AEABD21297CCFA8003F2975 /* de-DE */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "de-DE"; path = "de-DE.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		3AEABD22297CCFA8003F2975 /* de-DE */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = "de-DE"; path = "de-DE.lproj/Localizable.stringsdict"; sourceTree = "<group>"; };
 		4C06670028FC7C5900038D2A /* RelayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayView.swift; sourceTree = "<group>"; };
 		4C06670528FCB08600038D2A /* ImageCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCarousel.swift; sourceTree = "<group>"; };
 		4C06670828FDE64700038D2A /* damus-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "damus-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -817,6 +820,7 @@
 				Base,
 				"es-419",
 				"en-US",
+				"de-DE",
 			);
 			mainGroup = 4CE6DEDA27F7A08100C66700;
 			packageReferences = (
@@ -1052,6 +1056,7 @@
 			children = (
 				3A5C4575296A879E0032D398 /* es-419 */,
 				3A2B8B0A296A8982009CC16D /* en-US */,
+				3AEABD22297CCFA8003F2975 /* de-DE */,
 			);
 			name = Localizable.stringsdict;
 			sourceTree = "<group>";
@@ -1060,6 +1065,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				3ACB685B297633BC00C46468 /* es-419 */,
+				3AEABD20297CCFA8003F2975 /* de-DE */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -1068,6 +1074,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				3ACB685E297633BC00C46468 /* es-419 */,
+				3AEABD21297CCFA8003F2975 /* de-DE */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
