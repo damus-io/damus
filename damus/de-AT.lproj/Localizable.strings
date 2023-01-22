@@ -1,0 +1,493 @@
+/* Blank space to separate profile picture from profile editor form. */
+"   " = "61b6edf1108e6f396680a33b02486a70_tr";
+
+/* Description of how the nip05 identifier would be used for verification. */
+"'%@' at '%@' will be used for verification" = "'%@' bei '%@' wird zur Verifizierung benutzt werden.";
+
+/* Description of why the nip05 identifier is invalid. */
+"'%@' is an invalid nip05 identifier. It should look like an email." = "'%@' ist eine ungültige nip05 Kennzeichnung. Diese sollte wie eine Emailadresse aussehen. ";
+
+/* Navigation bar title for view that shows who is following a user. */
+"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "(Profile.displayName(profile: profile, pubkey: whos)) Follower";
+
+/* Navigation bar title for view that shows who a user is following. */
+"(who) following" = "(who) folgt";
+
+/* Prefix character to username. */
+"@" = "@";
+
+/* Amount of time that has passed since reply quote event occurred.
+Abbreviated version of a nostr public key. */
+"%@" = "%@";
+
+/* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
+Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
+"%@ %@" = "%@ %@";
+
+/* Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string. */
+"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. Ein Konto zu erstellen benötigt keine Telefonnummer, Emailadresse oder Name. Fang jetzt sofort ganz reibungslos an.";
+
+/* Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string. */
+"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. End-zu-End verschlüsselter privater Nachrichtenaustausch. Halte Tech-Riesen aus deinen PNs heraus";
+
+/* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
+"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Belohne Beiträge deiner Freunde und sammle Sats mit Bitcoin⚡️, der eigenen Währung des Internets.";
+
+/* Number of reposts.
+Number of profiles a user is following. */
+"%lld" = "%lld";
+
+/* Fraction of how many of the user's relay servers that are operational. */
+"%lld/%lld" = "%lld/%lld";
+
+/* Placeholder for event mention. */
+"< e >" = "< e >";
+
+/* Label to prompt for about text entry for user to describe about themself. */
+"About" = "Über";
+
+/* Label for About Me section of user profile form. */
+"About Me" = "Über mich";
+
+/* Placeholder text for About Me description. */
+"Absolute Boss" = "Absoluter Macher";
+
+/* Label to indicate the public ID of the account. */
+"Account ID" = "Konto ID";
+
+/* Button to add recommended relay server.
+   Button to confirm adding user inputted relay. */
+"Add" = "Hinzufügen";
+
+/* Label for section for adding a relay server. */
+"Add Relay" = "Relay hinzufügen";
+
+/* Any amount of sats */
+"Any" = "beliebig";
+
+/* Alert message to ask if user wants to repost a post. */
+"Are you sure you want to repost this?" = "Bist du sicher dass Du den Beitrag auf deinem Profil teilen möchtest?";
+
+/* Label for Banner Image section of user profile form. */
+"Banner Image" = "Bannerbild";
+
+/* Reminder to user that they should save their account information. */
+"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "Bevor wir anfangen, Du wirst deine Kontodaten sichern müssen, sonst wirst du dich in der Zukunft nicht mehr anmelden können wenn du Damus jemals deinstallierst.";
+
+/* Dropdown option label for Lightning wallet, Bitcoin Beach. */
+"Bitcoin Beach" = "Bitcoin Beach";
+
+/* Label for Bitcoin Lightning Tips section of user profile form. */
+"Bitcoin Lightning Tips" = "Bitcoin Lightning Zahlungen";
+
+/* Dropdown option label for Lightning wallet, Blixt Wallet */
+"Blixt Wallet" = "Blixt Wallet";
+
+/* Dropdown option label for Lightning wallet, Blue Wallet. */
+"Blue Wallet" = "Blue Wallet";
+
+/* Dropdown option label for Lightning wallet, Breez. */
+"Breez" = "Breez";
+
+/* Context menu option for broadcasting the user's note to all of the user's connected relay servers. */
+"Broadcast" = "Senden";
+
+/* Button to cancel out of posting a note.
+   Button to cancel out of reposting a post.
+   Button to cancel out of view adding user inputted relay.
+   Cancel out of logging out the user. */
+"Cancel" = "Abbrechen";
+
+/* Dropdown option label for Lightning wallet, Cash App. */
+"Cash App" = "Cash App";
+
+/* Navigation bar title for Chatroom view. */
+"Chat" = "Unterhaltungen";
+
+/* Button for clearing cached data. */
+"Clear" = "Löschen";
+
+/* Section title for clearing cached data. */
+"Clear Cache" = "Zwischenspeicher löschen";
+
+/* Label indicating that a user's key was copied. */
+"Copied" = "Kopiert";
+
+/* Button to copy a relay server address. */
+"Copy" = "Kopieren";
+
+/* Context menu option for copying the ID of the account that created the note. */
+"Copy Account ID" = "Konto ID kopieren";
+
+/* Context menu option to copy an image into clipboard.
+   Context menu option to copy an image to clipboard. */
+"Copy Image" = "Bild kopieren";
+
+/* Context menu option to copy the URL of an image into clipboard. */
+"Copy Image URL" = "Bild URL kopieren";
+
+/* Title of section for copying a Lightning invoice identifier. */
+"Copy invoice" = "Zahlungsdaten kopieren";
+
+/* Context menu option for copying a user's Lightning URL. */
+"Copy LNURL" = "LNURL kopieren";
+
+/* Context menu option for copying the ID of the note. */
+"Copy Note ID" = "Notiz ID kopieren";
+
+/* Context menu option for copying the JSON text from the note. */
+"Copy Note JSON" = "Notiz JSON kopieren";
+
+/* Context menu option for copying the text from an note. */
+"Copy Text" = "Text kopieren";
+
+/* Context menu option for copying the ID of the user who created the note. */
+"Copy User ID" = "Benutzer ID kopieren";
+
+/* Button to create account. */
+"Create" = "Erstellen";
+
+/* Button to create an account. */
+"Create Account" = "Konto erstellen";
+
+/* Example description about Bitcoin creator(s), Satoshi Nakamoto. */
+"Creator(s) of Bitcoin. Absolute legend." = "Erfinder von Bitcoin. Absolute Legende(n).";
+
+/* Name of the app, shown on the first screen when user is not logged in. */
+"Damus" = "Damus";
+
+/* Button to pay a Lightning invoice with the user's default Lightning wallet. */
+"Default Wallet" = "Voreingestelltes Wallet";
+
+/* Button to delete a relay server that the user connects to. */
+"Delete" = "Löschen";
+
+/* Button to dismiss a text field alert. */
+"Dismiss" = "Schließen";
+
+/* Label to prompt display name entry. */
+"Display Name" = "Profilname";
+
+/* Navigation title for DM view, which is the English abbreviation for Direct Message. */
+"DM" = "PN";
+
+/* Button to dismiss wallet selection view for paying Lightning invoice. */
+"Done" = "Fertig";
+
+/* Heading indicating that this application allows users to earn money. */
+"Earn Money" = "Verdiene Geld";
+
+/* Button to edit user's profile. */
+"Edit" = "Bearbeiten";
+
+/* Heading indicating that this application keeps private messaging end-to-end encrypted. */
+"Encrypted" = "Verschlüsselt";
+
+/* Navigation title for view of encrypted DMs, where DM is an English abbreviation for Direct Message. */
+"Encrypted DMs" = "Verschlüsselte PNs";
+
+/* Prompt for user to enter an account key to login. */
+"Enter your account key to login:" = "Gib deinen Kontoschlüssel ein um dich anzumelden:";
+
+/* Error message indicating why saving keys failed. */
+"Error: %@" = "Fehler: %@";
+
+/* Filter state for seeing either only posts, or posts & replies. */
+"Filter State" = "Filter Einstellung";
+
+/* Button to follow a user. */
+"Follow" = "Folgen";
+
+/* Label describing followers of a user. */
+"Followers" = "Follower";
+
+/* Text to indicate that the button next to it is in a state that indicates that it is in the process of following a profile.
+Part of a larger sentence to describe how many profiles a user is following. */
+"Following" = "Folgt";
+
+/* Label to indicate that the user is in the process of following another user. */
+"Following..." = "Folge…";
+
+/* Text to indicate that button next to it is in a state that will follow a profile when tapped. */
+"Follows" = "Folgt";
+
+/* Navigation bar title for Global view where posts from all connected relay servers appear. */
+"Global" = "Weltweit";
+
+/* Navigation link to go to post referenced by hex code. */
+"Goto post %@" = "Gehe zum Beitrag %@";
+
+/* Navigation link to go to profile. */
+"Goto profile %@" = "Gehe zum Profil %@";
+
+/* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
+"Home" = "Heim";
+
+/* Placeholder example text for profile picture URL. */
+"https://example.com/pic.jpg" = "https://beispiel.at/bild.jpg";
+
+/* Placeholder example text for website URL for user profile. */
+"https://jb55.com" = "https://jb55.com";
+
+/* Error message indicating that an invalid account key was entered for login. */
+"Invalid key" = "Ungültiger Schlüssel";
+
+/* Placeholder example text for identifier used for NIP-05 verification. */
+"jb55@jb55.com" = "jb55@jb55.com";
+
+/* Moves the post button to the left side of the screen */
+"Left Handed" = "Linkshändig";
+
+/* Button to complete account creation and start using the app. */
+"Let's go!" = "Lass uns loslegen!";
+
+/* Placeholder text for entry of Lightning Address or LNURL. */
+"Lightning Address or LNURL" = "Lightning-Adresse oder LNURL";
+
+/* Indicates that the view is for paying a Lightning invoice. */
+"Lightning Invoice" = "Lightning-Rechnung";
+
+/* Dropdown option label for Lightning wallet, LNLink. */
+"LNLink" = "LNLink";
+
+/* Dropdown option label for system default for Lightning wallet. */
+"Local default" = "System-Standard";
+
+/* Button to log into account.
+   Button to log into an account. */
+"Login" = "Einloggen";
+
+/* Alert for logging out the user.
+   Button for logging out the user.
+   Button to logout the user. */
+"Logout" = "Ausloggen";
+
+/* Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out. */
+"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "Stelle sicher, dass du deinen nsec-Schlüssel gespeichert hast, sonst wirst du den Zugang zu deinem Konto verlieren.";
+
+/* Dropdown option label for Lightning wallet, Muun. */
+"Muun" = "Muun";
+
+/* Label for NIP-05 Verification section of user profile form. */
+"NIP-05 Verification" = "NIP-05-Verifizierung";
+
+/* No search results. */
+"none" = "keine";
+
+/* Indicates that there are no notes in the timeline to view. */
+"Nothing to see here. Check back later!" = "Hier gibt es nichts zu sehen. Komm später wieder vorbei!";
+
+/* Navigation title for notifications. */
+"Notifications" = "Benachrichtigungen";
+
+/* String indicating that a given timestamp just occurred */
+"now" = "jetzt";
+
+/* Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key. */
+"nsec1..." = "nsec1...";
+
+/* Label indicating that a form input is optional. */
+"optional" = "optional";
+
+/* Button to pay a Lightning invoice. */
+"Pay" = "Bezahlen";
+
+/* Navigation bar title for view to pay Lightning invoice. */
+"Pay the Lightning invoice" = "Bezahle die Lightning-Rechnung";
+
+/* Dropdown option label for Lightning wallet, Phoenix. */
+"Phoenix" = "Phoenix";
+
+/* Button to post a note. */
+"Post" = "Veröffentlichen";
+
+/* Label for filter for seeing only posts (instead of posts and replies). */
+"Posts" = "Beiträge";
+
+/* Label for filter for seeing posts and replies (instead of only posts). */
+"Posts & Replies" = "Beiträge & Antworten";
+
+/* Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading. */
+"Private" = "Privat";
+
+/* Label to indicate that the text below is the user's private key used by only the user themself as a secret to login to access their account. */
+"Private Key" = "Privater Schlüssel";
+
+/* Title of the secure field that holds the user's private key. */
+"PrivateKey" = "Privater Schlüssel";
+
+/* Sidebar menu label for Profile view. */
+"Profile" = "Profil";
+
+/* Label for Profile Picture section of user profile form. */
+"Profile Picture" = "Profilbild";
+
+/* Section title for the user's public account ID. */
+"Public Account ID" = "Öffentliche Konto ID";
+
+/* Label indicating that the text is a user's public account key. */
+"Public key" = "Öffentlicher Schlüssel";
+
+/* Label indicating that the text is a user's public account key. */
+"Public Key" = "Öffentlicher Schlüssel";
+
+/* Prompt to ask user if the key they entered is a public key. */
+"Public Key?" = "Öffentlicher Schlüssel?";
+
+/* Navigation bar title for Reactions view. */
+"Reactions" = "Reaktionen";
+
+/* Section title for recommend relay servers that could be added as part of configuration */
+"Recommended Relays" = "Empfohlene Relays";
+
+/* Text field for relay server. Used for testing purposes. */
+"Relay" = "Relay";
+
+/* Sidebar menu label for Relay servers view */
+"Relays" = "Relays";
+
+/* Label to indicate that the user is replying to themself. */
+"Reply to self" = "Antwort an sich selbst";
+
+/* Label to indicate that the user is replying to 2 users. */
+"Replying to %@ & %@" = "Antwort an %1$@ & %2$@";
+
+/* Indicating that the user is replying to the following listed people. */
+"Replying to:" = "Antwort an:";
+
+/* Button to confirm reposting a post.
+   Title of alert for confirming to repost a post. */
+"Repost" = "Teilen";
+
+/* Text indicating that the post was reposted (i.e. re-shared). */
+"Reposted" = "Geteilt";
+
+/* Section title for resetting the user */
+"Reset" = "Zurücksetzen";
+
+/* Button to retry completing account creation after an error occurred. */
+"Retry" = "Erneut versuchen";
+
+/* Dropdown option label for Lightning wallet, River */
+"River" = "River";
+
+/* Example username of Bitcoin creator(s), Satoshi Nakamoto. */
+"satoshi" = "satoshi";
+
+/* Name of Bitcoin creator(s). */
+"Satoshi Nakamoto" = "Satoshi Nakamoto";
+
+/* Button for saving profile. */
+"Save" = "Speichern";
+
+/* Context menu option to save an image. */
+"Save Image" = "Bild sichern";
+
+/* Navigation link to search hashtag. */
+"Search hashtag: #%@" = "Hashtag suchen: #%@";
+
+/* Placeholder text to prompt entry of search query. */
+"Search..." = "Suchen...";
+
+/* Section title for user's secret account login key. */
+"Secret Account Login Key" = "Geheimer Konto Anmeldeschlüssel";
+
+/* Title of section for selecting a Lightning wallet to pay a Lightning invoice. */
+"Select a Lightning wallet" = "Wähle ein Lightning Wallet";
+
+/* Prompt selection of user's default wallet */
+"Select default wallet" = "Wähle das voreingestellte Wallet";
+
+/* Text prompt for user to send a message to the other user. */
+"Send a message to start the conversation..." = "Sende eine Nachricht um eine Unterhaltung zu beginnen...";
+
+/* Navigation title for Settings view.
+   Sidebar menu label for accessing the app settings */
+"Settings" = "Einstellungen";
+
+/* Button to share an image. */
+"Share" = "Teilen";
+
+/* Toggle to show or hide user's secret account login key. */
+"Show" = "Anzeigen";
+
+/* Toggle to show or hide selection of wallet. */
+"Show wallet selector" = "Wallet-Auswahl zeigen";
+
+/* Sidebar menu label to sign out of the account. */
+"Sign out" = "Abmelden";
+
+/* Dropdown option label for Lightning wallet, Strike. */
+"Strike" = "Strike";
+
+/* Warning that the inputted account key is a public key and the result of what happens because of it. */
+"This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Dies ist ein öffentlicher Schlüssel, mit dem Sie keine Beiträge verfassen oder in irgendeiner Weise interagieren können. Er wird verwendet, um Konten aus deren Perspektive zu betrachten.";
+
+/* Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key. */
+"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Dies ist ein Nostr-Schlüssel im alten Format. Es ist nicht eindeutig, ob es ein öffentlicher oder privater Schlüssel ist. Bitte aktiviere die Schaltfläche unten, wenn es ein öffentlicher Schlüssel ist.";
+
+/* Label to describe that a public key is the user's account ID and what they can do with it. */
+"This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "Dies ist deine Konto-ID, die du an deine Freunde weitergeben kannst, damit sie dir folgen können. Zum Kopieren anklicken.";
+
+/* Label to describe that a private key is the user's secret account key and what they should do with it. */
+"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Dies ist dein geheimer, privater Schlüssel. Du benötigst ihn, um auf dein Konto zuzugreifen. Gib den privaten Schlüssel an niemanden weiter! Speichere ihn in einem Passwort-Manager und bewahre ihn sicher auf!";
+
+/* Navigation bar title for note thread.
+   Navigation bar title for threaded event detail view. */
+"Thread" = "Thema";
+
+/* Text box prompt to ask user to type their post. */
+"Type your post here..." = "Schreibe deinen Beitrag hier...";
+
+/* Non-breaking space character to fill in blank space next to event action button icons. */
+"u{00A0}" = "u{00A0}";
+
+/* Button to unfollow a user. */
+"Unfollow" = "Entfolgen";
+
+/* Text to indicate that the button next to it is in  a state that indicates that it is in the process of unfollowing a profile. */
+"Unfollowing" = "Entfolgen...";
+
+/* Label to indicate that the user is in the process of unfollowing another user. */
+"Unfollowing..." = "Entfolgen...";
+
+/* Text to indicate that the button next to it is in a state that will unfollow a profile when tapped. */
+"Unfollows" = "Entfolgen";
+
+/* Label for Username section of user profile form.
+   Label to prompt username entry. */
+"Username" = "Benutzername";
+
+/* Sidebar menu label for Wallet view. */
+"Wallet" = "Wallet";
+
+/* Dropdown option label for Lightning wallet, Wallet Of Satoshi. */
+"Wallet Of Satoshi" = "Wallet Of Satoshi";
+
+/* Section title for selection of wallet. */
+"Wallet Selector" = "Wallet-Auswahl";
+
+/* Label for Website section of user profile form. */
+"Website" = "Website";
+
+/* Welcoming message to the reader. The variable is 'you', the reader. */
+"Welcome to the social network %@ control." = "Willkommen bei dem soziaen Netzwerk, das %@ kontrollierst.";
+
+/* Text to welcome user. */
+"Welcome, %@!" = "Willkommen, %@!";
+
+/* Placeholder example for relay server address. */
+"wss://some.relay.com" = "wss://irgendein.relay.at";
+
+/* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
+"you" = "Du";
+
+/* Label for Your Name section of user profile form. */
+"Your Name" = "Dein Name";
+
+/* Dropdown option label for Lightning wallet, Zebedee. */
+"Zebedee" = "Zebedee";
+
+/* Dropdown option label for Lightning wallet, Zeus LN. */
+"Zeus LN" = "Zeus LN";
+

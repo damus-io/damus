@@ -187,6 +187,9 @@
 		31D2E846295218AF006D67F8 /* Shimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shimmer.swift; sourceTree = "<group>"; };
 		3A2B8B0A296A8982009CC16D /* en-US */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = "en-US"; path = "en-US.lproj/Localizable.stringsdict"; sourceTree = "<group>"; };
 		3A5C4575296A879E0032D398 /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = "es-419"; path = "es-419.lproj/Localizable.stringsdict"; sourceTree = "<group>"; };
+		3A5EA10F297CCF6C00569477 /* de-AT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "de-AT"; path = "de-AT.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		3A5EA110297CCF6C00569477 /* de-AT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "de-AT"; path = "de-AT.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		3A5EA111297CCF6C00569477 /* de-AT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = "de-AT"; path = "de-AT.lproj/Localizable.stringsdict"; sourceTree = "<group>"; };
 		3ACB685B297633BC00C46468 /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = "es-419.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		3ACB685E297633BC00C46468 /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = "es-419.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		3ACBCB77295FE5C70037388A /* TimeAgoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeAgoTests.swift; sourceTree = "<group>"; };
@@ -817,6 +820,7 @@
 				Base,
 				"es-419",
 				"en-US",
+				"de-AT",
 			);
 			mainGroup = 4CE6DEDA27F7A08100C66700;
 			packageReferences = (
@@ -1052,6 +1056,7 @@
 			children = (
 				3A5C4575296A879E0032D398 /* es-419 */,
 				3A2B8B0A296A8982009CC16D /* en-US */,
+				3A5EA111297CCF6C00569477 /* de-AT */,
 			);
 			name = Localizable.stringsdict;
 			sourceTree = "<group>";
@@ -1060,6 +1065,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				3ACB685B297633BC00C46468 /* es-419 */,
+				3A5EA10F297CCF6C00569477 /* de-AT */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -1068,6 +1074,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				3ACB685E297633BC00C46468 /* es-419 */,
+				3A5EA110297CCF6C00569477 /* de-AT */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
