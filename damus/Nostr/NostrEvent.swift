@@ -790,8 +790,6 @@ func inner_event_or_self(ev: NostrEvent) -> NostrEvent {
     return inner_ev
 }
 
-<<<<<<< HEAD
-
 func first_eref_mention(ev: NostrEvent, privkey: String?) -> Mention? {
     let blocks = ev.blocks(privkey).filter { block in
         guard case .mention(let mention) = block else {
