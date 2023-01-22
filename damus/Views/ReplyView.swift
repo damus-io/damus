@@ -47,7 +47,7 @@ struct ReplyView: View {
             ScrollView {
                 EventView(damus: damus, event: replying_to, has_action_bar: false)
             }
-            PostView(replying_to: replying_to, references: references)
+            PostView(replying_to: replying_to, references: gather_reply_ids(our_pubkey: damus.pubkey, from: replying_to), damus_state: damus)
         }
         .onAppear {
             references =  gather_reply_ids(our_pubkey: damus.pubkey, from: replying_to)

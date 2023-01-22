@@ -171,6 +171,7 @@
 		4CF0ABEC29844B4700D66079 /* AnyDecodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABEB29844B4700D66079 /* AnyDecodable.swift */; };
 		4CF0ABEE29844B5500D66079 /* AnyEncodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABED29844B5500D66079 /* AnyEncodable.swift */; };
 		4CF0ABF029857E9200D66079 /* Bech32Object.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABEF29857E9200D66079 /* Bech32Object.swift */; };
+		4CF0ABF62985CD5500D66079 /* UserSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABF52985CD5500D66079 /* UserSearch.swift */; };
 		4FE60CDD295E1C5E00105A1F /* Wallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE60CDC295E1C5E00105A1F /* Wallet.swift */; };
 		5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FCB2984ACA60072348F /* QRCodeView.swift */; };
 		6439E014296790CF0020672B /* ProfileZoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6439E013296790CF0020672B /* ProfileZoomView.swift */; };
@@ -426,6 +427,7 @@
 		4CF0ABEB29844B4700D66079 /* AnyDecodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyDecodable.swift; sourceTree = "<group>"; };
 		4CF0ABED29844B5500D66079 /* AnyEncodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyEncodable.swift; sourceTree = "<group>"; };
 		4CF0ABEF29857E9200D66079 /* Bech32Object.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32Object.swift; sourceTree = "<group>"; };
+		4CF0ABF52985CD5500D66079 /* UserSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSearch.swift; sourceTree = "<group>"; };
 		4FE60CDC295E1C5E00105A1F /* Wallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wallet.swift; sourceTree = "<group>"; };
 		5C513FCB2984ACA60072348F /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		6439E013296790CF0020672B /* ProfileZoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileZoomView.swift; sourceTree = "<group>"; };
@@ -587,6 +589,7 @@
 		4C75EFA227FA576C0006080F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4CF0ABF42985CD4200D66079 /* Posting */,
 				4CF0ABDF2981A83000D66079 /* Muting */,
 				4CC7AAEE297F11B300430951 /* Events */,
 				3AA24800297E3DAE0090C62D /* Reposts */,
@@ -846,6 +849,14 @@
 			path = AnyCodable;
 			sourceTree = "<group>";
 		};
+		4CF0ABF42985CD4200D66079 /* Posting */ = {
+			isa = PBXGroup;
+			children = (
+				4CF0ABF52985CD5500D66079 /* UserSearch.swift */,
+			);
+			path = Posting;
+			sourceTree = "<group>";
+		};
 		F7F0BA23297892AE009531F3 /* Modifiers */ = {
 			isa = PBXGroup;
 			children = (
@@ -1014,6 +1025,7 @@
 				4C216F34286F5ACD00040376 /* DMView.swift in Sources */,
 				4C3EA64428FF558100C48A62 /* sha256.c in Sources */,
 				4CE4F9E1285287B800C00DD9 /* TextFieldAlert.swift in Sources */,
+				4CF0ABF62985CD5500D66079 /* UserSearch.swift in Sources */,
 				4C363AA828297703006E126D /* InsertSort.swift in Sources */,
 				4C285C86283892E7008A31F1 /* CreateAccountModel.swift in Sources */,
 				4C64987C286D03E000EAE2B3 /* DirectMessagesView.swift in Sources */,

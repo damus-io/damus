@@ -16,10 +16,11 @@ let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Tex
 
 struct PostView: View {
     @State var post: String = ""
-
-    let replying_to: NostrEvent?
     @FocusState var focus: Bool
+    
+    let replying_to: NostrEvent?
     let references: [ReferencedId]
+    let damus_state: DamusState
 
     @Environment(\.presentationMode) var presentationMode
 
@@ -74,6 +75,7 @@ struct PostView: View {
                 TextEditor(text: $post)
                     .focused($focus)
                     .textInputAutocapitalization(.sentences)
+
                 if post.isEmpty {
                     Text(POST_PLACEHOLDER)
                         .padding(.top, 8)
@@ -81,6 +83,14 @@ struct PostView: View {
                         .foregroundColor(Color(uiColor: .placeholderText))
                         .allowsHitTesting(false)
                 }
+            }
+
+            // This if-block observes @ for tagging
+            if let searching = get_searching_string(post) {
+                VStack {
+                    Spacer()
+                    UserSearch(damus_state: damus_state, search: searching, post: $post)
+                }.zIndex(1)
             }
         }
         .onAppear() {
@@ -92,3 +102,23 @@ struct PostView: View {
     }
 }
 
+func get_searching_string(_ post: String) -> String? {
+    guard let last_word = post.components(separatedBy: .whitespacesAndNewlines).last else {
+        return nil
+    }
+    
+    guard last_word.count >= 2 else {
+        return nil
+    }
+    
+    guard last_word.first! == "@" else {
+        return nil
+    }
+    
+    // don't include @npub... strings
+    guard last_word.count != 64 else {
+        return nil
+    }
+    
+    return String(last_word.dropFirst())
+}
