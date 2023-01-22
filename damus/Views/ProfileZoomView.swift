@@ -54,23 +54,20 @@ struct ProfileZoomView: View {
             Color("DamusDarkGrey") // Or Color("DamusBlack")
                 .edgesIgnoringSafeArea(.all)
             
-            HStack() {
-                Button {
-                    presentationMode.wrappedValue.dismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .foregroundColor(.white)
-                        .font(.largeTitle)
-                        .frame(width: 40, height: 40)
-                        .padding(20)
-                }
+            Button {
+                presentationMode.wrappedValue.dismiss()
+            } label: {
+                Image(systemName: "xmark")
+                    .foregroundColor(.white)
+                    .font(.subheadline)
+                    .padding(.leading, 20)
             }
             .zIndex(1)
 
             VStack(alignment: .center) {
-                Spacer()
-                    .frame(height: 120)
 
+                Spacer()
+                
                 ProfilePicView(pubkey: pubkey, size: 200.0, highlight: .none, profiles: profiles)
                     .padding(100)
                     .scaledToFit()
@@ -81,6 +78,8 @@ struct ProfileZoomView: View {
                     .modifier(SwipeToDismissModifier(minDistance: nil, onDismiss: {
                         presentationMode.wrappedValue.dismiss()
                     }))
+                
+                Spacer()
 
             }
         }

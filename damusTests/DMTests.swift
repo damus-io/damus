@@ -50,7 +50,8 @@ final class DMTests: XCTestCase {
     
     func testDMSortOrder() throws {
         let notif = NewEventsBits()
-        let model = DirectMessagesModel()
+        let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
+        let model = DirectMessagesModel(our_pubkey: pubkey)
         
         let now = Int64(Date().timeIntervalSince1970)
         

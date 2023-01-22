@@ -91,7 +91,7 @@ struct ConfigView: View {
                     Section(NSLocalizedString("Secret Account Login Key", comment: "Section title for user's secret account login key.")) {
                         HStack {
                             if show_privkey == false {
-                                SecureField(NSLocalizedString("PrivateKey", comment: "Title of the secure field that holds the user's private key."), text: $privkey)
+                                SecureField(NSLocalizedString("Private Key", comment: "Title of the secure field that holds the user's private key."), text: $privkey)
                                     .disabled(true)
                             } else {
                                 Text(sec)

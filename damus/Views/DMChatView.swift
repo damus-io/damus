@@ -158,7 +158,7 @@ struct DMChatView_Previews: PreviewProvider {
     static var previews: some View {
         let ev = NostrEvent(content: "hi", pubkey: "pubkey", kind: 1, tags: [])
 
-        let model = DirectMessageModel(events: [ev])
+        let model = DirectMessageModel(events: [ev], our_pubkey: "pubkey")
 
         DMChatView(damus_state: test_damus_state(), pubkey: "pubkey")
             .environmentObject(model)

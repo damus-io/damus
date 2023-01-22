@@ -1,3 +1,23 @@
+## [1.0.0-8] - 2023-01-22
+
+### Added
+
+- Show website on profiles (William Casarin)
+- Add the ability to choose participants when replying (Joel Klabo)
+- Translations for de_AT, de_DE, tr_TR, fr_FR (William Casarin)
+- Add DM Message Requests (William Casarin)
+
+
+### Fixed
+
+- Fix commands and emojis getting included in hashtags (William Casarin)
+- Fix duplicate post buttons when swiping tabs (Thomas Rademaker)
+- Show embedded note references (William Casarin)
+
+
+[1.0.0-8]: https://github.com/damus-io/damus/releases/tag/v1.0.0-8
+
+
 ## [1.0.0-7] - 2023-01-20
 
 ### Added
