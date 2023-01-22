@@ -33,10 +33,23 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
 }
 
 struct InnerProfilePicView: View {
-    let url: URL?
     let pubkey: String
     let size: CGFloat
     let highlight: Highlight
+    
+    @ObservedObject var imageModel: KFImageModel
+    
+    init(url: URL?, fallbackUrl: URL?, pubkey: String, size: CGFloat, highlight: Highlight) {
+        self.pubkey = pubkey
+        self.size = size
+        self.highlight = highlight
+        self.imageModel = KFImageModel(
+            url: url,
+            fallbackUrl: fallbackUrl,
+            maxByteSize: 1000000,
+            downsampleSize: CGSize(width: 200, height: 200)
+        )
+    }
 
     var PlaceholderColor: Color {
         return id_to_color(pubkey)
@@ -53,11 +66,13 @@ struct InnerProfilePicView: View {
     var body: some View {
         ZStack {
             Color(uiColor: .systemBackground)
-            
-            KFAnimatedImage(url)
+    
+            KFAnimatedImage(imageModel.url)
                 .callbackQueue(.dispatch(.global(qos: .background)))
                 .processingQueue(.dispatch(.global(qos: .background)))
-                .appendProcessor(LargeImageProcessor())
+                .serialize(by: imageModel.serializer)
+                .setProcessor(imageModel.processor)
+                .cacheOriginalImage()
                 .configure { view in
                     view.framePreloadCount = 1
                 }
@@ -67,6 +82,10 @@ struct InnerProfilePicView: View {
                 .scaleFactor(UIScreen.main.scale)
                 .loadDiskFileSynchronously()
                 .fade(duration: 0.1)
+                .onFailure { _ in
+                    imageModel.downloadFailed()
+                }
+                .id(imageModel.refreshID)
         }
         .frame(width: size, height: size)
         .clipShape(Circle())
@@ -91,7 +110,7 @@ struct ProfilePicView: View {
     }
     
     var body: some View {
-        InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), pubkey: pubkey, size: size, highlight: highlight)
+        InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: size, highlight: highlight)
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let updated = notif.object as! ProfileUpdate
 
@@ -106,33 +125,6 @@ struct ProfilePicView: View {
     }
 }
 
-struct LargeImageProcessor: ImageProcessor {
-    
-    let identifier: String = "com.damus.largeimageprocessor"
-    let maxSize: Int = 1000000
-    let downsampleSize = CGSize(width: 200, height: 200)
-    
-    func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
-        
-        switch item {
-        case .image(let image):
-            guard let data = image.kf.data(format: .unknown) else {
-                return nil
-            }
-            
-            if data.count > maxSize {
-                return KingfisherWrapper.downsampledImage(data: data, to: downsampleSize, scale: options.scaleFactor)
-            }
-            return image
-        case .data(let data):
-            if data.count > maxSize {
-                return KingfisherWrapper.downsampledImage(data: data, to: downsampleSize, scale: options.scaleFactor)
-            }
-            return KFCrossPlatformImage(data: data)
-        }
-    }
-}
-
 func get_profile_url(picture: String?, pubkey: String, profiles: Profiles) -> URL {
     let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
     if let url = URL(string: pic) {
@@ -144,7 +136,7 @@ func get_profile_url(picture: String?, pubkey: String, profiles: Profiles) -> UR
 func make_preview_profiles(_ pubkey: String) -> Profiles {
     let profiles = Profiles()
     let picture = "http://cdn.jb55.com/img/red-me.jpg"
-    let profile = Profile(name: "jb55", display_name: "William Casarin", about: "It's me", picture: picture, website: "https://jb55.com", lud06: nil, lud16: nil, nip05: "jb55.com")
+    let profile = Profile(name: "jb55", display_name: "William Casarin", about: "It's me", picture: picture, banner: "", website: "https://jb55.com", lud06: nil, lud16: nil, nip05: "jb55.com")
     let ts_profile = TimestampedProfile(profile: profile, timestamp: 0)
     profiles.add(id: pubkey, profile: ts_profile)
     return profiles

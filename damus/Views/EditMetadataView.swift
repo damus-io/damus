@@ -8,6 +8,7 @@
 import SwiftUI
 
 let PPM_SIZE: CGFloat = 80.0
+let BANNER_HEIGHT: CGFloat = 150.0;
 
 func isHttpsUrl(_ string: String) -> Bool {
     let urlRegEx = "^https://.*$"
@@ -56,12 +57,14 @@ struct EditMetadataView: View {
     @State var display_name: String
     @State var about: String
     @State var picture: String
+    @State var banner: String
     @State var nip05: String
     @State var name: String
     @State var ln: String
     @State var website: String
     
     @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) var colorScheme
     
     init (damus_state: DamusState) {
         self.damus_state = damus_state
@@ -72,9 +75,14 @@ struct EditMetadataView: View {
         _about = State(initialValue: data?.about ?? "")
         _website = State(initialValue: data?.website ?? "")
         _picture = State(initialValue: data?.picture ?? "")
+        _banner = State(initialValue: data?.banner ?? "")
         _nip05 = State(initialValue: data?.nip05 ?? "")
         _ln = State(initialValue: data?.lud16 ?? data?.lud06 ?? "")
     }
+    
+    func imageBorderColor() -> Color {
+            colorScheme == .light ? Color("DamusWhite") : Color("DamusBlack")
+        }
     
     func save() {
         let metadata = NostrMetadata(
@@ -84,6 +92,7 @@ struct EditMetadataView: View {
             website: website,
             nip05: nip05.isEmpty ? nil : nip05,
             picture: picture.isEmpty ? nil : picture,
+            banner: banner.isEmpty ? nil : banner,
             lud06: ln.contains("@") ? nil : ln,
             lud16: ln.contains("@") ? ln : nil
         );
@@ -99,40 +108,65 @@ struct EditMetadataView: View {
         return NIP05.parse(nip05)
     }
     
+    var TopSection: some View {
+        ZStack(alignment: .top) {
+            GeometryReader { geo in
+                BannerImageView(pubkey: damus_state.pubkey, profiles: damus_state.profiles)
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: geo.size.width, height: BANNER_HEIGHT)
+                    .clipped()
+            }.frame(height: BANNER_HEIGHT)
+            VStack(alignment: .leading) {
+                let pfp_size: CGFloat = 90.0
+
+                HStack(alignment: .center) {
+                    ProfilePicView(pubkey: damus_state.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles)
+                        .offset(y: -(pfp_size/2.0)) // Increase if set a frame
+
+                   Spacer()
+                }.padding(.bottom,-(pfp_size/2.0))
+            }
+            .padding(.horizontal,18)
+            .padding(.top,BANNER_HEIGHT)
+        }
+    }
+    
     var body: some View {
         VStack(alignment: .leading) {
-            HStack {
-                Spacer()
-                InnerProfilePicView(url: URL(string: picture), pubkey: damus_state.pubkey, size: PPM_SIZE, highlight: .none)
-                Spacer()
-            }
+            TopSection
             Form {
-                Section("Your Name") {
+                Section(NSLocalizedString("Your Name", comment: "Label for Your Name section of user profile form.")) {
                     TextField("Satoshi Nakamoto", text: $display_name)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }
                 
-                Section("Username") {
+                Section(NSLocalizedString("Username", comment: "Label for Username section of user profile form.")) {
                     TextField("satoshi", text: $name)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
 
                 }
                 
-                Section ("Profile Picture") {
-                    TextField("https://example.com/pic.jpg", text: $picture)
+                Section (NSLocalizedString("Profile Picture", comment: "Label for Profile Picture section of user profile form.")) {
+                    TextField(NSLocalizedString("https://example.com/pic.jpg", comment: "Placeholder example text for profile picture URL."), text: $picture)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }
                 
-                Section("Website") {
-                    TextField("https://jb55.com", text: $website)
+                Section (NSLocalizedString("Banner Image", comment: "Label for Banner Image section of user profile form.")) {
+                                    TextField(NSLocalizedString("https://example.com/pic.jpg", comment: "Placeholder example text for profile picture URL."), text: $banner)
+                                        .autocorrectionDisabled(true)
+                                        .textInputAutocapitalization(.never)
+                                }
+                
+                Section(NSLocalizedString("Website", comment: "Label for Website section of user profile form.")) {
+                    TextField(NSLocalizedString("https://jb55.com", comment: "Placeholder example text for website URL for user profile."), text: $website)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }
                 
-                Section("About Me") {
+                Section(NSLocalizedString("About Me", comment: "Label for About Me section of user profile form.")) {
                     let placeholder = NSLocalizedString("Absolute Boss", comment: "Placeholder text for About Me description.")
                     ZStack(alignment: .topLeading) {
                         TextEditor(text: $about)
@@ -146,33 +180,33 @@ struct EditMetadataView: View {
                     }
                 }
                 
-                Section("Bitcoin Lightning Tips") {
-                    TextField("Lightning Address or LNURL", text: $ln)
+                Section(NSLocalizedString("Bitcoin Lightning Tips", comment: "Label for Bitcoin Lightning Tips section of user profile form.")) {
+                    TextField(NSLocalizedString("Lightning Address or LNURL", comment: "Placeholder text for entry of Lightning Address or LNURL."), text: $ln)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }
                                 
                 Section(content: {
-                    TextField("jb55@jb55.com", text: $nip05)
+                    TextField(NSLocalizedString("jb55@jb55.com", comment: "Placeholder example text for identifier used for NIP-05 verification."), text: $nip05)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }, header: {
-                    Text("NIP-05 Verification")
+                    Text("NIP-05 Verification", comment: "Label for NIP-05 Verification section of user profile form.")
                 }, footer: {
                     if let parts = nip05_parts {
-                        Text(String.localizedStringWithFormat("'%@' at '%@' will be used for verification", parts.username, parts.host))
+                        Text("'\(parts.username)' at '\(parts.host)' will be used for verification", comment: "Description of how the nip05 identifier would be used for verification.")
                     } else {
-                        Text(String.localizedStringWithFormat("'%@' is an invalid nip05 identifier. It should look like an email.", nip05))
+                        Text("'\(nip05)' is an invalid nip05 identifier. It should look like an email.", comment: "Description of why the nip05 identifier is invalid.")
                     }
                 })
 
-                Button("Save") {
+                Button(NSLocalizedString("Save", comment: "Button for saving profile.")) {
                     save()
                     dismiss()
                 }
             }
         }
-        .navigationTitle("Edit Profile")
+        .ignoresSafeArea()
     }
 }
 

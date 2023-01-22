@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "nostr-hello-outline-black.png",
+      "filename" : "damus-home@1x.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "nostr-hello-outline-black@2x.png",
+      "filename" : "damus-home@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "nostr-hello-outline-black@3x.png",
+      "filename" : "damus-home@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

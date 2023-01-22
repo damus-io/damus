@@ -53,7 +53,7 @@ struct DirectMessagesView: View {
     
     var body: some View {
         MainContent
-            .navigationTitle("Encrypted DMs")
+            .navigationTitle(NSLocalizedString("Encrypted DMs", comment: "Navigation title for view of encrypted DMs, where DM is an English abbreviation for Direct Message."))
     }
 }
 

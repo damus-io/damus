@@ -15,8 +15,6 @@
 			</array>
 		</dict>
 	</array>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>&quot;Granting Damus access to your photo library allows you to save photos.</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>river</string>

@@ -142,14 +142,14 @@ struct DMChatView: View {
 
                 Footer
             }
-            Text("Send a message to start the conversation...")
+            Text("Send a message to start the conversation...", comment: "Text prompt for user to send a message to the other user.")
             .lineLimit(nil)
             .multilineTextAlignment(.center)
             .padding(.horizontal, 40)
             .opacity(((dms.events.count == 0) ? 1.0 : 0.0))
             .foregroundColor(.gray)
         }
-        .navigationTitle("DM")
+        .navigationTitle(NSLocalizedString("DM", comment: "Navigation title for DM view, which is the English abbreviation for Direct Message."))
         .toolbar { Header }
     }
 }
@@ -166,7 +166,7 @@ struct DMChatView_Previews: PreviewProvider {
 }
 
 
-func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair) -> NostrEvent?
+func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair, created_at: Int64? = nil) -> NostrEvent?
 {
     guard let privkey = keypair.privkey else {
         return nil
@@ -181,7 +181,9 @@ func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keyp
         return nil
     }
     let enc_content = encode_dm_base64(content: enc_message.bytes, iv: iv)
-    let ev = NostrEvent(content: enc_content, pubkey: keypair.pubkey, kind: 4, tags: tags)
+    let created = created_at ?? Int64(Date().timeIntervalSince1970)
+    let ev = NostrEvent(content: enc_content, pubkey: keypair.pubkey, kind: 4, tags: tags, createdAt: created)
+    
     ev.calculate_id()
     ev.sign(privkey: privkey)
     return ev

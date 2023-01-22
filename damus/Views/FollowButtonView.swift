@@ -19,8 +19,7 @@ struct FollowButtonView: View {
             follow_state = perform_follow_btn_action(follow_state, target: target)
         } label: {
             Text(follow_btn_txt(follow_state))
-                .frame(height: 30)
-                .padding(.horizontal, 25)
+                .frame(width: 105, height: 30)
                 //.padding(.vertical, 10)
                 .font(.caption.weight(.bold))
                 .foregroundColor(follow_state == .unfollows ? filledTextColor() : borderColor())
@@ -70,16 +69,16 @@ struct FollowButtonPreviews: View {
     let target: FollowTarget = .pubkey("")
     var body: some View {
         VStack {
-            Text("Unfollows")
+            Text("Unfollows", comment: "Text to indicate that the button next to it is in a state that will unfollow a profile when tapped.")
             FollowButtonView(target: target, follow_state: .unfollows)
             
-            Text("Following")
+            Text("Following", comment: "Text to indicate that the button next to it is in a state that indicates that it is in the process of following a profile.")
             FollowButtonView(target: target, follow_state: .following)
             
-            Text("Follows")
+            Text("Follows", comment: "Text to indicate that button next to it is in a state that will follow a profile when tapped.")
             FollowButtonView(target: target, follow_state: .follows)
             
-            Text("Unfollowing")
+            Text("Unfollowing", comment: "Text to indicate that the button next to it is in  a state that indicates that it is in the process of unfollowing a profile.")
             FollowButtonView(target: target, follow_state: .unfollowing)
         }
     }

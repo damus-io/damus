@@ -172,20 +172,10 @@ struct EventView: View {
                     let booster_profile = ProfileView(damus_state: damus, profile: prof_model, followers: follow_model)
                     
                     NavigationLink(destination: booster_profile) {
-                        HStack {
-                            Image(systemName: "arrow.2.squarepath")
-                                .font(.footnote.weight(.bold))
-                                .foregroundColor(Color.gray)
-                            ProfileName(pubkey: event.pubkey, profile: prof, damus: damus, show_friend_confirmed: true)
-                                    .font(.footnote.weight(.bold))
-                                    .foregroundColor(Color.gray)
-                            Text("Boosted")
-                                .font(.footnote.weight(.bold))
-                                .foregroundColor(Color.gray)
-                        }
+                        Reposted(damus: damus, pubkey: event.pubkey, profile: prof)
                     }
                     .buttonStyle(PlainButtonStyle())
-                    TextEvent(inner_ev, pubkey: inner_ev.pubkey)
+                    TextEvent(inner_ev, pubkey: inner_ev.pubkey, booster_pubkey: event.pubkey)
                         .padding([.top], 1)
                 }
             } else {
@@ -195,7 +185,7 @@ struct EventView: View {
         }
     }
 
-    func TextEvent(_ event: NostrEvent, pubkey: String) -> some View {
+    func TextEvent(_ event: NostrEvent, pubkey: String, booster_pubkey: String? = nil) -> some View {
         let content = event.get_content(damus.keypair.privkey)
         
         return HStack(alignment: .top) {
@@ -242,7 +232,7 @@ struct EventView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                let should_show_img = should_show_images(contacts: damus.contacts, ev: event, our_pubkey: damus.pubkey)
+                let should_show_img = should_show_images(contacts: damus.contacts, ev: event, our_pubkey: damus.pubkey, booster_pubkey: booster_pubkey)
                 
                 NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, previews: damus.previews, show_images: should_show_img, artifacts: .just_content(content), size: self.size)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -261,6 +251,13 @@ struct EventView: View {
                     }
                     
                     let bar = make_actionbar_model(ev: event, damus: damus)
+                    
+                    if size == .selected && !bar.is_empty {
+                        EventDetailBar(state: damus, target: event.id, bar: bar)
+                        Divider()
+                            .padding([.bottom], 4)
+                    }
+                    
                     EventActionBar(damus_state: damus, event: event, bar: bar)
                 }
 
@@ -279,11 +276,14 @@ struct EventView: View {
 }
 
 // blame the porn bots for this code
-func should_show_images(contacts: Contacts, ev: NostrEvent, our_pubkey: String) -> Bool {
+func should_show_images(contacts: Contacts, ev: NostrEvent, our_pubkey: String, booster_pubkey: String? = nil) -> Bool {
     if ev.pubkey == our_pubkey {
         return true
     }
     if contacts.is_in_friendosphere(ev.pubkey) {
+        return true
+    }
+    if let boost_key = booster_pubkey, contacts.is_in_friendosphere(boost_key) {
         return true
     }
     return false
@@ -308,7 +308,7 @@ extension View {
             Button {
                     UIPasteboard.general.string = bech32_pubkey
             } label: {
-                Label("Copy Account ID", systemImage: "doc.on.doc")
+                Label(NSLocalizedString("Copy Account ID", comment: "Context menu option for copying the ID of the account that created the note."), systemImage: "doc.on.doc")
             }
         }
     }
@@ -318,31 +318,31 @@ extension View {
             Button {
                 UIPasteboard.general.string = event.get_content(privkey)
             } label: {
-                Label("Copy Text", systemImage: "doc.on.doc")
+                Label(NSLocalizedString("Copy Text", comment: "Context menu option for copying the text from an note."), systemImage: "doc.on.doc")
             }
 
             Button {
                 UIPasteboard.general.string = bech32_pubkey(pubkey) ?? pubkey
             } label: {
-                Label("Copy User ID", systemImage: "tag")
+                Label(NSLocalizedString("Copy User ID", comment: "Context menu option for copying the ID of the user who created the note."), systemImage: "person")
             }
 
             Button {
                 UIPasteboard.general.string = bech32_note_id(event.id) ?? event.id
             } label: {
-                Label("Copy Note ID", systemImage: "tag")
+                Label(NSLocalizedString("Copy Note ID", comment: "Context menu option for copying the ID of the note."), systemImage: "note.text")
             }
 
             Button {
                 UIPasteboard.general.string = event_to_json(ev: event)
             } label: {
-                Label("Copy Note JSON", systemImage: "note")
+                Label(NSLocalizedString("Copy Note JSON", comment: "Context menu option for copying the JSON text from the note."), systemImage: "j.square.on.square")
             }
 
             Button {
                 NotificationCenter.default.post(name: .broadcast_event, object: event)
             } label: {
-                Label("Broadcast", systemImage: "globe")
+                Label(NSLocalizedString("Broadcast", comment: "Context menu option for broadcasting the user's note to all of the user's connected relay servers."), systemImage: "globe")
             }
         }
 
@@ -380,13 +380,13 @@ func reply_desc(profiles: Profiles, event: NostrEvent) -> String {
     if names.count == 2 {
         if n > 2 {
             let othersCount = n - pubkeys.count
-            return String(format: NSLocalizedString("replying_to_two_and_others", comment: "Label to indicate that the user is replying to 2 users and others."), othersCount, names[0], names[1])
+            return String(format: NSLocalizedString("replying_to_two_and_others", comment: "Label to indicate that the user is replying to 2 users and others."), names[0], names[1], othersCount)
         }
-        return String.localizedStringWithFormat("Replying to %@ & %@", names[0], names[1])
+        return String(format: NSLocalizedString("Replying to %@ & %@", comment: "Label to indicate that the user is replying to 2 users."), names[0], names[1])
     }
 
     let othersCount = n - pubkeys.count
-    return String(format: NSLocalizedString("replying_to_one_and_others", comment: "Label to indicate that the user is replying to 1 user and others."), othersCount, names[0])
+    return String(format: NSLocalizedString("replying_to_one_and_others", comment: "Label to indicate that the user is replying to 1 user and others."), names[0], othersCount)
 }
 
 

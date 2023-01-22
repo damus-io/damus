@@ -310,7 +310,7 @@ struct ThreadV2View: View {
                         }
                     }
                 }.padding()
-            }.navigationBarTitle("Thread")
+            }.navigationBarTitle(NSLocalizedString("Thread", comment: "Navigation bar title for note thread."))
         }
     }
 }

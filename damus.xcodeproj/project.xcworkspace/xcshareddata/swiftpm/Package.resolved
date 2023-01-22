@@ -18,21 +18,20 @@
       }
     },
     {
-      "identity" : "shimmer",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/joshuajhomann/Shimmer",
-      "state" : {
-        "branch" : "master",
-        "revision" : "2fde687b3f1d9c5409c53da095d3686361e41343"
-      }
-    },
-    {
       "identity" : "starscream",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/daltoniam/Starscream",
       "state" : {
         "revision" : "df8d82047f6654d8e4b655d1b1525c64e1059d21",
         "version" : "4.0.4"
+      }
+    },
+    {
+      "identity" : "svgkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SVGKit/SVGKit",
+      "state" : {
+        "revision" : "e1f13e27b1e4c0ffe20e7d8d3984bf49c2a584d0"
       }
     },
     {

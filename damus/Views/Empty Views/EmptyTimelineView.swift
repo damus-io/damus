@@ -13,7 +13,7 @@ struct EmptyTimelineView: View {
             Image(systemName: "tray.fill")
                 .font(.system(size: 35))
                 .padding()
-            Text("Nothing to see here. Check back later!")
+            Text("Nothing to see here. Check back later!", comment: "Indicates that there are no notes in the timeline to view.")
                 .multilineTextAlignment(.center)
                 .font(.callout.weight(.medium))
         }

@@ -16,6 +16,10 @@ class ActionBarModel: ObservableObject {
     @Published var boosts: Int
     @Published var tips: Int64
     
+    static func empty() -> ActionBarModel {
+        return ActionBarModel(likes: 0, boosts: 0, tips: 0, our_like: nil, our_boost: nil, our_tip: nil)
+    }
+    
     init(likes: Int, boosts: Int, tips: Int64, our_like: NostrEvent?, our_boost: NostrEvent?, our_tip: NostrEvent?) {
         self.likes = likes
         self.boosts = boosts
@@ -23,6 +27,10 @@ class ActionBarModel: ObservableObject {
         self.our_like = our_like
         self.our_boost = our_boost
         self.our_tip = our_tip
+    }
+    
+    var is_empty: Bool {
+        return likes == 0 && boosts == 0 && tips == 0
     }
     
     var tipped: Bool {

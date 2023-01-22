@@ -18,11 +18,11 @@ class FollowersModel: ObservableObject {
     let sub_id: String = UUID().description
     let profiles_id: String = UUID().description
     
-    var count_display: String {
+    var count: Int? {
         guard let contacts = self.contacts else {
-            return "?"
+            return nil
         }
-        return "\(contacts.count)";
+        return contacts.count
     }
     
     init(damus_state: DamusState, target: String) {
@@ -73,31 +73,30 @@ class FollowersModel: ObservableObject {
     }
     
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
-        switch ev {
-        case .ws_event:
-            break
-        case .nostr_event(let nev):
-            switch nev {
-            case .event(let sub_id, let ev):
-                guard sub_id == self.sub_id || sub_id == self.profiles_id else {
-                    return
-                }
-                
-                if ev.known_kind == .contacts {
-                    handle_contact_event(ev)
-                } else if ev.known_kind == .metadata {
-                    process_metadata_event(profiles: damus_state.profiles, ev: ev)
-                }
-                
-            case .notice(let msg):
-                print("followingmodel notice: \(msg)")
-                
-            case .eose(let sub_id):
-                if sub_id == self.sub_id {
-                    load_profiles(relay_id: relay_id)
-                } else if sub_id == self.profiles_id {
-                    damus_state.pool.unsubscribe(sub_id: profiles_id, to: [relay_id])
-                }
+        guard case .nostr_event(let nev) = ev else {
+            return
+        }
+        
+        switch nev {
+        case .event(let sub_id, let ev):
+            guard sub_id == self.sub_id || sub_id == self.profiles_id else {
+                return
+            }
+            
+            if ev.known_kind == .contacts {
+                handle_contact_event(ev)
+            } else if ev.known_kind == .metadata {
+                process_metadata_event(profiles: damus_state.profiles, ev: ev)
+            }
+            
+        case .notice(let msg):
+            print("followingmodel notice: \(msg)")
+            
+        case .eose(let sub_id):
+            if sub_id == self.sub_id {
+                load_profiles(relay_id: relay_id)
+            } else if sub_id == self.profiles_id {
+                damus_state.pool.unsubscribe(sub_id: profiles_id, to: [relay_id])
             }
         }
     }
