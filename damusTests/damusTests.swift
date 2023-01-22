@@ -105,6 +105,14 @@ class damusTests: XCTestCase {
         XCTAssertEqual(parsed[1].is_text, " br")
     }
     
+    func testNoParseUrlWithOnlyWhitespace() {
+        let testString = "https:// "
+        let parsed = parse_mentions(content: testString, tags: [])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed[0].is_text, testString)
+    }
+    
     func testParseMentionBlank() {
         let parsed = parse_mentions(content: "", tags: [["e", "event_id"]])
         
@@ -135,6 +143,26 @@ class damusTests: XCTestCase {
         XCTAssertEqual(parsed[0].is_text, "some hashtag ")
         XCTAssertEqual(parsed[1].is_hashtag, "bitcoin")
         XCTAssertEqual(parsed[2].is_text, " derp")
+    }
+    
+    func testHashtagWithComma() {
+        let parsed = parse_mentions(content: "some hashtag #bitcoin, cool", tags: [])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 3)
+        XCTAssertEqual(parsed[0].is_text, "some hashtag ")
+        XCTAssertEqual(parsed[1].is_hashtag, "bitcoin")
+        XCTAssertEqual(parsed[2].is_text, ", cool")
+    }
+    
+    func testHashtagWithEmoji() {
+        let parsed = parse_mentions(content: "some hashtag #bitcoin☕️ cool", tags: [])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 3)
+        XCTAssertEqual(parsed[0].is_text, "some hashtag ")
+        XCTAssertEqual(parsed[1].is_hashtag, "bitcoin")
+        XCTAssertEqual(parsed[2].is_text, "☕️ cool")
     }
     
     func testParseHashtagEnd() {

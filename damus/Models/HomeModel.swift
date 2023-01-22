@@ -48,17 +48,19 @@ class HomeModel: ObservableObject {
 
     @Published var new_events: NewEventsBits = NewEventsBits()
     @Published var notifications: [NostrEvent] = []
-    @Published var dms: DirectMessagesModel = DirectMessagesModel()
+    @Published var dms: DirectMessagesModel
     @Published var events: [NostrEvent] = []
     @Published var loading: Bool = false
     @Published var signal: SignalModel = SignalModel()
 
     init() {
         self.damus_state = DamusState.empty
+        self.dms = DirectMessagesModel(our_pubkey: damus_state.pubkey)
     }
 
     init(damus_state: DamusState) {
         self.damus_state = damus_state
+        self.dms = DirectMessagesModel(our_pubkey: damus_state.pubkey)
     }
 
     var pool: RelayPool {
@@ -644,7 +646,7 @@ func handle_incoming_dm(prev_events: NewEventsBits, dms: DirectMessagesModel, ou
 
     if !found {
         inserted = true
-        let model = DirectMessageModel(events: [ev])
+        let model = DirectMessageModel(events: [ev], our_pubkey: our_pubkey)
         dms.dms.append((the_pk, model))
     }
 

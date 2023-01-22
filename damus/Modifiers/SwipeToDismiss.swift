@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SwipeToDismissModifier: ViewModifier {
+    let minDistance: CGFloat?
     var onDismiss: () -> Void
     @State private var offset: CGSize = .zero
 
@@ -16,7 +17,7 @@ struct SwipeToDismissModifier: ViewModifier {
             .offset(y: offset.height)
             .animation(.interactiveSpring(), value: offset)
             .simultaneousGesture(
-                DragGesture()
+                DragGesture(minimumDistance: minDistance ?? 10)
                     .onChanged { gesture in
                         if gesture.translation.width < 50 {
                             offset = gesture.translation
