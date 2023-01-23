@@ -8,6 +8,3 @@ git:
 
 settings:
   pr_branch_name: transifex/<br_unique_id>
-  language_mapping:
-    en_US: en-US
-    es_419: es-419

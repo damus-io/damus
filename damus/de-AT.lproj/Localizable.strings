@@ -25,7 +25,7 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 "%@ %@" = "%@ %@";
 
 /* Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. Ein Konto zu erstellen benötigt keine Telefonnummer, Emailadresse oder Name. Fang jetzt sofort ganz reibungslos an.";
+"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. Ein Konto zu erstellen benötigt keine Telefonnummer, Emailadresse oder Namen. Fang jetzt gleich ganz reibungslos an.";
 
 /* Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. End-zu-End verschlüsselter privater Nachrichtenaustausch. Halte Tech-Riesen aus deinen PNs heraus";
@@ -171,6 +171,12 @@ Number of profiles a user is following. */
 /* Navigation title for DM view, which is the English abbreviation for Direct Message. */
 "DM" = "PN";
 
+/* DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet. */
+"DM Type" = "PN Typ";
+
+/* No comment provided by engineer. */
+"DMs" = "PNs";
+
 /* Button to dismiss wallet selection view for paying Lightning invoice. */
 "Done" = "Fertig";
 
@@ -310,11 +316,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading. */
 "Private" = "Privat";
 
-/* Label to indicate that the text below is the user's private key used by only the user themself as a secret to login to access their account. */
-"Private Key" = "Privater Schlüssel";
-
 /* Title of the secure field that holds the user's private key. */
-"PrivateKey" = "Privater Schlüssel";
+"Private Key" = "Privater Schlüssel";
 
 /* Sidebar menu label for Profile view. */
 "Profile" = "Profil";
@@ -357,10 +360,13 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Button to confirm reposting a post.
    Title of alert for confirming to repost a post. */
-"Repost" = "Teilen";
+"Repost" = "Selbst teilen";
 
 /* Text indicating that the post was reposted (i.e. re-shared). */
-"Reposted" = "Geteilt";
+"Reposted" = "Selbst geteilt";
+
+/* No comment provided by engineer. */
+"Requests" = "Anfragen";
 
 /* Section title for resetting the user */
 "Reset" = "Zurücksetzen";
@@ -471,13 +477,13 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Website" = "Website";
 
 /* Welcoming message to the reader. The variable is 'you', the reader. */
-"Welcome to the social network %@ control." = "Willkommen bei dem soziaen Netzwerk, das %@ kontrollierst.";
+"Welcome to the social network %@ control." = "Willkommen in dem sozialen Netzwerk das %@ kontrollierst.";
 
 /* Text to welcome user. */
 "Welcome, %@!" = "Willkommen, %@!";
 
 /* Placeholder example for relay server address. */
-"wss://some.relay.com" = "wss://irgendein.relay.at";
+"wss://some.relay.com" = "wss://ein.relay.at";
 
 /* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
 "you" = "Du";

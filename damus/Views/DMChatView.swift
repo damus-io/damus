@@ -149,7 +149,7 @@ struct DMChatView: View {
             .opacity(((dms.events.count == 0) ? 1.0 : 0.0))
             .foregroundColor(.gray)
         }
-        .navigationTitle(NSLocalizedString("DM", comment: "Navigation title for DM view, which is the English abbreviation for Direct Message."))
+        .navigationTitle(NSLocalizedString("DMs", comment: "Navigation title for DMs view, where DM is the English abbreviation for Direct Message."))
         .toolbar { Header }
     }
 }

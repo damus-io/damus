@@ -181,7 +181,7 @@ struct ContentView: View {
                     .frame(width:30,height:30)
                     .shadow(color: Color("DamusPurple"), radius: 2)
                 case .dms:
-                    Text("DM", comment: "Toolbar label for DM view, which is the English abbreviation for Direct Message.")
+                    Text("DMs", comment: "Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.")
                         .bold()
                 case .notifications:
                     Text("Notifications", comment: "Toolbar label for Notifications view.")
