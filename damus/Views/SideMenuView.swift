@@ -165,7 +165,7 @@ struct SideMenuView: View {
                     notify(.logout, ())
                 }
             } message: {
-                Text("Make sure your nsec account key is saved before you logout or you will lose access to this account", comment: "Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.")
+                Text(NSLocalizedString("Make sure your nsec account key is saved before you logout or you will lose access to this account", comment: "Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out."))
             }
 
             Spacer()
