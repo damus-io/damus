@@ -43,7 +43,7 @@ struct InnerTimelineView: View {
                     //let is_chatroom = should_show_chatroom(ev)
                     //let tv = ThreadView(thread: tm, damus: damus, is_chatroom: is_chatroom)
                                 
-                    EventView(event: ev, highlight: .none, has_action_bar: true, damus: damus, show_friend_icon: show_friend_icon)
+                    EventView(event: ev, has_action_bar: true, damus: damus)
                         .onTapGesture {
                             nav_target = ev
                             navigating = true

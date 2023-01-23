@@ -57,15 +57,16 @@ struct BuilderEventView: View {
             if let event = event {
                 let ev = event.inner_event ?? event
                 NavigationLink(destination: BuildThreadV2View(damus: damus, event_id: ev.id)) {
-                    EventView(damus: damus, event: event, show_friend_icon: true, size: .small, embedded: true)
+                    EmbeddedEventView(damus_state: damus, event: event)
+                        .padding(8)
                 }.buttonStyle(.plain)
             } else {
                 ProgressView().padding()
             }
         }
         .frame(minWidth: 0, maxWidth: .infinity)
+        .cornerRadius(8)
         .border(Color.gray.opacity(0.2), width: 1)
-        .cornerRadius(2)
         .onAppear {
             self.load()
         }

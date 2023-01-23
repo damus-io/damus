@@ -49,7 +49,7 @@ struct DirectMessagesView: View {
     func MaybeEvent(_ tup: (String, DirectMessageModel)) -> some View {
         Group {
             if let ev = tup.1.events.last {
-                EventView(damus: damus_state, event: ev, pubkey: tup.0, show_friend_icon: true)
+                EventView(damus: damus_state, event: ev, pubkey: tup.0)
                     .onTapGesture {
                         pubkey = tup.0
                         active_model = tup.1
