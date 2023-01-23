@@ -17,8 +17,8 @@
         <note>Bundle name</note>
       </trans-unit>
       <trans-unit id="NSPhotoLibraryAddUsageDescription" xml:space="preserve">
-        <source>&quot;Granting Damus access to your photo library allows you to save photos.</source>
-        <target>“Damus Zugriff auf deine Fotomediathek zu gewähren, erlaubt dir Fotos zu sichern.</target>
+        <source>Granting Damus access to your photos allows you to save images.</source>
+        <target>Damus Zugriff auf deine Fotos zu gewähren erlaubt dir Bilder zu sichern.</target>
         
         <note>Privacy - Photo Library Additions Usage Description</note>
       </trans-unit>
@@ -50,7 +50,7 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
       </trans-unit>
       <trans-unit id="%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." xml:space="preserve">
         <source>%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction.</source>
-        <target>%@. Ein Konto zu erstellen benötigt keine Telefonnummer, Emailadresse oder Name. Fang jetzt sofort ganz reibungslos an.</target>
+        <target>%@. Ein Konto zu erstellen benötigt keine Telefonnummer, Emailadresse oder Namen. Fang jetzt gleich ganz reibungslos an.</target>
         
         <note>Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string.</note>
       </trans-unit>
@@ -336,6 +336,18 @@ Number of profiles a user is following.</note>
         
         <note>Navigation title for DM view, which is the English abbreviation for Direct Message.</note>
       </trans-unit>
+      <trans-unit id="DM Type" xml:space="preserve">
+        <source>DM Type</source>
+        <target>PN Typ</target>
+        
+        <note>DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet.</note>
+      </trans-unit>
+      <trans-unit id="DMs" xml:space="preserve">
+        <source>DMs</source>
+        <target>PNs</target>
+        
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
       <trans-unit id="Damus" xml:space="preserve">
         <source>Damus</source>
         <target>Damus</target>
@@ -602,12 +614,6 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Private Key</source>
         <target>Privater Schlüssel</target>
         
-        <note>Label to indicate that the text below is the user's private key used by only the user themself as a secret to login to access their account.</note>
-      </trans-unit>
-      <trans-unit id="PrivateKey" xml:space="preserve">
-        <source>PrivateKey</source>
-        <target>Privater Schlüssel</target>
-        
         <note>Title of the secure field that holds the user's private key.</note>
       </trans-unit>
       <trans-unit id="Profile" xml:space="preserve">
@@ -690,16 +696,22 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Repost" xml:space="preserve">
         <source>Repost</source>
-        <target>Teilen</target>
+        <target>Selbst teilen</target>
         
         <note>Button to confirm reposting a post.
    Title of alert for confirming to repost a post.</note>
       </trans-unit>
       <trans-unit id="Reposted" xml:space="preserve">
         <source>Reposted</source>
-        <target>Geteilt</target>
+        <target>Selbst geteilt</target>
         
         <note>Text indicating that the post was reposted (i.e. re-shared).</note>
+      </trans-unit>
+      <trans-unit id="Requests" xml:space="preserve">
+        <source>Requests</source>
+        <target>Anfragen</target>
+        
+        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Reset" xml:space="preserve">
         <source>Reset</source>
@@ -904,7 +916,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Welcome to the social network %@ control." xml:space="preserve">
         <source>Welcome to the social network %@ control.</source>
-        <target>Willkommen bei dem soziaen Netzwerk, das %@ kontrollierst.</target>
+        <target>Willkommen in dem sozialen Netzwerk das %@ kontrollierst.</target>
         
         <note>Welcoming message to the reader. The variable is 'you', the reader.</note>
       </trans-unit>
@@ -1042,7 +1054,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="wss://some.relay.com" xml:space="preserve">
         <source>wss://some.relay.com</source>
-        <target>wss://irgendein.relay.at</target>
+        <target>wss://ein.relay.at</target>
         
         <note>Placeholder example for relay server address.</note>
       </trans-unit>
@@ -1183,13 +1195,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/reposts_count:dict/REPOSTS:dict/one:dict/:string" xml:space="preserve">
         <source>Repost</source>
-        <target>Mal geteilt</target>
+        <target>geteilter Beitrag</target>
         
         <note>Part of a larger sentence to describe how many reposts there are.</note>
       </trans-unit>
       <trans-unit id="/reposts_count:dict/REPOSTS:dict/other:dict/:string" xml:space="preserve">
         <source>Reposts</source>
-        <target>Mal geteilt</target>
+        <target>geteilte Beiträge</target>
         
         <note>Part of a larger sentence to describe how many reposts there are.</note>
       </trans-unit>
