@@ -131,6 +131,11 @@ Number of profiles a user is following.</note>
         <target>Add Relay</target>
         <note>Label for section for adding a relay server.</note>
       </trans-unit>
+      <trans-unit id="Add all" xml:space="preserve">
+        <source>Add all</source>
+        <target>Add all</target>
+        <note>Button label to re-add all original participants as profiles to reply to in a note</note>
+      </trans-unit>
       <trans-unit id="Any" xml:space="preserve">
         <source>Any</source>
         <target>Any</target>
@@ -280,20 +285,16 @@ Number of profiles a user is following.</note>
         <target>Creator(s) of Bitcoin. Absolute legend.</target>
         <note>Example description about Bitcoin creator(s), Satoshi Nakamoto.</note>
       </trans-unit>
-      <trans-unit id="DM" xml:space="preserve">
-        <source>DM</source>
-        <target>DM</target>
-        <note>Navigation title for DM view, which is the English abbreviation for Direct Message.</note>
-      </trans-unit>
       <trans-unit id="DM Type" xml:space="preserve">
         <source>DM Type</source>
         <target>DM Type</target>
-        <note>DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet.</note>
+        <note>DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet. DM is the English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="DMs" xml:space="preserve">
         <source>DMs</source>
         <target>DMs</target>
-        <note>No comment provided by engineer.</note>
+        <note>Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
+   Navigation title for view of DMs, where DM is an English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="Damus" xml:space="preserve">
         <source>Damus</source>
@@ -335,15 +336,15 @@ Number of profiles a user is following.</note>
         <target>Edit</target>
         <note>Button to edit user's profile.</note>
       </trans-unit>
+      <trans-unit id="Edit participants" xml:space="preserve">
+        <source>Edit participants</source>
+        <target>Edit participants</target>
+        <note>Text indicating that the view is used for editing which participants are replied to in a note.</note>
+      </trans-unit>
       <trans-unit id="Encrypted" xml:space="preserve">
         <source>Encrypted</source>
         <target>Encrypted</target>
         <note>Heading indicating that this application keeps private messaging end-to-end encrypted.</note>
-      </trans-unit>
-      <trans-unit id="Encrypted DMs" xml:space="preserve">
-        <source>Encrypted DMs</source>
-        <target>Encrypted DMs</target>
-        <note>Navigation title for view of encrypted DMs, where DM is an English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="Enter your account key to login:" xml:space="preserve">
         <source>Enter your account key to login:</source>
@@ -569,6 +570,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Relays</target>
         <note>Sidebar menu label for Relay servers view</note>
       </trans-unit>
+      <trans-unit id="Remove all" xml:space="preserve">
+        <source>Remove all</source>
+        <target>Remove all</target>
+        <note>Button label to remove all participants from a note reply.</note>
+      </trans-unit>
       <trans-unit id="Reply to self" xml:space="preserve">
         <source>Reply to self</source>
         <target>Reply to self</target>
@@ -598,7 +604,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       <trans-unit id="Requests" xml:space="preserve">
         <source>Requests</source>
         <target>Requests</target>
-        <note>No comment provided by engineer.</note>
+        <note>Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="Reset" xml:space="preserve">
         <source>Reset</source>

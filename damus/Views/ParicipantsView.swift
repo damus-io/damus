@@ -16,21 +16,21 @@ struct ParticipantsView: View {
     
     var body: some View {
         VStack {
-            Text("Edit participants")
+            Text("Edit participants", comment: "Text indicating that the view is used for editing which participants are replied to in a note.")
             HStack {
                 Spacer()
                 Button {
                     // Remove all "p" refs, keep "e" refs
                     references = originalReferences.eRefs
                 } label: {
-                    Text("Remove all")
+                    Text("Remove all", comment: "Button label to remove all participants from a note reply.")
                 }
                 .buttonStyle(.borderedProminent)
                 Spacer()
                 Button {
                     references = originalReferences
                 } label: {
-                    Text("Add all")
+                    Text("Add all", comment: "Button label to re-add all original participants as profiles to reply to in a note")
                 }
                 .buttonStyle(.borderedProminent)
                 Spacer()
