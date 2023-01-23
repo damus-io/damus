@@ -75,7 +75,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="%lld/%lld" xml:space="preserve">
         <source>%lld/%lld</source>
-        <target>%lld/%lld&lt;br data-mce-bogus=&quot;1&quot;&gt;</target>
+        <target>%lld/%lld</target>
         
         <note>Fraction of how many of the user's relay servers that are operational.</note>
       </trans-unit>
