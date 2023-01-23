@@ -425,13 +425,15 @@ func make_actionbar_model(ev: NostrEvent, damus: DamusState) -> ActionBarModel {
 struct EventView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
+            /*
             EventView(damus: test_damus_state(), event: NostrEvent(content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool", pubkey: "pk"), show_friend_icon: true, size: .small)
             EventView(damus: test_damus_state(), event: NostrEvent(content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool", pubkey: "pk"), show_friend_icon: true, size: .normal)
             EventView(damus: test_damus_state(), event: NostrEvent(content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool", pubkey: "pk"), show_friend_icon: true, size: .big)
             
+             */
             EventView(
                 event: NostrEvent(
-                    content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool",
+                    content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jpg cool",
                     pubkey: "pk",
                     createdAt: Int64(Date().timeIntervalSince1970 - 100)
                 ),
@@ -441,6 +443,20 @@ struct EventView_Previews: PreviewProvider {
                 show_friend_icon: true,
                 size: .selected
             )
+            
+            EventView(
+                event: NostrEvent(
+                    content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jpg cool",
+                    pubkey: "pk",
+                    createdAt: Int64(Date().timeIntervalSince1970 - 100)
+                ),
+                highlight: .none,
+                has_action_bar: true,
+                damus: test_damus_state(),
+                show_friend_icon: true,
+                size: .normal
+            )
         }
+        .padding()
     }
 }
