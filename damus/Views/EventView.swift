@@ -80,8 +80,6 @@ struct EventView: View {
     }
 
     func TextEvent(_ event: NostrEvent, pubkey: String, booster_pubkey: String? = nil) -> some View {
-        let content = event.get_content(damus.keypair.privkey)
-        
         return HStack(alignment: .top) {
             let profile = damus.profiles.lookup(id: pubkey)
         
@@ -218,33 +216,6 @@ func format_date(_ created_at: Int64) -> String {
     dateFormatter.timeStyle = .short
     dateFormatter.dateStyle = .short
     return dateFormatter.string(from: date)
-}
-
-
-func reply_desc(profiles: Profiles, event: NostrEvent) -> String {
-    let desc = make_reply_description(event.tags)
-    let pubkeys = desc.pubkeys
-    let n = desc.others
-
-    if desc.pubkeys.count == 0 {
-        return NSLocalizedString("Reply to self", comment: "Label to indicate that the user is replying to themself.")
-    }
-
-    let names: [String] = pubkeys.map {
-        let prof = profiles.lookup(id: $0)
-        return Profile.displayName(profile: prof, pubkey: $0)
-    }
-
-    if names.count == 2 {
-        if n > 2 {
-            let othersCount = n - pubkeys.count
-            return String(format: NSLocalizedString("replying_to_two_and_others", comment: "Label to indicate that the user is replying to 2 users and others."), names[0], names[1], othersCount)
-        }
-        return String(format: NSLocalizedString("Replying to %@ & %@", comment: "Label to indicate that the user is replying to 2 users."), names[0], names[1])
-    }
-
-    let othersCount = n - pubkeys.count
-    return String(format: NSLocalizedString("replying_to_one_and_others", comment: "Label to indicate that the user is replying to 1 user and others."), names[0], othersCount)
 }
 
 
