@@ -20,19 +20,7 @@ struct SelectedEventView: View {
             let profile = damus.profiles.lookup(id: pubkey)
 
             VStack(alignment: .leading) {
-                HStack(alignment: .center) {
-                    VStack {
-                        let pmodel = ProfileModel(pubkey: pubkey, damus: damus)
-                        let pv = ProfileView(damus_state: damus, profile: pmodel, followers: FollowersModel(damus_state: damus, target: pubkey))
-                        
-                        NavigationLink(destination: pv) {
-                            ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus.profiles)
-                        }
-                    }
-                    
-                    EventProfileName(pubkey: pubkey, profile: profile, damus: damus, show_friend_confirmed: true, size: .selected)
-                }
-                
+                EventProfile(damus_state: damus, pubkey: pubkey, profile: profile, size: .normal)
                 EventBody(damus_state: damus, event: event, size: .selected)
                 
                 if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
