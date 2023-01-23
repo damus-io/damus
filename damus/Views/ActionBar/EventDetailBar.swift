@@ -15,7 +15,10 @@ struct EventDetailBar: View {
     var body: some View {
         HStack {
             if bar.boosts > 0 {
-                Text("\(Text("\(bar.boosts)", comment: "Number of reposts.").font(.body.bold())) \(Text(String(format: NSLocalizedString("reposts_count", comment: "Part of a larger sentence to describe how many reposts there are."), bar.boosts)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.")
+                NavigationLink(destination: RepostsView(damus_state: state, model: RepostsModel(state: state, target: target))) {
+                    Text("\(Text("\(bar.boosts)", comment: "Number of reposts.").font(.body.bold())) \(Text(String(format: NSLocalizedString("reposts_count", comment: "Part of a larger sentence to describe how many reposts there are."), bar.boosts)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.")
+                }
+                .buttonStyle(PlainButtonStyle())
             }
 
             if bar.likes > 0 {
