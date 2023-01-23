@@ -5,8 +5,8 @@
 //  Created by William Casarin on 2022-06-09.
 //
 import AVFoundation
-import SwiftUI
 import Kingfisher
+import SwiftUI
 
 struct ConfigView: View {
     let state: DamusState
@@ -20,14 +20,14 @@ struct ConfigView: View {
     @State var pubkey_copied: Bool = false
     @State var delete_text: String = ""
     @EnvironmentObject var user_settings: UserSettingsStore
-    
+
     let generator = UIImpactFeedbackGenerator(style: .light)
-    
+
     init(state: DamusState) {
         self.state = state
         _privkey = State(initialValue: self.state.keypair.privkey_bech32 ?? "")
     }
-    
+
     // TODO: (jb55) could be more general but not gonna worry about it atm
     func CopyButton(is_pk: Bool) -> some View {
         return Button(action: {
@@ -40,20 +40,19 @@ struct ConfigView: View {
             Image(systemName: copied ? "checkmark.circle" : "doc.on.doc")
         }
     }
-    
+
     var body: some View {
         ZStack(alignment: .leading) {
             Form {
-                
                 Section(NSLocalizedString("Public Account ID", comment: "Section title for the user's public account ID.")) {
                     HStack {
                         Text(state.keypair.pubkey_bech32)
-                        
+
                         CopyButton(is_pk: true)
                     }
                     .clipShape(RoundedRectangle(cornerRadius: 5))
                 }
-                
+
                 if let sec = state.keypair.privkey_bech32 {
                     Section(NSLocalizedString("Secret Account Login Key", comment: "Section title for user's secret account login key.")) {
                         HStack {
@@ -64,14 +63,14 @@ struct ConfigView: View {
                                 Text(sec)
                                     .clipShape(RoundedRectangle(cornerRadius: 5))
                             }
-                            
+
                             CopyButton(is_pk: false)
                         }
-                        
+
                         Toggle(NSLocalizedString("Show", comment: "Toggle to show or hide user's secret account login key."), isOn: $show_privkey)
                     }
                 }
-                
+
                 Section(NSLocalizedString("Wallet Selector", comment: "Section title for selection of wallet.")) {
                     Toggle(NSLocalizedString("Show wallet selector", comment: "Toggle to show or hide selection of wallet."), isOn: $user_settings.show_wallet_selector).toggleStyle(.switch)
                     Picker(NSLocalizedString("Select default wallet", comment: "Prompt selection of user's default wallet"),
@@ -128,16 +127,12 @@ struct ConfigView: View {
                         KingfisherManager.shared.cache.cleanExpiredDiskCache()
                     }
                 }
-                
-                Section(NSLocalizedString("Reset", comment: "Section title for resetting the user")) {
-                    Button(NSLocalizedString("Logout", comment: "Button to logout the user.")) {
-                        confirm_logout = true
-                    }
-                    
-                    if state.is_privkey_user {
-                        Button(NSLocalizedString("Delete Account", comment: "Button to delete the user's account."), role: .destructive) {
-                            confirm_delete_account = true
-                        }
+
+                if state.is_privkey_user {
+                    Section(NSLocalizedString("Delete", comment: "Section title for deleting the user")) {
+                            Button(NSLocalizedString("Delete Account", comment: "Button to delete the user's account."), role: .destructive) {
+                                confirm_delete_account = true
+                            }
                     }
                 }
             }
