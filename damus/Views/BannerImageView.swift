@@ -9,29 +9,43 @@ import SwiftUI
 import Kingfisher
 
 struct InnerBannerImageView: View {
-    let url: URL?
-    let pubkey: String
+    
+    let defaultImage = UIImage(named: "profile-banner") ?? UIImage()
+    
+    @ObservedObject var imageModel: KFImageModel
+    
+    init(url: URL?) {
+        self.imageModel = KFImageModel(
+            url: url,
+            fallbackUrl: nil,
+            maxByteSize: 5000000,
+            downsampleSize: CGSize(width: 750, height: 250)
+        )
+    }
 
     var body: some View {
         ZStack {
             Color(uiColor: .systemBackground)
             
-            if (url != nil) {
-                KFAnimatedImage(url)
+            if (imageModel.url != nil) {
+                KFAnimatedImage(imageModel.url)
                     .callbackQueue(.dispatch(.global(qos: .background)))
                     .processingQueue(.dispatch(.global(qos: .background)))
-                    .appendProcessor(LargeImageProcessor.shared)
+                    .serialize(by: imageModel.serializer)
+                    .setProcessor(imageModel.processor)
                     .configure { view in
                         view.framePreloadCount = 1
                     }
                     .placeholder { _ in
-                        Image("profile-banner").resizable()
+                        Color(uiColor: .secondarySystemBackground)
                     }
                     .scaleFactor(UIScreen.main.scale)
                     .loadDiskFileSynchronously()
                     .fade(duration: 0.1)
+                    .onFailureImage(defaultImage)
+                    .id(imageModel.refreshID)
             } else {
-                Image("profile-banner").resizable()
+                Image(uiImage: defaultImage).resizable()
             }
         }
     }
@@ -50,7 +64,7 @@ struct BannerImageView: View {
     }
     
     var body: some View {
-        InnerBannerImageView(url: get_banner_url(banner: banner, pubkey: pubkey, profiles: profiles), pubkey: pubkey)
+        InnerBannerImageView(url: get_banner_url(banner: banner, pubkey: pubkey, profiles: profiles))
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let updated = notif.object as! ProfileUpdate
 

@@ -1,0 +1,493 @@
+/* Blank space to separate profile picture from profile editor form. */
+"   " = "61b6edf1108e6f396680a33b02486a70_tr";
+
+/* Description of how the nip05 identifier would be used for verification. */
+"'%@' at '%@' will be used for verification" = "'%@' adresindeki '%@' doğrulama için kullanılacaktır";
+
+/* Description of why the nip05 identifier is invalid. */
+"'%@' is an invalid nip05 identifier. It should look like an email." = "'%@' geçersiz bir nip05 tanımlayıcısı. Tanımlayıcı, e-posta gibi gözükmeli. ";
+
+/* Navigation bar title for view that shows who is following a user. */
+"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "(Profile.displayName(profile: profile, pubkey: whos))'nin Takipçileri";
+
+/* Navigation bar title for view that shows who a user is following. */
+"(who) following" = "(who)'nin Takip Ettikleri";
+
+/* Prefix character to username. */
+"@" = "@";
+
+/* Amount of time that has passed since reply quote event occurred.
+Abbreviated version of a nostr public key. */
+"%@" = "%@";
+
+/* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
+Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
+"%@ %@" = "%@ %@";
+
+/* Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string. */
+"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. Hesap oluşturmak için telefon numarası, e-posta veya isim gerekmez. Vakit kaybetmeden hemen hemen başlayın.";
+
+/* Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string. */
+"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. Uçtan uca şifreli özel mesajlaşma. Teknoloji baronlarını DM'lerinden uzak tut";
+
+/* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
+"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Arkadaşlarınızın gönderilerine bahşiş verin ve internetin yerel para birimi olan Bitcoin⚡️ ile sats biriktirin.";
+
+/* Number of reposts.
+Number of profiles a user is following. */
+"%lld" = "%lld";
+
+/* Fraction of how many of the user's relay servers that are operational. */
+"%lld/%lld" = "%lld/%lld";
+
+/* Placeholder for event mention. */
+"< e >" = "< e >";
+
+/* Label to prompt for about text entry for user to describe about themself. */
+"About" = "Hakkında";
+
+/* Label for About Me section of user profile form. */
+"About Me" = "Hakkında";
+
+/* Placeholder text for About Me description. */
+"Absolute Boss" = "Kral Adam";
+
+/* Label to indicate the public ID of the account. */
+"Account ID" = "Hesap Kimliği";
+
+/* Button to add recommended relay server.
+   Button to confirm adding user inputted relay. */
+"Add" = "Ekle";
+
+/* Label for section for adding a relay server. */
+"Add Relay" = "Röle Ekle";
+
+/* Any amount of sats */
+"Any" = "Herhangi";
+
+/* Alert message to ask if user wants to repost a post. */
+"Are you sure you want to repost this?" = "Bu gönderiyi yinelemek istediğinden emin misin?";
+
+/* Label for Banner Image section of user profile form. */
+"Banner Image" = "Pankart Resmi";
+
+/* Reminder to user that they should save their account information. */
+"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "Başlamadan önce, hesap bilgilierini kaydetmen gerekiyor. Aksi takdirde, Damus'u silme durumunda hesabına giriş yapamayacaksın.";
+
+/* Dropdown option label for Lightning wallet, Bitcoin Beach. */
+"Bitcoin Beach" = "Bitcoin Beach";
+
+/* Label for Bitcoin Lightning Tips section of user profile form. */
+"Bitcoin Lightning Tips" = "Bitcoin Lightning Bahşişleri";
+
+/* Dropdown option label for Lightning wallet, Blixt Wallet */
+"Blixt Wallet" = "Blixt Wallet";
+
+/* Dropdown option label for Lightning wallet, Blue Wallet. */
+"Blue Wallet" = "Blue Wallet";
+
+/* Dropdown option label for Lightning wallet, Breez. */
+"Breez" = "Breez";
+
+/* Context menu option for broadcasting the user's note to all of the user's connected relay servers. */
+"Broadcast" = "Yayınla";
+
+/* Button to cancel out of posting a note.
+   Button to cancel out of reposting a post.
+   Button to cancel out of view adding user inputted relay.
+   Cancel out of logging out the user. */
+"Cancel" = "İptal Et";
+
+/* Dropdown option label for Lightning wallet, Cash App. */
+"Cash App" = "Cash App";
+
+/* Navigation bar title for Chatroom view. */
+"Chat" = "Sohbet";
+
+/* Button for clearing cached data. */
+"Clear" = "Temizle";
+
+/* Section title for clearing cached data. */
+"Clear Cache" = "Önbelleği Temizle";
+
+/* Label indicating that a user's key was copied. */
+"Copied" = "Kopyalandı";
+
+/* Button to copy a relay server address. */
+"Copy" = "Kopyala";
+
+/* Context menu option for copying the ID of the account that created the note. */
+"Copy Account ID" = "Hesap Kimliğini Kopyala";
+
+/* Context menu option to copy an image into clipboard.
+   Context menu option to copy an image to clipboard. */
+"Copy Image" = "Resmi Kopyala";
+
+/* Context menu option to copy the URL of an image into clipboard. */
+"Copy Image URL" = "Resim URL'sini Kopyala";
+
+/* Title of section for copying a Lightning invoice identifier. */
+"Copy invoice" = "Faturayı Kopyala";
+
+/* Context menu option for copying a user's Lightning URL. */
+"Copy LNURL" = "LNURL'i Kopyala";
+
+/* Context menu option for copying the ID of the note. */
+"Copy Note ID" = "Gönderi Kimliğini Kopyala ";
+
+/* Context menu option for copying the JSON text from the note. */
+"Copy Note JSON" = "Gönderinin JSON Metnini Kopyala";
+
+/* Context menu option for copying the text from an note. */
+"Copy Text" = "Metni Kopyala";
+
+/* Context menu option for copying the ID of the user who created the note. */
+"Copy User ID" = "Hesap Kimliğini Kopyala";
+
+/* Button to create account. */
+"Create" = "Yarat";
+
+/* Button to create an account. */
+"Create Account" = "Hesap Yarat";
+
+/* Example description about Bitcoin creator(s), Satoshi Nakamoto. */
+"Creator(s) of Bitcoin. Absolute legend." = "Bitcoin'in Yaratıcısı. Kral Adam.";
+
+/* Name of the app, shown on the first screen when user is not logged in. */
+"Damus" = "Damus";
+
+/* Button to pay a Lightning invoice with the user's default Lightning wallet. */
+"Default Wallet" = "Varsayılan Cüzdan";
+
+/* Button to delete a relay server that the user connects to. */
+"Delete" = "Sil";
+
+/* Button to dismiss a text field alert. */
+"Dismiss" = "Yok Say";
+
+/* Label to prompt display name entry. */
+"Display Name" = "Görünür İsim";
+
+/* Navigation title for DM view, which is the English abbreviation for Direct Message. */
+"DM" = "DM";
+
+/* Button to dismiss wallet selection view for paying Lightning invoice. */
+"Done" = "Tamam";
+
+/* Heading indicating that this application allows users to earn money. */
+"Earn Money" = "Para Kazan";
+
+/* Button to edit user's profile. */
+"Edit" = "Düzenle";
+
+/* Heading indicating that this application keeps private messaging end-to-end encrypted. */
+"Encrypted" = "Şifreli";
+
+/* Navigation title for view of encrypted DMs, where DM is an English abbreviation for Direct Message. */
+"Encrypted DMs" = "Şifreli DM'ler";
+
+/* Prompt for user to enter an account key to login. */
+"Enter your account key to login:" = "Giriş yapmak için hesap anahtarını gir:";
+
+/* Error message indicating why saving keys failed. */
+"Error: %@" = "Hata: %@";
+
+/* Filter state for seeing either only posts, or posts & replies. */
+"Filter State" = "Filtre Durumu";
+
+/* Button to follow a user. */
+"Follow" = "Takip Et";
+
+/* Label describing followers of a user. */
+"Followers" = "Takipçiler";
+
+/* Text to indicate that the button next to it is in a state that indicates that it is in the process of following a profile.
+Part of a larger sentence to describe how many profiles a user is following. */
+"Following" = "Takip Ediliyor";
+
+/* Label to indicate that the user is in the process of following another user. */
+"Following..." = "Takip Ediliyor...";
+
+/* Text to indicate that button next to it is in a state that will follow a profile when tapped. */
+"Follows" = "Takipler";
+
+/* Navigation bar title for Global view where posts from all connected relay servers appear. */
+"Global" = "Küresel";
+
+/* Navigation link to go to post referenced by hex code. */
+"Goto post %@" = "%@'a git";
+
+/* Navigation link to go to profile. */
+"Goto profile %@" = "%@'a git";
+
+/* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
+"Home" = "Ev";
+
+/* Placeholder example text for profile picture URL. */
+"https://example.com/pic.jpg" = "https://example.com/pic.jpg";
+
+/* Placeholder example text for website URL for user profile. */
+"https://jb55.com" = "https://jb55.com";
+
+/* Error message indicating that an invalid account key was entered for login. */
+"Invalid key" = "Hatalı anahtar";
+
+/* Placeholder example text for identifier used for NIP-05 verification. */
+"jb55@jb55.com" = "jb55@jb55.com";
+
+/* Moves the post button to the left side of the screen */
+"Left Handed" = "Solak Modu";
+
+/* Button to complete account creation and start using the app. */
+"Let's go!" = "Haydi Başla!";
+
+/* Placeholder text for entry of Lightning Address or LNURL. */
+"Lightning Address or LNURL" = "Lightning Adresi ya da LNURL";
+
+/* Indicates that the view is for paying a Lightning invoice. */
+"Lightning Invoice" = "Lightning Faturası";
+
+/* Dropdown option label for Lightning wallet, LNLink. */
+"LNLink" = "LNLink";
+
+/* Dropdown option label for system default for Lightning wallet. */
+"Local default" = "Cihaz varsayılanı";
+
+/* Button to log into account.
+   Button to log into an account. */
+"Login" = "Giriş yap";
+
+/* Alert for logging out the user.
+   Button for logging out the user.
+   Button to logout the user. */
+"Logout" = "Çıkış yap";
+
+/* Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out. */
+"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "Çıkış yapmadan önce, nsec hesap anahtarını kaydetmeyi unutma. Aksi takdirde bu hesaba giremeyeceksin.";
+
+/* Dropdown option label for Lightning wallet, Muun. */
+"Muun" = "Muun";
+
+/* Label for NIP-05 Verification section of user profile form. */
+"NIP-05 Verification" = "NIP-05 Doğrulaması";
+
+/* No search results. */
+"none" = "sonuç yok";
+
+/* Indicates that there are no notes in the timeline to view. */
+"Nothing to see here. Check back later!" = "Görülecek bir şey yok. Daha sonra tekrar kontrol et!";
+
+/* Navigation title for notifications. */
+"Notifications" = "Bildirimler";
+
+/* String indicating that a given timestamp just occurred */
+"now" = "şimdi";
+
+/* Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key. */
+"nsec1..." = "nsec1...";
+
+/* Label indicating that a form input is optional. */
+"optional" = "opsiyonel";
+
+/* Button to pay a Lightning invoice. */
+"Pay" = "Öde";
+
+/* Navigation bar title for view to pay Lightning invoice. */
+"Pay the Lightning invoice" = "Lightning faturasını öde";
+
+/* Dropdown option label for Lightning wallet, Phoenix. */
+"Phoenix" = "Phoenix";
+
+/* Button to post a note. */
+"Post" = "Gönder";
+
+/* Label for filter for seeing only posts (instead of posts and replies). */
+"Posts" = "Gönderiler";
+
+/* Label for filter for seeing posts and replies (instead of only posts). */
+"Posts & Replies" = "Gönderiler & Yorumlar";
+
+/* Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading. */
+"Private" = "Özel";
+
+/* Label to indicate that the text below is the user's private key used by only the user themself as a secret to login to access their account. */
+"Private Key" = "Özel Anahtar";
+
+/* Title of the secure field that holds the user's private key. */
+"PrivateKey" = "Özel Anahtar";
+
+/* Sidebar menu label for Profile view. */
+"Profile" = "Profil";
+
+/* Label for Profile Picture section of user profile form. */
+"Profile Picture" = "Profil Fotoğrafı";
+
+/* Section title for the user's public account ID. */
+"Public Account ID" = "Herkese Açık Hesap Kimliği";
+
+/* Label indicating that the text is a user's public account key. */
+"Public key" = "Umumi anahtar";
+
+/* Label indicating that the text is a user's public account key. */
+"Public Key" = "Herkese Açık Anahtar";
+
+/* Prompt to ask user if the key they entered is a public key. */
+"Public Key?" = "Herkese Açık Anahtar?";
+
+/* Navigation bar title for Reactions view. */
+"Reactions" = "Tepkiler";
+
+/* Section title for recommend relay servers that could be added as part of configuration */
+"Recommended Relays" = "Önerilen Röleler";
+
+/* Text field for relay server. Used for testing purposes. */
+"Relay" = "Röle";
+
+/* Sidebar menu label for Relay servers view */
+"Relays" = "Röleler";
+
+/* Label to indicate that the user is replying to themself. */
+"Reply to self" = "Kendine yanıt ver";
+
+/* Label to indicate that the user is replying to 2 users. */
+"Replying to %@ & %@" = "%1$@ & %2$@'ya yanıt ver";
+
+/* Indicating that the user is replying to the following listed people. */
+"Replying to:" = "Şunlara yanıt ver:";
+
+/* Button to confirm reposting a post.
+   Title of alert for confirming to repost a post. */
+"Repost" = "Yinele";
+
+/* Text indicating that the post was reposted (i.e. re-shared). */
+"Reposted" = "Yinelendi";
+
+/* Section title for resetting the user */
+"Reset" = "Sıfırla";
+
+/* Button to retry completing account creation after an error occurred. */
+"Retry" = "Yeniden Dene";
+
+/* Dropdown option label for Lightning wallet, River */
+"River" = "River";
+
+/* Example username of Bitcoin creator(s), Satoshi Nakamoto. */
+"satoshi" = "satoshi";
+
+/* Name of Bitcoin creator(s). */
+"Satoshi Nakamoto" = "Satoshi Nakamoto";
+
+/* Button for saving profile. */
+"Save" = "Kaydet";
+
+/* Context menu option to save an image. */
+"Save Image" = "Resmi Kaydet";
+
+/* Navigation link to search hashtag. */
+"Search hashtag: #%@" = "Etiketi ara: #%@";
+
+/* Placeholder text to prompt entry of search query. */
+"Search..." = "Ara...";
+
+/* Section title for user's secret account login key. */
+"Secret Account Login Key" = "Gizli Hesap Giriş Anahtarı";
+
+/* Title of section for selecting a Lightning wallet to pay a Lightning invoice. */
+"Select a Lightning wallet" = "Bir Lightning cüzdanı seç";
+
+/* Prompt selection of user's default wallet */
+"Select default wallet" = "Varsayılan cüzdanı seç";
+
+/* Text prompt for user to send a message to the other user. */
+"Send a message to start the conversation..." = "Sohbeti başlatmak için bir mesaj gönder";
+
+/* Navigation title for Settings view.
+   Sidebar menu label for accessing the app settings */
+"Settings" = "Ayarlar";
+
+/* Button to share an image. */
+"Share" = "Paylaş";
+
+/* Toggle to show or hide user's secret account login key. */
+"Show" = "Göster";
+
+/* Toggle to show or hide selection of wallet. */
+"Show wallet selector" = "Cüzdan seçiciyi göster";
+
+/* Sidebar menu label to sign out of the account. */
+"Sign out" = "Çıkış yap";
+
+/* Dropdown option label for Lightning wallet, Strike. */
+"Strike" = "Strike";
+
+/* Warning that the inputted account key is a public key and the result of what happens because of it. */
+"This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Bu herkese açık bir anahtardır, herhangi bir şekilde gönderi yapamaz veya etkileşimde bulunamazsınız. Bu, hesapları kendi bakış açılarından görüntülemek için kullanılır.";
+
+/* Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key. */
+"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Bu eski tip bir nostr anahtarı. Bunun bir pubkey mi yoksa private key mi olduğundan emin değiliz. Bu bir genel anahtarsa lütfen aşağıdaki düğmeyi değiştirin.";
+
+/* Label to describe that a public key is the user's account ID and what they can do with it. */
+"This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "Bu sizin hesap kimliğinizdir, sizi takip edebilmeleri için bunu arkadaşlarınıza verebilirsiniz. Kopyalamak için tıklayın.";
+
+/* Label to describe that a private key is the user's secret account key and what they should do with it. */
+"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Bu sizin gizli hesap anahtarınızdır. Hesabınıza erişmek için buna ihtiyacınız var. Bunu kimseyle paylaşmayın! Bir şifre yöneticisine kaydedin ve güvende tutun!";
+
+/* Navigation bar title for note thread.
+   Navigation bar title for threaded event detail view. */
+"Thread" = "Konu";
+
+/* Text box prompt to ask user to type their post. */
+"Type your post here..." = "Gönderinizi buraya yazın...";
+
+/* Non-breaking space character to fill in blank space next to event action button icons. */
+"u{00A0}" = "u{00A0}";
+
+/* Button to unfollow a user. */
+"Unfollow" = "Takipten Çık";
+
+/* Text to indicate that the button next to it is in  a state that indicates that it is in the process of unfollowing a profile. */
+"Unfollowing" = "Takipten Çıkılıyor";
+
+/* Label to indicate that the user is in the process of unfollowing another user. */
+"Unfollowing..." = "Takipten Çıkılıyor...";
+
+/* Text to indicate that the button next to it is in a state that will unfollow a profile when tapped. */
+"Unfollows" = "Takipten Çık";
+
+/* Label for Username section of user profile form.
+   Label to prompt username entry. */
+"Username" = "Kullanıcı Adı";
+
+/* Sidebar menu label for Wallet view. */
+"Wallet" = "Cüzdan";
+
+/* Dropdown option label for Lightning wallet, Wallet Of Satoshi. */
+"Wallet Of Satoshi" = "Wallet Of Satoshi";
+
+/* Section title for selection of wallet. */
+"Wallet Selector" = "Cüzdan Seçici";
+
+/* Label for Website section of user profile form. */
+"Website" = "Websitesi";
+
+/* Welcoming message to the reader. The variable is 'you', the reader. */
+"Welcome to the social network %@ control." = "Kontrolün %@'da olduğu sosyal ağa hoş geldiniz.";
+
+/* Text to welcome user. */
+"Welcome, %@!" = "Hoş geldin, %@";
+
+/* Placeholder example for relay server address. */
+"wss://some.relay.com" = "wss://some.relay.com";
+
+/* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
+"you" = "sen";
+
+/* Label for Your Name section of user profile form. */
+"Your Name" = "İsminiz";
+
+/* Dropdown option label for Lightning wallet, Zebedee. */
+"Zebedee" = "Zebedee";
+
+/* Dropdown option label for Lightning wallet, Zeus LN. */
+"Zeus LN" = "Zeus LN";
+

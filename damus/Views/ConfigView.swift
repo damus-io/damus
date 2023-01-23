@@ -91,7 +91,7 @@ struct ConfigView: View {
                     Section(NSLocalizedString("Secret Account Login Key", comment: "Section title for user's secret account login key.")) {
                         HStack {
                             if show_privkey == false {
-                                SecureField(NSLocalizedString("PrivateKey", comment: "Title of the secure field that holds the user's private key."), text: $privkey)
+                                SecureField(NSLocalizedString("Private Key", comment: "Title of the secure field that holds the user's private key."), text: $privkey)
                                     .disabled(true)
                             } else {
                                 Text(sec)
@@ -142,7 +142,7 @@ struct ConfigView: View {
             Button(NSLocalizedString("Cancel", comment: "Cancel out of logging out the user.")) {
                 confirm_logout = false
             }
-                   Button(NSLocalizedString("Logout", comment: "Button for logging out the user.")) {
+            Button(NSLocalizedString("Logout", comment: "Button for logging out the user.")) {
                 notify(.logout, ())
             }
         } message: {

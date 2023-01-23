@@ -118,7 +118,8 @@ struct ProfileView: View {
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
-    
+    @Environment(\.openURL) var openURL
+
     // We just want to have a white "< Home" text here, however,
     // setting the initialiser is causing issues, and it's late.
     // Ref: https://blog.techchee.com/navigation-bar-title-style-color-and-custom-back-button-in-swiftui/
@@ -194,7 +195,7 @@ struct ProfileView: View {
     var TopSection: some View {
         ZStack(alignment: .top) {
             GeometryReader { geo in
-                BannerImageView(pubkey: damus_state.pubkey, profiles: damus_state.profiles)
+                BannerImageView(pubkey: profile.pubkey, profiles: damus_state.profiles)
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: BANNER_HEIGHT)
                     .clipped()
@@ -202,7 +203,7 @@ struct ProfileView: View {
                 ShareButton
                     .offset(x: geo.size.width - 80.0, y: 50.0 )
             }.frame(height: BANNER_HEIGHT)
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 8.0) {
                 let data = damus_state.profiles.lookup(id: profile.pubkey)
                 let pfp_size: CGFloat = 90.0
                 
@@ -211,9 +212,8 @@ struct ProfileView: View {
                         .onTapGesture {
                             is_zoomed.toggle()
                         }
-                        .sheet(isPresented: $is_zoomed) {
-                            ProfilePicView(pubkey: profile.pubkey, size: zoom_size, highlight: .none, profiles: damus_state.profiles)
-                        }
+                        .fullScreenCover(isPresented: $is_zoomed) {
+                            ProfileZoomView(pubkey: profile.pubkey, profiles: damus_state.profiles)                        }
                         .offset(y: -(pfp_size/2.0)) // Increase if set a frame
                     
                     Spacer()
@@ -251,6 +251,10 @@ struct ProfileView: View {
                 Text(ProfileView.markdown.process(data?.about ?? ""))
                     .font(.subheadline)
                 
+                if let url = data?.website_url {
+                    WebsiteLink(url: url)
+                }
+                
                 Divider()
                 
                 HStack {
@@ -282,7 +286,7 @@ struct ProfileView: View {
                     
                     if let relays = profile.relays {
                         NavigationLink(destination: UserRelaysView(state: damus_state, pubkey: profile.pubkey, relays: Array(relays.keys).sorted())) {
-                            Text("\(Text("\(relays.keys.count)", comment: "Number of relay servers a user is connected.").font(.subheadline.weight(.medium))) \(Text("Relays", comment: "Part of a larger sentence to describe how many relay servers a user is connected.").font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relays'.")
+                            Text("\(Text("\(relays.keys.count)", comment: "Number of relay servers a user is connected.").font(.subheadline.weight(.medium))) \(Text(String(format: NSLocalizedString("relays_count", comment: "Part of a larger sentence to describe how many relay servers a user is connected."), relays.keys.count)).font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
                         }
                         .buttonStyle(PlainButtonStyle())
                     }
@@ -296,13 +300,14 @@ struct ProfileView: View {
     
     var FollowersCount: some View {
         HStack {
-            if followers.count_display == "?" {
+            if followers.count == nil {
                 Image(systemName: "square.and.arrow.down")
                 Text("Followers", comment: "Label describing followers of a user.")
                     .font(.subheadline)
                     .foregroundColor(.gray)
             } else {
-                Text("\(Text("\(followers.count_display)", comment: "Number of people following a user.").font(.subheadline.weight(.medium))) \(Text("Followers", comment: "Part of a larger sentence to describe how many people are following a user.").font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Followers'.")
+                let followerCount = followers.count!
+                Text("\(Text("\(followerCount)", comment: "Number of people following a user.").font(.subheadline.weight(.medium))) \(Text(String(format: NSLocalizedString("followers_count", comment: "Part of a larger sentence to describe how many people are following a user."), followerCount)).font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
             }
         }
     }
@@ -355,7 +360,7 @@ struct ProfileView_Previews: PreviewProvider {
 
 func test_damus_state() -> DamusState {
     let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
-    let damus = DamusState(pool: RelayPool(), keypair: Keypair(pubkey: pubkey, privkey: "privkey"), likes: EventCounter(our_pubkey: pubkey), boosts: EventCounter(our_pubkey: pubkey), contacts: Contacts(our_pubkey: pubkey), tips: TipCounter(our_pubkey: pubkey), profiles: Profiles(), dms: DirectMessagesModel(), previews: PreviewCache())
+    let damus = DamusState(pool: RelayPool(), keypair: Keypair(pubkey: pubkey, privkey: "privkey"), likes: EventCounter(our_pubkey: pubkey), boosts: EventCounter(our_pubkey: pubkey), contacts: Contacts(our_pubkey: pubkey), tips: TipCounter(our_pubkey: pubkey), profiles: Profiles(), dms: DirectMessagesModel(our_pubkey: pubkey), previews: PreviewCache())
     
     let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", banner: "", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io")
     let tsprof = TimestampedProfile(profile: prof, timestamp: 0)

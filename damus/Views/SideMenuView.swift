@@ -16,7 +16,7 @@ struct SideMenuView: View {
     
     @Environment(\.colorScheme) var colorScheme
     
-    var sideBarWidth = UIScreen.main.bounds.size.width * 0.65
+    var sideBarWidth = min(UIScreen.main.bounds.size.width * 0.65, 400.0)
     
     func fillColor() -> Color {
         colorScheme == .light ? Color("DamusWhite") : Color("DamusBlack")
@@ -50,22 +50,26 @@ struct SideMenuView: View {
 
                 VStack(alignment: .leading, spacing: 20) {
                     let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
+                    let followers = FollowersModel(damus_state: damus_state, target: damus_state.pubkey)
+                    let profile_model = ProfileModel(pubkey: damus_state.pubkey, damus: damus_state)
                     
-                    if let picture = damus_state.profiles.lookup(id: damus_state.pubkey)?.picture {
-                        ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, picture: picture)
-                    } else {
-                        Image(systemName: "person.fill")
-                    }
-                    VStack(alignment: .leading) {
-                        if let display_name = profile?.display_name {
-                            Text(display_name)
-                                .foregroundColor(textColor())
-                                .font(.title)
+                    NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
+                        if let picture = damus_state.profiles.lookup(id: damus_state.pubkey)?.picture {
+                            ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, picture: picture)
+                        } else {
+                            Image(systemName: "person.fill")
                         }
-                        if let name = profile?.name {
-                            Text("@" + name)
-                                .foregroundColor(Color("DamusMediumGrey"))
-                                .font(.body)
+                        VStack(alignment: .leading) {
+                            if let display_name = profile?.display_name {
+                                Text(display_name)
+                                    .foregroundColor(textColor())
+                                    .font(.title)
+                            }
+                            if let name = profile?.name {
+                                Text("@" + name)
+                                    .foregroundColor(Color("DamusMediumGrey"))
+                                    .font(.body)
+                            }
                         }
                     }
                     
@@ -87,12 +91,9 @@ struct SideMenuView: View {
                      */
                     
                     // THERE IS A LIMIT OF 10 NAVIGATIONLINKS!!! (Consider some in other views)
-                    
-                    let followers = FollowersModel(damus_state: damus_state, target: damus_state.pubkey)
-                    let profile_model = ProfileModel(pubkey: damus_state.pubkey, damus: damus_state)
 
                     NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
-                        Label("Profile", systemImage: "person")
+                        Label(NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), systemImage: "person")
                             .font(.title2)
                             .foregroundColor(textColor())
                     }
@@ -102,7 +103,7 @@ struct SideMenuView: View {
                     
                     /*
                     NavigationLink(destination: EmptyView()) {
-                        Label("Relays", systemImage: "xserve")
+                        Label(NSLocalizedString("Relays", comment: "Sidebar menu label for Relay servers view"), systemImage: "xserve")
                             .font(.title2)
                             .foregroundColor(textColor())
                     }
@@ -113,7 +114,7 @@ struct SideMenuView: View {
                     
                     /*
                     NavigationLink(destination: EmptyView()) {
-                        Label("Wallet", systemImage: "bolt")
+                        Label(NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), systemImage: "bolt")
                             .font(.title2)
                             .foregroundColor(textColor())
                     }
@@ -135,9 +136,13 @@ struct SideMenuView: View {
                     
                     Button(action: {
                         //ConfigView(state: damus_state)
-                        confirm_logout = true
+                        if damus_state.keypair.privkey == nil {
+                            notify(.logout, ())
+                        } else {
+                            confirm_logout = true
+                        }
                     }, label: {
-                        Label("Sign out", systemImage: "pip.exit")
+                        Label(NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account."), systemImage: "pip.exit")
                             .font(.title3)
                             .foregroundColor(textColor())
                     })
@@ -153,14 +158,14 @@ struct SideMenuView: View {
                 isSidebarVisible.toggle()
             }
             .alert("Logout", isPresented: $confirm_logout) {
-                Button("Cancel") {
+                Button(NSLocalizedString("Cancel", comment: "Cancel out of logging out the user.")) {
                     confirm_logout = false
                 }
-                Button("Logout") {
+                Button(NSLocalizedString("Logout", comment: "Button for logging out the user.")) {
                     notify(.logout, ())
                 }
             } message: {
-                Text("Make sure your nsec account key is saved before you logout or you will lose access to this account")
+                Text("Make sure your nsec account key is saved before you logout or you will lose access to this account", comment: "Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.")
             }
 
             Spacer()

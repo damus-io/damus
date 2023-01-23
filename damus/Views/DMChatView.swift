@@ -149,7 +149,7 @@ struct DMChatView: View {
             .opacity(((dms.events.count == 0) ? 1.0 : 0.0))
             .foregroundColor(.gray)
         }
-        .navigationTitle(NSLocalizedString("DM", comment: "Navigation title for DM view, which is the English abbreviation for Direct Message."))
+        .navigationTitle(NSLocalizedString("DMs", comment: "Navigation title for DMs view, where DM is the English abbreviation for Direct Message."))
         .toolbar { Header }
     }
 }
@@ -158,7 +158,7 @@ struct DMChatView_Previews: PreviewProvider {
     static var previews: some View {
         let ev = NostrEvent(content: "hi", pubkey: "pubkey", kind: 1, tags: [])
 
-        let model = DirectMessageModel(events: [ev])
+        let model = DirectMessageModel(events: [ev], our_pubkey: "pubkey")
 
         DMChatView(damus_state: test_damus_state(), pubkey: "pubkey")
             .environmentObject(model)
@@ -166,7 +166,7 @@ struct DMChatView_Previews: PreviewProvider {
 }
 
 
-func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair) -> NostrEvent?
+func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair, created_at: Int64? = nil) -> NostrEvent?
 {
     guard let privkey = keypair.privkey else {
         return nil
@@ -181,7 +181,9 @@ func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keyp
         return nil
     }
     let enc_content = encode_dm_base64(content: enc_message.bytes, iv: iv)
-    let ev = NostrEvent(content: enc_content, pubkey: keypair.pubkey, kind: 4, tags: tags)
+    let created = created_at ?? Int64(Date().timeIntervalSince1970)
+    let ev = NostrEvent(content: enc_content, pubkey: keypair.pubkey, kind: 4, tags: tags, createdAt: created)
+    
     ev.calculate_id()
     ev.sign(privkey: privkey)
     return ev

@@ -20,7 +20,7 @@ struct ReactionsView: View {
             }
             .padding()
         }
-        .navigationBarTitle("Reactions")
+        .navigationBarTitle(NSLocalizedString("Reactions", comment: "Navigation bar title for Reactions view."))
         .onAppear {
             model.subscribe()
         }

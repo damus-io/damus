@@ -93,17 +93,25 @@ struct ContentView: View {
 
     var PostingTimelineView: some View {
         VStack {
-            TabView(selection: $filter_state) {
-                contentTimelineView(filter: FilterState.posts.filter)
-                    .tag(FilterState.posts)
-                    .id(FilterState.posts)
-                contentTimelineView(filter: FilterState.posts_and_replies.filter)
-                    .tag(FilterState.posts_and_replies)
-                    .id(FilterState.posts_and_replies)
+            ZStack {
+                TabView(selection: $filter_state) {
+                    contentTimelineView(filter: FilterState.posts.filter)
+                        .tag(FilterState.posts)
+                        .id(FilterState.posts)
+                    contentTimelineView(filter: FilterState.posts_and_replies.filter)
+                        .tag(FilterState.posts_and_replies)
+                        .id(FilterState.posts_and_replies)
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                
+                if privkey != nil {
+                    PostButtonContainer(userSettings: user_settings) {
+                        self.active_sheet = .post
+                    }
+                }
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
         }
-        .safeAreaInset(edge: .top) {
+        .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
                 FiltersView
                     //.frame(maxWidth: 275)
@@ -113,18 +121,12 @@ struct ContentView: View {
             }
             .background(colorScheme == .dark ? Color.black : Color.white)
         }
-        .ignoresSafeArea(.keyboard)
     }
     
     func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
         ZStack {
             if let damus = self.damus_state {
                 TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter)
-            }
-            if privkey != nil {
-                PostButtonContainer(userSettings: user_settings) {
-                    self.active_sheet = .post
-                }
             }
         }
     }
@@ -172,17 +174,27 @@ struct ContentView: View {
         .navigationBarTitle(selected_timeline == .home ?  NSLocalizedString("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.") : NSLocalizedString("Global", comment: "Navigation bar title for Global view where posts from all connected relay servers appear."), displayMode: .inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                if selected_timeline == .home {
+                switch selected_timeline {
+                case .home:
                     Image("damus-home")
                     .resizable()
                     .frame(width:30,height:30)
                     .shadow(color: Color("DamusPurple"), radius: 2)
-                } else {
-                    Text("Global")
+                case .dms:
+                    Text("DMs", comment: "Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.")
+                        .bold()
+                case .notifications:
+                    Text("Notifications", comment: "Toolbar label for Notifications view.")
+                        .bold()
+                case .search:
+                    Text("Global", comment: "Toolbar label for Global view where posts from all connected relay servers appear.")
+                        .bold()
+                case .none:
+                    Text("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
                 }
             }
-             
         }
+        .ignoresSafeArea(.keyboard)
     }
     
     var MaybeSearchView: some View {
@@ -229,11 +241,7 @@ struct ContentView: View {
                                         Button {
                                             isSideBarOpened.toggle()
                                         } label: {
-                                            if let picture = damus_state?.profiles.lookup(id: pubkey)?.picture {
-                                                ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, picture: picture)
-                                            } else {
-                                                Image(systemName: "person.fill")
-                                            }
+                                            ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles)
                                         }
                                     }
                                     

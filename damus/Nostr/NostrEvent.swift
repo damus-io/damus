@@ -789,3 +789,46 @@ func inner_event_or_self(ev: NostrEvent) -> NostrEvent {
     
     return inner_ev
 }
+
+func first_eref_mention(ev: NostrEvent, privkey: String?) -> Mention? {
+    let blocks = ev.blocks(privkey).filter { block in
+        guard case .mention(let mention) = block else {
+            return false
+        }
+        
+        guard case .event = mention.type else {
+            return false
+        }
+        
+        if mention.ref.key != "e" {
+            return false
+        }
+        
+        return true
+    }
+    
+    /// MARK: - Preview
+    if let firstBlock = blocks.first, case .mention(let mention) = firstBlock, mention.ref.key == "e" {
+        return mention
+    }
+    
+    return nil
+}
+
+extension [ReferencedId] {
+    var pRefs: [ReferencedId] {
+        get {
+            self.filter { ref in
+                ref.key == "p"
+            }
+        }
+    }
+    
+    var eRefs: [ReferencedId] {
+        get {
+            self.filter { ref in
+                ref.key == "e"
+            }
+        }
+    }
+}

@@ -27,6 +27,14 @@
       }
     },
     {
+      "identity" : "svgkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SVGKit/SVGKit",
+      "state" : {
+        "revision" : "e1f13e27b1e4c0ffe20e7d8d3984bf49c2a584d0"
+      }
+    },
+    {
       "identity" : "vault",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SparrowTek/Vault",

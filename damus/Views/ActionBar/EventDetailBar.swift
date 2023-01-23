@@ -14,20 +14,20 @@ struct EventDetailBar: View {
     
     var body: some View {
         HStack {
-            Text("\(bar.boosts)")
-                .font(.body.bold())
-            Text("Reposts")
-
-            NavigationLink(destination: ReactionsView(damus_state: state, model: ReactionsModel(state: state, target: target))) {
-                Text("\(bar.likes)")
-                    .font(.body.bold())
-                Text("Reactions")
+            if bar.boosts > 0 {
+                Text("\(Text("\(bar.boosts)", comment: "Number of reposts.").font(.body.bold())) \(Text(String(format: NSLocalizedString("reposts_count", comment: "Part of a larger sentence to describe how many reposts there are."), bar.boosts)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.")
             }
-            .buttonStyle(PlainButtonStyle())
+
+            if bar.likes > 0 {
+                NavigationLink(destination: ReactionsView(damus_state: state, model: ReactionsModel(state: state, target: target))) {
+                    Text("\(Text("\(bar.likes)", comment: "Number of reactions on a post.").font(.body.bold())) \(Text(String(format: NSLocalizedString("reactions_count", comment: "Part of a larger sentence to describe how many reactions there are on a post."), bar.likes)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.")
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
             
-            Text("\(bar.tips)")
-                .font(.body.bold())
-            Text("Tips")
+            if bar.tips > 0 {
+                Text("\(Text("\(bar.tips)", comment: "Number of tip payments on a post.").font(.body.bold())) \(Text(String(format: NSLocalizedString("tips_count", comment: "Part of a larger sentence to describe how many tip payments there are on a post."), bar.boosts)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many tip payments there are on a post. In source English, the first variable is the number of tip payments, and the second variable is 'Tip' or 'Tips'.")
+            }
         }
     }
 }

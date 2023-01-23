@@ -52,6 +52,7 @@ struct InnerTimelineView: View {
             }
         }
         .padding(.horizontal)
+        .padding(.top,10)
     }
 }
 

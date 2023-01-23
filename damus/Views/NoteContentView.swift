@@ -53,7 +53,7 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
 }
 
 func is_image_url(_ url: URL) -> Bool {
-    let str = url.lastPathComponent
+    let str = url.lastPathComponent.lowercased()
     return str.hasSuffix("png") || str.hasSuffix("jpg") || str.hasSuffix("jpeg") || str.hasSuffix("gif")
 }
 
@@ -74,6 +74,7 @@ struct NoteContentView: View {
         return VStack(alignment: .leading) {
             Text(Markdown.parse(content: artifacts.content))
                 .font(eventviewsize_to_font(size))
+                .fixedSize(horizontal: false, vertical: true)
 
             if show_images && artifacts.images.count > 0 {
                 ImageCarousel(urls: artifacts.images)
@@ -90,8 +91,8 @@ struct NoteContentView: View {
                 InvoicesView(invoices: artifacts.invoices)
             }
             
-            if show_images, self.preview != nil {
-                self.preview
+            if let preview = self.preview, show_images {
+                preview
             } else {
                 ForEach(artifacts.links, id:\.self) { link in
                     if let url = link {

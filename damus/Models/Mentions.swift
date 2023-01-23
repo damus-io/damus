@@ -198,11 +198,7 @@ enum Amount: Equatable {
             let sats = NSNumber(value: (Double(amt) / 1000.0))
             let formattedSats = numberFormatter.string(from: sats) ?? sats.stringValue
 
-            if formattedSats == numberFormatter.string(from: 1) {
-                return NSLocalizedString("\(formattedSats) sat", comment: "Amount of 1 sat.")
-            }
-
-            return NSLocalizedString("\(formattedSats) sats", comment: "Amount of sats.")
+            return String(format: NSLocalizedString("sats_count", comment: "Amount of sats."), sats.decimalValue as NSDecimalNumber, formattedSats)
         }
     }
 }

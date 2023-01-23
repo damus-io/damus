@@ -106,7 +106,7 @@ struct BuilderEventView: View {
             if let event = event {
                 let ev = event.inner_event ?? event
                 NavigationLink(destination: BuildThreadV2View(damus: damus, event_id: ev.id)) {
-                    EventView(damus: damus, event: event, show_friend_icon: true, size: .small)
+                    EventView(damus: damus, event: event, show_friend_icon: true, size: .small, embedded: true)
                 }.buttonStyle(.plain)
             } else {
                 ProgressView().padding()
@@ -129,10 +129,11 @@ struct EventView: View {
     let pubkey: String
     let show_friend_icon: Bool
     let size: EventViewKind
+    let embedded: Bool
 
     @EnvironmentObject var action_bar: ActionBarModel
 
-    init(event: NostrEvent, highlight: Highlight, has_action_bar: Bool, damus: DamusState, show_friend_icon: Bool, size: EventViewKind = .normal) {
+    init(event: NostrEvent, highlight: Highlight, has_action_bar: Bool, damus: DamusState, show_friend_icon: Bool, size: EventViewKind = .normal, embedded: Bool = false) {
         self.event = event
         self.highlight = highlight
         self.has_action_bar = has_action_bar
@@ -140,9 +141,10 @@ struct EventView: View {
         self.pubkey = event.pubkey
         self.show_friend_icon = show_friend_icon
         self.size = size
+        self.embedded = embedded
     }
 
-    init(damus: DamusState, event: NostrEvent, show_friend_icon: Bool, size: EventViewKind = .normal) {
+    init(damus: DamusState, event: NostrEvent, show_friend_icon: Bool, size: EventViewKind = .normal, embedded: Bool = false) {
         self.event = event
         self.highlight = .none
         self.has_action_bar = false
@@ -150,6 +152,7 @@ struct EventView: View {
         self.pubkey = event.pubkey
         self.show_friend_icon = show_friend_icon
         self.size = size
+        self.embedded = embedded
     }
 
     init(damus: DamusState, event: NostrEvent, pubkey: String, show_friend_icon: Bool, size: EventViewKind = .normal, embedded: Bool = false) {
@@ -160,6 +163,7 @@ struct EventView: View {
         self.pubkey = pubkey
         self.show_friend_icon = show_friend_icon
         self.size = size
+        self.embedded = embedded
     }
 
     var body: some View {
@@ -175,7 +179,7 @@ struct EventView: View {
                         Reposted(damus: damus, pubkey: event.pubkey, profile: prof)
                     }
                     .buttonStyle(PlainButtonStyle())
-                    TextEvent(inner_ev, pubkey: inner_ev.pubkey)
+                    TextEvent(inner_ev, pubkey: inner_ev.pubkey, booster_pubkey: event.pubkey)
                         .padding([.top], 1)
                 }
             } else {
@@ -185,7 +189,7 @@ struct EventView: View {
         }
     }
 
-    func TextEvent(_ event: NostrEvent, pubkey: String) -> some View {
+    func TextEvent(_ event: NostrEvent, pubkey: String, booster_pubkey: String? = nil) -> some View {
         let content = event.get_content(damus.keypair.privkey)
         
         return HStack(alignment: .top) {
@@ -196,8 +200,10 @@ struct EventView: View {
                     let pmodel = ProfileModel(pubkey: pubkey, damus: damus)
                     let pv = ProfileView(damus_state: damus, profile: pmodel, followers: FollowersModel(damus_state: damus, target: pubkey))
                     
-                    NavigationLink(destination: pv) {
-                        ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: highlight, profiles: damus.profiles)
+                    if !embedded {
+                        NavigationLink(destination: pv) {
+                            ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: highlight, profiles: damus.profiles)
+                        }
                     }
                     
                     Spacer()
@@ -232,37 +238,44 @@ struct EventView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                let should_show_img = should_show_images(contacts: damus.contacts, ev: event, our_pubkey: damus.pubkey)
+                let should_show_img = should_show_images(contacts: damus.contacts, ev: event, our_pubkey: damus.pubkey, booster_pubkey: booster_pubkey)
                 
                 NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, previews: damus.previews, show_images: should_show_img, artifacts: .just_content(content), size: .normal)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .allowsHitTesting(!embedded)
                 
-                if has_action_bar {
-                    if size == .selected {
-                        Text("\(format_date(event.created_at))")
-                            .padding(.top, 10)
-                            .font(.footnote)
-                            .foregroundColor(.gray)
+                if !embedded {
+                    if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
+                        BuilderEventView(damus: damus, event_id: mention.ref.id)
+                    }
+                    
+                    if has_action_bar {
+                        if size == .selected {
+                            Text("\(format_date(event.created_at))")
+                                .padding(.top, 10)
+                                .font(.footnote)
+                                .foregroundColor(.gray)
+                            
+                            Divider()
+                                .padding([.bottom], 4)
+                        } else {
+                            Rectangle().frame(height: 2).opacity(0)
+                        }
                         
-                        Divider()
-                            .padding([.bottom], 4)
-                    } else {
-                        Rectangle().frame(height: 2).opacity(0)
+                        let bar = make_actionbar_model(ev: event, damus: damus)
+                        
+                        if size == .selected && !bar.is_empty {
+                            EventDetailBar(state: damus, target: event.id, bar: bar)
+                            Divider()
+                        }
+                        
+                        EventActionBar(damus_state: damus, event: event, bar: bar)
+                            .padding([.top], 4)
                     }
-                    
-                    let bar = make_actionbar_model(ev: event, damus: damus)
-                    
-                    if size == .selected {
-                        EventDetailBar(state: damus, target: event.id, bar: bar)
-                        Divider()
-                            .padding([.bottom], 4)
-                    }
-                    
-                    EventActionBar(damus_state: damus, event: event, bar: bar)
-                }
 
-                Divider()
-                    .padding([.top], 4)
+                    Divider()
+                        .padding([.top], 4)
+                }
             }
             .padding([.leading], 2)
         }
@@ -276,11 +289,14 @@ struct EventView: View {
 }
 
 // blame the porn bots for this code
-func should_show_images(contacts: Contacts, ev: NostrEvent, our_pubkey: String) -> Bool {
+func should_show_images(contacts: Contacts, ev: NostrEvent, our_pubkey: String, booster_pubkey: String? = nil) -> Bool {
     if ev.pubkey == our_pubkey {
         return true
     }
     if contacts.is_in_friendosphere(ev.pubkey) {
+        return true
+    }
+    if let boost_key = booster_pubkey, contacts.is_in_friendosphere(boost_key) {
         return true
     }
     return false
@@ -321,19 +337,19 @@ extension View {
             Button {
                 UIPasteboard.general.string = bech32_pubkey(pubkey) ?? pubkey
             } label: {
-                Label(NSLocalizedString("Copy User ID", comment: "Context menu option for copying the ID of the user who created the note."), systemImage: "tag")
+                Label(NSLocalizedString("Copy User ID", comment: "Context menu option for copying the ID of the user who created the note."), systemImage: "person")
             }
 
             Button {
                 UIPasteboard.general.string = bech32_note_id(event.id) ?? event.id
             } label: {
-                Label(NSLocalizedString("Copy Note ID", comment: "Context menu option for copying the ID of the note."), systemImage: "tag")
+                Label(NSLocalizedString("Copy Note ID", comment: "Context menu option for copying the ID of the note."), systemImage: "note.text")
             }
 
             Button {
                 UIPasteboard.general.string = event_to_json(ev: event)
             } label: {
-                Label(NSLocalizedString("Copy Note JSON", comment: "Context menu option for copying the JSON text from the note."), systemImage: "note")
+                Label(NSLocalizedString("Copy Note JSON", comment: "Context menu option for copying the JSON text from the note."), systemImage: "j.square.on.square")
             }
 
             Button {

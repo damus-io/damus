@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>collapsed_event_view_other_notes</key>
+	<dict>
+		<key>NOTES</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>1%d diğer not</string>
+			<key>other</key>
+			<string>%d diğer notlar</string>
+		</dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>··· %#@NOTES@ ···</string>
+	</dict>
+	<key>followers_count</key>
+	<dict>
+		<key>FOLLOWERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Takipçi</string>
+			<key>other</key>
+			<string>Takipçiler</string>
+		</dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWERS@</string>
+	</dict>
+	<key>reactions_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTIONS@</string>
+		<key>REACTIONS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Tepki</string>
+			<key>other</key>
+			<string>Tepkiler</string>
+		</dict>
+	</dict>
+	<key>relays_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@RELAYS@</string>
+		<key>RELAYS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Röle</string>
+			<key>other</key>
+			<string>Röleler</string>
+		</dict>
+	</dict>
+	<key>replying_to_one_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%@%#@OTHERS@'lara yanıt </string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>&amp; %d diğer</string>
+			<key>other</key>
+			<string>&amp; %d diğerleri</string>
+			<key>zero</key>
+			<string></string>
+		</dict>
+	</dict>
+	<key>replying_to_two_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%@, %@%#@OTHERS@'a yanıt</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>&amp; %d diğer</string>
+			<key>other</key>
+			<string>&amp; %d diğerleri</string>
+			<key>zero</key>
+			<string></string>
+		</dict>
+	</dict>
+	<key>reposts_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTS@</string>
+		<key>REPOSTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Yineleme</string>
+			<key>other</key>
+			<string>Yinelemeler</string>
+		</dict>
+	</dict>
+	<key>sats_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@SATS@</string>
+		<key>SATS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>%2$@ sat</string>
+			<key>other</key>
+			<string>%2$@ sat</string>
+		</dict>
+	</dict>
+	<key>tips_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@TIPS@</string>
+		<key>TIPS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Bahşiş</string>
+			<key>other</key>
+			<string>Bahşişler</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

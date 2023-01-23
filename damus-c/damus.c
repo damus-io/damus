@@ -22,6 +22,10 @@ static inline int is_whitespace(char c) {
     return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
 }
 
+static inline int is_boundary(char c) {
+    return !isalnum(c);
+}
+
 static void make_cursor(struct cursor *c, const u8 *content, size_t len)
 {
     c->start = content;
@@ -29,16 +33,33 @@ static void make_cursor(struct cursor *c, const u8 *content, size_t len)
     c->p = content;
 }
 
-static int consume_until_whitespace(struct cursor *cur, int or_end) {
+static int consume_until_boundary(struct cursor *cur) {
     char c;
     
     while (cur->p < cur->end) {
         c = *cur->p;
         
-        if (is_whitespace(c))
+        if (is_boundary(c))
             return 1;
         
         cur->p++;
+    }
+    
+    return 1;
+}
+
+static int consume_until_whitespace(struct cursor *cur, int or_end) {
+    char c;
+    bool consumedAtLeastOne = false;
+    
+    while (cur->p < cur->end) {
+        c = *cur->p;
+        
+        if (is_whitespace(c) && consumedAtLeastOne)
+            return 1;
+        
+        cur->p++;
+        consumedAtLeastOne = true;
     }
     
     return or_end;
@@ -145,7 +166,7 @@ static int parse_hashtag(struct cursor *cur, struct block *block) {
         return 0;
     }
     
-    consume_until_whitespace(cur, 1);
+    consume_until_boundary(cur);
     
     block->type = BLOCK_HASHTAG;
     block->block.str.start = (const char*)(start + 1);
