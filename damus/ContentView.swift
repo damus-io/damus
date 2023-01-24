@@ -120,9 +120,10 @@ struct ContentView: View {
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
-                FiltersView
-                    //.frame(maxWidth: 275)
-                    .padding()
+                CustomPicker(selection: $filter_state, content: {
+                    Text("Posts", comment: "Label for filter for seeing only posts (instead of posts and replies).").tag(FilterState.posts)
+                    Text("Posts & Replies", comment: "Label for filter for seeing posts and replies (instead of only posts).").tag(FilterState.posts_and_replies)
+                })
                 Divider()
                     .frame(height: 1)
             }
@@ -135,16 +136,6 @@ struct ContentView: View {
             if let damus = self.damus_state {
                 TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter)
             }
-        }
-    }
-    
-    var FiltersView: some View {
-        VStack{
-            Picker(NSLocalizedString("Filter State", comment: "Filter state for seeing either only posts, or posts & replies."), selection: $filter_state) {
-                Text("Posts", comment: "Label for filter for seeing only posts (instead of posts and replies).").tag(FilterState.posts)
-                Text("Posts & Replies", comment: "Label for filter for seeing posts and replies (instead of only posts).").tag(FilterState.posts_and_replies)
-            }
-            .pickerStyle(.segmented)
         }
     }
     
