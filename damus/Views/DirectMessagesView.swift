@@ -62,16 +62,16 @@ struct DirectMessagesView: View {
     }
     
     var body: some View {
-        VStack {
-            Picker(NSLocalizedString("DM Type", comment: "DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet."), selection: $dm_type) {
+        VStack(spacing: 0) {
+            CustomPicker(selection: $dm_type, content: {
                 Text("DMs")
                     .tag(DMType.friend)
-                
                 Text("Requests")
                     .tag(DMType.rando)
-                
-            }
-            .pickerStyle(.segmented)
+            })
+            
+            Divider()
+                .frame(height: 1)
             
             TabView(selection: $dm_type) {
                 MainContent(requests: false)
@@ -83,7 +83,6 @@ struct DirectMessagesView: View {
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
         .padding(.horizontal)
-        .padding(.top)
         .navigationTitle(NSLocalizedString("Encrypted DMs", comment: "Navigation title for view of encrypted DMs, where DM is an English abbreviation for Direct Message."))
     }
 }
