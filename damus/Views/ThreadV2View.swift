@@ -255,14 +255,7 @@ struct ThreadV2View: View {
                     // MARK: - Parents events view
                     VStack {
                         ForEach(thread.parentEvents, id: \.id) { event in
-                            EventView(
-                                event: event,
-                                highlight: .none,
-                                has_action_bar: true,
-                                damus: damus,
-                                show_friend_icon: true, // TODO: change it
-                                size: .small
-                            )
+                            EventView(event: event, has_action_bar: true, damus: damus)
                             .onTapGesture {
                                 nav_target = event.id
                                 navigating = true
@@ -285,24 +278,17 @@ struct ThreadV2View: View {
                     })
                     
                     // MARK: - Actual event view
-                    EventView(
-                        event: thread.current,
-                        highlight: .none,
-                        has_action_bar: true,
+                    SelectedEventView(
                         damus: damus,
-                        show_friend_icon: true, // TODO: change it
-                        size: .selected
+                        event: thread.current
                     ).id("main")
                     
                     // MARK: - Responses of the actual event view
                     ForEach(thread.childEvents, id: \.id) { event in
                         EventView(
                             event: event,
-                            highlight: .none,
                             has_action_bar: true,
-                            damus: damus,
-                            show_friend_icon: true, // TODO: change it
-                            size: .small
+                            damus: damus
                         )
                         .onTapGesture {
                             nav_target = event.id

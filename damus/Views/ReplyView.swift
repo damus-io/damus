@@ -45,7 +45,7 @@ struct ReplyView: View {
                 ParticipantsView(damus_state: damus, references: $references, originalReferences: $originalReferences)
             }
             ScrollView {
-                EventView(event: replying_to, highlight: .none, has_action_bar: false, damus: damus, show_friend_icon: true)
+                EventView(event: replying_to, has_action_bar: false, damus: damus)
             }
             PostView(replying_to: replying_to, references: references)
         }

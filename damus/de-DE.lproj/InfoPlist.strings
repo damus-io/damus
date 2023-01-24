@@ -5,5 +5,5 @@
 "CFBundleName" = "damus";
 
 /* Privacy - Photo Library Additions Usage Description */
-"NSPhotoLibraryAddUsageDescription" = "Damus Zugriff auf deine Fotomediathek zu gewähren erlaubt dir Fotos zu sichern.";
+"NSPhotoLibraryAddUsageDescription" = "Damus Zugriff auf deine Fotos zu gewähren erlaubt dir Bilder zu sichern.";
 

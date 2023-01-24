@@ -8,38 +8,9 @@
 import Foundation
 import SwiftUI
 
-enum Highlight {
-    case none
-    case main
-    case reply
-    case custom(Color, Float)
-
-    var is_main: Bool {
-        if case .main = self {
-            return true
-        }
-        return false
-    }
-
-    var is_none: Bool {
-        if case .none = self {
-            return true
-        }
-        return false
-    }
-
-    var is_replied_to: Bool {
-        switch self {
-        case .reply: return true
-        default: return false
-        }
-    }
-}
-
 enum EventViewKind {
     case small
     case normal
-    case big
     case selected
 }
 
@@ -49,121 +20,40 @@ func eventviewsize_to_font(_ size: EventViewKind) -> Font {
         return .body
     case .normal:
         return .body
-    case .big:
-        return .headline
     case .selected:
         return .custom("selected", size: 21.0)
     }
 }
 
-struct BuilderEventView: View {
-    let damus: DamusState
-    let event_id: String
-    @State var event: NostrEvent?
-    @State var subscription_uuid: String = UUID().description
-    
-    func unsubscribe() {
-        damus.pool.unsubscribe(sub_id: subscription_uuid)
-    }
-    
-    func subscribe(filters: [NostrFilter]) {
-        damus.pool.register_handler(sub_id: subscription_uuid, handler: handle_event)
-        damus.pool.send(.subscribe(.init(filters: filters, sub_id: subscription_uuid)))
-    }
-    
-    func handle_event(relay_id: String, ev: NostrConnectionEvent) {
-        guard case .nostr_event(let nostr_response) = ev else {
-            return
-        }
-        
-        guard case .event(let id, let nostr_event) = nostr_response else {
-            return
-        }
-        
-        // Is current event
-        if id == subscription_uuid {
-            if event != nil {
-                return
-            }
-            
-            event = nostr_event
-            
-            unsubscribe()
-        }
-    }
-    
-    func load() {
-        subscribe(filters: [
-            NostrFilter(
-                ids: [self.event_id],
-                limit: 1
-            )
-        ])
-    }
-    
-    var body: some View {
-        VStack {
-            if let event = event {
-                let ev = event.inner_event ?? event
-                NavigationLink(destination: BuildThreadV2View(damus: damus, event_id: ev.id)) {
-                    EventView(damus: damus, event: event, show_friend_icon: true, size: .small, embedded: true)
-                }.buttonStyle(.plain)
-            } else {
-                ProgressView().padding()
-            }
-        }
-        .frame(minWidth: 0, maxWidth: .infinity)
-        .border(Color.gray.opacity(0.2), width: 1)
-        .cornerRadius(2)
-        .onAppear {
-            self.load()
-        }
-    }
-}
+
 
 struct EventView: View {
     let event: NostrEvent
-    let highlight: Highlight
     let has_action_bar: Bool
     let damus: DamusState
     let pubkey: String
-    let show_friend_icon: Bool
-    let size: EventViewKind
-    let embedded: Bool
 
     @EnvironmentObject var action_bar: ActionBarModel
 
-    init(event: NostrEvent, highlight: Highlight, has_action_bar: Bool, damus: DamusState, show_friend_icon: Bool, size: EventViewKind = .normal, embedded: Bool = false) {
+    init(event: NostrEvent, has_action_bar: Bool, damus: DamusState) {
         self.event = event
-        self.highlight = highlight
         self.has_action_bar = has_action_bar
         self.damus = damus
         self.pubkey = event.pubkey
-        self.show_friend_icon = show_friend_icon
-        self.size = size
-        self.embedded = embedded
     }
 
-    init(damus: DamusState, event: NostrEvent, show_friend_icon: Bool, size: EventViewKind = .normal, embedded: Bool = false) {
+    init(damus: DamusState, event: NostrEvent) {
         self.event = event
-        self.highlight = .none
         self.has_action_bar = false
         self.damus = damus
         self.pubkey = event.pubkey
-        self.show_friend_icon = show_friend_icon
-        self.size = size
-        self.embedded = embedded
     }
 
-    init(damus: DamusState, event: NostrEvent, pubkey: String, show_friend_icon: Bool, size: EventViewKind = .normal, embedded: Bool = false) {
+    init(damus: DamusState, event: NostrEvent, pubkey: String) {
         self.event = event
-        self.highlight = .none
         self.has_action_bar = false
         self.damus = damus
         self.pubkey = pubkey
-        self.show_friend_icon = show_friend_icon
-        self.size = size
-        self.embedded = embedded
     }
 
     var body: some View {
@@ -190,92 +80,45 @@ struct EventView: View {
     }
 
     func TextEvent(_ event: NostrEvent, pubkey: String, booster_pubkey: String? = nil) -> some View {
-        let content = event.get_content(damus.keypair.privkey)
-        
         return HStack(alignment: .top) {
             let profile = damus.profiles.lookup(id: pubkey)
-            
-            if size != .selected {
-                VStack {
-                    let pmodel = ProfileModel(pubkey: pubkey, damus: damus)
-                    let pv = ProfileView(damus_state: damus, profile: pmodel, followers: FollowersModel(damus_state: damus, target: pubkey))
-                    
-                    if !embedded {
-                        NavigationLink(destination: pv) {
-                            ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: highlight, profiles: damus.profiles)
-                        }
-                    }
-                    
-                    Spacer()
+        
+            VStack {
+                let pmodel = ProfileModel(pubkey: pubkey, damus: damus)
+                let pv = ProfileView(damus_state: damus, profile: pmodel, followers: FollowersModel(damus_state: damus, target: pubkey))
+                
+                NavigationLink(destination: pv) {
+                    ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus.profiles)
                 }
+                
+                Spacer()
             }
 
             VStack(alignment: .leading) {
                 HStack(alignment: .center) {
-                    if size == .selected {
-                        VStack {
-                            let pmodel = ProfileModel(pubkey: pubkey, damus: damus)
-                            let pv = ProfileView(damus_state: damus, profile: pmodel, followers: FollowersModel(damus_state: damus, target: pubkey))
-                            
-                            NavigationLink(destination: pv) {
-                                ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: highlight, profiles: damus.profiles)
-                            }
-                        }
-                    }
+                    EventProfileName(pubkey: pubkey, profile: profile, damus: damus, show_friend_confirmed: true, size: .normal)
                     
-                    EventProfileName(pubkey: pubkey, profile: profile, damus: damus, show_friend_confirmed: show_friend_icon, size: size)
-                    if size != .selected {
-                        Text("\(format_relative_time(event.created_at))")
-                            .font(eventviewsize_to_font(size))
-                            .foregroundColor(.gray)
-                    }
-                }
-                
-                if event.is_reply(damus.keypair.privkey) {
-                    Text("\(reply_desc(profiles: damus.profiles, event: event))")
-                        .font(.footnote)
+                    Text("\(format_relative_time(event.created_at))")
                         .foregroundColor(.gray)
-                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-
-                let should_show_img = should_show_images(contacts: damus.contacts, ev: event, our_pubkey: damus.pubkey, booster_pubkey: booster_pubkey)
                 
-                NoteContentView(privkey: damus.keypair.privkey, event: event, profiles: damus.profiles, previews: damus.previews, show_images: should_show_img, artifacts: .just_content(content), size: self.size)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .allowsHitTesting(!embedded)
+                EventBody(damus_state: damus, event: event, size: .normal)
                 
-                if !embedded {
-                    if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
-                        BuilderEventView(damus: damus, event_id: mention.ref.id)
-                    }
+                if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
+                    BuilderEventView(damus: damus, event_id: mention.ref.id)
+                }
+                
+                if has_action_bar {
+                    Rectangle().frame(height: 2).opacity(0)
                     
-                    if has_action_bar {
-                        if size == .selected {
-                            Text("\(format_date(event.created_at))")
-                                .padding(.top, 10)
-                                .font(.footnote)
-                                .foregroundColor(.gray)
-                            
-                            Divider()
-                                .padding([.bottom], 4)
-                        } else {
-                            Rectangle().frame(height: 2).opacity(0)
-                        }
-                        
-                        let bar = make_actionbar_model(ev: event, damus: damus)
-                        
-                        if size == .selected && !bar.is_empty {
-                            EventDetailBar(state: damus, target: event.id, bar: bar)
-                            Divider()
-                        }
-                        
-                        EventActionBar(damus_state: damus, event: event, bar: bar)
-                            .padding([.top], 4)
-                    }
-
-                    Divider()
+                    let bar = make_actionbar_model(ev: event, damus: damus)
+                    
+                    EventActionBar(damus_state: damus, event: event, bar: bar)
                         .padding([.top], 4)
                 }
+
+                Divider()
+                    .padding([.top], 4)
             }
             .padding([.leading], 2)
         }
@@ -376,33 +219,6 @@ func format_date(_ created_at: Int64) -> String {
 }
 
 
-func reply_desc(profiles: Profiles, event: NostrEvent) -> String {
-    let desc = make_reply_description(event.tags)
-    let pubkeys = desc.pubkeys
-    let n = desc.others
-
-    if desc.pubkeys.count == 0 {
-        return NSLocalizedString("Reply to self", comment: "Label to indicate that the user is replying to themself.")
-    }
-
-    let names: [String] = pubkeys.map {
-        let prof = profiles.lookup(id: $0)
-        return Profile.displayName(profile: prof, pubkey: $0)
-    }
-
-    if names.count == 2 {
-        if n > 2 {
-            let othersCount = n - pubkeys.count
-            return String(format: NSLocalizedString("replying_to_two_and_others", comment: "Label to indicate that the user is replying to 2 users and others."), names[0], names[1], othersCount)
-        }
-        return String(format: NSLocalizedString("Replying to %@ & %@", comment: "Label to indicate that the user is replying to 2 users."), names[0], names[1])
-    }
-
-    let othersCount = n - pubkeys.count
-    return String(format: NSLocalizedString("replying_to_one_and_others", comment: "Label to indicate that the user is replying to 1 user and others."), names[0], othersCount)
-}
-
-
 
 func make_actionbar_model(ev: NostrEvent, damus: DamusState) -> ActionBarModel {
     let likes = damus.likes.counts[ev.id]
@@ -425,22 +241,25 @@ func make_actionbar_model(ev: NostrEvent, damus: DamusState) -> ActionBarModel {
 struct EventView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
+            /*
             EventView(damus: test_damus_state(), event: NostrEvent(content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool", pubkey: "pk"), show_friend_icon: true, size: .small)
             EventView(damus: test_damus_state(), event: NostrEvent(content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool", pubkey: "pk"), show_friend_icon: true, size: .normal)
             EventView(damus: test_damus_state(), event: NostrEvent(content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool", pubkey: "pk"), show_friend_icon: true, size: .big)
             
+             */
             EventView(
-                event: NostrEvent(
-                    content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool",
-                    pubkey: "pk",
-                    createdAt: Int64(Date().timeIntervalSince1970 - 100)
-                ),
-                highlight: .none,
+                event: test_event,
                 has_action_bar: true,
-                damus: test_damus_state(),
-                show_friend_icon: true,
-                size: .selected
+                damus: test_damus_state()
             )
         }
+        .padding()
     }
 }
+
+let test_event =
+        NostrEvent(
+            content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jpg cool",
+            pubkey: "pk",
+            createdAt: Int64(Date().timeIntervalSince1970 - 100)
+        )

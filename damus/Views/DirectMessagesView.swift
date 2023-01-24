@@ -49,7 +49,7 @@ struct DirectMessagesView: View {
     func MaybeEvent(_ tup: (String, DirectMessageModel)) -> some View {
         Group {
             if let ev = tup.1.events.last {
-                EventView(damus: damus_state, event: ev, pubkey: tup.0, show_friend_icon: true)
+                EventView(damus: damus_state, event: ev, pubkey: tup.0)
                     .onTapGesture {
                         pubkey = tup.0
                         active_model = tup.1
@@ -64,9 +64,9 @@ struct DirectMessagesView: View {
     var body: some View {
         VStack(spacing: 0) {
             CustomPicker(selection: $dm_type, content: {
-                Text("DMs")
+                Text("DMs", comment: "Picker option for DM selector for seeing only DMs that have been responded to. DM is the English abbreviation for Direct Message.")
                     .tag(DMType.friend)
-                Text("Requests")
+                Text("Requests", comment: "Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message.")
                     .tag(DMType.rando)
             })
             
@@ -83,7 +83,7 @@ struct DirectMessagesView: View {
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
         .padding(.horizontal)
-        .navigationTitle(NSLocalizedString("Encrypted DMs", comment: "Navigation title for view of encrypted DMs, where DM is an English abbreviation for Direct Message."))
+        .navigationTitle(NSLocalizedString("DMs", comment: "Navigation title for view of DMs, where DM is an English abbreviation for Direct Message."))
     }
 }
 
