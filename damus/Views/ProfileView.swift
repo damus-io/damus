@@ -284,6 +284,8 @@ struct ProfileView: View {
                     WebsiteLink(url: url)
                 }
                 
+                InBefore(events: $profile.events)
+                
                 Divider()
                 
                 HStack {
