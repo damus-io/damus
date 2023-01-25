@@ -12,11 +12,24 @@ import Vault
 let PUBKEY_HRP = "npub"
 let PRIVKEY_HRP = "nsec"
 
+struct FullKeypair {
+    let pubkey: String
+    let privkey: String
+}
+
 struct Keypair {
     let pubkey: String
     let privkey: String?
     let pubkey_bech32: String
     let privkey_bech32: String?
+    
+    func to_full() -> FullKeypair? {
+        guard let privkey = self.privkey else {
+            return nil
+        }
+        
+        return FullKeypair(pubkey: pubkey, privkey: privkey)
+    }
     
     init(pubkey: String, privkey: String?) {
         self.pubkey = pubkey
