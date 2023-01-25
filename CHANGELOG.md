@@ -1,3 +1,17 @@
+
+## [1.0.0-10] - 2023-01-25
+
+### Added
+
+- Added EULA
+- Added ability to block users (William Casarin)
+- Added a way to report content (William Casarin)
+- Stretchable profile cover header (Swift)
+
+
+[1.0.0-10]: https://github.com/damus-io/damus/releases/tag/v1.0.0-10
+
+
 ## [1.0.0-8] - 2023-01-22
 
 ### Added
