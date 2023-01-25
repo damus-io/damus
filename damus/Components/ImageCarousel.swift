@@ -115,56 +115,6 @@ private struct ImageContainerView: View {
         // TODO: Update ImageCarousel with serializer and processor
         // .serialize(by: imageModel.serializer)
         // .setProcessor(imageModel.processor)
-        
-    }
-}
-
-struct ZoomableScrollView<Content: View>: UIViewRepresentable {
-    
-    private var content: Content
-
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
-    }
-
-    func makeUIView(context: Context) -> UIScrollView {
-        let scrollView = UIScrollView()
-        scrollView.delegate = context.coordinator
-        scrollView.maximumZoomScale = 20
-        scrollView.minimumZoomScale = 1
-        scrollView.bouncesZoom = true
-        scrollView.showsVerticalScrollIndicator = false
-        scrollView.showsHorizontalScrollIndicator = false
-
-        let hostedView = context.coordinator.hostingController.view!
-        hostedView.translatesAutoresizingMaskIntoConstraints = true
-        hostedView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        hostedView.frame = scrollView.bounds
-        hostedView.backgroundColor = .clear
-        scrollView.addSubview(hostedView)
-
-        return scrollView
-    }
-
-    func makeCoordinator() -> Coordinator {
-        return Coordinator(hostingController: UIHostingController(rootView: self.content))
-    }
-
-    func updateUIView(_ uiView: UIScrollView, context: Context) {
-        context.coordinator.hostingController.rootView = self.content
-        assert(context.coordinator.hostingController.view.superview == uiView)
-    }
-
-    class Coordinator: NSObject, UIScrollViewDelegate {
-        var hostingController: UIHostingController<Content>
-
-        init(hostingController: UIHostingController<Content>) {
-          self.hostingController = hostingController
-        }
-
-        func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-          return hostingController.view
-        }
     }
 }
 
@@ -176,6 +126,14 @@ struct ImageView: View {
     
     @State private var selectedIndex = 0
     @State var showMenu = true
+    
+    var safeAreaInsets: UIEdgeInsets? {
+        return UIApplication
+                .shared
+                .connectedScenes
+                .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
+                .first { $0.isKeyWindow }?.safeAreaInsets
+    }
     
     var navBarView: some View {
         VStack {
@@ -222,22 +180,24 @@ struct ImageView: View {
                     ZoomableScrollView {
                         ImageContainerView(url: urls[index])
                             .aspectRatio(contentMode: .fit)
+                            .padding(.top, safeAreaInsets?.top)
+                            .padding(.bottom, safeAreaInsets?.bottom)
                     }
-                    .ignoresSafeArea()
-                    .tag(index)
                     .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
                         presentationMode.wrappedValue.dismiss()
                     }))
+                    .ignoresSafeArea()
+                    .tag(index)
                 }
             }
             .ignoresSafeArea()
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            .onChange(of: selectedIndex, perform: { _ in
-                showMenu = true
+            .gesture(TapGesture(count: 2).onEnded {
+                // Prevents menu from hiding on double tap
             })
-            .onTapGesture {
+            .gesture(TapGesture(count: 1).onEnded {
                 showMenu.toggle()
-            }
+            })
             .overlay(
                 VStack {
                     if showMenu {
@@ -250,14 +210,7 @@ struct ImageView: View {
                     }
                 }
                 .animation(.easeInOut, value: showMenu)
-                .padding(
-                    .bottom,
-                    UIApplication
-                        .shared
-                        .connectedScenes
-                        .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
-                        .first { $0.isKeyWindow }?.safeAreaInsets.bottom
-                )
+                .padding(.bottom, safeAreaInsets?.bottom)
             )
         }
     }
