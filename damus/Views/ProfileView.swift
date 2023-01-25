@@ -219,9 +219,6 @@ struct ProfileView: View {
                     .frame(width: geometry.size.width, height: self.getHeightForHeaderImage(geometry))
                     .clipped()
                     .offset(x: 0, y: self.getOffsetForHeaderImage(geometry))
-                
-                ShareButton
-                    .offset(x: geometry.size.width - 80.0, y: 50.0 )
 
             }.frame(height: BANNER_HEIGHT)
             
@@ -249,6 +246,8 @@ struct ProfileView: View {
                         }
                         
                         DMButton
+                        
+                        ShareButton
                         
                         if profile.pubkey != damus_state.pubkey {
                             FollowButtonView(
