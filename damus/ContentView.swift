@@ -15,7 +15,7 @@ var BOOTSTRAP_RELAYS = [
     "wss://nostr.fmt.wiz.biz",
     "wss://relay.nostr.bg",
     "wss://nostr.oxtr.dev",
-    "wss://nostr.v0l.io",
+    "wss://relay.snort.social",
     "wss://brb.io",
 ]
 
