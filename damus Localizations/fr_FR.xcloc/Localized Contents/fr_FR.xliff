@@ -17,8 +17,8 @@
         <note>Bundle name</note>
       </trans-unit>
       <trans-unit id="NSPhotoLibraryAddUsageDescription" xml:space="preserve">
-        <source>&quot;Granting Damus access to your photo library allows you to save photos.</source>
-        <target>&quot;Accorder à Damus l'accès à votre galerie photos vous permet d'enregistrer des photos.</target>
+        <source>Granting Damus access to your photos allows you to save images.</source>
+        <target>Donner accès à Damus à vos photos vous permet d'enregistrer des images</target>
         
         <note>Privacy - Photo Library Additions Usage Description</note>
       </trans-unit>
@@ -75,7 +75,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="%lld/%lld" xml:space="preserve">
         <source>%lld/%lld</source>
-        <target>%lld/%lld&lt;br data-mce-bogus=&quot;1&quot;&gt;</target>
+        <target>%lld/%lld</target>
         
         <note>Fraction of how many of the user's relay servers that are operational.</note>
       </trans-unit>
@@ -93,13 +93,13 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="(Profile.displayName(profile: profile, pubkey: whos))'s Followers" xml:space="preserve">
         <source>(Profile.displayName(profile: profile, pubkey: whos))'s Followers</source>
-        <target>(Profile.displayName(profile: profile, pubkey: whos))'s Followers</target>
+        <target>Abonnés de (Profile.displayName(profile: profile, pubkey: whos))</target>
         
         <note>Navigation bar title for view that shows who is following a user.</note>
       </trans-unit>
       <trans-unit id="(who) following" xml:space="preserve">
         <source>(who) following</source>
-        <target>(who) following</target>
+        <target>(who) suit</target>
         
         <note>Navigation bar title for view that shows who a user is following.</note>
       </trans-unit>
@@ -152,6 +152,12 @@ Number of profiles a user is following.</note>
         
         <note>Label for section for adding a relay server.</note>
       </trans-unit>
+      <trans-unit id="Add all" xml:space="preserve">
+        <source>Add all</source>
+        <target>Tout ajouter</target>
+        
+        <note>Button label to re-add all original participants as profiles to reply to in a note</note>
+      </trans-unit>
       <trans-unit id="Any" xml:space="preserve">
         <source>Any</source>
         <target>N'importe Lequel</target>
@@ -160,7 +166,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Are you sure you want to repost this?" xml:space="preserve">
         <source>Are you sure you want to repost this?</source>
-        <target>Êtes-vous sûr de vouloir republier ceci ?</target>
+        <target>Êtes-vous sûr de vouloir republier ceci ?</target>
         
         <note>Alert message to ask if user wants to repost a post.</note>
       </trans-unit>
@@ -190,13 +196,13 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Blixt Wallet" xml:space="preserve">
         <source>Blixt Wallet</source>
-        <target>Portefeuille Blixt</target>
+        <target>Blixt Wallet</target>
         
         <note>Dropdown option label for Lightning wallet, Blixt Wallet</note>
       </trans-unit>
       <trans-unit id="Blue Wallet" xml:space="preserve">
         <source>Blue Wallet</source>
-        <target>Portefeuille Blue</target>
+        <target>Blue Wallet</target>
         
         <note>Dropdown option label for Lightning wallet, Blue Wallet.</note>
       </trans-unit>
@@ -235,7 +241,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Clear" xml:space="preserve">
         <source>Clear</source>
-        <target>&lt;br&gt;Vider</target>
+        <target>Vider</target>
         
         <note>Button for clearing cached data.</note>
       </trans-unit>
@@ -330,11 +336,18 @@ Number of profiles a user is following.</note>
         
         <note>Example description about Bitcoin creator(s), Satoshi Nakamoto.</note>
       </trans-unit>
-      <trans-unit id="DM" xml:space="preserve">
-        <source>DM</source>
-        <target>DM</target>
+      <trans-unit id="DM Type" xml:space="preserve">
+        <source>DM Type</source>
+        <target>Type de message privé</target>
         
-        <note>Navigation title for DM view, which is the English abbreviation for Direct Message.</note>
+        <note>DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet. DM is the English abbreviation for Direct Message.</note>
+      </trans-unit>
+      <trans-unit id="DMs" xml:space="preserve">
+        <source>DMs</source>
+        <target>Messages privés</target>
+        
+        <note>Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
+   Navigation title for view of DMs, where DM is an English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="Damus" xml:space="preserve">
         <source>Damus</source>
@@ -350,7 +363,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Delete" xml:space="preserve">
         <source>Delete</source>
-        <target>&lt;br&gt;Effacer</target>
+        <target>Effacer</target>
         
         <note>Button to delete a relay server that the user connects to.</note>
       </trans-unit>
@@ -384,17 +397,17 @@ Number of profiles a user is following.</note>
         
         <note>Button to edit user's profile.</note>
       </trans-unit>
+      <trans-unit id="Edit participants" xml:space="preserve">
+        <source>Edit participants</source>
+        <target>Modifier les participants</target>
+        
+        <note>Text indicating that the view is used for editing which participants are replied to in a note.</note>
+      </trans-unit>
       <trans-unit id="Encrypted" xml:space="preserve">
         <source>Encrypted</source>
         <target>Crypté</target>
         
         <note>Heading indicating that this application keeps private messaging end-to-end encrypted.</note>
-      </trans-unit>
-      <trans-unit id="Encrypted DMs" xml:space="preserve">
-        <source>Encrypted DMs</source>
-        <target>DMs cryptés</target>
-        
-        <note>Navigation title for view of encrypted DMs, where DM is an English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="Enter your account key to login:" xml:space="preserve">
         <source>Enter your account key to login:</source>
@@ -404,7 +417,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Error: %@" xml:space="preserve">
         <source>Error: %@</source>
-        <target>Error: %@</target>
+        <target>Erreur: %@</target>
         
         <note>Error message indicating why saving keys failed.</note>
       </trans-unit>
@@ -416,7 +429,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Follow" xml:space="preserve">
         <source>Follow</source>
-        <target>S'abonner&lt;br&gt;</target>
+        <target>S'abonner</target>
         
         <note>Button to follow a user.</note>
       </trans-unit>
@@ -441,7 +454,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Follows" xml:space="preserve">
         <source>Follows</source>
-        <target>Follow&lt;br&gt;</target>
+        <target>Suit</target>
         
         <note>Text to indicate that button next to it is in a state that will follow a profile when tapped.</note>
       </trans-unit>
@@ -453,13 +466,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Goto post %@" xml:space="preserve">
         <source>Goto post %@</source>
-        <target>Goto post %@</target>
+        <target>Aller au post %@</target>
         
         <note>Navigation link to go to post referenced by hex code.</note>
       </trans-unit>
       <trans-unit id="Goto profile %@" xml:space="preserve">
         <source>Goto profile %@</source>
-        <target>Goto profile %@</target>
+        <target>Aller au profil %@</target>
         
         <note>Navigation link to go to profile.</note>
       </trans-unit>
@@ -477,7 +490,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="LNLink" xml:space="preserve">
         <source>LNLink</source>
-        <target>Lien LN</target>
+        <target>LNLink</target>
         
         <note>Dropdown option label for Lightning wallet, LNLink.</note>
       </trans-unit>
@@ -602,12 +615,6 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Private Key</source>
         <target>Clé Privée</target>
         
-        <note>Label to indicate that the text below is the user's private key used by only the user themself as a secret to login to access their account.</note>
-      </trans-unit>
-      <trans-unit id="PrivateKey" xml:space="preserve">
-        <source>PrivateKey</source>
-        <target>PrivateKey</target>
-        
         <note>Title of the secure field that holds the user's private key.</note>
       </trans-unit>
       <trans-unit id="Profile" xml:space="preserve">
@@ -670,9 +677,15 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Sidebar menu label for Relay servers view</note>
       </trans-unit>
+      <trans-unit id="Remove all" xml:space="preserve">
+        <source>Remove all</source>
+        <target>Tout supprimer</target>
+        
+        <note>Button label to remove all participants from a note reply.</note>
+      </trans-unit>
       <trans-unit id="Reply to self" xml:space="preserve">
         <source>Reply to self</source>
-        <target>Répondre à soi-même</target>
+        <target>Réponse à soi-même</target>
         
         <note>Label to indicate that the user is replying to themself.</note>
       </trans-unit>
@@ -700,6 +713,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>A republié</target>
         
         <note>Text indicating that the post was reposted (i.e. re-shared).</note>
+      </trans-unit>
+      <trans-unit id="Requests" xml:space="preserve">
+        <source>Requests</source>
+        <target>Demandes</target>
+        
+        <note>Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="Reset" xml:space="preserve">
         <source>Reset</source>
@@ -788,7 +807,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Show" xml:space="preserve">
         <source>Show</source>
-        <target>Afficher&lt;br&gt;</target>
+        <target>Afficher</target>
         
         <note>Toggle to show or hide user's secret account login key.</note>
       </trans-unit>
@@ -861,7 +880,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Unfollowing..." xml:space="preserve">
         <source>Unfollowing...</source>
-        <target>Ne plus suivre...&lt;br&gt;</target>
+        <target>Ne plus suivre...</target>
         
         <note>Label to indicate that the user is in the process of unfollowing another user.</note>
       </trans-unit>
@@ -886,7 +905,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Wallet Of Satoshi" xml:space="preserve">
         <source>Wallet Of Satoshi</source>
-        <target>Portefeuille de Satoshi</target>
+        <target>Wallet Of Satoshi</target>
         
         <note>Dropdown option label for Lightning wallet, Wallet Of Satoshi.</note>
       </trans-unit>
@@ -928,7 +947,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Zeus LN" xml:space="preserve">
         <source>Zeus LN</source>
-        <target>LN de Zeus</target>
+        <target>Zeus LN</target>
         
         <note>Dropdown option label for Lightning wallet, Zeus LN.</note>
       </trans-unit>
@@ -946,7 +965,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="https://example.com/pic.jpg" xml:space="preserve">
         <source>https://example.com/pic.jpg</source>
-        <target>https://example.com/pic.jpg</target>
+        <target>https://exemple.com/pic.jpg</target>
         
         <note>Placeholder example text for profile picture URL.</note>
       </trans-unit>
@@ -964,13 +983,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="none" xml:space="preserve">
         <source>none</source>
-        <target>none</target>
+        <target>aucun</target>
         
         <note>No search results.</note>
       </trans-unit>
       <trans-unit id="now" xml:space="preserve">
         <source>now</source>
-        <target>now</target>
+        <target>maintenant</target>
         
         <note>String indicating that a given timestamp just occurred</note>
       </trans-unit>
@@ -982,7 +1001,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="optional" xml:space="preserve">
         <source>optional</source>
-        <target>optional</target>
+        <target>optionnel</target>
         
         <note>Label indicating that a form input is optional.</note>
       </trans-unit>
@@ -1042,13 +1061,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="wss://some.relay.com" xml:space="preserve">
         <source>wss://some.relay.com</source>
-        <target>wss://some.relay.com</target>
+        <target>wss://un.relais.com</target>
         
         <note>Placeholder example for relay server address.</note>
       </trans-unit>
       <trans-unit id="you" xml:space="preserve">
         <source>you</source>
-        <target>you</target>
+        <target>vous</target>
         
         <note>You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself.</note>
       </trans-unit>
@@ -1061,13 +1080,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
     <body>
       <trans-unit id="/collapsed_event_view_other_notes:dict/NOTES:dict/one:dict/:string" xml:space="preserve">
         <source>%d other note</source>
-        <target>%d other note</target>
+        <target>%d autre note</target>
         
         <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped.</note>
       </trans-unit>
       <trans-unit id="/collapsed_event_view_other_notes:dict/NOTES:dict/other:dict/:string" xml:space="preserve">
         <source>%d other notes</source>
-        <target>%d other notes</target>
+        <target>%d autres notes</target>
         
         <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped.</note>
       </trans-unit>
@@ -1133,19 +1152,19 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/replying_to_one_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>Replying to %@%#@OTHERS@</source>
-        <target>Répondre à %@%#@OTHERS@</target>
+        <target>Réponse à %@%#@OTHERS@</target>
         
         <note>Label to indicate that the user is replying to 1 user and others.</note>
       </trans-unit>
       <trans-unit id="/replying_to_one_and_others:dict/OTHERS:dict/one:dict/:string" xml:space="preserve">
         <source> &amp; %d other</source>
-        <target>&amp; %d other</target>
+        <target>&amp; %d autre</target>
         
         <note>Label to indicate that the user is replying to 1 user and others.</note>
       </trans-unit>
       <trans-unit id="/replying_to_one_and_others:dict/OTHERS:dict/other:dict/:string" xml:space="preserve">
         <source> &amp; %d others</source>
-        <target>&amp; %d others</target>
+        <target>&amp; %d autres</target>
         
         <note>Label to indicate that the user is replying to 1 user and others.</note>
       </trans-unit>
@@ -1161,13 +1180,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/replying_to_two_and_others:dict/OTHERS:dict/one:dict/:string" xml:space="preserve">
         <source> &amp; %d other</source>
-        <target>&amp; %d other</target>
+        <target>&amp; %d autre</target>
         
         <note>Label to indicate that the user is replying to 2 users and others.</note>
       </trans-unit>
       <trans-unit id="/replying_to_two_and_others:dict/OTHERS:dict/other:dict/:string" xml:space="preserve">
         <source> &amp; %d others</source>
-        <target>&amp; %d others</target>
+        <target>&amp; %d autres</target>
         
         <note>Label to indicate that the user is replying to 2 users and others.</note>
       </trans-unit>

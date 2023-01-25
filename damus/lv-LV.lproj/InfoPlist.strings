@@ -5,5 +5,5 @@
 "CFBundleName" = "damus";
 
 /* Privacy - Photo Library Additions Usage Description */
-"NSPhotoLibraryAddUsageDescription" = "Donner accès à Damus à vos photos vous permet d'enregistrer des images";
+"NSPhotoLibraryAddUsageDescription" = "Piešķir Damus piekļuvi saviem fotoattēliem, lai varat saglabāt attēlus.";
 

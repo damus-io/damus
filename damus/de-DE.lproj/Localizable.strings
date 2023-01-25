@@ -59,6 +59,9 @@ Number of profiles a user is following. */
    Button to confirm adding user inputted relay. */
 "Add" = "Hinzufügen";
 
+/* Button label to re-add all original participants as profiles to reply to in a note */
+"Add all" = "Alle hinzufügen";
+
 /* Label for section for adding a relay server. */
 "Add Relay" = "Relay hinzufügen";
 
@@ -168,13 +171,11 @@ Number of profiles a user is following. */
 /* Label to prompt display name entry. */
 "Display Name" = "Profilname";
 
-/* Navigation title for DM view, which is the English abbreviation for Direct Message. */
-"DM" = "PN";
-
-/* DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet. */
+/* DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet. DM is the English abbreviation for Direct Message. */
 "DM Type" = "PN Art";
 
-/* No comment provided by engineer. */
+/* Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
+   Navigation title for view of DMs, where DM is an English abbreviation for Direct Message. */
 "DMs" = "PNs";
 
 /* Button to dismiss wallet selection view for paying Lightning invoice. */
@@ -186,11 +187,11 @@ Number of profiles a user is following. */
 /* Button to edit user's profile. */
 "Edit" = "Bearbeiten";
 
+/* Text indicating that the view is used for editing which participants are replied to in a note. */
+"Edit participants" = "Teilnehmer editieren";
+
 /* Heading indicating that this application keeps private messaging end-to-end encrypted. */
 "Encrypted" = "Verschlüsselt";
-
-/* Navigation title for view of encrypted DMs, where DM is an English abbreviation for Direct Message. */
-"Encrypted DMs" = "Verschlüsselte PNs";
 
 /* Prompt for user to enter an account key to login. */
 "Enter your account key to login:" = "Gib deinen Kontoschlüssel ein um dich anzumelden:";
@@ -349,6 +350,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Sidebar menu label for Relay servers view */
 "Relays" = "Relays";
 
+/* Button label to remove all participants from a note reply. */
+"Remove all" = "Alle entfernen";
+
 /* Label to indicate that the user is replying to themself. */
 "Reply to self" = "Antwort an dich selbst";
 
@@ -365,7 +369,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Text indicating that the post was reposted (i.e. re-shared). */
 "Reposted" = "Geteilt";
 
-/* No comment provided by engineer. */
+/* Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message. */
 "Requests" = "Anfragen";
 
 /* Section title for resetting the user */
