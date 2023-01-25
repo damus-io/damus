@@ -114,6 +114,7 @@ struct ProfileView: View {
     @State var showing_select_wallet: Bool = false
     @State var is_zoomed: Bool = false
     @State var show_share_sheet: Bool = false
+    @State var action_sheet_presented: Bool = false
     @StateObject var user_settings = UserSettingsStore()
     
     @Environment(\.dismiss) var dismiss
@@ -165,6 +166,15 @@ struct ProfileView: View {
     }
 
     static let markdown = Markdown()
+    
+    var ActionSheetButton: some View {
+        Button(action: {
+            action_sheet_presented = true
+        }) {
+            Image(systemName: "ellipsis.circle")
+                .profile_button_style(scheme: colorScheme)
+        }
+    }
     
     var ShareButton: some View {
         Button(action: {
@@ -238,6 +248,7 @@ struct ProfileView: View {
                     Spacer()
                     
                     Group {
+                        ActionSheetButton
                         
                         if let profile = data {
                             if let lnurl = profile.lnurl, lnurl != "" {
@@ -246,8 +257,6 @@ struct ProfileView: View {
                         }
                         
                         DMButton
-                        
-                        ShareButton
                         
                         if profile.pubkey != damus_state.pubkey {
                             FollowButtonView(
@@ -363,6 +372,16 @@ struct ProfileView: View {
                 if let url = URL(string: "https://damus.io/" + npub) {
                     ShareSheet(activityItems: [url])
                 }
+            }
+        }
+        .confirmationDialog("Actions", isPresented: $action_sheet_presented) {
+            Button("Share") {
+                show_share_sheet = true
+            }
+            
+            Button("Report") {
+                let target: ReportTarget = .user(profile.pubkey)
+                notify(.report, target)
             }
         }
         .ignoresSafeArea()
