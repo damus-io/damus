@@ -162,6 +162,7 @@
 		4CF0ABDE2981A69500D66079 /* MutelistModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABDD2981A69500D66079 /* MutelistModel.swift */; };
 		4CF0ABE12981A83900D66079 /* MutelistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE02981A83900D66079 /* MutelistView.swift */; };
 		4CF0ABE32981BC7D00D66079 /* UserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE22981BC7D00D66079 /* UserView.swift */; };
+		4CF0ABE52981EE0C00D66079 /* EULAView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE42981EE0C00D66079 /* EULAView.swift */; };
 		4FE60CDD295E1C5E00105A1F /* Wallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE60CDC295E1C5E00105A1F /* Wallet.swift */; };
 		6439E014296790CF0020672B /* ProfileZoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6439E013296790CF0020672B /* ProfileZoomView.swift */; };
 		647D9A8D2968520300A295DE /* SideMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 647D9A8C2968520300A295DE /* SideMenuView.swift */; };
@@ -401,6 +402,7 @@
 		4CF0ABDD2981A69500D66079 /* MutelistModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutelistModel.swift; sourceTree = "<group>"; };
 		4CF0ABE02981A83900D66079 /* MutelistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutelistView.swift; sourceTree = "<group>"; };
 		4CF0ABE22981BC7D00D66079 /* UserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserView.swift; sourceTree = "<group>"; };
+		4CF0ABE42981EE0C00D66079 /* EULAView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EULAView.swift; sourceTree = "<group>"; };
 		4FE60CDC295E1C5E00105A1F /* Wallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wallet.swift; sourceTree = "<group>"; };
 		6439E013296790CF0020672B /* ProfileZoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileZoomView.swift; sourceTree = "<group>"; };
 		647D9A8C2968520300A295DE /* SideMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuView.swift; sourceTree = "<group>"; };
@@ -604,6 +606,7 @@
 				4CB8838E296F781C00DC99E7 /* ReactionsView.swift */,
 				6439E013296790CF0020672B /* ProfileZoomView.swift */,
 				4CF0ABD529817F5B00D66079 /* ReportView.swift */,
+				4CF0ABE42981EE0C00D66079 /* EULAView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1047,6 +1050,7 @@
 				4C363A9C282838B9006E126D /* EventRef.swift in Sources */,
 				4CD7641B28A1641400B6928F /* EndBlock.swift in Sources */,
 				4C3EA66528FF5F6800C48A62 /* mem.c in Sources */,
+				4CF0ABE52981EE0C00D66079 /* EULAView.swift in Sources */,
 				4CBCA930297DB57F00EC6B2F /* WebsiteLink.swift in Sources */,
 				4C3EA64128FF553900C48A62 /* hash_u5.c in Sources */,
 				4C3EA64F28FF59F200C48A62 /* tal.c in Sources */,
