@@ -26,10 +26,12 @@ struct TimestampedProfile {
 
 enum Sheets: Identifiable {
     case post
+    case report(ReportTarget)
     case reply(NostrEvent)
 
     var id: String {
         switch self {
+        case .report: return "report"
         case .post: return "post"
         case .reply(let ev): return "reply-" + ev.id
         }
@@ -229,6 +231,20 @@ struct ContentView: View {
         }
     }
     
+    func MaybeReportView(target: ReportTarget) -> some View {
+        Group {
+            if let ds = damus_state {
+                if let sec = ds.keypair.privkey {
+                    ReportView(pool: ds.pool, target: target, privkey: sec)
+                } else {
+                    EmptyView()
+                }
+            } else {
+                EmptyView()
+            }
+        }
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
@@ -279,6 +295,8 @@ struct ContentView: View {
         }
         .sheet(item: $active_sheet) { item in
             switch item {
+            case .report(let target):
+                MaybeReportView(target: target)
             case .post:
                 PostView(replying_to: nil, references: [])
             case .reply(let event):
@@ -325,6 +343,10 @@ struct ContentView: View {
             self.active_sheet = .reply(ev)
         }
         .onReceive(handle_notify(.like)) { like in
+        }
+        .onReceive(handle_notify(.report)) { notif in
+            let target = notif.object as! ReportTarget
+            self.active_sheet = .report(target)
         }
         .onReceive(handle_notify(.broadcast_event)) { obj in
             let ev = obj.object as! NostrEvent

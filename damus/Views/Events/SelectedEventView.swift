@@ -49,6 +49,7 @@ struct SelectedEventView: View {
                     .padding([.top], 4)
             }
             .padding([.leading], 2)
+            .event_context_menu(event, pubkey: pubkey, privkey: damus.keypair.privkey)
         }
     }
 }
