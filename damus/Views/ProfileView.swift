@@ -147,9 +147,7 @@ struct ProfileView: View {
             }
         }) {
             Image(systemName: "bolt.circle")
-                .symbolRenderingMode(.palette)
-                .foregroundStyle(colorScheme == .dark ? .white : .black, colorScheme == .dark ? .white : .black)
-                .font(.system(size: 32).weight(.thin))
+                .profile_button_style(scheme: colorScheme)
                 .contextMenu {
                     Button {
                         UIPasteboard.general.string = profile.lnurl ?? ""
@@ -172,11 +170,8 @@ struct ProfileView: View {
         Button(action: {
             show_share_sheet = true
         }) {
-            Image(systemName: "square.and.arrow.up.circle.fill")
-                .symbolRenderingMode(.palette)
-                .font(.system(size: 32))
-                .padding()
-                .foregroundStyle(.white, .black, .black.opacity(0.8))
+            Image(systemName: "square.and.arrow.up.circle")
+                .profile_button_style(scheme: colorScheme)
         }
     }
     
@@ -186,9 +181,7 @@ struct ProfileView: View {
             .environmentObject(dm_model)
         return NavigationLink(destination: dmview) {
             Image(systemName: "bubble.left.circle")
-                .symbolRenderingMode(.palette)
-                .font(.system(size: 32).weight(.thin))
-                .foregroundStyle(colorScheme == .dark ? .white : .black, colorScheme == .dark ? .white : .black)
+                .profile_button_style(scheme: colorScheme)
         }
     }
 
@@ -471,5 +464,13 @@ struct KeyView: View {
                 }
             }
         }
+    }
+}
+
+extension View {
+    func profile_button_style(scheme: ColorScheme) -> some View {
+        self.symbolRenderingMode(.palette)
+            .font(.system(size: 32).weight(.thin))
+            .foregroundStyle(scheme == .dark ? .white : .black, scheme == .dark ? .white : .black)
     }
 }
