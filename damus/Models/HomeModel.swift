@@ -98,6 +98,8 @@ class HomeModel: ObservableObject {
             handle_contact_event(sub_id: sub_id, relay_id: relay_id, ev: ev)
         case .metadata:
             handle_metadata_event(ev)
+        case .list:
+            handle_list_event(ev)
         case .boost:
             handle_boost_event(sub_id: sub_id, ev)
         case .like:
@@ -122,6 +124,12 @@ class HomeModel: ObservableObject {
     }
     
     func handle_channel_meta(_ ev: NostrEvent) {
+    }
+    
+    func filter_muted() {
+        self.events = events.filter { !damus_state.contacts.is_muted($0.pubkey) }
+        self.dms.dms = dms.dms.filter { !damus_state.contacts.is_muted($0.0) }
+        self.notifications = notifications.filter { !damus_state.contacts.is_muted($0.pubkey) }
     }
     
     func handle_delete_event(_ ev: NostrEvent) {
@@ -274,7 +282,11 @@ class HomeModel: ObservableObject {
         
         var our_contacts_filter = NostrFilter.filter_kinds([3, 0])
         our_contacts_filter.authors = [damus_state.pubkey]
-
+        
+        var our_blocklist_filter = NostrFilter.filter_kinds([30000])
+        our_blocklist_filter.parameter = "mute"
+        our_blocklist_filter.authors = [damus_state.pubkey]
+        
         var dms_filter = NostrFilter.filter_kinds([
             NostrKind.dm.rawValue,
         ])
@@ -311,7 +323,7 @@ class HomeModel: ObservableObject {
 
         var home_filters = [home_filter]
         var notifications_filters = [notifications_filter]
-        var contacts_filters = [contacts_filter, our_contacts_filter]
+        var contacts_filters = [contacts_filter, our_contacts_filter, our_blocklist_filter]
         var dms_filters = [dms_filter, our_dms_filter]
 
         let last_of_kind = relay_id.flatMap { last_event_of_kind[$0] } ?? [:]
@@ -335,7 +347,30 @@ class HomeModel: ObservableObject {
             pool.send(.subscribe(.init(filters: dms_filters, sub_id: dms_subid)))
         }
     }
-
+    
+    func handle_list_event(_ ev: NostrEvent) {
+        // we only care about our lists
+        guard ev.pubkey == damus_state.pubkey else {
+            return
+        }
+        
+        if let mutelist = damus_state.contacts.mutelist {
+            if ev.created_at <= mutelist.created_at {
+                return
+            }
+        }
+        
+        guard let name = get_referenced_ids(tags: ev.tags, key: "d").first else {
+            return
+        }
+        
+        guard name.ref_id == "mute" else {
+            return
+        }
+        
+        damus_state.contacts.set_mutelist(ev)
+    }
+    
     func handle_metadata_event(_ ev: NostrEvent) {
         process_metadata_event(profiles: damus_state.profiles, ev: ev)
     }
@@ -376,6 +411,9 @@ class HomeModel: ObservableObject {
     }
 
     func should_hide_event(_ ev: NostrEvent) -> Bool {
+        if damus_state.contacts.is_muted(ev.pubkey) {
+            return true
+        }
         return !ev.should_show_event
     }
 

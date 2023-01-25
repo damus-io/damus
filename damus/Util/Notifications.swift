@@ -86,6 +86,15 @@ extension Notification.Name {
     static var report: Notification.Name {
         return Notification.Name("report")
     }
+    static var block: Notification.Name {
+        return Notification.Name("block")
+    }
+    static var new_mutes: Notification.Name {
+        return Notification.Name("new_mutes")
+    }
+    static var new_unmutes: Notification.Name {
+        return Notification.Name("new_unmutes")
+    }
 }
 
 func handle_notify(_ name: Notification.Name) -> NotificationCenter.Publisher {

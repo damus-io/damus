@@ -44,6 +44,12 @@ struct EventMenuContext: View {
         } label: {
             Label(NSLocalizedString("Report", comment: "Context menu option for reporting content."), systemImage: "exclamationmark.bubble")
         }
+        
+        Button {
+            notify(.block, event.pubkey)
+        } label: {
+            Label(NSLocalizedString("Block", comment: "Context menu option for blocking users."), systemImage: "exclamationmark.octagon")
+        }
 
         Button {
             NotificationCenter.default.post(name: .broadcast_event, object: event)

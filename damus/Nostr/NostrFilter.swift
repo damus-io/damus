@@ -17,6 +17,7 @@ struct NostrFilter: Codable {
     var limit: UInt32?
     var authors: [String]?
     var hashtag: [String]? = nil
+    var parameter: String? = nil
 
     private enum CodingKeys : String, CodingKey {
         case ids
@@ -24,6 +25,7 @@ struct NostrFilter: Codable {
         case referenced_ids = "#e"
         case pubkeys = "#p"
         case hashtag = "#t"
+        case parameter = "#d"
         case since
         case until
         case authors

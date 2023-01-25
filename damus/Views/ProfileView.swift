@@ -383,6 +383,10 @@ struct ProfileView: View {
                 let target: ReportTarget = .user(profile.pubkey)
                 notify(.report, target)
             }
+            
+            Button("Block") {
+                notify(.block, profile.pubkey)
+            }
         }
         .ignoresSafeArea()
     }

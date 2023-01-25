@@ -81,6 +81,10 @@ struct ContentView: View {
     @State var profile_open: Bool = false
     @State var thread_open: Bool = false
     @State var search_open: Bool = false
+    @State var blocking: String? = nil
+    @State var confirm_block: Bool = false
+    @State var user_blocked_confirm: Bool = false
+    @State var confirm_overwrite_mutelist: Bool = false
     @State var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
@@ -348,6 +352,11 @@ struct ContentView: View {
             let target = notif.object as! ReportTarget
             self.active_sheet = .report(target)
         }
+        .onReceive(handle_notify(.block)) { notif in
+            let pubkey = notif.object as! String
+            self.blocking = pubkey
+            self.confirm_block = true
+        }
         .onReceive(handle_notify(.broadcast_event)) { obj in
             let ev = obj.object as! NostrEvent
             self.damus_state?.pool.send(.event(ev))
@@ -422,6 +431,91 @@ struct ContentView: View {
         .onReceive(timer) { n in
             self.damus_state?.pool.connect_to_disconnected()
         }
+        .onReceive(handle_notify(.new_mutes)) { notif in
+            home.filter_muted()
+        }
+        .alert("User blocked", isPresented: $user_blocked_confirm, actions: {
+            Button("Thanks!") {
+                user_blocked_confirm = false
+            }
+        }, message: {
+            if let pubkey = self.blocking {
+                let profile = damus_state!.profiles.lookup(id: pubkey)
+                let name = Profile.displayName(profile: profile, pubkey: pubkey)
+                Text("\(name) has been blocked")
+            } else {
+                Text("User has been blocked")
+            }
+        })
+        .alert("Create new mutelist", isPresented: $confirm_overwrite_mutelist, actions: {
+            Button("Yes, Overwrite") {
+                guard let ds = damus_state else {
+                    return
+                }
+                
+                guard let keypair = ds.keypair.to_full() else {
+                    return
+                }
+                
+                guard let pubkey = blocking else {
+                    return
+                }
+                
+                guard let mutelist = create_or_update_mutelist(keypair: keypair, mprev: nil, to_add: pubkey) else {
+                    return
+                }
+                
+                damus_state?.contacts.set_mutelist(mutelist)
+                ds.pool.send(.event(mutelist))
+
+                confirm_overwrite_mutelist = false
+                confirm_block = false
+                user_blocked_confirm = true
+            }
+            
+            Button("Cancel") {
+                confirm_overwrite_mutelist = false
+                confirm_block = false
+            }
+        }, message: {
+            Text("No block list found, create a new one? This will overwrite any previous block lists.")
+        })
+        .alert("Block User", isPresented: $confirm_block, actions: {
+            Button("Block") {
+                guard let ds = damus_state else {
+                    return
+                }
+                
+                if ds.contacts.mutelist == nil {
+                    confirm_overwrite_mutelist = true
+                } else {
+                    guard let keypair = ds.keypair.to_full() else {
+                        return
+                    }
+                    guard let pubkey = blocking else {
+                        return
+                    }
+                            
+                    guard let ev = create_or_update_mutelist(keypair: keypair, mprev: ds.contacts.mutelist, to_add: pubkey) else {
+                        return
+                    }
+                    damus_state?.contacts.set_mutelist(ev)
+                    ds.pool.send(.event(ev))
+                }
+            }
+            
+            Button("Cancel") {
+                confirm_block = false
+            }
+        }, message: {
+            if let pubkey = blocking {
+                let profile = damus_state?.profiles.lookup(id: pubkey)
+                let name = Profile.displayName(profile: profile, pubkey: pubkey)
+                Text("Block \(name)?")
+            } else {
+                Text("Could not find user to block...")
+            }
+        })
     }
     
     func switch_timeline(_ timeline: Timeline) {
