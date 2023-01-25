@@ -2,16 +2,16 @@
 "   " = "61b6edf1108e6f396680a33b02486a70_tr";
 
 /* Description of how the nip05 identifier would be used for verification. */
-"'%@' at '%@' will be used for verification" = "'%@' à '@' sera utilisé pour la vérification";
+"'%@' at '%@' will be used for verification" = "'%@' at '%@' sarà usato per la verifica";
 
 /* Description of why the nip05 identifier is invalid. */
-"'%@' is an invalid nip05 identifier. It should look like an email." = "'@' est un identifiant nip05 invalide. Cela devrait ressembler à une adresse e-mail.";
+"'%@' is an invalid nip05 identifier. It should look like an email." = "'%@' non è un identificatore NIP05 valido. Dovrebbe essere simile ad un indirizzo email.";
 
 /* Navigation bar title for view that shows who is following a user. */
-"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "Abonnés de (Profile.displayName(profile: profile, pubkey: whos))";
+"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "Seguaci di (Profile.displayName(profile: profile, pubkey: whos))'";
 
 /* Navigation bar title for view that shows who a user is following. */
-"(who) following" = "(who) suit";
+"(who) following" = "(who) segui già";
 
 /* Prefix character to username. */
 "@" = "@";
@@ -25,13 +25,13 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 "%@ %@" = "%@ %@";
 
 /* Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. La création d'un compte ne nécessite pas de numéro de téléphone, d'e-mail ou de nom. Commencez tout de suite sans aucune friction.";
+"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. Per creare un account non hai bisogno di un numero di telefono, un indirizzo email o del tuo nome. Inizia ora senza impegni.";
 
 /* Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. Messagerie privée cryptée de bout en bout. Gardez Big Tech hors de vos DMs";
+"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. I messaggi sono criptati utilizzando la crittografia end-to-end. Mantieni i colossi della tecnologia lontani dai tuoi messaggi";
 
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Donnez un pourboire aux publications de vos amis et empilez les sats avec Bitcoin⚡️, la monnaie native d'Internet.";
+"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Paga i tuoi amici e accumula sats con Bitcoin⚡️, la moneta di internet.";
 
 /* Number of reposts.
 Number of profiles a user is following. */
@@ -44,44 +44,44 @@ Number of profiles a user is following. */
 "< e >" = "< e >";
 
 /* Label to prompt for about text entry for user to describe about themself. */
-"About" = "À propos de";
+"About" = "Informazioni";
 
 /* Label for About Me section of user profile form. */
-"About Me" = "À Propos de Moi";
+"About Me" = "Io";
 
 /* Placeholder text for About Me description. */
-"Absolute Boss" = "Patron Absolu";
+"Absolute Boss" = "Capo supremo";
 
 /* Label to indicate the public ID of the account. */
-"Account ID" = "Identifiant de Compte";
+"Account ID" = "ID dell'account";
 
 /* Button to add recommended relay server.
    Button to confirm adding user inputted relay. */
-"Add" = "Ajouter";
+"Add" = "Aggiungi";
 
 /* Button label to re-add all original participants as profiles to reply to in a note */
-"Add all" = "Tout ajouter";
+"Add all" = "Aggiungi tutto";
 
 /* Label for section for adding a relay server. */
-"Add Relay" = "Ajouter un Relais";
+"Add Relay" = "Aggiungi relè";
 
 /* Any amount of sats */
-"Any" = "N'importe Lequel";
+"Any" = "Qualsiasi";
 
 /* Alert message to ask if user wants to repost a post. */
-"Are you sure you want to repost this?" = "Êtes-vous sûr de vouloir republier ceci ?";
+"Are you sure you want to repost this?" = "Sei sicuro di voler segnalare questo post?";
 
 /* Label for Banner Image section of user profile form. */
-"Banner Image" = "Image Bannière";
+"Banner Image" = "Immagine banner";
 
 /* Reminder to user that they should save their account information. */
-"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "Avant de commencer, vous devrez enregistrer les informations de votre compte, sinon vous ne pourrez plus vous connecter à l'avenir si vous désinstallez Damus.";
+"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "Prima di iniziare, dovrai salvare le informazioni del tuo account altrimenti non sarai in grado di accedere in futuro se dovessi disinstallare Damus.";
 
 /* Dropdown option label for Lightning wallet, Bitcoin Beach. */
 "Bitcoin Beach" = "Bitcoin Beach";
 
 /* Label for Bitcoin Lightning Tips section of user profile form. */
-"Bitcoin Lightning Tips" = "Pourboires de Bitcoin Lightning";
+"Bitcoin Lightning Tips" = "Mancia con Bitcoin Lightning";
 
 /* Dropdown option label for Lightning wallet, Blixt Wallet */
 "Blixt Wallet" = "Blixt Wallet";
@@ -93,290 +93,290 @@ Number of profiles a user is following. */
 "Breez" = "Breez";
 
 /* Context menu option for broadcasting the user's note to all of the user's connected relay servers. */
-"Broadcast" = "Diffuser";
+"Broadcast" = "Trasmetti";
 
 /* Button to cancel out of posting a note.
    Button to cancel out of reposting a post.
    Button to cancel out of view adding user inputted relay.
    Cancel out of logging out the user. */
-"Cancel" = "Annuler";
+"Cancel" = "Annulla";
 
 /* Dropdown option label for Lightning wallet, Cash App. */
 "Cash App" = "Cash App";
 
 /* Navigation bar title for Chatroom view. */
-"Chat" = "Chatter";
+"Chat" = "Chat";
 
 /* Button for clearing cached data. */
-"Clear" = "Vider";
+"Clear" = "Cancella";
 
 /* Section title for clearing cached data. */
-"Clear Cache" = "Vider le Cache";
+"Clear Cache" = "Cancella cache";
 
 /* Label indicating that a user's key was copied. */
-"Copied" = "Copié";
+"Copied" = "Copiato";
 
 /* Button to copy a relay server address. */
-"Copy" = "Copier";
+"Copy" = "Copia";
 
 /* Context menu option for copying the ID of the account that created the note. */
-"Copy Account ID" = "Copier l'Identifiant de Compte";
+"Copy Account ID" = "Copia ID dell'Account";
 
 /* Context menu option to copy an image into clipboard.
    Context menu option to copy an image to clipboard. */
-"Copy Image" = "Copier l'Image";
+"Copy Image" = "Copia Immagine";
 
 /* Context menu option to copy the URL of an image into clipboard. */
-"Copy Image URL" = "Copier l'URL de l'Image";
+"Copy Image URL" = "Copia URL dell'Immagine";
 
 /* Title of section for copying a Lightning invoice identifier. */
-"Copy invoice" = "Copier la Facture";
+"Copy invoice" = "Copia fattura";
 
 /* Context menu option for copying a user's Lightning URL. */
-"Copy LNURL" = "Copier le LNURL";
+"Copy LNURL" = "Copia LNURL";
 
 /* Context menu option for copying the ID of the note. */
-"Copy Note ID" = "Copier l'Identifiant de la Note";
+"Copy Note ID" = "Copia ID della Nota";
 
 /* Context menu option for copying the JSON text from the note. */
-"Copy Note JSON" = "Copier le JSON de la Note";
+"Copy Note JSON" = "Copia JSON della Nota";
 
 /* Context menu option for copying the text from an note. */
-"Copy Text" = "Copier le Texte";
+"Copy Text" = "Copia Testo";
 
 /* Context menu option for copying the ID of the user who created the note. */
-"Copy User ID" = "Copier l'Identifiant de l'Utilisateur";
+"Copy User ID" = "Copia ID dell'Utente";
 
 /* Button to create account. */
-"Create" = "Créer";
+"Create" = "Crea";
 
 /* Button to create an account. */
-"Create Account" = "Créer un Compte";
+"Create Account" = "Crea Account";
 
 /* Example description about Bitcoin creator(s), Satoshi Nakamoto. */
-"Creator(s) of Bitcoin. Absolute legend." = "Créateur(s) de Bitcoin. Légende absolue.";
+"Creator(s) of Bitcoin. Absolute legend." = "Creatore/i di Bitcoin. Leggenda assoluta";
 
 /* Name of the app, shown on the first screen when user is not logged in. */
 "Damus" = "Damus";
 
 /* Button to pay a Lightning invoice with the user's default Lightning wallet. */
-"Default Wallet" = "Portefeuille par défaut";
+"Default Wallet" = "Portafoglio Principale";
 
 /* Button to delete a relay server that the user connects to. */
-"Delete" = "Effacer";
+"Delete" = "Cancella";
 
 /* Button to dismiss a text field alert. */
-"Dismiss" = "Rejeter";
+"Dismiss" = "Lascia stare";
 
 /* Label to prompt display name entry. */
-"Display Name" = "Afficher Nom";
+"Display Name" = "Nome visualizzato";
 
 /* DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet. DM is the English abbreviation for Direct Message. */
-"DM Type" = "Type de message privé";
+"DM Type" = "Tipo DM";
 
 /* Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
    Navigation title for view of DMs, where DM is an English abbreviation for Direct Message. */
-"DMs" = "Messages privés";
+"DMs" = "DM";
 
 /* Button to dismiss wallet selection view for paying Lightning invoice. */
-"Done" = "Fini";
+"Done" = "Finito";
 
 /* Heading indicating that this application allows users to earn money. */
-"Earn Money" = "Gagnes de l'argent";
+"Earn Money" = "Guadagna Soldi";
 
 /* Button to edit user's profile. */
-"Edit" = "Modifier";
+"Edit" = "Modifica";
 
 /* Text indicating that the view is used for editing which participants are replied to in a note. */
-"Edit participants" = "Modifier les participants";
+"Edit participants" = "Modifica partecipanti";
 
 /* Heading indicating that this application keeps private messaging end-to-end encrypted. */
-"Encrypted" = "Crypté";
+"Encrypted" = "Criptato";
 
 /* Prompt for user to enter an account key to login. */
-"Enter your account key to login:" = "Entrez votre clé de compte pour vous connecter:";
+"Enter your account key to login:" = "Inserisci la chiave del tuo account per accedere";
 
 /* Error message indicating why saving keys failed. */
-"Error: %@" = "Erreur: %@";
+"Error: %@" = "Errore: %@";
 
 /* Filter state for seeing either only posts, or posts & replies. */
-"Filter State" = "État du filtre";
+"Filter State" = "Filtra";
 
 /* Button to follow a user. */
-"Follow" = "S'abonner";
+"Follow" = "Segui";
 
 /* Label describing followers of a user. */
-"Followers" = "Abonnés";
+"Followers" = "Seguaci";
 
 /* Text to indicate that the button next to it is in a state that indicates that it is in the process of following a profile.
 Part of a larger sentence to describe how many profiles a user is following. */
-"Following" = "Abonnements";
+"Following" = "Seguiti";
 
 /* Label to indicate that the user is in the process of following another user. */
-"Following..." = "Abonnements...";
+"Following..." = "Segui già...";
 
 /* Text to indicate that button next to it is in a state that will follow a profile when tapped. */
-"Follows" = "Suit";
+"Follows" = "Segui";
 
 /* Navigation bar title for Global view where posts from all connected relay servers appear. */
-"Global" = "Global";
+"Global" = "Globale";
 
 /* Navigation link to go to post referenced by hex code. */
-"Goto post %@" = "Aller au post %@";
+"Goto post %@" = "Vai al post %@";
 
 /* Navigation link to go to profile. */
-"Goto profile %@" = "Aller au profil %@";
+"Goto profile %@" = "Vai al profilo %@";
 
 /* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
-"Home" = "Accueil";
+"Home" = "Home";
 
 /* Placeholder example text for profile picture URL. */
-"https://example.com/pic.jpg" = "https://exemple.com/pic.jpg";
+"https://example.com/pic.jpg" = "https://esempio.com/foto.jpg";
 
 /* Placeholder example text for website URL for user profile. */
 "https://jb55.com" = "https://jb55.com";
 
 /* Error message indicating that an invalid account key was entered for login. */
-"Invalid key" = "Clé non valide";
+"Invalid key" = "Chiave non valida";
 
 /* Placeholder example text for identifier used for NIP-05 verification. */
 "jb55@jb55.com" = "jb55@jb55.com";
 
 /* Moves the post button to the left side of the screen */
-"Left Handed" = "Gaucher";
+"Left Handed" = "Mancino";
 
 /* Button to complete account creation and start using the app. */
-"Let's go!" = "Allons-y!";
+"Let's go!" = "Andiamo!";
 
 /* Placeholder text for entry of Lightning Address or LNURL. */
-"Lightning Address or LNURL" = "Adresse Lightning ou LNURL";
+"Lightning Address or LNURL" = "Indirizzo Lightning o LNURL";
 
 /* Indicates that the view is for paying a Lightning invoice. */
-"Lightning Invoice" = "Facture Lightning";
+"Lightning Invoice" = "Fattura Lightning";
 
 /* Dropdown option label for Lightning wallet, LNLink. */
 "LNLink" = "LNLink";
 
 /* Dropdown option label for system default for Lightning wallet. */
-"Local default" = "Valeur locale par défaut";
+"Local default" = "Predefinito";
 
 /* Button to log into account.
    Button to log into an account. */
-"Login" = "Se connecter";
+"Login" = "Entra";
 
 /* Alert for logging out the user.
    Button for logging out the user.
    Button to logout the user. */
-"Logout" = "Se déconnecter";
+"Logout" = "Esci";
 
 /* Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out. */
-"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "Assurez-vous que votre clé de compte nsec est enregistrée avant de vous déconnecter ou vous perdrez l'accès à ce compte";
+"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "Assicurati di aver salvato la chiave privata (nSEC) prima di uscire o perderai l'accesso a questo account";
 
 /* Dropdown option label for Lightning wallet, Muun. */
 "Muun" = "Muun";
 
 /* Label for NIP-05 Verification section of user profile form. */
-"NIP-05 Verification" = "Vérification NIP-05";
+"NIP-05 Verification" = "Verifica NIP-05";
 
 /* No search results. */
-"none" = "aucun";
+"none" = "Nessun risultato";
 
 /* Indicates that there are no notes in the timeline to view. */
-"Nothing to see here. Check back later!" = "Rien à voir ici. Revenez plus tard!";
+"Nothing to see here. Check back later!" = "Niente da vedere qui. Controlla dopo!";
 
 /* Navigation title for notifications. */
-"Notifications" = "Notifications";
+"Notifications" = "Notifiche";
 
 /* String indicating that a given timestamp just occurred */
-"now" = "maintenant";
+"now" = "ora";
 
 /* Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key. */
 "nsec1..." = "nsec1...";
 
 /* Label indicating that a form input is optional. */
-"optional" = "optionnel";
+"optional" = "opzione1";
 
 /* Button to pay a Lightning invoice. */
-"Pay" = "Payer";
+"Pay" = "Paga";
 
 /* Navigation bar title for view to pay Lightning invoice. */
-"Pay the Lightning invoice" = "Payer la facture Lightning";
+"Pay the Lightning invoice" = "Paga la fattura Lightning";
 
 /* Dropdown option label for Lightning wallet, Phoenix. */
 "Phoenix" = "Phoenix";
 
 /* Button to post a note. */
-"Post" = "Publication";
+"Post" = "Post";
 
 /* Label for filter for seeing only posts (instead of posts and replies). */
-"Posts" = "Publications";
+"Posts" = "Post";
 
 /* Label for filter for seeing posts and replies (instead of only posts). */
-"Posts & Replies" = "Publications & Réponses";
+"Posts & Replies" = "Post & Risposte";
 
 /* Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading. */
-"Private" = "Privé";
+"Private" = "Privato";
 
 /* Title of the secure field that holds the user's private key. */
-"Private Key" = "Clé Privée";
+"Private Key" = "Chiave Privata";
 
 /* Sidebar menu label for Profile view. */
-"Profile" = "Profil";
+"Profile" = "Profilo1";
 
 /* Label for Profile Picture section of user profile form. */
-"Profile Picture" = "Image de profil";
+"Profile Picture" = "Foto Profilo";
 
 /* Section title for the user's public account ID. */
-"Public Account ID" = "Identifiant publique de compte";
+"Public Account ID" = "ID Pubblico dell'Account";
 
 /* Label indicating that the text is a user's public account key. */
-"Public key" = "Clé Publique";
+"Public key" = "Chiave Pubblica";
 
 /* Label indicating that the text is a user's public account key. */
-"Public Key" = "Clé Publique";
+"Public Key" = "Chiave Pubblica";
 
 /* Prompt to ask user if the key they entered is a public key. */
-"Public Key?" = "Clé Publique?";
+"Public Key?" = "È la chiave pubblica?";
 
 /* Navigation bar title for Reactions view. */
-"Reactions" = "Réactions";
+"Reactions" = "Reazioni";
 
 /* Section title for recommend relay servers that could be added as part of configuration */
-"Recommended Relays" = "Relais Recommandés";
+"Recommended Relays" = "Relè consigliati";
 
 /* Text field for relay server. Used for testing purposes. */
-"Relay" = "Relais";
+"Relay" = "Relè";
 
 /* Sidebar menu label for Relay servers view */
-"Relays" = "Relais";
+"Relays" = "Relè";
 
 /* Button label to remove all participants from a note reply. */
-"Remove all" = "Tout supprimer";
+"Remove all" = "Rimuovi tutto";
 
 /* Label to indicate that the user is replying to themself. */
-"Reply to self" = "Réponse à soi-même";
+"Reply to self" = "Rispondi a te stesso";
 
 /* Label to indicate that the user is replying to 2 users. */
-"Replying to %@ & %@" = "Répondre à %1$@ & %2$@";
+"Replying to %@ & %@" = "Rispondi a %1$@ e %2$@";
 
 /* Indicating that the user is replying to the following listed people. */
-"Replying to:" = "Répondre à:";
+"Replying to:" = "Rispondi a:";
 
 /* Button to confirm reposting a post.
    Title of alert for confirming to repost a post. */
-"Repost" = "Republier";
+"Repost" = "Reposta";
 
 /* Text indicating that the post was reposted (i.e. re-shared). */
-"Reposted" = "A republié";
+"Reposted" = "Repostato";
 
 /* Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message. */
-"Requests" = "Demandes";
+"Requests" = "Richiesta";
 
 /* Section title for resetting the user */
-"Reset" = "Réinitialiser";
+"Reset" = "Ricomincia";
 
 /* Button to retry completing account creation after an error occurred. */
-"Retry" = "Retenter";
+"Retry" = "Riprova";
 
 /* Dropdown option label for Lightning wallet, River */
 "River" = "River";
@@ -388,112 +388,112 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Satoshi Nakamoto" = "Satoshi Nakamoto";
 
 /* Button for saving profile. */
-"Save" = "Enregistrer";
+"Save" = "Salva";
 
 /* Context menu option to save an image. */
-"Save Image" = "Enregistrer Image";
+"Save Image" = "Salva Immagine";
 
 /* Navigation link to search hashtag. */
-"Search hashtag: #%@" = "Rechercher hashtag: #%@";
+"Search hashtag: #%@" = "Cerca hashtag: #%@";
 
 /* Placeholder text to prompt entry of search query. */
-"Search..." = "Rechercher...";
+"Search..." = "Cerca...";
 
 /* Section title for user's secret account login key. */
-"Secret Account Login Key" = "Clé secrète de connexion au compte";
+"Secret Account Login Key" = "Chiave login segreta dell'Account";
 
 /* Title of section for selecting a Lightning wallet to pay a Lightning invoice. */
-"Select a Lightning wallet" = "Sélectionnez un portefeuille Lightning";
+"Select a Lightning wallet" = "Seleziona un portafoglio Lightning";
 
 /* Prompt selection of user's default wallet */
-"Select default wallet" = "Sélectionnez le portefeuille par défaut";
+"Select default wallet" = "Seleziona un wallet predefinito";
 
 /* Text prompt for user to send a message to the other user. */
-"Send a message to start the conversation..." = "Envoyez un message pour démarrer la conversation...";
+"Send a message to start the conversation..." = "Invia un messaggio e inizia la conversazione...";
 
 /* Navigation title for Settings view.
    Sidebar menu label for accessing the app settings */
-"Settings" = "Paramètres";
+"Settings" = "Impostazioni";
 
 /* Button to share an image. */
-"Share" = "Partager";
+"Share" = "Condividi";
 
 /* Toggle to show or hide user's secret account login key. */
-"Show" = "Afficher";
+"Show" = "Mostra";
 
 /* Toggle to show or hide selection of wallet. */
-"Show wallet selector" = "Afficher le sélecteur de portefeuille";
+"Show wallet selector" = "Mostra wallet disponibili";
 
 /* Sidebar menu label to sign out of the account. */
-"Sign out" = "Se déconnecter";
+"Sign out" = "Esci";
 
 /* Dropdown option label for Lightning wallet, Strike. */
 "Strike" = "Strike";
 
 /* Warning that the inputted account key is a public key and the result of what happens because of it. */
-"This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Il s'agit d'une clé publique, vous ne pourrez pas publier de messages ou interagir de quelque manière que ce soit. Ceci est utilisé pour visualiser les comptes de leur point de vue.";
+"This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Questa è una chiave pubblica, non potrai postare o interagire in alcun modo. Puoi utilizzarla solo per vedere gli account";
 
 /* Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key. */
-"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Il s'agit d'une clé Nostr à l'ancienne. Nous ne savons pas s'il s'agit d'une clé publique ou d'une clé privée. Veuillez basculer le bouton ci-dessous s'il s'agit d'une clé publique.";
+"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Questa è una chiave di vecchio tipo. Non siamo sicuri se si tratti di una chiave pubblica o privata. Utilizza il pulsante sottostante se si tratta di una chiave pubblica.";
 
 /* Label to describe that a public key is the user's account ID and what they can do with it. */
-"This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "Ceci est votre identifiant de compte, vous pouvez le donner à vos amis afin qu'ils puissent vous suivre. Cliquez pour copier.";
+"This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "Questo è l'ID del tuo account. Condividilo con i tuoi amici per farti seguire. Clicca per copiare";
 
 /* Label to describe that a private key is the user's secret account key and what they should do with it. */
-"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Il s'agit de votre clé de compte secrète. Vous en aurez besoin pour accéder à votre compte. Ne le partagez avec personne ! Enregistrez-le dans un gestionnaire de mots de passe et gardez-le en sécurité!";
+"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Questa è la tua chiave privata. Ti serve ad accedere al tuo account. Non condividerla con nessuno! Salvala in un gestore password e tienila al sicuro";
 
 /* Navigation bar title for note thread.
    Navigation bar title for threaded event detail view. */
-"Thread" = "Fil de discussion";
+"Thread" = "Thread";
 
 /* Text box prompt to ask user to type their post. */
-"Type your post here..." = "Tapez votre message ici...";
+"Type your post here..." = "Scrivi il tuo post qui...";
 
 /* Non-breaking space character to fill in blank space next to event action button icons. */
 "u{00A0}" = "u{00A0}";
 
 /* Button to unfollow a user. */
-"Unfollow" = "Se désabonner";
+"Unfollow" = "Smetti di seguire";
 
 /* Text to indicate that the button next to it is in  a state that indicates that it is in the process of unfollowing a profile. */
-"Unfollowing" = "Ne plus suivre";
+"Unfollowing" = "Smetti di seguire";
 
 /* Label to indicate that the user is in the process of unfollowing another user. */
-"Unfollowing..." = "Ne plus suivre...";
+"Unfollowing..." = "Togliendo il segui...";
 
 /* Text to indicate that the button next to it is in a state that will unfollow a profile when tapped. */
-"Unfollows" = "Se désabonne de";
+"Unfollows" = "Smetti di seguire";
 
 /* Label for Username section of user profile form.
    Label to prompt username entry. */
-"Username" = "Nom d'utilisateur";
+"Username" = "Nome utente";
 
 /* Sidebar menu label for Wallet view. */
-"Wallet" = "Portefeuille";
+"Wallet" = "Portafoglio";
 
 /* Dropdown option label for Lightning wallet, Wallet Of Satoshi. */
 "Wallet Of Satoshi" = "Wallet Of Satoshi";
 
 /* Section title for selection of wallet. */
-"Wallet Selector" = "Sélecteur de portefeuille";
+"Wallet Selector" = "Seleziona un portafoglio";
 
 /* Label for Website section of user profile form. */
-"Website" = "Site Internet";
+"Website" = "Sito web";
 
 /* Welcoming message to the reader. The variable is 'you', the reader. */
-"Welcome to the social network %@ control." = "Bienvenue sur le réseau social %@ contrôle.";
+"Welcome to the social network %@ control." = "Benvenuto nel social network %@ controlla.";
 
 /* Text to welcome user. */
-"Welcome, %@!" = "Bienvenue, %@!";
+"Welcome, %@!" = "Benvenuto, %@!";
 
 /* Placeholder example for relay server address. */
-"wss://some.relay.com" = "wss://un.relais.com";
+"wss://some.relay.com" = "wss://un.relè.com";
 
 /* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
-"you" = "vous";
+"you" = "tu";
 
 /* Label for Your Name section of user profile form. */
-"Your Name" = "Votre Nom";
+"Your Name" = "Nome";
 
 /* Dropdown option label for Lightning wallet, Zebedee. */
 "Zebedee" = "Zebedee";
