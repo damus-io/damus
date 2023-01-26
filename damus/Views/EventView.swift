@@ -100,6 +100,8 @@ struct EventView: View {
                     
                     Text("\(format_relative_time(event.created_at))")
                         .foregroundColor(.gray)
+                    
+                    Spacer()
                 }
                 
                 EventBody(damus_state: damus, event: event, size: .normal)
@@ -171,35 +173,7 @@ extension View {
     
     func event_context_menu(_ event: NostrEvent, pubkey: String, privkey: String?) -> some View {
         return self.contextMenu {
-            Button {
-                UIPasteboard.general.string = event.get_content(privkey)
-            } label: {
-                Label(NSLocalizedString("Copy Text", comment: "Context menu option for copying the text from an note."), systemImage: "doc.on.doc")
-            }
-
-            Button {
-                UIPasteboard.general.string = bech32_pubkey(pubkey) ?? pubkey
-            } label: {
-                Label(NSLocalizedString("Copy User ID", comment: "Context menu option for copying the ID of the user who created the note."), systemImage: "person")
-            }
-
-            Button {
-                UIPasteboard.general.string = bech32_note_id(event.id) ?? event.id
-            } label: {
-                Label(NSLocalizedString("Copy Note ID", comment: "Context menu option for copying the ID of the note."), systemImage: "note.text")
-            }
-
-            Button {
-                UIPasteboard.general.string = event_to_json(ev: event)
-            } label: {
-                Label(NSLocalizedString("Copy Note JSON", comment: "Context menu option for copying the JSON text from the note."), systemImage: "j.square.on.square")
-            }
-
-            Button {
-                NotificationCenter.default.post(name: .broadcast_event, object: event)
-            } label: {
-                Label(NSLocalizedString("Broadcast", comment: "Context menu option for broadcasting the user's note to all of the user's connected relay servers."), systemImage: "globe")
-            }
+            EventMenuContext(event: event, privkey: privkey, pubkey: pubkey)
         }
 
     }

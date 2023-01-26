@@ -114,6 +114,7 @@ struct ProfileView: View {
     @State var showing_select_wallet: Bool = false
     @State var is_zoomed: Bool = false
     @State var show_share_sheet: Bool = false
+    @State var action_sheet_presented: Bool = false
     @StateObject var user_settings = UserSettingsStore()
     
     @Environment(\.dismiss) var dismiss
@@ -147,9 +148,7 @@ struct ProfileView: View {
             }
         }) {
             Image(systemName: "bolt.circle")
-                .symbolRenderingMode(.palette)
-                .foregroundStyle(colorScheme == .dark ? .white : .black, colorScheme == .dark ? .white : .black)
-                .font(.system(size: 32).weight(.thin))
+                .profile_button_style(scheme: colorScheme)
                 .contextMenu {
                     Button {
                         UIPasteboard.general.string = profile.lnurl ?? ""
@@ -168,15 +167,21 @@ struct ProfileView: View {
 
     static let markdown = Markdown()
     
+    var ActionSheetButton: some View {
+        Button(action: {
+            action_sheet_presented = true
+        }) {
+            Image(systemName: "ellipsis.circle")
+                .profile_button_style(scheme: colorScheme)
+        }
+    }
+    
     var ShareButton: some View {
         Button(action: {
             show_share_sheet = true
         }) {
-            Image(systemName: "square.and.arrow.up.circle.fill")
-                .symbolRenderingMode(.palette)
-                .font(.system(size: 32))
-                .padding()
-                .foregroundStyle(.white, .black, .black.opacity(0.8))
+            Image(systemName: "square.and.arrow.up.circle")
+                .profile_button_style(scheme: colorScheme)
         }
     }
     
@@ -186,9 +191,7 @@ struct ProfileView: View {
             .environmentObject(dm_model)
         return NavigationLink(destination: dmview) {
             Image(systemName: "bubble.left.circle")
-                .symbolRenderingMode(.palette)
-                .font(.system(size: 32).weight(.thin))
-                .foregroundStyle(colorScheme == .dark ? .white : .black, colorScheme == .dark ? .white : .black)
+                .profile_button_style(scheme: colorScheme)
         }
     }
 
@@ -226,9 +229,6 @@ struct ProfileView: View {
                     .frame(width: geometry.size.width, height: self.getHeightForHeaderImage(geometry))
                     .clipped()
                     .offset(x: 0, y: self.getOffsetForHeaderImage(geometry))
-                
-                ShareButton
-                    .offset(x: geometry.size.width - 80.0, y: 50.0 )
 
             }.frame(height: BANNER_HEIGHT)
             
@@ -248,6 +248,7 @@ struct ProfileView: View {
                     Spacer()
                     
                     Group {
+                        ActionSheetButton
                         
                         if let profile = data {
                             if let lnurl = profile.lnurl, lnurl != "" {
@@ -373,6 +374,20 @@ struct ProfileView: View {
                 }
             }
         }
+        .confirmationDialog("Actions", isPresented: $action_sheet_presented) {
+            Button("Share") {
+                show_share_sheet = true
+            }
+            
+            Button("Report") {
+                let target: ReportTarget = .user(profile.pubkey)
+                notify(.report, target)
+            }
+            
+            Button("Block") {
+                notify(.block, profile.pubkey)
+            }
+        }
         .ignoresSafeArea()
     }
 }
@@ -471,5 +486,13 @@ struct KeyView: View {
                 }
             }
         }
+    }
+}
+
+extension View {
+    func profile_button_style(scheme: ColorScheme) -> some View {
+        self.symbolRenderingMode(.palette)
+            .font(.system(size: 32).weight(.thin))
+            .foregroundStyle(scheme == .dark ? .white : .black, scheme == .dark ? .white : .black)
     }
 }

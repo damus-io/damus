@@ -15,26 +15,7 @@ struct FollowUserView: View {
 
     var body: some View {
         HStack {
-            let pmodel = ProfileModel(pubkey: target.pubkey, damus: damus_state)
-            let followers = FollowersModel(damus_state: damus_state, target: target.pubkey)
-            let pv = ProfileView(damus_state: damus_state, profile: pmodel, followers: followers)
-            
-            NavigationLink(destination: pv) {
-                ProfilePicView(pubkey: target.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
-            
-                VStack(alignment: .leading) {
-                    let profile = damus_state.profiles.lookup(id: target.pubkey)
-                    ProfileName(pubkey: target.pubkey, profile: profile, damus: damus_state, show_friend_confirmed: false, show_nip5_domain: false)
-                    if let about = profile?.about {
-                        Text(FollowUserView.markdown.process(about))
-                            .lineLimit(3)
-                            .font(.footnote)
-                    }
-                }
-                
-                Spacer()
-            }
-            .buttonStyle(PlainButtonStyle())
+            UserView(damus_state: damus_state, pubkey: target.pubkey)
             
             FollowButtonView(target: target, follow_state: damus_state.contacts.follow_state(target.pubkey))
         }

@@ -75,22 +75,6 @@ struct SideMenuView: View {
                     
                     Divider()
                         .padding(.trailing,40)
-                    
-                    /*
-                    HStack(alignment: .bottom) {
-                        Text("69,420")
-                            .foregroundColor(.accentColor)
-                            .font(.largeTitle)
-                        Text("SATS")
-                            .font(.caption)
-                            .padding(.bottom,6)
-                    }
-                    
-                    Divider()
-                        .padding(.trailing,40)
-                     */
-                    
-                    // THERE IS A LIMIT OF 10 NAVIGATIONLINKS!!! (Consider some in other views)
 
                     NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
                         Label(NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), systemImage: "person")
@@ -122,6 +106,12 @@ struct SideMenuView: View {
                         isSidebarVisible.toggle()
                     })
                      */
+                    
+                    NavigationLink(destination: MutelistView(damus_state: damus_state, users: get_mutelist_users(damus_state.contacts.mutelist) )) {
+                        Label(NSLocalizedString("Blocked", comment: "Sidebar menu label for Profile view."), systemImage: "exclamationmark.octagon")
+                            .font(.title2)
+                            .foregroundColor(textColor())
+                    }
                     
                     NavigationLink(destination: ConfigView(state: damus_state).environmentObject(user_settings)) {
                         Label(NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), systemImage: "gear")

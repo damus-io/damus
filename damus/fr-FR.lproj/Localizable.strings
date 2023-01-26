@@ -8,10 +8,10 @@
 "'%@' is an invalid nip05 identifier. It should look like an email." = "'@' est un identifiant nip05 invalide. Cela devrait ressembler à une adresse e-mail.";
 
 /* Navigation bar title for view that shows who is following a user. */
-"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "(Profile.displayName(profile: profile, pubkey: whos))'s Followers";
+"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "Abonnés de (Profile.displayName(profile: profile, pubkey: whos))";
 
 /* Navigation bar title for view that shows who a user is following. */
-"(who) following" = "(who) following";
+"(who) following" = "(who) suit";
 
 /* Prefix character to username. */
 "@" = "@";
@@ -38,7 +38,7 @@ Number of profiles a user is following. */
 "%lld" = "%lld";
 
 /* Fraction of how many of the user's relay servers that are operational. */
-"%lld/%lld" = "%lld/%lld<br data-mce-bogus=\"1\">";
+"%lld/%lld" = "%lld/%lld";
 
 /* Placeholder for event mention. */
 "< e >" = "< e >";
@@ -59,6 +59,9 @@ Number of profiles a user is following. */
    Button to confirm adding user inputted relay. */
 "Add" = "Ajouter";
 
+/* Button label to re-add all original participants as profiles to reply to in a note */
+"Add all" = "Tout ajouter";
+
 /* Label for section for adding a relay server. */
 "Add Relay" = "Ajouter un Relais";
 
@@ -66,7 +69,7 @@ Number of profiles a user is following. */
 "Any" = "N'importe Lequel";
 
 /* Alert message to ask if user wants to repost a post. */
-"Are you sure you want to repost this?" = "Êtes-vous sûr de vouloir republier ceci ?";
+"Are you sure you want to repost this?" = "Êtes-vous sûr de vouloir republier ceci ?";
 
 /* Label for Banner Image section of user profile form. */
 "Banner Image" = "Image Bannière";
@@ -81,10 +84,10 @@ Number of profiles a user is following. */
 "Bitcoin Lightning Tips" = "Pourboires de Bitcoin Lightning";
 
 /* Dropdown option label for Lightning wallet, Blixt Wallet */
-"Blixt Wallet" = "Portefeuille Blixt";
+"Blixt Wallet" = "Blixt Wallet";
 
 /* Dropdown option label for Lightning wallet, Blue Wallet. */
-"Blue Wallet" = "Portefeuille Blue";
+"Blue Wallet" = "Blue Wallet";
 
 /* Dropdown option label for Lightning wallet, Breez. */
 "Breez" = "Breez";
@@ -105,7 +108,7 @@ Number of profiles a user is following. */
 "Chat" = "Chatter";
 
 /* Button for clearing cached data. */
-"Clear" = "<br>Vider";
+"Clear" = "Vider";
 
 /* Section title for clearing cached data. */
 "Clear Cache" = "Vider le Cache";
@@ -160,7 +163,7 @@ Number of profiles a user is following. */
 "Default Wallet" = "Portefeuille par défaut";
 
 /* Button to delete a relay server that the user connects to. */
-"Delete" = "<br>Effacer";
+"Delete" = "Effacer";
 
 /* Button to dismiss a text field alert. */
 "Dismiss" = "Rejeter";
@@ -168,8 +171,12 @@ Number of profiles a user is following. */
 /* Label to prompt display name entry. */
 "Display Name" = "Afficher Nom";
 
-/* Navigation title for DM view, which is the English abbreviation for Direct Message. */
-"DM" = "DM";
+/* DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet. DM is the English abbreviation for Direct Message. */
+"DM Type" = "Type de message privé";
+
+/* Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
+   Navigation title for view of DMs, where DM is an English abbreviation for Direct Message. */
+"DMs" = "Messages privés";
 
 /* Button to dismiss wallet selection view for paying Lightning invoice. */
 "Done" = "Fini";
@@ -180,23 +187,23 @@ Number of profiles a user is following. */
 /* Button to edit user's profile. */
 "Edit" = "Modifier";
 
+/* Text indicating that the view is used for editing which participants are replied to in a note. */
+"Edit participants" = "Modifier les participants";
+
 /* Heading indicating that this application keeps private messaging end-to-end encrypted. */
 "Encrypted" = "Crypté";
-
-/* Navigation title for view of encrypted DMs, where DM is an English abbreviation for Direct Message. */
-"Encrypted DMs" = "DMs cryptés";
 
 /* Prompt for user to enter an account key to login. */
 "Enter your account key to login:" = "Entrez votre clé de compte pour vous connecter:";
 
 /* Error message indicating why saving keys failed. */
-"Error: %@" = "Error: %@";
+"Error: %@" = "Erreur: %@";
 
 /* Filter state for seeing either only posts, or posts & replies. */
 "Filter State" = "État du filtre";
 
 /* Button to follow a user. */
-"Follow" = "S'abonner<br>";
+"Follow" = "S'abonner";
 
 /* Label describing followers of a user. */
 "Followers" = "Abonnés";
@@ -209,22 +216,22 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Following..." = "Abonnements...";
 
 /* Text to indicate that button next to it is in a state that will follow a profile when tapped. */
-"Follows" = "Follow<br>";
+"Follows" = "Suit";
 
 /* Navigation bar title for Global view where posts from all connected relay servers appear. */
 "Global" = "Global";
 
 /* Navigation link to go to post referenced by hex code. */
-"Goto post %@" = "Goto post %@";
+"Goto post %@" = "Aller au post %@";
 
 /* Navigation link to go to profile. */
-"Goto profile %@" = "Goto profile %@";
+"Goto profile %@" = "Aller au profil %@";
 
 /* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
 "Home" = "Accueil";
 
 /* Placeholder example text for profile picture URL. */
-"https://example.com/pic.jpg" = "https://example.com/pic.jpg";
+"https://example.com/pic.jpg" = "https://exemple.com/pic.jpg";
 
 /* Placeholder example text for website URL for user profile. */
 "https://jb55.com" = "https://jb55.com";
@@ -248,7 +255,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Lightning Invoice" = "Facture Lightning";
 
 /* Dropdown option label for Lightning wallet, LNLink. */
-"LNLink" = "Lien LN";
+"LNLink" = "LNLink";
 
 /* Dropdown option label for system default for Lightning wallet. */
 "Local default" = "Valeur locale par défaut";
@@ -272,7 +279,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "NIP-05 Verification" = "Vérification NIP-05";
 
 /* No search results. */
-"none" = "none";
+"none" = "aucun";
 
 /* Indicates that there are no notes in the timeline to view. */
 "Nothing to see here. Check back later!" = "Rien à voir ici. Revenez plus tard!";
@@ -281,13 +288,13 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Notifications" = "Notifications";
 
 /* String indicating that a given timestamp just occurred */
-"now" = "now";
+"now" = "maintenant";
 
 /* Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key. */
 "nsec1..." = "nsec1...";
 
 /* Label indicating that a form input is optional. */
-"optional" = "optional";
+"optional" = "optionnel";
 
 /* Button to pay a Lightning invoice. */
 "Pay" = "Payer";
@@ -310,11 +317,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading. */
 "Private" = "Privé";
 
-/* Label to indicate that the text below is the user's private key used by only the user themself as a secret to login to access their account. */
-"Private Key" = "Clé Privée";
-
 /* Title of the secure field that holds the user's private key. */
-"PrivateKey" = "PrivateKey";
+"Private Key" = "Clé Privée";
 
 /* Sidebar menu label for Profile view. */
 "Profile" = "Profil";
@@ -346,8 +350,11 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Sidebar menu label for Relay servers view */
 "Relays" = "Relais";
 
+/* Button label to remove all participants from a note reply. */
+"Remove all" = "Tout supprimer";
+
 /* Label to indicate that the user is replying to themself. */
-"Reply to self" = "Répondre à soi-même";
+"Reply to self" = "Réponse à soi-même";
 
 /* Label to indicate that the user is replying to 2 users. */
 "Replying to %@ & %@" = "Répondre à %1$@ & %2$@";
@@ -361,6 +368,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Text indicating that the post was reposted (i.e. re-shared). */
 "Reposted" = "A republié";
+
+/* Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message. */
+"Requests" = "Demandes";
 
 /* Section title for resetting the user */
 "Reset" = "Réinitialiser";
@@ -409,7 +419,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Share" = "Partager";
 
 /* Toggle to show or hide user's secret account login key. */
-"Show" = "Afficher<br>";
+"Show" = "Afficher";
 
 /* Toggle to show or hide selection of wallet. */
 "Show wallet selector" = "Afficher le sélecteur de portefeuille";
@@ -449,7 +459,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Unfollowing" = "Ne plus suivre";
 
 /* Label to indicate that the user is in the process of unfollowing another user. */
-"Unfollowing..." = "Ne plus suivre...<br>";
+"Unfollowing..." = "Ne plus suivre...";
 
 /* Text to indicate that the button next to it is in a state that will unfollow a profile when tapped. */
 "Unfollows" = "Se désabonne de";
@@ -462,7 +472,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Wallet" = "Portefeuille";
 
 /* Dropdown option label for Lightning wallet, Wallet Of Satoshi. */
-"Wallet Of Satoshi" = "Portefeuille de Satoshi";
+"Wallet Of Satoshi" = "Wallet Of Satoshi";
 
 /* Section title for selection of wallet. */
 "Wallet Selector" = "Sélecteur de portefeuille";
@@ -477,10 +487,10 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Welcome, %@!" = "Bienvenue, %@!";
 
 /* Placeholder example for relay server address. */
-"wss://some.relay.com" = "wss://some.relay.com";
+"wss://some.relay.com" = "wss://un.relais.com";
 
 /* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
-"you" = "you";
+"you" = "vous";
 
 /* Label for Your Name section of user profile form. */
 "Your Name" = "Votre Nom";
@@ -489,5 +499,5 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Zebedee" = "Zebedee";
 
 /* Dropdown option label for Lightning wallet, Zeus LN. */
-"Zeus LN" = "LN de Zeus";
+"Zeus LN" = "Zeus LN";
 

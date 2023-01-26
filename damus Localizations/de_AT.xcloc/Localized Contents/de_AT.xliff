@@ -152,6 +152,12 @@ Number of profiles a user is following.</note>
         
         <note>Label for section for adding a relay server.</note>
       </trans-unit>
+      <trans-unit id="Add all" xml:space="preserve">
+        <source>Add all</source>
+        <target>Alle hinzufügen</target>
+        
+        <note>Button label to re-add all original participants as profiles to reply to in a note</note>
+      </trans-unit>
       <trans-unit id="Any" xml:space="preserve">
         <source>Any</source>
         <target>beliebig</target>
@@ -330,23 +336,18 @@ Number of profiles a user is following.</note>
         
         <note>Example description about Bitcoin creator(s), Satoshi Nakamoto.</note>
       </trans-unit>
-      <trans-unit id="DM" xml:space="preserve">
-        <source>DM</source>
-        <target>PN</target>
-        
-        <note>Navigation title for DM view, which is the English abbreviation for Direct Message.</note>
-      </trans-unit>
       <trans-unit id="DM Type" xml:space="preserve">
         <source>DM Type</source>
         <target>PN Typ</target>
         
-        <note>DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet.</note>
+        <note>DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet. DM is the English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="DMs" xml:space="preserve">
         <source>DMs</source>
         <target>PNs</target>
         
-        <note>No comment provided by engineer.</note>
+        <note>Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
+   Navigation title for view of DMs, where DM is an English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="Damus" xml:space="preserve">
         <source>Damus</source>
@@ -396,17 +397,17 @@ Number of profiles a user is following.</note>
         
         <note>Button to edit user's profile.</note>
       </trans-unit>
+      <trans-unit id="Edit participants" xml:space="preserve">
+        <source>Edit participants</source>
+        <target>Teilnehmer editieren</target>
+        
+        <note>Text indicating that the view is used for editing which participants are replied to in a note.</note>
+      </trans-unit>
       <trans-unit id="Encrypted" xml:space="preserve">
         <source>Encrypted</source>
         <target>Verschlüsselt</target>
         
         <note>Heading indicating that this application keeps private messaging end-to-end encrypted.</note>
-      </trans-unit>
-      <trans-unit id="Encrypted DMs" xml:space="preserve">
-        <source>Encrypted DMs</source>
-        <target>Verschlüsselte PNs</target>
-        
-        <note>Navigation title for view of encrypted DMs, where DM is an English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="Enter your account key to login:" xml:space="preserve">
         <source>Enter your account key to login:</source>
@@ -676,6 +677,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Sidebar menu label for Relay servers view</note>
       </trans-unit>
+      <trans-unit id="Remove all" xml:space="preserve">
+        <source>Remove all</source>
+        <target>Alle entfernen</target>
+        
+        <note>Button label to remove all participants from a note reply.</note>
+      </trans-unit>
       <trans-unit id="Reply to self" xml:space="preserve">
         <source>Reply to self</source>
         <target>Antwort an sich selbst</target>
@@ -711,7 +718,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Requests</source>
         <target>Anfragen</target>
         
-        <note>No comment provided by engineer.</note>
+        <note>Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="Reset" xml:space="preserve">
         <source>Reset</source>

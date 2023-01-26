@@ -11,11 +11,49 @@ import Foundation
 class Contacts {
     private var friends: Set<String> = Set()
     private var friend_of_friends: Set<String> = Set()
+    private var muted: Set<String> = Set()
+    
     let our_pubkey: String
     var event: NostrEvent?
+    var mutelist: NostrEvent?
     
     init(our_pubkey: String) {
         self.our_pubkey = our_pubkey
+    }
+    
+    func is_muted(_ pk: String) -> Bool {
+        return muted.contains(pk)
+    }
+    
+    func set_mutelist(_ ev: NostrEvent) {
+        let oldlist = self.mutelist
+        self.mutelist = ev
+        
+        let old = Set(oldlist?.referenced_pubkeys.map({ $0.ref_id }) ?? [])
+        let new = Set(ev.referenced_pubkeys.map({ $0.ref_id }))
+        let diff = old.symmetricDifference(new)
+        
+        var new_mutes = Array<String>()
+        var new_unmutes = Array<String>()
+        
+        for d in diff {
+            if new.contains(d) {
+                new_mutes.append(d)
+            } else {
+                new_unmutes.append(d)
+            }
+        }
+        
+        // TODO: set local mutelist here
+        self.muted = Set(ev.referenced_pubkeys.map({ $0.ref_id }))
+        
+        if new_mutes.count > 0 {
+            notify(.new_mutes, new_mutes)
+        }
+        
+        if new_unmutes.count > 0 {
+            notify(.new_unmutes, new_unmutes)
+        }
     }
     
     func get_friendosphere() -> [String] {
