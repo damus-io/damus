@@ -1,15 +1,28 @@
 
-## [1.0.0-10] - 2023-01-25
+## [1.0.0-11] - 2023-01-25
 
 ### Added
 
-- Added EULA
+- Reposts view (Terry Yiu)
+- Translations for it_IT, it_CH, fr_FR, de_DE, de_AT and lv_LV (William Casarin)
 - Added ability to block users (William Casarin)
 - Added a way to report content (William Casarin)
 - Stretchable profile cover header (Swift)
 
 
-[1.0.0-10]: https://github.com/damus-io/damus/releases/tag/v1.0.0-10
+### Changed
+
+- Bump pfp/banner animated fize size limit to 5MiB/20MiB (William Casarin)
+- Updated default boostrap relays (Ricardo Arturo Cabral Mejía)
+
+
+### Fixed
+
+- allow ws:// relays again (Steven Briscoe)
+
+
+
+[1.0.0-11]: https://github.com/damus-io/damus/releases/tag/v1.0.0-11
 
 
 ## [1.0.0-8] - 2023-01-22
