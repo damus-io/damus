@@ -38,14 +38,14 @@ struct EventMenuContext: View {
             Label(NSLocalizedString("Copy Note JSON", comment: "Context menu option for copying the JSON text from the note."), systemImage: "square.on.square")
         }
         
-        Button {
+        Button(role: .destructive) {
             let target: ReportTarget = .note(ReportNoteTarget(pubkey: event.pubkey, note_id: event.id))
             notify(.report, target)
         } label: {
             Label(NSLocalizedString("Report", comment: "Context menu option for reporting content."), systemImage: "exclamationmark.bubble")
         }
         
-        Button {
+        Button(role: .destructive) {
             notify(.block, event.pubkey)
         } label: {
             Label(NSLocalizedString("Block", comment: "Context menu option for blocking users."), systemImage: "exclamationmark.octagon")

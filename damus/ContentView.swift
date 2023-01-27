@@ -434,21 +434,26 @@ struct ContentView: View {
         .onReceive(handle_notify(.new_mutes)) { notif in
             home.filter_muted()
         }
-        .alert("User blocked", isPresented: $user_blocked_confirm, actions: {
-            Button("Thanks!") {
+        .alert(NSLocalizedString("User blocked", comment: "Alert message to indicate "), isPresented: $user_blocked_confirm, actions: {
+            Button(NSLocalizedString("Thanks!", comment: "Button to close out of alert that informs that the action to block a user was successful.")) {
                 user_blocked_confirm = false
             }
         }, message: {
             if let pubkey = self.blocking {
                 let profile = damus_state!.profiles.lookup(id: pubkey)
                 let name = Profile.displayName(profile: profile, pubkey: pubkey)
-                Text("\(name) has been blocked")
+                Text("\(name) has been blocked", comment: "Alert message that informs a user was blocked.")
             } else {
-                Text("User has been blocked")
+                Text("User has been blocked", comment: "Alert message that informs a user was blocked.")
             }
         })
-        .alert("Create new mutelist", isPresented: $confirm_overwrite_mutelist, actions: {
-            Button("Yes, Overwrite") {
+        .alert(NSLocalizedString("Create new mutelist", comment: "Title of alert prompting the user to create a new mutelist."), isPresented: $confirm_overwrite_mutelist, actions: {
+            Button(NSLocalizedString("Cancel", comment: "Button to cancel out of alert that creates a new mutelist.")) {
+                confirm_overwrite_mutelist = false
+                confirm_block = false
+            }
+
+            Button(NSLocalizedString("Yes, Overwrite", comment: "Text of button that confirms to overwrite the existing mutelist.")) {
                 guard let ds = damus_state else {
                     return
                 }
@@ -472,20 +477,18 @@ struct ContentView: View {
                 confirm_block = false
                 user_blocked_confirm = true
             }
-            
-            Button("Cancel") {
-                confirm_overwrite_mutelist = false
+        }, message: {
+            Text("No block list found, create a new one? This will overwrite any previous block lists.", comment: "Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists.")
+        })
+        .alert(NSLocalizedString("Block User", comment: "Title of alert for blocking a user."), isPresented: $confirm_block, actions: {
+            Button(NSLocalizedString("Cancel", comment: "Alert button to cancel out of alert for blocking a user."), role: .cancel) {
                 confirm_block = false
             }
-        }, message: {
-            Text("No block list found, create a new one? This will overwrite any previous block lists.")
-        })
-        .alert("Block User", isPresented: $confirm_block, actions: {
-            Button("Block") {
+            Button(NSLocalizedString("Block", comment: "Alert button to block a user."), role: .destructive) {
                 guard let ds = damus_state else {
                     return
                 }
-                
+
                 if ds.contacts.mutelist == nil {
                     confirm_overwrite_mutelist = true
                 } else {
@@ -495,7 +498,7 @@ struct ContentView: View {
                     guard let pubkey = blocking else {
                         return
                     }
-                            
+
                     guard let ev = create_or_update_mutelist(keypair: keypair, mprev: ds.contacts.mutelist, to_add: pubkey) else {
                         return
                     }
@@ -503,17 +506,13 @@ struct ContentView: View {
                     ds.pool.send(.event(ev))
                 }
             }
-            
-            Button("Cancel") {
-                confirm_block = false
-            }
         }, message: {
             if let pubkey = blocking {
                 let profile = damus_state?.profiles.lookup(id: pubkey)
                 let name = Profile.displayName(profile: profile, pubkey: pubkey)
-                Text("Block \(name)?")
+                Text("Block \(name)?", comment: "Alert message prompt to ask if a user should be blocked.")
             } else {
-                Text("Could not find user to block...")
+                Text("Could not find user to block...", comment: "Alert message to indicate that the blocked user could not be found.")
             }
         })
     }

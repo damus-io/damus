@@ -25,16 +25,16 @@ struct ReportView: View {
     
     var Success: some View {
         VStack(alignment: .center, spacing: 20) {
-            Text("Report sent!")
+            Text("Report sent!", comment: "Message indicating that a report was successfully sent to relay servers.")
                 .font(.headline)
             
-            Text("Relays have been notified and clients will be able to use this information to filter content. Thank you!")
+            Text("Relays have been notified and clients will be able to use this information to filter content. Thank you!", comment: "Description of what was done as a result of sending a report to relay servers.")
             
-            Text("Report ID:")
+            Text("Report ID:", comment: "Label indicating that the text underneath is the identifier of the report that was sent to relay servers.")
             
             Text(report_id)
             
-            Button("Copy Report ID") {
+            Button(NSLocalizedString("Copy Report ID", comment: "Button to copy report ID.")) {
                 UIPasteboard.general.string = report_id
                 let g = UIImpactFeedbackGenerator(style: .medium)
                 g.impactOccurred()
@@ -59,33 +59,33 @@ struct ReportView: View {
     var MainForm: some View {
         VStack {
             
-        Text("Report")
+            Text("Report", comment: "Label indicating that the current view is for the user to report content.")
                 .font(.headline)
                 .padding()
             
         Form {
             Section(content: {
-                Button("It's spam") {
+                Button(NSLocalizedString("It's spam", comment: "Button for user to report that the account or content has spam.")) {
                     do_send_report(type: .spam)
                 }
                 
-                Button("Nudity or explicit content") {
+                Button(NSLocalizedString("Nudity or explicit content", comment: "Button for user to report that the account or content has nudity or explicit content.")) {
                     do_send_report(type: .explicit)
                 }
                 
-                Button("Illegal content") {
+                       Button(NSLocalizedString("Illegal content", comment: "Button for user to report that the account or content has illegal content.")) {
                     do_send_report(type: .illegal)
                 }
                 
                 if case .user = target {
-                    Button("They are impersonating someone") {
+                    Button(NSLocalizedString("They are impersonating someone", comment: "Button for user to report that the account is impersonating someone.")) {
                         do_send_report(type: .impersonation)
                     }
                 }
             }, header: {
-                Text("What do you want to report?")
+                Text("What do you want to report?", comment: "Header text to prompt user what issue they want to report.")
             }, footer: {
-                Text("Your report will be sent to the relays you are connected to")
+                Text("Your report will be sent to the relays you are connected to", comment: "Footer text to inform user what will happen when the report is submitted.")
             })
         }
         }

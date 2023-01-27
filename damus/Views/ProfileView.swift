@@ -374,17 +374,17 @@ struct ProfileView: View {
                 }
             }
         }
-        .confirmationDialog("Actions", isPresented: $action_sheet_presented) {
-            Button("Share") {
+        .confirmationDialog(NSLocalizedString("Actions", comment: "Title for confirmation dialog to either share, report, or block a profile."), isPresented: $action_sheet_presented) {
+            Button(NSLocalizedString("Share", comment: "Button to share the link to a profile.")) {
                 show_share_sheet = true
             }
             
-            Button("Report") {
+            Button(NSLocalizedString("Report", comment: "Button to report a profile."), role: .destructive) {
                 let target: ReportTarget = .user(profile.pubkey)
                 notify(.report, target)
             }
             
-            Button("Block") {
+            Button(NSLocalizedString("Block", comment: "Button to block a profile."), role: .destructive) {
                 notify(.block, profile.pubkey)
             }
         }

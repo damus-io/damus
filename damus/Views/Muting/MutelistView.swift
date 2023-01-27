@@ -43,7 +43,7 @@ struct MutelistView: View {
                     RemoveAction(pubkey: pubkey)
                 }
         }
-        .navigationTitle("Blocked Users")
+        .navigationTitle(NSLocalizedString("Blocked Users", comment: "Navigation title of view to see list of blocked users."))
     }
 }
 
