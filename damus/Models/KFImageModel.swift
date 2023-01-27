@@ -5,9 +5,8 @@
 //  Created by Oleg Abalonski on 1/11/23.
 //
 
-import Foundation
+import UIKit
 import Kingfisher
-import SVGKit
 
 class KFImageModel: ObservableObject {
     
@@ -80,8 +79,15 @@ struct CustomImageProcessor: ImageProcessor {
             }
             
             // Handle SVG image
-            if let svgImage = SVGKImage(data: data), let image = svgImage.uiImage {
-                return image.kf.scaled(to: options.scaleFactor)
+            if let dataString = String(data: data, encoding: .utf8),
+                let svg = SVG(dataString) {
+                
+                    let render = UIGraphicsImageRenderer(size: svg.size)
+                    let image = render.image { context in
+                        svg.draw(in: context.cgContext)
+                    }
+
+                    return image.kf.scaled(to: options.scaleFactor)
             }
             
             return DefaultImageProcessor.default.process(item: item, options: options)

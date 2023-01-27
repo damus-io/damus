@@ -177,9 +177,8 @@
 		647D9A8D2968520300A295DE /* SideMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 647D9A8C2968520300A295DE /* SideMenuView.swift */; };
 		64FBD06F296255C400D9D3B2 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64FBD06E296255C400D9D3B2 /* Theme.swift */; };
 		6C7DE41F2955169800E66263 /* Vault in Frameworks */ = {isa = PBXBuildFile; productRef = 6C7DE41E2955169800E66263 /* Vault */; };
-		7C45AE6D297352F90031D7BC /* SVGKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7C45AE6C297352F90031D7BC /* SVGKit */; };
-		7C45AE6F297352F90031D7BC /* SVGKitSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7C45AE6E297352F90031D7BC /* SVGKitSwift */; };
 		7C45AE71297353390031D7BC /* KFImageModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C45AE70297353390031D7BC /* KFImageModel.swift */; };
+		7C60CAEF298471A1009C80D6 /* CoreSVG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C60CAEE298471A1009C80D6 /* CoreSVG.swift */; };
 		7C902AE32981D55B002AB16E /* ZoomableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C902AE22981D55B002AB16E /* ZoomableScrollView.swift */; };
 		9609F058296E220800069BF3 /* BannerImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9609F057296E220800069BF3 /* BannerImageView.swift */; };
 		BA693074295D649800ADDB87 /* UserSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA693073295D649800ADDB87 /* UserSettingsStore.swift */; };
@@ -433,6 +432,7 @@
 		647D9A8C2968520300A295DE /* SideMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuView.swift; sourceTree = "<group>"; };
 		64FBD06E296255C400D9D3B2 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		7C45AE70297353390031D7BC /* KFImageModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KFImageModel.swift; sourceTree = "<group>"; };
+		7C60CAEE298471A1009C80D6 /* CoreSVG.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreSVG.swift; sourceTree = "<group>"; };
 		7C902AE22981D55B002AB16E /* ZoomableScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableScrollView.swift; sourceTree = "<group>"; };
 		9609F057296E220800069BF3 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
 		BA693073295D649800ADDB87 /* UserSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsStore.swift; sourceTree = "<group>"; };
@@ -449,8 +449,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7C45AE6F297352F90031D7BC /* SVGKitSwift in Frameworks */,
-				7C45AE6D297352F90031D7BC /* SVGKit in Frameworks */,
 				4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */,
 				6C7DE41F2955169800E66263 /* Vault in Frameworks */,
 				4CE6DF1227F7A2B300C66700 /* Starscream in Frameworks */,
@@ -689,6 +687,7 @@
 				4CB8838529656C8B00DC99E7 /* NIP05.swift */,
 				4CF0ABD72981980C00D66079 /* Lists.swift */,
 				4CF0ABEF29857E9200D66079 /* Bech32Object.swift */,
+				7C60CAEE298471A1009C80D6 /* CoreSVG.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -876,8 +875,6 @@
 				4C649880286E0EE300EAE2B3 /* secp256k1 */,
 				4C06670328FC7EC500038D2A /* Kingfisher */,
 				6C7DE41E2955169800E66263 /* Vault */,
-				7C45AE6C297352F90031D7BC /* SVGKit */,
-				7C45AE6E297352F90031D7BC /* SVGKitSwift */,
 			);
 			productName = damus;
 			productReference = 4CE6DEE327F7A08100C66700 /* damus.app */;
@@ -964,7 +961,6 @@
 				4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */,
 				4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				6C7DE41D2955169800E66263 /* XCRemoteSwiftPackageReference "Vault" */,
-				7C45AE6B297352F90031D7BC /* XCRemoteSwiftPackageReference "SVGKit" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -1124,6 +1120,7 @@
 				4CB8838629656C8B00DC99E7 /* NIP05.swift in Sources */,
 				4CF0ABD82981980C00D66079 /* Lists.swift in Sources */,
 				4C5C7E6A284EDE2E00A22DF5 /* SearchResultsView.swift in Sources */,
+				7C60CAEF298471A1009C80D6 /* CoreSVG.swift in Sources */,
 				6439E014296790CF0020672B /* ProfileZoomView.swift in Sources */,
 				4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */,
 				4C3BEFD6281D995700B3DE84 /* ActionBarModel.swift in Sources */,
@@ -1391,7 +1388,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
-				DEVELOPMENT_TEAM = XK7H4JAB3D;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = damus/Info.plist;
@@ -1612,14 +1609,6 @@
 				minimumVersion = 1.0.0;
 			};
 		};
-		7C45AE6B297352F90031D7BC /* XCRemoteSwiftPackageReference "SVGKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SVGKit/SVGKit";
-			requirement = {
-				kind = revision;
-				revision = e1f13e27b1e4c0ffe20e7d8d3984bf49c2a584d0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1642,16 +1631,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6C7DE41D2955169800E66263 /* XCRemoteSwiftPackageReference "Vault" */;
 			productName = Vault;
-		};
-		7C45AE6C297352F90031D7BC /* SVGKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 7C45AE6B297352F90031D7BC /* XCRemoteSwiftPackageReference "SVGKit" */;
-			productName = SVGKit;
-		};
-		7C45AE6E297352F90031D7BC /* SVGKitSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 7C45AE6B297352F90031D7BC /* XCRemoteSwiftPackageReference "SVGKit" */;
-			productName = SVGKitSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
