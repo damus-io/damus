@@ -42,10 +42,10 @@ struct SetupView: View {
                 DamusGradient()
                 
                 VStack(alignment: .center) {
-                    NavigationLink(destination: EULAView(), tag: .create_account, selection: $state ) {
+                    NavigationLink(destination: EULAView(state: state), tag: .create_account, selection: $state ) {
                         EmptyView()
                     }
-                    NavigationLink(destination: LoginView(), tag: .login, selection: $state ) {
+                    NavigationLink(destination: EULAView(state: state), tag: .login, selection: $state ) {
                         EmptyView()
                     }
                     
