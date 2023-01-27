@@ -44,7 +44,7 @@ struct ReportView: View {
     }
     
     func do_send_report(type: ReportType) {
-        guard let ev = send_report(privkey: privkey, pool: pool, target: target, type: .spam) else {
+        guard let ev = send_report(privkey: privkey, pool: pool, target: target, type: type) else {
             return
         }
         
