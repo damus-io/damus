@@ -139,10 +139,10 @@ struct ConfigView: View {
         .navigationTitle(NSLocalizedString("Settings", comment: "Navigation title for Settings view."))
         .navigationBarTitleDisplayMode(.large)
         .alert(NSLocalizedString("Logout", comment: "Alert for logging out the user."), isPresented: $confirm_logout) {
-            Button(NSLocalizedString("Cancel", comment: "Cancel out of logging out the user.")) {
+            Button(NSLocalizedString("Cancel", comment: "Cancel out of logging out the user."), role: .cancel) {
                 confirm_logout = false
             }
-            Button(NSLocalizedString("Logout", comment: "Button for logging out the user.")) {
+            Button(NSLocalizedString("Logout", comment: "Button for logging out the user."), role: .destructive) {
                 notify(.logout, ())
             }
         } message: {

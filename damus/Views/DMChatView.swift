@@ -19,7 +19,7 @@ struct DMChatView: View {
                 VStack(alignment: .leading) {
                     ForEach(Array(zip(dms.events, dms.events.indices)), id: \.0.id) { (ev, ind) in
                         DMView(event: dms.events[ind], damus_state: damus_state)
-                            .event_context_menu(ev, pubkey: ev.pubkey, privkey: damus_state.keypair.privkey)
+                            .event_context_menu(ev, keypair: damus_state.keypair)
                     }
                     EndBlock(height: 80)
                 }
