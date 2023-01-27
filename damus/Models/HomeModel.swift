@@ -284,7 +284,7 @@ class HomeModel: ObservableObject {
         our_contacts_filter.authors = [damus_state.pubkey]
         
         var our_blocklist_filter = NostrFilter.filter_kinds([30000])
-        our_blocklist_filter.parameter = "mute"
+        our_blocklist_filter.parameter = ["mute"]
         our_blocklist_filter.authors = [damus_state.pubkey]
         
         var dms_filter = NostrFilter.filter_kinds([
