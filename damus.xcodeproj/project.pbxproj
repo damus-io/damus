@@ -166,6 +166,9 @@
 		4CF0ABE12981A83900D66079 /* MutelistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE02981A83900D66079 /* MutelistView.swift */; };
 		4CF0ABE32981BC7D00D66079 /* UserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE22981BC7D00D66079 /* UserView.swift */; };
 		4CF0ABE52981EE0C00D66079 /* EULAView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE42981EE0C00D66079 /* EULAView.swift */; };
+		4CF0ABE929844AF100D66079 /* AnyCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE829844AF100D66079 /* AnyCodable.swift */; };
+		4CF0ABEC29844B4700D66079 /* AnyDecodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABEB29844B4700D66079 /* AnyDecodable.swift */; };
+		4CF0ABEE29844B5500D66079 /* AnyEncodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABED29844B5500D66079 /* AnyEncodable.swift */; };
 		4FE60CDD295E1C5E00105A1F /* Wallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE60CDC295E1C5E00105A1F /* Wallet.swift */; };
 		6439E014296790CF0020672B /* ProfileZoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6439E013296790CF0020672B /* ProfileZoomView.swift */; };
 		647D9A8D2968520300A295DE /* SideMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 647D9A8C2968520300A295DE /* SideMenuView.swift */; };
@@ -419,6 +422,9 @@
 		4CF0ABE02981A83900D66079 /* MutelistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutelistView.swift; sourceTree = "<group>"; };
 		4CF0ABE22981BC7D00D66079 /* UserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserView.swift; sourceTree = "<group>"; };
 		4CF0ABE42981EE0C00D66079 /* EULAView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EULAView.swift; sourceTree = "<group>"; };
+		4CF0ABE829844AF100D66079 /* AnyCodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyCodable.swift; sourceTree = "<group>"; };
+		4CF0ABEB29844B4700D66079 /* AnyDecodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyDecodable.swift; sourceTree = "<group>"; };
+		4CF0ABED29844B5500D66079 /* AnyEncodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyEncodable.swift; sourceTree = "<group>"; };
 		4FE60CDC295E1C5E00105A1F /* Wallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wallet.swift; sourceTree = "<group>"; };
 		6439E013296790CF0020672B /* ProfileZoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileZoomView.swift; sourceTree = "<group>"; };
 		647D9A8C2968520300A295DE /* SideMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuView.swift; sourceTree = "<group>"; };
@@ -662,6 +668,7 @@
 		4C7FF7D628233637009601DB /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				4CF0ABEA29844B2F00D66079 /* AnyCodable */,
 				4C3A1D322960DB0500558C0F /* Markdown.swift */,
 				4CEE2AF4280B29E600AB5EEF /* TimeAgo.swift */,
 				4CE4F8CC281352B30009DFBB /* Notifications.swift */,
@@ -822,6 +829,16 @@
 				4CF0ABE02981A83900D66079 /* MutelistView.swift */,
 			);
 			path = Muting;
+			sourceTree = "<group>";
+		};
+		4CF0ABEA29844B2F00D66079 /* AnyCodable */ = {
+			isa = PBXGroup;
+			children = (
+				4CF0ABE829844AF100D66079 /* AnyCodable.swift */,
+				4CF0ABEB29844B4700D66079 /* AnyDecodable.swift */,
+				4CF0ABED29844B5500D66079 /* AnyEncodable.swift */,
+			);
+			path = AnyCodable;
 			sourceTree = "<group>";
 		};
 		F7F0BA23297892AE009531F3 /* Modifiers */ = {
@@ -1003,6 +1020,7 @@
 				4C363A8C28236B92006E126D /* PubkeyView.swift in Sources */,
 				4C5C7E68284ED36500A22DF5 /* SearchHomeModel.swift in Sources */,
 				4C75EFB728049D990006080F /* RelayPool.swift in Sources */,
+				4CF0ABEE29844B5500D66079 /* AnyEncodable.swift in Sources */,
 				4CB8838D296F710400DC99E7 /* Reposted.swift in Sources */,
 				4C3EA67728FF7A9800C48A62 /* talstr.c in Sources */,
 				4CE6DEE927F7A08100C66700 /* ContentView.swift in Sources */,
@@ -1053,6 +1071,7 @@
 				4CEE2B02280B39E800AB5EEF /* EventActionBar.swift in Sources */,
 				4C3BEFE0281DE1ED00B3DE84 /* DamusState.swift in Sources */,
 				7C45AE71297353390031D7BC /* KFImageModel.swift in Sources */,
+				4CF0ABE929844AF100D66079 /* AnyCodable.swift in Sources */,
 				4C0A3F8F280F640A000448DE /* ThreadModel.swift in Sources */,
 				4CC7AAF2297F129C00430951 /* EmbeddedEventView.swift in Sources */,
 				4C3AC79F2833115300E1F516 /* FollowButtonView.swift in Sources */,
@@ -1122,6 +1141,7 @@
 				4C3AC79B28306D7B00E1F516 /* Contacts.swift in Sources */,
 				4C3EA63D28FF52D600C48A62 /* bolt11.c in Sources */,
 				4CB55EF3295E5D59007FD187 /* RecommendedRelayView.swift in Sources */,
+				4CF0ABEC29844B4700D66079 /* AnyDecodable.swift in Sources */,
 				4C5F9118283D88E40052CD1C /* FollowingModel.swift in Sources */,
 				4C3EA67D28FFBBA300C48A62 /* InvoicesView.swift in Sources */,
 				4C363A8E28236FE4006E126D /* NoteContentView.swift in Sources */,
