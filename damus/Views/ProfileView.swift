@@ -378,14 +378,17 @@ struct ProfileView: View {
             Button(NSLocalizedString("Share", comment: "Button to share the link to a profile.")) {
                 show_share_sheet = true
             }
-            
-            Button(NSLocalizedString("Report", comment: "Button to report a profile."), role: .destructive) {
-                let target: ReportTarget = .user(profile.pubkey)
-                notify(.report, target)
-            }
-            
-            Button(NSLocalizedString("Block", comment: "Button to block a profile."), role: .destructive) {
-                notify(.block, profile.pubkey)
+
+            // Only allow reporting if logged in with private key and the currently viewed profile is not the logged in profile.
+            if profile.pubkey != damus_state.pubkey && damus_state.is_privkey_user {
+                Button(NSLocalizedString("Report", comment: "Button to report a profile."), role: .destructive) {
+                    let target: ReportTarget = .user(profile.pubkey)
+                    notify(.report, target)
+                }
+
+                Button(NSLocalizedString("Block", comment: "Button to block a profile."), role: .destructive) {
+                    notify(.block, profile.pubkey)
+                }
             }
         }
         .ignoresSafeArea()

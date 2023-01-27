@@ -9,19 +9,18 @@ import SwiftUI
 
 struct EventMenuContext: View {
     let event: NostrEvent
-    let privkey: String?
-    let pubkey: String
+    let keypair: Keypair
     
     var body: some View {
     
         Button {
-            UIPasteboard.general.string = event.get_content(privkey)
+            UIPasteboard.general.string = event.get_content(keypair.privkey)
         } label: {
             Label(NSLocalizedString("Copy Text", comment: "Context menu option for copying the text from an note."), systemImage: "doc.on.doc")
         }
 
         Button {
-            UIPasteboard.general.string = bech32_pubkey(pubkey) ?? pubkey
+            UIPasteboard.general.string = keypair.pubkey_bech32
         } label: {
             Label(NSLocalizedString("Copy User Pubkey", comment: "Context menu option for copying the ID of the user who created the note."), systemImage: "person")
         }
@@ -37,24 +36,27 @@ struct EventMenuContext: View {
         } label: {
             Label(NSLocalizedString("Copy Note JSON", comment: "Context menu option for copying the JSON text from the note."), systemImage: "square.on.square")
         }
-        
-        Button(role: .destructive) {
-            let target: ReportTarget = .note(ReportNoteTarget(pubkey: event.pubkey, note_id: event.id))
-            notify(.report, target)
-        } label: {
-            Label(NSLocalizedString("Report", comment: "Context menu option for reporting content."), systemImage: "exclamationmark.bubble")
-        }
-        
-        Button(role: .destructive) {
-            notify(.block, event.pubkey)
-        } label: {
-            Label(NSLocalizedString("Block", comment: "Context menu option for blocking users."), systemImage: "exclamationmark.octagon")
-        }
 
         Button {
             NotificationCenter.default.post(name: .broadcast_event, object: event)
         } label: {
             Label(NSLocalizedString("Broadcast", comment: "Context menu option for broadcasting the user's note to all of the user's connected relay servers."), systemImage: "globe")
+        }
+
+        // Only allow reporting if logged in with private key and the currently viewed profile is not the logged in profile.
+        if keypair.pubkey != event.pubkey && keypair.privkey != nil {
+            Button(role: .destructive) {
+                let target: ReportTarget = .note(ReportNoteTarget(pubkey: event.pubkey, note_id: event.id))
+                notify(.report, target)
+            } label: {
+                Label(NSLocalizedString("Report", comment: "Context menu option for reporting content."), systemImage: "exclamationmark.bubble")
+            }
+
+            Button(role: .destructive) {
+                notify(.block, event.pubkey)
+            } label: {
+                Label(NSLocalizedString("Block", comment: "Context menu option for blocking users."), systemImage: "exclamationmark.octagon")
+            }
         }
     }
 }
