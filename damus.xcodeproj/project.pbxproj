@@ -166,6 +166,7 @@
 		4CF0ABE12981A83900D66079 /* MutelistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE02981A83900D66079 /* MutelistView.swift */; };
 		4CF0ABE32981BC7D00D66079 /* UserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE22981BC7D00D66079 /* UserView.swift */; };
 		4CF0ABE52981EE0C00D66079 /* EULAView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE42981EE0C00D66079 /* EULAView.swift */; };
+		4CF0ABE7298444FD00D66079 /* MutedEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE6298444FC00D66079 /* MutedEventView.swift */; };
 		4CF0ABE929844AF100D66079 /* AnyCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABE829844AF100D66079 /* AnyCodable.swift */; };
 		4CF0ABEC29844B4700D66079 /* AnyDecodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABEB29844B4700D66079 /* AnyDecodable.swift */; };
 		4CF0ABEE29844B5500D66079 /* AnyEncodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABED29844B5500D66079 /* AnyEncodable.swift */; };
@@ -422,6 +423,7 @@
 		4CF0ABE02981A83900D66079 /* MutelistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutelistView.swift; sourceTree = "<group>"; };
 		4CF0ABE22981BC7D00D66079 /* UserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserView.swift; sourceTree = "<group>"; };
 		4CF0ABE42981EE0C00D66079 /* EULAView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EULAView.swift; sourceTree = "<group>"; };
+		4CF0ABE6298444FC00D66079 /* MutedEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutedEventView.swift; sourceTree = "<group>"; };
 		4CF0ABE829844AF100D66079 /* AnyCodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyCodable.swift; sourceTree = "<group>"; };
 		4CF0ABEB29844B4700D66079 /* AnyDecodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyDecodable.swift; sourceTree = "<group>"; };
 		4CF0ABED29844B5500D66079 /* AnyEncodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyEncodable.swift; sourceTree = "<group>"; };
@@ -715,6 +717,7 @@
 				4CC7AAEA297F0AEC00430951 /* BuilderEventView.swift */,
 				4CC7AAF7297F1CEE00430951 /* EventProfile.swift */,
 				4CC7AAF9297F64AC00430951 /* EventMenu.swift */,
+				4CF0ABE6298444FC00D66079 /* MutedEventView.swift */,
 			);
 			path = Events;
 			sourceTree = "<group>";
@@ -1061,6 +1064,7 @@
 				4C3EA66828FF5F9900C48A62 /* hex.c in Sources */,
 				E9E4ED0B295867B900DD7078 /* ThreadV2View.swift in Sources */,
 				4C3BEFDC281DCE6100B3DE84 /* Liked.swift in Sources */,
+				4CF0ABE7298444FD00D66079 /* MutedEventView.swift in Sources */,
 				4CF0ABE12981A83900D66079 /* MutelistView.swift in Sources */,
 				4C75EFB128049D510006080F /* NostrResponse.swift in Sources */,
 				4CEE2AF7280B2DEA00AB5EEF /* ProfileName.swift in Sources */,

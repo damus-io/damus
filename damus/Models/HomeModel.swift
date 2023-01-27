@@ -410,15 +410,8 @@ class HomeModel: ObservableObject {
         return ok
     }
 
-    func should_hide_event(_ ev: NostrEvent) -> Bool {
-        if damus_state.contacts.is_muted(ev.pubkey) {
-            return true
-        }
-        return !ev.should_show_event
-    }
-
     func handle_text_event(sub_id: String, _ ev: NostrEvent) {
-        if should_hide_event(ev) {
+        if should_hide_event(contacts: damus_state.contacts, ev: ev) {
             return
         }
 
@@ -725,4 +718,12 @@ func event_has_our_pubkey(_ ev: NostrEvent, our_pubkey: String) -> Bool {
     }
     
     return false
+}
+
+
+func should_hide_event(contacts: Contacts, ev: NostrEvent) -> Bool {
+    if contacts.is_muted(ev.pubkey) {
+        return true
+    }
+    return !ev.should_show_event
 }

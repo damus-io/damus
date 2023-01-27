@@ -35,7 +35,7 @@ struct EventView: View {
 
     @EnvironmentObject var action_bar: ActionBarModel
 
-    init(event: NostrEvent, has_action_bar: Bool, damus: DamusState) {
+    init(damus: DamusState, event: NostrEvent, has_action_bar: Bool) {
         self.event = event
         self.has_action_bar = has_action_bar
         self.damus = damus
@@ -222,9 +222,9 @@ struct EventView_Previews: PreviewProvider {
             
              */
             EventView(
+                damus: test_damus_state(),
                 event: test_event,
-                has_action_bar: true,
-                damus: test_damus_state()
+                has_action_bar: true
             )
         }
         .padding()

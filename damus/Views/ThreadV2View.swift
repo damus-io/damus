@@ -255,15 +255,13 @@ struct ThreadV2View: View {
                     // MARK: - Parents events view
                     VStack {
                         ForEach(thread.parentEvents, id: \.id) { event in
-                            EventView(event: event, has_action_bar: true, damus: damus)
-                            .onTapGesture {
-                                nav_target = event.id
-                                navigating = true
-                            }
-                            .onAppear {
-                                // TODO: find another solution to prevent layout shifting and layout blocking on large responses
-                                reader.scrollTo("main", anchor: .bottom)
-                            }
+                            MutedEventView(damus_state: damus,
+                                           event: event,
+                                           scroller: reader,
+                                           nav_target: $nav_target,
+                                           navigating: $navigating,
+                                           selected: false
+                            )
                         }
                     }.background(GeometryReader { geometry in
                         // get the height and width of the EventView view
@@ -278,22 +276,25 @@ struct ThreadV2View: View {
                     })
                     
                     // MARK: - Actual event view
-                    SelectedEventView(
-                        damus: damus,
-                        event: thread.current
+                    MutedEventView(
+                        damus_state: damus,
+                        event: thread.current,
+                        scroller: reader,
+                        nav_target: $nav_target,
+                        navigating: $navigating,
+                        selected: true
                     ).id("main")
                     
                     // MARK: - Responses of the actual event view
                     ForEach(thread.childEvents, id: \.id) { event in
-                        EventView(
+                        MutedEventView(
+                            damus_state: damus,
                             event: event,
-                            has_action_bar: true,
-                            damus: damus
+                            scroller: reader,
+                            nav_target: $nav_target,
+                            navigating: $navigating,
+                            selected: false
                         )
-                        .onTapGesture {
-                            nav_target = event.id
-                            navigating = true
-                        }
                     }
                 }.padding()
             }.navigationBarTitle(NSLocalizedString("Thread", comment: "Navigation bar title for note thread."))
