@@ -45,7 +45,7 @@ enum Wallet: String, CaseIterable, Identifiable {
             return .init(index: 0, tag: "strike", displayName: NSLocalizedString("Strike", comment: "Dropdown option label for Lightning wallet, Strike."), link: "strike:",
                          appStoreLink: "https://apps.apple.com/us/app/strike-bitcoin-payments/id1488724463", image: "strike")
         case .cashapp:
-            return .init(index: 1, tag: "cashapp", displayName: NSLocalizedString("Cash App", comment: "Dropdown option label for Lightning wallet, Cash App."), link: "squarecash://",
+            return .init(index: 1, tag: "cashapp", displayName: NSLocalizedString("Cash App", comment: "Dropdown option label for Lightning wallet, Cash App."), link: "https://cash.app/launch/lightning/",
                          appStoreLink: "https://apps.apple.com/us/app/cash-app/id711923939", image: "cashapp")
         case .muun:
             return .init(index: 2, tag: "muun", displayName: NSLocalizedString("Muun", comment: "Dropdown option label for Lightning wallet, Muun."), link: "muun:", appStoreLink: "https://apps.apple.com/us/app/muun-wallet/id1482037683", image: "muun")
