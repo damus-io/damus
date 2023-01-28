@@ -39,7 +39,7 @@ struct UserSearch: View {
                             guard let pk = bech32_pubkey(user.pubkey) else {
                                 return
                             }
-                            post = post.replacingOccurrences(of: "@"+search, with: "@"+pk)
+                            post = post.replacingOccurrences(of: "@"+search, with: "@"+pk+" ")
                         }
                 }
             }
