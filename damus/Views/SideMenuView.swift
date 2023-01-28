@@ -14,6 +14,8 @@ struct SideMenuView: View {
     @State var confirm_logout: Bool = false
     @StateObject var user_settings = UserSettingsStore()
     
+    @State private var showQRCode = false
+    
     @Environment(\.colorScheme) var colorScheme
     
     var sideBarWidth = min(UIScreen.main.bounds.size.width * 0.65, 400.0)
@@ -124,18 +126,33 @@ struct SideMenuView: View {
                     
                     Spacer()
                     
-                    Button(action: {
-                        //ConfigView(state: damus_state)
-                        if damus_state.keypair.privkey == nil {
-                            notify(.logout, ())
-                        } else {
-                            confirm_logout = true
+                    HStack(alignment: .center) {
+                        Button(action: {
+                            //ConfigView(state: damus_state)
+                            if damus_state.keypair.privkey == nil {
+                                notify(.logout, ())
+                            } else {
+                                confirm_logout = true
+                            }
+                        }, label: {
+                            Label(NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account."), systemImage: "pip.exit")
+                                .font(.title3)
+                                .foregroundColor(textColor())
+                        })
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            showQRCode.toggle()
+                        }, label: {
+                            Label(NSLocalizedString("", comment: "Sidebar menu label for accessing QRCode view"), systemImage: "qrcode")
+                                .font(.title)
+                                .foregroundColor(textColor())
+                                .padding(.trailing, 20)
+                        }).fullScreenCover(isPresented: $showQRCode) {
+                            QRCodeView(damus_state: damus_state)
                         }
-                    }, label: {
-                        Label(NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account."), systemImage: "pip.exit")
-                            .font(.title3)
-                            .foregroundColor(textColor())
-                    })
+                    }
                 }
                 .padding(.top, 60)
                 .padding(.bottom, 40)
