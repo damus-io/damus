@@ -36,7 +36,7 @@ struct CustomPicker<SelectionValue: Hashable, Content: View>: View {
                 } label: {
                     text
                         .padding(EdgeInsets(top: 15, leading: 0, bottom: 10, trailing: 0))
-                        .font(.footnote.weight(.heavy))
+                        .font(.system(size: 14, weight: .heavy))
                 }
                 .background(
                     Group {
