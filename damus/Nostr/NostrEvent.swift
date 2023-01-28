@@ -27,7 +27,7 @@ struct KeyEvent {
     let relay_url: String
 }
 
-struct ReferencedId: Identifiable, Hashable {
+struct ReferencedId: Identifiable, Hashable, Equatable {
     let ref_id: String
     let relay_id: String?
     let key: String

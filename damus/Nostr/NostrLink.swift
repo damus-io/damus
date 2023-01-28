@@ -8,7 +8,7 @@
 import Foundation
 
 
-enum NostrLink {
+enum NostrLink: Equatable {
     case ref(ReferencedId)
     case filter(NostrFilter)
 }
@@ -101,6 +101,24 @@ func decode_universal_link(_ s: String) -> NostrLink? {
     return nil
 }
 
+func decode_nostr_bech32_uri(_ s: String) -> NostrLink? {
+    guard let obj = Bech32Object.parse(s) else {
+        return nil
+    }
+    
+    switch obj {
+    case .nsec(let privkey):
+        guard let pubkey = privkey_to_pubkey(privkey: privkey) else {
+            return nil
+        }
+        return .ref(ReferencedId(ref_id: pubkey, relay_id: nil, key: "p"))
+    case .npub(let pubkey):
+        return .ref(ReferencedId(ref_id: pubkey, relay_id: nil, key: "p"))
+    case .note(let id):
+        return .ref(ReferencedId(ref_id: id, relay_id: nil, key: "e"))
+    }
+}
+
 func decode_nostr_uri(_ s: String) -> NostrLink? {
     if s.starts(with: "https://damus.io/") {
         return decode_universal_link(s)
@@ -122,5 +140,15 @@ func decode_nostr_uri(_ s: String) -> NostrLink? {
         return .filter(NostrFilter.filter_hashtag([parts[1].lowercased()]))
     }
     
-    return tag_to_refid(parts).map { .ref($0) }
+    if let rid = tag_to_refid(parts) {
+        return .ref(rid)
+    }
+    
+    guard parts.count == 1 else {
+        return nil
+    }
+    
+    let part = parts[0]
+    
+    return decode_nostr_bech32_uri(part)
 }

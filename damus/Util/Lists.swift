@@ -24,7 +24,7 @@ func create_or_update_list_event(keypair: FullKeypair, mprev: NostrEvent?, to_ad
         }
     }
     
-    var tags = [["d", list_name], [list_type, to_add]]
+    let tags = [["d", list_name], [list_type, to_add]]
     let ev = NostrEvent(content: "", pubkey: pubkey, kind: 30000, tags: tags)
     
     ev.tags = tags
