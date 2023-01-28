@@ -1,3 +1,28 @@
+## [1.0.0-12] - 2023-01-28
+
+### Added
+
+- Added arabic and portugese translations (William Casarin)
+- Add QRCode view for sharing your pubkey (ericholguin)
+- Added nostr: uri handling (William Casarin)
+
+### Changed
+
+- Remove markdown link support from posts (Joel Klabo)
+
+
+### Fixed
+
+- Fixed crash on some SVG profile pictures (OlegAba)
+- Localization fixes
+- Don't allow blocking yourself (Terry)
+- Hide muted users from global (William Casarin)
+- Fixed profiles sometimes not loading from other clients (William Casarin)
+- Fixed bug where `spam` was always the report type (William Casarin)
+
+
+
+[1.0.0-12]: https://github.com/damus-io/damus/releases/tag/v1.0.0-12
 
 ## [1.0.0-11] - 2023-01-25
 
