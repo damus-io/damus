@@ -11,11 +11,11 @@ import Kingfisher
 
 var BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
-    "wss://nostr-relay.wlvs.space",
+    "wss://eden.nostr.land",
     "wss://nostr.fmt.wiz.biz",
     "wss://relay.nostr.bg",
     "wss://nostr.oxtr.dev",
-    "wss://nostr.v0l.io",
+    "wss://relay.snort.social",
     "wss://brb.io",
 ]
 
@@ -26,10 +26,12 @@ struct TimestampedProfile {
 
 enum Sheets: Identifiable {
     case post
+    case report(ReportTarget)
     case reply(NostrEvent)
 
     var id: String {
         switch self {
+        case .report: return "report"
         case .post: return "post"
         case .reply(let ev): return "reply-" + ev.id
         }
@@ -79,6 +81,10 @@ struct ContentView: View {
     @State var profile_open: Bool = false
     @State var thread_open: Bool = false
     @State var search_open: Bool = false
+    @State var blocking: String? = nil
+    @State var confirm_block: Bool = false
+    @State var user_blocked_confirm: Bool = false
+    @State var confirm_overwrite_mutelist: Bool = false
     @State var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
@@ -181,7 +187,7 @@ struct ContentView: View {
                     .frame(width:30,height:30)
                     .shadow(color: Color("DamusPurple"), radius: 2)
                 case .dms:
-                    Text("DM", comment: "Toolbar label for DM view, which is the English abbreviation for Direct Message.")
+                    Text("DMs", comment: "Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.")
                         .bold()
                 case .notifications:
                     Text("Notifications", comment: "Toolbar label for Notifications view.")
@@ -223,6 +229,20 @@ struct ContentView: View {
                 let profile_model = ProfileModel(pubkey: pk, damus: damus_state!)
                 let followers = FollowersModel(damus_state: damus_state!, target: pk)
                 ProfileView(damus_state: damus_state!, profile: profile_model, followers: followers)
+            } else {
+                EmptyView()
+            }
+        }
+    }
+    
+    func MaybeReportView(target: ReportTarget) -> some View {
+        Group {
+            if let ds = damus_state {
+                if let sec = ds.keypair.privkey {
+                    ReportView(pool: ds.pool, target: target, privkey: sec)
+                } else {
+                    EmptyView()
+                }
             } else {
                 EmptyView()
             }
@@ -279,6 +299,8 @@ struct ContentView: View {
         }
         .sheet(item: $active_sheet) { item in
             switch item {
+            case .report(let target):
+                MaybeReportView(target: target)
             case .post:
                 PostView(replying_to: nil, references: [], damus_state: damus_state!)
             case .reply(let event):
@@ -325,6 +347,15 @@ struct ContentView: View {
             self.active_sheet = .reply(ev)
         }
         .onReceive(handle_notify(.like)) { like in
+        }
+        .onReceive(handle_notify(.report)) { notif in
+            let target = notif.object as! ReportTarget
+            self.active_sheet = .report(target)
+        }
+        .onReceive(handle_notify(.block)) { notif in
+            let pubkey = notif.object as! String
+            self.blocking = pubkey
+            self.confirm_block = true
         }
         .onReceive(handle_notify(.broadcast_event)) { obj in
             let ev = obj.object as! NostrEvent
@@ -400,6 +431,90 @@ struct ContentView: View {
         .onReceive(timer) { n in
             self.damus_state?.pool.connect_to_disconnected()
         }
+        .onReceive(handle_notify(.new_mutes)) { notif in
+            home.filter_muted()
+        }
+        .alert(NSLocalizedString("User blocked", comment: "Alert message to indicate "), isPresented: $user_blocked_confirm, actions: {
+            Button(NSLocalizedString("Thanks!", comment: "Button to close out of alert that informs that the action to block a user was successful.")) {
+                user_blocked_confirm = false
+            }
+        }, message: {
+            if let pubkey = self.blocking {
+                let profile = damus_state!.profiles.lookup(id: pubkey)
+                let name = Profile.displayName(profile: profile, pubkey: pubkey)
+                Text("\(name) has been blocked", comment: "Alert message that informs a user was blocked.")
+            } else {
+                Text("User has been blocked", comment: "Alert message that informs a user was blocked.")
+            }
+        })
+        .alert(NSLocalizedString("Create new mutelist", comment: "Title of alert prompting the user to create a new mutelist."), isPresented: $confirm_overwrite_mutelist, actions: {
+            Button(NSLocalizedString("Cancel", comment: "Button to cancel out of alert that creates a new mutelist.")) {
+                confirm_overwrite_mutelist = false
+                confirm_block = false
+            }
+
+            Button(NSLocalizedString("Yes, Overwrite", comment: "Text of button that confirms to overwrite the existing mutelist.")) {
+                guard let ds = damus_state else {
+                    return
+                }
+                
+                guard let keypair = ds.keypair.to_full() else {
+                    return
+                }
+                
+                guard let pubkey = blocking else {
+                    return
+                }
+                
+                guard let mutelist = create_or_update_mutelist(keypair: keypair, mprev: nil, to_add: pubkey) else {
+                    return
+                }
+                
+                damus_state?.contacts.set_mutelist(mutelist)
+                ds.pool.send(.event(mutelist))
+
+                confirm_overwrite_mutelist = false
+                confirm_block = false
+                user_blocked_confirm = true
+            }
+        }, message: {
+            Text("No block list found, create a new one? This will overwrite any previous block lists.", comment: "Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists.")
+        })
+        .alert(NSLocalizedString("Block User", comment: "Title of alert for blocking a user."), isPresented: $confirm_block, actions: {
+            Button(NSLocalizedString("Cancel", comment: "Alert button to cancel out of alert for blocking a user."), role: .cancel) {
+                confirm_block = false
+            }
+            Button(NSLocalizedString("Block", comment: "Alert button to block a user."), role: .destructive) {
+                guard let ds = damus_state else {
+                    return
+                }
+
+                if ds.contacts.mutelist == nil {
+                    confirm_overwrite_mutelist = true
+                } else {
+                    guard let keypair = ds.keypair.to_full() else {
+                        return
+                    }
+                    guard let pubkey = blocking else {
+                        return
+                    }
+
+                    guard let ev = create_or_update_mutelist(keypair: keypair, mprev: ds.contacts.mutelist, to_add: pubkey) else {
+                        return
+                    }
+                    damus_state?.contacts.set_mutelist(ev)
+                    ds.pool.send(.event(ev))
+                }
+            }
+        }, message: {
+            if let pubkey = blocking {
+                let profile = damus_state?.profiles.lookup(id: pubkey)
+                let name = Profile.displayName(profile: profile, pubkey: pubkey)
+                Text("Block \(name)?", comment: "Alert message prompt to ask if a user should be blocked.")
+            } else {
+                Text("Could not find user to block...", comment: "Alert message to indicate that the blocked user could not be found.")
+            }
+        })
     }
     
     func switch_timeline(_ timeline: Timeline) {

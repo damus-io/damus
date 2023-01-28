@@ -9,13 +9,13 @@ import SwiftUI
 import LinkPresentation
 
 struct NoteArtifacts {
-    let content: String
+    let content: AttributedString
     let images: [URL]
     let invoices: [Invoice]
     let links: [URL]
     
     static func just_content(_ content: String) -> NoteArtifacts {
-        NoteArtifacts(content: content, images: [], invoices: [], links: [])
+        NoteArtifacts(content: AttributedString(stringLiteral: content), images: [], invoices: [], links: [])
     }
 }
 
@@ -24,19 +24,18 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
     var invoices: [Invoice] = []
     var img_urls: [URL] = []
     var link_urls: [URL] = []
-    let txt = blocks.reduce("") { str, block in
+    let txt: AttributedString = blocks.reduce("") { str, block in
         switch block {
         case .mention(let m):
             return str + mention_str(m, profiles: profiles)
         case .text(let txt):
-            return str + txt
+            return str + AttributedString(stringLiteral: txt)
         case .hashtag(let htag):
             return str + hashtag_str(htag)
         case .invoice(let invoice):
             invoices.append(invoice)
             return str
         case .url(let url):
-            
             // Handle Image URLs
             if is_image_url(url) {
                 // Append Image
@@ -44,7 +43,7 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
                 return str
             } else {
                 link_urls.append(url)
-                return str + url.absoluteString
+                return str + url_str(url)
             }
         }
     }
@@ -72,7 +71,7 @@ struct NoteContentView: View {
     
     func MainContent() -> some View {
         return VStack(alignment: .leading) {
-            Text(Markdown.parse(content: artifacts.content))
+            Text(artifacts.content)
                 .font(eventviewsize_to_font(size))
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -163,20 +162,36 @@ struct NoteContentView: View {
     }
 }
 
-func hashtag_str(_ htag: String) -> String {
-    return "[#\(htag)](nostr:t:\(htag))"
-}
+func hashtag_str(_ htag: String) -> AttributedString {
+     var attributedString = AttributedString(stringLiteral: "#\(htag)")
+     attributedString.link = URL(string: "nostr:t:\(htag)")
+     attributedString.foregroundColor = .purple
+     return attributedString
+ }
 
-func mention_str(_ m: Mention, profiles: Profiles) -> String {
+func url_str(_ url: URL) -> AttributedString {
+    var attributedString = AttributedString(stringLiteral: url.absoluteString)
+    attributedString.link = url
+    attributedString.foregroundColor = .purple
+    return attributedString
+ }
+
+func mention_str(_ m: Mention, profiles: Profiles) -> AttributedString {
     switch m.type {
     case .pubkey:
         let pk = m.ref.ref_id
         let profile = profiles.lookup(id: pk)
         let disp = Profile.displayName(profile: profile, pubkey: pk)
-        return "[@\(disp)](nostr:\(encode_pubkey_uri(m.ref)))"
+        var attributedString = AttributedString(stringLiteral: "@\(disp)")
+        attributedString.link = URL(string: "nostr:\(encode_pubkey_uri(m.ref))")
+        attributedString.foregroundColor = .purple
+        return attributedString
     case .event:
         let bevid = bech32_note_id(m.ref.ref_id) ?? m.ref.ref_id
-        return "[@\(abbrev_pubkey(bevid))](nostr:\(encode_event_id_uri(m.ref)))"
+        var attributedString = AttributedString(stringLiteral: "@\(abbrev_pubkey(bevid))")
+        attributedString.link = URL(string: "nostr:\(encode_event_id_uri(m.ref))")
+        attributedString.foregroundColor = .purple
+        return attributedString
     }
 }
 
@@ -185,7 +200,7 @@ struct NoteContentView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
         let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
-        let artifacts = NoteArtifacts(content: content, images: [], invoices: [], links: [])
+        let artifacts = NoteArtifacts(content: AttributedString(stringLiteral: content), images: [], invoices: [], links: [])
         NoteContentView(privkey: "", event: NostrEvent(content: content, pubkey: "pk"), profiles: state.profiles, previews: PreviewCache(), show_images: true, artifacts: artifacts, size: .normal)
     }
 }

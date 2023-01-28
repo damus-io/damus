@@ -11,9 +11,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%d other note</string>
+			<string>%d autre note</string>
 			<key>other</key>
-			<string>%d other notes</string>
+			<string>%d autres notes</string>
 		</dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>··· %#@NOTES@ ···</string>
@@ -69,7 +69,7 @@
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Répondre à %@%#@OTHERS@</string>
+		<string>Réponse à %@%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -77,9 +77,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>&amp; %d other</string>
+			<string>&amp; %d autre</string>
 			<key>other</key>
-			<string>&amp; %d others</string>
+			<string>&amp; %d autres</string>
 			<key>zero</key>
 			<string></string>
 		</dict>
@@ -95,9 +95,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>&amp; %d other</string>
+			<string>&amp; %d autre</string>
 			<key>other</key>
-			<string>&amp; %d others</string>
+			<string>&amp; %d autres</string>
 			<key>zero</key>
 			<string></string>
 		</dict>

@@ -1,0 +1,9 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Damus";
+
+/* Bundle name */
+"CFBundleName" = "damus";
+
+/* Privacy - Photo Library Additions Usage Description */
+"NSPhotoLibraryAddUsageDescription" = "Piešķir Damus piekļuvi saviem fotoattēliem, lai varat saglabāt attēlus.";
+

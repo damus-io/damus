@@ -114,6 +114,7 @@ struct ProfileView: View {
     @State var showing_select_wallet: Bool = false
     @State var is_zoomed: Bool = false
     @State var show_share_sheet: Bool = false
+    @State var action_sheet_presented: Bool = false
     @StateObject var user_settings = UserSettingsStore()
     
     @Environment(\.dismiss) var dismiss
@@ -147,9 +148,7 @@ struct ProfileView: View {
             }
         }) {
             Image(systemName: "bolt.circle")
-                .symbolRenderingMode(.palette)
-                .foregroundStyle(colorScheme == .dark ? .white : .black, colorScheme == .dark ? .white : .black)
-                .font(.system(size: 32).weight(.thin))
+                .profile_button_style(scheme: colorScheme)
                 .contextMenu {
                     Button {
                         UIPasteboard.general.string = profile.lnurl ?? ""
@@ -168,15 +167,21 @@ struct ProfileView: View {
 
     static let markdown = Markdown()
     
+    var ActionSheetButton: some View {
+        Button(action: {
+            action_sheet_presented = true
+        }) {
+            Image(systemName: "ellipsis.circle")
+                .profile_button_style(scheme: colorScheme)
+        }
+    }
+    
     var ShareButton: some View {
         Button(action: {
             show_share_sheet = true
         }) {
-            Image(systemName: "square.and.arrow.up.circle.fill")
-                .symbolRenderingMode(.palette)
-                .font(.system(size: 32))
-                .padding()
-                .foregroundStyle(.white, .black, .black.opacity(0.8))
+            Image(systemName: "square.and.arrow.up.circle")
+                .profile_button_style(scheme: colorScheme)
         }
     }
     
@@ -186,23 +191,47 @@ struct ProfileView: View {
             .environmentObject(dm_model)
         return NavigationLink(destination: dmview) {
             Image(systemName: "bubble.left.circle")
-                .symbolRenderingMode(.palette)
-                .font(.system(size: 32).weight(.thin))
-                .foregroundStyle(colorScheme == .dark ? .white : .black, colorScheme == .dark ? .white : .black)
+                .profile_button_style(scheme: colorScheme)
         }
+    }
+
+    private func getScrollOffset(_ geometry: GeometryProxy) -> CGFloat {
+        geometry.frame(in: .global).minY
+    }
+
+    private func getHeightForHeaderImage(_ geometry: GeometryProxy) -> CGFloat {
+        let offset = getScrollOffset(geometry)
+        let imageHeight = 150.0
+
+        if offset > 0 {
+            return imageHeight + offset
+        }
+
+        return imageHeight
+    }
+
+    private func getOffsetForHeaderImage(_ geometry: GeometryProxy) -> CGFloat {
+        let offset = getScrollOffset(geometry)
+
+        // Image was pulled down
+        if offset > 0 {
+            return -offset
+        }
+
+        return 0
     }
     
     var TopSection: some View {
         ZStack(alignment: .top) {
-            GeometryReader { geo in
+            GeometryReader { geometry in
                 BannerImageView(pubkey: profile.pubkey, profiles: damus_state.profiles)
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: geo.size.width, height: BANNER_HEIGHT)
+                    .frame(width: geometry.size.width, height: self.getHeightForHeaderImage(geometry))
                     .clipped()
-                
-                ShareButton
-                    .offset(x: geo.size.width - 80.0, y: 50.0 )
+                    .offset(x: 0, y: self.getOffsetForHeaderImage(geometry))
+
             }.frame(height: BANNER_HEIGHT)
+            
             VStack(alignment: .leading, spacing: 8.0) {
                 let data = damus_state.profiles.lookup(id: profile.pubkey)
                 let pfp_size: CGFloat = 90.0
@@ -219,6 +248,7 @@ struct ProfileView: View {
                     Spacer()
                     
                     Group {
+                        ActionSheetButton
                         
                         if let profile = data {
                             if let lnurl = profile.lnurl, lnurl != "" {
@@ -344,6 +374,23 @@ struct ProfileView: View {
                 }
             }
         }
+        .confirmationDialog(NSLocalizedString("Actions", comment: "Title for confirmation dialog to either share, report, or block a profile."), isPresented: $action_sheet_presented) {
+            Button(NSLocalizedString("Share", comment: "Button to share the link to a profile.")) {
+                show_share_sheet = true
+            }
+
+            // Only allow reporting if logged in with private key and the currently viewed profile is not the logged in profile.
+            if profile.pubkey != damus_state.pubkey && damus_state.is_privkey_user {
+                Button(NSLocalizedString("Report", comment: "Button to report a profile."), role: .destructive) {
+                    let target: ReportTarget = .user(profile.pubkey)
+                    notify(.report, target)
+                }
+
+                Button(NSLocalizedString("Block", comment: "Button to block a profile."), role: .destructive) {
+                    notify(.block, profile.pubkey)
+                }
+            }
+        }
         .ignoresSafeArea()
     }
 }
@@ -442,5 +489,13 @@ struct KeyView: View {
                 }
             }
         }
+    }
+}
+
+extension View {
+    func profile_button_style(scheme: ColorScheme) -> some View {
+        self.symbolRenderingMode(.palette)
+            .font(.system(size: 32).weight(.thin))
+            .foregroundStyle(scheme == .dark ? .white : .black, scheme == .dark ? .white : .black)
     }
 }

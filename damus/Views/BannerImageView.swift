@@ -18,7 +18,7 @@ struct InnerBannerImageView: View {
         self.imageModel = KFImageModel(
             url: url,
             fallbackUrl: nil,
-            maxByteSize: 5000000,
+            maxByteSize: 20_971_520, // 20 MiB
             downsampleSize: CGSize(width: 750, height: 250)
         )
     }

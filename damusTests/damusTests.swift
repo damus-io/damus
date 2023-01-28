@@ -79,6 +79,15 @@ class damusTests: XCTestCase {
         XCTAssertEqual(parsed[1].is_url?.absoluteString, "HTTPS://jb55.COM")
     }
     
+    func testBech32Url()  {
+        let parsed = decode_nostr_uri("nostr:npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s")
+        
+        let hexpk = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
+        let expected: NostrLink = .ref(ReferencedId(ref_id: hexpk, relay_id: nil, key: "p"))
+        
+        XCTAssertEqual(parsed, expected)
+    }
+    
     func testParseUrl() {
         let parsed = parse_mentions(content: "a https://jb55.com b", tags: [])
 

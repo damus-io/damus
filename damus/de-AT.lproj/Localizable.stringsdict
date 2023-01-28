@@ -113,9 +113,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Mal geteilt</string>
+			<string>geteilter Beitrag</string>
 			<key>other</key>
-			<string>Mal geteilt</string>
+			<string>geteilte Beiträge</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>

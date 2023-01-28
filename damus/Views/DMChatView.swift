@@ -19,7 +19,7 @@ struct DMChatView: View {
                 VStack(alignment: .leading) {
                     ForEach(Array(zip(dms.events, dms.events.indices)), id: \.0.id) { (ev, ind) in
                         DMView(event: dms.events[ind], damus_state: damus_state)
-                            .event_context_menu(ev, pubkey: ev.pubkey, privkey: damus_state.keypair.privkey)
+                            .event_context_menu(ev, keypair: damus_state.keypair)
                     }
                     EndBlock(height: 80)
                 }
@@ -149,7 +149,7 @@ struct DMChatView: View {
             .opacity(((dms.events.count == 0) ? 1.0 : 0.0))
             .foregroundColor(.gray)
         }
-        .navigationTitle(NSLocalizedString("DM", comment: "Navigation title for DM view, which is the English abbreviation for Direct Message."))
+        .navigationTitle(NSLocalizedString("DMs", comment: "Navigation title for DMs view, where DM is the English abbreviation for Direct Message."))
         .toolbar { Header }
     }
 }

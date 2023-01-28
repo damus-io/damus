@@ -46,7 +46,7 @@ struct InnerProfilePicView: View {
         self.imageModel = KFImageModel(
             url: url,
             fallbackUrl: fallbackUrl,
-            maxByteSize: 1000000,
+            maxByteSize: 5_242_880, // 5Mib
             downsampleSize: CGSize(width: 200, height: 200)
         )
     }

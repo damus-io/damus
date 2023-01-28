@@ -49,7 +49,7 @@ struct DirectMessagesView: View {
     func MaybeEvent(_ tup: (String, DirectMessageModel)) -> some View {
         Group {
             if let ev = tup.1.events.last {
-                EventView(damus: damus_state, event: ev, pubkey: tup.0, show_friend_icon: true)
+                EventView(damus: damus_state, event: ev, pubkey: tup.0)
                     .onTapGesture {
                         pubkey = tup.0
                         active_model = tup.1
@@ -63,11 +63,11 @@ struct DirectMessagesView: View {
     
     var body: some View {
         VStack {
-            Picker(NSLocalizedString("DM Type", comment: "DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet."), selection: $dm_type) {
-                Text("DMs")
+            Picker(NSLocalizedString("DM Type", comment: "DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet. DM is the English abbreviation for Direct Message."), selection: $dm_type) {
+                Text("DMs", comment: "Picker option for DM selector for seeing only DMs that have been responded to. DM is the English abbreviation for Direct Message.")
                     .tag(DMType.friend)
                 
-                Text("Requests")
+                Text("Requests", comment: "Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message.")
                     .tag(DMType.rando)
                 
             }
@@ -84,7 +84,7 @@ struct DirectMessagesView: View {
         }
         .padding(.horizontal)
         .padding(.top)
-        .navigationTitle(NSLocalizedString("Encrypted DMs", comment: "Navigation title for view of encrypted DMs, where DM is an English abbreviation for Direct Message."))
+        .navigationTitle(NSLocalizedString("DMs", comment: "Navigation title for view of DMs, where DM is an English abbreviation for Direct Message."))
     }
 }
 
