@@ -3,8 +3,8 @@ git:
   - filter_type: file
     file_format: XLIFF
     source_language: en_US
-    source_file: damus Localizations/en-US.xcloc/Localized Contents/en-US.xliff
-    translation_files_expression: damus Localizations/<lang>.xcloc/Localized Contents/<lang>.xliff
+    source_file: translations/en-US.xcloc/Localized Contents/en-US.xliff
+    translation_files_expression: translations/<lang>.xliff
 
 settings:
   pr_branch_name: transifex/<br_unique_id>
