@@ -9,18 +9,19 @@ import SwiftUI
 
 struct EventMenuContext: View {
     let event: NostrEvent
-    let keypair: Keypair
+    let privkey: String?
+    let pubkey: String
     
     var body: some View {
     
         Button {
-            UIPasteboard.general.string = event.get_content(keypair.privkey)
+            UIPasteboard.general.string = event.get_content(privkey)
         } label: {
             Label(NSLocalizedString("Copy Text", comment: "Context menu option for copying the text from an note."), systemImage: "doc.on.doc")
         }
 
         Button {
-            UIPasteboard.general.string = keypair.pubkey_bech32
+            UIPasteboard.general.string = bech32_pubkey(event.pubkey)
         } label: {
             Label(NSLocalizedString("Copy User Pubkey", comment: "Context menu option for copying the ID of the user who created the note."), systemImage: "person")
         }
@@ -44,7 +45,7 @@ struct EventMenuContext: View {
         }
 
         // Only allow reporting if logged in with private key and the currently viewed profile is not the logged in profile.
-        if keypair.pubkey != event.pubkey && keypair.privkey != nil {
+        if pubkey != event.pubkey && privkey != nil {
             Button(role: .destructive) {
                 let target: ReportTarget = .note(ReportNoteTarget(pubkey: event.pubkey, note_id: event.id))
                 notify(.report, target)

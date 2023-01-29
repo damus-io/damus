@@ -22,7 +22,7 @@ struct DamusState {
     var pubkey: String {
         return keypair.pubkey
     }
-
+    
     var is_privkey_user: Bool {
         keypair.privkey != nil
     }
