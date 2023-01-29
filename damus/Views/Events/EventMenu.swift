@@ -20,7 +20,7 @@ struct EventMenuContext: View {
         }
 
         Button {
-            UIPasteboard.general.string = keypair.pubkey_bech32
+            UIPasteboard.general.string = bech32_pubkey(event.pubkey)
         } label: {
             Label(NSLocalizedString("Copy User Pubkey", comment: "Context menu option for copying the ID of the user who created the note."), systemImage: "person")
         }
