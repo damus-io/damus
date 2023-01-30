@@ -42,9 +42,9 @@ struct MutedEventView: View {
                 .foregroundColor(FillColor)
             
             HStack {
-                Text("Post from a user you've blocked")
+                Text("Post from a user you've blocked", comment: "Text to indicate that what is being shown is a post from a user who has been blocked.")
                 Spacer()
-                Button(shown ? "Hide" : "Show") {
+                Button(shown ? NSLocalizedString("Hide", comment: "Button to hide a post from a user who has been blocked.") : NSLocalizedString("Show", comment: "Button to show a post from a user who has been blocked.")) {
                     shown.toggle()
                 }
             }

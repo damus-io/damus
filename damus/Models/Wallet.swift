@@ -53,7 +53,7 @@ enum Wallet: String, CaseIterable, Identifiable {
             return .init(index: 3, tag: "bluewallet", displayName: NSLocalizedString("Blue Wallet", comment: "Dropdown option label for Lightning wallet, Blue Wallet."), link: "bluewallet:lightning:",
                          appStoreLink: "https://apps.apple.com/us/app/bluewallet-bitcoin-wallet/id1376878040", image: "bluewallet")
         case .walletofsatoshi:
-            return .init(index: 4, tag: "walletofsatoshi", displayName: NSLocalizedString("Wallet Of Satoshi", comment: "Dropdown option label for Lightning wallet, Wallet Of Satoshi."), link:  "walletofsatoshi:lightning:",
+            return .init(index: 4, tag: "walletofsatoshi", displayName: NSLocalizedString("Wallet of Satoshi", comment: "Dropdown option label for Lightning wallet, Wallet of Satoshi."), link:  "walletofsatoshi:lightning:",
                          appStoreLink: "https://apps.apple.com/us/app/wallet-of-satoshi/id1438599608", image: "walletofsatoshi")
         case .zebedee:
             return .init(index: 5, tag: "zebedee", displayName: NSLocalizedString("Zebedee", comment: "Dropdown option label for Lightning wallet, Zebedee."), link: "zebedee:lightning:",
