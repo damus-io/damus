@@ -27,9 +27,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Follower</string>
+			<string>Gefolgte:r</string>
 			<key>other</key>
-			<string>Follower</string>
+			<string>Gefolgte</string>
 		</dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@FOLLOWERS@</string>
@@ -77,9 +77,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>&amp; %d andere</string>
+			<string> &amp; %d andere</string>
 			<key>other</key>
-			<string>&amp; %d andere</string>
+			<string> &amp; %d andere</string>
 			<key>zero</key>
 			<string></string>
 		</dict>
@@ -95,9 +95,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>&amp; %d andere</string>
+			<string> &amp; %d andere</string>
 			<key>other</key>
-			<string>&amp; %d andere</string>
+			<string> &amp; %d andere</string>
 			<key>zero</key>
 			<string></string>
 		</dict>
@@ -113,9 +113,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Mal geteilt</string>
+			<string>geteilter Beitrag</string>
 			<key>other</key>
-			<string>Mal geteilt</string>
+			<string>geteilte Beiträge</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
