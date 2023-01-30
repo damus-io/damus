@@ -5,7 +5,7 @@
 "'%@' at '%@' will be used for verification" = "'%@' bei '%@' wird zur Verifizierung benutzt werden.";
 
 /* Description of why the nip05 identifier is invalid. */
-"'%@' is an invalid nip05 identifier. It should look like an email." = "'%@' ist eine ungültige nip05 Kennzeichnung. Diese sollte wie eine Emailadresse aussehen. ";
+"'%@' is an invalid nip05 identifier. It should look like an email." = "'%@' ist eine ungültige nip05 Kennung. Diese sollte wie eine Emailadresse aussehen. ";
 
 /* Navigation bar title for view that shows who is following a user. */
 "(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "(Profile.displayName(profile: profile, pubkey: whos)) Gefolgte";
@@ -28,10 +28,10 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 "%@ has been blocked" = "%@ wurde blockiert";
 
 /* Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. Ein Konto zu erstellen benötigt keine Telefonnummer, Emailadresse oder Namen. Fang jetzt gleich ganz reibungslos an.";
+"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. Du brauchst für ein Konto keine Telefonnummer, Emailadresse oder Namen. Fang ganz reibungslos einfach an.";
 
 /* Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. End-zu-End verschlüsselter privater Nachrichtenaustausch. Halte Tech-Riesen aus deinen PNs heraus";
+"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. Ende-zu-Ende verschlüsselter privater Nachrichtenaustausch. Halte Big Tech aus deinen PNs heraus";
 
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Belohne Beiträge deiner Freunde und sammle Sats mit Bitcoin⚡️, der eigenen Währung des Internets.";
@@ -75,7 +75,7 @@ Number of profiles a user is following. */
 "Add Relay" = "Relay hinzufügen";
 
 /* Any amount of sats */
-"Any" = "beliebig";
+"Any" = "Beliebig";
 
 /* Alert message to ask if user wants to repost a post. */
 "Are you sure you want to repost this?" = "Bist du sicher dass Du den Beitrag auf deinem Profil teilen möchtest?";
@@ -84,7 +84,7 @@ Number of profiles a user is following. */
 "Banner Image" = "Bannerbild";
 
 /* Reminder to user that they should save their account information. */
-"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "Bevor wir anfangen, musst du deine Kontodaten sichern, sonst kannst du dich in Zukunft nicht mehr anmelden, wenn du Damus jemals deinstallierst.";
+"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "Bevor wir anfangen, musst du deine Kontodaten sichern, sonst kannst du dich in Zukunft nicht mehr anmelden, wenn du Damus einmal deinstallierst.";
 
 /* Dropdown option label for Lightning wallet, Bitcoin Beach. */
 "Bitcoin Beach" = "Bitcoin Beach";
@@ -272,7 +272,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Home" = "Heim";
 
 /* Placeholder example text for profile picture URL. */
-"https://example.com/pic.jpg" = "https://beispiel.at/bild.jpg";
+"https://example.com/pic.jpg" = "https://example.com/pic.jpg";
 
 /* Placeholder example text for website URL for user profile. */
 "https://jb55.com" = "https://jb55.com";
@@ -284,7 +284,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Invalid key" = "Ungültiger Schlüssel";
 
 /* Button for user to report that the account or content has spam. */
-"It's spam" = "Es ist Spam";
+"It's spam" = "Das ist Spam";
 
 /* Placeholder example text for identifier used for NIP-05 verification. */
 "jb55@jb55.com" = "jb55@jb55.com";
@@ -314,10 +314,10 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Alert for logging out the user.
    Button for logging out the user.
    Button to logout the user. */
-"Logout" = "Abmelden";
+"Logout" = "Ausloggen";
 
 /* Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out. */
-"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "Stelle sicher dass dein nsec Kontoschlüssel gesichert ist bevor du dich abmeldest oder du wirst den Zugang zu diesem Konto verlieren";
+"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "Sorge dafür dass dein nsec Kontoschlüssel vor dem Abmelden gesichert ist, oder du wirst den Zugang zu diesem Konto verlieren";
 
 /* Dropdown option label for Lightning wallet, Muun. */
 "Muun" = "Muun";
@@ -326,7 +326,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "NIP-05 Verification" = "NIP-05-Verifizierung";
 
 /* Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists. */
-"No block list found, create a new one? This will overwrite any previous block lists." = "Es wurde keine Blockier-Liste gefunden, soll eine neue erzeugt werden? Dies wird eine frühere Blockier-Liste überschreiben.";
+"No block list found, create a new one? This will overwrite any previous block lists." = "Es wurde keine Blockier-Liste gefunden, soll eine neue erzeugt werden? Dies überschreibt eventuelle frühere Blockier-Listen.";
 
 /* No search results. */
 "none" = "keine";
@@ -481,7 +481,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Select default wallet" = "Wähle ein voreingestelltes Wallet";
 
 /* Text prompt for user to send a message to the other user. */
-"Send a message to start the conversation..." = "Sende eine Nachricht um die Unterhaltung zu beginnen...";
+"Send a message to start the conversation..." = "Sende eine Nachricht um eine Unterhaltung zu beginnen...";
 
 /* Navigation title for Settings view.
    Sidebar menu label for accessing the app settings */
@@ -507,13 +507,13 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Thanks!" = "Danke!";
 
 /* Button for user to report that the account is impersonating someone. */
-"They are impersonating someone" = "Sie gibt sich für jemand anderen aus";
+"They are impersonating someone" = "Die geben sich für jemand anderen aus";
 
 /* Warning that the inputted account key is a public key and the result of what happens because of it. */
-"This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Dies ist ein öffentlicher Schlüssel, Du wirst keine Beiträge teilen oder oder auf irgendeine Weise interagieren können. Dies wird genutzt um Kontos aus deren Perspektive zu sehen.";
+"This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Dies ist ein öffentlicher Schlüssel, Du wirst keine Beiträge teilen oder oder auf irgendeine Weise interagieren können. Dies wird genutzt um andere Kontos aus deren Perspektive zu sehen.";
 
 /* Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key. */
-"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Dies ist ein veralteter nostr-Schlüssel. Wir sind und unsicher ob es ein öffentlicher Schlüssel oder ein privater Schlüssel ist. Bitte betätige die untenstehende Schaltfläche wenn es ein öffentlicher Schlüssel ist.";
+"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Dies ist ein nostr-Schlüsse im veralteten Format. Wir sind nicht sicher ob es ein öffentlicher Schlüssel oder ein privater Schlüssel ist. Bitte betätige die untenstehende Schaltfläche wenn es ein öffentlicher Schlüssel ist.";
 
 /* Label to describe that a public key is the user's account ID and what they can do with it. */
 "This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "Dies ist deine Konto-ID, die du an deine Freunde weitergeben kannst, damit sie dir folgen können. Zum Kopieren anklicken.";
@@ -535,7 +535,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Unfollow" = "Entfolgen";
 
 /* Text to indicate that the button next to it is in  a state that indicates that it is in the process of unfollowing a profile. */
-"Unfollowing" = "Entfolgen...";
+"Unfollowing" = "Entfolge...";
 
 /* Label to indicate that the user is in the process of unfollowing another user. */
 "Unfollowing..." = "Entfolgen...";
@@ -566,7 +566,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Website" = "Website";
 
 /* Welcoming message to the reader. The variable is 'you', the reader. */
-"Welcome to the social network %@ control." = "Willkommen in dem sozialen Netzwerk das %@ kontrollierst.";
+"Welcome to the social network %@ control." = "Willkommen in dem sozialen Netzwerk das %@ kontrolliert.";
 
 /* Text to welcome user. */
 "Welcome, %@!" = "Willkommen, %@!";
@@ -575,7 +575,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "What do you want to report?" = "Was möchtest du melden?";
 
 /* Placeholder example for relay server address. */
-"wss://some.relay.com" = "wss://ein.relay.at";
+"wss://some.relay.com" = "wss://some.relay.com";
 
 /* Text of button that confirms to overwrite the existing mutelist. */
 "Yes, Overwrite" = "Ja, überschreiben";
