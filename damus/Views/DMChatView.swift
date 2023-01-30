@@ -63,6 +63,8 @@ struct DMChatView: View {
             )
             .padding(16)
             .foregroundColor(Color.primary)
+            .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     @Environment(\.colorScheme) var colorScheme
@@ -97,22 +99,15 @@ struct DMChatView: View {
                     }
                 }
             }
-        }
-        .frame(height: 50 + 20 * CGFloat(text_lines))
-    }
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
 
-    var text_lines: Int {
-        var lines = 1
-        for c in message {
-            if lines > 4 {
-                return lines
-            }
-            if c.isNewline {
-                lines += 1
-            }
+            Text(message).opacity(0).padding(.all, 8)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
         }
-
-        return lines
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
     }
 
     func send_message() {
@@ -142,12 +137,13 @@ struct DMChatView: View {
 
                 Footer
             }
+
             Text("Send a message to start the conversation...", comment: "Text prompt for user to send a message to the other user.")
-            .lineLimit(nil)
-            .multilineTextAlignment(.center)
-            .padding(.horizontal, 40)
-            .opacity(((dms.events.count == 0) ? 1.0 : 0.0))
-            .foregroundColor(.gray)
+                .lineLimit(nil)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+                .opacity(((dms.events.count == 0) ? 1.0 : 0.0))
+                .foregroundColor(.gray)
         }
         .navigationTitle(NSLocalizedString("DMs", comment: "Navigation title for DMs view, where DM is the English abbreviation for Direct Message."))
         .toolbar { Header }
