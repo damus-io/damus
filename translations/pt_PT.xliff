@@ -1189,26 +1189,31 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       <trans-unit id="reactions_count" translate="no" xml:space="preserve">
         <source>reactions_count</source>
         <target>contagem_reações</target>
+        
         <note>Part of a larger sentence to describe how many reactions there are on a post. (Key in .stringsdict)</note>
       </trans-unit>
       <trans-unit id="relays_count" translate="no" xml:space="preserve">
         <source>relays_count</source>
         <target>contagem_relays</target>
+        
         <note>Part of a larger sentence to describe how many relay servers a user is connected. (Key in .stringsdict)</note>
       </trans-unit>
       <trans-unit id="replying_to_one_and_others" translate="no" xml:space="preserve">
         <source>replying_to_one_and_others</source>
         <target>respondendo_a_um_e_outros</target>
+        
         <note>Label to indicate that the user is replying to 1 user and others. (Key in .stringsdict)</note>
       </trans-unit>
       <trans-unit id="replying_to_two_and_others" translate="no" xml:space="preserve">
         <source>replying_to_two_and_others</source>
         <target>respondendo_a_dois_e_outros</target>
+        
         <note>Label to indicate that the user is replying to 2 users and others. (Key in .stringsdict)</note>
       </trans-unit>
       <trans-unit id="reposts_count" translate="no" xml:space="preserve">
         <source>reposts_count</source>
         <target>contagem_reposts</target>
+        
         <note>Part of a larger sentence to describe how many reposts there are. (Key in .stringsdict)</note>
       </trans-unit>
       <trans-unit id="satoshi" xml:space="preserve">
@@ -1220,11 +1225,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       <trans-unit id="sats_count" translate="no" xml:space="preserve">
         <source>sats_count</source>
         <target>contagem_sats</target>
+        
         <note>Amount of sats. (Key in .stringsdict)</note>
       </trans-unit>
       <trans-unit id="tips_count" translate="no" xml:space="preserve">
         <source>tips_count</source>
         <target>contagem_grojetas</target>
+        
         <note>Part of a larger sentence to describe how many tip payments there are on a post. (Key in .stringsdict)</note>
       </trans-unit>
       <trans-unit id="u{00A0}" xml:space="preserve">
@@ -1327,6 +1334,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       <trans-unit id="/replying_to_one_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>Replying to %@%#@OTHERS@</source>
         <target>Respondendo a %@%#@OUTROS@</target>
+        
         <note>Label to indicate that the user is replying to 1 user and others.</note>
       </trans-unit>
       <trans-unit id="/replying_to_one_and_others:dict/OTHERS:dict/one:dict/:string" xml:space="preserve">
@@ -1348,6 +1356,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       <trans-unit id="/replying_to_two_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>Replying to %@, %@%#@OTHERS@</source>
         <target>Respondendo a %@, %@%#@OUTROS@</target>
+        
         <note>Label to indicate that the user is replying to 2 users and others.</note>
       </trans-unit>
       <trans-unit id="/replying_to_two_and_others:dict/OTHERS:dict/one:dict/:string" xml:space="preserve">
@@ -1405,16 +1414,19 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       <trans-unit id="/tips_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@TIPS@</source>
         <target>%#@GROJETAS@</target>
+        
         <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
       </trans-unit>
       <trans-unit id="/tips_count:dict/TIPS:dict/one:dict/:string" xml:space="preserve">
         <source>Tip</source>
         <target>Grojeta</target>
+        
         <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
       </trans-unit>
       <trans-unit id="/tips_count:dict/TIPS:dict/other:dict/:string" xml:space="preserve">
         <source>Tips</source>
         <target>Gorjetas</target>
+        
         <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
       </trans-unit>
     </body>
