@@ -91,9 +91,9 @@ Number of profiles a user is following.</note>
         
         <note>Description of how the nip05 identifier would be used for verification.</note>
       </trans-unit>
-      <trans-unit id="'%@' is an invalid nip05 identifier. It should look like an email." xml:space="preserve">
-        <source>'%@' is an invalid nip05 identifier. It should look like an email.</source>
-        <target>'@' est un identifiant nip05 invalide. Cela devrait ressembler à une adresse e-mail.</target>
+      <trans-unit id="'%@' is an invalid NIP-05 identifier. It should look like an email." xml:space="preserve">
+        <source>'%@' is an invalid NIP-05 identifier. It should look like an email.</source>
+        <target>'%@' n'est pas un identifiant NIP-05 valide. Il doit avoir le format d'une adresse courriel.</target>
         
         <note>Description of why the nip05 identifier is invalid.</note>
       </trans-unit>
@@ -178,7 +178,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Any" xml:space="preserve">
         <source>Any</source>
-        <target>N'importe Lequel</target>
+        <target>Montant au choix</target>
         
         <note>Any amount of sats</note>
       </trans-unit>
@@ -354,7 +354,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Copy Report ID" xml:space="preserve">
         <source>Copy Report ID</source>
-        <target>Copier l'ID de rapport</target>
+        <target>Copier l'ID du signalement</target>
         
         <note>Button to copy report ID.</note>
       </trans-unit>
@@ -553,6 +553,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Navigation link to go to profile.</note>
       </trans-unit>
+      <trans-unit id="Hide" xml:space="preserve">
+        <source>Hide</source>
+        <target>Cacher</target>
+        
+        <note>Button to hide a post from a user who has been blocked.</note>
+      </trans-unit>
       <trans-unit id="Home" xml:space="preserve">
         <source>Home</source>
         <target>Accueil</target>
@@ -694,6 +700,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Button to post a note.</note>
       </trans-unit>
+      <trans-unit id="Post from a user you've blocked" xml:space="preserve">
+        <source>Post from a user you've blocked</source>
+        <target>Publication d'un utilisateur que vous avez bloqué</target>
+        
+        <note>Text to indicate that what is being shown is a post from a user who has been blocked.</note>
+      </trans-unit>
       <trans-unit id="Posts" xml:space="preserve">
         <source>Posts</source>
         <target>Publications</target>
@@ -816,20 +828,20 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Report" xml:space="preserve">
         <source>Report</source>
-        <target>Rapporter</target>
+        <target>Signaler</target>
         
         <note>Button to report a profile.
    Context menu option for reporting content.</note>
       </trans-unit>
       <trans-unit id="Report ID:" xml:space="preserve">
         <source>Report ID:</source>
-        <target>ID de rapport:</target>
+        <target>ID de signalement:</target>
         
         <note>Label indicating that the text underneath is the identifier of the report that was sent to relay servers.</note>
       </trans-unit>
       <trans-unit id="Report sent!" xml:space="preserve">
         <source>Report sent!</source>
-        <target>Rapport envoyé!</target>
+        <target>Signalement envoyé!</target>
         
         <note>Message indicating that a report was successfully sent to relay servers.</note>
       </trans-unit>
@@ -948,7 +960,8 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Show</source>
         <target>Afficher</target>
         
-        <note>Toggle to show or hide user's secret account login key.</note>
+        <note>Button to show a post from a user who has been blocked.
+   Toggle to show or hide user's secret account login key.</note>
       </trans-unit>
       <trans-unit id="Show wallet selector" xml:space="preserve">
         <source>Show wallet selector</source>
@@ -1066,17 +1079,17 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Sidebar menu label for Wallet view.</note>
       </trans-unit>
-      <trans-unit id="Wallet Of Satoshi" xml:space="preserve">
-        <source>Wallet Of Satoshi</source>
-        <target>Wallet Of Satoshi</target>
-        
-        <note>Dropdown option label for Lightning wallet, Wallet Of Satoshi.</note>
-      </trans-unit>
       <trans-unit id="Wallet Selector" xml:space="preserve">
         <source>Wallet Selector</source>
         <target>Sélecteur de portefeuille</target>
         
         <note>Section title for selection of wallet.</note>
+      </trans-unit>
+      <trans-unit id="Wallet of Satoshi" xml:space="preserve">
+        <source>Wallet of Satoshi</source>
+        <target>Wallet of Satoshi</target>
+        
+        <note>Dropdown option label for Lightning wallet, Wallet of Satoshi.</note>
       </trans-unit>
       <trans-unit id="Website" xml:space="preserve">
         <source>Website</source>
@@ -1098,7 +1111,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="What do you want to report?" xml:space="preserve">
         <source>What do you want to report?</source>
-        <target>Que voulez-vous rapporter?</target>
+        <target>Que voulez-vous signaler?</target>
         
         <note>Header text to prompt user what issue they want to report.</note>
       </trans-unit>
@@ -1116,7 +1129,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Your report will be sent to the relays you are connected to" xml:space="preserve">
         <source>Your report will be sent to the relays you are connected to</source>
-        <target>Votre rapport sera envoyé aux relais auxquels vous êtes connectés</target>
+        <target>Votre signalement sera envoyé aux relais auxquels vous êtes connectés</target>
         
         <note>Footer text to inform user what will happen when the report is submitted.</note>
       </trans-unit>
