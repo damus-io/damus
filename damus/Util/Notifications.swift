@@ -95,6 +95,9 @@ extension Notification.Name {
     static var new_unmutes: Notification.Name {
         return Notification.Name("new_unmutes")
     }
+    static var deleted_account: Notification.Name {
+        return Notification.Name("deleted_account")
+    }
 }
 
 func handle_notify(_ name: Notification.Name) -> NotificationCenter.Publisher {

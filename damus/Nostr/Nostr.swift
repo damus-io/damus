@@ -24,24 +24,37 @@ struct Profile: Codable {
     }
     
     private func str(_ str: String) -> String? {
-        guard let val = self.value[str] else{
+        return get_val(str)
+    }
+    
+    private func get_val<T>(_ v: String) -> T? {
+        guard let val = self.value[v] else{
             return nil
         }
         
-        guard let s = val.value as? String else {
+        guard let s = val.value as? T else {
             return nil
         }
         
         return s
     }
     
-    private mutating func set_str(_ key: String, _ val: String?) {
+    private mutating func set_val<T>(_ key: String, _ val: T?) {
         if val == nil {
             self.value.removeValue(forKey: key)
             return
         }
         
         self.value[key] = AnyCodable.init(val)
+    }
+    
+    private mutating func set_str(_ key: String, _ val: String?) {
+        set_val(key, val)
+    }
+    
+    var deleted: Bool? {
+        get { return get_val("deleted"); }
+        set(s) { set_val("deleted", s) }
     }
     
     var display_name: String? {
@@ -107,6 +120,10 @@ struct Profile: Codable {
     
     var lightning_uri: URL? {
         return make_ln_url(self.lnurl)
+    }
+    
+    init() {
+        self.value = [:]
     }
     
     init(from decoder: Decoder) throws {

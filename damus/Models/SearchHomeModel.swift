@@ -129,7 +129,7 @@ func load_profiles(profiles_subid: String, relay_id: String, events: [NostrEvent
             }
             
             if ev.known_kind == .metadata {
-                process_metadata_event(profiles: damus_state.profiles, ev: ev)
+                process_metadata_event(our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
             }
             
         }

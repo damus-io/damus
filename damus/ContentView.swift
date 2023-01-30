@@ -73,6 +73,7 @@ struct ContentView: View {
     @State var damus_state: DamusState? = nil
     @State var selected_timeline: Timeline? = .home
     @State var is_thread_open: Bool = false
+    @State var is_deleted_account: Bool = false
     @State var is_profile_open: Bool = false
     @State var event: NostrEvent? = nil
     @State var active_profile: String? = nil
@@ -348,6 +349,9 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.like)) { like in
         }
+        .onReceive(handle_notify(.deleted_account)) { notif in
+            self.is_deleted_account = true
+        }
         .onReceive(handle_notify(.report)) { notif in
             let target = notif.object as! ReportTarget
             self.active_sheet = .report(target)
@@ -434,7 +438,13 @@ struct ContentView: View {
         .onReceive(handle_notify(.new_mutes)) { notif in
             home.filter_muted()
         }
-        .alert(NSLocalizedString("User blocked", comment: "Alert message to indicate "), isPresented: $user_blocked_confirm, actions: {
+        .alert(NSLocalizedString("Deleted Account", comment: "Alert message to indicate this is a deleted account"), isPresented: $is_deleted_account) {
+            Button(NSLocalizedString("Logout", comment: "Button to close the alert that informs that the current account has been deleted.")) {
+                is_deleted_account = false
+                notify(.logout, ())
+            }
+        }
+        .alert(NSLocalizedString("User blocked", comment: "Alert message to indicate the user has been blocked"), isPresented: $user_blocked_confirm, actions: {
             Button(NSLocalizedString("Thanks!", comment: "Button to close out of alert that informs that the action to block a user was successful.")) {
                 user_blocked_confirm = false
             }

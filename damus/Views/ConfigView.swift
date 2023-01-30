@@ -13,12 +13,14 @@ struct ConfigView: View {
     @Environment(\.dismiss) var dismiss
     @State var show_add_relay: Bool = false
     @State var confirm_logout: Bool = false
+    @State var confirm_delete_account: Bool = false
     @State var new_relay: String = ""
     @State var show_privkey: Bool = false
     @State var privkey: String
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
     @State var relays: [RelayDescriptor]
+    @State var delete_text: String = ""
     @EnvironmentObject var user_settings: UserSettingsStore
     
     let generator = UIImpactFeedbackGenerator(style: .light)
@@ -128,16 +130,41 @@ struct ConfigView: View {
                         KingfisherManager.shared.cache.cleanExpiredDiskCache()
                     }
                 }
-
+                
                 Section(NSLocalizedString("Reset", comment: "Section title for resetting the user")) {
                     Button(NSLocalizedString("Logout", comment: "Button to logout the user.")) {
                         confirm_logout = true
+                    }
+                    
+                    if state.is_privkey_user {
+                        Button(NSLocalizedString("Delete Account", comment: "Button to delete the user's account."), role: .destructive) {
+                            confirm_delete_account = true
+                        }
                     }
                 }
             }
         }
         .navigationTitle(NSLocalizedString("Settings", comment: "Navigation title for Settings view."))
         .navigationBarTitleDisplayMode(.large)
+        .alert(NSLocalizedString("Delete Account", comment: "Alert for deleting the users account."), isPresented: $confirm_delete_account) {
+            TextField("Type DELETE to delete", text: $delete_text)
+            Button(NSLocalizedString("Cancel", comment: "Cancel deleting the user."), role: .cancel) {
+                confirm_delete_account = false
+            }
+            Button(NSLocalizedString("Delete", comment: "Button for deleting the users account."), role: .destructive) {
+                guard let full_kp = state.keypair.to_full() else {
+                    return
+                }
+                
+                guard delete_text == "DELETE" else {
+                    return
+                }
+                
+                let ev = created_deleted_account_profile(keypair: full_kp)
+                state.pool.send(.event(ev))
+                notify(.logout, ())
+            }
+        }
         .alert(NSLocalizedString("Logout", comment: "Alert for logging out the user."), isPresented: $confirm_logout) {
             Button(NSLocalizedString("Cancel", comment: "Cancel out of logging out the user."), role: .cancel) {
                 confirm_logout = false

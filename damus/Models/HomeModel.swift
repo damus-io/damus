@@ -372,7 +372,7 @@ class HomeModel: ObservableObject {
     }
     
     func handle_metadata_event(_ ev: NostrEvent) {
-        process_metadata_event(profiles: damus_state.profiles, ev: ev)
+        process_metadata_event(our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
     }
 
     func get_last_event_of_kind(relay_id: String, kind: Int) -> NostrEvent? {
@@ -530,8 +530,15 @@ func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
     print("-----")
 }
 
-func process_metadata_event(profiles: Profiles, ev: NostrEvent) {
+func process_metadata_event(our_pubkey: String, profiles: Profiles, ev: NostrEvent) {
     guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
+        return
+    }
+    
+    if our_pubkey == ev.pubkey && (profile.deleted ?? false) {
+        DispatchQueue.main.async {
+            notify(.deleted_account, ())
+        }
         return
     }
 
