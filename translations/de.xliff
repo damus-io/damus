@@ -18,7 +18,7 @@
       </trans-unit>
       <trans-unit id="NSPhotoLibraryAddUsageDescription" xml:space="preserve">
         <source>Granting Damus access to your photos allows you to save images.</source>
-        <target>Damus Zugriff auf deine Fotos zu gewähren erlaubt dir Bilder zu sichern.</target>
+        <target>Zum Speichern von Bildern braucht Damus Zugriff auf deine Fotos</target>
         
         <note>Privacy - Photo Library Additions Usage Description</note>
       </trans-unit>
@@ -56,13 +56,13 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
       </trans-unit>
       <trans-unit id="%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." xml:space="preserve">
         <source>%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction.</source>
-        <target>%@. Ein Konto zu erstellen benötigt keine Telefonnummer, Emailadresse oder Namen. Fang jetzt gleich ganz reibungslos an.</target>
+        <target>%@. Du brauchst für ein Konto keine Telefonnummer, Emailadresse oder Namen. Fang ganz reibungslos einfach an.</target>
         
         <note>Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string.</note>
       </trans-unit>
       <trans-unit id="%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" xml:space="preserve">
         <source>%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs</source>
-        <target>%@. End-zu-End verschlüsselter privater Nachrichtenaustausch. Halte Tech-Riesen aus deinen PNs heraus</target>
+        <target>%@. Ende-zu-Ende verschlüsselter privater Nachrichtenaustausch. Halte Big Tech aus deinen PNs heraus</target>
         
         <note>Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string.</note>
       </trans-unit>
@@ -93,7 +93,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="'%@' is an invalid nip05 identifier. It should look like an email." xml:space="preserve">
         <source>'%@' is an invalid nip05 identifier. It should look like an email.</source>
-        <target>'%@' ist eine ungültige nip05 Kennzeichnung. Diese sollte wie eine Emailadresse aussehen. </target>
+        <target>'%@' ist eine ungültige nip05 Kennung. Diese sollte wie eine Emailadresse aussehen. </target>
         
         <note>Description of why the nip05 identifier is invalid.</note>
       </trans-unit>
@@ -178,7 +178,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Any" xml:space="preserve">
         <source>Any</source>
-        <target>beliebig</target>
+        <target>Beliebig</target>
         
         <note>Any amount of sats</note>
       </trans-unit>
@@ -196,7 +196,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." xml:space="preserve">
         <source>Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus.</source>
-        <target>Bevor wir anfangen, musst du deine Kontodaten sichern, sonst kannst du dich in Zukunft nicht mehr anmelden, wenn du Damus jemals deinstallierst.</target>
+        <target>Bevor wir anfangen, musst du deine Kontodaten sichern, sonst kannst du dich in Zukunft nicht mehr anmelden, wenn du Damus einmal deinstallierst.</target>
         
         <note>Reminder to user that they should save their account information.</note>
       </trans-unit>
@@ -573,7 +573,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="It's spam" xml:space="preserve">
         <source>It's spam</source>
-        <target>Es ist Spam</target>
+        <target>Das ist Spam</target>
         
         <note>Button for user to report that the account or content has spam.</note>
       </trans-unit>
@@ -622,7 +622,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Logout" xml:space="preserve">
         <source>Logout</source>
-        <target>Abmelden</target>
+        <target>Ausloggen</target>
         
         <note>Alert for logging out the user.
    Button for logging out the user.
@@ -630,7 +630,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Make sure your nsec account key is saved before you logout or you will lose access to this account" xml:space="preserve">
         <source>Make sure your nsec account key is saved before you logout or you will lose access to this account</source>
-        <target>Stelle sicher dass dein nsec Kontoschlüssel gesichert ist bevor du dich abmeldest oder du wirst den Zugang zu diesem Konto verlieren</target>
+        <target>Sorge dafür dass dein nsec Kontoschlüssel vor dem Abmelden gesichert ist, oder du wirst den Zugang zu diesem Konto verlieren</target>
         
         <note>Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.</note>
       </trans-unit>
@@ -648,7 +648,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="No block list found, create a new one? This will overwrite any previous block lists." xml:space="preserve">
         <source>No block list found, create a new one? This will overwrite any previous block lists.</source>
-        <target>Es wurde keine Blockier-Liste gefunden, soll eine neue erzeugt werden? Dies wird eine frühere Blockier-Liste überschreiben.</target>
+        <target>Es wurde keine Blockier-Liste gefunden, soll eine neue erzeugt werden? Dies überschreibt eventuelle frühere Blockier-Listen.</target>
         
         <note>Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists.</note>
       </trans-unit>
@@ -926,7 +926,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Send a message to start the conversation..." xml:space="preserve">
         <source>Send a message to start the conversation...</source>
-        <target>Sende eine Nachricht um die Unterhaltung zu beginnen...</target>
+        <target>Sende eine Nachricht um eine Unterhaltung zu beginnen...</target>
         
         <note>Text prompt for user to send a message to the other user.</note>
       </trans-unit>
@@ -976,19 +976,19 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="They are impersonating someone" xml:space="preserve">
         <source>They are impersonating someone</source>
-        <target>Sie gibt sich für jemand anderen aus</target>
+        <target>Die geben sich für jemand anderen aus</target>
         
         <note>Button for user to report that the account is impersonating someone.</note>
       </trans-unit>
       <trans-unit id="This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." xml:space="preserve">
         <source>This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective.</source>
-        <target>Dies ist ein öffentlicher Schlüssel, Du wirst keine Beiträge teilen oder oder auf irgendeine Weise interagieren können. Dies wird genutzt um Kontos aus deren Perspektive zu sehen.</target>
+        <target>Dies ist ein öffentlicher Schlüssel, Du wirst keine Beiträge teilen oder oder auf irgendeine Weise interagieren können. Dies wird genutzt um andere Kontos aus deren Perspektive zu sehen.</target>
         
         <note>Warning that the inputted account key is a public key and the result of what happens because of it.</note>
       </trans-unit>
       <trans-unit id="This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." xml:space="preserve">
         <source>This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key.</source>
-        <target>Dies ist ein veralteter nostr-Schlüssel. Wir sind und unsicher ob es ein öffentlicher Schlüssel oder ein privater Schlüssel ist. Bitte betätige die untenstehende Schaltfläche wenn es ein öffentlicher Schlüssel ist.</target>
+        <target>Dies ist ein nostr-Schlüsse im veralteten Format. Wir sind nicht sicher ob es ein öffentlicher Schlüssel oder ein privater Schlüssel ist. Bitte betätige die untenstehende Schaltfläche wenn es ein öffentlicher Schlüssel ist.</target>
         
         <note>Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key.</note>
       </trans-unit>
@@ -1025,7 +1025,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Unfollowing" xml:space="preserve">
         <source>Unfollowing</source>
-        <target>Entfolgen...</target>
+        <target>Entfolge...</target>
         
         <note>Text to indicate that the button next to it is in  a state that indicates that it is in the process of unfollowing a profile.</note>
       </trans-unit>
@@ -1086,7 +1086,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Welcome to the social network %@ control." xml:space="preserve">
         <source>Welcome to the social network %@ control.</source>
-        <target>Willkommen in dem sozialen Netzwerk das %@ kontrollierst.</target>
+        <target>Willkommen in dem sozialen Netzwerk das %@ kontrolliert.</target>
         
         <note>Welcoming message to the reader. The variable is 'you', the reader.</note>
       </trans-unit>
@@ -1146,7 +1146,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="https://example.com/pic.jpg" xml:space="preserve">
         <source>https://example.com/pic.jpg</source>
-        <target>https://beispiel.at/bild.jpg</target>
+        <target>https://example.com/pic.jpg</target>
         
         <note>Placeholder example text for profile picture URL.</note>
       </trans-unit>
@@ -1242,7 +1242,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="wss://some.relay.com" xml:space="preserve">
         <source>wss://some.relay.com</source>
-        <target>wss://ein.relay.at</target>
+        <target>wss://some.relay.com</target>
         
         <note>Placeholder example for relay server address.</note>
       </trans-unit>
