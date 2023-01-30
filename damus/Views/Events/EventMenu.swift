@@ -9,19 +9,19 @@ import SwiftUI
 
 struct EventMenuContext: View {
     let event: NostrEvent
-    let privkey: String?
-    let pubkey: String
+    let keypair: Keypair
+    let target_pubkey: String
     
     var body: some View {
     
         Button {
-            UIPasteboard.general.string = event.get_content(privkey)
+            UIPasteboard.general.string = event.get_content(keypair.privkey)
         } label: {
             Label(NSLocalizedString("Copy Text", comment: "Context menu option for copying the text from an note."), systemImage: "doc.on.doc")
         }
 
         Button {
-            UIPasteboard.general.string = bech32_pubkey(event.pubkey)
+            UIPasteboard.general.string = bech32_pubkey(target_pubkey)
         } label: {
             Label(NSLocalizedString("Copy User Pubkey", comment: "Context menu option for copying the ID of the user who created the note."), systemImage: "person")
         }
@@ -45,16 +45,16 @@ struct EventMenuContext: View {
         }
 
         // Only allow reporting if logged in with private key and the currently viewed profile is not the logged in profile.
-        if pubkey != event.pubkey && privkey != nil {
+        if keypair.pubkey != target_pubkey && keypair.privkey != nil {
             Button(role: .destructive) {
-                let target: ReportTarget = .note(ReportNoteTarget(pubkey: event.pubkey, note_id: event.id))
+                let target: ReportTarget = .note(ReportNoteTarget(pubkey: target_pubkey, note_id: event.id))
                 notify(.report, target)
             } label: {
                 Label(NSLocalizedString("Report", comment: "Context menu option for reporting content."), systemImage: "exclamationmark.bubble")
             }
 
             Button(role: .destructive) {
-                notify(.block, event.pubkey)
+                notify(.block, target_pubkey)
             } label: {
                 Label(NSLocalizedString("Block", comment: "Context menu option for blocking users."), systemImage: "exclamationmark.octagon")
             }

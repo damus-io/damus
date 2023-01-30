@@ -129,7 +129,7 @@ struct EventView: View {
         .id(event.id)
         .frame(maxWidth: .infinity, minHeight: PFP_SIZE)
         .padding([.bottom], 2)
-        .event_context_menu(event, privkey: damus.keypair.privkey, pubkey: pubkey)
+        .event_context_menu(event, keypair: damus.keypair, target_pubkey: pubkey)
     }
 }
 
@@ -171,9 +171,9 @@ extension View {
         }
     }
     
-    func event_context_menu(_ event: NostrEvent, privkey: String?, pubkey: String) -> some View {
+    func event_context_menu(_ event: NostrEvent, keypair: Keypair, target_pubkey: String) -> some View {
         return self.contextMenu {
-            EventMenuContext(event: event, privkey: privkey, pubkey: pubkey)
+            EventMenuContext(event: event, keypair: keypair, target_pubkey: target_pubkey)
         }
 
     }
