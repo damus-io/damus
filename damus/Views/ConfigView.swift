@@ -11,16 +11,13 @@ import Kingfisher
 struct ConfigView: View {
     let state: DamusState
     @Environment(\.dismiss) var dismiss
-    @State var show_add_relay: Bool = false
     @State var confirm_logout: Bool = false
     @State var confirm_delete_account: Bool = false
-    @State var new_relay: String = ""
     @State var show_privkey: Bool = false
     @State var show_libretranslate_api_key: Bool = false
     @State var privkey: String
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
-    @State var relays: [RelayDescriptor]
     @State var delete_text: String = ""
     @EnvironmentObject var user_settings: UserSettingsStore
     
@@ -29,7 +26,6 @@ struct ConfigView: View {
     init(state: DamusState) {
         self.state = state
         _privkey = State(initialValue: self.state.keypair.privkey_bech32 ?? "")
-        _relays = State(initialValue: state.pool.descriptors)
     }
     
     // TODO: (jb55) could be more general but not gonna worry about it atm
@@ -45,41 +41,9 @@ struct ConfigView: View {
         }
     }
     
-    var recommended: [RelayDescriptor] {
-        let rs: [RelayDescriptor] = []
-        return BOOTSTRAP_RELAYS.reduce(into: rs) { (xs, x) in
-            if let _ = state.pool.get_relay(x) {
-            } else {
-                xs.append(RelayDescriptor(url: URL(string: x)!, info: .rw))
-            }
-        }
-    }
-    
     var body: some View {
         ZStack(alignment: .leading) {
             Form {
-                Section {
-                    List(Array(relays), id: \.url) { relay in
-                        RelayView(state: state, relay: relay.url.absoluteString)
-                    }
-                } header: {
-                    HStack {
-                        Text("Relays", comment: "Header text for relay server list for configuration.")
-                        Spacer()
-                        Button(action: { show_add_relay = true }) {
-                            Image(systemName: "plus")
-                                .foregroundColor(.accentColor)
-                        }
-                    }
-                }
-                
-                if recommended.count > 0 {
-                    Section(NSLocalizedString("Recommended Relays", comment: "Section title for recommend relay servers that could be added as part of configuration")) {
-                        List(recommended, id: \.url) { r in
-                            RecommendedRelayView(damus: state, relay: r.url.absoluteString)
-                        }
-                    }
-                }
                 
                 Section(NSLocalizedString("Public Account ID", comment: "Section title for the user's public account ID.")) {
                     HStack {
@@ -209,50 +173,8 @@ struct ConfigView: View {
         } message: {
                 Text("Make sure your nsec account key is saved before you logout or you will lose access to this account", comment: "Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.")
         }
-        .sheet(isPresented: $show_add_relay) {
-            AddRelayView(show_add_relay: $show_add_relay, relay: $new_relay) { m_relay in
-                guard var relay = m_relay else {
-                    return
-                }
-                
-                if relay.starts(with: "wss://") == false && relay.starts(with: "ws://") == false {
-                    relay = "wss://" + relay
-                }
-                
-                guard let url = URL(string: relay) else {
-                    return
-                }
-                                
-                guard let ev = state.contacts.event else {
-                    return
-                }
-                
-                guard let privkey = state.keypair.privkey else {
-                    return
-                }
-                
-                let info = RelayInfo.rw
-                
-                guard (try? state.pool.add_relay(url, info: info)) != nil else {
-                    return
-                }
-                
-                state.pool.connect(to: [relay])
-                
-                guard let new_ev = add_relay(ev: ev, privkey: privkey, current_relays: state.pool.descriptors, relay: relay, info: info) else {
-                    return
-                }
-                
-                process_contact_event(pool: state.pool, contacts: state.contacts, pubkey: state.pubkey, ev: ev)
-                
-                state.pool.send(.event(new_ev))
-            }
-        }
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
-        }
-        .onReceive(handle_notify(.relays_changed)) { _ in
-            self.relays = state.pool.descriptors
         }
     }
 }

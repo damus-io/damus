@@ -115,6 +115,12 @@ struct SideMenuView: View {
                             .foregroundColor(textColor())
                     }
                     
+                    NavigationLink(destination: RelayConfigView(state: damus_state)) {
+                        Label(NSLocalizedString("Relays", comment: "Sidebar menu label for Relays view."), systemImage: "network")
+                            .font(.title2)
+                            .foregroundColor(textColor())
+                    }
+                    
                     NavigationLink(destination: ConfigView(state: damus_state).environmentObject(user_settings)) {
                         Label(NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), systemImage: "gear")
                             .font(.title2)

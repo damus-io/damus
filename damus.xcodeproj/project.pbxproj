@@ -118,6 +118,7 @@
 		4C99737B28C92A9200E53835 /* ChatroomMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C99737A28C92A9200E53835 /* ChatroomMetadata.swift */; };
 		4CA2EFA0280E37AC0044ACD8 /* TimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA2EF9F280E37AC0044ACD8 /* TimelineView.swift */; };
 		4CAAD8AD298851D000060CEA /* AccountDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CAAD8AC298851D000060CEA /* AccountDeletion.swift */; };
+		4CAAD8B029888AD200060CEA /* RelayConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CAAD8AF29888AD200060CEA /* RelayConfigView.swift */; };
 		4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CACA9D4280C31E100D9BBE8 /* ReplyView.swift */; };
 		4CACA9DC280C38C000D9BBE8 /* Profiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CACA9DB280C38C000D9BBE8 /* Profiles.swift */; };
 		4CB55EF3295E5D59007FD187 /* RecommendedRelayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB55EF2295E5D59007FD187 /* RecommendedRelayView.swift */; };
@@ -175,8 +176,8 @@
 		4CF0ABF029857E9200D66079 /* Bech32Object.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABEF29857E9200D66079 /* Bech32Object.swift */; };
 		4CF0ABF62985CD5500D66079 /* UserSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABF52985CD5500D66079 /* UserSearch.swift */; };
 		4FE60CDD295E1C5E00105A1F /* Wallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE60CDC295E1C5E00105A1F /* Wallet.swift */; };
-		5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FCB2984ACA60072348F /* QRCodeView.swift */; };
 		5C513FBA297F72980072348F /* CustomPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FB9297F72980072348F /* CustomPicker.swift */; };
+		5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FCB2984ACA60072348F /* QRCodeView.swift */; };
 		6439E014296790CF0020672B /* ProfileZoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6439E013296790CF0020672B /* ProfileZoomView.swift */; };
 		647D9A8D2968520300A295DE /* SideMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 647D9A8C2968520300A295DE /* SideMenuView.swift */; };
 		64FBD06F296255C400D9D3B2 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64FBD06E296255C400D9D3B2 /* Theme.swift */; };
@@ -380,6 +381,7 @@
 		4C99737A28C92A9200E53835 /* ChatroomMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatroomMetadata.swift; sourceTree = "<group>"; };
 		4CA2EF9F280E37AC0044ACD8 /* TimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineView.swift; sourceTree = "<group>"; };
 		4CAAD8AC298851D000060CEA /* AccountDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDeletion.swift; sourceTree = "<group>"; };
+		4CAAD8AF29888AD200060CEA /* RelayConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayConfigView.swift; sourceTree = "<group>"; };
 		4CACA9D4280C31E100D9BBE8 /* ReplyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyView.swift; sourceTree = "<group>"; };
 		4CACA9DB280C38C000D9BBE8 /* Profiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profiles.swift; sourceTree = "<group>"; };
 		4CB55EF2295E5D59007FD187 /* RecommendedRelayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendedRelayView.swift; sourceTree = "<group>"; };
@@ -440,8 +442,8 @@
 		4CF0ABEF29857E9200D66079 /* Bech32Object.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32Object.swift; sourceTree = "<group>"; };
 		4CF0ABF52985CD5500D66079 /* UserSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSearch.swift; sourceTree = "<group>"; };
 		4FE60CDC295E1C5E00105A1F /* Wallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wallet.swift; sourceTree = "<group>"; };
-		5C513FCB2984ACA60072348F /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		5C513FB9297F72980072348F /* CustomPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPicker.swift; sourceTree = "<group>"; };
+		5C513FCB2984ACA60072348F /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		6439E013296790CF0020672B /* ProfileZoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileZoomView.swift; sourceTree = "<group>"; };
 		647D9A8C2968520300A295DE /* SideMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuView.swift; sourceTree = "<group>"; };
 		64FBD06E296255C400D9D3B2 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -602,6 +604,7 @@
 		4C75EFA227FA576C0006080F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4CAAD8AE29888A9B00060CEA /* Relays */,
 				4CF0ABF42985CD4200D66079 /* Posting */,
 				4CF0ABDF2981A83000D66079 /* Muting */,
 				4CC7AAEE297F11B300430951 /* Events */,
@@ -636,8 +639,6 @@
 				4C8682862814DE470026224F /* ProfileView.swift */,
 				4C3AC7A42836987600E1F516 /* MainTabView.swift */,
 				4C363A8B28236B92006E126D /* PubkeyView.swift */,
-				4CB55EF2295E5D59007FD187 /* RecommendedRelayView.swift */,
-				4C06670028FC7C5900038D2A /* RelayView.swift */,
 				4C0A3F94280F6C78000448DE /* ReplyQuoteView.swift */,
 				4CACA9D4280C31E100D9BBE8 /* ReplyView.swift */,
 				F7F0BA262978E54D009531F3 /* ParicipantsView.swift */,
@@ -707,6 +708,16 @@
 				4CAAD8AC298851D000060CEA /* AccountDeletion.swift */,
 			);
 			path = Util;
+			sourceTree = "<group>";
+		};
+		4CAAD8AE29888A9B00060CEA /* Relays */ = {
+			isa = PBXGroup;
+			children = (
+				4CB55EF2295E5D59007FD187 /* RecommendedRelayView.swift */,
+				4C06670028FC7C5900038D2A /* RelayView.swift */,
+				4CAAD8AF29888AD200060CEA /* RelayConfigView.swift */,
+			);
+			path = Relays;
 			sourceTree = "<group>";
 		};
 		4CB88387296AF97C00DC99E7 /* ActionBar */ = {
@@ -1139,6 +1150,7 @@
 				4C3EA66528FF5F6800C48A62 /* mem.c in Sources */,
 				4CF0ABE52981EE0C00D66079 /* EULAView.swift in Sources */,
 				4CBCA930297DB57F00EC6B2F /* WebsiteLink.swift in Sources */,
+				4CAAD8B029888AD200060CEA /* RelayConfigView.swift in Sources */,
 				4C3EA64128FF553900C48A62 /* hash_u5.c in Sources */,
 				5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */,
 				4C3EA64F28FF59F200C48A62 /* tal.c in Sources */,
