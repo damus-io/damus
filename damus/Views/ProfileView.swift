@@ -91,6 +91,7 @@ struct EditButton: View {
                     RoundedRectangle(cornerRadius: 24)
                         .stroke(borderColor(), lineWidth: 1)
                 }
+                .minimumScaleFactor(0.5)
         }
     }
     
