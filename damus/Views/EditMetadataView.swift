@@ -196,7 +196,7 @@ struct EditMetadataView: View {
                     if let parts = nip05_parts {
                         Text("'\(parts.username)' at '\(parts.host)' will be used for verification", comment: "Description of how the nip05 identifier would be used for verification.")
                     } else {
-                        Text("'\(nip05)' is an invalid nip05 identifier. It should look like an email.", comment: "Description of why the nip05 identifier is invalid.")
+                        Text("'\(nip05)' is an invalid NIP-05 identifier. It should look like an email.", comment: "Description of why the nip05 identifier is invalid.")
                     }
                 })
 

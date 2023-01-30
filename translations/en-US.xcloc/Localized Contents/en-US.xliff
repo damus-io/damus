@@ -80,9 +80,9 @@ Number of profiles a user is following.</note>
         <target>'%@' at '%@' will be used for verification</target>
         <note>Description of how the nip05 identifier would be used for verification.</note>
       </trans-unit>
-      <trans-unit id="'%@' is an invalid nip05 identifier. It should look like an email." xml:space="preserve">
-        <source>'%@' is an invalid nip05 identifier. It should look like an email.</source>
-        <target>'%@' is an invalid nip05 identifier. It should look like an email.</target>
+      <trans-unit id="'%@' is an invalid NIP-05 identifier. It should look like an email." xml:space="preserve">
+        <source>'%@' is an invalid NIP-05 identifier. It should look like an email.</source>
+        <target>'%@' is an invalid NIP-05 identifier. It should look like an email.</target>
         <note>Description of why the nip05 identifier is invalid.</note>
       </trans-unit>
       <trans-unit id="(Profile.displayName(profile: profile, pubkey: whos))'s Followers" xml:space="preserve">
@@ -467,6 +467,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Goto profile %@</target>
         <note>Navigation link to go to profile.</note>
       </trans-unit>
+      <trans-unit id="Hide" xml:space="preserve">
+        <source>Hide</source>
+        <target>Hide</target>
+        <note>Button to hide a post from a user who has been blocked.</note>
+      </trans-unit>
       <trans-unit id="Home" xml:space="preserve">
         <source>Home</source>
         <target>Home</target>
@@ -584,6 +589,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Post</source>
         <target>Post</target>
         <note>Button to post a note.</note>
+      </trans-unit>
+      <trans-unit id="Post from a user you've blocked" xml:space="preserve">
+        <source>Post from a user you've blocked</source>
+        <target>Post from a user you've blocked</target>
+        <note>Text to indicate that what is being shown is a post from a user who has been blocked.</note>
       </trans-unit>
       <trans-unit id="Posts" xml:space="preserve">
         <source>Posts</source>
@@ -797,7 +807,8 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       <trans-unit id="Show" xml:space="preserve">
         <source>Show</source>
         <target>Show</target>
-        <note>Toggle to show or hide user's secret account login key.</note>
+        <note>Button to show a post from a user who has been blocked.
+   Toggle to show or hide user's secret account login key.</note>
       </trans-unit>
       <trans-unit id="Show wallet selector" xml:space="preserve">
         <source>Show wallet selector</source>
@@ -896,15 +907,15 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Wallet</target>
         <note>Sidebar menu label for Wallet view.</note>
       </trans-unit>
-      <trans-unit id="Wallet Of Satoshi" xml:space="preserve">
-        <source>Wallet Of Satoshi</source>
-        <target>Wallet Of Satoshi</target>
-        <note>Dropdown option label for Lightning wallet, Wallet Of Satoshi.</note>
-      </trans-unit>
       <trans-unit id="Wallet Selector" xml:space="preserve">
         <source>Wallet Selector</source>
         <target>Wallet Selector</target>
         <note>Section title for selection of wallet.</note>
+      </trans-unit>
+      <trans-unit id="Wallet of Satoshi" xml:space="preserve">
+        <source>Wallet of Satoshi</source>
+        <target>Wallet of Satoshi</target>
+        <note>Dropdown option label for Lightning wallet, Wallet of Satoshi.</note>
       </trans-unit>
       <trans-unit id="Website" xml:space="preserve">
         <source>Website</source>
