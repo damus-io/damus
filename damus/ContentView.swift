@@ -12,10 +12,10 @@ import Kingfisher
 var BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
     "wss://eden.nostr.land",
-    "wss://nostr.fmt.wiz.biz",
-    "wss://relay.nostr.bg",
-    "wss://nostr.oxtr.dev",
     "wss://relay.snort.social",
+    "wss://nostr.orangepill.dev",
+    "wss://nos.lol",
+    "wss://relay.current.fyi",
     "wss://brb.io",
 ]
 
