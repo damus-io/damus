@@ -23,19 +23,44 @@ struct QRCodeView: View {
     }
     
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            DamusGradient()
-            Button {
-                presentationMode.wrappedValue.dismiss()
-            } label: {
-                Image(systemName: "xmark")
-                    .foregroundColor(.white)
-                    .font(.subheadline)
-                    .padding(.leading, 20)
+        ZStack(alignment: .center) {
+            
+            ZStack(alignment: .topLeading) {
+                DamusGradient()
+                Button {
+                    presentationMode.wrappedValue.dismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                        .foregroundColor(.white)
+                        .font(.subheadline)
+                        .padding(.leading, 20)
+                }
+                .zIndex(1)
             }
-            .zIndex(1)
         
             VStack(alignment: .center) {
+                let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
+                
+                if (damus_state.profiles.lookup(id: damus_state.pubkey)?.picture) != nil {
+                    ProfilePicView(pubkey: damus_state.pubkey, size: 90.0, highlight: .custom(Color("DamusWhite"), 4.0), profiles: damus_state.profiles)
+                        .padding(.top, 50)
+                } else {
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 60))
+                        .foregroundColor(Color("DamusWhite"))
+                        .padding(.top, 50)
+                }
+                
+                if let display_name = profile?.display_name {
+                    Text(display_name)
+                        .foregroundColor(Color("DamusWhite"))
+                        .font(.system(size: 24, weight: .heavy))
+                }
+                if let name = profile?.name {
+                    Text("@" + name)
+                        .foregroundColor(Color("DamusWhite"))
+                        .font(.body)
+                }
                 
                 Spacer()
                 
@@ -46,15 +71,24 @@ struct QRCodeView: View {
                         .scaledToFit()
                         .frame(width: 200, height: 200)
                         .padding()
-                    
-                    Text(key)
-                        .font(.headline)
-                        .foregroundColor(Color(.white))
-                        .padding()
+                        .cornerRadius(10)
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color("DamusWhite"), lineWidth: 1))
+                        .shadow(radius: 10)
                 }
                 
                 Spacer()
-
+                
+                Text("Follow me on nostr")
+                    .foregroundColor(Color("DamusWhite"))
+                    .font(.system(size: 24, weight: .heavy))
+                    .padding(.top)
+                
+                Text("Scan the code")
+                    .foregroundColor(Color("DamusWhite"))
+                    .font(.system(size: 18, weight: .ultraLight))
+                
+                Spacer()
             }
             
         }
