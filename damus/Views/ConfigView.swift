@@ -130,9 +130,9 @@ struct ConfigView: View {
 
                 if state.is_privkey_user {
                     Section(NSLocalizedString("Delete", comment: "Section title for deleting the user")) {
-                            Button(NSLocalizedString("Delete Account", comment: "Button to delete the user's account."), role: .destructive) {
-                                confirm_delete_account = true
-                            }
+                        Button(NSLocalizedString("Delete Account", comment: "Button to delete the user's account."), role: .destructive) {
+                            confirm_delete_account = true
+                        }
                     }
                 }
             }
