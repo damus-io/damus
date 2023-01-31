@@ -1,3 +1,28 @@
+## [1.0.0-13] - 2023-01-30
+
+### Added
+
+- LibreTranslate note translations (Terry Yiu)
+- Added support for account deletion (William Casarin)
+- User tagging and autocompletion in posts (Swift)
+
+
+### Changed
+
+- Remove redundant logout button from settings (Jonathan Milligan)
+- Moved relay config to its own sidebar entry (William Casarin)
+- New stylized tabs (ericholguin)
+
+
+### Fixed
+
+- Fix hidden profile action sheet when clicking ... (William Casarin)
+- Fixed height of DM input (Terry Yiu)
+- Fixed bug where copying pubkey from context menu only copied your own pubkey (Terry Yiu)
+
+
+
+[1.0.0-13]: https://github.com/damus-io/damus/releases/tag/v1.0.0-13
 ## [1.0.0-12] - 2023-01-28
 
 ### Added
@@ -488,5 +513,6 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
+
 
 
