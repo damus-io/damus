@@ -63,7 +63,6 @@ struct QRCodeView: View {
                 }
                 
                 Spacer()
-
                 
                 if let key = maybe_key {
                     Image(uiImage: generateQRCode(pubkey: "nostr:" + key))
