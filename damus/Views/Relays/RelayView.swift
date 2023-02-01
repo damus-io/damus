@@ -34,11 +34,10 @@ struct RelayView: View {
             Circle()
                 .frame(width: 8.0, height: 8.0)
                 .foregroundColor(conn_color)
-            HStack {
+            NavigationLink {
+                RelayDetailView(relay: relay)
+            } label: {
                 Text(relay)
-                NavigationLink {
-                    RelayDetailView(relay: relay)
-                } label: {}
             }
         }
         .onReceive(timer) { _ in
