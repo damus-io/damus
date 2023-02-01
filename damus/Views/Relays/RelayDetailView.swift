@@ -19,14 +19,14 @@ struct RelayDetailView: View {
             if let nip11 {
                 VStack(alignment: .leading, spacing: 8) {
                     
-                    RelayDetailItemView(label: "Name", detail: nip11.name)
-                    RelayDetailItemView(label: "Relay", detail: relay)
-                    RelayDetailItemView(label: "Description", detail: nip11.description)
-                    RelayDetailItemView(label: "Public Key", detail: nip11.pubkey)
-                    RelayDetailItemView(label: "Contact", detail: nip11.contact)
-                    RelayDetailItemView(label: "Software", detail: nip11.software)
+                    RelayDetailItemView(label: NSLocalizedString("Name", comment: "Label to display relay name."), detail: nip11.name)
+                    RelayDetailItemView(label: NSLocalizedString("Relay", comment: "Label to display relay address."), detail: relay)
+                    RelayDetailItemView(label: NSLocalizedString("Description", comment: "Label to display relay description."), detail: nip11.description)
+                    RelayDetailItemView(label: NSLocalizedString("Public Key", comment: "Label to display relay contact public key."), detail: nip11.pubkey)
+                    RelayDetailItemView(label: NSLocalizedString("Contact", comment: "Label to display relay contact information."), detail: nip11.contact)
+                    RelayDetailItemView(label: NSLocalizedString("Software", comment: "Label to display relay software."), detail: nip11.software)
                     
-                    Text("Supported NIPs")
+                    Text(NSLocalizedString("Supported NIPs", comment: "Label to display relay's supported NIPs."))
                         .font(.subheadline.weight(.bold))
                     
                     WrappingHStack(nip11.supported_nips, id: \.self) { nip in
