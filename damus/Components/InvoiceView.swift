@@ -37,24 +37,35 @@ struct InvoiceView: View {
     @EnvironmentObject var user_settings: UserSettingsStore
     
     var PayButton: some View {
-        Button {
-            if user_settings.show_wallet_selector {
-                showing_select_wallet = true
-            } else {
-                open_with_wallet(wallet: user_settings.default_wallet.model, invoice: invoice.string)
-            }
-        } label: {
-            RoundedRectangle(cornerRadius: 20)
-                .foregroundColor(colorScheme == .light ? .black : .white)
-                .overlay {
-                    Text("Pay", comment: "Button to pay a Lightning invoice.")
-                        .fontWeight(.medium)
-                        .foregroundColor(colorScheme == .light ? .white : .black)
+        HStack{
+            Button {
+                if user_settings.show_wallet_selector {
+                    showing_select_wallet = true
+                } else {
+                    open_with_wallet(wallet: user_settings.default_wallet.model, invoice: invoice.string)
                 }
-        }
-        //.buttonStyle(.bordered)
-        .onTapGesture {
-            // Temporary solution so that the "pay" button can be clicked (Yes we need an empty tap gesture)
+            } label: {
+                RoundedRectangle(cornerRadius: 20, style: .circular)
+                    .foregroundColor(colorScheme == .light ? .black : .white)
+                    .overlay {
+                        Text("Pay", comment: "Button to pay a Lightning invoice.")
+                            .fontWeight(.medium)
+                            .foregroundColor(colorScheme == .light ? .white : .black)
+                    }
+            }
+            .onTapGesture {
+                // Temporary solution so that the "pay" button can be clicked (Yes we need an empty tap gesture)
+            }
+            Button {
+                UIPasteboard.general.string = invoice.string
+            } label: {
+                Image(systemName: "doc.on.clipboard")
+                    .foregroundColor(colorScheme == .light ? .black : .white)
+            }
+            .onTapGesture {
+                // Temporary solution so that the "pay" button can be clicked (Yes we need an empty tap gesture)
+            }
+
         }
     }
     
@@ -90,6 +101,8 @@ let test_invoice = Invoice(description: "this is a description", amount: .specif
 struct InvoiceView_Previews: PreviewProvider {
     static var previews: some View {
         InvoiceView(invoice: test_invoice)
-            .frame(width: 200, height: 200)
+            .frame(width: 300, height: 200)
+        InvoiceView(invoice: test_invoice)
+            .frame(width: 300, height: 200)
     }
 }
