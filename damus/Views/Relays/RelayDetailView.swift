@@ -57,13 +57,8 @@ struct RelayDetailView: View {
                         return
                     }
                     
-                    do {
-                        let decoder = JSONDecoder()
-                        let nip11 = try? decoder.decode(RelayNIP11.self, from: data)
-                        self.nip11 = nip11
-                    } catch {
-                        print(data, response, error)
-                    }
+                    let nip11 = try? JSONDecoder().decode(RelayNIP11.self, from: data)
+                    self.nip11 = nip11
                 }
                 task.resume()
             }
