@@ -11,7 +11,7 @@ import WrappingHStack
 struct RelayDetailView: View {
     let relay: String
     
-    @State private var networkError = false
+    @State private var networkError: String?
     @State private var nip11: RelayNIP11?
 
     var body: some View {
@@ -34,8 +34,8 @@ struct RelayDetailView: View {
                     }
                 }
                 .padding()
-            } else if networkError {
-                Text("error")
+            } else if let networkError {
+                Text(networkError)
                     .foregroundColor(.red)
             } else {
                 ProgressView()
@@ -50,7 +50,7 @@ struct RelayDetailView: View {
                 let task = URLSession.shared.dataTask(with: request) { data, response, error in
                     
                     if error != nil {
-                        networkError = true
+                        networkError = error?.localizedDescription
                     }
                     
                     guard let data else {
