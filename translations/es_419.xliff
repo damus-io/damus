@@ -17,8 +17,8 @@
         <note>Bundle name</note>
       </trans-unit>
       <trans-unit id="NSPhotoLibraryAddUsageDescription" xml:space="preserve">
-        <source>&quot;Granting Damus access to your photo library allows you to save photos.</source>
-        <target>Si le concedes acceso a Damus a tu fototeca, podrás guardar fotos.</target>
+        <source>Granting Damus access to your photos allows you to save images.</source>
+        <target>Si le concedes acceso a Damus a tus fotos, podrás guardar imágenes.</target>
         
         <note>Privacy - Photo Library Additions Usage Description</note>
       </trans-unit>
@@ -45,8 +45,14 @@ Abbreviated version of a nostr public key.</note>
         <source>%@ %@</source>
         <target>%@ %@</target>
         
-        <note>Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
+        <note>Sentence composed of 2 variables to describe how many tip payments there are on a post. In source English, the first variable is the number of tip payments, and the second variable is 'Tip' or 'Tips'.
 Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.</note>
+      </trans-unit>
+      <trans-unit id="%@ has been blocked" xml:space="preserve">
+        <source>%@ has been blocked</source>
+        <target>Se bloqueó a %@</target>
+        
+        <note>Alert message that informs a user was blocked.</note>
       </trans-unit>
       <trans-unit id="%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." xml:space="preserve">
         <source>%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction.</source>
@@ -70,7 +76,7 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
         <source>%lld</source>
         <target>%lld</target>
         
-        <note>Number of reposts.
+        <note>Number of tip payments on a post.
 Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="%lld/%lld" xml:space="preserve">
@@ -81,13 +87,13 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="'%@' at '%@' will be used for verification" xml:space="preserve">
         <source>'%@' at '%@' will be used for verification</source>
-        <target>'%@' en '%@' se usarán con fines de verificación</target>
+        <target>'%@' en '%@' se usará con fines de verificación</target>
         
         <note>Description of how the nip05 identifier would be used for verification.</note>
       </trans-unit>
-      <trans-unit id="'%@' is an invalid nip05 identifier. It should look like an email." xml:space="preserve">
-        <source>'%@' is an invalid nip05 identifier. It should look like an email.</source>
-        <target>'%@' es un identificador nip05 no válido. Debería de tener la apariencia de un correo electrónico.</target>
+      <trans-unit id="'%@' is an invalid NIP-05 identifier. It should look like an email." xml:space="preserve">
+        <source>'%@' is an invalid NIP-05 identifier. It should look like an email.</source>
+        <target>'%@' es un identificador NIP-05 no válido. Debería de tener la apariencia de un correo electrónico.</target>
         
         <note>Description of why the nip05 identifier is invalid.</note>
       </trans-unit>
@@ -115,6 +121,12 @@ Number of profiles a user is following.</note>
         
         <note>Prefix character to username.</note>
       </trans-unit>
+      <trans-unit id="API Key (optional)" xml:space="preserve">
+        <source>API Key (optional)</source>
+        <target>Clave de API (opcional)</target>
+        
+        <note>Example URL to LibreTranslate server</note>
+      </trans-unit>
       <trans-unit id="About" xml:space="preserve">
         <source>About</source>
         <target>Información</target>
@@ -133,11 +145,23 @@ Number of profiles a user is following.</note>
         
         <note>Placeholder text for About Me description.</note>
       </trans-unit>
+      <trans-unit id="Accept" xml:space="preserve">
+        <source>Accept</source>
+        <target>Aceptar</target>
+        
+        <note>Button to accept the end user license agreement before being allowed into the app.</note>
+      </trans-unit>
       <trans-unit id="Account ID" xml:space="preserve">
         <source>Account ID</source>
         <target>Identificador de cuenta</target>
         
         <note>Label to indicate the public ID of the account.</note>
+      </trans-unit>
+      <trans-unit id="Actions" xml:space="preserve">
+        <source>Actions</source>
+        <target>Acciones</target>
+        
+        <note>Title for confirmation dialog to either share, report, or block a profile.</note>
       </trans-unit>
       <trans-unit id="Add" xml:space="preserve">
         <source>Add</source>
@@ -151,6 +175,12 @@ Number of profiles a user is following.</note>
         <target>Agregar relé</target>
         
         <note>Label for section for adding a relay server.</note>
+      </trans-unit>
+      <trans-unit id="Add all" xml:space="preserve">
+        <source>Add all</source>
+        <target>Agregar todo</target>
+        
+        <note>Button label to re-add all original participants as profiles to reply to in a note</note>
       </trans-unit>
       <trans-unit id="Any" xml:space="preserve">
         <source>Any</source>
@@ -194,6 +224,38 @@ Number of profiles a user is following.</note>
         
         <note>Dropdown option label for Lightning wallet, Blixt Wallet</note>
       </trans-unit>
+      <trans-unit id="Block" xml:space="preserve">
+        <source>Block</source>
+        <target>Bloquear</target>
+        
+        <note>Alert button to block a user.
+   Button to block a profile.
+   Context menu option for blocking users.</note>
+      </trans-unit>
+      <trans-unit id="Block %@?" xml:space="preserve">
+        <source>Block %@?</source>
+        <target>¿Bloquear a %@?</target>
+        
+        <note>Alert message prompt to ask if a user should be blocked.</note>
+      </trans-unit>
+      <trans-unit id="Block User" xml:space="preserve">
+        <source>Block User</source>
+        <target>Bloquear usuario</target>
+        
+        <note>Title of alert for blocking a user.</note>
+      </trans-unit>
+      <trans-unit id="Blocked" xml:space="preserve">
+        <source>Blocked</source>
+        <target>Bloqueado</target>
+        
+        <note>Sidebar menu label for Profile view.</note>
+      </trans-unit>
+      <trans-unit id="Blocked Users" xml:space="preserve">
+        <source>Blocked Users</source>
+        <target>Usuarios bloqueados</target>
+        
+        <note>Navigation title of view to see list of blocked users.</note>
+      </trans-unit>
       <trans-unit id="Blue Wallet" xml:space="preserve">
         <source>Blue Wallet</source>
         <target>Blue Wallet</target>
@@ -216,7 +278,9 @@ Number of profiles a user is following.</note>
         <source>Cancel</source>
         <target>Cancelar</target>
         
-        <note>Button to cancel out of posting a note.
+        <note>Alert button to cancel out of alert for blocking a user.
+   Button to cancel out of alert that creates a new mutelist.
+   Button to cancel out of posting a note.
    Button to cancel out of reposting a post.
    Button to cancel out of view adding user inputted relay.
    Cancel out of logging out the user.</note>
@@ -294,15 +358,21 @@ Number of profiles a user is following.</note>
         
         <note>Context menu option for copying the JSON text from the note.</note>
       </trans-unit>
+      <trans-unit id="Copy Report ID" xml:space="preserve">
+        <source>Copy Report ID</source>
+        <target>Copiar identificador de reporte</target>
+        
+        <note>Button to copy report ID.</note>
+      </trans-unit>
       <trans-unit id="Copy Text" xml:space="preserve">
         <source>Copy Text</source>
         <target>Copiar texto</target>
         
         <note>Context menu option for copying the text from an note.</note>
       </trans-unit>
-      <trans-unit id="Copy User ID" xml:space="preserve">
-        <source>Copy User ID</source>
-        <target>Copiar identificador de usuario</target>
+      <trans-unit id="Copy User Pubkey" xml:space="preserve">
+        <source>Copy User Pubkey</source>
+        <target>Copiar clave pública de usuario</target>
         
         <note>Context menu option for copying the ID of the user who created the note.</note>
       </trans-unit>
@@ -311,6 +381,12 @@ Number of profiles a user is following.</note>
         <target>Copiar factura</target>
         
         <note>Title of section for copying a Lightning invoice identifier.</note>
+      </trans-unit>
+      <trans-unit id="Could not find user to block..." xml:space="preserve">
+        <source>Could not find user to block...</source>
+        <target>No se pudo encontrar al usuario para bloquearlo...</target>
+        
+        <note>Alert message to indicate that the blocked user could not be found.</note>
       </trans-unit>
       <trans-unit id="Create" xml:space="preserve">
         <source>Create</source>
@@ -324,17 +400,36 @@ Number of profiles a user is following.</note>
         
         <note>Button to create an account.</note>
       </trans-unit>
+      <trans-unit id="Create new mutelist" xml:space="preserve">
+        <source>Create new mutelist</source>
+        <target>Crear nueva lista de silenciados</target>
+        
+        <note>Title of alert prompting the user to create a new mutelist.</note>
+      </trans-unit>
       <trans-unit id="Creator(s) of Bitcoin. Absolute legend." xml:space="preserve">
         <source>Creator(s) of Bitcoin. Absolute legend.</source>
         <target>Creador(es) de Bitcoin. Toda una leyenda.</target>
         
         <note>Example description about Bitcoin creator(s), Satoshi Nakamoto.</note>
       </trans-unit>
-      <trans-unit id="DM" xml:space="preserve">
-        <source>DM</source>
-        <target>MD</target>
+      <trans-unit id="Custom" xml:space="preserve">
+        <source>Custom</source>
+        <target>Personalizado</target>
         
-        <note>Navigation title for DM view, which is the English abbreviation for Direct Message.</note>
+        <note>Dropdown option for selecting a custom translation server.</note>
+      </trans-unit>
+      <trans-unit id="DM Type" xml:space="preserve">
+        <source>DM Type</source>
+        <target>Tipo de mensaje directo</target>
+        
+        <note>DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet. DM is the English abbreviation for Direct Message.</note>
+      </trans-unit>
+      <trans-unit id="DMs" xml:space="preserve">
+        <source>DMs</source>
+        <target>Mensajes directos</target>
+        
+        <note>Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
+   Navigation title for view of DMs, where DM is an English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="Damus" xml:space="preserve">
         <source>Damus</source>
@@ -352,7 +447,8 @@ Number of profiles a user is following.</note>
         <source>Delete</source>
         <target>Borrar</target>
         
-        <note>Button to delete a relay server that the user connects to.</note>
+        <note>Button to delete a relay server that the user connects to.
+   Button to remove a user from their blocklist.</note>
       </trans-unit>
       <trans-unit id="Dismiss" xml:space="preserve">
         <source>Dismiss</source>
@@ -372,6 +468,12 @@ Number of profiles a user is following.</note>
         
         <note>Button to dismiss wallet selection view for paying Lightning invoice.</note>
       </trans-unit>
+      <trans-unit id="EULA" xml:space="preserve">
+        <source>EULA</source>
+        <target>CLUF</target>
+        
+        <note>Label indicating that the below text is the EULA, an acronym for End User License Agreement.</note>
+      </trans-unit>
       <trans-unit id="Earn Money" xml:space="preserve">
         <source>Earn Money</source>
         <target>Gana dinero</target>
@@ -384,17 +486,17 @@ Number of profiles a user is following.</note>
         
         <note>Button to edit user's profile.</note>
       </trans-unit>
+      <trans-unit id="Edit participants" xml:space="preserve">
+        <source>Edit participants</source>
+        <target>Editar participantes</target>
+        
+        <note>Text indicating that the view is used for editing which participants are replied to in a note.</note>
+      </trans-unit>
       <trans-unit id="Encrypted" xml:space="preserve">
         <source>Encrypted</source>
         <target>Cifrada</target>
         
         <note>Heading indicating that this application keeps private messaging end-to-end encrypted.</note>
-      </trans-unit>
-      <trans-unit id="Encrypted DMs" xml:space="preserve">
-        <source>Encrypted DMs</source>
-        <target>MD cifrados</target>
-        
-        <note>Navigation title for view of encrypted DMs, where DM is an English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="Enter your account key to login:" xml:space="preserve">
         <source>Enter your account key to login:</source>
@@ -463,17 +565,41 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Navigation link to go to profile.</note>
       </trans-unit>
+      <trans-unit id="Hide" xml:space="preserve">
+        <source>Hide</source>
+        <target>Ocultar</target>
+        
+        <note>Button to hide a post from a user who has been blocked.</note>
+      </trans-unit>
+      <trans-unit id="Hide API Key" xml:space="preserve">
+        <source>Hide API Key</source>
+        <target>Ocultar clave de API</target>
+        
+        <note>Button to hide the LibreTranslate server API key.</note>
+      </trans-unit>
       <trans-unit id="Home" xml:space="preserve">
         <source>Home</source>
         <target>Inicio</target>
         
         <note>Navigation bar title for Home view where posts and replies appear from those who the user is following.</note>
       </trans-unit>
+      <trans-unit id="Illegal content" xml:space="preserve">
+        <source>Illegal content</source>
+        <target>Contenido ilegal</target>
+        
+        <note>Button for user to report that the account or content has illegal content.</note>
+      </trans-unit>
       <trans-unit id="Invalid key" xml:space="preserve">
         <source>Invalid key</source>
         <target>Clave inválida</target>
         
         <note>Error message indicating that an invalid account key was entered for login.</note>
+      </trans-unit>
+      <trans-unit id="It's spam" xml:space="preserve">
+        <source>It's spam</source>
+        <target>Es spam</target>
+        
+        <note>Button for user to report that the account or content has spam.</note>
       </trans-unit>
       <trans-unit id="LNLink" xml:space="preserve">
         <source>LNLink</source>
@@ -492,6 +618,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>¡Vamos!</target>
         
         <note>Button to complete account creation and start using the app.</note>
+      </trans-unit>
+      <trans-unit id="LibreTranslate Translations" xml:space="preserve">
+        <source>LibreTranslate Translations</source>
+        <target>Traducciones de LibreTranslate</target>
+        
+        <note>Section title for selecting the server that hosts the LibreTranslate machine translation API.</note>
       </trans-unit>
       <trans-unit id="Lightning Address or LNURL" xml:space="preserve">
         <source>Lightning Address or LNURL</source>
@@ -544,6 +676,18 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Label for NIP-05 Verification section of user profile form.</note>
       </trans-unit>
+      <trans-unit id="No block list found, create a new one? This will overwrite any previous block lists." xml:space="preserve">
+        <source>No block list found, create a new one? This will overwrite any previous block lists.</source>
+        <target>No se encontró una lista de bloqueo. ¿Crear una nueva? Esto sobrescribirá las listas de bloqueo anteriores.</target>
+        
+        <note>Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists.</note>
+      </trans-unit>
+      <trans-unit id="None" xml:space="preserve">
+        <source>None</source>
+        <target>Ninguno</target>
+        
+        <note>Dropdown option for selecting no translation server.</note>
+      </trans-unit>
       <trans-unit id="Nothing to see here. Check back later!" xml:space="preserve">
         <source>Nothing to see here. Check back later!</source>
         <target>Nada para ver aquí. ¡Vuelve a consultar luego!</target>
@@ -555,6 +699,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Notificaciones</target>
         
         <note>Navigation title for notifications.</note>
+      </trans-unit>
+      <trans-unit id="Nudity or explicit content" xml:space="preserve">
+        <source>Nudity or explicit content</source>
+        <target>Desnudos o contenido explícito</target>
+        
+        <note>Button for user to report that the account or content has nudity or explicit content.</note>
       </trans-unit>
       <trans-unit id="Pay" xml:space="preserve">
         <source>Pay</source>
@@ -580,6 +730,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Button to post a note.</note>
       </trans-unit>
+      <trans-unit id="Post from a user you've blocked" xml:space="preserve">
+        <source>Post from a user you've blocked</source>
+        <target>Publicación de un usuario que bloqueaste</target>
+        
+        <note>Text to indicate that what is being shown is a post from a user who has been blocked.</note>
+      </trans-unit>
       <trans-unit id="Posts" xml:space="preserve">
         <source>Posts</source>
         <target>Publicaciones</target>
@@ -601,12 +757,6 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       <trans-unit id="Private Key" xml:space="preserve">
         <source>Private Key</source>
         <target>Clave privada</target>
-        
-        <note>Label to indicate that the text below is the user's private key used by only the user themself as a secret to login to access their account.</note>
-      </trans-unit>
-      <trans-unit id="PrivateKey" xml:space="preserve">
-        <source>PrivateKey</source>
-        <target>ClavePrivada</target>
         
         <note>Title of the secure field that holds the user's private key.</note>
       </trans-unit>
@@ -658,6 +808,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Section title for recommend relay servers that could be added as part of configuration</note>
       </trans-unit>
+      <trans-unit id="Reject" xml:space="preserve">
+        <source>Reject</source>
+        <target>Rechazar</target>
+        
+        <note>Button to reject the end user license agreement, which disallows the user from being let into the app.</note>
+      </trans-unit>
       <trans-unit id="Relay" xml:space="preserve">
         <source>Relay</source>
         <target>Relé</target>
@@ -669,6 +825,18 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Relés</target>
         
         <note>Sidebar menu label for Relay servers view</note>
+      </trans-unit>
+      <trans-unit id="Relays have been notified and clients will be able to use this information to filter content. Thank you!" xml:space="preserve">
+        <source>Relays have been notified and clients will be able to use this information to filter content. Thank you!</source>
+        <target>Se notificó a los relés, por lo que los clientes podrán usar esta información para filtrar contenido. ¡Gracias!</target>
+        
+        <note>Description of what was done as a result of sending a report to relay servers.</note>
+      </trans-unit>
+      <trans-unit id="Remove all" xml:space="preserve">
+        <source>Remove all</source>
+        <target>Eliminar todo</target>
+        
+        <note>Button label to remove all participants from a note reply.</note>
       </trans-unit>
       <trans-unit id="Reply to self" xml:space="preserve">
         <source>Reply to self</source>
@@ -688,6 +856,25 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Indicating that the user is replying to the following listed people.</note>
       </trans-unit>
+      <trans-unit id="Report" xml:space="preserve">
+        <source>Report</source>
+        <target>Reportar</target>
+        
+        <note>Button to report a profile.
+   Context menu option for reporting content.</note>
+      </trans-unit>
+      <trans-unit id="Report ID:" xml:space="preserve">
+        <source>Report ID:</source>
+        <target>Identificador de reporte:</target>
+        
+        <note>Label indicating that the text underneath is the identifier of the report that was sent to relay servers.</note>
+      </trans-unit>
+      <trans-unit id="Report sent!" xml:space="preserve">
+        <source>Report sent!</source>
+        <target>¡Reporte enviado!</target>
+        
+        <note>Message indicating that a report was successfully sent to relay servers.</note>
+      </trans-unit>
       <trans-unit id="Repost" xml:space="preserve">
         <source>Repost</source>
         <target>Republicar</target>
@@ -700,6 +887,18 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Republicada</target>
         
         <note>Text indicating that the post was reposted (i.e. re-shared).</note>
+      </trans-unit>
+      <trans-unit id="Reposts" xml:space="preserve">
+        <source>Reposts</source>
+        <target>Republicaciones</target>
+        
+        <note>Navigation bar title for Reposts view.</note>
+      </trans-unit>
+      <trans-unit id="Requests" xml:space="preserve">
+        <source>Requests</source>
+        <target>Solicitudes</target>
+        
+        <note>Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="Reset" xml:space="preserve">
         <source>Reset</source>
@@ -745,7 +944,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Search..." xml:space="preserve">
         <source>Search...</source>
-        <target>Búsqueda...</target>
+        <target>Buscar...</target>
         
         <note>Placeholder text to prompt entry of search query.</note>
       </trans-unit>
@@ -773,6 +972,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Text prompt for user to send a message to the other user.</note>
       </trans-unit>
+      <trans-unit id="Server" xml:space="preserve">
+        <source>Server</source>
+        <target>Servidor</target>
+        
+        <note>Prompt selection of LibreTranslate server to perform machine translations on notes</note>
+      </trans-unit>
       <trans-unit id="Settings" xml:space="preserve">
         <source>Settings</source>
         <target>Configuración</target>
@@ -784,13 +989,21 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Share</source>
         <target>Compartir</target>
         
-        <note>Button to share an image.</note>
+        <note>Button to share an image.
+   Button to share the link to a profile.</note>
       </trans-unit>
       <trans-unit id="Show" xml:space="preserve">
         <source>Show</source>
         <target>Mostrar</target>
         
-        <note>Toggle to show or hide user's secret account login key.</note>
+        <note>Button to show a post from a user who has been blocked.
+   Toggle to show or hide user's secret account login key.</note>
+      </trans-unit>
+      <trans-unit id="Show API Key" xml:space="preserve">
+        <source>Show API Key</source>
+        <target>Mostrar clave de API</target>
+        
+        <note>Button to hide the LibreTranslate server API key.</note>
       </trans-unit>
       <trans-unit id="Show wallet selector" xml:space="preserve">
         <source>Show wallet selector</source>
@@ -809,6 +1022,18 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Strike</target>
         
         <note>Dropdown option label for Lightning wallet, Strike.</note>
+      </trans-unit>
+      <trans-unit id="Thanks!" xml:space="preserve">
+        <source>Thanks!</source>
+        <target>¡Gracias!</target>
+        
+        <note>Button to close out of alert that informs that the action to block a user was successful.</note>
+      </trans-unit>
+      <trans-unit id="They are impersonating someone" xml:space="preserve">
+        <source>They are impersonating someone</source>
+        <target>Está suplantando a alguien</target>
+        
+        <note>Button for user to report that the account is impersonating someone.</note>
       </trans-unit>
       <trans-unit id="This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." xml:space="preserve">
         <source>This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective.</source>
@@ -830,7 +1055,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" xml:space="preserve">
         <source>This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!</source>
-        <target>Esta es tu clave de cuenta secreta, que necesitas para acceder a tu cuenta. ¡No la compartas con nadie! Guárdala en un administrador de contraseñas y protégela!</target>
+        <target>Esta es tu clave de cuenta secreta, que necesitas para acceder a tu cuenta. ¡No la compartas con nadie! Guárdala en un administrador de contraseñas y protégela.</target>
         
         <note>Label to describe that a private key is the user's secret account key and what they should do with it.</note>
       </trans-unit>
@@ -841,11 +1066,29 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <note>Navigation bar title for note thread.
    Navigation bar title for threaded event detail view.</note>
       </trans-unit>
+      <trans-unit id="Translate Note" xml:space="preserve">
+        <source>Translate Note</source>
+        <target>Traducir nota</target>
+        
+        <note>Button to translate note from different language.</note>
+      </trans-unit>
+      <trans-unit id="Translated from (languageName!)" xml:space="preserve">
+        <source>Translated from (languageName!)</source>
+        <target>Traducida del (languageName!)</target>
+        
+        <note>Button to indicate that the note has been translated from a different language.</note>
+      </trans-unit>
       <trans-unit id="Type your post here..." xml:space="preserve">
         <source>Type your post here...</source>
-        <target>Ingresa tu publicación aquí...</target>
+        <target>Escribe tu publicación aquí...</target>
         
         <note>Text box prompt to ask user to type their post.</note>
+      </trans-unit>
+      <trans-unit id="URL" xml:space="preserve">
+        <source>URL</source>
+        <target>URL</target>
+        
+        <note>Example URL to LibreTranslate server</note>
       </trans-unit>
       <trans-unit id="Unfollow" xml:space="preserve">
         <source>Unfollow</source>
@@ -871,6 +1114,18 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Text to indicate that the button next to it is in a state that will unfollow a profile when tapped.</note>
       </trans-unit>
+      <trans-unit id="User blocked" xml:space="preserve">
+        <source>User blocked</source>
+        <target>Usuario bloqueado</target>
+        
+        <note>Alert message to indicate</note>
+      </trans-unit>
+      <trans-unit id="User has been blocked" xml:space="preserve">
+        <source>User has been blocked</source>
+        <target>Se bloqueó al usuario</target>
+        
+        <note>Alert message that informs a user was blocked.</note>
+      </trans-unit>
       <trans-unit id="Username" xml:space="preserve">
         <source>Username</source>
         <target>Nombre de usuario</target>
@@ -884,17 +1139,17 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Sidebar menu label for Wallet view.</note>
       </trans-unit>
-      <trans-unit id="Wallet Of Satoshi" xml:space="preserve">
-        <source>Wallet Of Satoshi</source>
-        <target>Wallet Of Satoshi</target>
-        
-        <note>Dropdown option label for Lightning wallet, Wallet Of Satoshi.</note>
-      </trans-unit>
       <trans-unit id="Wallet Selector" xml:space="preserve">
         <source>Wallet Selector</source>
         <target>Selección de billetera</target>
         
         <note>Section title for selection of wallet.</note>
+      </trans-unit>
+      <trans-unit id="Wallet of Satoshi" xml:space="preserve">
+        <source>Wallet of Satoshi</source>
+        <target>Wallet of Satoshi</target>
+        
+        <note>Dropdown option label for Lightning wallet, Wallet of Satoshi.</note>
       </trans-unit>
       <trans-unit id="Website" xml:space="preserve">
         <source>Website</source>
@@ -914,11 +1169,29 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Text to welcome user.</note>
       </trans-unit>
+      <trans-unit id="What do you want to report?" xml:space="preserve">
+        <source>What do you want to report?</source>
+        <target>¿Qué quieres reportar?</target>
+        
+        <note>Header text to prompt user what issue they want to report.</note>
+      </trans-unit>
+      <trans-unit id="Yes, Overwrite" xml:space="preserve">
+        <source>Yes, Overwrite</source>
+        <target>Sí, sobrescribir</target>
+        
+        <note>Text of button that confirms to overwrite the existing mutelist.</note>
+      </trans-unit>
       <trans-unit id="Your Name" xml:space="preserve">
         <source>Your Name</source>
         <target>Tu nombre</target>
         
         <note>Label for Your Name section of user profile form.</note>
+      </trans-unit>
+      <trans-unit id="Your report will be sent to the relays you are connected to" xml:space="preserve">
+        <source>Your report will be sent to the relays you are connected to</source>
+        <target>El reporte se enviará a los relés con los que tengas conexión</target>
+        
+        <note>Footer text to inform user what will happen when the report is submitted.</note>
       </trans-unit>
       <trans-unit id="Zebedee" xml:space="preserve">
         <source>Zebedee</source>
@@ -934,13 +1207,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="collapsed_event_view_other_notes" translate="no" xml:space="preserve">
         <source>collapsed_event_view_other_notes</source>
-        <target>evento_colapsado_ver_otras_notas</target>
+        <target>collapsed_event_view_other_notes</target>
         
         <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped. (Key in .stringsdict)</note>
       </trans-unit>
       <trans-unit id="followers_count" translate="no" xml:space="preserve">
         <source>followers_count</source>
-        <target>recuento_de_seguidores</target>
+        <target>followers_count</target>
         
         <note>Part of a larger sentence to describe how many people are following a user. (Key in .stringsdict)</note>
       </trans-unit>
@@ -988,13 +1261,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="reactions_count" translate="no" xml:space="preserve">
         <source>reactions_count</source>
-        <target>recuento_de_reacciones</target>
+        <target>reactions_count</target>
         
         <note>Part of a larger sentence to describe how many reactions there are on a post. (Key in .stringsdict)</note>
       </trans-unit>
       <trans-unit id="relays_count" translate="no" xml:space="preserve">
         <source>relays_count</source>
-        <target>recuento_de_relés</target>
+        <target>relays_count</target>
         
         <note>Part of a larger sentence to describe how many relay servers a user is connected. (Key in .stringsdict)</note>
       </trans-unit>
@@ -1042,7 +1315,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="wss://some.relay.com" xml:space="preserve">
         <source>wss://some.relay.com</source>
-        <target>wss://algún.relé.com</target>
+        <target>wss://algun.rele.com</target>
         
         <note>Placeholder example for relay server address.</note>
       </trans-unit>
