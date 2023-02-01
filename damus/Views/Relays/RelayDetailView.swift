@@ -13,7 +13,7 @@ struct RelayDetailView: View {
     
     @State private var networkError = false
     @State private var nip11: RelayNIP11?
-    
+
     var body: some View {
         Group {
             if let nip11 {
@@ -73,10 +73,14 @@ struct RelayDetailView: View {
 
 struct RelayNIPDetailView: View {
     let nip: Int
+    
+    @Environment(\.openURL) var openURL
+    
     var body: some View {
-        
         Button {
-            print("GO TO NIP")
+            if let url = NIPURLBuilder.url(forNIP: nip) {
+                openURL(url)
+            }
         } label: {
             Text("\(nip)")
                 .font(.body)
