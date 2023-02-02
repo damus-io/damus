@@ -115,6 +115,7 @@ struct ProfilePicView: View {
     var body: some View {
         if !show_img && user_settings.blur_profile_pic {
             InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: size, highlight: highlight)
+                .environmentObject(user_settings)
                 .blur(radius: 7)
                 .overlay{
                     Circle()
