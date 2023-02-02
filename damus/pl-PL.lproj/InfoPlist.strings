@@ -5,5 +5,5 @@
 "CFBundleName" = "damus";
 
 /* Privacy - Photo Library Additions Usage Description */
-"NSPhotoLibraryAddUsageDescription" = "Uprawnienie Damusa by miał dostęp do Twoich zdjęć umożliwia zapisywanie obrazów.";
+"NSPhotoLibraryAddUsageDescription" = "Nadanie Damusowi uprawnień by miał dostęp do Twoich zdjęć umożliwia zapisywanie obrazów.";
 
