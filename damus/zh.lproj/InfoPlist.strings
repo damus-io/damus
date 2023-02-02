@@ -1,0 +1,9 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "大麦子";
+
+/* Bundle name */
+"CFBundleName" = "大麦子";
+
+/* Privacy - Photo Library Additions Usage Description */
+"NSPhotoLibraryAddUsageDescription" = "允许大麦子访问您的相册以便保存图片。";
+

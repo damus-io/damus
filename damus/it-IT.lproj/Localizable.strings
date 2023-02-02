@@ -5,7 +5,7 @@
 "'%@' at '%@' will be used for verification" = "'%@' at '%@' sarà usato per la verifica";
 
 /* Description of why the nip05 identifier is invalid. */
-"'%@' is an invalid nip05 identifier. It should look like an email." = "'%@' non è un identificatore NIP05 valido. Dovrebbe essere simile ad un indirizzo email.";
+"'%@' is an invalid NIP-05 identifier. It should look like an email." = "%@ non è un identificativo NIP-05 valido. Dovrebbe sembrare come un indirizzo email.";
 
 /* Navigation bar title for view that shows who is following a user. */
 "(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "Seguaci di (Profile.displayName(profile: profile, pubkey: whos))'";
@@ -20,9 +20,12 @@
 Abbreviated version of a nostr public key. */
 "%@" = "%@";
 
-/* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
+/* Sentence composed of 2 variables to describe how many tip payments there are on a post. In source English, the first variable is the number of tip payments, and the second variable is 'Tip' or 'Tips'.
 Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
 "%@ %@" = "%@ %@";
+
+/* Alert message that informs a user was blocked. */
+"%@ has been blocked" = "%@ è stato bloccato";
 
 /* Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. Per creare un account non hai bisogno di un numero di telefono, un indirizzo email o del tuo nome. Inizia ora senza impegni.";
@@ -33,7 +36,7 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Paga i tuoi amici e accumula sats con Bitcoin⚡️, la moneta di internet.";
 
-/* Number of reposts.
+/* Number of tip payments on a post.
 Number of profiles a user is following. */
 "%lld" = "%lld";
 
@@ -52,8 +55,14 @@ Number of profiles a user is following. */
 /* Placeholder text for About Me description. */
 "Absolute Boss" = "Capo supremo";
 
+/* Button to accept the end user license agreement before being allowed into the app. */
+"Accept" = "Accetta";
+
 /* Label to indicate the public ID of the account. */
 "Account ID" = "ID dell'account";
+
+/* Title for confirmation dialog to either share, report, or block a profile. */
+"Actions" = "Azioni";
 
 /* Button to add recommended relay server.
    Button to confirm adding user inputted relay. */
@@ -68,8 +77,11 @@ Number of profiles a user is following. */
 /* Any amount of sats */
 "Any" = "Qualsiasi";
 
+/* Example URL to LibreTranslate server */
+"API Key (optional)" = "API Key (facoltativo)";
+
 /* Alert message to ask if user wants to repost a post. */
-"Are you sure you want to repost this?" = "Sei sicuro di voler segnalare questo post?";
+"Are you sure you want to repost this?" = "Sei sicuro di voler condividere questo post?";
 
 /* Label for Banner Image section of user profile form. */
 "Banner Image" = "Immagine banner";
@@ -86,6 +98,23 @@ Number of profiles a user is following. */
 /* Dropdown option label for Lightning wallet, Blixt Wallet */
 "Blixt Wallet" = "Blixt Wallet";
 
+/* Alert button to block a user.
+   Button to block a profile.
+   Context menu option for blocking users. */
+"Block" = "Blocca";
+
+/* Alert message prompt to ask if a user should be blocked. */
+"Block %@?" = "Vuoi bloccare %@?";
+
+/* Title of alert for blocking a user. */
+"Block User" = "Bloccare Utente";
+
+/* Sidebar menu label for Profile view. */
+"Blocked" = "Bloccato";
+
+/* Navigation title of view to see list of blocked users. */
+"Blocked Users" = "Utenti bloccati";
+
 /* Dropdown option label for Lightning wallet, Blue Wallet. */
 "Blue Wallet" = "Blue Wallet";
 
@@ -95,9 +124,12 @@ Number of profiles a user is following. */
 /* Context menu option for broadcasting the user's note to all of the user's connected relay servers. */
 "Broadcast" = "Trasmetti";
 
-/* Button to cancel out of posting a note.
+/* Alert button to cancel out of alert for blocking a user.
+   Button to cancel out of alert that creates a new mutelist.
+   Button to cancel out of posting a note.
    Button to cancel out of reposting a post.
    Button to cancel out of view adding user inputted relay.
+   Cancel deleting the user.
    Cancel out of logging out the user. */
 "Cancel" = "Annulla";
 
@@ -111,7 +143,7 @@ Number of profiles a user is following. */
 "Clear" = "Cancella";
 
 /* Section title for clearing cached data. */
-"Clear Cache" = "Cancella cache";
+"Clear Cache" = "Cancella Cache";
 
 /* Label indicating that a user's key was copied. */
 "Copied" = "Copiato";
@@ -120,17 +152,17 @@ Number of profiles a user is following. */
 "Copy" = "Copia";
 
 /* Context menu option for copying the ID of the account that created the note. */
-"Copy Account ID" = "Copia ID dell'Account";
+"Copy Account ID" = "Copia l'ID dell'Account";
 
 /* Context menu option to copy an image into clipboard.
    Context menu option to copy an image to clipboard. */
 "Copy Image" = "Copia Immagine";
 
 /* Context menu option to copy the URL of an image into clipboard. */
-"Copy Image URL" = "Copia URL dell'Immagine";
+"Copy Image URL" = "Copia l'URL dell'immagine";
 
 /* Title of section for copying a Lightning invoice identifier. */
-"Copy invoice" = "Copia fattura";
+"Copy invoice" = "Copia invoice";
 
 /* Context menu option for copying a user's Lightning URL. */
 "Copy LNURL" = "Copia LNURL";
@@ -141,11 +173,17 @@ Number of profiles a user is following. */
 /* Context menu option for copying the JSON text from the note. */
 "Copy Note JSON" = "Copia JSON della Nota";
 
+/* Button to copy report ID. */
+"Copy Report ID" = "Copia l'ID del Report";
+
 /* Context menu option for copying the text from an note. */
 "Copy Text" = "Copia Testo";
 
 /* Context menu option for copying the ID of the user who created the note. */
-"Copy User ID" = "Copia ID dell'Utente";
+"Copy User Pubkey" = "Copia la chiave pubblica dell'utente";
+
+/* Alert message to indicate that the blocked user could not be found. */
+"Could not find user to block..." = "Non riesco a trovare l'utente da bloccare...";
 
 /* Button to create account. */
 "Create" = "Crea";
@@ -153,17 +191,26 @@ Number of profiles a user is following. */
 /* Button to create an account. */
 "Create Account" = "Crea Account";
 
+/* Title of alert prompting the user to create a new mutelist. */
+"Create new mutelist" = "Crea una nuova lista delle persone mutate";
+
 /* Example description about Bitcoin creator(s), Satoshi Nakamoto. */
-"Creator(s) of Bitcoin. Absolute legend." = "Creatore/i di Bitcoin. Leggenda assoluta";
+"Creator(s) of Bitcoin. Absolute legend." = "Il creatore(i) di Bitcoin. Leggenda assoluta";
+
+/* Dropdown option for selecting a custom translation server. */
+"Custom" = "Custom";
 
 /* Name of the app, shown on the first screen when user is not logged in. */
 "Damus" = "Damus";
 
 /* Button to pay a Lightning invoice with the user's default Lightning wallet. */
-"Default Wallet" = "Portafoglio Principale";
+"Default Wallet" = "Portafoglio Predefinito";
 
-/* Button to delete a relay server that the user connects to. */
-"Delete" = "Cancella";
+/* Button for deleting the users account.
+   Button to delete a relay server that the user connects to.
+   Button to remove a user from their blocklist.
+   Section title for deleting the user */
+"Delete" = "Elimina";
 
 /* Button to dismiss a text field alert. */
 "Dismiss" = "Lascia stare";
@@ -171,15 +218,12 @@ Number of profiles a user is following. */
 /* Label to prompt display name entry. */
 "Display Name" = "Nome visualizzato";
 
-/* DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet. DM is the English abbreviation for Direct Message. */
-"DM Type" = "Tipo DM";
-
 /* Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
    Navigation title for view of DMs, where DM is an English abbreviation for Direct Message. */
 "DMs" = "DM";
 
 /* Button to dismiss wallet selection view for paying Lightning invoice. */
-"Done" = "Finito";
+"Done" = "Fatto";
 
 /* Heading indicating that this application allows users to earn money. */
 "Earn Money" = "Guadagna Soldi";
@@ -199,8 +243,8 @@ Number of profiles a user is following. */
 /* Error message indicating why saving keys failed. */
 "Error: %@" = "Errore: %@";
 
-/* Filter state for seeing either only posts, or posts & replies. */
-"Filter State" = "Filtra";
+/* Label indicating that the below text is the EULA, an acronym for End User License Agreement. */
+"EULA" = "EULA";
 
 /* Button to follow a user. */
 "Follow" = "Segui";
@@ -227,8 +271,14 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Navigation link to go to profile. */
 "Goto profile %@" = "Vai al profilo %@";
 
+/* Button to hide a post from a user who has been blocked. */
+"Hide" = "Nascondi";
+
+/* Button to hide the LibreTranslate server API key. */
+"Hide API Key" = "Nascondi la chiave dell' API";
+
 /* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
-"Home" = "Home";
+"Home" = "Casa";
 
 /* Placeholder example text for profile picture URL. */
 "https://example.com/pic.jpg" = "https://esempio.com/foto.jpg";
@@ -236,8 +286,14 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Placeholder example text for website URL for user profile. */
 "https://jb55.com" = "https://jb55.com";
 
+/* Button for user to report that the account or content has illegal content. */
+"Illegal content" = "Contenuto illegale";
+
 /* Error message indicating that an invalid account key was entered for login. */
 "Invalid key" = "Chiave non valida";
+
+/* Button for user to report that the account or content has spam. */
+"It's spam" = "E' spam";
 
 /* Placeholder example text for identifier used for NIP-05 verification. */
 "jb55@jb55.com" = "jb55@jb55.com";
@@ -247,6 +303,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Button to complete account creation and start using the app. */
 "Let's go!" = "Andiamo!";
+
+/* Section title for selecting the server that hosts the LibreTranslate machine translation API. */
+"LibreTranslate Translations" = "Traduzioni LibreTranslate";
 
 /* Placeholder text for entry of Lightning Address or LNURL. */
 "Lightning Address or LNURL" = "Indirizzo Lightning o LNURL";
@@ -266,11 +325,11 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Alert for logging out the user.
    Button for logging out the user.
-   Button to logout the user. */
+   Button to close the alert that informs that the current account has been deleted. */
 "Logout" = "Esci";
 
 /* Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out. */
-"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "Assicurati di aver salvato la chiave privata (nSEC) prima di uscire o perderai l'accesso a questo account";
+"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "Assicurati di aver salvato la chiave privata prima di uscire o perderai l'accesso a questo account";
 
 /* Dropdown option label for Lightning wallet, Muun. */
 "Muun" = "Muun";
@@ -278,8 +337,14 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label for NIP-05 Verification section of user profile form. */
 "NIP-05 Verification" = "Verifica NIP-05";
 
+/* Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists. */
+"No block list found, create a new one? This will overwrite any previous block lists." = "Nessuna lista degli utenti bloccati trovata, vuoi creane una nuova?Creandone una nuova, sovrascriverai eventuali liste di utenti bloccati in precedenza";
+
 /* No search results. */
 "none" = "Nessun risultato";
+
+/* Dropdown option for selecting no translation server. */
+"None" = "Nessuno";
 
 /* Indicates that there are no notes in the timeline to view. */
 "Nothing to see here. Check back later!" = "Niente da vedere qui. Controlla dopo!";
@@ -293,8 +358,11 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key. */
 "nsec1..." = "nsec1...";
 
+/* Button for user to report that the account or content has nudity or explicit content. */
+"Nudity or explicit content" = "Nudità o contenuti espliciti";
+
 /* Label indicating that a form input is optional. */
-"optional" = "opzione1";
+"optional" = "facoltativo";
 
 /* Button to pay a Lightning invoice. */
 "Pay" = "Paga";
@@ -307,6 +375,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Button to post a note. */
 "Post" = "Post";
+
+/* Text to indicate that what is being shown is a post from a user who has been blocked. */
+"Post from a user you've blocked" = "Post di un utente che hai bloccato";
 
 /* Label for filter for seeing only posts (instead of posts and replies). */
 "Posts" = "Post";
@@ -321,7 +392,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Private Key" = "Chiave Privata";
 
 /* Sidebar menu label for Profile view. */
-"Profile" = "Profilo1";
+"Profile" = "Profilo";
 
 /* Label for Profile Picture section of user profile form. */
 "Profile Picture" = "Foto Profilo";
@@ -344,11 +415,18 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Section title for recommend relay servers that could be added as part of configuration */
 "Recommended Relays" = "Relè consigliati";
 
+/* Button to reject the end user license agreement, which disallows the user from being let into the app. */
+"Reject" = "Rifiuta";
+
 /* Text field for relay server. Used for testing purposes. */
 "Relay" = "Relè";
 
-/* Sidebar menu label for Relay servers view */
+/* Sidebar menu label for Relay servers view
+   Sidebar menu label for Relays view. */
 "Relays" = "Relè";
+
+/* Description of what was done as a result of sending a report to relay servers. */
+"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "I relè sono stati notificati e i clients potranno sfruttare questa informazione per filtrare i contenuti. Grazie!";
 
 /* Button label to remove all participants from a note reply. */
 "Remove all" = "Rimuovi tutto";
@@ -362,18 +440,28 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Indicating that the user is replying to the following listed people. */
 "Replying to:" = "Rispondi a:";
 
+/* Button to report a profile.
+   Context menu option for reporting content. */
+"Report" = "Report";
+
+/* Label indicating that the text underneath is the identifier of the report that was sent to relay servers. */
+"Report ID:" = "ID del Report:";
+
+/* Message indicating that a report was successfully sent to relay servers. */
+"Report sent!" = "Report inviato!";
+
 /* Button to confirm reposting a post.
    Title of alert for confirming to repost a post. */
-"Repost" = "Reposta";
+"Repost" = "Repost";
 
 /* Text indicating that the post was reposted (i.e. re-shared). */
 "Reposted" = "Repostato";
 
+/* Navigation bar title for Reposts view. */
+"Reposts" = "I Ripost";
+
 /* Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message. */
 "Requests" = "Richiesta";
-
-/* Section title for resetting the user */
-"Reset" = "Ricomincia";
 
 /* Button to retry completing account creation after an error occurred. */
 "Retry" = "Riprova";
@@ -411,15 +499,23 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Text prompt for user to send a message to the other user. */
 "Send a message to start the conversation..." = "Invia un messaggio e inizia la conversazione...";
 
+/* Prompt selection of LibreTranslate server to perform machine translations on notes */
+"Server" = "Server";
+
 /* Navigation title for Settings view.
    Sidebar menu label for accessing the app settings */
 "Settings" = "Impostazioni";
 
-/* Button to share an image. */
+/* Button to share an image.
+   Button to share the link to a profile. */
 "Share" = "Condividi";
 
-/* Toggle to show or hide user's secret account login key. */
+/* Button to show a post from a user who has been blocked.
+   Toggle to show or hide user's secret account login key. */
 "Show" = "Mostra";
+
+/* Button to hide the LibreTranslate server API key. */
+"Show API Key" = "Mostra la chiave dell'API";
 
 /* Toggle to show or hide selection of wallet. */
 "Show wallet selector" = "Mostra wallet disponibili";
@@ -430,21 +526,33 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Dropdown option label for Lightning wallet, Strike. */
 "Strike" = "Strike";
 
+/* Button to close out of alert that informs that the action to block a user was successful. */
+"Thanks!" = "Grazie!";
+
+/* Button for user to report that the account is impersonating someone. */
+"They are impersonating someone" = "Stanno impersonando qualcuno";
+
 /* Warning that the inputted account key is a public key and the result of what happens because of it. */
 "This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Questa è una chiave pubblica, non potrai postare o interagire in alcun modo. Puoi utilizzarla solo per vedere gli account";
 
 /* Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key. */
-"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Questa è una chiave di vecchio tipo. Non siamo sicuri se si tratti di una chiave pubblica o privata. Utilizza il pulsante sottostante se si tratta di una chiave pubblica.";
+"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Questa è una chiave nostr vecchia. Non siamo sicuri se si tratti di una chiave pubblica o privata. Utilizza il pulsante sottostante se si tratta di una chiave pubblica.";
 
 /* Label to describe that a public key is the user's account ID and what they can do with it. */
 "This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "Questo è l'ID del tuo account. Condividilo con i tuoi amici per farti seguire. Clicca per copiare";
 
 /* Label to describe that a private key is the user's secret account key and what they should do with it. */
-"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Questa è la tua chiave privata. Ti serve ad accedere al tuo account. Non condividerla con nessuno! Salvala in un gestore password e tienila al sicuro";
+"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Questa è la tua chiave privata. Ti serve ad accedere al tuo account. Non condividerla mai con nessuno! Salvala in un gestore password e tienila al sicuro";
 
 /* Navigation bar title for note thread.
    Navigation bar title for threaded event detail view. */
 "Thread" = "Thread";
+
+/* Button to translate note from different language. */
+"Translate Note" = "Nota sulla traduzione";
+
+/* Button to indicate that the note has been translated from a different language. */
+"Translated from (languageName!)" = "Tradotto da (languageName!)";
 
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "Scrivi il tuo post qui...";
@@ -464,6 +572,15 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Text to indicate that the button next to it is in a state that will unfollow a profile when tapped. */
 "Unfollows" = "Smetti di seguire";
 
+/* Example URL to LibreTranslate server */
+"URL" = "URL";
+
+/* Alert message to indicate the user has been blocked */
+"User blocked" = "Utente bloccato";
+
+/* Alert message that informs a user was blocked. */
+"User has been blocked" = "L'utente è stato bloccato";
+
 /* Label for Username section of user profile form.
    Label to prompt username entry. */
 "Username" = "Nome utente";
@@ -471,8 +588,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Sidebar menu label for Wallet view. */
 "Wallet" = "Portafoglio";
 
-/* Dropdown option label for Lightning wallet, Wallet Of Satoshi. */
-"Wallet Of Satoshi" = "Wallet Of Satoshi";
+/* Dropdown option label for Lightning wallet, Wallet of Satoshi. */
+"Wallet of Satoshi" = "Wallet of Satoshi";
 
 /* Section title for selection of wallet. */
 "Wallet Selector" = "Seleziona un portafoglio";
@@ -486,14 +603,23 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Text to welcome user. */
 "Welcome, %@!" = "Benvenuto, %@!";
 
+/* Header text to prompt user what issue they want to report. */
+"What do you want to report?" = "Che cosa vuoi reportare?";
+
 /* Placeholder example for relay server address. */
-"wss://some.relay.com" = "wss://un.relè.com";
+"wss://some.relay.com" = "wss://qualche.relay.com";
+
+/* Text of button that confirms to overwrite the existing mutelist. */
+"Yes, Overwrite" = "Si, sovrascrivi";
 
 /* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
 "you" = "tu";
 
 /* Label for Your Name section of user profile form. */
 "Your Name" = "Nome";
+
+/* Footer text to inform user what will happen when the report is submitted. */
+"Your report will be sent to the relays you are connected to" = "Questo report sarà inviato a i relays a cui sei connesso";
 
 /* Dropdown option label for Lightning wallet, Zebedee. */
 "Zebedee" = "Zebedee";

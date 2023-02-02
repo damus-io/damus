@@ -2,16 +2,16 @@
 "   " = "61b6edf1108e6f396680a33b02486a70_tr";
 
 /* Description of how the nip05 identifier would be used for verification. */
-"'%@' at '%@' will be used for verification" = "'%@' à '@' sera utilisé pour la vérification";
+"'%@' at '%@' will be used for verification" = "'%@' at '%@' 将被用于认证";
 
 /* Description of why the nip05 identifier is invalid. */
-"'%@' is an invalid NIP-05 identifier. It should look like an email." = "'%@' n'est pas un identifiant NIP-05 valide. Il doit avoir le format d'une adresse courriel.";
+"'%@' is an invalid NIP-05 identifier. It should look like an email." = "输入的内容 '%@' 是无效NIP-05标识符。有效输入应当为email格式。";
 
 /* Navigation bar title for view that shows who is following a user. */
-"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "Abonnés de (Profile.displayName(profile: profile, pubkey: whos))";
+"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "(Profile.displayName(profile: profile, pubkey: whos))的粉丝";
 
 /* Navigation bar title for view that shows who a user is following. */
-"(who) following" = "(who) suit";
+"(who) following" = "(who)关注";
 
 /* Prefix character to username. */
 "@" = "@";
@@ -25,16 +25,16 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 "%@ %@" = "%@ %@";
 
 /* Alert message that informs a user was blocked. */
-"%@ has been blocked" = "%@ est blocké";
+"%@ has been blocked" = "%@被拉黑了";
 
 /* Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. La création d'un compte ne nécessite pas de numéro de téléphone, d'e-mail ou de nom. Commencez tout de suite sans aucune friction.";
+"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. 创建账户无需电话号码、电子邮箱或者姓名。立刻开启丝滑之旅。";
 
 /* Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. Messagerie privée cryptée de bout en bout. Gardez Big Tech hors de vos DMs";
+"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. 端到端加密信息，保护你的私信不被科技巨头公司窥视";
 
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Donnez un pourboire aux publications de vos amis et empilez les sats avec Bitcoin⚡️, la monnaie native d'Internet.";
+"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. 用互联网原生货币--比特币⚡️来打赏好友的推文并积攒财富。";
 
 /* Number of tip payments on a post.
 Number of profiles a user is following. */
@@ -47,73 +47,73 @@ Number of profiles a user is following. */
 "< e >" = "< e >";
 
 /* Label to prompt for about text entry for user to describe about themself. */
-"About" = "À propos de";
+"About" = "关于";
 
 /* Label for About Me section of user profile form. */
-"About Me" = "À Propos de Moi";
+"About Me" = "关于我";
 
 /* Placeholder text for About Me description. */
-"Absolute Boss" = "Patron Absolu";
+"Absolute Boss" = "三界一哥";
 
 /* Button to accept the end user license agreement before being allowed into the app. */
-"Accept" = "Accepter";
+"Accept" = "接受";
 
 /* Label to indicate the public ID of the account. */
-"Account ID" = "Identifiant de Compte";
+"Account ID" = "账号ID";
 
 /* Title for confirmation dialog to either share, report, or block a profile. */
-"Actions" = "Actions";
+"Actions" = "动态";
 
 /* Button to add recommended relay server.
    Button to confirm adding user inputted relay. */
-"Add" = "Ajouter";
+"Add" = "添加";
 
 /* Button label to re-add all original participants as profiles to reply to in a note */
-"Add all" = "Tout ajouter";
+"Add all" = "添加全部";
 
 /* Label for section for adding a relay server. */
-"Add Relay" = "Ajouter un Relais";
+"Add Relay" = "添加中继器";
 
 /* Any amount of sats */
-"Any" = "Montant au choix";
+"Any" = "任意";
 
 /* Example URL to LibreTranslate server */
-"API Key (optional)" = "Clé d'API (optionnelle)";
+"API Key (optional)" = "API Key (可选)";
 
 /* Alert message to ask if user wants to repost a post. */
-"Are you sure you want to repost this?" = "Êtes-vous sûr de vouloir republier ceci ?";
+"Are you sure you want to repost this?" = "确定转发吗？";
 
 /* Label for Banner Image section of user profile form. */
-"Banner Image" = "Image Bannière";
+"Banner Image" = "主页背景图片";
 
 /* Reminder to user that they should save their account information. */
-"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "Avant de commencer, vous devrez enregistrer les informations de votre compte, sinon vous ne pourrez plus vous connecter à l'avenir si vous désinstallez Damus.";
+"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "请先保存您的账户信息！否则您将在登出或卸载后无法重新登陆大麦子。";
 
 /* Dropdown option label for Lightning wallet, Bitcoin Beach. */
 "Bitcoin Beach" = "Bitcoin Beach";
 
 /* Label for Bitcoin Lightning Tips section of user profile form. */
-"Bitcoin Lightning Tips" = "Pourboires de Bitcoin Lightning";
+"Bitcoin Lightning Tips" = "Bitcoin Lightning Tips";
 
 /* Dropdown option label for Lightning wallet, Blixt Wallet */
-"Blixt Wallet" = "Blixt Wallet";
+"Blixt Wallet" = "Blixt钱包";
 
 /* Alert button to block a user.
    Button to block a profile.
    Context menu option for blocking users. */
-"Block" = "Bloquer";
+"Block" = "拉黑";
 
 /* Alert message prompt to ask if a user should be blocked. */
-"Block %@?" = "Bloquer %@?";
+"Block %@?" = "拉黑%@?";
 
 /* Title of alert for blocking a user. */
-"Block User" = "Bloquer un utilisateur";
+"Block User" = "拉黑用户";
 
 /* Sidebar menu label for Profile view. */
-"Blocked" = "Bloqué";
+"Blocked" = "已拉黑";
 
 /* Navigation title of view to see list of blocked users. */
-"Blocked Users" = "Utilisateurs bloqués";
+"Blocked Users" = "拉黑用户";
 
 /* Dropdown option label for Lightning wallet, Blue Wallet. */
 "Blue Wallet" = "Blue Wallet";
@@ -122,7 +122,7 @@ Number of profiles a user is following. */
 "Breez" = "Breez";
 
 /* Context menu option for broadcasting the user's note to all of the user's connected relay servers. */
-"Broadcast" = "Diffuser";
+"Broadcast" = "广播";
 
 /* Alert button to cancel out of alert for blocking a user.
    Button to cancel out of alert that creates a new mutelist.
@@ -131,340 +131,340 @@ Number of profiles a user is following. */
    Button to cancel out of view adding user inputted relay.
    Cancel deleting the user.
    Cancel out of logging out the user. */
-"Cancel" = "Annuler";
+"Cancel" = "取消";
 
 /* Dropdown option label for Lightning wallet, Cash App. */
 "Cash App" = "Cash App";
 
 /* Navigation bar title for Chatroom view. */
-"Chat" = "Chatter";
+"Chat" = "聊天";
 
 /* Button for clearing cached data. */
-"Clear" = "Vider";
+"Clear" = "清除";
 
 /* Section title for clearing cached data. */
-"Clear Cache" = "Vider le Cache";
+"Clear Cache" = "清除缓存";
 
 /* Label indicating that a user's key was copied. */
-"Copied" = "Copié";
+"Copied" = "已复制";
 
 /* Button to copy a relay server address. */
-"Copy" = "Copier";
+"Copy" = "复制";
 
 /* Context menu option for copying the ID of the account that created the note. */
-"Copy Account ID" = "Copier l'Identifiant de Compte";
+"Copy Account ID" = "复制账户ID";
 
 /* Context menu option to copy an image into clipboard.
    Context menu option to copy an image to clipboard. */
-"Copy Image" = "Copier l'Image";
+"Copy Image" = "复制图片";
 
 /* Context menu option to copy the URL of an image into clipboard. */
-"Copy Image URL" = "Copier l'URL de l'Image";
+"Copy Image URL" = "复制图片URL地址";
 
 /* Title of section for copying a Lightning invoice identifier. */
-"Copy invoice" = "Copier la Facture";
+"Copy invoice" = "复制发票";
 
 /* Context menu option for copying a user's Lightning URL. */
-"Copy LNURL" = "Copier le LNURL";
+"Copy LNURL" = "复制LNURL";
 
 /* Context menu option for copying the ID of the note. */
-"Copy Note ID" = "Copier l'Identifiant de la Note";
+"Copy Note ID" = "复制此条推文ID";
 
 /* Context menu option for copying the JSON text from the note. */
-"Copy Note JSON" = "Copier le JSON de la Note";
+"Copy Note JSON" = "复制此条推文JSON";
 
 /* Button to copy report ID. */
-"Copy Report ID" = "Copier l'ID du signalement";
+"Copy Report ID" = "复制举报记录ID";
 
 /* Context menu option for copying the text from an note. */
-"Copy Text" = "Copier le Texte";
+"Copy Text" = "复制文本";
 
 /* Context menu option for copying the ID of the user who created the note. */
-"Copy User Pubkey" = "Copier la clé publique";
+"Copy User Pubkey" = "复制用户公钥Pubkey";
 
 /* Alert message to indicate that the blocked user could not be found. */
-"Could not find user to block..." = "Aucun utilisateur à bloquer";
+"Could not find user to block..." = "找不到可拉黑用户";
 
 /* Button to create account. */
-"Create" = "Créer";
+"Create" = "创建";
 
 /* Button to create an account. */
-"Create Account" = "Créer un Compte";
+"Create Account" = "创建账户";
 
 /* Title of alert prompting the user to create a new mutelist. */
-"Create new mutelist" = "Créer une nouvelle liste muette";
+"Create new mutelist" = "创建新的屏蔽列表";
 
 /* Example description about Bitcoin creator(s), Satoshi Nakamoto. */
-"Creator(s) of Bitcoin. Absolute legend." = "Créateur(s) de Bitcoin. Légende absolue.";
+"Creator(s) of Bitcoin. Absolute legend." = "传奇的比特币创始人";
 
 /* Dropdown option for selecting a custom translation server. */
-"Custom" = "Serveur personnalisé";
+"Custom" = "自定义";
 
 /* Name of the app, shown on the first screen when user is not logged in. */
-"Damus" = "Damus";
+"Damus" = "大麦子";
 
 /* Button to pay a Lightning invoice with the user's default Lightning wallet. */
-"Default Wallet" = "Portefeuille par défaut";
+"Default Wallet" = "默认钱包";
 
 /* Button for deleting the users account.
    Button to delete a relay server that the user connects to.
    Button to remove a user from their blocklist.
    Section title for deleting the user */
-"Delete" = "Effacer";
+"Delete" = "删除";
 
 /* Button to dismiss a text field alert. */
-"Dismiss" = "Rejeter";
+"Dismiss" = "忽略";
 
 /* Label to prompt display name entry. */
-"Display Name" = "Afficher Nom";
+"Display Name" = "昵称";
 
 /* Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
    Navigation title for view of DMs, where DM is an English abbreviation for Direct Message. */
-"DMs" = "Messages privés";
+"DMs" = "私信";
 
 /* Button to dismiss wallet selection view for paying Lightning invoice. */
-"Done" = "Fini";
+"Done" = "完成";
 
 /* Heading indicating that this application allows users to earn money. */
-"Earn Money" = "Gagnes de l'argent";
+"Earn Money" = "赚钱";
 
 /* Button to edit user's profile. */
-"Edit" = "Modifier";
+"Edit" = "编辑";
 
 /* Text indicating that the view is used for editing which participants are replied to in a note. */
-"Edit participants" = "Modifier les participants";
+"Edit participants" = "编辑参加者列表";
 
 /* Heading indicating that this application keeps private messaging end-to-end encrypted. */
-"Encrypted" = "Crypté";
+"Encrypted" = "已加密";
 
 /* Prompt for user to enter an account key to login. */
-"Enter your account key to login:" = "Entrez votre clé de compte pour vous connecter:";
+"Enter your account key to login:" = "输入您的账户key以登陆：";
 
 /* Error message indicating why saving keys failed. */
-"Error: %@" = "Erreur: %@";
+"Error: %@" = "错误：%@";
 
 /* Label indicating that the below text is the EULA, an acronym for End User License Agreement. */
-"EULA" = "CLUF";
+"EULA" = "用户条款";
 
 /* Button to follow a user. */
-"Follow" = "S'abonner";
+"Follow" = "关注";
 
 /* Label describing followers of a user. */
-"Followers" = "Abonnés";
+"Followers" = "粉丝";
 
 /* Text to indicate that the button next to it is in a state that indicates that it is in the process of following a profile.
 Part of a larger sentence to describe how many profiles a user is following. */
-"Following" = "Abonnements";
+"Following" = "已关注";
 
 /* Label to indicate that the user is in the process of following another user. */
-"Following..." = "Abonnements...";
+"Following..." = "关注中...";
 
 /* Text to indicate that button next to it is in a state that will follow a profile when tapped. */
-"Follows" = "Suit";
+"Follows" = "关注";
 
 /* Navigation bar title for Global view where posts from all connected relay servers appear. */
-"Global" = "Global";
+"Global" = "广场";
 
 /* Navigation link to go to post referenced by hex code. */
-"Goto post %@" = "Aller au post %@";
+"Goto post %@" = "查看推文%@";
 
 /* Navigation link to go to profile. */
-"Goto profile %@" = "Aller au profil %@";
+"Goto profile %@" = "查看用户%@";
 
 /* Button to hide a post from a user who has been blocked. */
-"Hide" = "Cacher";
+"Hide" = "隐藏";
 
 /* Button to hide the LibreTranslate server API key. */
-"Hide API Key" = "Cacher la clé d'API";
+"Hide API Key" = "隐藏API Key";
 
 /* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
-"Home" = "Accueil";
+"Home" = "主页";
 
 /* Placeholder example text for profile picture URL. */
-"https://example.com/pic.jpg" = "https://exemple.com/pic.jpg";
+"https://example.com/pic.jpg" = "https://example.com/pic.jpg";
 
 /* Placeholder example text for website URL for user profile. */
 "https://jb55.com" = "https://jb55.com";
 
 /* Button for user to report that the account or content has illegal content. */
-"Illegal content" = "Contenu Illégal";
+"Illegal content" = "违规内容";
 
 /* Error message indicating that an invalid account key was entered for login. */
-"Invalid key" = "Clé non valide";
+"Invalid key" = "无效的key";
 
 /* Button for user to report that the account or content has spam. */
-"It's spam" = "C'est du pourriel";
+"It's spam" = "这是垃圾信息";
 
 /* Placeholder example text for identifier used for NIP-05 verification. */
 "jb55@jb55.com" = "jb55@jb55.com";
 
 /* Moves the post button to the left side of the screen */
-"Left Handed" = "Gaucher";
+"Left Handed" = "左撇子界面";
 
 /* Button to complete account creation and start using the app. */
-"Let's go!" = "Allons-y!";
+"Let's go!" = "开启旅程！";
 
 /* Section title for selecting the server that hosts the LibreTranslate machine translation API. */
-"LibreTranslate Translations" = "Traductions LibreTranslate";
+"LibreTranslate Translations" = "LibreTranslate Translations";
 
 /* Placeholder text for entry of Lightning Address or LNURL. */
-"Lightning Address or LNURL" = "Adresse Lightning ou LNURL";
+"Lightning Address or LNURL" = "闪电地址或LNURL";
 
 /* Indicates that the view is for paying a Lightning invoice. */
-"Lightning Invoice" = "Facture Lightning";
+"Lightning Invoice" = "闪电发票";
 
 /* Dropdown option label for Lightning wallet, LNLink. */
 "LNLink" = "LNLink";
 
 /* Dropdown option label for system default for Lightning wallet. */
-"Local default" = "Valeur locale par défaut";
+"Local default" = "本地默认";
 
 /* Button to log into account.
    Button to log into an account. */
-"Login" = "Se connecter";
+"Login" = "登陆";
 
 /* Alert for logging out the user.
    Button for logging out the user.
    Button to close the alert that informs that the current account has been deleted. */
-"Logout" = "Se déconnecter";
+"Logout" = "登出";
 
 /* Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out. */
-"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "Assurez-vous que votre clé de compte nsec est enregistrée avant de vous déconnecter ou vous perdrez l'accès à ce compte";
+"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "请确保您已经保存好nsec account key账户私钥！否则登出后您将无法重新访问您的账户。";
 
 /* Dropdown option label for Lightning wallet, Muun. */
 "Muun" = "Muun";
 
 /* Label for NIP-05 Verification section of user profile form. */
-"NIP-05 Verification" = "Vérification NIP-05";
+"NIP-05 Verification" = "NIP-05认证";
 
 /* Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists. */
-"No block list found, create a new one? This will overwrite any previous block lists." = "Aucune liste de blocage trouvée, voulez-vous en créer une nouvelle?  Cela va écraser votre liste de blocage existante.";
+"No block list found, create a new one? This will overwrite any previous block lists." = "没有找到黑名单，是否创建新黑名单？先前的黑名单将被覆盖。";
 
 /* No search results. */
-"none" = "aucun";
+"none" = "无结果";
 
 /* Dropdown option for selecting no translation server. */
-"None" = "Aucun";
+"None" = "无";
 
 /* Indicates that there are no notes in the timeline to view. */
-"Nothing to see here. Check back later!" = "Rien à voir ici. Revenez plus tard!";
+"Nothing to see here. Check back later!" = "暂无内容，请稍后重试。";
 
 /* Navigation title for notifications. */
-"Notifications" = "Notifications";
+"Notifications" = "通知";
 
 /* String indicating that a given timestamp just occurred */
-"now" = "maintenant";
+"now" = "现在";
 
 /* Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key. */
 "nsec1..." = "nsec1...";
 
 /* Button for user to report that the account or content has nudity or explicit content. */
-"Nudity or explicit content" = "Nudité ou contenu explicite";
+"Nudity or explicit content" = "裸体或暴露的内容";
 
 /* Label indicating that a form input is optional. */
-"optional" = "optionnel";
+"optional" = "选填";
 
 /* Button to pay a Lightning invoice. */
-"Pay" = "Payer";
+"Pay" = "支付";
 
 /* Navigation bar title for view to pay Lightning invoice. */
-"Pay the Lightning invoice" = "Payer la facture Lightning";
+"Pay the Lightning invoice" = "支付闪电发票";
 
 /* Dropdown option label for Lightning wallet, Phoenix. */
 "Phoenix" = "Phoenix";
 
 /* Button to post a note. */
-"Post" = "Publication";
+"Post" = "发布";
 
 /* Text to indicate that what is being shown is a post from a user who has been blocked. */
-"Post from a user you've blocked" = "Publication d'un utilisateur que vous avez bloqué";
+"Post from a user you've blocked" = "该推文来自已拉黑用户";
 
 /* Label for filter for seeing only posts (instead of posts and replies). */
-"Posts" = "Publications";
+"Posts" = "推文";
 
 /* Label for filter for seeing posts and replies (instead of only posts). */
-"Posts & Replies" = "Publications & Réponses";
+"Posts & Replies" = "推文与回复";
 
 /* Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading. */
-"Private" = "Privé";
+"Private" = "私密";
 
 /* Title of the secure field that holds the user's private key. */
-"Private Key" = "Clé Privée";
+"Private Key" = "私钥";
 
 /* Sidebar menu label for Profile view. */
-"Profile" = "Profil";
+"Profile" = "我的档案";
 
 /* Label for Profile Picture section of user profile form. */
-"Profile Picture" = "Image de profil";
+"Profile Picture" = "头像";
 
 /* Section title for the user's public account ID. */
-"Public Account ID" = "Identifiant publique de compte";
+"Public Account ID" = "公开账号ID";
 
 /* Label indicating that the text is a user's public account key. */
-"Public key" = "Clé Publique";
+"Public key" = "公钥Public Key";
 
 /* Label indicating that the text is a user's public account key. */
-"Public Key" = "Clé Publique";
+"Public Key" = "公钥Public Key";
 
 /* Prompt to ask user if the key they entered is a public key. */
-"Public Key?" = "Clé Publique?";
+"Public Key?" = "输入的是公钥Public Key吗？";
 
 /* Navigation bar title for Reactions view. */
-"Reactions" = "Réactions";
+"Reactions" = "回应";
 
 /* Section title for recommend relay servers that could be added as part of configuration */
-"Recommended Relays" = "Relais Recommandés";
+"Recommended Relays" = "推荐的中继器";
 
 /* Button to reject the end user license agreement, which disallows the user from being let into the app. */
-"Reject" = "Refuser";
+"Reject" = "拒绝";
 
 /* Text field for relay server. Used for testing purposes. */
-"Relay" = "Relais";
+"Relay" = "中继器";
 
 /* Sidebar menu label for Relay servers view
    Sidebar menu label for Relays view. */
-"Relays" = "Relais";
+"Relays" = "中继器";
 
 /* Description of what was done as a result of sending a report to relay servers. */
-"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "Les relais ont été avisés et les clients pourront utiliser ces renseignements pour filtrer le contenu. Merci!";
+"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "已通知中继器。其他用户将可以使用该信息过滤内容。谢谢！";
 
 /* Button label to remove all participants from a note reply. */
-"Remove all" = "Tout supprimer";
+"Remove all" = "移除全部";
 
 /* Label to indicate that the user is replying to themself. */
-"Reply to self" = "Réponse à soi-même";
+"Reply to self" = "自回复";
 
 /* Label to indicate that the user is replying to 2 users. */
-"Replying to %@ & %@" = "Réponse à %1$@ & %2$@";
+"Replying to %@ & %@" = "正在回复%1$@ & %2$@";
 
 /* Indicating that the user is replying to the following listed people. */
-"Replying to:" = "Répondre à:";
+"Replying to:" = "正在回复：";
 
 /* Button to report a profile.
    Context menu option for reporting content. */
-"Report" = "Signaler";
+"Report" = "举报";
 
 /* Label indicating that the text underneath is the identifier of the report that was sent to relay servers. */
-"Report ID:" = "ID de signalement:";
+"Report ID:" = "举报记录ID：";
 
 /* Message indicating that a report was successfully sent to relay servers. */
-"Report sent!" = "Signalement envoyé!";
+"Report sent!" = "举报成功！";
 
 /* Button to confirm reposting a post.
    Title of alert for confirming to repost a post. */
-"Repost" = "Republier";
+"Repost" = "转发";
 
 /* Text indicating that the post was reposted (i.e. re-shared). */
-"Reposted" = "A republié";
+"Reposted" = "已转发";
 
 /* Navigation bar title for Reposts view. */
-"Reposts" = "Republications";
+"Reposts" = "转发";
 
 /* Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message. */
-"Requests" = "Demandes";
+"Requests" = "请求";
 
 /* Button to retry completing account creation after an error occurred. */
-"Retry" = "Retenter";
+"Retry" = "重试";
 
 /* Dropdown option label for Lightning wallet, River */
 "River" = "River";
@@ -476,150 +476,150 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Satoshi Nakamoto" = "Satoshi Nakamoto";
 
 /* Button for saving profile. */
-"Save" = "Enregistrer";
+"Save" = "保存";
 
 /* Context menu option to save an image. */
-"Save Image" = "Enregistrer Image";
+"Save Image" = "保存图片";
 
 /* Navigation link to search hashtag. */
-"Search hashtag: #%@" = "Rechercher hashtag: #%@";
+"Search hashtag: #%@" = "热搜词：#%@";
 
 /* Placeholder text to prompt entry of search query. */
-"Search..." = "Rechercher...";
+"Search..." = "搜索...";
 
 /* Section title for user's secret account login key. */
-"Secret Account Login Key" = "Clé secrète de connexion au compte";
+"Secret Account Login Key" = "账户私钥";
 
 /* Title of section for selecting a Lightning wallet to pay a Lightning invoice. */
-"Select a Lightning wallet" = "Sélectionnez un portefeuille Lightning";
+"Select a Lightning wallet" = "选择一个闪电钱包";
 
 /* Prompt selection of user's default wallet */
-"Select default wallet" = "Sélectionnez le portefeuille par défaut";
+"Select default wallet" = "选择默认钱包";
 
 /* Text prompt for user to send a message to the other user. */
-"Send a message to start the conversation..." = "Envoyez un message pour démarrer la conversation...";
+"Send a message to start the conversation..." = "发送信息来开启聊天吧...";
 
 /* Prompt selection of LibreTranslate server to perform machine translations on notes */
-"Server" = "Serveur";
+"Server" = "服务器";
 
 /* Navigation title for Settings view.
    Sidebar menu label for accessing the app settings */
-"Settings" = "Paramètres";
+"Settings" = "设置";
 
 /* Button to share an image.
    Button to share the link to a profile. */
-"Share" = "Partager";
+"Share" = "分享";
 
 /* Button to show a post from a user who has been blocked.
    Toggle to show or hide user's secret account login key. */
-"Show" = "Afficher";
+"Show" = "显示";
 
 /* Button to hide the LibreTranslate server API key. */
-"Show API Key" = "Montrer la clé d'API";
+"Show API Key" = "显示API Key";
 
 /* Toggle to show or hide selection of wallet. */
-"Show wallet selector" = "Afficher le sélecteur de portefeuille";
+"Show wallet selector" = "显示钱包选择";
 
 /* Sidebar menu label to sign out of the account. */
-"Sign out" = "Se déconnecter";
+"Sign out" = "登出";
 
 /* Dropdown option label for Lightning wallet, Strike. */
 "Strike" = "Strike";
 
 /* Button to close out of alert that informs that the action to block a user was successful. */
-"Thanks!" = "Merci!";
+"Thanks!" = "谢谢！";
 
 /* Button for user to report that the account is impersonating someone. */
-"They are impersonating someone" = "Ils personnifient quelqu'un";
+"They are impersonating someone" = "抄袭模仿他人";
 
 /* Warning that the inputted account key is a public key and the result of what happens because of it. */
-"This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Il s'agit d'une clé publique, vous ne pourrez pas publier de messages ou interagir de quelque manière que ce soit. Ceci est utilisé pour visualiser les comptes de leur point de vue.";
+"This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "这是一个公钥。您无法使用公钥发布推文或进行其他交互。您只可以从该用户视角查看此账户。";
 
 /* Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key. */
-"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Il s'agit d'une clé Nostr à l'ancienne. Nous ne savons pas s'il s'agit d'une clé publique ou d'une clé privée. Veuillez basculer le bouton ci-dessous s'il s'agit d'une clé publique.";
+"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "这是一个老式nostr key。系统无法确定这是公钥还是私钥。如果是公钥，请点击下面的按钮切换。";
 
 /* Label to describe that a public key is the user's account ID and what they can do with it. */
-"This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "Ceci est votre identifiant de compte, vous pouvez le donner à vos amis afin qu'ils puissent vous suivre. Cliquez pour copier.";
+"This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "这是您的账号ID。您可以把账号ID分享给朋友来邀请他们关注您。点击复制";
 
 /* Label to describe that a private key is the user's secret account key and what they should do with it. */
-"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Il s'agit de votre clé de compte secrète. Vous en aurez besoin pour accéder à votre compte. Ne le partagez avec personne ! Enregistrez-le dans un gestionnaire de mots de passe et gardez-le en sécurité!";
+"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "这是您的秘密私钥。您需要用这个私钥来访问您的账户。您可以用密码管理器或者其他安全的方式保管您的私钥。切记不要把私钥透露给任何人！";
 
 /* Navigation bar title for note thread.
    Navigation bar title for threaded event detail view. */
-"Thread" = "Fil de discussion";
+"Thread" = "推文链";
 
 /* Button to translate note from different language. */
-"Translate Note" = "Traduire la note";
+"Translate Note" = "翻译推文";
 
 /* Button to indicate that the note has been translated from a different language. */
-"Translated from (languageName!)" = "Traduit de (languageName!)";
+"Translated from (languageName!)" = "翻译自 (languageName!)";
 
 /* Text box prompt to ask user to type their post. */
-"Type your post here..." = "Tapez votre message ici...";
+"Type your post here..." = "说点什么呢...";
 
 /* Non-breaking space character to fill in blank space next to event action button icons. */
 "u{00A0}" = "u{00A0}";
 
 /* Button to unfollow a user. */
-"Unfollow" = "Se désabonner";
+"Unfollow" = "取消关注";
 
 /* Text to indicate that the button next to it is in  a state that indicates that it is in the process of unfollowing a profile. */
-"Unfollowing" = "Ne plus suivre";
+"Unfollowing" = "取消关注";
 
 /* Label to indicate that the user is in the process of unfollowing another user. */
-"Unfollowing..." = "Ne plus suivre...";
+"Unfollowing..." = "取消关注...";
 
 /* Text to indicate that the button next to it is in a state that will unfollow a profile when tapped. */
-"Unfollows" = "Se désabonne de";
+"Unfollows" = "取消关注";
 
 /* Example URL to LibreTranslate server */
 "URL" = "URL";
 
 /* Alert message to indicate the user has been blocked */
-"User blocked" = "Utilisateur bloqué";
+"User blocked" = "用户已被拉黑";
 
 /* Alert message that informs a user was blocked. */
-"User has been blocked" = "L'utilisateur a été bloqué";
+"User has been blocked" = "用户已被拉黑";
 
 /* Label for Username section of user profile form.
    Label to prompt username entry. */
-"Username" = "Nom d'utilisateur";
+"Username" = "用户名";
 
 /* Sidebar menu label for Wallet view. */
-"Wallet" = "Portefeuille";
+"Wallet" = "钱包";
 
 /* Dropdown option label for Lightning wallet, Wallet of Satoshi. */
 "Wallet of Satoshi" = "Wallet of Satoshi";
 
 /* Section title for selection of wallet. */
-"Wallet Selector" = "Sélecteur de portefeuille";
+"Wallet Selector" = "选择钱包";
 
 /* Label for Website section of user profile form. */
-"Website" = "Site Internet";
+"Website" = "网站";
 
 /* Welcoming message to the reader. The variable is 'you', the reader. */
-"Welcome to the social network %@ control." = "Bienvenue sur le réseau social %@ contrôle.";
+"Welcome to the social network %@ control." = "欢迎来到由%@控制的社交网络。";
 
 /* Text to welcome user. */
-"Welcome, %@!" = "Bienvenue, %@!";
+"Welcome, %@!" = "欢迎，%@！";
 
 /* Header text to prompt user what issue they want to report. */
-"What do you want to report?" = "Que voulez-vous signaler?";
+"What do you want to report?" = "您希望举报什么问题？";
 
 /* Placeholder example for relay server address. */
-"wss://some.relay.com" = "wss://un.relais.com";
+"wss://some.relay.com" = "wss://some.relay.com";
 
 /* Text of button that confirms to overwrite the existing mutelist. */
-"Yes, Overwrite" = "Oui, écraser";
+"Yes, Overwrite" = "确定覆盖";
 
 /* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
-"you" = "vous";
+"you" = "你";
 
 /* Label for Your Name section of user profile form. */
-"Your Name" = "Votre Nom";
+"Your Name" = "名字";
 
 /* Footer text to inform user what will happen when the report is submitted. */
-"Your report will be sent to the relays you are connected to" = "Votre signalement sera envoyé aux relais auxquels vous êtes connectés";
+"Your report will be sent to the relays you are connected to" = "您的举报将被发送到您已连接的中继器上";
 
 /* Dropdown option label for Lightning wallet, Zebedee. */
 "Zebedee" = "Zebedee";
