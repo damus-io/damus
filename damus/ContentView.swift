@@ -260,9 +260,11 @@ struct ContentView: View {
                                     ToolbarItem(placement: .navigationBarTrailing) {
                                         HStack(alignment: .center) {
                                             if home.signal.signal != home.signal.max_signal {
-                                                Text("\(home.signal.signal)/\(home.signal.max_signal)", comment: "Fraction of how many of the user's relay servers that are operational.")
-                                                    .font(.callout)
-                                                    .foregroundColor(.gray)
+                                                NavigationLink(destination: RelayConfigView(state: damus_state!)) {
+                                                    Text("\(home.signal.signal)/\(home.signal.max_signal)", comment: "Fraction of how many of the user's relay servers that are operational.")
+                                                        .font(.callout)
+                                                        .foregroundColor(.gray)
+                                                }
                                             }
 
                                         }
