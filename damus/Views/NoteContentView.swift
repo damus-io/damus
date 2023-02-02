@@ -65,7 +65,7 @@ struct NoteContentView: View {
     var body: some View {
         MainContent()
             .onAppear() {
-                self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+                self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey, show_images: show_images)
             }
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let profile = notif.object as! ProfileUpdate
@@ -74,7 +74,7 @@ struct NoteContentView: View {
                     switch block {
                     case .mention(let m):
                         if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
-                            self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+                            self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey, show_images: show_images)
                         }
                     case .text: return
                     case .hashtag: return
@@ -261,12 +261,12 @@ struct NoteArtifacts {
     }
 }
 
-func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -> NoteArtifacts {
+func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?, show_images: Bool) -> NoteArtifacts {
     let blocks = ev.blocks(privkey)
-    return render_blocks(blocks: blocks, profiles: profiles, privkey: privkey)
+    return render_blocks(blocks: blocks, profiles: profiles, privkey: privkey, show_images: show_images)
 }
 
-func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> NoteArtifacts {
+func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?, show_images: Bool) -> NoteArtifacts {
     var invoices: [Invoice] = []
     var img_urls: [URL] = []
     var link_urls: [URL] = []
@@ -283,7 +283,7 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
             return str
         case .url(let url):
             // Handle Image URLs
-            if is_image_url(url) {
+            if show_images && is_image_url(url) {
                 // Append Image
                 img_urls.append(url)
                 return str

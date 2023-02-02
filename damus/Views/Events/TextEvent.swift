@@ -17,13 +17,13 @@ struct TextEvent: View {
     var body: some View {
         HStack(alignment: .top) {
             let profile = damus.profiles.lookup(id: pubkey)
-        
+
             VStack {
                 let pmodel = ProfileModel(pubkey: pubkey, damus: damus)
                 let pv = ProfileView(damus_state: damus, profile: pmodel, followers: FollowersModel(damus_state: damus, target: pubkey))
                 
                 NavigationLink(destination: pv) {
-                    ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus.profiles)
+                    ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus.profiles, contacts: damus.contacts)
                 }
                 
                 Spacer()

@@ -8,6 +8,26 @@ import AVFoundation
 import Kingfisher
 import SwiftUI
 
+enum RemoteImagePolicy: String, CaseIterable {
+    case everyone
+    case friendsOnly
+    case friendsOfFriends
+    case restricted
+}
+
+func remoteImagePolicyText(_ fs: RemoteImagePolicy) -> String {
+    switch fs {
+    case .everyone:
+        return "Everyone"
+    case .friendsOnly:
+        return "Friends Only"
+    case .friendsOfFriends:
+        return "Friends of Friends"
+    case .restricted:
+        return "Block Images"
+    }
+}
+
 struct ConfigView: View {
     let state: DamusState
     @Environment(\.dismiss) var dismiss
@@ -19,8 +39,8 @@ struct ConfigView: View {
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
     @State var delete_text: String = ""
-    
     @ObservedObject var settings: UserSettingsStore
+    @AppStorage("remote_image_policy") var remote_image_policy: RemoteImagePolicy = .everyone
     
     let generator = UIImpactFeedbackGenerator(style: .light)
     
@@ -129,7 +149,35 @@ struct ConfigView: View {
                         KingfisherManager.shared.cache.cleanExpiredDiskCache()
                     }
                 }
-
+                
+                Section(NSLocalizedString("Remote Image Loading Policy", comment: "Section title for remote image loading policy")) {
+                    Menu {
+                        Button {
+                            self.remote_image_policy = .everyone
+                        } label: {
+                            Text(remoteImagePolicyText(.everyone))
+                        }
+                        Button {
+                            self.remote_image_policy = .friendsOfFriends
+                        } label: {
+                            Text(remoteImagePolicyText(.friendsOfFriends))
+                        }
+                        Button {
+                            self.remote_image_policy = .friendsOnly
+                        } label: {
+                            Text(remoteImagePolicyText(.friendsOnly))
+                        }
+                        Button {
+                            self.remote_image_policy = .restricted
+                        } label: {
+                            Text(remoteImagePolicyText(.restricted))
+                        }
+                    } label: {
+                        Text("\(remoteImagePolicyText(remote_image_policy))")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                
                 if state.is_privkey_user {
                     Section(NSLocalizedString("Delete", comment: "Section title for deleting the user")) {
                         Button(NSLocalizedString("Delete Account", comment: "Button to delete the user's account."), role: .destructive) {

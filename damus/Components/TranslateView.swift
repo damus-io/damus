@@ -121,7 +121,8 @@ struct TranslateView: View {
             if let translated = translated_note {
                 // Render translated note.
                 let blocks = event.get_blocks(content: translated)
-                translated_artifacts = render_blocks(blocks: blocks, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+                let show_images = should_show_images(contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
+                translated_artifacts = render_blocks(blocks: blocks, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey, show_images: show_images)
             }
 
             checkingTranslationStatus = false
