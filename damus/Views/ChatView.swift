@@ -75,7 +75,7 @@ struct ChatView: View {
         HStack {
             VStack {
                 if is_active || just_started {
-                    ProfilePicView(pubkey: event.pubkey, size: 32, highlight: is_active ? .main : .none, profiles: damus_state.profiles, show_img: should_show_images(contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey))
+                    ProfilePicView(pubkey: event.pubkey, size: 32, highlight: is_active ? .main : .none, profiles: damus_state.profiles, show_img: damus_state.contacts.is_in_friendosphere(event.pubkey))
                 }
 
                 Spacer()
