@@ -32,12 +32,12 @@
 			<string>Seguidores</string>
 		</dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@SEGUIDORES@</string>
+		<string>%#@FOLLOWERS@</string>
 	</dict>
 	<key>reactions_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@REAÇÕES@</string>
+		<string>%#@REACTIONS@</string>
 		<key>REACTIONS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -69,7 +69,7 @@
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Respondendo a %@%#@OUTROS@</string>
+		<string>Respondendo a %@%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -87,7 +87,7 @@
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Respondendo a %@, %@%#@OUTROS@</string>
+		<string>Respondendo a %@, %@%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -137,7 +137,7 @@
 	<key>tips_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@GROJETAS@</string>
+		<string>%#@TIPS@</string>
 		<key>TIPS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>

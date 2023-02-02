@@ -91,9 +91,9 @@ Number of profiles a user is following.</note>
         
         <note>Description of how the nip05 identifier would be used for verification.</note>
       </trans-unit>
-      <trans-unit id="'%@' is an invalid nip05 identifier. It should look like an email." xml:space="preserve">
-        <source>'%@' is an invalid nip05 identifier. It should look like an email.</source>
-        <target>'%@' é um identificador nip05 inválido. Deve parecer-se com um e-mail.</target>
+      <trans-unit id="'%@' is an invalid NIP-05 identifier. It should look like an email." xml:space="preserve">
+        <source>'%@' is an invalid NIP-05 identifier. It should look like an email.</source>
+        <target>'%@' é um identificador NIP-05 inválido. Deve parecer-se com um e-mail.</target>
         
         <note>Description of why the nip05 identifier is invalid.</note>
       </trans-unit>
@@ -120,6 +120,12 @@ Number of profiles a user is following.</note>
         <target>@</target>
         
         <note>Prefix character to username.</note>
+      </trans-unit>
+      <trans-unit id="API Key (optional)" xml:space="preserve">
+        <source>API Key (optional)</source>
+        <target>Chave API (opcional)</target>
+        
+        <note>Example URL to LibreTranslate server</note>
       </trans-unit>
       <trans-unit id="About" xml:space="preserve">
         <source>About</source>
@@ -406,6 +412,12 @@ Number of profiles a user is following.</note>
         
         <note>Example description about Bitcoin creator(s), Satoshi Nakamoto.</note>
       </trans-unit>
+      <trans-unit id="Custom" xml:space="preserve">
+        <source>Custom</source>
+        <target>Personalizado</target>
+        
+        <note>Dropdown option for selecting a custom translation server.</note>
+      </trans-unit>
       <trans-unit id="DM Type" xml:space="preserve">
         <source>DM Type</source>
         <target>TIpo de MPs</target>
@@ -553,6 +565,18 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Navigation link to go to profile.</note>
       </trans-unit>
+      <trans-unit id="Hide" xml:space="preserve">
+        <source>Hide</source>
+        <target>Ocultar</target>
+        
+        <note>Button to hide a post from a user who has been blocked.</note>
+      </trans-unit>
+      <trans-unit id="Hide API Key" xml:space="preserve">
+        <source>Hide API Key</source>
+        <target>Ocultar Chave API</target>
+        
+        <note>Button to hide the LibreTranslate server API key.</note>
+      </trans-unit>
       <trans-unit id="Home" xml:space="preserve">
         <source>Home</source>
         <target>Iniciar</target>
@@ -594,6 +618,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Vamos!</target>
         
         <note>Button to complete account creation and start using the app.</note>
+      </trans-unit>
+      <trans-unit id="LibreTranslate Translations" xml:space="preserve">
+        <source>LibreTranslate Translations</source>
+        <target>Traduções LibreTranslate</target>
+        
+        <note>Section title for selecting the server that hosts the LibreTranslate machine translation API.</note>
       </trans-unit>
       <trans-unit id="Lightning Address or LNURL" xml:space="preserve">
         <source>Lightning Address or LNURL</source>
@@ -652,6 +682,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists.</note>
       </trans-unit>
+      <trans-unit id="None" xml:space="preserve">
+        <source>None</source>
+        <target>Nenhum</target>
+        
+        <note>Dropdown option for selecting no translation server.</note>
+      </trans-unit>
       <trans-unit id="Nothing to see here. Check back later!" xml:space="preserve">
         <source>Nothing to see here. Check back later!</source>
         <target>Não há nada para ver aqui. Volte mais tarde!</target>
@@ -693,6 +729,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Post</target>
         
         <note>Button to post a note.</note>
+      </trans-unit>
+      <trans-unit id="Post from a user you've blocked" xml:space="preserve">
+        <source>Post from a user you've blocked</source>
+        <target>Post de um utilizador que bloqueou</target>
+        
+        <note>Text to indicate that what is being shown is a post from a user who has been blocked.</note>
       </trans-unit>
       <trans-unit id="Posts" xml:space="preserve">
         <source>Posts</source>
@@ -930,6 +972,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Text prompt for user to send a message to the other user.</note>
       </trans-unit>
+      <trans-unit id="Server" xml:space="preserve">
+        <source>Server</source>
+        <target>Servidor</target>
+        
+        <note>Prompt selection of LibreTranslate server to perform machine translations on notes</note>
+      </trans-unit>
       <trans-unit id="Settings" xml:space="preserve">
         <source>Settings</source>
         <target>Configurações</target>
@@ -948,7 +996,14 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Show</source>
         <target>Ver</target>
         
-        <note>Toggle to show or hide user's secret account login key.</note>
+        <note>Button to show a post from a user who has been blocked.
+   Toggle to show or hide user's secret account login key.</note>
+      </trans-unit>
+      <trans-unit id="Show API Key" xml:space="preserve">
+        <source>Show API Key</source>
+        <target>Mostrar Chave API</target>
+        
+        <note>Button to hide the LibreTranslate server API key.</note>
       </trans-unit>
       <trans-unit id="Show wallet selector" xml:space="preserve">
         <source>Show wallet selector</source>
@@ -1011,11 +1066,29 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <note>Navigation bar title for note thread.
    Navigation bar title for threaded event detail view.</note>
       </trans-unit>
+      <trans-unit id="Translate Note" xml:space="preserve">
+        <source>Translate Note</source>
+        <target>Traduzir Note</target>
+        
+        <note>Button to translate note from different language.</note>
+      </trans-unit>
+      <trans-unit id="Translated from (languageName!)" xml:space="preserve">
+        <source>Translated from (languageName!)</source>
+        <target>Traduzido de (languageName!)</target>
+        
+        <note>Button to indicate that the note has been translated from a different language.</note>
+      </trans-unit>
       <trans-unit id="Type your post here..." xml:space="preserve">
         <source>Type your post here...</source>
         <target>Escreva aqui o seu post...</target>
         
         <note>Text box prompt to ask user to type their post.</note>
+      </trans-unit>
+      <trans-unit id="URL" xml:space="preserve">
+        <source>URL</source>
+        <target>URL</target>
+        
+        <note>Example URL to LibreTranslate server</note>
       </trans-unit>
       <trans-unit id="Unfollow" xml:space="preserve">
         <source>Unfollow</source>
@@ -1066,17 +1139,17 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Sidebar menu label for Wallet view.</note>
       </trans-unit>
-      <trans-unit id="Wallet Of Satoshi" xml:space="preserve">
-        <source>Wallet Of Satoshi</source>
-        <target>Wallet Of Satoshi</target>
-        
-        <note>Dropdown option label for Lightning wallet, Wallet Of Satoshi.</note>
-      </trans-unit>
       <trans-unit id="Wallet Selector" xml:space="preserve">
         <source>Wallet Selector</source>
         <target>Selector de Carteira</target>
         
         <note>Section title for selection of wallet.</note>
+      </trans-unit>
+      <trans-unit id="Wallet of Satoshi" xml:space="preserve">
+        <source>Wallet of Satoshi</source>
+        <target>Wallet of Satoshi</target>
+        
+        <note>Dropdown option label for Lightning wallet, Wallet of Satoshi.</note>
       </trans-unit>
       <trans-unit id="Website" xml:space="preserve">
         <source>Website</source>
@@ -1134,13 +1207,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="collapsed_event_view_other_notes" translate="no" xml:space="preserve">
         <source>collapsed_event_view_other_notes</source>
-        <target>colapso_evento_visualizar_outras_notas</target>
+        <target>collapsed_event_view_other_notes</target>
         
         <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped. (Key in .stringsdict)</note>
       </trans-unit>
       <trans-unit id="followers_count" translate="no" xml:space="preserve">
         <source>followers_count</source>
-        <target>contagem_de_seguidores</target>
+        <target>followers_count</target>
         
         <note>Part of a larger sentence to describe how many people are following a user. (Key in .stringsdict)</note>
       </trans-unit>
@@ -1164,7 +1237,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="none" xml:space="preserve">
         <source>none</source>
-        <target> nada</target>
+        <target>nada</target>
         
         <note>No search results.</note>
       </trans-unit>
@@ -1188,31 +1261,31 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="reactions_count" translate="no" xml:space="preserve">
         <source>reactions_count</source>
-        <target>contagem_reações</target>
+        <target>reactions_count</target>
         
         <note>Part of a larger sentence to describe how many reactions there are on a post. (Key in .stringsdict)</note>
       </trans-unit>
       <trans-unit id="relays_count" translate="no" xml:space="preserve">
         <source>relays_count</source>
-        <target>contagem_relays</target>
+        <target>relays_count</target>
         
         <note>Part of a larger sentence to describe how many relay servers a user is connected. (Key in .stringsdict)</note>
       </trans-unit>
       <trans-unit id="replying_to_one_and_others" translate="no" xml:space="preserve">
         <source>replying_to_one_and_others</source>
-        <target>respondendo_a_um_e_outros</target>
+        <target>replying_to_one_and_others</target>
         
         <note>Label to indicate that the user is replying to 1 user and others. (Key in .stringsdict)</note>
       </trans-unit>
       <trans-unit id="replying_to_two_and_others" translate="no" xml:space="preserve">
         <source>replying_to_two_and_others</source>
-        <target>respondendo_a_dois_e_outros</target>
+        <target>replying_to_two_and_others</target>
         
         <note>Label to indicate that the user is replying to 2 users and others. (Key in .stringsdict)</note>
       </trans-unit>
       <trans-unit id="reposts_count" translate="no" xml:space="preserve">
         <source>reposts_count</source>
-        <target>contagem_reposts</target>
+        <target>reposts_count</target>
         
         <note>Part of a larger sentence to describe how many reposts there are. (Key in .stringsdict)</note>
       </trans-unit>
@@ -1224,13 +1297,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="sats_count" translate="no" xml:space="preserve">
         <source>sats_count</source>
-        <target>contagem_sats</target>
+        <target>sats_count</target>
         
         <note>Amount of sats. (Key in .stringsdict)</note>
       </trans-unit>
       <trans-unit id="tips_count" translate="no" xml:space="preserve">
         <source>tips_count</source>
-        <target>contagem_grojetas</target>
+        <target>tips_count</target>
         
         <note>Part of a larger sentence to describe how many tip payments there are on a post. (Key in .stringsdict)</note>
       </trans-unit>
@@ -1291,13 +1364,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/followers_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@FOLLOWERS@</source>
-        <target>%#@SEGUIDORES@</target>
+        <target>%#@FOLLOWERS@</target>
         
         <note>Part of a larger sentence to describe how many people are following a user.</note>
       </trans-unit>
       <trans-unit id="/reactions_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@REACTIONS@</source>
-        <target>%#@REAÇÕES@</target>
+        <target>%#@REACTIONS@</target>
         
         <note>Part of a larger sentence to describe how many reactions there are on a post.</note>
       </trans-unit>
@@ -1333,7 +1406,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/replying_to_one_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>Replying to %@%#@OTHERS@</source>
-        <target>Respondendo a %@%#@OUTROS@</target>
+        <target>Respondendo a %@%#@OTHERS@</target>
         
         <note>Label to indicate that the user is replying to 1 user and others.</note>
       </trans-unit>
@@ -1355,7 +1428,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/replying_to_two_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>Replying to %@, %@%#@OTHERS@</source>
-        <target>Respondendo a %@, %@%#@OUTROS@</target>
+        <target>Respondendo a %@, %@%#@OTHERS@</target>
         
         <note>Label to indicate that the user is replying to 2 users and others.</note>
       </trans-unit>
@@ -1413,7 +1486,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/tips_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@TIPS@</source>
-        <target>%#@GROJETAS@</target>
+        <target>%#@TIPS@</target>
         
         <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
       </trans-unit>
