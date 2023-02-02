@@ -10,7 +10,7 @@ import SwiftUI
 struct RelayDetailView: View {
     let relay: String
     
-    @State private var networkError: String?
+    @State private var errorString: String?
     @State private var nip11: RelayNIP11?
     
     var body: some View {
@@ -42,8 +42,8 @@ struct RelayDetailView: View {
                         Text(nipsList(nips: nip11.supported_nips))
                     }
                 }
-            } else if let networkError {
-                Text(networkError)
+            } else if let errorString {
+                Text(errorString)
                     .foregroundColor(.red)
             } else {
                 ProgressView()
@@ -58,15 +58,15 @@ struct RelayDetailView: View {
                 let task = URLSession.shared.dataTask(with: request) { data, response, error in
                     
                     if error != nil {
-                        networkError = error?.localizedDescription
-                    }
-                    
-                    guard let data else {
+                        errorString = error?.localizedDescription
                         return
                     }
                     
-                    let nip11 = try? JSONDecoder().decode(RelayNIP11.self, from: data)
-                    self.nip11 = nip11
+                    if let data, let nip11 = try? JSONDecoder().decode(RelayNIP11.self, from: data) {
+                        self.nip11 = nip11
+                    } else {
+                        errorString = "Failed to parse NIP-11 Data"
+                    }
                 }
                 task.resume()
             }
