@@ -17,7 +17,6 @@ struct RelayDetailView: View {
         Group {
             if let nip11 {
                 VStack(alignment: .leading) {
-
                     Form {
                         Section(NSLocalizedString("Name", comment: "Label to display relay name.")) {
                             Text(nip11.name)
