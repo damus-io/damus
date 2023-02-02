@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import WrappingHStack
 
 struct RelayDetailView: View {
     let relay: String
@@ -45,9 +44,6 @@ struct RelayDetailView: View {
                     Text(NSLocalizedString("Supported NIPs", comment: "Label to display relay's supported NIPs."))
                         .font(.subheadline.weight(.bold))
                     
-                    WrappingHStack(nip11.supported_nips, id: \.self) { nip in
-                        RelayNIPDetailView(nip: nip)
-                    }
                 }
                 .padding()
             } else if let networkError {

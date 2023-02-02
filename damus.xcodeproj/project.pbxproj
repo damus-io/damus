@@ -199,7 +199,6 @@
 		E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E990020E2955F837003BBC5A /* EditMetadataView.swift */; };
 		E9E4ED0B295867B900DD7078 /* ThreadV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E4ED0A295867B900DD7078 /* ThreadV2View.swift */; };
 		F7908E92298B0F0700AB113A /* RelayDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7908E91298B0F0700AB113A /* RelayDetailView.swift */; };
-		F7908E95298B1CAF00AB113A /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = F7908E94298B1CAF00AB113A /* WrappingHStack */; };
 		F7908E97298B1FDF00AB113A /* NIPURLBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7908E96298B1FDF00AB113A /* NIPURLBuilder.swift */; };
 		F7F0BA25297892BD009531F3 /* SwipeToDismiss.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F0BA24297892BD009531F3 /* SwipeToDismiss.swift */; };
 		F7F0BA272978E54D009531F3 /* ParicipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F0BA262978E54D009531F3 /* ParicipantsView.swift */; };
@@ -494,7 +493,6 @@
 				6C7DE41F2955169800E66263 /* Vault in Frameworks */,
 				4CE6DF1227F7A2B300C66700 /* Starscream in Frameworks */,
 				4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */,
-				F7908E95298B1CAF00AB113A /* WrappingHStack in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -947,7 +945,6 @@
 				4C649880286E0EE300EAE2B3 /* secp256k1 */,
 				4C06670328FC7EC500038D2A /* Kingfisher */,
 				6C7DE41E2955169800E66263 /* Vault */,
-				F7908E94298B1CAF00AB113A /* WrappingHStack */,
 			);
 			productName = damus;
 			productReference = 4CE6DEE327F7A08100C66700 /* damus.app */;
@@ -1038,7 +1035,6 @@
 				4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */,
 				4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				6C7DE41D2955169800E66263 /* XCRemoteSwiftPackageReference "Vault" */,
-				F7908E93298B1CAF00AB113A /* XCRemoteSwiftPackageReference "WrappingHStack" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -1713,14 +1709,6 @@
 				minimumVersion = 1.0.0;
 			};
 		};
-		F7908E93298B1CAF00AB113A /* XCRemoteSwiftPackageReference "WrappingHStack" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/dkk/WrappingHStack";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1743,11 +1731,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6C7DE41D2955169800E66263 /* XCRemoteSwiftPackageReference "Vault" */;
 			productName = Vault;
-		};
-		F7908E94298B1CAF00AB113A /* WrappingHStack */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F7908E93298B1CAF00AB113A /* XCRemoteSwiftPackageReference "WrappingHStack" */;
-			productName = WrappingHStack;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
