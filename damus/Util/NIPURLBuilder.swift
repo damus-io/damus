@@ -10,12 +10,17 @@ import Foundation
 struct NIPURLBuilder {
     static private let baseURL = "https://github.com/nostr-protocol/nips/blob/master/"
     static func url(forNIP nip: Int) -> URL? {
-        let urlString: String
-        if nip < 10 {
-            urlString = baseURL + "0\(nip).md"
-        } else {
-            urlString = baseURL + "\(nip).md"
-        }
+        let urlString = baseURL + "\(formatNipNumber(nip: nip)).md"
         return URL(string: urlString)
+    }
+    
+    static func formatNipNumber(nip: Int) -> String {
+        let formatted: String
+        if nip < 10 {
+            formatted = "0\(nip)"
+        } else {
+            formatted = "\(nip)"
+        }
+        return formatted
     }
 }

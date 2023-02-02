@@ -40,10 +40,10 @@ struct RelayDetailView: View {
                         Section(NSLocalizedString("Version", comment: "Label to display relay software version.")) {
                             Text(nip11.version)
                         }
+                        Section(NSLocalizedString("Supported NIPs", comment: "Label to display relay's supported NIPs.")) {
+                            Text(nipsList(nips: nip11.supported_nips))
+                        }
                     }
-                    Text(NSLocalizedString("Supported NIPs", comment: "Label to display relay's supported NIPs."))
-                        .font(.subheadline.weight(.bold))
-                    
                 }
                 .padding()
             } else if let networkError {
@@ -75,6 +75,23 @@ struct RelayDetailView: View {
                 task.resume()
             }
         }
+    }
+    
+    private func nipsList(nips: [Int]) -> AttributedString {
+        var attrString = AttributedString()
+        let lastNipIndex = nips.count - 1
+        for (index, nip) in nips.enumerated() {
+            if let link = NIPURLBuilder.url(forNIP: nip) {
+                let nipString = NIPURLBuilder.formatNipNumber(nip: nip)
+                var nipAttrString = AttributedString(stringLiteral: nipString)
+                nipAttrString.link = link
+                attrString = attrString + nipAttrString
+                if index < lastNipIndex {
+                    attrString = attrString + AttributedString(stringLiteral: ", ")
+                }
+            }
+        }
+        return attrString
     }
 }
 
