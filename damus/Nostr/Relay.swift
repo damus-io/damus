@@ -32,6 +32,7 @@ struct RelayNIP11: Codable {
     let contact: String
     let supported_nips: [Int]
     let software: String
+    let version: String
 }
 
 class Relay: Identifiable {
