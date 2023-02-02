@@ -87,6 +87,35 @@ struct NoteContentView: View {
 
     @EnvironmentObject var user_settings: UserSettingsStore
     
+    var TranslateButton: some View {
+        Group {
+            let languageName = Locale.current.localizedString(forLanguageCode: noteLanguage!)
+            if show_translated_note {
+                if checkingTranslationStatus {
+                    Button(NSLocalizedString("Translating from \(languageName!)...", comment: "Button to indicate that the note is in the process of being translated from a different language.")) {
+                        show_translated_note = false
+                    }
+                    .translate_button_style()
+                    
+                } else if translated_artifacts != nil {
+                    Button(NSLocalizedString("Translated from \(languageName!)", comment: "Button to indicate that the note has been translated from a different language.")) {
+                        show_translated_note = false
+                    }
+                    .translate_button_style()
+
+                    Text(translated_artifacts!.content)
+                        .font(eventviewsize_to_font(size))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            } else {
+                Button(NSLocalizedString("Translate Note", comment: "Button to translate note from different language.")) {
+                    show_translated_note = true
+                }
+                .translate_button_style()
+            }
+        }
+    }
+    
     func MainContent() -> some View {
         return VStack(alignment: .leading) {
             Text(artifacts.content)
@@ -94,35 +123,7 @@ struct NoteContentView: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             if size == .selected && noteLanguage != nil && noteLanguage != currentLanguage {
-                let languageName = Locale.current.localizedString(forLanguageCode: noteLanguage!)
-                if show_translated_note {
-                    if checkingTranslationStatus {
-                        Button(NSLocalizedString("Translating from \(languageName!)...", comment: "Button to indicate that the note is in the process of being translated from a different language.")) {
-                            show_translated_note = false
-                        }
-                        .font(.footnote)
-                        .contentShape(Rectangle())
-                        .padding(.top, 10)
-                    } else if translated_artifacts != nil {
-                        Button(NSLocalizedString("Translated from \(languageName!)", comment: "Button to indicate that the note has been translated from a different language.")) {
-                            show_translated_note = false
-                        }
-                        .font(.footnote)
-                        .contentShape(Rectangle())
-                        .padding(.top, 10)
-
-                        Text(translated_artifacts!.content)
-                            .font(eventviewsize_to_font(size))
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                } else {
-                    Button(NSLocalizedString("Translate Note", comment: "Button to translate note from different language.")) {
-                        show_translated_note = true
-                    }
-                    .font(.footnote)
-                    .contentShape(Rectangle())
-                    .padding(.top, 10)
-                }
+                TranslateButton
             }
 
             if show_images && artifacts.images.count > 0 {
@@ -372,5 +373,15 @@ struct NoteContentView_Previews: PreviewProvider {
         let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
         let artifacts = NoteArtifacts(content: AttributedString(stringLiteral: content), images: [], invoices: [], links: [])
         NoteContentView(privkey: "", event: NostrEvent(content: content, pubkey: "pk"), profiles: state.profiles, previews: PreviewCache(), show_images: true, artifacts: artifacts, size: .normal)
+    }
+}
+
+
+extension View {
+    func translate_button_style() -> some View {
+        return self
+            .font(.footnote)
+            .contentShape(Rectangle())
+            .padding([.top, .bottom], 10)
     }
 }
