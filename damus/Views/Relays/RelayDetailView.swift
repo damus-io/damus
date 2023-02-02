@@ -16,35 +16,32 @@ struct RelayDetailView: View {
     var body: some View {
         Group {
             if let nip11 {
-                VStack(alignment: .leading) {
-                    Form {
-                        Section(NSLocalizedString("Name", comment: "Label to display relay name.")) {
-                            Text(nip11.name)
-                        }
-                        Section(NSLocalizedString("Relay", comment: "Label to display relay address.")) {
-                            Text(relay)
-                        }
-                        Section(NSLocalizedString("Description", comment: "Label to display relay description.")) {
-                            Text(nip11.description)
-                        }
-                        Section(NSLocalizedString("Public Key", comment: "Label to display relay contact public key.")) {
-                            Text(nip11.pubkey)
-                        }
-                        Section(NSLocalizedString("Contact", comment: "Label to display relay contact information.")) {
-                            Text(nip11.contact)
-                        }
-                        Section(NSLocalizedString("Software", comment: "Label to display relay software.")) {
-                            Text(nip11.software)
-                        }
-                        Section(NSLocalizedString("Version", comment: "Label to display relay software version.")) {
-                            Text(nip11.version)
-                        }
-                        Section(NSLocalizedString("Supported NIPs", comment: "Label to display relay's supported NIPs.")) {
-                            Text(nipsList(nips: nip11.supported_nips))
-                        }
+                Form {
+                    Section(NSLocalizedString("Name", comment: "Label to display relay name.")) {
+                        Text(nip11.name)
+                    }
+                    Section(NSLocalizedString("Relay", comment: "Label to display relay address.")) {
+                        Text(relay)
+                    }
+                    Section(NSLocalizedString("Description", comment: "Label to display relay description.")) {
+                        Text(nip11.description)
+                    }
+                    Section(NSLocalizedString("Public Key", comment: "Label to display relay contact public key.")) {
+                        Text(nip11.pubkey)
+                    }
+                    Section(NSLocalizedString("Contact", comment: "Label to display relay contact information.")) {
+                        Text(nip11.contact)
+                    }
+                    Section(NSLocalizedString("Software", comment: "Label to display relay software.")) {
+                        Text(nip11.software)
+                    }
+                    Section(NSLocalizedString("Version", comment: "Label to display relay software version.")) {
+                        Text(nip11.version)
+                    }
+                    Section(NSLocalizedString("Supported NIPs", comment: "Label to display relay's supported NIPs.")) {
+                        Text(nipsList(nips: nip11.supported_nips))
                     }
                 }
-                .padding()
             } else if let networkError {
                 Text(networkError)
                     .foregroundColor(.red)
