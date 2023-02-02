@@ -5,7 +5,7 @@
 "'%@' at '%@' will be used for verification" = "'%@' bei '%@' wird zur Verifizierung benutzt werden.";
 
 /* Description of why the nip05 identifier is invalid. */
-"'%@' is an invalid nip05 identifier. It should look like an email." = "'%@' ist eine ungültige nip05 Kennzeichnung. Diese sollte wie eine Emailadresse aussehen. ";
+"'%@' is an invalid NIP-05 identifier. It should look like an email." = "%@' ist kein gülter NIP-05 identifier. Dieser sollte wie eine email aussehen. ";
 
 /* Navigation bar title for view that shows who is following a user. */
 "(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "(Profile.displayName(profile: profile, pubkey: whos)) Gefolgte";
@@ -62,7 +62,7 @@ Number of profiles a user is following. */
 "Account ID" = "Konto ID";
 
 /* Title for confirmation dialog to either share, report, or block a profile. */
-"Actions" = "Aktionen";
+"Actions" = "Handlungen";
 
 /* Button to add recommended relay server.
    Button to confirm adding user inputted relay. */
@@ -76,6 +76,9 @@ Number of profiles a user is following. */
 
 /* Any amount of sats */
 "Any" = "beliebig";
+
+/* Example URL to LibreTranslate server */
+"API Key (optional)" = "API Schlüssel (optional)";
 
 /* Alert message to ask if user wants to repost a post. */
 "Are you sure you want to repost this?" = "Bist du sicher dass Du den Beitrag auf deinem Profil teilen möchtest?";
@@ -126,6 +129,7 @@ Number of profiles a user is following. */
    Button to cancel out of posting a note.
    Button to cancel out of reposting a post.
    Button to cancel out of view adding user inputted relay.
+   Cancel deleting the user.
    Cancel out of logging out the user. */
 "Cancel" = "Abbrechen";
 
@@ -193,14 +197,19 @@ Number of profiles a user is following. */
 /* Example description about Bitcoin creator(s), Satoshi Nakamoto. */
 "Creator(s) of Bitcoin. Absolute legend." = "Erfinder von Bitcoin. Absolute Legende(n).";
 
+/* Dropdown option for selecting a custom translation server. */
+"Custom" = "Auswahl";
+
 /* Name of the app, shown on the first screen when user is not logged in. */
 "Damus" = "Damus";
 
 /* Button to pay a Lightning invoice with the user's default Lightning wallet. */
 "Default Wallet" = "Voreingestelltes Wallet";
 
-/* Button to delete a relay server that the user connects to.
-   Button to remove a user from their blocklist. */
+/* Button for deleting the users account.
+   Button to delete a relay server that the user connects to.
+   Button to remove a user from their blocklist.
+   Section title for deleting the user */
 "Delete" = "Löschen";
 
 /* Button to dismiss a text field alert. */
@@ -208,9 +217,6 @@ Number of profiles a user is following. */
 
 /* Label to prompt display name entry. */
 "Display Name" = "Profilname";
-
-/* DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet. DM is the English abbreviation for Direct Message. */
-"DM Type" = "PN Typ";
 
 /* Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
    Navigation title for view of DMs, where DM is an English abbreviation for Direct Message. */
@@ -240,9 +246,6 @@ Number of profiles a user is following. */
 /* Label indicating that the below text is the EULA, an acronym for End User License Agreement. */
 "EULA" = "Endbenutzer-Lizenzvereinbarung";
 
-/* Filter state for seeing either only posts, or posts & replies. */
-"Filter State" = "Filter Einstellung";
-
 /* Button to follow a user. */
 "Follow" = "Folgen";
 
@@ -267,6 +270,12 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Navigation link to go to profile. */
 "Goto profile %@" = "Gehe zum Profil %@";
+
+/* Button to hide a post from a user who has been blocked. */
+"Hide" = "Verstecken";
+
+/* Button to hide the LibreTranslate server API key. */
+"Hide API Key" = "API Schlüssel verstecken";
 
 /* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
 "Home" = "Heim";
@@ -295,6 +304,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button to complete account creation and start using the app. */
 "Let's go!" = "Lass uns loslegen!";
 
+/* Section title for selecting the server that hosts the LibreTranslate machine translation API. */
+"LibreTranslate Translations" = "LibreTranslate Übersetzungen";
+
 /* Placeholder text for entry of Lightning Address or LNURL. */
 "Lightning Address or LNURL" = "Lightning-Adresse oder LNURL";
 
@@ -313,7 +325,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Alert for logging out the user.
    Button for logging out the user.
-   Button to logout the user. */
+   Button to close the alert that informs that the current account has been deleted. */
 "Logout" = "Ausloggen";
 
 /* Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out. */
@@ -330,6 +342,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* No search results. */
 "none" = "keine";
+
+/* Dropdown option for selecting no translation server. */
+"None" = "Keine";
 
 /* Indicates that there are no notes in the timeline to view. */
 "Nothing to see here. Check back later!" = "Hier gibt es nichts zu sehen. Komm später wieder vorbei!";
@@ -360,6 +375,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Button to post a note. */
 "Post" = "Veröffentlichen";
+
+/* Text to indicate that what is being shown is a post from a user who has been blocked. */
+"Post from a user you've blocked" = "Nachricht von einem/e User/in den/die Du geblockt hast";
 
 /* Label for filter for seeing only posts (instead of posts and replies). */
 "Posts" = "Beiträge";
@@ -403,7 +421,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Text field for relay server. Used for testing purposes. */
 "Relay" = "Relay";
 
-/* Sidebar menu label for Relay servers view */
+/* Sidebar menu label for Relay servers view
+   Sidebar menu label for Relays view. */
 "Relays" = "Relays";
 
 /* Description of what was done as a result of sending a report to relay servers. */
@@ -444,9 +463,6 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message. */
 "Requests" = "Anfragen";
 
-/* Section title for resetting the user */
-"Reset" = "Zurücksetzen";
-
 /* Button to retry completing account creation after an error occurred. */
 "Retry" = "Erneut versuchen";
 
@@ -483,6 +499,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Text prompt for user to send a message to the other user. */
 "Send a message to start the conversation..." = "Sende eine Nachricht um eine Unterhaltung zu beginnen...";
 
+/* Prompt selection of LibreTranslate server to perform machine translations on notes */
+"Server" = "Server";
+
 /* Navigation title for Settings view.
    Sidebar menu label for accessing the app settings */
 "Settings" = "Einstellungen";
@@ -491,8 +510,12 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Button to share the link to a profile. */
 "Share" = "Teilen";
 
-/* Toggle to show or hide user's secret account login key. */
+/* Button to show a post from a user who has been blocked.
+   Toggle to show or hide user's secret account login key. */
 "Show" = "Anzeigen";
+
+/* Button to hide the LibreTranslate server API key. */
+"Show API Key" = "API Schlüssel anzeigen";
 
 /* Toggle to show or hide selection of wallet. */
 "Show wallet selector" = "Wallet-Auswahl zeigen";
@@ -525,6 +548,12 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Navigation bar title for threaded event detail view. */
 "Thread" = "Thema";
 
+/* Button to translate note from different language. */
+"Translate Note" = "Note übersetzen";
+
+/* Button to indicate that the note has been translated from a different language. */
+"Translated from (languageName!)" = "Übersetzt aus (languageName!)";
+
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "Schreibe deinen Beitrag hier...";
 
@@ -543,7 +572,10 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Text to indicate that the button next to it is in a state that will unfollow a profile when tapped. */
 "Unfollows" = "Entfolgen";
 
-/* Alert message to indicate */
+/* Example URL to LibreTranslate server */
+"URL" = "URL";
+
+/* Alert message to indicate the user has been blocked */
 "User blocked" = "Benutzer blockiert";
 
 /* Alert message that informs a user was blocked. */
@@ -556,8 +588,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Sidebar menu label for Wallet view. */
 "Wallet" = "Wallet";
 
-/* Dropdown option label for Lightning wallet, Wallet Of Satoshi. */
-"Wallet Of Satoshi" = "Wallet Of Satoshi";
+/* Dropdown option label for Lightning wallet, Wallet of Satoshi. */
+"Wallet of Satoshi" = "Wallet of Satoshi";
 
 /* Section title for selection of wallet. */
 "Wallet Selector" = "Wallet-Auswahl";
