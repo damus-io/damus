@@ -13,6 +13,8 @@ struct RelayDetailView: View {
     @State private var errorString: String?
     @State private var nip11: RelayNIP11?
     
+    @State var conn_color: Color
+    
     var body: some View {
         Group {
             if let nip11 {
@@ -21,7 +23,13 @@ struct RelayDetailView: View {
                         Text(nip11.name)
                     }
                     Section(NSLocalizedString("Relay", comment: "Label to display relay address.")) {
-                        Text(relay)
+                        HStack {
+                            Text(relay)
+                            Spacer()
+                            Circle()
+                                .frame(width: 8.0, height: 8.0)
+                                .foregroundColor(conn_color)
+                        }
                     }
                     Section(NSLocalizedString("Description", comment: "Label to display relay description.")) {
                         Text(nip11.description)
@@ -45,6 +53,7 @@ struct RelayDetailView: View {
             } else if let errorString {
                 Text(errorString)
                     .foregroundColor(.red)
+                    .font(.caption)
             } else {
                 ProgressView()
             }
@@ -93,6 +102,6 @@ struct RelayDetailView: View {
 
 struct RelayDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        RelayDetailView(relay: "wss://nostr.klabo.blog")
+        RelayDetailView(relay: "wss://nostr.klabo.blog", conn_color: .green)
     }
 }

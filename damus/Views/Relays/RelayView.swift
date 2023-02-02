@@ -35,7 +35,7 @@ struct RelayView: View {
                 .frame(width: 8.0, height: 8.0)
                 .foregroundColor(conn_color)
             NavigationLink {
-                RelayDetailView(relay: relay)
+                RelayDetailView(relay: relay, conn_color: conn_color)
             } label: {
                 Text(relay)
             }
