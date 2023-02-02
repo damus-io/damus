@@ -236,7 +236,7 @@ struct NoteContentView_Previews: PreviewProvider {
         let state = test_damus_state()
         let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
         let artifacts = NoteArtifacts(content: AttributedString(stringLiteral: content), images: [], invoices: [], links: [])
-        NoteContentView(damus_state: state, event: NostrEvent(content: content, pubkey: "pk"), show_images: true, artifacts: artifacts, size: .normal)
+        NoteContentView(privkey: "", event: NostrEvent(content: content, pubkey: "pk"), profiles: state.profiles, previews: PreviewCache(), show_images: false, artifacts: artifacts, size: .normal)
     }
 }
 

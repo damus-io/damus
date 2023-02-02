@@ -98,30 +98,49 @@ struct ProfilePicView: View {
     let size: CGFloat
     let highlight: Highlight
     let profiles: Profiles
+    let show_img: Bool
     
     @State var picture: String?
     
-    init (pubkey: String, size: CGFloat, highlight: Highlight, profiles: Profiles, picture: String? = nil) {
+    init (pubkey: String, size: CGFloat, highlight: Highlight, profiles: Profiles, picture: String? = nil, show_img: Bool) {
         self.pubkey = pubkey
         self.profiles = profiles
         self.size = size
         self.highlight = highlight
         self._picture = State(initialValue: picture)
+        self.show_img = show_img
     }
     
     var body: some View {
-        InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: size, highlight: highlight)
-            .onReceive(handle_notify(.profile_updated)) { notif in
-                let updated = notif.object as! ProfileUpdate
+        if !show_img {
+            InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: size, highlight: highlight)
+                .blur(radius: 7)
+                .overlay{ Circle().opacity(0.50)}
+                .onReceive(handle_notify(.profile_updated)) { notif in
+                    let updated = notif.object as! ProfileUpdate
 
-                guard updated.pubkey == self.pubkey else {
-                    return
+                    guard updated.pubkey == self.pubkey else {
+                        return
+                    }
+                    
+                    if let pic = updated.profile.picture {
+                        self.picture = pic
+                    }
                 }
-                
-                if let pic = updated.profile.picture {
-                    self.picture = pic
+        } else {
+            InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: size, highlight: highlight)
+                .onReceive(handle_notify(.profile_updated)) { notif in
+                    let updated = notif.object as! ProfileUpdate
+
+                    guard updated.pubkey == self.pubkey else {
+                        return
+                    }
+                    
+                    if let pic = updated.profile.picture {
+                        self.picture = pic
+                    }
                 }
-            }
+        }
     }
 }
 
@@ -150,7 +169,8 @@ struct ProfilePicView_Previews: PreviewProvider {
             pubkey: pubkey,
             size: 100,
             highlight: .none,
-            profiles: make_preview_profiles(pubkey))
+            profiles: make_preview_profiles(pubkey),
+            show_img: false)
     }
 }
 

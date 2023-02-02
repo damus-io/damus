@@ -68,7 +68,7 @@ struct ProfileZoomView: View {
 
                 Spacer()
                 
-                ProfilePicView(pubkey: pubkey, size: 200.0, highlight: .none, profiles: profiles)
+                ProfilePicView(pubkey: pubkey, size: 200.0, highlight: .none, profiles: profiles, show_img: true)
                     .padding(100)
                     .scaledToFit()
                     .scaleEffect(self.scale * scaleState)

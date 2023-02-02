@@ -254,7 +254,7 @@ struct ProfileView: View {
                 let pfp_size: CGFloat = 90.0
                 
                 HStack(alignment: .center) {
-                    ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles)
+                    ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, show_img: true)
                         .onTapGesture {
                             is_zoomed.toggle()
                         }
