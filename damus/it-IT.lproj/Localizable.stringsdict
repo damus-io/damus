@@ -11,9 +11,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%d other note</string>
+			<string>%d altra nota</string>
 			<key>other</key>
-			<string>%d other notes</string>
+			<string>%d altre note</string>
 		</dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>··· %#@NOTES@ ···</string>
@@ -27,9 +27,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Follower</string>
+			<string>Seguace</string>
 			<key>other</key>
-			<string>Followers</string>
+			<string>Seguaci</string>
 		</dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@FOLLOWERS@</string>
@@ -45,9 +45,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Reaction</string>
+			<string>Reazione</string>
 			<key>other</key>
-			<string>Reactions</string>
+			<string>Reazioni</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -61,15 +61,15 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Relay</string>
+			<string>Relè</string>
 			<key>other</key>
-			<string>Relays</string>
+			<string>Relè</string>
 		</dict>
 	</dict>
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Replying to %@%#@OTHERS@</string>
+		<string>Rispondendo a %@%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -77,9 +77,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string> &amp; %d other</string>
+			<string> &amp; %d altro</string>
 			<key>other</key>
-			<string> &amp; %d others</string>
+			<string> &amp; %d altri</string>
 			<key>zero</key>
 			<string></string>
 		</dict>
@@ -87,7 +87,7 @@
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Replying to %@, %@%#@OTHERS@</string>
+		<string>Rispondendo a %@, %@%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -95,9 +95,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string> &amp; %d other</string>
+			<string> &amp; %d altro</string>
 			<key>other</key>
-			<string> &amp; %d others</string>
+			<string> &amp; %d altri</string>
 			<key>zero</key>
 			<string></string>
 		</dict>
@@ -115,7 +115,7 @@
 			<key>one</key>
 			<string>Repost</string>
 			<key>other</key>
-			<string>Reposts</string>
+			<string>I Repost</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -145,9 +145,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Tip</string>
+			<string>Mancia</string>
 			<key>other</key>
-			<string>Tips</string>
+			<string>Mance</string>
 		</dict>
 	</dict>
 </dict>
