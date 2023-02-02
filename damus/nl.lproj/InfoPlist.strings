@@ -1,0 +1,9 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Damus";
+
+/* Bundle name */
+"CFBundleName" = "damus";
+
+/* Privacy - Photo Library Additions Usage Description */
+"NSPhotoLibraryAddUsageDescription" = "Geef Damus toegang tot je foto's om afbeeldingen op te kunnen slaan.";
+
