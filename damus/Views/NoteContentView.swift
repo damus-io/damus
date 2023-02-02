@@ -7,6 +7,7 @@
 
 import SwiftUI
 import LinkPresentation
+import NaturalLanguage
 
 #if canImport(FoundationNetworking)
     import FoundationNetworking
@@ -73,7 +74,8 @@ struct NoteContentView: View {
     let show_images: Bool
     
     @State var checkingTranslationStatus: Bool = false
-    @State var language: String? = nil
+    @State var currentLanguage: String = "en"
+    @State var noteLanguage: String? = nil
     @State var translated_note: String? = nil
     @State var show_translated_note: Bool = false
     @State var translated_artifacts: NoteArtifacts? = nil
@@ -91,19 +93,28 @@ struct NoteContentView: View {
                 .font(eventviewsize_to_font(size))
                 .fixedSize(horizontal: false, vertical: true)
 
-            if size == .selected && language != nil && translated_artifacts != nil {
-                let languageName = Locale.current.localizedString(forLanguageCode: language!)
+            if size == .selected && noteLanguage != nil && noteLanguage != currentLanguage {
+                let languageName = Locale.current.localizedString(forLanguageCode: noteLanguage!)
                 if show_translated_note {
-                    Button(NSLocalizedString("Translated from \(languageName!)", comment: "Button to indicate that the note has been translated from a different language.")) {
-                        show_translated_note = false
-                    }
-                    .font(.footnote)
-                    .contentShape(Rectangle())
-                    .padding(.top, 10)
+                    if checkingTranslationStatus {
+                        Button(NSLocalizedString("Translating from \(languageName!)...", comment: "Button to indicate that the note is in the process of being translated from a different language.")) {
+                            show_translated_note = false
+                        }
+                        .font(.footnote)
+                        .contentShape(Rectangle())
+                        .padding(.top, 10)
+                    } else if translated_artifacts != nil {
+                        Button(NSLocalizedString("Translated from \(languageName!)", comment: "Button to indicate that the note has been translated from a different language.")) {
+                            show_translated_note = false
+                        }
+                        .font(.footnote)
+                        .contentShape(Rectangle())
+                        .padding(.top, 10)
 
-                    Text(translated_artifacts!.content)
-                        .font(eventviewsize_to_font(size))
-                        .fixedSize(horizontal: false, vertical: true)
+                        Text(translated_artifacts!.content)
+                            .font(eventviewsize_to_font(size))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 } else {
                     Button(NSLocalizedString("Translate Note", comment: "Button to translate note from different language.")) {
                         show_translated_note = true
@@ -182,37 +193,52 @@ struct NoteContentView: View {
                     self.preview = view
                 }
 
-                if size == .selected && language == nil && !checkingTranslationStatus && user_settings.libretranslate_url != "" {
+                if size == .selected && noteLanguage == nil && !checkingTranslationStatus && user_settings.libretranslate_url != "" {
                     checkingTranslationStatus = true
 
-                    let currentLanguage = Locale.current.languageCode ?? "en"
-                    let translator = Translator(user_settings.libretranslate_url, apiKey: user_settings.libretranslate_api_key)
+                    if #available(iOS 16, *) {
+                        currentLanguage = Locale.current.language.languageCode?.identifier ?? "en"
+                    } else {
+                        currentLanguage = Locale.current.languageCode ?? "en"
+                    }
 
-                    do {
-                        language = try await translator.detect(event.content)
+                    // Rely on Apple's NLLanguageRecognizer to tell us which language it thinks the note is in.
+                    noteLanguage = NLLanguageRecognizer.dominantLanguage(for: event.content)?.rawValue ?? currentLanguage
 
-                        if language == nil {
-                            language = currentLanguage
-                            translated_note = nil
-                        } else if language != currentLanguage {
-                            translated_note = try await translator.translate(event.content, from: language!, to: currentLanguage)
-
-                            if translated_note != nil {
-                                let blocks = event.get_blocks(content: translated_note!)
-                                translated_artifacts = render_blocks(blocks: blocks, profiles: profiles, privkey: privkey)
-                            }
+                    if noteLanguage != currentLanguage {
+                        // If the detected dominant language is a variant, remove the variant component and just take the language part as LibreTranslate typically only supports the variant-less language.
+                        if #available(iOS 16, *) {
+                            noteLanguage = Locale.LanguageCode(stringLiteral: noteLanguage!).identifier(.alpha2)
+                        } else {
+                            noteLanguage = Locale.canonicalLanguageIdentifier(from: noteLanguage!)
                         }
-                    } catch {
-                        // If for whatever reason we're not able to figure out the language of the note, or translate the note, fail gracefully and do not retry. It's not the end of the world. Don't want to take down someone's translation server with an accidental denial of service attack.
-                        language = currentLanguage
+                    }
+
+                    if noteLanguage == nil {
+                        noteLanguage = currentLanguage
                         translated_note = nil
+                    } else if noteLanguage != currentLanguage {
+                        do {
+                            // If the note language is different from our language, send a translation request.
+                            let translator = Translator(user_settings.libretranslate_url, apiKey: user_settings.libretranslate_api_key)
+                            translated_note = try await translator.translate(event.content, from: noteLanguage!, to: currentLanguage)
+                        } catch {
+                            // If for whatever reason we're not able to figure out the language of the note, or translate the note, fail gracefully and do not retry. It's not the end of the world. Don't want to take down someone's translation server with an accidental denial of service attack.
+                            noteLanguage = currentLanguage
+                            translated_note = nil
+                        }
+                    }
+
+                    if translated_note != nil {
+                        // Render translated note.
+                        let blocks = event.get_blocks(content: translated_note!)
+                        translated_artifacts = render_blocks(blocks: blocks, profiles: profiles, privkey: privkey)
                     }
 
                     checkingTranslationStatus = false
                 }
             }
     }
-    
     
     func getMetaData(for url: URL) async -> LPLinkMetadata? {
         // iOS 15 is crashing for some reason
@@ -274,36 +300,6 @@ public struct Translator {
     public init(_ url: String, apiKey: String? = nil) {
         self.url = url
         self.apiKey = apiKey
-    }
-
-    public func detect(_ text: String) async throws -> String? {
-        let url = try makeURL(path: "/detect")
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        struct RequestBody: Encodable {
-            let q: String
-            let api_key: String?
-        }
-        let body = RequestBody(q: text, api_key: apiKey)
-        request.httpBody = try encoder.encode(body)
-
-        struct Response: Decodable {
-            let confidence: Double
-            let language: String
-        }
-
-        let data = try await session.data(for: request)
-        let response = try decoder.decode([Response].self, from: data)
-        let language = response.first!
-
-        if language.confidence >= 80 {
-            return language.language
-        } else {
-            return nil
-        }
     }
 
     public func translate(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> String {
