@@ -1,0 +1,629 @@
+/* Blank space to separate profile picture from profile editor form. */
+"   " = "61b6edf1108e6f396680a33b02486a70_tr";
+
+/* Description of how the nip05 identifier would be used for verification. */
+"'%@' at '%@' will be used for verification" = "سيتم التحقق من '%@' @ '%@'";
+
+/* Description of why the nip05 identifier is invalid. */
+"'%@' is an invalid NIP-05 identifier. It should look like an email." = "'%@' عنوان NIP-05 غير صالح. من المفترض أن يشابه صيغة الايميل مثل المثال الموضح.";
+
+/* Navigation bar title for view that shows who is following a user. */
+"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "متابعي (Profile.displayName(profile: profile, pubkey: whos))";
+
+/* Navigation bar title for view that shows who a user is following. */
+"(who) following" = "(who) يتابع";
+
+/* Prefix character to username. */
+"@" = "@";
+
+/* Amount of time that has passed since reply quote event occurred.
+Abbreviated version of a nostr public key. */
+"%@" = "%@";
+
+/* Sentence composed of 2 variables to describe how many tip payments there are on a post. In source English, the first variable is the number of tip payments, and the second variable is 'Tip' or 'Tips'.
+Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
+"%@ %@" = "%@ %@";
+
+/* Alert message that informs a user was blocked. */
+"%@ has been blocked" = "تم حظر %@";
+
+/* Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string. */
+"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "انشاء حسابك لايتطلب رقم جوال أو بريد الكتروني أو معلومات شخصية. احصل على حسابك الخاص في ثواني.";
+
+/* Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string. */
+"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "محادثات خاصة مشفرة كليا. ";
+
+/* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
+"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. بسهولة مطلقة، أرسل و استقبل برقيات البتكوين ⚡️عملة الانترنت العالمية.";
+
+/* Number of tip payments on a post.
+Number of profiles a user is following. */
+"%lld" = "%lld";
+
+/* Fraction of how many of the user's relay servers that are operational. */
+"%lld/%lld" = "%lld/%lld";
+
+/* Placeholder for event mention. */
+"< e >" = "< e >";
+
+/* Label to prompt for about text entry for user to describe about themself. */
+"About" = "النبذة التعريفية";
+
+/* Label for About Me section of user profile form. */
+"About Me" = "النبذة التعريفية";
+
+/* Placeholder text for About Me description. */
+"Absolute Boss" = "مدير كبير";
+
+/* Button to accept the end user license agreement before being allowed into the app. */
+"Accept" = "موافق";
+
+/* Label to indicate the public ID of the account. */
+"Account ID" = "معرف الحساب";
+
+/* Title for confirmation dialog to either share, report, or block a profile. */
+"Actions" = "خيارات";
+
+/* Button to add recommended relay server.
+   Button to confirm adding user inputted relay. */
+"Add" = "اضافة";
+
+/* Button label to re-add all original participants as profiles to reply to in a note */
+"Add all" = "اضافة الجميع";
+
+/* Label for section for adding a relay server. */
+"Add Relay" = "اضافة موصّل";
+
+/* Any amount of sats */
+"Any" = "كم";
+
+/* Example URL to LibreTranslate server */
+"API Key (optional)" = "مفتاح API (اختياري)";
+
+/* Alert message to ask if user wants to repost a post. */
+"Are you sure you want to repost this?" = "هل أنت متأكد من اعادة النشر؟";
+
+/* Label for Banner Image section of user profile form. */
+"Banner Image" = "صورة الخلفية";
+
+/* Reminder to user that they should save their account information. */
+"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "قبل البدء، يجب عليك حفظ معلومات حسابك لتتمكن من الوصول إليه مستقبلا في حالة حذف دامُس أو تغيير جهازك.";
+
+/* Dropdown option label for Lightning wallet, Bitcoin Beach. */
+"Bitcoin Beach" = "Bitcoin Beach";
+
+/* Label for Bitcoin Lightning Tips section of user profile form. */
+"Bitcoin Lightning Tips" = "اكراميات البتكوين";
+
+/* Dropdown option label for Lightning wallet, Blixt Wallet */
+"Blixt Wallet" = "Blixt Wallet";
+
+/* Alert button to block a user.
+   Button to block a profile.
+   Context menu option for blocking users. */
+"Block" = "حظر";
+
+/* Alert message prompt to ask if a user should be blocked. */
+"Block %@?" = "حظر %@؟";
+
+/* Title of alert for blocking a user. */
+"Block User" = "حظر المستخدم";
+
+/* Sidebar menu label for Profile view. */
+"Blocked" = "قائمة الحظر";
+
+/* Navigation title of view to see list of blocked users. */
+"Blocked Users" = "المحظورون";
+
+/* Dropdown option label for Lightning wallet, Blue Wallet. */
+"Blue Wallet" = "Blue Wallet";
+
+/* Dropdown option label for Lightning wallet, Breez. */
+"Breez" = "Breez";
+
+/* Context menu option for broadcasting the user's note to all of the user's connected relay servers. */
+"Broadcast" = "بث";
+
+/* Alert button to cancel out of alert for blocking a user.
+   Button to cancel out of alert that creates a new mutelist.
+   Button to cancel out of posting a note.
+   Button to cancel out of reposting a post.
+   Button to cancel out of view adding user inputted relay.
+   Cancel deleting the user.
+   Cancel out of logging out the user. */
+"Cancel" = "الغاء";
+
+/* Dropdown option label for Lightning wallet, Cash App. */
+"Cash App" = "Cash App";
+
+/* Navigation bar title for Chatroom view. */
+"Chat" = "المحادثة";
+
+/* Button for clearing cached data. */
+"Clear" = "مسح";
+
+/* Section title for clearing cached data. */
+"Clear Cache" = "مسح البيانات المؤقتة";
+
+/* Label indicating that a user's key was copied. */
+"Copied" = "تم النسخ";
+
+/* Button to copy a relay server address. */
+"Copy" = "نسخ";
+
+/* Context menu option for copying the ID of the account that created the note. */
+"Copy Account ID" = "نسخ عنوان الحساب";
+
+/* Context menu option to copy an image into clipboard.
+   Context menu option to copy an image to clipboard. */
+"Copy Image" = "نسخ الصورة";
+
+/* Context menu option to copy the URL of an image into clipboard. */
+"Copy Image URL" = "نسخ رابط الصورة";
+
+/* Title of section for copying a Lightning invoice identifier. */
+"Copy invoice" = "نسخ البرقية";
+
+/* Context menu option for copying a user's Lightning URL. */
+"Copy LNURL" = "نسخ LNURL";
+
+/* Context menu option for copying the ID of the note. */
+"Copy Note ID" = "نسخ معرف المنشور";
+
+/* Context menu option for copying the JSON text from the note. */
+"Copy Note JSON" = "نسخ المنشور بصيغة JSON";
+
+/* Button to copy report ID. */
+"Copy Report ID" = "نسخ معرف البلاغ";
+
+/* Context menu option for copying the text from an note. */
+"Copy Text" = "نسخ النص";
+
+/* Context menu option for copying the ID of the user who created the note. */
+"Copy User Pubkey" = "نسخ معرف الحساب";
+
+/* Alert message to indicate that the blocked user could not be found. */
+"Could not find user to block..." = "لم يتم العثور حساب لحظره";
+
+/* Button to create account. */
+"Create" = "انشاء";
+
+/* Button to create an account. */
+"Create Account" = "انشاء حساب";
+
+/* Title of alert prompting the user to create a new mutelist. */
+"Create new mutelist" = "أنشئ قائمة حظر جديدة";
+
+/* Example description about Bitcoin creator(s), Satoshi Nakamoto. */
+"Creator(s) of Bitcoin. Absolute legend." = "مبتكر البتكوين. اسطورة لن تتكرر.";
+
+/* Dropdown option for selecting a custom translation server. */
+"Custom" = "مخصص";
+
+/* Name of the app, shown on the first screen when user is not logged in. */
+"Damus" = "دامُس";
+
+/* Button to pay a Lightning invoice with the user's default Lightning wallet. */
+"Default Wallet" = "المحفظة الافتراضية";
+
+/* Button for deleting the users account.
+   Button to delete a relay server that the user connects to.
+   Button to remove a user from their blocklist.
+   Section title for deleting the user */
+"Delete" = "حذف";
+
+/* Button to dismiss a text field alert. */
+"Dismiss" = "اغلاق";
+
+/* Label to prompt display name entry. */
+"Display Name" = "الاسم";
+
+/* Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
+   Navigation title for view of DMs, where DM is an English abbreviation for Direct Message. */
+"DMs" = "الرسائل الخاصة";
+
+/* Button to dismiss wallet selection view for paying Lightning invoice. */
+"Done" = "انهاء";
+
+/* Heading indicating that this application allows users to earn money. */
+"Earn Money" = "اكسب المال.";
+
+/* Button to edit user's profile. */
+"Edit" = "تحرير";
+
+/* Text indicating that the view is used for editing which participants are replied to in a note. */
+"Edit participants" = "تحرير المشاركين";
+
+/* Heading indicating that this application keeps private messaging end-to-end encrypted. */
+"Encrypted" = "مشفر";
+
+/* Prompt for user to enter an account key to login. */
+"Enter your account key to login:" = "أدخل مفتاح حسابك لتسجيل الدخول:";
+
+/* Error message indicating why saving keys failed. */
+"Error: %@" = "خطأ: %@";
+
+/* Label indicating that the below text is the EULA, an acronym for End User License Agreement. */
+"EULA" = "اتفاقية الاستخدام";
+
+/* Button to follow a user. */
+"Follow" = "متابعة";
+
+/* Label describing followers of a user. */
+"Followers" = "المتابعون";
+
+/* Text to indicate that the button next to it is in a state that indicates that it is in the process of following a profile.
+Part of a larger sentence to describe how many profiles a user is following. */
+"Following" = "المتابَعين";
+
+/* Label to indicate that the user is in the process of following another user. */
+"Following..." = "يتابع...";
+
+/* Text to indicate that button next to it is in a state that will follow a profile when tapped. */
+"Follows" = "تابع";
+
+/* Navigation bar title for Global view where posts from all connected relay servers appear. */
+"Global" = "عام";
+
+/* Navigation link to go to post referenced by hex code. */
+"Goto post %@" = "عرض المنشور %@";
+
+/* Navigation link to go to profile. */
+"Goto profile %@" = "عرض الحساب %@";
+
+/* Button to hide a post from a user who has been blocked. */
+"Hide" = "اخفاء";
+
+/* Button to hide the LibreTranslate server API key. */
+"Hide API Key" = "اخفاء مفتاح API";
+
+/* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
+"Home" = "الرئيسية";
+
+/* Placeholder example text for profile picture URL. */
+"https://example.com/pic.jpg" = "https://example.com/pic.jpg";
+
+/* Placeholder example text for website URL for user profile. */
+"https://jb55.com" = "https://jb55.com";
+
+/* Button for user to report that the account or content has illegal content. */
+"Illegal content" = "محتوى غير قانوني";
+
+/* Error message indicating that an invalid account key was entered for login. */
+"Invalid key" = "المفتاح غير صالح";
+
+/* Button for user to report that the account or content has spam. */
+"It's spam" = "سبام";
+
+/* Placeholder example text for identifier used for NIP-05 verification. */
+"jb55@jb55.com" = "jb55@jb55.com";
+
+/* Moves the post button to the left side of the screen */
+"Left Handed" = "تفضيل استخدام اليد اليسرى";
+
+/* Button to complete account creation and start using the app. */
+"Let's go!" = "هيا بنا!";
+
+/* Section title for selecting the server that hosts the LibreTranslate machine translation API. */
+"LibreTranslate Translations" = "ترجمة LibreTranslate";
+
+/* Placeholder text for entry of Lightning Address or LNURL. */
+"Lightning Address or LNURL" = "عنوان البرق أو LNURL";
+
+/* Indicates that the view is for paying a Lightning invoice. */
+"Lightning Invoice" = "برقية";
+
+/* Dropdown option label for Lightning wallet, LNLink. */
+"LNLink" = "LNLink";
+
+/* Dropdown option label for system default for Lightning wallet. */
+"Local default" = "الاختيار";
+
+/* Button to log into account.
+   Button to log into an account. */
+"Login" = "الدخول";
+
+/* Alert for logging out the user.
+   Button for logging out the user.
+   Button to close the alert that informs that the current account has been deleted. */
+"Logout" = "الخروج";
+
+/* Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out. */
+"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "تأكد من حفظ مفتاح حسابك السري قبل الخروج حتى لا تفقد امكانية الدخول الى حسابك.";
+
+/* Dropdown option label for Lightning wallet, Muun. */
+"Muun" = "Muun";
+
+/* Label for NIP-05 Verification section of user profile form. */
+"NIP-05 Verification" = "تحقق NIP-05";
+
+/* Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists. */
+"No block list found, create a new one? This will overwrite any previous block lists." = "لم نعثر على قائمة حظر. هل تريد انشاء قائمة جديدة؟ سيتم استبدال أي قوائم سابقة ان وجدت";
+
+/* No search results. */
+"none" = "لا شيء";
+
+/* Dropdown option for selecting no translation server. */
+"None" = "لا اختيار";
+
+/* Indicates that there are no notes in the timeline to view. */
+"Nothing to see here. Check back later!" = "لا جديد في هذه اللحظة. يرجى المعاودة لاحقا!";
+
+/* Navigation title for notifications. */
+"Notifications" = "التنبيهات";
+
+/* String indicating that a given timestamp just occurred */
+"now" = "الان";
+
+/* Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key. */
+"nsec1..." = "nsec1...";
+
+/* Button for user to report that the account or content has nudity or explicit content. */
+"Nudity or explicit content" = "عري أو محتوى فاضح";
+
+/* Label indicating that a form input is optional. */
+"optional" = "غير الزامي";
+
+/* Button to pay a Lightning invoice. */
+"Pay" = "ادفع";
+
+/* Navigation bar title for view to pay Lightning invoice. */
+"Pay the Lightning invoice" = "ادفع البرقية";
+
+/* Dropdown option label for Lightning wallet, Phoenix. */
+"Phoenix" = "Phoenix";
+
+/* Button to post a note. */
+"Post" = "انشر";
+
+/* Text to indicate that what is being shown is a post from a user who has been blocked. */
+"Post from a user you've blocked" = "منشور لمستخدم محظور";
+
+/* Label for filter for seeing only posts (instead of posts and replies). */
+"Posts" = "المنشورات";
+
+/* Label for filter for seeing posts and replies (instead of only posts). */
+"Posts & Replies" = "المنشورات والردود";
+
+/* Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading. */
+"Private" = "خصوصية";
+
+/* Title of the secure field that holds the user's private key. */
+"Private Key" = "المفتاح السري";
+
+/* Sidebar menu label for Profile view. */
+"Profile" = "الملف الشخصي";
+
+/* Label for Profile Picture section of user profile form. */
+"Profile Picture" = "صورة الحساب";
+
+/* Section title for the user's public account ID. */
+"Public Account ID" = "معرف الحساب";
+
+/* Label indicating that the text is a user's public account key. */
+"Public key" = "المفتاح العام";
+
+/* Label indicating that the text is a user's public account key. */
+"Public Key" = "المفتاح العام";
+
+/* Prompt to ask user if the key they entered is a public key. */
+"Public Key?" = "مفتاح عام؟";
+
+/* Navigation bar title for Reactions view. */
+"Reactions" = "التفاعل";
+
+/* Section title for recommend relay servers that could be added as part of configuration */
+"Recommended Relays" = "موصّلات موصى بها";
+
+/* Button to reject the end user license agreement, which disallows the user from being let into the app. */
+"Reject" = "رفض";
+
+/* Text field for relay server. Used for testing purposes. */
+"Relay" = "موصّل";
+
+/* Sidebar menu label for Relay servers view
+   Sidebar menu label for Relays view. */
+"Relays" = "موصّلات";
+
+/* Description of what was done as a result of sending a report to relay servers. */
+"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "تم ابلاغ الموصّلات وسيتم الاستفادة من هذا البلاغ لتصفية المحتوى. شكرا لك!";
+
+/* Button label to remove all participants from a note reply. */
+"Remove all" = "حذف المشاركين";
+
+/* Label to indicate that the user is replying to themself. */
+"Reply to self" = "رد على منشوره السابق";
+
+/* Label to indicate that the user is replying to 2 users. */
+"Replying to %@ & %@" = "رد على %1$@ & %2$@";
+
+/* Indicating that the user is replying to the following listed people. */
+"Replying to:" = "رد على:";
+
+/* Button to report a profile.
+   Context menu option for reporting content. */
+"Report" = "ابلاغ";
+
+/* Label indicating that the text underneath is the identifier of the report that was sent to relay servers. */
+"Report ID:" = "معرف البلاغ";
+
+/* Message indicating that a report was successfully sent to relay servers. */
+"Report sent!" = "تم الابلاغ!";
+
+/* Button to confirm reposting a post.
+   Title of alert for confirming to repost a post. */
+"Repost" = "إعادة نشر";
+
+/* Text indicating that the post was reposted (i.e. re-shared). */
+"Reposted" = "منشور مُعاد";
+
+/* Navigation bar title for Reposts view. */
+"Reposts" = "اعادات النشر";
+
+/* Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message. */
+"Requests" = "طلبات";
+
+/* Button to retry completing account creation after an error occurred. */
+"Retry" = "اعادة المحاولة";
+
+/* Dropdown option label for Lightning wallet, River */
+"River" = "River";
+
+/* Example username of Bitcoin creator(s), Satoshi Nakamoto. */
+"satoshi" = "ساتوشي";
+
+/* Name of Bitcoin creator(s). */
+"Satoshi Nakamoto" = "ساتوشي ناكاموتو";
+
+/* Button for saving profile. */
+"Save" = "حفظ";
+
+/* Context menu option to save an image. */
+"Save Image" = "حفظ الصورة";
+
+/* Navigation link to search hashtag. */
+"Search hashtag: #%@" = "البحث عن وسم: #%@";
+
+/* Placeholder text to prompt entry of search query. */
+"Search..." = "بحث...";
+
+/* Section title for user's secret account login key. */
+"Secret Account Login Key" = "المفتاح السري للحساب";
+
+/* Title of section for selecting a Lightning wallet to pay a Lightning invoice. */
+"Select a Lightning wallet" = "اختر محفظة البرق";
+
+/* Prompt selection of user's default wallet */
+"Select default wallet" = "المحفظة الافتراضية";
+
+/* Text prompt for user to send a message to the other user. */
+"Send a message to start the conversation..." = "أرسل رسالة لبدء المحادثة...";
+
+/* Prompt selection of LibreTranslate server to perform machine translations on notes */
+"Server" = "سيرفر";
+
+/* Navigation title for Settings view.
+   Sidebar menu label for accessing the app settings */
+"Settings" = "الاعدادات";
+
+/* Button to share an image.
+   Button to share the link to a profile. */
+"Share" = "مشاركة";
+
+/* Button to show a post from a user who has been blocked.
+   Toggle to show or hide user's secret account login key. */
+"Show" = "عرض";
+
+/* Button to hide the LibreTranslate server API key. */
+"Show API Key" = "عرض مفتاح API";
+
+/* Toggle to show or hide selection of wallet. */
+"Show wallet selector" = "هل تريد اختيار المحفظة عند كل عملية دفع؟";
+
+/* Sidebar menu label to sign out of the account. */
+"Sign out" = "تسجيل الخروج";
+
+/* Dropdown option label for Lightning wallet, Strike. */
+"Strike" = "Strike";
+
+/* Button to close out of alert that informs that the action to block a user was successful. */
+"Thanks!" = "شكرا!";
+
+/* Button for user to report that the account is impersonating someone. */
+"They are impersonating someone" = "انتحال صفة شخص آخر";
+
+/* Warning that the inputted account key is a public key and the result of what happens because of it. */
+"This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "هذا مفتاح عام. لن تستطيع النشر أو التفاعل بهذا الحساب بأي طريقة. تستطيع فقط مشاهدة المحتوى العام من منظور صاحب الحساب.";
+
+/* Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key. */
+"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "صيغة المفتاح قديمة. لا نستطيع التحديد إذا ما كان المفتاح خاصا أو عاما. الرجاء تفعيل الخانة بالأسفل إذا كان المفتاح عاما.";
+
+/* Label to describe that a public key is the user's account ID and what they can do with it. */
+"This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "هذا معرف حسابك. بإمكانك إرساله لأصدقائك حتى يتمكنوا من متابعتك. اضغط للنسخ.";
+
+/* Label to describe that a private key is the user's secret account key and what they should do with it. */
+"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "هذا مفتاح الحساب السري. تحتاجه للدخول إلى حسابك. لا تشاركه مع أي شخص! احتفظ به في مكان آمن مثل برنامج إدارة كلمات المرور السرية. ";
+
+/* Navigation bar title for note thread.
+   Navigation bar title for threaded event detail view. */
+"Thread" = "منشور";
+
+/* Button to translate note from different language. */
+"Translate Note" = "ترجم المنشور";
+
+/* Button to indicate that the note has been translated from a different language. */
+"Translated from (languageName!)" = "مُترجَم من (languageName!)";
+
+/* Text box prompt to ask user to type their post. */
+"Type your post here..." = "اكتب المنشور هنا...";
+
+/* Non-breaking space character to fill in blank space next to event action button icons. */
+"u{00A0}" = "u{00A0}";
+
+/* Button to unfollow a user. */
+"Unfollow" = "الغاء المتابعة";
+
+/* Text to indicate that the button next to it is in  a state that indicates that it is in the process of unfollowing a profile. */
+"Unfollowing" = "يلغي المتابعة";
+
+/* Label to indicate that the user is in the process of unfollowing another user. */
+"Unfollowing..." = "يلغي المتابعة...";
+
+/* Text to indicate that the button next to it is in a state that will unfollow a profile when tapped. */
+"Unfollows" = "ألغى متابعة";
+
+/* Example URL to LibreTranslate server */
+"URL" = "رابط";
+
+/* Alert message to indicate the user has been blocked */
+"User blocked" = "الحساب محظور";
+
+/* Alert message that informs a user was blocked. */
+"User has been blocked" = "تم الحظر";
+
+/* Label for Username section of user profile form.
+   Label to prompt username entry. */
+"Username" = "اسم المستخدم";
+
+/* Sidebar menu label for Wallet view. */
+"Wallet" = "المحفظة";
+
+/* Dropdown option label for Lightning wallet, Wallet of Satoshi. */
+"Wallet of Satoshi" = "Wallet of Satoshi";
+
+/* Section title for selection of wallet. */
+"Wallet Selector" = "تفضيلات المحفظة";
+
+/* Label for Website section of user profile form. */
+"Website" = "موقع الكتروني";
+
+/* Welcoming message to the reader. The variable is 'you', the reader. */
+"Welcome to the social network %@ control." = "مرحبا بك في شبكتك الاجتماعية!";
+
+/* Text to welcome user. */
+"Welcome, %@!" = "مرحبا، %@!";
+
+/* Header text to prompt user what issue they want to report. */
+"What do you want to report?" = "عن ماذا تريد الابلاغ";
+
+/* Placeholder example for relay server address. */
+"wss://some.relay.com" = "wss://some.relay.com";
+
+/* Text of button that confirms to overwrite the existing mutelist. */
+"Yes, Overwrite" = "نعم، استبدل";
+
+/* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
+"you" = "أنت";
+
+/* Label for Your Name section of user profile form. */
+"Your Name" = "الاسم";
+
+/* Footer text to inform user what will happen when the report is submitted. */
+"Your report will be sent to the relays you are connected to" = "سيتم ارسال بلاغك للموصّلات المتصلة بحسابك";
+
+/* Dropdown option label for Lightning wallet, Zebedee. */
+"Zebedee" = "Zebedee";
+
+/* Dropdown option label for Lightning wallet, Zeus LN. */
+"Zeus LN" = "Zeus LN";
+
