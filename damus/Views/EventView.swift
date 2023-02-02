@@ -104,7 +104,7 @@ struct EventView: View {
                 let pv = ProfileView(damus_state: damus, profile: pmodel, followers: FollowersModel(damus_state: damus, target: pubkey))
                 
                 NavigationLink(destination: pv) {
-                    ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus.profiles)
+                    ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus.profiles, contacts: damus.contacts)
                 }
                 
                 Spacer()

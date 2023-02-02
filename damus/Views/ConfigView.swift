@@ -19,8 +19,8 @@ struct ConfigView: View {
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
     @State var delete_text: String = ""
-    
     @ObservedObject var settings: UserSettingsStore
+    @AppStorage("remote_image_policy") var remote_image_policy: String = "everyone"
     
     let generator = UIImpactFeedbackGenerator(style: .light)
     
@@ -129,7 +129,30 @@ struct ConfigView: View {
                         KingfisherManager.shared.cache.cleanExpiredDiskCache()
                     }
                 }
-
+                
+                Section("Profile Image Loading Policy") {
+                    Menu {
+                        Button {
+                            UserDefaults.standard.set("everyone", forKey:"remote_image_policy")
+                        } label: {
+                            Text("Everyone")
+                        }
+                        Button {
+                            UserDefaults.standard.set("friends", forKey:"remote_image_policy")
+                        } label: {
+                            Text("Friends Only")
+                        }
+                        Button {
+                            UserDefaults.standard.set("restricted", forKey:"remote_image_policy")
+                        } label: {
+                            Text("Restricted")
+                        }
+                    } label: {
+                        Text("\(convertImageLoadPolicyTxt(policy:remote_image_policy))")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                
                 if state.is_privkey_user {
                     Section(NSLocalizedString("Delete", comment: "Section title for deleting the user")) {
                         Button(NSLocalizedString("Delete Account", comment: "Button to delete the user's account."), role: .destructive) {
@@ -173,6 +196,17 @@ struct ConfigView: View {
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
         }
+    }
+}
+
+func convertImageLoadPolicyTxt(policy: String) -> String {
+    switch policy {
+    case "restricted":
+        return "Restricted"
+    case "friends":
+        return "Friends Only"
+    default:
+        return "Everyone"
     }
 }
 

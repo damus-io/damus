@@ -75,7 +75,7 @@ struct ChatView: View {
         HStack {
             VStack {
                 if is_active || just_started {
-                    ProfilePicView(pubkey: event.pubkey, size: 32, highlight: is_active ? .main : .none, profiles: damus_state.profiles)
+                    ProfilePicView(pubkey: event.pubkey, size: 32, highlight: is_active ? .main : .none, profiles: damus_state.profiles, contacts:damus_state.contacts)
                 }
 
                 Spacer()
@@ -97,7 +97,7 @@ struct ChatView: View {
                     if let ref_id = thread.replies.lookup(event.id) {
                         if !is_reply_to_prev() {
                             /*
-                            ReplyQuoteView(keypair: damus_state.keypair, quoter: event, event_id: ref_id, profiles: damus_state.profiles, previews: damus_state.previews)
+                            ReplyQuoteView(keypair: damus_state.keypair, quoter: event, event_id: ref_id, profiles: damus_state.profiles, previews: damus_state.previews, contacts: damus_state.contacts)
                                 .frame(maxHeight: expand_reply ? nil : 100)
                                 .environmentObject(thread)
                                 .onTapGesture {
