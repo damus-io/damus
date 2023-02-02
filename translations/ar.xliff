@@ -91,9 +91,9 @@ Number of profiles a user is following.</note>
         
         <note>Description of how the nip05 identifier would be used for verification.</note>
       </trans-unit>
-      <trans-unit id="'%@' is an invalid nip05 identifier. It should look like an email." xml:space="preserve">
-        <source>'%@' is an invalid nip05 identifier. It should look like an email.</source>
-        <target>'%@' العنوان غير صالح. من المفترض أن يشابه صيغة الايميل مثل المثال الموضح.</target>
+      <trans-unit id="'%@' is an invalid NIP-05 identifier. It should look like an email." xml:space="preserve">
+        <source>'%@' is an invalid NIP-05 identifier. It should look like an email.</source>
+        <target>'%@' عنوان NIP-05 غير صالح. من المفترض أن يشابه صيغة الايميل مثل المثال الموضح.</target>
         
         <note>Description of why the nip05 identifier is invalid.</note>
       </trans-unit>
@@ -120,6 +120,12 @@ Number of profiles a user is following.</note>
         <target>@</target>
         
         <note>Prefix character to username.</note>
+      </trans-unit>
+      <trans-unit id="API Key (optional)" xml:space="preserve">
+        <source>API Key (optional)</source>
+        <target>مفتاح API (اختياري)</target>
+        
+        <note>Example URL to LibreTranslate server</note>
       </trans-unit>
       <trans-unit id="About" xml:space="preserve">
         <source>About</source>
@@ -406,6 +412,12 @@ Number of profiles a user is following.</note>
         
         <note>Example description about Bitcoin creator(s), Satoshi Nakamoto.</note>
       </trans-unit>
+      <trans-unit id="Custom" xml:space="preserve">
+        <source>Custom</source>
+        <target>مخصص</target>
+        
+        <note>Dropdown option for selecting a custom translation server.</note>
+      </trans-unit>
       <trans-unit id="DM Type" xml:space="preserve">
         <source>DM Type</source>
         <target>خيار العرض</target>
@@ -553,6 +565,18 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Navigation link to go to profile.</note>
       </trans-unit>
+      <trans-unit id="Hide" xml:space="preserve">
+        <source>Hide</source>
+        <target>اخفاء</target>
+        
+        <note>Button to hide a post from a user who has been blocked.</note>
+      </trans-unit>
+      <trans-unit id="Hide API Key" xml:space="preserve">
+        <source>Hide API Key</source>
+        <target>اخفاء مفتاح API</target>
+        
+        <note>Button to hide the LibreTranslate server API key.</note>
+      </trans-unit>
       <trans-unit id="Home" xml:space="preserve">
         <source>Home</source>
         <target>الرئيسية</target>
@@ -594,6 +618,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>هيا بنا!</target>
         
         <note>Button to complete account creation and start using the app.</note>
+      </trans-unit>
+      <trans-unit id="LibreTranslate Translations" xml:space="preserve">
+        <source>LibreTranslate Translations</source>
+        <target>ترجمة LibreTranslate</target>
+        
+        <note>Section title for selecting the server that hosts the LibreTranslate machine translation API.</note>
       </trans-unit>
       <trans-unit id="Lightning Address or LNURL" xml:space="preserve">
         <source>Lightning Address or LNURL</source>
@@ -652,6 +682,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists.</note>
       </trans-unit>
+      <trans-unit id="None" xml:space="preserve">
+        <source>None</source>
+        <target>لا اختيار</target>
+        
+        <note>Dropdown option for selecting no translation server.</note>
+      </trans-unit>
       <trans-unit id="Nothing to see here. Check back later!" xml:space="preserve">
         <source>Nothing to see here. Check back later!</source>
         <target>لا جديد في هذه اللحظة. يرجى المعاودة لاحقا!</target>
@@ -693,6 +729,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>انشر</target>
         
         <note>Button to post a note.</note>
+      </trans-unit>
+      <trans-unit id="Post from a user you've blocked" xml:space="preserve">
+        <source>Post from a user you've blocked</source>
+        <target>منشور لمستخدم محظور</target>
+        
+        <note>Text to indicate that what is being shown is a post from a user who has been blocked.</note>
       </trans-unit>
       <trans-unit id="Posts" xml:space="preserve">
         <source>Posts</source>
@@ -930,6 +972,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Text prompt for user to send a message to the other user.</note>
       </trans-unit>
+      <trans-unit id="Server" xml:space="preserve">
+        <source>Server</source>
+        <target>سيرفر</target>
+        
+        <note>Prompt selection of LibreTranslate server to perform machine translations on notes</note>
+      </trans-unit>
       <trans-unit id="Settings" xml:space="preserve">
         <source>Settings</source>
         <target>الاعدادات</target>
@@ -948,7 +996,14 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Show</source>
         <target>عرض</target>
         
-        <note>Toggle to show or hide user's secret account login key.</note>
+        <note>Button to show a post from a user who has been blocked.
+   Toggle to show or hide user's secret account login key.</note>
+      </trans-unit>
+      <trans-unit id="Show API Key" xml:space="preserve">
+        <source>Show API Key</source>
+        <target>عرض مفتاح API</target>
+        
+        <note>Button to hide the LibreTranslate server API key.</note>
       </trans-unit>
       <trans-unit id="Show wallet selector" xml:space="preserve">
         <source>Show wallet selector</source>
@@ -1011,11 +1066,29 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <note>Navigation bar title for note thread.
    Navigation bar title for threaded event detail view.</note>
       </trans-unit>
+      <trans-unit id="Translate Note" xml:space="preserve">
+        <source>Translate Note</source>
+        <target>ترجم المنشور</target>
+        
+        <note>Button to translate note from different language.</note>
+      </trans-unit>
+      <trans-unit id="Translated from (languageName!)" xml:space="preserve">
+        <source>Translated from (languageName!)</source>
+        <target>مُترجَم من (languageName!)</target>
+        
+        <note>Button to indicate that the note has been translated from a different language.</note>
+      </trans-unit>
       <trans-unit id="Type your post here..." xml:space="preserve">
         <source>Type your post here...</source>
         <target>اكتب المنشور هنا...</target>
         
         <note>Text box prompt to ask user to type their post.</note>
+      </trans-unit>
+      <trans-unit id="URL" xml:space="preserve">
+        <source>URL</source>
+        <target>رابط</target>
+        
+        <note>Example URL to LibreTranslate server</note>
       </trans-unit>
       <trans-unit id="Unfollow" xml:space="preserve">
         <source>Unfollow</source>
@@ -1066,17 +1139,17 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Sidebar menu label for Wallet view.</note>
       </trans-unit>
-      <trans-unit id="Wallet Of Satoshi" xml:space="preserve">
-        <source>Wallet Of Satoshi</source>
-        <target>Wallet Of Satoshi</target>
-        
-        <note>Dropdown option label for Lightning wallet, Wallet Of Satoshi.</note>
-      </trans-unit>
       <trans-unit id="Wallet Selector" xml:space="preserve">
         <source>Wallet Selector</source>
         <target>تفضيلات المحفظة</target>
         
         <note>Section title for selection of wallet.</note>
+      </trans-unit>
+      <trans-unit id="Wallet of Satoshi" xml:space="preserve">
+        <source>Wallet of Satoshi</source>
+        <target>Wallet of Satoshi</target>
+        
+        <note>Dropdown option label for Lightning wallet, Wallet of Satoshi.</note>
       </trans-unit>
       <trans-unit id="Website" xml:space="preserve">
         <source>Website</source>
