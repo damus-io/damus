@@ -298,7 +298,7 @@ struct ProfileView: View {
                     .padding(.top,-(pfp_size/2.0))
                 
                 Text(ProfileView.markdown.process(data?.about ?? ""))
-                    .font(.subheadline)
+                    .font(.subheadline).textSelection(.enabled)
                 
                 if let url = data?.website_url {
                     WebsiteLink(url: url)
