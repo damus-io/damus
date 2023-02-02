@@ -252,7 +252,7 @@ struct ContentView: View {
                                         Button {
                                             isSideBarOpened.toggle()
                                         } label: {
-                                            ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, show_img: should_show_images(contacts: damus_state!.contacts, ev: event!, our_pubkey: damus_state!.pubkey))
+                                            ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, show_img: true)
                                         }
                                     }
                                     

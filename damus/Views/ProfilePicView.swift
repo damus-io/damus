@@ -101,6 +101,7 @@ struct ProfilePicView: View {
     let show_img: Bool
     
     @State var picture: String?
+    @EnvironmentObject var user_settings: UserSettingsStore
     
     init (pubkey: String, size: CGFloat, highlight: Highlight, profiles: Profiles, picture: String? = nil, show_img: Bool) {
         self.pubkey = pubkey
@@ -112,10 +113,14 @@ struct ProfilePicView: View {
     }
     
     var body: some View {
-        if !show_img {
+        if !show_img && user_settings.blur_profile_pic {
             InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: size, highlight: highlight)
                 .blur(radius: 7)
-                .overlay{ Circle().opacity(0.50)}
+                .overlay{
+                    Circle()
+                        .opacity(0.50)
+                        .foregroundColor(.clear)
+                }
                 .onReceive(handle_notify(.profile_updated)) { notif in
                     let updated = notif.object as! ProfileUpdate
 

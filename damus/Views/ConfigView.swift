@@ -116,6 +116,11 @@ struct ConfigView: View {
                         }
                     }
                 }
+                
+                Section(NSLocalizedString("Images", comment: "Section title configuring how images are handled")) {
+                    Toggle(NSLocalizedString("Blur profile pictures", comment: "Toggle for blurring profile pictures"), isOn: $user_settings.blur_profile_pic)
+                        .toggleStyle(.switch)
+                }
 
                 Section(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen")) {
                     Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)

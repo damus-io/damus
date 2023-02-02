@@ -94,6 +94,12 @@ class UserSettingsStore: ObservableObject {
             }
         }
     }
+    
+    @Published var blur_profile_pic: Bool {
+        didSet {
+            UserDefaults.standard.set(blur_profile_pic, forKey: "blur_profile_pic")
+        }
+    }
 
     init() {
         // TODO: pubkey-scoped settings
@@ -122,6 +128,8 @@ class UserSettingsStore: ObservableObject {
         } catch {
             libretranslate_api_key = ""
         }
+        
+        blur_profile_pic = UserDefaults.standard.object(forKey: "blur_profile_pic") as? Bool ?? true
     }
 
     func saveLibreTranslateApiKey(_ apiKey: String) throws {
