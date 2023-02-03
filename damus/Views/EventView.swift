@@ -134,9 +134,6 @@ struct EventView: View {
                     EventActionBar(damus_state: damus, event: event, bar: bar)
                         .padding([.top], 4)
                 }
-
-                Divider()
-                    .padding([.top], 4)
             }
             .padding([.leading], 2)
         }
