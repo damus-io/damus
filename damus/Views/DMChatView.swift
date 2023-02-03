@@ -12,6 +12,7 @@ struct DMChatView: View {
     let pubkey: String
     @EnvironmentObject var dms: DirectMessageModel
     @State var message: String = ""
+    @State var showPrivateKeyWarning: Bool = false
 
     var Messages: some View {
         ScrollViewReader { scroller in
@@ -93,7 +94,16 @@ struct DMChatView: View {
                 InputField
 
                 if !message.isEmpty {
-                    Button(role: .none, action: send_message) {
+                    Button(
+                        role: .none,
+                        action: {
+                            showPrivateKeyWarning = contentContainsPrivateKey(message)
+
+                            if !showPrivateKeyWarning {
+                                send_message()
+                            }
+                        }
+                    ) {
                         Label("", systemImage: "arrow.right.circle")
                             .font(.title)
                     }
@@ -147,6 +157,14 @@ struct DMChatView: View {
         }
         .navigationTitle(NSLocalizedString("DMs", comment: "Navigation title for DMs view, where DM is the English abbreviation for Direct Message."))
         .toolbar { Header }
+        .alert(NSLocalizedString("Note contains \"nsec1\" private key. Are you sure?", comment: "Alert user that they might be attempting to paste a private key and ask them to confirm."), isPresented: $showPrivateKeyWarning, actions: {
+            Button(NSLocalizedString("No", comment: "Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key."), role: .cancel) {
+                showPrivateKeyWarning = false
+            }
+            Button(NSLocalizedString("Yes, Post with Private Key", comment: "Button to proceed with posting a note even though it looks like they might be posting a private key."), role: .destructive) {
+                send_message()
+            }
+        })
     }
 }
 

@@ -158,6 +158,20 @@ func get_saved_privkey() -> String? {
     return mkey.map { $0.trimmingCharacters(in: .whitespaces) }
 }
 
+/**
+ Detects whether a string might contain an nsec1 prefixed private key.
+ It does not determine if it's the current user's private key and does not verify if it is properly encoded or has the right length.
+ */
+func contentContainsPrivateKey(_ content: String) -> Bool {
+    if #available(iOS 16.0, *) {
+        return content.contains(/nsec1[02-9ac-z]+/)
+    } else {
+        let regex = try! NSRegularExpression(pattern: "nsec1[02-9ac-z]+")
+        return (regex.firstMatch(in: content, range: NSRange(location: 0, length: content.count)) != nil)
+    }
+
+}
+
 fileprivate func removePrivateKeyFromUserDefaults() throws {
     guard let privKey = UserDefaults.standard.string(forKey: "privkey") else { return }
     try save_privkey(privkey: privKey)

@@ -92,7 +92,7 @@ struct TranslateView: View {
                 if #available(iOS 16, *) {
                     noteLanguage = Locale.LanguageCode(stringLiteral: lang).identifier(.alpha2)
                 } else {
-                    noteLanguage = Locale.canonicalLanguageIdentifier(from: lang)
+                    noteLanguage = NSLocale(localeIdentifier: lang).languageCode
                 }
             }
             
