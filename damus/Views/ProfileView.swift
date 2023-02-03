@@ -116,6 +116,8 @@ struct ProfileView: View {
     @State var is_zoomed: Bool = false
     @State var show_share_sheet: Bool = false
     @State var action_sheet_presented: Bool = false
+    @State var filter_state : FilterState = .posts
+    @StateObject var home : HomeModel = HomeModel()
     @EnvironmentObject var user_settings: UserSettingsStore
     
     @Environment(\.dismiss) var dismiss
@@ -304,8 +306,6 @@ struct ProfileView: View {
                     WebsiteLink(url: url)
                 }
                 
-                Divider()
-                
                 HStack {
                     if let contact = profile.contacts {
                         let contacts = contact.referenced_pubkeys.map { $0.ref_id }
@@ -347,6 +347,36 @@ struct ProfileView: View {
         }
     }
     
+    var ProfileTimelineView: some View {
+        VStack {
+            VStack(spacing: 0) {
+                CustomPicker(selection: $filter_state, content: {
+                    Text("Posts", comment: "Label for filter for seeing only your posts (instead of posts and replies).").tag(FilterState.posts)
+                    Text("Posts & Replies", comment: "Label for filter for seeing your posts and replies (instead of only your posts).").tag(FilterState.posts_and_replies)
+                })
+                Divider()
+                    .frame(height: 1)
+            }
+            .background(colorScheme == .dark ? Color.black : Color.white)
+            
+            TabView(selection: $filter_state) {
+                contentTimelineView(filter: FilterState.posts.filter)
+                    .tag(FilterState.posts)
+                    .id(FilterState.posts)
+                contentTimelineView(filter: FilterState.posts_and_replies.filter)
+                    .tag(FilterState.posts_and_replies)
+                    .id(FilterState.posts_and_replies)
+            }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+        }
+    }
+    
+    func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
+        ZStack {
+            TimelineView(events: $profile.events, loading: $home.loading, damus: damus_state, show_friend_icon: false, filter: filter)
+        }
+    }
+    
     var FollowersCount: some View {
         HStack {
             if followers.count == nil {
@@ -364,12 +394,10 @@ struct ProfileView: View {
     var body: some View {
         
         VStack(alignment: .leading) {
-            ScrollView {
+            VStack {
                 TopSection
-            
-                Divider()
-                
-                InnerTimelineView(events: $profile.events, damus: damus_state, show_friend_icon: false, filter: { _ in true })
+
+                ProfileTimelineView
             }
             .frame(maxHeight: .infinity, alignment: .topLeading)
         }
