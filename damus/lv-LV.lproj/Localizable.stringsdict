@@ -18,7 +18,7 @@
 			<string>%d other notes</string>
 		</dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>··· %#@PIEZĪMES@ ···</string>
+		<string>··· %#@NOTES@ ···</string>
 	</dict>
 	<key>followers_count</key>
 	<dict>
@@ -36,12 +36,12 @@
 			<string>Followers</string>
 		</dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@SEKOTĀJI@</string>
+		<string>%#@FOLLOWERS@</string>
 	</dict>
 	<key>reactions_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@REAKCIJAS@</string>
+		<string>%#@REACTIONS@</string>
 		<key>REACTIONS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -59,7 +59,7 @@
 	<key>relays_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@RELEJI@</string>
+		<string>%#@RELAYS@</string>
 		<key>RELAYS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -77,7 +77,7 @@
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Atbildot %@%#@CITIEM@</string>
+		<string>Atbildot %@%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -95,7 +95,7 @@
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Atbildot %@, %@%#@CITIEM@</string>
+		<string>Atbildot %@, %@%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -113,7 +113,7 @@
 	<key>reposts_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@PĀRPUBLICĒJUMI@</string>
+		<string>%#@REPOSTS@</string>
 		<key>REPOSTS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -131,7 +131,7 @@
 	<key>sats_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%1$#@SATIŅI@</string>
+		<string>%1$#@SATS@</string>
 		<key>SATS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -139,29 +139,29 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>%2$@ satiņš</string>
+			<string>%2$@ sats</string>
 			<key>other</key>
-			<string>%2$@ satiņi</string>
+			<string>%2$@ sati</string>
 			<key>zero</key>
 			<string>%2$@ sats</string>
 		</dict>
 	</dict>
-	<key>tips_count</key>
+	<key>zaps_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@SPONSORĒJUMI@</string>
-		<key>TIPS</key>
+		<string>%#@ZAPS@</string>
+		<key>ZAPS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Sponsorējums</string>
+			<string>Zap</string>
 			<key>other</key>
-			<string>Sponsorējumi</string>
+			<string>Zaps</string>
 			<key>zero</key>
-			<string>Tips</string>
+			<string>Zaps</string>
 		</dict>
 	</dict>
 </dict>

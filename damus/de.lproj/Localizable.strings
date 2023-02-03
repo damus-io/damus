@@ -16,11 +16,10 @@
 /* Prefix character to username. */
 "@" = "@";
 
-/* Amount of time that has passed since reply quote event occurred.
-Abbreviated version of a nostr public key. */
+/* Abbreviated version of a nostr public key. */
 "%@" = "%@";
 
-/* Sentence composed of 2 variables to describe how many tip payments there are on a post. In source English, the first variable is the number of tip payments, and the second variable is 'Tip' or 'Tips'.
+/* Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
 Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
 "%@ %@" = "%@ %@";
 
@@ -31,12 +30,12 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 "%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. Du brauchst für ein Konto keine Telefonnummer, E-Mail-Adresse oder Namen. Fang ganz reibungslos einfach an.";
 
 /* Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. Ende-zu-Ende verschlüsselter privater Nachrichtenaustausch. Halte Big Tech aus deinen PNs heraus";
+"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. Ende-zu-Ende-verschlüsselter, privater Nachrichtenaustausch. Halte Big Tech aus deinen PNs heraus.";
 
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Belohne Beiträge deiner Freunde und sammle Sats mit Bitcoin⚡️, der eigenen Währung des Internets.";
 
-/* Number of tip payments on a post.
+/* Number of zap payments on a post.
 Number of profiles a user is following. */
 "%lld" = "%lld";
 
@@ -45,6 +44,9 @@ Number of profiles a user is following. */
 
 /* Placeholder for event mention. */
 "< e >" = "< e >";
+
+/* No comment provided by engineer. */
+"⚡️ %@" = "⚡️ %@";
 
 /* Label to prompt for about text entry for user to describe about themself. */
 "About" = "Über";
@@ -81,7 +83,7 @@ Number of profiles a user is following. */
 "API Key (optional)" = "API Schlüssel (optional)";
 
 /* Alert message to ask if user wants to repost a post. */
-"Are you sure you want to repost this?" = "Bist du sicher dass Du den Beitrag teilen möchtest?";
+"Are you sure you want to repost this?" = "Bist du sicher, dass Du den Beitrag teilen möchtest?";
 
 /* Label for Banner Image section of user profile form. */
 "Banner Image" = "Bannerbild";
@@ -250,7 +252,7 @@ Number of profiles a user is following. */
 "Follow" = "Folgen";
 
 /* Label describing followers of a user. */
-"Followers" = "Gefolgte:r";
+"Followers" = "Follower";
 
 /* Text to indicate that the button next to it is in a state that indicates that it is in the process of following a profile.
 Part of a larger sentence to describe how many profiles a user is following. */
@@ -302,7 +304,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Left Handed" = "Linkshändig";
 
 /* Button to complete account creation and start using the app. */
-"Let's go!" = "Los gehts!";
+"Let's go!" = "Los geht’s!";
 
 /* Section title for selecting the server that hosts the LibreTranslate machine translation API. */
 "LibreTranslate Translations" = "LibreTranslate Übersetzungen";
@@ -347,7 +349,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "None" = "Kein";
 
 /* Indicates that there are no notes in the timeline to view. */
-"Nothing to see here. Check back later!" = "Hier gibts nichts zu sehen. Schau später wieder vorbei!";
+"Nothing to see here. Check back later!" = "Hier gibt es nichts zu sehen. Schau später wieder vorbei!";
 
 /* Navigation title for notifications. */
 "Notifications" = "Benachrichtigungen";
@@ -536,7 +538,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Dies ist ein öffentlicher Schlüssel, Du wirst keine Beiträge teilen oder oder auf irgendeine Weise interagieren können. Dies wird genutzt um andere Kontos aus deren Perspektive zu sehen.";
 
 /* Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key. */
-"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Dies ist ein nostr-Schlüsse im veralteten Format. Wir sind nicht sicher ob es ein öffentlicher Schlüssel oder ein privater Schlüssel ist. Bitte betätige die untenstehende Schaltfläche wenn es ein öffentlicher Schlüssel ist.";
+"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Dies ist ein Nostr-Schlüssel im veralteten Format. Wir sind nicht sicher ob es ein öffentlicher Schlüssel oder ein privater Schlüssel ist. Bitte betätige die untenstehende Schaltfläche wenn es ein öffentlicher Schlüssel ist.";
 
 /* Label to describe that a public key is the user's account ID and what they can do with it. */
 "This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "Dies ist deine Konto-ID, die du an deine Freunde weitergeben kannst, damit sie dir folgen können. Zum Kopieren anklicken.";
@@ -552,7 +554,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Translate Note" = "Notiz übersetzen";
 
 /* Button to indicate that the note has been translated from a different language. */
-"Translated from (languageName!)" = "Übersetzt aus (languageName!)";
+"Translated from (lang)" = "Übersetzt aus (lang)";
 
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "Schreibe deinen Beitrag hier...";
