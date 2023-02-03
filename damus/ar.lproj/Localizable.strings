@@ -16,11 +16,10 @@
 /* Prefix character to username. */
 "@" = "@";
 
-/* Amount of time that has passed since reply quote event occurred.
-Abbreviated version of a nostr public key. */
+/* Abbreviated version of a nostr public key. */
 "%@" = "%@";
 
-/* Sentence composed of 2 variables to describe how many tip payments there are on a post. In source English, the first variable is the number of tip payments, and the second variable is 'Tip' or 'Tips'.
+/* Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
 Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
 "%@ %@" = "%@ %@";
 
@@ -36,7 +35,7 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. بسهولة مطلقة، أرسل و استقبل برقيات البتكوين ⚡️عملة الانترنت العالمية.";
 
-/* Number of tip payments on a post.
+/* Number of zap payments on a post.
 Number of profiles a user is following. */
 "%lld" = "%lld";
 
@@ -45,6 +44,9 @@ Number of profiles a user is following. */
 
 /* Placeholder for event mention. */
 "< e >" = "< e >";
+
+/* No comment provided by engineer. */
+"⚡️ %@" = "⚡️ %@";
 
 /* Label to prompt for about text entry for user to describe about themself. */
 "About" = "النبذة التعريفية";
@@ -500,7 +502,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Send a message to start the conversation..." = "أرسل رسالة لبدء المحادثة...";
 
 /* Prompt selection of LibreTranslate server to perform machine translations on notes */
-"Server" = "سيرفر";
+"Server" = "خادم";
 
 /* Navigation title for Settings view.
    Sidebar menu label for accessing the app settings */
@@ -521,7 +523,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Show wallet selector" = "هل تريد اختيار المحفظة عند كل عملية دفع؟";
 
 /* Sidebar menu label to sign out of the account. */
-"Sign out" = "تسجيل الخروج";
+"Sign out" = "خروج";
 
 /* Dropdown option label for Lightning wallet, Strike. */
 "Strike" = "Strike";
@@ -552,7 +554,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Translate Note" = "ترجم المنشور";
 
 /* Button to indicate that the note has been translated from a different language. */
-"Translated from (languageName!)" = "مُترجَم من (languageName!)";
+"Translated from (lang)" = "مُترجَم من (lang)";
 
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "اكتب المنشور هنا...";

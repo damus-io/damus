@@ -11,17 +11,17 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>few</key>
-			<string>%d other notes</string>
+			<string>%d منشورات اضافية</string>
 			<key>many</key>
-			<string>%d other notes</string>
+			<string>%d منشورات اضافية</string>
 			<key>one</key>
-			<string>%dمنشور اضافي</string>
+			<string>%d منشور اضافي</string>
 			<key>other</key>
-			<string>%dمنشورات اضافية</string>
+			<string>%d منشورات اضافية</string>
 			<key>two</key>
-			<string>%d other notes</string>
+			<string>%d منشوران</string>
 			<key>zero</key>
-			<string>%d other notes</string>
+			<string>%d منشورات أخرى</string>
 		</dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>··· %#@NOTES@ ···</string>
@@ -35,17 +35,17 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>few</key>
-			<string>Followers</string>
+			<string>المتابعون</string>
 			<key>many</key>
-			<string>Followers</string>
+			<string>المتابعون</string>
 			<key>one</key>
 			<string>متابع</string>
 			<key>other</key>
 			<string>المتابعون</string>
 			<key>two</key>
-			<string>Followers</string>
+			<string>متابعان</string>
 			<key>zero</key>
-			<string>Followers</string>
+			<string>متابع</string>
 		</dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@FOLLOWERS@</string>
@@ -61,17 +61,17 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>few</key>
-			<string>Reactions</string>
+			<string>تفاعلات</string>
 			<key>many</key>
-			<string>Reactions</string>
+			<string>تفاعل</string>
 			<key>one</key>
 			<string>تفاعل</string>
 			<key>other</key>
 			<string>تفاعل</string>
 			<key>two</key>
-			<string>Reactions</string>
+			<string>تفاعل</string>
 			<key>zero</key>
-			<string>Reactions</string>
+			<string>تفاعل</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -85,17 +85,17 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>few</key>
-			<string>Relays</string>
+			<string>موصّلات</string>
 			<key>many</key>
-			<string>Relays</string>
+			<string>موصّلات</string>
 			<key>one</key>
-			<string>  موصّل</string>
+			<string> موصّل</string>
 			<key>other</key>
 			<string>موصّلات</string>
 			<key>two</key>
-			<string>Relays</string>
+			<string>موصّلان</string>
 			<key>zero</key>
-			<string>Relays</string>
+			<string>موصّل</string>
 		</dict>
 	</dict>
 	<key>replying_to_one_and_others</key>
@@ -109,15 +109,15 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>few</key>
-			<string> &amp; %d others</string>
+			<string> &amp; %d آخرون</string>
 			<key>many</key>
-			<string> &amp; %d others</string>
+			<string> &amp; %d آخرون</string>
 			<key>one</key>
-			<string>&amp; %dآخر</string>
+			<string>&amp; %d آخر</string>
 			<key>other</key>
-			<string>&amp; %dآخرين</string>
+			<string>&amp; %d آخرون</string>
 			<key>two</key>
-			<string> &amp; %d others</string>
+			<string> &amp; %d آخران</string>
 			<key>zero</key>
 			<string></string>
 		</dict>
@@ -133,15 +133,15 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>few</key>
-			<string> &amp; %d others</string>
+			<string> &amp; %d آخرون</string>
 			<key>many</key>
-			<string> &amp; %d others</string>
+			<string> &amp; %d آخرون</string>
 			<key>one</key>
-			<string>&amp; %dآخر</string>
+			<string>&amp; %d آخر</string>
 			<key>other</key>
-			<string>&amp; %dآخرين</string>
+			<string>&amp; %d آخرون</string>
 			<key>two</key>
-			<string> &amp; %d others</string>
+			<string> &amp; %d آخران</string>
 			<key>zero</key>
 			<string></string>
 		</dict>
@@ -157,17 +157,17 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>few</key>
-			<string>Reposts</string>
+			<string>اعادات نشر</string>
 			<key>many</key>
-			<string>Reposts</string>
+			<string>اعادات نشر</string>
 			<key>one</key>
 			<string>اعادة نشر</string>
 			<key>other</key>
 			<string>اعادات نشر</string>
 			<key>two</key>
-			<string>Reposts</string>
+			<string>اعادات نشر</string>
 			<key>zero</key>
-			<string>Reposts</string>
+			<string>اعادات نشر</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -181,41 +181,41 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>few</key>
-			<string>%2$@ sats</string>
+			<string>%2$@ ساتوشي</string>
 			<key>many</key>
-			<string>%2$@ sats</string>
+			<string>%2$@ ساتوشي</string>
 			<key>one</key>
 			<string>%2$@ ساتوشي</string>
 			<key>other</key>
 			<string>%2$@ ساتوشي</string>
 			<key>two</key>
-			<string>%2$@ sats</string>
+			<string>%2$@ ساتوشي</string>
 			<key>zero</key>
-			<string>%2$@ sats</string>
+			<string>%2$@ ساتوشي</string>
 		</dict>
 	</dict>
-	<key>tips_count</key>
+	<key>zaps_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@TIPS@</string>
-		<key>TIPS</key>
+		<string>%#@ZAPS@</string>
+		<key>ZAPS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>few</key>
-			<string>Tips</string>
+			<string>Zaps</string>
 			<key>many</key>
-			<string>Tips</string>
+			<string>Zaps</string>
 			<key>one</key>
-			<string>اكرامية</string>
+			<string>Zap</string>
 			<key>other</key>
-			<string>اكراميات</string>
+			<string>Zaps</string>
 			<key>two</key>
-			<string>Tips</string>
+			<string>Zaps</string>
 			<key>zero</key>
-			<string>Tips</string>
+			<string>Zaps</string>
 		</dict>
 	</dict>
 </dict>

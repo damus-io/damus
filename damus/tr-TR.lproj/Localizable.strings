@@ -4,9 +4,6 @@
 /* Description of how the nip05 identifier would be used for verification. */
 "'%@' at '%@' will be used for verification" = "'%@' adresindeki '%@' doğrulama için kullanılacaktır";
 
-/* Description of why the nip05 identifier is invalid. */
-"'%@' is an invalid nip05 identifier. It should look like an email." = "'%@' geçersiz bir nip05 tanımlayıcısı. Tanımlayıcı, e-posta gibi gözükmeli. ";
-
 /* Navigation bar title for view that shows who is following a user. */
 "(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "(Profile.displayName(profile: profile, pubkey: whos))'nin Takipçileri";
 
@@ -16,11 +13,10 @@
 /* Prefix character to username. */
 "@" = "@";
 
-/* Amount of time that has passed since reply quote event occurred.
-Abbreviated version of a nostr public key. */
+/* Abbreviated version of a nostr public key. */
 "%@" = "%@";
 
-/* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
+/* Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
 Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
 "%@ %@" = "%@ %@";
 
@@ -33,7 +29,7 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Arkadaşlarınızın gönderilerine bahşiş verin ve internetin yerel para birimi olan Bitcoin⚡️ ile sats biriktirin.";
 
-/* Number of reposts.
+/* Number of zap payments on a post.
 Number of profiles a user is following. */
 "%lld" = "%lld";
 
@@ -42,6 +38,9 @@ Number of profiles a user is following. */
 
 /* Placeholder for event mention. */
 "< e >" = "< e >";
+
+/* No comment provided by engineer. */
+"⚡️ %@" = "⚡️ %@";
 
 /* Label to prompt for about text entry for user to describe about themself. */
 "About" = "Hakkında";
@@ -92,9 +91,12 @@ Number of profiles a user is following. */
 /* Context menu option for broadcasting the user's note to all of the user's connected relay servers. */
 "Broadcast" = "Yayınla";
 
-/* Button to cancel out of posting a note.
+/* Alert button to cancel out of alert for blocking a user.
+   Button to cancel out of alert that creates a new mutelist.
+   Button to cancel out of posting a note.
    Button to cancel out of reposting a post.
    Button to cancel out of view adding user inputted relay.
+   Cancel deleting the user.
    Cancel out of logging out the user. */
 "Cancel" = "İptal Et";
 
@@ -141,9 +143,6 @@ Number of profiles a user is following. */
 /* Context menu option for copying the text from an note. */
 "Copy Text" = "Metni Kopyala";
 
-/* Context menu option for copying the ID of the user who created the note. */
-"Copy User ID" = "Hesap Kimliğini Kopyala";
-
 /* Button to create account. */
 "Create" = "Yarat";
 
@@ -159,7 +158,10 @@ Number of profiles a user is following. */
 /* Button to pay a Lightning invoice with the user's default Lightning wallet. */
 "Default Wallet" = "Varsayılan Cüzdan";
 
-/* Button to delete a relay server that the user connects to. */
+/* Button for deleting the users account.
+   Button to delete a relay server that the user connects to.
+   Button to remove a user from their blocklist.
+   Section title for deleting the user */
 "Delete" = "Sil";
 
 /* Button to dismiss a text field alert. */
@@ -167,9 +169,6 @@ Number of profiles a user is following. */
 
 /* Label to prompt display name entry. */
 "Display Name" = "Görünür İsim";
-
-/* Navigation title for DM view, which is the English abbreviation for Direct Message. */
-"DM" = "DM";
 
 /* Button to dismiss wallet selection view for paying Lightning invoice. */
 "Done" = "Tamam";
@@ -183,17 +182,11 @@ Number of profiles a user is following. */
 /* Heading indicating that this application keeps private messaging end-to-end encrypted. */
 "Encrypted" = "Şifreli";
 
-/* Navigation title for view of encrypted DMs, where DM is an English abbreviation for Direct Message. */
-"Encrypted DMs" = "Şifreli DM'ler";
-
 /* Prompt for user to enter an account key to login. */
 "Enter your account key to login:" = "Giriş yapmak için hesap anahtarını gir:";
 
 /* Error message indicating why saving keys failed. */
 "Error: %@" = "Hata: %@";
-
-/* Filter state for seeing either only posts, or posts & replies. */
-"Filter State" = "Filtre Durumu";
 
 /* Button to follow a user. */
 "Follow" = "Takip Et";
@@ -224,7 +217,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Home" = "Ev";
 
 /* Placeholder example text for profile picture URL. */
-"https://example.com/pic.jpg" = "https://example.com/pic.jpg";
+"https://example.com/pic.jpg" = "https://ornek.com/resim.jpg";
 
 /* Placeholder example text for website URL for user profile. */
 "https://jb55.com" = "https://jb55.com";
@@ -259,7 +252,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Alert for logging out the user.
    Button for logging out the user.
-   Button to logout the user. */
+   Button to close the alert that informs that the current account has been deleted. */
 "Logout" = "Çıkış yap";
 
 /* Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out. */
@@ -310,11 +303,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading. */
 "Private" = "Özel";
 
-/* Label to indicate that the text below is the user's private key used by only the user themself as a secret to login to access their account. */
-"Private Key" = "Özel Anahtar";
-
 /* Title of the secure field that holds the user's private key. */
-"PrivateKey" = "Özel Anahtar";
+"Private Key" = "Özel Anahtar";
 
 /* Sidebar menu label for Profile view. */
 "Profile" = "Profil";
@@ -343,7 +333,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Text field for relay server. Used for testing purposes. */
 "Relay" = "Röle";
 
-/* Sidebar menu label for Relay servers view */
+/* Sidebar menu label for Relay servers view
+   Sidebar menu label for Relays view. */
 "Relays" = "Röleler";
 
 /* Label to indicate that the user is replying to themself. */
@@ -361,9 +352,6 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Text indicating that the post was reposted (i.e. re-shared). */
 "Reposted" = "Yinelendi";
-
-/* Section title for resetting the user */
-"Reset" = "Sıfırla";
 
 /* Button to retry completing account creation after an error occurred. */
 "Retry" = "Yeniden Dene";
@@ -405,10 +393,12 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Sidebar menu label for accessing the app settings */
 "Settings" = "Ayarlar";
 
-/* Button to share an image. */
+/* Button to share an image.
+   Button to share the link to a profile. */
 "Share" = "Paylaş";
 
-/* Toggle to show or hide user's secret account login key. */
+/* Button to show a post from a user who has been blocked.
+   Toggle to show or hide user's secret account login key. */
 "Show" = "Göster";
 
 /* Toggle to show or hide selection of wallet. */
@@ -461,8 +451,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Sidebar menu label for Wallet view. */
 "Wallet" = "Cüzdan";
 
-/* Dropdown option label for Lightning wallet, Wallet Of Satoshi. */
-"Wallet Of Satoshi" = "Wallet Of Satoshi";
+/* Dropdown option label for Lightning wallet, Wallet of Satoshi. */
+"Wallet of Satoshi" = "Wallet of Satoshi";
 
 /* Section title for selection of wallet. */
 "Wallet Selector" = "Cüzdan Seçici";
@@ -477,7 +467,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Welcome, %@!" = "Hoş geldin, %@";
 
 /* Placeholder example for relay server address. */
-"wss://some.relay.com" = "wss://some.relay.com";
+"wss://some.relay.com" = "wss://örnek.role.com";
 
 /* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
 "you" = "sen";

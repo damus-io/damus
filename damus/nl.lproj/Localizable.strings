@@ -2,16 +2,16 @@
 "   " = "61b6edf1108e6f396680a33b02486a70_tr";
 
 /* Description of how the nip05 identifier would be used for verification. */
-"'%@' at '%@' will be used for verification" = "'%@' pod adresem '%@' zostanie użyty do weryfikacji";
+"'%@' at '%@' will be used for verification" = "‘%@’ op ‘%@’ wordt gebruikt ter verificatie";
 
 /* Description of why the nip05 identifier is invalid. */
-"'%@' is an invalid NIP-05 identifier. It should look like an email." = "'%@' jest niepoprawnym identyfikatorem NIP-05. Powinien wyglądać jak email.";
+"'%@' is an invalid NIP-05 identifier. It should look like an email." = "‘%@’ is een ongeldige NIP-05-identificatie. Het moet op e-mailadres lijken.";
 
 /* Navigation bar title for view that shows who is following a user. */
-"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "Obserwujący (Profile.displayName(profile: profile, pubkey: whos))";
+"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "(Profile.displayName(profile: profile, pubkey: whos))s volgers";
 
 /* Navigation bar title for view that shows who a user is following. */
-"(who) following" = "(who) obserwuje";
+"(who) following" = "(who) volgt";
 
 /* Prefix character to username. */
 "@" = "@";
@@ -24,16 +24,16 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 "%@ %@" = "%@ %@";
 
 /* Alert message that informs a user was blocked. */
-"%@ has been blocked" = "Użytkownik %@ zablokowany";
+"%@ has been blocked" = "%@ is geblokkeerd";
 
 /* Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. Tworzenie konta nie wymaga numeru telefonu, emaila, ani imienia. Zacznij już teraz bez żadnych przeszkód.";
+"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. Bij het aanmaken van een account is geen telefoonnummer, e-mailadres of naam vereist. Je kunt dus snel aan de slag.";
 
 /* Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. Prywatny komunikator z szyfrowaniem typu \"End-to-End\". Trzymaj branżę technologiczną z dala od swoich prywatnych wiadomości";
+"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. Eind-tot-eind versleutelde privéberichten: grote techbedrijven kijken niet mee.";
 
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Dawaj napiwki w reakcji na odpowiedzi znajomych i ciułaj satsy z Bitcoin⚡️, natywną walutą internetu.";
+"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Geef je vrienden een fooi met Bitcoin⚡️, dé internetvaluta.";
 
 /* Number of zap payments on a post.
 Number of profiles a user is following. */
@@ -49,82 +49,82 @@ Number of profiles a user is following. */
 "⚡️ %@" = "⚡️ %@";
 
 /* Label to prompt for about text entry for user to describe about themself. */
-"About" = "O programie";
+"About" = "Over";
 
 /* Label for About Me section of user profile form. */
-"About Me" = "O mnie";
+"About Me" = "Over mijzelf";
 
 /* Placeholder text for About Me description. */
-"Absolute Boss" = "Miszcz";
+"Absolute Boss" = "De beste van de klas";
 
 /* Button to accept the end user license agreement before being allowed into the app. */
-"Accept" = "Potwierdź";
+"Accept" = "Accepteer";
 
 /* Label to indicate the public ID of the account. */
-"Account ID" = "ID konta";
+"Account ID" = "Account-id";
 
 /* Title for confirmation dialog to either share, report, or block a profile. */
-"Actions" = "Akcje";
+"Actions" = "Acties";
 
 /* Button to add recommended relay server.
    Button to confirm adding user inputted relay. */
-"Add" = "Dodaj";
+"Add" = "Voeg toe";
 
 /* Button label to re-add all original participants as profiles to reply to in a note */
-"Add all" = "Dodaj wszystkie";
+"Add all" = "Voeg iedereen toe";
 
 /* Label for section for adding a relay server. */
-"Add Relay" = "Dodaj przekaźnik";
+"Add Relay" = "Voeg relay toe";
 
 /* Any amount of sats */
-"Any" = "Dowolny";
+"Any" = "Elk";
 
 /* Example URL to LibreTranslate server */
-"API Key (optional)" = "Klucz API (opcjonalny)";
+"API Key (optional)" = "Api-sleutel (optioneel)";
 
 /* Alert message to ask if user wants to repost a post. */
-"Are you sure you want to repost this?" = "Na pewno chcesz podać dalej?";
+"Are you sure you want to repost this?" = "Weet je zeker dat je dit wilt herplaatsen?";
 
 /* Label for Banner Image section of user profile form. */
-"Banner Image" = "Baner";
+"Banner Image" = "Profielomslag";
 
 /* Reminder to user that they should save their account information. */
-"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "Zanim zaczniesz, musisz zapisać dane swojego konta. W przeciwnym razie nie będziesz można zalogować się w przyszłości, jeśli kiedykolwiek odinstalujesz Damusa.";
+"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "Voordat je aan de slag kant, moet je je accountinformatie opslaan, anders kun je niet inloggen, zelfs niet als je Damus verwijdert.";
 
 /* Dropdown option label for Lightning wallet, Bitcoin Beach. */
 "Bitcoin Beach" = "Bitcoin Beach";
 
 /* Label for Bitcoin Lightning Tips section of user profile form. */
-"Bitcoin Lightning Tips" = "Napiwki Bitcoin Lightning";
+"Bitcoin Lightning Tips" = "Bitcoin Lightning-tips";
 
 /* Dropdown option label for Lightning wallet, Blixt Wallet */
-"Blixt Wallet" = "Blixt Wallet";
+"Blixt Wallet" = "Blixt-portefeuille";
 
 /* Alert button to block a user.
    Button to block a profile.
    Context menu option for blocking users. */
-"Block" = "Zablokuj";
+"Block" = "Blokkeer";
 
 /* Alert message prompt to ask if a user should be blocked. */
-"Block %@?" = "Zablokować %@?";
+"Block %@?" = "Wil je %@ blokkeren?";
 
 /* Title of alert for blocking a user. */
-"Block User" = "Zablokowanie użytkownika";
+"Block User" = "Blokkeer gebruiker";
 
 /* Sidebar menu label for Profile view. */
-"Blocked" = "Zablokowani";
+"Blocked" = "Geblokkeerd";
 
 /* Navigation title of view to see list of blocked users. */
-"Blocked Users" = "Zablokowani użytkownicy";
+"Blocked Users" = "Geblokkeerde gebruikers";
 
 /* Dropdown option label for Lightning wallet, Blue Wallet. */
-"Blue Wallet" = "Blue Wallet";
+"Blue Wallet" = "Blue-portefeuille";
 
 /* Dropdown option label for Lightning wallet, Breez. */
 "Breez" = "Breez";
 
 /* Context menu option for broadcasting the user's note to all of the user's connected relay servers. */
-"Broadcast" = "Rozgłoś";
+"Broadcast" = "Uitzenden";
 
 /* Alert button to cancel out of alert for blocking a user.
    Button to cancel out of alert that creates a new mutelist.
@@ -133,340 +133,347 @@ Number of profiles a user is following. */
    Button to cancel out of view adding user inputted relay.
    Cancel deleting the user.
    Cancel out of logging out the user. */
-"Cancel" = "Anuluj";
+"Cancel" = "Annuleer";
 
 /* Dropdown option label for Lightning wallet, Cash App. */
-"Cash App" = "Cash App";
+"Cash App" = "Cash-app";
 
 /* Navigation bar title for Chatroom view. */
-"Chat" = "Czat";
+"Chat" = "Chat";
 
 /* Button for clearing cached data. */
-"Clear" = "Wyczyść";
+"Clear" = "Wis";
 
 /* Section title for clearing cached data. */
-"Clear Cache" = "Pamięć podręczna";
+"Clear Cache" = "Wis cache";
 
 /* Label indicating that a user's key was copied. */
-"Copied" = "Skopiowano";
+"Copied" = "Gekopieerd";
 
 /* Button to copy a relay server address. */
-"Copy" = "Kopiuj";
+"Copy" = "Kopieer";
 
 /* Context menu option for copying the ID of the account that created the note. */
-"Copy Account ID" = "Kopiuj ID konta";
+"Copy Account ID" = "Kopieer account-id";
 
 /* Context menu option to copy an image into clipboard.
    Context menu option to copy an image to clipboard. */
-"Copy Image" = "Kopiuj obraz";
+"Copy Image" = "Kopieer afbeelding";
 
 /* Context menu option to copy the URL of an image into clipboard. */
-"Copy Image URL" = "Kopiuj adres obrazu";
+"Copy Image URL" = "Kopieer afbeeldingslink";
 
 /* Title of section for copying a Lightning invoice identifier. */
-"Copy invoice" = "Kopiuj fakturę";
+"Copy invoice" = "Kopieer factuur";
 
 /* Context menu option for copying a user's Lightning URL. */
-"Copy LNURL" = "Kopiuj LNURL";
+"Copy LNURL" = "Kopieer LNURL";
 
 /* Context menu option for copying the ID of the note. */
-"Copy Note ID" = "Kopiuj ID notatki";
+"Copy Note ID" = "Kopieer notitie-id";
 
 /* Context menu option for copying the JSON text from the note. */
-"Copy Note JSON" = "Kopiuj JSON notatki";
+"Copy Note JSON" = "Kopieer notitie-json";
 
 /* Button to copy report ID. */
-"Copy Report ID" = "Kopiuj ID zgłoszenia";
+"Copy Report ID" = "Kopieer meldings-id";
 
 /* Context menu option for copying the text from an note. */
-"Copy Text" = "Kopiuj tekst";
+"Copy Text" = "Kopieer tekst";
 
 /* Context menu option for copying the ID of the user who created the note. */
-"Copy User Pubkey" = "Kopiuj klucz publiczny użytkownika";
+"Copy User Pubkey" = "Kopieer gebruikerssleutel";
 
 /* Alert message to indicate that the blocked user could not be found. */
-"Could not find user to block..." = "Nie odnaleziono użytkownika do zablokowania...";
+"Could not find user to block..." = "Er is geen gebruiker gevonden…";
 
 /* Button to create account. */
-"Create" = "Utwórz";
+"Create" = "Registreer";
 
 /* Button to create an account. */
-"Create Account" = "Utwórz konto";
+"Create Account" = "Maak account aan";
 
 /* Title of alert prompting the user to create a new mutelist. */
-"Create new mutelist" = "Tworzenie nowej listy zablokowanych";
+"Create new mutelist" = "Maak nieuwe demplijst aan";
 
 /* Example description about Bitcoin creator(s), Satoshi Nakamoto. */
-"Creator(s) of Bitcoin. Absolute legend." = "Twórca/y Bitcoina. Absolutna legenda.";
+"Creator(s) of Bitcoin. Absolute legend." = "Maker(s) van Bitcoin. Een ware legende.";
 
 /* Dropdown option for selecting a custom translation server. */
-"Custom" = "Użytkownika";
+"Custom" = "Aangepast";
 
 /* Name of the app, shown on the first screen when user is not logged in. */
 "Damus" = "Damus";
 
 /* Button to pay a Lightning invoice with the user's default Lightning wallet. */
-"Default Wallet" = "Portfel domyślny";
+"Default Wallet" = "Damus-portefeuille";
 
 /* Button for deleting the users account.
    Button to delete a relay server that the user connects to.
    Button to remove a user from their blocklist.
    Section title for deleting the user */
-"Delete" = "Usuń";
+"Delete" = "Verwijder";
+
+/* Alert for deleting the users account.
+   Button to delete the user's account. */
+"Delete Account" = "Verwijder account";
+
+/* Alert message to indicate this is a deleted account */
+"Deleted Account" = "Verwijderd account";
 
 /* Button to dismiss a text field alert. */
-"Dismiss" = "Odzruć";
+"Dismiss" = "Negeer";
 
 /* Label to prompt display name entry. */
-"Display Name" = "Nazwa wyświetlana";
+"Display Name" = "Weergavenaam";
 
 /* Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
    Navigation title for view of DMs, where DM is an English abbreviation for Direct Message. */
-"DMs" = "PW";
+"DMs" = "DM's";
 
 /* Button to dismiss wallet selection view for paying Lightning invoice. */
-"Done" = "Gotowe";
+"Done" = "Klaar";
 
 /* Heading indicating that this application allows users to earn money. */
-"Earn Money" = "Zarabiaj pieniądze";
+"Earn Money" = "Verdien geld";
 
 /* Button to edit user's profile. */
-"Edit" = "Edytuj";
+"Edit" = "Bewerk";
 
 /* Text indicating that the view is used for editing which participants are replied to in a note. */
-"Edit participants" = "Edytuj uczestników";
+"Edit participants" = "Bewerk deelnemers";
 
 /* Heading indicating that this application keeps private messaging end-to-end encrypted. */
-"Encrypted" = "Zaszyfrowane";
+"Encrypted" = "Versleuteld";
 
 /* Prompt for user to enter an account key to login. */
-"Enter your account key to login:" = "Wprowadź klucz swojego konta aby się zalogować:";
+"Enter your account key to login:" = "Voer je accountsleutel in om in te loggen:";
 
 /* Error message indicating why saving keys failed. */
-"Error: %@" = "Błąd: %@";
+"Error: %@" = "Foutmelding: %@";
 
 /* Label indicating that the below text is the EULA, an acronym for End User License Agreement. */
 "EULA" = "EULA";
 
 /* Button to follow a user. */
-"Follow" = "Obserwuj";
+"Follow" = "Volg";
 
 /* Label describing followers of a user. */
-"Followers" = "Obserwujący";
+"Followers" = "Volgers";
 
 /* Text to indicate that the button next to it is in a state that indicates that it is in the process of following a profile.
 Part of a larger sentence to describe how many profiles a user is following. */
-"Following" = "Obserwuje";
+"Following" = "Volgend";
 
 /* Label to indicate that the user is in the process of following another user. */
-"Following..." = "Obserwowani...";
+"Following..." = "Volgend…";
 
 /* Text to indicate that button next to it is in a state that will follow a profile when tapped. */
-"Follows" = "Obserwuje";
+"Follows" = "Volgt";
 
 /* Navigation bar title for Global view where posts from all connected relay servers appear. */
-"Global" = "Globalny";
+"Global" = "Algemeen";
 
 /* Navigation link to go to post referenced by hex code. */
-"Goto post %@" = "Idź do postu %@";
+"Goto post %@" = "Ga naar bericht %@";
 
 /* Navigation link to go to profile. */
-"Goto profile %@" = "Idź do profilu %@";
+"Goto profile %@" = "Ga naar profiel %@";
 
 /* Button to hide a post from a user who has been blocked. */
-"Hide" = "Ukryj";
+"Hide" = "Verberg";
 
 /* Button to hide the LibreTranslate server API key. */
-"Hide API Key" = "Ukryj klucz API";
+"Hide API Key" = "Verberg api-sleutel";
 
 /* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
-"Home" = "Strona główna";
+"Home" = "Startpagina";
 
 /* Placeholder example text for profile picture URL. */
-"https://example.com/pic.jpg" = "https://example.com/pic.jpg";
+"https://example.com/pic.jpg" = "https://voorbeeld.nl/foto.jpg";
 
 /* Placeholder example text for website URL for user profile. */
 "https://jb55.com" = "https://jb55.com";
 
 /* Button for user to report that the account or content has illegal content. */
-"Illegal content" = "Treści nielegalne";
+"Illegal content" = "Illegale inhoud";
 
 /* Error message indicating that an invalid account key was entered for login. */
-"Invalid key" = "Klucz nieprawidłowy";
+"Invalid key" = "Ongeldige sleutel";
 
 /* Button for user to report that the account or content has spam. */
-"It's spam" = "To jest spam";
+"It's spam" = "Spam";
 
 /* Placeholder example text for identifier used for NIP-05 verification. */
 "jb55@jb55.com" = "jb55@jb55.com";
 
 /* Moves the post button to the left side of the screen */
-"Left Handed" = "Leworęczny";
+"Left Handed" = "Linkshandig";
 
 /* Button to complete account creation and start using the app. */
-"Let's go!" = "Jedziemy!";
+"Let's go!" = "Aan de slag!";
 
 /* Section title for selecting the server that hosts the LibreTranslate machine translation API. */
-"LibreTranslate Translations" = "Tłumaczenia LibreTranslate";
+"LibreTranslate Translations" = "LibreTranslate-vertalingen";
 
 /* Placeholder text for entry of Lightning Address or LNURL. */
-"Lightning Address or LNURL" = "Address Lightning lub LNURL";
+"Lightning Address or LNURL" = "Lightningadres of LNURL";
 
 /* Indicates that the view is for paying a Lightning invoice. */
-"Lightning Invoice" = "Faktura Lightning";
+"Lightning Invoice" = "Lightningfactuur";
 
 /* Dropdown option label for Lightning wallet, LNLink. */
 "LNLink" = "LNLink";
 
 /* Dropdown option label for system default for Lightning wallet. */
-"Local default" = "Domyślny systemowy";
+"Local default" = "Lokaal standaard";
 
 /* Button to log into account.
    Button to log into an account. */
-"Login" = "Logowanie";
+"Login" = "Log in";
 
 /* Alert for logging out the user.
    Button for logging out the user.
    Button to close the alert that informs that the current account has been deleted. */
-"Logout" = "Wylogowanie";
+"Logout" = "Log uit";
 
 /* Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out. */
-"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "Upewnij się, że Twój klucz konta nsec jest zapisany zanim się wylogujesz bo inaczej stracisz dostęp do tego konta";
+"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "Zorg er voor dat je nsec-accountsleutel is opgeslagen voordat je uitlogt, anders verlies je toegang tot dit account";
 
 /* Dropdown option label for Lightning wallet, Muun. */
 "Muun" = "Muun";
 
 /* Label for NIP-05 Verification section of user profile form. */
-"NIP-05 Verification" = "Weryfikacja NIP-05";
+"NIP-05 Verification" = "NIP-05-verificatie";
 
 /* Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists. */
-"No block list found, create a new one? This will overwrite any previous block lists." = "Nie znaleziono listy zablokowanych, stworzyć nową? Nadpisać poprzednie listy.";
+"No block list found, create a new one? This will overwrite any previous block lists." = "Er is geen blokkadelijst. Wil je een lijst aanmaken? Hierdoor worden vorige lijsten overschreven.";
 
 /* No search results. */
-"none" = "brak wyników";
+"none" = "geen";
 
 /* Dropdown option for selecting no translation server. */
-"None" = "Żaden";
+"None" = "Geen";
 
 /* Indicates that there are no notes in the timeline to view. */
-"Nothing to see here. Check back later!" = "Nic tu nie ma. Sprawdź później!";
+"Nothing to see here. Check back later!" = "Er is hier nog niks te zien. Kijk later nog eens!";
 
 /* Navigation title for notifications. */
-"Notifications" = "Powiadomienia";
+"Notifications" = "Meldingen";
 
 /* String indicating that a given timestamp just occurred */
-"now" = "przed chwilą";
+"now" = "zojuist";
 
 /* Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key. */
-"nsec1..." = "nsec1...";
+"nsec1..." = "nsec1…";
 
 /* Button for user to report that the account or content has nudity or explicit content. */
-"Nudity or explicit content" = "Nagość lub jednoznaczne treści";
+"Nudity or explicit content" = "Naaktheid of expliciete inhoud";
 
 /* Label indicating that a form input is optional. */
-"optional" = "opcjonalne";
+"optional" = "optioneel";
 
 /* Button to pay a Lightning invoice. */
-"Pay" = "Zapłać";
+"Pay" = "Betaal";
 
 /* Navigation bar title for view to pay Lightning invoice. */
-"Pay the Lightning invoice" = "Zapłać fakturę Lightning";
+"Pay the Lightning invoice" = "Betaal de Lightningfactuur";
 
 /* Dropdown option label for Lightning wallet, Phoenix. */
 "Phoenix" = "Phoenix";
 
 /* Button to post a note. */
-"Post" = "Napisz post";
+"Post" = "Bericht";
 
 /* Text to indicate that what is being shown is a post from a user who has been blocked. */
-"Post from a user you've blocked" = "Post od użytkownika, którego zablokowałeś";
+"Post from a user you've blocked" = "Bericht van een geblokkeerde gebruiker";
 
 /* Label for filter for seeing only posts (instead of posts and replies). */
-"Posts" = "Posty";
+"Posts" = "Berichten";
 
 /* Label for filter for seeing posts and replies (instead of only posts). */
-"Posts & Replies" = "Posty i odpowiedzi";
+"Posts & Replies" = "Berichten en antwoorden";
 
 /* Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading. */
-"Private" = "Prywatność";
+"Private" = "Privé";
 
 /* Title of the secure field that holds the user's private key. */
-"Private Key" = "Klucz prywatny";
+"Private Key" = "Privésleutel";
 
 /* Sidebar menu label for Profile view. */
-"Profile" = "Profil";
+"Profile" = "Profiel";
 
 /* Label for Profile Picture section of user profile form. */
-"Profile Picture" = "Zdjęcie profilowe";
+"Profile Picture" = "Profielfoto";
 
 /* Section title for the user's public account ID. */
-"Public Account ID" = "Publiczny ID konta";
+"Public Account ID" = "Openbare account-id";
 
 /* Label indicating that the text is a user's public account key. */
-"Public key" = "Klucz publiczny";
+"Public key" = "Openbare sleutel";
 
 /* Label indicating that the text is a user's public account key. */
-"Public Key" = "Klucz publiczny";
+"Public Key" = "Openbare sleutel";
 
 /* Prompt to ask user if the key they entered is a public key. */
-"Public Key?" = "Klucz publiczny?";
+"Public Key?" = "Openbare sleutel?";
 
 /* Navigation bar title for Reactions view. */
-"Reactions" = "Reakcje";
+"Reactions" = "Reacties";
 
 /* Section title for recommend relay servers that could be added as part of configuration */
-"Recommended Relays" = "Polecane przekaźniki";
+"Recommended Relays" = "Aanbevolen relays";
 
 /* Button to reject the end user license agreement, which disallows the user from being let into the app. */
-"Reject" = "Odrzuć";
+"Reject" = "Wijs af";
 
 /* Text field for relay server. Used for testing purposes. */
-"Relay" = "Przekaźnik";
+"Relay" = "Relay";
 
 /* Sidebar menu label for Relay servers view
    Sidebar menu label for Relays view. */
-"Relays" = "Przekaźniki";
+"Relays" = "Relays";
 
 /* Description of what was done as a result of sending a report to relay servers. */
-"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "Przekaźniki zostały powiadomione a klienci będą mogli użyć tej informacji do filtrowania treści. Dziękuję!";
+"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "De relays zijn op de hoogte gebracht en clients kunnen deze informatie gebruiken om inhoud te filteren. Dank!";
 
 /* Button label to remove all participants from a note reply. */
-"Remove all" = "Usuń wszystkie";
+"Remove all" = "Verwijder allen";
 
 /* Label to indicate that the user is replying to themself. */
-"Reply to self" = "Odpowiedz sobie";
+"Reply to self" = "Antwoord aan mijzelf";
 
 /* Label to indicate that the user is replying to 2 users. */
-"Replying to %@ & %@" = "Odpowiedz %1$@ i %2$@";
+"Replying to %@ & %@" = "Antwoord aan %1$@ en %2$@";
 
 /* Indicating that the user is replying to the following listed people. */
-"Replying to:" = "Odpowiedź do:";
+"Replying to:" = "Antwoord aan:";
 
 /* Button to report a profile.
    Context menu option for reporting content. */
-"Report" = "Zgłoś";
+"Report" = "Meld";
 
 /* Label indicating that the text underneath is the identifier of the report that was sent to relay servers. */
-"Report ID:" = "ID zgłoszenia:";
+"Report ID:" = "Meldings-id:";
 
 /* Message indicating that a report was successfully sent to relay servers. */
-"Report sent!" = "Zgłoszenie wysłane!";
+"Report sent!" = "De melding is gemaakt!";
 
 /* Button to confirm reposting a post.
    Title of alert for confirming to repost a post. */
-"Repost" = "Podaj dalej";
+"Repost" = "Herplaats";
 
 /* Text indicating that the post was reposted (i.e. re-shared). */
-"Reposted" = "Podano dalej";
+"Reposted" = "Herplaatst";
 
 /* Navigation bar title for Reposts view. */
-"Reposts" = "Podane dalej";
+"Reposts" = "Herplaatsingen";
 
 /* Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message. */
-"Requests" = "Prośby";
+"Requests" = "Verzoeken";
 
 /* Button to retry completing account creation after an error occurred. */
-"Retry" = "Ponów";
+"Retry" = "Probeer opnieuw";
 
 /* Dropdown option label for Lightning wallet, River */
 "River" = "River";
@@ -478,150 +485,156 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Satoshi Nakamoto" = "Satoshi Nakamoto";
 
 /* Button for saving profile. */
-"Save" = "Zapisz";
+"Save" = "Bewaar";
 
 /* Context menu option to save an image. */
-"Save Image" = "Zapisz obraz";
+"Save Image" = "Bewaar afbeelding";
 
 /* Navigation link to search hashtag. */
-"Search hashtag: #%@" = "Szukaj hasztag: #%@";
+"Search hashtag: #%@" = "Zoek naar hashtag: #%@";
 
 /* Placeholder text to prompt entry of search query. */
-"Search..." = "Szukaj..";
+"Search..." = "Zoek…";
 
 /* Section title for user's secret account login key. */
-"Secret Account Login Key" = "Tajny klucz logowania do konta";
+"Secret Account Login Key" = "Geheime inlogsleutel";
 
 /* Title of section for selecting a Lightning wallet to pay a Lightning invoice. */
-"Select a Lightning wallet" = "Wybierz portfel Lightning";
+"Select a Lightning wallet" = "Kies een Lightningportefeuille";
 
 /* Prompt selection of user's default wallet */
-"Select default wallet" = "Wybierz domyślny portfel";
+"Select default wallet" = "Kies de standaardportefeuille";
 
 /* Text prompt for user to send a message to the other user. */
-"Send a message to start the conversation..." = "Wyślij wiadomość aby zacząć rozmowę...";
+"Send a message to start the conversation..." = "Begin het gesprek door een bericht te versturen…";
 
 /* Prompt selection of LibreTranslate server to perform machine translations on notes */
-"Server" = "Serwer";
+"Server" = "Server";
 
 /* Navigation title for Settings view.
    Sidebar menu label for accessing the app settings */
-"Settings" = "Ustawienia";
+"Settings" = "Instellingen";
 
 /* Button to share an image.
    Button to share the link to a profile. */
-"Share" = "Udostępnij";
+"Share" = "Deel";
 
 /* Button to show a post from a user who has been blocked.
    Toggle to show or hide user's secret account login key. */
-"Show" = "Pokaż";
+"Show" = "Toon";
 
 /* Button to hide the LibreTranslate server API key. */
-"Show API Key" = "Pokaż klucz API";
+"Show API Key" = "Toon api-sleutel";
 
 /* Toggle to show or hide selection of wallet. */
-"Show wallet selector" = "Pokaż wybór portfela";
+"Show wallet selector" = "Toon portefeuillekeuze";
 
 /* Sidebar menu label to sign out of the account. */
-"Sign out" = "Wyloguj się";
+"Sign out" = "Log uit";
 
 /* Dropdown option label for Lightning wallet, Strike. */
 "Strike" = "Strike";
 
 /* Button to close out of alert that informs that the action to block a user was successful. */
-"Thanks!" = "Dzięki!";
+"Thanks!" = "Bedankt!";
 
 /* Button for user to report that the account is impersonating someone. */
-"They are impersonating someone" = "Podszywa się pod kogoś";
+"They are impersonating someone" = "Dit account doet zich voor als iemand anders";
 
 /* Warning that the inputted account key is a public key and the result of what happens because of it. */
-"This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "To jest klucz publiczny, nie będziesz mógł pisać postów ani mieć żadnych interakcji. Jest używany tylko do odczytu z ich perspektywy.";
+"This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Dit is een openbare sleutel waarmee geen berichten of antwoorden kunnen worden geplaatst. Deze wordt alléén gebruikt om accounts te tonen.";
 
 /* Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key. */
-"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "To jest klucz nostr starego typu. Trudno powiedzieć czy to jest klucz publiczny czy prywatny. Przestaw przycisk jeśli to jest klucz publiczny.";
+"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Dit is een oude nostr-sleutel waarvan we niet weten of het een pubkey or privésleutel is. Druk op onderstaande knop als het een privésleutel betreft.";
 
 /* Label to describe that a public key is the user's account ID and what they can do with it. */
-"This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "To jest ID Twojego konta, które możesz dać znajomym by mogli Cię obserwować. Kliknij aby skopiować.";
+"This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "Dit je account-id. Je kunt deze delen met je vrienden zodat ze je kunnen volgen. Druk om te kopiëren.";
 
 /* Label to describe that a private key is the user's secret account key and what they should do with it. */
-"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "To jest Twój klucz prywatny. Potrzebny jest aby mieć dostęp do Twojego konta. Nie udostępniaj go nikomu! Zapisz w menedżerze haseł i przechowuj bezpiecznie!";
+"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Dit is je geheime accountsleutel. Deze heb je nodig om in te loggen op je account - deel de sleutel dus met niemand! Bewaar hem eventueel in een wachtwoordbeheerder.";
 
 /* Navigation bar title for note thread.
    Navigation bar title for threaded event detail view. */
-"Thread" = "Wątek";
+"Thread" = "Details";
 
 /* Button to translate note from different language. */
-"Translate Note" = "Tłumacz wpis";
+"Translate Note" = "Vertaal notitie";
 
 /* Button to indicate that the note has been translated from a different language. */
-"Translated from (lang)" = "Tłumaczenie z (lang)";
+"Translated from (lang)" = "Vertaald uit het (lang)";
+
+/* Button to indicate that the note is in the process of being translated from a different language. */
+"Translating from (lang)..." = "Bezig met vertalen uit (lang)…";
+
+/* No comment provided by engineer. */
+"Type DELETE to delete" = "Typ DELETE om te verwijderen";
 
 /* Text box prompt to ask user to type their post. */
-"Type your post here..." = "Napisz swój post tutaj...";
+"Type your post here..." = "Typ een bericht…";
 
 /* Non-breaking space character to fill in blank space next to event action button icons. */
 "u{00A0}" = "u{00A0}";
 
 /* Button to unfollow a user. */
-"Unfollow" = "Przestań obserwować";
+"Unfollow" = "Ontvolg";
 
 /* Text to indicate that the button next to it is in  a state that indicates that it is in the process of unfollowing a profile. */
-"Unfollowing" = "Przestaje obserwować";
+"Unfollowing" = "Bezig met ontvolgen…";
 
 /* Label to indicate that the user is in the process of unfollowing another user. */
-"Unfollowing..." = "Przestaje obserwować...";
+"Unfollowing..." = "Bezig met ontvolgen…";
 
 /* Text to indicate that the button next to it is in a state that will unfollow a profile when tapped. */
-"Unfollows" = "Przestaje obserwować";
+"Unfollows" = "Ontvolgt";
 
 /* Example URL to LibreTranslate server */
-"URL" = "URL";
+"URL" = "Url";
 
 /* Alert message to indicate the user has been blocked */
-"User blocked" = "Blokowanie użytkownika";
+"User blocked" = "Geblokkeerd";
 
 /* Alert message that informs a user was blocked. */
-"User has been blocked" = "Użytkownik został zablokowany";
+"User has been blocked" = "De gebruiker is geblokkeerd";
 
 /* Label for Username section of user profile form.
    Label to prompt username entry. */
-"Username" = "Nazwa użytkownika";
+"Username" = "Gebruikersnaam";
 
 /* Sidebar menu label for Wallet view. */
-"Wallet" = "Portfel";
+"Wallet" = "Portefeuille";
 
 /* Dropdown option label for Lightning wallet, Wallet of Satoshi. */
-"Wallet of Satoshi" = "Wallet of Satoshi";
+"Wallet of Satoshi" = "Portefeuille of Satoshi";
 
 /* Section title for selection of wallet. */
-"Wallet Selector" = "Wybór portfela";
+"Wallet Selector" = "Portefeuillekeuze";
 
 /* Label for Website section of user profile form. */
-"Website" = "Strona internetowa";
+"Website" = "Website";
 
 /* Welcoming message to the reader. The variable is 'you', the reader. */
-"Welcome to the social network %@ control." = "Widaj w sieci społecznościowej, którą %@ kontrolujesz.";
+"Welcome to the social network %@ control." = "Welkom op het sociale netwerk waar %@ de baas bent.";
 
 /* Text to welcome user. */
-"Welcome, %@!" = "Witaj, %@!";
+"Welcome, %@!" = "Welkom, %@!";
 
 /* Header text to prompt user what issue they want to report. */
-"What do you want to report?" = "Co chcesz zgłosić?";
+"What do you want to report?" = "Waar wil je melding van maken?";
 
 /* Placeholder example for relay server address. */
-"wss://some.relay.com" = "wss://jakis.przekaznik.com";
+"wss://some.relay.com" = "wss://een.relay.nl";
 
 /* Text of button that confirms to overwrite the existing mutelist. */
-"Yes, Overwrite" = "Tak, nadpisz";
+"Yes, Overwrite" = "Ja, overschrijven";
 
 /* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
-"you" = "Ty";
+"you" = "jíj";
 
 /* Label for Your Name section of user profile form. */
-"Your Name" = "Twoje Imię";
+"Your Name" = "Mijn naam";
 
 /* Footer text to inform user what will happen when the report is submitted. */
-"Your report will be sent to the relays you are connected to" = "Twoje zgłoszenie zostanie wysłane do przekaźników, do których jesteś podłączony";
+"Your report will be sent to the relays you are connected to" = "Je melding wordt verstuurd aan de relays waarmee je verbonden bent";
 
 /* Dropdown option label for Lightning wallet, Zebedee. */
 "Zebedee" = "Zebedee";

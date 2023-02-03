@@ -4,6 +4,3 @@
 /* Bundle name */
 "CFBundleName" = "damus";
 
-/* Privacy - Photo Library Additions Usage Description */
-"NSPhotoLibraryAddUsageDescription" = "Damus'a fotoğraf kitaplığınıza erişim izni vermek, fotoğrafları kaydetmenize olanak tanır.";
-
