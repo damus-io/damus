@@ -11,6 +11,7 @@ class ProfileModel: ObservableObject, Equatable {
     @Published var events: [NostrEvent] = []
     @Published var contacts: NostrEvent? = nil
     @Published var following: Int = 0
+    @Published var loading: Bool = true
     @Published var relays: [String: RelayInfo]? = nil
     
     let pubkey: String
@@ -47,6 +48,8 @@ class ProfileModel: ObservableObject, Equatable {
     }
     
     func subscribe() {
+        loading = true
+        
         var text_filter = NostrFilter.filter_kinds([
             NostrKind.text.rawValue,
             NostrKind.chat.rawValue,
@@ -116,6 +119,7 @@ class ProfileModel: ObservableObject, Equatable {
             case .notice(let notice):
                 notify(.notice, notice)
             case .eose:
+                loading = false
                 break
             }
         }
