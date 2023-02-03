@@ -156,6 +156,7 @@ struct ContentView: View {
                 
             case .home:
                 PostingTimelineView
+                    .environment(\.layoutDirection, .leftToRight)
                 
             case .notifications:
                 TimelineView(events: $home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
