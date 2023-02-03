@@ -110,7 +110,7 @@ struct Profile: Codable {
             return lnaddress_to_lnurl(addr);
         }
         
-        if !addr.hasPrefix("lnurl") {
+        if !addr.lowercased().hasPrefix("lnurl") {
             return nil
         }
         
