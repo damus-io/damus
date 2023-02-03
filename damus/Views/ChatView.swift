@@ -96,17 +96,24 @@ struct ChatView: View {
                 
                     if let ref_id = thread.replies.lookup(event.id) {
                         if !is_reply_to_prev() {
+                            /*
                             ReplyQuoteView(keypair: damus_state.keypair, quoter: event, event_id: ref_id, profiles: damus_state.profiles, previews: damus_state.previews)
                                 .frame(maxHeight: expand_reply ? nil : 100)
                                 .environmentObject(thread)
                                 .onTapGesture {
                                     expand_reply = !expand_reply
                                 }
+                             */
                             ReplyDescription
                         }
                     }
                     
-                    NoteContentView(keypair: damus_state.keypair, event: event, profiles: damus_state.profiles, previews: damus_state.previews, show_images: should_show_images(contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey), artifacts: .just_content(event.content), size: .normal)
+                    let show_images = should_show_images(contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
+                    NoteContentView(damus_state: damus_state,
+                                    event: event,
+                                    show_images: show_images,
+                                    artifacts: .just_content(event.content),
+                                    size: .normal)
 
                     if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
                         let bar = make_actionbar_model(ev: event, damus: damus_state)

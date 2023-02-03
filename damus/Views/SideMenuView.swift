@@ -10,9 +10,7 @@ import SwiftUI
 struct SideMenuView: View {
     let damus_state: DamusState
     @Binding var isSidebarVisible: Bool
-
     @State var confirm_logout: Bool = false
-    @EnvironmentObject var user_settings: UserSettingsStore
     
     @State private var showQRCode = false
     
@@ -121,7 +119,7 @@ struct SideMenuView: View {
                             .foregroundColor(textColor())
                     }
                     
-                    NavigationLink(destination: ConfigView(state: damus_state).environmentObject(user_settings)) {
+                    NavigationLink(destination: ConfigView(state: damus_state)) {
                         Label(NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), systemImage: "gear")
                             .font(.title2)
                             .foregroundColor(textColor())

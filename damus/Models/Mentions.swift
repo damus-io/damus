@@ -52,7 +52,7 @@ struct LightningInvoice<T> {
         switch description {
         case .description(let string):
             return string
-        case .description_hash(let data):
+        case .description_hash:
             return ""
         }
     }
