@@ -87,7 +87,7 @@ Number of profiles a user is following. */
 "Banner Image" = "主页背景图片";
 
 /* Reminder to user that they should save their account information. */
-"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "请先保存您的账户信息！否则您将在登出或卸载后无法重新登陆大麦子。";
+"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "请先保存您的账户信息！否则您将在登出或卸载后无法重新登陆大妹子。";
 
 /* Dropdown option label for Lightning wallet, Bitcoin Beach. */
 "Bitcoin Beach" = "Bitcoin Beach";
@@ -201,7 +201,7 @@ Number of profiles a user is following. */
 "Custom" = "自定义";
 
 /* Name of the app, shown on the first screen when user is not logged in. */
-"Damus" = "大麦子";
+"Damus" = "大妹子";
 
 /* Button to pay a Lightning invoice with the user's default Lightning wallet. */
 "Default Wallet" = "默认钱包";

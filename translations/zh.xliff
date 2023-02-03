@@ -6,19 +6,19 @@
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
         <source>Damus</source>
-        <target>大麦子</target>
+        <target>大妹子</target>
         
         <note>Bundle display name</note>
       </trans-unit>
       <trans-unit id="CFBundleName" xml:space="preserve">
         <source>damus</source>
-        <target>大麦子</target>
+        <target>大妹子</target>
         
         <note>Bundle name</note>
       </trans-unit>
       <trans-unit id="NSPhotoLibraryAddUsageDescription" xml:space="preserve">
         <source>Granting Damus access to your photos allows you to save images.</source>
-        <target>允许大麦子访问您的相册以便保存图片。</target>
+        <target>允许大妹子访问您的相册以便保存图片。</target>
         
         <note>Privacy - Photo Library Additions Usage Description</note>
       </trans-unit>
@@ -202,7 +202,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." xml:space="preserve">
         <source>Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus.</source>
-        <target>请先保存您的账户信息！否则您将在登出或卸载后无法重新登陆大麦子。</target>
+        <target>请先保存您的账户信息！否则您将在登出或卸载后无法重新登陆大妹子。</target>
         
         <note>Reminder to user that they should save their account information.</note>
       </trans-unit>
@@ -433,7 +433,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Damus" xml:space="preserve">
         <source>Damus</source>
-        <target>大麦子</target>
+        <target>大妹子</target>
         
         <note>Name of the app, shown on the first screen when user is not logged in.</note>
       </trans-unit>
