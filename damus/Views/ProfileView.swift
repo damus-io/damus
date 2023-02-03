@@ -92,6 +92,7 @@ struct EditButton: View {
                         .stroke(borderColor(), lineWidth: 1)
                 }
                 .minimumScaleFactor(0.5)
+                .lineLimit(1)
         }
     }
     
