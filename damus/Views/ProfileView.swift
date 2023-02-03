@@ -107,6 +107,7 @@ struct ProfileView: View {
     @State var is_zoomed: Bool = false
     @State var show_share_sheet: Bool = false
     @State var action_sheet_presented: Bool = false
+    @State var filter_state : FilterState = .posts
     @State var yOffset: CGFloat = 0
     
     @Environment(\.dismiss) var dismiss
@@ -336,8 +337,6 @@ struct ProfileView: View {
                 WebsiteLink(url: url)
             }
             
-            Divider()
-            
             HStack {
                 if let contact = profile.contacts {
                     let contacts = contact.referenced_pubkeys.map { $0.ref_id }
@@ -386,7 +385,6 @@ struct ProfileView: View {
     }
         
     var body: some View {
-        
         ScrollView(.vertical) {
             VStack(spacing: 0) {
                 bannerSection
@@ -395,9 +393,22 @@ struct ProfileView: View {
                 VStack() {
                     aboutSection
                 
-                    Divider()
+                    VStack(spacing: 0) {
+                        CustomPicker(selection: $filter_state, content: {
+                            Text("Posts", comment: "Label for filter for seeing only your posts (instead of posts and replies).").tag(FilterState.posts)
+                            Text("Posts & Replies", comment: "Label for filter for seeing your posts and replies (instead of only your posts).").tag(FilterState.posts_and_replies)
+                        })
+                        Divider()
+                            .frame(height: 1)
+                    }
+                    .background(colorScheme == .dark ? Color.black : Color.white)
                     
-                    InnerTimelineView(events: $profile.events, damus: damus_state, show_friend_icon: false, filter: { _ in true })
+                    if filter_state == FilterState.posts {
+                        InnerTimelineView(events: $profile.events, damus: damus_state, show_friend_icon: false, filter: FilterState.posts.filter)
+                    }
+                    if filter_state == FilterState.posts_and_replies {
+                        InnerTimelineView(events: $profile.events, damus: damus_state, show_friend_icon: false, filter: FilterState.posts_and_replies.filter)
+                    }
                 }
                 .padding(.horizontal, Theme.safeAreaInsets?.left)
                 .zIndex(-yOffset > navbarHeight ? 0 : 1)
