@@ -21,12 +21,25 @@ enum ActionBarSheet: Identifiable {
 struct EventActionBar: View {
     let damus_state: DamusState
     let event: NostrEvent
+    let test_lnurl: String?
     let generator = UIImpactFeedbackGenerator(style: .medium)
     
+    // just used for previews
     @State var sheet: ActionBarSheet? = nil
     @State var confirm_boost: Bool = false
     @State var show_share_sheet: Bool = false
     @StateObject var bar: ActionBarModel
+    
+    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel, test_lnurl: String? = nil) {
+        self.damus_state = damus_state
+        self.event = event
+        self.test_lnurl = test_lnurl
+        _bar = StateObject.init(wrappedValue: bar)
+    }
+    
+    var lnurl: String? {
+        test_lnurl ?? damus_state.profiles.lookup(id: event.pubkey)?.lnurl
+    }
     
     var body: some View {
         HStack {
@@ -51,6 +64,7 @@ struct EventActionBar: View {
                     .foregroundColor(bar.boosted ? Color.green : Color.gray)
             }
             Spacer()
+            
             ZStack {
                 LikeButton(liked: bar.liked) {
                     if bar.liked {
@@ -66,7 +80,7 @@ struct EventActionBar: View {
                 
             }
             
-            if let lnurl = damus_state.profiles.lookup(id: event.pubkey)?.lnurl {
+            if let lnurl = self.lnurl {
                 Spacer()
                 ZapButton(damus_state: damus_state, event: event, lnurl: lnurl, bar: bar)
             }
@@ -177,7 +191,7 @@ struct EventActionBar_Previews: PreviewProvider {
             
             EventActionBar(damus_state: ds, event: ev, bar: maxed_bar)
 
-            EventActionBar(damus_state: ds, event: ev, bar: zapbar)
+            EventActionBar(damus_state: ds, event: ev, bar: zapbar, test_lnurl: "lnurl")
         }
         .padding(20)
     }

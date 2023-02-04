@@ -69,6 +69,8 @@
 		4C3BEFDA281DCA1400B3DE84 /* LikeCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD9281DCA1400B3DE84 /* LikeCounter.swift */; };
 		4C3BEFDC281DCE6100B3DE84 /* Liked.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFDB281DCE6100B3DE84 /* Liked.swift */; };
 		4C3BEFE0281DE1ED00B3DE84 /* DamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFDF281DE1ED00B3DE84 /* DamusState.swift */; };
+		4C3D52B6298DB4E6001C5831 /* ZapEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3D52B5298DB4E6001C5831 /* ZapEvent.swift */; };
+		4C3D52B8298DB5C6001C5831 /* TextEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3D52B7298DB5C6001C5831 /* TextEvent.swift */; };
 		4C3EA63D28FF52D600C48A62 /* bolt11.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA63C28FF52D600C48A62 /* bolt11.c */; };
 		4C3EA64128FF553900C48A62 /* hash_u5.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64028FF553900C48A62 /* hash_u5.c */; };
 		4C3EA64428FF558100C48A62 /* sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64328FF558100C48A62 /* sha256.c */; };
@@ -315,6 +317,8 @@
 		4C3BEFD9281DCA1400B3DE84 /* LikeCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikeCounter.swift; sourceTree = "<group>"; };
 		4C3BEFDB281DCE6100B3DE84 /* Liked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Liked.swift; sourceTree = "<group>"; };
 		4C3BEFDF281DE1ED00B3DE84 /* DamusState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusState.swift; sourceTree = "<group>"; };
+		4C3D52B5298DB4E6001C5831 /* ZapEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapEvent.swift; sourceTree = "<group>"; };
+		4C3D52B7298DB5C6001C5831 /* TextEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEvent.swift; sourceTree = "<group>"; };
 		4C3EA63B28FF52D600C48A62 /* bolt11.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bolt11.h; sourceTree = "<group>"; };
 		4C3EA63C28FF52D600C48A62 /* bolt11.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bolt11.c; sourceTree = "<group>"; };
 		4C3EA63E28FF54BD00C48A62 /* short_types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = short_types.h; sourceTree = "<group>"; };
@@ -771,6 +775,8 @@
 				4CC7AAF7297F1CEE00430951 /* EventProfile.swift */,
 				4CC7AAF9297F64AC00430951 /* EventMenu.swift */,
 				4CF0ABE6298444FC00D66079 /* MutedEventView.swift */,
+				4C3D52B5298DB4E6001C5831 /* ZapEvent.swift */,
+				4C3D52B7298DB5C6001C5831 /* TextEvent.swift */,
 			);
 			path = Events;
 			sourceTree = "<group>";
@@ -1109,11 +1115,13 @@
 				4C363A9028247A1D006E126D /* NostrLink.swift in Sources */,
 				4C0A3F8C280F5FCA000448DE /* ChatroomView.swift in Sources */,
 				4C477C9E282C3A4800033AA3 /* TipCounter.swift in Sources */,
+				4C3D52B6298DB4E6001C5831 /* ZapEvent.swift in Sources */,
 				647D9A8D2968520300A295DE /* SideMenuView.swift in Sources */,
 				F7F0BA272978E54D009531F3 /* ParicipantsView.swift in Sources */,
 				4C0A3F91280F6528000448DE /* ChatView.swift in Sources */,
 				4CF0ABE32981BC7D00D66079 /* UserView.swift in Sources */,
 				4CF0ABF029857E9200D66079 /* Bech32Object.swift in Sources */,
+				4C3D52B8298DB5C6001C5831 /* TextEvent.swift in Sources */,
 				4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */,
 				4C216F382871EDE300040376 /* DirectMessageModel.swift in Sources */,
 				4C75EFA627FF87A20006080F /* Nostr.swift in Sources */,
