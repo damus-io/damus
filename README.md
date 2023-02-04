@@ -1,30 +1,23 @@
-[![Run Test Suite](https://github.com/damus-io/damus/actions/workflows/run-tests.yaml/badge.svg?branch=master)](https://github.com/damus-io/damus/actions/workflows/run-tests.yaml)
+# Damus - The social network you control.
+### A [nostr protocol][nostr] compliant client for iOS & MacOS.
 
-# damus
-#### A twitter-like [nostr][nostr] client for iPhone, iPad and MacOS.
 <HR>
-<center>
 
 <a href="https://apps.apple.com/us/app/damus/id1628663131" rel="damus nostr app" style="width: 50%; height: 50%">![Damus](./ss.png)</a>
 
 <a href="https://apps.apple.com/us/app/damus/id1628663131" rel="damus nostr app" style="width: 100%; height: 100%">![Damus](./devtools/App_Store_Badge.svg)</a>
 </center>
 
+[![Run Test Suite](https://github.com/damus-io/damus/actions/workflows/run-tests.yaml/badge.svg?branch=master)](https://github.com/damus-io/damus/actions/workflows/run-tests.yaml)
 
-## Spec Compliance
+<HR>
 
-damus implements the following [Nostr Implementation Possibilities][nips]
+### [damus][damus] supports the following [Nostr Implementation Possibilities][nips]
 
 - [NIP-01: Basic protocol flow][nip01]
 - [NIP-08: Mentions][nip08]
 - [NIP-10: Reply conventions][nip10]
 - [NIP-12: Generic tag queries (hashtags)][nip12]
-
-[nips]: https://github.com/nostr-protocol/nips
-[nip01]: https://github.com/nostr-protocol/nips/blob/master/01.md
-[nip08]: https://github.com/nostr-protocol/nips/blob/master/08.md
-[nip10]: https://github.com/nostr-protocol/nips/blob/master/10.md
-[nip12]: https://github.com/nostr-protocol/nips/blob/master/12.md
 
 ## Getting Started on Damus 
 
@@ -143,3 +136,9 @@ First contributors:
 npub1fjtdwclt9lspjy8huu3qklr7eklp5uq90u6yh8mec290pqxraccqlufnas
 
 [nostr]: https://github.com/fiatjaf/nostr
+[damus]: https://damus.io
+[nips]: https://github.com/nostr-protocol/nips
+[nip01]: https://github.com/nostr-protocol/nips/blob/master/01.md
+[nip08]: https://github.com/nostr-protocol/nips/blob/master/08.md
+[nip10]: https://github.com/nostr-protocol/nips/blob/master/10.md
+[nip12]: https://github.com/nostr-protocol/nips/blob/master/12.md
