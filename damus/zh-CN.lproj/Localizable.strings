@@ -95,7 +95,7 @@ Number of profiles a user is following. */
 "Bitcoin Beach" = "Bitcoin Beach";
 
 /* Label for Bitcoin Lightning Tips section of user profile form. */
-"Bitcoin Lightning Tips" = "Bitcoin Lightning Tips";
+"Bitcoin Lightning Tips" = "比特币闪电小费";
 
 /* Dropdown option label for Lightning wallet, Blixt Wallet */
 "Blixt Wallet" = "Blixt钱包";
@@ -247,7 +247,7 @@ Number of profiles a user is following. */
 "Encrypted" = "已加密";
 
 /* Prompt for user to enter an account key to login. */
-"Enter your account key to login:" = "输入您的账户key以登陆：";
+"Enter your account key to login:" = "输入你的账户钥匙以登陆：";
 
 /* Error message indicating why saving keys failed. */
 "Error: %@" = "错误：%@";
@@ -314,7 +314,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Let's go!" = "开启旅程！";
 
 /* Section title for selecting the server that hosts the LibreTranslate machine translation API. */
-"LibreTranslate Translations" = "LibreTranslate Translations";
+"LibreTranslate Translations" = "LibreTranslate 翻译";
 
 /* Placeholder text for entry of Lightning Address or LNURL. */
 "Lightning Address or LNURL" = "闪电地址或LNURL";
@@ -482,7 +482,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "satoshi" = "satoshi";
 
 /* Name of Bitcoin creator(s). */
-"Satoshi Nakamoto" = "Satoshi Nakamoto";
+"Satoshi Nakamoto" = "中本聪";
 
 /* Button for saving profile. */
 "Save" = "保存";

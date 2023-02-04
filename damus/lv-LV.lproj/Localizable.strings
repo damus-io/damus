@@ -4,6 +4,9 @@
 /* Description of how the nip05 identifier would be used for verification. */
 "'%@' at '%@' will be used for verification" = "'%@' pie '%@' tiks izmantota priekš verifikācijas.";
 
+/* Description of why the nip05 identifier is invalid. */
+"'%@' is an invalid NIP-05 identifier. It should look like an email." = "'%@' ir nederīgs NIP-05 identifikators. Tam vajadzētu izskatīties pēc e-pasta.";
+
 /* Navigation bar title for view that shows who is following a user. */
 "(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "(Profile.displayName(profile: profile, pubkey: whos))'am Sekotāji";
 
@@ -19,6 +22,9 @@
 /* Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
 Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
 "%@ %@" = "%@ %@";
+
+/* Alert message that informs a user was blocked. */
+"%@ has been blocked" = "ir bloķēts";
 
 /* Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "Lai izveidotu kontu, nav nepieciešams tālruņa numurs, e-pasts vai vārds. Sāciet uzreiz bez aizkaves.";
@@ -51,8 +57,14 @@ Number of profiles a user is following. */
 /* Placeholder text for About Me description. */
 "Absolute Boss" = "Pilnīgs Priekšnieks";
 
+/* Button to accept the end user license agreement before being allowed into the app. */
+"Accept" = "Pieņemt";
+
 /* Label to indicate the public ID of the account. */
 "Account ID" = "Konta ID";
+
+/* Title for confirmation dialog to either share, report, or block a profile. */
+"Actions" = "Darbības";
 
 /* Button to add recommended relay server.
    Button to confirm adding user inputted relay. */
@@ -66,6 +78,9 @@ Number of profiles a user is following. */
 
 /* Any amount of sats */
 "Any" = "Jebkurš";
+
+/* Example URL to LibreTranslate server */
+"API Key (optional)" = "API Atslēga (pēc izvēles)";
 
 /* Alert message to ask if user wants to repost a post. */
 "Are you sure you want to repost this?" = "Vai tiešām vēlies pārpublicēt šo?";
@@ -84,6 +99,23 @@ Number of profiles a user is following. */
 
 /* Dropdown option label for Lightning wallet, Blixt Wallet */
 "Blixt Wallet" = "Blixt Maciņš";
+
+/* Alert button to block a user.
+   Button to block a profile.
+   Context menu option for blocking users. */
+"Block" = "Bloķējums";
+
+/* Alert message prompt to ask if a user should be blocked. */
+"Block %@?" = "Vai bloķēt %@?";
+
+/* Title of alert for blocking a user. */
+"Block User" = "Bloķēt Lietotāju";
+
+/* Sidebar menu label for Profile view. */
+"Blocked" = "Bloķēts";
+
+/* Navigation title of view to see list of blocked users. */
+"Blocked Users" = "Bloķētie Lietotāji";
 
 /* Dropdown option label for Lightning wallet, Blue Wallet. */
 "Blue Wallet" = "Blue Maciņš";
@@ -143,8 +175,17 @@ Number of profiles a user is following. */
 /* Context menu option for copying the JSON text from the note. */
 "Copy Note JSON" = "Nokopēt Ziņas JSON";
 
+/* Button to copy report ID. */
+"Copy Report ID" = "Kopēt Atskaites ID";
+
 /* Context menu option for copying the text from an note. */
 "Copy Text" = "Nokopēt Tekstu";
+
+/* Context menu option for copying the ID of the user who created the note. */
+"Copy User Pubkey" = "Kopēt Lietotāja PubAtslēgu";
+
+/* Alert message to indicate that the blocked user could not be found. */
+"Could not find user to block..." = "Nevar atrast lietotāju, ko nobloķēt...";
 
 /* Button to create account. */
 "Create" = "Izveidot";
@@ -152,8 +193,14 @@ Number of profiles a user is following. */
 /* Button to create an account. */
 "Create Account" = "Izveidot Kontu";
 
+/* Title of alert prompting the user to create a new mutelist. */
+"Create new mutelist" = "Izveidot jaunu klusinājumSarakstu";
+
 /* Example description about Bitcoin creator(s), Satoshi Nakamoto. */
 "Creator(s) of Bitcoin. Absolute legend." = "Bitmonētas Radītājs(i). Pilnīgas Leģendas.";
+
+/* Dropdown option for selecting a custom translation server. */
+"Custom" = "Pielāgots";
 
 /* Name of the app, shown on the first screen when user is not logged in. */
 "Damus" = "Damus";
@@ -166,6 +213,13 @@ Number of profiles a user is following. */
    Button to remove a user from their blocklist.
    Section title for deleting the user */
 "Delete" = "Izdzēst";
+
+/* Alert for deleting the users account.
+   Button to delete the user's account. */
+"Delete Account" = "Izdzēst Kontu";
+
+/* Alert message to indicate this is a deleted account */
+"Deleted Account" = "Izdzēstais Konts";
 
 /* Button to dismiss a text field alert. */
 "Dismiss" = "Atmest";
@@ -198,6 +252,9 @@ Number of profiles a user is following. */
 /* Error message indicating why saving keys failed. */
 "Error: %@" = "Kļūda: %@";
 
+/* Label indicating that the below text is the EULA, an acronym for End User License Agreement. */
+"EULA" = "EULA";
+
 /* Button to follow a user. */
 "Follow" = "Sekot";
 
@@ -223,6 +280,12 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Navigation link to go to profile. */
 "Goto profile %@" = "Ej uz profilu %@";
 
+/* Button to hide a post from a user who has been blocked. */
+"Hide" = "Slēpt";
+
+/* Button to hide the LibreTranslate server API key. */
+"Hide API Key" = "Slēpt API Atslēgu";
+
 /* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
 "Home" = "Sākums";
 
@@ -232,8 +295,14 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Placeholder example text for website URL for user profile. */
 "https://jb55.com" = "https://jb55.com";
 
+/* Button for user to report that the account or content has illegal content. */
+"Illegal content" = "Pretlikumīgs saturs";
+
 /* Error message indicating that an invalid account key was entered for login. */
 "Invalid key" = "Nepareiza atslēga";
+
+/* Button for user to report that the account or content has spam. */
+"It's spam" = "Tā ir mēstule";
 
 /* Placeholder example text for identifier used for NIP-05 verification. */
 "jb55@jb55.com" = "jb55@jb55.com";
@@ -243,6 +312,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Button to complete account creation and start using the app. */
 "Let's go!" = "Uz priekšu!";
+
+/* Section title for selecting the server that hosts the LibreTranslate machine translation API. */
+"LibreTranslate Translations" = "LibreTulkotāja Tulkojumi";
 
 /* Placeholder text for entry of Lightning Address or LNURL. */
 "Lightning Address or LNURL" = "Zibens Adrese vai ZibSaite";
@@ -274,8 +346,14 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label for NIP-05 Verification section of user profile form. */
 "NIP-05 Verification" = "NIP-05 Verifikācija";
 
+/* Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists. */
+"No block list found, create a new one? This will overwrite any previous block lists." = "Nav atrasts bloķējuma saraksts, izveidot jaunu? Tiks pārrakstīti visi iepriekšējie bloķējuma saraksti.";
+
 /* No search results. */
 "none" = "neviens";
+
+/* Dropdown option for selecting no translation server. */
+"None" = "Neviens";
 
 /* Indicates that there are no notes in the timeline to view. */
 "Nothing to see here. Check back later!" = "Nav ko redzēt te. Ienāc šeit vēlāk.";
@@ -288,6 +366,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key. */
 "nsec1..." = "nsec1...";
+
+/* Button for user to report that the account or content has nudity or explicit content. */
+"Nudity or explicit content" = "Kailums vai nepārprotams saturs";
 
 /* Label indicating that a form input is optional. */
 "optional" = "pēc izvēles";
@@ -303,6 +384,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Button to post a note. */
 "Post" = "Publicēt";
+
+/* Text to indicate that what is being shown is a post from a user who has been blocked. */
+"Post from a user you've blocked" = "Ziņa no lietotāja, kuru esat bloķējis";
 
 /* Label for filter for seeing only posts (instead of posts and replies). */
 "Posts" = "Ieraksti";
@@ -340,12 +424,18 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Section title for recommend relay servers that could be added as part of configuration */
 "Recommended Relays" = "Ieteicamie Releji";
 
+/* Button to reject the end user license agreement, which disallows the user from being let into the app. */
+"Reject" = "Noraidīt";
+
 /* Text field for relay server. Used for testing purposes. */
 "Relay" = "Relejs";
 
 /* Sidebar menu label for Relay servers view
    Sidebar menu label for Relays view. */
 "Relays" = "Releji";
+
+/* Description of what was done as a result of sending a report to relay servers. */
+"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "Releji ir informēti un klienti varēs izmantot šo informāciju, lai filtrētu saturu. Paldies Tev!";
 
 /* Button label to remove all participants from a note reply. */
 "Remove all" = "Noņemt visu";
@@ -359,12 +449,25 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Indicating that the user is replying to the following listed people. */
 "Replying to:" = "Atbildot";
 
+/* Button to report a profile.
+   Context menu option for reporting content. */
+"Report" = "Noziņot";
+
+/* Label indicating that the text underneath is the identifier of the report that was sent to relay servers. */
+"Report ID:" = "Ziņojuma ID";
+
+/* Message indicating that a report was successfully sent to relay servers. */
+"Report sent!" = "Ziņojums nosūtīts!";
+
 /* Button to confirm reposting a post.
    Title of alert for confirming to repost a post. */
 "Repost" = "Pārpublicēt";
 
 /* Text indicating that the post was reposted (i.e. re-shared). */
 "Reposted" = "Pārpublicēts";
+
+/* Navigation bar title for Reposts view. */
+"Reposts" = "Pārpublicējumi";
 
 /* Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message. */
 "Requests" = "Pieprasījumi";
@@ -405,6 +508,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Text prompt for user to send a message to the other user. */
 "Send a message to start the conversation..." = "Sūti ziņu, lai sāktu sarunu...";
 
+/* Prompt selection of LibreTranslate server to perform machine translations on notes */
+"Server" = "Serveris";
+
 /* Navigation title for Settings view.
    Sidebar menu label for accessing the app settings */
 "Settings" = "Uzstādījumi";
@@ -417,6 +523,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Toggle to show or hide user's secret account login key. */
 "Show" = "Parādīt";
 
+/* Button to hide the LibreTranslate server API key. */
+"Show API Key" = "Parādīt API Atslēgu";
+
 /* Toggle to show or hide selection of wallet. */
 "Show wallet selector" = "Parādīt maciņu atlasītāju";
 
@@ -425,6 +534,12 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Dropdown option label for Lightning wallet, Strike. */
 "Strike" = "Strike";
+
+/* Button to close out of alert that informs that the action to block a user was successful. */
+"Thanks!" = "Paldies!";
+
+/* Button for user to report that the account is impersonating someone. */
+"They are impersonating someone" = "Viņi uzdodas par kādu citu";
 
 /* Warning that the inputted account key is a public key and the result of what happens because of it. */
 "This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Šī ir publiskā atslēga, jūs nevarēsit rakstīt ziņas vai kādā citā veidā darboties. To izmanto, lai tikai skatītu kontus no to skatpunkta.";
@@ -441,6 +556,18 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Navigation bar title for note thread.
    Navigation bar title for threaded event detail view. */
 "Thread" = "Plūsma";
+
+/* Button to translate note from different language. */
+"Translate Note" = "Iztulkot Ziņu";
+
+/* Button to indicate that the note has been translated from a different language. */
+"Translated from (lang)" = "Tulkot no (val)";
+
+/* Button to indicate that the note is in the process of being translated from a different language. */
+"Translating from (lang)..." = "Tiek tulkots no (val)...";
+
+/* No comment provided by engineer. */
+"Type DELETE to delete" = "Ieraksti IZDZĒST, lai izdzēstu";
 
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "Rakstiet savu ziņu šeit...";
@@ -459,6 +586,15 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Text to indicate that the button next to it is in a state that will unfollow a profile when tapped. */
 "Unfollows" = "Atsekos";
+
+/* Example URL to LibreTranslate server */
+"URL" = "Saite";
+
+/* Alert message to indicate the user has been blocked */
+"User blocked" = "Lietotājs bloķēts";
+
+/* Alert message that informs a user was blocked. */
+"User has been blocked" = "Lietotājs ir nobloķēts";
 
 /* Label for Username section of user profile form.
    Label to prompt username entry. */
@@ -482,14 +618,23 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Text to welcome user. */
 "Welcome, %@!" = "Laipni lūgts, %@!";
 
+/* Header text to prompt user what issue they want to report. */
+"What do you want to report?" = "Ko Tu vēlies noziņot?";
+
 /* Placeholder example for relay server address. */
 "wss://some.relay.com" = "wss://cits.relejs.com";
+
+/* Text of button that confirms to overwrite the existing mutelist. */
+"Yes, Overwrite" = "Jā, Pārrakstīt";
 
 /* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
 "you" = "jūs";
 
 /* Label for Your Name section of user profile form. */
 "Your Name" = "Tavs Vārds";
+
+/* Footer text to inform user what will happen when the report is submitted. */
+"Your report will be sent to the relays you are connected to" = "Tavs ziņojums tiks nosūtīts uz relejiem, are kuriem esi savienots";
 
 /* Dropdown option label for Lightning wallet, Zebedee. */
 "Zebedee" = "Zebedee";

@@ -11,14 +11,14 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%d cita piezīme</string>
+			<string>%d cita ziņa</string>
 			<key>other</key>
-			<string>%d citas piezīmes</string>
+			<string>%d citas ziņas</string>
 			<key>zero</key>
 			<string>%d other notes</string>
 		</dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>··· %#@NOTES@ ···</string>
+		<string>··· Ziņas ···</string>
 	</dict>
 	<key>followers_count</key>
 	<dict>
@@ -36,12 +36,12 @@
 			<string>Followers</string>
 		</dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@FOLLOWERS@</string>
+		<string>Sekotāji</string>
 	</dict>
 	<key>reactions_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@REACTIONS@</string>
+		<string>Reakcijas</string>
 		<key>REACTIONS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -59,7 +59,7 @@
 	<key>relays_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@RELAYS@</string>
+		<string>Releji</string>
 		<key>RELAYS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -77,7 +77,7 @@
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Atbildot %@%#@OTHERS@</string>
+		<string>Atbildot %@% #Citam</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -95,7 +95,7 @@
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Atbildot %@, %@%#@OTHERS@</string>
+		<string>Atbildot %@, %@%#Citiem</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -113,7 +113,7 @@
 	<key>reposts_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@REPOSTS@</string>
+		<string>Pārpublicējumi</string>
 		<key>REPOSTS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -131,7 +131,7 @@
 	<key>sats_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%1$#@SATS@</string>
+		<string>%1$#@Sats@</string>
 		<key>SATS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -139,7 +139,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>%2$@ sats</string>
+			<string>%2$@ sati</string>
 			<key>other</key>
 			<string>%2$@ sati</string>
 			<key>zero</key>
@@ -149,7 +149,7 @@
 	<key>zaps_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@ZAPS@</string>
+		<string>Zapi</string>
 		<key>ZAPS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -157,9 +157,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Zap</string>
-			<key>other</key>
 			<string>Zaps</string>
+			<key>other</key>
+			<string>Zapi</string>
 			<key>zero</key>
 			<string>Zaps</string>
 		</dict>

@@ -49,6 +49,7 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
       </trans-unit>
       <trans-unit id="%@ has been blocked" xml:space="preserve">
         <source>%@ has been blocked</source>
+        <target>ir bloķēts</target>
         
         <note>Alert message that informs a user was blocked.</note>
       </trans-unit>
@@ -91,6 +92,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="'%@' is an invalid NIP-05 identifier. It should look like an email." xml:space="preserve">
         <source>'%@' is an invalid NIP-05 identifier. It should look like an email.</source>
+        <target>'%@' ir nederīgs NIP-05 identifikators. Tam vajadzētu izskatīties pēc e-pasta.</target>
         
         <note>Description of why the nip05 identifier is invalid.</note>
       </trans-unit>
@@ -120,6 +122,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="API Key (optional)" xml:space="preserve">
         <source>API Key (optional)</source>
+        <target>API Atslēga (pēc izvēles)</target>
         
         <note>Example URL to LibreTranslate server</note>
       </trans-unit>
@@ -143,6 +146,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Accept" xml:space="preserve">
         <source>Accept</source>
+        <target>Pieņemt</target>
         
         <note>Button to accept the end user license agreement before being allowed into the app.</note>
       </trans-unit>
@@ -154,6 +158,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Actions" xml:space="preserve">
         <source>Actions</source>
+        <target>Darbības</target>
         
         <note>Title for confirmation dialog to either share, report, or block a profile.</note>
       </trans-unit>
@@ -220,6 +225,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Block" xml:space="preserve">
         <source>Block</source>
+        <target>Bloķējums</target>
         
         <note>Alert button to block a user.
    Button to block a profile.
@@ -227,21 +233,25 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Block %@?" xml:space="preserve">
         <source>Block %@?</source>
+        <target>Vai bloķēt %@?</target>
         
         <note>Alert message prompt to ask if a user should be blocked.</note>
       </trans-unit>
       <trans-unit id="Block User" xml:space="preserve">
         <source>Block User</source>
+        <target>Bloķēt Lietotāju</target>
         
         <note>Title of alert for blocking a user.</note>
       </trans-unit>
       <trans-unit id="Blocked" xml:space="preserve">
         <source>Blocked</source>
+        <target>Bloķēts</target>
         
         <note>Sidebar menu label for Profile view.</note>
       </trans-unit>
       <trans-unit id="Blocked Users" xml:space="preserve">
         <source>Blocked Users</source>
+        <target>Bloķētie Lietotāji</target>
         
         <note>Navigation title of view to see list of blocked users.</note>
       </trans-unit>
@@ -350,6 +360,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Copy Report ID" xml:space="preserve">
         <source>Copy Report ID</source>
+        <target>Kopēt Atskaites ID</target>
         
         <note>Button to copy report ID.</note>
       </trans-unit>
@@ -361,6 +372,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Copy User Pubkey" xml:space="preserve">
         <source>Copy User Pubkey</source>
+        <target>Kopēt Lietotāja PubAtslēgu</target>
         
         <note>Context menu option for copying the ID of the user who created the note.</note>
       </trans-unit>
@@ -372,6 +384,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Could not find user to block..." xml:space="preserve">
         <source>Could not find user to block...</source>
+        <target>Nevar atrast lietotāju, ko nobloķēt...</target>
         
         <note>Alert message to indicate that the blocked user could not be found.</note>
       </trans-unit>
@@ -389,6 +402,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Create new mutelist" xml:space="preserve">
         <source>Create new mutelist</source>
+        <target>Izveidot jaunu klusinājumSarakstu</target>
         
         <note>Title of alert prompting the user to create a new mutelist.</note>
       </trans-unit>
@@ -400,6 +414,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Custom" xml:space="preserve">
         <source>Custom</source>
+        <target>Pielāgots</target>
         
         <note>Dropdown option for selecting a custom translation server.</note>
       </trans-unit>
@@ -433,12 +448,14 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Delete Account" xml:space="preserve">
         <source>Delete Account</source>
+        <target>Izdzēst Kontu</target>
         
         <note>Alert for deleting the users account.
    Button to delete the user's account.</note>
       </trans-unit>
       <trans-unit id="Deleted Account" xml:space="preserve">
         <source>Deleted Account</source>
+        <target>Izdzēstais Konts</target>
         
         <note>Alert message to indicate this is a deleted account</note>
       </trans-unit>
@@ -462,6 +479,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="EULA" xml:space="preserve">
         <source>EULA</source>
+        <target>EULA</target>
         
         <note>Label indicating that the below text is the EULA, an acronym for End User License Agreement.</note>
       </trans-unit>
@@ -552,11 +570,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Hide" xml:space="preserve">
         <source>Hide</source>
+        <target>Slēpt</target>
         
         <note>Button to hide a post from a user who has been blocked.</note>
       </trans-unit>
       <trans-unit id="Hide API Key" xml:space="preserve">
         <source>Hide API Key</source>
+        <target>Slēpt API Atslēgu</target>
         
         <note>Button to hide the LibreTranslate server API key.</note>
       </trans-unit>
@@ -568,6 +588,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Illegal content" xml:space="preserve">
         <source>Illegal content</source>
+        <target>Pretlikumīgs saturs</target>
         
         <note>Button for user to report that the account or content has illegal content.</note>
       </trans-unit>
@@ -579,6 +600,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="It's spam" xml:space="preserve">
         <source>It's spam</source>
+        <target>Tā ir mēstule</target>
         
         <note>Button for user to report that the account or content has spam.</note>
       </trans-unit>
@@ -602,6 +624,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="LibreTranslate Translations" xml:space="preserve">
         <source>LibreTranslate Translations</source>
+        <target>LibreTulkotāja Tulkojumi</target>
         
         <note>Section title for selecting the server that hosts the LibreTranslate machine translation API.</note>
       </trans-unit>
@@ -658,21 +681,25 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="No" xml:space="preserve">
         <source>No</source>
+        <target>Nē</target>
         
         <note>Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key.</note>
       </trans-unit>
       <trans-unit id="No block list found, create a new one? This will overwrite any previous block lists." xml:space="preserve">
         <source>No block list found, create a new one? This will overwrite any previous block lists.</source>
+        <target>Nav atrasts bloķējuma saraksts, izveidot jaunu? Tiks pārrakstīti visi iepriekšējie bloķējuma saraksti.</target>
         
         <note>Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists.</note>
       </trans-unit>
       <trans-unit id="None" xml:space="preserve">
         <source>None</source>
+        <target>Neviens</target>
         
         <note>Dropdown option for selecting no translation server.</note>
       </trans-unit>
       <trans-unit id="Note contains &quot;nsec1&quot; private key. Are you sure?" xml:space="preserve">
         <source>Note contains &quot;nsec1&quot; private key. Are you sure?</source>
+        <target>Ziņojums satur &quot;nsec1&quot; privāto atslēgu. Vai esi pārliecināts?</target>
         
         <note>Alert user that they might be attempting to paste a private key and ask them to confirm.</note>
       </trans-unit>
@@ -690,6 +717,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Nudity or explicit content" xml:space="preserve">
         <source>Nudity or explicit content</source>
+        <target>Kailums vai nepārprotams saturs</target>
         
         <note>Button for user to report that the account or content has nudity or explicit content.</note>
       </trans-unit>
@@ -719,6 +747,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Post from a user you've blocked" xml:space="preserve">
         <source>Post from a user you've blocked</source>
+        <target>Ziņa no lietotāja, kuru esat bloķējis</target>
         
         <note>Text to indicate that what is being shown is a post from a user who has been blocked.</note>
       </trans-unit>
@@ -796,6 +825,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Reject" xml:space="preserve">
         <source>Reject</source>
+        <target>Noraidīt</target>
         
         <note>Button to reject the end user license agreement, which disallows the user from being let into the app.</note>
       </trans-unit>
@@ -814,6 +844,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Relays have been notified and clients will be able to use this information to filter content. Thank you!" xml:space="preserve">
         <source>Relays have been notified and clients will be able to use this information to filter content. Thank you!</source>
+        <target>Releji ir informēti un klienti varēs izmantot šo informāciju, lai filtrētu saturu. Paldies Tev!</target>
         
         <note>Description of what was done as a result of sending a report to relay servers.</note>
       </trans-unit>
@@ -843,17 +874,20 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Report" xml:space="preserve">
         <source>Report</source>
+        <target>Noziņot</target>
         
         <note>Button to report a profile.
    Context menu option for reporting content.</note>
       </trans-unit>
       <trans-unit id="Report ID:" xml:space="preserve">
         <source>Report ID:</source>
+        <target>Ziņojuma ID</target>
         
         <note>Label indicating that the text underneath is the identifier of the report that was sent to relay servers.</note>
       </trans-unit>
       <trans-unit id="Report sent!" xml:space="preserve">
         <source>Report sent!</source>
+        <target>Ziņojums nosūtīts!</target>
         
         <note>Message indicating that a report was successfully sent to relay servers.</note>
       </trans-unit>
@@ -872,6 +906,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Reposts" xml:space="preserve">
         <source>Reposts</source>
+        <target>Pārpublicējumi</target>
         
         <note>Navigation bar title for Reposts view.</note>
       </trans-unit>
@@ -949,6 +984,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Server" xml:space="preserve">
         <source>Server</source>
+        <target>Serveris</target>
         
         <note>Prompt selection of LibreTranslate server to perform machine translations on notes</note>
       </trans-unit>
@@ -975,6 +1011,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Show API Key" xml:space="preserve">
         <source>Show API Key</source>
+        <target>Parādīt API Atslēgu</target>
         
         <note>Button to hide the LibreTranslate server API key.</note>
       </trans-unit>
@@ -998,11 +1035,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Thanks!" xml:space="preserve">
         <source>Thanks!</source>
+        <target>Paldies!</target>
         
         <note>Button to close out of alert that informs that the action to block a user was successful.</note>
       </trans-unit>
       <trans-unit id="They are impersonating someone" xml:space="preserve">
         <source>They are impersonating someone</source>
+        <target>Viņi uzdodas par kādu citu</target>
         
         <note>Button for user to report that the account is impersonating someone.</note>
       </trans-unit>
@@ -1039,21 +1078,25 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Translate Note" xml:space="preserve">
         <source>Translate Note</source>
+        <target>Iztulkot Ziņu</target>
         
         <note>Button to translate note from different language.</note>
       </trans-unit>
       <trans-unit id="Translated from (lang)" xml:space="preserve">
         <source>Translated from (lang)</source>
+        <target>Tulkot no (val)</target>
         
         <note>Button to indicate that the note has been translated from a different language.</note>
       </trans-unit>
       <trans-unit id="Translating from (lang)..." xml:space="preserve">
         <source>Translating from (lang)...</source>
+        <target>Tiek tulkots no (val)...</target>
         
         <note>Button to indicate that the note is in the process of being translated from a different language.</note>
       </trans-unit>
       <trans-unit id="Type DELETE to delete" xml:space="preserve">
         <source>Type DELETE to delete</source>
+        <target>Ieraksti IZDZĒST, lai izdzēstu</target>
         
         <note>No comment provided by engineer.</note>
       </trans-unit>
@@ -1065,6 +1108,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="URL" xml:space="preserve">
         <source>URL</source>
+        <target>Saite</target>
         
         <note>Example URL to LibreTranslate server</note>
       </trans-unit>
@@ -1094,11 +1138,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="User blocked" xml:space="preserve">
         <source>User blocked</source>
+        <target>Lietotājs bloķēts</target>
         
         <note>Alert message to indicate the user has been blocked</note>
       </trans-unit>
       <trans-unit id="User has been blocked" xml:space="preserve">
         <source>User has been blocked</source>
+        <target>Lietotājs ir nobloķēts</target>
         
         <note>Alert message that informs a user was blocked.</note>
       </trans-unit>
@@ -1147,16 +1193,19 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="What do you want to report?" xml:space="preserve">
         <source>What do you want to report?</source>
+        <target>Ko Tu vēlies noziņot?</target>
         
         <note>Header text to prompt user what issue they want to report.</note>
       </trans-unit>
       <trans-unit id="Yes, Overwrite" xml:space="preserve">
         <source>Yes, Overwrite</source>
+        <target>Jā, Pārrakstīt</target>
         
         <note>Text of button that confirms to overwrite the existing mutelist.</note>
       </trans-unit>
       <trans-unit id="Yes, Post with Private Key" xml:space="preserve">
         <source>Yes, Post with Private Key</source>
+        <target>Jā, Publicēt ar Privāto Atslēgu</target>
         
         <note>Button to proceed with posting a note even though it looks like they might be posting a private key.</note>
       </trans-unit>
@@ -1168,6 +1217,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Your report will be sent to the relays you are connected to" xml:space="preserve">
         <source>Your report will be sent to the relays you are connected to</source>
+        <target>Tavs ziņojums tiks nosūtīts uz relejiem, are kuriem esi savienots</target>
         
         <note>Footer text to inform user what will happen when the report is submitted.</note>
       </trans-unit>
@@ -1318,19 +1368,19 @@ Part of a larger sentence to describe how many profiles a user is following.</no
     <body>
       <trans-unit id="/collapsed_event_view_other_notes:dict/NOTES:dict/one:dict/:string" xml:space="preserve">
         <source>%d other note</source>
-        <target>%d cita piezīme</target>
+        <target>%d cita ziņa</target>
         
         <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped.</note>
       </trans-unit>
       <trans-unit id="/collapsed_event_view_other_notes:dict/NOTES:dict/other:dict/:string" xml:space="preserve">
         <source>%d other notes</source>
-        <target>%d citas piezīmes</target>
+        <target>%d citas ziņas</target>
         
         <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped.</note>
       </trans-unit>
       <trans-unit id="/collapsed_event_view_other_notes:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>··· %#@NOTES@ ···</source>
-        <target>··· %#@NOTES@ ···</target>
+        <target>··· Ziņas ···</target>
         
         <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped.</note>
       </trans-unit>
@@ -1348,13 +1398,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/followers_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@FOLLOWERS@</source>
-        <target>%#@FOLLOWERS@</target>
+        <target>Sekotāji</target>
         
         <note>Part of a larger sentence to describe how many people are following a user.</note>
       </trans-unit>
       <trans-unit id="/reactions_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@REACTIONS@</source>
-        <target>%#@REACTIONS@</target>
+        <target>Reakcijas</target>
         
         <note>Part of a larger sentence to describe how many reactions there are on a post.</note>
       </trans-unit>
@@ -1372,7 +1422,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/relays_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@RELAYS@</source>
-        <target>%#@RELAYS@</target>
+        <target>Releji</target>
         
         <note>Part of a larger sentence to describe how many relay servers a user is connected.</note>
       </trans-unit>
@@ -1390,7 +1440,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/replying_to_one_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>Replying to %@%#@OTHERS@</source>
-        <target>Atbildot %@%#@OTHERS@</target>
+        <target>Atbildot %@% #Citam</target>
         
         <note>Label to indicate that the user is replying to 1 user and others.</note>
       </trans-unit>
@@ -1412,7 +1462,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/replying_to_two_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>Replying to %@, %@%#@OTHERS@</source>
-        <target>Atbildot %@, %@%#@OTHERS@</target>
+        <target>Atbildot %@, %@%#Citiem</target>
         
         <note>Label to indicate that the user is replying to 2 users and others.</note>
       </trans-unit>
@@ -1434,7 +1484,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/reposts_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@REPOSTS@</source>
-        <target>%#@REPOSTS@</target>
+        <target>Pārpublicējumi</target>
         
         <note>Part of a larger sentence to describe how many reposts there are.</note>
       </trans-unit>
@@ -1452,13 +1502,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/sats_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%1$#@SATS@</source>
-        <target>%1$#@SATS@</target>
+        <target>%1$#@Sats@</target>
         
         <note>Amount of sats.</note>
       </trans-unit>
       <trans-unit id="/sats_count:dict/SATS:dict/one:dict/:string" xml:space="preserve">
         <source>%2$@ sat</source>
-        <target>%2$@ sats</target>
+        <target>%2$@ sati</target>
         
         <note>Amount of sats.</note>
       </trans-unit>
@@ -1470,17 +1520,19 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/zaps_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@ZAPS@</source>
-        <target>%#@ZAPS@</target>
+        <target>Zapi</target>
         
         <note>Part of a larger sentence to describe how many zap payments there are on a post.</note>
       </trans-unit>
       <trans-unit id="/zaps_count:dict/ZAPS:dict/one:dict/:string" xml:space="preserve">
         <source>Zap</source>
+        <target>Zaps</target>
         
         <note>Part of a larger sentence to describe how many zap payments there are on a post.</note>
       </trans-unit>
       <trans-unit id="/zaps_count:dict/ZAPS:dict/other:dict/:string" xml:space="preserve">
         <source>Zaps</source>
+        <target>Zapi</target>
         
         <note>Part of a larger sentence to describe how many zap payments there are on a post.</note>
       </trans-unit>

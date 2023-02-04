@@ -214,6 +214,13 @@ Number of profiles a user is following. */
    Section title for deleting the user */
 "Delete" = "Effacer";
 
+/* Alert for deleting the users account.
+   Button to delete the user's account. */
+"Delete Account" = "Supprimer votre compte";
+
+/* Alert message to indicate this is a deleted account */
+"Deleted Account" = "Compte supprimé";
+
 /* Button to dismiss a text field alert. */
 "Dismiss" = "Rejeter";
 
@@ -225,7 +232,7 @@ Number of profiles a user is following. */
 "DMs" = "Messages privés";
 
 /* Button to dismiss wallet selection view for paying Lightning invoice. */
-"Done" = "Fini";
+"Done" = "Terminé";
 
 /* Heading indicating that this application allows users to earn money. */
 "Earn Money" = "Gagne de l'argent";
@@ -555,6 +562,12 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Button to indicate that the note has been translated from a different language. */
 "Translated from (lang)" = "Traduit de (lang)";
+
+/* Button to indicate that the note is in the process of being translated from a different language. */
+"Translating from (lang)..." = "Traduction de (lang)...";
+
+/* No comment provided by engineer. */
+"Type DELETE to delete" = "Appuyez sur SUPPRIMER pour supprimer";
 
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "Tapez votre message ici...";
