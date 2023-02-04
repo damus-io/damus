@@ -17,7 +17,6 @@ enum LibreTranslateServer: String, CaseIterable, Identifiable {
         var url: String?
     }
 
-    case none
     case argosopentech
     case terraprint
     case vern
@@ -25,8 +24,6 @@ enum LibreTranslateServer: String, CaseIterable, Identifiable {
 
     var model: Model {
         switch self {
-        case .none:
-            return .init(tag: self.rawValue, displayName: NSLocalizedString("None", comment: "Dropdown option for selecting no translation server."), url: nil)
         case .argosopentech:
             return .init(tag: self.rawValue, displayName: "translate.argosopentech.com", url: "https://translate.argosopentech.com")
         case .terraprint:
