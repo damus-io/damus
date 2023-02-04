@@ -14,7 +14,7 @@ struct RelayDetailView: View {
     @State private var nip11: RelayNIP11?
     
     @State var conn_color: Color
-    
+        
     var body: some View {
         Group {
             if let nip11 {
@@ -71,10 +71,16 @@ struct RelayDetailView: View {
                         return
                     }
                     
-                    if let data, let nip11 = try? JSONDecoder().decode(RelayNIP11.self, from: data) {
+                    guard let data else {
+                        errorString = "Relay not responding to NIP-11 request"
+                        return
+                    }
+                    
+                    do {
+                        let nip11 = try JSONDecoder().decode(RelayNIP11.self, from: data)
                         self.nip11 = nip11
-                    } else {
-                        errorString = "Failed to parse NIP-11 Data"
+                    } catch {
+                        errorString = error.localizedDescription
                     }
                 }
                 task.resume()

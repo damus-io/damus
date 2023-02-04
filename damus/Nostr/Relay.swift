@@ -25,14 +25,13 @@ enum RelayFlags: Int {
 }
 
 struct RelayNIP11: Codable {
-    let id: String
-    let name: String
-    let description: String
-    let pubkey: String
-    let contact: String
-    let supported_nips: [Int]
-    let software: String
-    let version: String
+    var name = "No data available"
+    var description = "No data available"
+    var pubkey = "No data available"
+    var contact = "No data available"
+    var supported_nips: [Int] = []
+    var software = "No data available"
+    var version = "No data available"
 }
 
 class Relay: Identifiable {
