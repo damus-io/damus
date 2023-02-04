@@ -15,6 +15,9 @@
 		3AA247FD297E3CFF0090C62D /* RepostsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA247FC297E3CFF0090C62D /* RepostsModel.swift */; };
 		3AA247FF297E3D900090C62D /* RepostsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA247FE297E3D900090C62D /* RepostsView.swift */; };
 		3AA24802297E3DC20090C62D /* RepostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA24801297E3DC20090C62D /* RepostView.swift */; };
+		3AAA95CA298DF87B00F3D526 /* TranslationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AAA95C9298DF87B00F3D526 /* TranslationService.swift */; };
+		3AAA95CC298E07E900F3D526 /* DeepLPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AAA95CB298E07E900F3D526 /* DeepLPlan.swift */; };
+		3AB72AB9298ECF30004BB58C /* Translator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AB72AB8298ECF30004BB58C /* Translator.swift */; };
 		3ACB685C297633BC00C46468 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3ACB685A297633BC00C46468 /* InfoPlist.strings */; };
 		3ACB685F297633BC00C46468 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3ACB685D297633BC00C46468 /* Localizable.strings */; };
 		3ACBCB78295FE5C70037388A /* TimeAgoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ACBCB77295FE5C70037388A /* TimeAgoTests.swift */; };
@@ -249,9 +252,12 @@
 		3AA247FC297E3CFF0090C62D /* RepostsModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepostsModel.swift; sourceTree = "<group>"; };
 		3AA247FE297E3D900090C62D /* RepostsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepostsView.swift; sourceTree = "<group>"; };
 		3AA24801297E3DC20090C62D /* RepostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepostView.swift; sourceTree = "<group>"; };
+		3AAA95C9298DF87B00F3D526 /* TranslationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationService.swift; sourceTree = "<group>"; };
+		3AAA95CB298E07E900F3D526 /* DeepLPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLPlan.swift; sourceTree = "<group>"; };
 		3AB5B86A2986D8A3006599D2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		3AB5B86B2986D8A3006599D2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3AB5B86C2986D8A3006599D2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = de; path = de.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
+		3AB72AB8298ECF30004BB58C /* Translator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Translator.swift; sourceTree = "<group>"; };
 		3AC524EE298C000B00693EBF /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		3AC524EF298C000B00693EBF /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3AC524F0298C000B00693EBF /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = ar; path = ar.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
@@ -621,6 +627,8 @@
 				4CF0ABD32980996B00D66079 /* Report.swift */,
 				4CF0ABDD2981A69500D66079 /* MutelistModel.swift */,
 				3AE45AF5297BB2E700C1D842 /* LibreTranslateServer.swift */,
+				3AAA95C9298DF87B00F3D526 /* TranslationService.swift */,
+				3AAA95CB298E07E900F3D526 /* DeepLPlan.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -733,6 +741,7 @@
 				4CB883A52975F83C00DC99E7 /* LNUrlPayRequest.swift */,
 				4CB883A72975FC1800DC99E7 /* Zaps.swift */,
 				4CB883B5297730E400DC99E7 /* LNUrls.swift */,
+				3AB72AB8298ECF30004BB58C /* Translator.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -1112,6 +1121,7 @@
 				4C7FF7D52823313F009601DB /* Mentions.swift in Sources */,
 				4C633350283D40E500B1C9C3 /* HomeModel.swift in Sources */,
 				4C987B57283FD07F0042CE38 /* FollowersModel.swift in Sources */,
+				3AB72AB9298ECF30004BB58C /* Translator.swift in Sources */,
 				4C363A9028247A1D006E126D /* NostrLink.swift in Sources */,
 				4C0A3F8C280F5FCA000448DE /* ChatroomView.swift in Sources */,
 				4C477C9E282C3A4800033AA3 /* TipCounter.swift in Sources */,
@@ -1134,6 +1144,7 @@
 				4C75EFB328049D640006080F /* NostrEvent.swift in Sources */,
 				4CA2EFA0280E37AC0044ACD8 /* TimelineView.swift in Sources */,
 				4C363A8428233689006E126D /* Parser.swift in Sources */,
+				3AAA95CA298DF87B00F3D526 /* TranslationService.swift in Sources */,
 				4CE4F9E328528C5200C00DD9 /* AddRelayView.swift in Sources */,
 				4C363A9A28283854006E126D /* Reply.swift in Sources */,
 				BA693074295D649800ADDB87 /* UserSettingsStore.swift in Sources */,
@@ -1242,6 +1253,7 @@
 				4CF0ABD42980996B00D66079 /* Report.swift in Sources */,
 				4C0A3F97280F8E02000448DE /* ThreadView.swift in Sources */,
 				4C06670B28FDE64700038D2A /* damus.c in Sources */,
+				3AAA95CC298E07E900F3D526 /* DeepLPlan.swift in Sources */,
 				4FE60CDD295E1C5E00105A1F /* Wallet.swift in Sources */,
 				3AA247FF297E3D900090C62D /* RepostsView.swift in Sources */,
 				3AE45AF6297BB2E700C1D842 /* LibreTranslateServer.swift in Sources */,
