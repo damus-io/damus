@@ -8,7 +8,7 @@
 "'%@' is an invalid NIP-05 identifier. It should look like an email." = "%@' ist kein gülter NIP-05 identifier. Dieser sollte wie eine email aussehen. ";
 
 /* Navigation bar title for view that shows who is following a user. */
-"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "(Profile.displayName(profile: profile, pubkey: whos)) Gefolgte";
+"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "Follower von (Profile.displayName(profile: profile, pubkey: whos))";
 
 /* Navigation bar title for view that shows who a user is following. */
 "(who) following" = "(who) folgt";
@@ -213,6 +213,13 @@ Number of profiles a user is following. */
    Button to remove a user from their blocklist.
    Section title for deleting the user */
 "Delete" = "Löschen";
+
+/* Alert for deleting the users account.
+   Button to delete the user's account. */
+"Delete Account" = "Konto löschen";
+
+/* Alert message to indicate this is a deleted account */
+"Deleted Account" = "Gelöschtes Konto";
 
 /* Button to dismiss a text field alert. */
 "Dismiss" = "Schließen";
@@ -434,7 +441,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Remove all" = "Alle entfernen";
 
 /* Label to indicate that the user is replying to themself. */
-"Reply to self" = "Antwort an dich selbst";
+"Reply to self" = "Antwort an sich selbst";
 
 /* Label to indicate that the user is replying to 2 users. */
 "Replying to %@ & %@" = "%1$@ & %2$@ antworten";
@@ -555,6 +562,12 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Button to indicate that the note has been translated from a different language. */
 "Translated from (lang)" = "Übersetzt aus (lang)";
+
+/* Button to indicate that the note is in the process of being translated from a different language. */
+"Translating from (lang)..." = "Übersetzung aus (lang)...";
+
+/* No comment provided by engineer. */
+"Type DELETE to delete" = "Gib DELETE ein, um zu löschen";
 
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "Schreibe deinen Beitrag hier...";

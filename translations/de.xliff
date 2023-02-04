@@ -98,7 +98,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="(Profile.displayName(profile: profile, pubkey: whos))'s Followers" xml:space="preserve">
         <source>(Profile.displayName(profile: profile, pubkey: whos))'s Followers</source>
-        <target>(Profile.displayName(profile: profile, pubkey: whos)) Gefolgte</target>
+        <target>Follower von (Profile.displayName(profile: profile, pubkey: whos))</target>
         
         <note>Navigation bar title for view that shows who is following a user.</note>
       </trans-unit>
@@ -448,12 +448,14 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Delete Account" xml:space="preserve">
         <source>Delete Account</source>
+        <target>Konto löschen</target>
         
         <note>Alert for deleting the users account.
    Button to delete the user's account.</note>
       </trans-unit>
       <trans-unit id="Deleted Account" xml:space="preserve">
         <source>Deleted Account</source>
+        <target>Gelöschtes Konto</target>
         
         <note>Alert message to indicate this is a deleted account</note>
       </trans-unit>
@@ -679,6 +681,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="No" xml:space="preserve">
         <source>No</source>
+        <target>Nein</target>
         
         <note>Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key.</note>
       </trans-unit>
@@ -696,6 +699,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Note contains &quot;nsec1&quot; private key. Are you sure?" xml:space="preserve">
         <source>Note contains &quot;nsec1&quot; private key. Are you sure?</source>
+        <target>Notiz enthält einen privaten &quot;nsec1&quot;-Schlüssel. Bist du sicher?</target>
         
         <note>Alert user that they might be attempting to paste a private key and ask them to confirm.</note>
       </trans-unit>
@@ -852,7 +856,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Reply to self" xml:space="preserve">
         <source>Reply to self</source>
-        <target>Antwort an dich selbst</target>
+        <target>Antwort an sich selbst</target>
         
         <note>Label to indicate that the user is replying to themself.</note>
       </trans-unit>
@@ -1086,11 +1090,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Translating from (lang)..." xml:space="preserve">
         <source>Translating from (lang)...</source>
+        <target>Übersetzung aus (lang)...</target>
         
         <note>Button to indicate that the note is in the process of being translated from a different language.</note>
       </trans-unit>
       <trans-unit id="Type DELETE to delete" xml:space="preserve">
         <source>Type DELETE to delete</source>
+        <target>Gib DELETE ein, um zu löschen</target>
         
         <note>No comment provided by engineer.</note>
       </trans-unit>
@@ -1199,6 +1205,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Yes, Post with Private Key" xml:space="preserve">
         <source>Yes, Post with Private Key</source>
+        <target>Ja, teile mit privatem Schlüssel</target>
         
         <note>Button to proceed with posting a note even though it looks like they might be posting a private key.</note>
       </trans-unit>
@@ -1385,7 +1392,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/followers_count:dict/FOLLOWERS:dict/other:dict/:string" xml:space="preserve">
         <source>Followers</source>
-        <target>Gefolgte</target>
+        <target>Follower</target>
         
         <note>Part of a larger sentence to describe how many people are following a user.</note>
       </trans-unit>
@@ -1519,11 +1526,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/zaps_count:dict/ZAPS:dict/one:dict/:string" xml:space="preserve">
         <source>Zap</source>
+        <target>Zap</target>
         
         <note>Part of a larger sentence to describe how many zap payments there are on a post.</note>
       </trans-unit>
       <trans-unit id="/zaps_count:dict/ZAPS:dict/other:dict/:string" xml:space="preserve">
         <source>Zaps</source>
+        <target>Zaps</target>
         
         <note>Part of a larger sentence to describe how many zap payments there are on a post.</note>
       </trans-unit>
