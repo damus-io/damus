@@ -66,12 +66,7 @@ struct PostView: View {
 
                 if !is_post_empty {
                     Button(NSLocalizedString("Post", comment: "Button to post a note.")) {
-                        if #available(iOS 16.0, *) {
-                            showPrivateKeyWarning = self.post.contains(/nsec1[02-9ac-z]+/)
-                        } else {
-                            let regex = try! NSRegularExpression(pattern: "nsec1[02-9ac-z]+")
-                            showPrivateKeyWarning = (regex.firstMatch(in: self.post, range: NSRange(location: 0, length: self.post.count)) != nil)
-                        }
+                        showPrivateKeyWarning = contentContainsPrivateKey(self.post)
 
                         if !showPrivateKeyWarning {
                             self.send_post()

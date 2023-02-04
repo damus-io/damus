@@ -97,12 +97,7 @@ struct DMChatView: View {
                     Button(
                         role: .none,
                         action: {
-                            if #available(iOS 16.0, *) {
-                                showPrivateKeyWarning = message.contains(/nsec1[02-9ac-z]+/)
-                            } else {
-                                let regex = try! NSRegularExpression(pattern: "nsec1[02-9ac-z]+")
-                                showPrivateKeyWarning = (regex.firstMatch(in: message, range: NSRange(location: 0, length: message.count)) != nil)
-                            }
+                            showPrivateKeyWarning = contentContainsPrivateKey(message)
 
                             if !showPrivateKeyWarning {
                                 send_message()
