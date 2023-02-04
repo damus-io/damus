@@ -1,12 +1,15 @@
 [![Run Test Suite](https://github.com/damus-io/damus/actions/workflows/run-tests.yaml/badge.svg?branch=master)](https://github.com/damus-io/damus/actions/workflows/run-tests.yaml)
 
 # damus
+#### A twitter-like [nostr][nostr] client for iPhone, iPad and MacOS.
+<HR>
+<center>
 
-A twitter-like [nostr][nostr] client for iPhone, iPad and MacOS.
+<a href="https://apps.apple.com/us/app/damus/id1628663131" rel="damus nostr app" style="width: 50%; height: 50%">![Damus](./ss.png)</a>
 
-<img src="./ss.png" width="50%" height="50%" />
+<a href="https://apps.apple.com/us/app/damus/id1628663131" rel="damus nostr app" style="width: 100%; height: 100%">![Damus](./devtools/App_Store_Badge.svg)</a>
+</center>
 
-[nostr]: https://github.com/fiatjaf/nostr
 
 ## Spec Compliance
 
@@ -138,3 +141,5 @@ First contributors:
 ### git log bot
 
 npub1fjtdwclt9lspjy8huu3qklr7eklp5uq90u6yh8mec290pqxraccqlufnas
+
+[nostr]: https://github.com/fiatjaf/nostr
