@@ -31,23 +31,30 @@ struct BuilderEventView: View {
             return
         }
         
-        // Is current event
-        if id == subscription_uuid {
-            if event != nil {
-                return
-            }
-            
-            event = nostr_event
-            
-            unsubscribe()
+        guard id == subscription_uuid else {
+            return
         }
+        
+        guard nostr_event.known_kind == .text else {
+            return
+        }
+        
+        if event != nil {
+            return
+        }
+        
+        event = nostr_event
+        
+        unsubscribe()
     }
     
     func load() {
         subscribe(filters: [
+            NostrFilter(ids: [self.event_id], limit: 1),
             NostrFilter(
-                ids: [self.event_id],
-                limit: 1
+                kinds: [NostrKind.zap.rawValue],
+                referenced_ids: [self.event_id],
+                limit: 500
             )
         ])
     }

@@ -16,11 +16,10 @@
 /* Prefix character to username. */
 "@" = "@";
 
-/* Amount of time that has passed since reply quote event occurred.
-Abbreviated version of a nostr public key. */
+/* Abbreviated version of a nostr public key. */
 "%@" = "%@";
 
-/* Sentence composed of 2 variables to describe how many tip payments there are on a post. In source English, the first variable is the number of tip payments, and the second variable is 'Tip' or 'Tips'.
+/* Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
 Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
 "%@ %@" = "%@ %@";
 
@@ -36,7 +35,7 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Paga i tuoi amici e accumula sats con Bitcoin⚡️, la moneta di internet.";
 
-/* Number of tip payments on a post.
+/* Number of zap payments on a post.
 Number of profiles a user is following. */
 "%lld" = "%lld";
 
@@ -45,6 +44,9 @@ Number of profiles a user is following. */
 
 /* Placeholder for event mention. */
 "< e >" = "< e >";
+
+/* No comment provided by engineer. */
+"⚡️ %@" = "⚡️ %@";
 
 /* Label to prompt for about text entry for user to describe about themself. */
 "About" = "Informazioni";
@@ -72,7 +74,7 @@ Number of profiles a user is following. */
 "Add all" = "Aggiungi tutto";
 
 /* Label for section for adding a relay server. */
-"Add Relay" = "Aggiungi relè";
+"Add Relay" = "Aggiungi Relay";
 
 /* Any amount of sats */
 "Any" = "Qualsiasi";
@@ -107,7 +109,7 @@ Number of profiles a user is following. */
 "Block %@?" = "Vuoi bloccare %@?";
 
 /* Title of alert for blocking a user. */
-"Block User" = "Bloccare Utente";
+"Block User" = "Blocca Utente";
 
 /* Sidebar menu label for Profile view. */
 "Blocked" = "Bloccato";
@@ -338,7 +340,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "NIP-05 Verification" = "Verifica NIP-05";
 
 /* Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists. */
-"No block list found, create a new one? This will overwrite any previous block lists." = "Nessuna lista degli utenti bloccati trovata, vuoi creane una nuova?Creandone una nuova, sovrascriverai eventuali liste di utenti bloccati in precedenza";
+"No block list found, create a new one? This will overwrite any previous block lists." = "Nessuna lista degli utenti bloccati trovata, vuoi creane una nuova? Creandone una nuova, sovrascriverai eventuali liste di utenti bloccati in precedenza";
 
 /* No search results. */
 "none" = "Nessun risultato";
@@ -413,20 +415,20 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Reactions" = "Reazioni";
 
 /* Section title for recommend relay servers that could be added as part of configuration */
-"Recommended Relays" = "Relè consigliati";
+"Recommended Relays" = "Relays consigliati";
 
 /* Button to reject the end user license agreement, which disallows the user from being let into the app. */
 "Reject" = "Rifiuta";
 
 /* Text field for relay server. Used for testing purposes. */
-"Relay" = "Relè";
+"Relay" = "Relay";
 
 /* Sidebar menu label for Relay servers view
    Sidebar menu label for Relays view. */
-"Relays" = "Relè";
+"Relays" = "Relays";
 
 /* Description of what was done as a result of sending a report to relay servers. */
-"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "I relè sono stati notificati e i clients potranno sfruttare questa informazione per filtrare i contenuti. Grazie!";
+"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "I relays sono stati notificati e i clients potranno sfruttare questa informazione per filtrare i contenuti. Grazie!";
 
 /* Button label to remove all participants from a note reply. */
 "Remove all" = "Rimuovi tutto";
@@ -552,7 +554,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Translate Note" = "Nota sulla traduzione";
 
 /* Button to indicate that the note has been translated from a different language. */
-"Translated from (languageName!)" = "Tradotto da (languageName!)";
+"Translated from (lang)" = "Tradotto da (lang)";
 
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "Scrivi il tuo post qui...";
@@ -604,7 +606,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Welcome, %@!" = "Benvenuto, %@!";
 
 /* Header text to prompt user what issue they want to report. */
-"What do you want to report?" = "Che cosa vuoi reportare?";
+"What do you want to report?" = "Che cosa vuoi segnalare?";
 
 /* Placeholder example for relay server address. */
 "wss://some.relay.com" = "wss://qualche.relay.com";

@@ -27,7 +27,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Gefolgte:r</string>
+			<string>Follower</string>
 			<key>other</key>
 			<string>Gefolgte</string>
 		</dict>
@@ -134,20 +134,20 @@
 			<string>%2$@ sats</string>
 		</dict>
 	</dict>
-	<key>tips_count</key>
+	<key>zaps_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@TIPS@</string>
-		<key>TIPS</key>
+		<string>%#@ZAPS@</string>
+		<key>ZAPS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Trinkgeld</string>
+			<string>Zap</string>
 			<key>other</key>
-			<string>Trinkgelder</string>
+			<string>Zaps</string>
 		</dict>
 	</dict>
 </dict>

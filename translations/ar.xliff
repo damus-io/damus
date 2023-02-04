@@ -38,14 +38,13 @@
         <source>%@</source>
         <target>%@</target>
         
-        <note>Amount of time that has passed since reply quote event occurred.
-Abbreviated version of a nostr public key.</note>
+        <note>Abbreviated version of a nostr public key.</note>
       </trans-unit>
       <trans-unit id="%@ %@" xml:space="preserve">
         <source>%@ %@</source>
         <target>%@ %@</target>
         
-        <note>Sentence composed of 2 variables to describe how many tip payments there are on a post. In source English, the first variable is the number of tip payments, and the second variable is 'Tip' or 'Tips'.
+        <note>Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
 Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.</note>
       </trans-unit>
       <trans-unit id="%@ has been blocked" xml:space="preserve">
@@ -76,7 +75,7 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
         <source>%lld</source>
         <target>%lld</target>
         
-        <note>Number of tip payments on a post.
+        <note>Number of zap payments on a post.
 Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="%lld/%lld" xml:space="preserve">
@@ -283,6 +282,7 @@ Number of profiles a user is following.</note>
    Button to cancel out of posting a note.
    Button to cancel out of reposting a post.
    Button to cancel out of view adding user inputted relay.
+   Cancel deleting the user.
    Cancel out of logging out the user.</note>
       </trans-unit>
       <trans-unit id="Cash App" xml:space="preserve">
@@ -418,12 +418,6 @@ Number of profiles a user is following.</note>
         
         <note>Dropdown option for selecting a custom translation server.</note>
       </trans-unit>
-      <trans-unit id="DM Type" xml:space="preserve">
-        <source>DM Type</source>
-        <target>خيار العرض</target>
-        
-        <note>DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet. DM is the English abbreviation for Direct Message.</note>
-      </trans-unit>
       <trans-unit id="DMs" xml:space="preserve">
         <source>DMs</source>
         <target>الرسائل الخاصة</target>
@@ -447,8 +441,21 @@ Number of profiles a user is following.</note>
         <source>Delete</source>
         <target>حذف</target>
         
-        <note>Button to delete a relay server that the user connects to.
-   Button to remove a user from their blocklist.</note>
+        <note>Button for deleting the users account.
+   Button to delete a relay server that the user connects to.
+   Button to remove a user from their blocklist.
+   Section title for deleting the user</note>
+      </trans-unit>
+      <trans-unit id="Delete Account" xml:space="preserve">
+        <source>Delete Account</source>
+        
+        <note>Alert for deleting the users account.
+   Button to delete the user's account.</note>
+      </trans-unit>
+      <trans-unit id="Deleted Account" xml:space="preserve">
+        <source>Deleted Account</source>
+        
+        <note>Alert message to indicate this is a deleted account</note>
       </trans-unit>
       <trans-unit id="Dismiss" xml:space="preserve">
         <source>Dismiss</source>
@@ -509,12 +516,6 @@ Number of profiles a user is following.</note>
         <target>خطأ: %@</target>
         
         <note>Error message indicating why saving keys failed.</note>
-      </trans-unit>
-      <trans-unit id="Filter State" xml:space="preserve">
-        <source>Filter State</source>
-        <target>اختيار المحتوى</target>
-        
-        <note>Filter state for seeing either only posts, or posts &amp; replies.</note>
       </trans-unit>
       <trans-unit id="Follow" xml:space="preserve">
         <source>Follow</source>
@@ -656,7 +657,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Alert for logging out the user.
    Button for logging out the user.
-   Button to logout the user.</note>
+   Button to close the alert that informs that the current account has been deleted.</note>
       </trans-unit>
       <trans-unit id="Make sure your nsec account key is saved before you logout or you will lose access to this account" xml:space="preserve">
         <source>Make sure your nsec account key is saved before you logout or you will lose access to this account</source>
@@ -676,6 +677,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Label for NIP-05 Verification section of user profile form.</note>
       </trans-unit>
+      <trans-unit id="No" xml:space="preserve">
+        <source>No</source>
+        
+        <note>Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key.</note>
+      </trans-unit>
       <trans-unit id="No block list found, create a new one? This will overwrite any previous block lists." xml:space="preserve">
         <source>No block list found, create a new one? This will overwrite any previous block lists.</source>
         <target>لم نعثر على قائمة حظر. هل تريد انشاء قائمة جديدة؟ سيتم استبدال أي قوائم سابقة ان وجدت</target>
@@ -687,6 +693,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>لا اختيار</target>
         
         <note>Dropdown option for selecting no translation server.</note>
+      </trans-unit>
+      <trans-unit id="Note contains &quot;nsec1&quot; private key. Are you sure?" xml:space="preserve">
+        <source>Note contains &quot;nsec1&quot; private key. Are you sure?</source>
+        
+        <note>Alert user that they might be attempting to paste a private key and ask them to confirm.</note>
       </trans-unit>
       <trans-unit id="Nothing to see here. Check back later!" xml:space="preserve">
         <source>Nothing to see here. Check back later!</source>
@@ -824,7 +835,8 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Relays</source>
         <target>موصّلات</target>
         
-        <note>Sidebar menu label for Relay servers view</note>
+        <note>Sidebar menu label for Relay servers view
+   Sidebar menu label for Relays view.</note>
       </trans-unit>
       <trans-unit id="Relays have been notified and clients will be able to use this information to filter content. Thank you!" xml:space="preserve">
         <source>Relays have been notified and clients will be able to use this information to filter content. Thank you!</source>
@@ -900,12 +912,6 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message.</note>
       </trans-unit>
-      <trans-unit id="Reset" xml:space="preserve">
-        <source>Reset</source>
-        <target>تسجيل الخروج</target>
-        
-        <note>Section title for resetting the user</note>
-      </trans-unit>
       <trans-unit id="Retry" xml:space="preserve">
         <source>Retry</source>
         <target>اعادة المحاولة</target>
@@ -974,7 +980,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Server" xml:space="preserve">
         <source>Server</source>
-        <target>سيرفر</target>
+        <target>خادم</target>
         
         <note>Prompt selection of LibreTranslate server to perform machine translations on notes</note>
       </trans-unit>
@@ -1013,7 +1019,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Sign out" xml:space="preserve">
         <source>Sign out</source>
-        <target>تسجيل الخروج</target>
+        <target>خروج</target>
         
         <note>Sidebar menu label to sign out of the account.</note>
       </trans-unit>
@@ -1072,11 +1078,21 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Button to translate note from different language.</note>
       </trans-unit>
-      <trans-unit id="Translated from (languageName!)" xml:space="preserve">
-        <source>Translated from (languageName!)</source>
-        <target>مُترجَم من (languageName!)</target>
+      <trans-unit id="Translated from (lang)" xml:space="preserve">
+        <source>Translated from (lang)</source>
+        <target>مُترجَم من (lang)</target>
         
         <note>Button to indicate that the note has been translated from a different language.</note>
+      </trans-unit>
+      <trans-unit id="Translating from (lang)..." xml:space="preserve">
+        <source>Translating from (lang)...</source>
+        
+        <note>Button to indicate that the note is in the process of being translated from a different language.</note>
+      </trans-unit>
+      <trans-unit id="Type DELETE to delete" xml:space="preserve">
+        <source>Type DELETE to delete</source>
+        
+        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Type your post here..." xml:space="preserve">
         <source>Type your post here...</source>
@@ -1118,7 +1134,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>User blocked</source>
         <target>الحساب محظور</target>
         
-        <note>Alert message to indicate</note>
+        <note>Alert message to indicate the user has been blocked</note>
       </trans-unit>
       <trans-unit id="User has been blocked" xml:space="preserve">
         <source>User has been blocked</source>
@@ -1180,6 +1196,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>نعم، استبدل</target>
         
         <note>Text of button that confirms to overwrite the existing mutelist.</note>
+      </trans-unit>
+      <trans-unit id="Yes, Post with Private Key" xml:space="preserve">
+        <source>Yes, Post with Private Key</source>
+        
+        <note>Button to proceed with posting a note even though it looks like they might be posting a private key.</note>
       </trans-unit>
       <trans-unit id="Your Name" xml:space="preserve">
         <source>Your Name</source>
@@ -1301,12 +1322,6 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Amount of sats. (Key in .stringsdict)</note>
       </trans-unit>
-      <trans-unit id="tips_count" translate="no" xml:space="preserve">
-        <source>tips_count</source>
-        <target>tips_count</target>
-        
-        <note>Part of a larger sentence to describe how many tip payments there are on a post. (Key in .stringsdict)</note>
-      </trans-unit>
       <trans-unit id="u{00A0}" xml:space="preserve">
         <source>u{00A0}</source>
         <target>u{00A0}</target>
@@ -1324,6 +1339,18 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>أنت</target>
         
         <note>You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself.</note>
+      </trans-unit>
+      <trans-unit id="zaps_count" translate="no" xml:space="preserve">
+        <source>zaps_count</source>
+        <target>zaps_count</target>
+        
+        <note>Part of a larger sentence to describe how many zap payments there are on a post. (Key in .stringsdict)</note>
+      </trans-unit>
+      <trans-unit id="⚡️ %@" xml:space="preserve">
+        <source>⚡️ %@</source>
+        <target>⚡️ %@</target>
+        
+        <note>No comment provided by engineer.</note>
       </trans-unit>
     </body>
   </file>
@@ -1484,23 +1511,21 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Amount of sats.</note>
       </trans-unit>
-      <trans-unit id="/tips_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
-        <source>%#@TIPS@</source>
-        <target>%#@TIPS@</target>
+      <trans-unit id="/zaps_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@ZAPS@</source>
+        <target>%#@ZAPS@</target>
         
-        <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
+        <note>Part of a larger sentence to describe how many zap payments there are on a post.</note>
       </trans-unit>
-      <trans-unit id="/tips_count:dict/TIPS:dict/one:dict/:string" xml:space="preserve">
-        <source>Tip</source>
-        <target>اكرامية</target>
+      <trans-unit id="/zaps_count:dict/ZAPS:dict/one:dict/:string" xml:space="preserve">
+        <source>Zap</source>
         
-        <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
+        <note>Part of a larger sentence to describe how many zap payments there are on a post.</note>
       </trans-unit>
-      <trans-unit id="/tips_count:dict/TIPS:dict/other:dict/:string" xml:space="preserve">
-        <source>Tips</source>
-        <target>اكراميات</target>
+      <trans-unit id="/zaps_count:dict/ZAPS:dict/other:dict/:string" xml:space="preserve">
+        <source>Zaps</source>
         
-        <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
+        <note>Part of a larger sentence to describe how many zap payments there are on a post.</note>
       </trans-unit>
     </body>
   </file>

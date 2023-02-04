@@ -77,15 +77,15 @@
 			<key>many</key>
 			<string>Relays</string>
 			<key>one</key>
-			<string>Serwer</string>
+			<string>Przekaźnik</string>
 			<key>other</key>
-			<string>Serwery</string>
+			<string>Przekaźników</string>
 		</dict>
 	</dict>
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Odpowiadanie %@%#@OTHERS@</string>
+		<string>W odpowiedzi do %@%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -107,7 +107,7 @@
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Odpowiadanie %@, %@%#@OTHERS@</string>
+		<string>W odpowiedzi do %@, %@%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -166,24 +166,24 @@
 			<string>%2$@ satów</string>
 		</dict>
 	</dict>
-	<key>tips_count</key>
+	<key>zaps_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@TIPS@</string>
-		<key>TIPS</key>
+		<string>%#@ZAPS@</string>
+		<key>ZAPS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>few</key>
-			<string>Tips</string>
+			<string>Zaps</string>
 			<key>many</key>
-			<string>Tips</string>
+			<string>Zaps</string>
 			<key>one</key>
-			<string>Napiwek</string>
+			<string>Zap</string>
 			<key>other</key>
-			<string>Napiwki</string>
+			<string>Zaps</string>
 		</dict>
 	</dict>
 </dict>

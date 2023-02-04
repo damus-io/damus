@@ -35,7 +35,7 @@ struct EventProfile: View {
                 let pv = ProfileView(damus_state: damus_state, profile: pmodel, followers: FollowersModel(damus_state: damus_state, target: pubkey))
                 
                 NavigationLink(destination: pv) {
-                    ProfilePicView(pubkey: pubkey, size: pfp_size, highlight: .none, profiles: damus_state.profiles, show_img: damus_state.contacts.is_in_friendosphere(pubkey))
+                    ProfilePicView(pubkey: pubkey, size: pfp_size, highlight: .none, profiles: damus_state.profiles, contacts: damus_state.contacts, show_img: damus_state.contacts.is_in_friendosphere(pubkey))
                 }
             }
             

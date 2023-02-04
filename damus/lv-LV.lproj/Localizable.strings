@@ -4,23 +4,19 @@
 /* Description of how the nip05 identifier would be used for verification. */
 "'%@' at '%@' will be used for verification" = "'%@' pie '%@' tiks izmantota priekš verifikācijas.";
 
-/* Description of why the nip05 identifier is invalid. */
-"'%@' is an invalid nip05 identifier. It should look like an email." = "'%@' ir nederīgs nip05 identifikators. Tam vajadzētu būt kā e-pasta adresei.";
-
 /* Navigation bar title for view that shows who is following a user. */
-"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "(Profils.ParādāmaisVārds(profils: profils, kopAtslēga: kurš))'am Sekotāji";
+"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "(Profile.displayName(profile: profile, pubkey: whos))'am Sekotāji";
 
 /* Navigation bar title for view that shows who a user is following. */
-"(who) following" = "(kurš) seko";
+"(who) following" = "(who) seko";
 
 /* Prefix character to username. */
 "@" = "@";
 
-/* Amount of time that has passed since reply quote event occurred.
-Abbreviated version of a nostr public key. */
+/* Abbreviated version of a nostr public key. */
 "%@" = "%@";
 
-/* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
+/* Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
 Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
 "%@ %@" = "%@ %@";
 
@@ -31,9 +27,9 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 "%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. Pilnīga šifrēta privātā ziņojumapmaiņa. Esi privātajā iesūtnē bez lielo tekfirmu klātbūtnes.";
 
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Sponsorē draugu ziņas un krājiet Satiņus ar BitMonētu⚡️, interneta digitālo valūtu.";
+"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Sponsorē draugu ziņas un krājiet Satus ar BitMonētu⚡️, interneta digitālo valūtu.";
 
-/* Number of reposts.
+/* Number of zap payments on a post.
 Number of profiles a user is following. */
 "%lld" = "%lld";
 
@@ -42,6 +38,9 @@ Number of profiles a user is following. */
 
 /* Placeholder for event mention. */
 "< e >" = "< e >";
+
+/* No comment provided by engineer. */
+"⚡️ %@" = "⚡️ %@";
 
 /* Label to prompt for about text entry for user to describe about themself. */
 "About" = "Par";
@@ -69,7 +68,7 @@ Number of profiles a user is following. */
 "Any" = "Jebkurš";
 
 /* Alert message to ask if user wants to repost a post. */
-"Are you sure you want to repost this?" = "Vai tiešām vēlies šo ziņu pārpublicēt?";
+"Are you sure you want to repost this?" = "Vai tiešām vēlies pārpublicēt šo?";
 
 /* Label for Banner Image section of user profile form. */
 "Banner Image" = "Karoga Attēls";
@@ -81,7 +80,7 @@ Number of profiles a user is following. */
 "Bitcoin Beach" = "Bitmonētas Pludmale";
 
 /* Label for Bitcoin Lightning Tips section of user profile form. */
-"Bitcoin Lightning Tips" = "Bitmonētas Zibens Naudiņa";
+"Bitcoin Lightning Tips" = "Bitmonētas Zibens Sponsorējumi";
 
 /* Dropdown option label for Lightning wallet, Blixt Wallet */
 "Blixt Wallet" = "Blixt Maciņš";
@@ -95,9 +94,12 @@ Number of profiles a user is following. */
 /* Context menu option for broadcasting the user's note to all of the user's connected relay servers. */
 "Broadcast" = "Pārraidīt";
 
-/* Button to cancel out of posting a note.
+/* Alert button to cancel out of alert for blocking a user.
+   Button to cancel out of alert that creates a new mutelist.
+   Button to cancel out of posting a note.
    Button to cancel out of reposting a post.
    Button to cancel out of view adding user inputted relay.
+   Cancel deleting the user.
    Cancel out of logging out the user. */
 "Cancel" = "Atcelt";
 
@@ -144,9 +146,6 @@ Number of profiles a user is following. */
 /* Context menu option for copying the text from an note. */
 "Copy Text" = "Nokopēt Tekstu";
 
-/* Context menu option for copying the ID of the user who created the note. */
-"Copy User ID" = "Nokopēt Lietotāja ID";
-
 /* Button to create account. */
 "Create" = "Izveidot";
 
@@ -162,7 +161,10 @@ Number of profiles a user is following. */
 /* Button to pay a Lightning invoice with the user's default Lightning wallet. */
 "Default Wallet" = "Noklusējuma Maciņš";
 
-/* Button to delete a relay server that the user connects to. */
+/* Button for deleting the users account.
+   Button to delete a relay server that the user connects to.
+   Button to remove a user from their blocklist.
+   Section title for deleting the user */
 "Delete" = "Izdzēst";
 
 /* Button to dismiss a text field alert. */
@@ -170,9 +172,6 @@ Number of profiles a user is following. */
 
 /* Label to prompt display name entry. */
 "Display Name" = "Parādāmais Vārds";
-
-/* DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet. DM is the English abbreviation for Direct Message. */
-"DM Type" = "Privātās Iesūtnes Tips";
 
 /* Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
    Navigation title for view of DMs, where DM is an English abbreviation for Direct Message. */
@@ -199,9 +198,6 @@ Number of profiles a user is following. */
 /* Error message indicating why saving keys failed. */
 "Error: %@" = "Kļūda: %@";
 
-/* Filter state for seeing either only posts, or posts & replies. */
-"Filter State" = "Filtrēt Štatu";
-
 /* Button to follow a user. */
 "Follow" = "Sekot";
 
@@ -219,7 +215,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Follows" = "Seko";
 
 /* Navigation bar title for Global view where posts from all connected relay servers appear. */
-"Global" = "Globāls";
+"Global" = "Globāli";
 
 /* Navigation link to go to post referenced by hex code. */
 "Goto post %@" = "Ej uz ierakstu %@";
@@ -231,7 +227,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Home" = "Sākums";
 
 /* Placeholder example text for profile picture URL. */
-"https://example.com/pic.jpg" = "https://paraugs.lv/att.jpg";
+"https://example.com/pic.jpg" = "https://paraugs.com/att.jpg";
 
 /* Placeholder example text for website URL for user profile. */
 "https://jb55.com" = "https://jb55.com";
@@ -266,7 +262,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Alert for logging out the user.
    Button for logging out the user.
-   Button to logout the user. */
+   Button to close the alert that informs that the current account has been deleted. */
 "Logout" = "Iziet";
 
 /* Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out. */
@@ -347,7 +343,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Text field for relay server. Used for testing purposes. */
 "Relay" = "Relejs";
 
-/* Sidebar menu label for Relay servers view */
+/* Sidebar menu label for Relay servers view
+   Sidebar menu label for Relays view. */
 "Relays" = "Releji";
 
 /* Button label to remove all participants from a note reply. */
@@ -372,9 +369,6 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message. */
 "Requests" = "Pieprasījumi";
 
-/* Section title for resetting the user */
-"Reset" = "Atiestatīt";
-
 /* Button to retry completing account creation after an error occurred. */
 "Retry" = "Mēģiniet vēlreiz";
 
@@ -394,7 +388,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Save Image" = "Saglabāt Attēlu";
 
 /* Navigation link to search hashtag. */
-"Search hashtag: #%@" = "Meklēt Režģbirku #%@";
+"Search hashtag: #%@" = "Meklēt atsauci #%@";
 
 /* Placeholder text to prompt entry of search query. */
 "Search..." = "Meklēt...";
@@ -415,10 +409,12 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Sidebar menu label for accessing the app settings */
 "Settings" = "Uzstādījumi";
 
-/* Button to share an image. */
+/* Button to share an image.
+   Button to share the link to a profile. */
 "Share" = "Dalīties";
 
-/* Toggle to show or hide user's secret account login key. */
+/* Button to show a post from a user who has been blocked.
+   Toggle to show or hide user's secret account login key. */
 "Show" = "Parādīt";
 
 /* Toggle to show or hide selection of wallet. */
@@ -434,13 +430,13 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Šī ir publiskā atslēga, jūs nevarēsit rakstīt ziņas vai kādā citā veidā darboties. To izmanto, lai tikai skatītu kontus no to skatpunkta.";
 
 /* Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key. */
-"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Šī ir vecā parauga nostr atslēga. Mēs neesam pārliecināti, vai tā ir kopAtslēga vai slepenā atslēga. Lūdzu, pārslēdziet ar tālāk esošo pogu, ja šī ir publiskā atslēga.";
+"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Šī ir vecā parauga nostr atslēga. Mēs neesam pārliecināti, vai tā ir pubAtslēga vai slepenā atslēga. Lūdzu, pārslēdziet ar tālāk esošo pogu, ja šī ir publiskā atslēga.";
 
 /* Label to describe that a public key is the user's account ID and what they can do with it. */
 "This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "Šis ir jūsu konta ID. Varat to iedot draugiem, lai viņi varētu jums sekot. Noklikšķiniet, lai nokopētu.";
 
 /* Label to describe that a private key is the user's secret account key and what they should do with it. */
-"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Šī ir jūsu konta slepenā atslēga. Tā ir nepieciešama, lai piekļūtu savam kontam. Nedalies ar to nevienam! Saglabājiet to paroļu pārvaldniekā un glabājiet to drošībā!";
+"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Šī ir jūsu konta slepenā atslēga. Tā ir nepieciešama, lai piekļūtu savam kontam. Ar nevienu nedalies to! Saglabājiet to paroļu pārvaldniekā un glabājiet to drošībā!";
 
 /* Navigation bar title for note thread.
    Navigation bar title for threaded event detail view. */
@@ -471,8 +467,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Sidebar menu label for Wallet view. */
 "Wallet" = "Maciņš";
 
-/* Dropdown option label for Lightning wallet, Wallet Of Satoshi. */
-"Wallet Of Satoshi" = "Wallet Of Satoshi";
+/* Dropdown option label for Lightning wallet, Wallet of Satoshi. */
+"Wallet of Satoshi" = "Wallet of Satoshi";
 
 /* Section title for selection of wallet. */
 "Wallet Selector" = "Maciņu Atlasītājs";
@@ -487,7 +483,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Welcome, %@!" = "Laipni lūgts, %@!";
 
 /* Placeholder example for relay server address. */
-"wss://some.relay.com" = "wss://cits.relejs.lv";
+"wss://some.relay.com" = "wss://cits.relejs.com";
 
 /* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
 "you" = "jūs";

@@ -57,93 +57,39 @@ struct EventView: View {
     }
 
     var body: some View {
-        return Group {
-            if event.known_kind == .boost, let inner_ev = event.inner_event {
-                VStack(alignment: .leading) {
-                    let prof_model = ProfileModel(pubkey: event.pubkey, damus: damus)
-                    let follow_model = FollowersModel(damus_state: damus, target: event.pubkey)
-                    let prof = damus.profiles.lookup(id: event.pubkey)
-                    let booster_profile = ProfileView(damus_state: damus, profile: prof_model, followers: follow_model)
-                    
-                    NavigationLink(destination: booster_profile) {
-                        Reposted(damus: damus, pubkey: event.pubkey, profile: prof)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    TextEvent(inner_ev, pubkey: inner_ev.pubkey, booster_pubkey: event.pubkey)
-                        .padding([.top], 1)
-                }
-            } else if event.known_kind == .zap {
-                if let zap = damus.zaps.zaps[event.id] {
+        VStack {
+            if event.known_kind == .boost {
+                if let inner_ev = event.inner_event {
                     VStack(alignment: .leading) {
-                        Text("⚡️ \(format_msats(zap.invoice.amount))")
-                            .font(.headline)
-                            .padding([.top], 2)
-
-                        TextEvent(zap.request.ev, pubkey: zap.request.ev.pubkey, booster_pubkey: nil)
+                        let prof_model = ProfileModel(pubkey: event.pubkey, damus: damus)
+                        let follow_model = FollowersModel(damus_state: damus, target: event.pubkey)
+                        let prof = damus.profiles.lookup(id: event.pubkey)
+                        let booster_profile = ProfileView(damus_state: damus, profile: prof_model, followers: follow_model)
+                        
+                        NavigationLink(destination: booster_profile) {
+                            Reposted(damus: damus, pubkey: event.pubkey, profile: prof)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        TextEvent(damus: damus, event: inner_ev, pubkey: inner_ev.pubkey, has_action_bar: has_action_bar, booster_pubkey: event.pubkey)
                             .padding([.top], 1)
                     }
                 } else {
                     EmptyView()
                 }
+            } else if event.known_kind == .zap {
+                if let zap = damus.zaps.zaps[event.id] {
+                    ZapEvent(damus: damus, zap: zap)
+                } else {
+                    EmptyView()
+                }
             } else {
-                TextEvent(event, pubkey: pubkey)
+                TextEvent(damus: damus, event: event, pubkey: pubkey, has_action_bar: has_action_bar, booster_pubkey: nil)
                     .padding([.top], 6)
             }
             
             Divider()
                 .padding([.top], 4)
         }
-    }
-
-    func TextEvent(_ event: NostrEvent, pubkey: String, booster_pubkey: String? = nil) -> some View {
-        return HStack(alignment: .top) {
-            let profile = damus.profiles.lookup(id: pubkey)
-        
-            VStack {
-                let pmodel = ProfileModel(pubkey: pubkey, damus: damus)
-                let pv = ProfileView(damus_state: damus, profile: pmodel, followers: FollowersModel(damus_state: damus, target: pubkey))
-                
-                NavigationLink(destination: pv) {
-                   
-                    ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus.profiles, show_img: should_show_images(contacts: damus.contacts, ev: event, our_pubkey: damus.pubkey))
-                }
-                
-                Spacer()
-            }
-
-            VStack(alignment: .leading) {
-                HStack(alignment: .center) {
-                    EventProfileName(pubkey: pubkey, profile: profile, damus: damus, show_friend_confirmed: true, size: .normal)
-                    
-                    Text("\(format_relative_time(event.created_at))")
-                        .foregroundColor(.gray)
-                    
-                    Spacer()
-                }
-                
-                EventBody(damus_state: damus, event: event, size: .normal)
-                
-                if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
-                    BuilderEventView(damus: damus, event_id: mention.ref.id)
-                }
-                
-                if has_action_bar {
-                    Rectangle().frame(height: 2).opacity(0)
-                    
-                    let bar = make_actionbar_model(ev: event, damus: damus)
-                    
-                    EventActionBar(damus_state: damus, event: event, bar: bar)
-                        .padding([.top], 4)
-                }
-            }
-            .padding([.leading], 2)
-        }
-        .contentShape(Rectangle())
-        .background(event_validity_color(event.validity))
-        .id(event.id)
-        .frame(maxWidth: .infinity, minHeight: PFP_SIZE)
-        .padding([.bottom], 2)
-        .event_context_menu(event, keypair: damus.keypair, target_pubkey: pubkey)
     }
 }
 
@@ -152,12 +98,18 @@ func should_show_images(contacts: Contacts, ev: NostrEvent, our_pubkey: String, 
     if ev.pubkey == our_pubkey {
         return true
     }
-    if contacts.is_in_friendosphere(ev.pubkey) {
+
+    let remote_image_policy: RemoteImagePolicy = RemoteImagePolicy(rawValue: UserDefaults.standard.string(forKey: "remote_image_policy") ?? "") ?? .friendsOfFriends
+    if remote_image_policy == .everyone ||
+       remote_image_policy == .friendsOnly && contacts.is_friend(ev.pubkey) ||
+       remote_image_policy == .friendsOfFriends && contacts.is_in_friendosphere(ev.pubkey) {
         return true
     }
-    if let boost_key = booster_pubkey, contacts.is_in_friendosphere(boost_key) {
+
+    if let boost_key = booster_pubkey, contacts.is_in_friendosphere(boost_key) && remote_image_policy != .restricted {
         return true
     }
+    
     return false
 }
 

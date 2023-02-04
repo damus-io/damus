@@ -252,7 +252,7 @@ struct ContentView: View {
                                         Button {
                                             isSideBarOpened.toggle()
                                         } label: {
-                                            ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, show_img: damus_state!.contacts.is_in_friendosphere(pubkey))
+                                            ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, contacts: damus_state!.contacts, show_img: damus_state!.contacts.is_in_friendosphere(pubkey))
                                         }
                                     }
                                     

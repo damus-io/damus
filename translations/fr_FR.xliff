@@ -18,7 +18,7 @@
       </trans-unit>
       <trans-unit id="NSPhotoLibraryAddUsageDescription" xml:space="preserve">
         <source>Granting Damus access to your photos allows you to save images.</source>
-        <target>Donner accès à Damus à vos photos vous permet d'enregistrer des images</target>
+        <target>Accorder à Damus l'accès à vos photos vous permet d'enregistrer des images.</target>
         
         <note>Privacy - Photo Library Additions Usage Description</note>
       </trans-unit>
@@ -38,14 +38,13 @@
         <source>%@</source>
         <target>%@</target>
         
-        <note>Amount of time that has passed since reply quote event occurred.
-Abbreviated version of a nostr public key.</note>
+        <note>Abbreviated version of a nostr public key.</note>
       </trans-unit>
       <trans-unit id="%@ %@" xml:space="preserve">
         <source>%@ %@</source>
         <target>%@ %@</target>
         
-        <note>Sentence composed of 2 variables to describe how many tip payments there are on a post. In source English, the first variable is the number of tip payments, and the second variable is 'Tip' or 'Tips'.
+        <note>Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
 Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.</note>
       </trans-unit>
       <trans-unit id="%@ has been blocked" xml:space="preserve">
@@ -62,13 +61,13 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
       </trans-unit>
       <trans-unit id="%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" xml:space="preserve">
         <source>%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs</source>
-        <target>%@. Messagerie privée cryptée de bout en bout. Gardez Big Tech hors de vos DMs</target>
+        <target>%@. Messagerie privée cryptée de bout en bout. Gardez les Big Tech hors de vos DMs</target>
         
         <note>Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string.</note>
       </trans-unit>
       <trans-unit id="%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." xml:space="preserve">
         <source>%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet.</source>
-        <target>%@. Donnez un pourboire aux publications de vos amis et empilez les sats avec Bitcoin⚡️, la monnaie native d'Internet.</target>
+        <target>%@. Donnez un pourboire aux publications de vos amis et accumulez les sats avec Bitcoin⚡️, la monnaie native d'Internet.</target>
         
         <note>Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string.</note>
       </trans-unit>
@@ -76,7 +75,7 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
         <source>%lld</source>
         <target>%lld</target>
         
-        <note>Number of tip payments on a post.
+        <note>Number of zap payments on a post.
 Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="%lld/%lld" xml:space="preserve">
@@ -135,13 +134,13 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="About Me" xml:space="preserve">
         <source>About Me</source>
-        <target>À Propos de Moi</target>
+        <target>À propos de moi</target>
         
         <note>Label for About Me section of user profile form.</note>
       </trans-unit>
       <trans-unit id="Absolute Boss" xml:space="preserve">
         <source>Absolute Boss</source>
-        <target>Patron Absolu</target>
+        <target>Patron absolu</target>
         
         <note>Placeholder text for About Me description.</note>
       </trans-unit>
@@ -153,7 +152,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Account ID" xml:space="preserve">
         <source>Account ID</source>
-        <target>Identifiant de Compte</target>
+        <target>Identifiant de compte</target>
         
         <note>Label to indicate the public ID of the account.</note>
       </trans-unit>
@@ -172,7 +171,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Add Relay" xml:space="preserve">
         <source>Add Relay</source>
-        <target>Ajouter un Relais</target>
+        <target>Ajouter un relais</target>
         
         <note>Label for section for adding a relay server.</note>
       </trans-unit>
@@ -196,7 +195,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Banner Image" xml:space="preserve">
         <source>Banner Image</source>
-        <target>Image Bannière</target>
+        <target>Image de la bannière</target>
         
         <note>Label for Banner Image section of user profile form.</note>
       </trans-unit>
@@ -283,6 +282,7 @@ Number of profiles a user is following.</note>
    Button to cancel out of posting a note.
    Button to cancel out of reposting a post.
    Button to cancel out of view adding user inputted relay.
+   Cancel deleting the user.
    Cancel out of logging out the user.</note>
       </trans-unit>
       <trans-unit id="Cash App" xml:space="preserve">
@@ -305,7 +305,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Clear Cache" xml:space="preserve">
         <source>Clear Cache</source>
-        <target>Vider le Cache</target>
+        <target>Vider le cache</target>
         
         <note>Section title for clearing cached data.</note>
       </trans-unit>
@@ -323,20 +323,20 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Copy Account ID" xml:space="preserve">
         <source>Copy Account ID</source>
-        <target>Copier l'Identifiant de Compte</target>
+        <target>Copier l'identifiant de compte</target>
         
         <note>Context menu option for copying the ID of the account that created the note.</note>
       </trans-unit>
       <trans-unit id="Copy Image" xml:space="preserve">
         <source>Copy Image</source>
-        <target>Copier l'Image</target>
+        <target>Copier l'image</target>
         
         <note>Context menu option to copy an image into clipboard.
    Context menu option to copy an image to clipboard.</note>
       </trans-unit>
       <trans-unit id="Copy Image URL" xml:space="preserve">
         <source>Copy Image URL</source>
-        <target>Copier l'URL de l'Image</target>
+        <target>Copier l'URL de l'image</target>
         
         <note>Context menu option to copy the URL of an image into clipboard.</note>
       </trans-unit>
@@ -348,13 +348,13 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Copy Note ID" xml:space="preserve">
         <source>Copy Note ID</source>
-        <target>Copier l'Identifiant de la Note</target>
+        <target>Copier l'identifiant de la note</target>
         
         <note>Context menu option for copying the ID of the note.</note>
       </trans-unit>
       <trans-unit id="Copy Note JSON" xml:space="preserve">
         <source>Copy Note JSON</source>
-        <target>Copier le JSON de la Note</target>
+        <target>Copier le JSON de la note</target>
         
         <note>Context menu option for copying the JSON text from the note.</note>
       </trans-unit>
@@ -366,7 +366,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Copy Text" xml:space="preserve">
         <source>Copy Text</source>
-        <target>Copier le Texte</target>
+        <target>Copier le texte</target>
         
         <note>Context menu option for copying the text from an note.</note>
       </trans-unit>
@@ -378,7 +378,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Copy invoice" xml:space="preserve">
         <source>Copy invoice</source>
-        <target>Copier la Facture</target>
+        <target>Copier la facture</target>
         
         <note>Title of section for copying a Lightning invoice identifier.</note>
       </trans-unit>
@@ -396,7 +396,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Create Account" xml:space="preserve">
         <source>Create Account</source>
-        <target>Créer un Compte</target>
+        <target>Créer un compte</target>
         
         <note>Button to create an account.</note>
       </trans-unit>
@@ -417,12 +417,6 @@ Number of profiles a user is following.</note>
         <target>Serveur personnalisé</target>
         
         <note>Dropdown option for selecting a custom translation server.</note>
-      </trans-unit>
-      <trans-unit id="DM Type" xml:space="preserve">
-        <source>DM Type</source>
-        <target>Type de message privé</target>
-        
-        <note>DM selector for seeing either DMs or message requests, which are messages that have not been responded to yet. DM is the English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="DMs" xml:space="preserve">
         <source>DMs</source>
@@ -447,8 +441,21 @@ Number of profiles a user is following.</note>
         <source>Delete</source>
         <target>Effacer</target>
         
-        <note>Button to delete a relay server that the user connects to.
-   Button to remove a user from their blocklist.</note>
+        <note>Button for deleting the users account.
+   Button to delete a relay server that the user connects to.
+   Button to remove a user from their blocklist.
+   Section title for deleting the user</note>
+      </trans-unit>
+      <trans-unit id="Delete Account" xml:space="preserve">
+        <source>Delete Account</source>
+        
+        <note>Alert for deleting the users account.
+   Button to delete the user's account.</note>
+      </trans-unit>
+      <trans-unit id="Deleted Account" xml:space="preserve">
+        <source>Deleted Account</source>
+        
+        <note>Alert message to indicate this is a deleted account</note>
       </trans-unit>
       <trans-unit id="Dismiss" xml:space="preserve">
         <source>Dismiss</source>
@@ -458,7 +465,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Display Name" xml:space="preserve">
         <source>Display Name</source>
-        <target>Afficher Nom</target>
+        <target>Afficher le nom</target>
         
         <note>Label to prompt display name entry.</note>
       </trans-unit>
@@ -476,7 +483,7 @@ Number of profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Earn Money" xml:space="preserve">
         <source>Earn Money</source>
-        <target>Gagnes de l'argent</target>
+        <target>Gagne de l'argent</target>
         
         <note>Heading indicating that this application allows users to earn money.</note>
       </trans-unit>
@@ -510,12 +517,6 @@ Number of profiles a user is following.</note>
         
         <note>Error message indicating why saving keys failed.</note>
       </trans-unit>
-      <trans-unit id="Filter State" xml:space="preserve">
-        <source>Filter State</source>
-        <target>État du filtre</target>
-        
-        <note>Filter state for seeing either only posts, or posts &amp; replies.</note>
-      </trans-unit>
       <trans-unit id="Follow" xml:space="preserve">
         <source>Follow</source>
         <target>S'abonner</target>
@@ -543,7 +544,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Follows" xml:space="preserve">
         <source>Follows</source>
-        <target>Suit</target>
+        <target>S'abonner</target>
         
         <note>Text to indicate that button next to it is in a state that will follow a profile when tapped.</note>
       </trans-unit>
@@ -585,7 +586,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Illegal content" xml:space="preserve">
         <source>Illegal content</source>
-        <target>Contenu Illégal</target>
+        <target>Contenu illégal</target>
         
         <note>Button for user to report that the account or content has illegal content.</note>
       </trans-unit>
@@ -656,7 +657,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Alert for logging out the user.
    Button for logging out the user.
-   Button to logout the user.</note>
+   Button to close the alert that informs that the current account has been deleted.</note>
       </trans-unit>
       <trans-unit id="Make sure your nsec account key is saved before you logout or you will lose access to this account" xml:space="preserve">
         <source>Make sure your nsec account key is saved before you logout or you will lose access to this account</source>
@@ -676,6 +677,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Label for NIP-05 Verification section of user profile form.</note>
       </trans-unit>
+      <trans-unit id="No" xml:space="preserve">
+        <source>No</source>
+        
+        <note>Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key.</note>
+      </trans-unit>
       <trans-unit id="No block list found, create a new one? This will overwrite any previous block lists." xml:space="preserve">
         <source>No block list found, create a new one? This will overwrite any previous block lists.</source>
         <target>Aucune liste de blocage trouvée, voulez-vous en créer une nouvelle?  Cela va écraser votre liste de blocage existante.</target>
@@ -687,6 +693,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Aucun</target>
         
         <note>Dropdown option for selecting no translation server.</note>
+      </trans-unit>
+      <trans-unit id="Note contains &quot;nsec1&quot; private key. Are you sure?" xml:space="preserve">
+        <source>Note contains &quot;nsec1&quot; private key. Are you sure?</source>
+        
+        <note>Alert user that they might be attempting to paste a private key and ask them to confirm.</note>
       </trans-unit>
       <trans-unit id="Nothing to see here. Check back later!" xml:space="preserve">
         <source>Nothing to see here. Check back later!</source>
@@ -780,19 +791,19 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Public Key" xml:space="preserve">
         <source>Public Key</source>
-        <target>Clé Publique</target>
+        <target>Clé publique</target>
         
         <note>Label indicating that the text is a user's public account key.</note>
       </trans-unit>
       <trans-unit id="Public Key?" xml:space="preserve">
         <source>Public Key?</source>
-        <target>Clé Publique?</target>
+        <target>Clé publique?</target>
         
         <note>Prompt to ask user if the key they entered is a public key.</note>
       </trans-unit>
       <trans-unit id="Public key" xml:space="preserve">
         <source>Public key</source>
-        <target>Clé Publique</target>
+        <target>Clé publique</target>
         
         <note>Label indicating that the text is a user's public account key.</note>
       </trans-unit>
@@ -804,7 +815,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Recommended Relays" xml:space="preserve">
         <source>Recommended Relays</source>
-        <target>Relais Recommandés</target>
+        <target>Relais recommandés</target>
         
         <note>Section title for recommend relay servers that could be added as part of configuration</note>
       </trans-unit>
@@ -824,7 +835,8 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Relays</source>
         <target>Relais</target>
         
-        <note>Sidebar menu label for Relay servers view</note>
+        <note>Sidebar menu label for Relay servers view
+   Sidebar menu label for Relays view.</note>
       </trans-unit>
       <trans-unit id="Relays have been notified and clients will be able to use this information to filter content. Thank you!" xml:space="preserve">
         <source>Relays have been notified and clients will be able to use this information to filter content. Thank you!</source>
@@ -900,12 +912,6 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message.</note>
       </trans-unit>
-      <trans-unit id="Reset" xml:space="preserve">
-        <source>Reset</source>
-        <target>Réinitialiser</target>
-        
-        <note>Section title for resetting the user</note>
-      </trans-unit>
       <trans-unit id="Retry" xml:space="preserve">
         <source>Retry</source>
         <target>Retenter</target>
@@ -932,7 +938,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Save Image" xml:space="preserve">
         <source>Save Image</source>
-        <target>Enregistrer Image</target>
+        <target>Enregistrer l'image</target>
         
         <note>Context menu option to save an image.</note>
       </trans-unit>
@@ -1055,7 +1061,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" xml:space="preserve">
         <source>This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!</source>
-        <target>Il s'agit de votre clé de compte secrète. Vous en aurez besoin pour accéder à votre compte. Ne le partagez avec personne ! Enregistrez-le dans un gestionnaire de mots de passe et gardez-le en sécurité!</target>
+        <target>Il s'agit de votre clé de compte secrète. Vous en aurez besoin pour accéder à votre compte. Ne le partagez avec personne ! Enregistrez-la dans un gestionnaire de mots de passe et gardez-la en sécurité!</target>
         
         <note>Label to describe that a private key is the user's secret account key and what they should do with it.</note>
       </trans-unit>
@@ -1072,11 +1078,21 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Button to translate note from different language.</note>
       </trans-unit>
-      <trans-unit id="Translated from (languageName!)" xml:space="preserve">
-        <source>Translated from (languageName!)</source>
-        <target>Traduit de (languageName!)</target>
+      <trans-unit id="Translated from (lang)" xml:space="preserve">
+        <source>Translated from (lang)</source>
+        <target>Traduit de (lang)</target>
         
         <note>Button to indicate that the note has been translated from a different language.</note>
+      </trans-unit>
+      <trans-unit id="Translating from (lang)..." xml:space="preserve">
+        <source>Translating from (lang)...</source>
+        
+        <note>Button to indicate that the note is in the process of being translated from a different language.</note>
+      </trans-unit>
+      <trans-unit id="Type DELETE to delete" xml:space="preserve">
+        <source>Type DELETE to delete</source>
+        
+        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Type your post here..." xml:space="preserve">
         <source>Type your post here...</source>
@@ -1098,19 +1114,19 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Unfollowing" xml:space="preserve">
         <source>Unfollowing</source>
-        <target>Ne plus suivre</target>
+        <target>Désabonnement</target>
         
         <note>Text to indicate that the button next to it is in  a state that indicates that it is in the process of unfollowing a profile.</note>
       </trans-unit>
       <trans-unit id="Unfollowing..." xml:space="preserve">
         <source>Unfollowing...</source>
-        <target>Ne plus suivre...</target>
+        <target>Désabonnement...</target>
         
         <note>Label to indicate that the user is in the process of unfollowing another user.</note>
       </trans-unit>
       <trans-unit id="Unfollows" xml:space="preserve">
         <source>Unfollows</source>
-        <target>Se désabonne de</target>
+        <target>Se désabonner</target>
         
         <note>Text to indicate that the button next to it is in a state that will unfollow a profile when tapped.</note>
       </trans-unit>
@@ -1118,7 +1134,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>User blocked</source>
         <target>Utilisateur bloqué</target>
         
-        <note>Alert message to indicate</note>
+        <note>Alert message to indicate the user has been blocked</note>
       </trans-unit>
       <trans-unit id="User has been blocked" xml:space="preserve">
         <source>User has been blocked</source>
@@ -1153,13 +1169,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Website" xml:space="preserve">
         <source>Website</source>
-        <target>Site Internet</target>
+        <target>Site internet</target>
         
         <note>Label for Website section of user profile form.</note>
       </trans-unit>
       <trans-unit id="Welcome to the social network %@ control." xml:space="preserve">
         <source>Welcome to the social network %@ control.</source>
-        <target>Bienvenue sur le réseau social %@ contrôle.</target>
+        <target>Bienvenue dans le réseau social sur lequel %@ avez le contrôle.</target>
         
         <note>Welcoming message to the reader. The variable is 'you', the reader.</note>
       </trans-unit>
@@ -1181,9 +1197,14 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Text of button that confirms to overwrite the existing mutelist.</note>
       </trans-unit>
+      <trans-unit id="Yes, Post with Private Key" xml:space="preserve">
+        <source>Yes, Post with Private Key</source>
+        
+        <note>Button to proceed with posting a note even though it looks like they might be posting a private key.</note>
+      </trans-unit>
       <trans-unit id="Your Name" xml:space="preserve">
         <source>Your Name</source>
-        <target>Votre Nom</target>
+        <target>Votre nom</target>
         
         <note>Label for Your Name section of user profile form.</note>
       </trans-unit>
@@ -1301,12 +1322,6 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Amount of sats. (Key in .stringsdict)</note>
       </trans-unit>
-      <trans-unit id="tips_count" translate="no" xml:space="preserve">
-        <source>tips_count</source>
-        <target>tips_count</target>
-        
-        <note>Part of a larger sentence to describe how many tip payments there are on a post. (Key in .stringsdict)</note>
-      </trans-unit>
       <trans-unit id="u{00A0}" xml:space="preserve">
         <source>u{00A0}</source>
         <target>u{00A0}</target>
@@ -1324,6 +1339,18 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>vous</target>
         
         <note>You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself.</note>
+      </trans-unit>
+      <trans-unit id="zaps_count" translate="no" xml:space="preserve">
+        <source>zaps_count</source>
+        <target>zaps_count</target>
+        
+        <note>Part of a larger sentence to describe how many zap payments there are on a post. (Key in .stringsdict)</note>
+      </trans-unit>
+      <trans-unit id="⚡️ %@" xml:space="preserve">
+        <source>⚡️ %@</source>
+        <target>⚡️ %@</target>
+        
+        <note>No comment provided by engineer.</note>
       </trans-unit>
     </body>
   </file>
@@ -1484,23 +1511,21 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Amount of sats.</note>
       </trans-unit>
-      <trans-unit id="/tips_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
-        <source>%#@TIPS@</source>
-        <target>%#@TIPS@</target>
+      <trans-unit id="/zaps_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@ZAPS@</source>
+        <target>%#@ZAPS@</target>
         
-        <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
+        <note>Part of a larger sentence to describe how many zap payments there are on a post.</note>
       </trans-unit>
-      <trans-unit id="/tips_count:dict/TIPS:dict/one:dict/:string" xml:space="preserve">
-        <source>Tip</source>
-        <target>Pourboire</target>
+      <trans-unit id="/zaps_count:dict/ZAPS:dict/one:dict/:string" xml:space="preserve">
+        <source>Zap</source>
         
-        <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
+        <note>Part of a larger sentence to describe how many zap payments there are on a post.</note>
       </trans-unit>
-      <trans-unit id="/tips_count:dict/TIPS:dict/other:dict/:string" xml:space="preserve">
-        <source>Tips</source>
-        <target>Pourboires</target>
+      <trans-unit id="/zaps_count:dict/ZAPS:dict/other:dict/:string" xml:space="preserve">
+        <source>Zaps</source>
         
-        <note>Part of a larger sentence to describe how many tip payments there are on a post.</note>
+        <note>Part of a larger sentence to describe how many zap payments there are on a post.</note>
       </trans-unit>
     </body>
   </file>
