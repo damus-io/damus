@@ -28,8 +28,8 @@ struct EventDetailBar: View {
                 .buttonStyle(PlainButtonStyle())
             }
             
-            if bar.tips > 0 {
-                Text("\(Text("\(bar.tips)", comment: "Number of tip payments on a post.").font(.body.bold())) \(Text(String(format: NSLocalizedString("tips_count", comment: "Part of a larger sentence to describe how many tip payments there are on a post."), bar.boosts)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many tip payments there are on a post. In source English, the first variable is the number of tip payments, and the second variable is 'Tip' or 'Tips'.")
+            if bar.zaps > 0 {
+                Text("\(Text("\(bar.zaps)", comment: "Number of zap payments on a post.").font(.body.bold())) \(Text(String(format: NSLocalizedString("zaps_count", comment: "Part of a larger sentence to describe how many zap payments there are on a post."), bar.boosts)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.")
             }
         }
     }

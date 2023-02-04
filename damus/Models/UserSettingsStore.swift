@@ -8,6 +8,36 @@
 import Foundation
 import Vault
 
+func should_show_wallet_selector(_ pubkey: String) -> Bool {
+    return UserDefaults.standard.object(forKey: "show_wallet_selector") as? Bool ?? true
+}
+
+func get_default_wallet(_ pubkey: String) -> Wallet {
+    if let defaultWalletName = UserDefaults.standard.string(forKey: "default_wallet"),
+       let default_wallet = Wallet(rawValue: defaultWalletName)
+    {
+        return default_wallet
+    } else {
+        return .system_default_wallet
+    }
+}
+
+func get_libretranslate_server(_ pubkey: String) -> LibreTranslateServer? {
+    guard let server_name = UserDefaults.standard.string(forKey: "libretranslate_server") else {
+        return nil
+    }
+    
+    return LibreTranslateServer(rawValue: server_name)
+}
+
+func get_libretranslate_url(_ pubkey: String, server: LibreTranslateServer) -> String? {
+    if let url = server.model.url {
+        return url
+    }
+    
+    return UserDefaults.standard.object(forKey: "libretranslate_url") as? String
+}
+
 class UserSettingsStore: ObservableObject {
     @Published var default_wallet: Wallet {
         didSet {
@@ -66,21 +96,16 @@ class UserSettingsStore: ObservableObject {
     }
 
     init() {
-        if let defaultWalletName = UserDefaults.standard.string(forKey: "default_wallet"),
-           let default_wallet = Wallet(rawValue: defaultWalletName)
-        {
-            self.default_wallet = default_wallet
-        } else {
-            default_wallet = .system_default_wallet
-        }
-        show_wallet_selector = UserDefaults.standard.object(forKey: "show_wallet_selector") as? Bool ?? true
+        // TODO: pubkey-scoped settings
+        let pubkey = ""
+        self.default_wallet = get_default_wallet(pubkey)
+        show_wallet_selector = should_show_wallet_selector(pubkey)
 
         left_handed = UserDefaults.standard.object(forKey: "left_handed") as? Bool ?? false
-
-        if let translationServerName = UserDefaults.standard.string(forKey: "libretranslate_server"),
-           let translationServer = LibreTranslateServer(rawValue: translationServerName) {
-            self.libretranslate_server = translationServer
-            libretranslate_url = translationServer.model.url ?? UserDefaults.standard.object(forKey: "libretranslate_url") as? String ?? ""
+        
+        if let server = get_libretranslate_server(pubkey) {
+            self.libretranslate_server = server
+            self.libretranslate_url = get_libretranslate_url(pubkey, server: server) ?? ""
         } else {
             // Note from @tyiu:
             // Default server is disabled by default for now until we gain some confidence that it is working well in production.
@@ -91,7 +116,7 @@ class UserSettingsStore: ObservableObject {
             libretranslate_server = .none
             libretranslate_url = ""
         }
-
+            
         do {
             libretranslate_api_key = try Vault.getPrivateKey(keychainConfiguration: DamusLibreTranslateKeychainConfiguration())
         } catch {

@@ -19,13 +19,15 @@ struct ConfigView: View {
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
     @State var delete_text: String = ""
-    @EnvironmentObject var user_settings: UserSettingsStore
-
+    
+    @ObservedObject var settings: UserSettingsStore
+    
     let generator = UIImpactFeedbackGenerator(style: .light)
-
+    
     init(state: DamusState) {
         self.state = state
         _privkey = State(initialValue: self.state.keypair.privkey_bech32 ?? "")
+        _settings = ObservedObject(initialValue: state.settings)
     }
 
     // TODO: (jb55) could be more general but not gonna worry about it atm
@@ -72,9 +74,9 @@ struct ConfigView: View {
                 }
 
                 Section(NSLocalizedString("Wallet Selector", comment: "Section title for selection of wallet.")) {
-                    Toggle(NSLocalizedString("Show wallet selector", comment: "Toggle to show or hide selection of wallet."), isOn: $user_settings.show_wallet_selector).toggleStyle(.switch)
+                    Toggle(NSLocalizedString("Show wallet selector", comment: "Toggle to show or hide selection of wallet."), isOn: $settings.show_wallet_selector).toggleStyle(.switch)
                     Picker(NSLocalizedString("Select default wallet", comment: "Prompt selection of user's default wallet"),
-                           selection: $user_settings.default_wallet) {
+                           selection: $settings.default_wallet) {
                         ForEach(Wallet.allCases, id: \.self) { wallet in
                             Text(wallet.model.displayName)
                                 .tag(wallet.model.tag)
@@ -83,28 +85,28 @@ struct ConfigView: View {
                 }
 
                 Section(NSLocalizedString("LibreTranslate Translations", comment: "Section title for selecting the server that hosts the LibreTranslate machine translation API.")) {
-                    Picker(NSLocalizedString("Server", comment: "Prompt selection of LibreTranslate server to perform machine translations on notes"), selection: $user_settings.libretranslate_server) {
+                    Picker(NSLocalizedString("Server", comment: "Prompt selection of LibreTranslate server to perform machine translations on notes"), selection: $settings.libretranslate_server) {
                         ForEach(LibreTranslateServer.allCases, id: \.self) { server in
                             Text(server.model.displayName)
                                 .tag(server.model.tag)
                         }
                     }
 
-                    if user_settings.libretranslate_server != .none {
-                        TextField(NSLocalizedString("URL", comment: "Example URL to LibreTranslate server"), text: $user_settings.libretranslate_url)
+                    if settings.libretranslate_server != .none {
+                        TextField(NSLocalizedString("URL", comment: "Example URL to LibreTranslate server"), text: $settings.libretranslate_url)
                             .disableAutocorrection(true)
-                            .disabled(user_settings.libretranslate_server != .custom)
+                            .disabled(settings.libretranslate_server != .custom)
                             .autocapitalization(UITextAutocapitalizationType.none)
                         HStack {
                             if show_libretranslate_api_key {
-                                TextField(NSLocalizedString("API Key (optional)", comment: "Example URL to LibreTranslate server"), text: $user_settings.libretranslate_api_key)
+                                TextField(NSLocalizedString("API Key (optional)", comment: "Example URL to LibreTranslate server"), text: $settings.libretranslate_api_key)
                                     .disableAutocorrection(true)
                                     .autocapitalization(UITextAutocapitalizationType.none)
                                 Button(NSLocalizedString("Hide API Key", comment: "Button to hide the LibreTranslate server API key.")) {
                                     show_libretranslate_api_key = false
                                 }
                             } else {
-                                SecureField(NSLocalizedString("API Key (optional)", comment: "Example URL to LibreTranslate server"), text: $user_settings.libretranslate_api_key)
+                                SecureField(NSLocalizedString("API Key (optional)", comment: "Example URL to LibreTranslate server"), text: $settings.libretranslate_api_key)
                                     .disableAutocorrection(true)
                                     .autocapitalization(UITextAutocapitalizationType.none)
                                 Button(NSLocalizedString("Show API Key", comment: "Button to hide the LibreTranslate server API key.")) {
@@ -116,7 +118,7 @@ struct ConfigView: View {
                 }
 
                 Section(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen")) {
-                    Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $user_settings.left_handed)
+                    Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)
                         .toggleStyle(.switch)
                 }
 

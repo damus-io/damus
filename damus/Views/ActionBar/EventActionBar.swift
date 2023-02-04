@@ -22,6 +22,7 @@ struct EventActionBar: View {
     let damus_state: DamusState
     let event: NostrEvent
     let generator = UIImpactFeedbackGenerator(style: .medium)
+    
     @State var sheet: ActionBarSheet? = nil
     @State var confirm_boost: Bool = false
     @State var show_share_sheet: Bool = false
@@ -64,6 +65,12 @@ struct EventActionBar: View {
                     .foregroundColor(bar.liked ? Color.accentColor : Color.gray)
                 
             }
+            
+            if let lnurl = damus_state.profiles.lookup(id: event.pubkey)?.lnurl {
+                Spacer()
+                ZapButton(damus_state: damus_state, event: event, lnurl: lnurl, bar: bar)
+            }
+
             Spacer()
             EventActionButton(img: "square.and.arrow.up", col: Color.gray) {
                 show_share_sheet = true
@@ -155,10 +162,11 @@ struct EventActionBar_Previews: PreviewProvider {
         let ds = test_damus_state()
         let ev = NostrEvent(content: "hi", pubkey: pk)
         
-        let bar = ActionBarModel(likes: 0, boosts: 0, tips: 0, our_like: nil, our_boost: nil, our_tip: nil)
-        let likedbar = ActionBarModel(likes: 10, boosts: 10, tips: 0, our_like: nil, our_boost: nil, our_tip: nil)
-        let likedbar_ours = ActionBarModel(likes: 100, boosts: 100, tips: 0, our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: nil, our_tip: nil)
-        let maxed_bar = ActionBarModel(likes: 999, boosts: 999, tips: 0, our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: NostrEvent(id: "", content: "", pubkey: ""), our_tip: nil)
+        let bar = ActionBarModel.empty()
+        let likedbar = ActionBarModel(likes: 10, boosts: 0, zaps: 0, zap_total: 0, our_like: nil, our_boost: nil, our_zap: nil)
+        let likedbar_ours = ActionBarModel(likes: 10, boosts: 0, zaps: 0, zap_total: 0, our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: nil, our_zap: nil)
+        let maxed_bar = ActionBarModel(likes: 999, boosts: 999, zaps: 999, zap_total: 99999999,  our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: NostrEvent(id: "", content: "", pubkey: ""), our_zap: nil)
+        let zapbar = ActionBarModel(likes: 0, boosts: 0, zaps: 5, zap_total: 10000000, our_like: nil, our_boost: nil, our_zap: nil)
         
         VStack(spacing: 50) {
             EventActionBar(damus_state: ds, event: ev, bar: bar)
@@ -168,6 +176,8 @@ struct EventActionBar_Previews: PreviewProvider {
             EventActionBar(damus_state: ds, event: ev, bar: likedbar_ours)
             
             EventActionBar(damus_state: ds, event: ev, bar: maxed_bar)
+
+            EventActionBar(damus_state: ds, event: ev, bar: zapbar)
         }
         .padding(20)
     }
