@@ -98,7 +98,7 @@ struct ProfilePicView: View {
     let size: CGFloat
     let highlight: Highlight
     let profiles: Profiles
-    let show_img: bool
+    let show_img: Bool
     let contacts: Contacts
     
     @State var picture: String?
@@ -137,7 +137,7 @@ struct ProfilePicView: View {
                     }
                 }
         } else {
-            InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: size, highlight: highlight)
+            InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles, contacts: contacts), fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: size, highlight: highlight)
                 .onReceive(handle_notify(.profile_updated)) { notif in
                     let updated = notif.object as! ProfileUpdate
 
@@ -190,8 +190,8 @@ struct ProfilePicView_Previews: PreviewProvider {
             size: 100,
             highlight: .none,
             profiles: make_preview_profiles(pubkey),
+            contacts: Contacts(our_pubkey: pubkey),
             show_img: false)
-            contacts: Contacts(our_pubkey: pubkey))
     }
 }
 
