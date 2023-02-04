@@ -42,7 +42,7 @@ struct QRCodeView: View {
                 let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
                 
                 if (damus_state.profiles.lookup(id: damus_state.pubkey)?.picture) != nil {
-                    ProfilePicView(pubkey: damus_state.pubkey, size: 90.0, highlight: .custom(Color("DamusWhite"), 4.0), profiles: damus_state.profiles)
+                    ProfilePicView(pubkey: damus_state.pubkey, size: 90.0, highlight: .custom(Color("DamusWhite"), 4.0), profiles: damus_state.profiles, contacts: damus_state.contacts)
                         .padding(.top, 50)
                 } else {
                     Image(systemName: "person.fill")
