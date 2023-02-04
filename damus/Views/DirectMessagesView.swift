@@ -43,6 +43,7 @@ struct DirectMessagesView: View {
                     }
                 }
             }
+            .padding(.horizontal)
         }
     }
     
@@ -82,7 +83,6 @@ struct DirectMessagesView: View {
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
-        .padding(.horizontal)
         .navigationTitle(NSLocalizedString("DMs", comment: "Navigation title for view of DMs, where DM is an English abbreviation for Direct Message."))
     }
 }
