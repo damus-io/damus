@@ -108,6 +108,7 @@ struct ZapButton: View {
                     send_zap()
                 }
             }
+            .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
             
             Text("\(bar.zap_total > 0 ? "\(format_msats_abbrev(bar.zap_total))" : "")")
                 .offset(x: 22)
