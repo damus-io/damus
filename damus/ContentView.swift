@@ -12,7 +12,7 @@ var BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
     "wss://eden.nostr.land",
     "wss://relay.snort.social",
-    "wss://nostr.orangepill.dev",
+    "wss://nostr.bitcoiner.social",
     "wss://nos.lol",
     "wss://relay.current.fyi",
     "wss://brb.io",
@@ -88,7 +88,6 @@ struct ContentView: View {
     @State var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
-    @StateObject var user_settings = UserSettingsStore()
 
     // connect retry timer
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
@@ -111,7 +110,7 @@ struct ContentView: View {
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 
                 if privkey != nil {
-                    PostButtonContainer(userSettings: user_settings) {
+                    PostButtonContainer(is_left_handed: damus_state?.settings.left_handed ?? false) {
                         self.active_sheet = .post
                     }
                 }
@@ -206,7 +205,7 @@ struct ContentView: View {
     var MaybeSearchView: some View {
         Group {
             if let search = self.active_search {
-                SearchView(appstate: damus_state!, search: SearchModel(pool: damus_state!.pool, search: search))
+                SearchView(appstate: damus_state!, search: SearchModel(contacts: damus_state!.contacts, pool: damus_state!.pool, search: search))
             } else {
                 EmptyView()
             }
@@ -271,9 +270,11 @@ struct ContentView: View {
                                     ToolbarItem(placement: .navigationBarTrailing) {
                                         HStack(alignment: .center) {
                                             if home.signal.signal != home.signal.max_signal {
-                                                Text("\(home.signal.signal)/\(home.signal.max_signal)", comment: "Fraction of how many of the user's relay servers that are operational.")
-                                                    .font(.callout)
-                                                    .foregroundColor(.gray)
+                                                NavigationLink(destination: RelayConfigView(state: damus_state!)) {
+                                                    Text("\(home.signal.signal)/\(home.signal.max_signal)", comment: "Fraction of how many of the user's relay servers that are operational.")
+                                                        .font(.callout)
+                                                        .foregroundColor(.gray)
+                                                }
                                             }
 
                                         }
@@ -292,7 +293,6 @@ struct ContentView: View {
                     .padding([.bottom], 8)
             }
         }
-        .environmentObject(user_settings)
         .onAppear() {
             self.connect()
             setup_notifications()
@@ -566,7 +566,10 @@ struct ContentView: View {
                                 tips: TipCounter(our_pubkey: pubkey),
                                 profiles: Profiles(),
                                 dms: home.dms,
-                                previews: PreviewCache()
+                                previews: PreviewCache(),
+                                zaps: Zaps(our_pubkey: pubkey),
+                                lnurls: LNUrls(),
+                                settings: UserSettingsStore()
         )
         home.damus_state = self.damus_state!
         

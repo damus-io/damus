@@ -25,11 +25,11 @@ struct MutedEventView: View {
         self.selected = selected
         self._nav_target = nav_target
         self._navigating = navigating
-        self._shown = State(initialValue: !should_hide_event(contacts: damus_state.contacts, ev: event))
+        self._shown = State(initialValue: should_show_event(contacts: damus_state.contacts, ev: event))
     }
     
     var should_mute: Bool {
-        return should_hide_event(contacts: damus_state.contacts, ev: event)
+        return !should_show_event(contacts: damus_state.contacts, ev: event)
     }
     
     var FillColor: Color {

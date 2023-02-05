@@ -7,17 +7,16 @@
 
 import Foundation
 
+enum CountResult {
+    case already_counted
+    case success(Int)
+}
 
 class EventCounter {
     var counts: [String: Int] = [:]
     var user_events: [String: Set<String>] = [:]
     var our_events: [String: NostrEvent] = [:]
     var our_pubkey: String
-    
-    enum CountResult {
-        case already_counted
-        case success(Int)
-    }
     
     init (our_pubkey: String) {
         self.our_pubkey = our_pubkey

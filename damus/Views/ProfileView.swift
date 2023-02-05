@@ -92,6 +92,7 @@ struct EditButton: View {
                         .stroke(borderColor(), lineWidth: 1)
                 }
                 .minimumScaleFactor(0.5)
+                .lineLimit(1)
         }
     }
     
@@ -116,7 +117,6 @@ struct ProfileView: View {
     @State var is_zoomed: Bool = false
     @State var show_share_sheet: Bool = false
     @State var action_sheet_presented: Bool = false
-    @EnvironmentObject var user_settings: UserSettingsStore
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
@@ -142,10 +142,10 @@ struct ProfileView: View {
     
     func LNButton(lnurl: String, profile: Profile) -> some View {
         Button(action: {
-            if user_settings.show_wallet_selector  {
+            if damus_state.settings.show_wallet_selector  {
                 showing_select_wallet = true
             } else {
-                open_with_wallet(wallet: user_settings.default_wallet.model, invoice: lnurl)
+                open_with_wallet(wallet: damus_state.settings.default_wallet.model, invoice: lnurl)
             }
         }) {
             Image(systemName: "bolt.circle")
@@ -161,8 +161,7 @@ struct ProfileView: View {
         }
         .cornerRadius(24)
         .sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
-            SelectWalletView(showingSelectWallet: $showing_select_wallet, invoice: lnurl)
-                .environmentObject(user_settings)
+            SelectWalletView(showingSelectWallet: $showing_select_wallet, our_pubkey: damus_state.pubkey, invoice: lnurl)
         }
     }
 
@@ -298,7 +297,7 @@ struct ProfileView: View {
                     .padding(.top,-(pfp_size/2.0))
                 
                 Text(ProfileView.markdown.process(data?.about ?? ""))
-                    .font(.subheadline)
+                    .font(.subheadline).textSelection(.enabled)
                 
                 if let url = data?.website_url {
                     WebsiteLink(url: url)
@@ -409,7 +408,7 @@ struct ProfileView_Previews: PreviewProvider {
 
 func test_damus_state() -> DamusState {
     let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
-    let damus = DamusState(pool: RelayPool(), keypair: Keypair(pubkey: pubkey, privkey: "privkey"), likes: EventCounter(our_pubkey: pubkey), boosts: EventCounter(our_pubkey: pubkey), contacts: Contacts(our_pubkey: pubkey), tips: TipCounter(our_pubkey: pubkey), profiles: Profiles(), dms: DirectMessagesModel(our_pubkey: pubkey), previews: PreviewCache())
+    let damus = DamusState.empty
     
     let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", banner: "", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io")
     let tsprof = TimestampedProfile(profile: prof, timestamp: 0)
