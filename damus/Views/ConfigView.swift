@@ -7,6 +7,7 @@
 import AVFoundation
 import Kingfisher
 import SwiftUI
+import LocalAuthentication
 
 struct ConfigView: View {
     let state: DamusState
@@ -14,6 +15,7 @@ struct ConfigView: View {
     @State var confirm_logout: Bool = false
     @State var confirm_delete_account: Bool = false
     @State var show_privkey: Bool = false
+    @State var has_authenticated_locally: Bool = false
     @State var show_libretranslate_api_key: Bool = false
     @State var privkey: String
     @State var privkey_copied: Bool = false
@@ -30,13 +32,45 @@ struct ConfigView: View {
         _settings = ObservedObject(initialValue: state.settings)
     }
 
+    func authenticateLocally(completion: @escaping (Bool) -> Void) {
+        // Need to authenticate only once while ConfigView is presented
+        guard !has_authenticated_locally else {
+            completion(true)
+            return
+        }
+        let context = LAContext()
+        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) {
+            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: NSLocalizedString("Local authentication to access private key", comment: "Face ID usage description shown when trying to access private key")) { success, error in
+                DispatchQueue.main.async {
+                    has_authenticated_locally = success
+                    completion(success)
+                }
+            }
+        } else {
+            // If there's no authentication set up on the device, let the user copy the key without it
+            has_authenticated_locally = true
+            completion(true)
+        }
+    }
+    
     // TODO: (jb55) could be more general but not gonna worry about it atm
     func CopyButton(is_pk: Bool) -> some View {
         return Button(action: {
-            UIPasteboard.general.string = is_pk ? self.state.keypair.pubkey_bech32 : self.privkey
-            self.privkey_copied = !is_pk
-            self.pubkey_copied = is_pk
-            generator.impactOccurred()
+            let copyKey = {
+                UIPasteboard.general.string = is_pk ? self.state.keypair.pubkey_bech32 : self.privkey
+                self.privkey_copied = !is_pk
+                self.pubkey_copied = is_pk
+                generator.impactOccurred()
+            }
+            if has_authenticated_locally {
+                copyKey()
+            } else {
+                authenticateLocally { success in
+                    if success {
+                        copyKey()
+                    }
+                }
+            }
         }) {
             let copied = is_pk ? self.pubkey_copied : self.privkey_copied
             Image(systemName: copied ? "checkmark.circle" : "doc.on.doc")
@@ -58,7 +92,7 @@ struct ConfigView: View {
                 if let sec = state.keypair.privkey_bech32 {
                     Section(NSLocalizedString("Secret Account Login Key", comment: "Section title for user's secret account login key.")) {
                         HStack {
-                            if show_privkey == false {
+                            if show_privkey == false || !has_authenticated_locally {
                                 SecureField(NSLocalizedString("Private Key", comment: "Title of the secure field that holds the user's private key."), text: $privkey)
                                     .disabled(true)
                             } else {
@@ -70,6 +104,13 @@ struct ConfigView: View {
                         }
 
                         Toggle(NSLocalizedString("Show", comment: "Toggle to show or hide user's secret account login key."), isOn: $show_privkey)
+                            .onChange(of: show_privkey) { newValue in
+                                if newValue {
+                                    authenticateLocally { success in
+                                        show_privkey = success
+                                    }
+                                }
+                            }
                     }
                 }
 
