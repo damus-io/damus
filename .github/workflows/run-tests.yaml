@@ -32,11 +32,6 @@ jobs:
       - name: Export Localizations
         run: xcodebuild -exportLocalizations -project damus.xcodeproj -localizationPath "translations" -exportLanguage en-US
 
-      - name: Set up Git
-        run: |
-          git config --global user.email "$GIT_AUTHOR_EMAIL"
-          git config --global user.name "$GIT_AUTHOR_NAME"
-
       - name: Check for changes in translations directory
         run: |
           if [ -n "$(git diff HEAD origin/main -- translations/)" ]; then
@@ -47,9 +42,8 @@ jobs:
           fi
 
       - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          branch: ${{ github.head_ref }}
-          force: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.email "$GIT_AUTHOR_EMAIL"
+          git config --global user.name "$GIT_AUTHOR_NAME"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.event.pull_request.head.repo.full_name}}.git
+          git push origin HEAD:${{github.event.pull_request.head.ref}}
