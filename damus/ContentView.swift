@@ -197,7 +197,7 @@ struct ContentView: View {
     var MaybeSearchView: some View {
         Group {
             if let search = self.active_search {
-                SearchView(appstate: damus_state!, search: SearchModel(pool: damus_state!.pool, search: search))
+                SearchView(appstate: damus_state!, search: SearchModel(contacts: damus_state!.contacts, pool: damus_state!.pool, search: search))
             } else {
                 EmptyView()
             }
