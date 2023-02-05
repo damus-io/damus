@@ -13,7 +13,7 @@ var BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
     "wss://eden.nostr.land",
     "wss://relay.snort.social",
-    "wss://nostr.orangepill.dev",
+    "wss://nostr.bitcoiner.social",
     "wss://nos.lol",
     "wss://relay.current.fyi",
     "wss://brb.io",
