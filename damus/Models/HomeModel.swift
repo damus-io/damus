@@ -476,7 +476,7 @@ class HomeModel: ObservableObject {
     }
 
     func handle_dm(_ ev: NostrEvent) {
-        if let notifs = handle_incoming_dm(prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, ev: ev) {
+        if let notifs = handle_incoming_dm(contacts: damus_state.contacts, prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, ev: ev) {
             self.new_events = notifs
         }
     }
@@ -707,7 +707,12 @@ func load_our_relays(contacts: Contacts, our_pubkey: String, pool: RelayPool, m_
     }
 }
 
-func handle_incoming_dm(prev_events: NewEventsBits, dms: DirectMessagesModel, our_pubkey: String, ev: NostrEvent) -> NewEventsBits? {
+func handle_incoming_dm(contacts: Contacts, prev_events: NewEventsBits, dms: DirectMessagesModel, our_pubkey: String, ev: NostrEvent) -> NewEventsBits? {
+    // hide blocked users
+    guard should_show_event(contacts: contacts, ev: ev) else {
+        return prev_events
+    }
+    
     var inserted = false
     var found = false
     let ours = ev.pubkey == our_pubkey
