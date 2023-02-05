@@ -7,7 +7,6 @@
 
 import SwiftUI
 import Starscream
-import Kingfisher
 
 var BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
@@ -143,6 +142,29 @@ struct ContentView: View {
         thread_open = false
         search_open = false
     }
+
+    var timelineNavItem: some View {
+        VStack {
+            switch selected_timeline {
+            case .home:
+                Image("damus-home")
+                .resizable()
+                .frame(width:30,height:30)
+                .shadow(color: Color("DamusPurple"), radius: 2)
+            case .dms:
+                Text("DMs", comment: "Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.")
+                    .bold()
+            case .notifications:
+                Text("Notifications", comment: "Toolbar label for Notifications view.")
+                    .bold()
+            case .search:
+                Text("Global", comment: "Toolbar label for Global view where posts from all connected relay servers appear.")
+                    .bold()
+            case .none:
+                Text("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
+            }
+        }
+    }
     
     func MainContent(damus: DamusState) -> some View {
         VStack {
@@ -163,9 +185,10 @@ struct ContentView: View {
                 PostingTimelineView
                 
             case .notifications:
-                TimelineView(events: $home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
-                    .navigationTitle(NSLocalizedString("Notifications", comment: "Navigation title for notifications."))
-                
+                VStack(spacing: 0) {
+                    Divider()
+                    TimelineView(events: $home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
+                }
             case .dms:
                 DirectMessagesView(damus_state: damus_state!)
                     .environmentObject(home.dms)
@@ -177,24 +200,9 @@ struct ContentView: View {
         .navigationBarTitle(selected_timeline == .home ?  NSLocalizedString("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.") : NSLocalizedString("Global", comment: "Navigation bar title for Global view where posts from all connected relay servers appear."), displayMode: .inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                switch selected_timeline {
-                case .home:
-                    Image("damus-home")
-                    .resizable()
-                    .frame(width:30,height:30)
-                    .shadow(color: Color("DamusPurple"), radius: 2)
-                case .dms:
-                    Text("DMs", comment: "Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.")
-                        .bold()
-                case .notifications:
-                    Text("Notifications", comment: "Toolbar label for Notifications view.")
-                        .bold()
-                case .search:
-                    Text("Global", comment: "Toolbar label for Global view where posts from all connected relay servers appear.")
-                        .bold()
-                case .none:
-                    Text("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
-                }
+                timelineNavItem
+                    .opacity(isSideBarOpened ? 0 : 1)
+                    .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
             }
         }
         .ignoresSafeArea(.keyboard)
@@ -251,7 +259,7 @@ struct ContentView: View {
             if let damus = self.damus_state {
                 NavigationView {
                     ZStack {
-                        VStack {
+                        TabView { // Prevents navbar appearance change on scroll
                             MainContent(damus: damus)
                                 .toolbar() {
                                     ToolbarItem(placement: .navigationBarLeading) {
@@ -259,7 +267,10 @@ struct ContentView: View {
                                             isSideBarOpened.toggle()
                                         } label: {
                                             ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles)
+                                                .opacity(isSideBarOpened ? 0 : 1)
+                                                .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
                                         }
+                                        .disabled(isSideBarOpened)
                                     }
                                     
                                     ToolbarItem(placement: .navigationBarTrailing) {
@@ -275,15 +286,12 @@ struct ContentView: View {
                                         }
                                     }
                                 }
-
                         }
-                        
-                        Color.clear
-                        .overlay(
-                            SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened)
-                        )
+                        .tabViewStyle(.page(indexDisplayMode: .never))
                     }
-                    .navigationBarHidden(isSideBarOpened ? true: false) // Would prefer a different way of doing this.
+                    .overlay(
+                        SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened.animation())
+                    )
                 }
                 .navigationViewStyle(.stack)
             
@@ -293,7 +301,6 @@ struct ContentView: View {
         }
         .onAppear() {
             self.connect()
-            //KingfisherManager.shared.cache.clearDiskCache()
             setup_notifications()
         }
         .sheet(item: $active_sheet) { item in
