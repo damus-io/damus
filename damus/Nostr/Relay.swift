@@ -7,14 +7,14 @@
 
 import Foundation
 
-public struct RelayInfo: Codable {
+public struct RelayInfo: Codable, Hashable {
     let read: Bool
     let write: Bool
 
     static let rw = RelayInfo(read: true, write: true)
 }
 
-public struct RelayDescriptor: Codable {
+public struct RelayDescriptor: Codable, Hashable {
     public let url: URL
     public let info: RelayInfo
 }

@@ -133,8 +133,8 @@ struct DMChatView: View {
 
         message = ""
 
-        damus_state.pool.send(.event(dm))
         end_editing()
+        damus_state.pool.send(.event(dm))
     }
 
     var body: some View {

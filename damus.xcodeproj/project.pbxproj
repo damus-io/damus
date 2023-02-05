@@ -198,6 +198,8 @@
 		7C60CAEF298471A1009C80D6 /* CoreSVG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C60CAEE298471A1009C80D6 /* CoreSVG.swift */; };
 		7C902AE32981D55B002AB16E /* ZoomableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C902AE22981D55B002AB16E /* ZoomableScrollView.swift */; };
 		9609F058296E220800069BF3 /* BannerImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9609F057296E220800069BF3 /* BannerImageView.swift */; };
+		B02AAD55298CD07300807B3C /* BroadcastToRelaysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02AAD54298CD07300807B3C /* BroadcastToRelaysView.swift */; };
+		B0B92015298F21F0008E39BA /* SelectableRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B92014298F21F0008E39BA /* SelectableRowView.swift */; };
 		BA693074295D649800ADDB87 /* UserSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA693073295D649800ADDB87 /* UserSettingsStore.swift */; };
 		BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
 		DD597CBD2963D85A00C64D32 /* MarkdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD597CBC2963D85A00C64D32 /* MarkdownTests.swift */; };
@@ -483,6 +485,8 @@
 		7C60CAEE298471A1009C80D6 /* CoreSVG.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreSVG.swift; sourceTree = "<group>"; };
 		7C902AE22981D55B002AB16E /* ZoomableScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableScrollView.swift; sourceTree = "<group>"; };
 		9609F057296E220800069BF3 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
+		B02AAD54298CD07300807B3C /* BroadcastToRelaysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastToRelaysView.swift; sourceTree = "<group>"; };
+		B0B92014298F21F0008E39BA /* SelectableRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectableRowView.swift; sourceTree = "<group>"; };
 		BA693073295D649800ADDB87 /* UserSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsStore.swift; sourceTree = "<group>"; };
 		BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectWalletView.swift; sourceTree = "<group>"; };
 		DD597CBC2963D85A00C64D32 /* MarkdownTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkdownTests.swift; sourceTree = "<group>"; };
@@ -681,6 +685,7 @@
 				4C3AC7A628369BA200E1F516 /* SearchHomeView.swift */,
 				4C5C7E69284EDE2E00A22DF5 /* SearchResultsView.swift */,
 				4C363AA128296A7E006E126D /* SearchView.swift */,
+				B0B92014298F21F0008E39BA /* SelectableRowView.swift */,
 				BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */,
 				4C3AC7A02835A81400E1F516 /* SetupView.swift */,
 				E9E4ED0A295867B900DD7078 /* ThreadV2View.swift */,
@@ -758,6 +763,7 @@
 				4C06670028FC7C5900038D2A /* RelayView.swift */,
 				4CAAD8AF29888AD200060CEA /* RelayConfigView.swift */,
 				F7908E91298B0F0700AB113A /* RelayDetailView.swift */,
+				B02AAD54298CD07300807B3C /* BroadcastToRelaysView.swift */,
 			);
 			path = Relays;
 			sourceTree = "<group>";
@@ -1119,6 +1125,7 @@
 				4C75EFAD28049CFB0006080F /* PostButton.swift in Sources */,
 				4CB55EF5295E679D007FD187 /* UserRelaysView.swift in Sources */,
 				4C363AA228296A7E006E126D /* SearchView.swift in Sources */,
+				B02AAD55298CD07300807B3C /* BroadcastToRelaysView.swift in Sources */,
 				4CC7AAED297F0B9E00430951 /* Highlight.swift in Sources */,
 				4C285C8A2838B985008A31F1 /* ProfilePictureSelector.swift in Sources */,
 				4C75EFB92804A2740006080F /* EventView.swift in Sources */,
@@ -1135,6 +1142,7 @@
 				647D9A8D2968520300A295DE /* SideMenuView.swift in Sources */,
 				F7F0BA272978E54D009531F3 /* ParicipantsView.swift in Sources */,
 				4C0A3F91280F6528000448DE /* ChatView.swift in Sources */,
+				B0B92015298F21F0008E39BA /* SelectableRowView.swift in Sources */,
 				4CF0ABE32981BC7D00D66079 /* UserView.swift in Sources */,
 				4CF0ABF029857E9200D66079 /* Bech32Object.swift in Sources */,
 				4C3D52B8298DB5C6001C5831 /* TextEvent.swift in Sources */,

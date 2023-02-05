@@ -28,12 +28,14 @@ enum Sheets: Identifiable {
     case post
     case report(ReportTarget)
     case reply(NostrEvent)
+    case broadcast(NostrEvent)
 
     var id: String {
         switch self {
         case .report: return "report"
         case .post: return "post"
         case .reply(let ev): return "reply-" + ev.id
+        case .broadcast(let ev): return "broadcast-" + ev.id
         }
     }
 }
@@ -298,6 +300,8 @@ struct ContentView: View {
                 PostView(replying_to: nil, references: [], damus_state: damus_state!)
             case .reply(let event):
                 ReplyView(replying_to: event, damus: damus_state!)
+            case .broadcast(let event):
+                BroadcastToRelaysView(state: .init(state: damus_state!), broadCastEvent: event)
             }
         }
         .onOpenURL { url in
@@ -355,7 +359,7 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.broadcast_event)) { obj in
             let ev = obj.object as! NostrEvent
-            self.damus_state?.pool.send(.event(ev))
+            self.active_sheet = .broadcast(ev)
         }
         .onReceive(handle_notify(.unfollow)) { notif in
             guard let privkey = self.privkey else {
@@ -415,10 +419,10 @@ struct ContentView: View {
             
             let post_res = obj.object as! NostrPostResult
             switch post_res {
-            case .post(let post):
+            case .post(let post, onlyToRelayIds: let relayIds):
                 print("post \(post.content)")
                 let new_ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
-                self.damus_state?.pool.send(.event(new_ev))
+                self.damus_state?.pool.send(.event(new_ev), to: relayIds)
             case .cancel:
                 active_sheet = nil
                 print("post cancelled")

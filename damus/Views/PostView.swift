@@ -8,13 +8,15 @@
 import SwiftUI
 
 enum NostrPostResult {
-    case post(NostrPost)
+    case post(NostrPost, onlyToRelayIds: [String]?)
     case cancel
 }
 
 let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Text box prompt to ask user to type their post.")
 
 struct PostView: View {
+    @State var isPresentingRelaysScreen: Bool = false
+    @StateObject var relaysScreenState: BroadcastToRelaysView.ViewState
     @State var post: String = ""
     @FocusState var focus: Bool
     @State var showPrivateKeyWarning: Bool = false
@@ -25,6 +27,14 @@ struct PostView: View {
 
     @Environment(\.presentationMode) var presentationMode
 
+    init(replying_to: NostrEvent?, references: [ReferencedId], damus_state: DamusState) {
+        _relaysScreenState = StateObject(wrappedValue: BroadcastToRelaysView.ViewState(state: damus_state))
+        
+        self.replying_to = replying_to
+        self.references = references
+        self.damus_state = damus_state
+    }
+    
     enum FocusField: Hashable {
       case post
     }
@@ -46,7 +56,9 @@ struct PostView: View {
         let content = self.post.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         let new_post = NostrPost(content: content, references: references, kind: kind)
 
-        NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
+        NotificationCenter.default.post(name: .post,
+                                        object: NostrPostResult.post(new_post,
+                                                                     onlyToRelayIds: relaysScreenState.limitingRelayIds))
         dismiss()
     }
 
@@ -55,16 +67,55 @@ struct PostView: View {
     }
 
     var body: some View {
-        VStack {
-            HStack {
-                Button(NSLocalizedString("Cancel", comment: "Button to cancel out of posting a note.")) {
-                    self.cancel()
+        NavigationView {
+            VStack {
+                ZStack(alignment: .topLeading) {
+                    TextEditor(text: $post)
+                        .focused($focus)
+                        .textInputAutocapitalization(.sentences)
+                    
+                    if post.isEmpty {
+                        Text(POST_PLACEHOLDER)
+                            .padding(.top, 8)
+                            .padding(.leading, 4)
+                            .foregroundColor(Color(uiColor: .placeholderText))
+                            .allowsHitTesting(false)
+                    }
                 }
-                .foregroundColor(.primary)
-
-                Spacer()
-
-                if !is_post_empty {
+                
+                // This if-block observes @ for tagging
+                if let searching = get_searching_string(post) {
+                    VStack {
+                        Spacer()
+                        UserSearch(damus_state: damus_state, search: searching, post: $post)
+                    }.zIndex(1)
+                }
+            }
+            .onAppear() {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self.focus = true
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(NSLocalizedString("Cancel", comment: "Button to cancel out of posting a note.")) {
+                        self.cancel()
+                    }
+                    .foregroundColor(.primary)
+                }
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    HStack {
+                        Button(action: { isPresentingRelaysScreen.toggle() }) {
+                            Image(systemName: "network")
+                                .foregroundColor(.primary)
+                                .overlay {
+                                    if relaysScreenState.hasExcludedRelays {
+                                        Circle()
+                                            .stroke(style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [8, 5]))
+                                    }
+                                }
+                        }
+                    }
                     Button(NSLocalizedString("Post", comment: "Button to post a note.")) {
                         showPrivateKeyWarning = contentContainsPrivateKey(self.post)
 
@@ -72,31 +123,13 @@ struct PostView: View {
                             self.send_post()
                         }
                     }
+                    .disabled(is_post_empty)
                 }
             }
-            .padding([.top, .bottom], 4)
-
-            ZStack(alignment: .topLeading) {
-                TextEditor(text: $post)
-                    .focused($focus)
-                    .textInputAutocapitalization(.sentences)
-
-                if post.isEmpty {
-                    Text(POST_PLACEHOLDER)
-                        .padding(.top, 8)
-                        .padding(.leading, 4)
-                        .foregroundColor(Color(uiColor: .placeholderText))
-                        .allowsHitTesting(false)
-                }
-            }
-
-            // This if-block observes @ for tagging
-            if let searching = get_searching_string(post) {
-                VStack {
-                    Spacer()
-                    UserSearch(damus_state: damus_state, search: searching, post: $post)
-                }.zIndex(1)
-            }
+            .sheet(isPresented: $isPresentingRelaysScreen, content: {
+                BroadcastToRelaysView(state: relaysScreenState, broadCastEvent: nil)
+            })
+            .padding()
         }
         .onAppear() {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
