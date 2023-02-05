@@ -29,5 +29,3 @@ jobs:
           xcode-version: ${{ matrix.xcode }}
       - name: Run Tests 
         run: xcodebuild test -scheme damus -project damus.xcodeproj -destination 'platform=iOS Simulator,name=iPhone 14,OS=${{ matrix.ios }}' | xcpretty && exit ${PIPESTATUS[0]}
-      - name: Export Localizations
-        run: xcodebuild -exportLocalizations -project damus.xcodeproj -localizationPath "translations" -exportLanguage en-US
