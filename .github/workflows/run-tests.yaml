@@ -31,3 +31,15 @@ jobs:
         run: xcodebuild test -scheme damus -project damus.xcodeproj -destination 'platform=iOS Simulator,name=iPhone 14,OS=${{ matrix.ios }}' | xcpretty && exit ${PIPESTATUS[0]}
       - name: Export Localizations
         run: xcodebuild -exportLocalizations -project damus.xcodeproj -localizationPath "translations" -exportLanguage en-US
+
+      - name: Check for Updated Localizations
+        id: changed-files
+        uses: tj-actions/changed-files@v35
+        with:
+          files: translations/**
+
+      - name: List all changed files
+        run: |
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$file was changed"
+          done
