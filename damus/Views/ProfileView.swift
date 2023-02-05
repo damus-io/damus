@@ -255,12 +255,12 @@ struct ProfileView: View {
                 let pfp_size: CGFloat = 90.0
                 
                 HStack(alignment: .center) {
-                    ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, contacts: damus_state.contacts)
+                    ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles)
                         .onTapGesture {
                             is_zoomed.toggle()
                         }
                         .fullScreenCover(isPresented: $is_zoomed) {
-                            ProfileZoomView(pubkey: profile.pubkey, profiles: damus_state.profiles, contacts: damus_state.contacts)}
+                            ProfileZoomView(pubkey: profile.pubkey, profiles: damus_state.profiles)                        }
                         .offset(y: -(pfp_size/2.0)) // Increase if set a frame
                     
                     Spacer()
