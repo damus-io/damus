@@ -1,0 +1,23 @@
+{
+  "images" : [
+    {
+      "filename" : "relay-explanation-avatar.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "217016449-93de42ef-10d0-42c3-a150-19f0c0ce7e7f.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "217016452-69ef04a0-0bf4-4ea3-85e8-20d1c5fb8f78.png",
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

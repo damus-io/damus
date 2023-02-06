@@ -77,6 +77,10 @@ struct RelayConfigView: View {
     var MainContent: some View {
         Form {
             Section {
+                relayExplanationView
+            }
+
+            Section {
                 List(Array(relays), id: \.url) { relay in
                     RelayView(state: state, relay: relay.url.absoluteString)
                 }
@@ -99,6 +103,73 @@ struct RelayConfigView: View {
                 }
             }
         }
+    }
+}
+
+extension RelayConfigView {
+    private var relayExplanationView: some View {
+        relayExplanationBackground
+            .overlay { icon.padding(12) }
+    }
+
+    private var relayExplanationBackground: some View {
+        RoundedRectangle(cornerRadius: 9)
+            .padding(.all, 1.5)
+            .foregroundColor(Color(.systemGroupedBackground))
+            .listRowBackground(Color.primary)
+            .listRowInsets(.init(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)))
+            .frame(height: 180)
+    }
+
+    private var icon: some View {
+        VStack {
+            HStack(alignment: .top, spacing: 10) {
+                Image("relay-explanation-avatar")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 40, height: 40)
+
+                explanationText
+            }
+
+            buttons
+        }
+    }
+
+    private var explanationText: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text("What’s a relay?")
+                .font(.system(size: 17, weight: .bold, design: .default))
+
+            Text("It’s a server that you send notes to and receive notes from. Those numbers you tapped on represent the ones you’re currently connected to.")
+                .font(.system(size: 15, weight: .medium, design: .default))
+        }
+    }
+
+    private var buttons: some View {
+        HStack(alignment: .center, spacing: 10) {
+            Button {
+
+            } label: {
+                Text("Got it")
+                    .foregroundColor(.accentColor)
+                    .font(.system(size: 15, weight: .bold))
+                    .padding(.init(top: 10, leading: 18, bottom: 10, trailing: 18))
+                    .overlay(.gray, in: RoundedRectangle(cornerRadius: 20).stroke(style: .init(lineWidth: 1)))
+            }
+            .background(Color(.systemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
+
+            Button {
+
+            } label: {
+                Text("Learn more")
+                    .foregroundColor(.white)
+                    .font(.system(size: 15, weight: .bold))
+                    .padding(.init(top: 10, leading: 18, bottom: 10, trailing: 18))
+            }
+            .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 20))
+        }
+        .frame(maxWidth: .infinity, alignment: .trailing)
     }
 }
 
