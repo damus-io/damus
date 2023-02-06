@@ -12,6 +12,7 @@ struct RelayConfigView: View {
     @State var new_relay: String = ""
     @State var show_add_relay: Bool = false
     @State var relays: [RelayDescriptor]
+    @State var is_show_relay_explanation: Bool = true
     
     init(state: DamusState) {
         self.state = state
@@ -77,7 +78,9 @@ struct RelayConfigView: View {
     var MainContent: some View {
         Form {
             Section {
-                relayExplanationView
+                if is_show_relay_explanation {
+                    relayExplanationView
+                }
             }
 
             Section {
@@ -149,7 +152,7 @@ extension RelayConfigView {
     private var buttons: some View {
         HStack(alignment: .center, spacing: 10) {
             Button {
-
+                withAnimation { is_show_relay_explanation = false }
             } label: {
                 Text("Got it")
                     .foregroundColor(.accentColor)
@@ -157,16 +160,19 @@ extension RelayConfigView {
                     .padding(.init(top: 10, leading: 18, bottom: 10, trailing: 18))
                     .overlay(.gray, in: RoundedRectangle(cornerRadius: 20).stroke(style: .init(lineWidth: 1)))
             }
+            .buttonStyle(.borderless)
             .background(Color(.systemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
 
             Button {
-
+                guard let url = URL(string: "https://nostr-resources.com/") else { return }
+                UIApplication.shared.open(url)
             } label: {
                 Text("Learn more")
                     .foregroundColor(.white)
                     .font(.system(size: 15, weight: .bold))
                     .padding(.init(top: 10, leading: 18, bottom: 10, trailing: 18))
             }
+            .buttonStyle(.borderless)
             .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 20))
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
