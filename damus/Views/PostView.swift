@@ -44,8 +44,10 @@ struct PostView: View {
         }
         let content = self.post.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         let new_post = NostrPost(content: content, references: references, kind: kind)
-
-        NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
+        self.dismiss()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
+        }
     }
 
     var is_post_empty: Bool {
@@ -64,10 +66,7 @@ struct PostView: View {
 
                 if !is_post_empty {
                     Button(NSLocalizedString("Post", comment: "Button to post a note.")) {
-                        self.dismiss()
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            self.send_post()
-                        }
+                        self.send_post()
                     }
                 }
             }
