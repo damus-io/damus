@@ -370,6 +370,7 @@ func decode_nostr_event(txt: String) -> NostrResponse? {
 
 func encode_json<T: Encodable>(_ val: T) -> String? {
     let encoder = JSONEncoder()
+    encoder.outputFormatting = .withoutEscapingSlashes
     return (try? encoder.encode(val)).map { String(decoding: $0, as: UTF8.self) }
 }
 

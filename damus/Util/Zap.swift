@@ -296,6 +296,7 @@ func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent, amount: In
     
     if zappable {
         if let json = encode_json(zapreq) {
+            print("zapreq json: \(json)")
             query.append(URLQueryItem(name: "nostr", value: json))
         }
     }
