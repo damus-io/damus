@@ -175,13 +175,9 @@ struct SideMenuView: View {
                 Button(NSLocalizedString("Logout", comment: "Button for logging out the user."), role: .destructive) {
                     notify(.logout, ())
                 }
-                Button(NSLocalizedString("Cancel", comment: "Cancel out of logging out the user.")) {
-                    confirm_logout = false
-                }
             } message: {
                 Text("Make sure your nsec account key is saved before you logout or you will lose access to this account", comment: "Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.")
             }
-            
             Spacer()
         }
     }
