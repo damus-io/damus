@@ -16,10 +16,12 @@ let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Tex
 
 struct PostView: View {
     @State var post: String = ""
-
-    let replying_to: NostrEvent?
     @FocusState var focus: Bool
+    @State var showPrivateKeyWarning: Bool = false
+    
+    let replying_to: NostrEvent?
     let references: [ReferencedId]
+    let damus_state: DamusState
 
     @Environment(\.presentationMode) var presentationMode
 
@@ -64,7 +66,11 @@ struct PostView: View {
 
                 if !is_post_empty {
                     Button(NSLocalizedString("Post", comment: "Button to post a note.")) {
-                        self.send_post()
+                        showPrivateKeyWarning = contentContainsPrivateKey(self.post)
+
+                        if !showPrivateKeyWarning {
+                            self.send_post()
+                        }
                     }
                 }
             }
@@ -74,6 +80,7 @@ struct PostView: View {
                 TextEditor(text: $post)
                     .focused($focus)
                     .textInputAutocapitalization(.sentences)
+
                 if post.isEmpty {
                     Text(POST_PLACEHOLDER)
                         .padding(.top, 8)
@@ -82,6 +89,14 @@ struct PostView: View {
                         .allowsHitTesting(false)
                 }
             }
+
+            // This if-block observes @ for tagging
+            if let searching = get_searching_string(post) {
+                VStack {
+                    Spacer()
+                    UserSearch(damus_state: damus_state, search: searching, post: $post)
+                }.zIndex(1)
+            }
         }
         .onAppear() {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -89,6 +104,34 @@ struct PostView: View {
             }
         }
         .padding()
+        .alert(NSLocalizedString("Note contains \"nsec1\" private key. Are you sure?", comment: "Alert user that they might be attempting to paste a private key and ask them to confirm."), isPresented: $showPrivateKeyWarning, actions: {
+            Button(NSLocalizedString("No", comment: "Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key."), role: .cancel) {
+                showPrivateKeyWarning = false
+            }
+            Button(NSLocalizedString("Yes, Post with Private Key", comment: "Button to proceed with posting a note even though it looks like they might be posting a private key."), role: .destructive) {
+                self.send_post()
+            }
+        })
     }
 }
 
+func get_searching_string(_ post: String) -> String? {
+    guard let last_word = post.components(separatedBy: .whitespacesAndNewlines).last else {
+        return nil
+    }
+    
+    guard last_word.count >= 2 else {
+        return nil
+    }
+    
+    guard last_word.first! == "@" else {
+        return nil
+    }
+    
+    // don't include @npub... strings
+    guard last_word.count != 64 else {
+        return nil
+    }
+    
+    return String(last_word.dropFirst())
+}

@@ -19,4 +19,6 @@ enum NostrKind: Int {
     case channel_create = 40
     case channel_meta = 41
     case chat = 42
+    case list = 30000
+    case zap = 9735
 }

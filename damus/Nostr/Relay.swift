@@ -7,16 +7,16 @@
 
 import Foundation
 
-struct RelayInfo: Codable {
+public struct RelayInfo: Codable {
     let read: Bool
     let write: Bool
 
     static let rw = RelayInfo(read: true, write: true)
 }
 
-struct RelayDescriptor: Codable {
-    let url: URL
-    let info: RelayInfo
+public struct RelayDescriptor: Codable {
+    public let url: URL
+    public let info: RelayInfo
 }
 
 enum RelayFlags: Int {

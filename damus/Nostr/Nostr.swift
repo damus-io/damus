@@ -8,7 +8,7 @@
 import Foundation
 
 struct Profile: Codable {
-    var value: [String: String]
+    var value: [String: AnyCodable]
     
     init (name: String?, display_name: String?, about: String?, picture: String?, banner: String?, website: String?, lud06: String?, lud16: String?, nip05: String?) {
         self.value = [:]
@@ -23,44 +23,82 @@ struct Profile: Codable {
         self.nip05 = nip05
     }
     
+    private func str(_ str: String) -> String? {
+        return get_val(str)
+    }
+    
+    private func get_val<T>(_ v: String) -> T? {
+        guard let val = self.value[v] else{
+            return nil
+        }
+        
+        guard let s = val.value as? T else {
+            return nil
+        }
+        
+        return s
+    }
+    
+    private mutating func set_val<T>(_ key: String, _ val: T?) {
+        if val == nil {
+            self.value.removeValue(forKey: key)
+            return
+        }
+        
+        self.value[key] = AnyCodable.init(val)
+    }
+    
+    private mutating func set_str(_ key: String, _ val: String?) {
+        set_val(key, val)
+    }
+    
+    var deleted: Bool? {
+        get { return get_val("deleted"); }
+        set(s) { set_val("deleted", s) }
+    }
+    
     var display_name: String? {
-        get { return value["display_name"]; }
-        set(s) { value["display_name"] = s }
+        get { return str("display_name"); }
+        set(s) { set_str("display_name", s) }
     }
     
     var name: String? {
-        get { return value["name"]; }
-        set(s) { value["name"] = s }
+        get { return str("name"); }
+        set(s) { set_str("name", s) }
     }
     
     var about: String? {
-        get { return value["about"]; }
-        set(s) { value["about"] = s }
+        get { return str("about"); }
+        set(s) { set_str("about", s) }
     }
     
     var picture: String? {
-        get { return value["picture"]; }
-        set(s) { value["picture"] = s }
+        get { return str("picture"); }
+        set(s) { set_str("picture", s) }
     }
     
     var banner: String? {
-        get { return value["banner"]; }
-        set(s) { value["banner"] = s }
+        get { return str("banner"); }
+        set(s) { set_str("banner", s) }
     }
     
     var website: String? {
-        get { return value["website"]; }
-        set(s) { value["website"] = s }
+        get { return str("website"); }
+        set(s) { set_str("website", s) }
     }
     
     var lud06: String? {
-        get { return value["lud06"]; }
-        set(s) { value["lud06"] = s }
+        get { return str("lud06"); }
+        set(s) { set_str("lud06", s) }
     }
     
     var lud16: String? {
-        get { return value["lud16"]; }
-        set(s) { value["lud16"] = s }
+        get { return str("lud16"); }
+        set(s) { set_str("lud16", s) }
+    }
+    
+    var website_url: URL? {
+        return self.website.flatMap { URL(string: $0) }
     }
     
     var lnurl: String? {
@@ -72,21 +110,29 @@ struct Profile: Codable {
             return lnaddress_to_lnurl(addr);
         }
         
+        if !addr.lowercased().hasPrefix("lnurl") {
+            return nil
+        }
+        
         return addr;
     }
     
     var nip05: String? {
-        get { return value["nip05"]; }
-        set(s) { value["nip05"] = s }
+        get { return str("nip05"); }
+        set(s) { set_str("nip05", s) }
     }
     
     var lightning_uri: URL? {
         return make_ln_url(self.lnurl)
     }
     
+    init() {
+        self.value = [:]
+    }
+    
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        self.value = try container.decode([String: String].self)
+        self.value = try container.decode([String: AnyCodable].self)
     }
     
     func encode(to encoder: Encoder) throws {

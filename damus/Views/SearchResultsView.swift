@@ -35,7 +35,7 @@ struct SearchResultsView: View {
                         }
                     }
                 case .hashtag(let ht):
-                    let search_model = SearchModel(pool: damus_state.pool, search: .filter_hashtag([ht]))
+                    let search_model = SearchModel(contacts: damus_state.contacts, pool: damus_state.pool, search: .filter_hashtag([ht]))
                     let dst = SearchView(appstate: damus_state, search: search_model)
                     NavigationLink(destination: dst) {
                         Text("Search hashtag: #\(ht)", comment: "Navigation link to search hashtag.")

@@ -55,6 +55,7 @@ struct CarouselItemView: View {
                 .font(.title2)
                 .foregroundColor(Color.white)
                 .padding([.leading,.trailing], 50.0)
+                .minimumScaleFactor(0.5)
         }
     }
 }

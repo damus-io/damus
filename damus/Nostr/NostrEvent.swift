@@ -11,6 +11,8 @@ import secp256k1
 import secp256k1_implementation
 import CryptoKit
 
+
+
 enum ValidationResult: Decodable {
     case ok
     case bad_id
@@ -27,7 +29,7 @@ struct KeyEvent {
     let relay_url: String
 }
 
-struct ReferencedId: Identifiable, Hashable {
+struct ReferencedId: Identifiable, Hashable, Equatable {
     let ref_id: String
     let relay_id: String?
     let key: String
@@ -79,7 +81,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     }
     
     var too_big: Bool {
-        return self.content.count > 32000
+        return self.content.count > 16000
     }
     
     var should_show_event: Bool {
@@ -103,9 +105,13 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         if let bs = _blocks {
             return bs
         }
-        let blocks = parse_mentions(content: self.get_content(privkey), tags: self.tags)
+        let blocks = get_blocks(content: self.get_content(privkey))
         self._blocks = blocks
         return blocks
+    }
+
+    func get_blocks(content: String) -> [Block] {
+        return parse_mentions(content: content, tags: self.tags)
     }
 
     lazy var inner_event: NostrEvent? = {
@@ -364,7 +370,12 @@ func decode_nostr_event(txt: String) -> NostrResponse? {
 
 func encode_json<T: Encodable>(_ val: T) -> String? {
     let encoder = JSONEncoder()
+    encoder.outputFormatting = .withoutEscapingSlashes
     return (try? encoder.encode(val)).map { String(decoding: $0, as: UTF8.self) }
+}
+
+func decode_nostr_event_json(json: String) -> NostrEvent? {
+    return decode_json(json)
 }
 
 func decode_json<T: Decodable>(_ val: String) -> T? {
@@ -564,6 +575,26 @@ func make_like_event(pubkey: String, privkey: String, liked: NostrEvent) -> Nost
     ev.calculate_id()
     ev.sign(privkey: privkey)
 
+    return ev
+}
+
+func zap_target_to_tags(_ target: ZapTarget) -> [[String]] {
+    switch target {
+    case .profile(let pk):
+        return [["p", pk]]
+    case .note(let note_target):
+        return [["e", note_target.note_id], ["p", note_target.author]]
+    }
+}
+
+func make_zap_request_event(pubkey: String, privkey: String, content: String, relays: [RelayDescriptor], target: ZapTarget) -> NostrEvent {
+    var tags = zap_target_to_tags(target)
+    var relay_tag = ["relays"]
+    relay_tag.append(contentsOf: relays.map { $0.url.absoluteString })
+    tags.append(relay_tag)
+    let ev = NostrEvent(content: content, pubkey: pubkey, kind: 9734, tags: tags)
+    ev.id = calculate_event_id(ev: ev)
+    ev.sig = sign_event(privkey: privkey, ev: ev)
     return ev
 }
 
@@ -788,4 +819,47 @@ func inner_event_or_self(ev: NostrEvent) -> NostrEvent {
     }
     
     return inner_ev
+}
+
+func first_eref_mention(ev: NostrEvent, privkey: String?) -> Mention? {
+    let blocks = ev.blocks(privkey).filter { block in
+        guard case .mention(let mention) = block else {
+            return false
+        }
+        
+        guard case .event = mention.type else {
+            return false
+        }
+        
+        if mention.ref.key != "e" {
+            return false
+        }
+        
+        return true
+    }
+    
+    /// MARK: - Preview
+    if let firstBlock = blocks.first, case .mention(let mention) = firstBlock, mention.ref.key == "e" {
+        return mention
+    }
+    
+    return nil
+}
+
+extension [ReferencedId] {
+    var pRefs: [ReferencedId] {
+        get {
+            self.filter { ref in
+                ref.key == "p"
+            }
+        }
+    }
+    
+    var eRefs: [ReferencedId] {
+        get {
+            self.filter { ref in
+                ref.key == "e"
+            }
+        }
+    }
 }

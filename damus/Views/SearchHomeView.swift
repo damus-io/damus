@@ -87,6 +87,9 @@ struct SearchHomeView: View {
         .onChange(of: search) { s in
             print("search change 1")
         }
+        .onReceive(handle_notify(.new_mutes)) { _ in
+            self.model.filter_muted()
+        }
         .onAppear {
             if model.events.isEmpty {
                 model.subscribe()

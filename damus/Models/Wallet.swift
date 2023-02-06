@@ -45,7 +45,7 @@ enum Wallet: String, CaseIterable, Identifiable {
             return .init(index: 0, tag: "strike", displayName: NSLocalizedString("Strike", comment: "Dropdown option label for Lightning wallet, Strike."), link: "strike:",
                          appStoreLink: "https://apps.apple.com/us/app/strike-bitcoin-payments/id1488724463", image: "strike")
         case .cashapp:
-            return .init(index: 1, tag: "cashapp", displayName: NSLocalizedString("Cash App", comment: "Dropdown option label for Lightning wallet, Cash App."), link: "squarecash://",
+            return .init(index: 1, tag: "cashapp", displayName: NSLocalizedString("Cash App", comment: "Dropdown option label for Lightning wallet, Cash App."), link: "https://cash.app/launch/lightning/",
                          appStoreLink: "https://apps.apple.com/us/app/cash-app/id711923939", image: "cashapp")
         case .muun:
             return .init(index: 2, tag: "muun", displayName: NSLocalizedString("Muun", comment: "Dropdown option label for Lightning wallet, Muun."), link: "muun:", appStoreLink: "https://apps.apple.com/us/app/muun-wallet/id1482037683", image: "muun")
@@ -53,7 +53,7 @@ enum Wallet: String, CaseIterable, Identifiable {
             return .init(index: 3, tag: "bluewallet", displayName: NSLocalizedString("Blue Wallet", comment: "Dropdown option label for Lightning wallet, Blue Wallet."), link: "bluewallet:lightning:",
                          appStoreLink: "https://apps.apple.com/us/app/bluewallet-bitcoin-wallet/id1376878040", image: "bluewallet")
         case .walletofsatoshi:
-            return .init(index: 4, tag: "walletofsatoshi", displayName: NSLocalizedString("Wallet Of Satoshi", comment: "Dropdown option label for Lightning wallet, Wallet Of Satoshi."), link:  "walletofsatoshi:lightning:",
+            return .init(index: 4, tag: "walletofsatoshi", displayName: NSLocalizedString("Wallet of Satoshi", comment: "Dropdown option label for Lightning wallet, Wallet of Satoshi."), link:  "walletofsatoshi:lightning:",
                          appStoreLink: "https://apps.apple.com/us/app/wallet-of-satoshi/id1438599608", image: "walletofsatoshi")
         case .zebedee:
             return .init(index: 5, tag: "zebedee", displayName: NSLocalizedString("Zebedee", comment: "Dropdown option label for Lightning wallet, Zebedee."), link: "zebedee:lightning:",
@@ -75,7 +75,7 @@ enum Wallet: String, CaseIterable, Identifiable {
                          appStoreLink: "https://apps.apple.com/sv/app/bitcoin-beach-wallet/id1531383905", image: "bbw")
         case .blixtwallet:
             return .init(index: 11, tag: "blixtwallet", displayName: NSLocalizedString("Blixt Wallet", comment: "Dropdown option label for Lightning wallet, Blixt Wallet"), link: "blixtwallet:lightning:",
-                         appStoreLink: nil, image: "blixt-wallet")
+                         appStoreLink: "https://testflight.apple.com/join/EXvGhRzS", image: "blixt-wallet")
         case .river:
             return .init(index: 12, tag: "river", displayName: NSLocalizedString("River", comment: "Dropdown option label for Lightning wallet, River"), link: "river://",
                          appStoreLink: "https://apps.apple.com/us/app/river-buy-mine-bitcoin/id1536176542", image: "river")

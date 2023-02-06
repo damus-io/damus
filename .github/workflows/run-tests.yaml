@@ -1,4 +1,6 @@
-name: Test
+name: Run Test Suite 
+run-name: Testing ${{ github.ref }} by @${{ github.actor }}
+
 on:
   push:
     branches:
@@ -6,12 +8,24 @@ on:
   pull_request:
     branches:
       - "*"
+
+
 jobs:
-  test:
-    name: Run Tests
-    runs-on: macos-latest
+  run_tests:
+    runs-on: macos-12
+    strategy:
+      matrix:
+        include:
+          - xcode: "14.2"
+            ios: "16.2"
+    
+    name: Test iOS (${{ matrix.ios }})
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v1
-    - name: Running Tests
-      run: xcodebuild test -scheme damus -project damus.xcodeproj -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.0' | xcpretty && exit ${PIPESTATUS[0]}
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ matrix.xcode }}
+      - name: Run Tests 
+        run: xcodebuild test -scheme damus -project damus.xcodeproj -destination 'platform=iOS Simulator,name=iPhone 14,OS=${{ matrix.ios }}' | xcpretty && exit ${PIPESTATUS[0]}

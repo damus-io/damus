@@ -1,3 +1,134 @@
+## [1.0.0-13] - 2023-01-30
+
+### Added
+
+- LibreTranslate note translations (Terry Yiu)
+- Added support for account deletion (William Casarin)
+- User tagging and autocompletion in posts (Swift)
+
+
+### Changed
+
+- Remove redundant logout button from settings (Jonathan Milligan)
+- Moved relay config to its own sidebar entry (William Casarin)
+- New stylized tabs (ericholguin)
+
+
+### Fixed
+
+- Fix hidden profile action sheet when clicking ... (William Casarin)
+- Fixed height of DM input (Terry Yiu)
+- Fixed bug where copying pubkey from context menu only copied your own pubkey (Terry Yiu)
+
+
+
+[1.0.0-13]: https://github.com/damus-io/damus/releases/tag/v1.0.0-13
+## [1.0.0-12] - 2023-01-28
+
+### Added
+
+- Added Arabic and Portuguese translations (Barodane, Antonio Chagas)
+- Add QRCode view for sharing your pubkey (ericholguin)
+- Added nostr: uri handling (William Casarin)
+
+### Changed
+
+- Remove markdown link support from posts (Joel Klabo)
+
+
+### Fixed
+
+- Fixed crash on some SVG profile pictures (OlegAba)
+- Localization fixes
+- Don't allow blocking yourself (Terry)
+- Hide muted users from global (William Casarin)
+- Fixed profiles sometimes not loading from other clients (William Casarin)
+- Fixed bug where `spam` was always the report type (William Casarin)
+
+
+
+[1.0.0-12]: https://github.com/damus-io/damus/releases/tag/v1.0.0-12
+
+## [1.0.0-11] - 2023-01-25
+
+### Added
+
+- Reposts view (Terry Yiu)
+- Translations for it_IT, it_CH, fr_FR, de_DE, de_AT and lv_LV (Nicolò Carcagnì, Solobalbo, Gregor, Peter Gerstbach, SYX)
+- Added ability to block users (William Casarin)
+- Added a way to report content (William Casarin)
+- Stretchable profile cover header (Swift)
+
+
+### Changed
+
+- Bump pfp/banner animated fize size limit to 5MiB/20MiB (William Casarin)
+- Updated default boostrap relays (Ricardo Arturo Cabral Mejía)
+
+
+### Fixed
+
+- allow ws:// relays again (Steven Briscoe)
+
+
+
+[1.0.0-11]: https://github.com/damus-io/damus/releases/tag/v1.0.0-11
+
+
+## [1.0.0-8] - 2023-01-22
+
+### Added
+
+- Show website on profiles (William Casarin)
+- Add the ability to choose participants when replying (Joel Klabo)
+- Translations for de_AT, de_DE, tr_TR, fr_FR (Gregor, Peter Gerstbach, Taylan Benli, Solobalbo)
+- Add DM Message Requests (William Casarin)
+
+
+### Fixed
+
+- Fix commands and emojis getting included in hashtags (William Casarin)
+- Fix duplicate post buttons when swiping tabs (Thomas Rademaker)
+- Show embedded note references (William Casarin)
+
+
+[1.0.0-8]: https://github.com/damus-io/damus/releases/tag/v1.0.0-8
+
+
+## [1.0.0-7] - 2023-01-20
+
+### Added
+
+- Drastically improved image viewer (OlegAba)
+- Added pinch to zoom on images (Swift)
+- Add Latin American Spanish translations (Nicolás Valencia)
+- Added SVG profile picture support (OlegAba)
+
+
+### Changed
+
+- Makes both name and username clickable in sidebar to go to profile (Zach Hendel)
+- Clicking pfp in sidebar opens profile as well (radixrat)
+- Don't blur images if your friend boosted it (ericholguin)
+
+
+### Fixed
+
+- Fix ... when too many likes/reposts (Joel Klabo)
+- Don't show report alert if logged in as a pubkey (Swift)
+- Fix padding issue at top of home timeline (Ben Weeks)
+- Fix absurdly large sidebar on Mac/iPad (John Bethancourt)
+- Fix tab views moving after selecting from search result (OlegAba)
+- Make follow/unfollow button a consistent width (OlegAba)
+- Don't add events to notifications from buggy relays (William Casarin)
+- Fixed some crashes with large images (OlegAba)
+- Fix DM sorting on incoming messages (William Casarin)
+- Fix text getting truncated next to link previews (William Casarin)
+
+
+[1.0.0-7]: https://github.com/damus-io/damus/releases/tag/v1.0.0-7
+
+
 ## [1.0.0-6] - 2023-01-13
 
 ### Added

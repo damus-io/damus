@@ -79,6 +79,15 @@ class damusTests: XCTestCase {
         XCTAssertEqual(parsed[1].is_url?.absoluteString, "HTTPS://jb55.COM")
     }
     
+    func testBech32Url()  {
+        let parsed = decode_nostr_uri("nostr:npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s")
+        
+        let hexpk = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
+        let expected: NostrLink = .ref(ReferencedId(ref_id: hexpk, relay_id: nil, key: "p"))
+        
+        XCTAssertEqual(parsed, expected)
+    }
+    
     func testParseUrl() {
         let parsed = parse_mentions(content: "a https://jb55.com b", tags: [])
 
@@ -103,6 +112,14 @@ class damusTests: XCTestCase {
         XCTAssertEqual(parsed.count, 2)
         XCTAssertEqual(parsed[0].is_url?.absoluteString, "https://jb55.com")
         XCTAssertEqual(parsed[1].is_text, " br")
+    }
+    
+    func testNoParseUrlWithOnlyWhitespace() {
+        let testString = "https:// "
+        let parsed = parse_mentions(content: testString, tags: [])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed[0].is_text, testString)
     }
     
     func testParseMentionBlank() {
@@ -135,6 +152,26 @@ class damusTests: XCTestCase {
         XCTAssertEqual(parsed[0].is_text, "some hashtag ")
         XCTAssertEqual(parsed[1].is_hashtag, "bitcoin")
         XCTAssertEqual(parsed[2].is_text, " derp")
+    }
+    
+    func testHashtagWithComma() {
+        let parsed = parse_mentions(content: "some hashtag #bitcoin, cool", tags: [])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 3)
+        XCTAssertEqual(parsed[0].is_text, "some hashtag ")
+        XCTAssertEqual(parsed[1].is_hashtag, "bitcoin")
+        XCTAssertEqual(parsed[2].is_text, ", cool")
+    }
+    
+    func testHashtagWithEmoji() {
+        let parsed = parse_mentions(content: "some hashtag #bitcoin☕️ cool", tags: [])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 3)
+        XCTAssertEqual(parsed[0].is_text, "some hashtag ")
+        XCTAssertEqual(parsed[1].is_hashtag, "bitcoin")
+        XCTAssertEqual(parsed[2].is_text, "☕️ cool")
     }
     
     func testParseHashtagEnd() {

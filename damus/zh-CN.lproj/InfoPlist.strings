@@ -1,0 +1,9 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "达摩";
+
+/* Bundle name */
+"CFBundleName" = "达摩";
+
+/* Privacy - Photo Library Additions Usage Description */
+"NSPhotoLibraryAddUsageDescription" = "允许达摩访问您的相册以便保存图片。";
+

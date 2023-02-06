@@ -1,3 +1,4 @@
+[![Run Test Suite](https://github.com/damus-io/damus/actions/workflows/run-tests.yaml/badge.svg?branch=master)](https://github.com/damus-io/damus/actions/workflows/run-tests.yaml)
 
 # damus
 
@@ -25,7 +26,7 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 ## Getting Started on Damus 
 
 ### Damus iOS
-1) Get the Damus app on TestFlight: https://testflight.apple.com/join/CLwjLxWl
+1) Get the Damus app on the iOS App Store: https://apps.apple.com/ca/app/damus/id1628663131
 
 #### ⚙️ Settings (gear icon, top right)
 - Relays: You can add more relays to send your notes to by tapping the "+". 
@@ -48,7 +49,7 @@ damus implements the following [Nostr Implementation Possibilities][nips]
   4. Add @ direcly followed by the pubkey (e.g., `@npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s`)
 - You can also long-press a Note to grab their User ID aka pubkey or Note ID to link directly to a Note.
 - Currently you can't delete your Notes in the iOS app
-- Share images by pasting the image url which you can grab from imgbb, imgur, etc. (i.e., `(https://i.ibb.co/2SHZbwm/alpha60.jpg)`). Currently images only load for people you follow in the 🏠 Personal Feed. Images are not automatically loaded in 🔍 Global Feed
+- Share images by pasting the image url which you can grab from imgbb, imgur, etc. (i.e., `https://i.ibb.co/2SHZbwm/alpha60.jpg`). Currently images only load for people you follow in the 🏠 Personal Feed. Images are not automatically loaded in 🔍 Global Feed
 - Engaging with Notes
   - 💬 Replying to a Note: Tap the chat icon underneath the note. This will show up in the users’ notifications and in your 🏠 Personal and 🔍 Global Feeds
   - ♺ Reposts: Tap the repost icon which will show up in your 🏠 Personal and 🔍 Global Feeds
@@ -91,15 +92,41 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 
 ## Contributing
 
-Contributors welcome! [Email patches][git-send-email] to jb55@jb55.com are preferred, but I accept PRs on github as well.
+Contributors welcome!
+
+### Code
+
+[Email patches][git-send-email] to jb55@jb55.com are preferred, but I accept PRs on GitHub as well.
 
 [git-send-email]: http://git-send-email.io
 
-## git log bot
+### Translations
 
-npub1fjtdwclt9lspjy8huu3qklr7eklp5uq90u6yh8mec290pqxraccqlufnas
+Translators welcome! Join the [Transifex][transifex] project.
 
-### Awards 
+All user-facing strings must have a comment in order to provide context to translators. If a SwiftUI component has a `comment` parameter, use that. Otherwise, wrap your string with `NSLocalizedString` with the `comment` field populated.
+
+[transifex]: https://explore.transifex.com/damus/damus-ios/
+
+#### Export Source Translations
+
+If user-facing strings have been added or changed, please export them for translation as part of your pull request or commit by running:
+
+```zsh
+./devtools/export-source-translation.sh
+```
+
+This command will export source translations to `translations/en-US.xcloc/Localized Contents/en-US.xliff`, which the Transifex integration will read from the `master` branch and allow translators to translate those strings.
+
+#### Import Translations
+
+Once 100% of strings have been translated for a given locale, Transifex will open up a pull request with the `translations/<locale>.xliff` file changed. Currently, it must be manually imported into the project before merging the pull request by running:
+
+```zsh
+./devtools/import-translation.sh <locale_code_in_snake_case>
+```
+
+### Awards
 
 There may be nostr badges awarded for contributors in the future... :)
 
@@ -107,3 +134,7 @@ First contributors:
 
 1. @randymcmillan
 2. @jcarucci27
+
+### git log bot
+
+npub1fjtdwclt9lspjy8huu3qklr7eklp5uq90u6yh8mec290pqxraccqlufnas

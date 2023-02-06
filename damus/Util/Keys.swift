@@ -12,11 +12,24 @@ import Vault
 let PUBKEY_HRP = "npub"
 let PRIVKEY_HRP = "nsec"
 
+struct FullKeypair {
+    let pubkey: String
+    let privkey: String
+}
+
 struct Keypair {
     let pubkey: String
     let privkey: String?
     let pubkey_bech32: String
     let privkey_bech32: String?
+    
+    func to_full() -> FullKeypair? {
+        guard let privkey = self.privkey else {
+            return nil
+        }
+        
+        return FullKeypair(pubkey: pubkey, privkey: privkey)
+    }
     
     init(pubkey: String, privkey: String?) {
         self.pubkey = pubkey
@@ -143,6 +156,20 @@ func get_saved_pubkey() -> String? {
 func get_saved_privkey() -> String? {
     let mkey = try? Vault.getPrivateKey(keychainConfiguration: DamusKeychainConfiguration());
     return mkey.map { $0.trimmingCharacters(in: .whitespaces) }
+}
+
+/**
+ Detects whether a string might contain an nsec1 prefixed private key.
+ It does not determine if it's the current user's private key and does not verify if it is properly encoded or has the right length.
+ */
+func contentContainsPrivateKey(_ content: String) -> Bool {
+    if #available(iOS 16.0, *) {
+        return content.contains(/nsec1[02-9ac-z]+/)
+    } else {
+        let regex = try! NSRegularExpression(pattern: "nsec1[02-9ac-z]+")
+        return (regex.firstMatch(in: content, range: NSRange(location: 0, length: content.count)) != nil)
+    }
+
 }
 
 fileprivate func removePrivateKeyFromUserDefaults() throws {

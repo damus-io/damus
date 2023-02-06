@@ -30,6 +30,10 @@ class SearchHomeModel: ObservableObject {
         return filter
     }
     
+    func filter_muted() {
+        events = events.filter { should_show_event(contacts: damus_state.contacts, ev: $0) }
+    }
+    
     func subscribe() {
         loading = true
         damus_state.pool.subscribe(sub_id: base_subid, filters: [get_base_filter()], handler: handle_event)
@@ -50,7 +54,7 @@ class SearchHomeModel: ObservableObject {
             guard sub_id == self.base_subid || sub_id == self.profiles_subid else {
                 return
             }
-            if ev.is_textlike && ev.should_show_event && !ev.is_reply(nil) {
+            if ev.is_textlike && should_show_event(contacts: damus_state.contacts, ev: ev) && !ev.is_reply(nil) {
                 if seen_pubkey.contains(ev.pubkey) {
                     return
                 }
@@ -125,7 +129,7 @@ func load_profiles(profiles_subid: String, relay_id: String, events: [NostrEvent
             }
             
             if ev.known_kind == .metadata {
-                process_metadata_event(profiles: damus_state.profiles, ev: ev)
+                process_metadata_event(our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
             }
             
         }
