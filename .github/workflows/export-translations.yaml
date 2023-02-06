@@ -1,0 +1,45 @@
+name: Sync Fork, Export Translations, Commit 
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+
+jobs:
+  run_tests:
+    runs-on: macos-12
+    strategy:
+      matrix:
+        include:
+          - xcode: "14.2"
+    
+    name: Setup Xcode (${{ matrix.xcode }})
+    steps:
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ matrix.xcode }}
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Sync fork
+        uses: peter-evans/fork-sync-action@v2
+        with:
+          args: --rebase
+
+      - name: Export Translations 
+        run: xcodebuild -exportLocalizations -project damus.xcodeproj -localizationPath "translations" -exportLanguage en-US 
+
+      - name: Commit changes
+        run: |
+          set +e
+          git diff-index --quiet HEAD || (
+            git config --global user.email "$GIT_AUTHOR_EMAIL"
+            git config --global user.name "$GIT_AUTHOR_NAME"
+            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+            git add translations/ 
+            git commit -m "Exported Translations (automated)"
+            git push origin HEAD
+          )
+          set -e
