@@ -112,7 +112,7 @@ struct RelayConfigView: View {
 extension RelayConfigView {
     private var relayExplanationView: some View {
         relayExplanationBackground
-            .overlay { icon.padding(12) }
+            .overlay { relayExplanationOverlay.padding(12) }
     }
 
     private var relayExplanationBackground: some View {
@@ -124,7 +124,7 @@ extension RelayConfigView {
             .frame(height: 180)
     }
 
-    private var icon: some View {
+    private var relayExplanationOverlay: some View {
         VStack {
             HStack(alignment: .top, spacing: 10) {
                 Image("relay-explanation-avatar")
@@ -135,7 +135,12 @@ extension RelayConfigView {
                 explanationText
             }
 
-            buttons
+            HStack(alignment: .center, spacing: 10) {
+                gotitButton
+
+                learnmoreButton
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
         }
     }
 
@@ -149,33 +154,32 @@ extension RelayConfigView {
         }
     }
 
-    private var buttons: some View {
-        HStack(alignment: .center, spacing: 10) {
-            Button {
-                withAnimation { is_show_relay_explanation = false }
-            } label: {
-                Text("Got it")
-                    .foregroundColor(.accentColor)
-                    .font(.system(size: 15, weight: .bold))
-                    .padding(.init(top: 10, leading: 18, bottom: 10, trailing: 18))
-                    .overlay(.gray, in: RoundedRectangle(cornerRadius: 20).stroke(style: .init(lineWidth: 1)))
-            }
-            .buttonStyle(.borderless)
-            .background(Color(.systemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
-
-            Button {
-                guard let url = URL(string: "https://nostr-resources.com/") else { return }
-                UIApplication.shared.open(url)
-            } label: {
-                Text("Learn more")
-                    .foregroundColor(.white)
-                    .font(.system(size: 15, weight: .bold))
-                    .padding(.init(top: 10, leading: 18, bottom: 10, trailing: 18))
-            }
-            .buttonStyle(.borderless)
-            .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 20))
+    private var gotitButton: some View {
+        Button {
+            withAnimation { is_show_relay_explanation = false }
+        } label: {
+            Text("Got it")
+                .foregroundColor(.accentColor)
+                .font(.system(size: 15, weight: .bold))
+                .padding(.init(top: 10, leading: 18, bottom: 10, trailing: 18))
+                .overlay(.gray, in: RoundedRectangle(cornerRadius: 20).stroke(style: .init(lineWidth: 1)))
         }
-        .frame(maxWidth: .infinity, alignment: .trailing)
+        .buttonStyle(.borderless)
+        .background(Color(.systemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
+    }
+
+    private var learnmoreButton: some View {
+        Button {
+            guard let url = URL(string: "https://nostr-resources.com/") else { return }
+            UIApplication.shared.open(url)
+        } label: {
+            Text("Learn more")
+                .foregroundColor(.white)
+                .font(.system(size: 15, weight: .bold))
+                .padding(.init(top: 10, leading: 18, bottom: 10, trailing: 18))
+        }
+        .buttonStyle(.borderless)
+        .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 20))
     }
 }
 
