@@ -12,9 +12,13 @@ func should_show_wallet_selector(_ pubkey: String) -> Bool {
     return UserDefaults.standard.object(forKey: "show_wallet_selector") as? Bool ?? true
 }
 
+func pk_setting_key(_ pubkey: String, key: String) -> String {
+    return "\(pubkey)_\(key)"
+}
+
 let tip_amount_key = "default_tip_amount"
 func set_default_tip_amount(pubkey: String, amount: Int64) {
-    let key = "\(pubkey)_\(tip_amount_key)"
+    let key = pk_setting_key(pubkey, key: tip_amount_key)
     UserDefaults.standard.setValue(amount, forKey: key)
 }
 
