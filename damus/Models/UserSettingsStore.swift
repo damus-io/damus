@@ -12,6 +12,18 @@ func should_show_wallet_selector(_ pubkey: String) -> Bool {
     return UserDefaults.standard.object(forKey: "show_wallet_selector") as? Bool ?? true
 }
 
+let tip_amount_key = "default_tip_amount"
+func set_default_tip_amount(pubkey: String, amount: Int64) {
+    let key = "\(pubkey)_\(tip_amount_key)"
+    UserDefaults.standard.setValue(amount, forKey: key)
+}
+
+func get_default_tip_amount(pubkey: String) -> Int64 {
+    let key = "\(pubkey)_\(tip_amount_key)"
+    return UserDefaults.standard.object(forKey: key) as? Int64 ?? 1000000
+}
+
+
 func get_default_wallet(_ pubkey: String) -> Wallet {
     if let defaultWalletName = UserDefaults.standard.string(forKey: "default_wallet"),
        let default_wallet = Wallet(rawValue: defaultWalletName)
