@@ -49,35 +49,6 @@ func follow_btn_enabled_state(_ fs: FollowState) -> Bool {
     }
 }
 
-struct ProfileNameView: View {
-    let pubkey: String
-    let profile: Profile?
-    let damus: DamusState
-    
-    var body: some View {
-        Group {
-            if let real_name = profile?.display_name {
-                VStack(alignment: .leading) {
-                    Text(real_name)
-                        .font(.title3.weight(.bold))
-                    ProfileName(pubkey: pubkey, profile: profile, prefix: "@", damus: damus, show_friend_confirmed: true)
-                        .font(.callout)
-                        .foregroundColor(.gray)
-                    KeyView(pubkey: pubkey)
-                        .pubkey_context_menu(bech32_pubkey: pubkey)
-                }
-            } else {
-                VStack(alignment: .leading) {
-                    ProfileName(pubkey: pubkey, profile: profile, damus: damus, show_friend_confirmed: true)
-                        .font(.title3.weight(.bold))
-                    KeyView(pubkey: pubkey)
-                        .pubkey_context_menu(bech32_pubkey: pubkey)
-                }
-            }
-        }
-    }
-}
-
 struct EditButton: View {
     let damus_state: DamusState
     
@@ -243,6 +214,33 @@ struct ProfileView: View {
         return 0
     }
     
+    func ActionSection(profile_data: Profile?) -> some View {
+        return Group {
+            ActionSheetButton
+            
+            if let profile = profile_data {
+                if let lnurl = profile.lnurl, lnurl != "" {
+                    LNButton(lnurl: lnurl, profile: profile)
+                }
+            }
+            
+            DMButton
+            
+            if profile.pubkey != damus_state.pubkey {
+                FollowButtonView(
+                    target: profile.get_follow_target(),
+                    follows_you: profile.follows(pubkey: damus_state.pubkey),
+                    follow_state: damus_state.contacts.follow_state(profile.pubkey)
+                )
+            } else if damus_state.keypair.privkey != nil {
+                NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
+                    EditButton(damus_state: damus_state)
+                }
+            }
+            
+        }
+    }
+    
     func NameSection(profile_data: Profile?) -> some View {
         return Group {
             HStack(alignment: .center) {
@@ -256,35 +254,12 @@ struct ProfileView: View {
                 
                 Spacer()
                 
-                Group {
-                    ActionSheetButton
-                    
-                    if let profile = profile_data {
-                        if let lnurl = profile.lnurl, lnurl != "" {
-                            LNButton(lnurl: lnurl, profile: profile)
-                        }
-                    }
-                    
-                    DMButton
-                    
-                    if profile.pubkey != damus_state.pubkey {
-                        FollowButtonView(
-                            target: profile.get_follow_target(),
-                            follows_you: profile.follows(pubkey: damus_state.pubkey),
-                            follow_state: damus_state.contacts.follow_state(profile.pubkey)
-                        )
-                    } else if damus_state.keypair.privkey != nil {
-                        NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
-                            EditButton(damus_state: damus_state)
-                        }
-                    }
-                    
-                }
-                .offset(y: -15.0) // Increase if set a frame
-                
+                ActionSection(profile_data: profile_data)
+                    .offset(y: -15.0) // Increase if set a frame
             }
             
-            ProfileNameView(pubkey: profile.pubkey, profile: profile_data, damus: damus_state)
+            let follows_you = profile.follows(pubkey: damus_state.pubkey)
+            ProfileNameView(pubkey: profile.pubkey, profile: profile_data, follows_you: follows_you, damus: damus_state)
             //.padding(.bottom)
                 .padding(.top,-(pfp_size/2.0))
         }
