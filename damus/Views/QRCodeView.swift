@@ -79,12 +79,12 @@ struct QRCodeView: View {
                 
                 Spacer()
                 
-                Text("Follow me on nostr")
+                Text("Follow me on nostr", comment: "Text on QR code view to prompt viewer looking at screen to follow the user.")
                     .foregroundColor(Color("DamusWhite"))
                     .font(.system(size: 24, weight: .heavy))
                     .padding(.top)
                 
-                Text("Scan the code")
+                Text("Scan the code", comment: "Text on QR code view to prompt viewer to scan the QR code on screen with their device camera.")
                     .foregroundColor(Color("DamusWhite"))
                     .font(.system(size: 18, weight: .ultraLight))
                 
