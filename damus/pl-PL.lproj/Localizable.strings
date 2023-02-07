@@ -20,7 +20,7 @@
 "%@" = "%@";
 
 /* Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
-Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
+Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
 "%@ %@" = "%@ %@";
 
 /* Alert message that informs a user was blocked. */
@@ -36,7 +36,7 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Dawaj napiwki w reakcji na odpowiedzi znajomych i ciułaj satsy z Bitcoin⚡️, natywną walutą internetu.";
 
 /* Number of zap payments on a post.
-Number of profiles a user is following. */
+Number of relay servers a user is connected. */
 "%lld" = "%lld";
 
 /* Fraction of how many of the user's relay servers that are operational. */
@@ -45,7 +45,7 @@ Number of profiles a user is following. */
 /* Placeholder for event mention. */
 "< e >" = "< e >";
 
-/* No comment provided by engineer. */
+/* Text indicating the zap amount. i.e. number of satoshis that were tipped to a user */
 "⚡️ %@" = "⚡️ %@";
 
 /* Label to prompt for about text entry for user to describe about themself. */
@@ -79,7 +79,7 @@ Number of profiles a user is following. */
 /* Any amount of sats */
 "Any" = "Dowolny";
 
-/* Example URL to LibreTranslate server */
+/* Prompt for optional entry of API Key to use translation server. */
 "API Key (optional)" = "Klucz API (opcjonalny)";
 
 /* Alert message to ask if user wants to repost a post. */
@@ -276,7 +276,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button to hide a post from a user who has been blocked. */
 "Hide" = "Ukryj";
 
-/* Button to hide the LibreTranslate server API key. */
+/* Button to hide the DeepL translation API key.
+   Button to hide the LibreTranslate server API key. */
 "Hide API Key" = "Ukryj klucz API";
 
 /* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
@@ -305,9 +306,6 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Button to complete account creation and start using the app. */
 "Let's go!" = "Jedziemy!";
-
-/* Section title for selecting the server that hosts the LibreTranslate machine translation API. */
-"LibreTranslate Translations" = "Tłumaczenia LibreTranslate";
 
 /* Placeholder text for entry of Lightning Address or LNURL. */
 "Lightning Address or LNURL" = "Address Lightning lub LNURL";
@@ -345,7 +343,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* No search results. */
 "none" = "brak wyników";
 
-/* Dropdown option for selecting no translation server. */
+/* Dropdown option for selecting no translation service. */
 "None" = "Żaden";
 
 /* Indicates that there are no notes in the timeline to view. */
@@ -420,7 +418,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button to reject the end user license agreement, which disallows the user from being let into the app. */
 "Reject" = "Odrzuć";
 
-/* Text field for relay server. Used for testing purposes. */
+/* Label to display relay address.
+   Text field for relay server. Used for testing purposes. */
 "Relay" = "Przekaźnik";
 
 /* Sidebar menu label for Relay servers view
@@ -508,7 +507,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Sidebar menu label for accessing the app settings */
 "Settings" = "Ustawienia";
 
-/* Button to share an image.
+/* Button to share a post
+   Button to share an image.
    Button to share the link to a profile. */
 "Share" = "Udostępnij";
 
@@ -516,7 +516,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Toggle to show or hide user's secret account login key. */
 "Show" = "Pokaż";
 
-/* Button to hide the LibreTranslate server API key. */
+/* Button to show the DeepL translation API key.
+   Button to show the LibreTranslate server API key. */
 "Show API Key" = "Pokaż klucz API";
 
 /* Toggle to show or hide selection of wallet. */
