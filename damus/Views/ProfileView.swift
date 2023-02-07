@@ -239,6 +239,57 @@ struct ProfileView: View {
         return 0
     }
     
+    func NameSection(profile_data: Profile?) -> some View {
+        return Group {
+            HStack(alignment: .center) {
+                ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles)
+                    .onTapGesture {
+                        is_zoomed.toggle()
+                    }
+                    .fullScreenCover(isPresented: $is_zoomed) {
+                        ProfileZoomView(pubkey: profile.pubkey, profiles: damus_state.profiles)                        }
+                    .offset(y: -(pfp_size/2.0)) // Increase if set a frame
+                
+                Spacer()
+                
+                Group {
+                    ActionSheetButton
+                    
+                    if let profile = profile_data {
+                        if let lnurl = profile.lnurl, lnurl != "" {
+                            LNButton(lnurl: lnurl, profile: profile)
+                        }
+                    }
+                    
+                    DMButton
+                    
+                    if profile.pubkey != damus_state.pubkey {
+                        FollowButtonView(
+                            target: profile.get_follow_target(),
+                            follows_you: profile.follows(pubkey: damus_state.pubkey),
+                            follow_state: damus_state.contacts.follow_state(profile.pubkey)
+                        )
+                    } else if damus_state.keypair.privkey != nil {
+                        NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
+                            EditButton(damus_state: damus_state)
+                        }
+                    }
+                    
+                }
+                .offset(y: -15.0) // Increase if set a frame
+                
+            }
+            
+            ProfileNameView(pubkey: profile.pubkey, profile: profile_data, damus: damus_state)
+            //.padding(.bottom)
+                .padding(.top,-(pfp_size/2.0))
+        }
+    }
+    
+    var pfp_size: CGFloat {
+        return 90.0
+    }
+    
     var TopSection: some View {
         ZStack(alignment: .top) {
             GeometryReader { geometry in
@@ -251,55 +302,14 @@ struct ProfileView: View {
             }.frame(height: BANNER_HEIGHT)
             
             VStack(alignment: .leading, spacing: 8.0) {
-                let data = damus_state.profiles.lookup(id: profile.pubkey)
-                let pfp_size: CGFloat = 90.0
+                let profile_data = damus_state.profiles.lookup(id: profile.pubkey)
                 
-                HStack(alignment: .center) {
-                    ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles)
-                        .onTapGesture {
-                            is_zoomed.toggle()
-                        }
-                        .fullScreenCover(isPresented: $is_zoomed) {
-                            ProfileZoomView(pubkey: profile.pubkey, profiles: damus_state.profiles)                        }
-                        .offset(y: -(pfp_size/2.0)) // Increase if set a frame
-                    
-                    Spacer()
-                    
-                    Group {
-                        ActionSheetButton
-                        
-                        if let profile = data {
-                            if let lnurl = profile.lnurl, lnurl != "" {
-                                LNButton(lnurl: lnurl, profile: profile)
-                            }
-                        }
-                        
-                        DMButton
-                        
-                        if profile.pubkey != damus_state.pubkey {
-                            FollowButtonView(
-                                target: profile.get_follow_target(),
-                                follow_state: damus_state.contacts.follow_state(profile.pubkey)
-                            )
-                        } else if damus_state.keypair.privkey != nil {
-                            NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
-                                EditButton(damus_state: damus_state)
-                            }
-                        }
-                        
-                    }
-                    .offset(y: -15.0) // Increase if set a frame
-                    
-                }
-                               
-                ProfileNameView(pubkey: profile.pubkey, profile: data, damus: damus_state)
-                    //.padding(.bottom)
-                    .padding(.top,-(pfp_size/2.0))
+                NameSection(profile_data: profile_data)
                 
-                Text(ProfileView.markdown.process(data?.about ?? ""))
+                Text(ProfileView.markdown.process(profile_data?.about ?? ""))
                     .font(.subheadline).textSelection(.enabled)
                 
-                if let url = data?.website_url {
+                if let url = profile_data?.website_url {
                     WebsiteLink(url: url)
                 }
                 
