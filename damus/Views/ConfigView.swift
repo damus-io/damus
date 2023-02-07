@@ -197,7 +197,7 @@ struct ConfigView: View {
         .navigationTitle(NSLocalizedString("Settings", comment: "Navigation title for Settings view."))
         .navigationBarTitleDisplayMode(.large)
         .alert(NSLocalizedString("Delete Account", comment: "Alert for deleting the users account."), isPresented: $confirm_delete_account) {
-            TextField("Type DELETE to delete", text: $delete_text)
+            TextField(NSLocalizedString("Type DELETE to delete", comment: "Text field prompt asking user to type the word DELETE to confirm that they want to proceed with deleting their account. The all caps lock DELETE word should not be translated. Everything else should."), text: $delete_text)
             Button(NSLocalizedString("Cancel", comment: "Cancel deleting the user."), role: .cancel) {
                 confirm_delete_account = false
             }
