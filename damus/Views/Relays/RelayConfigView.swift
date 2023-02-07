@@ -111,20 +111,22 @@ struct RelayConfigView: View {
 
 extension RelayConfigView {
     private var relayExplanationView: some View {
-        relayExplanationBackground
-            .overlay { relayExplanationOverlay.padding(12) }
+        ZStack(alignment: .center) {
+            relayExplanationBackground
+
+            relayExplanationContent.padding(13)
+        }
+        .listRowBackground(Color.primary)
+        .listRowInsets(.init(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)))
     }
 
     private var relayExplanationBackground: some View {
         RoundedRectangle(cornerRadius: 9)
             .padding(.all, 1.5)
             .foregroundColor(Color(.systemGroupedBackground))
-            .listRowBackground(Color.primary)
-            .listRowInsets(.init(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)))
-            .frame(height: 180)
     }
 
-    private var relayExplanationOverlay: some View {
+    private var relayExplanationContent: some View {
         VStack {
             HStack(alignment: .top, spacing: 10) {
                 Image("relay-explanation-avatar")
@@ -134,6 +136,7 @@ extension RelayConfigView {
 
                 explanationText
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             HStack(alignment: .center, spacing: 10) {
                 gotitButton
@@ -151,6 +154,7 @@ extension RelayConfigView {
 
             Text("It’s a server that you send notes to and receive notes from. Those numbers you tapped on represent the ones you’re currently connected to.")
                 .font(.system(size: 15, weight: .medium, design: .default))
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
