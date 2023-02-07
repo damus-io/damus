@@ -64,7 +64,7 @@ struct RelayView: View {
         Button {
             UIPasteboard.general.setValue(relay, forPasteboardType: "public.plain-text")
         } label: {
-            Label(NSLocalizedString("Copy", comment: "Button to copy a relay server address."), systemImage: "doc.on.doc")
+            Label(NSLocalizedString("Copy T", comment: "Button to copy a relay server address."), systemImage: "doc.on.doc")
         }
     }
     
