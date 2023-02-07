@@ -19,7 +19,7 @@ enum FollowState {
     case unfollows
 }
 
-func follow_btn_txt(_ fs: FollowState) -> String {
+func follow_btn_txt(_ fs: FollowState, follows_you: Bool) -> String {
     switch fs {
     case .follows:
         return NSLocalizedString("Unfollow", comment: "Button to unfollow a user.")
@@ -28,7 +28,11 @@ func follow_btn_txt(_ fs: FollowState) -> String {
     case .unfollowing:
         return NSLocalizedString("Unfollowing...", comment: "Label to indicate that the user is in the process of unfollowing another user.")
     case .unfollows:
-        return NSLocalizedString("Follow", comment: "Button to follow a user.")
+        if follows_you {
+            return NSLocalizedString("Follow Back", comment: "Button to follow a user back.")
+        } else {
+            return NSLocalizedString("Follow", comment: "Button to follow a user.")
+        }
     }
 }
 
