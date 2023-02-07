@@ -2,6 +2,7 @@ name: Run Test Suite
 run-name: Testing ${{ github.ref }} by @${{ github.actor }}
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - "master"
