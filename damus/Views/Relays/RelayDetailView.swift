@@ -12,16 +12,22 @@ struct RelayDetailView: View {
     let relay: String
     
     @State private var errorString: String?
-    @State private var nip11: RelayNIP11?
+    @State private var nip11: RelayMetadata?
     
     @State var conn_color: Color
-        
+    
+    func FieldText(_ str: String?) -> some View {
+        Text(str ?? "No data available")
+    }
+    
     var body: some View {
         Group {
             if let nip11 {
                 Form {
-                    Section(NSLocalizedString("Admin", comment: "Label to display relay contact user.")) {
-                        UserView(damus_state: state, pubkey: nip11.pubkey)
+                    if let pubkey = nip11.pubkey {
+                        Section(NSLocalizedString("Admin", comment: "Label to display relay contact user.")) {
+                            UserView(damus_state: state, pubkey: pubkey)
+                        }
                     }
                     Section(NSLocalizedString("Relay", comment: "Label to display relay address.")) {
                         HStack {
@@ -33,19 +39,21 @@ struct RelayDetailView: View {
                         }
                     }
                     Section(NSLocalizedString("Description", comment: "Label to display relay description.")) {
-                        Text(nip11.description)
+                        FieldText(nip11.description)
                     }
                     Section(NSLocalizedString("Contact", comment: "Label to display relay contact information.")) {
-                        Text(nip11.contact)
+                        FieldText(nip11.contact)
                     }
                     Section(NSLocalizedString("Software", comment: "Label to display relay software.")) {
-                        Text(nip11.software)
+                        FieldText(nip11.software)
                     }
                     Section(NSLocalizedString("Version", comment: "Label to display relay software version.")) {
-                        Text(nip11.version)
+                        FieldText(nip11.version)
                     }
-                    Section(NSLocalizedString("Supported NIPs", comment: "Label to display relay's supported NIPs.")) {
-                        Text(nipsList(nips: nip11.supported_nips))
+                    if let nips = nip11.supported_nips, nips.count > 0 {
+                        Section(NSLocalizedString("Supported NIPs", comment: "Label to display relay's supported NIPs.")) {
+                            Text(nipsList(nips: nips))
+                        }
                     }
                 }
             } else if let errorString {
@@ -83,7 +91,7 @@ struct RelayDetailView: View {
             }
             
             do {
-                let nip11 = try JSONDecoder().decode(RelayNIP11.self, from: data)
+                let nip11 = try JSONDecoder().decode(RelayMetadata.self, from: data)
                 self.nip11 = nip11
             } catch {
                 errorString = error.localizedDescription
