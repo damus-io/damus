@@ -15,7 +15,7 @@ struct FollowsYou: View {
     }
     
     var body: some View {
-        Text("Follows you")
+        Text("Follows you", comment: "Text to indicate that a user is following your profile.")
             .padding([.leading, .trailing], 6.0)
             .padding([.top, .bottom], 2.0)
             .foregroundColor(.gray)
