@@ -16,6 +16,8 @@ struct RelayDetailView: View {
     
     @State var conn_color: Color
     
+    @Environment(\.dismiss) var dismiss
+    
     func FieldText(_ str: String?) -> some View {
         Text(str ?? "No data available")
     }
@@ -63,6 +65,9 @@ struct RelayDetailView: View {
             } else {
                 ProgressView()
             }
+        }
+        .onReceive(handle_notify(.switched_timeline)) { notif in
+            dismiss()
         }
         .navigationTitle(nip11?.name ?? "")
         .task {
