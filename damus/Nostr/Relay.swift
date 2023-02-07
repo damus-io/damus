@@ -7,21 +7,31 @@
 
 import Foundation
 
-struct RelayInfo: Codable {
+public struct RelayInfo: Codable {
     let read: Bool
     let write: Bool
 
     static let rw = RelayInfo(read: true, write: true)
 }
 
-struct RelayDescriptor: Codable {
-    let url: URL
-    let info: RelayInfo
+public struct RelayDescriptor: Codable {
+    public let url: URL
+    public let info: RelayInfo
 }
 
 enum RelayFlags: Int {
     case none = 0
     case broken = 1
+}
+
+struct RelayNIP11: Codable {
+    var name = "No data available"
+    var description = "No data available"
+    var pubkey = "No data available"
+    var contact = "No data available"
+    var supported_nips: [Int] = []
+    var software = "No data available"
+    var version = "No data available"
 }
 
 class Relay: Identifiable {

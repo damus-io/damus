@@ -7,6 +7,7 @@
 import AVFoundation
 import Kingfisher
 import SwiftUI
+import LocalAuthentication
 
 struct ConfigView: View {
     let state: DamusState
@@ -14,27 +15,62 @@ struct ConfigView: View {
     @State var confirm_logout: Bool = false
     @State var confirm_delete_account: Bool = false
     @State var show_privkey: Bool = false
-    @State var show_libretranslate_api_key: Bool = false
+    @State var has_authenticated_locally: Bool = false
+    @State var show_api_key: Bool = false
     @State var privkey: String
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
     @State var delete_text: String = ""
-    @EnvironmentObject var user_settings: UserSettingsStore
-
+    
+    @ObservedObject var settings: UserSettingsStore
+    
     let generator = UIImpactFeedbackGenerator(style: .light)
-
+    
     init(state: DamusState) {
         self.state = state
         _privkey = State(initialValue: self.state.keypair.privkey_bech32 ?? "")
+        _settings = ObservedObject(initialValue: state.settings)
     }
 
+    func authenticateLocally(completion: @escaping (Bool) -> Void) {
+        // Need to authenticate only once while ConfigView is presented
+        guard !has_authenticated_locally else {
+            completion(true)
+            return
+        }
+        let context = LAContext()
+        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) {
+            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: NSLocalizedString("Local authentication to access private key", comment: "Face ID usage description shown when trying to access private key")) { success, error in
+                DispatchQueue.main.async {
+                    has_authenticated_locally = success
+                    completion(success)
+                }
+            }
+        } else {
+            // If there's no authentication set up on the device, let the user copy the key without it
+            has_authenticated_locally = true
+            completion(true)
+        }
+    }
+    
     // TODO: (jb55) could be more general but not gonna worry about it atm
     func CopyButton(is_pk: Bool) -> some View {
         return Button(action: {
-            UIPasteboard.general.string = is_pk ? self.state.keypair.pubkey_bech32 : self.privkey
-            self.privkey_copied = !is_pk
-            self.pubkey_copied = is_pk
-            generator.impactOccurred()
+            let copyKey = {
+                UIPasteboard.general.string = is_pk ? self.state.keypair.pubkey_bech32 : self.privkey
+                self.privkey_copied = !is_pk
+                self.pubkey_copied = is_pk
+                generator.impactOccurred()
+            }
+            if has_authenticated_locally {
+                copyKey()
+            } else {
+                authenticateLocally { success in
+                    if success {
+                        copyKey()
+                    }
+                }
+            }
         }) {
             let copied = is_pk ? self.pubkey_copied : self.privkey_copied
             Image(systemName: copied ? "checkmark.circle" : "doc.on.doc")
@@ -56,7 +92,7 @@ struct ConfigView: View {
                 if let sec = state.keypair.privkey_bech32 {
                     Section(NSLocalizedString("Secret Account Login Key", comment: "Section title for user's secret account login key.")) {
                         HStack {
-                            if show_privkey == false {
+                            if show_privkey == false || !has_authenticated_locally {
                                 SecureField(NSLocalizedString("Private Key", comment: "Title of the secure field that holds the user's private key."), text: $privkey)
                                     .disabled(true)
                             } else {
@@ -68,13 +104,20 @@ struct ConfigView: View {
                         }
 
                         Toggle(NSLocalizedString("Show", comment: "Toggle to show or hide user's secret account login key."), isOn: $show_privkey)
+                            .onChange(of: show_privkey) { newValue in
+                                if newValue {
+                                    authenticateLocally { success in
+                                        show_privkey = success
+                                    }
+                                }
+                            }
                     }
                 }
 
                 Section(NSLocalizedString("Wallet Selector", comment: "Section title for selection of wallet.")) {
-                    Toggle(NSLocalizedString("Show wallet selector", comment: "Toggle to show or hide selection of wallet."), isOn: $user_settings.show_wallet_selector).toggleStyle(.switch)
+                    Toggle(NSLocalizedString("Show wallet selector", comment: "Toggle to show or hide selection of wallet."), isOn: $settings.show_wallet_selector).toggleStyle(.switch)
                     Picker(NSLocalizedString("Select default wallet", comment: "Prompt selection of user's default wallet"),
-                           selection: $user_settings.default_wallet) {
+                           selection: $settings.default_wallet) {
                         ForEach(Wallet.allCases, id: \.self) { wallet in
                             Text(wallet.model.displayName)
                                 .tag(wallet.model.tag)
@@ -82,41 +125,55 @@ struct ConfigView: View {
                     }
                 }
 
-                Section(NSLocalizedString("LibreTranslate Translations", comment: "Section title for selecting the server that hosts the LibreTranslate machine translation API.")) {
-                    Picker(NSLocalizedString("Server", comment: "Prompt selection of LibreTranslate server to perform machine translations on notes"), selection: $user_settings.libretranslate_server) {
-                        ForEach(LibreTranslateServer.allCases, id: \.self) { server in
+                Section(NSLocalizedString("Translations", comment: "Section title for selecting the translation service.")) {
+                    Picker(NSLocalizedString("Service", comment: "Prompt selection of translation service provider."), selection: $settings.translation_service) {
+                        ForEach(TranslationService.allCases, id: \.self) { server in
                             Text(server.model.displayName)
                                 .tag(server.model.tag)
                         }
                     }
 
-                    if user_settings.libretranslate_server != .none {
-                        TextField(NSLocalizedString("URL", comment: "Example URL to LibreTranslate server"), text: $user_settings.libretranslate_url)
-                            .disableAutocorrection(true)
-                            .disabled(user_settings.libretranslate_server != .custom)
-                            .autocapitalization(UITextAutocapitalizationType.none)
-                        HStack {
-                            if show_libretranslate_api_key {
-                                TextField(NSLocalizedString("API Key (optional)", comment: "Example URL to LibreTranslate server"), text: $user_settings.libretranslate_api_key)
-                                    .disableAutocorrection(true)
-                                    .autocapitalization(UITextAutocapitalizationType.none)
-                                Button(NSLocalizedString("Hide API Key", comment: "Button to hide the LibreTranslate server API key.")) {
-                                    show_libretranslate_api_key = false
-                                }
-                            } else {
-                                SecureField(NSLocalizedString("API Key (optional)", comment: "Example URL to LibreTranslate server"), text: $user_settings.libretranslate_api_key)
-                                    .disableAutocorrection(true)
-                                    .autocapitalization(UITextAutocapitalizationType.none)
-                                Button(NSLocalizedString("Show API Key", comment: "Button to hide the LibreTranslate server API key.")) {
-                                    show_libretranslate_api_key = true
-                                }
+                    if settings.translation_service == .libretranslate {
+                        Picker(NSLocalizedString("Server", comment: "Prompt selection of LibreTranslate server to perform machine translations on notes"), selection: $settings.libretranslate_server) {
+                            ForEach(LibreTranslateServer.allCases, id: \.self) { server in
+                                Text(server.model.displayName)
+                                    .tag(server.model.tag)
                             }
+                        }
+
+                        if settings.libretranslate_server == .custom {
+                            TextField(NSLocalizedString("URL", comment: "Example URL to LibreTranslate server"), text: $settings.libretranslate_url)
+                                .disableAutocorrection(true)
+                                .autocapitalization(UITextAutocapitalizationType.none)
+                        }
+
+                        SecureField(NSLocalizedString("API Key (optional)", comment: "Prompt for optional entry of API Key to use translation server."), text: $settings.libretranslate_api_key)
+                            .disableAutocorrection(true)
+                            .disabled(settings.translation_service != .libretranslate)
+                            .autocapitalization(UITextAutocapitalizationType.none)
+                    }
+
+                    if settings.translation_service == .deepl {
+                        Picker(NSLocalizedString("Plan", comment: "Prompt selection of DeepL subscription plan to perform machine translations on notes"), selection: $settings.deepl_plan) {
+                            ForEach(DeepLPlan.allCases, id: \.self) { server in
+                                Text(server.model.displayName)
+                                    .tag(server.model.tag)
+                            }
+                        }
+
+                        SecureField(NSLocalizedString("API Key (required)", comment: "Prompt for required entry of API Key to use translation server."), text: $settings.deepl_api_key)
+                            .disableAutocorrection(true)
+                            .disabled(settings.translation_service != .deepl)
+                            .autocapitalization(UITextAutocapitalizationType.none)
+
+                        if settings.deepl_api_key == "" {
+                            Link(NSLocalizedString("Get API Key", comment: "Button to navigate to DeepL website to get a translation API key."), destination: URL(string: "https://www.deepl.com/pro-api")!)
                         }
                     }
                 }
 
                 Section(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen")) {
-                    Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $user_settings.left_handed)
+                    Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)
                         .toggleStyle(.switch)
                 }
 
@@ -170,6 +227,81 @@ struct ConfigView: View {
         }
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
+        }
+    }
+
+    var libretranslate_view: some View {
+        VStack {
+            Picker(NSLocalizedString("Server", comment: "Prompt selection of LibreTranslate server to perform machine translations on notes"), selection: $settings.libretranslate_server) {
+                ForEach(LibreTranslateServer.allCases, id: \.self) { server in
+                    Text(server.model.displayName)
+                        .tag(server.model.tag)
+                }
+            }
+
+            TextField(NSLocalizedString("URL", comment: "Example URL to LibreTranslate server"), text: $settings.libretranslate_url)
+                .disableAutocorrection(true)
+                .disabled(settings.libretranslate_server != .custom)
+                .autocapitalization(UITextAutocapitalizationType.none)
+            HStack {
+                let libretranslate_api_key_placeholder = NSLocalizedString("API Key (optional)", comment: "Prompt for optional entry of API Key to use translation server.")
+                if show_api_key {
+                    TextField(libretranslate_api_key_placeholder, text: $settings.libretranslate_api_key)
+                        .disableAutocorrection(true)
+                        .autocapitalization(UITextAutocapitalizationType.none)
+                    if settings.libretranslate_api_key != "" {
+                        Button(NSLocalizedString("Hide API Key", comment: "Button to hide the LibreTranslate server API key.")) {
+                            show_api_key = false
+                        }
+                    }
+                } else {
+                    SecureField(libretranslate_api_key_placeholder, text: $settings.libretranslate_api_key)
+                        .disableAutocorrection(true)
+                        .autocapitalization(UITextAutocapitalizationType.none)
+                    if settings.libretranslate_api_key != "" {
+                        Button(NSLocalizedString("Show API Key", comment: "Button to show the LibreTranslate server API key.")) {
+                            show_api_key = true
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    var deepl_view: some View {
+        VStack {
+            Picker(NSLocalizedString("Plan", comment: "Prompt selection of DeepL subscription plan to perform machine translations on notes"), selection: $settings.deepl_plan) {
+                ForEach(DeepLPlan.allCases, id: \.self) { server in
+                    Text(server.model.displayName)
+                        .tag(server.model.tag)
+                }
+            }
+
+            HStack {
+                let deepl_api_key_placeholder = NSLocalizedString("API Key (required)", comment: "Prompt for required entry of API Key to use translation server.")
+                if show_api_key {
+                    TextField(deepl_api_key_placeholder, text: $settings.deepl_api_key)
+                        .disableAutocorrection(true)
+                        .autocapitalization(UITextAutocapitalizationType.none)
+                    if settings.deepl_api_key != "" {
+                        Button(NSLocalizedString("Hide API Key", comment: "Button to hide the DeepL translation API key.")) {
+                            show_api_key = false
+                        }
+                    }
+                } else {
+                    SecureField(deepl_api_key_placeholder, text: $settings.deepl_api_key)
+                        .disableAutocorrection(true)
+                        .autocapitalization(UITextAutocapitalizationType.none)
+                    if settings.deepl_api_key != "" {
+                        Button(NSLocalizedString("Show API Key", comment: "Button to show the DeepL translation API key.")) {
+                            show_api_key = true
+                        }
+                    }
+                }
+                if settings.deepl_api_key == "" {
+                    Link(NSLocalizedString("Get API Key", comment: "Button to navigate to DeepL website to get a translation API key."), destination: URL(string: "https://www.deepl.com/pro-api")!)
+                }
+            }
         }
     }
 }

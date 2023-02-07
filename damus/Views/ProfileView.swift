@@ -92,6 +92,7 @@ struct EditButton: View {
                         .stroke(borderColor(), lineWidth: 1)
                 }
                 .minimumScaleFactor(0.5)
+                .lineLimit(1)
         }
     }
     
@@ -118,7 +119,6 @@ struct ProfileView: View {
     @State var action_sheet_presented: Bool = false
     @State var filter_state : FilterState = .posts
     @StateObject var home : HomeModel = HomeModel()
-    @EnvironmentObject var user_settings: UserSettingsStore
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
@@ -144,10 +144,10 @@ struct ProfileView: View {
     
     func LNButton(lnurl: String, profile: Profile) -> some View {
         Button(action: {
-            if user_settings.show_wallet_selector  {
+            if damus_state.settings.show_wallet_selector  {
                 showing_select_wallet = true
             } else {
-                open_with_wallet(wallet: user_settings.default_wallet.model, invoice: lnurl)
+                open_with_wallet(wallet: damus_state.settings.default_wallet.model, invoice: lnurl)
             }
         }) {
             Image(systemName: "bolt.circle")
@@ -163,8 +163,7 @@ struct ProfileView: View {
         }
         .cornerRadius(24)
         .sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
-            SelectWalletView(showingSelectWallet: $showing_select_wallet, invoice: lnurl)
-                .environmentObject(user_settings)
+            SelectWalletView(showingSelectWallet: $showing_select_wallet, our_pubkey: damus_state.pubkey, invoice: lnurl)
         }
     }
 
@@ -300,7 +299,7 @@ struct ProfileView: View {
                     .padding(.top,-(pfp_size/2.0))
                 
                 Text(ProfileView.markdown.process(data?.about ?? ""))
-                    .font(.subheadline)
+                    .font(.subheadline).textSelection(.enabled)
                 
                 if let url = data?.website_url {
                     WebsiteLink(url: url)
@@ -334,10 +333,19 @@ struct ProfileView: View {
                     }
                     
                     if let relays = profile.relays {
-                        NavigationLink(destination: UserRelaysView(state: damus_state, pubkey: profile.pubkey, relays: Array(relays.keys).sorted())) {
-                            Text("\(Text("\(relays.keys.count)", comment: "Number of relay servers a user is connected.").font(.subheadline.weight(.medium))) \(Text(String(format: NSLocalizedString("relays_count", comment: "Part of a larger sentence to describe how many relay servers a user is connected."), relays.keys.count)).font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
+                        // Only open relay config view if the user is logged in with private key and they are looking at their own profile.
+                        let relay_text = Text("\(Text("\(relays.keys.count)", comment: "Number of relay servers a user is connected.").font(.subheadline.weight(.medium))) \(Text(String(format: NSLocalizedString("relays_count", comment: "Part of a larger sentence to describe how many relay servers a user is connected."), relays.keys.count)).font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
+                        if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
+                            NavigationLink(destination: RelayConfigView(state: damus_state)) {
+                                relay_text
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        } else {
+                            NavigationLink(destination: UserRelaysView(state: damus_state, pubkey: profile.pubkey, relays: Array(relays.keys).sorted())) {
+                                relay_text
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
-                        .buttonStyle(PlainButtonStyle())
                     }
                 }
             }
@@ -437,7 +445,7 @@ struct ProfileView_Previews: PreviewProvider {
 
 func test_damus_state() -> DamusState {
     let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
-    let damus = DamusState(pool: RelayPool(), keypair: Keypair(pubkey: pubkey, privkey: "privkey"), likes: EventCounter(our_pubkey: pubkey), boosts: EventCounter(our_pubkey: pubkey), contacts: Contacts(our_pubkey: pubkey), tips: TipCounter(our_pubkey: pubkey), profiles: Profiles(), dms: DirectMessagesModel(our_pubkey: pubkey), previews: PreviewCache())
+    let damus = DamusState.empty
     
     let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", banner: "", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io")
     let tsprof = TimestampedProfile(profile: prof, timestamp: 0)

@@ -112,7 +112,59 @@ class HomeModel: ObservableObject {
             handle_channel_create(ev)
         case .channel_meta:
             handle_channel_meta(ev)
+        case .zap:
+            handle_zap_event(ev)
         }
+    }
+    
+    func handle_zap_event_with_zapper(_ ev: NostrEvent, zapper: String) {
+        guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper) else {
+            return
+        }
+        
+        damus_state.zaps.add_zap(zap: zap)
+        
+        if !insert_uniq_sorted_event(events: &notifications, new_ev: ev, cmp: { $0.created_at > $1.created_at }) {
+            return
+        }
+        
+        handle_last_event(ev: ev, timeline: .notifications)
+        return
+    }
+    
+    func handle_zap_event(_ ev: NostrEvent) {
+        // These are zap notifications
+        guard let ptag = event_tag(ev, name: "p") else {
+            return
+        }
+        
+        guard ptag == damus_state.pubkey else {
+            return
+        }
+        
+        if let local_zapper = damus_state.profiles.lookup_zapper(pubkey: damus_state.pubkey) {
+            handle_zap_event_with_zapper(ev, zapper: local_zapper)
+            return
+        }
+        
+        guard let profile = damus_state.profiles.lookup(id: damus_state.pubkey) else {
+            return
+        }
+        
+        guard let lnurl = profile.lnurl else {
+            return
+        }
+        
+        Task {
+            guard let zapper = await fetch_zapper_from_lnurl(lnurl) else {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.handle_zap_event_with_zapper(ev, zapper: zapper)
+            }
+        }
+        
     }
     
     func handle_channel_create(_ ev: NostrEvent) {
@@ -234,7 +286,7 @@ class HomeModel: ObservableObject {
             switch ev {
             case .event(let sub_id, let ev):
                 // globally handle likes
-                let always_process = sub_id == notifications_subid || sub_id == contacts_subid || sub_id == home_subid || sub_id == dms_subid || sub_id == init_subid || ev.known_kind == .like || ev.known_kind == .contacts || ev.known_kind == .metadata
+                let always_process = sub_id == notifications_subid || sub_id == contacts_subid || sub_id == home_subid || sub_id == dms_subid || sub_id == init_subid || ev.known_kind == .like || ev.known_kind == .zap || ev.known_kind == .contacts || ev.known_kind == .metadata
                 if !always_process {
                     // TODO: other views like threads might have their own sub ids, so ignore those events... or should we?
                     return
@@ -317,6 +369,7 @@ class HomeModel: ObservableObject {
             NostrKind.chat.rawValue,
             NostrKind.like.rawValue,
             NostrKind.boost.rawValue,
+            NostrKind.zap.rawValue,
         ])
         notifications_filter.pubkeys = [damus_state.pubkey]
         notifications_filter.limit = 100
@@ -411,7 +464,7 @@ class HomeModel: ObservableObject {
     }
 
     func handle_text_event(sub_id: String, _ ev: NostrEvent) {
-        if should_hide_event(contacts: damus_state.contacts, ev: ev) {
+        guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
             return
         }
 
@@ -423,7 +476,7 @@ class HomeModel: ObservableObject {
     }
 
     func handle_dm(_ ev: NostrEvent) {
-        if let notifs = handle_incoming_dm(prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, ev: ev) {
+        if let notifs = handle_incoming_dm(contacts: damus_state.contacts, prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, ev: ev) {
             self.new_events = notifs
         }
     }
@@ -654,7 +707,12 @@ func load_our_relays(contacts: Contacts, our_pubkey: String, pool: RelayPool, m_
     }
 }
 
-func handle_incoming_dm(prev_events: NewEventsBits, dms: DirectMessagesModel, our_pubkey: String, ev: NostrEvent) -> NewEventsBits? {
+func handle_incoming_dm(contacts: Contacts, prev_events: NewEventsBits, dms: DirectMessagesModel, our_pubkey: String, ev: NostrEvent) -> NewEventsBits? {
+    // hide blocked users
+    guard should_show_event(contacts: contacts, ev: ev) else {
+        return prev_events
+    }
+    
     var inserted = false
     var found = false
     let ours = ev.pubkey == our_pubkey
@@ -728,9 +786,10 @@ func event_has_our_pubkey(_ ev: NostrEvent, our_pubkey: String) -> Bool {
 }
 
 
-func should_hide_event(contacts: Contacts, ev: NostrEvent) -> Bool {
+func should_show_event(contacts: Contacts, ev: NostrEvent) -> Bool {
     if contacts.is_muted(ev.pubkey) {
-        return true
+        return false
     }
-    return !ev.should_show_event
+    return ev.should_show_event
 }
+

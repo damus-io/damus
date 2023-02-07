@@ -16,11 +16,10 @@
 /* Prefix character to username. */
 "@" = "@";
 
-/* Amount of time that has passed since reply quote event occurred.
-Abbreviated version of a nostr public key. */
+/* Abbreviated version of a nostr public key. */
 "%@" = "%@";
 
-/* Sentence composed of 2 variables to describe how many tip payments there are on a post. In source English, the first variable is the number of tip payments, and the second variable is 'Tip' or 'Tips'.
+/* Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
 Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
 "%@ %@" = "%@ %@";
 
@@ -36,7 +35,7 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Deja propinas en las publicaciones de tus amigos y acumula sats con Bitcoin⚡️, la moneda nativa de internet.";
 
-/* Number of tip payments on a post.
+/* Number of zap payments on a post.
 Number of profiles a user is following. */
 "%lld" = "%lld";
 
@@ -45,6 +44,9 @@ Number of profiles a user is following. */
 
 /* Placeholder for event mention. */
 "< e >" = "< e >";
+
+/* No comment provided by engineer. */
+"⚡️ %@" = "⚡️ %@";
 
 /* Label to prompt for about text entry for user to describe about themself. */
 "About" = "Información";
@@ -552,7 +554,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Translate Note" = "Traducir nota";
 
 /* Button to indicate that the note has been translated from a different language. */
-"Translated from (languageName!)" = "Traducida del (languageName!)";
+"Translated from (lang)" = "Traducida del (lang)";
 
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "Escribe tu publicación aquí...";

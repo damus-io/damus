@@ -11,7 +11,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>1%d diğer not</string>
+			<string>%d diğer not</string>
 			<key>other</key>
 			<string>%d diğer notlar</string>
 		</dict>
@@ -69,7 +69,7 @@
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%@%#@OTHERS@'lara yanıt </string>
+		<string>%@%#@OTHERS@'lara yanıt</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -134,20 +134,20 @@
 			<string>%2$@ sat</string>
 		</dict>
 	</dict>
-	<key>tips_count</key>
+	<key>zaps_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@TIPS@</string>
-		<key>TIPS</key>
+		<string>%#@ZAPS@</string>
+		<key>ZAPS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Bahşiş</string>
+			<string>Zap</string>
 			<key>other</key>
-			<string>Bahşişler</string>
+			<string>Zaps</string>
 		</dict>
 	</dict>
 </dict>

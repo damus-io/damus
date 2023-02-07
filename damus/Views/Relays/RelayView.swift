@@ -34,7 +34,11 @@ struct RelayView: View {
             Circle()
                 .frame(width: 8.0, height: 8.0)
                 .foregroundColor(conn_color)
-            Text(relay)
+            NavigationLink {
+                RelayDetailView(state: state, relay: relay, conn_color: conn_color)
+            } label: {
+                Text(relay)
+            }
         }
         .onReceive(timer) { _ in
             update_connection_color()

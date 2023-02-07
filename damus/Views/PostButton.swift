@@ -34,8 +34,7 @@ func PostButton(action: @escaping () -> ()) -> some View {
     .keyboardShortcut("n", modifiers: [.command, .shift])
 }
 
-func PostButtonContainer(userSettings: UserSettingsStore, action: @escaping () -> Void) -> some View {
-    let is_left_handed = userSettings.left_handed.self
+func PostButtonContainer(is_left_handed: Bool, action: @escaping () -> Void) -> some View {
     return VStack {
         Spacer()
 

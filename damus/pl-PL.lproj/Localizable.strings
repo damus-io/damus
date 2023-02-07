@@ -16,11 +16,10 @@
 /* Prefix character to username. */
 "@" = "@";
 
-/* Amount of time that has passed since reply quote event occurred.
-Abbreviated version of a nostr public key. */
+/* Abbreviated version of a nostr public key. */
 "%@" = "%@";
 
-/* Sentence composed of 2 variables to describe how many tip payments there are on a post. In source English, the first variable is the number of tip payments, and the second variable is 'Tip' or 'Tips'.
+/* Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
 Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
 "%@ %@" = "%@ %@";
 
@@ -36,7 +35,7 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Dawaj napiwki w reakcji na odpowiedzi znajomych i ciułaj satsy z Bitcoin⚡️, natywną walutą internetu.";
 
-/* Number of tip payments on a post.
+/* Number of zap payments on a post.
 Number of profiles a user is following. */
 "%lld" = "%lld";
 
@@ -45,6 +44,9 @@ Number of profiles a user is following. */
 
 /* Placeholder for event mention. */
 "< e >" = "< e >";
+
+/* No comment provided by engineer. */
+"⚡️ %@" = "⚡️ %@";
 
 /* Label to prompt for about text entry for user to describe about themself. */
 "About" = "O programie";
@@ -72,7 +74,7 @@ Number of profiles a user is following. */
 "Add all" = "Dodaj wszystkie";
 
 /* Label for section for adding a relay server. */
-"Add Relay" = "Dodaj serwer";
+"Add Relay" = "Dodaj przekaźnik";
 
 /* Any amount of sats */
 "Any" = "Dowolny";
@@ -143,7 +145,7 @@ Number of profiles a user is following. */
 "Clear" = "Wyczyść";
 
 /* Section title for clearing cached data. */
-"Clear Cache" = "Wyczyść pamięć podręczną";
+"Clear Cache" = "Pamięć podręczna";
 
 /* Label indicating that a user's key was copied. */
 "Copied" = "Skopiowano";
@@ -192,7 +194,7 @@ Number of profiles a user is following. */
 "Create Account" = "Utwórz konto";
 
 /* Title of alert prompting the user to create a new mutelist. */
-"Create new mutelist" = "Stwórz nową listę wyciszeń";
+"Create new mutelist" = "Tworzenie nowej listy zablokowanych";
 
 /* Example description about Bitcoin creator(s), Satoshi Nakamoto. */
 "Creator(s) of Bitcoin. Absolute legend." = "Twórca/y Bitcoina. Absolutna legenda.";
@@ -254,7 +256,7 @@ Number of profiles a user is following. */
 
 /* Text to indicate that the button next to it is in a state that indicates that it is in the process of following a profile.
 Part of a larger sentence to describe how many profiles a user is following. */
-"Following" = "Obserwowani";
+"Following" = "Obserwuje";
 
 /* Label to indicate that the user is in the process of following another user. */
 "Following..." = "Obserwowani...";
@@ -266,7 +268,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Global" = "Globalny";
 
 /* Navigation link to go to post referenced by hex code. */
-"Goto post %@" = "Idź do wpisu %@";
+"Goto post %@" = "Idź do postu %@";
 
 /* Navigation link to go to profile. */
 "Goto profile %@" = "Idź do profilu %@";
@@ -338,7 +340,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "NIP-05 Verification" = "Weryfikacja NIP-05";
 
 /* Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists. */
-"No block list found, create a new one? This will overwrite any previous block lists." = "Nie znaleziony listy zablokowanych, stworzyć nową? To nadpisze poprzednie listy.";
+"No block list found, create a new one? This will overwrite any previous block lists." = "Nie znaleziono listy zablokowanych, stworzyć nową? Nadpisać poprzednie listy.";
 
 /* No search results. */
 "none" = "brak wyników";
@@ -374,16 +376,16 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Phoenix" = "Phoenix";
 
 /* Button to post a note. */
-"Post" = "Wpis";
+"Post" = "Napisz post";
 
 /* Text to indicate that what is being shown is a post from a user who has been blocked. */
-"Post from a user you've blocked" = "Wpis od użytkownika, którego zablokowałeś";
+"Post from a user you've blocked" = "Post od użytkownika, którego zablokowałeś";
 
 /* Label for filter for seeing only posts (instead of posts and replies). */
-"Posts" = "Wpisy";
+"Posts" = "Posty";
 
 /* Label for filter for seeing posts and replies (instead of only posts). */
-"Posts & Replies" = "Wpisy i odpowiedzi";
+"Posts & Replies" = "Posty i odpowiedzi";
 
 /* Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading. */
 "Private" = "Prywatność";
@@ -398,7 +400,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Profile Picture" = "Zdjęcie profilowe";
 
 /* Section title for the user's public account ID. */
-"Public Account ID" = "ID publicznego konta";
+"Public Account ID" = "Publiczny ID konta";
 
 /* Label indicating that the text is a user's public account key. */
 "Public key" = "Klucz publiczny";
@@ -413,20 +415,20 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Reactions" = "Reakcje";
 
 /* Section title for recommend relay servers that could be added as part of configuration */
-"Recommended Relays" = "Serwery rekomendowane";
+"Recommended Relays" = "Polecane przekaźniki";
 
 /* Button to reject the end user license agreement, which disallows the user from being let into the app. */
 "Reject" = "Odrzuć";
 
 /* Text field for relay server. Used for testing purposes. */
-"Relay" = "Serwer";
+"Relay" = "Przekaźnik";
 
 /* Sidebar menu label for Relay servers view
    Sidebar menu label for Relays view. */
-"Relays" = "Serwery";
+"Relays" = "Przekaźniki";
 
 /* Description of what was done as a result of sending a report to relay servers. */
-"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "Serwery zostały powiadomione a klienci będą mogli użyć tej informacji do filtrowania treści. Dziękuję!";
+"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "Przekaźniki zostały powiadomione a klienci będą mogli użyć tej informacji do filtrowania treści. Dziękuję!";
 
 /* Button label to remove all participants from a note reply. */
 "Remove all" = "Usuń wszystkie";
@@ -485,7 +487,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Search hashtag: #%@" = "Szukaj hasztag: #%@";
 
 /* Placeholder text to prompt entry of search query. */
-"Search..." = "Szukanie...";
+"Search..." = "Szukaj..";
 
 /* Section title for user's secret account login key. */
 "Secret Account Login Key" = "Tajny klucz logowania do konta";
@@ -552,7 +554,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Translate Note" = "Tłumacz wpis";
 
 /* Button to indicate that the note has been translated from a different language. */
-"Translated from (languageName!)" = "Tłumaczenie z (languageName!)";
+"Translated from (lang)" = "Tłumaczenie z (lang)";
 
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "Napisz swój post tutaj...";
@@ -576,7 +578,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "URL" = "URL";
 
 /* Alert message to indicate the user has been blocked */
-"User blocked" = "Użytkownik zablokowany";
+"User blocked" = "Blokowanie użytkownika";
 
 /* Alert message that informs a user was blocked. */
 "User has been blocked" = "Użytkownik został zablokowany";
@@ -607,7 +609,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "What do you want to report?" = "Co chcesz zgłosić?";
 
 /* Placeholder example for relay server address. */
-"wss://some.relay.com" = "wss://jakis.relay.com";
+"wss://some.relay.com" = "wss://jakis.przekaznik.com";
 
 /* Text of button that confirms to overwrite the existing mutelist. */
 "Yes, Overwrite" = "Tak, nadpisz";
@@ -619,7 +621,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Your Name" = "Twoje Imię";
 
 /* Footer text to inform user what will happen when the report is submitted. */
-"Your report will be sent to the relays you are connected to" = "Twoje zgłoszenie zostanie wysłane na serwery, do których jesteś podłączony";
+"Your report will be sent to the relays you are connected to" = "Twoje zgłoszenie zostanie wysłane do przekaźników, do których jesteś podłączony";
 
 /* Dropdown option label for Lightning wallet, Zebedee. */
 "Zebedee" = "Zebedee";

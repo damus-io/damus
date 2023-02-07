@@ -17,6 +17,7 @@ let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Tex
 struct PostView: View {
     @State var post: String = ""
     @FocusState var focus: Bool
+    @State var showPrivateKeyWarning: Bool = false
     
     let replying_to: NostrEvent?
     let references: [ReferencedId]
@@ -65,7 +66,11 @@ struct PostView: View {
 
                 if !is_post_empty {
                     Button(NSLocalizedString("Post", comment: "Button to post a note.")) {
-                        self.send_post()
+                        showPrivateKeyWarning = contentContainsPrivateKey(self.post)
+
+                        if !showPrivateKeyWarning {
+                            self.send_post()
+                        }
                     }
                 }
             }
@@ -99,6 +104,14 @@ struct PostView: View {
             }
         }
         .padding()
+        .alert(NSLocalizedString("Note contains \"nsec1\" private key. Are you sure?", comment: "Alert user that they might be attempting to paste a private key and ask them to confirm."), isPresented: $showPrivateKeyWarning, actions: {
+            Button(NSLocalizedString("No", comment: "Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key."), role: .cancel) {
+                showPrivateKeyWarning = false
+            }
+            Button(NSLocalizedString("Yes, Post with Private Key", comment: "Button to proceed with posting a note even though it looks like they might be posting a private key."), role: .destructive) {
+                self.send_post()
+            }
+        })
     }
 }
 

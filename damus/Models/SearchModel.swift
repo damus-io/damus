@@ -15,12 +15,18 @@ class SearchModel: ObservableObject {
     
     let pool: RelayPool
     var search: NostrFilter
+    let contacts: Contacts
     let sub_id = UUID().description
     let limit: UInt32 = 500
     
-    init(pool: RelayPool, search: NostrFilter) {
+    init(contacts: Contacts, pool: RelayPool, search: NostrFilter) {
+        self.contacts = contacts
         self.pool = pool
         self.search = search
+    }
+    
+    func filter_muted()  {
+        self.events = self.events.filter { should_show_event(contacts: contacts, ev: $0) }
     }
     
     func subscribe() {
@@ -44,6 +50,10 @@ class SearchModel: ObservableObject {
     
     func add_event(_ ev: NostrEvent) {
         if !event_matches_filter(ev, filter: search) {
+            return
+        }
+        
+        guard should_show_event(contacts: contacts, ev: ev) else {
             return
         }
         
