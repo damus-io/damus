@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 @main
 struct damusApp: App {
     var body: some Scene {

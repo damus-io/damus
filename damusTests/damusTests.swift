@@ -88,6 +88,24 @@ class damusTests: XCTestCase {
         XCTAssertEqual(parsed, expected)
     }
     
+    func testSaveRelayFilters() {
+        var filters = Set<RelayFilter>()
+        
+        let filter1 = RelayFilter(timeline: .search, relay_id: "wss://abc.com")
+        let filter2 = RelayFilter(timeline: .home, relay_id: "wss://abc.com")
+        filters.insert(filter1)
+        filters.insert(filter2)
+        
+        let pubkey = "test_pubkey"
+        save_relay_filters(pubkey, filters: filters)
+        let loaded_filters = load_relay_filters(pubkey)
+        
+        XCTAssertEqual(loaded_filters.count, 2)
+        XCTAssertTrue(loaded_filters.contains(filter1))
+        XCTAssertTrue(loaded_filters.contains(filter2))
+        XCTAssertEqual(filters, loaded_filters)
+    }
+    
     func testParseUrl() {
         let parsed = parse_mentions(content: "a https://jb55.com b", tags: [])
 
