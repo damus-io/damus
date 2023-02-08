@@ -19,7 +19,7 @@ class DirectMessageModel: ObservableObject {
     
     func determine_is_request() -> Bool {
         for event in events {
-            if event.pubkey == our_pubkey {
+            if event.pubkey != our_pubkey {
                 return false
             }
         }
