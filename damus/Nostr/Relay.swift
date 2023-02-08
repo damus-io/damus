@@ -24,14 +24,14 @@ enum RelayFlags: Int {
     case broken = 1
 }
 
-struct RelayNIP11: Codable {
-    var name = "No data available"
-    var description = "No data available"
-    var pubkey = "No data available"
-    var contact = "No data available"
-    var supported_nips: [Int] = []
-    var software = "No data available"
-    var version = "No data available"
+struct RelayMetadata: Codable {
+    let name: String?
+    let description: String?
+    let pubkey: String?
+    let contact: String?
+    let supported_nips: [Int]?
+    let software: String?
+    let version: String?
 }
 
 class Relay: Identifiable {

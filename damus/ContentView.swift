@@ -138,6 +138,12 @@ struct ContentView: View {
         }
     }
     
+    func popToRoot() {
+        profile_open = false
+        thread_open = false
+        search_open = false
+    }
+    
     func MainContent(damus: DamusState) -> some View {
         VStack {
             NavigationLink(destination: MaybeProfileView, isActive: $profile_open) {
@@ -520,6 +526,7 @@ struct ContentView: View {
     }
     
     func switch_timeline(_ timeline: Timeline) {
+        self.popToRoot()
         NotificationCenter.default.post(name: .switched_timeline, object: timeline)
         
         if timeline == self.selected_timeline {

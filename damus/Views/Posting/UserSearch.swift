@@ -57,8 +57,10 @@ struct UserSearch_Previews: PreviewProvider {
 }
 
 
-func search_users(profiles: Profiles, tags: [[String]], search: String) -> [SearchedUser] {
+func search_users(profiles: Profiles, tags: [[String]], search _search: String) -> [SearchedUser] {
     var seen_user = Set<String>()
+    let search = _search.lowercased()
+    
     return tags.reduce(into: Array<SearchedUser>()) { arr, tag in
         guard tag.count >= 2 && tag[0] == "p" else {
             return
@@ -77,7 +79,7 @@ func search_users(profiles: Profiles, tags: [[String]], search: String) -> [Sear
         
         let profile = profiles.lookup(id: pubkey)
         
-        guard ((petname?.hasPrefix(search) ?? false) || (profile?.name?.hasPrefix(search) ?? false)) else {
+        guard ((petname?.lowercased().hasPrefix(search) ?? false) || (profile?.name?.lowercased().hasPrefix(search) ?? false)) else {
             return
         }
         
