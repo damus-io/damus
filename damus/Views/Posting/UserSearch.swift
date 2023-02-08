@@ -77,7 +77,7 @@ func search_users(profiles: Profiles, tags: [[String]], search: String) -> [Sear
         
         let profile = profiles.lookup(id: pubkey)
         
-        guard ((petname?.hasPrefix(search) ?? false) || (profile?.name?.hasPrefix(search) ?? false)) else {
+        guard ((petname?.lowercased().hasPrefix(search.lowercased()) ?? false) || (profile?.name?.lowercased().hasPrefix(search.lowercased()) ?? false)) else {
             return
         }
         
