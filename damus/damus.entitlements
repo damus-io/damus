@@ -7,6 +7,7 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:damus.io</string>
+		<string>webcredentials:damus.io</string>
 	</array>
 	<key>keychain-access-groups</key>
 	<array>
