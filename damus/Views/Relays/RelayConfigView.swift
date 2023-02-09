@@ -81,6 +81,8 @@ struct RelayConfigView: View {
                 if is_show_relay_explanation {
                     relayExplanationView
                 }
+            } header: {
+                relay
             }
 
             Section {
@@ -152,7 +154,16 @@ extension RelayConfigView {
             Text("What’s a relay?")
                 .font(.system(size: 17, weight: .bold, design: .default))
 
-            Text("It’s a server that you send notes to and receive notes from. Those numbers you tapped on represent the ones you’re currently connected to.")
+            Text("It’s a server that you send notes to and receive notes from.")
+                .font(.system(size: 15, weight: .medium, design: .default))
+                .fixedSize(horizontal: false, vertical: true)
+
+            Spacer(minLength: 3)
+
+            Text("What are the numbers in the top right?")
+                .font(.system(size: 17, weight: .bold, design: .default))
+
+            Text("The top number displays the number of relays you are connected to. The bottom number shows the count of all the relays you want to connect to.")
                 .font(.system(size: 15, weight: .medium, design: .default))
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -184,6 +195,10 @@ extension RelayConfigView {
         }
         .buttonStyle(.borderless)
         .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 20))
+    }
+
+    private var relay: some View {
+        Text("12/14")
     }
 }
 
