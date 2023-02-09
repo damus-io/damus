@@ -34,9 +34,13 @@ struct RelayView: View {
             Circle()
                 .frame(width: 8.0, height: 8.0)
                 .foregroundColor(conn_color)
-            NavigationLink {
-                RelayDetailView(state: state, relay: relay, conn_color: conn_color)
-            } label: {
+            if let meta = state.relay_metadata.lookup(relay_id: relay) {
+                NavigationLink {
+                    RelayDetailView(state: state, relay: relay, nip11: meta, conn_color: conn_color)
+                } label: {
+                    Text(relay)
+                }
+            } else {
                 Text(relay)
             }
         }
@@ -79,7 +83,7 @@ struct RelayView: View {
                 return
             }
             
-            process_contact_event(pool: state.pool, contacts: state.contacts, pubkey: state.pubkey, ev: new_ev)
+            process_contact_event(state: state, ev: new_ev)
             state.pool.send(.event(new_ev))
         } label: {
             Label(NSLocalizedString("Delete", comment: "Button to delete a relay server that the user connects to."), systemImage: "trash")

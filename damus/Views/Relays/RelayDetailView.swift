@@ -10,10 +10,9 @@ import SwiftUI
 struct RelayDetailView: View {
     let state: DamusState
     let relay: String
+    let nip11: RelayMetadata
     
     @State private var errorString: String?
-    @State private var nip11: RelayMetadata?
-    
     @State var conn_color: Color
     
     @Environment(\.dismiss) var dismiss
@@ -69,39 +68,7 @@ struct RelayDetailView: View {
         .onReceive(handle_notify(.switched_timeline)) { notif in
             dismiss()
         }
-        .navigationTitle(nip11?.name ?? "")
-        .task {
-            var urlString = relay.replacingOccurrences(of: "wss://", with: "https://")
-            urlString = urlString.replacingOccurrences(of: "ws://", with: "http://")
-            
-            guard let url = URL(string: urlString) else {
-                return
-            }
-            
-            var request = URLRequest(url: url)
-            request.setValue("application/nostr+json", forHTTPHeaderField: "Accept")
-            
-            var res: (Data, URLResponse)? = nil
-            
-            do {
-                res = try await URLSession.shared.data(for: request)
-            } catch {
-                errorString = error.localizedDescription
-                return
-            }
-            
-            guard let data = res?.0 else {
-                errorString = "Relay not responding to metadata request"
-                return
-            }
-            
-            do {
-                let nip11 = try JSONDecoder().decode(RelayMetadata.self, from: data)
-                self.nip11 = nip11
-            } catch {
-                errorString = error.localizedDescription
-            }
-        }
+        .navigationTitle(nip11.name ?? "")
     }
     
     private func nipsList(nips: [Int]) -> AttributedString {
@@ -124,6 +91,7 @@ struct RelayDetailView: View {
 
 struct RelayDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        RelayDetailView(state: test_damus_state(), relay: "wss://nostr.klabo.blog", conn_color: .green)
+        let metadata = RelayMetadata(name: "name", description: "desc", pubkey: "pubkey", contact: "contact", supported_nips: [1,2,3], software: "software", version: "version")
+        RelayDetailView(state: test_damus_state(), relay: "relay", nip11: metadata, conn_color: .green)
     }
 }

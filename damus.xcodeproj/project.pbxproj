@@ -168,6 +168,7 @@
 		4CE6DF1227F7A2B300C66700 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = 4CE6DF1127F7A2B300C66700 /* Starscream */; };
 		4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */; };
 		4CE8794829941DA700F758CC /* RelayFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8794729941DA700F758CC /* RelayFilters.swift */; };
+		4CE8794C2995B59E00F758CC /* RelayMetadatas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8794B2995B59E00F758CC /* RelayMetadatas.swift */; };
 		4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */; };
 		4CEE2AF1280B216B00AB5EEF /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */; };
 		4CEE2AF3280B25C500AB5EEF /* ProfilePicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF2280B25C500AB5EEF /* ProfilePicView.swift */; };
@@ -459,6 +460,7 @@
 		4CE6DF0327F7A08200C66700 /* damusUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = damusUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayConnection.swift; sourceTree = "<group>"; };
 		4CE8794729941DA700F758CC /* RelayFilters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayFilters.swift; sourceTree = "<group>"; };
+		4CE8794B2995B59E00F758CC /* RelayMetadatas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayMetadatas.swift; sourceTree = "<group>"; };
 		4CEE2AE72804F57C00AB5EEF /* libsecp256k1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libsecp256k1.a; sourceTree = "<group>"; };
 		4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrRequest.swift; sourceTree = "<group>"; };
 		4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
@@ -732,6 +734,7 @@
 		4C7FF7D628233637009601DB /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				4CE879492995B58700F758CC /* Relays */,
 				4CF0ABEA29844B2F00D66079 /* AnyCodable */,
 				4CC7AAE6297EFA7B00430951 /* Zap.swift */,
 				4C3A1D322960DB0500558C0F /* Markdown.swift */,
@@ -757,7 +760,6 @@
 				4CB883A72975FC1800DC99E7 /* Zaps.swift */,
 				4CB883B5297730E400DC99E7 /* LNUrls.swift */,
 				3AB72AB8298ECF30004BB58C /* Translator.swift */,
-				4CE8794729941DA700F758CC /* RelayFilters.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -915,6 +917,15 @@
 				4CE6DF0327F7A08200C66700 /* damusUITestsLaunchTests.swift */,
 			);
 			path = damusUITests;
+			sourceTree = "<group>";
+		};
+		4CE879492995B58700F758CC /* Relays */ = {
+			isa = PBXGroup;
+			children = (
+				4CE8794729941DA700F758CC /* RelayFilters.swift */,
+				4CE8794B2995B59E00F758CC /* RelayMetadatas.swift */,
+			);
+			path = Relays;
 			sourceTree = "<group>";
 		};
 		4CEE2AE62804F57B00AB5EEF /* Frameworks */ = {
@@ -1129,6 +1140,7 @@
 				4C285C86283892E7008A31F1 /* CreateAccountModel.swift in Sources */,
 				4C64987C286D03E000EAE2B3 /* DirectMessagesView.swift in Sources */,
 				7C902AE32981D55B002AB16E /* ZoomableScrollView.swift in Sources */,
+				4CE8794C2995B59E00F758CC /* RelayMetadatas.swift in Sources */,
 				4C363A8C28236B92006E126D /* PubkeyView.swift in Sources */,
 				4C5C7E68284ED36500A22DF5 /* SearchHomeModel.swift in Sources */,
 				4C75EFB728049D990006080F /* RelayPool.swift in Sources */,

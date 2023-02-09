@@ -67,7 +67,7 @@ struct RelayConfigView: View {
                     return
                 }
                 
-                process_contact_event(pool: state.pool, contacts: state.contacts, pubkey: state.pubkey, ev: ev)
+                process_contact_event(state: state, ev: ev)
                 
                 state.pool.send(.event(new_ev))
             }

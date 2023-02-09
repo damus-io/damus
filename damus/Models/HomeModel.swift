@@ -193,7 +193,7 @@ class HomeModel: ObservableObject {
     }
 
     func handle_contact_event(sub_id: String, relay_id: String, ev: NostrEvent) {
-        process_contact_event(pool: damus_state.pool, contacts: damus_state.contacts, pubkey: damus_state.pubkey, ev: ev)
+        process_contact_event(state: self.damus_state, ev: ev)
 
         if sub_id == init_subid {
             pool.send(.unsubscribe(init_subid), to: [relay_id])
@@ -643,31 +643,31 @@ func robohash(_ pk: String) -> String {
     return "https://robohash.org/" + pk
 }
 
-func load_our_stuff(pool: RelayPool, contacts: Contacts, pubkey: String, ev: NostrEvent) {
-    guard ev.pubkey == pubkey else {
+func load_our_stuff(state: DamusState, ev: NostrEvent) {
+    guard ev.pubkey == state.pubkey else {
         return
     }
     
     // only use new stuff
-    if let current_ev = contacts.event {
+    if let current_ev = state.contacts.event {
         guard ev.created_at > current_ev.created_at else {
             return
         }
     }
     
-    let m_old_ev = contacts.event
-    contacts.event = ev
+    let m_old_ev = state.contacts.event
+    state.contacts.event = ev
 
-    load_our_contacts(contacts: contacts, our_pubkey: pubkey, m_old_ev: m_old_ev, ev: ev)
-    load_our_relays(contacts: contacts, our_pubkey: pubkey, pool: pool, m_old_ev: m_old_ev, ev: ev)
+    load_our_contacts(contacts: state.contacts, our_pubkey: state.pubkey, m_old_ev: m_old_ev, ev: ev)
+    load_our_relays(state: state, m_old_ev: m_old_ev, ev: ev)
 }
 
-func process_contact_event(pool: RelayPool, contacts: Contacts, pubkey: String, ev: NostrEvent) {
-    load_our_stuff(pool: pool, contacts: contacts, pubkey: pubkey, ev: ev)
-    add_contact_if_friend(contacts: contacts, ev: ev)
+func process_contact_event(state: DamusState, ev: NostrEvent) {
+    load_our_stuff(state: state, ev: ev)
+    add_contact_if_friend(contacts: state.contacts, ev: ev)
 }
 
-func load_our_relays(contacts: Contacts, our_pubkey: String, pool: RelayPool, m_old_ev: NostrEvent?, ev: NostrEvent) {
+func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     let bootstrap_dict: [String: RelayInfo] = [:]
     let old_decoded = m_old_ev.flatMap { decode_json_relays($0.content) } ?? BOOTSTRAP_RELAYS.reduce(into: bootstrap_dict) { (d, r) in
         d[r] = .rw
@@ -695,16 +695,61 @@ func load_our_relays(contacts: Contacts, our_pubkey: String, pool: RelayPool, m_
         changed = true
         if new.contains(d) {
             if let url = URL(string: d) {
-                try? pool.add_relay(url, info: decoded[d] ?? .rw)
+                add_new_relay(url: url, info: decoded[d] ?? .rw, metadatas: state.relay_metadata, pool: state.pool)
             }
         } else {
-            pool.remove_relay(d)
+            state.pool.remove_relay(d)
         }
     }
     
     if changed {
         notify(.relays_changed, ())
     }
+}
+
+func add_new_relay(url: URL, info: RelayInfo, metadatas: RelayMetadatas, pool: RelayPool) {
+    try? pool.add_relay(url, info: info)
+    
+    let relay_id = url.absoluteString
+    guard metadatas.lookup(relay_id: relay_id) == nil else {
+        return
+    }
+    
+    Task.detached(priority: .background) {
+        guard let meta = try? await fetch_relay_metadata(relay_id: relay_id) else {
+            return
+        }
+        
+        DispatchQueue.main.async {
+            metadatas.insert(relay_id: relay_id, metadata: meta)
+        }
+    }
+}
+
+func fetch_relay_metadata(relay_id: String) async throws -> RelayMetadata? {
+    var urlString = relay_id.replacingOccurrences(of: "wss://", with: "https://")
+    urlString = urlString.replacingOccurrences(of: "ws://", with: "http://")
+    
+    guard let url = URL(string: urlString) else {
+        return nil
+    }
+    
+    var request = URLRequest(url: url)
+    request.setValue("application/nostr+json", forHTTPHeaderField: "Accept")
+    
+    var res: (Data, URLResponse)? = nil
+    
+    res = try await URLSession.shared.data(for: request)
+    
+    guard let data = res?.0 else {
+        return nil
+    }
+    
+    let nip11 = try JSONDecoder().decode(RelayMetadata.self, from: data)
+    return nip11
+}
+
+func process_relay_metadata() {
 }
 
 func handle_incoming_dm(contacts: Contacts, prev_events: NewEventsBits, dms: DirectMessagesModel, our_pubkey: String, ev: NostrEvent) -> NewEventsBits? {

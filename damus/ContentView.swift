@@ -287,14 +287,17 @@ struct ContentView: View {
                                                 }
                                             }
                                             
-                                            Button(action: {
-                                                //isFilterVisible.toggle()
-                                                self.active_sheet = .filter
-                                            }) {
-                                                // checklist, checklist.checked, lisdt.bullet, list.bullet.circle, line.3.horizontal.decrease...,  line.3.horizontail.decrease
-                                                Label("Filter", systemImage: "line.3.horizontal.decrease")
-                                                    .foregroundColor(.gray)
-                                                    //.contentShape(Rectangle())
+                                            // maybe expand this to other timelines in the future
+                                            if selected_timeline == .search {
+                                                Button(action: {
+                                                    //isFilterVisible.toggle()
+                                                    self.active_sheet = .filter
+                                                }) {
+                                                    // checklist, checklist.checked, lisdt.bullet, list.bullet.circle, line.3.horizontal.decrease...,  line.3.horizontail.decrease
+                                                    Label("Filter", systemImage: "line.3.horizontal.decrease")
+                                                        .foregroundColor(.gray)
+                                                        //.contentShape(Rectangle())
+                                                }
                                             }
                                         }
                                     }
@@ -585,8 +588,12 @@ struct ContentView: View {
 
     func connect() {
         let pool = RelayPool()
+        let metadatas = RelayMetadatas()
         
         for relay in BOOTSTRAP_RELAYS {
+            if let url = URL(string: relay) {
+                add_new_relay(url: url, info: .rw, metadatas: metadatas, pool: pool)
+            }
             add_relay(pool, relay)
         }
         
@@ -603,7 +610,8 @@ struct ContentView: View {
                                 zaps: Zaps(our_pubkey: pubkey),
                                 lnurls: LNUrls(),
                                 settings: UserSettingsStore(),
-                                relay_filters: RelayFilters(our_pubkey: pubkey)
+                                relay_filters: RelayFilters(our_pubkey: pubkey),
+                                relay_metadata: metadatas
         )
         home.damus_state = self.damus_state!
         

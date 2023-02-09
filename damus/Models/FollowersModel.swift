@@ -51,11 +51,7 @@ class FollowersModel: ObservableObject {
         if has_contact.contains(ev.pubkey) {
             return
         }
-        process_contact_event(
-            pool: damus_state.pool,
-            contacts: damus_state.contacts,
-            pubkey: damus_state.pubkey, ev: ev
-        )
+        process_contact_event(state: damus_state, ev: ev)
         contacts?.append(ev.pubkey)
         has_contact.insert(ev.pubkey)
     }
