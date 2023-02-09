@@ -10,7 +10,7 @@ import Foundation
 class DirectMessagesModel: ObservableObject {
     @Published var dms: [(String, DirectMessageModel)] = []
     @Published var loading: Bool = false
-    let our_pubkey: String
+    var our_pubkey: String
     
     init(our_pubkey: String) {
         self.our_pubkey = our_pubkey

@@ -31,7 +31,11 @@ struct NewEventsBits {
 }
 
 class HomeModel: ObservableObject {
-    var damus_state: DamusState
+    var damus_state: DamusState {
+        didSet {
+            dms.our_pubkey = damus_state.pubkey
+        }
+    }
 
     var has_event: [String: Set<String>] = [:]
     var deleted_events: Set<String> = Set()
