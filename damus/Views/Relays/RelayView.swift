@@ -30,14 +30,21 @@ struct RelayView: View {
     }
     
     var body: some View {
-        HStack {
-            Circle()
-                .frame(width: 8.0, height: 8.0)
-                .foregroundColor(conn_color)
-            NavigationLink {
+        ZStack {
+            NavigationLink ( destination:
                 RelayDetailView(state: state, relay: relay, conn_color: conn_color)
-            } label: {
+            ){
+                EmptyView()
+            }
+            .opacity(0.0)
+
+            HStack {
+                Image(systemName: "network")
+                    .foregroundColor(conn_color)
                 Text(relay)
+                Spacer()
+                Image(systemName: "info.circle")
+                    .foregroundColor(Color.accentColor)
             }
         }
         .onReceive(timer) { _ in
