@@ -10,14 +10,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>%d other notes</string>
-			<key>many</key>
-			<string>%d other notes</string>
-			<key>one</key>
-			<string>%d inna notatka</string>
 			<key>other</key>
-			<string>%d inne notatki</string>
+			<string>%d その他のNote</string>
 		</dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>··· %#@NOTES@ ···</string>
@@ -30,14 +24,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>Followers</string>
-			<key>many</key>
-			<string>Followers</string>
-			<key>one</key>
-			<string>Obserwujący</string>
 			<key>other</key>
-			<string>Obserwujący</string>
+			<string>フォロワー</string>
 		</dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@FOLLOWERS@</string>
@@ -52,14 +40,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>Reactions</string>
-			<key>many</key>
-			<string>Reactions</string>
-			<key>one</key>
-			<string>Reakcja</string>
 			<key>other</key>
-			<string>Reakcje</string>
+			<string>リアクション</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -72,34 +54,22 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>Relays</string>
-			<key>many</key>
-			<string>Relays</string>
-			<key>one</key>
-			<string>Przekaźnik</string>
 			<key>other</key>
-			<string>Przekaźników</string>
+			<string>リレー</string>
 		</dict>
 	</dict>
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>W odpowiedzi do %@%#@OTHERS@</string>
+		<string>%@%#@OTHERS@ にリプライ</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string> &amp; %d others</string>
-			<key>many</key>
-			<string> &amp; %d others</string>
-			<key>one</key>
-			<string> i %d innej osobie</string>
 			<key>other</key>
-			<string> i %d innym osobom</string>
+			<string> &amp; %d その他</string>
 			<key>zero</key>
 			<string></string>
 		</dict>
@@ -107,21 +77,15 @@
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>W odpowiedzi do %@, %@%#@OTHERS@</string>
+		<string>%@, %@%#@OTHERS@ にリプライ</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string> &amp; %d others</string>
-			<key>many</key>
-			<string> &amp; %d others</string>
-			<key>one</key>
-			<string> i %d innej osoba</string>
 			<key>other</key>
-			<string> i %d innym osobom</string>
+			<string> &amp; %d その他</string>
 			<key>zero</key>
 			<string></string>
 		</dict>
@@ -136,14 +100,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>Reposts</string>
-			<key>many</key>
-			<string>Reposts</string>
-			<key>one</key>
-			<string>Podany dalej</string>
 			<key>other</key>
-			<string>Podane dalej</string>
+			<string>リポスト</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -156,14 +114,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
-			<key>few</key>
-			<string>%2$@ sats</string>
-			<key>many</key>
-			<string>%2$@ sats</string>
-			<key>one</key>
-			<string>%2$@ sat</string>
 			<key>other</key>
-			<string>%2$@ satów</string>
+			<string>%2$@ sats</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
@@ -176,14 +128,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>Zaps</string>
-			<key>many</key>
-			<string>Zaps</string>
-			<key>one</key>
-			<string>Zap</string>
 			<key>other</key>
-			<string>Zapów</string>
+			<string>Zaps</string>
 		</dict>
 	</dict>
 </dict>

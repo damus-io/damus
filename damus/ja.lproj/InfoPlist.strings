@@ -1,0 +1,12 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Damus";
+
+/* Bundle name */
+"CFBundleName" = "damus";
+
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "秘密鍵にアクセスするためのローカル認証";
+
+/* Privacy - Photo Library Additions Usage Description */
+"NSPhotoLibraryAddUsageDescription" = "Damusが画像を保存するためにあなたの写真にアクセスすることを許可する";
+

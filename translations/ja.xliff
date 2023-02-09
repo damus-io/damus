@@ -1,5 +1,5 @@
 <?xml version="1.0" ?><xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
-  <file original="damus/en-US.lproj/InfoPlist.strings" source-language="en-US" target-language="de" datatype="plaintext">
+  <file original="damus/en-US.lproj/InfoPlist.strings" source-language="en-US" target-language="ja" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.2" build-num="14C18"/>
     </header>
@@ -18,19 +18,19 @@
       </trans-unit>
       <trans-unit id="NSFaceIDUsageDescription" xml:space="preserve">
         <source>Local authentication to access private key</source>
-        <target>Lokale Authentifizierung für den Zugriff auf den privaten Schlüssel</target>
+        <target>秘密鍵にアクセスするためのローカル認証</target>
         
         <note>Privacy - Face ID Usage Description</note>
       </trans-unit>
       <trans-unit id="NSPhotoLibraryAddUsageDescription" xml:space="preserve">
         <source>Granting Damus access to your photos allows you to save images.</source>
-        <target>Zum Speichern von Bildern braucht Damus Zugriff auf deine Fotos.</target>
+        <target>Damusが画像を保存するためにあなたの写真にアクセスすることを許可する</target>
         
         <note>Privacy - Photo Library Additions Usage Description</note>
       </trans-unit>
     </body>
   </file>
-  <file original="damus/en-US.lproj/Localizable.strings" source-language="en-US" target-language="de" datatype="plaintext">
+  <file original="damus/en-US.lproj/Localizable.strings" source-language="en-US" target-language="ja" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.2" build-num="14C18"/>
     </header>
@@ -55,25 +55,25 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
       </trans-unit>
       <trans-unit id="%@ has been blocked" xml:space="preserve">
         <source>%@ has been blocked</source>
-        <target>%@ wurde blockiert</target>
+        <target>%@ はブロックされています</target>
         
         <note>Alert message that informs a user was blocked.</note>
       </trans-unit>
       <trans-unit id="%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." xml:space="preserve">
         <source>%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction.</source>
-        <target>%@. Du brauchst für ein Konto keine Telefonnummer, E-Mail-Adresse oder Namen. Fang ganz reibungslos einfach an.</target>
+        <target>%@. アカウントの作成には、電話番号もメールアドレスも名前も必要ありません。すぐに始められます。</target>
         
         <note>Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string.</note>
       </trans-unit>
       <trans-unit id="%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" xml:space="preserve">
         <source>%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs</source>
-        <target>%@. Ende-zu-Ende-verschlüsselter, privater Nachrichtenaustausch. Halte Big Tech aus deinen PNs heraus.</target>
+        <target>%@. End-to-Endで暗号化されたプライベートなメッセージ。 あなたのDMに巨大IT企業を近づけません。</target>
         
         <note>Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string.</note>
       </trans-unit>
       <trans-unit id="%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." xml:space="preserve">
         <source>%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet.</source>
-        <target>%@. Belohne Beiträge deiner Freunde und sammle Sats mit Bitcoin⚡️, der eigenen Währung des Internets.</target>
+        <target>%@. 友達の投稿にチップを送ろう。インターネットのネイティブ通貨:ビットコイン⚡️で。</target>
         
         <note>Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string.</note>
       </trans-unit>
@@ -92,25 +92,25 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="'%@' at '%@' will be used for verification" xml:space="preserve">
         <source>'%@' at '%@' will be used for verification</source>
-        <target>'%@' bei '%@' wird zur Verifizierung benutzt werden.</target>
+        <target>'%@' at '%@' は認証に使用されています</target>
         
         <note>Description of how the nip05 identifier would be used for verification.</note>
       </trans-unit>
       <trans-unit id="'%@' is an invalid NIP-05 identifier. It should look like an email." xml:space="preserve">
         <source>'%@' is an invalid NIP-05 identifier. It should look like an email.</source>
-        <target>%@' ist kein gülter NIP-05 identifier. Dieser sollte wie eine email aussehen. </target>
+        <target>'%@' は無効なNIP-05識別子です。emailのような見た目であるべきです。</target>
         
         <note>Description of why the nip05 identifier is invalid.</note>
       </trans-unit>
       <trans-unit id="(Profile.displayName(profile: profile, pubkey: whos))'s Followers" xml:space="preserve">
         <source>(Profile.displayName(profile: profile, pubkey: whos))'s Followers</source>
-        <target>Follower von (Profile.displayName(profile: profile, pubkey: whos))</target>
+        <target>(Profile.displayName(profile: profile, pubkey: whos))のフォロワー</target>
         
         <note>Navigation bar title for view that shows who is following a user.</note>
       </trans-unit>
       <trans-unit id="(who) following" xml:space="preserve">
         <source>(who) following</source>
-        <target>(who) folgt</target>
+        <target>(who) がフォロー中</target>
         
         <note>Navigation bar title for view that shows who a user is following.</note>
       </trans-unit>
@@ -128,98 +128,98 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="API Key (optional)" xml:space="preserve">
         <source>API Key (optional)</source>
-        <target>API Schlüssel (optional)</target>
+        <target>APIキー (任意)</target>
         
         <note>Prompt for optional entry of API Key to use translation server.</note>
       </trans-unit>
       <trans-unit id="API Key (required)" xml:space="preserve">
         <source>API Key (required)</source>
-        <target>API-Schlüssel (benötigt)</target>
+        <target>APIキー (必須)</target>
         
         <note>Prompt for required entry of API Key to use translation server.</note>
       </trans-unit>
       <trans-unit id="About" xml:space="preserve">
         <source>About</source>
-        <target>Über</target>
+        <target>自己紹介</target>
         
         <note>Label to prompt for about text entry for user to describe about themself.</note>
       </trans-unit>
       <trans-unit id="About Me" xml:space="preserve">
         <source>About Me</source>
-        <target>Über mich</target>
+        <target>自己紹介</target>
         
         <note>Label for About Me section of user profile form.</note>
       </trans-unit>
       <trans-unit id="Absolute Boss" xml:space="preserve">
         <source>Absolute Boss</source>
-        <target>Absoluter Macher</target>
+        <target>絶対的なボス</target>
         
         <note>Placeholder text for About Me description.</note>
       </trans-unit>
       <trans-unit id="Accept" xml:space="preserve">
         <source>Accept</source>
-        <target>Zustimmen</target>
+        <target>許可</target>
         
         <note>Button to accept the end user license agreement before being allowed into the app.</note>
       </trans-unit>
       <trans-unit id="Account ID" xml:space="preserve">
         <source>Account ID</source>
-        <target>Konto-ID</target>
+        <target>アカウントID</target>
         
         <note>Label to indicate the public ID of the account.</note>
       </trans-unit>
       <trans-unit id="Actions" xml:space="preserve">
         <source>Actions</source>
-        <target>Aktionen</target>
+        <target>アクション</target>
         
         <note>Title for confirmation dialog to either share, report, or block a profile.</note>
       </trans-unit>
       <trans-unit id="Add" xml:space="preserve">
         <source>Add</source>
-        <target>Hinzufügen</target>
+        <target>追加</target>
         
         <note>Button to add recommended relay server.
    Button to confirm adding user inputted relay.</note>
       </trans-unit>
       <trans-unit id="Add Relay" xml:space="preserve">
         <source>Add Relay</source>
-        <target>Relay hinzufügen</target>
+        <target>Relayを追加</target>
         
         <note>Label for section for adding a relay server.</note>
       </trans-unit>
       <trans-unit id="Add all" xml:space="preserve">
         <source>Add all</source>
-        <target>Alle hinzufügen</target>
+        <target>全て追加</target>
         
         <note>Button label to re-add all original participants as profiles to reply to in a note</note>
       </trans-unit>
       <trans-unit id="Admin" xml:space="preserve">
         <source>Admin</source>
-        <target>Admin</target>
+        <target>管理者</target>
         
         <note>Label to display relay contact user.</note>
       </trans-unit>
       <trans-unit id="Any" xml:space="preserve">
         <source>Any</source>
-        <target>Beliebig</target>
+        <target>Any</target>
         
         <note>Any amount of sats</note>
       </trans-unit>
       <trans-unit id="Are you sure you want to repost this?" xml:space="preserve">
         <source>Are you sure you want to repost this?</source>
-        <target>Bist du sicher, dass Du den Beitrag teilen möchtest?</target>
+        <target>本当にリポストしますか？</target>
         
         <note>Alert message to ask if user wants to repost a post.</note>
       </trans-unit>
       <trans-unit id="Banner Image" xml:space="preserve">
         <source>Banner Image</source>
-        <target>Bannerbild</target>
+        <target>バナー画像</target>
         
         <note>Label for Banner Image section of user profile form.</note>
       </trans-unit>
       <trans-unit id="Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." xml:space="preserve">
         <source>Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus.</source>
-        <target>Bevor wir anfangen, musst du deine Kontodaten sichern, sonst kannst du dich in Zukunft nicht mehr anmelden, wenn du Damus einmal deinstallierst.</target>
+        <target>始める前に、あなたのアカウント情報を保存しておく必要があります。もし保存しなかった場合、Damusをアンインストールすると今後ログインできなくなります。</target>
         
         <note>Reminder to user that they should save their account information.</note>
       </trans-unit>
@@ -231,7 +231,7 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="Bitcoin Lightning Tips" xml:space="preserve">
         <source>Bitcoin Lightning Tips</source>
-        <target>Bitcoin Lightning Zahlungen</target>
+        <target>Bitcoin Lightning チップ</target>
         
         <note>Label for Bitcoin Lightning Tips section of user profile form.</note>
       </trans-unit>
@@ -243,7 +243,7 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="Block" xml:space="preserve">
         <source>Block</source>
-        <target>Blockieren</target>
+        <target>ブロック</target>
         
         <note>Alert button to block a user.
    Button to block a profile.
@@ -251,25 +251,25 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="Block %@?" xml:space="preserve">
         <source>Block %@?</source>
-        <target>%@ blockieren?</target>
+        <target>%@をブロックしますか?</target>
         
         <note>Alert message prompt to ask if a user should be blocked.</note>
       </trans-unit>
       <trans-unit id="Block User" xml:space="preserve">
         <source>Block User</source>
-        <target>Benutzer blockieren</target>
+        <target>ユーザーをブロック</target>
         
         <note>Title of alert for blocking a user.</note>
       </trans-unit>
       <trans-unit id="Blocked" xml:space="preserve">
         <source>Blocked</source>
-        <target>Blockiert</target>
+        <target>ブロック中</target>
         
         <note>Sidebar menu label for Profile view.</note>
       </trans-unit>
       <trans-unit id="Blocked Users" xml:space="preserve">
         <source>Blocked Users</source>
-        <target>Blockierte Benutzer</target>
+        <target>ブロックしたユーザー</target>
         
         <note>Navigation title of view to see list of blocked users.</note>
       </trans-unit>
@@ -281,7 +281,7 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="Boosts" xml:space="preserve">
         <source>Boosts</source>
-        <target>Boosts</target>
+        <target>ブースト</target>
         
         <note>Accessibility label for boosts button</note>
       </trans-unit>
@@ -293,13 +293,13 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="Broadcast" xml:space="preserve">
         <source>Broadcast</source>
-        <target>Senden</target>
+        <target>ブロードキャスト</target>
         
         <note>Context menu option for broadcasting the user's note to all of the user's connected relay servers.</note>
       </trans-unit>
       <trans-unit id="Cancel" xml:space="preserve">
         <source>Cancel</source>
-        <target>Abbrechen</target>
+        <target>キャンセル</target>
         
         <note>Alert button to cancel out of alert for blocking a user.
    Button to cancel out of alert that creates a new mutelist.
@@ -317,140 +317,140 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="Chat" xml:space="preserve">
         <source>Chat</source>
-        <target>Unterhaltungen</target>
+        <target>チャット</target>
         
         <note>Navigation bar title for Chatroom view.</note>
       </trans-unit>
       <trans-unit id="Clear" xml:space="preserve">
         <source>Clear</source>
-        <target>Löschen</target>
+        <target>削除</target>
         
         <note>Button for clearing cached data.</note>
       </trans-unit>
       <trans-unit id="Clear Cache" xml:space="preserve">
         <source>Clear Cache</source>
-        <target>Zwischenspeicher löschen</target>
+        <target>キャッシュを削除</target>
         
         <note>Section title for clearing cached data.</note>
       </trans-unit>
       <trans-unit id="Contact" xml:space="preserve">
         <source>Contact</source>
-        <target>Kontakt</target>
+        <target>連絡先</target>
         
         <note>Label to display relay contact information.</note>
       </trans-unit>
       <trans-unit id="Copied" xml:space="preserve">
         <source>Copied</source>
-        <target>Kopiert</target>
+        <target>コピー完了</target>
         
         <note>Label indicating that a user's key was copied.</note>
       </trans-unit>
       <trans-unit id="Copy" xml:space="preserve">
         <source>Copy</source>
-        <target>Kopieren</target>
+        <target>コピー</target>
         
         <note>Button to copy a relay server address.</note>
       </trans-unit>
       <trans-unit id="Copy Account ID" xml:space="preserve">
         <source>Copy Account ID</source>
-        <target>Konto-ID kopieren</target>
+        <target>アカウントIDをコピー</target>
         
         <note>Context menu option for copying the ID of the account that created the note.</note>
       </trans-unit>
       <trans-unit id="Copy Image" xml:space="preserve">
         <source>Copy Image</source>
-        <target>Bild kopieren</target>
+        <target>画像をコピー</target>
         
         <note>Context menu option to copy an image into clipboard.
    Context menu option to copy an image to clipboard.</note>
       </trans-unit>
       <trans-unit id="Copy Image URL" xml:space="preserve">
         <source>Copy Image URL</source>
-        <target>Bild-URL kopieren</target>
+        <target>画像URLをコピー</target>
         
         <note>Context menu option to copy the URL of an image into clipboard.</note>
       </trans-unit>
       <trans-unit id="Copy LNURL" xml:space="preserve">
         <source>Copy LNURL</source>
-        <target>LNURL kopieren</target>
+        <target>LNURLをコピー</target>
         
         <note>Context menu option for copying a user's Lightning URL.</note>
       </trans-unit>
       <trans-unit id="Copy Note ID" xml:space="preserve">
         <source>Copy Note ID</source>
-        <target>Notiz-ID kopieren</target>
+        <target>Note IDをコピー</target>
         
         <note>Context menu option for copying the ID of the note.</note>
       </trans-unit>
       <trans-unit id="Copy Note JSON" xml:space="preserve">
         <source>Copy Note JSON</source>
-        <target>Notiz-JSON kopieren</target>
+        <target>Note JSONをコピー</target>
         
         <note>Context menu option for copying the JSON text from the note.</note>
       </trans-unit>
       <trans-unit id="Copy Report ID" xml:space="preserve">
         <source>Copy Report ID</source>
-        <target>Meldungs-ID kopieren</target>
+        <target>通報IDをコピー</target>
         
         <note>Button to copy report ID.</note>
       </trans-unit>
       <trans-unit id="Copy Text" xml:space="preserve">
         <source>Copy Text</source>
-        <target>Text kopieren</target>
+        <target>テキストをコピー</target>
         
         <note>Context menu option for copying the text from an note.</note>
       </trans-unit>
       <trans-unit id="Copy User Pubkey" xml:space="preserve">
         <source>Copy User Pubkey</source>
-        <target>Öffentlichen Schlüssel des Benutzers kopieren</target>
+        <target>ユーザーの公開鍵をコピー</target>
         
         <note>Context menu option for copying the ID of the user who created the note.</note>
       </trans-unit>
       <trans-unit id="Copy invoice" xml:space="preserve">
         <source>Copy invoice</source>
-        <target>Zahlungsdaten kopieren</target>
+        <target>インボイスをコピー</target>
         
         <note>Title of section for copying a Lightning invoice identifier.</note>
       </trans-unit>
       <trans-unit id="Could not find user to block..." xml:space="preserve">
         <source>Could not find user to block...</source>
-        <target>Der zu blockierende Benutzer konnte nicht gefunden werden...</target>
+        <target>ブロック対象のユーザーが見つかりませんでした...</target>
         
         <note>Alert message to indicate that the blocked user could not be found.</note>
       </trans-unit>
       <trans-unit id="Create" xml:space="preserve">
         <source>Create</source>
-        <target>Erstellen</target>
+        <target>作成</target>
         
         <note>Button to create account.</note>
       </trans-unit>
       <trans-unit id="Create Account" xml:space="preserve">
         <source>Create Account</source>
-        <target>Konto erstellen</target>
+        <target>アカウントを作成</target>
         
         <note>Button to create an account.</note>
       </trans-unit>
       <trans-unit id="Create new mutelist" xml:space="preserve">
         <source>Create new mutelist</source>
-        <target>Neue Stummschaltungsliste</target>
+        <target>新しいミュートリストを作成する</target>
         
         <note>Title of alert prompting the user to create a new mutelist.</note>
       </trans-unit>
       <trans-unit id="Creator(s) of Bitcoin. Absolute legend." xml:space="preserve">
         <source>Creator(s) of Bitcoin. Absolute legend.</source>
-        <target>Erfinder von Bitcoin. Absolute Legende(n).</target>
+        <target>ビットコインの発明者(達)。紛れもないレジェンド。</target>
         
         <note>Example description about Bitcoin creator(s), Satoshi Nakamoto.</note>
       </trans-unit>
       <trans-unit id="Custom" xml:space="preserve">
         <source>Custom</source>
-        <target>Anpassen</target>
+        <target>カスタム</target>
         
         <note>Dropdown option for selecting a custom translation server.</note>
       </trans-unit>
       <trans-unit id="DMs" xml:space="preserve">
         <source>DMs</source>
-        <target>PNs</target>
+        <target>メッセージ</target>
         
         <note>Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
    Navigation title for view of DMs, where DM is an English abbreviation for Direct Message.</note>
@@ -463,19 +463,19 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="DeepL (Proprietary, Higher Accuracy)" xml:space="preserve">
         <source>DeepL (Proprietary, Higher Accuracy)</source>
-        <target>DeepL (Proprietär, bessere Genauigkeit)</target>
+        <target>DeepL (プロプライエタリ, より高精度)</target>
         
         <note>Dropdown option for selecting DeepL as the translation service.</note>
       </trans-unit>
       <trans-unit id="Default Wallet" xml:space="preserve">
         <source>Default Wallet</source>
-        <target>Voreingestellte Wallet</target>
+        <target>デフォルトウォレット</target>
         
         <note>Button to pay a Lightning invoice with the user's default Lightning wallet.</note>
       </trans-unit>
       <trans-unit id="Delete" xml:space="preserve">
         <source>Delete</source>
-        <target>Löschen</target>
+        <target>削除</target>
         
         <note>Button for deleting the users account.
    Button to delete a relay server that the user connects to.
@@ -484,196 +484,196 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="Delete Account" xml:space="preserve">
         <source>Delete Account</source>
-        <target>Konto löschen</target>
+        <target>アカウントを削除</target>
         
         <note>Alert for deleting the users account.
    Button to delete the user's account.</note>
       </trans-unit>
       <trans-unit id="Deleted Account" xml:space="preserve">
         <source>Deleted Account</source>
-        <target>Gelöschtes Konto</target>
+        <target>削除されたアカウント</target>
         
         <note>Alert message to indicate this is a deleted account</note>
       </trans-unit>
       <trans-unit id="Description" xml:space="preserve">
         <source>Description</source>
-        <target>Beschreibung</target>
+        <target>詳細</target>
         
         <note>Label to display relay description.</note>
       </trans-unit>
       <trans-unit id="Dismiss" xml:space="preserve">
         <source>Dismiss</source>
-        <target>Schließen</target>
+        <target>却下</target>
         
         <note>Button to dismiss a text field alert.</note>
       </trans-unit>
       <trans-unit id="Display Name" xml:space="preserve">
         <source>Display Name</source>
-        <target>Profilname</target>
+        <target>表示名</target>
         
         <note>Label to prompt display name entry.</note>
       </trans-unit>
       <trans-unit id="Done" xml:space="preserve">
         <source>Done</source>
-        <target>Fertig</target>
+        <target>完了</target>
         
         <note>Button to dismiss wallet selection view for paying Lightning invoice.</note>
       </trans-unit>
       <trans-unit id="EULA" xml:space="preserve">
         <source>EULA</source>
-        <target>Endbenutzer-Lizenzvereinbarung</target>
+        <target>EULA</target>
         
         <note>Label indicating that the below text is the EULA, an acronym for End User License Agreement.</note>
       </trans-unit>
       <trans-unit id="Earn Money" xml:space="preserve">
         <source>Earn Money</source>
-        <target>Verdiene Geld</target>
+        <target>Earn Money</target>
         
         <note>Heading indicating that this application allows users to earn money.</note>
       </trans-unit>
       <trans-unit id="Edit" xml:space="preserve">
         <source>Edit</source>
-        <target>Bearbeiten</target>
+        <target>編集</target>
         
         <note>Button to edit user's profile.</note>
       </trans-unit>
       <trans-unit id="Edit participants" xml:space="preserve">
         <source>Edit participants</source>
-        <target>Teilnehmer editieren</target>
+        <target>参加者を編集</target>
         
         <note>Text indicating that the view is used for editing which participants are replied to in a note.</note>
       </trans-unit>
       <trans-unit id="Encrypted" xml:space="preserve">
         <source>Encrypted</source>
-        <target>Verschlüsselt</target>
+        <target>暗号化されています</target>
         
         <note>Heading indicating that this application keeps private messaging end-to-end encrypted.</note>
       </trans-unit>
       <trans-unit id="Enter your account key to login:" xml:space="preserve">
         <source>Enter your account key to login:</source>
-        <target>Gib deinen Kontoschlüssel ein um dich anzumelden:</target>
+        <target>ログイン用のアカウントキーを入力してください:</target>
         
         <note>Prompt for user to enter an account key to login.</note>
       </trans-unit>
       <trans-unit id="Error: %@" xml:space="preserve">
         <source>Error: %@</source>
-        <target>Fehler: %@</target>
+        <target>エラー: %@</target>
         
         <note>Error message indicating why saving keys failed.</note>
       </trans-unit>
       <trans-unit id="Follow" xml:space="preserve">
         <source>Follow</source>
-        <target>Folgen</target>
+        <target>フォローする</target>
         
         <note>Button to follow a user.</note>
       </trans-unit>
       <trans-unit id="Follow Back" xml:space="preserve">
         <source>Follow Back</source>
-        <target>Ebenfalls folgen</target>
+        <target>フォローバックする</target>
         
         <note>Button to follow a user back.</note>
       </trans-unit>
       <trans-unit id="Follow me on nostr" xml:space="preserve">
         <source>Follow me on nostr</source>
-        <target>Folge mir auf Nostr</target>
+        <target>nostrでフォローしてね</target>
         
         <note>Text on QR code view to prompt viewer looking at screen to follow the user.</note>
       </trans-unit>
       <trans-unit id="Followers" xml:space="preserve">
         <source>Followers</source>
-        <target>Follower</target>
+        <target>フォロワー</target>
         
         <note>Label describing followers of a user.</note>
       </trans-unit>
       <trans-unit id="Following" xml:space="preserve">
         <source>Following</source>
-        <target>Gefolgt</target>
+        <target>フォロー中</target>
         
         <note>Text to indicate that the button next to it is in a state that indicates that it is in the process of following a profile.
 Part of a larger sentence to describe how many profiles a user is following.</note>
       </trans-unit>
       <trans-unit id="Following..." xml:space="preserve">
         <source>Following...</source>
-        <target>Folge…</target>
+        <target>フォローしています...</target>
         
         <note>Label to indicate that the user is in the process of following another user.</note>
       </trans-unit>
       <trans-unit id="Follows" xml:space="preserve">
         <source>Follows</source>
-        <target>Folgt</target>
+        <target>フォロー</target>
         
         <note>Text to indicate that button next to it is in a state that will follow a profile when tapped.</note>
       </trans-unit>
       <trans-unit id="Follows you" xml:space="preserve">
         <source>Follows you</source>
-        <target>Folgt dir</target>
+        <target>フォローされています</target>
         
         <note>Text to indicate that a user is following your profile.</note>
       </trans-unit>
       <trans-unit id="Free" xml:space="preserve">
         <source>Free</source>
-        <target>kostenlos</target>
+        <target>Free</target>
         
         <note>Dropdown option for selecting Free plan for DeepL translation service.</note>
       </trans-unit>
       <trans-unit id="Get API Key" xml:space="preserve">
         <source>Get API Key</source>
-        <target>API-Schlüssel erhalten</target>
+        <target>APIキーを取得</target>
         
         <note>Button to navigate to DeepL website to get a translation API key.</note>
       </trans-unit>
       <trans-unit id="Global" xml:space="preserve">
         <source>Global</source>
-        <target>Allgemein</target>
+        <target>グローバル</target>
         
         <note>Navigation bar title for Global view where posts from all connected relay servers appear.</note>
       </trans-unit>
       <trans-unit id="Goto post %@" xml:space="preserve">
         <source>Goto post %@</source>
-        <target>Gehe zum Beitrag %@</target>
+        <target>投稿へ %@</target>
         
         <note>Navigation link to go to post referenced by hex code.</note>
       </trans-unit>
       <trans-unit id="Goto profile %@" xml:space="preserve">
         <source>Goto profile %@</source>
-        <target>Gehe zum Profil %@</target>
+        <target>プロフィールへ %@</target>
         
         <note>Navigation link to go to profile.</note>
       </trans-unit>
       <trans-unit id="Hide" xml:space="preserve">
         <source>Hide</source>
-        <target>Verstecken</target>
+        <target>非表示</target>
         
         <note>Button to hide a post from a user who has been blocked.</note>
       </trans-unit>
       <trans-unit id="Hide API Key" xml:space="preserve">
         <source>Hide API Key</source>
-        <target>API Schlüssel verstecken</target>
+        <target>APIキーを非表示にする</target>
         
         <note>Button to hide the DeepL translation API key.
    Button to hide the LibreTranslate server API key.</note>
       </trans-unit>
       <trans-unit id="Home" xml:space="preserve">
         <source>Home</source>
-        <target>Heim</target>
+        <target>ホーム</target>
         
         <note>Navigation bar title for Home view where posts and replies appear from those who the user is following.</note>
       </trans-unit>
       <trans-unit id="Illegal content" xml:space="preserve">
         <source>Illegal content</source>
-        <target>Illegaler Inhalt</target>
+        <target>違法なコンテンツ</target>
         
         <note>Button for user to report that the account or content has illegal content.</note>
       </trans-unit>
       <trans-unit id="Invalid key" xml:space="preserve">
         <source>Invalid key</source>
-        <target>Ungültiger Schlüssel</target>
+        <target>無効なキー</target>
         
         <note>Error message indicating that an invalid account key was entered for login.</note>
       </trans-unit>
       <trans-unit id="It's spam" xml:space="preserve">
         <source>It's spam</source>
-        <target>Das ist Spam</target>
+        <target>これはスパムです</target>
         
         <note>Button for user to report that the account or content has spam.</note>
       </trans-unit>
@@ -685,62 +685,62 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Left Handed" xml:space="preserve">
         <source>Left Handed</source>
-        <target>Linkshändig</target>
+        <target>左利きモード</target>
         
         <note>Moves the post button to the left side of the screen</note>
       </trans-unit>
       <trans-unit id="Let's go!" xml:space="preserve">
         <source>Let's go!</source>
-        <target>Los geht’s!</target>
+        <target>Let's go!</target>
         
         <note>Button to complete account creation and start using the app.</note>
       </trans-unit>
       <trans-unit id="LibreTranslate (Open Source)" xml:space="preserve">
         <source>LibreTranslate (Open Source)</source>
-        <target>LibreTranslate (Open Source)</target>
+        <target>LibreTranslate (オープンソース)</target>
         
         <note>Dropdown option for selecting LibreTranslate as the translation service.</note>
       </trans-unit>
       <trans-unit id="Lightning Address or LNURL" xml:space="preserve">
         <source>Lightning Address or LNURL</source>
-        <target>Lightning-Adresse oder LNURL</target>
+        <target>Lightning Address または LNURL</target>
         
         <note>Placeholder text for entry of Lightning Address or LNURL.</note>
       </trans-unit>
       <trans-unit id="Lightning Invoice" xml:space="preserve">
         <source>Lightning Invoice</source>
-        <target>Lightning-Rechnung</target>
+        <target>Lightning Invoice</target>
         
         <note>Indicates that the view is for paying a Lightning invoice.</note>
       </trans-unit>
       <trans-unit id="Like" xml:space="preserve">
         <source>Like</source>
-        <target>Like</target>
+        <target>いいね</target>
         
         <note>Accessibility Label for Like button</note>
       </trans-unit>
       <trans-unit id="Local authentication to access private key" xml:space="preserve">
         <source>Local authentication to access private key</source>
-        <target>Lokale Authentifizierung für den Zugriff auf den privaten Schlüssel</target>
+        <target>秘密鍵にアクセスするためのローカル認証</target>
         
         <note>Face ID usage description shown when trying to access private key</note>
       </trans-unit>
       <trans-unit id="Local default" xml:space="preserve">
         <source>Local default</source>
-        <target>System-Standard</target>
+        <target>ローカルのデフォルト</target>
         
         <note>Dropdown option label for system default for Lightning wallet.</note>
       </trans-unit>
       <trans-unit id="Login" xml:space="preserve">
         <source>Login</source>
-        <target>Anmelden</target>
+        <target>ログイン</target>
         
         <note>Button to log into account.
    Button to log into an account.</note>
       </trans-unit>
       <trans-unit id="Logout" xml:space="preserve">
         <source>Logout</source>
-        <target>Ausloggen</target>
+        <target>ログアウト</target>
         
         <note>Alert for logging out the user.
    Button for logging out the user.
@@ -748,7 +748,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Make sure your nsec account key is saved before you logout or you will lose access to this account" xml:space="preserve">
         <source>Make sure your nsec account key is saved before you logout or you will lose access to this account</source>
-        <target>Sorge dafür dass dein nsec Kontoschlüssel vor dem Abmelden gesichert ist, oder du wirst den Zugang zu diesem Konto verlieren</target>
+        <target>ログアウト前にあなたのnsec秘密鍵を保存していることを確認してください。保存していない場合、アカウントへのアクセスを失うことになります。</target>
         
         <note>Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.</note>
       </trans-unit>
@@ -760,61 +760,61 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="NIP-05 Verification" xml:space="preserve">
         <source>NIP-05 Verification</source>
-        <target>NIP-05-Verifizierung</target>
+        <target>NIP-05検証</target>
         
         <note>Label for NIP-05 Verification section of user profile form.</note>
       </trans-unit>
       <trans-unit id="No" xml:space="preserve">
         <source>No</source>
-        <target>Nein</target>
+        <target>中断する</target>
         
         <note>Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key.</note>
       </trans-unit>
       <trans-unit id="No block list found, create a new one? This will overwrite any previous block lists." xml:space="preserve">
         <source>No block list found, create a new one? This will overwrite any previous block lists.</source>
-        <target>Es wurde keine Blockier-Liste gefunden, soll eine neue erzeugt werden? Dies überschreibt eventuelle frühere Blockier-Listen.</target>
+        <target>ブロックリストが見つかりませんでした。新しく作成しますか？これは以前のブロックリストを上書きします。</target>
         
         <note>Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists.</note>
       </trans-unit>
       <trans-unit id="None" xml:space="preserve">
         <source>None</source>
-        <target>Kein</target>
+        <target>利用しない</target>
         
         <note>Dropdown option for selecting no translation service.</note>
       </trans-unit>
       <trans-unit id="Note contains &quot;nsec1&quot; private key. Are you sure?" xml:space="preserve">
         <source>Note contains &quot;nsec1&quot; private key. Are you sure?</source>
-        <target>Notiz enthält einen privaten &quot;nsec1&quot;-Schlüssel. Bist du sicher?</target>
+        <target>投稿に &quot;nsec1&quot; 秘密鍵が含まれています。本当に続けますか？</target>
         
         <note>Alert user that they might be attempting to paste a private key and ask them to confirm.</note>
       </trans-unit>
       <trans-unit id="Nothing to see here. Check back later!" xml:space="preserve">
         <source>Nothing to see here. Check back later!</source>
-        <target>Hier gibt es nichts zu sehen. Schau später wieder vorbei!</target>
+        <target>まだ何もないようです。また後で見に来てね！</target>
         
         <note>Indicates that there are no notes in the timeline to view.</note>
       </trans-unit>
       <trans-unit id="Notifications" xml:space="preserve">
         <source>Notifications</source>
-        <target>Benachrichtigungen</target>
+        <target>通知</target>
         
         <note>Navigation title for notifications.</note>
       </trans-unit>
       <trans-unit id="Nudity or explicit content" xml:space="preserve">
         <source>Nudity or explicit content</source>
-        <target>Nacktheit oder anstößige Inhalte</target>
+        <target>ヌードまたは露骨なコンテンツ</target>
         
         <note>Button for user to report that the account or content has nudity or explicit content.</note>
       </trans-unit>
       <trans-unit id="Pay" xml:space="preserve">
         <source>Pay</source>
-        <target>Bezahlen</target>
+        <target>支払う</target>
         
         <note>Button to pay a Lightning invoice.</note>
       </trans-unit>
       <trans-unit id="Pay the Lightning invoice" xml:space="preserve">
         <source>Pay the Lightning invoice</source>
-        <target>Bezahle die Lightning-Rechnung</target>
+        <target>Lightning invoiceを支払う</target>
         
         <note>Navigation bar title for view to pay Lightning invoice.</note>
       </trans-unit>
@@ -826,43 +826,43 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Plan" xml:space="preserve">
         <source>Plan</source>
-        <target>Paket</target>
+        <target>プラン</target>
         
         <note>Prompt selection of DeepL subscription plan to perform machine translations on notes</note>
       </trans-unit>
       <trans-unit id="Post" xml:space="preserve">
         <source>Post</source>
-        <target>Teilen</target>
+        <target>投稿する</target>
         
         <note>Button to post a note.</note>
       </trans-unit>
       <trans-unit id="Post from a user you've blocked" xml:space="preserve">
         <source>Post from a user you've blocked</source>
-        <target>Nachricht von einem/e User/in den/die Du geblockt hast.</target>
+        <target>あなたがブロックしたユーザーの投稿</target>
         
         <note>Text to indicate that what is being shown is a post from a user who has been blocked.</note>
       </trans-unit>
       <trans-unit id="Posts" xml:space="preserve">
         <source>Posts</source>
-        <target>Beiträge</target>
+        <target>投稿</target>
         
         <note>Label for filter for seeing only posts (instead of posts and replies).</note>
       </trans-unit>
       <trans-unit id="Posts &amp; Replies" xml:space="preserve">
         <source>Posts &amp; Replies</source>
-        <target>Beiträge &amp; Antworten</target>
+        <target>投稿とリプライ</target>
         
         <note>Label for filter for seeing posts and replies (instead of only posts).</note>
       </trans-unit>
       <trans-unit id="Private" xml:space="preserve">
         <source>Private</source>
-        <target>Privatsphäre</target>
+        <target>プライベート</target>
         
         <note>Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading.</note>
       </trans-unit>
       <trans-unit id="Private Key" xml:space="preserve">
         <source>Private Key</source>
-        <target>Privater Schlüssel</target>
+        <target>秘密鍵</target>
         
         <note>Title of the secure field that holds the user's private key.</note>
       </trans-unit>
@@ -874,155 +874,155 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Profile" xml:space="preserve">
         <source>Profile</source>
-        <target>Profil</target>
+        <target>プロフィール</target>
         
         <note>Sidebar menu label for Profile view.</note>
       </trans-unit>
       <trans-unit id="Profile Picture" xml:space="preserve">
         <source>Profile Picture</source>
-        <target>Profilbild</target>
+        <target>プロフィール画像</target>
         
         <note>Label for Profile Picture section of user profile form.</note>
       </trans-unit>
       <trans-unit id="Public Account ID" xml:space="preserve">
         <source>Public Account ID</source>
-        <target>Öffentliche Konto ID</target>
+        <target>パブリックアカウントID</target>
         
         <note>Section title for the user's public account ID.</note>
       </trans-unit>
       <trans-unit id="Public Key" xml:space="preserve">
         <source>Public Key</source>
-        <target>Öffentlicher Schlüssel</target>
+        <target>公開鍵</target>
         
         <note>Label indicating that the text is a user's public account key.</note>
       </trans-unit>
       <trans-unit id="Public Key?" xml:space="preserve">
         <source>Public Key?</source>
-        <target>Öffentlicher Schlüssel?</target>
+        <target>公開鍵ですか？</target>
         
         <note>Prompt to ask user if the key they entered is a public key.</note>
       </trans-unit>
       <trans-unit id="Public key" xml:space="preserve">
         <source>Public key</source>
-        <target>Öffentlicher Schlüssel</target>
+        <target>公開鍵</target>
         
         <note>Label indicating that the text is a user's public account key.</note>
       </trans-unit>
       <trans-unit id="Reactions" xml:space="preserve">
         <source>Reactions</source>
-        <target>Reaktionen</target>
+        <target>リアクション</target>
         
         <note>Navigation bar title for Reactions view.</note>
       </trans-unit>
       <trans-unit id="Recommended Relays" xml:space="preserve">
         <source>Recommended Relays</source>
-        <target>Empfohlene Relays</target>
+        <target>推奨のリレーサーバー</target>
         
         <note>Section title for recommend relay servers that could be added as part of configuration</note>
       </trans-unit>
       <trans-unit id="Reject" xml:space="preserve">
         <source>Reject</source>
-        <target>Ablehnen</target>
+        <target>却下</target>
         
         <note>Button to reject the end user license agreement, which disallows the user from being let into the app.</note>
       </trans-unit>
       <trans-unit id="Relay" xml:space="preserve">
         <source>Relay</source>
-        <target>Relay</target>
+        <target>リレー</target>
         
         <note>Label to display relay address.
    Text field for relay server. Used for testing purposes.</note>
       </trans-unit>
       <trans-unit id="Relays" xml:space="preserve">
         <source>Relays</source>
-        <target>Relays</target>
+        <target>リレー</target>
         
         <note>Sidebar menu label for Relay servers view
    Sidebar menu label for Relays view.</note>
       </trans-unit>
       <trans-unit id="Relays have been notified and clients will be able to use this information to filter content. Thank you!" xml:space="preserve">
         <source>Relays have been notified and clients will be able to use this information to filter content. Thank you!</source>
-        <target>Relays wurden benachrichtigt und Anwendungen können diese Information nutzen, um Inhalte zu filtern. Vielen Dank!</target>
+        <target>リレーに通報が通知され、クライアントはこの情報を使ってコンテンツをフィルタリングすることができるようになります。ありがとうございます！</target>
         
         <note>Description of what was done as a result of sending a report to relay servers.</note>
       </trans-unit>
       <trans-unit id="Remove all" xml:space="preserve">
         <source>Remove all</source>
-        <target>Alle entfernen</target>
+        <target>全て削除</target>
         
         <note>Button label to remove all participants from a note reply.</note>
       </trans-unit>
       <trans-unit id="Reply" xml:space="preserve">
         <source>Reply</source>
-        <target>Antworten</target>
+        <target>リプライ</target>
         
         <note>Accessibility label for reply button</note>
       </trans-unit>
       <trans-unit id="Reply to self" xml:space="preserve">
         <source>Reply to self</source>
-        <target>Antwort an sich selbst</target>
+        <target>自分にリプライ</target>
         
         <note>Label to indicate that the user is replying to themself.</note>
       </trans-unit>
       <trans-unit id="Replying to %@ &amp; %@" xml:space="preserve">
         <source>Replying to %1$@ &amp; %2$@</source>
-        <target>%1$@ &amp; %2$@ antworten</target>
+        <target>%1$@ と %2$@ にリプライ</target>
         
         <note>Label to indicate that the user is replying to 2 users.</note>
       </trans-unit>
       <trans-unit id="Replying to:" xml:space="preserve">
         <source>Replying to:</source>
-        <target>Du antwortest:</target>
+        <target>リプライ先:</target>
         
         <note>Indicating that the user is replying to the following listed people.</note>
       </trans-unit>
       <trans-unit id="Report" xml:space="preserve">
         <source>Report</source>
-        <target>Melden</target>
+        <target>通報</target>
         
         <note>Button to report a profile.
    Context menu option for reporting content.</note>
       </trans-unit>
       <trans-unit id="Report ID:" xml:space="preserve">
         <source>Report ID:</source>
-        <target>Meldungs-ID</target>
+        <target>通報ID:</target>
         
         <note>Label indicating that the text underneath is the identifier of the report that was sent to relay servers.</note>
       </trans-unit>
       <trans-unit id="Report sent!" xml:space="preserve">
         <source>Report sent!</source>
-        <target>Meldung versandt!</target>
+        <target>通報が送信されました！</target>
         
         <note>Message indicating that a report was successfully sent to relay servers.</note>
       </trans-unit>
       <trans-unit id="Repost" xml:space="preserve">
         <source>Repost</source>
-        <target>Teilen</target>
+        <target>リポスト</target>
         
         <note>Button to confirm reposting a post.
    Title of alert for confirming to repost a post.</note>
       </trans-unit>
       <trans-unit id="Reposted" xml:space="preserve">
         <source>Reposted</source>
-        <target>Geteilt</target>
+        <target>リポストされました</target>
         
         <note>Text indicating that the post was reposted (i.e. re-shared).</note>
       </trans-unit>
       <trans-unit id="Reposts" xml:space="preserve">
         <source>Reposts</source>
-        <target>Geteilte Beiträge</target>
+        <target>リポスト</target>
         
         <note>Navigation bar title for Reposts view.</note>
       </trans-unit>
       <trans-unit id="Requests" xml:space="preserve">
         <source>Requests</source>
-        <target>Anfragen</target>
+        <target>リクエスト</target>
         
         <note>Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="Retry" xml:space="preserve">
         <source>Retry</source>
-        <target>Erneut versuchen</target>
+        <target>リトライ</target>
         
         <note>Button to retry completing account creation after an error occurred.</note>
       </trans-unit>
@@ -1034,86 +1034,86 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Satoshi Nakamoto" xml:space="preserve">
         <source>Satoshi Nakamoto</source>
-        <target>Satoshi Nakamoto</target>
+        <target>サトシ・ナカモト</target>
         
         <note>Name of Bitcoin creator(s).</note>
       </trans-unit>
       <trans-unit id="Save" xml:space="preserve">
         <source>Save</source>
-        <target>Speichern</target>
+        <target>保存</target>
         
         <note>Button for saving profile.</note>
       </trans-unit>
       <trans-unit id="Save Image" xml:space="preserve">
         <source>Save Image</source>
-        <target>Bild sichern</target>
+        <target>画像を保存する</target>
         
         <note>Context menu option to save an image.</note>
       </trans-unit>
       <trans-unit id="Scan the code" xml:space="preserve">
         <source>Scan the code</source>
-        <target>Code scannen</target>
+        <target>QRコードをスキャン</target>
         
         <note>Text on QR code view to prompt viewer to scan the QR code on screen with their device camera.</note>
       </trans-unit>
       <trans-unit id="Search hashtag: #%@" xml:space="preserve">
         <source>Search hashtag: #%@</source>
-        <target>Hashtag suchen: #%@</target>
+        <target>ハッシュタグを検索: #%@</target>
         
         <note>Navigation link to search hashtag.</note>
       </trans-unit>
       <trans-unit id="Search..." xml:space="preserve">
         <source>Search...</source>
-        <target>Suchen...</target>
+        <target>検索する...</target>
         
         <note>Placeholder text to prompt entry of search query.</note>
       </trans-unit>
       <trans-unit id="Secret Account Login Key" xml:space="preserve">
         <source>Secret Account Login Key</source>
-        <target>Geheimer Konto-Anmeldeschlüssel</target>
+        <target>ログイン用秘密鍵</target>
         
         <note>Section title for user's secret account login key.</note>
       </trans-unit>
       <trans-unit id="Select a Lightning wallet" xml:space="preserve">
         <source>Select a Lightning wallet</source>
-        <target>Wähle ein Lightning Wallet</target>
+        <target>Lightningウォレットを選択</target>
         
         <note>Title of section for selecting a Lightning wallet to pay a Lightning invoice.</note>
       </trans-unit>
       <trans-unit id="Select default wallet" xml:space="preserve">
         <source>Select default wallet</source>
-        <target>Wähle ein voreingestelltes Wallet</target>
+        <target>デフォルトのウォレットを選択</target>
         
         <note>Prompt selection of user's default wallet</note>
       </trans-unit>
       <trans-unit id="Send a message to start the conversation..." xml:space="preserve">
         <source>Send a message to start the conversation...</source>
-        <target>Sende eine Nachricht um eine Unterhaltung zu beginnen...</target>
+        <target>会話を開始するにはメッセージを送信してください...</target>
         
         <note>Text prompt for user to send a message to the other user.</note>
       </trans-unit>
       <trans-unit id="Server" xml:space="preserve">
         <source>Server</source>
-        <target>Server</target>
+        <target>サーバー</target>
         
         <note>Prompt selection of LibreTranslate server to perform machine translations on notes</note>
       </trans-unit>
       <trans-unit id="Service" xml:space="preserve">
         <source>Service</source>
-        <target>Dienst</target>
+        <target>サービス</target>
         
         <note>Prompt selection of translation service provider.</note>
       </trans-unit>
       <trans-unit id="Settings" xml:space="preserve">
         <source>Settings</source>
-        <target>Einstellungen</target>
+        <target>設定</target>
         
         <note>Navigation title for Settings view.
    Sidebar menu label for accessing the app settings</note>
       </trans-unit>
       <trans-unit id="Share" xml:space="preserve">
         <source>Share</source>
-        <target>Teilen</target>
+        <target>共有</target>
         
         <note>Button to share a post
    Button to share an image.
@@ -1121,33 +1121,33 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Show" xml:space="preserve">
         <source>Show</source>
-        <target>Anzeigen</target>
+        <target>表示</target>
         
         <note>Button to show a post from a user who has been blocked.
    Toggle to show or hide user's secret account login key.</note>
       </trans-unit>
       <trans-unit id="Show API Key" xml:space="preserve">
         <source>Show API Key</source>
-        <target>API Schlüssel anzeigen</target>
+        <target>APIキーを表示</target>
         
         <note>Button to show the DeepL translation API key.
    Button to show the LibreTranslate server API key.</note>
       </trans-unit>
       <trans-unit id="Show wallet selector" xml:space="preserve">
         <source>Show wallet selector</source>
-        <target>Wallet-Auswahl anzeigen</target>
+        <target>ウォレット選択を表示</target>
         
         <note>Toggle to show or hide selection of wallet.</note>
       </trans-unit>
       <trans-unit id="Sign out" xml:space="preserve">
         <source>Sign out</source>
-        <target>Abmelden</target>
+        <target>サインアウト</target>
         
         <note>Sidebar menu label to sign out of the account.</note>
       </trans-unit>
       <trans-unit id="Software" xml:space="preserve">
         <source>Software</source>
-        <target>Software</target>
+        <target>ソフトウェア</target>
         
         <note>Label to display relay software.</note>
       </trans-unit>
@@ -1159,86 +1159,86 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Supported NIPs" xml:space="preserve">
         <source>Supported NIPs</source>
-        <target>Unterstützte NIPs</target>
+        <target>対応しているNIP</target>
         
         <note>Label to display relay's supported NIPs.</note>
       </trans-unit>
       <trans-unit id="Thanks!" xml:space="preserve">
         <source>Thanks!</source>
-        <target>Danke!</target>
+        <target>ありがとう!</target>
         
         <note>Button to close out of alert that informs that the action to block a user was successful.</note>
       </trans-unit>
       <trans-unit id="They are impersonating someone" xml:space="preserve">
         <source>They are impersonating someone</source>
-        <target>Die geben sich für jemand anderen aus</target>
+        <target>誰かになりすましています</target>
         
         <note>Button for user to report that the account is impersonating someone.</note>
       </trans-unit>
       <trans-unit id="This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." xml:space="preserve">
         <source>This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective.</source>
-        <target>Dies ist ein öffentlicher Schlüssel, Du wirst keine Beiträge teilen oder oder auf irgendeine Weise interagieren können. Dies wird genutzt um andere Kontos aus deren Perspektive zu sehen.</target>
+        <target>これは公開鍵で、投稿などの操作は一切できません。入力された公開鍵の視点で投稿を見るために使用します。</target>
         
         <note>Warning that the inputted account key is a public key and the result of what happens because of it.</note>
       </trans-unit>
       <trans-unit id="This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." xml:space="preserve">
         <source>This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key.</source>
-        <target>Dies ist ein Nostr-Schlüssel im veralteten Format. Wir sind nicht sicher ob es ein öffentlicher Schlüssel oder ein privater Schlüssel ist. Bitte betätige die untenstehende Schaltfläche wenn es ein öffentlicher Schlüssel ist.</target>
+        <target>これは古い形式のnostrキーです。公開鍵または秘密鍵かどうかの判別が出来ません。公開鍵の場合は下のボタンをトグルしてください。</target>
         
         <note>Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key.</note>
       </trans-unit>
       <trans-unit id="This is your account ID, you can give this to your friends so that they can follow you. Click to copy." xml:space="preserve">
         <source>This is your account ID, you can give this to your friends so that they can follow you. Click to copy.</source>
-        <target>Dies ist deine Konto-ID, die du an deine Freunde weitergeben kannst, damit sie dir folgen können. Zum Kopieren anklicken.</target>
+        <target>これはあなたのアカウントIDで、これを友達に共有すれば、友達はあなたをフォローできます。クリックしてコピー。</target>
         
         <note>Label to describe that a public key is the user's account ID and what they can do with it.</note>
       </trans-unit>
       <trans-unit id="This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" xml:space="preserve">
         <source>This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!</source>
-        <target>Dies ist dein geheimer, privater Schlüssel. Du benötigst ihn, um auf dein Konto zuzugreifen. Gib den privaten Schlüssel an niemanden weiter! Speichere ihn in einem Passwort-Manager und bewahre ihn sicher auf!</target>
+        <target>これがあなたの秘密鍵です。アカウントにアクセスするにはこれが必要になります。誰にも共有しないでください！パスワードマネージャーに保存して、安全に管理してください！</target>
         
         <note>Label to describe that a private key is the user's secret account key and what they should do with it.</note>
       </trans-unit>
       <trans-unit id="Thread" xml:space="preserve">
         <source>Thread</source>
-        <target>Thema</target>
+        <target>スレッド</target>
         
         <note>Navigation bar title for note thread.
    Navigation bar title for threaded event detail view.</note>
       </trans-unit>
       <trans-unit id="Translate Note" xml:space="preserve">
         <source>Translate Note</source>
-        <target>Notiz übersetzen</target>
+        <target>翻訳する</target>
         
         <note>Button to translate note from different language.</note>
       </trans-unit>
       <trans-unit id="Translated from (lang)" xml:space="preserve">
         <source>Translated from (lang)</source>
-        <target>Übersetzt aus (lang)</target>
+        <target>(lang) からの翻訳</target>
         
         <note>Button to indicate that the note has been translated from a different language.</note>
       </trans-unit>
       <trans-unit id="Translating from (lang)..." xml:space="preserve">
         <source>Translating from (lang)...</source>
-        <target>Übersetzung aus (lang)...</target>
+        <target>(lang) から翻訳しています...</target>
         
         <note>Button to indicate that the note is in the process of being translated from a different language.</note>
       </trans-unit>
       <trans-unit id="Translations" xml:space="preserve">
         <source>Translations</source>
-        <target>Übersetzungen</target>
+        <target>翻訳サービス</target>
         
         <note>Section title for selecting the translation service.</note>
       </trans-unit>
       <trans-unit id="Type DELETE to delete" xml:space="preserve">
         <source>Type DELETE to delete</source>
-        <target>Gib DELETE ein, um zu löschen</target>
+        <target>削除するには DELETE と入力してください</target>
         
         <note>Text field prompt asking user to type the word DELETE to confirm that they want to proceed with deleting their account. The all caps lock DELETE word should not be translated. Everything else should.</note>
       </trans-unit>
       <trans-unit id="Type your post here..." xml:space="preserve">
         <source>Type your post here...</source>
-        <target>Schreibe deinen Beitrag hier...</target>
+        <target>投稿をここに入力...</target>
         
         <note>Text box prompt to ask user to type their post.</note>
       </trans-unit>
@@ -1250,62 +1250,62 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Unfollow" xml:space="preserve">
         <source>Unfollow</source>
-        <target>Entfolgen</target>
+        <target>フォロー解除</target>
         
         <note>Button to unfollow a user.</note>
       </trans-unit>
       <trans-unit id="Unfollowing" xml:space="preserve">
         <source>Unfollowing</source>
-        <target>Entfolge...</target>
+        <target>フォロー解除中</target>
         
         <note>Text to indicate that the button next to it is in  a state that indicates that it is in the process of unfollowing a profile.</note>
       </trans-unit>
       <trans-unit id="Unfollowing..." xml:space="preserve">
         <source>Unfollowing...</source>
-        <target>Entfolgen...</target>
+        <target>フォローを解除しています...</target>
         
         <note>Label to indicate that the user is in the process of unfollowing another user.</note>
       </trans-unit>
       <trans-unit id="Unfollows" xml:space="preserve">
         <source>Unfollows</source>
-        <target>Entfolgen</target>
+        <target>フォロー解除</target>
         
         <note>Text to indicate that the button next to it is in a state that will unfollow a profile when tapped.</note>
       </trans-unit>
       <trans-unit id="User blocked" xml:space="preserve">
         <source>User blocked</source>
-        <target>Benutzer blockiert</target>
+        <target>ユーザーをブロックしました</target>
         
         <note>Alert message to indicate the user has been blocked</note>
       </trans-unit>
       <trans-unit id="User has been blocked" xml:space="preserve">
         <source>User has been blocked</source>
-        <target>Der Benutzer wurde blockiert</target>
+        <target>ユーザーはブロックされています</target>
         
         <note>Alert message that informs a user was blocked.</note>
       </trans-unit>
       <trans-unit id="Username" xml:space="preserve">
         <source>Username</source>
-        <target>Benutzername</target>
+        <target>ユーザー名</target>
         
         <note>Label for Username section of user profile form.
    Label to prompt username entry.</note>
       </trans-unit>
       <trans-unit id="Version" xml:space="preserve">
         <source>Version</source>
-        <target>Version</target>
+        <target>バージョン</target>
         
         <note>Label to display relay software version.</note>
       </trans-unit>
       <trans-unit id="Wallet" xml:space="preserve">
         <source>Wallet</source>
-        <target>Wallet</target>
+        <target>ウォレット</target>
         
         <note>Sidebar menu label for Wallet view.</note>
       </trans-unit>
       <trans-unit id="Wallet Selector" xml:space="preserve">
         <source>Wallet Selector</source>
-        <target>Wallet-Auswahl</target>
+        <target>ウォレットを選択</target>
         
         <note>Section title for selection of wallet.</note>
       </trans-unit>
@@ -1317,49 +1317,49 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Website" xml:space="preserve">
         <source>Website</source>
-        <target>Website</target>
+        <target>ウェブサイト</target>
         
         <note>Label for Website section of user profile form.</note>
       </trans-unit>
       <trans-unit id="Welcome to the social network %@ control." xml:space="preserve">
         <source>Welcome to the social network %@ control.</source>
-        <target>Willkommen in dem sozialen Netzwerk das %@ kontrollierst.</target>
+        <target>あなたがコントロールするSNSへようこそ。</target>
         
         <note>Welcoming message to the reader. The variable is 'you', the reader.</note>
       </trans-unit>
       <trans-unit id="Welcome, %@!" xml:space="preserve">
         <source>Welcome, %@!</source>
-        <target>Willkommen, %@!</target>
+        <target>ようこそ, %@!</target>
         
         <note>Text to welcome user.</note>
       </trans-unit>
       <trans-unit id="What do you want to report?" xml:space="preserve">
         <source>What do you want to report?</source>
-        <target>Was möchtest du melden?</target>
+        <target>通報したい項目は何ですか？</target>
         
         <note>Header text to prompt user what issue they want to report.</note>
       </trans-unit>
       <trans-unit id="Yes, Overwrite" xml:space="preserve">
         <source>Yes, Overwrite</source>
-        <target>Ja, überschreiben</target>
+        <target>はい、上書きします</target>
         
         <note>Text of button that confirms to overwrite the existing mutelist.</note>
       </trans-unit>
       <trans-unit id="Yes, Post with Private Key" xml:space="preserve">
         <source>Yes, Post with Private Key</source>
-        <target>Ja, teile mit privatem Schlüssel</target>
+        <target>はい、秘密鍵を投稿します</target>
         
         <note>Button to proceed with posting a note even though it looks like they might be posting a private key.</note>
       </trans-unit>
       <trans-unit id="Your Name" xml:space="preserve">
         <source>Your Name</source>
-        <target>Dein Name</target>
+        <target>あなたの名前</target>
         
         <note>Label for Your Name section of user profile form.</note>
       </trans-unit>
       <trans-unit id="Your report will be sent to the relays you are connected to" xml:space="preserve">
         <source>Your report will be sent to the relays you are connected to</source>
-        <target>Die Meldung wird an Relays versendet, mit denen du verbunden bist</target>
+        <target>あなたの通報は接続しているリレーに送信されました</target>
         
         <note>Footer text to inform user what will happen when the report is submitted.</note>
       </trans-unit>
@@ -1413,13 +1413,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="none" xml:space="preserve">
         <source>none</source>
-        <target>keine</target>
+        <target>該当なし</target>
         
         <note>No search results.</note>
       </trans-unit>
       <trans-unit id="now" xml:space="preserve">
         <source>now</source>
-        <target>jetzt</target>
+        <target>たった今</target>
         
         <note>String indicating that a given timestamp just occurred</note>
       </trans-unit>
@@ -1431,7 +1431,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="optional" xml:space="preserve">
         <source>optional</source>
-        <target>optional</target>
+        <target>任意</target>
         
         <note>Label indicating that a form input is optional.</note>
       </trans-unit>
@@ -1467,7 +1467,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="satoshi" xml:space="preserve">
         <source>satoshi</source>
-        <target>satoshi</target>
+        <target>サトシ</target>
         
         <note>Example username of Bitcoin creator(s), Satoshi Nakamoto.</note>
       </trans-unit>
@@ -1491,7 +1491,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="you" xml:space="preserve">
         <source>you</source>
-        <target>Du</target>
+        <target>あなた</target>
         
         <note>You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself.</note>
       </trans-unit>
@@ -1509,20 +1509,20 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
     </body>
   </file>
-  <file original="damus/en-US.lproj/Localizable.stringsdict" source-language="en-US" target-language="de" datatype="plaintext">
+  <file original="damus/en-US.lproj/Localizable.stringsdict" source-language="en-US" target-language="ja" datatype="plaintext">
     <header>
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.2" build-num="14C18"/>
     </header>
     <body>
       <trans-unit id="/collapsed_event_view_other_notes:dict/NOTES:dict/one:dict/:string" xml:space="preserve">
         <source>%d other note</source>
-        <target>%d andere Notiz</target>
+        <target>%d その他のNote</target>
         
         <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped.</note>
       </trans-unit>
       <trans-unit id="/collapsed_event_view_other_notes:dict/NOTES:dict/other:dict/:string" xml:space="preserve">
         <source>%d other notes</source>
-        <target>%d andere Notizen</target>
+        <target>%d その他のNote</target>
         
         <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped.</note>
       </trans-unit>
@@ -1534,13 +1534,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/followers_count:dict/FOLLOWERS:dict/one:dict/:string" xml:space="preserve">
         <source>Follower</source>
-        <target>Follower</target>
+        <target>フォロワー</target>
         
         <note>Part of a larger sentence to describe how many people are following a user.</note>
       </trans-unit>
       <trans-unit id="/followers_count:dict/FOLLOWERS:dict/other:dict/:string" xml:space="preserve">
         <source>Followers</source>
-        <target>Follower</target>
+        <target>フォロワー</target>
         
         <note>Part of a larger sentence to describe how many people are following a user.</note>
       </trans-unit>
@@ -1558,13 +1558,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/reactions_count:dict/REACTIONS:dict/one:dict/:string" xml:space="preserve">
         <source>Reaction</source>
-        <target>Reaktion</target>
+        <target>リアクション</target>
         
         <note>Part of a larger sentence to describe how many reactions there are on a post.</note>
       </trans-unit>
       <trans-unit id="/reactions_count:dict/REACTIONS:dict/other:dict/:string" xml:space="preserve">
         <source>Reactions</source>
-        <target>Reaktionen</target>
+        <target>リアクション</target>
         
         <note>Part of a larger sentence to describe how many reactions there are on a post.</note>
       </trans-unit>
@@ -1576,31 +1576,31 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/relays_count:dict/RELAYS:dict/one:dict/:string" xml:space="preserve">
         <source>Relay</source>
-        <target>Relay</target>
+        <target>リレー</target>
         
         <note>Part of a larger sentence to describe how many relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="/relays_count:dict/RELAYS:dict/other:dict/:string" xml:space="preserve">
         <source>Relays</source>
-        <target>Relays</target>
+        <target>リレー</target>
         
         <note>Part of a larger sentence to describe how many relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="/replying_to_one_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>Replying to %@%#@OTHERS@</source>
-        <target>Antwort an %@%#@OTHERS@</target>
+        <target>%@%#@OTHERS@ にリプライ</target>
         
         <note>Label to indicate that the user is replying to 1 user and others.</note>
       </trans-unit>
       <trans-unit id="/replying_to_one_and_others:dict/OTHERS:dict/one:dict/:string" xml:space="preserve">
         <source> &amp; %d other</source>
-        <target> &amp; %d andere</target>
+        <target> &amp; %d その他</target>
         
         <note>Label to indicate that the user is replying to 1 user and others.</note>
       </trans-unit>
       <trans-unit id="/replying_to_one_and_others:dict/OTHERS:dict/other:dict/:string" xml:space="preserve">
         <source> &amp; %d others</source>
-        <target> &amp; %d andere</target>
+        <target> &amp; %d その他</target>
         
         <note>Label to indicate that the user is replying to 1 user and others.</note>
       </trans-unit>
@@ -1610,19 +1610,19 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/replying_to_two_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>Replying to %@, %@%#@OTHERS@</source>
-        <target>Antwort an %@, %@%#@OTHERS@</target>
+        <target>%@, %@%#@OTHERS@ にリプライ</target>
         
         <note>Label to indicate that the user is replying to 2 users and others.</note>
       </trans-unit>
       <trans-unit id="/replying_to_two_and_others:dict/OTHERS:dict/one:dict/:string" xml:space="preserve">
         <source> &amp; %d other</source>
-        <target> &amp; %d andere</target>
+        <target> &amp; %d その他</target>
         
         <note>Label to indicate that the user is replying to 2 users and others.</note>
       </trans-unit>
       <trans-unit id="/replying_to_two_and_others:dict/OTHERS:dict/other:dict/:string" xml:space="preserve">
         <source> &amp; %d others</source>
-        <target> &amp; %d andere</target>
+        <target> &amp; %d その他</target>
         
         <note>Label to indicate that the user is replying to 2 users and others.</note>
       </trans-unit>
@@ -1638,13 +1638,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/reposts_count:dict/REPOSTS:dict/one:dict/:string" xml:space="preserve">
         <source>Repost</source>
-        <target>geteilter Beitrag</target>
+        <target>リポスト</target>
         
         <note>Part of a larger sentence to describe how many reposts there are.</note>
       </trans-unit>
       <trans-unit id="/reposts_count:dict/REPOSTS:dict/other:dict/:string" xml:space="preserve">
         <source>Reposts</source>
-        <target>geteilte Beiträge</target>
+        <target>リポスト</target>
         
         <note>Part of a larger sentence to describe how many reposts there are.</note>
       </trans-unit>
