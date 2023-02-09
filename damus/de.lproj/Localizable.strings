@@ -20,7 +20,7 @@
 "%@" = "%@";
 
 /* Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
-Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
+Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
 "%@ %@" = "%@ %@";
 
 /* Alert message that informs a user was blocked. */
@@ -36,7 +36,7 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Belohne Beiträge deiner Freunde und sammle Sats mit Bitcoin⚡️, der eigenen Währung des Internets.";
 
 /* Number of zap payments on a post.
-Number of profiles a user is following. */
+Number of relay servers a user is connected. */
 "%lld" = "%lld";
 
 /* Fraction of how many of the user's relay servers that are operational. */
@@ -45,7 +45,7 @@ Number of profiles a user is following. */
 /* Placeholder for event mention. */
 "< e >" = "< e >";
 
-/* No comment provided by engineer. */
+/* Text indicating the zap amount. i.e. number of satoshis that were tipped to a user */
 "⚡️ %@" = "⚡️ %@";
 
 /* Label to prompt for about text entry for user to describe about themself. */
@@ -79,7 +79,7 @@ Number of profiles a user is following. */
 /* Any amount of sats */
 "Any" = "Beliebig";
 
-/* Example URL to LibreTranslate server */
+/* Prompt for optional entry of API Key to use translation server. */
 "API Key (optional)" = "API Schlüssel (optional)";
 
 /* Alert message to ask if user wants to repost a post. */
@@ -283,7 +283,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button to hide a post from a user who has been blocked. */
 "Hide" = "Verstecken";
 
-/* Button to hide the LibreTranslate server API key. */
+/* Button to hide the DeepL translation API key.
+   Button to hide the LibreTranslate server API key. */
 "Hide API Key" = "API Schlüssel verstecken";
 
 /* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
@@ -312,9 +313,6 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Button to complete account creation and start using the app. */
 "Let's go!" = "Los geht’s!";
-
-/* Section title for selecting the server that hosts the LibreTranslate machine translation API. */
-"LibreTranslate Translations" = "LibreTranslate Übersetzungen";
 
 /* Placeholder text for entry of Lightning Address or LNURL. */
 "Lightning Address or LNURL" = "Lightning-Adresse oder LNURL";
@@ -346,14 +344,20 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label for NIP-05 Verification section of user profile form. */
 "NIP-05 Verification" = "NIP-05-Verifizierung";
 
+/* Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key. */
+"No" = "Nein";
+
 /* Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists. */
 "No block list found, create a new one? This will overwrite any previous block lists." = "Es wurde keine Blockier-Liste gefunden, soll eine neue erzeugt werden? Dies überschreibt eventuelle frühere Blockier-Listen.";
 
 /* No search results. */
 "none" = "keine";
 
-/* Dropdown option for selecting no translation server. */
+/* Dropdown option for selecting no translation service. */
 "None" = "Kein";
+
+/* Alert user that they might be attempting to paste a private key and ask them to confirm. */
+"Note contains \"nsec1\" private key. Are you sure?" = "Notiz enthält einen privaten \"nsec1\"-Schlüssel. Bist du sicher?";
 
 /* Indicates that there are no notes in the timeline to view. */
 "Nothing to see here. Check back later!" = "Hier gibt es nichts zu sehen. Schau später wieder vorbei!";
@@ -427,7 +431,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button to reject the end user license agreement, which disallows the user from being let into the app. */
 "Reject" = "Ablehnen";
 
-/* Text field for relay server. Used for testing purposes. */
+/* Label to display relay address.
+   Text field for relay server. Used for testing purposes. */
 "Relay" = "Relay";
 
 /* Sidebar menu label for Relay servers view
@@ -515,7 +520,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Sidebar menu label for accessing the app settings */
 "Settings" = "Einstellungen";
 
-/* Button to share an image.
+/* Button to share a post
+   Button to share an image.
    Button to share the link to a profile. */
 "Share" = "Teilen";
 
@@ -523,7 +529,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Toggle to show or hide user's secret account login key. */
 "Show" = "Anzeigen";
 
-/* Button to hide the LibreTranslate server API key. */
+/* Button to show the DeepL translation API key.
+   Button to show the LibreTranslate server API key. */
 "Show API Key" = "API Schlüssel anzeigen";
 
 /* Toggle to show or hide selection of wallet. */
@@ -566,7 +573,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button to indicate that the note is in the process of being translated from a different language. */
 "Translating from (lang)..." = "Übersetzung aus (lang)...";
 
-/* No comment provided by engineer. */
+/* Text field prompt asking user to type the word DELETE to confirm that they want to proceed with deleting their account. The all caps lock DELETE word should not be translated. Everything else should. */
 "Type DELETE to delete" = "Gib DELETE ein, um zu löschen";
 
 /* Text box prompt to ask user to type their post. */
@@ -626,6 +633,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Text of button that confirms to overwrite the existing mutelist. */
 "Yes, Overwrite" = "Ja, überschreiben";
+
+/* Button to proceed with posting a note even though it looks like they might be posting a private key. */
+"Yes, Post with Private Key" = "Ja, teile mit privatem Schlüssel";
 
 /* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
 "you" = "Du";

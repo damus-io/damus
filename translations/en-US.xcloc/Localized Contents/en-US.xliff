@@ -479,6 +479,11 @@ Number of relay servers a user is connected.</note>
         <target>Follow</target>
         <note>Button to follow a user.</note>
       </trans-unit>
+      <trans-unit id="Follow Back" xml:space="preserve">
+        <source>Follow Back</source>
+        <target>Follow Back</target>
+        <note>Button to follow a user back.</note>
+      </trans-unit>
       <trans-unit id="Follow me on nostr" xml:space="preserve">
         <source>Follow me on nostr</source>
         <target>Follow me on nostr</target>
@@ -504,6 +509,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Follows</source>
         <target>Follows</target>
         <note>Text to indicate that button next to it is in a state that will follow a profile when tapped.</note>
+      </trans-unit>
+      <trans-unit id="Follows you" xml:space="preserve">
+        <source>Follows you</source>
+        <target>Follows you</target>
+        <note>Text to indicate that a user is following your profile.</note>
       </trans-unit>
       <trans-unit id="Free" xml:space="preserve">
         <source>Free</source>

@@ -4,6 +4,9 @@
 /* Bundle name */
 "CFBundleName" = "达摩";
 
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "需要本地认证以访问私钥";
+
 /* Privacy - Photo Library Additions Usage Description */
 "NSPhotoLibraryAddUsageDescription" = "允许达摩访问您的相册以便保存图片。";
 

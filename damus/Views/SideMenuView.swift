@@ -17,6 +17,7 @@ struct SideMenuView: View {
     @Environment(\.colorScheme) var colorScheme
     
     var sideBarWidth = min(UIScreen.main.bounds.size.width * 0.65, 400.0)
+    let verticalSpacing: CGFloat = 20
     
     func fillColor() -> Color {
         colorScheme == .light ? Color("DamusWhite") : Color("DamusBlack")
@@ -33,104 +34,86 @@ struct SideMenuView: View {
             }
             .background(Color("DamusDarkGrey").opacity(0.6))
             .opacity(isSidebarVisible ? 1 : 0)
-            .animation(.easeInOut.delay(0.2), value: isSidebarVisible)
+            .animation(.default, value: isSidebarVisible)
             .onTapGesture {
                 isSidebarVisible.toggle()
             }
             content
         }
-        .edgesIgnoringSafeArea(.all)
-
     }
     
     var content: some View {
         HStack(alignment: .top) {
             ZStack(alignment: .top) {
                 fillColor()
-
-                VStack(alignment: .leading, spacing: 20) {
-                    let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
-                    let followers = FollowersModel(damus_state: damus_state, target: damus_state.pubkey)
-                    let profile_model = ProfileModel(pubkey: damus_state.pubkey, damus: damus_state)
+                    .ignoresSafeArea()
+                
+                VStack(alignment: .leading, spacing: 0) {
                     
-                    NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
-                        if let picture = damus_state.profiles.lookup(id: damus_state.pubkey)?.picture {
-                            ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, picture: picture)
-                        } else {
-                            Image(systemName: "person.fill")
+                    VStack(alignment: .leading, spacing: 0) {
+                        let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
+                        let followers = FollowersModel(damus_state: damus_state, target: damus_state.pubkey)
+                        let profile_model = ProfileModel(pubkey: damus_state.pubkey, damus: damus_state)
+                        
+                        NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
+                            
+                            HStack {
+                                ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles)
+                                
+                                VStack(alignment: .leading) {
+                                    if let display_name = profile?.display_name {
+                                        Text(display_name)
+                                            .foregroundColor(textColor())
+                                            .font(.title)
+                                            .lineLimit(1)
+                                    }
+                                    if let name = profile?.name {
+                                        Text("@" + name)
+                                            .foregroundColor(Color("DamusMediumGrey"))
+                                            .font(.body)
+                                            .lineLimit(1)
+                                    }
+                                }
+                            }
+                            .padding(.bottom, verticalSpacing)
                         }
-                        VStack(alignment: .leading) {
-                            if let display_name = profile?.display_name {
-                                Text(display_name)
-                                    .foregroundColor(textColor())
-                                    .font(.title)
+                        
+                        Divider()
+                        
+                        ScrollView {
+                            VStack(spacing: verticalSpacing) {
+                                NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
+                                    navLabel(title: NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), systemImage: "person")
+                                }
+                                
+                                /*
+                                NavigationLink(destination: EmptyView()) {
+                                    navLabel(title: NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), systemImage: "bolt")
+                                }
+                                */
+                                 
+                                NavigationLink(destination: MutelistView(damus_state: damus_state, users: get_mutelist_users(damus_state.contacts.mutelist) )) {
+                                    navLabel(title: NSLocalizedString("Blocked", comment: "Sidebar menu label for Profile view."), systemImage: "exclamationmark.octagon")
+                                }
+                                
+                                NavigationLink(destination: RelayConfigView(state: damus_state)) {
+                                    navLabel(title: NSLocalizedString("Relays", comment: "Sidebar menu label for Relays view."), systemImage: "network")
+                                }
+                                
+                                NavigationLink(destination: ConfigView(state: damus_state)) {
+                                    navLabel(title: NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), systemImage: "gear")
+                                }
                             }
-                            if let name = profile?.name {
-                                Text("@" + name)
-                                    .foregroundColor(Color("DamusMediumGrey"))
-                                    .font(.body)
-                            }
+                            .padding([.top, .bottom], verticalSpacing)
                         }
                     }
+                    .simultaneousGesture(TapGesture().onEnded {
+                        isSidebarVisible = false
+                    })
                     
                     Divider()
-                        .padding(.trailing,40)
-
-                    NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
-                        Label(NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), systemImage: "person")
-                            .font(.title2)
-                            .foregroundColor(textColor())
-                    }
-                    .simultaneousGesture(TapGesture().onEnded {
-                        isSidebarVisible = false
-                    })
                     
-                    /*
-                    NavigationLink(destination: EmptyView()) {
-                        Label(NSLocalizedString("Relays", comment: "Sidebar menu label for Relay servers view"), systemImage: "xserve")
-                            .font(.title2)
-                            .foregroundColor(textColor())
-                    }
-                    .simultaneousGesture(TapGesture().onEnded {
-                        isSidebarVisible.toggle()
-                    })
-                    */
-                    
-                    /*
-                    NavigationLink(destination: EmptyView()) {
-                        Label(NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), systemImage: "bolt")
-                            .font(.title2)
-                            .foregroundColor(textColor())
-                    }
-                    .simultaneousGesture(TapGesture().onEnded {
-                        isSidebarVisible.toggle()
-                    })
-                     */
-                    
-                    NavigationLink(destination: MutelistView(damus_state: damus_state, users: get_mutelist_users(damus_state.contacts.mutelist) )) {
-                        Label(NSLocalizedString("Blocked", comment: "Sidebar menu label for Profile view."), systemImage: "exclamationmark.octagon")
-                            .font(.title2)
-                            .foregroundColor(textColor())
-                    }
-                    
-                    NavigationLink(destination: RelayConfigView(state: damus_state)) {
-                        Label(NSLocalizedString("Relays", comment: "Sidebar menu label for Relays view."), systemImage: "network")
-                            .font(.title2)
-                            .foregroundColor(textColor())
-                    }
-                    
-                    NavigationLink(destination: ConfigView(state: damus_state)) {
-                        Label(NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), systemImage: "gear")
-                            .font(.title2)
-                            .foregroundColor(textColor())
-                    }
-                    .simultaneousGesture(TapGesture().onEnded {
-                        isSidebarVisible = false
-                    })
-                    
-                    Spacer()
-                    
-                    HStack(alignment: .center) {
+                    HStack() {
                         Button(action: {
                             //ConfigView(state: damus_state)
                             if damus_state.keypair.privkey == nil {
@@ -142,6 +125,7 @@ struct SideMenuView: View {
                             Label(NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account."), systemImage: "pip.exit")
                                 .font(.title3)
                                 .foregroundColor(textColor())
+                                .frame(maxWidth: .infinity, alignment: .leading)
                         })
                         
                         Spacer()
@@ -152,22 +136,18 @@ struct SideMenuView: View {
                             Label(NSLocalizedString("", comment: "Sidebar menu label for accessing QRCode view"), systemImage: "qrcode")
                                 .font(.title)
                                 .foregroundColor(textColor())
-                                .padding(.trailing, 20)
                         }).fullScreenCover(isPresented: $showQRCode) {
                             QRCodeView(damus_state: damus_state)
                         }
                     }
+                    .padding(.top, verticalSpacing)
                 }
-                .padding(.top, 60)
-                .padding(.bottom, 40)
-                .padding(.leading, 40)
+                .padding(.top, -15)
+                .padding([.leading, .trailing, .bottom], 30)
             }
             .frame(width: sideBarWidth)
             .offset(x: isSidebarVisible ? 0 : -sideBarWidth)
             .animation(.default, value: isSidebarVisible)
-            .onTapGesture {
-                isSidebarVisible.toggle()
-            }
             .alert("Logout", isPresented: $confirm_logout) {
                 Button(NSLocalizedString("Cancel", comment: "Cancel out of logging out the user."), role: .cancel) {
                     confirm_logout = false
@@ -181,6 +161,15 @@ struct SideMenuView: View {
 
             Spacer()
         }
+    }
+    
+    
+    @ViewBuilder
+    func navLabel(title: String, systemImage: String) -> some View {
+        Label(title, systemImage: systemImage)
+            .font(.title2)
+            .foregroundColor(textColor())
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

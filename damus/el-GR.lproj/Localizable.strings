@@ -2,16 +2,16 @@
 "   " = "61b6edf1108e6f396680a33b02486a70_tr";
 
 /* Description of how the nip05 identifier would be used for verification. */
-"'%@' at '%@' will be used for verification" = "'%@' à '@' sera utilisé pour la vérification";
+"'%@' at '%@' will be used for verification" = "'%@' at '%@' θα χρησιμοποιηθεί για επαλήθευση";
 
 /* Description of why the nip05 identifier is invalid. */
-"'%@' is an invalid NIP-05 identifier. It should look like an email." = "'%@' n'est pas un identifiant NIP-05 valide. Il doit avoir le format d'une adresse courriel.";
+"'%@' is an invalid NIP-05 identifier. It should look like an email." = "'%@' είναι ένα λανθασμένο NIP-05 αναγνωριστικό. Θα πρέπει να έχει την μορφή email.";
 
 /* Navigation bar title for view that shows who is following a user. */
-"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "Abonnés de (Profile.displayName(profile: profile, pubkey: whos))";
+"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "(Profile.displayName(profile: profile, pubkey: whos))'s Ακόλουθοι";
 
 /* Navigation bar title for view that shows who a user is following. */
-"(who) following" = "(who) suit";
+"(who) following" = "(ποίους) ακολουθεί";
 
 /* Prefix character to username. */
 "@" = "@";
@@ -24,16 +24,16 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
 "%@ %@" = "%@ %@";
 
 /* Alert message that informs a user was blocked. */
-"%@ has been blocked" = "%@ est blocké";
+"%@ has been blocked" = "%@ έχει μπλοκαριστεί";
 
 /* Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. La création d'un compte ne nécessite pas de numéro de téléphone, d'e-mail ou de nom. Commencez tout de suite sans aucune friction.";
+"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. Η δημιουργία λογαριασμού δεν απαιτεί τηλεφωνικό αριθμό, email ή όνομα. Ξεκινήστε αμέσως χωρίς προστιβές.";
 
 /* Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. Messagerie privée cryptée de bout en bout. Gardez les Big Tech hors de vos DMs";
+"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. End-to-End κρυπτογραφημένα προσωπικά μηνύματα. Κρατήστε τις μεγάλες εταιρείες τεχνολογίας μακριά από τα προσωπικά σας μηνύματα.";
 
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Donnez un pourboire aux publications de vos amis et accumulez les sats avec Bitcoin⚡️, la monnaie native d'Internet.";
+"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Δώστε φιλοδώρημα στις δημοσιεύσεις των φίλων σας και μαζέψτε Bitcoin sats⚡️, το νόμισμα του ίντερνετ.";
 
 /* Number of zap payments on a post.
 Number of relay servers a user is connected. */
@@ -49,59 +49,59 @@ Number of relay servers a user is connected. */
 "⚡️ %@" = "⚡️ %@";
 
 /* Label to prompt for about text entry for user to describe about themself. */
-"About" = "À propos de";
+"About" = "Σχετικά";
 
 /* Label for About Me section of user profile form. */
-"About Me" = "À propos de moi";
+"About Me" = "Σχετικά με εμένα";
 
 /* Placeholder text for About Me description. */
-"Absolute Boss" = "Patron absolu";
+"Absolute Boss" = "Απόλυτο αφεντικό";
 
 /* Button to accept the end user license agreement before being allowed into the app. */
-"Accept" = "Accepter";
+"Accept" = "Αποδοχή";
 
 /* Label to indicate the public ID of the account. */
-"Account ID" = "Identifiant de compte";
+"Account ID" = "ID Λογαρισμού";
 
 /* Title for confirmation dialog to either share, report, or block a profile. */
-"Actions" = "Actions";
+"Actions" = "Ενέργειες";
 
 /* Button to add recommended relay server.
    Button to confirm adding user inputted relay. */
-"Add" = "Ajouter";
+"Add" = "Προσθήκη";
 
 /* Button label to re-add all original participants as profiles to reply to in a note */
-"Add all" = "Tout ajouter";
+"Add all" = "Προσθήκη όλων";
 
 /* Label for section for adding a relay server. */
-"Add Relay" = "Ajouter un relais";
+"Add Relay" = "Προσθήκη διακομιστή Relay";
 
 /* Label to display relay contact user. */
-"Admin" = "Admin";
+"Admin" = "Διαχειριστής";
 
 /* Any amount of sats */
-"Any" = "Montant au choix";
+"Any" = "Ποσό";
 
 /* Prompt for optional entry of API Key to use translation server. */
-"API Key (optional)" = "Clé d'API (optionnelle)";
+"API Key (optional)" = "Κλειδί API (προαιρετικό)";
 
 /* Prompt for required entry of API Key to use translation server. */
-"API Key (required)" = "Clé d'API (requise)";
+"API Key (required)" = "Κλειδί API (απαιτείται)";
 
 /* Alert message to ask if user wants to repost a post. */
-"Are you sure you want to repost this?" = "Êtes-vous sûr de vouloir republier ceci ?";
+"Are you sure you want to repost this?" = "Είστε βέβαιοι ότι θέλετε να το αναδημοσιεύσετε;";
 
 /* Label for Banner Image section of user profile form. */
-"Banner Image" = "Image de la bannière";
+"Banner Image" = "Φωτογραφία εξωφύλλου";
 
 /* Reminder to user that they should save their account information. */
-"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "Avant de commencer, vous devrez enregistrer les informations de votre compte, sinon vous ne pourrez plus vous connecter à l'avenir si vous désinstallez Damus.";
+"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "Πριν ξεκινήσουμε, θα χρειαστεί να αποθηκεύσετε τις πληροφορίες του λογαριασμού σας, διαφορετικά θα χάσετε την πρόσβαση σας αν ποτέ απεγκαταστήσετε το Damus.";
 
 /* Dropdown option label for Lightning wallet, Bitcoin Beach. */
 "Bitcoin Beach" = "Bitcoin Beach";
 
 /* Label for Bitcoin Lightning Tips section of user profile form. */
-"Bitcoin Lightning Tips" = "Pourboires de Bitcoin Lightning";
+"Bitcoin Lightning Tips" = "Bitcoin Lightning Tips";
 
 /* Dropdown option label for Lightning wallet, Blixt Wallet */
 "Blixt Wallet" = "Blixt Wallet";
@@ -109,31 +109,31 @@ Number of relay servers a user is connected. */
 /* Alert button to block a user.
    Button to block a profile.
    Context menu option for blocking users. */
-"Block" = "Bloquer";
+"Block" = "Μπλοκάρισμα";
 
 /* Alert message prompt to ask if a user should be blocked. */
-"Block %@?" = "Bloquer %@?";
+"Block %@?" = "Μπλοκάρισμα %@;";
 
 /* Title of alert for blocking a user. */
-"Block User" = "Bloquer un utilisateur";
+"Block User" = "Μπλοκάρισμα χρήστη";
 
 /* Sidebar menu label for Profile view. */
-"Blocked" = "Bloqué";
+"Blocked" = "Μπλοκαρισμένοι";
 
 /* Navigation title of view to see list of blocked users. */
-"Blocked Users" = "Utilisateurs bloqués";
+"Blocked Users" = "Μπλοκαρισμένοι χρήστες";
 
 /* Dropdown option label for Lightning wallet, Blue Wallet. */
 "Blue Wallet" = "Blue Wallet";
 
 /* Accessibility label for boosts button */
-"Boosts" = "Promouvoir";
+"Boosts" = "Boosts";
 
 /* Dropdown option label for Lightning wallet, Breez. */
 "Breez" = "Breez";
 
 /* Context menu option for broadcasting the user's note to all of the user's connected relay servers. */
-"Broadcast" = "Diffuser";
+"Broadcast" = "Αναμετάδοση";
 
 /* Alert button to cancel out of alert for blocking a user.
    Button to cancel out of alert that creates a new mutelist.
@@ -142,394 +142,394 @@ Number of relay servers a user is connected. */
    Button to cancel out of view adding user inputted relay.
    Cancel deleting the user.
    Cancel out of logging out the user. */
-"Cancel" = "Annuler";
+"Cancel" = "Άκυρο";
 
 /* Dropdown option label for Lightning wallet, Cash App. */
 "Cash App" = "Cash App";
 
 /* Navigation bar title for Chatroom view. */
-"Chat" = "Chatter";
+"Chat" = "Συνομιλίες";
 
 /* Button for clearing cached data. */
-"Clear" = "Vider";
+"Clear" = "Καθαρισμός";
 
 /* Section title for clearing cached data. */
-"Clear Cache" = "Vider le cache";
+"Clear Cache" = "Καθαρισμός προσωρινής μνήμης";
 
 /* Label to display relay contact information. */
-"Contact" = "Contact";
+"Contact" = "Επικοινωνία";
 
 /* Label indicating that a user's key was copied. */
-"Copied" = "Copié";
+"Copied" = "Αντιγράφηκε";
 
 /* Button to copy a relay server address. */
-"Copy" = "Copier";
+"Copy" = "Αντιγραφή";
 
 /* Context menu option for copying the ID of the account that created the note. */
-"Copy Account ID" = "Copier l'identifiant de compte";
+"Copy Account ID" = "Αντιγραφή ID λογαριασμού";
 
 /* Context menu option to copy an image into clipboard.
    Context menu option to copy an image to clipboard. */
-"Copy Image" = "Copier l'image";
+"Copy Image" = "Αντιγραφή εικόνας";
 
 /* Context menu option to copy the URL of an image into clipboard. */
-"Copy Image URL" = "Copier l'URL de l'image";
+"Copy Image URL" = "Αντιγραφή URL εικόνας";
 
 /* Title of section for copying a Lightning invoice identifier. */
-"Copy invoice" = "Copier la facture";
+"Copy invoice" = "Αντιγραφή ποσού";
 
 /* Context menu option for copying a user's Lightning URL. */
-"Copy LNURL" = "Copier le LNURL";
+"Copy LNURL" = "Αντιγραφή LNURL";
 
 /* Context menu option for copying the ID of the note. */
-"Copy Note ID" = "Copier l'identifiant de la note";
+"Copy Note ID" = "Αντιγραφή ID σημείωσης";
 
 /* Context menu option for copying the JSON text from the note. */
-"Copy Note JSON" = "Copier le JSON de la note";
+"Copy Note JSON" = "Αντιγραφή JSON σημείωσης";
 
 /* Button to copy report ID. */
-"Copy Report ID" = "Copier l'ID du signalement";
+"Copy Report ID" = "Αντιγραφή ID αναφοράς";
 
 /* Context menu option for copying the text from an note. */
-"Copy Text" = "Copier le texte";
+"Copy Text" = "Αντιγραφή κειμένου";
 
 /* Context menu option for copying the ID of the user who created the note. */
-"Copy User Pubkey" = "Copier la clé publique";
+"Copy User Pubkey" = "Αντιγραφή δημόσιου κλειδιού χρήστη";
 
 /* Alert message to indicate that the blocked user could not be found. */
-"Could not find user to block..." = "Aucun utilisateur à bloquer";
+"Could not find user to block..." = "Ο χρήστης για μπλοκάρισμα δεν βρέθηκε...";
 
 /* Button to create account. */
-"Create" = "Créer";
+"Create" = "Δημιουργία";
 
 /* Button to create an account. */
-"Create Account" = "Créer un compte";
+"Create Account" = "Δημιουργία λογαριασμού";
 
 /* Title of alert prompting the user to create a new mutelist. */
-"Create new mutelist" = "Créer une nouvelle liste muette";
+"Create new mutelist" = "Δημιουργία νέας λίστας αποκλεισμού";
 
 /* Example description about Bitcoin creator(s), Satoshi Nakamoto. */
-"Creator(s) of Bitcoin. Absolute legend." = "Créateur(s) de Bitcoin. Légende absolue.";
+"Creator(s) of Bitcoin. Absolute legend." = "Δημιουργός(οί) του Bitcoin. Απόλυτος θρύλος.";
 
 /* Dropdown option for selecting a custom translation server. */
-"Custom" = "Serveur personnalisé";
+"Custom" = "Προσαρμογή";
 
 /* Name of the app, shown on the first screen when user is not logged in. */
 "Damus" = "Damus";
 
 /* Dropdown option for selecting DeepL as the translation service. */
-"DeepL (Proprietary, Higher Accuracy)" = "DeepL (Propriétaire, haute précision)";
+"DeepL (Proprietary, Higher Accuracy)" = "DeepL (Υπηρεσία, Υψηλότερη Ακρίβεια)";
 
 /* Button to pay a Lightning invoice with the user's default Lightning wallet. */
-"Default Wallet" = "Portefeuille par défaut";
+"Default Wallet" = "Προεπιλεγμένο πορτοφόλι";
 
 /* Button for deleting the users account.
    Button to delete a relay server that the user connects to.
    Button to remove a user from their blocklist.
    Section title for deleting the user */
-"Delete" = "Effacer";
+"Delete" = "Διαγραφή";
 
 /* Alert for deleting the users account.
    Button to delete the user's account. */
-"Delete Account" = "Supprimer votre compte";
+"Delete Account" = "Διαγραφή λογαριασμού";
 
 /* Alert message to indicate this is a deleted account */
-"Deleted Account" = "Compte supprimé";
+"Deleted Account" = "Διεγραμμένος λογαριασμός";
 
 /* Label to display relay description. */
-"Description" = "Description";
+"Description" = "Περιγραφή";
 
 /* Button to dismiss a text field alert. */
-"Dismiss" = "Rejeter";
+"Dismiss" = "Απόρριψη";
 
 /* Label to prompt display name entry. */
-"Display Name" = "Afficher le nom";
+"Display Name" = "Εμφανιζόμενο όνομα";
 
 /* Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
    Navigation title for view of DMs, where DM is an English abbreviation for Direct Message. */
-"DMs" = "Messages privés";
+"DMs" = "Προσωπικά Μηνύματα";
 
 /* Button to dismiss wallet selection view for paying Lightning invoice. */
-"Done" = "Terminé";
+"Done" = "Ολοκλήρωση";
 
 /* Heading indicating that this application allows users to earn money. */
-"Earn Money" = "Gagne de l'argent";
+"Earn Money" = "Βγάλτε χρήματα";
 
 /* Button to edit user's profile. */
-"Edit" = "Modifier";
+"Edit" = "Επεξεργασία";
 
 /* Text indicating that the view is used for editing which participants are replied to in a note. */
-"Edit participants" = "Modifier les participants";
+"Edit participants" = "Επεξεργασία συμμετεχόντων";
 
 /* Heading indicating that this application keeps private messaging end-to-end encrypted. */
-"Encrypted" = "Crypté";
+"Encrypted" = "Κρυπτογραφημένα";
 
 /* Prompt for user to enter an account key to login. */
-"Enter your account key to login:" = "Entrez votre clé de compte pour vous connecter:";
+"Enter your account key to login:" = "Εισάγετε το κλειδί του λογαριασμού σας για είσοδο:";
 
 /* Error message indicating why saving keys failed. */
-"Error: %@" = "Erreur: %@";
+"Error: %@" = "Σφάλμα: %@";
 
 /* Label indicating that the below text is the EULA, an acronym for End User License Agreement. */
-"EULA" = "CLUF";
+"EULA" = "EULA";
 
 /* Button to follow a user. */
-"Follow" = "S'abonner";
+"Follow" = "Ακολουθήστε";
 
 /* Button to follow a user back. */
-"Follow Back" = "Suivre en retour";
+"Follow Back" = "Ακολουθήστε";
 
 /* Text on QR code view to prompt viewer looking at screen to follow the user. */
-"Follow me on nostr" = "Me suivre sur nostr";
+"Follow me on nostr" = "Ακολουθήστε με στο nostr";
 
 /* Label describing followers of a user. */
-"Followers" = "Abonnés";
+"Followers" = "Ακόλουθοι";
 
 /* Text to indicate that the button next to it is in a state that indicates that it is in the process of following a profile.
 Part of a larger sentence to describe how many profiles a user is following. */
-"Following" = "Abonnements";
+"Following" = "Ακολουθεί";
 
 /* Label to indicate that the user is in the process of following another user. */
-"Following..." = "Abonnements...";
+"Following..." = "Ακολουθεί...";
 
 /* Text to indicate that button next to it is in a state that will follow a profile when tapped. */
-"Follows" = "S'abonner";
+"Follows" = "Ακολουθήστε";
 
 /* Text to indicate that a user is following your profile. */
-"Follows you" = "Vous suit";
+"Follows you" = "Σας ακολουθούν";
 
 /* Dropdown option for selecting Free plan for DeepL translation service. */
-"Free" = "Gratuit";
+"Free" = "Δωρεάν";
 
 /* Button to navigate to DeepL website to get a translation API key. */
-"Get API Key" = "Obtenir une clé d'API";
+"Get API Key" = "Λάβετε κλειδί API";
 
 /* Navigation bar title for Global view where posts from all connected relay servers appear. */
-"Global" = "Global";
+"Global" = "Κεντρική";
 
 /* Navigation link to go to post referenced by hex code. */
-"Goto post %@" = "Aller au post %@";
+"Goto post %@" = "Πήγαινε στη δημοσίευση %@";
 
 /* Navigation link to go to profile. */
-"Goto profile %@" = "Aller au profil %@";
+"Goto profile %@" = "Πήγαινε στο προφίλ %@";
 
 /* Button to hide a post from a user who has been blocked. */
-"Hide" = "Cacher";
+"Hide" = "Απόκρυψη";
 
 /* Button to hide the DeepL translation API key.
    Button to hide the LibreTranslate server API key. */
-"Hide API Key" = "Cacher la clé d'API";
+"Hide API Key" = "Απόκρυψη κλειδιού API";
 
 /* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
-"Home" = "Accueil";
+"Home" = "Αρχική";
 
 /* Placeholder example text for profile picture URL. */
-"https://example.com/pic.jpg" = "https://exemple.com/pic.jpg";
+"https://example.com/pic.jpg" = "https://example.com/pic.jpg";
 
 /* Placeholder example text for website URL for user profile. */
 "https://jb55.com" = "https://jb55.com";
 
 /* Button for user to report that the account or content has illegal content. */
-"Illegal content" = "Contenu illégal";
+"Illegal content" = "Παράνομο περιεχόμενο";
 
 /* Error message indicating that an invalid account key was entered for login. */
-"Invalid key" = "Clé non valide";
+"Invalid key" = "Λανθασμένο κλειδί";
 
 /* Button for user to report that the account or content has spam. */
-"It's spam" = "C'est du pourriel";
+"It's spam" = "Είναι ανεπιθύμητο";
 
 /* Placeholder example text for identifier used for NIP-05 verification. */
 "jb55@jb55.com" = "jb55@jb55.com";
 
 /* Moves the post button to the left side of the screen */
-"Left Handed" = "Gaucher";
+"Left Handed" = "Για αριστερόχειρες";
 
 /* Button to complete account creation and start using the app. */
-"Let's go!" = "Allons-y!";
+"Let's go!" = "Φύγαμε!";
 
 /* Dropdown option for selecting LibreTranslate as the translation service. */
-"LibreTranslate (Open Source)" = "LibreTranslate (Logiciel Libre)";
+"LibreTranslate (Open Source)" = "LibreTranslate (Ανοιχτού κώδικα)";
 
 /* Placeholder text for entry of Lightning Address or LNURL. */
-"Lightning Address or LNURL" = "Adresse Lightning ou LNURL";
+"Lightning Address or LNURL" = "Διεύθυνση Lightning ή LNURL";
 
 /* Indicates that the view is for paying a Lightning invoice. */
-"Lightning Invoice" = "Facture Lightning";
+"Lightning Invoice" = "Lightning ποσό";
 
 /* Accessibility Label for Like button */
-"Like" = "J'aime";
+"Like" = "Μου αρέσει";
 
 /* Dropdown option label for Lightning wallet, LNLink. */
 "LNLink" = "LNLink";
 
 /* Face ID usage description shown when trying to access private key */
-"Local authentication to access private key" = "Authentification locale pour l'accès à la clé privée";
+"Local authentication to access private key" = "Τοπικά δικαιώματα για πρόσβαση στο ιδιωτικό κλειδί";
 
 /* Dropdown option label for system default for Lightning wallet. */
-"Local default" = "Valeur locale par défaut";
+"Local default" = "Προεπιλογή";
 
 /* Button to log into account.
    Button to log into an account. */
-"Login" = "Se connecter";
+"Login" = "Σύνδεση";
 
 /* Alert for logging out the user.
    Button for logging out the user.
    Button to close the alert that informs that the current account has been deleted. */
-"Logout" = "Se déconnecter";
+"Logout" = "Αποσύνδεση";
 
 /* Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out. */
-"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "Assurez-vous que votre clé de compte nsec est enregistrée avant de vous déconnecter ou vous perdrez l'accès à ce compte";
+"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "Βεβαιωθείτε ότι έχετε αποθηκεύσει το ιδιωτικό κλειδί nsec του λογαριασμού σας πριν αποσυνδεθείτε, διαφορετικά θα χάσετε την πρόσβαση στο λογαριασμό σας";
 
 /* Dropdown option label for Lightning wallet, Muun. */
 "Muun" = "Muun";
 
 /* Label for NIP-05 Verification section of user profile form. */
-"NIP-05 Verification" = "Vérification NIP-05";
+"NIP-05 Verification" = "Πιστοποιητικό NIP-05";
 
 /* Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key. */
-"No" = "Non";
+"No" = "Όχι";
 
 /* Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists. */
-"No block list found, create a new one? This will overwrite any previous block lists." = "Aucune liste de blocage trouvée, voulez-vous en créer une nouvelle?  Cela va écraser votre liste de blocage existante.";
+"No block list found, create a new one? This will overwrite any previous block lists." = "Δεν βρέθηκε λίστα αποκλεισμού, να δημιουργηθεί μια νέα; Αυτό θα αντικαταστήσει κάθε προηγούμενη λίστα αποκλεισμού.";
 
 /* No search results. */
-"none" = "aucun";
+"none" = "κανένα";
 
 /* Dropdown option for selecting no translation service. */
-"None" = "Aucun";
+"None" = "Κανένας";
 
 /* Alert user that they might be attempting to paste a private key and ask them to confirm. */
-"Note contains \"nsec1\" private key. Are you sure?" = "La note contient une clé privée \"nsec1\".  Êtes-vous certain?";
+"Note contains \"nsec1\" private key. Are you sure?" = "Το σχόλιο περιέχει \"nsec1\" ιδωτικό κλειδί. Είστε σίγουροι;";
 
 /* Indicates that there are no notes in the timeline to view. */
-"Nothing to see here. Check back later!" = "Rien à voir ici. Revenez plus tard!";
+"Nothing to see here. Check back later!" = "Δεν βρέθηκε κάτι. Δοκιμάστε αργότερα!";
 
 /* Navigation title for notifications. */
-"Notifications" = "Notifications";
+"Notifications" = "Ειδοποιήσεις";
 
 /* String indicating that a given timestamp just occurred */
-"now" = "maintenant";
+"now" = "τώρα";
 
 /* Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key. */
 "nsec1..." = "nsec1...";
 
 /* Button for user to report that the account or content has nudity or explicit content. */
-"Nudity or explicit content" = "Nudité ou contenu explicite";
+"Nudity or explicit content" = "Γυμνό ή ακατάλληλο περιεχόμενο";
 
 /* Label indicating that a form input is optional. */
-"optional" = "optionnel";
+"optional" = "προαιρετικό";
 
 /* Button to pay a Lightning invoice. */
-"Pay" = "Payer";
+"Pay" = "Πληρωμή";
 
 /* Navigation bar title for view to pay Lightning invoice. */
-"Pay the Lightning invoice" = "Payer la facture Lightning";
+"Pay the Lightning invoice" = "Πληρωμή Lightning ποσού";
 
 /* Dropdown option label for Lightning wallet, Phoenix. */
 "Phoenix" = "Phoenix";
 
 /* Prompt selection of DeepL subscription plan to perform machine translations on notes */
-"Plan" = "Plan";
+"Plan" = "Συνδρομή";
 
 /* Button to post a note. */
-"Post" = "Publication";
+"Post" = "Δημοσίευση";
 
 /* Text to indicate that what is being shown is a post from a user who has been blocked. */
-"Post from a user you've blocked" = "Publication d'un utilisateur que vous avez bloqué";
+"Post from a user you've blocked" = "Δημοσίευση μπλοκαρισμένου χρήστη";
 
 /* Label for filter for seeing only posts (instead of posts and replies). */
-"Posts" = "Publications";
+"Posts" = "Δημοσιεύσεις";
 
 /* Label for filter for seeing posts and replies (instead of only posts). */
-"Posts & Replies" = "Publications & Réponses";
+"Posts & Replies" = "Δημοσιεύσεις & Απαντήσεις";
 
 /* Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading. */
-"Private" = "Privé";
+"Private" = "Προσωπικά δεδομένα";
 
 /* Title of the secure field that holds the user's private key. */
-"Private Key" = "Clé Privée";
+"Private Key" = "Ιδιωτικό κλειδί";
 
 /* Dropdown option for selecting Pro plan for DeepL translation service. */
 "Pro" = "Pro";
 
 /* Sidebar menu label for Profile view. */
-"Profile" = "Profil";
+"Profile" = "Προφίλ";
 
 /* Label for Profile Picture section of user profile form. */
-"Profile Picture" = "Image de profil";
+"Profile Picture" = "Εικόνα προφίλ";
 
 /* Section title for the user's public account ID. */
-"Public Account ID" = "Identifiant publique de compte";
+"Public Account ID" = "Δημόσιο ID λογαριασμού";
 
 /* Label indicating that the text is a user's public account key. */
-"Public key" = "Clé publique";
+"Public key" = "Δημόσιο κλειδί";
 
 /* Label indicating that the text is a user's public account key. */
-"Public Key" = "Clé publique";
+"Public Key" = "Δημόσιο κλειδί";
 
 /* Prompt to ask user if the key they entered is a public key. */
-"Public Key?" = "Clé publique?";
+"Public Key?" = "Δημόσιο κλειδί;";
 
 /* Navigation bar title for Reactions view. */
-"Reactions" = "Réactions";
+"Reactions" = "Αντιδράσεις";
 
 /* Section title for recommend relay servers that could be added as part of configuration */
-"Recommended Relays" = "Relais recommandés";
+"Recommended Relays" = "Προτεινόμενοι διακομιστές Relays";
 
 /* Button to reject the end user license agreement, which disallows the user from being let into the app. */
-"Reject" = "Refuser";
+"Reject" = "Απόρριψη";
 
 /* Label to display relay address.
    Text field for relay server. Used for testing purposes. */
-"Relay" = "Relais";
+"Relay" = "Διακομιστής Relay";
 
 /* Sidebar menu label for Relay servers view
    Sidebar menu label for Relays view. */
-"Relays" = "Relais";
+"Relays" = "Διακομιστές Relays";
 
 /* Description of what was done as a result of sending a report to relay servers. */
-"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "Les relais ont été avisés et les clients pourront utiliser ces renseignements pour filtrer le contenu. Merci!";
+"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "Οι διακομιστές Relays έχουν ειδοποιηθεί και οι εφαρμογές θα μπορούν να φιλτράρουν το περιεχόμενο. Ευχαριστούμε!";
 
 /* Button label to remove all participants from a note reply. */
-"Remove all" = "Tout supprimer";
+"Remove all" = "Αφαίρεση όλων";
 
 /* Accessibility label for reply button */
-"Reply" = "Répondre";
+"Reply" = "Απάντηση";
 
 /* Label to indicate that the user is replying to themself. */
-"Reply to self" = "Réponse à soi-même";
+"Reply to self" = "Απάντηση στον εαυτό μου";
 
 /* Label to indicate that the user is replying to 2 users. */
-"Replying to %@ & %@" = "Réponse à %1$@ & %2$@";
+"Replying to %@ & %@" = "Απάντηση σε %1$@ & %2$@";
 
 /* Indicating that the user is replying to the following listed people. */
-"Replying to:" = "Répondre à:";
+"Replying to:" = "Απάντηση σε:";
 
 /* Button to report a profile.
    Context menu option for reporting content. */
-"Report" = "Signaler";
+"Report" = "Αναφορά";
 
 /* Label indicating that the text underneath is the identifier of the report that was sent to relay servers. */
-"Report ID:" = "ID de signalement:";
+"Report ID:" = "ID Αναφοράς:";
 
 /* Message indicating that a report was successfully sent to relay servers. */
-"Report sent!" = "Signalement envoyé!";
+"Report sent!" = "Η αναφορά εστάλει!";
 
 /* Button to confirm reposting a post.
    Title of alert for confirming to repost a post. */
-"Repost" = "Republier";
+"Repost" = "Αναδημοσίευση";
 
 /* Text indicating that the post was reposted (i.e. re-shared). */
-"Reposted" = "A republié";
+"Reposted" = "Αναδημοσιεύθηκε";
 
 /* Navigation bar title for Reposts view. */
-"Reposts" = "Republications";
+"Reposts" = "Αναδημοσιεύσεις";
 
 /* Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message. */
-"Requests" = "Demandes";
+"Requests" = "Αιτήματα";
 
 /* Button to retry completing account creation after an error occurred. */
-"Retry" = "Retenter";
+"Retry" = "Δοκιμάστε ξανά";
 
 /* Dropdown option label for Lightning wallet, River */
 "River" = "River";
@@ -541,179 +541,179 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Satoshi Nakamoto" = "Satoshi Nakamoto";
 
 /* Button for saving profile. */
-"Save" = "Enregistrer";
+"Save" = "Αποθήκευση";
 
 /* Context menu option to save an image. */
-"Save Image" = "Enregistrer l'image";
+"Save Image" = "Αποθήκευση εικόνας";
 
 /* Text on QR code view to prompt viewer to scan the QR code on screen with their device camera. */
-"Scan the code" = "Scanner le code";
+"Scan the code" = "Σκανάρισμα κωδικού";
 
 /* Navigation link to search hashtag. */
-"Search hashtag: #%@" = "Rechercher hashtag: #%@";
+"Search hashtag: #%@" = "Αναζήτηση ετικέτας: #%@";
 
 /* Placeholder text to prompt entry of search query. */
-"Search..." = "Rechercher...";
+"Search..." = "Αναζήτηση...";
 
 /* Section title for user's secret account login key. */
-"Secret Account Login Key" = "Clé secrète de connexion au compte";
+"Secret Account Login Key" = "Μυστικό ιδιωτικό κλειδί λογαριασμού";
 
 /* Title of section for selecting a Lightning wallet to pay a Lightning invoice. */
-"Select a Lightning wallet" = "Sélectionnez un portefeuille Lightning";
+"Select a Lightning wallet" = "Επιλέξτε ένα Lightning πορτοφόλι";
 
 /* Prompt selection of user's default wallet */
-"Select default wallet" = "Sélectionnez le portefeuille par défaut";
+"Select default wallet" = "Προεπιλεγμένο πορτοφόλι";
 
 /* Text prompt for user to send a message to the other user. */
-"Send a message to start the conversation..." = "Envoyez un message pour démarrer la conversation...";
+"Send a message to start the conversation..." = "Στείλτε ένα μήνυμα για να ξεκινήσετε την συνομιλία...";
 
 /* Prompt selection of LibreTranslate server to perform machine translations on notes */
-"Server" = "Serveur";
+"Server" = "Διακομιστής";
 
 /* Prompt selection of translation service provider. */
-"Service" = "Service";
+"Service" = "Υπηρεσία";
 
 /* Navigation title for Settings view.
    Sidebar menu label for accessing the app settings */
-"Settings" = "Paramètres";
+"Settings" = "Ρυθμίσεις";
 
 /* Button to share a post
    Button to share an image.
    Button to share the link to a profile. */
-"Share" = "Partager";
+"Share" = "Κοινοποίηση";
 
 /* Button to show a post from a user who has been blocked.
    Toggle to show or hide user's secret account login key. */
-"Show" = "Afficher";
+"Show" = "Προβολή";
 
 /* Button to show the DeepL translation API key.
    Button to show the LibreTranslate server API key. */
-"Show API Key" = "Montrer la clé d'API";
+"Show API Key" = "Προβολή κλειδιού API";
 
 /* Toggle to show or hide selection of wallet. */
-"Show wallet selector" = "Afficher le sélecteur de portefeuille";
+"Show wallet selector" = "Προβολή επιλογής πορτοφολιού";
 
 /* Sidebar menu label to sign out of the account. */
-"Sign out" = "Se déconnecter";
+"Sign out" = "Αποσύνδεση";
 
 /* Label to display relay software. */
-"Software" = "Logiciel";
+"Software" = "Λογισμικό";
 
 /* Dropdown option label for Lightning wallet, Strike. */
 "Strike" = "Strike";
 
 /* Label to display relay's supported NIPs. */
-"Supported NIPs" = "NIPs supportés";
+"Supported NIPs" = "Υποστηριζόμενα NIPs";
 
 /* Button to close out of alert that informs that the action to block a user was successful. */
-"Thanks!" = "Merci!";
+"Thanks!" = "Ευχαριστούμε!";
 
 /* Button for user to report that the account is impersonating someone. */
-"They are impersonating someone" = "Ils personnifient quelqu'un";
+"They are impersonating someone" = "Προσποιείται κάποιον άλλο";
 
 /* Warning that the inputted account key is a public key and the result of what happens because of it. */
-"This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Il s'agit d'une clé publique, vous ne pourrez pas publier de messages ou interagir de quelque manière que ce soit. Ceci est utilisé pour visualiser les comptes de leur point de vue.";
+"This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Αυτό είναι ένα δημόσιο κλειδί, δεν θα έχετε την δυνατότητα να κάνετε δημοσιεύσεις ή να αλληλεπιδράσετε με κάποιο τρόπο. Αυτό το κλειδί είναι μόνο για προβολή / εύρεση λογαριασμών.";
 
 /* Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key. */
-"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Il s'agit d'une clé Nostr à l'ancienne. Nous ne savons pas s'il s'agit d'une clé publique ou d'une clé privée. Veuillez basculer le bouton ci-dessous s'il s'agit d'une clé publique.";
+"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Αυτό είναι ένα παλαιού τύπου κλειδί nostr. Δεν αναγνωρίζουμε αν είναι δημόσιο ή ιδιωτικό κλειδί. Παρακαλούμε πατήστε το παρακάτων κουμπί αν είναι ένα δημόσιο κλειδί.";
 
 /* Label to describe that a public key is the user's account ID and what they can do with it. */
-"This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "Ceci est votre identifiant de compte, vous pouvez le donner à vos amis afin qu'ils puissent vous suivre. Cliquez pour copier.";
+"This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "Αυτό είναι το ID του λογαριασμού σας, μπορείτε να το δώσετε στους φίλους σας ώστε να σας ακολουθήσουν. Κάντε κλικ για αντιγραφή.";
 
 /* Label to describe that a private key is the user's secret account key and what they should do with it. */
-"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Il s'agit de votre clé de compte secrète. Vous en aurez besoin pour accéder à votre compte. Ne le partagez avec personne ! Enregistrez-la dans un gestionnaire de mots de passe et gardez-la en sécurité!";
+"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Αυτό είναι το κρυφό ιδιωτικό σας κλειδί. Το χρειάζεστε για να έχετε προσβαση στο λογαριασμό σας. Μη το δώσετε ποτέ σε κανέναν! Αποθηκεύστε το σε ένα ασφαλές μέρος!";
 
 /* Navigation bar title for note thread.
    Navigation bar title for threaded event detail view. */
-"Thread" = "Fil de discussion";
+"Thread" = "Νήμα";
 
 /* Button to translate note from different language. */
-"Translate Note" = "Traduire la note";
+"Translate Note" = "Μεταφρασμένο σχόλιο";
 
 /* Button to indicate that the note has been translated from a different language. */
-"Translated from (lang)" = "Traduit de (lang)";
+"Translated from (lang)" = "Μεταφράστηκε από (lang)";
 
 /* Button to indicate that the note is in the process of being translated from a different language. */
-"Translating from (lang)..." = "Traduction de (lang)...";
+"Translating from (lang)..." = "Μεταφράζετε από (lang)...";
 
 /* Section title for selecting the translation service. */
-"Translations" = "Traductions";
+"Translations" = "Μεταφράσεις";
 
 /* Text field prompt asking user to type the word DELETE to confirm that they want to proceed with deleting their account. The all caps lock DELETE word should not be translated. Everything else should. */
-"Type DELETE to delete" = "Appuyez sur SUPPRIMER pour supprimer";
+"Type DELETE to delete" = "Πληκρολογίστε DELETE για διαγραφή";
 
 /* Text box prompt to ask user to type their post. */
-"Type your post here..." = "Tapez votre message ici...";
+"Type your post here..." = "Πληκρολογίστε την δημοσίευσή σας εδώ...";
 
 /* Non-breaking space character to fill in blank space next to event action button icons. */
 "u{00A0}" = "u{00A0}";
 
 /* Button to unfollow a user. */
-"Unfollow" = "Se désabonner";
+"Unfollow" = "Διακοπή";
 
 /* Text to indicate that the button next to it is in  a state that indicates that it is in the process of unfollowing a profile. */
-"Unfollowing" = "Désabonnement";
+"Unfollowing" = "Παύση ακολούθησης";
 
 /* Label to indicate that the user is in the process of unfollowing another user. */
-"Unfollowing..." = "Désabonnement...";
+"Unfollowing..." = "Παύση ακολούθησης...";
 
 /* Text to indicate that the button next to it is in a state that will unfollow a profile when tapped. */
-"Unfollows" = "Se désabonner";
+"Unfollows" = "Διακοπή ακολούθησης";
 
 /* Example URL to LibreTranslate server */
 "URL" = "URL";
 
 /* Alert message to indicate the user has been blocked */
-"User blocked" = "Utilisateur bloqué";
+"User blocked" = "Ο χρήστης αποκλείστηκε";
 
 /* Alert message that informs a user was blocked. */
-"User has been blocked" = "L'utilisateur a été bloqué";
+"User has been blocked" = "Ο χρήστης έχει αποκλειστεί";
 
 /* Label for Username section of user profile form.
    Label to prompt username entry. */
-"Username" = "Nom d'utilisateur";
+"Username" = "Όνομα χρήστη";
 
 /* Label to display relay software version. */
-"Version" = "Version";
+"Version" = "Έκδοση";
 
 /* Sidebar menu label for Wallet view. */
-"Wallet" = "Portefeuille";
+"Wallet" = "Πορτοφόλι";
 
 /* Dropdown option label for Lightning wallet, Wallet of Satoshi. */
 "Wallet of Satoshi" = "Wallet of Satoshi";
 
 /* Section title for selection of wallet. */
-"Wallet Selector" = "Sélecteur de portefeuille";
+"Wallet Selector" = "Επιλογή πορτοφολιού";
 
 /* Label for Website section of user profile form. */
-"Website" = "Site internet";
+"Website" = "Ιστοσελίδα";
 
 /* Welcoming message to the reader. The variable is 'you', the reader. */
-"Welcome to the social network %@ control." = "Bienvenue dans le réseau social sur lequel %@ avez le contrôle.";
+"Welcome to the social network %@ control." = "Καλώς ήρθες στο κοινωνικό δίκτυο %@ που ελέγχεις.";
 
 /* Text to welcome user. */
-"Welcome, %@!" = "Bienvenue, %@!";
+"Welcome, %@!" = "Καλώς ήρθες, %@!";
 
 /* Header text to prompt user what issue they want to report. */
-"What do you want to report?" = "Que voulez-vous signaler?";
+"What do you want to report?" = "Τι θα ήθελες να αναφέρεις;";
 
 /* Placeholder example for relay server address. */
-"wss://some.relay.com" = "wss://un.relais.com";
+"wss://some.relay.com" = "wss://some.relay.com";
 
 /* Text of button that confirms to overwrite the existing mutelist. */
-"Yes, Overwrite" = "Oui, écraser";
+"Yes, Overwrite" = "Ναι, αντικατάσταση";
 
 /* Button to proceed with posting a note even though it looks like they might be posting a private key. */
-"Yes, Post with Private Key" = "Oui, publier avec clé privée";
+"Yes, Post with Private Key" = "Ναί, δημοσίευση περιλαμβανομένου του ιδιωτικού κλειδιού";
 
 /* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
-"you" = "vous";
+"you" = "εσείς";
 
 /* Label for Your Name section of user profile form. */
-"Your Name" = "Votre nom";
+"Your Name" = "Το όνομά σας";
 
 /* Footer text to inform user what will happen when the report is submitted. */
-"Your report will be sent to the relays you are connected to" = "Votre signalement sera envoyé aux relais auxquels vous êtes connectés";
+"Your report will be sent to the relays you are connected to" = "Η αναφορά σας θα αποσταλεί στους διακομιστές relays που είστε συνδεδεμένοι";
 
 /* Accessibility label for zap button */
 "Zap" = "Zap";

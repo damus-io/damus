@@ -20,7 +20,7 @@
 "%@" = "%@";
 
 /* Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
-Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
+Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
 "%@ %@" = "%@ %@";
 
 /* Alert message that informs a user was blocked. */
@@ -36,7 +36,7 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. 用互联网原生货币--比特币⚡️来打赏好友的推文并积攒财富。";
 
 /* Number of zap payments on a post.
-Number of profiles a user is following. */
+Number of relay servers a user is connected. */
 "%lld" = "%lld";
 
 /* Fraction of how many of the user's relay servers that are operational. */
@@ -45,7 +45,7 @@ Number of profiles a user is following. */
 /* Placeholder for event mention. */
 "< e >" = "< e >";
 
-/* No comment provided by engineer. */
+/* Text indicating the zap amount. i.e. number of satoshis that were tipped to a user */
 "⚡️ %@" = "⚡️ %@";
 
 /* Label to prompt for about text entry for user to describe about themself. */
@@ -76,11 +76,17 @@ Number of profiles a user is following. */
 /* Label for section for adding a relay server. */
 "Add Relay" = "添加中继器";
 
+/* Label to display relay contact user. */
+"Admin" = "管理员";
+
 /* Any amount of sats */
 "Any" = "任意";
 
-/* Example URL to LibreTranslate server */
+/* Prompt for optional entry of API Key to use translation server. */
 "API Key (optional)" = "API Key (可选)";
+
+/* Prompt for required entry of API Key to use translation server. */
+"API Key (required)" = "API Key (必填)";
 
 /* Alert message to ask if user wants to repost a post. */
 "Are you sure you want to repost this?" = "确定转发吗？";
@@ -120,6 +126,9 @@ Number of profiles a user is following. */
 /* Dropdown option label for Lightning wallet, Blue Wallet. */
 "Blue Wallet" = "Blue Wallet";
 
+/* Accessibility label for boosts button */
+"Boosts" = "加速";
+
 /* Dropdown option label for Lightning wallet, Breez. */
 "Breez" = "Breez";
 
@@ -146,6 +155,9 @@ Number of profiles a user is following. */
 
 /* Section title for clearing cached data. */
 "Clear Cache" = "清除缓存";
+
+/* Label to display relay contact information. */
+"Contact" = "联系人";
 
 /* Label indicating that a user's key was copied. */
 "Copied" = "已复制";
@@ -221,6 +233,9 @@ Number of profiles a user is following. */
 /* Alert message to indicate this is a deleted account */
 "Deleted Account" = "已删除账户";
 
+/* Label to display relay description. */
+"Description" = "描述";
+
 /* Button to dismiss a text field alert. */
 "Dismiss" = "忽略";
 
@@ -258,6 +273,9 @@ Number of profiles a user is following. */
 /* Button to follow a user. */
 "Follow" = "关注";
 
+/* Text on QR code view to prompt viewer looking at screen to follow the user. */
+"Follow me on nostr" = "关注我的Nostr";
+
 /* Label describing followers of a user. */
 "Followers" = "粉丝";
 
@@ -271,6 +289,12 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Text to indicate that button next to it is in a state that will follow a profile when tapped. */
 "Follows" = "关注";
 
+/* Dropdown option for selecting Free plan for DeepL translation service. */
+"Free" = "免费";
+
+/* Button to navigate to DeepL website to get a translation API key. */
+"Get API Key" = "获取API Key";
+
 /* Navigation bar title for Global view where posts from all connected relay servers appear. */
 "Global" = "广场";
 
@@ -283,7 +307,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button to hide a post from a user who has been blocked. */
 "Hide" = "隐藏";
 
-/* Button to hide the LibreTranslate server API key. */
+/* Button to hide the DeepL translation API key.
+   Button to hide the LibreTranslate server API key. */
 "Hide API Key" = "隐藏API Key";
 
 /* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
@@ -313,8 +338,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button to complete account creation and start using the app. */
 "Let's go!" = "开启旅程！";
 
-/* Section title for selecting the server that hosts the LibreTranslate machine translation API. */
-"LibreTranslate Translations" = "LibreTranslate 翻译";
+/* Dropdown option for selecting LibreTranslate as the translation service. */
+"LibreTranslate (Open Source)" = "LibreTranslate (开源)";
 
 /* Placeholder text for entry of Lightning Address or LNURL. */
 "Lightning Address or LNURL" = "闪电地址或LNURL";
@@ -322,8 +347,14 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Indicates that the view is for paying a Lightning invoice. */
 "Lightning Invoice" = "闪电发票";
 
+/* Accessibility Label for Like button */
+"Like" = "赞";
+
 /* Dropdown option label for Lightning wallet, LNLink. */
 "LNLink" = "LNLink";
+
+/* Face ID usage description shown when trying to access private key */
+"Local authentication to access private key" = "需要本地认证以访问私钥";
 
 /* Dropdown option label for system default for Lightning wallet. */
 "Local default" = "本地默认";
@@ -346,14 +377,20 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label for NIP-05 Verification section of user profile form. */
 "NIP-05 Verification" = "NIP-05认证";
 
+/* Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key. */
+"No" = "否";
+
 /* Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists. */
 "No block list found, create a new one? This will overwrite any previous block lists." = "没有找到黑名单，是否创建新黑名单？先前的黑名单将被覆盖。";
 
 /* No search results. */
 "none" = "无结果";
 
-/* Dropdown option for selecting no translation server. */
+/* Dropdown option for selecting no translation service. */
 "None" = "无";
+
+/* Alert user that they might be attempting to paste a private key and ask them to confirm. */
+"Note contains \"nsec1\" private key. Are you sure?" = "字条包含 \"nsec1\" 私钥，你确定吗？";
 
 /* Indicates that there are no notes in the timeline to view. */
 "Nothing to see here. Check back later!" = "暂无内容，请稍后重试。";
@@ -382,6 +419,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Dropdown option label for Lightning wallet, Phoenix. */
 "Phoenix" = "Phoenix";
 
+/* Prompt selection of DeepL subscription plan to perform machine translations on notes */
+"Plan" = "选择套餐";
+
 /* Button to post a note. */
 "Post" = "发布";
 
@@ -399,6 +439,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Title of the secure field that holds the user's private key. */
 "Private Key" = "私钥";
+
+/* Dropdown option for selecting Pro plan for DeepL translation service. */
+"Pro" = "专业版";
 
 /* Sidebar menu label for Profile view. */
 "Profile" = "我的档案";
@@ -427,7 +470,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button to reject the end user license agreement, which disallows the user from being let into the app. */
 "Reject" = "拒绝";
 
-/* Text field for relay server. Used for testing purposes. */
+/* Label to display relay address.
+   Text field for relay server. Used for testing purposes. */
 "Relay" = "中继器";
 
 /* Sidebar menu label for Relay servers view
@@ -439,6 +483,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Button label to remove all participants from a note reply. */
 "Remove all" = "移除全部";
+
+/* Accessibility label for reply button */
+"Reply" = "回复";
 
 /* Label to indicate that the user is replying to themself. */
 "Reply to self" = "自回复";
@@ -490,6 +537,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Context menu option to save an image. */
 "Save Image" = "保存图片";
 
+/* Text on QR code view to prompt viewer to scan the QR code on screen with their device camera. */
+"Scan the code" = "扫码";
+
 /* Navigation link to search hashtag. */
 "Search hashtag: #%@" = "热搜词：#%@";
 
@@ -511,11 +561,15 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Prompt selection of LibreTranslate server to perform machine translations on notes */
 "Server" = "服务器";
 
+/* Prompt selection of translation service provider. */
+"Service" = "选择服务";
+
 /* Navigation title for Settings view.
    Sidebar menu label for accessing the app settings */
 "Settings" = "设置";
 
-/* Button to share an image.
+/* Button to share a post
+   Button to share an image.
    Button to share the link to a profile. */
 "Share" = "分享";
 
@@ -523,7 +577,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Toggle to show or hide user's secret account login key. */
 "Show" = "显示";
 
-/* Button to hide the LibreTranslate server API key. */
+/* Button to show the DeepL translation API key.
+   Button to show the LibreTranslate server API key. */
 "Show API Key" = "显示API Key";
 
 /* Toggle to show or hide selection of wallet. */
@@ -532,8 +587,14 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Sidebar menu label to sign out of the account. */
 "Sign out" = "登出";
 
+/* Label to display relay software. */
+"Software" = "软件";
+
 /* Dropdown option label for Lightning wallet, Strike. */
 "Strike" = "Strike";
+
+/* Label to display relay's supported NIPs. */
+"Supported NIPs" = "支持的NIP";
 
 /* Button to close out of alert that informs that the action to block a user was successful. */
 "Thanks!" = "谢谢！";
@@ -566,7 +627,10 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button to indicate that the note is in the process of being translated from a different language. */
 "Translating from (lang)..." = "正在从(lang)翻译...";
 
-/* No comment provided by engineer. */
+/* Section title for selecting the translation service. */
+"Translations" = "翻译";
+
+/* Text field prompt asking user to type the word DELETE to confirm that they want to proceed with deleting their account. The all caps lock DELETE word should not be translated. Everything else should. */
 "Type DELETE to delete" = "输入 DELETE 以删除";
 
 /* Text box prompt to ask user to type their post. */
@@ -600,6 +664,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Label to prompt username entry. */
 "Username" = "用户名";
 
+/* Label to display relay software version. */
+"Version" = "版本";
+
 /* Sidebar menu label for Wallet view. */
 "Wallet" = "钱包";
 
@@ -626,6 +693,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Text of button that confirms to overwrite the existing mutelist. */
 "Yes, Overwrite" = "确定覆盖";
+
+/* Button to proceed with posting a note even though it looks like they might be posting a private key. */
+"Yes, Post with Private Key" = "确定，发布私钥";
 
 /* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
 "you" = "你";
