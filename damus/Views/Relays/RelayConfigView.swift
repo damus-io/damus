@@ -48,6 +48,10 @@ struct RelayConfigView: View {
                     relay = "wss://" + relay
                 }
                 
+                if relay.hasSuffix("/") {
+                    relay.removeLast();
+                }
+                
                 guard let url = URL(string: relay) else {
                     return
                 }
