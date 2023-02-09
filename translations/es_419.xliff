@@ -18,6 +18,7 @@
       </trans-unit>
       <trans-unit id="NSFaceIDUsageDescription" xml:space="preserve">
         <source>Local authentication to access private key</source>
+        <target>Autenticación local para acceder a la clave privada</target>
         
         <note>Privacy - Face ID Usage Description</note>
       </trans-unit>
@@ -133,6 +134,7 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="API Key (required)" xml:space="preserve">
         <source>API Key (required)</source>
+        <target>Clave de API (obligatorio)</target>
         
         <note>Prompt for required entry of API Key to use translation server.</note>
       </trans-unit>
@@ -193,6 +195,7 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="Admin" xml:space="preserve">
         <source>Admin</source>
+        <target>Administrador</target>
         
         <note>Label to display relay contact user.</note>
       </trans-unit>
@@ -278,6 +281,7 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="Boosts" xml:space="preserve">
         <source>Boosts</source>
+        <target>Boosts</target>
         
         <note>Accessibility label for boosts button</note>
       </trans-unit>
@@ -331,6 +335,7 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="Contact" xml:space="preserve">
         <source>Contact</source>
+        <target>Contacto</target>
         
         <note>Label to display relay contact information.</note>
       </trans-unit>
@@ -458,6 +463,7 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="DeepL (Proprietary, Higher Accuracy)" xml:space="preserve">
         <source>DeepL (Proprietary, Higher Accuracy)</source>
+        <target>DeepL (Propietario, Mayor precisión)</target>
         
         <note>Dropdown option for selecting DeepL as the translation service.</note>
       </trans-unit>
@@ -478,17 +484,20 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="Delete Account" xml:space="preserve">
         <source>Delete Account</source>
+        <target>Eliminar cuenta</target>
         
         <note>Alert for deleting the users account.
    Button to delete the user's account.</note>
       </trans-unit>
       <trans-unit id="Deleted Account" xml:space="preserve">
         <source>Deleted Account</source>
+        <target>Cuenta eliminada</target>
         
         <note>Alert message to indicate this is a deleted account</note>
       </trans-unit>
       <trans-unit id="Description" xml:space="preserve">
         <source>Description</source>
+        <target>Descripción</target>
         
         <note>Label to display relay description.</note>
       </trans-unit>
@@ -560,11 +569,13 @@ Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="Follow Back" xml:space="preserve">
         <source>Follow Back</source>
+        <target>Seguir</target>
         
         <note>Button to follow a user back.</note>
       </trans-unit>
       <trans-unit id="Follow me on nostr" xml:space="preserve">
         <source>Follow me on nostr</source>
+        <target>Sigueme en nostr</target>
         
         <note>Text on QR code view to prompt viewer looking at screen to follow the user.</note>
       </trans-unit>
@@ -595,16 +606,19 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Follows you" xml:space="preserve">
         <source>Follows you</source>
+        <target>Te sigue</target>
         
         <note>Text to indicate that a user is following your profile.</note>
       </trans-unit>
       <trans-unit id="Free" xml:space="preserve">
         <source>Free</source>
+        <target>Gratuito</target>
         
         <note>Dropdown option for selecting Free plan for DeepL translation service.</note>
       </trans-unit>
       <trans-unit id="Get API Key" xml:space="preserve">
         <source>Get API Key</source>
+        <target>Obtener clave de API</target>
         
         <note>Button to navigate to DeepL website to get a translation API key.</note>
       </trans-unit>
@@ -683,6 +697,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="LibreTranslate (Open Source)" xml:space="preserve">
         <source>LibreTranslate (Open Source)</source>
+        <target>LibreTranslate (Código abierto)</target>
         
         <note>Dropdown option for selecting LibreTranslate as the translation service.</note>
       </trans-unit>
@@ -700,11 +715,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Like" xml:space="preserve">
         <source>Like</source>
+        <target>Me gusta</target>
         
         <note>Accessibility Label for Like button</note>
       </trans-unit>
       <trans-unit id="Local authentication to access private key" xml:space="preserve">
         <source>Local authentication to access private key</source>
+        <target>Autenticación local para acceder a la clave privada</target>
         
         <note>Face ID usage description shown when trying to access private key</note>
       </trans-unit>
@@ -749,6 +766,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="No" xml:space="preserve">
         <source>No</source>
+        <target>No</target>
         
         <note>Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key.</note>
       </trans-unit>
@@ -766,6 +784,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Note contains &quot;nsec1&quot; private key. Are you sure?" xml:space="preserve">
         <source>Note contains &quot;nsec1&quot; private key. Are you sure?</source>
+        <target>La nota incluye una clave privada &quot;nsec1&quot;. ¿Estas seguro?</target>
         
         <note>Alert user that they might be attempting to paste a private key and ask them to confirm.</note>
       </trans-unit>
@@ -807,6 +826,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Plan" xml:space="preserve">
         <source>Plan</source>
+        <target>Plan</target>
         
         <note>Prompt selection of DeepL subscription plan to perform machine translations on notes</note>
       </trans-unit>
@@ -848,6 +868,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Pro" xml:space="preserve">
         <source>Pro</source>
+        <target>Pro</target>
         
         <note>Dropdown option for selecting Pro plan for DeepL translation service.</note>
       </trans-unit>
@@ -933,6 +954,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Reply" xml:space="preserve">
         <source>Reply</source>
+        <target>Responder</target>
         
         <note>Accessibility label for reply button</note>
       </trans-unit>
@@ -1030,6 +1052,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Scan the code" xml:space="preserve">
         <source>Scan the code</source>
+        <target>Escanea el código</target>
         
         <note>Text on QR code view to prompt viewer to scan the QR code on screen with their device camera.</note>
       </trans-unit>
@@ -1077,6 +1100,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Service" xml:space="preserve">
         <source>Service</source>
+        <target>Servicio</target>
         
         <note>Prompt selection of translation service provider.</note>
       </trans-unit>
@@ -1123,6 +1147,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Software" xml:space="preserve">
         <source>Software</source>
+        <target>Software</target>
         
         <note>Label to display relay software.</note>
       </trans-unit>
@@ -1134,6 +1159,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Supported NIPs" xml:space="preserve">
         <source>Supported NIPs</source>
+        <target>NIPs soportados</target>
         
         <note>Label to display relay's supported NIPs.</note>
       </trans-unit>
@@ -1194,16 +1220,19 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Translating from (lang)..." xml:space="preserve">
         <source>Translating from (lang)...</source>
+        <target>Traduciendo del (lang)...</target>
         
         <note>Button to indicate that the note is in the process of being translated from a different language.</note>
       </trans-unit>
       <trans-unit id="Translations" xml:space="preserve">
         <source>Translations</source>
+        <target>Traducciones</target>
         
         <note>Section title for selecting the translation service.</note>
       </trans-unit>
       <trans-unit id="Type DELETE to delete" xml:space="preserve">
         <source>Type DELETE to delete</source>
+        <target>Escriba &quot;DELETE&quot; para eliminar</target>
         
         <note>Text field prompt asking user to type the word DELETE to confirm that they want to proceed with deleting their account. The all caps lock DELETE word should not be translated. Everything else should.</note>
       </trans-unit>
@@ -1264,6 +1293,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Version" xml:space="preserve">
         <source>Version</source>
+        <target>Versión</target>
         
         <note>Label to display relay software version.</note>
       </trans-unit>
@@ -1317,6 +1347,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Yes, Post with Private Key" xml:space="preserve">
         <source>Yes, Post with Private Key</source>
+        <target>Sí, publicar con clave privada</target>
         
         <note>Button to proceed with posting a note even though it looks like they might be posting a private key.</note>
       </trans-unit>
@@ -1334,6 +1365,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="Zap" xml:space="preserve">
         <source>Zap</source>
+        <target>Zap</target>
         
         <note>Accessibility label for zap button</note>
       </trans-unit>
@@ -1642,11 +1674,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/zaps_count:dict/ZAPS:dict/one:dict/:string" xml:space="preserve">
         <source>Zap</source>
+        <target>Zap</target>
         
         <note>Part of a larger sentence to describe how many zap payments there are on a post.</note>
       </trans-unit>
       <trans-unit id="/zaps_count:dict/ZAPS:dict/other:dict/:string" xml:space="preserve">
         <source>Zaps</source>
+        <target>Zaps</target>
         
         <note>Part of a larger sentence to describe how many zap payments there are on a post.</note>
       </trans-unit>
