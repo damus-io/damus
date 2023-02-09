@@ -18,6 +18,7 @@ struct SideMenuView: View {
     
     var sideBarWidth = min(UIScreen.main.bounds.size.width * 0.65, 400.0)
     let verticalSpacing: CGFloat = 20
+    let padding: CGFloat = 30
     
     func fillColor() -> Color {
         colorScheme == .light ? Color("DamusWhite") : Color("DamusBlack")
@@ -142,11 +143,11 @@ struct SideMenuView: View {
                     }
                     .padding(.top, verticalSpacing)
                 }
-                .padding(.top, -15)
-                .padding([.leading, .trailing, .bottom], 30)
+                .padding(.top, -(padding / 2.0))
+                .padding([.leading, .trailing, .bottom], padding)
             }
             .frame(width: sideBarWidth)
-            .offset(x: isSidebarVisible ? 0 : -sideBarWidth)
+            .offset(x: isSidebarVisible ? 0 : -(sideBarWidth + padding))
             .animation(.default, value: isSidebarVisible)
             .alert("Logout", isPresented: $confirm_logout) {
                 Button(NSLocalizedString("Cancel", comment: "Cancel out of logging out the user."), role: .cancel) {
