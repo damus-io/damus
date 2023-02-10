@@ -285,12 +285,13 @@ func fetch_static_payreq(_ lnurl: String) async -> LNUrlPayRequest? {
     return endpoint
 }
 
-func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent, amount: Int64) async -> String? {
+func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent, sats: Int) async -> String? {
     guard var base_url = payreq.callback.flatMap({ URLComponents(string: $0) }) else {
         return nil
     }
     
     let zappable = payreq.allowsNostr ?? false
+    let amount: Int64 = Int64(sats) * 1000
     
     var query = [URLQueryItem(name: "amount", value: "\(amount)")]
     

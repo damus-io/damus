@@ -52,8 +52,8 @@ struct ZapButton: View {
                 damus_state.lnurls.endpoints[target.pubkey] = payreq
             }
             
-            let tip_amount = get_default_tip_amount(pubkey: damus_state.pubkey)
-            guard let inv = await fetch_zap_invoice(payreq, zapreq: zapreq, amount: tip_amount) else {
+            let zap_amount = get_default_zap_amount(pubkey: damus_state.pubkey) ?? 1000
+            guard let inv = await fetch_zap_invoice(payreq, zapreq: zapreq, sats: zap_amount) else {
                 DispatchQueue.main.async {
                     zapping = false
                 }

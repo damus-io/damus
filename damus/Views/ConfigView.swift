@@ -21,6 +21,7 @@ struct ConfigView: View {
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
     @State var delete_text: String = ""
+    @State var default_zap_amount: String
     
     @ObservedObject var settings: UserSettingsStore
     
@@ -28,6 +29,8 @@ struct ConfigView: View {
     
     init(state: DamusState) {
         self.state = state
+        let zap_amt = get_default_zap_amount(pubkey: state.pubkey).map({ "\($0)" }) ?? "1000"
+        _default_zap_amount = State(initialValue: zap_amt)
         _privkey = State(initialValue: self.state.keypair.privkey_bech32 ?? "")
         _settings = ObservedObject(initialValue: state.settings)
     }
@@ -124,6 +127,11 @@ struct ConfigView: View {
                         }
                     }
                 }
+                
+                
+                Section(NSLocalizedString("Default Zap Amount in sats", comment: "Section title for zap configuration")) {
+                    TextField("1000", text: $default_zap_amount)
+                }
 
                 Section(NSLocalizedString("Translations", comment: "Section title for selecting the translation service.")) {
                     Picker(NSLocalizedString("Service", comment: "Prompt selection of translation service provider."), selection: $settings.translation_service) {
@@ -193,6 +201,12 @@ struct ConfigView: View {
                     }
                 }
             }
+        }
+        .onChange(of: default_zap_amount) { val in
+            guard let amt = Int(val) else {
+                return
+            }
+            set_default_zap_amount(pubkey: state.pubkey, amount: amt)
         }
         .navigationTitle(NSLocalizedString("Settings", comment: "Navigation title for Settings view."))
         .navigationBarTitleDisplayMode(.large)
