@@ -344,36 +344,6 @@ struct ProfileView: View {
         }
     }
     
-    var ProfileTimelineView: some View {
-        VStack {
-            VStack(spacing: 0) {
-                CustomPicker(selection: $filter_state, content: {
-                    Text("Posts", comment: "Label for filter for seeing only your posts (instead of posts and replies).").tag(FilterState.posts)
-                    Text("Posts & Replies", comment: "Label for filter for seeing your posts and replies (instead of only your posts).").tag(FilterState.posts_and_replies)
-                })
-                Divider()
-                    .frame(height: 1)
-            }
-            .background(colorScheme == .dark ? Color.black : Color.white)
-            
-            TabView(selection: $filter_state) {
-                contentTimelineView(filter: FilterState.posts.filter)
-                    .tag(FilterState.posts)
-                    .id(FilterState.posts)
-                contentTimelineView(filter: FilterState.posts_and_replies.filter)
-                    .tag(FilterState.posts_and_replies)
-                    .id(FilterState.posts_and_replies)
-            }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-        }
-    }
-    
-    func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
-        ZStack {
-            TimelineView(events: $profile.events, loading: $home.loading, damus: damus_state, show_friend_icon: false, filter: filter)
-        }
-    }
-    
     var FollowersCount: some View {
         HStack {
             if followers.count == nil {
@@ -389,16 +359,29 @@ struct ProfileView: View {
     }
         
     var body: some View {
-        
-        VStack(alignment: .leading) {
-            VStack {
-                TopSection
 
-                ProfileTimelineView
+        ScrollView {
+
+            TopSection
+            
+            VStack(spacing: 0) {
+                CustomPicker(selection: $filter_state, content: {
+                    Text("Posts", comment: "Label for filter for seeing only your posts (instead of posts and replies).").tag(FilterState.posts)
+                    Text("Posts & Replies", comment: "Label for filter for seeing your posts and replies (instead of only your posts).").tag(FilterState.posts_and_replies)
+                })
+                Divider()
+                    .frame(height: 1)
             }
-            .frame(maxHeight: .infinity, alignment: .topLeading)
+            .background(colorScheme == .dark ? Color.black : Color.white)
+
+            if filter_state == FilterState.posts {
+                InnerTimelineView(events: $profile.events, damus: damus_state, show_friend_icon: false, filter: FilterState.posts.filter)
+            }
+            if filter_state == FilterState.posts_and_replies {
+                InnerTimelineView(events: $profile.events, damus: damus_state, show_friend_icon: false, filter: FilterState.posts_and_replies.filter)
+            }
+
         }
-        .frame(maxWidth: .infinity, alignment: .topLeading)
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
         }
