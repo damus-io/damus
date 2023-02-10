@@ -2,6 +2,7 @@
 
 ### Added
 
+- Relay Filtering (William Casarin)
 - Japanese translations (Terry Yiu)
 - Add password autofill on account login and creation (Terry Yiu)
 - Show if relay is paid (William Casarin)
@@ -13,7 +14,6 @@
 - Use local authentication (faceid) to access private key (Andrii Sievrikov)
 - Add accessibility labels to action bar (Bryan Montz)
 - Copy invoice button (Joel Klabo)
-- Ability to change remote image loading policy (radixrat)
 - Receive Lightning Zaps (William Casarin)
 - Allow text selection in bio (Suhail Saqan)
 
@@ -23,9 +23,7 @@
 - Show "Follow Back" button on profile page (William Casarin)
 - When on your profile page, open relay view instead for your own relays (Terry Yiu)
 - Updated QR code view, include profile image, etc (ericholguin)
-- Make app smaller by optimizing pngs (pea-sys)
 - Clicking relay numbers now goes to relay config (radixrat)
-
 
 ### Fixed
 
