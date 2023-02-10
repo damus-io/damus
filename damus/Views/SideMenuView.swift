@@ -13,6 +13,8 @@ struct SideMenuView: View {
     @State var confirm_logout: Bool = false
     
     @State private var showQRCode = false
+
+    @ObservedObject var home: HomeModel
     
     @Environment(\.colorScheme) var colorScheme
     
@@ -113,7 +115,7 @@ struct SideMenuView: View {
                             .foregroundColor(textColor())
                     }
                     
-                    NavigationLink(destination: RelayConfigView(state: damus_state)) {
+                    NavigationLink(destination: RelayConfigView(state: damus_state, home: home)) {
                         Label(NSLocalizedString("Relays", comment: "Sidebar menu label for Relays view."), systemImage: "network")
                             .font(.title2)
                             .foregroundColor(textColor())
@@ -187,6 +189,6 @@ struct SideMenuView: View {
 struct Previews_SideMenuView_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state()
-        SideMenuView(damus_state: ds, isSidebarVisible: .constant(true))
+        SideMenuView(damus_state: ds, isSidebarVisible: .constant(true), home: .init())
     }
 }
