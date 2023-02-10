@@ -4,6 +4,9 @@
 /* Bundle name */
 "CFBundleName" = "damus";
 
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "Autenticación local para acceder a la clave privada";
+
 /* Privacy - Photo Library Additions Usage Description */
 "NSPhotoLibraryAddUsageDescription" = "Si le concedes acceso a Damus a tus fotos, podrás guardar imágenes.";
 

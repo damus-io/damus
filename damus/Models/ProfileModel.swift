@@ -88,7 +88,7 @@ class ProfileModel: ObservableObject, Equatable {
     }
     
     func handle_profile_contact_event(_ ev: NostrEvent) {
-        process_contact_event(pool: damus.pool, contacts: damus.contacts, pubkey: damus.pubkey, ev: ev)
+        process_contact_event(state: damus, ev: ev)
         
         // only use new stuff
         if let current_ev = self.contacts {
