@@ -26,6 +26,14 @@ struct ConfigView: View {
     
     let generator = UIImpactFeedbackGenerator(style: .light)
     
+    let appVersion: String? = {
+        return Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+    }()
+    
+    let buildNumber: String? = {
+        return Bundle.main.infoDictionary?["CFBundleVersion"] as? String
+    }()
+    
     init(state: DamusState) {
         self.state = state
         _privkey = State(initialValue: self.state.keypair.privkey_bech32 ?? "")
@@ -190,6 +198,12 @@ struct ConfigView: View {
                         Button(NSLocalizedString("Delete Account", comment: "Button to delete the user's account."), role: .destructive) {
                             confirm_delete_account = true
                         }
+                    }
+                }
+                
+                if let appVersion, let buildNumber {
+                    Section(NSLocalizedString("Damus Version", comment: "Displays the current app version of Damus")) {
+                        Text("\(appVersion) (\(buildNumber))")
                     }
                 }
             }
