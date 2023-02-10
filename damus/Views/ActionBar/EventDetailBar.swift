@@ -10,7 +10,7 @@ import SwiftUI
 struct EventDetailBar: View {
     let state: DamusState
     let target: String
-    @StateObject var bar: ActionBarModel
+    @ObservedObject var bar: ActionBarModel
     
     var body: some View {
         HStack {
