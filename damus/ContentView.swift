@@ -589,12 +589,13 @@ struct ContentView: View {
     func connect() {
         let pool = RelayPool()
         let metadatas = RelayMetadatas()
+        let relay_filters = RelayFilters(our_pubkey: pubkey)
         
+        let new_relay_filters = load_relay_filters(pubkey) == nil
         for relay in BOOTSTRAP_RELAYS {
             if let url = URL(string: relay) {
-                add_new_relay(url: url, info: .rw, metadatas: metadatas, pool: pool)
+                add_new_relay(relay_filters: relay_filters, metadatas: metadatas, pool: pool, url: url, info: .rw, new_relay_filters: new_relay_filters)
             }
-            add_relay(pool, relay)
         }
         
         pool.register_handler(sub_id: sub_id, handler: home.handle_event)
@@ -610,7 +611,7 @@ struct ContentView: View {
                                 zaps: Zaps(our_pubkey: pubkey),
                                 lnurls: LNUrls(),
                                 settings: UserSettingsStore(),
-                                relay_filters: RelayFilters(our_pubkey: pubkey),
+                                relay_filters: relay_filters,
                                 relay_metadata: metadatas
         )
         home.damus_state = self.damus_state!

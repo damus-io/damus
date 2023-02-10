@@ -10,6 +10,11 @@ import Foundation
 struct RelayFilter: Hashable {
     let timeline: Timeline
     let relay_id: String
+    
+    init(timeline: Timeline, relay_id: String, on: Bool = false) {
+        self.timeline = timeline
+        self.relay_id = relay_id
+    }
 }
 
 class RelayFilters {
@@ -44,7 +49,7 @@ class RelayFilters {
     
     init(our_pubkey: String) {
         self.our_pubkey = our_pubkey
-        disabled = load_relay_filters(our_pubkey)
+        disabled = load_relay_filters(our_pubkey) ?? Set()
     }
 }
 
@@ -54,10 +59,19 @@ func save_relay_filters(_ pubkey: String, filters: Set<RelayFilter>) {
     UserDefaults.standard.set(arr, forKey: key)
 }
 
-func load_relay_filters(_ pubkey: String) -> Set<RelayFilter> {
-    let key = pk_setting_key(pubkey, key: "relay_filters")
+func relay_filter_setting_key(_ pubkey: String) -> String {
+    return pk_setting_key(pubkey, key: "relay_filters")
+}
+
+func clear_relay_filters(_ pubkey: String) {
+    let key = relay_filter_setting_key(pubkey)
+    UserDefaults.standard.removeObject(forKey: key)
+}
+
+func load_relay_filters(_ pubkey: String) -> Set<RelayFilter>? {
+    let key = relay_filter_setting_key(pubkey)
     guard let filters = UserDefaults.standard.stringArray(forKey: key) else {
-        return Set()
+        return nil
     }
     
     return filters.reduce(into: Set()) { s, str in

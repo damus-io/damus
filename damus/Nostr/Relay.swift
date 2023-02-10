@@ -24,6 +24,14 @@ enum RelayFlags: Int {
     case broken = 1
 }
 
+struct Limitations: Codable {
+    let payment_required: Bool?
+    
+    static var empty: Limitations {
+        Limitations(payment_required: nil)
+    }
+}
+
 struct RelayMetadata: Codable {
     let name: String?
     let description: String?
@@ -32,6 +40,11 @@ struct RelayMetadata: Codable {
     let supported_nips: [Int]?
     let software: String?
     let version: String?
+    let limitation: Limitations?
+    
+    var is_paid: Bool {
+        return limitation?.payment_required ?? false
+    }
 }
 
 class Relay: Identifiable {
