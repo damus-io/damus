@@ -117,12 +117,16 @@ class HomeModel: ObservableObject {
         }
     }
     
-    func handle_zap_event_with_zapper(_ ev: NostrEvent, zapper: String) {
+    func handle_zap_event_with_zapper(_ ev: NostrEvent, our_pubkey: String, zapper: String) {
         guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper) else {
             return
         }
         
         damus_state.zaps.add_zap(zap: zap)
+        
+        guard zap.target.pubkey == our_pubkey else {
+            return
+        }
         
         if !insert_uniq_sorted_event(events: &notifications, new_ev: ev, cmp: { $0.created_at > $1.created_at }) {
             return
@@ -138,12 +142,8 @@ class HomeModel: ObservableObject {
             return
         }
         
-        guard ptag == damus_state.pubkey else {
-            return
-        }
-        
         if let local_zapper = damus_state.profiles.lookup_zapper(pubkey: damus_state.pubkey) {
-            handle_zap_event_with_zapper(ev, zapper: local_zapper)
+            handle_zap_event_with_zapper(ev, our_pubkey: damus_state.pubkey, zapper: local_zapper)
             return
         }
         
@@ -161,7 +161,8 @@ class HomeModel: ObservableObject {
             }
             
             DispatchQueue.main.async {
-                self.handle_zap_event_with_zapper(ev, zapper: zapper)
+                self.damus_state.profiles.zappers[ptag] = zapper
+                self.handle_zap_event_with_zapper(ev, our_pubkey: self.damus_state.pubkey, zapper: zapper)
             }
         }
         

@@ -10,6 +10,7 @@ import SwiftUI
 struct EventDetailBar: View {
     let state: DamusState
     let target: String
+    let target_pk: String
     @ObservedObject var bar: ActionBarModel
     
     var body: some View {
@@ -29,7 +30,11 @@ struct EventDetailBar: View {
             }
             
             if bar.zaps > 0 {
-                Text("\(Text("\(bar.zaps)", comment: "Number of zap payments on a post.").font(.body.bold())) \(Text(String(format: NSLocalizedString("zaps_count", comment: "Part of a larger sentence to describe how many zap payments there are on a post."), bar.boosts)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.")
+                let dst = ZapsView(state: state, target: .note(id: target, author: target_pk))
+                NavigationLink(destination: dst) {
+                    Text("\(Text("\(bar.zaps)", comment: "Number of zap payments on a post.").font(.body.bold())) \(Text(String(format: NSLocalizedString("zaps_count", comment: "Part of a larger sentence to describe how many zap payments there are on a post."), bar.boosts)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.")
+                }
+                .buttonStyle(PlainButtonStyle())
             }
         }
     }
@@ -37,6 +42,6 @@ struct EventDetailBar: View {
 
 struct EventDetailBar_Previews: PreviewProvider {
     static var previews: some View {
-        EventDetailBar(state: test_damus_state(), target: "", bar: ActionBarModel.empty())
+        EventDetailBar(state: test_damus_state(), target: "", target_pk: "", bar: ActionBarModel.empty())
     }
 }

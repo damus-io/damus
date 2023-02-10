@@ -38,7 +38,7 @@ struct SelectedEventView: View {
                 let bar = make_actionbar_model(ev: event, damus: damus)
                 
                 if !bar.is_empty {
-                    EventDetailBar(state: damus, target: event.id, bar: bar)
+                    EventDetailBar(state: damus, target: event.id, target_pk: event.pubkey, bar: bar)
                     Divider()
                 }
                 
