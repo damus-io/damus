@@ -145,6 +145,7 @@ struct ContentView: View {
         profile_open = false
         thread_open = false
         search_open = false
+        isSideBarOpened = false
     }
 
     var timelineNavItem: some View {
