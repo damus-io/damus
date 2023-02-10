@@ -172,6 +172,7 @@
 		4CE8794E2996B16A00F758CC /* RelayToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8794D2996B16A00F758CC /* RelayToggle.swift */; };
 		4CE879502996B2BD00F758CC /* RelayStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8794F2996B2BD00F758CC /* RelayStatus.swift */; };
 		4CE879522996B68900F758CC /* RelayType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE879512996B68900F758CC /* RelayType.swift */; };
+		4CE879552996BAB900F758CC /* RelayPaidDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE879542996BAB900F758CC /* RelayPaidDetail.swift */; };
 		4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */; };
 		4CEE2AF1280B216B00AB5EEF /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */; };
 		4CEE2AF3280B25C500AB5EEF /* ProfilePicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF2280B25C500AB5EEF /* ProfilePicView.swift */; };
@@ -467,6 +468,7 @@
 		4CE8794D2996B16A00F758CC /* RelayToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayToggle.swift; sourceTree = "<group>"; };
 		4CE8794F2996B2BD00F758CC /* RelayStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayStatus.swift; sourceTree = "<group>"; };
 		4CE879512996B68900F758CC /* RelayType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayType.swift; sourceTree = "<group>"; };
+		4CE879542996BAB900F758CC /* RelayPaidDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayPaidDetail.swift; sourceTree = "<group>"; };
 		4CEE2AE72804F57C00AB5EEF /* libsecp256k1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libsecp256k1.a; sourceTree = "<group>"; };
 		4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrRequest.swift; sourceTree = "<group>"; };
 		4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
@@ -773,6 +775,7 @@
 		4CAAD8AE29888A9B00060CEA /* Relays */ = {
 			isa = PBXGroup;
 			children = (
+				4CE879532996BA0000F758CC /* Detail */,
 				4CB55EF2295E5D59007FD187 /* RecommendedRelayView.swift */,
 				4C06670028FC7C5900038D2A /* RelayView.swift */,
 				4CAAD8AF29888AD200060CEA /* RelayConfigView.swift */,
@@ -935,6 +938,14 @@
 				4CE8794B2995B59E00F758CC /* RelayMetadatas.swift */,
 			);
 			path = Relays;
+			sourceTree = "<group>";
+		};
+		4CE879532996BA0000F758CC /* Detail */ = {
+			isa = PBXGroup;
+			children = (
+				4CE879542996BAB900F758CC /* RelayPaidDetail.swift */,
+			);
+			path = Detail;
 			sourceTree = "<group>";
 		};
 		4CEE2AE62804F57B00AB5EEF /* Frameworks */ = {
@@ -1305,6 +1316,7 @@
 				4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */,
 				F7908E92298B0F0700AB113A /* RelayDetailView.swift in Sources */,
 				4C3A1D332960DB0500558C0F /* Markdown.swift in Sources */,
+				4CE879552996BAB900F758CC /* RelayPaidDetail.swift in Sources */,
 				4CF0ABD42980996B00D66079 /* Report.swift in Sources */,
 				4C06670B28FDE64700038D2A /* damus.c in Sources */,
 				3AAA95CC298E07E900F3D526 /* DeepLPlan.swift in Sources */,
