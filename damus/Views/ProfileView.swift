@@ -94,7 +94,6 @@ struct VisualEffectView: UIViewRepresentable {
 
 struct ProfileView: View {
     let damus_state: DamusState
-    let zoom_size: CGFloat = 350.0
     let pfp_size: CGFloat = 90.0
     let bannerHeight: CGFloat = 150.0
     

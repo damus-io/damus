@@ -5,84 +5,99 @@
 //  Created by scoder1747 on 12/27/22.
 //
 import SwiftUI
+import Kingfisher
+
+private struct ImageContainerView: View {
+    
+    @ObservedObject var imageModel: KFImageModel
+    
+    @State private var image: UIImage?
+    @State private var showShareSheet = false
+    
+    init(url: URL?) {
+        self.imageModel = KFImageModel(
+            url: url,
+            fallbackUrl: nil,
+            maxByteSize: 2000000, // 2 MB
+            downsampleSize: CGSize(width: 400, height: 400)
+        )
+    }
+    
+    private struct ImageHandler: ImageModifier {
+        @Binding var handler: UIImage?
+        
+        func modify(_ image: UIImage) -> UIImage {
+            handler = image
+            return image
+        }
+    }
+    
+    var body: some View {
+        
+        KFAnimatedImage(imageModel.url)
+            .callbackQueue(.dispatch(.global(qos: .background)))
+            .processingQueue(.dispatch(.global(qos: .background)))
+            .cacheOriginalImage()
+            .configure { view in
+                view.framePreloadCount = 1
+            }
+            .scaleFactor(UIScreen.main.scale)
+            .loadDiskFileSynchronously()
+            .fade(duration: 0.1)
+            .imageModifier(ImageHandler(handler: $image))
+            .onFailure { _ in
+                imageModel.downloadFailed()
+            }
+            .id(imageModel.refreshID)
+            .clipShape(Circle())
+            .modifier(ImageContextMenuModifier(url: imageModel.url, image: image, showShareSheet: $showShareSheet))
+            .sheet(isPresented: $showShareSheet) {
+                ShareSheet(activityItems: [imageModel.url])
+            }
+    }
+}
 
 struct ProfileZoomView: View {
-
-    @Environment(\.presentationMode) var presentationMode
+    
     let pubkey: String
     let profiles: Profiles
-
-    @GestureState private var scaleState: CGFloat = 1
-    @GestureState private var offsetState = CGSize.zero
-
-    @State private var offset = CGSize.zero
-    @State private var scale: CGFloat = 1
-
-    func resetStatus(){
-        self.offset = CGSize.zero
-        self.scale = 1
-    }
-
-    var zoomGesture: some Gesture {
-        MagnificationGesture()
-            .updating($scaleState) { currentState, gestureState, _ in
-                gestureState = currentState
-            }
-            .onEnded { value in
-                scale *= value
-            }
-    }
-
-    var dragGesture: some Gesture {
-        DragGesture()
-            .updating($offsetState) { currentState, gestureState, _ in
-                gestureState = currentState.translation
-            }.onEnded { value in
-                offset.height += value.translation.height
-                offset.width += value.translation.width
-            }
-    }
-
-    var doubleTapGesture : some Gesture {
-        TapGesture(count: 2).onEnded { value in
-            resetStatus()
+    
+    @Environment(\.presentationMode) var presentationMode
+    
+    var navBarView: some View {
+        HStack {
+            Button(action: {
+                presentationMode.wrappedValue.dismiss()
+            }, label: {
+                Image(systemName: "xmark")
+                    .frame(width: 33, height: 33)
+                    .background(.regularMaterial)
+                    .clipShape(Circle())
+            })
+            
+            Spacer()
         }
+        .padding()
     }
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            Color("DamusDarkGrey") // Or Color("DamusBlack")
-                .edgesIgnoringSafeArea(.all)
+        ZStack {
+            Color(.systemBackground)
+                .ignoresSafeArea()
             
-            Button {
+            ZoomableScrollView {
+                ImageContainerView(url: get_profile_url(picture: nil, pubkey: pubkey, profiles: profiles))
+                    .aspectRatio(contentMode: .fit)
+                    .padding(.top, Theme.safeAreaInsets?.top)
+                    .padding(.bottom, Theme.safeAreaInsets?.bottom)
+                    .padding(.horizontal)
+            }
+            .ignoresSafeArea()
+            .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
                 presentationMode.wrappedValue.dismiss()
-            } label: {
-                Image(systemName: "xmark")
-                    .foregroundColor(.white)
-                    .font(.subheadline)
-                    .padding(.leading, 20)
-            }
-            .zIndex(1)
-
-            VStack(alignment: .center) {
-
-                Spacer()
-                
-                ProfilePicView(pubkey: pubkey, size: 200.0, highlight: .none, profiles: profiles)
-                    .padding(100)
-                    .scaledToFit()
-                    .scaleEffect(self.scale * scaleState)
-                    .offset(x: offset.width + offsetState.width, y: offset.height + offsetState.height)
-                    .gesture(SimultaneousGesture(zoomGesture, dragGesture))
-                    .gesture(doubleTapGesture)
-                    .modifier(SwipeToDismissModifier(minDistance: nil, onDismiss: {
-                        presentationMode.wrappedValue.dismiss()
-                    }))
-                
-                Spacer()
-
-            }
+            }))
         }
+        .overlay(navBarView, alignment: .top)
     }
 }
 
