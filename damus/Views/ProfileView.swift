@@ -93,7 +93,6 @@ struct ProfileView: View {
     @State var show_share_sheet: Bool = false
     @State var action_sheet_presented: Bool = false
     @State var filter_state : FilterState = .posts
-    @StateObject var home : HomeModel = HomeModel()
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
