@@ -205,7 +205,7 @@ extension RelayConfigView {
                 .frame(width: 50, height: 50)
                 .foregroundColor(.clear)
                 .overlay(Color.accentColor, in: Circle().stroke(style: .init(lineWidth: 2)))
-            Text("10/12")
+            Text("\(state.pool.relays.count - state.pool.num_connecting)/\(state.pool.relays.count)")
                 .font(.system(size: 15, weight: .bold))
                 .foregroundColor(.primary)
         }
