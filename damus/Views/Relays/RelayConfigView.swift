@@ -155,6 +155,7 @@ extension RelayConfigView {
         VStack(alignment: .leading, spacing: 3) {
             Text("What’s a relay?")
                 .font(.system(size: 17, weight: .bold, design: .default))
+                .fixedSize(horizontal: false, vertical: true)
 
             Text("It’s a server that you send notes to and receive notes from.")
                 .font(.system(size: 15, weight: .medium, design: .default))
@@ -164,6 +165,7 @@ extension RelayConfigView {
 
             Text("What are the numbers in the top right?")
                 .font(.system(size: 17, weight: .bold, design: .default))
+                .fixedSize(horizontal: false, vertical: true)
 
             Text("The top number displays the number of relays you are connected to. The bottom number shows the count of all the relays you want to connect to.")
                 .font(.system(size: 15, weight: .medium, design: .default))
