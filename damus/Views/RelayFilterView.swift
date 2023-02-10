@@ -25,18 +25,6 @@ struct RelayFilterView: View {
         return state.pool.descriptors
     }
     
-    func toggle_binding(relay_id: String) -> Binding<Bool> {
-        return Binding(get: {
-            !state.relay_filters.is_filtered(timeline: timeline, relay_id: relay_id)
-        }, set: { on in
-            if !on {
-                state.relay_filters.insert(timeline: timeline, relay_id: relay_id)
-            } else {
-                state.relay_filters.remove(timeline: timeline, relay_id: relay_id)
-            }
-        })
-    }
-    
     var body: some View {
         Text("To filter your \(timeline.rawValue) feed, please choose applicable relays from the list below:")
             .padding()
@@ -44,10 +32,7 @@ struct RelayFilterView: View {
             .padding(.bottom, 0)
         
         List(Array(relays), id: \.url) { relay in
-            //RelayView(state: state, relay: relay.url.absoluteString)
-            let relay_id = relay.url.absoluteString
-            Toggle(relay_id, isOn: toggle_binding(relay_id: relay_id))
-                .toggleStyle(SwitchToggleStyle(tint: .accentColor))
+            RelayToggle(state: state, timeline: timeline, relay_id: relay.url.absoluteString)
         }
     }
 }
