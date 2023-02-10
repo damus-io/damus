@@ -100,9 +100,9 @@ class damusTests: XCTestCase {
         save_relay_filters(pubkey, filters: filters)
         let loaded_filters = load_relay_filters(pubkey)
         
-        XCTAssertEqual(loaded_filters.count, 2)
-        XCTAssertTrue(loaded_filters.contains(filter1))
-        XCTAssertTrue(loaded_filters.contains(filter2))
+        XCTAssertEqual(loaded_filters?.count, 2)
+        XCTAssertTrue(loaded_filters?.contains(filter1) == true)
+        XCTAssertTrue(loaded_filters?.contains(filter2) == true)
         XCTAssertEqual(filters, loaded_filters)
     }
     
