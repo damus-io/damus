@@ -13,11 +13,9 @@ struct RelayConfigView: View {
     @State var show_add_relay: Bool = false
     @State var relays: [RelayDescriptor]
     @State var is_show_relay_explanation: Bool = true
-    @ObservedObject var home: HomeModel
 
-    init(state: DamusState, home: HomeModel) {
+    init(state: DamusState) {
         self.state = state
-        self.home = home
         _relays = State(initialValue: state.pool.descriptors)
     }
     
@@ -207,7 +205,7 @@ extension RelayConfigView {
                 .frame(width: 50, height: 50)
                 .foregroundColor(.clear)
                 .overlay(Color.accentColor, in: Circle().stroke(style: .init(lineWidth: 2)))
-            Text("\(home.signal.signal)/\(home.signal.max_signal)")
+            Text("10/12")
                 .font(.system(size: 15, weight: .bold))
                 .foregroundColor(.primary)
         }
@@ -217,6 +215,6 @@ extension RelayConfigView {
 
 struct RelayConfigView_Previews: PreviewProvider {
     static var previews: some View {
-        RelayConfigView(state: test_damus_state(), home: .init())
+        RelayConfigView(state: test_damus_state())
     }
 }
