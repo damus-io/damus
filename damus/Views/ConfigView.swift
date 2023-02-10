@@ -202,7 +202,7 @@ struct ConfigView: View {
                 }
                 
                 if let appVersion, let buildNumber {
-                    Section(NSLocalizedString("Damus Version", comment: "Displays the current app version of Damus")) {
+                    Section(NSLocalizedString("Damus Version", comment: "Section title for displaying the current app version of Damus")) {
                         Text("\(appVersion) (\(buildNumber))")
                     }
                 }
