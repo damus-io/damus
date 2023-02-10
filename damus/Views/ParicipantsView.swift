@@ -39,7 +39,7 @@ struct ParticipantsView: View {
                 ForEach(originalReferences.pRefs) { participant in
                     let pubkey = participant.id
                     HStack {
-                        ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, contacts: damus_state.contacts)
+                        ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
                         
                         VStack(alignment: .leading) {
                             let profile = damus_state.profiles.lookup(id: pubkey)

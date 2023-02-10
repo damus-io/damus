@@ -47,6 +47,7 @@ struct EventActionBar: View {
                 EventActionButton(img: "bubble.left", col: nil) {
                     notify(.reply, event)
                 }
+                .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
             }
             Spacer()
             ZStack {
@@ -58,6 +59,7 @@ struct EventActionBar: View {
                         self.confirm_boost = true
                     }
                 }
+                .accessibilityLabel(NSLocalizedString("Boosts", comment: "Accessibility label for boosts button"))
                 Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
                     .offset(x: 18)
                     .font(.footnote.weight(.medium))
@@ -89,6 +91,7 @@ struct EventActionBar: View {
             EventActionButton(img: "square.and.arrow.up", col: Color.gray) {
                 show_share_sheet = true
             }
+            .accessibilityLabel(NSLocalizedString("Share", comment: "Button to share a post"))
         }
         .sheet(isPresented: $show_share_sheet) {
             if let note_id = bech32_note_id(event.id) {
@@ -166,6 +169,7 @@ struct LikeButton: View {
             Image(liked ? "shaka-full" : "shaka-line")
                 .foregroundColor(liked ? .accentColor : .gray)
         }
+        .accessibilityLabel(NSLocalizedString("Like", comment: "Accessibility Label for Like button"))
     }
 }
 

@@ -98,21 +98,19 @@ struct ProfilePicView: View {
     let size: CGFloat
     let highlight: Highlight
     let profiles: Profiles
-    let contacts: Contacts
     
     @State var picture: String?
     
-    init (pubkey: String, size: CGFloat, highlight: Highlight, profiles: Profiles, contacts: Contacts, picture: String? = nil) {
+    init (pubkey: String, size: CGFloat, highlight: Highlight, profiles: Profiles, picture: String? = nil) {
         self.pubkey = pubkey
         self.profiles = profiles
-        self.contacts = contacts
         self.size = size
         self.highlight = highlight
         self._picture = State(initialValue: picture)
     }
     
     var body: some View {
-        InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles, contacts: contacts), fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: size, highlight: highlight)
+        InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: size, highlight: highlight)
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let updated = notif.object as! ProfileUpdate
 
@@ -127,19 +125,8 @@ struct ProfilePicView: View {
     }
 }
 
-func get_profile_url(picture: String?, pubkey: String, profiles: Profiles, contacts: Contacts) -> URL {
-    var pic: String
-    let remote_image_policy: RemoteImagePolicy = RemoteImagePolicy(rawValue: UserDefaults.standard.string(forKey: "remote_image_policy") ?? "") ?? .friendsOfFriends
-    
-    if pubkey == contacts.our_pubkey ||
-       remote_image_policy == .everyone ||
-       remote_image_policy == .friendsOnly && contacts.is_friend(pubkey) ||
-       remote_image_policy == .friendsOfFriends && contacts.is_in_friendosphere(pubkey) {
-        pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
-    } else {
-        pic = robohash(pubkey)
-    }
-    
+func get_profile_url(picture: String?, pubkey: String, profiles: Profiles) -> URL {
+    let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
     if let url = URL(string: pic) {
         return url
     }
@@ -163,8 +150,7 @@ struct ProfilePicView_Previews: PreviewProvider {
             pubkey: pubkey,
             size: 100,
             highlight: .none,
-            profiles: make_preview_profiles(pubkey),
-            contacts: Contacts(our_pubkey: pubkey))
+            profiles: make_preview_profiles(pubkey))
     }
 }
 

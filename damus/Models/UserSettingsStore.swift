@@ -12,6 +12,22 @@ func should_show_wallet_selector(_ pubkey: String) -> Bool {
     return UserDefaults.standard.object(forKey: "show_wallet_selector") as? Bool ?? true
 }
 
+func pk_setting_key(_ pubkey: String, key: String) -> String {
+    return "\(pubkey)_\(key)"
+}
+
+let tip_amount_key = "default_tip_amount"
+func set_default_tip_amount(pubkey: String, amount: Int64) {
+    let key = pk_setting_key(pubkey, key: tip_amount_key)
+    UserDefaults.standard.setValue(amount, forKey: key)
+}
+
+func get_default_tip_amount(pubkey: String) -> Int64 {
+    let key = "\(pubkey)_\(tip_amount_key)"
+    return UserDefaults.standard.object(forKey: key) as? Int64 ?? 1000000
+}
+
+
 func get_default_wallet(_ pubkey: String) -> Wallet {
     if let defaultWalletName = UserDefaults.standard.string(forKey: "default_wallet"),
        let default_wallet = Wallet(rawValue: defaultWalletName)
@@ -22,7 +38,23 @@ func get_default_wallet(_ pubkey: String) -> Wallet {
     }
 }
 
-func get_libretranslate_server(_ pubkey: String) -> LibreTranslateServer? {
+private func get_translation_service(_ pubkey: String) -> TranslationService? {
+    guard let translation_service = UserDefaults.standard.string(forKey: "translation_service") else {
+        return nil
+    }
+
+    return TranslationService(rawValue: translation_service)
+}
+
+private func get_deepl_plan(_ pubkey: String) -> DeepLPlan? {
+    guard let server_name = UserDefaults.standard.string(forKey: "deepl_plan") else {
+        return nil
+    }
+
+    return DeepLPlan(rawValue: server_name)
+}
+
+private func get_libretranslate_server(_ pubkey: String) -> LibreTranslateServer? {
     guard let server_name = UserDefaults.standard.string(forKey: "libretranslate_server") else {
         return nil
     }
@@ -30,7 +62,7 @@ func get_libretranslate_server(_ pubkey: String) -> LibreTranslateServer? {
     return LibreTranslateServer(rawValue: server_name)
 }
 
-func get_libretranslate_url(_ pubkey: String, server: LibreTranslateServer) -> String? {
+private func get_libretranslate_url(_ pubkey: String, server: LibreTranslateServer) -> String? {
     if let url = server.model.url {
         return url
     }
@@ -57,6 +89,32 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
+    @Published var translation_service: TranslationService {
+        didSet {
+            UserDefaults.standard.set(translation_service.rawValue, forKey: "translation_service")
+        }
+    }
+
+    @Published var deepl_plan: DeepLPlan {
+        didSet {
+            UserDefaults.standard.set(deepl_plan.rawValue, forKey: "deepl_plan")
+        }
+    }
+
+    @Published var deepl_api_key: String {
+        didSet {
+            do {
+                if deepl_api_key == "" {
+                    try clearDeepLApiKey()
+                } else {
+                    try saveDeepLApiKey(deepl_api_key)
+                }
+            } catch {
+                // No-op.
+            }
+        }
+    }
+
     @Published var libretranslate_server: LibreTranslateServer {
         didSet {
             if oldValue == libretranslate_server {
@@ -67,7 +125,7 @@ class UserSettingsStore: ObservableObject {
 
             libretranslate_api_key = ""
 
-            if libretranslate_server == .custom || libretranslate_server == .none {
+            if libretranslate_server == .custom {
                 libretranslate_url = ""
             } else {
                 libretranslate_url = libretranslate_server.model.url!
@@ -102,18 +160,25 @@ class UserSettingsStore: ObservableObject {
         show_wallet_selector = should_show_wallet_selector(pubkey)
 
         left_handed = UserDefaults.standard.object(forKey: "left_handed") as? Bool ?? false
-        
-        if let server = get_libretranslate_server(pubkey) {
-            self.libretranslate_server = server
-            self.libretranslate_url = get_libretranslate_url(pubkey, server: server) ?? ""
+
+        // Note from @tyiu:
+        // Default translation service is disabled by default for now until we gain some confidence that it is working well in production.
+        // Instead of throwing all Damus users onto feature immediately, allow for discovery of feature organically.
+        // Also, we are connecting to servers listed as mirrors on the official LibreTranslate GitHub README that do not require API keys.
+        // However, we have not asked them for permission to use, so we're trying to be good neighbors for now.
+        // Opportunity: spin up dedicated trusted LibreTranslate server that requires an API key for any access (or higher rate limit access).
+        if let translation_service = get_translation_service(pubkey) {
+            self.translation_service = translation_service
         } else {
-            // Note from @tyiu:
-            // Default server is disabled by default for now until we gain some confidence that it is working well in production.
-            // Instead of throwing all Damus users onto feature immediately, allow for discovery of feature organically.
-            // Also, we are connecting to servers listed as mirrors on the official LibreTranslate GitHub README that do not require API keys.
-            // However, we have not asked them for permission to use, so we're trying to be good neighbors for now.
-            // Opportunity: spin up dedicated trusted LibreTranslate server that requires an API key for any access (or higher rate limit access).
-            libretranslate_server = .none
+            self.translation_service = .none
+        }
+
+        if let libretranslate_server = get_libretranslate_server(pubkey) {
+            self.libretranslate_server = libretranslate_server
+            self.libretranslate_url = get_libretranslate_url(pubkey, server: libretranslate_server) ?? ""
+        } else {
+            // Choose a random server to distribute load.
+            libretranslate_server = .allCases.filter { $0 != .custom }.randomElement()!
             libretranslate_url = ""
         }
             
@@ -122,14 +187,45 @@ class UserSettingsStore: ObservableObject {
         } catch {
             libretranslate_api_key = ""
         }
+
+        if let deepl_plan = get_deepl_plan(pubkey) {
+            self.deepl_plan = deepl_plan
+        } else {
+            self.deepl_plan = .free
+        }
+
+        do {
+            deepl_api_key = try Vault.getPrivateKey(keychainConfiguration: DamusDeepLKeychainConfiguration())
+        } catch {
+            deepl_api_key = ""
+        }
     }
 
-    func saveLibreTranslateApiKey(_ apiKey: String) throws {
+    private func saveLibreTranslateApiKey(_ apiKey: String) throws {
         try Vault.savePrivateKey(apiKey, keychainConfiguration: DamusLibreTranslateKeychainConfiguration())
     }
 
-    func clearLibreTranslateApiKey() throws {
+    private func clearLibreTranslateApiKey() throws {
         try Vault.deletePrivateKey(keychainConfiguration: DamusLibreTranslateKeychainConfiguration())
+    }
+
+    private func saveDeepLApiKey(_ apiKey: String) throws {
+        try Vault.savePrivateKey(apiKey, keychainConfiguration: DamusDeepLKeychainConfiguration())
+    }
+
+    private func clearDeepLApiKey() throws {
+        try Vault.deletePrivateKey(keychainConfiguration: DamusDeepLKeychainConfiguration())
+    }
+
+    func can_translate(_ pubkey: String) -> Bool {
+        switch translation_service {
+        case .none:
+            return false
+        case .libretranslate:
+            return URLComponents(string: libretranslate_url) != nil
+        case .deepl:
+            return deepl_api_key != ""
+        }
     }
 }
 
@@ -137,4 +233,10 @@ struct DamusLibreTranslateKeychainConfiguration: KeychainConfiguration {
     var serviceName = "damus"
     var accessGroup: String? = nil
     var accountName = "libretranslate_apikey"
+}
+
+struct DamusDeepLKeychainConfiguration: KeychainConfiguration {
+    var serviceName = "damus"
+    var accessGroup: String? = nil
+    var accountName = "deepl_apikey"
 }

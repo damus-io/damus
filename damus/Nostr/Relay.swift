@@ -24,6 +24,16 @@ enum RelayFlags: Int {
     case broken = 1
 }
 
+struct RelayMetadata: Codable {
+    let name: String?
+    let description: String?
+    let pubkey: String?
+    let contact: String?
+    let supported_nips: [Int]?
+    let software: String?
+    let version: String?
+}
+
 class Relay: Identifiable {
     let descriptor: RelayDescriptor
     let connection: RelayConnection

@@ -19,7 +19,7 @@ enum FollowState {
     case unfollows
 }
 
-func follow_btn_txt(_ fs: FollowState) -> String {
+func follow_btn_txt(_ fs: FollowState, follows_you: Bool) -> String {
     switch fs {
     case .follows:
         return NSLocalizedString("Unfollow", comment: "Button to unfollow a user.")
@@ -28,7 +28,11 @@ func follow_btn_txt(_ fs: FollowState) -> String {
     case .unfollowing:
         return NSLocalizedString("Unfollowing...", comment: "Label to indicate that the user is in the process of unfollowing another user.")
     case .unfollows:
-        return NSLocalizedString("Follow", comment: "Button to follow a user.")
+        if follows_you {
+            return NSLocalizedString("Follow Back", comment: "Button to follow a user back.")
+        } else {
+            return NSLocalizedString("Follow", comment: "Button to follow a user.")
+        }
     }
 }
 
@@ -42,35 +46,6 @@ func follow_btn_enabled_state(_ fs: FollowState) -> Bool {
         return false
     case .unfollows:
        return true
-    }
-}
-
-struct ProfileNameView: View {
-    let pubkey: String
-    let profile: Profile?
-    let damus: DamusState
-    
-    var body: some View {
-        Group {
-            if let real_name = profile?.display_name {
-                VStack(alignment: .leading) {
-                    Text(real_name)
-                        .font(.title3.weight(.bold))
-                    ProfileName(pubkey: pubkey, profile: profile, prefix: "@", damus: damus, show_friend_confirmed: true)
-                        .font(.callout)
-                        .foregroundColor(.gray)
-                    KeyView(pubkey: pubkey)
-                        .pubkey_context_menu(bech32_pubkey: pubkey)
-                }
-            } else {
-                VStack(alignment: .leading) {
-                    ProfileName(pubkey: pubkey, profile: profile, damus: damus, show_friend_confirmed: true)
-                        .font(.title3.weight(.bold))
-                    KeyView(pubkey: pubkey)
-                        .pubkey_context_menu(bech32_pubkey: pubkey)
-                }
-            }
-        }
     }
 }
 
@@ -239,6 +214,61 @@ struct ProfileView: View {
         return 0
     }
     
+    func ActionSection(profile_data: Profile?) -> some View {
+        return Group {
+            ActionSheetButton
+            
+            if let profile = profile_data {
+                if let lnurl = profile.lnurl, lnurl != "" {
+                    LNButton(lnurl: lnurl, profile: profile)
+                }
+            }
+            
+            DMButton
+            
+            if profile.pubkey != damus_state.pubkey {
+                FollowButtonView(
+                    target: profile.get_follow_target(),
+                    follows_you: profile.follows(pubkey: damus_state.pubkey),
+                    follow_state: damus_state.contacts.follow_state(profile.pubkey)
+                )
+            } else if damus_state.keypair.privkey != nil {
+                NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
+                    EditButton(damus_state: damus_state)
+                }
+            }
+            
+        }
+    }
+    
+    func NameSection(profile_data: Profile?) -> some View {
+        return Group {
+            HStack(alignment: .center) {
+                ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles)
+                    .onTapGesture {
+                        is_zoomed.toggle()
+                    }
+                    .fullScreenCover(isPresented: $is_zoomed) {
+                        ProfileZoomView(pubkey: profile.pubkey, profiles: damus_state.profiles)                        }
+                    .offset(y: -(pfp_size/2.0)) // Increase if set a frame
+                
+                Spacer()
+                
+                ActionSection(profile_data: profile_data)
+                    .offset(y: -15.0) // Increase if set a frame
+            }
+            
+            let follows_you = profile.follows(pubkey: damus_state.pubkey)
+            ProfileNameView(pubkey: profile.pubkey, profile: profile_data, follows_you: follows_you, damus: damus_state)
+            //.padding(.bottom)
+                .padding(.top,-(pfp_size/2.0))
+        }
+    }
+    
+    var pfp_size: CGFloat {
+        return 90.0
+    }
+    
     var TopSection: some View {
         ZStack(alignment: .top) {
             GeometryReader { geometry in
@@ -251,55 +281,14 @@ struct ProfileView: View {
             }.frame(height: BANNER_HEIGHT)
             
             VStack(alignment: .leading, spacing: 8.0) {
-                let data = damus_state.profiles.lookup(id: profile.pubkey)
-                let pfp_size: CGFloat = 90.0
+                let profile_data = damus_state.profiles.lookup(id: profile.pubkey)
                 
-                HStack(alignment: .center) {
-                    ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, contacts: damus_state.contacts)
-                        .onTapGesture {
-                            is_zoomed.toggle()
-                        }
-                        .fullScreenCover(isPresented: $is_zoomed) {
-                            ProfileZoomView(pubkey: profile.pubkey, profiles: damus_state.profiles, contacts: damus_state.contacts)}
-                        .offset(y: -(pfp_size/2.0)) // Increase if set a frame
-                    
-                    Spacer()
-                    
-                    Group {
-                        ActionSheetButton
-                        
-                        if let profile = data {
-                            if let lnurl = profile.lnurl, lnurl != "" {
-                                LNButton(lnurl: lnurl, profile: profile)
-                            }
-                        }
-                        
-                        DMButton
-                        
-                        if profile.pubkey != damus_state.pubkey {
-                            FollowButtonView(
-                                target: profile.get_follow_target(),
-                                follow_state: damus_state.contacts.follow_state(profile.pubkey)
-                            )
-                        } else if damus_state.keypair.privkey != nil {
-                            NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
-                                EditButton(damus_state: damus_state)
-                            }
-                        }
-                        
-                    }
-                    .offset(y: -15.0) // Increase if set a frame
-                    
-                }
-                               
-                ProfileNameView(pubkey: profile.pubkey, profile: data, damus: damus_state)
-                    //.padding(.bottom)
-                    .padding(.top,-(pfp_size/2.0))
+                NameSection(profile_data: profile_data)
                 
-                Text(ProfileView.markdown.process(data?.about ?? ""))
+                Text(ProfileView.markdown.process(profile_data?.about ?? ""))
                     .font(.subheadline).textSelection(.enabled)
                 
-                if let url = data?.website_url {
+                if let url = profile_data?.website_url {
                     WebsiteLink(url: url)
                 }
                 
@@ -333,10 +322,19 @@ struct ProfileView: View {
                     }
                     
                     if let relays = profile.relays {
-                        NavigationLink(destination: UserRelaysView(state: damus_state, pubkey: profile.pubkey, relays: Array(relays.keys).sorted())) {
-                            Text("\(Text("\(relays.keys.count)", comment: "Number of relay servers a user is connected.").font(.subheadline.weight(.medium))) \(Text(String(format: NSLocalizedString("relays_count", comment: "Part of a larger sentence to describe how many relay servers a user is connected."), relays.keys.count)).font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
+                        // Only open relay config view if the user is logged in with private key and they are looking at their own profile.
+                        let relay_text = Text("\(Text("\(relays.keys.count)", comment: "Number of relay servers a user is connected.").font(.subheadline.weight(.medium))) \(Text(String(format: NSLocalizedString("relays_count", comment: "Part of a larger sentence to describe how many relay servers a user is connected."), relays.keys.count)).font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
+                        if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
+                            NavigationLink(destination: RelayConfigView(state: damus_state)) {
+                                relay_text
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        } else {
+                            NavigationLink(destination: UserRelaysView(state: damus_state, pubkey: profile.pubkey, relays: Array(relays.keys).sorted())) {
+                                relay_text
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
-                        .buttonStyle(PlainButtonStyle())
                     }
                 }
             }

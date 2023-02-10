@@ -2,5 +2,7 @@
 "CFBundleDisplayName" = "Damus";
 /* Bundle name */
 "CFBundleName" = "damus";
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "Local authentication to access private key";
 /* Privacy - Photo Library Additions Usage Description */
 "NSPhotoLibraryAddUsageDescription" = "Granting Damus access to your photos allows you to save images.";

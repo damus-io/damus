@@ -9,10 +9,6 @@ import SwiftUI
 import LinkPresentation
 import NaturalLanguage
 
-#if canImport(FoundationNetworking)
-    import FoundationNetworking
-#endif
-
 struct NoteContentView: View {
     let damus_state: DamusState
     let event: NostrEvent
@@ -65,7 +61,7 @@ struct NoteContentView: View {
     var body: some View {
         MainContent()
             .onAppear() {
-                self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey, show_images: show_images)
+                self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
             }
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let profile = notif.object as! ProfileUpdate
@@ -74,7 +70,7 @@ struct NoteContentView: View {
                     switch block {
                     case .mention(let m):
                         if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
-                            self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey, show_images: show_images)
+                            self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
                         }
                     case .text: return
                     case .hashtag: return
@@ -154,83 +150,6 @@ func mention_str(_ m: Mention, profiles: Profiles) -> AttributedString {
     }
 }
 
-
-public struct Translator {
-    private let url: String
-    private let apiKey: String?
-    private let session = URLSession.shared
-    private let encoder = JSONEncoder()
-    private let decoder = JSONDecoder()
-
-    public init(_ url: String, apiKey: String? = nil) {
-        self.url = url
-        self.apiKey = apiKey
-    }
-
-    public func translate(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> String {
-        let url = try makeURL(path: "/translate")
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        struct RequestBody: Encodable {
-            let q: String
-            let source: String
-            let target: String
-            let api_key: String?
-        }
-        let body = RequestBody(q: text, source: sourceLanguage, target: targetLanguage, api_key: apiKey)
-        request.httpBody = try encoder.encode(body)
-
-        struct Response: Decodable {
-            let translatedText: String
-        }
-        let response: Response = try await decodedData(for: request)
-        return response.translatedText
-    }
-
-    private func makeURL(path: String) throws -> URL {
-        guard var components = URLComponents(string: url) else {
-            throw URLError(.badURL)
-        }
-        components.path = path
-        guard let url = components.url else {
-            throw URLError(.badURL)
-        }
-        return url
-    }
-
-    private func decodedData<Output: Decodable>(for request: URLRequest) async throws -> Output {
-        let data = try await session.data(for: request)
-        let result = try decoder.decode(Output.self, from: data)
-        return result
-    }
-}
-
-private extension URLSession {
-    func data(for request: URLRequest) async throws -> Data {
-        var task: URLSessionDataTask?
-        let onCancel = { task?.cancel() }
-        return try await withTaskCancellationHandler(
-            operation: {
-                try await withCheckedThrowingContinuation { continuation in
-                    task = dataTask(with: request) { data, _, error in
-                        guard let data = data else {
-                            let error = error ?? URLError(.badServerResponse)
-                            return continuation.resume(throwing: error)
-                        }
-                        continuation.resume(returning: data)
-                    }
-                    task?.resume()
-                }
-            },
-            onCancel: { onCancel() }
-        )
-    }
-}
-
-
 struct NoteContentView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
@@ -261,12 +180,12 @@ struct NoteArtifacts {
     }
 }
 
-func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?, show_images: Bool) -> NoteArtifacts {
+func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -> NoteArtifacts {
     let blocks = ev.blocks(privkey)
-    return render_blocks(blocks: blocks, profiles: profiles, privkey: privkey, show_images: show_images)
+    return render_blocks(blocks: blocks, profiles: profiles, privkey: privkey)
 }
 
-func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?, show_images: Bool) -> NoteArtifacts {
+func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> NoteArtifacts {
     var invoices: [Invoice] = []
     var img_urls: [URL] = []
     var link_urls: [URL] = []
@@ -283,7 +202,7 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?, show_i
             return str
         case .url(let url):
             // Handle Image URLs
-            if show_images && is_image_url(url) {
+            if is_image_url(url) {
                 // Append Image
                 img_urls.append(url)
                 return str

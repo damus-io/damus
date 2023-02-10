@@ -17,7 +17,7 @@ struct FollowUserView: View {
         HStack {
             UserView(damus_state: damus_state, pubkey: target.pubkey)
             
-            FollowButtonView(target: target, follow_state: damus_state.contacts.follow_state(target.pubkey))
+            FollowButtonView(target: target, follows_you: false, follow_state: damus_state.contacts.follow_state(target.pubkey))
         }
     }
 }

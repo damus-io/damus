@@ -52,7 +52,8 @@ struct ZapButton: View {
                 damus_state.lnurls.endpoints[target.pubkey] = payreq
             }
             
-            guard let inv = await fetch_zap_invoice(payreq, zapreq: zapreq, amount: 1000000) else {
+            let tip_amount = get_default_tip_amount(pubkey: damus_state.pubkey)
+            guard let inv = await fetch_zap_invoice(payreq, zapreq: zapreq, amount: tip_amount) else {
                 DispatchQueue.main.async {
                     zapping = false
                 }
@@ -107,6 +108,7 @@ struct ZapButton: View {
                     send_zap()
                 }
             }
+            .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
             
             Text("\(bar.zap_total > 0 ? "\(format_msats_abbrev(bar.zap_total))" : "")")
                 .offset(x: 22)

@@ -13,7 +13,7 @@ struct ZapEvent: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("⚡️ \(format_msats(zap.invoice.amount))")
+            Text("⚡️ \(format_msats(zap.invoice.amount))", comment: "Text indicating the zap amount. i.e. number of satoshis that were tipped to a user")
                 .font(.headline)
                 .padding([.top], 2)
 

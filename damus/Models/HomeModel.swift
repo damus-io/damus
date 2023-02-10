@@ -464,7 +464,7 @@ class HomeModel: ObservableObject {
     }
 
     func handle_text_event(sub_id: String, _ ev: NostrEvent) {
-        if should_hide_event(contacts: damus_state.contacts, ev: ev) {
+        guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
             return
         }
 
@@ -476,7 +476,7 @@ class HomeModel: ObservableObject {
     }
 
     func handle_dm(_ ev: NostrEvent) {
-        if let notifs = handle_incoming_dm(prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, ev: ev) {
+        if let notifs = handle_incoming_dm(contacts: damus_state.contacts, prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, ev: ev) {
             self.new_events = notifs
         }
     }
@@ -707,7 +707,12 @@ func load_our_relays(contacts: Contacts, our_pubkey: String, pool: RelayPool, m_
     }
 }
 
-func handle_incoming_dm(prev_events: NewEventsBits, dms: DirectMessagesModel, our_pubkey: String, ev: NostrEvent) -> NewEventsBits? {
+func handle_incoming_dm(contacts: Contacts, prev_events: NewEventsBits, dms: DirectMessagesModel, our_pubkey: String, ev: NostrEvent) -> NewEventsBits? {
+    // hide blocked users
+    guard should_show_event(contacts: contacts, ev: ev) else {
+        return prev_events
+    }
+    
     var inserted = false
     var found = false
     let ours = ev.pubkey == our_pubkey
@@ -781,10 +786,10 @@ func event_has_our_pubkey(_ ev: NostrEvent, our_pubkey: String) -> Bool {
 }
 
 
-func should_hide_event(contacts: Contacts, ev: NostrEvent) -> Bool {
+func should_show_event(contacts: Contacts, ev: NostrEvent) -> Bool {
     if contacts.is_muted(ev.pubkey) {
-        return true
+        return false
     }
-    return !ev.should_show_event
+    return ev.should_show_event
 }
 

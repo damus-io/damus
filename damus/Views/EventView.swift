@@ -98,18 +98,12 @@ func should_show_images(contacts: Contacts, ev: NostrEvent, our_pubkey: String, 
     if ev.pubkey == our_pubkey {
         return true
     }
-
-    let remote_image_policy: RemoteImagePolicy = RemoteImagePolicy(rawValue: UserDefaults.standard.string(forKey: "remote_image_policy") ?? "") ?? .friendsOfFriends
-    if remote_image_policy == .everyone ||
-       remote_image_policy == .friendsOnly && contacts.is_friend(ev.pubkey) ||
-       remote_image_policy == .friendsOfFriends && contacts.is_in_friendosphere(ev.pubkey) {
+    if contacts.is_in_friendosphere(ev.pubkey) {
         return true
     }
-
-    if let boost_key = booster_pubkey, contacts.is_in_friendosphere(boost_key) && remote_image_policy != .restricted {
+    if let boost_key = booster_pubkey, contacts.is_in_friendosphere(boost_key) {
         return true
     }
-    
     return false
 }
 

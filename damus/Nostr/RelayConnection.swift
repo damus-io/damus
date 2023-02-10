@@ -118,10 +118,9 @@ func make_nostr_req(_ req: NostrRequest) -> String? {
 }
 
 func make_nostr_push_event(ev: NostrEvent) -> String? {
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = .withoutEscapingSlashes
-    let event_data = try! encoder.encode(ev)
-    let event = String(decoding: event_data, as: UTF8.self)
+    guard let event = encode_json(ev) else {
+        return nil
+    }
     let encoded = "[\"EVENT\",\(event)]"
     print(encoded)
     return encoded

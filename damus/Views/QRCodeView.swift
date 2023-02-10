@@ -42,7 +42,7 @@ struct QRCodeView: View {
                 let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
                 
                 if (damus_state.profiles.lookup(id: damus_state.pubkey)?.picture) != nil {
-                    ProfilePicView(pubkey: damus_state.pubkey, size: 90.0, highlight: .custom(Color("DamusWhite"), 4.0), profiles: damus_state.profiles, contacts: damus_state.contacts)
+                    ProfilePicView(pubkey: damus_state.pubkey, size: 90.0, highlight: .custom(Color("DamusWhite"), 4.0), profiles: damus_state.profiles)
                         .padding(.top, 50)
                 } else {
                     Image(systemName: "person.fill")
@@ -79,12 +79,12 @@ struct QRCodeView: View {
                 
                 Spacer()
                 
-                Text("Follow me on nostr")
+                Text("Follow me on nostr", comment: "Text on QR code view to prompt viewer looking at screen to follow the user.")
                     .foregroundColor(Color("DamusWhite"))
                     .font(.system(size: 24, weight: .heavy))
                     .padding(.top)
                 
-                Text("Scan the code")
+                Text("Scan the code", comment: "Text on QR code view to prompt viewer to scan the QR code on screen with their device camera.")
                     .foregroundColor(Color("DamusWhite"))
                     .font(.system(size: 18, weight: .ultraLight))
                 

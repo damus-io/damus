@@ -185,9 +185,9 @@
 			<key>many</key>
 			<string>%2$@ sats</string>
 			<key>one</key>
-			<string>%2$@ sat</string>
+			<string>%2$@ 聪</string>
 			<key>other</key>
-			<string>%2$@ sats</string>
+			<string>%2$@ 聪</string>
 			<key>two</key>
 			<string>%2$@ sats</string>
 			<key>zero</key>
@@ -209,9 +209,9 @@
 			<key>many</key>
 			<string>Zaps</string>
 			<key>one</key>
-			<string>Zap</string>
+			<string>电击</string>
 			<key>other</key>
-			<string>Zaps</string>
+			<string>电击</string>
 			<key>two</key>
 			<string>Zaps</string>
 			<key>zero</key>

@@ -71,10 +71,7 @@ struct TranslateView: View {
             }
         }
         .task {
-            let translate_url = damus_state.settings.libretranslate_url
-            let api_key = damus_state.settings.libretranslate_api_key
-            
-            guard noteLanguage == nil && !checkingTranslationStatus && translate_url != "" else {
+            guard noteLanguage == nil && !checkingTranslationStatus && damus_state.settings.can_translate(damus_state.pubkey) else {
                 return
             }
             
@@ -91,11 +88,11 @@ struct TranslateView: View {
             noteLanguage = NLLanguageRecognizer.dominantLanguage(for: content)?.rawValue ?? currentLanguage
 
             if let lang = noteLanguage, noteLanguage != currentLanguage {
-                // If the detected dominant language is a variant, remove the variant component and just take the language part as LibreTranslate typically only supports the variant-less language.
+                // If the detected dominant language is a variant, remove the variant component and just take the language part as translation services typically only supports the variant-less language.
                 if #available(iOS 16, *) {
                     noteLanguage = Locale.LanguageCode(stringLiteral: lang).identifier(.alpha2)
                 } else {
-                    noteLanguage = Locale.canonicalLanguageIdentifier(from: lang)
+                    noteLanguage = NSLocale(localeIdentifier: lang).languageCode
                 }
             }
             
@@ -109,7 +106,7 @@ struct TranslateView: View {
             if note_lang != currentLanguage {
                 do {
                     // If the note language is different from our language, send a translation request.
-                    let translator = Translator(translate_url, apiKey: api_key)
+                    let translator = Translator(damus_state.settings)
                     translated_note = try await translator.translate(content, from: note_lang, to: currentLanguage)
                 } catch {
                     // If for whatever reason we're not able to figure out the language of the note, or translate the note, fail gracefully and do not retry. It's not the end of the world. Don't want to take down someone's translation server with an accidental denial of service attack.
@@ -121,8 +118,7 @@ struct TranslateView: View {
             if let translated = translated_note {
                 // Render translated note.
                 let blocks = event.get_blocks(content: translated)
-                let show_images = should_show_images(contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
-                translated_artifacts = render_blocks(blocks: blocks, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey, show_images: show_images)
+                translated_artifacts = render_blocks(blocks: blocks, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
             }
 
             checkingTranslationStatus = false
