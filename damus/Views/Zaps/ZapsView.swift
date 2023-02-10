@@ -13,7 +13,7 @@ struct ZapsView: View {
     
     init(state: DamusState, target: ZapTarget) {
         self.state = state
-        self._model = StateObject(wrappedValue: ZapsModel(profiles: state.profiles, pool: state.pool, target: target))
+        self._model = StateObject(wrappedValue: ZapsModel(state: state, target: target))
     }
     
     var body: some View {

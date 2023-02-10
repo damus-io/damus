@@ -8,17 +8,15 @@
 import Foundation
 
 class ZapsModel: ObservableObject {
-    let profiles: Profiles
-    let pool: RelayPool
+    let state: DamusState
     let target: ZapTarget
     var zaps: [Zap]
     
     let zaps_subid = UUID().description
     
-    init(profiles: Profiles, pool: RelayPool, target: ZapTarget) {
+    init(state: DamusState, target: ZapTarget) {
+        self.state = state
         self.target = target
-        self.profiles = profiles
-        self.pool = pool
         self.zaps = []
     }
     
@@ -30,11 +28,11 @@ class ZapsModel: ObservableObject {
         case .note(let note_target):
             filter.referenced_ids = [note_target.note_id]
         }
-        pool.subscribe(sub_id: zaps_subid, filters: [filter], handler: handle_event)
+        state.pool.subscribe(sub_id: zaps_subid, filters: [filter], handler: handle_event)
     }
     
     func unsubscribe() {
-        pool.unsubscribe(sub_id: zaps_subid)
+        state.pool.unsubscribe(sub_id: zaps_subid)
     }
     
     func handle_event(relay_id: String, conn_ev: NostrConnectionEvent) {
@@ -54,16 +52,26 @@ class ZapsModel: ObservableObject {
             return
         }
         
-        guard let zapper = profiles.lookup_zapper(pubkey: target.pubkey) else {
-            return
+        if let zap = state.zaps.zaps[ev.id] {
+            if insert_uniq_sorted_zap(zaps: &zaps, new_zap: zap) {
+                objectWillChange.send()
+            }
+        } else {
+            guard let zapper = state.profiles.lookup_zapper(pubkey: target.pubkey) else {
+                return
+            }
+            
+            guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper) else {
+                return
+            }
+            
+            state.zaps.add_zap(zap: zap)
+            
+            if insert_uniq_sorted_zap(zaps: &zaps, new_zap: zap) {
+                objectWillChange.send()
+            }
         }
         
-        guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper) else {
-            return
-        }
         
-        if insert_uniq_sorted_zap(zaps: &zaps, new_zap: zap) {
-            objectWillChange.send()
-        }
     }
 }
