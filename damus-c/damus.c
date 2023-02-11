@@ -55,8 +55,8 @@ static int consume_until_whitespace(struct cursor *cur, int or_end) {
     while (cur->p < cur->end) {
         c = *cur->p;
         
-        if (is_whitespace(c) && consumedAtLeastOne)
-            return 1;
+        if (is_whitespace(c))
+            return consumedAtLeastOne;
         
         cur->p++;
         consumedAtLeastOne = true;
