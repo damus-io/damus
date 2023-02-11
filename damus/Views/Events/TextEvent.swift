@@ -37,7 +37,13 @@ struct TextEvent: View {
                         .foregroundColor(.gray)
                     
                     Spacer()
+                    
+                    EventMenuContext(event: event, keypair: damus.keypair, target_pubkey: event.pubkey)
+                        .padding([.bottom], 4)
+
                 }
+                .minimumScaleFactor(0.75)
+                .lineLimit(1)
                 
                 EventBody(damus_state: damus, event: event, size: .normal)
                 
@@ -61,7 +67,6 @@ struct TextEvent: View {
         .id(event.id)
         .frame(maxWidth: .infinity, minHeight: PFP_SIZE)
         .padding([.bottom], 2)
-        .event_context_menu(event, keypair: damus.keypair, target_pubkey: pubkey)
     }
 }
 
