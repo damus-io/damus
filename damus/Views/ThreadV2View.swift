@@ -47,6 +47,7 @@ struct BuildThreadV2View: View {
     @State var thread: ThreadV2? = nil
     
     @State var current_events_uuid: String = ""
+    @State var extra_events_uuid: String = ""
     @State var childs_events_uuid: String = ""
     @State var parents_events_uuids: [String] = []
     
@@ -197,13 +198,15 @@ struct BuildThreadV2View: View {
         self.unsubscribe_all()
         print("ThreadV2View: Reload!")
         
+        var extra = NostrFilter.filter_kinds([9735, 6, 7])
+        extra.referenced_ids = [ self.event_id ]
+        
         // Get the current event
         current_events_uuid = subscribe(filters: [
-            NostrFilter(
-                ids: [self.event_id],
-                limit: 1
-            )
+            NostrFilter(ids: [self.event_id], limit: 1)
         ])
+        
+        extra_events_uuid = subscribe(filters: [extra])
         print("subscribing to threadV2 \(event_id) with sub_id \(current_events_uuid)")
     }
     

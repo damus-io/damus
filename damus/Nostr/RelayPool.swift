@@ -42,6 +42,8 @@ class RelayPool {
     var relays: [Relay] = []
     var handlers: [RelayHandler] = []
     var request_queue: [QueuedRequest] = []
+    var seen: Set<String> = Set()
+    var counts: [String: UInt64] = [:]
 
     var descriptors: [RelayDescriptor] {
         relays.map { $0.descriptor }
@@ -149,9 +151,9 @@ class RelayPool {
         self.send(.unsubscribe(sub_id), to: to)
     }
     
-    func subscribe(sub_id: String, filters: [NostrFilter], handler: @escaping (String, NostrConnectionEvent) -> ()) {
+    func subscribe(sub_id: String, filters: [NostrFilter], handler: @escaping (String, NostrConnectionEvent) -> (), to: [String]? = nil) {
         register_handler(sub_id: sub_id, handler: handler)
-        send(.subscribe(.init(filters: filters, sub_id: sub_id)))
+        send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
     }
     
     func subscribe_to(sub_id: String, filters: [NostrFilter], to: [String]?, handler: @escaping (String, NostrConnectionEvent) -> ()) {
@@ -241,8 +243,25 @@ class RelayPool {
         }
     }
     
+    func record_seen(relay_id: String, event: NostrConnectionEvent) {
+        if case .nostr_event(let ev) = event {
+            if case .event(_, let nev) = ev {
+                let k = relay_id + nev.id
+                if !seen.contains(k) {
+                    seen.insert(k)
+                    if counts[relay_id] == nil {
+                        counts[relay_id] = 1
+                    } else {
+                        counts[relay_id] = (counts[relay_id] ?? 0) + 1
+                    }
+                }
+            }
+        }
+    }
+    
     func handle_event(relay_id: String, event: NostrConnectionEvent) {
         record_last_pong(relay_id: relay_id, event: event)
+        record_seen(relay_id: relay_id, event: event)
         
         // run req queue when we reconnect
         if case .ws_event(let ws) = event {

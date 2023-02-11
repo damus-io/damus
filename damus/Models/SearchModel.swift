@@ -98,6 +98,21 @@ func event_matches_hashtag(_ ev: NostrEvent, hashtags: [String]) -> Bool {
     return false
 }
 
+func tag_is_hashtag(_ tag: [String]) -> Bool {
+    // "hashtag" is deprecated, will remove in the future
+    return tag.count >= 2 && (tag[0] == "hashtag" || tag[0] == "t")
+}
+
+func has_hashtag(_ tags: [[String]], hashtag: String) -> Bool {
+    for tag in tags {
+        if tag_is_hashtag(tag) && tag[1] == hashtag {
+            return true
+        }
+    }
+    
+    return false
+}
+
 func event_matches_filter(_ ev: NostrEvent, filter: NostrFilter) -> Bool {
     if let hashtags = filter.hashtag {
         return event_matches_hashtag(ev, hashtags: hashtags)

@@ -14,6 +14,8 @@ struct RelayConfigView: View {
     @State var relays: [RelayDescriptor]
     @State var is_show_relay_explanation: Bool = true
 
+    @Environment(\.dismiss) var dismiss
+
     init(state: DamusState) {
         self.state = state
         _relays = State(initialValue: state.pool.descriptors)
@@ -33,6 +35,9 @@ struct RelayConfigView: View {
         MainContent
         .onReceive(handle_notify(.relays_changed)) { _ in
             self.relays = state.pool.descriptors
+        }
+        .onReceive(handle_notify(.switched_timeline)) { _ in
+            dismiss()
         }
         .sheet(isPresented: $show_add_relay) {
             AddRelayView(show_add_relay: $show_add_relay, relay: $new_relay) { m_relay in
@@ -68,7 +73,7 @@ struct RelayConfigView: View {
                     return
                 }
                 
-                process_contact_event(pool: state.pool, contacts: state.contacts, pubkey: state.pubkey, ev: ev)
+                process_contact_event(state: state, ev: ev)
                 
                 state.pool.send(.event(new_ev))
             }

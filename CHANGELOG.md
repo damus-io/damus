@@ -1,3 +1,50 @@
+## [1.0.0-15] - 2023-02-10
+
+### Added
+
+- Japanese translations (Terry Yiu)
+- Add password autofill on account login and creation (Terry Yiu)
+- Show if relay is paid (William Casarin)
+- Add "Follows You" indicator on profile (William Casarin)
+- Add screen to select individual relays when posting/broadcasting (Andrii Sievrikov)
+- Relay Detail View (Joel Klabo)
+- Warn when attempting to post an nsec key (Terry Yiu)
+- DeepL translation integration (Terry Yiu)
+- Use local authentication (faceid) to access private key (Andrii Sievrikov)
+- Add accessibility labels to action bar (Bryan Montz)
+- Copy invoice button (Joel Klabo)
+- Ability to change remote image loading policy (radixrat)
+- Receive Lightning Zaps (William Casarin)
+- Allow text selection in bio (Suhail Saqan)
+
+
+### Changed
+
+- Show "Follow Back" button on profile page (William Casarin)
+- When on your profile page, open relay view instead for your own relays (Terry Yiu)
+- Updated QR code view, include profile image, etc (ericholguin)
+- Make app smaller by optimizing pngs (pea-sys)
+- Clicking relay numbers now goes to relay config (radixrat)
+
+
+### Fixed
+
+- Load zaps, likes and reposts when you open a thread (William Casarin)
+- Fix bug where sidebar navigation fails to pop when switching timelines (William Casarin)
+- Use lnaddress before lnurl for tip addresses to avoid Anigma scamming (William Casarin)
+- Fix sidebar navigation bugs (OlegAba)
+- Fix issue where navigation fails pop to root when switching timelines (William Casarin)
+- Make @ mentions case insensitive (William Casarin)
+- Fix some lnurls not getting decoded properly (William Casarin)
+- Hide incoming DMs from blocked users (William Casarin)
+- Hide blocked users from search results (William Casarin)
+- Fix Cash App invoice payments (Rob Seward)
+- DM Padding (OlegAba)
+- Check for broken lnurls (William Casarin)
+
+
+
+[1.0.0-15]: https://github.com/damus-io/damus/releases/tag/v1.0.0-15
 ## [1.0.0-13] - 2023-01-30
 
 ### Added
@@ -513,6 +560,4 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
-
 
