@@ -33,14 +33,14 @@ func print_event(_ ev: NostrEvent) {
     print(ev.description)
 }
 
-func scroll_to_event(scroller: ScrollViewProxy, id: String, delay: Double, animate: Bool) {
+func scroll_to_event(scroller: ScrollViewProxy, id: String, delay: Double, animate: Bool, anchor: UnitPoint = .bottom) {
     DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
         if animate {
             withAnimation {
-                scroller.scrollTo(id, anchor: .bottom)
+                scroller.scrollTo(id, anchor: anchor)
             }
         } else {
-            scroller.scrollTo(id, anchor: .bottom)
+            scroller.scrollTo(id, anchor: anchor)
         }
     }
 }
