@@ -141,7 +141,7 @@ class damusTests: XCTestCase {
     }
     
     func testNoParseUrlWithOnlyWhitespace() {
-        let testString = "https:// "
+        let testString = "https://  "
         let parsed = parse_mentions(content: testString, tags: [])
         
         XCTAssertNotNil(parsed)
