@@ -77,7 +77,7 @@ struct TimelineView: View {
                 guard let event = events.filter(self.filter).first else {
                     return
                 }
-                scroll_to_event(scroller: scroller, id: event.id, delay: 0.0, animate: true)
+                scroll_to_event(scroller: scroller, id: event.id, delay: 0.0, animate: true, anchor: .top)
             }
         }
     }
