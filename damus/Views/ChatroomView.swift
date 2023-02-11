@@ -25,7 +25,7 @@ struct ChatroomView: View {
                                  next_ev: ind == count-1 ? nil : thread.events[ind+1],
                                  damus_state: damus
                         )
-                        .event_context_menu(ev, keypair: damus.keypair, target_pubkey: ev.pubkey, bookmarks: damus.bookmarks)
+                        .contextMenu{MenuItems(event: ev, keypair: damus.keypair, target_pubkey: ev.pubkey, bookmarks: damus.bookmarks)}
                         .onTapGesture {
                             if thread.event.id == ev.id {
                                 //dismiss()
