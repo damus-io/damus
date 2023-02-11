@@ -34,7 +34,7 @@ struct InnerTimelineView: View {
         NavigationLink(destination: MaybeBuildThreadView, isActive: $navigating) {
             EmptyView()
         }
-        LazyVStack {
+        LazyVStack(spacing: 0) {
             if events.isEmpty {
                 EmptyTimelineView()
             } else {
@@ -44,11 +44,11 @@ struct InnerTimelineView: View {
                             nav_target = ev
                             navigating = true
                         }
+                        .padding(.top, 10)
                 }
             }
         }
         .padding(.horizontal)
-        .padding(.top,10)
     }
 }
 

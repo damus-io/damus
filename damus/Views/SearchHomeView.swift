@@ -37,7 +37,6 @@ struct SearchHomeView: View {
             RoundedRectangle(cornerRadius: 8)
                 .foregroundColor(.secondary.opacity(0.2))
         }
-        //.padding()
     }
     
     var GlobalContent: some View {
@@ -74,7 +73,7 @@ struct SearchHomeView: View {
         VStack {
             MainContent
         }
-        .safeAreaInset(edge: .top) {
+        .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
                 SearchInput
                     //.frame(maxWidth: 275)

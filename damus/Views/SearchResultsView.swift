@@ -79,7 +79,8 @@ struct SearchResultsView: View {
                 case .none:
                     Text("none", comment: "No search results.")
                 }
-            }.padding(.horizontal)
+            }
+            .padding()
         }
     }
     
