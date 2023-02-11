@@ -15,7 +15,6 @@ struct SearchView: View {
     var body: some View {
         TimelineView(events: $search.events, loading: $search.loading, damus: appstate, show_friend_icon: true, filter: { _ in true })
             .navigationBarTitle(describe_search(search.search))
-            .padding([.leading, .trailing], 6)
             .onReceive(handle_notify(.switched_timeline)) { obj in
                 dismiss()
             }

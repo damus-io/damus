@@ -33,13 +33,14 @@ struct DirectMessagesView: View {
             NavigationLink(destination: chat, isActive: $open_dm) {
                 EmptyView()
             }
-            LazyVStack {
+            LazyVStack(spacing: 0) {
                 if model.dms.isEmpty, !model.loading {
                     EmptyTimelineView()
                 } else {
                     let dms = requests ? model.message_requests : model.friend_dms
                     ForEach(dms, id: \.0) { tup in
                         MaybeEvent(tup)
+                            .padding(.top, 10)
                     }
                 }
             }
