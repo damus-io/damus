@@ -386,7 +386,7 @@ struct ContentView: View {
 			guard let ev = delete.object as? NostrEvent else {
 				return
 			}
-			self.home.handle_delete_event(ev)
+			self.home.handle_unlike_event(ev)
 		}
         .onReceive(handle_notify(.deleted_account)) { notif in
             self.is_deleted_account = true
