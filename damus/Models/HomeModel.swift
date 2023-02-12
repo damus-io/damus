@@ -34,7 +34,6 @@ class HomeModel: ObservableObject {
     var damus_state: DamusState
 
     var has_event: [String: Set<String>] = [:]
-    var deleted_events: Set<String> = Set()
     var channels: [String: NostrEvent] = [:]
     var last_event_of_kind: [String: [Int: NostrEvent]] = [:]
     var done_init: Bool = false
@@ -185,13 +184,15 @@ class HomeModel: ObservableObject {
         self.notifications = notifications.filter { !damus_state.contacts.is_muted($0.pubkey) }
     }
     
-    func handle_delete_event(_ ev: NostrEvent) {
-        guard ev.is_valid else {
-            return
-        }
-        
-        self.deleted_events.insert(ev.id)
-    }
+
+	func handle_delete_event(_ ev: NostrEvent) {
+		guard ev.is_valid, let privkey = self.damus_state.keypair.privkey else {
+			   return
+		}
+
+		let delete = make_delete_event(pubkey: damus_state.keypair.pubkey, privkey: privkey, deleted_events: [ev.id])
+		pool.send(.event(delete))
+	}
 
     func handle_contact_event(sub_id: String, relay_id: String, ev: NostrEvent) {
         process_contact_event(state: self.damus_state, ev: ev)
