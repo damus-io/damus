@@ -100,7 +100,7 @@ struct ZapButton: View {
     }
     
     var body: some View {
-        ZStack {
+        HStack(spacing: 4) {
             EventActionButton(img: zap_img, col: zap_color) {
                 if bar.zapped {
                     //notify(.delete, bar.our_tip)
@@ -111,7 +111,6 @@ struct ZapButton: View {
             .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
             
             Text(String("\(bar.zap_total > 0 ? "\(format_msats_abbrev(bar.zap_total))" : "")"))
-                .offset(x: 22)
                 .font(.footnote)
                 .foregroundColor(bar.zapped ? Color.orange : Color.gray)
         }
