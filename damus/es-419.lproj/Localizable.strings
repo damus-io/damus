@@ -19,7 +19,7 @@
 /* Abbreviated version of a nostr public key. */
 "%@" = "%@";
 
-/* Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
+/* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
 Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
 "%@ %@" = "%@ %@";
 
@@ -35,7 +35,7 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Deja propinas en las publicaciones de tus amigos y acumula sats con Bitcoin⚡️, la moneda nativa de internet.";
 
-/* Number of zap payments on a post.
+/* Number of reposts.
 Number of relay servers a user is connected. */
 "%lld" = "%lld";
 
@@ -147,9 +147,6 @@ Number of relay servers a user is connected. */
 /* Dropdown option label for Lightning wallet, Cash App. */
 "Cash App" = "Cash App";
 
-/* Navigation bar title for Chatroom view. */
-"Chat" = "Chat";
-
 /* Button for clearing cached data. */
 "Clear" = "Borrar";
 
@@ -229,8 +226,7 @@ Number of relay servers a user is connected. */
    Section title for deleting the user */
 "Delete" = "Borrar";
 
-/* Alert for deleting the users account.
-   Button to delete the user's account. */
+/* Button to delete the user's account. */
 "Delete Account" = "Eliminar cuenta";
 
 /* Alert message to indicate this is a deleted account */
@@ -622,8 +618,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label to describe that a private key is the user's secret account key and what they should do with it. */
 "This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Esta es tu clave de cuenta secreta, que necesitas para acceder a tu cuenta. ¡No la compartas con nadie! Guárdala en un administrador de contraseñas y protégela.";
 
-/* Navigation bar title for note thread.
-   Navigation bar title for threaded event detail view. */
+/* Navigation bar title for note thread. */
 "Thread" = "Hilo";
 
 /* Button to translate note from different language. */

@@ -19,7 +19,7 @@
 /* Abbreviated version of a nostr public key. */
 "%@" = "%@";
 
-/* Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
+/* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
 Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
 "%@ %@" = "%@ %@";
 
@@ -35,7 +35,7 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. بسهولة مطلقة، أرسل و استقبل برقيات البتكوين ⚡️عملة الانترنت العالمية.";
 
-/* Number of zap payments on a post.
+/* Number of reposts.
 Number of relay servers a user is connected. */
 "%lld" = "%lld";
 
@@ -76,11 +76,17 @@ Number of relay servers a user is connected. */
 /* Label for section for adding a relay server. */
 "Add Relay" = "اضافة موصّل";
 
+/* Label to display relay contact user. */
+"Admin" = "المدير";
+
 /* Any amount of sats */
 "Any" = "أي شيء";
 
 /* Prompt for optional entry of API Key to use translation server. */
 "API Key (optional)" = "مفتاح API (اختياري)";
+
+/* Prompt for required entry of API Key to use translation server. */
+"API Key (required)" = "مفتاح API (مطلوب)";
 
 /* Alert message to ask if user wants to repost a post. */
 "Are you sure you want to repost this?" = "هل أنت متأكد من اعادة النشر؟";
@@ -120,6 +126,9 @@ Number of relay servers a user is connected. */
 /* Dropdown option label for Lightning wallet, Blue Wallet. */
 "Blue Wallet" = "Blue Wallet";
 
+/* Accessibility label for boosts button */
+"Boosts" = "تعزيز";
+
 /* Dropdown option label for Lightning wallet, Breez. */
 "Breez" = "Breez";
 
@@ -138,14 +147,14 @@ Number of relay servers a user is connected. */
 /* Dropdown option label for Lightning wallet, Cash App. */
 "Cash App" = "Cash App";
 
-/* Navigation bar title for Chatroom view. */
-"Chat" = "المحادثة";
-
 /* Button for clearing cached data. */
 "Clear" = "مسح";
 
 /* Section title for clearing cached data. */
 "Clear Cache" = "مسح البيانات المؤقتة";
+
+/* Label to display relay contact information. */
+"Contact" = "تواصل";
 
 /* Label indicating that a user's key was copied. */
 "Copied" = "تم النسخ";
@@ -205,6 +214,9 @@ Number of relay servers a user is connected. */
 /* Name of the app, shown on the first screen when user is not logged in. */
 "Damus" = "دامُس";
 
+/* Dropdown option for selecting DeepL as the translation service. */
+"DeepL (Proprietary, Higher Accuracy)" = "DeepL (دقة أعلى، ملكية خاصة)";
+
 /* Button to pay a Lightning invoice with the user's default Lightning wallet. */
 "Default Wallet" = "المحفظة الافتراضية";
 
@@ -214,12 +226,14 @@ Number of relay servers a user is connected. */
    Section title for deleting the user */
 "Delete" = "حذف";
 
-/* Alert for deleting the users account.
-   Button to delete the user's account. */
+/* Button to delete the user's account. */
 "Delete Account" = "حذف الحساب";
 
 /* Alert message to indicate this is a deleted account */
 "Deleted Account" = "حذف الحساب";
+
+/* Label to display relay description. */
+"Description" = "الوصف";
 
 /* Button to dismiss a text field alert. */
 "Dismiss" = "اغلاق";
@@ -255,8 +269,20 @@ Number of relay servers a user is connected. */
 /* Label indicating that the below text is the EULA, an acronym for End User License Agreement. */
 "EULA" = "اتفاقية الاستخدام";
 
+/* No comment provided by engineer. */
+"EventDetailView" = "EventDetailView";
+
+/* No comment provided by engineer. */
+"Filter" = "تصفية";
+
 /* Button to follow a user. */
 "Follow" = "متابعة";
+
+/* Button to follow a user back. */
+"Follow Back" = "رد المتابعة";
+
+/* Text on QR code view to prompt viewer looking at screen to follow the user. */
+"Follow me on nostr" = "تابعني على نوستر";
 
 /* Label describing followers of a user. */
 "Followers" = "المتابعون";
@@ -270,6 +296,15 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Text to indicate that button next to it is in a state that will follow a profile when tapped. */
 "Follows" = "تابع";
+
+/* Text to indicate that a user is following your profile. */
+"Follows you" = "متابع لك";
+
+/* Dropdown option for selecting Free plan for DeepL translation service. */
+"Free" = "مجاني";
+
+/* Button to navigate to DeepL website to get a translation API key. */
+"Get API Key" = "احصل على مفتاح API";
 
 /* Navigation bar title for Global view where posts from all connected relay servers appear. */
 "Global" = "عام";
@@ -314,14 +349,23 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button to complete account creation and start using the app. */
 "Let's go!" = "هيا بنا!";
 
+/* Dropdown option for selecting LibreTranslate as the translation service. */
+"LibreTranslate (Open Source)" = "LibreTranslate (مفتوح المصدر)";
+
 /* Placeholder text for entry of Lightning Address or LNURL. */
 "Lightning Address or LNURL" = "عنوان البرق أو LNURL";
 
 /* Indicates that the view is for paying a Lightning invoice. */
 "Lightning Invoice" = "برقية";
 
+/* Accessibility Label for Like button */
+"Like" = "اعجاب";
+
 /* Dropdown option label for Lightning wallet, LNLink. */
 "LNLink" = "LNLink";
+
+/* Face ID usage description shown when trying to access private key */
+"Local authentication to access private key" = "التحقق للوصول للمفتاح الخاص";
 
 /* Dropdown option label for system default for Lightning wallet. */
 "Local default" = "الاختيار";
@@ -362,7 +406,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Indicates that there are no notes in the timeline to view. */
 "Nothing to see here. Check back later!" = "لا جديد في هذه اللحظة. يرجى المعاودة لاحقا!";
 
-/* Navigation title for notifications. */
+/* Toolbar label for Notifications view. */
 "Notifications" = "التنبيهات";
 
 /* String indicating that a given timestamp just occurred */
@@ -377,14 +421,23 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label indicating that a form input is optional. */
 "optional" = "غير الزامي";
 
+/* No comment provided by engineer. */
+"Paid Relay" = "موصل مدفوع";
+
 /* Button to pay a Lightning invoice. */
 "Pay" = "ادفع";
 
 /* Navigation bar title for view to pay Lightning invoice. */
 "Pay the Lightning invoice" = "ادفع البرقية";
 
+/* Alert for deleting the users account. */
+"Permanently Delete Account" = "حذف الحساب للأبد";
+
 /* Dropdown option label for Lightning wallet, Phoenix. */
 "Phoenix" = "Phoenix";
+
+/* Prompt selection of DeepL subscription plan to perform machine translations on notes */
+"Plan" = "الخطة";
 
 /* Button to post a note. */
 "Post" = "انشر";
@@ -403,6 +456,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Title of the secure field that holds the user's private key. */
 "Private Key" = "المفتاح السري";
+
+/* Dropdown option for selecting Pro plan for DeepL translation service. */
+"Pro" = "برو";
 
 /* Sidebar menu label for Profile view. */
 "Profile" = "الملف الشخصي";
@@ -435,8 +491,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Text field for relay server. Used for testing purposes. */
 "Relay" = "موصّل";
 
-/* Sidebar menu label for Relay servers view
-   Sidebar menu label for Relays view. */
+/* Sidebar menu label for Relays view. */
 "Relays" = "موصّلات";
 
 /* Description of what was done as a result of sending a report to relay servers. */
@@ -444,6 +499,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Button label to remove all participants from a note reply. */
 "Remove all" = "حذف المشاركين";
+
+/* Accessibility label for reply button */
+"Reply" = "رد";
 
 /* Label to indicate that the user is replying to themself. */
 "Reply to self" = "رد على منشوره السابق";
@@ -495,6 +553,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Context menu option to save an image. */
 "Save Image" = "حفظ الصورة";
 
+/* Text on QR code view to prompt viewer to scan the QR code on screen with their device camera. */
+"Scan the code" = "امسح رمز الاستجابة السريع (QR)";
+
 /* Navigation link to search hashtag. */
 "Search hashtag: #%@" = "البحث عن وسم: #%@";
 
@@ -515,6 +576,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Prompt selection of LibreTranslate server to perform machine translations on notes */
 "Server" = "خادم";
+
+/* Prompt selection of translation service provider. */
+"Service" = "الخدمة";
 
 /* Navigation title for Settings view.
    Sidebar menu label for accessing the app settings */
@@ -539,14 +603,23 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Sidebar menu label to sign out of the account. */
 "Sign out" = "خروج";
 
+/* Label to display relay software. */
+"Software" = "البرنامج";
+
 /* Dropdown option label for Lightning wallet, Strike. */
 "Strike" = "Strike";
+
+/* Label to display relay's supported NIPs. */
+"Supported NIPs" = "الـ NIPs المدعومة";
 
 /* Button to close out of alert that informs that the action to block a user was successful. */
 "Thanks!" = "شكرا!";
 
 /* Button for user to report that the account is impersonating someone. */
 "They are impersonating someone" = "انتحال صفة شخص آخر";
+
+/* No comment provided by engineer. */
+"This is a paid relay, you must pay for posts to be accepted." = "هذا موصل بمقابل، يجب الاشتراك للنشر فيه";
 
 /* Warning that the inputted account key is a public key and the result of what happens because of it. */
 "This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "هذا مفتاح عام. لن تستطيع النشر أو التفاعل بهذا الحساب بأي طريقة. تستطيع فقط مشاهدة المحتوى العام من منظور صاحب الحساب.";
@@ -560,9 +633,11 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label to describe that a private key is the user's secret account key and what they should do with it. */
 "This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "هذا مفتاح الحساب السري. تحتاجه للدخول إلى حسابك. لا تشاركه مع أي شخص! احتفظ به في مكان آمن مثل برنامج إدارة كلمات المرور السرية. ";
 
-/* Navigation bar title for note thread.
-   Navigation bar title for threaded event detail view. */
+/* Navigation bar title for note thread. */
 "Thread" = "منشور";
+
+/* No comment provided by engineer. */
+"To filter your %@ feed, please choose applicable relays from the list below:" = "الرجاء اختيار موصلات معينة لتصفية محتوى %@";
 
 /* Button to translate note from different language. */
 "Translate Note" = "ترجم المنشور";
@@ -572,6 +647,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Button to indicate that the note is in the process of being translated from a different language. */
 "Translating from (lang)..." = "الترجمة من (lang)...";
+
+/* Section title for selecting the translation service. */
+"Translations" = "الترجمة";
 
 /* Text field prompt asking user to type the word DELETE to confirm that they want to proceed with deleting their account. The all caps lock DELETE word should not be translated. Everything else should. */
 "Type DELETE to delete" = "اكتب DELETE لتأكيد الحذف";
@@ -606,6 +684,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label for Username section of user profile form.
    Label to prompt username entry. */
 "Username" = "اسم المستخدم";
+
+/* Label to display relay software version. */
+"Version" = "الاصدار";
 
 /* Sidebar menu label for Wallet view. */
 "Wallet" = "المحفظة";
@@ -645,6 +726,12 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Footer text to inform user what will happen when the report is submitted. */
 "Your report will be sent to the relays you are connected to" = "سيتم ارسال بلاغك للموصّلات المتصلة بحسابك";
+
+/* Accessibility label for zap button */
+"Zap" = "ومضة";
+
+/* Navigation bar title for the Zaps view. */
+"Zaps" = "وميض";
 
 /* Dropdown option label for Lightning wallet, Zebedee. */
 "Zebedee" = "Zebedee";

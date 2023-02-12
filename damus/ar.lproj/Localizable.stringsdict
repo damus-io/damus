@@ -89,7 +89,7 @@
 			<key>many</key>
 			<string>موصّلات</string>
 			<key>one</key>
-			<string> موصّل</string>
+			<string>  موصّل</string>
 			<key>other</key>
 			<string>موصّلات</string>
 			<key>two</key>
@@ -115,7 +115,7 @@
 			<key>one</key>
 			<string>&amp; %d آخر</string>
 			<key>other</key>
-			<string>&amp; %d آخرون</string>
+			<string>&amp; %d آخرين</string>
 			<key>two</key>
 			<string> &amp; %d آخران</string>
 			<key>zero</key>
@@ -139,7 +139,7 @@
 			<key>one</key>
 			<string>&amp; %d آخر</string>
 			<key>other</key>
-			<string>&amp; %d آخرون</string>
+			<string>&amp; %d آخرين</string>
 			<key>two</key>
 			<string> &amp; %d آخران</string>
 			<key>zero</key>
@@ -205,17 +205,17 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>few</key>
-			<string>Zaps</string>
+			<string>وميض</string>
 			<key>many</key>
-			<string>Zaps</string>
+			<string>وميض</string>
 			<key>one</key>
-			<string>Zap</string>
+			<string>ومضة</string>
 			<key>other</key>
-			<string>Zaps</string>
+			<string>وميض</string>
 			<key>two</key>
-			<string>Zaps</string>
+			<string>وميض</string>
 			<key>zero</key>
-			<string>Zaps</string>
+			<string>وميض</string>
 		</dict>
 	</dict>
 </dict>
