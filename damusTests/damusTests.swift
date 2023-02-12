@@ -148,6 +148,14 @@ class damusTests: XCTestCase {
         XCTAssertEqual(parsed[0].is_text, testString)
     }
     
+    func testNoParseUrlTrailingCharacters() {
+        let testString = "https://foo.bar, "
+        let parsed = parse_mentions(content: testString, tags: [])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed[0].is_url?.absoluteString, "https://foo.bar")
+    }
+    
     func testParseMentionBlank() {
         let parsed = parse_mentions(content: "", tags: [["e", "event_id"]])
         
