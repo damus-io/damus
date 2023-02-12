@@ -49,7 +49,7 @@ struct EventActionBar: View {
                 }
             }
             Spacer()
-            ZStack {
+            HStack(spacing: 4) {
                 
                 EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
                     if bar.boosted {
@@ -59,13 +59,12 @@ struct EventActionBar: View {
                     }
                 }
                 Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
-                    .offset(x: 18)
                     .font(.footnote.weight(.medium))
                     .foregroundColor(bar.boosted ? Color.green : Color.gray)
             }
             Spacer()
             
-            ZStack {
+            HStack(spacing: 4) {
                 LikeButton(liked: bar.liked) {
                     if bar.liked {
                         notify(.delete, bar.our_like)
@@ -74,7 +73,6 @@ struct EventActionBar: View {
                     }
                 }
                 Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
-                    .offset(x: 22)
                     .font(.footnote.weight(.medium))
                     .foregroundColor(bar.liked ? Color.accentColor : Color.gray)
                 
@@ -149,9 +147,9 @@ struct EventActionBar: View {
 
 func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> some View {
     Button(action: action) {
-        Label(NSLocalizedString("\u{00A0}", comment: "Non-breaking space character to fill in blank space next to event action button icons."), systemImage: img)
-            .font(.footnote.weight(.medium))
+        Image(systemName: img)
             .foregroundColor(col == nil ? Color.gray : col!)
+            .font(.footnote.weight(.medium))
     }
 }
 
