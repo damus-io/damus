@@ -26,6 +26,10 @@ static inline int is_boundary(char c) {
     return !isalnum(c);
 }
 
+static inline int is_invalid_url_ending(char c) {
+    return c == '!' || c == '?' || c == ')' || c == '.' || c == ',' || c == ';';
+}
+
 static void make_cursor(struct cursor *c, const u8 *content, size_t len)
 {
     c->start = content;
@@ -220,6 +224,9 @@ static int parse_url(struct cursor *cur, struct block *block) {
         cur->p = start;
         return 0;
     }
+    
+    // strip any unwanted characters
+    while(is_invalid_url_ending(peek_char(cur, -1))) cur->p--;
     
     block->type = BLOCK_URL;
     block->block.str.start = (const char *)start;
