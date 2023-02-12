@@ -23,19 +23,21 @@ struct EventActionBar: View {
     let event: NostrEvent
     let test_lnurl: String?
     let generator = UIImpactFeedbackGenerator(style: .medium)
+    let thread: ThreadV2?
     
     // just used for previews
     @State var sheet: ActionBarSheet? = nil
     @State var confirm_boost: Bool = false
     @State var show_share_sheet: Bool = false
-    
+
     @ObservedObject var bar: ActionBarModel
     
-    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil, test_lnurl: String? = nil) {
+    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil, test_lnurl: String? = nil, thread: ThreadV2? = nil) {
         self.damus_state = damus_state
         self.event = event
         self.test_lnurl = test_lnurl
         _bar = ObservedObject(wrappedValue: bar ?? make_actionbar_model(ev: event.id, damus: damus_state))
+        self.thread = thread
     }
     
     var lnurl: String? {
@@ -45,10 +47,18 @@ struct EventActionBar: View {
     var body: some View {
         HStack {
             if damus_state.keypair.privkey != nil {
-                EventActionButton(img: "bubble.left", col: nil) {
+                let self_replied = (thread != nil && thread!.childEvents.first { $0.pubkey == damus_state.pubkey } != nil)
+
+                EventActionButton(img: "bubble.left", col: self_replied ? Color.blue : nil) {
                     notify(.reply, event)
                 }
                 .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
+                if thread != nil && !thread!.childEvents.isEmpty {
+                    Text("\(thread!.childEvents.count)")
+                        .offset(x: -10)
+                        .font(.footnote.weight(.medium))
+                        .foregroundColor(self_replied ? Color.blue : Color.gray)
+                }
             }
             Spacer()
             ZStack {

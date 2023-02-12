@@ -11,6 +11,7 @@ struct MutedEventView: View {
     let damus_state: DamusState
     let event: NostrEvent
     let scroller: ScrollViewProxy?
+    let thread: ThreadV2?
     
     let selected: Bool
     @Binding var nav_target: String?
@@ -18,7 +19,7 @@ struct MutedEventView: View {
     @State var shown: Bool
     @Environment(\.colorScheme) var colorScheme
     
-    init(damus_state: DamusState, event: NostrEvent, scroller: ScrollViewProxy?, nav_target: Binding<String?>, navigating: Binding<Bool>, selected: Bool) {
+    init(damus_state: DamusState, event: NostrEvent, scroller: ScrollViewProxy?, nav_target: Binding<String?>, navigating: Binding<Bool>, selected: Bool, thread: ThreadV2?) {
         self.damus_state = damus_state
         self.event = event
         self.scroller = scroller
@@ -26,6 +27,7 @@ struct MutedEventView: View {
         self._nav_target = nav_target
         self._navigating = navigating
         self._shown = State(initialValue: should_show_event(contacts: damus_state.contacts, ev: event))
+        self.thread = thread
     }
     
     var should_mute: Bool {
@@ -55,7 +57,7 @@ struct MutedEventView: View {
     var Event: some View {
         Group {
             if selected {
-                SelectedEventView(damus: damus_state, event: event)
+                SelectedEventView(damus: damus_state, event: event, thread: thread)
             } else {
                 EventView(damus: damus_state, event: event, has_action_bar: true)
                     .onTapGesture {
@@ -106,7 +108,7 @@ struct MutedEventView_Previews: PreviewProvider {
     
     static var previews: some View {
         
-        MutedEventView(damus_state: test_damus_state(), event: test_event, scroller: nil, nav_target: $nav_target, navigating: $navigating, selected: false)
+        MutedEventView(damus_state: test_damus_state(), event: test_event, scroller: nil, nav_target: $nav_target, navigating: $navigating, selected: false, thread: nil)
             .frame(width: .infinity, height: 50)
     }
 }

@@ -263,7 +263,8 @@ struct ThreadV2View: View {
                                            scroller: reader,
                                            nav_target: $nav_target,
                                            navigating: $navigating,
-                                           selected: false
+                                           selected: false,
+                                           thread: nil
                             )
                         }
                     }.background(GeometryReader { geometry in
@@ -285,7 +286,8 @@ struct ThreadV2View: View {
                         scroller: reader,
                         nav_target: $nav_target,
                         navigating: $navigating,
-                        selected: true
+                        selected: true,
+                        thread: thread
                     ).id("main")
                     
                     // MARK: - Responses of the actual event view
@@ -296,7 +298,8 @@ struct ThreadV2View: View {
                             scroller: reader,
                             nav_target: $nav_target,
                             navigating: $navigating,
-                            selected: false
+                            selected: false,
+                            thread: nil
                         )
                     }
                 }.padding()

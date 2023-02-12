@@ -10,6 +10,7 @@ import SwiftUI
 struct SelectedEventView: View {
     let damus: DamusState
     let event: NostrEvent
+    let thread: ThreadV2?
     
     var pubkey: String {
         event.pubkey
@@ -17,10 +18,11 @@ struct SelectedEventView: View {
     
     @StateObject var bar: ActionBarModel
     
-    init(damus: DamusState, event: NostrEvent) {
+    init(damus: DamusState, event: NostrEvent, thread: ThreadV2?) {
         self.damus = damus
         self.event = event
         self._bar = StateObject(wrappedValue: make_actionbar_model(ev: event.id, damus: damus))
+        self.thread = thread
     }
     
     var body: some View {
@@ -47,8 +49,8 @@ struct SelectedEventView: View {
                     EventDetailBar(state: damus, target: event.id, target_pk: event.pubkey)
                     Divider()
                 }
-                
-                EventActionBar(damus_state: damus, event: event)
+
+                EventActionBar(damus_state: damus, event: event, thread: thread)
                     .padding([.top], 4)
 
                 Divider()
@@ -67,7 +69,7 @@ struct SelectedEventView: View {
 
 struct SelectedEventView_Previews: PreviewProvider {
     static var previews: some View {
-        SelectedEventView(damus: test_damus_state(), event: test_event)
+        SelectedEventView(damus: test_damus_state(), event: test_event, thread: nil)
             .padding()
     }
 }
