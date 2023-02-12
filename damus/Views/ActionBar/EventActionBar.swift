@@ -120,6 +120,15 @@ struct EventActionBar: View {
                 self.bar.our_like = liked.event
             }
         }
+		.onReceive(handle_notify(.delete)) { delete in
+			guard let deleteRequest = delete.object as? NostrEvent, deleteRequest.tags.flatMap({$0}).contains(event.id),
+			    deleteRequest.pubkey == damus_state.keypair.pubkey else {
+				return
+			}
+
+			self.bar.our_like = nil
+			self.bar.likes -= 1
+		}
     }
     
     func send_boost() {

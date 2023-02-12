@@ -167,6 +167,15 @@ class HomeModel: ObservableObject {
         }
         
     }
+
+	func handle_delete_event(_ ev: NostrEvent) {
+		guard ev.is_valid else {
+			return
+		}
+
+		self.deleted_events.insert(ev.id)
+	}
+
     
     func handle_channel_create(_ ev: NostrEvent) {
         guard ev.is_valid else {
@@ -185,13 +194,18 @@ class HomeModel: ObservableObject {
         self.notifications = notifications.filter { !damus_state.contacts.is_muted($0.pubkey) }
     }
     
-    func handle_delete_event(_ ev: NostrEvent) {
-        guard ev.is_valid else {
-            return
-        }
-        
-        self.deleted_events.insert(ev.id)
-    }
+
+	func handle_unlike_event(_ ev: NostrEvent) {
+		guard ev.is_valid, let privkey = self.damus_state.keypair.privkey, let e = ev.last_refid() else {
+			   return
+		}
+
+		let delete = make_delete_event(pubkey: damus_state.keypair.pubkey, privkey: privkey, deleted_events: [ev.id])
+
+		pool.send(.event(delete))
+
+		damus_state.likes.remove_event(ev, target: e.ref_id)
+	}
 
     func handle_contact_event(sub_id: String, relay_id: String, ev: NostrEvent) {
         process_contact_event(state: self.damus_state, ev: ev)

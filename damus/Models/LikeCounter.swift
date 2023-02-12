@@ -49,4 +49,17 @@ class EventCounter {
         
         return .success(counts[target]!)
     }
+
+	func remove_event(_ ev: NostrEvent, target: String) {
+		let pubkey = ev.pubkey
+
+		user_events[pubkey]?.remove(target)
+
+		if counts[target] == nil {
+			counts[target] = 0
+			return
+		}
+
+		counts[target]! -= 1
+	}
 }
