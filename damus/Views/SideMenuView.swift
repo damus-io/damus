@@ -166,8 +166,13 @@ struct SideMenuView: View {
     
     @ViewBuilder
     func navLabel(title: String, systemImage: String) -> some View {
-        Label(title, systemImage: systemImage)
-            .font(.title2)
+        Label {
+            Text(title)
+                .font(.title2)
+        } icon: {
+            Image(systemName: systemImage)
+                .frame(width:20)
+        }
             .foregroundColor(textColor())
             .frame(maxWidth: .infinity, alignment: .leading)
     }
