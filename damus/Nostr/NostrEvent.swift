@@ -578,16 +578,6 @@ func make_like_event(pubkey: String, privkey: String, liked: NostrEvent) -> Nost
     return ev
 }
 
-func make_delete_event(pubkey: String, privkey: String, deleted_events: Set<String>) -> NostrEvent {
-
-	let tags: [[String]] = deleted_events.map{["e", $0]}
-
-	let ev = NostrEvent(content: "Content delete", pubkey: pubkey, kind: NostrKind.delete.rawValue, tags: tags)
-	ev.calculate_id()
-	ev.sign(privkey: privkey)
-	return ev
-}
-
 func zap_target_to_tags(_ target: ZapTarget) -> [[String]] {
     switch target {
     case .profile(let pk):
