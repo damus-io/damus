@@ -16,6 +16,7 @@ let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Tex
 
 struct PostView: View {
     @State var post: String = ""
+
     @FocusState var focus: Bool
     @State var showPrivateKeyWarning: Bool = false
     
@@ -47,6 +48,13 @@ struct PostView: View {
         let new_post = NostrPost(content: content, references: references, kind: kind)
 
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
+
+        if replying_to == nil {
+            damus_state.drafts_model.post = ""
+        } else {
+            damus_state.drafts_model.replies.removeValue(forKey: replying_to!)
+        }
+
         dismiss()
     }
 
@@ -80,6 +88,13 @@ struct PostView: View {
                 TextEditor(text: $post)
                     .focused($focus)
                     .textInputAutocapitalization(.sentences)
+                    .onChange(of: post) { _ in
+                        if replying_to == nil {
+                            damus_state.drafts_model.post = post
+                        } else {
+                            damus_state.drafts_model.replies[replying_to!] = post
+                        }
+                    }
 
                 if post.isEmpty {
                     Text(POST_PLACEHOLDER)
@@ -99,8 +114,24 @@ struct PostView: View {
             }
         }
         .onAppear() {
+            if replying_to == nil {
+                post = damus_state.drafts_model.post
+            } else {
+                if damus_state.drafts_model.replies[replying_to!] == nil {
+                    damus_state.drafts_model.replies[replying_to!] = ""
+                }
+                post = damus_state.drafts_model.replies[replying_to!]!
+            }
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 self.focus = true
+            }
+        }
+        .onDisappear {
+            if replying_to == nil && damus_state.drafts_model.post.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                damus_state.drafts_model.post = ""
+            } else if replying_to != nil && damus_state.drafts_model.replies[replying_to!]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true {
+                damus_state.drafts_model.replies.removeValue(forKey: replying_to!)
             }
         }
         .padding()
