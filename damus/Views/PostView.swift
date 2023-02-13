@@ -49,10 +49,10 @@ struct PostView: View {
 
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
 
-        if replying_to == nil {
-            damus_state.drafts_model.post = ""
+        if let replying_to {
+            damus_state.drafts.replies.removeValue(forKey: replying_to)
         } else {
-            damus_state.drafts_model.replies.removeValue(forKey: replying_to!)
+            damus_state.drafts.post = ""
         }
 
         dismiss()
@@ -89,10 +89,10 @@ struct PostView: View {
                     .focused($focus)
                     .textInputAutocapitalization(.sentences)
                     .onChange(of: post) { _ in
-                        if replying_to == nil {
-                            damus_state.drafts_model.post = post
+                        if let replying_to {
+                            damus_state.drafts.replies[replying_to] = post
                         } else {
-                            damus_state.drafts_model.replies[replying_to!] = post
+                            damus_state.drafts.post = post
                         }
                     }
 
@@ -114,13 +114,15 @@ struct PostView: View {
             }
         }
         .onAppear() {
-            if replying_to == nil {
-                post = damus_state.drafts_model.post
-            } else {
-                if damus_state.drafts_model.replies[replying_to!] == nil {
-                    damus_state.drafts_model.replies[replying_to!] = ""
+            if let replying_to {
+                if damus_state.drafts.replies[replying_to] == nil {
+                    damus_state.drafts.replies[replying_to] = ""
                 }
-                post = damus_state.drafts_model.replies[replying_to!]!
+                if let p = damus_state.drafts.replies[replying_to] {
+                    post = p
+                }
+            } else {
+                post = damus_state.drafts.post
             }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -128,10 +130,10 @@ struct PostView: View {
             }
         }
         .onDisappear {
-            if replying_to == nil && damus_state.drafts_model.post.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                damus_state.drafts_model.post = ""
-            } else if replying_to != nil && damus_state.drafts_model.replies[replying_to!]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true {
-                damus_state.drafts_model.replies.removeValue(forKey: replying_to!)
+            if let replying_to, let reply = damus_state.drafts.replies[replying_to], reply.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                damus_state.drafts.replies.removeValue(forKey: replying_to)
+            } else if replying_to == nil && damus_state.drafts.post.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                damus_state.drafts.post = ""
             }
         }
         .padding()

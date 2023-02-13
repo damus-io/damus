@@ -52,18 +52,15 @@ class HomeModel: ObservableObject {
     @Published var events: [NostrEvent] = []
     @Published var loading: Bool = false
     @Published var signal: SignalModel = SignalModel()
-    @Published var drafts_model: DraftsModel
 
     init() {
         self.damus_state = DamusState.empty
         self.dms = DirectMessagesModel(our_pubkey: damus_state.pubkey)
-        self.drafts_model = DraftsModel()
     }
 
     init(damus_state: DamusState) {
         self.damus_state = damus_state
         self.dms = DirectMessagesModel(our_pubkey: damus_state.pubkey)
-        self.drafts_model = DraftsModel()
     }
 
     var pool: RelayPool {

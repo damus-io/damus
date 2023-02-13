@@ -620,7 +620,7 @@ struct ContentView: View {
                                       settings: UserSettingsStore(),
                                       relay_filters: relay_filters,
                                       relay_metadata: metadatas,
-                                      drafts_model: home.drafts_model
+                                      drafts: Drafts()
         )
         home.damus_state = self.damus_state!
         

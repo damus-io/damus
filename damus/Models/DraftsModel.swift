@@ -7,7 +7,7 @@
 
 import Foundation
 
-class DraftsModel: ObservableObject {
+class Drafts: ObservableObject {
     @Published var post: String = ""
-    @Published var replies = Dictionary<NostrEvent, String>()
+    @Published var replies: [NostrEvent: String] = [:]
 }
