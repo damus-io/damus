@@ -227,6 +227,19 @@ class UserSettingsStore: ObservableObject {
             return deepl_api_key != ""
         }
     }
+
+    func delete_settings(_ pubkey: String) throws {
+        UserDefaults.standard.removeObject(forKey: pk_setting_key(pubkey, key: tip_amount_key))
+        UserDefaults.standard.removeObject(forKey: "show_wallet_selector")
+        UserDefaults.standard.removeObject(forKey: "default_wallet")
+        UserDefaults.standard.removeObject(forKey: "left_handed")
+        UserDefaults.standard.removeObject(forKey: "translation_service")
+        UserDefaults.standard.removeObject(forKey: "deepl_plan")
+        UserDefaults.standard.removeObject(forKey: "libretranslate_server")
+        UserDefaults.standard.removeObject(forKey: "libretranslate_url")
+        try clearLibreTranslateApiKey()
+        try clearDeepLApiKey()
+    }
 }
 
 struct DamusLibreTranslateKeychainConfiguration: KeychainConfiguration {

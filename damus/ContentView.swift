@@ -473,6 +473,18 @@ struct ContentView: View {
         .onReceive(handle_notify(.new_mutes)) { notif in
             home.filter_muted()
         }
+        .onReceive(handle_notify(.logout)) { _ in
+            guard damus_state != nil else {
+                return
+            }
+
+            do {
+                try damus_state!.settings.delete_settings(damus_state!.pubkey)
+            } catch {
+                // Could not delete all settings for some reason. Continue with logout.
+                print("Unable to delete all user settings for \(damus_state!.pubkey). Continuing with logout.")
+            }
+        }
         .alert(NSLocalizedString("Deleted Account", comment: "Alert message to indicate this is a deleted account"), isPresented: $is_deleted_account) {
             Button(NSLocalizedString("Logout", comment: "Button to close the alert that informs that the current account has been deleted.")) {
                 is_deleted_account = false
