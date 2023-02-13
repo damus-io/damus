@@ -50,7 +50,7 @@
         <source>%@ %@</source>
         <target>%@ %@</target>
         
-        <note>Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
+        <note>Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
 Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.</note>
       </trans-unit>
       <trans-unit id="%@ has been blocked" xml:space="preserve">
@@ -81,7 +81,7 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
         <source>%lld</source>
         <target>%lld</target>
         
-        <note>Number of zap payments on a post.
+        <note>Number of reposts.
 Number of relay servers a user is connected.</note>
       </trans-unit>
       <trans-unit id="%lld/%lld" xml:space="preserve">
@@ -315,12 +315,6 @@ Number of relay servers a user is connected.</note>
         
         <note>Dropdown option label for Lightning wallet, Cash App.</note>
       </trans-unit>
-      <trans-unit id="Chat" xml:space="preserve">
-        <source>Chat</source>
-        <target>Unterhaltungen</target>
-        
-        <note>Navigation bar title for Chatroom view.</note>
-      </trans-unit>
       <trans-unit id="Clear" xml:space="preserve">
         <source>Clear</source>
         <target>Löschen</target>
@@ -486,8 +480,7 @@ Number of relay servers a user is connected.</note>
         <source>Delete Account</source>
         <target>Konto löschen</target>
         
-        <note>Alert for deleting the users account.
-   Button to delete the user's account.</note>
+        <note>Button to delete the user's account.</note>
       </trans-unit>
       <trans-unit id="Deleted Account" xml:space="preserve">
         <source>Deleted Account</source>
@@ -560,6 +553,16 @@ Number of relay servers a user is connected.</note>
         <target>Fehler: %@</target>
         
         <note>Error message indicating why saving keys failed.</note>
+      </trans-unit>
+      <trans-unit id="EventDetailView" xml:space="preserve">
+        <source>EventDetailView</source>
+        
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
+      <trans-unit id="Filter" xml:space="preserve">
+        <source>Filter</source>
+        
+        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Follow" xml:space="preserve">
         <source>Follow</source>
@@ -798,13 +801,18 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Notifications</source>
         <target>Benachrichtigungen</target>
         
-        <note>Navigation title for notifications.</note>
+        <note>Toolbar label for Notifications view.</note>
       </trans-unit>
       <trans-unit id="Nudity or explicit content" xml:space="preserve">
         <source>Nudity or explicit content</source>
         <target>Nacktheit oder anstößige Inhalte</target>
         
         <note>Button for user to report that the account or content has nudity or explicit content.</note>
+      </trans-unit>
+      <trans-unit id="Paid Relay" xml:space="preserve">
+        <source>Paid Relay</source>
+        
+        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Pay" xml:space="preserve">
         <source>Pay</source>
@@ -817,6 +825,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Bezahle die Lightning-Rechnung</target>
         
         <note>Navigation bar title for view to pay Lightning invoice.</note>
+      </trans-unit>
+      <trans-unit id="Permanently Delete Account" xml:space="preserve">
+        <source>Permanently Delete Account</source>
+        
+        <note>Alert for deleting the users account.</note>
       </trans-unit>
       <trans-unit id="Phoenix" xml:space="preserve">
         <source>Phoenix</source>
@@ -937,8 +950,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Relays</source>
         <target>Relays</target>
         
-        <note>Sidebar menu label for Relay servers view
-   Sidebar menu label for Relays view.</note>
+        <note>Sidebar menu label for Relays view.</note>
       </trans-unit>
       <trans-unit id="Relays have been notified and clients will be able to use this information to filter content. Thank you!" xml:space="preserve">
         <source>Relays have been notified and clients will be able to use this information to filter content. Thank you!</source>
@@ -1175,6 +1187,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Button for user to report that the account is impersonating someone.</note>
       </trans-unit>
+      <trans-unit id="This is a paid relay, you must pay for posts to be accepted." xml:space="preserve">
+        <source>This is a paid relay, you must pay for posts to be accepted.</source>
+        
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
       <trans-unit id="This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." xml:space="preserve">
         <source>This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective.</source>
         <target>Dies ist ein öffentlicher Schlüssel, Du wirst keine Beiträge teilen oder oder auf irgendeine Weise interagieren können. Dies wird genutzt um andere Kontos aus deren Perspektive zu sehen.</target>
@@ -1203,8 +1220,12 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>Thread</source>
         <target>Thema</target>
         
-        <note>Navigation bar title for note thread.
-   Navigation bar title for threaded event detail view.</note>
+        <note>Navigation bar title for note thread.</note>
+      </trans-unit>
+      <trans-unit id="To filter your %@ feed, please choose applicable relays from the list below:" xml:space="preserve">
+        <source>To filter your %@ feed, please choose applicable relays from the list below:</source>
+        
+        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Translate Note" xml:space="preserve">
         <source>Translate Note</source>
@@ -1369,6 +1390,11 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         
         <note>Accessibility label for zap button</note>
       </trans-unit>
+      <trans-unit id="Zaps" xml:space="preserve">
+        <source>Zaps</source>
+        
+        <note>Navigation bar title for the Zaps view.</note>
+      </trans-unit>
       <trans-unit id="Zebedee" xml:space="preserve">
         <source>Zebedee</source>
         <target>Zebedee</target>
@@ -1380,12 +1406,6 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>Zeus LN</target>
         
         <note>Dropdown option label for Lightning wallet, Zeus LN.</note>
-      </trans-unit>
-      <trans-unit id="collapsed_event_view_other_notes" translate="no" xml:space="preserve">
-        <source>collapsed_event_view_other_notes</source>
-        <target>collapsed_event_view_other_notes</target>
-        
-        <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped. (Key in .stringsdict)</note>
       </trans-unit>
       <trans-unit id="followers_count" translate="no" xml:space="preserve">
         <source>followers_count</source>
@@ -1518,19 +1538,19 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <source>%d other note</source>
         <target>%d andere Notiz</target>
         
-        <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped.</note>
+        <note/>
       </trans-unit>
       <trans-unit id="/collapsed_event_view_other_notes:dict/NOTES:dict/other:dict/:string" xml:space="preserve">
         <source>%d other notes</source>
         <target>%d andere Notizen</target>
         
-        <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped.</note>
+        <note/>
       </trans-unit>
       <trans-unit id="/collapsed_event_view_other_notes:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>··· %#@NOTES@ ···</source>
         <target>··· %#@NOTES@ ···</target>
         
-        <note>Text to indicate that the thread was collapsed and that there are other notes to view if tapped.</note>
+        <note/>
       </trans-unit>
       <trans-unit id="/followers_count:dict/FOLLOWERS:dict/one:dict/:string" xml:space="preserve">
         <source>Follower</source>

@@ -19,7 +19,7 @@
 /* Abbreviated version of a nostr public key. */
 "%@" = "%@";
 
-/* Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
+/* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
 Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
 "%@ %@" = "%@ %@";
 
@@ -35,7 +35,7 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Geef je vrienden een fooi met Bitcoin⚡️, dé internetvaluta.";
 
-/* Number of zap payments on a post.
+/* Number of reposts.
 Number of relay servers a user is connected. */
 "%lld" = "%lld";
 
@@ -147,9 +147,6 @@ Number of relay servers a user is connected. */
 /* Dropdown option label for Lightning wallet, Cash App. */
 "Cash App" = "Cash-app";
 
-/* Navigation bar title for Chatroom view. */
-"Chat" = "Chat";
-
 /* Button for clearing cached data. */
 "Clear" = "Wis";
 
@@ -229,8 +226,7 @@ Number of relay servers a user is connected. */
    Section title for deleting the user */
 "Delete" = "Verwijder";
 
-/* Alert for deleting the users account.
-   Button to delete the user's account. */
+/* Button to delete the user's account. */
 "Delete Account" = "Verwijder account";
 
 /* Alert message to indicate this is a deleted account */
@@ -272,6 +268,12 @@ Number of relay servers a user is connected. */
 
 /* Label indicating that the below text is the EULA, an acronym for End User License Agreement. */
 "EULA" = "EULA";
+
+/* No comment provided by engineer. */
+"EventDetailView" = "EventDetailView";
+
+/* No comment provided by engineer. */
+"Filter" = "Filter";
 
 /* Button to follow a user. */
 "Follow" = "Volg";
@@ -404,7 +406,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Indicates that there are no notes in the timeline to view. */
 "Nothing to see here. Check back later!" = "Er is hier nog niks te zien. Kijk later nog eens!";
 
-/* Navigation title for notifications. */
+/* Toolbar label for Notifications view. */
 "Notifications" = "Meldingen";
 
 /* String indicating that a given timestamp just occurred */
@@ -419,11 +421,17 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label indicating that a form input is optional. */
 "optional" = "optioneel";
 
+/* No comment provided by engineer. */
+"Paid Relay" = "Betaalde relay";
+
 /* Button to pay a Lightning invoice. */
 "Pay" = "Betaal";
 
 /* Navigation bar title for view to pay Lightning invoice. */
 "Pay the Lightning invoice" = "Betaal de Lightningfactuur";
+
+/* Alert for deleting the users account. */
+"Permanently Delete Account" = "Verwijder account permanent";
 
 /* Dropdown option label for Lightning wallet, Phoenix. */
 "Phoenix" = "Phoenix";
@@ -483,8 +491,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Text field for relay server. Used for testing purposes. */
 "Relay" = "Relay";
 
-/* Sidebar menu label for Relay servers view
-   Sidebar menu label for Relays view. */
+/* Sidebar menu label for Relays view. */
 "Relays" = "Relays";
 
 /* Description of what was done as a result of sending a report to relay servers. */
@@ -611,6 +618,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button for user to report that the account is impersonating someone. */
 "They are impersonating someone" = "Dit account doet zich voor als iemand anders";
 
+/* No comment provided by engineer. */
+"This is a paid relay, you must pay for posts to be accepted." = "Dit is een betaalde relay; je dient dus te betalen voordat berichten goedgekeurd worden.";
+
 /* Warning that the inputted account key is a public key and the result of what happens because of it. */
 "This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Dit is een openbare sleutel waarmee geen berichten of antwoorden kunnen worden geplaatst. Deze wordt alléén gebruikt om accounts te tonen.";
 
@@ -623,9 +633,11 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label to describe that a private key is the user's secret account key and what they should do with it. */
 "This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Dit is je geheime accountsleutel. Deze heb je nodig om in te loggen op je account - deel de sleutel dus met niemand! Bewaar hem eventueel in een wachtwoordbeheerder.";
 
-/* Navigation bar title for note thread.
-   Navigation bar title for threaded event detail view. */
+/* Navigation bar title for note thread. */
 "Thread" = "Details";
+
+/* No comment provided by engineer. */
+"To filter your %@ feed, please choose applicable relays from the list below:" = "Om je %@-feed te filteren, kun je kiezen uit onderstaande relays:";
 
 /* Button to translate note from different language. */
 "Translate Note" = "Vertaal notitie";
@@ -717,6 +729,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Accessibility label for zap button */
 "Zap" = "Zap";
+
+/* Navigation bar title for the Zaps view. */
+"Zaps" = "Zaps";
 
 /* Dropdown option label for Lightning wallet, Zebedee. */
 "Zebedee" = "Zebedee";

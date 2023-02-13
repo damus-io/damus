@@ -19,7 +19,7 @@
 /* Abbreviated version of a nostr public key. */
 "%@" = "%@";
 
-/* Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
+/* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
 Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
 "%@ %@" = "%@ %@";
 
@@ -35,7 +35,7 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Donnez un pourboire aux publications de vos amis et accumulez les sats avec Bitcoin⚡️, la monnaie native d'Internet.";
 
-/* Number of zap payments on a post.
+/* Number of reposts.
 Number of relay servers a user is connected. */
 "%lld" = "%lld";
 
@@ -147,9 +147,6 @@ Number of relay servers a user is connected. */
 /* Dropdown option label for Lightning wallet, Cash App. */
 "Cash App" = "Cash App";
 
-/* Navigation bar title for Chatroom view. */
-"Chat" = "Chatter";
-
 /* Button for clearing cached data. */
 "Clear" = "Vider";
 
@@ -229,8 +226,7 @@ Number of relay servers a user is connected. */
    Section title for deleting the user */
 "Delete" = "Effacer";
 
-/* Alert for deleting the users account.
-   Button to delete the user's account. */
+/* Button to delete the user's account. */
 "Delete Account" = "Supprimer votre compte";
 
 /* Alert message to indicate this is a deleted account */
@@ -253,7 +249,7 @@ Number of relay servers a user is connected. */
 "Done" = "Terminé";
 
 /* Heading indicating that this application allows users to earn money. */
-"Earn Money" = "Gagne de l'argent";
+"Earn Money" = "Gagner de l'argent";
 
 /* Button to edit user's profile. */
 "Edit" = "Modifier";
@@ -272,6 +268,12 @@ Number of relay servers a user is connected. */
 
 /* Label indicating that the below text is the EULA, an acronym for End User License Agreement. */
 "EULA" = "CLUF";
+
+/* No comment provided by engineer. */
+"EventDetailView" = "EventDetailView";
+
+/* No comment provided by engineer. */
+"Filter" = "Filtre";
 
 /* Button to follow a user. */
 "Follow" = "S'abonner";
@@ -404,7 +406,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Indicates that there are no notes in the timeline to view. */
 "Nothing to see here. Check back later!" = "Rien à voir ici. Revenez plus tard!";
 
-/* Navigation title for notifications. */
+/* Toolbar label for Notifications view. */
 "Notifications" = "Notifications";
 
 /* String indicating that a given timestamp just occurred */
@@ -419,11 +421,17 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label indicating that a form input is optional. */
 "optional" = "optionnel";
 
+/* No comment provided by engineer. */
+"Paid Relay" = "Relai payant";
+
 /* Button to pay a Lightning invoice. */
 "Pay" = "Payer";
 
 /* Navigation bar title for view to pay Lightning invoice. */
 "Pay the Lightning invoice" = "Payer la facture Lightning";
+
+/* Alert for deleting the users account. */
+"Permanently Delete Account" = "Supprimer le compte définitivement ";
 
 /* Dropdown option label for Lightning wallet, Phoenix. */
 "Phoenix" = "Phoenix";
@@ -483,8 +491,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Text field for relay server. Used for testing purposes. */
 "Relay" = "Relais";
 
-/* Sidebar menu label for Relay servers view
-   Sidebar menu label for Relays view. */
+/* Sidebar menu label for Relays view. */
 "Relays" = "Relais";
 
 /* Description of what was done as a result of sending a report to relay servers. */
@@ -611,6 +618,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button for user to report that the account is impersonating someone. */
 "They are impersonating someone" = "Ils personnifient quelqu'un";
 
+/* No comment provided by engineer. */
+"This is a paid relay, you must pay for posts to be accepted." = "C’est un relai payant, vous devez payer pour que vos publications soient acceptées.";
+
 /* Warning that the inputted account key is a public key and the result of what happens because of it. */
 "This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Il s'agit d'une clé publique, vous ne pourrez pas publier de messages ou interagir de quelque manière que ce soit. Ceci est utilisé pour visualiser les comptes de leur point de vue.";
 
@@ -623,9 +633,11 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label to describe that a private key is the user's secret account key and what they should do with it. */
 "This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Il s'agit de votre clé de compte secrète. Vous en aurez besoin pour accéder à votre compte. Ne le partagez avec personne ! Enregistrez-la dans un gestionnaire de mots de passe et gardez-la en sécurité!";
 
-/* Navigation bar title for note thread.
-   Navigation bar title for threaded event detail view. */
+/* Navigation bar title for note thread. */
 "Thread" = "Fil de discussion";
+
+/* No comment provided by engineer. */
+"To filter your %@ feed, please choose applicable relays from the list below:" = "Pour filtrer votre fil %@, veuillez choisir les relais applicables dans la liste ci-dessous:";
 
 /* Button to translate note from different language. */
 "Translate Note" = "Traduire la note";
@@ -717,6 +729,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Accessibility label for zap button */
 "Zap" = "Zap";
+
+/* Navigation bar title for the Zaps view. */
+"Zaps" = "Zaps";
 
 /* Dropdown option label for Lightning wallet, Zebedee. */
 "Zebedee" = "Zebedee";
