@@ -606,19 +606,21 @@ struct ContentView: View {
         
         pool.register_handler(sub_id: sub_id, handler: home.handle_event)
 
-        self.damus_state = DamusState(pool: pool, keypair: keypair,
-                                likes: EventCounter(our_pubkey: pubkey),
-                                boosts: EventCounter(our_pubkey: pubkey),
-                                contacts: Contacts(our_pubkey: pubkey),
-                                tips: TipCounter(our_pubkey: pubkey),
-                                profiles: Profiles(),
-                                dms: home.dms,
-                                previews: PreviewCache(),
-                                zaps: Zaps(our_pubkey: pubkey),
-                                lnurls: LNUrls(),
-                                settings: UserSettingsStore(),
-                                relay_filters: relay_filters,
-                                relay_metadata: metadatas
+        self.damus_state = DamusState(pool: pool,
+                                      keypair: keypair,
+                                      likes: EventCounter(our_pubkey: pubkey),
+                                      boosts: EventCounter(our_pubkey: pubkey),
+                                      contacts: Contacts(our_pubkey: pubkey),
+                                      tips: TipCounter(our_pubkey: pubkey),
+                                      profiles: Profiles(),
+                                      dms: home.dms,
+                                      previews: PreviewCache(),
+                                      zaps: Zaps(our_pubkey: pubkey),
+                                      lnurls: LNUrls(),
+                                      settings: UserSettingsStore(),
+                                      relay_filters: relay_filters,
+                                      relay_metadata: metadatas,
+                                      drafts_model: home.drafts_model
         )
         home.damus_state = self.damus_state!
         
