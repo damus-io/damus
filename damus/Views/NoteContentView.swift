@@ -9,6 +9,18 @@ import SwiftUI
 import LinkPresentation
 import NaturalLanguage
 
+struct Blur: UIViewRepresentable {
+    var style: UIBlurEffect.Style = .systemUltraThinMaterial
+
+    func makeUIView(context: Context) -> UIVisualEffectView {
+        return UIVisualEffectView(effect: UIBlurEffect(style: style))
+    }
+
+    func updateUIView(_ uiView: UIVisualEffectView, context: Context) {
+        uiView.effect = UIBlurEffect(style: style)
+    }
+}
+
 struct NoteContentView: View {
     let damus_state: DamusState
     let event: NostrEvent
@@ -33,13 +45,12 @@ struct NoteContentView: View {
             if show_images && artifacts.images.count > 0 {
                 ImageCarousel(urls: artifacts.images)
             } else if !show_images && artifacts.images.count > 0 {
-                ImageCarousel(urls: artifacts.images)
-                    .blur(radius: 10)
-                    .overlay {
-                        Rectangle()
-                            .opacity(0.50)
-                    }
-                    .cornerRadius(10)
+                ZStack {
+                    ImageCarousel(urls: artifacts.images)
+                        .blur(radius: 10, opaque: true)
+                    Blur()
+                }
+                .cornerRadius(10)
             }
             if artifacts.invoices.count > 0 {
                 InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: artifacts.invoices)
