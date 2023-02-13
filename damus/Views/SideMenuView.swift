@@ -39,8 +39,6 @@ struct SideMenuView: View {
                 isSidebarVisible.toggle()
             }
             content
-                //.ignoreSafeArea()
-                .zIndex(isSidebarVisible ? 1 : 0)
         }
     }
     
