@@ -161,7 +161,6 @@ struct SideMenuView: View {
 
             Spacer()
         }
-        .zIndex(2)
     }
     
     
