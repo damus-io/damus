@@ -10,7 +10,7 @@ import LinkPresentation
 import NaturalLanguage
 
 struct Blur: UIViewRepresentable {
-    var style: UIBlurEffect.Style = .systemThinMaterial
+    var style: UIBlurEffect.Style = .systemUltraThinMaterial
 
     func makeUIView(context: Context) -> UIVisualEffectView {
         return UIVisualEffectView(effect: UIBlurEffect(style: style))
