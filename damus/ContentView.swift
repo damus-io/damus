@@ -260,67 +260,62 @@ struct ContentView: View {
     }
     
     var body: some View {
-        ZStack() {
+        VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
                 NavigationView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        ZStack {
-                            TabView { // Prevents navbar appearance change on scroll
-                                MainContent(damus: damus)
-                                    .toolbar() {
-                                        ToolbarItem(placement: .navigationBarLeading) {
-                                            Button {
-                                                isSideBarOpened.toggle()
-                                            } label: {
-                                                ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles)
-                                                    .opacity(isSideBarOpened ? 0 : 1)
-                                                    .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
-                                            }
-                                            .disabled(isSideBarOpened)
+                    ZStack {
+                        TabView { // Prevents navbar appearance change on scroll
+                            MainContent(damus: damus)
+                                .toolbar() {
+                                    ToolbarItem(placement: .navigationBarLeading) {
+                                        Button {
+                                            isSideBarOpened.toggle()
+                                        } label: {
+                                            ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles)
+                                                .opacity(isSideBarOpened ? 0 : 1)
+                                                .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
                                         }
-                                        
-                                        ToolbarItem(placement: .navigationBarTrailing) {
-                                            HStack(alignment: .center) {
-                                                if home.signal.signal != home.signal.max_signal {
-                                                    NavigationLink(destination: RelayConfigView(state: damus_state!)) {
-                                                        Text("\(home.signal.signal)/\(home.signal.max_signal)", comment: "Fraction of how many of the user's relay servers that are operational.")
-                                                            .font(.callout)
-                                                            .foregroundColor(.gray)
-                                                    }
+                                        .disabled(isSideBarOpened)
+                                    }
+                                    
+                                    ToolbarItem(placement: .navigationBarTrailing) {
+                                        HStack(alignment: .center) {
+                                            if home.signal.signal != home.signal.max_signal {
+                                                NavigationLink(destination: RelayConfigView(state: damus_state!)) {
+                                                    Text("\(home.signal.signal)/\(home.signal.max_signal)", comment: "Fraction of how many of the user's relay servers that are operational.")
+                                                        .font(.callout)
+                                                        .foregroundColor(.gray)
                                                 }
-                                                
-                                                // maybe expand this to other timelines in the future
-                                                if selected_timeline == .search {
-                                                    Button(action: {
-                                                        //isFilterVisible.toggle()
-                                                        self.active_sheet = .filter
-                                                    }) {
-                                                        // checklist, checklist.checked, lisdt.bullet, list.bullet.circle, line.3.horizontal.decrease...,  line.3.horizontail.decrease
-                                                        Label("Filter", systemImage: "line.3.horizontal.decrease")
-                                                            .foregroundColor(.gray)
+                                            }
+                                            
+                                            // maybe expand this to other timelines in the future
+                                            if selected_timeline == .search {
+                                                Button(action: {
+                                                    //isFilterVisible.toggle()
+                                                    self.active_sheet = .filter
+                                                }) {
+                                                    // checklist, checklist.checked, lisdt.bullet, list.bullet.circle, line.3.horizontal.decrease...,  line.3.horizontail.decrease
+                                                    Label("Filter", systemImage: "line.3.horizontal.decrease")
+                                                        .foregroundColor(.gray)
                                                         //.contentShape(Rectangle())
-                                                    }
                                                 }
                                             }
                                         }
                                     }
-                            }
-                            .tabViewStyle(.page(indexDisplayMode: .never))
+                                }
                         }
-                        
-                        TabBar(new_events: $home.new_events, selected: $selected_timeline, isSidebarVisible: $isSideBarOpened, action: switch_timeline)
-                            .padding([.bottom], 8)
+                        .tabViewStyle(.page(indexDisplayMode: .never))
                     }
                     .overlay(
                         SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened.animation())
                     )
-                    .navigationBarTitleDisplayMode(.inline)
                 }
                 .navigationViewStyle(.stack)
-                
+            
+                TabBar(new_events: $home.new_events, selected: $selected_timeline, isSidebarVisible: $isSideBarOpened, action: switch_timeline)
+                    .padding([.bottom], 8)
             }
         }
-        
         .onAppear() {
             self.connect()
             setup_notifications()
