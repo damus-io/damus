@@ -47,8 +47,8 @@ struct NoteContentView: View {
             } else if !show_images && artifacts.images.count > 0 {
                 ZStack {
                     ImageCarousel(urls: artifacts.images)
-                        .blur(radius: 10, opaque: true)
                     Blur()
+                        .disabled(true)
                 }
                 .cornerRadius(10)
             }
