@@ -230,6 +230,7 @@ class HomeModel: ObservableObject {
         case .success(let n):
             let boosted = Counted(event: ev, id: e, total: n)
             notify(.boosted, boosted)
+            notify(.update_stats, e)
         }
     }
 
@@ -247,6 +248,7 @@ class HomeModel: ObservableObject {
         case .success(let n):
             let liked = Counted(event: ev, id: e.ref_id, total: n)
             notify(.liked, liked)
+            notify(.update_stats, e.ref_id)
         }
     }
 
@@ -287,7 +289,7 @@ class HomeModel: ObservableObject {
             switch ev {
             case .event(let sub_id, let ev):
                 // globally handle likes
-                let always_process = sub_id == notifications_subid || sub_id == contacts_subid || sub_id == home_subid || sub_id == dms_subid || sub_id == init_subid || ev.known_kind == .like || ev.known_kind == .zap || ev.known_kind == .contacts || ev.known_kind == .metadata
+                let always_process = sub_id == notifications_subid || sub_id == contacts_subid || sub_id == home_subid || sub_id == dms_subid || sub_id == init_subid || ev.known_kind == .like || ev.known_kind == .boost || ev.known_kind == .zap || ev.known_kind == .contacts || ev.known_kind == .metadata
                 if !always_process {
                     // TODO: other views like threads might have their own sub ids, so ignore those events... or should we?
                     return

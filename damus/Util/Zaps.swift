@@ -60,7 +60,7 @@ class Zaps {
         event_counts[id] = event_counts[id]! + 1
         event_totals[id] = event_totals[id]! + zap.invoice.amount
         
-        notify(.new_zap, zap)
+        notify(.update_stats, zap.target.id)
         
         return
     }
