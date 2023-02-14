@@ -11,7 +11,16 @@ struct EventDetailBar: View {
     let state: DamusState
     let target: String
     let target_pk: String
+    
     @ObservedObject var bar: ActionBarModel
+    
+    init (state: DamusState, target: String, target_pk: String) {
+        self.state = state
+        self.target = target
+        self.target_pk = target_pk
+        self._bar = ObservedObject(wrappedValue: make_actionbar_model(ev: target, damus: state))
+        
+    }
     
     var body: some View {
         HStack {
@@ -42,6 +51,6 @@ struct EventDetailBar: View {
 
 struct EventDetailBar_Previews: PreviewProvider {
     static var previews: some View {
-        EventDetailBar(state: test_damus_state(), target: "", target_pk: "", bar: ActionBarModel.empty())
+        EventDetailBar(state: test_damus_state(), target: "", target_pk: "")
     }
 }

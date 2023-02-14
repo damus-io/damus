@@ -98,6 +98,9 @@ extension Notification.Name {
     static var deleted_account: Notification.Name {
         return Notification.Name("deleted_account")
     }
+    static var new_zap: Notification.Name {
+        return Notification.Name("new_zap")
+    }
 }
 
 func handle_notify(_ name: Notification.Name) -> NotificationCenter.Publisher {

@@ -48,9 +48,7 @@ struct TextEvent: View {
                 if has_action_bar {
                     Rectangle().frame(height: 2).opacity(0)
                     
-                    let bar = make_actionbar_model(ev: event, damus: damus)
-                    
-                    EventActionBar(damus_state: damus, event: event, bar: bar)
+                    EventActionBar(damus_state: damus, event: event)
                         .padding([.top], 4)
                 }
             }

@@ -142,12 +142,12 @@ class HomeModel: ObservableObject {
             return
         }
         
-        if let local_zapper = damus_state.profiles.lookup_zapper(pubkey: damus_state.pubkey) {
+        if let local_zapper = damus_state.profiles.lookup_zapper(pubkey: ptag) {
             handle_zap_event_with_zapper(ev, our_pubkey: damus_state.pubkey, zapper: local_zapper)
             return
         }
         
-        guard let profile = damus_state.profiles.lookup(id: damus_state.pubkey) else {
+        guard let profile = damus_state.profiles.lookup(id: ptag) else {
             return
         }
         
