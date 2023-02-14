@@ -54,15 +54,10 @@ struct SelectedEventView: View {
                 Divider()
                     .padding([.top], 4)
             }
-            .onReceive(handle_notify(.new_zap)) { n in
-                let zap = n.object as! Zap
-                guard case .note(let note_target) = zap.target else {
-                    return
-                }
-                guard note_target.note_id == self.event.id else {
-                    return
-                }
-                self.bar.update(damus: self.damus, evid: self.event.id)
+            .onReceive(handle_notify(.update_stats)) { n in
+                let target = n.object as! String
+                guard target == self.event.id else { return }
+                self.bar.update(damus: self.damus, evid: target)
             }
             .padding([.leading], 2)
             .event_context_menu(event, keypair: damus.keypair, target_pubkey: event.pubkey)

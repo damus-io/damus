@@ -230,6 +230,7 @@ class HomeModel: ObservableObject {
         case .success(let n):
             let boosted = Counted(event: ev, id: e, total: n)
             notify(.boosted, boosted)
+            notify(.update_stats, e)
         }
     }
 
@@ -247,6 +248,7 @@ class HomeModel: ObservableObject {
         case .success(let n):
             let liked = Counted(event: ev, id: e.ref_id, total: n)
             notify(.liked, liked)
+            notify(.update_stats, e.ref_id)
         }
     }
 

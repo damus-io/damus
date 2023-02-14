@@ -111,15 +111,10 @@ struct EventActionBar: View {
         } message: {
             Text("Are you sure you want to repost this?", comment: "Alert message to ask if user wants to repost a post.")
         }
-        .onReceive(handle_notify(.new_zap)) { n in
-            let zap = n.object as! Zap
-            guard case .note(let note_target) = zap.target else {
-                return
-            }
-            guard note_target.note_id == self.event.id else {
-                return
-            }
-            self.bar.update(damus: self.damus_state, evid: self.event.id)
+        .onReceive(handle_notify(.update_stats)) { n in
+            let target = n.object as! String
+            guard target == self.event.id else { return }
+            self.bar.update(damus: self.damus_state, evid: target)
         }
         .onReceive(handle_notify(.liked)) { n in
             let liked = n.object as! Counted
