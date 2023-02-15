@@ -1,0 +1,12 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Damus";
+
+/* Bundle name */
+"CFBundleName" = "damus";
+
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "Autentikasi lokal untuk mengakses kunci pribadi";
+
+/* Privacy - Photo Library Additions Usage Description */
+"NSPhotoLibraryAddUsageDescription" = "Memberikan Damus izin untuk menyimpan gambar ke dalam galeri foto.";
+

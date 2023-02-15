@@ -1,6 +1,3 @@
-/* Blank space to separate profile picture from profile editor form. */
-"   " = "61b6edf1108e6f396680a33b02486a70_tr";
-
 /* Description of how the nip05 identifier would be used for verification. */
 "'%@' at '%@' will be used for verification" = "'%@' at '%@' 将被用于认证";
 
@@ -12,12 +9,6 @@
 
 /* Navigation bar title for view that shows who a user is following. */
 "(who) following" = "(who)关注";
-
-/* Prefix character to username. */
-"@" = "@";
-
-/* Abbreviated version of a nostr public key. */
-"%@" = "%@";
 
 /* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
 Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
@@ -35,15 +26,8 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. 用互联网原生货币--比特币⚡️来打赏好友的推文并积攒财富。";
 
-/* Number of reposts.
-Number of relay servers a user is connected. */
-"%lld" = "%lld";
-
 /* Fraction of how many of the user's relay servers that are operational. */
 "%lld/%lld" = "%lld/%lld";
-
-/* Placeholder for event mention. */
-"< e >" = "< e >";
 
 /* Text indicating the zap amount. i.e. number of satoshis that were tipped to a user */
 "⚡️ %@" = "⚡️ %@";
@@ -213,6 +197,9 @@ Number of relay servers a user is connected. */
 
 /* Name of the app, shown on the first screen when user is not logged in. */
 "Damus" = "达摩";
+
+/* Dropdown option for selecting DeepL as the translation service. */
+"DeepL (Proprietary, Higher Accuracy)" = "DeepL（专有软件，准确性更高）";
 
 /* Button to pay a Lightning invoice with the user's default Lightning wallet. */
 "Default Wallet" = "默认钱包";
@@ -651,9 +638,6 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "说点什么呢...";
 
-/* Non-breaking space character to fill in blank space next to event action button icons. */
-"u{00A0}" = "u{00A0}";
-
 /* Button to unfollow a user. */
 "Unfollow" = "取消关注";
 
@@ -679,7 +663,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Label to prompt username entry. */
 "Username" = "用户名";
 
-/* Label to display relay software version. */
+/* Label to display relay software version.
+   Section title for displaying the version number of the Damus app. */
 "Version" = "版本";
 
 /* Sidebar menu label for Wallet view. */
@@ -720,6 +705,12 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Footer text to inform user what will happen when the report is submitted. */
 "Your report will be sent to the relays you are connected to" = "您的举报将被发送到您已连接的中继器上";
+
+/* Accessibility label for zap button */
+"Zap" = "电击";
+
+/* Navigation bar title for the Zaps view. */
+"Zaps" = "电击";
 
 /* Dropdown option label for Lightning wallet, Zebedee. */
 "Zebedee" = "Zebedee";
