@@ -110,7 +110,7 @@ struct ZapButton: View {
             }
             .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
             
-            Text("\(bar.zap_total > 0 ? "\(format_msats_abbrev(bar.zap_total))" : "")")
+            Text(String("\(bar.zap_total > 0 ? "\(format_msats_abbrev(bar.zap_total))" : "")"))
                 .offset(x: 22)
                 .font(.footnote)
                 .foregroundColor(bar.zapped ? Color.orange : Color.gray)

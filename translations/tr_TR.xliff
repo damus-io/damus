@@ -33,17 +33,6 @@
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.2" build-num="14C18"/>
     </header>
     <body>
-      <trans-unit id="   " xml:space="preserve">
-        <source>   </source>
-        <target>61b6edf1108e6f396680a33b02486a70_tr</target>
-        <note>Blank space to separate profile picture from profile editor form.</note>
-      </trans-unit>
-      <trans-unit id="%@" xml:space="preserve">
-        <source>%@</source>
-        <target>%@</target>
-        
-        <note>Abbreviated version of a nostr public key.</note>
-      </trans-unit>
       <trans-unit id="%@ %@" xml:space="preserve">
         <source>%@ %@</source>
         <target>%@ %@</target>
@@ -74,13 +63,6 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
         
         <note>Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string.</note>
       </trans-unit>
-      <trans-unit id="%lld" xml:space="preserve">
-        <source>%lld</source>
-        <target>%lld</target>
-        
-        <note>Number of reposts.
-Number of relay servers a user is connected.</note>
-      </trans-unit>
       <trans-unit id="%lld/%lld" xml:space="preserve">
         <source>%lld/%lld</source>
         <target>%lld/%lld</target>
@@ -109,18 +91,6 @@ Number of relay servers a user is connected.</note>
         <target>(who)'nin Takip Ettikleri</target>
         
         <note>Navigation bar title for view that shows who a user is following.</note>
-      </trans-unit>
-      <trans-unit id="&lt; e &gt;" xml:space="preserve">
-        <source>&lt; e &gt;</source>
-        <target>&lt; e &gt;</target>
-        
-        <note>Placeholder for event mention.</note>
-      </trans-unit>
-      <trans-unit id="@" xml:space="preserve">
-        <source>@</source>
-        <target>@</target>
-        
-        <note>Prefix character to username.</note>
       </trans-unit>
       <trans-unit id="API Key (optional)" xml:space="preserve">
         <source>API Key (optional)</source>
@@ -443,6 +413,11 @@ Number of relay servers a user is connected.</note>
         
         <note>Button to pay a Lightning invoice with the user's default Lightning wallet.</note>
       </trans-unit>
+      <trans-unit id="Default Zap Amount in sats" xml:space="preserve">
+        <source>Default Zap Amount in sats</source>
+        
+        <note>Section title for zap configuration</note>
+      </trans-unit>
       <trans-unit id="Delete" xml:space="preserve">
         <source>Delete</source>
         <target>Sil</target>
@@ -524,11 +499,6 @@ Number of relay servers a user is connected.</note>
         <target>Hata: %@</target>
         
         <note>Error message indicating why saving keys failed.</note>
-      </trans-unit>
-      <trans-unit id="EventDetailView" xml:space="preserve">
-        <source>EventDetailView</source>
-        
-        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="Filter" xml:space="preserve">
         <source>Filter</source>
@@ -1241,7 +1211,8 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       <trans-unit id="Version" xml:space="preserve">
         <source>Version</source>
         
-        <note>Label to display relay software version.</note>
+        <note>Label to display relay software version.
+   Section title for displaying the version number of the Damus app.</note>
       </trans-unit>
       <trans-unit id="Wallet" xml:space="preserve">
         <source>Wallet</source>
@@ -1416,12 +1387,6 @@ Part of a larger sentence to describe how many profiles a user is following.</no
         <target>sats_count</target>
         
         <note>Amount of sats. (Key in .stringsdict)</note>
-      </trans-unit>
-      <trans-unit id="u{00A0}" xml:space="preserve">
-        <source>u{00A0}</source>
-        <target>u{00A0}</target>
-        
-        <note>Non-breaking space character to fill in blank space next to event action button icons.</note>
       </trans-unit>
       <trans-unit id="wss://some.relay.com" xml:space="preserve">
         <source>wss://some.relay.com</source>

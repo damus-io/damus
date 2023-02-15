@@ -11,7 +11,7 @@ import SwiftUI
 func PowView(_ mpow: Int?) -> some View
 {
     let pow = mpow ?? 0
-    return Text("\(pow)")
+    return Text(String("\(pow)"))
         .font(.callout)
         .foregroundColor(calculate_pow_color(pow))
 }

@@ -223,7 +223,7 @@ struct ConfigView: View {
                 let bundleShortVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String
                 let bundleVersion = Bundle.main.infoDictionary?["CFBundleVersion"] as! String
                 Section(NSLocalizedString("Version", comment: "Section title for displaying the version number of the Damus app.")) {
-                    Text("\(bundleShortVersion) (\(bundleVersion))", comment: "Text indicating which version of the Damus app is running. Should typically not need to be translated.")
+                    Text(String("\(bundleShortVersion) (\(bundleVersion))"))
                 }
             }
         }
