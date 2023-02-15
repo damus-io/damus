@@ -19,6 +19,7 @@ struct PostView: View {
 
     @FocusState var focus: Bool
     @State var showPrivateKeyWarning: Bool = false
+    @State var attach_media: Bool = false
     
     let replying_to: NostrEvent?
     let references: [ReferencedId]
@@ -71,6 +72,13 @@ struct PostView: View {
                 .foregroundColor(.primary)
 
                 Spacer()
+                    .frame(width: 70)
+
+                Button(NSLocalizedString("Attach media", comment: "Button to attach media.")) {
+                    attach_media = true
+                }.foregroundColor(.primary)
+
+                Spacer()
 
                 if !is_post_empty {
                     Button(NSLocalizedString("Post", comment: "Button to post a note.")) {
@@ -112,6 +120,9 @@ struct PostView: View {
                     UserSearch(damus_state: damus_state, search: searching, post: $post)
                 }.zIndex(1)
             }
+        }
+        .sheet(isPresented: $attach_media) {
+            AttachMediaWebViewSheet(post: $post)
         }
         .onAppear() {
             if let replying_to {
