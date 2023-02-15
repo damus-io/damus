@@ -231,10 +231,10 @@ struct ImageCarousel: View {
                         KFAnimatedImage(url)
                             .callbackQueue(.dispatch(.global(qos: .background)))
                             .processingQueue(.dispatch(.global(qos: .background)))
+                            .cancelOnDisappear(true)
+                            .backgroundDecode()
                             .cacheOriginalImage()
-                            .loadDiskFileSynchronously()
                             .scaleFactor(UIScreen.main.scale)
-                            .fade(duration: 0.1)
                             .configure { view in
                                 view.framePreloadCount = 3
                             }
