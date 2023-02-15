@@ -17,7 +17,7 @@ struct MentionView: View {
             let pk = bech32_pubkey(mention.ref.ref_id) ?? mention.ref.ref_id
             PubkeyView(pubkey: pk, relay: mention.ref.relay_id)
         case .event:
-            Text("< e >", comment: "Placeholder for event mention.")
+            Text(String("< e >"))
             //EventBlockView(pubkey: mention.ref.ref_id, relay: mention.ref.relay_id)
         }
     }

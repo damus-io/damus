@@ -36,14 +36,14 @@ struct CreateAccountView: View {
                 
                 HStack(alignment: .top) {
                     VStack {
-                        Text("   ", comment: "Blank space to separate profile picture from profile editor form.")
+                        Text(String("   "))
                             .foregroundColor(.white)
                     }
                     VStack {
                         SignupForm {
                             FormLabel(NSLocalizedString("Username", comment: "Label to prompt username entry."))
                             HStack(spacing: 0.0) {
-                                Text("@", comment: "Prefix character to username.")
+                                Text(String("@"))
                                     .foregroundColor(.white)
                                     .padding(.leading, -25.0)
                                 

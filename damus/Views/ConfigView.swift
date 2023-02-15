@@ -130,7 +130,7 @@ struct ConfigView: View {
                 
                 
                 Section(NSLocalizedString("Default Zap Amount in sats", comment: "Section title for zap configuration")) {
-                    TextField("1000", text: $default_zap_amount)
+                    TextField(String("1000"), text: $default_zap_amount)
                 }
 
                 Section(NSLocalizedString("Translations", comment: "Section title for selecting the translation service.")) {
@@ -204,7 +204,7 @@ struct ConfigView: View {
                 let bundleShortVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String
                 let bundleVersion = Bundle.main.infoDictionary?["CFBundleVersion"] as! String
                 Section(NSLocalizedString("Version", comment: "Section title for displaying the version number of the Damus app.")) {
-                    Text("\(bundleShortVersion) (\(bundleVersion))", comment: "Text indicating which version of the Damus app is running. Should typically not need to be translated.")
+                    Text(String("\(bundleShortVersion) (\(bundleVersion))"))
                 }
             }
         }
