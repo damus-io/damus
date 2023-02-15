@@ -88,6 +88,32 @@ class damusTests: XCTestCase {
         XCTAssertEqual(parsed, expected)
     }
     
+    func testSaveDefaultZapAmount() {
+        let pubkey = "test_pubkey"
+        let amt = 1000
+        set_default_zap_amount(pubkey: pubkey, amount: amt)
+        let loaded = get_default_zap_amount(pubkey: pubkey)!
+        XCTAssertEqual(loaded, amt)
+    }
+    
+    func testSaveRelayFilters() {
+        var filters = Set<RelayFilter>()
+        
+        let filter1 = RelayFilter(timeline: .search, relay_id: "wss://abc.com")
+        let filter2 = RelayFilter(timeline: .home, relay_id: "wss://abc.com")
+        filters.insert(filter1)
+        filters.insert(filter2)
+        
+        let pubkey = "test_pubkey"
+        save_relay_filters(pubkey, filters: filters)
+        let loaded_filters = load_relay_filters(pubkey)!
+        
+        XCTAssertEqual(loaded_filters.count, 2)
+        XCTAssertTrue(loaded_filters.contains(filter1))
+        XCTAssertTrue(loaded_filters.contains(filter2))
+        XCTAssertEqual(filters, loaded_filters)
+    }
+    
     func testParseUrl() {
         let parsed = parse_mentions(content: "a https://jb55.com b", tags: [])
 
@@ -115,11 +141,19 @@ class damusTests: XCTestCase {
     }
     
     func testNoParseUrlWithOnlyWhitespace() {
-        let testString = "https:// "
+        let testString = "https://  "
         let parsed = parse_mentions(content: testString, tags: [])
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed[0].is_text, testString)
+    }
+    
+    func testNoParseUrlTrailingCharacters() {
+        let testString = "https://foo.bar, "
+        let parsed = parse_mentions(content: testString, tags: [])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed[0].is_url?.absoluteString, "https://foo.bar")
     }
     
     func testParseMentionBlank() {

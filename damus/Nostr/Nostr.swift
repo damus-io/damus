@@ -102,12 +102,16 @@ struct Profile: Codable {
     }
     
     var lnurl: String? {
-        guard let addr = lud06 ?? lud16 else {
+        guard let addr = lud16 ?? lud06 else {
             return nil;
         }
         
         if addr.contains("@") {
             return lnaddress_to_lnurl(addr);
+        }
+        
+        if !addr.lowercased().hasPrefix("lnurl") {
+            return nil
         }
         
         return addr;

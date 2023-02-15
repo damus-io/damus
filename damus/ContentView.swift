@@ -7,13 +7,12 @@
 
 import SwiftUI
 import Starscream
-import Kingfisher
 
 var BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
     "wss://eden.nostr.land",
     "wss://relay.snort.social",
-    "wss://nostr.orangepill.dev",
+    "wss://offchain.pub",
     "wss://nos.lol",
     "wss://relay.current.fyi",
     "wss://brb.io",
@@ -28,12 +27,16 @@ enum Sheets: Identifiable {
     case post
     case report(ReportTarget)
     case reply(NostrEvent)
+    case event(NostrEvent)
+    case filter
 
     var id: String {
         switch self {
         case .report: return "report"
         case .post: return "post"
         case .reply(let ev): return "reply-" + ev.id
+        case .event(let ev): return "event-" + ev.id
+        case .filter: return "filter"
         }
     }
 }
@@ -89,7 +92,6 @@ struct ContentView: View {
     @State var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
-    @StateObject var user_settings = UserSettingsStore()
 
     // connect retry timer
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
@@ -112,7 +114,7 @@ struct ContentView: View {
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 
                 if privkey != nil {
-                    PostButtonContainer(userSettings: user_settings) {
+                    PostButtonContainer(is_left_handed: damus_state?.settings.left_handed ?? false) {
                         self.active_sheet = .post
                     }
                 }
@@ -139,6 +141,36 @@ struct ContentView: View {
         }
     }
     
+    func popToRoot() {
+        profile_open = false
+        thread_open = false
+        search_open = false
+        isSideBarOpened = false
+    }
+
+    var timelineNavItem: some View {
+        VStack {
+            switch selected_timeline {
+            case .home:
+                Image("damus-home")
+                .resizable()
+                .frame(width:30,height:30)
+                .shadow(color: Color("DamusPurple"), radius: 2)
+            case .dms:
+                Text("DMs", comment: "Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.")
+                    .bold()
+            case .notifications:
+                Text("Notifications", comment: "Toolbar label for Notifications view.")
+                    .bold()
+            case .search:
+                Text("Global", comment: "Toolbar label for Global view where posts from all connected relay servers appear.")
+                    .bold()
+            case .none:
+                Text("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
+            }
+        }
+    }
+    
     func MainContent(damus: DamusState) -> some View {
         VStack {
             NavigationLink(destination: MaybeProfileView, isActive: $profile_open) {
@@ -158,9 +190,10 @@ struct ContentView: View {
                 PostingTimelineView
                 
             case .notifications:
-                TimelineView(events: $home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
-                    .navigationTitle(NSLocalizedString("Notifications", comment: "Navigation title for notifications."))
-                
+                VStack(spacing: 0) {
+                    Divider()
+                    TimelineView(events: $home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
+                }
             case .dms:
                 DirectMessagesView(damus_state: damus_state!)
                     .environmentObject(home.dms)
@@ -172,24 +205,9 @@ struct ContentView: View {
         .navigationBarTitle(selected_timeline == .home ?  NSLocalizedString("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.") : NSLocalizedString("Global", comment: "Navigation bar title for Global view where posts from all connected relay servers appear."), displayMode: .inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                switch selected_timeline {
-                case .home:
-                    Image("damus-home")
-                    .resizable()
-                    .frame(width:30,height:30)
-                    .shadow(color: Color("DamusPurple"), radius: 2)
-                case .dms:
-                    Text("DMs", comment: "Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.")
-                        .bold()
-                case .notifications:
-                    Text("Notifications", comment: "Toolbar label for Notifications view.")
-                        .bold()
-                case .search:
-                    Text("Global", comment: "Toolbar label for Global view where posts from all connected relay servers appear.")
-                        .bold()
-                case .none:
-                    Text("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
-                }
+                timelineNavItem
+                    .opacity(isSideBarOpened ? 0 : 1)
+                    .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
             }
         }
         .ignoresSafeArea(.keyboard)
@@ -198,7 +216,7 @@ struct ContentView: View {
     var MaybeSearchView: some View {
         Group {
             if let search = self.active_search {
-                SearchView(appstate: damus_state!, search: SearchModel(pool: damus_state!.pool, search: search))
+                SearchView(appstate: damus_state!, search: SearchModel(contacts: damus_state!.contacts, pool: damus_state!.pool, search: search))
             } else {
                 EmptyView()
             }
@@ -246,7 +264,7 @@ struct ContentView: View {
             if let damus = self.damus_state {
                 NavigationView {
                     ZStack {
-                        VStack {
+                        TabView { // Prevents navbar appearance change on scroll
                             MainContent(damus: damus)
                                 .toolbar() {
                                     ToolbarItem(placement: .navigationBarLeading) {
@@ -254,7 +272,10 @@ struct ContentView: View {
                                             isSideBarOpened.toggle()
                                         } label: {
                                             ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles)
+                                                .opacity(isSideBarOpened ? 0 : 1)
+                                                .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
                                         }
+                                        .disabled(isSideBarOpened)
                                     }
                                     
                                     ToolbarItem(placement: .navigationBarTrailing) {
@@ -266,19 +287,28 @@ struct ContentView: View {
                                                         .foregroundColor(.gray)
                                                 }
                                             }
-
+                                            
+                                            // maybe expand this to other timelines in the future
+                                            if selected_timeline == .search {
+                                                Button(action: {
+                                                    //isFilterVisible.toggle()
+                                                    self.active_sheet = .filter
+                                                }) {
+                                                    // checklist, checklist.checked, lisdt.bullet, list.bullet.circle, line.3.horizontal.decrease...,  line.3.horizontail.decrease
+                                                    Label("Filter", systemImage: "line.3.horizontal.decrease")
+                                                        .foregroundColor(.gray)
+                                                        //.contentShape(Rectangle())
+                                                }
+                                            }
                                         }
                                     }
                                 }
-
                         }
-                        
-                        Color.clear
-                        .overlay(
-                            SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened)
-                        )
+                        .tabViewStyle(.page(indexDisplayMode: .never))
                     }
-                    .navigationBarHidden(isSideBarOpened ? true: false) // Would prefer a different way of doing this.
+                    .overlay(
+                        SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened.animation())
+                    )
                 }
                 .navigationViewStyle(.stack)
             
@@ -286,10 +316,8 @@ struct ContentView: View {
                     .padding([.bottom], 8)
             }
         }
-        .environmentObject(user_settings)
         .onAppear() {
             self.connect()
-            //KingfisherManager.shared.cache.clearDiskCache()
             setup_notifications()
         }
         .sheet(item: $active_sheet) { item in
@@ -300,6 +328,17 @@ struct ContentView: View {
                 PostView(replying_to: nil, references: [], damus_state: damus_state!)
             case .reply(let event):
                 ReplyView(replying_to: event, damus: damus_state!)
+            case .event(let event):
+                EventDetailView()
+            case .filter:
+                let timeline = selected_timeline ?? .home
+                if #available(iOS 16.0, *) {
+                    RelayFilterView(state: damus_state!, timeline: timeline)
+                        .presentationDetents([.height(550)])
+                        .presentationDragIndicator(.visible)
+                } else {
+                    RelayFilterView(state: damus_state!, timeline: timeline)
+                }
             }
         }
         .onOpenURL { url in
@@ -418,6 +457,8 @@ struct ContentView: View {
             let post_res = obj.object as! NostrPostResult
             switch post_res {
             case .post(let post):
+                //let post = tup.0
+                //let to_relays = tup.1
                 print("post \(post.content)")
                 let new_ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
                 self.damus_state?.pool.send(.event(new_ev))
@@ -522,6 +563,7 @@ struct ContentView: View {
     }
     
     func switch_timeline(_ timeline: Timeline) {
+        self.popToRoot()
         NotificationCenter.default.post(name: .switched_timeline, object: timeline)
         
         if timeline == self.selected_timeline {
@@ -547,21 +589,33 @@ struct ContentView: View {
 
     func connect() {
         let pool = RelayPool()
+        let metadatas = RelayMetadatas()
+        let relay_filters = RelayFilters(our_pubkey: pubkey)
         
+        let new_relay_filters = load_relay_filters(pubkey) == nil
         for relay in BOOTSTRAP_RELAYS {
-            add_relay(pool, relay)
+            if let url = URL(string: relay) {
+                add_new_relay(relay_filters: relay_filters, metadatas: metadatas, pool: pool, url: url, info: .rw, new_relay_filters: new_relay_filters)
+            }
         }
         
         pool.register_handler(sub_id: sub_id, handler: home.handle_event)
 
-        self.damus_state = DamusState(pool: pool, keypair: keypair,
-                                likes: EventCounter(our_pubkey: pubkey),
-                                boosts: EventCounter(our_pubkey: pubkey),
-                                contacts: Contacts(our_pubkey: pubkey),
-                                tips: TipCounter(our_pubkey: pubkey),
-                                profiles: Profiles(),
-                                dms: home.dms,
-                                previews: PreviewCache()
+        self.damus_state = DamusState(pool: pool,
+                                      keypair: keypair,
+                                      likes: EventCounter(our_pubkey: pubkey),
+                                      boosts: EventCounter(our_pubkey: pubkey),
+                                      contacts: Contacts(our_pubkey: pubkey),
+                                      tips: TipCounter(our_pubkey: pubkey),
+                                      profiles: Profiles(),
+                                      dms: home.dms,
+                                      previews: PreviewCache(),
+                                      zaps: Zaps(our_pubkey: pubkey),
+                                      lnurls: LNUrls(),
+                                      settings: UserSettingsStore(),
+                                      relay_filters: relay_filters,
+                                      relay_metadata: metadatas,
+                                      drafts: Drafts()
         )
         home.damus_state = self.damus_state!
         

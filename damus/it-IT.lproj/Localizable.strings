@@ -16,12 +16,11 @@
 /* Prefix character to username. */
 "@" = "@";
 
-/* Amount of time that has passed since reply quote event occurred.
-Abbreviated version of a nostr public key. */
+/* Abbreviated version of a nostr public key. */
 "%@" = "%@";
 
-/* Sentence composed of 2 variables to describe how many tip payments there are on a post. In source English, the first variable is the number of tip payments, and the second variable is 'Tip' or 'Tips'.
-Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
+/* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
+Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
 "%@ %@" = "%@ %@";
 
 /* Alert message that informs a user was blocked. */
@@ -36,8 +35,8 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Paga i tuoi amici e accumula sats con Bitcoin⚡️, la moneta di internet.";
 
-/* Number of tip payments on a post.
-Number of profiles a user is following. */
+/* Number of reposts.
+Number of relay servers a user is connected. */
 "%lld" = "%lld";
 
 /* Fraction of how many of the user's relay servers that are operational. */
@@ -45,6 +44,9 @@ Number of profiles a user is following. */
 
 /* Placeholder for event mention. */
 "< e >" = "< e >";
+
+/* Text indicating the zap amount. i.e. number of satoshis that were tipped to a user */
+"⚡️ %@" = "⚡️ %@";
 
 /* Label to prompt for about text entry for user to describe about themself. */
 "About" = "Informazioni";
@@ -72,12 +74,12 @@ Number of profiles a user is following. */
 "Add all" = "Aggiungi tutto";
 
 /* Label for section for adding a relay server. */
-"Add Relay" = "Aggiungi relè";
+"Add Relay" = "Aggiungi Relay";
 
 /* Any amount of sats */
 "Any" = "Qualsiasi";
 
-/* Example URL to LibreTranslate server */
+/* Prompt for optional entry of API Key to use translation server. */
 "API Key (optional)" = "API Key (facoltativo)";
 
 /* Alert message to ask if user wants to repost a post. */
@@ -107,7 +109,7 @@ Number of profiles a user is following. */
 "Block %@?" = "Vuoi bloccare %@?";
 
 /* Title of alert for blocking a user. */
-"Block User" = "Bloccare Utente";
+"Block User" = "Blocca Utente";
 
 /* Sidebar menu label for Profile view. */
 "Blocked" = "Bloccato";
@@ -135,9 +137,6 @@ Number of profiles a user is following. */
 
 /* Dropdown option label for Lightning wallet, Cash App. */
 "Cash App" = "Cash App";
-
-/* Navigation bar title for Chatroom view. */
-"Chat" = "Chat";
 
 /* Button for clearing cached data. */
 "Clear" = "Cancella";
@@ -274,7 +273,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button to hide a post from a user who has been blocked. */
 "Hide" = "Nascondi";
 
-/* Button to hide the LibreTranslate server API key. */
+/* Button to hide the DeepL translation API key.
+   Button to hide the LibreTranslate server API key. */
 "Hide API Key" = "Nascondi la chiave dell' API";
 
 /* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
@@ -303,9 +303,6 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Button to complete account creation and start using the app. */
 "Let's go!" = "Andiamo!";
-
-/* Section title for selecting the server that hosts the LibreTranslate machine translation API. */
-"LibreTranslate Translations" = "Traduzioni LibreTranslate";
 
 /* Placeholder text for entry of Lightning Address or LNURL. */
 "Lightning Address or LNURL" = "Indirizzo Lightning o LNURL";
@@ -338,18 +335,18 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "NIP-05 Verification" = "Verifica NIP-05";
 
 /* Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists. */
-"No block list found, create a new one? This will overwrite any previous block lists." = "Nessuna lista degli utenti bloccati trovata, vuoi creane una nuova?Creandone una nuova, sovrascriverai eventuali liste di utenti bloccati in precedenza";
+"No block list found, create a new one? This will overwrite any previous block lists." = "Nessuna lista degli utenti bloccati trovata, vuoi creane una nuova? Creandone una nuova, sovrascriverai eventuali liste di utenti bloccati in precedenza";
 
 /* No search results. */
 "none" = "Nessun risultato";
 
-/* Dropdown option for selecting no translation server. */
+/* Dropdown option for selecting no translation service. */
 "None" = "Nessuno";
 
 /* Indicates that there are no notes in the timeline to view. */
 "Nothing to see here. Check back later!" = "Niente da vedere qui. Controlla dopo!";
 
-/* Navigation title for notifications. */
+/* Toolbar label for Notifications view. */
 "Notifications" = "Notifiche";
 
 /* String indicating that a given timestamp just occurred */
@@ -413,20 +410,20 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Reactions" = "Reazioni";
 
 /* Section title for recommend relay servers that could be added as part of configuration */
-"Recommended Relays" = "Relè consigliati";
+"Recommended Relays" = "Relays consigliati";
 
 /* Button to reject the end user license agreement, which disallows the user from being let into the app. */
 "Reject" = "Rifiuta";
 
-/* Text field for relay server. Used for testing purposes. */
-"Relay" = "Relè";
+/* Label to display relay address.
+   Text field for relay server. Used for testing purposes. */
+"Relay" = "Relay";
 
-/* Sidebar menu label for Relay servers view
-   Sidebar menu label for Relays view. */
-"Relays" = "Relè";
+/* Sidebar menu label for Relays view. */
+"Relays" = "Relays";
 
 /* Description of what was done as a result of sending a report to relay servers. */
-"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "I relè sono stati notificati e i clients potranno sfruttare questa informazione per filtrare i contenuti. Grazie!";
+"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "I relays sono stati notificati e i clients potranno sfruttare questa informazione per filtrare i contenuti. Grazie!";
 
 /* Button label to remove all participants from a note reply. */
 "Remove all" = "Rimuovi tutto";
@@ -506,7 +503,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Sidebar menu label for accessing the app settings */
 "Settings" = "Impostazioni";
 
-/* Button to share an image.
+/* Button to share a post
+   Button to share an image.
    Button to share the link to a profile. */
 "Share" = "Condividi";
 
@@ -514,7 +512,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Toggle to show or hide user's secret account login key. */
 "Show" = "Mostra";
 
-/* Button to hide the LibreTranslate server API key. */
+/* Button to show the DeepL translation API key.
+   Button to show the LibreTranslate server API key. */
 "Show API Key" = "Mostra la chiave dell'API";
 
 /* Toggle to show or hide selection of wallet. */
@@ -544,15 +543,14 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label to describe that a private key is the user's secret account key and what they should do with it. */
 "This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Questa è la tua chiave privata. Ti serve ad accedere al tuo account. Non condividerla mai con nessuno! Salvala in un gestore password e tienila al sicuro";
 
-/* Navigation bar title for note thread.
-   Navigation bar title for threaded event detail view. */
+/* Navigation bar title for note thread. */
 "Thread" = "Thread";
 
 /* Button to translate note from different language. */
 "Translate Note" = "Nota sulla traduzione";
 
 /* Button to indicate that the note has been translated from a different language. */
-"Translated from (languageName!)" = "Tradotto da (languageName!)";
+"Translated from (lang)" = "Tradotto da (lang)";
 
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "Scrivi il tuo post qui...";
@@ -604,7 +602,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Welcome, %@!" = "Benvenuto, %@!";
 
 /* Header text to prompt user what issue they want to report. */
-"What do you want to report?" = "Che cosa vuoi reportare?";
+"What do you want to report?" = "Che cosa vuoi segnalare?";
 
 /* Placeholder example for relay server address. */
 "wss://some.relay.com" = "wss://qualche.relay.com";

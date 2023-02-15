@@ -25,6 +25,9 @@ struct SearchView: View {
             .onDisappear() {
                 search.unsubscribe()
             }
+            .onReceive(handle_notify(.new_mutes)) { notif in
+                search.filter_muted()
+            }
     }
 }
 
@@ -43,7 +46,7 @@ struct SearchView_Previews: PreviewProvider {
         let filter = NostrFilter.filter_hashtag(["bitcoin"])
         let pool = test_state.pool
         
-        let model = SearchModel(pool: pool, search: filter)
+        let model = SearchModel(contacts: test_state.contacts, pool: pool, search: filter)
         
         SearchView(appstate: test_state, search: model)
     }

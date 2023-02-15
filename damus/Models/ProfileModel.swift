@@ -20,6 +20,24 @@ class ProfileModel: ObservableObject, Equatable {
     var sub_id = UUID().description
     var prof_subid = UUID().description
     
+    func follows(pubkey: String) -> Bool {
+        guard let contacts = self.contacts else {
+            return false
+        }
+        
+        for tag in contacts.tags {
+            guard tag.count >= 2 && tag[0] == "p" else {
+                continue
+            }
+            
+            if tag[1] == pubkey {
+                return true
+            }
+        }
+        
+        return false
+    }
+    
     func get_follow_target() -> FollowTarget {
         if let contacts = contacts {
             return .contact(contacts)
@@ -70,7 +88,7 @@ class ProfileModel: ObservableObject, Equatable {
     }
     
     func handle_profile_contact_event(_ ev: NostrEvent) {
-        process_contact_event(pool: damus.pool, contacts: damus.contacts, pubkey: damus.pubkey, ev: ev)
+        process_contact_event(state: damus, ev: ev)
         
         // only use new stuff
         if let current_ev = self.contacts {

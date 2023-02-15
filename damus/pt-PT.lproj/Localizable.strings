@@ -16,12 +16,11 @@
 /* Prefix character to username. */
 "@" = "@";
 
-/* Amount of time that has passed since reply quote event occurred.
-Abbreviated version of a nostr public key. */
+/* Abbreviated version of a nostr public key. */
 "%@" = "%@";
 
-/* Sentence composed of 2 variables to describe how many tip payments there are on a post. In source English, the first variable is the number of tip payments, and the second variable is 'Tip' or 'Tips'.
-Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'. */
+/* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
+Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
 "%@ %@" = "%@ %@";
 
 /* Alert message that informs a user was blocked. */
@@ -36,8 +35,8 @@ Sentence composed of 2 variables to describe how many profiles a user is followi
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Dê uma gorjeta aos seus amigos e acumule sats com Bitcoin⚡️, a moeda nativa da Internet.";
 
-/* Number of tip payments on a post.
-Number of profiles a user is following. */
+/* Number of reposts.
+Number of relay servers a user is connected. */
 "%lld" = "%lld";
 
 /* Fraction of how many of the user's relay servers that are operational. */
@@ -45,6 +44,9 @@ Number of profiles a user is following. */
 
 /* Placeholder for event mention. */
 "< e >" = "< e >";
+
+/* Text indicating the zap amount. i.e. number of satoshis that were tipped to a user */
+"⚡️ %@" = "⚡️ %@";
 
 /* Label to prompt for about text entry for user to describe about themself. */
 "About" = "Acerca de";
@@ -77,7 +79,7 @@ Number of profiles a user is following. */
 /* Any amount of sats */
 "Any" = "Qualquer";
 
-/* Example URL to LibreTranslate server */
+/* Prompt for optional entry of API Key to use translation server. */
 "API Key (optional)" = "Chave API (opcional)";
 
 /* Alert message to ask if user wants to repost a post. */
@@ -135,9 +137,6 @@ Number of profiles a user is following. */
 
 /* Dropdown option label for Lightning wallet, Cash App. */
 "Cash App" = "Cash App";
-
-/* Navigation bar title for Chatroom view. */
-"Chat" = "Conversação";
 
 /* Button for clearing cached data. */
 "Clear" = "Limpar";
@@ -274,7 +273,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button to hide a post from a user who has been blocked. */
 "Hide" = "Ocultar";
 
-/* Button to hide the LibreTranslate server API key. */
+/* Button to hide the DeepL translation API key.
+   Button to hide the LibreTranslate server API key. */
 "Hide API Key" = "Ocultar Chave API";
 
 /* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
@@ -303,9 +303,6 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Button to complete account creation and start using the app. */
 "Let's go!" = "Vamos!";
-
-/* Section title for selecting the server that hosts the LibreTranslate machine translation API. */
-"LibreTranslate Translations" = "Traduções LibreTranslate";
 
 /* Placeholder text for entry of Lightning Address or LNURL. */
 "Lightning Address or LNURL" = "Endereço Lightning ou LNURL";
@@ -343,13 +340,13 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* No search results. */
 "none" = "nada";
 
-/* Dropdown option for selecting no translation server. */
+/* Dropdown option for selecting no translation service. */
 "None" = "Nenhum";
 
 /* Indicates that there are no notes in the timeline to view. */
 "Nothing to see here. Check back later!" = "Não há nada para ver aqui. Volte mais tarde!";
 
-/* Navigation title for notifications. */
+/* Toolbar label for Notifications view. */
 "Notifications" = "Notificações";
 
 /* String indicating that a given timestamp just occurred */
@@ -418,11 +415,11 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button to reject the end user license agreement, which disallows the user from being let into the app. */
 "Reject" = "Rejeitar";
 
-/* Text field for relay server. Used for testing purposes. */
+/* Label to display relay address.
+   Text field for relay server. Used for testing purposes. */
 "Relay" = "Relay";
 
-/* Sidebar menu label for Relay servers view
-   Sidebar menu label for Relays view. */
+/* Sidebar menu label for Relays view. */
 "Relays" = "Relays";
 
 /* Description of what was done as a result of sending a report to relay servers. */
@@ -506,7 +503,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Sidebar menu label for accessing the app settings */
 "Settings" = "Configurações";
 
-/* Button to share an image.
+/* Button to share a post
+   Button to share an image.
    Button to share the link to a profile. */
 "Share" = "Partilhar";
 
@@ -514,7 +512,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Toggle to show or hide user's secret account login key. */
 "Show" = "Ver";
 
-/* Button to hide the LibreTranslate server API key. */
+/* Button to show the DeepL translation API key.
+   Button to show the LibreTranslate server API key. */
 "Show API Key" = "Mostrar Chave API";
 
 /* Toggle to show or hide selection of wallet. */
@@ -544,15 +543,14 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label to describe that a private key is the user's secret account key and what they should do with it. */
 "This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Esta é a chave secreta da sua conta. Precisa dela para aceder à sua conta. Não partilhe isto com ninguém! Guarde-a num gestor de senhas e mantenha-a segura!";
 
-/* Navigation bar title for note thread.
-   Navigation bar title for threaded event detail view. */
+/* Navigation bar title for note thread. */
 "Thread" = "Thread";
 
 /* Button to translate note from different language. */
 "Translate Note" = "Traduzir Note";
 
 /* Button to indicate that the note has been translated from a different language. */
-"Translated from (languageName!)" = "Traduzido de (languageName!)";
+"Translated from (lang)" = "Traduzido de (lang)";
 
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "Escreva aqui o seu post...";

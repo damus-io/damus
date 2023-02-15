@@ -4,6 +4,9 @@
 /* Bundle name */
 "CFBundleName" = "دامُس";
 
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "التحقق للوصول للمفتاح الخاص";
+
 /* Privacy - Photo Library Additions Usage Description */
 "NSPhotoLibraryAddUsageDescription" = "السماح لدامُس بالوصول إلى الصور يتيح لك حفظ الصور";
 

@@ -112,7 +112,60 @@ class HomeModel: ObservableObject {
             handle_channel_create(ev)
         case .channel_meta:
             handle_channel_meta(ev)
+        case .zap:
+            handle_zap_event(ev)
         }
+    }
+    
+    func handle_zap_event_with_zapper(_ ev: NostrEvent, our_pubkey: String, zapper: String) {
+        guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper) else {
+            return
+        }
+        
+        damus_state.zaps.add_zap(zap: zap)
+        
+        guard zap.target.pubkey == our_pubkey else {
+            return
+        }
+        
+        if !insert_uniq_sorted_event(events: &notifications, new_ev: ev, cmp: { $0.created_at > $1.created_at }) {
+            return
+        }
+        
+        handle_last_event(ev: ev, timeline: .notifications)
+        return
+    }
+    
+    func handle_zap_event(_ ev: NostrEvent) {
+        // These are zap notifications
+        guard let ptag = event_tag(ev, name: "p") else {
+            return
+        }
+        
+        if let local_zapper = damus_state.profiles.lookup_zapper(pubkey: ptag) {
+            handle_zap_event_with_zapper(ev, our_pubkey: damus_state.pubkey, zapper: local_zapper)
+            return
+        }
+        
+        guard let profile = damus_state.profiles.lookup(id: ptag) else {
+            return
+        }
+        
+        guard let lnurl = profile.lnurl else {
+            return
+        }
+        
+        Task {
+            guard let zapper = await fetch_zapper_from_lnurl(lnurl) else {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.damus_state.profiles.zappers[ptag] = zapper
+                self.handle_zap_event_with_zapper(ev, our_pubkey: self.damus_state.pubkey, zapper: zapper)
+            }
+        }
+        
     }
     
     func handle_channel_create(_ ev: NostrEvent) {
@@ -141,7 +194,7 @@ class HomeModel: ObservableObject {
     }
 
     func handle_contact_event(sub_id: String, relay_id: String, ev: NostrEvent) {
-        process_contact_event(pool: damus_state.pool, contacts: damus_state.contacts, pubkey: damus_state.pubkey, ev: ev)
+        process_contact_event(state: self.damus_state, ev: ev)
 
         if sub_id == init_subid {
             pool.send(.unsubscribe(init_subid), to: [relay_id])
@@ -177,6 +230,7 @@ class HomeModel: ObservableObject {
         case .success(let n):
             let boosted = Counted(event: ev, id: e, total: n)
             notify(.boosted, boosted)
+            notify(.update_stats, e)
         }
     }
 
@@ -194,6 +248,7 @@ class HomeModel: ObservableObject {
         case .success(let n):
             let liked = Counted(event: ev, id: e.ref_id, total: n)
             notify(.liked, liked)
+            notify(.update_stats, e.ref_id)
         }
     }
 
@@ -234,7 +289,7 @@ class HomeModel: ObservableObject {
             switch ev {
             case .event(let sub_id, let ev):
                 // globally handle likes
-                let always_process = sub_id == notifications_subid || sub_id == contacts_subid || sub_id == home_subid || sub_id == dms_subid || sub_id == init_subid || ev.known_kind == .like || ev.known_kind == .contacts || ev.known_kind == .metadata
+                let always_process = sub_id == notifications_subid || sub_id == contacts_subid || sub_id == home_subid || sub_id == dms_subid || sub_id == init_subid || ev.known_kind == .like || ev.known_kind == .boost || ev.known_kind == .zap || ev.known_kind == .contacts || ev.known_kind == .metadata
                 if !always_process {
                     // TODO: other views like threads might have their own sub ids, so ignore those events... or should we?
                     return
@@ -317,6 +372,7 @@ class HomeModel: ObservableObject {
             NostrKind.chat.rawValue,
             NostrKind.like.rawValue,
             NostrKind.boost.rawValue,
+            NostrKind.zap.rawValue,
         ])
         notifications_filter.pubkeys = [damus_state.pubkey]
         notifications_filter.limit = 100
@@ -411,7 +467,7 @@ class HomeModel: ObservableObject {
     }
 
     func handle_text_event(sub_id: String, _ ev: NostrEvent) {
-        if should_hide_event(contacts: damus_state.contacts, ev: ev) {
+        guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
             return
         }
 
@@ -423,7 +479,7 @@ class HomeModel: ObservableObject {
     }
 
     func handle_dm(_ ev: NostrEvent) {
-        if let notifs = handle_incoming_dm(prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, ev: ev) {
+        if let notifs = handle_incoming_dm(contacts: damus_state.contacts, prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, ev: ev) {
             self.new_events = notifs
         }
     }
@@ -590,31 +646,31 @@ func robohash(_ pk: String) -> String {
     return "https://robohash.org/" + pk
 }
 
-func load_our_stuff(pool: RelayPool, contacts: Contacts, pubkey: String, ev: NostrEvent) {
-    guard ev.pubkey == pubkey else {
+func load_our_stuff(state: DamusState, ev: NostrEvent) {
+    guard ev.pubkey == state.pubkey else {
         return
     }
     
     // only use new stuff
-    if let current_ev = contacts.event {
+    if let current_ev = state.contacts.event {
         guard ev.created_at > current_ev.created_at else {
             return
         }
     }
     
-    let m_old_ev = contacts.event
-    contacts.event = ev
+    let m_old_ev = state.contacts.event
+    state.contacts.event = ev
 
-    load_our_contacts(contacts: contacts, our_pubkey: pubkey, m_old_ev: m_old_ev, ev: ev)
-    load_our_relays(contacts: contacts, our_pubkey: pubkey, pool: pool, m_old_ev: m_old_ev, ev: ev)
+    load_our_contacts(contacts: state.contacts, our_pubkey: state.pubkey, m_old_ev: m_old_ev, ev: ev)
+    load_our_relays(state: state, m_old_ev: m_old_ev, ev: ev)
 }
 
-func process_contact_event(pool: RelayPool, contacts: Contacts, pubkey: String, ev: NostrEvent) {
-    load_our_stuff(pool: pool, contacts: contacts, pubkey: pubkey, ev: ev)
-    add_contact_if_friend(contacts: contacts, ev: ev)
+func process_contact_event(state: DamusState, ev: NostrEvent) {
+    load_our_stuff(state: state, ev: ev)
+    add_contact_if_friend(contacts: state.contacts, ev: ev)
 }
 
-func load_our_relays(contacts: Contacts, our_pubkey: String, pool: RelayPool, m_old_ev: NostrEvent?, ev: NostrEvent) {
+func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     let bootstrap_dict: [String: RelayInfo] = [:]
     let old_decoded = m_old_ev.flatMap { decode_json_relays($0.content) } ?? BOOTSTRAP_RELAYS.reduce(into: bootstrap_dict) { (d, r) in
         d[r] = .rw
@@ -638,14 +694,15 @@ func load_our_relays(contacts: Contacts, our_pubkey: String, pool: RelayPool, m_
     
     let diff = old.symmetricDifference(new)
     
+    let new_relay_filters = load_relay_filters(state.pubkey) == nil
     for d in diff {
         changed = true
         if new.contains(d) {
             if let url = URL(string: d) {
-                try? pool.add_relay(url, info: decoded[d] ?? .rw)
+                add_new_relay(relay_filters: state.relay_filters, metadatas: state.relay_metadata, pool: state.pool, url: url, info: decoded[d] ?? .rw, new_relay_filters: new_relay_filters)
             }
         } else {
-            pool.remove_relay(d)
+            state.pool.remove_relay(d)
         }
     }
     
@@ -654,7 +711,62 @@ func load_our_relays(contacts: Contacts, our_pubkey: String, pool: RelayPool, m_
     }
 }
 
-func handle_incoming_dm(prev_events: NewEventsBits, dms: DirectMessagesModel, our_pubkey: String, ev: NostrEvent) -> NewEventsBits? {
+func add_new_relay(relay_filters: RelayFilters, metadatas: RelayMetadatas, pool: RelayPool, url: URL, info: RelayInfo, new_relay_filters: Bool) {
+    try? pool.add_relay(url, info: info)
+    
+    let relay_id = url.absoluteString
+    guard metadatas.lookup(relay_id: relay_id) == nil else {
+        return
+    }
+    
+    Task.detached(priority: .background) {
+        guard let meta = try? await fetch_relay_metadata(relay_id: relay_id) else {
+            return
+        }
+        
+        DispatchQueue.main.async {
+            metadatas.insert(relay_id: relay_id, metadata: meta)
+            
+            // if this is the first time adding filters, we should filter non-paid relays
+            if new_relay_filters && !meta.is_paid {
+                relay_filters.insert(timeline: .search, relay_id: relay_id)
+            }
+        }
+    }
+}
+
+func fetch_relay_metadata(relay_id: String) async throws -> RelayMetadata? {
+    var urlString = relay_id.replacingOccurrences(of: "wss://", with: "https://")
+    urlString = urlString.replacingOccurrences(of: "ws://", with: "http://")
+    
+    guard let url = URL(string: urlString) else {
+        return nil
+    }
+    
+    var request = URLRequest(url: url)
+    request.setValue("application/nostr+json", forHTTPHeaderField: "Accept")
+    
+    var res: (Data, URLResponse)? = nil
+    
+    res = try await URLSession.shared.data(for: request)
+    
+    guard let data = res?.0 else {
+        return nil
+    }
+    
+    let nip11 = try JSONDecoder().decode(RelayMetadata.self, from: data)
+    return nip11
+}
+
+func process_relay_metadata() {
+}
+
+func handle_incoming_dm(contacts: Contacts, prev_events: NewEventsBits, dms: DirectMessagesModel, our_pubkey: String, ev: NostrEvent) -> NewEventsBits? {
+    // hide blocked users
+    guard should_show_event(contacts: contacts, ev: ev) else {
+        return prev_events
+    }
+    
     var inserted = false
     var found = false
     let ours = ev.pubkey == our_pubkey
@@ -728,9 +840,10 @@ func event_has_our_pubkey(_ ev: NostrEvent, our_pubkey: String) -> Bool {
 }
 
 
-func should_hide_event(contacts: Contacts, ev: NostrEvent) -> Bool {
+func should_show_event(contacts: Contacts, ev: NostrEvent) -> Bool {
     if contacts.is_muted(ev.pubkey) {
-        return true
+        return false
     }
-    return !ev.should_show_event
+    return ev.should_show_event
 }
+

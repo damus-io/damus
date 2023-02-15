@@ -10,8 +10,10 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>one</key>
+			<string>%d andere notitie</string>
 			<key>other</key>
-			<string>%d other notes</string>
+			<string>%d andere notities</string>
 		</dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>··· %#@NOTES@ ···</string>
@@ -24,8 +26,10 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>one</key>
+			<string>Volger</string>
 			<key>other</key>
-			<string>粉丝</string>
+			<string>Volgers</string>
 		</dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@FOLLOWERS@</string>
@@ -40,8 +44,10 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>one</key>
+			<string>Reactie</string>
 			<key>other</key>
-			<string>回应</string>
+			<string>Reacties</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -54,22 +60,26 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>one</key>
+			<string>Relay</string>
 			<key>other</key>
-			<string>中继器</string>
+			<string>Relays</string>
 		</dict>
 	</dict>
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>正在回复%@%#@OTHERS@</string>
+		<string>Antwoord aan %@%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>one</key>
+			<string>en %d andere gebruiker</string>
 			<key>other</key>
-			<string> &amp; %d others</string>
+			<string>en %d andere gebruikers</string>
 			<key>zero</key>
 			<string></string>
 		</dict>
@@ -77,15 +87,17 @@
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>正在回复%@, %@%#@OTHERS@</string>
+		<string>Antwoord aan %@ en %@%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>one</key>
+			<string>en %d andere gebruiker</string>
 			<key>other</key>
-			<string> &amp; %d others</string>
+			<string>en %d andere gebruikers</string>
 			<key>zero</key>
 			<string></string>
 		</dict>
@@ -100,8 +112,10 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>one</key>
+			<string>Herplaatsing</string>
 			<key>other</key>
-			<string>转发</string>
+			<string>Herplaatsingen</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -114,22 +128,26 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
+			<key>one</key>
+			<string>%2$@ sat</string>
 			<key>other</key>
 			<string>%2$@ sats</string>
 		</dict>
 	</dict>
-	<key>tips_count</key>
+	<key>zaps_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@TIPS@</string>
-		<key>TIPS</key>
+		<string>%#@ZAPS@</string>
+		<key>ZAPS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>one</key>
+			<string>Zap</string>
 			<key>other</key>
-			<string>打赏</string>
+			<string>Zaps</string>
 		</dict>
 	</dict>
 </dict>

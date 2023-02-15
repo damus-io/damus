@@ -16,7 +16,9 @@ let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Tex
 
 struct PostView: View {
     @State var post: String = ""
+
     @FocusState var focus: Bool
+    @State var showPrivateKeyWarning: Bool = false
     
     let replying_to: NostrEvent?
     let references: [ReferencedId]
@@ -44,9 +46,16 @@ struct PostView: View {
         }
         let content = self.post.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         let new_post = NostrPost(content: content, references: references, kind: kind)
-        self.dismiss()
+
+        dismiss()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
+        }
+
+        if let replying_to {
+            damus_state.drafts.replies.removeValue(forKey: replying_to)
+        } else {
+            damus_state.drafts.post = ""
         }
     }
 
@@ -66,7 +75,11 @@ struct PostView: View {
 
                 if !is_post_empty {
                     Button(NSLocalizedString("Post", comment: "Button to post a note.")) {
-                        self.send_post()
+                        showPrivateKeyWarning = contentContainsPrivateKey(self.post)
+
+                        if !showPrivateKeyWarning {
+                            self.send_post()
+                        }
                     }
                 }
             }
@@ -76,6 +89,13 @@ struct PostView: View {
                 TextEditor(text: $post)
                     .focused($focus)
                     .textInputAutocapitalization(.sentences)
+                    .onChange(of: post) { _ in
+                        if let replying_to {
+                            damus_state.drafts.replies[replying_to] = post
+                        } else {
+                            damus_state.drafts.post = post
+                        }
+                    }
 
                 if post.isEmpty {
                     Text(POST_PLACEHOLDER)
@@ -95,11 +115,37 @@ struct PostView: View {
             }
         }
         .onAppear() {
+            if let replying_to {
+                if damus_state.drafts.replies[replying_to] == nil {
+                    damus_state.drafts.replies[replying_to] = ""
+                }
+                if let p = damus_state.drafts.replies[replying_to] {
+                    post = p
+                }
+            } else {
+                post = damus_state.drafts.post
+            }
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 self.focus = true
             }
         }
+        .onDisappear {
+            if let replying_to, let reply = damus_state.drafts.replies[replying_to], reply.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                damus_state.drafts.replies.removeValue(forKey: replying_to)
+            } else if replying_to == nil && damus_state.drafts.post.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                damus_state.drafts.post = ""
+            }
+        }
         .padding()
+        .alert(NSLocalizedString("Note contains \"nsec1\" private key. Are you sure?", comment: "Alert user that they might be attempting to paste a private key and ask them to confirm."), isPresented: $showPrivateKeyWarning, actions: {
+            Button(NSLocalizedString("No", comment: "Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key."), role: .cancel) {
+                showPrivateKeyWarning = false
+            }
+            Button(NSLocalizedString("Yes, Post with Private Key", comment: "Button to proceed with posting a note even though it looks like they might be posting a private key."), role: .destructive) {
+                self.send_post()
+            }
+        })
     }
 }
 

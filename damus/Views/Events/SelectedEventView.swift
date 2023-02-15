@@ -15,6 +15,14 @@ struct SelectedEventView: View {
         event.pubkey
     }
     
+    @StateObject var bar: ActionBarModel
+    
+    init(damus: DamusState, event: NostrEvent) {
+        self.damus = damus
+        self.event = event
+        self._bar = StateObject(wrappedValue: make_actionbar_model(ev: event.id, damus: damus))
+    }
+    
     var body: some View {
         HStack(alignment: .top) {
             let profile = damus.profiles.lookup(id: pubkey)
@@ -35,18 +43,21 @@ struct SelectedEventView: View {
                 Divider()
                     .padding([.bottom], 4)
                 
-                let bar = make_actionbar_model(ev: event, damus: damus)
-                
                 if !bar.is_empty {
-                    EventDetailBar(state: damus, target: event.id, bar: bar)
+                    EventDetailBar(state: damus, target: event.id, target_pk: event.pubkey)
                     Divider()
                 }
                 
-                EventActionBar(damus_state: damus, event: event, bar: bar)
+                EventActionBar(damus_state: damus, event: event)
                     .padding([.top], 4)
 
                 Divider()
                     .padding([.top], 4)
+            }
+            .onReceive(handle_notify(.update_stats)) { n in
+                let target = n.object as! String
+                guard target == self.event.id else { return }
+                self.bar.update(damus: self.damus, evid: target)
             }
             .padding([.leading], 2)
             .event_context_menu(event, keypair: damus.keypair, target_pubkey: event.pubkey)

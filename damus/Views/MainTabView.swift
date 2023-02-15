@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum Timeline: String, CustomStringConvertible {
+enum Timeline: String, CustomStringConvertible, Hashable {
     case home
     case notifications
     case search

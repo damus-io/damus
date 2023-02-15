@@ -11,7 +11,7 @@ struct DMChatView: View {
     let damus_state: DamusState
     let pubkey: String
     @EnvironmentObject var dms: DirectMessageModel
-    @State var message: String = ""
+    @State var showPrivateKeyWarning: Bool = false
 
     var Messages: some View {
         ScrollViewReader { scroller in
@@ -51,7 +51,7 @@ struct DMChatView: View {
     }
 
     var InputField: some View {
-        TextEditor(text: $message)
+        TextEditor(text: $dms.draft)
             .textEditorBackground {
                 InputBackground()
             }
@@ -92,8 +92,17 @@ struct DMChatView: View {
             HStack(spacing: 0) {
                 InputField
 
-                if !message.isEmpty {
-                    Button(role: .none, action: send_message) {
+                if !dms.draft.isEmpty {
+                    Button(
+                        role: .none,
+                        action: {
+                            showPrivateKeyWarning = contentContainsPrivateKey(dms.draft)
+
+                            if !showPrivateKeyWarning {
+                                send_message()
+                            }
+                        }
+                    ) {
                         Label("", systemImage: "arrow.right.circle")
                             .font(.title)
                     }
@@ -102,7 +111,7 @@ struct DMChatView: View {
             .fixedSize(horizontal: false, vertical: true)
             .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
 
-            Text(message).opacity(0).padding(.all, 8)
+            Text(dms.draft).opacity(0).padding(.all, 8)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
         }
@@ -112,7 +121,7 @@ struct DMChatView: View {
 
     func send_message() {
         let tags = [["p", pubkey]]
-        let post_blocks = parse_post_blocks(content: message)
+        let post_blocks = parse_post_blocks(content: dms.draft)
         let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
         let content = render_blocks(blocks: post_tags.blocks)
         
@@ -121,7 +130,7 @@ struct DMChatView: View {
             return
         }
 
-        message = ""
+        dms.draft = ""
 
         damus_state.pool.send(.event(dm))
         end_editing()
@@ -147,6 +156,19 @@ struct DMChatView: View {
         }
         .navigationTitle(NSLocalizedString("DMs", comment: "Navigation title for DMs view, where DM is the English abbreviation for Direct Message."))
         .toolbar { Header }
+        .onDisappear {
+            if dms.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                dms.draft = ""
+            }
+        }
+        .alert(NSLocalizedString("Note contains \"nsec1\" private key. Are you sure?", comment: "Alert user that they might be attempting to paste a private key and ask them to confirm."), isPresented: $showPrivateKeyWarning, actions: {
+            Button(NSLocalizedString("No", comment: "Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key."), role: .cancel) {
+                showPrivateKeyWarning = false
+            }
+            Button(NSLocalizedString("Yes, Post with Private Key", comment: "Button to proceed with posting a note even though it looks like they might be posting a private key."), role: .destructive) {
+                send_message()
+            }
+        })
     }
 }
 

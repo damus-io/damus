@@ -275,6 +275,7 @@ struct KeyInput: View {
             .autocapitalization(.none)
             .foregroundColor(.white)
             .font(.body.monospaced())
+            .textContentType(.password)
     }
 }
 

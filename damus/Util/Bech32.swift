@@ -147,7 +147,7 @@ public func bech32_decode(_ str: String) throws -> (hrp: String, data: Data)? {
     guard let strBytes = str.data(using: .utf8) else {
         throw Bech32Error.nonUTF8String
     }
-    guard strBytes.count <= 90 else {
+    guard strBytes.count <= 2024 else {
         throw Bech32Error.stringLengthExceeded
     }
     var lower: Bool = false
