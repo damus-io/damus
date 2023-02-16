@@ -9,19 +9,10 @@ import Kingfisher
 
 private struct ImageContainerView: View {
     
-    @ObservedObject var imageModel: KFImageModel
+    let url: URL?
     
     @State private var image: UIImage?
     @State private var showShareSheet = false
-    
-    init(url: URL?) {
-        self.imageModel = KFImageModel(
-            url: url,
-            fallbackUrl: nil,
-            maxByteSize: 2000000, // 2 MB
-            downsampleSize: CGSize(width: 400, height: 400)
-        )
-    }
     
     private struct ImageHandler: ImageModifier {
         @Binding var handler: UIImage?
@@ -34,25 +25,16 @@ private struct ImageContainerView: View {
     
     var body: some View {
         
-        KFAnimatedImage(imageModel.url)
-            .callbackQueue(.dispatch(.global(qos: .background)))
-            .processingQueue(.dispatch(.global(qos: .background)))
-            .cacheOriginalImage()
+        KFAnimatedImage(url)
+            .imageContext(.pfp)
             .configure { view in
-                view.framePreloadCount = 1
+                view.framePreloadCount = 3
             }
-            .scaleFactor(UIScreen.main.scale)
-            .loadDiskFileSynchronously()
-            .fade(duration: 0.1)
             .imageModifier(ImageHandler(handler: $image))
-            .onFailure { _ in
-                imageModel.downloadFailed()
-            }
-            .id(imageModel.refreshID)
             .clipShape(Circle())
-            .modifier(ImageContextMenuModifier(url: imageModel.url, image: image, showShareSheet: $showShareSheet))
+            .modifier(ImageContextMenuModifier(url: url, image: image, showShareSheet: $showShareSheet))
             .sheet(isPresented: $showShareSheet) {
-                ShareSheet(activityItems: [imageModel.url])
+                ShareSheet(activityItems: [url])
             }
     }
 }

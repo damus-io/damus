@@ -33,23 +33,12 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
 }
 
 struct InnerProfilePicView: View {
+    
+    let url: URL?
+    let fallbackUrl: URL?
     let pubkey: String
     let size: CGFloat
     let highlight: Highlight
-    
-    @ObservedObject var imageModel: KFImageModel
-    
-    init(url: URL?, fallbackUrl: URL?, pubkey: String, size: CGFloat, highlight: Highlight) {
-        self.pubkey = pubkey
-        self.size = size
-        self.highlight = highlight
-        self.imageModel = KFImageModel(
-            url: url,
-            fallbackUrl: fallbackUrl,
-            maxByteSize: 5_242_880, // 5Mib
-            downsampleSize: CGSize(width: 200, height: 200)
-        )
-    }
 
     var PlaceholderColor: Color {
         return id_to_color(pubkey)
@@ -67,26 +56,16 @@ struct InnerProfilePicView: View {
         ZStack {
             Color(uiColor: .systemBackground)
     
-            KFAnimatedImage(imageModel.url)
-                .callbackQueue(.dispatch(.global(qos: .background)))
-                .processingQueue(.dispatch(.global(qos: .background)))
+            KFAnimatedImage(url)
+                .imageContext(.pfp)
+                .onFailure(fallbackUrl: fallbackUrl, cacheKey: url?.absoluteString)
                 .cancelOnDisappear(true)
-                .backgroundDecode()
-                .serialize(by: imageModel.serializer)
-                .setProcessor(imageModel.processor)
-                .cacheOriginalImage()
-                .scaleFactor(UIScreen.main.scale)
                 .configure { view in
                     view.framePreloadCount = 3
                 }
                 .placeholder { _ in
                     Placeholder
                 }
-                .onFailure { error in
-                    if error.isTaskCancelled { return }
-                    imageModel.downloadFailed()
-                }
-                .id(imageModel.refreshID)
         }
         .frame(width: size, height: size)
         .clipShape(Circle())
