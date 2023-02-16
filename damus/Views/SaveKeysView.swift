@@ -15,6 +15,9 @@ struct SaveKeysView: View {
     @State var priv_copied: Bool = false
     @State var loading: Bool = false
     @State var error: String? = nil
+
+    @FocusState var pubkey_focused: Bool
+    @FocusState var privkey_focused: Bool
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -39,7 +42,7 @@ struct SaveKeysView: View {
                     .foregroundColor(.white)
                     .padding(.bottom, 10)
                 
-                SaveKeyView(text: account.pubkey_bech32, is_copied: $pub_copied)
+                SaveKeyView(text: account.pubkey_bech32, textContentType: .username, is_copied: $pub_copied, focus: $pubkey_focused)
                     .padding(.bottom, 10)
                 
                 if pub_copied {
@@ -52,7 +55,7 @@ struct SaveKeysView: View {
                         .foregroundColor(.white)
                         .padding(.bottom, 10)
                     
-                    SaveKeyView(text: account.privkey_bech32, is_copied: $priv_copied)
+                    SaveKeyView(text: account.privkey_bech32, textContentType: .newPassword, is_copied: $priv_copied, focus: $privkey_focused)
                         .padding(.bottom, 10)
                 }
                 
@@ -77,6 +80,13 @@ struct SaveKeysView: View {
         }
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackNav())
+        .onAppear {
+            // Hack to force keyboard to show up for a short moment and then hiding it to register password autofill flow.
+            pubkey_focused = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                pubkey_focused = false
+            }
+        }
     }
     
     func complete_account_creation(_ account: CreateAccountModel) {
@@ -138,7 +148,9 @@ struct SaveKeysView: View {
 
 struct SaveKeyView: View {
     let text: String
+    let textContentType: UITextContentType
     @Binding var is_copied: Bool
+    var focus: FocusState<Bool>.Binding
     
     func copy_text() {
         UIPasteboard.general.string = text
@@ -166,8 +178,8 @@ struct SaveKeyView: View {
                         }
                 }
             }
-          
-            Text(text)
+
+            TextField("", text: .constant(text))
                 .padding(5)
                 .background {
                     RoundedRectangle(cornerRadius: 4.0).opacity(0.2)
@@ -177,7 +189,14 @@ struct SaveKeyView: View {
                 .foregroundColor(.white)
                 .onTapGesture {
                     copy_text()
+                    // Hack to force keyboard to hide. Showing keyboard on text field is necessary to register password autofill flow but the text itself should not be modified.
+                    DispatchQueue.main.async {
+                        end_editing()
+                    }
                 }
+                .textContentType(textContentType)
+                .deleteDisabled(true)
+                .focused(focus)
             
             spacerBlock(width: 0, height: 0) /// set a 'width' > 0 here to vary key Text's aspect ratio
         }

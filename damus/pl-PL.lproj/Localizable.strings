@@ -1,6 +1,3 @@
-/* Blank space to separate profile picture from profile editor form. */
-"   " = "61b6edf1108e6f396680a33b02486a70_tr";
-
 /* Description of how the nip05 identifier would be used for verification. */
 "'%@' at '%@' will be used for verification" = "'%@' pod adresem '%@' zostanie użyty do weryfikacji";
 
@@ -13,13 +10,7 @@
 /* Navigation bar title for view that shows who a user is following. */
 "(who) following" = "(who) obserwuje";
 
-/* Prefix character to username. */
-"@" = "@";
-
-/* Abbreviated version of a nostr public key. */
-"%@" = "%@";
-
-/* Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
+/* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
 Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
 "%@ %@" = "%@ %@";
 
@@ -35,15 +26,8 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Dawaj napiwki w reakcji na odpowiedzi znajomych i ciułaj satsy z Bitcoin⚡️, natywną walutą internetu.";
 
-/* Number of zap payments on a post.
-Number of relay servers a user is connected. */
-"%lld" = "%lld";
-
 /* Fraction of how many of the user's relay servers that are operational. */
 "%lld/%lld" = "%lld/%lld";
-
-/* Placeholder for event mention. */
-"< e >" = "< e >";
 
 /* Text indicating the zap amount. i.e. number of satoshis that were tipped to a user */
 "⚡️ %@" = "⚡️ %@";
@@ -76,11 +60,17 @@ Number of relay servers a user is connected. */
 /* Label for section for adding a relay server. */
 "Add Relay" = "Dodaj przekaźnik";
 
+/* Label to display relay contact user. */
+"Admin" = "Admin";
+
 /* Any amount of sats */
 "Any" = "Dowolny";
 
 /* Prompt for optional entry of API Key to use translation server. */
 "API Key (optional)" = "Klucz API (opcjonalny)";
+
+/* Prompt for required entry of API Key to use translation server. */
+"API Key (required)" = "Klucz API (wymagany)";
 
 /* Alert message to ask if user wants to repost a post. */
 "Are you sure you want to repost this?" = "Na pewno chcesz podać dalej?";
@@ -120,6 +110,9 @@ Number of relay servers a user is connected. */
 /* Dropdown option label for Lightning wallet, Blue Wallet. */
 "Blue Wallet" = "Blue Wallet";
 
+/* Accessibility label for boosts button */
+"Boosts" = "Podbij";
+
 /* Dropdown option label for Lightning wallet, Breez. */
 "Breez" = "Breez";
 
@@ -138,14 +131,14 @@ Number of relay servers a user is connected. */
 /* Dropdown option label for Lightning wallet, Cash App. */
 "Cash App" = "Cash App";
 
-/* Navigation bar title for Chatroom view. */
-"Chat" = "Czat";
-
 /* Button for clearing cached data. */
 "Clear" = "Wyczyść";
 
 /* Section title for clearing cached data. */
 "Clear Cache" = "Pamięć podręczna";
+
+/* Label to display relay contact information. */
+"Contact" = "Kontakt";
 
 /* Label indicating that a user's key was copied. */
 "Copied" = "Skopiowano";
@@ -205,6 +198,9 @@ Number of relay servers a user is connected. */
 /* Name of the app, shown on the first screen when user is not logged in. */
 "Damus" = "Damus";
 
+/* Dropdown option for selecting DeepL as the translation service. */
+"DeepL (Proprietary, Higher Accuracy)" = "DeepL (Własnościowy, wysoka dokładność)";
+
 /* Button to pay a Lightning invoice with the user's default Lightning wallet. */
 "Default Wallet" = "Portfel domyślny";
 
@@ -213,6 +209,15 @@ Number of relay servers a user is connected. */
    Button to remove a user from their blocklist.
    Section title for deleting the user */
 "Delete" = "Usuń";
+
+/* Button to delete the user's account. */
+"Delete Account" = "Skasuj konto";
+
+/* Alert message to indicate this is a deleted account */
+"Deleted Account" = "Konto skasowane";
+
+/* Label to display relay description. */
+"Description" = "Opis";
 
 /* Button to dismiss a text field alert. */
 "Dismiss" = "Odzruć";
@@ -248,8 +253,17 @@ Number of relay servers a user is connected. */
 /* Label indicating that the below text is the EULA, an acronym for End User License Agreement. */
 "EULA" = "EULA";
 
+/* No comment provided by engineer. */
+"Filter" = "Filtr";
+
 /* Button to follow a user. */
 "Follow" = "Obserwuj";
+
+/* Button to follow a user back. */
+"Follow Back" = "Obserwuj";
+
+/* Text on QR code view to prompt viewer looking at screen to follow the user. */
+"Follow me on nostr" = "Obserwuj mnie na nostr";
 
 /* Label describing followers of a user. */
 "Followers" = "Obserwujący";
@@ -263,6 +277,15 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Text to indicate that button next to it is in a state that will follow a profile when tapped. */
 "Follows" = "Obserwuje";
+
+/* Text to indicate that a user is following your profile. */
+"Follows you" = "Obserwuje Cię";
+
+/* Dropdown option for selecting Free plan for DeepL translation service. */
+"Free" = "Darmowy";
+
+/* Button to navigate to DeepL website to get a translation API key. */
+"Get API Key" = "Pobierz klucz API";
 
 /* Navigation bar title for Global view where posts from all connected relay servers appear. */
 "Global" = "Globalny";
@@ -307,14 +330,23 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button to complete account creation and start using the app. */
 "Let's go!" = "Jedziemy!";
 
+/* Dropdown option for selecting LibreTranslate as the translation service. */
+"LibreTranslate (Open Source)" = "LibraTranslate (Otwarte Źródła)";
+
 /* Placeholder text for entry of Lightning Address or LNURL. */
 "Lightning Address or LNURL" = "Address Lightning lub LNURL";
 
 /* Indicates that the view is for paying a Lightning invoice. */
 "Lightning Invoice" = "Faktura Lightning";
 
+/* Accessibility Label for Like button */
+"Like" = "Polub";
+
 /* Dropdown option label for Lightning wallet, LNLink. */
 "LNLink" = "LNLink";
+
+/* Face ID usage description shown when trying to access private key */
+"Local authentication to access private key" = "Lokalne uwierzytelnienie dostępu do klucza prywatnego";
 
 /* Dropdown option label for system default for Lightning wallet. */
 "Local default" = "Domyślny systemowy";
@@ -337,6 +369,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label for NIP-05 Verification section of user profile form. */
 "NIP-05 Verification" = "Weryfikacja NIP-05";
 
+/* Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key. */
+"No" = "Nie";
+
 /* Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists. */
 "No block list found, create a new one? This will overwrite any previous block lists." = "Nie znaleziono listy zablokowanych, stworzyć nową? Nadpisać poprzednie listy.";
 
@@ -346,10 +381,13 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Dropdown option for selecting no translation service. */
 "None" = "Żaden";
 
+/* Alert user that they might be attempting to paste a private key and ask them to confirm. */
+"Note contains \"nsec1\" private key. Are you sure?" = "Treść zawiera klucz prywatny \"nsec1\". Jesteś pewien?";
+
 /* Indicates that there are no notes in the timeline to view. */
 "Nothing to see here. Check back later!" = "Nic tu nie ma. Sprawdź później!";
 
-/* Navigation title for notifications. */
+/* Toolbar label for Notifications view. */
 "Notifications" = "Powiadomienia";
 
 /* String indicating that a given timestamp just occurred */
@@ -364,14 +402,23 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label indicating that a form input is optional. */
 "optional" = "opcjonalne";
 
+/* No comment provided by engineer. */
+"Paid Relay" = "Płatny przekaźnik";
+
 /* Button to pay a Lightning invoice. */
 "Pay" = "Zapłać";
 
 /* Navigation bar title for view to pay Lightning invoice. */
 "Pay the Lightning invoice" = "Zapłać fakturę Lightning";
 
+/* Alert for deleting the users account. */
+"Permanently Delete Account" = "Trwałe skasowanie konta";
+
 /* Dropdown option label for Lightning wallet, Phoenix. */
 "Phoenix" = "Phoenix";
+
+/* Prompt selection of DeepL subscription plan to perform machine translations on notes */
+"Plan" = "Plan";
 
 /* Button to post a note. */
 "Post" = "Napisz post";
@@ -390,6 +437,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Title of the secure field that holds the user's private key. */
 "Private Key" = "Klucz prywatny";
+
+/* Dropdown option for selecting Pro plan for DeepL translation service. */
+"Pro" = "Profesjonalny";
 
 /* Sidebar menu label for Profile view. */
 "Profile" = "Profil";
@@ -422,8 +472,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Text field for relay server. Used for testing purposes. */
 "Relay" = "Przekaźnik";
 
-/* Sidebar menu label for Relay servers view
-   Sidebar menu label for Relays view. */
+/* Sidebar menu label for Relays view. */
 "Relays" = "Przekaźniki";
 
 /* Description of what was done as a result of sending a report to relay servers. */
@@ -431,6 +480,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Button label to remove all participants from a note reply. */
 "Remove all" = "Usuń wszystkie";
+
+/* Accessibility label for reply button */
+"Reply" = "Odpowiedz";
 
 /* Label to indicate that the user is replying to themself. */
 "Reply to self" = "Odpowiedz sobie";
@@ -482,6 +534,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Context menu option to save an image. */
 "Save Image" = "Zapisz obraz";
 
+/* Text on QR code view to prompt viewer to scan the QR code on screen with their device camera. */
+"Scan the code" = "Skanuj kod";
+
 /* Navigation link to search hashtag. */
 "Search hashtag: #%@" = "Szukaj hasztag: #%@";
 
@@ -502,6 +557,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Prompt selection of LibreTranslate server to perform machine translations on notes */
 "Server" = "Serwer";
+
+/* Prompt selection of translation service provider. */
+"Service" = "Usługa";
 
 /* Navigation title for Settings view.
    Sidebar menu label for accessing the app settings */
@@ -526,14 +584,23 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Sidebar menu label to sign out of the account. */
 "Sign out" = "Wyloguj się";
 
+/* Label to display relay software. */
+"Software" = "Oprogramowanie";
+
 /* Dropdown option label for Lightning wallet, Strike. */
 "Strike" = "Strike";
+
+/* Label to display relay's supported NIPs. */
+"Supported NIPs" = "Wspierane NIP";
 
 /* Button to close out of alert that informs that the action to block a user was successful. */
 "Thanks!" = "Dzięki!";
 
 /* Button for user to report that the account is impersonating someone. */
 "They are impersonating someone" = "Podszywa się pod kogoś";
+
+/* No comment provided by engineer. */
+"This is a paid relay, you must pay for posts to be accepted." = "To jest płatny przekaźnik - musisz zapłacić, aby wysyłać posty.";
 
 /* Warning that the inputted account key is a public key and the result of what happens because of it. */
 "This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "To jest klucz publiczny, nie będziesz mógł pisać postów ani mieć żadnych interakcji. Jest używany tylko do odczytu z ich perspektywy.";
@@ -547,9 +614,11 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label to describe that a private key is the user's secret account key and what they should do with it. */
 "This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "To jest Twój klucz prywatny. Potrzebny jest aby mieć dostęp do Twojego konta. Nie udostępniaj go nikomu! Zapisz w menedżerze haseł i przechowuj bezpiecznie!";
 
-/* Navigation bar title for note thread.
-   Navigation bar title for threaded event detail view. */
+/* Navigation bar title for note thread. */
 "Thread" = "Wątek";
+
+/* No comment provided by engineer. */
+"To filter your %@ feed, please choose applicable relays from the list below:" = "Aby filtrować swój %@ kanał, wybierz stosowne przekaźniki z listy poniżej:";
 
 /* Button to translate note from different language. */
 "Translate Note" = "Tłumacz wpis";
@@ -557,11 +626,17 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button to indicate that the note has been translated from a different language. */
 "Translated from (lang)" = "Tłumaczenie z (lang)";
 
+/* Button to indicate that the note is in the process of being translated from a different language. */
+"Translating from (lang)..." = "Tłumaczę z (lang)...";
+
+/* Section title for selecting the translation service. */
+"Translations" = "Tłumaczenia";
+
+/* Text field prompt asking user to type the word DELETE to confirm that they want to proceed with deleting their account. The all caps lock DELETE word should not be translated. Everything else should. */
+"Type DELETE to delete" = "Napisz DELETE aby skasować";
+
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "Napisz swój post tutaj...";
-
-/* Non-breaking space character to fill in blank space next to event action button icons. */
-"u{00A0}" = "u{00A0}";
 
 /* Button to unfollow a user. */
 "Unfollow" = "Przestań obserwować";
@@ -587,6 +662,10 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label for Username section of user profile form.
    Label to prompt username entry. */
 "Username" = "Nazwa użytkownika";
+
+/* Label to display relay software version.
+   Section title for displaying the version number of the Damus app. */
+"Version" = "Wersja";
 
 /* Sidebar menu label for Wallet view. */
 "Wallet" = "Portfel";
@@ -615,6 +694,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Text of button that confirms to overwrite the existing mutelist. */
 "Yes, Overwrite" = "Tak, nadpisz";
 
+/* Button to proceed with posting a note even though it looks like they might be posting a private key. */
+"Yes, Post with Private Key" = "Tak, wyślij pomimo to";
+
 /* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
 "you" = "Ty";
 
@@ -623,6 +705,12 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Footer text to inform user what will happen when the report is submitted. */
 "Your report will be sent to the relays you are connected to" = "Twoje zgłoszenie zostanie wysłane do przekaźników, do których jesteś podłączony";
+
+/* Accessibility label for zap button */
+"Zap" = "Zap";
+
+/* Navigation bar title for the Zaps view. */
+"Zaps" = "Zapy";
 
 /* Dropdown option label for Lightning wallet, Zebedee. */
 "Zebedee" = "Zebedee";

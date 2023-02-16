@@ -152,16 +152,14 @@ func format_date(_ created_at: Int64) -> String {
     return dateFormatter.string(from: date)
 }
 
-
-
-func make_actionbar_model(ev: NostrEvent, damus: DamusState) -> ActionBarModel {
-    let likes = damus.likes.counts[ev.id]
-    let boosts = damus.boosts.counts[ev.id]
-    let zaps = damus.zaps.event_counts[ev.id]
-    let zap_total = damus.zaps.event_totals[ev.id]
-    let our_like = damus.likes.our_events[ev.id]
-    let our_boost = damus.boosts.our_events[ev.id]
-    let our_zap = damus.zaps.our_zaps[ev.id]
+func make_actionbar_model(ev: String, damus: DamusState) -> ActionBarModel {
+    let likes = damus.likes.counts[ev]
+    let boosts = damus.boosts.counts[ev]
+    let zaps = damus.zaps.event_counts[ev]
+    let zap_total = damus.zaps.event_totals[ev]
+    let our_like = damus.likes.our_events[ev]
+    let our_boost = damus.boosts.our_events[ev]
+    let our_zap = damus.zaps.our_zaps[ev]
 
     return ActionBarModel(likes: likes ?? 0,
                           boosts: boosts ?? 0,

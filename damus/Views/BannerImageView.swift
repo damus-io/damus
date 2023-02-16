@@ -33,15 +33,15 @@ struct InnerBannerImageView: View {
                     .processingQueue(.dispatch(.global(qos: .background)))
                     .serialize(by: imageModel.serializer)
                     .setProcessor(imageModel.processor)
+                    .cacheOriginalImage()
                     .configure { view in
-                        view.framePreloadCount = 1
+                        view.framePreloadCount = 3
                     }
                     .placeholder { _ in
                         Color(uiColor: .secondarySystemBackground)
                     }
                     .scaleFactor(UIScreen.main.scale)
                     .loadDiskFileSynchronously()
-                    .fade(duration: 0.1)
                     .onFailureImage(defaultImage)
                     .id(imageModel.refreshID)
             } else {

@@ -102,7 +102,7 @@ struct Profile: Codable {
     }
     
     var lnurl: String? {
-        guard let addr = lud06 ?? lud16 else {
+        guard let addr = lud16 ?? lud06 else {
             return nil;
         }
         

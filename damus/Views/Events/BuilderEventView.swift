@@ -53,8 +53,7 @@ struct BuilderEventView: View {
             NostrFilter(ids: [self.event_id], limit: 1),
             NostrFilter(
                 kinds: [NostrKind.zap.rawValue],
-                referenced_ids: [self.event_id],
-                limit: 500
+                referenced_ids: [self.event_id]
             )
         ])
     }

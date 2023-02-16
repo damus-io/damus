@@ -127,14 +127,6 @@ struct ImageView: View {
     @State private var selectedIndex = 0
     @State var showMenu = true
     
-    var safeAreaInsets: UIEdgeInsets? {
-        return UIApplication
-                .shared
-                .connectedScenes
-                .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
-                .first { $0.isKeyWindow }?.safeAreaInsets
-    }
-    
     var navBarView: some View {
         VStack {
             HStack {
@@ -180,8 +172,8 @@ struct ImageView: View {
                     ZoomableScrollView {
                         ImageContainerView(url: urls[index])
                             .aspectRatio(contentMode: .fit)
-                            .padding(.top, safeAreaInsets?.top)
-                            .padding(.bottom, safeAreaInsets?.bottom)
+                            .padding(.top, Theme.safeAreaInsets?.top)
+                            .padding(.bottom, Theme.safeAreaInsets?.bottom)
                     }
                     .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
                         presentationMode.wrappedValue.dismiss()
@@ -210,7 +202,7 @@ struct ImageView: View {
                     }
                 }
                 .animation(.easeInOut, value: showMenu)
-                .padding(.bottom, safeAreaInsets?.bottom)
+                .padding(.bottom, Theme.safeAreaInsets?.bottom)
             )
         }
     }
@@ -231,10 +223,10 @@ struct ImageCarousel: View {
                         KFAnimatedImage(url)
                             .callbackQueue(.dispatch(.global(qos: .background)))
                             .processingQueue(.dispatch(.global(qos: .background)))
+                            .cancelOnDisappear(true)
+                            .backgroundDecode()
                             .cacheOriginalImage()
-                            .loadDiskFileSynchronously()
                             .scaleFactor(UIScreen.main.scale)
-                            .fade(duration: 0.1)
                             .configure { view in
                                 view.framePreloadCount = 3
                             }

@@ -13,7 +13,7 @@ struct ReplyDescription: View {
     let profiles: Profiles
     
     var body: some View {
-        Text("\(reply_desc(profiles: profiles, event: event))")
+        Text(String("\(reply_desc(profiles: profiles, event: event))"))
             .font(.footnote)
             .foregroundColor(.gray)
             .frame(maxWidth: .infinity, alignment: .leading)

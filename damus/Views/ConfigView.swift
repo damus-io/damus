@@ -8,6 +8,7 @@ import AVFoundation
 import Kingfisher
 import SwiftUI
 import LocalAuthentication
+import Combine
 
 struct ConfigView: View {
     let state: DamusState
@@ -21,6 +22,7 @@ struct ConfigView: View {
     @State var privkey_copied: Bool = false
     @State var pubkey_copied: Bool = false
     @State var delete_text: String = ""
+    @State var default_zap_amount: String
     
     @ObservedObject var settings: UserSettingsStore
     
@@ -28,6 +30,8 @@ struct ConfigView: View {
     
     init(state: DamusState) {
         self.state = state
+        let zap_amt = get_default_zap_amount(pubkey: state.pubkey).map({ "\($0)" }) ?? "1000"
+        _default_zap_amount = State(initialValue: zap_amt)
         _privkey = State(initialValue: self.state.keypair.privkey_bech32 ?? "")
         _settings = ObservedObject(initialValue: state.settings)
     }
@@ -124,6 +128,29 @@ struct ConfigView: View {
                         }
                     }
                 }
+                
+                
+                Section(NSLocalizedString("Default Zap Amount in sats", comment: "Section title for zap configuration")) {
+                    TextField("1000", text: $default_zap_amount)
+                        .keyboardType(.numberPad)
+                        .onReceive(Just(default_zap_amount)) { newValue in
+                            let filtered = newValue.filter { Set("0123456789").contains($0) }
+
+                            if filtered != newValue {
+                                default_zap_amount = filtered
+                            }
+
+                            if filtered == "" {
+                                set_default_zap_amount(pubkey: state.pubkey, amount: 1000)
+                                return
+                            }
+
+                            guard let amt = Int(filtered) else {
+                                return
+                            }
+                            set_default_zap_amount(pubkey: state.pubkey, amount: amt)
+                        }
+                }
 
                 Section(NSLocalizedString("Translations", comment: "Section title for selecting the translation service.")) {
                     Picker(NSLocalizedString("Service", comment: "Prompt selection of translation service provider."), selection: $settings.translation_service) {
@@ -192,11 +219,17 @@ struct ConfigView: View {
                         }
                     }
                 }
+
+                let bundleShortVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String
+                let bundleVersion = Bundle.main.infoDictionary?["CFBundleVersion"] as! String
+                Section(NSLocalizedString("Version", comment: "Section title for displaying the version number of the Damus app.")) {
+                    Text(String("\(bundleShortVersion) (\(bundleVersion))"))
+                }
             }
         }
         .navigationTitle(NSLocalizedString("Settings", comment: "Navigation title for Settings view."))
         .navigationBarTitleDisplayMode(.large)
-        .alert(NSLocalizedString("Delete Account", comment: "Alert for deleting the users account."), isPresented: $confirm_delete_account) {
+        .alert(NSLocalizedString("Permanently Delete Account", comment: "Alert for deleting the users account."), isPresented: $confirm_delete_account) {
             TextField(NSLocalizedString("Type DELETE to delete", comment: "Text field prompt asking user to type the word DELETE to confirm that they want to proceed with deleting their account. The all caps lock DELETE word should not be translated. Everything else should."), text: $delete_text)
             Button(NSLocalizedString("Cancel", comment: "Cancel deleting the user."), role: .cancel) {
                 confirm_delete_account = false

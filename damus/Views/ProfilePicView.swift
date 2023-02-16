@@ -70,19 +70,20 @@ struct InnerProfilePicView: View {
             KFAnimatedImage(imageModel.url)
                 .callbackQueue(.dispatch(.global(qos: .background)))
                 .processingQueue(.dispatch(.global(qos: .background)))
+                .cancelOnDisappear(true)
+                .backgroundDecode()
                 .serialize(by: imageModel.serializer)
                 .setProcessor(imageModel.processor)
                 .cacheOriginalImage()
+                .scaleFactor(UIScreen.main.scale)
                 .configure { view in
-                    view.framePreloadCount = 1
+                    view.framePreloadCount = 3
                 }
                 .placeholder { _ in
                     Placeholder
                 }
-                .scaleFactor(UIScreen.main.scale)
-                .loadDiskFileSynchronously()
-                .fade(duration: 0.1)
-                .onFailure { _ in
+                .onFailure { error in
+                    if error.isTaskCancelled { return }
                     imageModel.downloadFailed()
                 }
                 .id(imageModel.refreshID)

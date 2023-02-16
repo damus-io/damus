@@ -16,15 +16,22 @@ func pk_setting_key(_ pubkey: String, key: String) -> String {
     return "\(pubkey)_\(key)"
 }
 
-let tip_amount_key = "default_tip_amount"
-func set_default_tip_amount(pubkey: String, amount: Int64) {
-    let key = pk_setting_key(pubkey, key: tip_amount_key)
+func default_zap_setting_key(pubkey: String) -> String {
+    return pk_setting_key(pubkey, key: "default_zap_amount")
+}
+
+func set_default_zap_amount(pubkey: String, amount: Int) {
+    let key = default_zap_setting_key(pubkey: pubkey)
     UserDefaults.standard.setValue(amount, forKey: key)
 }
 
-func get_default_tip_amount(pubkey: String) -> Int64 {
-    let key = "\(pubkey)_\(tip_amount_key)"
-    return UserDefaults.standard.object(forKey: key) as? Int64 ?? 1000000
+func get_default_zap_amount(pubkey: String) -> Int? {
+    let key = default_zap_setting_key(pubkey: pubkey)
+    let amt = UserDefaults.standard.integer(forKey: key)
+    if amt == 0 {
+        return nil
+    }
+    return amt
 }
 
 

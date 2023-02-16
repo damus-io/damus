@@ -31,6 +31,17 @@ class ActionBarModel: ObservableObject {
         self.our_zap = our_zap
     }
     
+    func update(damus: DamusState, evid: String) {
+        self.likes = damus.likes.counts[evid] ?? 0
+        self.boosts = damus.boosts.counts[evid] ?? 0
+        self.zaps = damus.zaps.event_counts[evid] ?? 0
+        self.zap_total = damus.zaps.event_totals[evid] ?? 0
+        self.our_like = damus.likes.our_events[evid]
+        self.our_boost = damus.boosts.our_events[evid]
+        self.our_zap = damus.zaps.our_zaps[evid]?.first
+        self.objectWillChange.send()
+    }
+    
     var is_empty: Bool {
         return likes == 0 && boosts == 0 && zaps == 0
     }

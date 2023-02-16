@@ -12,7 +12,7 @@ var BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
     "wss://eden.nostr.land",
     "wss://relay.snort.social",
-    "wss://nostr.bitcoiner.social",
+    "wss://offchain.pub",
     "wss://nos.lol",
     "wss://relay.current.fyi",
     "wss://brb.io",
@@ -27,12 +27,16 @@ enum Sheets: Identifiable {
     case post
     case report(ReportTarget)
     case reply(NostrEvent)
+    case event(NostrEvent)
+    case filter
 
     var id: String {
         switch self {
         case .report: return "report"
         case .post: return "post"
         case .reply(let ev): return "reply-" + ev.id
+        case .event(let ev): return "event-" + ev.id
+        case .filter: return "filter"
         }
     }
 }
@@ -141,6 +145,7 @@ struct ContentView: View {
         profile_open = false
         thread_open = false
         search_open = false
+        isSideBarOpened = false
     }
 
     var timelineNavItem: some View {
@@ -282,7 +287,19 @@ struct ContentView: View {
                                                         .foregroundColor(.gray)
                                                 }
                                             }
-
+                                            
+                                            // maybe expand this to other timelines in the future
+                                            if selected_timeline == .search {
+                                                Button(action: {
+                                                    //isFilterVisible.toggle()
+                                                    self.active_sheet = .filter
+                                                }) {
+                                                    // checklist, checklist.checked, lisdt.bullet, list.bullet.circle, line.3.horizontal.decrease...,  line.3.horizontail.decrease
+                                                    Label("Filter", systemImage: "line.3.horizontal.decrease")
+                                                        .foregroundColor(.gray)
+                                                        //.contentShape(Rectangle())
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -311,6 +328,17 @@ struct ContentView: View {
                 PostView(replying_to: nil, references: [], damus_state: damus_state!)
             case .reply(let event):
                 ReplyView(replying_to: event, damus: damus_state!)
+            case .event(let event):
+                EventDetailView()
+            case .filter:
+                let timeline = selected_timeline ?? .home
+                if #available(iOS 16.0, *) {
+                    RelayFilterView(state: damus_state!, timeline: timeline)
+                        .presentationDetents([.height(550)])
+                        .presentationDragIndicator(.visible)
+                } else {
+                    RelayFilterView(state: damus_state!, timeline: timeline)
+                }
             }
         }
         .onOpenURL { url in
@@ -429,6 +457,8 @@ struct ContentView: View {
             let post_res = obj.object as! NostrPostResult
             switch post_res {
             case .post(let post):
+                //let post = tup.0
+                //let to_relays = tup.1
                 print("post \(post.content)")
                 let new_ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
                 self.damus_state?.pool.send(.event(new_ev))
@@ -559,24 +589,33 @@ struct ContentView: View {
 
     func connect() {
         let pool = RelayPool()
+        let metadatas = RelayMetadatas()
+        let relay_filters = RelayFilters(our_pubkey: pubkey)
         
+        let new_relay_filters = load_relay_filters(pubkey) == nil
         for relay in BOOTSTRAP_RELAYS {
-            add_relay(pool, relay)
+            if let url = URL(string: relay) {
+                add_new_relay(relay_filters: relay_filters, metadatas: metadatas, pool: pool, url: url, info: .rw, new_relay_filters: new_relay_filters)
+            }
         }
         
         pool.register_handler(sub_id: sub_id, handler: home.handle_event)
 
-        self.damus_state = DamusState(pool: pool, keypair: keypair,
-                                likes: EventCounter(our_pubkey: pubkey),
-                                boosts: EventCounter(our_pubkey: pubkey),
-                                contacts: Contacts(our_pubkey: pubkey),
-                                tips: TipCounter(our_pubkey: pubkey),
-                                profiles: Profiles(),
-                                dms: home.dms,
-                                previews: PreviewCache(),
-                                zaps: Zaps(our_pubkey: pubkey),
-                                lnurls: LNUrls(),
-                                settings: UserSettingsStore()
+        self.damus_state = DamusState(pool: pool,
+                                      keypair: keypair,
+                                      likes: EventCounter(our_pubkey: pubkey),
+                                      boosts: EventCounter(our_pubkey: pubkey),
+                                      contacts: Contacts(our_pubkey: pubkey),
+                                      tips: TipCounter(our_pubkey: pubkey),
+                                      profiles: Profiles(),
+                                      dms: home.dms,
+                                      previews: PreviewCache(),
+                                      zaps: Zaps(our_pubkey: pubkey),
+                                      lnurls: LNUrls(),
+                                      settings: UserSettingsStore(),
+                                      relay_filters: relay_filters,
+                                      relay_metadata: metadatas,
+                                      drafts: Drafts()
         )
         home.damus_state = self.damus_state!
         

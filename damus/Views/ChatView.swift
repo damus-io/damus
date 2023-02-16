@@ -63,7 +63,7 @@ struct ChatView: View {
     }
     
     var ReplyDescription: some View {
-        Text("\(reply_desc(profiles: damus_state.profiles, event: event))")
+        Text(String("\(reply_desc(profiles: damus_state.profiles, event: event))"))
             .font(.footnote)
             .foregroundColor(.gray)
             .frame(alignment: .leading)
@@ -89,7 +89,7 @@ struct ChatView: View {
                             ProfileName(pubkey: event.pubkey, profile: damus_state.profiles.lookup(id: event.pubkey), damus: damus_state, show_friend_confirmed: true)
                                 .foregroundColor(colorScheme == .dark ?  id_to_color(event.pubkey) : Color.black)
                                 //.shadow(color: Color.black, radius: 2)
-                            Text("\(format_relative_time(event.created_at))")
+                            Text(String("\(format_relative_time(event.created_at))"))
                                     .foregroundColor(.gray)
                         }
                     }
@@ -116,7 +116,7 @@ struct ChatView: View {
                                     size: .normal)
 
                     if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
-                        let bar = make_actionbar_model(ev: event, damus: damus_state)
+                        let bar = make_actionbar_model(ev: event.id, damus: damus_state)
                         EventActionBar(damus_state: damus_state, event: event, bar: bar)
                     }
 
