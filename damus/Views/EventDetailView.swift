@@ -10,7 +10,7 @@ import SwiftUI
 
 struct EventDetailView: View {
     var body: some View {
-        Text(String("EventDetailView"))
+        Text(verbatim: "EventDetailView")
     }
 }
 

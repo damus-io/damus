@@ -318,7 +318,7 @@ struct ProfileView: View {
                     .foregroundColor(.gray)
             } else {
                 let followerCount = followers.count!
-                Text("\(Text(String("\(followerCount)")).font(.subheadline.weight(.medium))) \(Text(String(format: NSLocalizedString("followers_count", comment: "Part of a larger sentence to describe how many people are following a user."), followerCount)).font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
+                Text("\(Text(verbatim: "\(followerCount)").font(.subheadline.weight(.medium))) \(Text(String(format: NSLocalizedString("followers_count", comment: "Part of a larger sentence to describe how many people are following a user."), followerCount)).font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
             }
         }
     }
@@ -344,7 +344,7 @@ struct ProfileView: View {
                     let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
                     NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model, whos: profile.pubkey)) {
                         HStack {
-                            Text("\(Text("\(profile.following)", comment: "Number of profiles a user is following.").font(.subheadline.weight(.medium))) \(Text("Following", comment: "Part of a larger sentence to describe how many profiles a user is following.").font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
+                            Text("\(Text(verbatim: "\(profile.following)").font(.subheadline.weight(.medium))) \(Text("Following", comment: "Part of a larger sentence to describe how many profiles a user is following.").font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
                         }
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -367,7 +367,7 @@ struct ProfileView: View {
                 
                 if let relays = profile.relays {
                     // Only open relay config view if the user is logged in with private key and they are looking at their own profile.
-                    let relay_text = Text("\(Text("\(relays.keys.count)", comment: "Number of relay servers a user is connected.").font(.subheadline.weight(.medium))) \(Text(String(format: NSLocalizedString("relays_count", comment: "Part of a larger sentence to describe how many relay servers a user is connected."), relays.keys.count)).font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
+                    let relay_text = Text("\(Text(verbatim: "\(relays.keys.count)").font(.subheadline.weight(.medium))) \(Text(String(format: NSLocalizedString("relays_count", comment: "Part of a larger sentence to describe how many relay servers a user is connected."), relays.keys.count)).font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
                     if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
                         NavigationLink(destination: RelayConfigView(state: damus_state)) {
                             relay_text

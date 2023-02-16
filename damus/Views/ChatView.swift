@@ -63,7 +63,7 @@ struct ChatView: View {
     }
     
     var ReplyDescription: some View {
-        Text(String("\(reply_desc(profiles: damus_state.profiles, event: event))"))
+        Text(verbatim: "\(reply_desc(profiles: damus_state.profiles, event: event))")
             .font(.footnote)
             .foregroundColor(.gray)
             .frame(alignment: .leading)
@@ -89,7 +89,7 @@ struct ChatView: View {
                             ProfileName(pubkey: event.pubkey, profile: damus_state.profiles.lookup(id: event.pubkey), damus: damus_state, show_friend_confirmed: true)
                                 .foregroundColor(colorScheme == .dark ?  id_to_color(event.pubkey) : Color.black)
                                 //.shadow(color: Color.black, radius: 2)
-                            Text(String("\(format_relative_time(event.created_at))"))
+                            Text(verbatim: "\(format_relative_time(event.created_at))")
                                     .foregroundColor(.gray)
                         }
                     }

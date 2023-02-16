@@ -61,7 +61,7 @@ struct EventActionBar: View {
                     }
                 }
                 .accessibilityLabel(NSLocalizedString("Boosts", comment: "Accessibility label for boosts button"))
-                Text(String("\(bar.boosts > 0 ? "\(bar.boosts)" : "")"))
+                Text(verbatim: "\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
                     .offset(x: 18)
                     .font(.footnote.weight(.medium))
                     .foregroundColor(bar.boosted ? Color.green : Color.gray)
@@ -76,7 +76,7 @@ struct EventActionBar: View {
                         send_like()
                     }
                 }
-                Text(String("\(bar.likes > 0 ? "\(bar.likes)" : "")"))
+                Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
                     .offset(x: 22)
                     .font(.footnote.weight(.medium))
                     .foregroundColor(bar.liked ? Color.accentColor : Color.gray)
