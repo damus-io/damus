@@ -473,8 +473,9 @@ struct KeyView: View {
                     Label {
                         Text("Public key", comment: "Label indicating that the text is a user's public account key.")
                     } icon: {
-                        Image("ic-copy")
+                        Image(systemName: "square.on.square.dashed")
                             .contentShape(Rectangle())
+                            .foregroundColor(.gray)
                             .frame(width: 20, height: 20)
                     }
                     .labelStyle(IconOnlyLabelStyle())
