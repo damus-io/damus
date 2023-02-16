@@ -439,6 +439,7 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
       </trans-unit>
       <trans-unit id="Default Zap Amount in sats" xml:space="preserve">
         <source>Default Zap Amount in sats</source>
+        <target>默认Zap金额（sat）</target>
         
         <note>Section title for zap configuration</note>
       </trans-unit>
