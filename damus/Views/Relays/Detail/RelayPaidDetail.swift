@@ -19,7 +19,7 @@ struct RelayPaidDetail: View {
                 Button(action: {
                     openURL(url)
                 }, label: {
-                    Text(String("\(url)"))
+                    Text(verbatim: "\(url)")
                 })
             }
         }

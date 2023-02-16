@@ -131,7 +131,7 @@ struct ConfigView: View {
                 
                 
                 Section(NSLocalizedString("Default Zap Amount in sats", comment: "Section title for zap configuration")) {
-                    TextField("1000", text: $default_zap_amount)
+                    TextField(String("1000"), text: $default_zap_amount)
                         .keyboardType(.numberPad)
                         .onReceive(Just(default_zap_amount)) { newValue in
                             let filtered = newValue.filter { Set("0123456789").contains($0) }
@@ -223,7 +223,7 @@ struct ConfigView: View {
                 let bundleShortVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String
                 let bundleVersion = Bundle.main.infoDictionary?["CFBundleVersion"] as! String
                 Section(NSLocalizedString("Version", comment: "Section title for displaying the version number of the Damus app.")) {
-                    Text(String("\(bundleShortVersion) (\(bundleVersion))"))
+                    Text(verbatim: "\(bundleShortVersion) (\(bundleVersion))")
                 }
             }
         }

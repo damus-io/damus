@@ -35,7 +35,7 @@ struct SelectedEventView: View {
                     BuilderEventView(damus: damus, event_id: mention.ref.id)
                 }
                 
-                Text(String("\(format_date(event.created_at))"))
+                Text(verbatim: "\(format_date(event.created_at))")
                     .padding(.top, 10)
                     .font(.footnote)
                     .foregroundColor(.gray)

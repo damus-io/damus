@@ -14,7 +14,7 @@ struct PubkeyView: View {
     var body: some View {
         let color: Color = id_to_color(pubkey)
         ZStack {
-            Text(String("\(abbrev_pubkey(pubkey))"))
+            Text(verbatim: "\(abbrev_pubkey(pubkey))")
                 .foregroundColor(color)
         }
     }
