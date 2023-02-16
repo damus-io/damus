@@ -483,13 +483,13 @@ struct KeyView: View {
                 }
             } else {
                 HStack {
-                    Image("ic-tick")
+                    Image(systemName: "checkmark.circle")
                         .frame(width: 20, height: 20)
                     Text(NSLocalizedString("Copied", comment: "Label indicating that a user's key was copied."))
                         .font(.footnote)
-                        .foregroundColor(Color("DamusGreen"))
                         .layoutPriority(1)
                 }
+                .foregroundColor(Color("DamusGreen"))
             }
         }
     }
