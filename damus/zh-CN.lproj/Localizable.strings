@@ -11,7 +11,7 @@
 "(who) following" = "(who)关注";
 
 /* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
-Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
+Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'. */
 "%@ %@" = "%@ %@";
 
 /* Alert message that informs a user was blocked. */
@@ -203,6 +203,9 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
 
 /* Button to pay a Lightning invoice with the user's default Lightning wallet. */
 "Default Wallet" = "默认钱包";
+
+/* Section title for zap configuration */
+"Default Zap Amount in sats" = "默认Zap金额（sat）";
 
 /* Button for deleting the users account.
    Button to delete a relay server that the user connects to.

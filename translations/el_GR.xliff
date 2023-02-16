@@ -439,6 +439,7 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
       </trans-unit>
       <trans-unit id="Default Zap Amount in sats" xml:space="preserve">
         <source>Default Zap Amount in sats</source>
+        <target>Προεπιλεγμένο ποσό Zap σε sats</target>
         
         <note>Section title for zap configuration</note>
       </trans-unit>
@@ -1198,7 +1199,7 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="To filter your %@ feed, please choose applicable relays from the list below:" xml:space="preserve">
         <source>To filter your %@ feed, please choose applicable relays from the list below:</source>
-        <target>Για να φιλτράρετε την ροή μηνυμάτων από ανεπιθύμητα στην κεντρική τροφοδοσία του %@, παρακαλώ επιλέξτε σχετικούς διακομιστές relays απο την παρακάτω λίστα:</target>
+        <target>Για να φιλτράρετε την ροή μηνυμάτων στην κεντρική ροή σας %@, παρακαλώ επιλέξτε σχετικούς διακομιστές relays απο την παρακάτω λίστα:</target>
         
         <note>No comment provided by engineer.</note>
       </trans-unit>
