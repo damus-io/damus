@@ -498,7 +498,7 @@ class HomeModel: ObservableObject {
         
         if !should_debounce_dms {
             self.incoming_dms.append(ev)
-            if let notifs = handle_incoming_dms(contacts: self.damus_state.contacts, prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
+            if let notifs = handle_incoming_dms(prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
                 self.new_events = notifs
             }
             self.incoming_dms = []
@@ -508,7 +508,7 @@ class HomeModel: ObservableObject {
         incoming_dms.append(ev)
         
         dm_debouncer.debounce {
-            if let notifs = handle_incoming_dms(contacts: self.damus_state.contacts, prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
+            if let notifs = handle_incoming_dms(prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
                 self.new_events = notifs
             }
             self.incoming_dms = []
@@ -792,6 +792,7 @@ func fetch_relay_metadata(relay_id: String) async throws -> RelayMetadata? {
 func process_relay_metadata() {
 }
 
+@discardableResult
 func handle_incoming_dm(ev: NostrEvent, our_pubkey: String, dms: DirectMessagesModel, prev_events: NewEventsBits) -> (Bool, NewEventsBits?) {
     var inserted = false
     var found = false
@@ -824,6 +825,7 @@ func handle_incoming_dm(ev: NostrEvent, our_pubkey: String, dms: DirectMessagesM
     if !found {
         let model = DirectMessageModel(events: [ev], our_pubkey: our_pubkey)
         dms.dms.append((the_pk, model))
+        inserted = true
     }
     
     var new_bits: NewEventsBits? = nil
@@ -834,7 +836,8 @@ func handle_incoming_dm(ev: NostrEvent, our_pubkey: String, dms: DirectMessagesM
     return (inserted, new_bits)
 }
 
-func handle_incoming_dms(contacts: Contacts, prev_events: NewEventsBits, dms: DirectMessagesModel, our_pubkey: String, evs: [NostrEvent]) -> NewEventsBits? {
+@discardableResult
+func handle_incoming_dms(prev_events: NewEventsBits, dms: DirectMessagesModel, our_pubkey: String, evs: [NostrEvent]) -> NewEventsBits? {
     var inserted = false
 
     var new_events: NewEventsBits? = nil
