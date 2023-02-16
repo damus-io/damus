@@ -18,7 +18,7 @@ struct ProfileNameView: View {
     var body: some View {
         Group {
             if let real_name = profile?.display_name {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 0) {
                     Text(real_name)
                         .font(.title3.weight(.bold))
                     HStack(alignment: .center, spacing: spacing) {
@@ -30,6 +30,7 @@ struct ProfileNameView: View {
                             FollowsYou()
                         }
                     }
+                    Spacer()
                     KeyView(pubkey: pubkey)
                         .pubkey_context_menu(bech32_pubkey: pubkey)
                 }

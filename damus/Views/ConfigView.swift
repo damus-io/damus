@@ -8,6 +8,7 @@ import AVFoundation
 import Kingfisher
 import SwiftUI
 import LocalAuthentication
+import Combine
 
 struct ConfigView: View {
     let state: DamusState
@@ -131,6 +132,24 @@ struct ConfigView: View {
                 
                 Section(NSLocalizedString("Default Zap Amount in sats", comment: "Section title for zap configuration")) {
                     TextField("1000", text: $default_zap_amount)
+                        .keyboardType(.numberPad)
+                        .onReceive(Just(default_zap_amount)) { newValue in
+                            let filtered = newValue.filter { Set("0123456789").contains($0) }
+
+                            if filtered != newValue {
+                                default_zap_amount = filtered
+                            }
+
+                            if filtered == "" {
+                                set_default_zap_amount(pubkey: state.pubkey, amount: 1000)
+                                return
+                            }
+
+                            guard let amt = Int(filtered) else {
+                                return
+                            }
+                            set_default_zap_amount(pubkey: state.pubkey, amount: amt)
+                        }
                 }
 
                 Section(NSLocalizedString("Translations", comment: "Section title for selecting the translation service.")) {
@@ -204,15 +223,9 @@ struct ConfigView: View {
                 let bundleShortVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String
                 let bundleVersion = Bundle.main.infoDictionary?["CFBundleVersion"] as! String
                 Section(NSLocalizedString("Version", comment: "Section title for displaying the version number of the Damus app.")) {
-                    Text("\(bundleShortVersion) (\(bundleVersion))", comment: "Text indicating which version of the Damus app is running. Should typically not need to be translated.")
+                    Text(String("\(bundleShortVersion) (\(bundleVersion))"))
                 }
             }
-        }
-        .onChange(of: default_zap_amount) { val in
-            guard let amt = Int(val) else {
-                return
-            }
-            set_default_zap_amount(pubkey: state.pubkey, amount: amt)
         }
         .navigationTitle(NSLocalizedString("Settings", comment: "Navigation title for Settings view."))
         .navigationBarTitleDisplayMode(.large)

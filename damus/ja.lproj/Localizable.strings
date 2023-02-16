@@ -1,6 +1,3 @@
-/* Blank space to separate profile picture from profile editor form. */
-"   " = "61b6edf1108e6f396680a33b02486a70_tr";
-
 /* Description of how the nip05 identifier would be used for verification. */
 "'%@' at '%@' will be used for verification" = "'%@' at '%@' は認証に使用されています";
 
@@ -12,12 +9,6 @@
 
 /* Navigation bar title for view that shows who a user is following. */
 "(who) following" = "(who) がフォロー中";
-
-/* Prefix character to username. */
-"@" = "@";
-
-/* Abbreviated version of a nostr public key. */
-"%@" = "%@";
 
 /* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
 Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
@@ -35,15 +26,8 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. 友達の投稿にチップを送ろう。インターネットのネイティブ通貨:ビットコイン⚡️で。";
 
-/* Number of reposts.
-Number of relay servers a user is connected. */
-"%lld" = "%lld";
-
 /* Fraction of how many of the user's relay servers that are operational. */
 "%lld/%lld" = "%lld/%lld";
-
-/* Placeholder for event mention. */
-"< e >" = "< e >";
 
 /* Text indicating the zap amount. i.e. number of satoshis that were tipped to a user */
 "⚡️ %@" = "⚡️ %@";
@@ -74,7 +58,7 @@ Number of relay servers a user is connected. */
 "Add all" = "全て追加";
 
 /* Label for section for adding a relay server. */
-"Add Relay" = "Relayを追加";
+"Add Relay" = "リレーを追加";
 
 /* Label to display relay contact user. */
 "Admin" = "管理者";
@@ -269,6 +253,9 @@ Number of relay servers a user is connected. */
 /* Label indicating that the below text is the EULA, an acronym for End User License Agreement. */
 "EULA" = "EULA";
 
+/* No comment provided by engineer. */
+"Filter" = "フィルター";
+
 /* Button to follow a user. */
 "Follow" = "フォローする";
 
@@ -415,11 +402,17 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label indicating that a form input is optional. */
 "optional" = "任意";
 
+/* No comment provided by engineer. */
+"Paid Relay" = "有料リレー";
+
 /* Button to pay a Lightning invoice. */
 "Pay" = "支払う";
 
 /* Navigation bar title for view to pay Lightning invoice. */
 "Pay the Lightning invoice" = "Lightning invoiceを支払う";
+
+/* Alert for deleting the users account. */
+"Permanently Delete Account" = "アカウントの永久的な削除";
 
 /* Dropdown option label for Lightning wallet, Phoenix. */
 "Phoenix" = "Phoenix";
@@ -470,7 +463,7 @@ Part of a larger sentence to describe how many profiles a user is following. */
 "Reactions" = "リアクション";
 
 /* Section title for recommend relay servers that could be added as part of configuration */
-"Recommended Relays" = "推奨のリレーサーバー";
+"Recommended Relays" = "推奨のリレー";
 
 /* Button to reject the end user license agreement, which disallows the user from being let into the app. */
 "Reject" = "却下";
@@ -606,6 +599,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button for user to report that the account is impersonating someone. */
 "They are impersonating someone" = "誰かになりすましています";
 
+/* No comment provided by engineer. */
+"This is a paid relay, you must pay for posts to be accepted." = "このリレーは有料です。投稿するには利用料の支払いが必要です。";
+
 /* Warning that the inputted account key is a public key and the result of what happens because of it. */
 "This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "これは公開鍵で、投稿などの操作は一切できません。入力された公開鍵の視点で投稿を見るために使用します。";
 
@@ -620,6 +616,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Navigation bar title for note thread. */
 "Thread" = "スレッド";
+
+/* No comment provided by engineer. */
+"To filter your %@ feed, please choose applicable relays from the list below:" = "%@ フィードをフィルタリングするには、以下のリストから該当するリレーを選択してください。";
 
 /* Button to translate note from different language. */
 "Translate Note" = "翻訳する";
@@ -638,9 +637,6 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "投稿をここに入力...";
-
-/* Non-breaking space character to fill in blank space next to event action button icons. */
-"u{00A0}" = "u{00A0}";
 
 /* Button to unfollow a user. */
 "Unfollow" = "フォロー解除";
@@ -667,7 +663,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Label to prompt username entry. */
 "Username" = "ユーザー名";
 
-/* Label to display relay software version. */
+/* Label to display relay software version.
+   Section title for displaying the version number of the Damus app. */
 "Version" = "バージョン";
 
 /* Sidebar menu label for Wallet view. */
@@ -711,6 +708,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Accessibility label for zap button */
 "Zap" = "Zap";
+
+/* Navigation bar title for the Zaps view. */
+"Zaps" = "Zaps";
 
 /* Dropdown option label for Lightning wallet, Zebedee. */
 "Zebedee" = "Zebedee";

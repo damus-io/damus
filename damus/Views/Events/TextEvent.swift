@@ -33,7 +33,7 @@ struct TextEvent: View {
                 HStack(alignment: .center) {
                     EventProfileName(pubkey: pubkey, profile: profile, damus: damus, show_friend_confirmed: true, size: .normal)
                     
-                    Text("\(format_relative_time(event.created_at))")
+                    Text(String("\(format_relative_time(event.created_at))"))
                         .foregroundColor(.gray)
                     
                     Spacer()

@@ -1,3 +1,21 @@
+
+## [1.1.0-2] - 2023-02-14
+
+### Added
+
+- Save drafts to posts, replies and DMs (Terry Yiu)
+
+### Fixed
+
+- Ensure stats get updated in realtime on action bars (William Casarin)
+- Fix reposts not getting counted properly (William Casarin)
+- Fix a bug where zaps on other people's posts weren't showing (William Casarin)
+- Fix punctuation getting included in some urls (Gert Goet)
+- Improve language detection (Terry Yiu)
+- Fix some animated image crashes (William Casarin)
+
+
+[1.1.0-2]: https://github.com/damus-io/damus/releases/tag/v1.1.0-2
 ## [1.0.0-15] - 2023-02-10
 
 ### Added
@@ -558,4 +576,5 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
+
 

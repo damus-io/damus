@@ -89,9 +89,20 @@ class RelayConnection: WebSocketDelegate {
             self.isConnected = false
 
         case .text(let txt):
-            if let ev = decode_nostr_event(txt: txt) {
-                handleEvent(.nostr_event(ev))
-                return
+            if txt.count > 2000 {
+                DispatchQueue.global(qos: .default).async {
+                    if let ev = decode_nostr_event(txt: txt) {
+                        DispatchQueue.main.async {
+                            self.handleEvent(.nostr_event(ev))
+                        }
+                        return
+                    }
+                }
+            } else {
+                if let ev = decode_nostr_event(txt: txt) {
+                    handleEvent(.nostr_event(ev))
+                    return
+                }
             }
 
             print("decode failed for \(txt)")

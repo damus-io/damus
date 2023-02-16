@@ -1,6 +1,3 @@
-/* Blank space to separate profile picture from profile editor form. */
-"   " = "61b6edf1108e6f396680a33b02486a70_tr";
-
 /* Description of how the nip05 identifier would be used for verification. */
 "'%@' at '%@' will be used for verification" = "'%@' adresindeki '%@' doğrulama için kullanılacaktır";
 
@@ -9,12 +6,6 @@
 
 /* Navigation bar title for view that shows who a user is following. */
 "(who) following" = "(who)'nin Takip Ettikleri";
-
-/* Prefix character to username. */
-"@" = "@";
-
-/* Abbreviated version of a nostr public key. */
-"%@" = "%@";
 
 /* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
 Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
@@ -29,15 +20,8 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Arkadaşlarınızın gönderilerine bahşiş verin ve internetin yerel para birimi olan Bitcoin⚡️ ile sats biriktirin.";
 
-/* Number of reposts.
-Number of relay servers a user is connected. */
-"%lld" = "%lld";
-
 /* Fraction of how many of the user's relay servers that are operational. */
 "%lld/%lld" = "%lld/%lld";
-
-/* Placeholder for event mention. */
-"< e >" = "< e >";
 
 /* Text indicating the zap amount. i.e. number of satoshis that were tipped to a user */
 "⚡️ %@" = "⚡️ %@";
@@ -425,9 +409,6 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "Gönderinizi buraya yazın...";
-
-/* Non-breaking space character to fill in blank space next to event action button icons. */
-"u{00A0}" = "u{00A0}";
 
 /* Button to unfollow a user. */
 "Unfollow" = "Takipten Çık";

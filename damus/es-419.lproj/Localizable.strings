@@ -1,6 +1,3 @@
-/* Blank space to separate profile picture from profile editor form. */
-"   " = "61b6edf1108e6f396680a33b02486a70_tr";
-
 /* Description of how the nip05 identifier would be used for verification. */
 "'%@' at '%@' will be used for verification" = "'%@' en '%@' se usará con fines de verificación";
 
@@ -12,12 +9,6 @@
 
 /* Navigation bar title for view that shows who a user is following. */
 "(who) following" = "(who) sigue a";
-
-/* Prefix character to username. */
-"@" = "@";
-
-/* Abbreviated version of a nostr public key. */
-"%@" = "%@";
 
 /* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
 Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
@@ -35,15 +26,8 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
 "%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Deja propinas en las publicaciones de tus amigos y acumula sats con Bitcoin⚡️, la moneda nativa de internet.";
 
-/* Number of reposts.
-Number of relay servers a user is connected. */
-"%lld" = "%lld";
-
 /* Fraction of how many of the user's relay servers that are operational. */
 "%lld/%lld" = "%lld/%lld";
-
-/* Placeholder for event mention. */
-"< e >" = "< e >";
 
 /* Text indicating the zap amount. i.e. number of satoshis that were tipped to a user */
 "⚡️ %@" = "⚡️ %@";
@@ -269,6 +253,9 @@ Number of relay servers a user is connected. */
 /* Label indicating that the below text is the EULA, an acronym for End User License Agreement. */
 "EULA" = "CLUF";
 
+/* No comment provided by engineer. */
+"Filter" = "Filtro";
+
 /* Button to follow a user. */
 "Follow" = "Seguir";
 
@@ -415,11 +402,17 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Label indicating that a form input is optional. */
 "optional" = "opcional";
 
+/* No comment provided by engineer. */
+"Paid Relay" = "Relé de pago";
+
 /* Button to pay a Lightning invoice. */
 "Pay" = "Pagar";
 
 /* Navigation bar title for view to pay Lightning invoice. */
 "Pay the Lightning invoice" = "Paga la factura de Lightning";
+
+/* Alert for deleting the users account. */
+"Permanently Delete Account" = "Cuenta eliminada permanentemente";
 
 /* Dropdown option label for Lightning wallet, Phoenix. */
 "Phoenix" = "Phoenix";
@@ -606,6 +599,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Button for user to report that the account is impersonating someone. */
 "They are impersonating someone" = "Está suplantando a alguien";
 
+/* No comment provided by engineer. */
+"This is a paid relay, you must pay for posts to be accepted." = "Este es un relé de pago, debes de pagar para que acepte tus publicaciones.";
+
 /* Warning that the inputted account key is a public key and the result of what happens because of it. */
 "This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Esta es una clave pública, por lo que no podrás hacer publicaciones ni interactuar de ningún modo. Se usa para ver cuentas desde su perspectiva.";
 
@@ -620,6 +616,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Navigation bar title for note thread. */
 "Thread" = "Hilo";
+
+/* No comment provided by engineer. */
+"To filter your %@ feed, please choose applicable relays from the list below:" = "Para filtrar tu feed de %@, elija los relés correspondientes de la lista siguiente:";
 
 /* Button to translate note from different language. */
 "Translate Note" = "Traducir nota";
@@ -638,9 +637,6 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Text box prompt to ask user to type their post. */
 "Type your post here..." = "Escribe tu publicación aquí...";
-
-/* Non-breaking space character to fill in blank space next to event action button icons. */
-"u{00A0}" = "u{00A0}";
 
 /* Button to unfollow a user. */
 "Unfollow" = "Dejar de seguir";
@@ -667,7 +663,8 @@ Part of a larger sentence to describe how many profiles a user is following. */
    Label to prompt username entry. */
 "Username" = "Nombre de usuario";
 
-/* Label to display relay software version. */
+/* Label to display relay software version.
+   Section title for displaying the version number of the Damus app. */
 "Version" = "Versión";
 
 /* Sidebar menu label for Wallet view. */
@@ -711,6 +708,9 @@ Part of a larger sentence to describe how many profiles a user is following. */
 
 /* Accessibility label for zap button */
 "Zap" = "Zap";
+
+/* Navigation bar title for the Zaps view. */
+"Zaps" = "Zaps";
 
 /* Dropdown option label for Lightning wallet, Zebedee. */
 "Zebedee" = "Zebedee";

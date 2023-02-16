@@ -61,7 +61,7 @@ struct EventActionBar: View {
                     }
                 }
                 .accessibilityLabel(NSLocalizedString("Boosts", comment: "Accessibility label for boosts button"))
-                Text("\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
+                Text(String("\(bar.boosts > 0 ? "\(bar.boosts)" : "")"))
                     .offset(x: 18)
                     .font(.footnote.weight(.medium))
                     .foregroundColor(bar.boosted ? Color.green : Color.gray)
@@ -76,7 +76,7 @@ struct EventActionBar: View {
                         send_like()
                     }
                 }
-                Text("\(bar.likes > 0 ? "\(bar.likes)" : "")")
+                Text(String("\(bar.likes > 0 ? "\(bar.likes)" : "")"))
                     .offset(x: 22)
                     .font(.footnote.weight(.medium))
                     .foregroundColor(bar.liked ? Color.accentColor : Color.gray)
@@ -158,7 +158,7 @@ struct EventActionBar: View {
 
 func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> some View {
     Button(action: action) {
-        Label(NSLocalizedString("\u{00A0}", comment: "Non-breaking space character to fill in blank space next to event action button icons."), systemImage: img)
+        Label(String("\u{00A0}"), systemImage: img)
             .font(.footnote.weight(.medium))
             .foregroundColor(col == nil ? Color.gray : col!)
     }
