@@ -337,8 +337,6 @@ struct ProfileView: View {
                 WebsiteLink(url: url)
             }
             
-            Divider()
-            
             HStack {
                 if let contact = profile.contacts {
                     let contacts = contact.referenced_pubkeys.map { $0.ref_id }
