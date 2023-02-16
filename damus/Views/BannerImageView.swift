@@ -10,40 +10,23 @@ import Kingfisher
 
 struct InnerBannerImageView: View {
     
+    let url: URL?
     let defaultImage = UIImage(named: "profile-banner") ?? UIImage()
-    
-    @ObservedObject var imageModel: KFImageModel
-    
-    init(url: URL?) {
-        self.imageModel = KFImageModel(
-            url: url,
-            fallbackUrl: nil,
-            maxByteSize: 20_971_520, // 20 MiB
-            downsampleSize: CGSize(width: 750, height: 250)
-        )
-    }
 
     var body: some View {
         ZStack {
             Color(uiColor: .systemBackground)
             
-            if (imageModel.url != nil) {
-                KFAnimatedImage(imageModel.url)
-                    .callbackQueue(.dispatch(.global(qos: .background)))
-                    .processingQueue(.dispatch(.global(qos: .background)))
-                    .serialize(by: imageModel.serializer)
-                    .setProcessor(imageModel.processor)
-                    .cacheOriginalImage()
+            if (url != nil) {
+                KFAnimatedImage(url)
+                    .imageContext(.banner)
                     .configure { view in
                         view.framePreloadCount = 3
                     }
                     .placeholder { _ in
                         Color(uiColor: .secondarySystemBackground)
                     }
-                    .scaleFactor(UIScreen.main.scale)
-                    .loadDiskFileSynchronously()
                     .onFailureImage(defaultImage)
-                    .id(imageModel.refreshID)
             } else {
                 Image(uiImage: defaultImage).resizable()
             }
