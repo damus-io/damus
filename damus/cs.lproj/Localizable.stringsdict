@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>collapsed_event_view_other_notes</key>
+	<dict>
+		<key>NOTES</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string>%d other notes</string>
+			<key>many</key>
+			<string>%d other notes</string>
+			<key>one</key>
+			<string>%d jiná poznámka</string>
+			<key>other</key>
+			<string>%d jiné poznámky</string>
+		</dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>··· %#@NOTES@ ···</string>
+	</dict>
+	<key>followers_count</key>
+	<dict>
+		<key>FOLLOWERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string>Followers</string>
+			<key>many</key>
+			<string>Followers</string>
+			<key>one</key>
+			<string>Seguidor</string>
+			<key>other</key>
+			<string>Sledují</string>
+		</dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWERS@</string>
+	</dict>
+	<key>reactions_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTIONS@</string>
+		<key>REACTIONS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string>Reactions</string>
+			<key>many</key>
+			<string>Reactions</string>
+			<key>one</key>
+			<string>Reakce</string>
+			<key>other</key>
+			<string>Reakce</string>
+		</dict>
+	</dict>
+	<key>relays_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@RELAYS@</string>
+		<key>RELAYS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string>Relays</string>
+			<key>many</key>
+			<string>Relays</string>
+			<key>one</key>
+			<string>Relé</string>
+			<key>other</key>
+			<string>Relé</string>
+		</dict>
+	</dict>
+	<key>replying_to_one_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Odpověď na %@%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string> &amp; %d others</string>
+			<key>many</key>
+			<string> &amp; %d others</string>
+			<key>one</key>
+			<string> a %d další</string>
+			<key>other</key>
+			<string> a %d další</string>
+			<key>zero</key>
+			<string></string>
+		</dict>
+	</dict>
+	<key>replying_to_two_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Odpovědět na %@, %@%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string> &amp; %d others</string>
+			<key>many</key>
+			<string> &amp; %d others</string>
+			<key>one</key>
+			<string> a %d další</string>
+			<key>other</key>
+			<string> a %d další</string>
+			<key>zero</key>
+			<string></string>
+		</dict>
+	</dict>
+	<key>reposts_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTS@</string>
+		<key>REPOSTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string>Reposts</string>
+			<key>many</key>
+			<string>Reposts</string>
+			<key>one</key>
+			<string>Přesdílet</string>
+			<key>other</key>
+			<string>Přesdílené </string>
+		</dict>
+	</dict>
+	<key>sats_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@SATS@</string>
+		<key>SATS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>few</key>
+			<string>%2$@ sats</string>
+			<key>many</key>
+			<string>%2$@ sats</string>
+			<key>one</key>
+			<string>%2$@ sat</string>
+			<key>other</key>
+			<string>%2$@ satů</string>
+		</dict>
+	</dict>
+	<key>zaps_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPS@</string>
+		<key>ZAPS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>few</key>
+			<string>Zaps</string>
+			<key>many</key>
+			<string>Zaps</string>
+			<key>one</key>
+			<string>Zap</string>
+			<key>other</key>
+			<string>Zapů</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

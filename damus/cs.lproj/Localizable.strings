@@ -1,0 +1,723 @@
+/* Description of how the nip05 identifier would be used for verification. */
+"'%@' at '%@' will be used for verification" = "'%@' na '%@' se použije pro účely ověření";
+
+/* Description of why the nip05 identifier is invalid. */
+"'%@' is an invalid NIP-05 identifier. It should look like an email." = "'%@' je neplatný identifikátor NIP-05. Měl by vypadat jako e-mail.";
+
+/* Navigation bar title for view that shows who is following a user. */
+"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "Uživatele (Profile.displayName(profile: profile, pubkey: whos)) sledují";
+
+/* Navigation bar title for view that shows who a user is following. */
+"(who) following" = "(who) sleduje";
+
+/* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
+Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'. */
+"%@ %@" = "%@ %@";
+
+/* Alert message that informs a user was blocked. */
+"%@ has been blocked" = "%@ byl zablokován";
+
+/* Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string. */
+"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. Vytvoření účtu nevyžaduje telefonní číslo, e-mail ani jméno. Začněte ihned bez dřiny.";
+
+/* Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string. */
+"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. End-to-End šifrované soukromé zprávy. Udržujte Technologické Giganty mimo vaše soukromé zprávy.";
+
+/* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
+"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Dávejte odměny na příspěvky svých přátel a štosujte saty na Bitcoinu⚡️, nativní měně internetu.";
+
+/* Fraction of how many of the user's relay servers that are operational. */
+"%lld/%lld" = "%lld/%lld";
+
+/* Text indicating the zap amount. i.e. number of satoshis that were tipped to a user */
+"⚡️ %@" = "⚡️ %@";
+
+/* Label to prompt for about text entry for user to describe about themself. */
+"About" = "Informace";
+
+/* Label for About Me section of user profile form. */
+"About Me" = "O mně";
+
+/* Placeholder text for About Me description. */
+"Absolute Boss" = "Absolutní šéf";
+
+/* Button to accept the end user license agreement before being allowed into the app. */
+"Accept" = "Přijmout";
+
+/* Label to indicate the public ID of the account. */
+"Account ID" = "ID účtu";
+
+/* Title for confirmation dialog to either share, report, or block a profile. */
+"Actions" = "Akce";
+
+/* Button to add recommended relay server.
+   Button to confirm adding user inputted relay. */
+"Add" = "Přidat";
+
+/* Button label to re-add all original participants as profiles to reply to in a note */
+"Add all" = "Přidat všechny";
+
+/* Label for section for adding a relay server. */
+"Add Relay" = "Přidat relé";
+
+/* Label to display relay contact user. */
+"Admin" = "Administrátor";
+
+/* Any amount of sats */
+"Any" = "Libovolná částka";
+
+/* Prompt for optional entry of API Key to use translation server. */
+"API Key (optional)" = "Klíč API (volitelný)";
+
+/* Prompt for required entry of API Key to use translation server. */
+"API Key (required)" = "Klíč API (volitelný)";
+
+/* Alert message to ask if user wants to repost a post. */
+"Are you sure you want to repost this?" = "Opravdu to chcete přesdílet?";
+
+/* Label for Banner Image section of user profile form. */
+"Banner Image" = "Obrázek pozadí";
+
+/* Reminder to user that they should save their account information. */
+"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "Než začnete, musíte si uložit informace o svém účtu, jinak se v budoucnu nebudete moci přihlásit, pokud Damus někdy odinstalujete.";
+
+/* Dropdown option label for Lightning wallet, Bitcoin Beach. */
+"Bitcoin Beach" = "Bitcoin Beach";
+
+/* Label for Bitcoin Lightning Tips section of user profile form. */
+"Bitcoin Lightning Tips" = "Lightning Bitcoin Odměny ";
+
+/* Dropdown option label for Lightning wallet, Blixt Wallet */
+"Blixt Wallet" = "Blixt Wallet";
+
+/* Alert button to block a user.
+   Button to block a profile.
+   Context menu option for blocking users. */
+"Block" = "Zablokovat";
+
+/* Alert message prompt to ask if a user should be blocked. */
+"Block %@?" = "Zablokovat %@?";
+
+/* Title of alert for blocking a user. */
+"Block User" = "Zablokovaní uživatele";
+
+/* Sidebar menu label for Profile view. */
+"Blocked" = "Blokováno";
+
+/* Navigation title of view to see list of blocked users. */
+"Blocked Users" = "Zablokovaní uživatelé";
+
+/* Dropdown option label for Lightning wallet, Blue Wallet. */
+"Blue Wallet" = "Blue Wallet";
+
+/* Accessibility label for boosts button */
+"Boosts" = "Boosts";
+
+/* Dropdown option label for Lightning wallet, Breez. */
+"Breez" = "Breez";
+
+/* Context menu option for broadcasting the user's note to all of the user's connected relay servers. */
+"Broadcast" = "Převysílat";
+
+/* Alert button to cancel out of alert for blocking a user.
+   Button to cancel out of alert that creates a new mutelist.
+   Button to cancel out of posting a note.
+   Button to cancel out of reposting a post.
+   Button to cancel out of view adding user inputted relay.
+   Cancel deleting the user.
+   Cancel out of logging out the user. */
+"Cancel" = "Zrušit";
+
+/* Dropdown option label for Lightning wallet, Cash App. */
+"Cash App" = "Cash App";
+
+/* Button for clearing cached data. */
+"Clear" = "Vyčistit";
+
+/* Section title for clearing cached data. */
+"Clear Cache" = "Vyčistit mezipaměť";
+
+/* Label to display relay contact information. */
+"Contact" = "Kontakt";
+
+/* Label indicating that a user's key was copied. */
+"Copied" = "Zkopírováno";
+
+/* Button to copy a relay server address. */
+"Copy" = "Kopírovat";
+
+/* Context menu option for copying the ID of the account that created the note. */
+"Copy Account ID" = "Kopírovat ID účtu";
+
+/* Context menu option to copy an image into clipboard.
+   Context menu option to copy an image to clipboard. */
+"Copy Image" = "Zkopírovat obrázek";
+
+/* Context menu option to copy the URL of an image into clipboard. */
+"Copy Image URL" = "Zkopírovat adresu obrázku";
+
+/* Title of section for copying a Lightning invoice identifier. */
+"Copy invoice" = "Zkopírovat fakturu";
+
+/* Context menu option for copying a user's Lightning URL. */
+"Copy LNURL" = "Zkopírovat LNURL";
+
+/* Context menu option for copying the ID of the note. */
+"Copy Note ID" = "Zkopírovat ID poznámky";
+
+/* Context menu option for copying the JSON text from the note. */
+"Copy Note JSON" = "Zkopírovat JSON poznámky";
+
+/* Button to copy report ID. */
+"Copy Report ID" = "Zkopírovat ID hlášení";
+
+/* Context menu option for copying the text from an note. */
+"Copy Text" = "Zkopírovat text";
+
+/* Context menu option for copying the ID of the user who created the note. */
+"Copy User Pubkey" = "Zkopírovat adresu uživatele";
+
+/* Alert message to indicate that the blocked user could not be found. */
+"Could not find user to block..." = "Nepodařilo se najít uživatele k zablokování...";
+
+/* Button to create account. */
+"Create" = "Vytvořit";
+
+/* Button to create an account. */
+"Create Account" = "Vytvořit účet";
+
+/* Title of alert prompting the user to create a new mutelist. */
+"Create new mutelist" = "Vytvoření nového seznamu umlčených";
+
+/* Example description about Bitcoin creator(s), Satoshi Nakamoto. */
+"Creator(s) of Bitcoin. Absolute legend." = "Zakladatel(é) Bitcoinu. Absolutní legenda.";
+
+/* Dropdown option for selecting a custom translation server. */
+"Custom" = "Vlastní";
+
+/* Name of the app, shown on the first screen when user is not logged in. */
+"Damus" = "Damus";
+
+/* Dropdown option for selecting DeepL as the translation service. */
+"DeepL (Proprietary, Higher Accuracy)" = "DeepL (Vlastní, Největší presnost)";
+
+/* Button to pay a Lightning invoice with the user's default Lightning wallet. */
+"Default Wallet" = "Výchozí peněženka";
+
+/* Section title for zap configuration */
+"Default Zap Amount in sats" = "Výchozí množství Zapů v satech";
+
+/* Button for deleting the users account.
+   Button to delete a relay server that the user connects to.
+   Button to remove a user from their blocklist.
+   Section title for deleting the user */
+"Delete" = "Smazat";
+
+/* Button to delete the user's account. */
+"Delete Account" = "Smazat účet";
+
+/* Alert message to indicate this is a deleted account */
+"Deleted Account" = "Účet je smazán";
+
+/* Label to display relay description. */
+"Description" = "Popis";
+
+/* Button to dismiss a text field alert. */
+"Dismiss" = "Odmítnout";
+
+/* Label to prompt display name entry. */
+"Display Name" = "Celé jméno";
+
+/* Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
+   Navigation title for view of DMs, where DM is an English abbreviation for Direct Message. */
+"DMs" = "Soukromé zprávy";
+
+/* Button to dismiss wallet selection view for paying Lightning invoice. */
+"Done" = "Hotovo";
+
+/* Heading indicating that this application allows users to earn money. */
+"Earn Money" = "Získejte peníze";
+
+/* Button to edit user's profile. */
+"Edit" = "Upravit";
+
+/* Text indicating that the view is used for editing which participants are replied to in a note. */
+"Edit participants" = "Upravit účastníky";
+
+/* Heading indicating that this application keeps private messaging end-to-end encrypted. */
+"Encrypted" = "Šifrované";
+
+/* Prompt for user to enter an account key to login. */
+"Enter your account key to login:" = "Pro přihlášení zadejte svůj klíč k účtu:";
+
+/* Error message indicating why saving keys failed. */
+"Error: %@" = "Error: %@";
+
+/* Label indicating that the below text is the EULA, an acronym for End User License Agreement. */
+"EULA" = "EULA";
+
+/* No comment provided by engineer. */
+"Filter" = "Filtr";
+
+/* Button to follow a user. */
+"Follow" = "Sledujte";
+
+/* Button to follow a user back. */
+"Follow Back" = "Sledovat také";
+
+/* Text on QR code view to prompt viewer looking at screen to follow the user. */
+"Follow me on nostr" = "Sledujte mě na nostru";
+
+/* Label describing followers of a user. */
+"Followers" = "Sledující";
+
+/* Text to indicate that the button next to it is in a state that indicates that it is in the process of following a profile.
+Part of a larger sentence to describe how many profiles a user is following. */
+"Following" = "Sleduje";
+
+/* Label to indicate that the user is in the process of following another user. */
+"Following..." = "Sleduje...";
+
+/* Text to indicate that button next to it is in a state that will follow a profile when tapped. */
+"Follows" = "Sledující";
+
+/* Text to indicate that a user is following your profile. */
+"Follows you" = "Sleduje vás";
+
+/* Dropdown option for selecting Free plan for DeepL translation service. */
+"Free" = "Bezplatný";
+
+/* Button to navigate to DeepL website to get a translation API key. */
+"Get API Key" = "Získat klíč API";
+
+/* Navigation bar title for Global view where posts from all connected relay servers appear. */
+"Global" = "Globální";
+
+/* Navigation link to go to post referenced by hex code. */
+"Goto post %@" = "Přejít na příspěvek %@";
+
+/* Navigation link to go to profile. */
+"Goto profile %@" = "Přejít na profil %@";
+
+/* Button to hide a post from a user who has been blocked. */
+"Hide" = "Skrýt";
+
+/* Button to hide the DeepL translation API key.
+   Button to hide the LibreTranslate server API key. */
+"Hide API Key" = "Skrýt klíč API";
+
+/* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
+"Home" = "Domů";
+
+/* Placeholder example text for profile picture URL. */
+"https://example.com/pic.jpg" = "https://priklad.webu.cz/fotka.jpg";
+
+/* Placeholder example text for website URL for user profile. */
+"https://jb55.com" = "https://jb55.com";
+
+/* Button for user to report that the account or content has illegal content. */
+"Illegal content" = "Nelegální obsah";
+
+/* Error message indicating that an invalid account key was entered for login. */
+"Invalid key" = "Neplatný klíč";
+
+/* Button for user to report that the account or content has spam. */
+"It's spam" = "Jde o spam";
+
+/* Placeholder example text for identifier used for NIP-05 verification. */
+"jb55@jb55.com" = "jb55@jb55.com";
+
+/* Moves the post button to the left side of the screen */
+"Left Handed" = "Pro leváky";
+
+/* Button to complete account creation and start using the app. */
+"Let's go!" = "Jdeme na to!";
+
+/* Dropdown option for selecting LibreTranslate as the translation service. */
+"LibreTranslate (Open Source)" = "LibreTranslate (Open Source)";
+
+/* Placeholder text for entry of Lightning Address or LNURL. */
+"Lightning Address or LNURL" = "Lightning adresa nebo LNURL";
+
+/* Indicates that the view is for paying a Lightning invoice. */
+"Lightning Invoice" = "Lightning faktura";
+
+/* Accessibility Label for Like button */
+"Like" = "To se mi líbí";
+
+/* Dropdown option label for Lightning wallet, LNLink. */
+"LNLink" = "LNLink";
+
+/* Face ID usage description shown when trying to access private key */
+"Local authentication to access private key" = "Biometrické ověření pro přístup k soukromému klíči";
+
+/* Dropdown option label for system default for Lightning wallet. */
+"Local default" = "Predeterminada del sistema";
+
+/* Button to log into account.
+   Button to log into an account. */
+"Login" = "Přihlásit se";
+
+/* Alert for logging out the user.
+   Button for logging out the user.
+   Button to close the alert that informs that the current account has been deleted. */
+"Logout" = "Odhlásit se";
+
+/* Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out. */
+"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "Před odhlášením se ujistěte, jestli je váš nsec klíč účtu uložen. Jinak ztratíte přístup k tomuto účtu.";
+
+/* Dropdown option label for Lightning wallet, Muun. */
+"Muun" = "Muun";
+
+/* Label for NIP-05 Verification section of user profile form. */
+"NIP-05 Verification" = "Ověření NIP-05";
+
+/* Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key. */
+"No" = "Ne";
+
+/* Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists. */
+"No block list found, create a new one? This will overwrite any previous block lists." = "Nebyl nalezen žádný seznam zablokovaných, chcete vytvořit nový? Tím se přepíší všechny předchozí seznamy zablokovaných.";
+
+/* No search results. */
+"none" = "žádné";
+
+/* Dropdown option for selecting no translation service. */
+"None" = "Žádné";
+
+/* Alert user that they might be attempting to paste a private key and ask them to confirm. */
+"Note contains \"nsec1\" private key. Are you sure?" = "Poznámka obsahuje \"nsec1\" soukromý klíč. Jste si jisti?";
+
+/* Indicates that there are no notes in the timeline to view. */
+"Nothing to see here. Check back later!" = "Zde není nic k vidění. Zkontrolujte později!";
+
+/* Toolbar label for Notifications view. */
+"Notifications" = "Upozornění";
+
+/* String indicating that a given timestamp just occurred */
+"now" = "nyní";
+
+/* Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key. */
+"nsec1..." = "nsec1...";
+
+/* Button for user to report that the account or content has nudity or explicit content. */
+"Nudity or explicit content" = "Nahota nebo explicitní obsah";
+
+/* Label indicating that a form input is optional. */
+"optional" = "volitelné";
+
+/* No comment provided by engineer. */
+"Paid Relay" = "Placené Relé";
+
+/* Button to pay a Lightning invoice. */
+"Pay" = "Zaplatit";
+
+/* Navigation bar title for view to pay Lightning invoice. */
+"Pay the Lightning invoice" = "Zaplaťtě Lightning fakturu";
+
+/* Alert for deleting the users account. */
+"Permanently Delete Account" = "Trvale odstranit účet";
+
+/* Dropdown option label for Lightning wallet, Phoenix. */
+"Phoenix" = "Phoenix";
+
+/* Prompt selection of DeepL subscription plan to perform machine translations on notes */
+"Plan" = "Plan";
+
+/* Button to post a note. */
+"Post" = "Zveřejnit";
+
+/* Text to indicate that what is being shown is a post from a user who has been blocked. */
+"Post from a user you've blocked" = "Příspěvek od zablokovaného uživatele";
+
+/* Label for filter for seeing only posts (instead of posts and replies). */
+"Posts" = "Příspěvky";
+
+/* Label for filter for seeing posts and replies (instead of only posts). */
+"Posts & Replies" = "Příspěvky a odpovědi";
+
+/* Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading. */
+"Private" = "Soukromé";
+
+/* Title of the secure field that holds the user's private key. */
+"Private Key" = "Soukromý klíč";
+
+/* Dropdown option for selecting Pro plan for DeepL translation service. */
+"Pro" = "Pro";
+
+/* Sidebar menu label for Profile view. */
+"Profile" = "Profil";
+
+/* Label for Profile Picture section of user profile form. */
+"Profile Picture" = "Profilová fotka";
+
+/* Section title for the user's public account ID. */
+"Public Account ID" = "Veřejné ID účtu";
+
+/* Label indicating that the text is a user's public account key. */
+"Public key" = "Veřejný klíč";
+
+/* Label indicating that the text is a user's public account key. */
+"Public Key" = "Veřejný klíč";
+
+/* Prompt to ask user if the key they entered is a public key. */
+"Public Key?" = "Je to veřejný klíč?";
+
+/* Navigation bar title for Reactions view. */
+"Reactions" = "Reacciones";
+
+/* Section title for recommend relay servers that could be added as part of configuration */
+"Recommended Relays" = "Doporučené Relé";
+
+/* Button to reject the end user license agreement, which disallows the user from being let into the app. */
+"Reject" = "Zamítnout";
+
+/* Label to display relay address.
+   Text field for relay server. Used for testing purposes. */
+"Relay" = "Relé";
+
+/* Sidebar menu label for Relays view. */
+"Relays" = "Relé";
+
+/* Description of what was done as a result of sending a report to relay servers. */
+"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "Relé byly informovány a klienti budou moci tyto informace použít k filtrování obsahu. Děkujeme!";
+
+/* Button label to remove all participants from a note reply. */
+"Remove all" = "Odebrat všechny";
+
+/* Accessibility label for reply button */
+"Reply" = "Odpovědět";
+
+/* Label to indicate that the user is replying to themself. */
+"Reply to self" = "Odpovědět sobě";
+
+/* Label to indicate that the user is replying to 2 users. */
+"Replying to %@ & %@" = "Reagovat na %1$@ a %2$@";
+
+/* Indicating that the user is replying to the following listed people. */
+"Replying to:" = "Reagovat na:";
+
+/* Button to report a profile.
+   Context menu option for reporting content. */
+"Report" = "Nahlásit";
+
+/* Label indicating that the text underneath is the identifier of the report that was sent to relay servers. */
+"Report ID:" = "ID nahlášení:";
+
+/* Message indicating that a report was successfully sent to relay servers. */
+"Report sent!" = "Nahlášeno!";
+
+/* Button to confirm reposting a post.
+   Title of alert for confirming to repost a post. */
+"Repost" = "Přesdílet";
+
+/* Text indicating that the post was reposted (i.e. re-shared). */
+"Reposted" = "Přesdíleno";
+
+/* Navigation bar title for Reposts view. */
+"Reposts" = "Přesdílené";
+
+/* Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message. */
+"Requests" = "Žádosti";
+
+/* Button to retry completing account creation after an error occurred. */
+"Retry" = "Opakovat";
+
+/* Dropdown option label for Lightning wallet, River */
+"River" = "River";
+
+/* Example username of Bitcoin creator(s), Satoshi Nakamoto. */
+"satoshi" = "satoshi";
+
+/* Name of Bitcoin creator(s). */
+"Satoshi Nakamoto" = "Satoshi Nakamoto";
+
+/* Button for saving profile. */
+"Save" = "Uložit";
+
+/* Context menu option to save an image. */
+"Save Image" = "Uložit obrázek";
+
+/* Text on QR code view to prompt viewer to scan the QR code on screen with their device camera. */
+"Scan the code" = "Naskenovat kód";
+
+/* Navigation link to search hashtag. */
+"Search hashtag: #%@" = "Hledat hashtag: #%@";
+
+/* Placeholder text to prompt entry of search query. */
+"Search..." = "Hledat...";
+
+/* Section title for user's secret account login key. */
+"Secret Account Login Key" = "Tajný klíč pro přihlášení k účtu";
+
+/* Title of section for selecting a Lightning wallet to pay a Lightning invoice. */
+"Select a Lightning wallet" = "Vyberte Lightning peněženku ";
+
+/* Prompt selection of user's default wallet */
+"Select default wallet" = "Vyberte výchozí peněženku";
+
+/* Text prompt for user to send a message to the other user. */
+"Send a message to start the conversation..." = "Pošlete zprávu a zahajte konverzaci...";
+
+/* Prompt selection of LibreTranslate server to perform machine translations on notes */
+"Server" = "Server";
+
+/* Prompt selection of translation service provider. */
+"Service" = "Služba";
+
+/* Navigation title for Settings view.
+   Sidebar menu label for accessing the app settings */
+"Settings" = "Nastavení";
+
+/* Button to share a post
+   Button to share an image.
+   Button to share the link to a profile. */
+"Share" = "Sdílet";
+
+/* Button to show a post from a user who has been blocked.
+   Toggle to show or hide user's secret account login key. */
+"Show" = "Zobrazit";
+
+/* Button to show the DeepL translation API key.
+   Button to show the LibreTranslate server API key. */
+"Show API Key" = "Zobrazit klíč API";
+
+/* Toggle to show or hide selection of wallet. */
+"Show wallet selector" = "Zobrazit výběr peněženky";
+
+/* Sidebar menu label to sign out of the account. */
+"Sign out" = "Odhlásit";
+
+/* Label to display relay software. */
+"Software" = "Software";
+
+/* Dropdown option label for Lightning wallet, Strike. */
+"Strike" = "Strike";
+
+/* Label to display relay's supported NIPs. */
+"Supported NIPs" = "Podporované NIP-y ";
+
+/* Button to close out of alert that informs that the action to block a user was successful. */
+"Thanks!" = "Děkuji!";
+
+/* Button for user to report that the account is impersonating someone. */
+"They are impersonating someone" = "Za někoho se vydává";
+
+/* No comment provided by engineer. */
+"This is a paid relay, you must pay for posts to be accepted." = "Jedná se o placené Relé, musíte zaplatit za příspěvky, které mají být přijaty.";
+
+/* Warning that the inputted account key is a public key and the result of what happens because of it. */
+"This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = " Jedná se o veřejný klíč, takže nebudete moci odesílat příspěvky ani nijak komunikovat. Slouží k zobrazení vašeho účtů z perspektivy sledujících.";
+
+/* Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key. */
+"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Jedná se o nostr klíč starého typu. Nejsme si jisti, zda se jedná o veřejný nebo soukromý klíč. Pokud se jedná o veřejný klíč, přepněte prosím tlačítko níže.";
+
+/* Label to describe that a public key is the user's account ID and what they can do with it. */
+"This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "Toto je vaše ID účtu, které můžete dát svým přátelům, aby vás mohli začít sledovat. Klikněte pro zkopírování.";
+
+/* Label to describe that a private key is the user's secret account key and what they should do with it. */
+"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Toto je vaše tajné heslo, které potřebujete pro přístup ke svému účtu. Nikomu ho nesdělujte! Uložte jej do správce hesel a chraňte jej!";
+
+/* Navigation bar title for note thread. */
+"Thread" = "Vlákno";
+
+/* No comment provided by engineer. */
+"To filter your %@ feed, please choose applicable relays from the list below:" = "Chcete-li filtrovat %@ obsah, vyberte příslušné Relé z níže uvedeného seznamu:";
+
+/* Button to translate note from different language. */
+"Translate Note" = "Přeložit poznámku";
+
+/* Button to indicate that the note has been translated from a different language. */
+"Translated from (lang)" = "Přeloženo z jazyku (lang)";
+
+/* Button to indicate that the note is in the process of being translated from a different language. */
+"Translating from (lang)..." = "Překládáno z jazyka (lang)...";
+
+/* Section title for selecting the translation service. */
+"Translations" = "Překlady";
+
+/* Text field prompt asking user to type the word DELETE to confirm that they want to proceed with deleting their account. The all caps lock DELETE word should not be translated. Everything else should. */
+"Type DELETE to delete" = "Napište \"DELETE\" pro smazání";
+
+/* Text box prompt to ask user to type their post. */
+"Type your post here..." = "Escribe tu publicación aquí...";
+
+/* Button to unfollow a user. */
+"Unfollow" = "Zrušit sledování";
+
+/* Text to indicate that the button next to it is in  a state that indicates that it is in the process of unfollowing a profile. */
+"Unfollowing" = "Rušení sledování";
+
+/* Label to indicate that the user is in the process of unfollowing another user. */
+"Unfollowing..." = "Rušení sledování...";
+
+/* Text to indicate that the button next to it is in a state that will unfollow a profile when tapped. */
+"Unfollows" = "Nesleduje";
+
+/* Example URL to LibreTranslate server */
+"URL" = "URL";
+
+/* Alert message to indicate the user has been blocked */
+"User blocked" = "Uživatel zablokován";
+
+/* Alert message that informs a user was blocked. */
+"User has been blocked" = "Uživatel byl zablokován";
+
+/* Label for Username section of user profile form.
+   Label to prompt username entry. */
+"Username" = "Uživatelské jméno";
+
+/* Label to display relay software version.
+   Section title for displaying the version number of the Damus app. */
+"Version" = "Verze";
+
+/* Sidebar menu label for Wallet view. */
+"Wallet" = "Billetera";
+
+/* Dropdown option label for Lightning wallet, Wallet of Satoshi. */
+"Wallet of Satoshi" = "Wallet of Satoshi";
+
+/* Section title for selection of wallet. */
+"Wallet Selector" = "Výběr peněženek";
+
+/* Label for Website section of user profile form. */
+"Website" = "Webová stránka";
+
+/* Welcoming message to the reader. The variable is 'you', the reader. */
+"Welcome to the social network %@ control." = "Vítejte v sociální síti %@, kterou máte pod kontrolou.";
+
+/* Text to welcome user. */
+"Welcome, %@!" = "Vítáme vás, %@!";
+
+/* Header text to prompt user what issue they want to report. */
+"What do you want to report?" = "Co chcete nahlásit?";
+
+/* Placeholder example for relay server address. */
+"wss://some.relay.com" = "wss://vlastni.rele.com";
+
+/* Text of button that confirms to overwrite the existing mutelist. */
+"Yes, Overwrite" = "Ano, přepsat";
+
+/* Button to proceed with posting a note even though it looks like they might be posting a private key. */
+"Yes, Post with Private Key" = "Ano, publikovat se soukromým klíčem";
+
+/* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
+"you" = "tú";
+
+/* Label for Your Name section of user profile form. */
+"Your Name" = "Vaše jméno";
+
+/* Footer text to inform user what will happen when the report is submitted. */
+"Your report will be sent to the relays you are connected to" = "Nahlášení bude odesláno na všechny relé, ke kterým jste připojen.";
+
+/* Accessibility label for zap button */
+"Zap" = "Zap";
+
+/* Navigation bar title for the Zaps view. */
+"Zaps" = "Zapy";
+
+/* Dropdown option label for Lightning wallet, Zebedee. */
+"Zebedee" = "Zebedee";
+
+/* Dropdown option label for Lightning wallet, Zeus LN. */
+"Zeus LN" = "Zeus LN";
+
