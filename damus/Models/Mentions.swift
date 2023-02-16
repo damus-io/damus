@@ -211,6 +211,32 @@ enum Amount: Equatable {
     }
 }
 
+func format_actions_abbrev(_ actions: Int) -> String {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    formatter.positiveSuffix = "m"
+    formatter.positivePrefix = ""
+    formatter.minimumFractionDigits = 0
+    formatter.maximumFractionDigits = 3
+    formatter.roundingMode = .down
+    formatter.roundingIncrement = 0.1
+    formatter.multiplier = 1
+        
+    if actions >= 1_000_000 {
+        formatter.positiveSuffix = "m"
+        formatter.multiplier = 0.000001
+    } else if actions >= 1000 {
+        formatter.positiveSuffix = "k"
+        formatter.multiplier = 0.001
+    } else {
+        return "\(actions)"
+    }
+    
+    let actions = NSNumber(value: actions)
+    
+    return formatter.string(from: actions) ?? "\(actions)"
+}
+
 func format_msats_abbrev(_ msats: Int64) -> String {
     let formatter = NumberFormatter()
     formatter.numberStyle = .decimal
