@@ -463,22 +463,30 @@ struct KeyView: View {
         colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite")
     }
     
+    private func copyPubkey(_ pubkey: String) {
+        UIPasteboard.general.string = pubkey
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        withAnimation {
+            isCopied = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                withAnimation {
+                    isCopied = false
+                }
+            }
+        }
+    }
+    
     var body: some View {
         let bech32 = bech32_pubkey(pubkey) ?? pubkey
         
         HStack {
-            RoundedRectangle(cornerRadius: 24)
-                .frame(width: 275, height:22)
+            RoundedRectangle(cornerRadius: 11)
+                .frame(height: 22)
                 .foregroundColor(fillColor())
                 .overlay(
                     HStack {
                         Button {
-                            UIPasteboard.general.string = bech32
-                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                            isCopied = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                isCopied = false
-                            }
+                            copyPubkey(bech32)
                         } label: {
                             Label(NSLocalizedString("Public Key", comment: "Label indicating that the text is a user's public account key."), systemImage: "key.fill")
                                 .font(.custom("key", size: 12.0))
@@ -490,23 +498,18 @@ struct KeyView: View {
                         Text(abbrev_pubkey(bech32, amount: 16))
                             .font(.footnote)
                             .foregroundColor(keyColor())
-                            .offset(x:-3) // Not sure why this is needed.
                     }
                 )
             if isCopied != true {
                 Button {
-                    UIPasteboard.general.string = bech32
-                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                    isCopied = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                        isCopied = false
-                    }
+                    copyPubkey(bech32)
                 } label: {
                     Label {
                         Text("Public key", comment: "Label indicating that the text is a user's public account key.")
                     } icon: {
-                        Image("ic-copy")
+                        Image(systemName: "square.on.square.dashed")
                             .contentShape(Rectangle())
+                            .foregroundColor(.gray)
                             .frame(width: 20, height: 20)
                     }
                     .labelStyle(IconOnlyLabelStyle())
@@ -514,12 +517,13 @@ struct KeyView: View {
                 }
             } else {
                 HStack {
-                    Image("ic-tick")
+                    Image(systemName: "checkmark.circle")
                         .frame(width: 20, height: 20)
                     Text(NSLocalizedString("Copied", comment: "Label indicating that a user's key was copied."))
                         .font(.footnote)
-                        .foregroundColor(Color("DamusGreen"))
+                        .layoutPriority(1)
                 }
+                .foregroundColor(Color("DamusGreen"))
             }
         }
     }
