@@ -42,7 +42,6 @@ func myImageUploadRequest(imageToUpload: UIImage, imgKey: String, completion: @e
 
 func createBodyWithParameters(filePathKey: String?, imageDataKey: NSData, boundary: String, imgKey: String) -> NSData {
     let body = NSMutableData();
-    let filename = "\(imgKey).jpg"
     let contentType = "image/png"
     body.appendString(string: "--\(boundary)\r\n")
     body.appendString(string: "Content-Disposition: form-data; name=\"\("fileToUpload")\"; filename=\"\("plus.png")\"\r\n")
