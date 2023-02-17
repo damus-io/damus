@@ -50,6 +50,15 @@ func get_default_wallet(_ pubkey: String) -> Wallet {
     }
 }
 
+func get_image_uploader(_ pubkey: String) -> ImageUploader {
+    if let defaultImageUploader = UserDefaults.standard.string(forKey: "default_image_uploader"),
+       let defaultImageUploader = ImageUploader(rawValue: defaultImageUploader) {
+        return defaultImageUploader
+    } else {
+        return .nostrBuild
+    }
+}
+
 private func get_translation_service(_ pubkey: String) -> TranslationService? {
     guard let translation_service = UserDefaults.standard.string(forKey: "translation_service") else {
         return nil
@@ -86,6 +95,12 @@ class UserSettingsStore: ObservableObject {
     @Published var default_wallet: Wallet {
         didSet {
             UserDefaults.standard.set(default_wallet.rawValue, forKey: "default_wallet")
+        }
+    }
+
+    @Published var default_image_uploader: ImageUploader {
+        didSet {
+            UserDefaults.standard.set(default_image_uploader.rawValue, forKey: "default_image_uploader")
         }
     }
     
@@ -189,6 +204,8 @@ class UserSettingsStore: ObservableObject {
         self.default_wallet = get_default_wallet(pubkey)
         show_wallet_selector = should_show_wallet_selector(pubkey)
         always_show_images = UserDefaults.standard.object(forKey: "always_show_images") as? Bool ?? false
+
+        default_image_uploader = get_image_uploader(pubkey)
 
         left_handed = UserDefaults.standard.object(forKey: "left_handed") as? Bool ?? false
         zap_vibration = UserDefaults.standard.object(forKey: "zap_vibration") as? Bool ?? false

@@ -139,7 +139,6 @@ struct ConfigView: View {
                     TextField(String("1000"), text: $default_zap_amount)
                         .keyboardType(.numberPad)
                         .onReceive(Just(default_zap_amount)) { newValue in
-                            
                             if let parsed = handle_string_amount(new_value: newValue) {
                                 self.default_zap_amount = String(parsed)
                                 set_default_zap_amount(pubkey: self.state.pubkey, amount: parsed)
@@ -212,6 +211,14 @@ struct ConfigView: View {
 
                     Button(NSLocalizedString("Clear Cache", comment: "Button to clear image cache.")) {
                         clear_kingfisher_cache()
+                    }
+                    
+                    Picker(NSLocalizedString("Select image uplodaer", comment: "Prompt selection of user's image uplodaer"),
+                           selection: $settings.default_image_uploader) {
+                        ForEach(ImageUploader.allCases, id: \.self) { uploader in
+                            Text(uploader.model.displayName)
+                                .tag(uploader.model.tag)
+                        }
                     }
                 }
                 
