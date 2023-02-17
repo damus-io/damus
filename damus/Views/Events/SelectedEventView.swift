@@ -28,18 +28,7 @@ struct SelectedEventView: View {
             let profile = damus.profiles.lookup(id: pubkey)
 
             VStack(alignment: .leading) {
-                HStack {
-                    EventProfile(damus_state: damus, pubkey: pubkey, profile: profile, size: .normal)
-                    
-                    Spacer()
-                    
-                    EventMenuContext(event: event, keypair: damus.keypair, target_pubkey: event.pubkey)
-                        .padding([.bottom], 4)
-
-                }
-                .minimumScaleFactor(0.75)
-                .lineLimit(1)
-                
+                EventProfile(damus_state: damus, pubkey: pubkey, profile: profile, size: .normal)
                 EventBody(damus_state: damus, event: event, size: .selected)
                 
                 if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
@@ -71,6 +60,7 @@ struct SelectedEventView: View {
                 self.bar.update(damus: self.damus, evid: target)
             }
             .padding([.leading], 2)
+            .event_context_menu(event, keypair: damus.keypair, target_pubkey: event.pubkey)
         }
     }
 }
