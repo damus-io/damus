@@ -471,12 +471,11 @@ class HomeModel: ObservableObject {
         }
     }
 
-    func insert_home_event(_ ev: NostrEvent) -> Bool {
+    func insert_home_event(_ ev: NostrEvent) {
         let ok = insert_uniq_sorted_event(events: &self.events, new_ev: ev, cmp: { $0.created_at > $1.created_at })
         if ok {
             handle_last_event(ev: ev, timeline: .home)
         }
-        return ok
     }
 
     func handle_text_event(sub_id: String, _ ev: NostrEvent) {
@@ -485,7 +484,7 @@ class HomeModel: ObservableObject {
         }
 
         if sub_id == home_subid {
-            let _ = insert_home_event(ev)
+            insert_home_event(ev)
         } else if sub_id == notifications_subid {
             handle_notification(ev: ev)
         }
@@ -657,14 +656,14 @@ func process_metadata_event(our_pubkey: String, profiles: Profiles, ev: NostrEve
     
     // load pfps asap
     let picture = tprof.profile.picture ?? robohash(ev.pubkey)
-    if let _ = URL(string: picture) {
+    if URL(string: picture) != nil {
         DispatchQueue.main.async {
             notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
         }
     }
     
     let banner = tprof.profile.banner ?? ""
-    if let _ = URL(string: banner) {
+    if URL(string: banner) != nil {
         DispatchQueue.main.async {
             notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
         }

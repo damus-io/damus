@@ -328,7 +328,7 @@ struct ContentView: View {
                 PostView(replying_to: nil, references: [], damus_state: damus_state!)
             case .reply(let event):
                 ReplyView(replying_to: event, damus: damus_state!)
-            case .event(let event):
+            case .event:
                 EventDetailView()
             case .filter:
                 let timeline = selected_timeline ?? .home
