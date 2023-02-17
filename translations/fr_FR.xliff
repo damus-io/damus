@@ -1586,13 +1586,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/replying_to_one_and_others:dict/OTHERS:dict/one:dict/:string" xml:space="preserve">
         <source> &amp; %d other</source>
-        <target>&amp; %d autre</target>
+        <target> &amp; %d autre</target>
         
         <note>Label to indicate that the user is replying to 1 user and others.</note>
       </trans-unit>
       <trans-unit id="/replying_to_one_and_others:dict/OTHERS:dict/other:dict/:string" xml:space="preserve">
         <source> &amp; %d others</source>
-        <target>&amp; %d autres</target>
+        <target> &amp; %d autres</target>
         
         <note>Label to indicate that the user is replying to 1 user and others.</note>
       </trans-unit>
@@ -1608,13 +1608,13 @@ Part of a larger sentence to describe how many profiles a user is following.</no
       </trans-unit>
       <trans-unit id="/replying_to_two_and_others:dict/OTHERS:dict/one:dict/:string" xml:space="preserve">
         <source> &amp; %d other</source>
-        <target>&amp; %d autre</target>
+        <target> &amp; %d autre</target>
         
         <note>Label to indicate that the user is replying to 2 users and others.</note>
       </trans-unit>
       <trans-unit id="/replying_to_two_and_others:dict/OTHERS:dict/other:dict/:string" xml:space="preserve">
         <source> &amp; %d others</source>
-        <target>&amp; %d autres</target>
+        <target> &amp; %d autres</target>
         
         <note>Label to indicate that the user is replying to 2 users and others.</note>
       </trans-unit>
