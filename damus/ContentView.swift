@@ -62,7 +62,7 @@ struct ContentView: View {
     @State var status: String = "Not connected"
     @State var active_sheet: Sheets? = nil
     @State var damus_state: DamusState? = nil
-    @State var selected_timeline: Timeline? = .home
+    @SceneStorage("ContentView.selected_timeline") var selected_timeline: Timeline = .home
     @State var is_deleted_account: Bool = false
     @State var is_profile_open: Bool = false
     @State var event: NostrEvent? = nil
@@ -76,7 +76,7 @@ struct ContentView: View {
     @State var confirm_mute: Bool = false
     @State var user_muted_confirm: Bool = false
     @State var confirm_overwrite_mutelist: Bool = false
-    @State var filter_state : FilterState = .posts_and_replies
+    @SceneStorage("ContentView.filter_state") var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
     
@@ -180,9 +180,6 @@ struct ContentView: View {
                 
             case .dms:
                 DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings)
-            
-            case .none:
-                EmptyView()
             }
         }
         .navigationBarTitle(timeline_name(selected_timeline), displayMode: .inline)
