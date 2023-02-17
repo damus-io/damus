@@ -61,7 +61,7 @@ class SearchHomeModel: ObservableObject {
                 }
                 seen_pubkey.insert(ev.pubkey)
                 
-                let _ = insert_uniq_sorted_event(events: &events, new_ev: ev) {
+                insert_uniq_sorted_event(events: &events, new_ev: ev) {
                     $0.created_at > $1.created_at
                 }
             }

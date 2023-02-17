@@ -95,20 +95,20 @@ struct SearchResultsView: View {
             return
         }
         
-        if let _ = hex_decode(new), new.count == 64 {
+        if hex_decode(new) != nil, new.count == 64 {
             self.result = .hex(new)
             return
         }
         
         if new.starts(with: "npub") {
-            if let _ = try? bech32_decode(new) {
+            if (try? bech32_decode(new)) != nil {
                 self.result = .profile(new)
                 return
             }
         }
         
         if new.starts(with: "note") {
-            if let _ = try? bech32_decode(new) {
+            if (try? bech32_decode(new)) != nil {
                 self.result = .note(new)
                 return
             }
