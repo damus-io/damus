@@ -2,7 +2,7 @@
 //  AttachMediaUtility.swift
 //  damus
 //
-//  Created by Guest Tech on 2/17/23.
+//  Created by Swift on 2/17/23.
 //
 
 import SwiftUI
