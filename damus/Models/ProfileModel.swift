@@ -21,6 +21,11 @@ class ProfileModel: ObservableObject, Equatable {
     var prof_subid = UUID().description
     
     func follows(pubkey: String) -> Bool {
+        
+        guard pubkey != self.pubkey else {
+            return false
+        }
+        
         guard let contacts = self.contacts else {
             return false
         }
