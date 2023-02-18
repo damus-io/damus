@@ -38,7 +38,7 @@ struct ProfileNameView: View {
                     HStack(alignment: .center, spacing: spacing) {
                         ProfileName(pubkey: pubkey, profile: profile, damus: damus, show_friend_confirmed: true)
                             .font(.title3.weight(.bold))
-                        if follows_you{
+                        if follows_you {
                             FollowsYou()
                         }
                     }
