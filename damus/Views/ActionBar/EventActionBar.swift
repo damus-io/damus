@@ -28,8 +28,12 @@ struct EventActionBar: View {
     @State var sheet: ActionBarSheet? = nil
     @State var confirm_boost: Bool = false
     @State var show_share_sheet: Bool = false
+    @State var show_repost_sheet: Bool = false
+    @State var show_post_sheet: Bool = false
     
     @ObservedObject var bar: ActionBarModel
+    
+    @Environment(\.colorScheme) var colorScheme
     
     init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil, test_lnurl: String? = nil) {
         self.damus_state = damus_state
@@ -54,6 +58,7 @@ struct EventActionBar: View {
             HStack(spacing: 4) {
                 
                 EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
+                    show_repost_sheet = true
                     if bar.boosted {
                         notify(.delete, bar.our_boost)
                     } else if damus_state.is_privkey_user {
@@ -99,15 +104,47 @@ struct EventActionBar: View {
                 }
             }
         }
-        .alert(NSLocalizedString("Repost", comment: "Title of alert for confirming to repost a post."), isPresented: $confirm_boost) {
-            Button(NSLocalizedString("Cancel", comment: "Button to cancel out of reposting a post.")) {
-                confirm_boost = false
+        .sheet(isPresented: $show_repost_sheet) {
+            HalfSheet {
+                VStack(alignment: .leading, spacing: 50) {
+                    Button {
+                        show_repost_sheet = false
+                        send_boost()
+                    } label: {
+                        Label(NSLocalizedString("Repost", comment: "Button to confirm reposting a post."), systemImage: "arrow.2.squarepath")
+                    }
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite"))
+                    
+                    Button {
+                        show_repost_sheet = false
+                        show_post_sheet = true
+                        
+                    } label: {
+                        Label(NSLocalizedString("Quote note", comment: "Button to quote a post."), systemImage: "quote.bubble")
+                    }
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite"))
+                    
+                    Button(NSLocalizedString("Cancel", comment: "Button to cancel a repost.")) {
+                        show_repost_sheet = false
+                        confirm_boost = false
+                    }
+                    .frame(width: 300, height: 50)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite"))
+                    .cornerRadius(24)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 24)
+                            .stroke(colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite"), lineWidth: 1)
+                    }
+                }
             }
-            Button(NSLocalizedString("Repost", comment: "Button to confirm reposting a post.")) {
-                send_boost()
+        }
+        .sheet(isPresented: $show_post_sheet) {
+            if let note_id = bech32_note_id(event.id) {
+                PostView(replying_to: nil, references: [], damus_state: damus_state, quote: "@\(note_id)")
             }
-        } message: {
-            Text("Are you sure you want to repost this?", comment: "Alert message to ask if user wants to repost a post.")
         }
         .onReceive(handle_notify(.update_stats)) { n in
             let target = n.object as! String

@@ -16,7 +16,8 @@ struct ParticipantsView: View {
     
     var body: some View {
         VStack {
-            Text("Edit participants", comment: "Text indicating that the view is used for editing which participants are replied to in a note.")
+            Text("Replying to", comment: "Text indicating that the view is used for editing which participants are replied to in a note.")
+                .font(.system(size: 18, weight: .bold))
             HStack {
                 Spacer()
                 Button {
@@ -35,6 +36,7 @@ struct ParticipantsView: View {
                 .buttonStyle(.borderedProminent)
                 Spacer()
             }
+            .padding(.bottom, 20)
             VStack {
                 ForEach(originalReferences.pRefs) { participant in
                     let pubkey = participant.id

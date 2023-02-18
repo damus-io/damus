@@ -23,6 +23,7 @@ struct PostView: View {
     let replying_to: NostrEvent?
     let references: [ReferencedId]
     let damus_state: DamusState
+    var quote: String = ""
 
     @Environment(\.presentationMode) var presentationMode
 
@@ -136,6 +137,10 @@ struct PostView: View {
                 }
             } else {
                 post = damus_state.drafts.post
+            }
+            
+            if !quote.isEmpty {
+                post = quote
             }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

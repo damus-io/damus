@@ -35,14 +35,16 @@ struct ReplyView: View {
                     }
                     .joined(separator: ", ")
                 Text(names)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.accentColor)
                     .font(.footnote)
             }
             .onTapGesture {
                 participantsShown.toggle()
             }
             .sheet(isPresented: $participantsShown) {
-                ParticipantsView(damus_state: damus, references: $references, originalReferences: $originalReferences)
+                HalfSheet {
+                    ParticipantsView(damus_state: damus, references: $references, originalReferences: $originalReferences)
+                }
             }
             ScrollView {
                 EventView(damus: damus, event: replying_to, has_action_bar: false)
