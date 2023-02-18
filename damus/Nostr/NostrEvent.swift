@@ -278,21 +278,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         return (self.flags & 1) != 0
     }
 
-    init(content: String, pubkey: String, kind: Int = 1, tags: [[String]] = [], createdAt: Int64 = Int64(Date().timeIntervalSince1970)) {
-        self.id = ""
-        self.sig = ""
-
-        self.content = content
-        self.pubkey = pubkey
-        self.kind = kind
-        self.tags = tags
-        self.created_at = createdAt
-    }
-    
-    /// Intiialization statement used to specificy ID
-    ///
-    /// This is mainly used for contant and testing data
-    init(id: String, content: String, pubkey: String, kind: Int = 1, tags: [[String]] = []) {
+    init(id: String = "", content: String, pubkey: String, kind: Int = 1, tags: [[String]] = [], createdAt: Int64 = Int64(Date().timeIntervalSince1970)) {
         self.id = id
         self.sig = ""
 
@@ -300,7 +286,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         self.pubkey = pubkey
         self.kind = kind
         self.tags = tags
-        self.created_at = Int64(Date().timeIntervalSince1970)
+        self.created_at = createdAt
     }
 
     init(from: NostrEvent, content: String? = nil) {
