@@ -18,20 +18,12 @@ struct EmbeddedEventView: View {
     var body: some View {
         VStack(alignment: .leading) {
             let profile = damus_state.profiles.lookup(id: pubkey)
-            HStack {
-                EventProfile(damus_state: damus_state, pubkey: pubkey, profile: profile, size: .small)
-                
-                Spacer()
-                
-                EventMenuContext(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey)
-                    .padding([.bottom], 4)
-
-            }
-            .minimumScaleFactor(0.75)
-            .lineLimit(1)
+            
+            EventProfile(damus_state: damus_state, pubkey: pubkey, profile: profile, size: .small)
             
             EventBody(damus_state: damus_state, event: event, size: .small)
         }
+        .event_context_menu(event, keypair: damus_state.keypair, target_pubkey: pubkey)
     }
 }
 
