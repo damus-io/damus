@@ -163,7 +163,7 @@
 			<key>one</key>
 			<string>%2$@ sat</string>
 			<key>other</key>
-			<string>%2$@ satów</string>
+			<string>%2$@ satoszy</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
