@@ -211,6 +211,12 @@ struct ConfigView: View {
                         KingfisherManager.shared.cache.cleanExpiredDiskCache()
                     }
                 }
+                
+                Section(NSLocalizedString("Clear Bookmarks", comment: "Section title for clearing bookmarks data.")) {
+                    Button(NSLocalizedString("Clear", comment: "Button for clearing bookmarks data.")) {
+                        BookmarksManager.clearAll()
+                    }
+                }
 
                 if state.is_privkey_user {
                     Section(NSLocalizedString("Delete", comment: "Section title for deleting the user")) {
