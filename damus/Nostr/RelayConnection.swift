@@ -19,7 +19,12 @@ final class RelayConnection: WebSocketDelegate, NostrRequestMaking {
     private(set) var isReconnecting = false
     
     private(set) var last_connection_attempt: TimeInterval = 0
-    private var socket: WebSocket?
+    private lazy var socket = {
+        let req = URLRequest(url: url)
+        let socket = WebSocket(request: req, compressionHandler: .none)
+        socket.delegate = self
+        return socket
+    }()
     private var handleEvent: (NostrConnectionEvent) -> ()
     private let url: URL
 
@@ -43,17 +48,13 @@ final class RelayConnection: WebSocketDelegate, NostrRequestMaking {
             return
         }
         
-        let socket = make_websocket(url: url)
-        socket.delegate = self
-
         isConnecting = true
         last_connection_attempt = Date().timeIntervalSince1970
         socket.connect()
-        self.socket = socket
     }
 
     func disconnect() {
-        socket?.disconnect()
+        socket.disconnect()
         isConnected = false
         isConnecting = false
     }
@@ -64,12 +65,7 @@ final class RelayConnection: WebSocketDelegate, NostrRequestMaking {
             return
         }
 
-        socket?.write(string: req)
-    }
-    
-    private func make_websocket(url: URL) -> WebSocket {
-        let req = URLRequest(url: url)
-        return WebSocket(request: req, compressionHandler: .none)
+        socket.write(string: req)
     }
     
     // MARK: - WebSocketDelegate
