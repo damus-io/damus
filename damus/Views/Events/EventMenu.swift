@@ -12,6 +12,8 @@ struct EventMenuContext: View {
     let keypair: Keypair
     let target_pubkey: String
     
+    @State private var isBookmarked: Bool = false
+    
     var body: some View {
     
         Button {
@@ -36,6 +38,23 @@ struct EventMenuContext: View {
             UIPasteboard.general.string = event_to_json(ev: event)
         } label: {
             Label(NSLocalizedString("Copy Note JSON", comment: "Context menu option for copying the JSON text from the note."), systemImage: "square.on.square")
+        }
+        
+        Button {
+            let event_json = event_to_json(ev: event)
+            BookmarksManager(pubkey: keypair.pubkey).updateBookmark(event_json)
+            isBookmarked = BookmarksManager(pubkey: keypair.pubkey).isBookmarked(event_json)
+            notify(.update_bookmarks, event)
+        } label: {
+            let imageName = isBookmarked ? "bookmark.fill" : "bookmark"
+            let unBookmarkString = NSLocalizedString("Un-Bookmark", comment: "Context menu option for un-bookmarking a note")
+            let bookmarkString = NSLocalizedString("Bookmark", comment: "Context menu optoin for bookmarking a note")
+            Label(isBookmarked ? unBookmarkString : bookmarkString, systemImage: imageName)
+        }
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                isBookmarked = BookmarksManager(pubkey: keypair.pubkey).isBookmarked(event_to_json(ev: event))
+            }
         }
 
         Button {
