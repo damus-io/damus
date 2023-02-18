@@ -123,7 +123,7 @@ struct PostView: View {
         }
         .sheet(isPresented: $attach_media) {
             ImagePicker(sourceType: .photoLibrary) { image in
-                myImageUploadRequest(imageToUpload: image, imgKey: "image") { uploadedImageURL in
+                myImageUploadRequest(imageToUpload: image) { uploadedImageURL in
                     post += uploadedImageURL
                 }
             }

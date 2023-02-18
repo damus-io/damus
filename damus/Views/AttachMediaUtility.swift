@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-func myImageUploadRequest(imageToUpload: UIImage, imgKey: String, completion: @escaping (String) -> ()) {
+func myImageUploadRequest(imageToUpload: UIImage, completion: @escaping (String) -> ()) {
     let myUrl = NSURL(string: "https://nostr.build/upload.php");
     let request = NSMutableURLRequest(url:myUrl! as URL);
     request.httpMethod = "POST";
@@ -17,7 +17,7 @@ func myImageUploadRequest(imageToUpload: UIImage, imgKey: String, completion: @e
     if imageData == nil  {
         return
     }
-    request.httpBody = createBodyWithParameters(filePathKey: "file", imageDataKey: imageData! as NSData, boundary: boundary, imgKey: imgKey) as Data
+    request.httpBody = createBodyWithParameters(imageDataKey: imageData! as NSData, boundary: boundary) as Data
 
     let task = URLSession.shared.dataTask(with: request as URLRequest) {
         data, response, error in
@@ -40,11 +40,11 @@ func myImageUploadRequest(imageToUpload: UIImage, imgKey: String, completion: @e
 
 
 
-func createBodyWithParameters(filePathKey: String?, imageDataKey: NSData, boundary: String, imgKey: String) -> NSData {
+func createBodyWithParameters(imageDataKey: NSData, boundary: String) -> NSData {
     let body = NSMutableData();
     let contentType = "image/png"
     body.appendString(string: "--\(boundary)\r\n")
-    body.appendString(string: "Content-Disposition: form-data; name=\"\("fileToUpload")\"; filename=\"\("plus.png")\"\r\n")
+    body.appendString(string: "Content-Disposition: form-data; name=\"\("fileToUpload")\"; filename=\"\("Damus.png")\"\r\n")
     body.appendString(string: "Content-Type: \(contentType)\r\n\r\n")
     body.append(imageDataKey as Data)
     body.appendString(string: "\r\n")
