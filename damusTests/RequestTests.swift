@@ -8,7 +8,7 @@
 import XCTest
 @testable import damus
 
-final class RequestTests: XCTestCase, NostrRequestMaking {
+final class RequestTests: XCTestCase {
     
     func testMakeUnsubscribeRequest() {
         let request = NostrRequest.unsubscribe("64FD064D-EB9E-4771-8255-8D16981B920B")

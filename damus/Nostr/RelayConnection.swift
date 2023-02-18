@@ -13,7 +13,7 @@ enum NostrConnectionEvent {
     case nostr_event(NostrResponse)
 }
 
-final class RelayConnection: WebSocketDelegate, NostrRequestMaking {
+final class RelayConnection: WebSocketDelegate {
     private(set) var isConnected = false
     private(set) var isConnecting = false
     private(set) var isReconnecting = false
@@ -116,45 +116,41 @@ final class RelayConnection: WebSocketDelegate, NostrRequestMaking {
     }
 }
 
-protocol NostrRequestMaking {}
-extension NostrRequestMaking {
-    
-    func make_nostr_req(_ req: NostrRequest) -> String? {
-        switch req {
-        case .subscribe(let sub):
-            return make_nostr_subscription_req(sub.filters, sub_id: sub.sub_id)
-        case .unsubscribe(let sub_id):
-            return make_nostr_unsubscribe_req(sub_id)
-        case .event(let ev):
-            return make_nostr_push_event(ev: ev)
-        }
+func make_nostr_req(_ req: NostrRequest) -> String? {
+    switch req {
+    case .subscribe(let sub):
+        return make_nostr_subscription_req(sub.filters, sub_id: sub.sub_id)
+    case .unsubscribe(let sub_id):
+        return make_nostr_unsubscribe_req(sub_id)
+    case .event(let ev):
+        return make_nostr_push_event(ev: ev)
     }
+}
 
-    private func make_nostr_push_event(ev: NostrEvent) -> String? {
-        guard let event = encode_json(ev) else {
+func make_nostr_push_event(ev: NostrEvent) -> String? {
+    guard let event = encode_json(ev) else {
+        return nil
+    }
+    let encoded = "[\"EVENT\",\(event)]"
+    print(encoded)
+    return encoded
+}
+
+func make_nostr_unsubscribe_req(_ sub_id: String) -> String? {
+    "[\"CLOSE\",\"\(sub_id)\"]"
+}
+
+func make_nostr_subscription_req(_ filters: [NostrFilter], sub_id: String) -> String? {
+    let encoder = JSONEncoder()
+    var req = "[\"REQ\",\"\(sub_id)\""
+    for filter in filters {
+        req += ","
+        guard let filter_json = try? encoder.encode(filter) else {
             return nil
         }
-        let encoded = "[\"EVENT\",\(event)]"
-        print(encoded)
-        return encoded
+        let filter_json_str = String(decoding: filter_json, as: UTF8.self)
+        req += filter_json_str
     }
-
-    private func make_nostr_unsubscribe_req(_ sub_id: String) -> String? {
-        "[\"CLOSE\",\"\(sub_id)\"]"
-    }
-
-    private func make_nostr_subscription_req(_ filters: [NostrFilter], sub_id: String) -> String? {
-        let encoder = JSONEncoder()
-        var req = "[\"REQ\",\"\(sub_id)\""
-        for filter in filters {
-            req += ","
-            guard let filter_json = try? encoder.encode(filter) else {
-                return nil
-            }
-            let filter_json_str = String(decoding: filter_json, as: UTF8.self)
-            req += filter_json_str
-        }
-        req += "]"
-        return req
-    }
+    req += "]"
+    return req
 }
