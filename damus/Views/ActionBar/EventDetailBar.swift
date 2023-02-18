@@ -41,7 +41,7 @@ struct EventDetailBar: View {
             if bar.zaps > 0 {
                 let dst = ZapsView(state: state, target: .note(id: target, author: target_pk))
                 NavigationLink(destination: dst) {
-                    Text("\(Text(verbatim: "\(bar.zaps)").font(.body.bold())) \(Text(String(format: NSLocalizedString("zaps_count", comment: "Part of a larger sentence to describe how many zap payments there are on a post."), bar.boosts)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.")
+                    Text("\(Text(verbatim: "\(bar.zaps)").font(.body.bold())) \(Text(String(format: NSLocalizedString("zaps_count", comment: "Part of a larger sentence to describe how many zap payments there are on a post."), bar.zaps)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.")
                 }
                 .buttonStyle(PlainButtonStyle())
             }
