@@ -32,6 +32,7 @@ struct MainView: View {
                     }
             }
         }
+        .dynamicTypeSize(.xSmall ... .xxxLarge)
         .onReceive(handle_notify(.logout)) { _ in
             try? clear_keypair()
             keypair = nil

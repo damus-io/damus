@@ -195,27 +195,13 @@ class RelayPool {
             relay.connection.send(req)
         }
     }
-
+    
     func get_relays(_ ids: [String]) -> [Relay] {
-        var relays: [Relay] = []
-
-        for id in ids {
-            if let relay = get_relay(id) {
-                relays.append(relay)
-            }
-        }
-
-        return relays
+        relays.filter { ids.contains($0.id) }
     }
-
+    
     func get_relay(_ id: String) -> Relay? {
-        for relay in relays {
-            if relay.id == id {
-                return relay
-            }
-        }
-
-        return nil
+        relays.first(where: { $0.id == id })
     }
     
     func record_last_pong(relay_id: String, event: NostrConnectionEvent) {

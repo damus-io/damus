@@ -22,24 +22,25 @@ struct Blur: UIViewRepresentable {
 }
 
 struct NoteContentView: View {
+    
     let damus_state: DamusState
     let event: NostrEvent
     let show_images: Bool
+    let size: EventViewKind
 
     @State var artifacts: NoteArtifacts
-    
-    let size: EventViewKind
-    
     @State var preview: LinkViewRepresentable? = nil
     
     func MainContent() -> some View {
         return VStack(alignment: .leading) {
-            Text(artifacts.content)
-                .font(eventviewsize_to_font(size))
-                .fixedSize(horizontal: false, vertical: true)
-
+            
             if size == .selected {
-                TranslateView(damus_state: damus_state, event: event, size: size)
+                SelectableText(attributedString: artifacts.content)
+                TranslateView(damus_state: damus_state, event: event)
+            } else {
+                Text(artifacts.content)
+                    .font(eventviewsize_to_font(size))
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             if show_images && artifacts.images.count > 0 {
@@ -166,7 +167,7 @@ struct NoteContentView_Previews: PreviewProvider {
         let state = test_damus_state()
         let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
         let artifacts = NoteArtifacts(content: AttributedString(stringLiteral: content), images: [], invoices: [], links: [])
-        NoteContentView(damus_state: state, event: NostrEvent(content: content, pubkey: "pk"), show_images: true, artifacts: artifacts, size: .normal)
+        NoteContentView(damus_state: state, event: NostrEvent(content: content, pubkey: "pk"), show_images: true, size: .normal, artifacts: artifacts)
     }
 }
 

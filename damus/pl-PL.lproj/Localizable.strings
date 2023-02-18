@@ -11,7 +11,7 @@
 "(who) following" = "(who) obserwuje";
 
 /* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
-Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
+Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'. */
 "%@ %@" = "%@ %@";
 
 /* Alert message that informs a user was blocked. */
@@ -24,7 +24,7 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
 "%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. Prywatny komunikator z szyfrowaniem typu \"End-to-End\". Trzymaj branżę technologiczną z dala od swoich prywatnych wiadomości";
 
 /* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
-"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Dawaj napiwki w reakcji na odpowiedzi znajomych i ciułaj satsy z Bitcoin⚡️, natywną walutą internetu.";
+"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Dawaj napiwki w reakcji na odpowiedzi znajomych i ciułaj satosze z Bitcoin⚡️, natywną walutą internetu.";
 
 /* Fraction of how many of the user's relay servers that are operational. */
 "%lld/%lld" = "%lld/%lld";
@@ -203,6 +203,9 @@ Sentence composed of 2 variables to describe how many relay servers a user is co
 
 /* Button to pay a Lightning invoice with the user's default Lightning wallet. */
 "Default Wallet" = "Portfel domyślny";
+
+/* Section title for zap configuration */
+"Default Zap Amount in sats" = "Domyślna zapów kwota w satoszach";
 
 /* Button for deleting the users account.
    Button to delete a relay server that the user connects to.
@@ -426,10 +429,12 @@ Part of a larger sentence to describe how many profiles a user is following. */
 /* Text to indicate that what is being shown is a post from a user who has been blocked. */
 "Post from a user you've blocked" = "Post od użytkownika, którego zablokowałeś";
 
-/* Label for filter for seeing only posts (instead of posts and replies). */
+/* Label for filter for seeing only posts (instead of posts and replies).
+Label for filter for seeing only your posts (instead of posts and replies). */
 "Posts" = "Posty";
 
-/* Label for filter for seeing posts and replies (instead of only posts). */
+/* Label for filter for seeing posts and replies (instead of only posts).
+Label for filter for seeing your posts and replies (instead of only your posts). */
 "Posts & Replies" = "Posty i odpowiedzi";
 
 /* Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading. */

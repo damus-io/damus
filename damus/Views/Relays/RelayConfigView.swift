@@ -22,9 +22,8 @@ struct RelayConfigView: View {
     
     var recommended: [RelayDescriptor] {
         let rs: [RelayDescriptor] = []
-        return BOOTSTRAP_RELAYS.reduce(into: rs) { (xs, x) in
-            if let _ = state.pool.get_relay(x) {
-            } else {
+        return BOOTSTRAP_RELAYS.reduce(into: rs) { xs, x in
+            if state.pool.get_relay(x) == nil {
                 xs.append(RelayDescriptor(url: URL(string: x)!, info: .rw))
             }
         }
