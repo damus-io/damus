@@ -44,7 +44,7 @@ func createBodyWithParameters(imageDataKey: NSData, boundary: String) -> NSData 
     let body = NSMutableData();
     let contentType = "image/png"
     body.appendString(string: "--\(boundary)\r\n")
-    body.appendString(string: "Content-Disposition: form-data; name=\"\("fileToUpload")\"; filename=\"\("Damus.png")\"\r\n")
+    body.appendString(string: "Content-Disposition: form-data; name=\"fileToUpload\"; filename=\"Damus.png\"\r\n")
     body.appendString(string: "Content-Type: \(contentType)\r\n\r\n")
     body.append(imageDataKey as Data)
     body.appendString(string: "\r\n")
