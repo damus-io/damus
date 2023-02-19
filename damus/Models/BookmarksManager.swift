@@ -8,25 +8,31 @@
 import Foundation
 
 class BookmarksManager {
-    static private let userDefaults = UserDefaults.standard
     
-    static var bookmarks: [String] {
+    private let userDefaults = UserDefaults.standard
+    private let pubkey: String
+    
+    init(pubkey: String) {
+        self.pubkey = pubkey
+    }
+    
+    var bookmarks: [String] {
         get {
-            return userDefaults.stringArray(forKey: "bookmarks") ?? []
+            return userDefaults.stringArray(forKey: storageKey()) ?? []
         }
         set {
             let uniqueBookmarks = Array(Set(newValue))
             if uniqueBookmarks != bookmarks {
-                userDefaults.set(uniqueBookmarks, forKey: "bookmarks")
+                userDefaults.set(uniqueBookmarks, forKey: storageKey())
             }
         }
     }
     
-    static func isBookmarked(_ string: String) -> Bool {
+    func isBookmarked(_ string: String) -> Bool {
         return bookmarks.contains(string)
     }
     
-    static func updateBookmark(_ string: String) {
+    func updateBookmark(_ string: String) {
         if isBookmarked(string) {
             bookmarks = bookmarks.filter { $0 != string }
         } else {
@@ -34,7 +40,11 @@ class BookmarksManager {
         }
     }
     
-    static func clearAll() {
+    func clearAll() {
         bookmarks = []
+    }
+    
+    private func storageKey() -> String {
+        pk_setting_key(pubkey, key: "bookmarks")
     }
 }

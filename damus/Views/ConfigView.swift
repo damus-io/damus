@@ -214,7 +214,7 @@ struct ConfigView: View {
                 
                 Section(NSLocalizedString("Clear Bookmarks", comment: "Section title for clearing bookmarks data.")) {
                     Button(NSLocalizedString("Clear", comment: "Button for clearing bookmarks data.")) {
-                        BookmarksManager.clearAll()
+                        BookmarksManager(pubkey: state.pubkey).clearAll()
                     }
                 }
 

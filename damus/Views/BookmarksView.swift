@@ -29,7 +29,7 @@ struct BookmarksView: View {
                     Text(NSLocalizedString("You have no bookmarks yet, add them in the context menu", comment: "Text indicating that there are no bookmarks to be viewed"))
                 }
                 .task {
-                    bookmarkEvents = BookmarksManager.bookmarks.compactMap { bookmark_json in
+                    bookmarkEvents = BookmarksManager(pubkey: state.pubkey).bookmarks.compactMap { bookmark_json in
                         event_from_json(dat: bookmark_json)
                     }
                 }
