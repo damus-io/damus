@@ -163,7 +163,7 @@ struct ContentView: View {
                 Text("Notifications", comment: "Toolbar label for Notifications view.")
                     .bold()
             case .search:
-                Text("Global", comment: "Toolbar label for Global view where posts from all connected relay servers appear.")
+                Text("Universe 🛸", comment: "Toolbar label for the universal view where posts from all connected relay servers appear.")
                     .bold()
             case .none:
                 Text("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
@@ -202,7 +202,7 @@ struct ContentView: View {
                 EmptyView()
             }
         }
-        .navigationBarTitle(selected_timeline == .home ?  NSLocalizedString("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.") : NSLocalizedString("Global", comment: "Navigation bar title for Global view where posts from all connected relay servers appear."), displayMode: .inline)
+        .navigationBarTitle(selected_timeline == .home ?  NSLocalizedString("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.") : NSLocalizedString("Universe 🛸", comment: "Navigation bar title for universal view where posts from all connected relay servers appear."), displayMode: .inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
                 timelineNavItem
