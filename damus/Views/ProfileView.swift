@@ -156,6 +156,7 @@ struct ProfileView: View {
 
         }
         .frame(height: bannerHeight)
+        .allowsHitTesting(false)
     }
     
     var navbarHeight: CGFloat {
