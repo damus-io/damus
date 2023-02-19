@@ -295,7 +295,7 @@ struct ContentView: View {
                                                     self.active_sheet = .filter
                                                 }) {
                                                     // checklist, checklist.checked, lisdt.bullet, list.bullet.circle, line.3.horizontal.decrease...,  line.3.horizontail.decrease
-                                                    Label("Filter", systemImage: "line.3.horizontal.decrease")
+                                                    Label(NSLocalizedString("Filter", comment: "Button label text for filtering relay servers."), systemImage: "line.3.horizontal.decrease")
                                                         .foregroundColor(.gray)
                                                         //.contentShape(Rectangle())
                                                 }

@@ -26,14 +26,14 @@ struct EventDetailBar: View {
         HStack {
             if bar.boosts > 0 {
                 NavigationLink(destination: RepostsView(damus_state: state, model: RepostsModel(state: state, target: target))) {
-                    Text("\(Text(verbatim: "\(bar.boosts)").font(.body.bold())) \(Text(String(format: NSLocalizedString("reposts_count", comment: "Part of a larger sentence to describe how many reposts there are."), bar.boosts)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.")
+                    Text("\(Text(verbatim: "\(bar.boosts)").font(.body.bold())) \(Text(String(format: Bundle.main.localizedString(forKey: "reposts_count", value: nil, table: nil), bar.boosts)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.")
                 }
                 .buttonStyle(PlainButtonStyle())
             }
 
             if bar.likes > 0 {
                 NavigationLink(destination: ReactionsView(damus_state: state, model: ReactionsModel(state: state, target: target))) {
-                    Text("\(Text(verbatim: "\(bar.likes)").font(.body.bold())) \(Text(String(format: NSLocalizedString("reactions_count", comment: "Part of a larger sentence to describe how many reactions there are on a post."), bar.likes)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.")
+                    Text("\(Text(verbatim: "\(bar.likes)").font(.body.bold())) \(Text(String(format: Bundle.main.localizedString(forKey: "reactions_count", value: nil, table: nil), bar.likes)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.")
                 }
                 .buttonStyle(PlainButtonStyle())
             }
@@ -41,7 +41,7 @@ struct EventDetailBar: View {
             if bar.zaps > 0 {
                 let dst = ZapsView(state: state, target: .note(id: target, author: target_pk))
                 NavigationLink(destination: dst) {
-                    Text("\(Text(verbatim: "\(bar.zaps)").font(.body.bold())) \(Text(String(format: NSLocalizedString("zaps_count", comment: "Part of a larger sentence to describe how many zap payments there are on a post."), bar.zaps)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.")
+                    Text("\(Text(verbatim: "\(bar.zaps)").font(.body.bold())) \(Text(String(format: Bundle.main.localizedString(forKey: "zaps_count", value: nil, table: nil), bar.zaps)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.")
                 }
                 .buttonStyle(PlainButtonStyle())
             }

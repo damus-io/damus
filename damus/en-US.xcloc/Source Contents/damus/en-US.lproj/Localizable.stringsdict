@@ -4,6 +4,8 @@
 <dict>
 	<key>collapsed_event_view_other_notes</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@NOTES@</string>
 		<key>NOTES</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -11,15 +13,15 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>1%d andere Notiz</string>
+			<string>... %d other note ...</string>
 			<key>other</key>
-			<string>1%d andere Notizen</string>
+			<string>... %d other notes ...</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>··· %#@NOTES@ ···</string>
 	</dict>
 	<key>followers_count</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWERS@</string>
 		<key>FOLLOWERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -27,12 +29,10 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Gefolgte:r</string>
+			<string>Follower</string>
 			<key>other</key>
-			<string>Gefolgte</string>
+			<string>Followers</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@FOLLOWERS@</string>
 	</dict>
 	<key>reactions_count</key>
 	<dict>
@@ -45,9 +45,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Reaktion</string>
+			<string>Reaction</string>
 			<key>other</key>
-			<string>Reaktionen</string>
+			<string>Reactions</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -69,7 +69,7 @@
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Antwort an %@%#@OTHERS@</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -77,17 +77,15 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>&amp; 1%d andere</string>
+			<string>Replying to %2$@ &amp; %1$d other</string>
 			<key>other</key>
-			<string>&amp; %d andere</string>
-			<key>zero</key>
-			<string></string>
+			<string>Replying to %2$@ &amp; %1$d others</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Antwort an %@, %@%#@OTHERS@</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -95,11 +93,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>&amp; %d andere</string>
+			<string>Replying to %2$@, %3$@ &amp; %1$d other</string>
 			<key>other</key>
-			<string>&amp; %d andere</string>
-			<key>zero</key>
-			<string></string>
+			<string>Replying to %2$@, %3$@ &amp; %1$d others</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -113,9 +109,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>geteilter Beitrag</string>
+			<string>Repost</string>
 			<key>other</key>
-			<string>geteilte Beiträge</string>
+			<string>Reposts</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -134,20 +130,20 @@
 			<string>%2$@ sats</string>
 		</dict>
 	</dict>
-	<key>tips_count</key>
+	<key>zaps_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@TIPS@</string>
-		<key>TIPS</key>
+		<string>%#@ZAPS@</string>
+		<key>ZAPS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Trinkgeld</string>
+			<string>Zap</string>
 			<key>other</key>
-			<string>Trinkgelder</string>
+			<string>Zaps</string>
 		</dict>
 	</dict>
 </dict>

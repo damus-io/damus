@@ -273,7 +273,7 @@ func format_msats(_ msat: Int64) -> String {
     let sats = NSNumber(value: (Double(msat) / 1000.0))
     let formattedSats = numberFormatter.string(from: sats) ?? sats.stringValue
 
-    return String(format: NSLocalizedString("sats_count", comment: "Amount of sats."), sats.decimalValue as NSDecimalNumber, formattedSats)
+    return String(format: Bundle.main.localizedString(forKey: "sats_count", value: nil, table: nil), sats.decimalValue as NSDecimalNumber, formattedSats)
 }
 
 func convert_invoice_block(_ b: invoice_block) -> Block? {
