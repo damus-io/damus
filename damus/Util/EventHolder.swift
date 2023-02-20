@@ -79,6 +79,10 @@ class EventHolder: ObservableObject {
     }
     
     func flush() {
+        guard !incoming.isEmpty else {
+            return
+        }
+        
         var changed = false
         for event in incoming {
             if insert_uniq_sorted_event_created(events: &events, new_ev: event) {

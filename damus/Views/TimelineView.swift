@@ -56,13 +56,17 @@ struct TimelineView: View {
             .buttonStyle(BorderlessButtonStyle())
             .coordinateSpace(name: "scroll")
             .onReceive(NotificationCenter.default.publisher(for: .scroll_to_top)) { _ in
+                let delay = events.has_incoming ? 0.1 : 0.0
+                events.flush()
                 guard let event = events.events.filter(self.filter).first else {
                     return
                 }
                 self.events.should_queue = false
-                events.flush()
-                scroll_to_event(scroller: scroller, id: event.id, delay: 0.0, animate: true, anchor: .top)
+                scroll_to_event(scroller: scroller, id: event.id, delay: delay, animate: true, anchor: .top)
             }
+        }
+        .onAppear {
+            events.flush()
         }
     }
 }
