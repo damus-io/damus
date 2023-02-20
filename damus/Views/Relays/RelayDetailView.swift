@@ -39,9 +39,9 @@ struct RelayDetailView: View {
                     Section(content: {
                         RelayPaidDetail(payments_url: nip11.payments_url)
                     }, header: {
-                        Text("Paid Relay")
+                        Text("Paid Relay", comment: "Section header that indicates the relay server requires payment.")
                     }, footer: {
-                        Text("This is a paid relay, you must pay for posts to be accepted.")
+                        Text("This is a paid relay, you must pay for posts to be accepted.", comment: "Footer description that explains that the relay server requires payment to post.")
                     })
                 }
                 

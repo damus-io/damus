@@ -50,19 +50,22 @@ class HomeModel: ObservableObject {
     let profiles_subid = UUID().description
 
     @Published var new_events: NewEventsBits = NewEventsBits()
-    @Published var notifications: [NostrEvent] = []
+    @Published var notifications: EventHolder
     @Published var dms: DirectMessagesModel
-    @Published var events: [NostrEvent] = []
+    @Published var events: EventHolder
     @Published var loading: Bool = false
     @Published var signal: SignalModel = SignalModel()
 
     init() {
+        self.events = EventHolder()
+        self.notifications = EventHolder()
         self.damus_state = DamusState.empty
-        self.dms = DirectMessagesModel(our_pubkey: damus_state.pubkey)
-        self.setup_debouncer()
+        self.dms = DirectMessagesModel(our_pubkey: "")
     }
-
+    
     init(damus_state: DamusState) {
+        self.events = EventHolder()
+        self.notifications = EventHolder()
         self.damus_state = damus_state
         self.dms = DirectMessagesModel(our_pubkey: damus_state.pubkey)
         self.setup_debouncer()
@@ -140,7 +143,7 @@ class HomeModel: ObservableObject {
             return
         }
         
-        if !insert_uniq_sorted_event(events: &notifications, new_ev: ev, cmp: { $0.created_at > $1.created_at }) {
+        if !notifications.insert(ev) {
             return
         }
         
@@ -192,9 +195,9 @@ class HomeModel: ObservableObject {
     }
     
     func filter_muted() {
-        self.events = events.filter { !damus_state.contacts.is_muted($0.pubkey) }
+        events.filter { !damus_state.contacts.is_muted($0.pubkey) }
         self.dms.dms = dms.dms.filter { !damus_state.contacts.is_muted($0.0) }
-        self.notifications = notifications.filter { !damus_state.contacts.is_muted($0.pubkey) }
+        notifications.filter { !damus_state.contacts.is_muted($0.pubkey) }
     }
     
     func handle_delete_event(_ ev: NostrEvent) {
@@ -319,7 +322,7 @@ class HomeModel: ObservableObject {
                     dms.append(contentsOf: incoming_dms)
                     load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: dms, damus_state: damus_state)
                 } else if sub_id == notifications_subid {
-                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: notifications, damus_state: damus_state)
+                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: notifications.all_events, damus_state: damus_state)
                 }
                 
                 self.loading = false
@@ -458,10 +461,10 @@ class HomeModel: ObservableObject {
             return
         }
         
-        if !insert_uniq_sorted_event(events: &notifications, new_ev: ev, cmp: { $0.created_at > $1.created_at }) {
+        if !notifications.insert(ev) {
             return
         }
-
+        
         handle_last_event(ev: ev, timeline: .notifications)
     }
     
@@ -472,8 +475,7 @@ class HomeModel: ObservableObject {
     }
 
     func insert_home_event(_ ev: NostrEvent) {
-        let ok = insert_uniq_sorted_event(events: &self.events, new_ev: ev, cmp: { $0.created_at > $1.created_at })
-        if ok {
+        if events.insert(ev) {
             handle_last_event(ev: ev, timeline: .home)
         }
     }

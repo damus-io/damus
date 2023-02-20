@@ -94,7 +94,7 @@ struct ChatView: View {
                         }
                     }
                 
-                    if let ref_id = thread.replies.lookup(event.id) {
+                    if let _ = thread.replies.lookup(event.id) {
                         if !is_reply_to_prev() {
                             /*
                             ReplyQuoteView(keypair: damus_state.keypair, quoter: event, event_id: ref_id, profiles: damus_state.profiles, previews: damus_state.previews)

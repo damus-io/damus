@@ -8,7 +8,7 @@
 import Foundation
 
 class ProfileModel: ObservableObject, Equatable {
-    @Published var events: [NostrEvent] = []
+    var events: EventHolder = EventHolder()
     @Published var contacts: NostrEvent? = nil
     @Published var following: Int = 0
     @Published var relays: [String: RelayInfo]? = nil
@@ -111,7 +111,9 @@ class ProfileModel: ObservableObject, Equatable {
             return
         }
         if ev.is_textlike || ev.known_kind == .boost {
-            insert_uniq_sorted_event(events: &self.events, new_ev: ev, cmp: { $0.created_at > $1.created_at})
+            if self.events.insert(ev) {
+                self.objectWillChange.send()
+            }
         } else if ev.known_kind == .contacts {
             handle_profile_contact_event(ev)
         } else if ev.known_kind == .metadata {

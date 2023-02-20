@@ -92,7 +92,7 @@ struct ContentView: View {
     @State var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
-
+    
     // connect retry timer
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
 
@@ -136,7 +136,7 @@ struct ContentView: View {
     func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
         ZStack {
             if let damus = self.damus_state {
-                TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter)
+                TimelineView(events: home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter)
             }
         }
     }
@@ -163,7 +163,7 @@ struct ContentView: View {
                 Text("Notifications", comment: "Toolbar label for Notifications view.")
                     .bold()
             case .search:
-                Text("Global", comment: "Toolbar label for Global view where posts from all connected relay servers appear.")
+                Text("Universe 🛸", comment: "Toolbar label for the universal view where posts from all connected relay servers appear.")
                     .bold()
             case .none:
                 Text("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
@@ -192,7 +192,7 @@ struct ContentView: View {
             case .notifications:
                 VStack(spacing: 0) {
                     Divider()
-                    TimelineView(events: $home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
+                    TimelineView(events: home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
                 }
             case .dms:
                 DirectMessagesView(damus_state: damus_state!)
@@ -202,7 +202,7 @@ struct ContentView: View {
                 EmptyView()
             }
         }
-        .navigationBarTitle(selected_timeline == .home ?  NSLocalizedString("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.") : NSLocalizedString("Global", comment: "Navigation bar title for Global view where posts from all connected relay servers appear."), displayMode: .inline)
+        .navigationBarTitle(selected_timeline == .home ?  NSLocalizedString("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.") : NSLocalizedString("Universe 🛸", comment: "Navigation bar title for universal view where posts from all connected relay servers appear."), displayMode: .inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
                 timelineNavItem
@@ -295,7 +295,7 @@ struct ContentView: View {
                                                     self.active_sheet = .filter
                                                 }) {
                                                     // checklist, checklist.checked, lisdt.bullet, list.bullet.circle, line.3.horizontal.decrease...,  line.3.horizontail.decrease
-                                                    Label("Filter", systemImage: "line.3.horizontal.decrease")
+                                                    Label(NSLocalizedString("Filter", comment: "Button label text for filtering relay servers."), systemImage: "line.3.horizontal.decrease")
                                                         .foregroundColor(.gray)
                                                         //.contentShape(Rectangle())
                                                 }

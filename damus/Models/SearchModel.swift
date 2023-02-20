@@ -9,7 +9,7 @@ import Foundation
 
 
 class SearchModel: ObservableObject {
-    @Published var events: [NostrEvent] = []
+    var events: EventHolder = EventHolder()
     @Published var loading: Bool = false
     @Published var channel_name: String? = nil
     
@@ -26,7 +26,8 @@ class SearchModel: ObservableObject {
     }
     
     func filter_muted()  {
-        self.events = self.events.filter { should_show_event(contacts: contacts, ev: $0) }
+        self.events.filter { should_show_event(contacts: contacts, ev: $0) }
+        self.objectWillChange.send()
     }
     
     func subscribe() {
@@ -57,7 +58,7 @@ class SearchModel: ObservableObject {
             return
         }
         
-        if insert_uniq_sorted_event(events: &self.events, new_ev: ev, cmp: { $0.created_at > $1.created_at } ) {
+        if self.events.insert(ev) {
             objectWillChange.send()
         }
     }

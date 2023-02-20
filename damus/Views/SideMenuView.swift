@@ -133,7 +133,7 @@ struct SideMenuView: View {
                         Button(action: {
                             showQRCode.toggle()
                         }, label: {
-                            Label(NSLocalizedString("", comment: "Sidebar menu label for accessing QRCode view"), systemImage: "qrcode")
+                            Label("", systemImage: "qrcode")
                                 .font(.title)
                                 .foregroundColor(textColor())
                         }).fullScreenCover(isPresented: $showQRCode) {
