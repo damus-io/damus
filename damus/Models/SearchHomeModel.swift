@@ -10,7 +10,7 @@ import Foundation
 
 /// The data model for the SearchHome view, typically something global-like
 class SearchHomeModel: ObservableObject {
-    @Published var events: [NostrEvent] = []
+    var events: EventHolder = EventHolder()
     @Published var loading: Bool = false
 
     var seen_pubkey: Set<String> = Set()
@@ -31,7 +31,8 @@ class SearchHomeModel: ObservableObject {
     }
     
     func filter_muted() {
-        events = events.filter { should_show_event(contacts: damus_state.contacts, ev: $0) }
+        events.filter { should_show_event(contacts: damus_state.contacts, ev: $0) }
+        self.objectWillChange.send()
     }
     
     func subscribe() {
@@ -61,8 +62,8 @@ class SearchHomeModel: ObservableObject {
                 }
                 seen_pubkey.insert(ev.pubkey)
                 
-                insert_uniq_sorted_event(events: &events, new_ev: ev) {
-                    $0.created_at > $1.created_at
+                if self.events.insert(ev) {
+                    self.objectWillChange.send()
                 }
             }
         case .notice(let msg):
@@ -75,7 +76,7 @@ class SearchHomeModel: ObservableObject {
                 // global events are not realtime
                 unsubscribe(to: relay_id)
                 
-                load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: events, damus_state: damus_state)
+                load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: events.all_events, damus_state: damus_state)
             }
             
             

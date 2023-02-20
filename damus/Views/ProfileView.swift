@@ -404,10 +404,10 @@ struct ProfileView: View {
                     .background(colorScheme == .dark ? Color.black : Color.white)
                     
                     if filter_state == FilterState.posts {
-                        InnerTimelineView(events: $profile.events, damus: damus_state, show_friend_icon: false, filter: FilterState.posts.filter)
+                        InnerTimelineView(events: profile.events, damus: damus_state, show_friend_icon: false, filter: FilterState.posts.filter)
                     }
                     if filter_state == FilterState.posts_and_replies {
-                        InnerTimelineView(events: $profile.events, damus: damus_state, show_friend_icon: false, filter: FilterState.posts_and_replies.filter)
+                        InnerTimelineView(events: profile.events, damus: damus_state, show_friend_icon: false, filter: FilterState.posts_and_replies.filter)
                     }
                 }
                 .padding(.horizontal, Theme.safeAreaInsets?.left)

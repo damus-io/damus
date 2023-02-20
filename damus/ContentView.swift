@@ -92,7 +92,7 @@ struct ContentView: View {
     @State var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
-
+    
     // connect retry timer
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
 
@@ -136,7 +136,7 @@ struct ContentView: View {
     func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
         ZStack {
             if let damus = self.damus_state {
-                TimelineView(events: $home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter)
+                TimelineView(events: home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter)
             }
         }
     }
@@ -192,7 +192,7 @@ struct ContentView: View {
             case .notifications:
                 VStack(spacing: 0) {
                     Divider()
-                    TimelineView(events: $home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
+                    TimelineView(events: home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
                 }
             case .dms:
                 DirectMessagesView(damus_state: damus_state!)

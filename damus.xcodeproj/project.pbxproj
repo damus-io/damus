@@ -156,6 +156,9 @@
 		4CC7AAF8297F1CEE00430951 /* EventProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAF7297F1CEE00430951 /* EventProfile.swift */; };
 		4CC7AAFA297F64AC00430951 /* EventMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAF9297F64AC00430951 /* EventMenu.swift */; };
 		4CD7641B28A1641400B6928F /* EndBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD7641A28A1641400B6928F /* EndBlock.swift */; };
+		4CE0E2AF29A2E82100DB4CA2 /* EventHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0E2AE29A2E82100DB4CA2 /* EventHolder.swift */; };
+		4CE0E2B229A3DF6900DB4CA2 /* LoadMoreButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0E2B129A3DF6900DB4CA2 /* LoadMoreButton.swift */; };
+		4CE0E2B629A3ED5500DB4CA2 /* InnerTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0E2B529A3ED5500DB4CA2 /* InnerTimelineView.swift */; };
 		4CE4F8CD281352B30009DFBB /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE4F8CC281352B30009DFBB /* Notifications.swift */; };
 		4CE4F9DE2852768D00C00DD9 /* ConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE4F9DD2852768D00C00DD9 /* ConfigView.swift */; };
 		4CE4F9E1285287B800C00DD9 /* TextFieldAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE4F9E0285287B800C00DD9 /* TextFieldAlert.swift */; };
@@ -468,6 +471,9 @@
 		4CC7AAF7297F1CEE00430951 /* EventProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventProfile.swift; sourceTree = "<group>"; };
 		4CC7AAF9297F64AC00430951 /* EventMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventMenu.swift; sourceTree = "<group>"; };
 		4CD7641A28A1641400B6928F /* EndBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndBlock.swift; sourceTree = "<group>"; };
+		4CE0E2AE29A2E82100DB4CA2 /* EventHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventHolder.swift; sourceTree = "<group>"; };
+		4CE0E2B129A3DF6900DB4CA2 /* LoadMoreButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadMoreButton.swift; sourceTree = "<group>"; };
+		4CE0E2B529A3ED5500DB4CA2 /* InnerTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InnerTimelineView.swift; sourceTree = "<group>"; };
 		4CE4F8CC281352B30009DFBB /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
 		4CE4F9DD2852768D00C00DD9 /* ConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigView.swift; sourceTree = "<group>"; };
 		4CE4F9E0285287B800C00DD9 /* TextFieldAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldAlert.swift; sourceTree = "<group>"; };
@@ -684,6 +690,7 @@
 		4C75EFA227FA576C0006080F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4CE0E2B029A3DF4700DB4CA2 /* Timeline */,
 				4CE879562996C44A00F758CC /* Zaps */,
 				4CB9D4A52992D01900A9A7E4 /* Profile */,
 				4CAAD8AE29888A9B00060CEA /* Relays */,
@@ -796,6 +803,7 @@
 				3AB72AB8298ECF30004BB58C /* Translator.swift */,
 				4C2CDDF6299D4A5E00879FD5 /* Debouncer.swift */,
 				7C95CAED299DCEF1009DCB67 /* KFOptionSetter+.swift */,
+				4CE0E2AE29A2E82100DB4CA2 /* EventHolder.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -856,6 +864,15 @@
 				4C3D52B7298DB5C6001C5831 /* TextEvent.swift */,
 			);
 			path = Events;
+			sourceTree = "<group>";
+		};
+		4CE0E2B029A3DF4700DB4CA2 /* Timeline */ = {
+			isa = PBXGroup;
+			children = (
+				4CE0E2B129A3DF6900DB4CA2 /* LoadMoreButton.swift */,
+				4CE0E2B529A3ED5500DB4CA2 /* InnerTimelineView.swift */,
+			);
+			path = Timeline;
 			sourceTree = "<group>";
 		};
 		4CE4F9DF285287A000C00DD9 /* Components */ = {
@@ -1231,6 +1248,8 @@
 				F7F0BA272978E54D009531F3 /* ParicipantsView.swift in Sources */,
 				4C0A3F91280F6528000448DE /* ChatView.swift in Sources */,
 				4CF0ABE32981BC7D00D66079 /* UserView.swift in Sources */,
+				4CE0E2AF29A2E82100DB4CA2 /* EventHolder.swift in Sources */,
+				4CE0E2B229A3DF6900DB4CA2 /* LoadMoreButton.swift in Sources */,
 				4CF0ABF029857E9200D66079 /* Bech32Object.swift in Sources */,
 				4C3D52B8298DB5C6001C5831 /* TextEvent.swift in Sources */,
 				4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */,
@@ -1298,6 +1317,7 @@
 				4CAAD8AD298851D000060CEA /* AccountDeletion.swift in Sources */,
 				4C3EA67928FF7ABF00C48A62 /* list.c in Sources */,
 				4C64987E286D082C00EAE2B3 /* DirectMessagesModel.swift in Sources */,
+				4CE0E2B629A3ED5500DB4CA2 /* InnerTimelineView.swift in Sources */,
 				4C363A8828236948006E126D /* BlocksView.swift in Sources */,
 				4C06670628FCB08600038D2A /* ImageCarousel.swift in Sources */,
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
