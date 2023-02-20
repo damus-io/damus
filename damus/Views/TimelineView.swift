@@ -41,42 +41,34 @@ struct TimelineView: View {
     
     var MainContent: some View {
         ScrollViewReader { scroller in
-            ZStack {
-                VStack {
-                    LoadMoreButton(events: events, scroller: scroller)
-                        .padding([.top], 10)
-                    Spacer()
+            ScrollView {
+                InnerTimelineView(events: events, damus: damus, show_friend_icon: show_friend_icon, filter: loading ? { _ in true } : filter)
+                    .redacted(reason: loading ? .placeholder : [])
+                    .shimmer(loading)
+                    .disabled(loading)
+                    .background(GeometryReader { proxy -> Color in
+                        DispatchQueue.main.async {
+                            handle_scroll(proxy)
+                        }
+                        return Color.clear
+                    })
+            }
+            .overlay(
+                Rectangle()
+                    .fill(RECTANGLE_GRADIENT.opacity(realtime_bar_opacity))
+                    .offset(y: -1)
+                    .frame(height: events.should_queue ? 0 : 8)
+                    ,
+                alignment: .top
+            )
+            .buttonStyle(BorderlessButtonStyle())
+            .coordinateSpace(name: "scroll")
+            .onReceive(NotificationCenter.default.publisher(for: .scroll_to_top)) { _ in
+                guard let event = events.events.filter(self.filter).first else {
+                    return
                 }
-                .zIndex(10.0)
-        
-                ScrollView {
-                    InnerTimelineView(events: events, damus: damus, show_friend_icon: show_friend_icon, filter: loading ? { _ in true } : filter)
-                        .redacted(reason: loading ? .placeholder : [])
-                        .shimmer(loading)
-                        .disabled(loading)
-                        .background(GeometryReader { proxy -> Color in
-                            DispatchQueue.main.async {
-                                handle_scroll(proxy)
-                            }
-                            return Color.clear
-                        })
-                }
-                .overlay(
-                    Rectangle()
-                        .fill(RECTANGLE_GRADIENT.opacity(realtime_bar_opacity))
-                        .offset(y: -1)
-                        .frame(height: events.should_queue ? 0 : 8)
-                        ,
-                    alignment: .top
-                )
-                .buttonStyle(BorderlessButtonStyle())
-                .coordinateSpace(name: "scroll")
-                .onReceive(NotificationCenter.default.publisher(for: .scroll_to_top)) { _ in
-                    guard let event = events.events.filter(self.filter).first else {
-                        return
-                    }
-                    scroll_to_event(scroller: scroller, id: event.id, delay: 0.0, animate: true, anchor: .top)
-                }
+                events.flush()
+                scroll_to_event(scroller: scroller, id: event.id, delay: 0.0, animate: true, anchor: .top)
             }
         }
     }
