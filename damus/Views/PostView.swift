@@ -72,20 +72,20 @@ struct PostView: View {
 
                 Spacer()
 
-                if !is_post_empty {
-                    Button(NSLocalizedString("Post", comment: "Button to post a note.")) {
-                        showPrivateKeyWarning = contentContainsPrivateKey(self.post)
+                Button(NSLocalizedString("Post", comment: "Button to post a note.")) {
+                    showPrivateKeyWarning = contentContainsPrivateKey(self.post)
 
-                        if !showPrivateKeyWarning {
-                            self.send_post()
-                        }
+                    if !showPrivateKeyWarning {
+                        self.send_post()
                     }
-                    .font(.system(size: 14, weight: .bold))
-                    .frame(width: 80, height: 30)
-                    .foregroundColor(.white)
-                    .background(LINEAR_GRADIENT)
-                    .clipShape(Capsule())
                 }
+                .disabled(is_post_empty)
+                .font(.system(size: 14, weight: .bold))
+                .frame(width: 80, height: 30)
+                .foregroundColor(.white)
+                .background(LINEAR_GRADIENT)
+                .opacity(is_post_empty ? 0.5 : 1.0)
+                .clipShape(Capsule())
             }
             .padding([.top, .bottom], 4)
             
