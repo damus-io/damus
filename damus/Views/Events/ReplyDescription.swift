@@ -43,14 +43,14 @@ func reply_desc(profiles: Profiles, event: NostrEvent) -> String {
     let othersCount = n - pubkeys.count
     if names.count > 1 {
         if othersCount == 0 {
-            return String(format: NSLocalizedString("Replying to %@ & %@", comment: "Label to indicate that the user is replying to 2 users."), names[0], names[1])
+            return String(format: "Replying to %@ & %@", names[0], names[1])
         } else {
             return String(format: "Replying to %@, %@ & %d others", names[0], names[1], othersCount)
         }
     }
 
     if othersCount == 0 {
-        return String(format: NSLocalizedString("Replying to %@", comment: "Label to indicate that the user is replying to 1 user."), names[0])
+        return String(format: "Replying to %@", names[0])
     } else {
         return String(format: "Replying to %@ & %d others", names[0], othersCount)
     }
