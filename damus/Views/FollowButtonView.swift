@@ -70,19 +70,19 @@ struct FollowButtonPreviews: View {
     let target: FollowTarget = .pubkey("")
     var body: some View {
         VStack {
-            Text("Unfollows", comment: "Text to indicate that the button next to it is in a state that will unfollow a profile when tapped.")
+            Text(verbatim: "Unfollows")
             FollowButtonView(target: target, follows_you: false, follow_state: .unfollows)
             
-            Text("Following", comment: "Text to indicate that the button next to it is in a state that indicates that it is in the process of following a profile.")
+            Text(verbatim: "Following")
             FollowButtonView(target: target, follows_you: false, follow_state: .following)
            
-            Text("Follows", comment: "Text to indicate that button next to it is in a state that will follow a profile when tapped.")
+            Text(verbatim: "Follows")
             FollowButtonView(target: target, follows_you: false, follow_state: .follows)
             
-            Text("Follows", comment: "Text to indicate that button next to it is in a state that will follow a profile when tapped.")
+            Text(verbatim: "Follows")
             FollowButtonView(target: target, follows_you: true, follow_state: .follows)
             
-            Text("Unfollowing", comment: "Text to indicate that the button next to it is in  a state that indicates that it is in the process of unfollowing a profile.")
+            Text(verbatim: "Unfollowing")
             FollowButtonView(target: target, follows_you: false, follow_state: .unfollowing)
         }
     }

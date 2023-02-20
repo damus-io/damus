@@ -32,7 +32,7 @@ func reply_desc(profiles: Profiles, event: NostrEvent) -> String {
     let n = desc.others
 
     if desc.pubkeys.count == 0 {
-        return NSLocalizedString("Reply to self", comment: "Label to indicate that the user is replying to themself.")
+        return NSLocalizedString("Replying to self", comment: "Label to indicate that the user is replying to themself.")
     }
 
     let names: [String] = pubkeys.map {
@@ -40,16 +40,20 @@ func reply_desc(profiles: Profiles, event: NostrEvent) -> String {
         return Profile.displayName(profile: prof, pubkey: $0)
     }
 
-    if names.count == 2 {
-        if n > 2 {
-            let othersCount = n - pubkeys.count
-            return String(format: NSLocalizedString("replying_to_two_and_others", comment: "Label to indicate that the user is replying to 2 users and others."), names[0], names[1], othersCount)
+    let othersCount = n - pubkeys.count
+    if names.count > 1 {
+        if othersCount == 0 {
+            return String(format: NSLocalizedString("Replying to %@ & %@", comment: "Label to indicate that the user is replying to 2 users."), names[0], names[1])
+        } else {
+            return String(format: Bundle.main.localizedString(forKey: "replying_to_two_and_others", value: nil, table: nil), othersCount, names[0], names[1])
         }
-        return String(format: NSLocalizedString("Replying to %@ & %@", comment: "Label to indicate that the user is replying to 2 users."), names[0], names[1])
     }
 
-    let othersCount = n - pubkeys.count
-    return String(format: NSLocalizedString("replying_to_one_and_others", comment: "Label to indicate that the user is replying to 1 user and others."), names[0], othersCount)
+    if othersCount == 0 {
+        return String(format: NSLocalizedString("Replying to %@", comment: "Label to indicate that the user is replying to 1 user."), names[0])
+    } else {
+        return String(format: Bundle.main.localizedString(forKey: "replying_to_one_and_others", value: nil, table: nil), othersCount, names[0])
+    }
 }
 
 

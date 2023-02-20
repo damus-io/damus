@@ -108,24 +108,6 @@ All user-facing strings must have a comment in order to provide context to trans
 
 [transifex]: https://explore.transifex.com/damus/damus-ios/
 
-#### Export Source Translations
-
-If user-facing strings have been added or changed, please export them for translation as part of your pull request or commit by running:
-
-```zsh
-./devtools/export-source-translation.sh
-```
-
-This command will export source translations to `translations/en-US.xcloc/Localized Contents/en-US.xliff`, which the Transifex integration will read from the `master` branch and allow translators to translate those strings.
-
-#### Import Translations
-
-Once 100% of strings have been translated for a given locale, Transifex will open up a pull request with the `translations/<locale>.xliff` file changed. Currently, it must be manually imported into the project before merging the pull request by running:
-
-```zsh
-./devtools/import-translation.sh <locale_code_in_snake_case>
-```
-
 ### Awards
 
 There may be nostr badges awarded for contributors in the future... :)

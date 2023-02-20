@@ -1,10 +1,28 @@
 git:
   filters:
-  - filter_type: file
-    file_format: XLIFF
+  - filter_type: dir
+    file_format: STRINGSDICT
+    source_file_extension: stringsdict
     source_language: en_US
-    source_file: translations/en-US.xcloc/Localized Contents/en-US.xliff
-    translation_files_expression: translations/<lang>.xliff
+    source_file_dir: damus/en-US.xcloc/Source Contents/damus/en-US.lproj/
+    translation_files_expression: damus/<lang>.lproj/
+
+  - filter_type: dir
+    file_format: STRINGS
+    source_file_extension: strings
+    source_language: en_US
+    source_file_dir: damus/en-US.xcloc/Source Contents/damus/en-US.lproj/
+    translation_files_expression: damus/<lang>.lproj/
 
 settings:
-  pr_branch_name: transifex/<br_unique_id>
+  language_mapping:
+    de_AT: de-AT
+    el_GR: el-GR
+    es_419: es-419
+    fr_FR: fr-FR
+    it_IT: it-IT
+    lv_LV: lv-LV
+    pl_PL: pl-PL
+    pt_PT: pt-PT
+    tr_TR: tr-TR
+    zh_CN: zh-CN
