@@ -29,7 +29,7 @@ struct TimelineView: View {
     
     func handle_scroll(_ proxy: GeometryProxy) {
         let offset = -proxy.frame(in: .named("scroll")).origin.y
-        guard offset != -0.0 else {
+        guard offset >= 0 else {
             return
         }
         self.events.should_queue = offset > 0
