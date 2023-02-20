@@ -53,20 +53,13 @@ struct TimelineView: View {
                         return Color.clear
                     })
             }
-            .overlay(
-                Rectangle()
-                    .fill(RECTANGLE_GRADIENT.opacity(realtime_bar_opacity))
-                    .offset(y: -1)
-                    .frame(height: events.should_queue ? 0 : 8)
-                    ,
-                alignment: .top
-            )
             .buttonStyle(BorderlessButtonStyle())
             .coordinateSpace(name: "scroll")
             .onReceive(NotificationCenter.default.publisher(for: .scroll_to_top)) { _ in
                 guard let event = events.events.filter(self.filter).first else {
                     return
                 }
+                self.events.should_queue = false
                 events.flush()
                 scroll_to_event(scroller: scroller, id: event.id, delay: 0.0, animate: true, anchor: .top)
             }
