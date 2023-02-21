@@ -71,6 +71,7 @@ struct SelectedEventView: View {
                 self.bar.update(damus: self.damus, evid: target)
             }
             .padding([.leading], 2)
+            .compositingGroup()
         }
     }
 }
