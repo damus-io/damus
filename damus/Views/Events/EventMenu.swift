@@ -44,6 +44,7 @@ struct EventMenuContext: View {
             let event_json = event_to_json(ev: event)
             BookmarksManager(pubkey: keypair.pubkey).updateBookmark(event_json)
             isBookmarked = BookmarksManager(pubkey: keypair.pubkey).isBookmarked(event_json)
+            notify(.update_bookmarks, event)
         } label: {
             let imageName = isBookmarked ? "bookmark.fill" : "bookmark"
             let unBookmarkString = NSLocalizedString("Un-Bookmark", comment: "Context menu option for un-bookmarking a note")

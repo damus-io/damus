@@ -29,9 +29,7 @@ struct BookmarksView: View {
                     Text(NSLocalizedString("You have no bookmarks yet, add them in the context menu", comment: "Text indicating that there are no bookmarks to be viewed"))
                 }
                 .task {
-                    bookmarkEvents = BookmarksManager(pubkey: state.pubkey).bookmarks.compactMap { bookmark_json in
-                        event_from_json(dat: bookmark_json)
-                    }
+                    updateBookmarks()
                 }
             } else {
                 ScrollView {
@@ -49,6 +47,15 @@ struct BookmarksView: View {
                     bookmarkEvents = []
                 }                
             }
+        }
+        .onReceive(handle_notify(.update_bookmarks)) { _ in
+            updateBookmarks()
+        }
+    }
+    
+    private func updateBookmarks() {
+        bookmarkEvents = BookmarksManager(pubkey: state.pubkey).bookmarks.compactMap { bookmark_json in
+            event_from_json(dat: bookmark_json)
         }
     }
 }
