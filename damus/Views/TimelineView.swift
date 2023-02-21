@@ -29,10 +29,13 @@ struct TimelineView: View {
     
     func handle_scroll(_ proxy: GeometryProxy) {
         let offset = -proxy.frame(in: .named("scroll")).origin.y
-        guard offset != -0.0 else {
+        guard offset >= 0 else {
             return
         }
-        self.events.should_queue = offset > 0
+        let val = offset > 0
+        if self.events.should_queue != val {
+            self.events.should_queue = val
+        }
     }
     
     var realtime_bar_opacity: Double {
@@ -41,43 +44,32 @@ struct TimelineView: View {
     
     var MainContent: some View {
         ScrollViewReader { scroller in
-            ZStack {
-                VStack {
-                    LoadMoreButton(events: events, scroller: scroller)
-                        .padding([.top], 10)
-                    Spacer()
-                }
-                .zIndex(10.0)
-        
-                ScrollView {
-                    InnerTimelineView(events: events, damus: damus, show_friend_icon: show_friend_icon, filter: loading ? { _ in true } : filter)
-                        .redacted(reason: loading ? .placeholder : [])
-                        .shimmer(loading)
-                        .disabled(loading)
-                        .background(GeometryReader { proxy -> Color in
-                            DispatchQueue.main.async {
-                                handle_scroll(proxy)
-                            }
-                            return Color.clear
-                        })
-                }
-                .overlay(
-                    Rectangle()
-                        .fill(RECTANGLE_GRADIENT.opacity(realtime_bar_opacity))
-                        .offset(y: -1)
-                        .frame(height: events.should_queue ? 0 : 8)
-                        ,
-                    alignment: .top
-                )
-                .buttonStyle(BorderlessButtonStyle())
-                .coordinateSpace(name: "scroll")
-                .onReceive(NotificationCenter.default.publisher(for: .scroll_to_top)) { _ in
-                    guard let event = events.events.filter(self.filter).first else {
-                        return
-                    }
-                    scroll_to_event(scroller: scroller, id: event.id, delay: 0.0, animate: true, anchor: .top)
-                }
+            ScrollView {
+                Color.white.opacity(0)
+                    .id("startblock")
+                    .frame(height: 1)
+                
+                InnerTimelineView(events: events, damus: damus, show_friend_icon: show_friend_icon, filter: loading ? { _ in true } : filter)
+                    .redacted(reason: loading ? .placeholder : [])
+                    .shimmer(loading)
+                    .disabled(loading)
+                    .background(GeometryReader { proxy -> Color in
+                        DispatchQueue.main.async {
+                            handle_scroll(proxy)
+                        }
+                        return Color.clear
+                    })
             }
+            .buttonStyle(BorderlessButtonStyle())
+            .coordinateSpace(name: "scroll")
+            .onReceive(NotificationCenter.default.publisher(for: .scroll_to_top)) { _ in
+                events.flush()
+                self.events.should_queue = false
+                scroll_to_event(scroller: scroller, id: "startblock", delay: 0.0, animate: true, anchor: .top)
+            }
+        }
+        .onAppear {
+            events.flush()
         }
     }
 }

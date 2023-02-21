@@ -8,8 +8,18 @@
 import Foundation
 import LinkPresentation
 
+class CachedMetadata {
+    let meta: LPLinkMetadata
+    var intrinsic_height: CGFloat?
+    
+    init(meta: LPLinkMetadata) {
+        self.meta = meta
+        self.intrinsic_height = nil
+    }
+}
+
 enum Preview {
-    case value(LinkViewRepresentable)
+    case value(CachedMetadata)
     case failed
 }
 
@@ -20,12 +30,12 @@ class PreviewCache {
         return previews[evid]
     }
     
-    func store(evid: String, preview: LinkViewRepresentable?)  {
+    func store(evid: String, preview: LPLinkMetadata?)  {
         switch preview {
         case .none:
             previews[evid] = .failed
         case .some(let meta):
-            previews[evid] = .value(meta)
+            previews[evid] = .value(CachedMetadata(meta: meta))
         }
     }
     

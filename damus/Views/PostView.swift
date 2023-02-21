@@ -87,6 +87,7 @@ struct PostView: View {
                     .clipShape(Capsule())
                 }
             }
+            .frame(height: 30)
             .padding([.top, .bottom], 4)
             
             HStack(alignment: .top) {
