@@ -42,6 +42,14 @@ struct BookmarksView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(bookmarksTitle)
+        .toolbar {
+            if !bookmarkEvents.isEmpty {
+                Button(NSLocalizedString("Clear All", comment: "Button for clearing bookmarks data.")) {
+                    BookmarksManager(pubkey: state.pubkey).clearAll()
+                    bookmarkEvents = []
+                }                
+            }
+        }
     }
 }
 
