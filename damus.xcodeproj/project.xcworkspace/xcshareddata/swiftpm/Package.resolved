@@ -1,12 +1,30 @@
 {
   "pins" : [
     {
-      "identity" : "kingfisher",
+      "identity" : "sdwebimage",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/onevcat/Kingfisher",
+      "location" : "https://github.com/SDWebImage/SDWebImage.git",
       "state" : {
-        "revision" : "415b1d97fb38bda1e5a6b2dde63354720832110b",
-        "version" : "7.6.1"
+        "revision" : "554e05a4415fe20add53531c21e593c403685c3d",
+        "version" : "5.15.3"
+      }
+    },
+    {
+      "identity" : "sdwebimagesvgcoder",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SDWebImage/SDWebImageSVGCoder.git",
+      "state" : {
+        "revision" : "afbe025cbdae37c20c144956fbabc07ddd5c0fc2",
+        "version" : "1.6.1"
+      }
+    },
+    {
+      "identity" : "sdwebimageswiftui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SDWebImage/SDWebImageSwiftUI.git",
+      "state" : {
+        "revision" : "61fefe9c284fd41ddef77d02749e88f00c305196",
+        "version" : "2.2.2"
       }
     },
     {
