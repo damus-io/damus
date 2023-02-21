@@ -33,7 +33,7 @@ struct BookmarksView: View {
                 }
             } else {
                 ScrollView {
-                    InnerTimelineView(events: $bookmarkEvents, damus: state, show_friend_icon: true, filter: noneFilter)
+                    InnerTimelineView(events: EventHolder(events: bookmarkEvents, incoming: []), damus: state, show_friend_icon: true, filter: noneFilter)
 
                 }
             }
