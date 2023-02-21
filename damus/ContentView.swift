@@ -192,7 +192,7 @@ struct ContentView: View {
             case .notifications:
                 VStack(spacing: 0) {
                     Divider()
-                    TimelineView(events: home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
+                    NotificationsView(state: damus, notifications: home.notifications)
                 }
             case .dms:
                 DirectMessagesView(damus_state: damus_state!)
@@ -615,7 +615,8 @@ struct ContentView: View {
                                       settings: UserSettingsStore(),
                                       relay_filters: relay_filters,
                                       relay_metadata: metadatas,
-                                      drafts: Drafts()
+                                      drafts: Drafts(),
+                                      events: EventCache()
         )
         home.damus_state = self.damus_state!
         

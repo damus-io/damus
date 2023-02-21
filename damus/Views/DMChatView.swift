@@ -37,9 +37,7 @@ struct DMChatView: View {
 
     var Header: some View {
         let profile = damus_state.profiles.lookup(id: pubkey)
-        let pmodel = ProfileModel(pubkey: pubkey, damus: damus_state)
-        let fmodel = FollowersModel(damus_state: damus_state, target: pubkey)
-        let profile_page = ProfileView(damus_state: damus_state, profile: pmodel, followers: fmodel)
+        let profile_page = ProfileView(damus_state: damus_state, pubkey: pubkey)
         return NavigationLink(destination: profile_page) {
             HStack {
                 ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles)

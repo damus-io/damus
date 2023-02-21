@@ -110,8 +110,6 @@ struct ProfileView: View {
     static let markdown = Markdown()
     
     @State private var selected_tab: ProfileTab = .posts
-    @StateObject var profile: ProfileModel
-    @StateObject var followers: FollowersModel
     @State private var showingEditProfile = false
     @State var showing_select_wallet: Bool = false
     @State var is_zoomed: Bool = false
@@ -119,6 +117,21 @@ struct ProfileView: View {
     @State var action_sheet_presented: Bool = false
     @State var filter_state : FilterState = .posts
     @State var yOffset: CGFloat = 0
+    
+    @StateObject var profile: ProfileModel
+    @StateObject var followers: FollowersModel
+    
+    init(damus_state: DamusState, profile: ProfileModel, followers: FollowersModel) {
+        self.damus_state = damus_state
+        self._profile = StateObject(wrappedValue: profile)
+        self._followers = StateObject(wrappedValue: followers)
+    }
+    
+    init(damus_state: DamusState, pubkey: String) {
+        self.damus_state = damus_state
+        self._profile = StateObject(wrappedValue: ProfileModel(pubkey: pubkey, damus: damus_state))
+        self._followers = StateObject(wrappedValue: FollowersModel(damus_state: damus_state, target: pubkey))
+    }
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
@@ -459,9 +472,7 @@ struct ProfileView: View {
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state()
-        let followers = FollowersModel(damus_state: ds, target: ds.pubkey)
-        let profile_model = ProfileModel(pubkey: ds.pubkey, damus: ds)
-        ProfileView(damus_state: ds, profile: profile_model, followers: followers)
+        ProfileView(damus_state: ds, pubkey: ds.pubkey)
     }
 }
 

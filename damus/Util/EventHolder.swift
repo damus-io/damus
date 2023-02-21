@@ -12,7 +12,7 @@ class EventHolder: ObservableObject {
     private var has_event: Set<String>
     @Published var events: [NostrEvent]
     @Published var incoming: [NostrEvent]
-    @Published var should_queue: Bool
+    var should_queue: Bool
     
     var queued: Int {
         return incoming.count

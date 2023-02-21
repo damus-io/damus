@@ -168,6 +168,9 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
             return decrypted(privkey: privkey) ?? "*failed to decrypt content*"
         }
         
+        return content
+        
+        /*
         switch validity {
         case .ok:
             return content
@@ -176,6 +179,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         case .bad_sig:
             return content + "\n\n*WARNING: invalid signature, could be forged!*"
         }
+         */
     }
 
     var description: String {
