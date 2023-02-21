@@ -51,7 +51,9 @@ struct EventMenuContext: View {
             Label(isBookmarked ? unBookmarkString : bookmarkString, systemImage: imageName)
         }
         .onAppear {
-            isBookmarked = BookmarksManager(pubkey: keypair.pubkey).isBookmarked(event_to_json(ev: event))
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                isBookmarked = BookmarksManager(pubkey: keypair.pubkey).isBookmarked(event_to_json(ev: event))
+            }
         }
 
         Button {
