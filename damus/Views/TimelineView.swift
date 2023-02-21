@@ -32,7 +32,10 @@ struct TimelineView: View {
         guard offset >= 0 else {
             return
         }
-        self.events.should_queue = offset > 0
+        let val = offset > 0
+        if self.events.should_queue != val {
+            self.events.should_queue = val
+        }
     }
     
     var realtime_bar_opacity: Double {
