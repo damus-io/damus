@@ -168,3 +168,9 @@ struct EventProfileName: View {
     }
 }
 
+struct ProfileName_Previews: PreviewProvider {
+    static var previews: some View {
+        ProfileName(pubkey:
+                        test_damus_state().pubkey, profile: make_test_profile(), damus: test_damus_state(), show_friend_confirmed: true)
+    }
+}
