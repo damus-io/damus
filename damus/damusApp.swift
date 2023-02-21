@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import SDWebImage
+import SDWebImageSVGCoder
 
 @main
 struct damusApp: App {
@@ -39,6 +41,23 @@ struct MainView: View {
         }
         .onAppear {
             keypair = get_saved_keypair()
+            
+            let responseModifier = SDWebImageDownloaderResponseModifier { (response) -> URLResponse? in
+                let contentLength = response.expectedContentLength
+
+                // Content-Length header is optional (-1 when missing)
+                if (contentLength != -1 && contentLength > 20_971_520) {
+                    return nil
+                }
+
+                return response
+            }
+
+            SDWebImageDownloader.shared.responseModifier = responseModifier
+
+            SDImageCoderHelper.defaultScaleDownLimitBytes = 5_242_880
+            SDImageCodersManager.shared.addCoder(SDImageAWebPCoder.shared)
+            SDImageCodersManager.shared.addCoder(SDImageSVGCoder.shared)
         }
     }
 }

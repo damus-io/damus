@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import Kingfisher
+import SDWebImageSwiftUI
 
 // TODO: all this ShareSheet complexity can be replaced with ShareLink once we update to iOS 16
 struct ShareSheet: UIViewControllerRepresentable {
@@ -71,23 +71,15 @@ private struct ImageContainerView: View {
     @State private var image: UIImage?
     @State private var showShareSheet = false
     
-    private struct ImageHandler: ImageModifier {
-        @Binding var handler: UIImage?
-        
-        func modify(_ image: UIImage) -> UIImage {
-            handler = image
-            return image
-        }
-    }
-    
     var body: some View {
         
-        KFAnimatedImage(url)
-            .imageContext(.note)
-            .configure { view in
-                view.framePreloadCount = 3
+        WebImage(url: url, options: [.scaleDownLargeImages])
+            .onSuccess { image,_,_ in
+                self.image = image
             }
-            .imageModifier(ImageHandler(handler: $image))
+            .purgeable(true)
+            .maxBufferSize(.max)
+            .resizable()
             .clipped()
             .modifier(ImageContextMenuModifier(url: url, image: image, showShareSheet: $showShareSheet))
             .sheet(isPresented: $showShareSheet) {
@@ -198,13 +190,12 @@ struct ImageCarousel: View {
                 Rectangle()
                     .foregroundColor(Color.clear)
                     .overlay {
-                        KFAnimatedImage(url)
-                            .imageContext(.note)
-                            .cancelOnDisappear(true)
-                            .configure { view in
-                                view.framePreloadCount = 3
-                            }
-                            .aspectRatio(contentMode: .fit)
+                        WebImage(url: url, options: [.scaleDownLargeImages])
+                            .purgeable(true)
+                            .maxBufferSize(.max)
+                            .resizable()
+                            .scaledToFit()
+                            .cornerRadius(10)
                             .tabItem {
                                 Text(url.absoluteString)
                             }
@@ -217,7 +208,6 @@ struct ImageCarousel: View {
                     }
             }
         }
-        .cornerRadius(10)
         .fullScreenCover(isPresented: $open_sheet) {
             ImageView(urls: urls)
         }

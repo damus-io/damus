@@ -6,27 +6,41 @@
 //
 
 import SwiftUI
-import Kingfisher
+import SDWebImageSwiftUI
 
 struct InnerBannerImageView: View {
     
     let url: URL?
     let defaultImage = UIImage(named: "profile-banner") ?? UIImage()
+    
+    @State var loading = true
+    @State var failed = false
 
     var body: some View {
         ZStack {
             Color(uiColor: .systemBackground)
             
-            if (url != nil) {
-                KFAnimatedImage(url)
-                    .imageContext(.banner)
-                    .configure { view in
-                        view.framePreloadCount = 3
+            if (url != nil && !failed) {
+                WebImage(url: url, options: [.scaleDownLargeImages])
+                    .onSuccess {_,_,_ in
+                        DispatchQueue.main.async {
+                            loading = false
+                        }
                     }
-                    .placeholder { _ in
+                    .onFailure { error in
+                        let code = (error as NSError).code
+                        if code == 2002 { return }
+                        DispatchQueue.main.async {
+                            failed = true
+                        }
+                    }
+                    .purgeable(true)
+                    .maxBufferSize(.max)
+                    .resizable()
+                    .scaledToFill()
+                    .placeholder(when: loading) {
                         Color(uiColor: .secondarySystemBackground)
                     }
-                    .onFailureImage(defaultImage)
             } else {
                 Image(uiImage: defaultImage).resizable()
             }

@@ -5,7 +5,7 @@
 //  Created by scoder1747 on 12/27/22.
 //
 import SwiftUI
-import Kingfisher
+import SDWebImageSwiftUI
 
 private struct ImageContainerView: View {
     
@@ -14,23 +14,16 @@ private struct ImageContainerView: View {
     @State private var image: UIImage?
     @State private var showShareSheet = false
     
-    private struct ImageHandler: ImageModifier {
-        @Binding var handler: UIImage?
-        
-        func modify(_ image: UIImage) -> UIImage {
-            handler = image
-            return image
-        }
-    }
-    
     var body: some View {
         
-        KFAnimatedImage(url)
-            .imageContext(.pfp)
-            .configure { view in
-                view.framePreloadCount = 3
+        WebImage(url: url, options: [.scaleDownLargeImages])
+            .onSuccess { image,_,_ in
+                self.image = image
             }
-            .imageModifier(ImageHandler(handler: $image))
+            .purgeable(true)
+            .maxBufferSize(.max)
+            .resizable()
+            .scaledToFill()
             .clipShape(Circle())
             .modifier(ImageContextMenuModifier(url: url, image: image, showShareSheet: $showShareSheet))
             .sheet(isPresented: $showShareSheet) {

@@ -230,6 +230,6 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
 
 func is_image_url(_ url: URL) -> Bool {
     let str = url.lastPathComponent.lowercased()
-    return str.hasSuffix("png") || str.hasSuffix("jpg") || str.hasSuffix("jpeg") || str.hasSuffix("gif")
+    return str.hasSuffix("png") || str.hasSuffix("jpg") || str.hasSuffix("jpeg") || str.hasSuffix("gif") || str.hasSuffix("webp")
 }
 

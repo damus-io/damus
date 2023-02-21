@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import Kingfisher
+import SDWebImageSwiftUI
 
 let PFP_SIZE: CGFloat = 52.0
 
@@ -39,6 +39,9 @@ struct InnerProfilePicView: View {
     let pubkey: String
     let size: CGFloat
     let highlight: Highlight
+    
+    @State var loading = true
+    @State var failed = false
 
     var PlaceholderColor: Color {
         return id_to_color(pubkey)
@@ -56,16 +59,42 @@ struct InnerProfilePicView: View {
         ZStack {
             Color(uiColor: .systemBackground)
     
-            KFAnimatedImage(url)
-                .imageContext(.pfp)
-                .onFailure(fallbackUrl: fallbackUrl, cacheKey: url?.absoluteString)
-                .cancelOnDisappear(true)
-                .configure { view in
-                    view.framePreloadCount = 3
-                }
-                .placeholder { _ in
-                    Placeholder
-                }
+            if !failed {
+                AnimatedImage(url: url, options: [.scaleDownLargeImages])
+                    .onSuccess {_,_,_ in
+                        DispatchQueue.main.async {
+                            loading = false
+                        }
+                    }
+                    .onFailure { error in
+                        let code = (error as NSError).code
+                        if code == 2002 { return }
+                        DispatchQueue.main.async {
+                            failed = true
+                        }
+                    }
+                    .purgeable(true)
+                    .maxBufferSize(.max)
+                    .resizable()
+                    .scaledToFill()
+                    .placeholder(when: loading) {
+                        Placeholder
+                    }
+            } else {
+                AnimatedImage(url: fallbackUrl, options: [.scaleDownLargeImages])
+                    .onSuccess {_,_,_ in
+                        DispatchQueue.main.async {
+                            loading = false
+                        }
+                    }
+                    .purgeable(true)
+                    .maxBufferSize(.max)
+                    .resizable()
+                    .scaledToFill()
+                    .placeholder(when: loading) {
+                        Placeholder
+                    }
+            }
         }
         .frame(width: size, height: size)
         .clipShape(Circle())

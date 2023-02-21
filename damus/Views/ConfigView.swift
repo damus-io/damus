@@ -5,7 +5,7 @@
 //  Created by William Casarin on 2022-06-09.
 //
 import AVFoundation
-import Kingfisher
+import SDWebImage
 import SwiftUI
 import LocalAuthentication
 import Combine
@@ -206,9 +206,8 @@ struct ConfigView: View {
 
                 Section(NSLocalizedString("Clear Cache", comment: "Section title for clearing cached data.")) {
                     Button(NSLocalizedString("Clear", comment: "Button for clearing cached data.")) {
-                        KingfisherManager.shared.cache.clearMemoryCache()
-                        KingfisherManager.shared.cache.clearDiskCache()
-                        KingfisherManager.shared.cache.cleanExpiredDiskCache()
+                        SDImageCache.shared.clearMemory()
+                        SDImageCache.shared.clearDisk()
                     }
                 }
 
