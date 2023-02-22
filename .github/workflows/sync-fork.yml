@@ -1,9 +1,9 @@
-name: Sync Fork, Export Translations 
+name: Sync Fork 
 
 on:
   workflow_dispatch:  # Run manually 
   schedule:
-  - cron: "0 */4 * * *" # Run every 4 hours
+  - cron: "0 */1 * * *" # Run every hour
 
 jobs:
   sync_latest:
