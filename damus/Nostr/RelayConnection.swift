@@ -96,18 +96,20 @@ final class RelayConnection: WebSocketDelegate {
                             self.handleEvent(.nostr_event(ev))
                         }
                         return
+                    } else {
+                        print("decode failed for \(txt)")
+                        // TODO: trigger event error
                     }
                 }
             } else {
                 if let ev = decode_nostr_event(txt: txt) {
                     handleEvent(.nostr_event(ev))
-                    return
+                } else {
+                    print("decode failed for \(txt)")
+                    // TODO: trigger event error
                 }
             }
-
-            print("decode failed for \(txt)")
-            // TODO: trigger event error
-
+            
         default:
             break
         }
