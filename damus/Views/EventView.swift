@@ -86,9 +86,6 @@ struct EventView: View {
                 TextEvent(damus: damus, event: event, pubkey: pubkey, has_action_bar: has_action_bar, booster_pubkey: nil)
                     .padding([.top], 6)
             }
-            
-            Divider()
-                .padding([.top], 4)
         }
     }
 }

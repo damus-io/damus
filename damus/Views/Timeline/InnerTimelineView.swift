@@ -42,6 +42,9 @@ struct InnerTimelineView: View {
                             navigating = true
                         }
                         .padding(.top, 10)
+                    
+                    Divider()
+                        .padding([.top], 10)
                 }
             }
         }
