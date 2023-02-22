@@ -265,6 +265,10 @@ struct ThreadV2View: View {
                                            navigating: $navigating,
                                            selected: false
                             )
+                            
+                            Divider()
+                                .padding(.top, 4)
+                                .padding(.leading, 25 * 2)
                         }
                     }.background(GeometryReader { geometry in
                         // get the height and width of the EventView view
@@ -299,6 +303,9 @@ struct ThreadV2View: View {
                                 navigating: $navigating,
                                 selected: false
                             )
+
+                            Divider()
+                                .padding([.top], 4)
                         }
                     }
                 }.padding()
