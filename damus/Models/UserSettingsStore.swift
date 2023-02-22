@@ -159,6 +159,12 @@ class UserSettingsStore: ObservableObject {
             }
         }
     }
+    
+    @Published var event_validation: EventValidation {
+        didSet {
+            UserDefaults.standard.set(event_validation.rawValue, forKey: "event_validation")
+        }
+    }
 
     init() {
         // TODO: pubkey-scoped settings
@@ -206,6 +212,8 @@ class UserSettingsStore: ObservableObject {
         } catch {
             deepl_api_key = ""
         }
+        
+        event_validation = UserDefaults.standard.object(forKey: "event_validation") as? EventValidation ?? .none
     }
 
     private func saveLibreTranslateApiKey(_ apiKey: String) throws {

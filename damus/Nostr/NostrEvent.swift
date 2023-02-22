@@ -10,8 +10,7 @@ import CommonCrypto
 import secp256k1
 import secp256k1_implementation
 import CryptoKit
-
-
+import SwiftUI
 
 enum ValidationResult: Decodable {
     case ok
@@ -48,6 +47,9 @@ struct EventId: Identifiable, CustomStringConvertible {
 }
 
 class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Hashable, Comparable {
+    //private var state: DamusState
+    private var settings = UserSettingsStore()
+    
     static func == (lhs: NostrEvent, rhs: NostrEvent) -> Bool {
         return lhs.id == rhs.id
     }
@@ -97,7 +99,18 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     }
     
     lazy var validity: ValidationResult = {
-        return .ok //validate_event(ev: self)
+        switch settings.event_validation {
+        case .none:
+            return .ok
+        case .subscribed:
+            if isFriend(pubkey: self.pubkey) {
+                return validate_event(ev: self)
+            } else {
+                return .ok
+            }
+        case .all:
+            return validate_event(ev: self)
+        }
     }()
     
     private var _blocks: [Block]? = nil
@@ -830,6 +843,10 @@ func first_eref_mention(ev: NostrEvent, privkey: String?) -> Mention? {
     }
     
     return nil
+}
+
+func isFriend(pubkey: String) -> Bool {
+    return Contacts(our_pubkey: pubkey).is_friend(pubkey)
 }
 
 extension [ReferencedId] {

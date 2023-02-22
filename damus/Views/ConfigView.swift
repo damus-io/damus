@@ -203,6 +203,15 @@ struct ConfigView: View {
                     Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)
                         .toggleStyle(.switch)
                 }
+                
+                Section(NSLocalizedString("Event Validation", comment: "Section title for validating events, where events are Nostr events and validation is proving the signature cryptographically correct")) {
+                    Picker(NSLocalizedString("Validation", comment: "Picker title for setting to validate Nostr events"), selection: $settings.event_validation) {
+                        ForEach(EventValidation.allCases, id: \.self) { validation in
+                            Text(validation.model.displayName)
+                                .tag(validation.model.tag)
+                        }
+                    }
+                }
 
                 Section(NSLocalizedString("Clear Cache", comment: "Section title for clearing cached data.")) {
                     Button(NSLocalizedString("Clear", comment: "Button for clearing cached data.")) {
