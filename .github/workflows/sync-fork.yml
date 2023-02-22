@@ -1,0 +1,35 @@
+name: Sync Fork, Export Translations 
+
+on:
+  workflow_dispatch:  # Run manually 
+  schedule:
+  - cron: "0 */4 * * *" # Run every 4 hours
+
+jobs:
+  sync_latest:
+    name: Sync damus-io/damus
+    runs-on: ubuntu-latest
+    outputs:
+      has_new_commits: ${{ steps.sync.outputs.has_new_commits }}
+    steps:
+    - name: Checkout target repo
+      uses: actions/checkout@v2
+      with:
+        ref: master
+        token: ${{ secrets.PAT }}
+    - name: Sync upstream changes
+      id: sync
+      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+      with:
+        target_sync_branch: master
+        target_repo_token: ${{ secrets.PAT }}
+        target_branch_push_args: '--force'
+        upstream_sync_branch: master
+        upstream_sync_repo: damus-io/damus
+        git_config_pull_rebase: true
+    - name: New commits found
+      if: steps.sync.outputs.has_new_commits == 'true'
+      run: echo "Found new commits"
+    - name: No new commits
+      if: steps.sync.outputs.has_new_commits == 'false'
+      run: echo "There were no new commits"
