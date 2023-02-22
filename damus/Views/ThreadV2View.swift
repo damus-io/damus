@@ -289,15 +289,17 @@ struct ThreadV2View: View {
                     ).id("main")
                     
                     // MARK: - Responses of the actual event view
-                    ForEach(thread.childEvents, id: \.id) { event in
-                        MutedEventView(
-                            damus_state: damus,
-                            event: event,
-                            scroller: reader,
-                            nav_target: $nav_target,
-                            navigating: $navigating,
-                            selected: false
-                        )
+                    LazyVStack {
+                        ForEach(thread.childEvents, id: \.id) { event in
+                            MutedEventView(
+                                damus_state: damus,
+                                event: event,
+                                scroller: nil,
+                                nav_target: $nav_target,
+                                navigating: $navigating,
+                                selected: false
+                            )
+                        }
                     }
                 }.padding()
             }.navigationBarTitle(NSLocalizedString("Thread", comment: "Navigation bar title for note thread."))
