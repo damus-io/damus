@@ -31,6 +31,8 @@
 		<string>walletofsatoshi</string>
 		<string>blixtwallet</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera access required to scan QR codes</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

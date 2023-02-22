@@ -12,6 +12,7 @@ struct SearchHomeView: View {
     let damus_state: DamusState
     @StateObject var model: SearchHomeModel
     @State var search: String = ""
+    @State private var showQRCapture = false
     
     var SearchInput: some View {
         ZStack(alignment: .leading) {
@@ -26,12 +27,28 @@ struct SearchHomeView: View {
                     .padding(EdgeInsets(top: 0.0, leading: 0.0, bottom: 0.0, trailing: 10.0))
                     .opacity((search == "") ? 0.0 : 1.0)
                     .onTapGesture {
-                        self.search = ""
+                        search = ""
                     }
             }
                 
             Label("", systemImage: "magnifyingglass")
                 .padding(.leading, 10)
+            
+            if (search.isEmpty) {
+                Button(action: {
+                    showQRCapture.toggle()
+                }, label: {
+                    Label("", systemImage: "qrcode")
+                        .font(.title)
+                })
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .fullScreenCover(isPresented: $showQRCapture) {
+                    QRCaptureView(onCapture: { code in
+                        search = code
+                        showQRCapture = false
+                    });
+                }
+            }
         }
         .background {
             RoundedRectangle(cornerRadius: 8)
