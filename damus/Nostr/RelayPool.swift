@@ -39,11 +39,17 @@ struct NostrRequestId: Equatable, Hashable {
 }
 
 class RelayPool {
+    /// Used for an exponential backoff algorithm when retrying stale connections
+    /// Each retry attempt will be delayed by raising this base delay to an exponent
+    /// equal to the number of previous retries.
+    private static let base_reconnect_delay: TimeInterval = 2
+    
     var relays: [Relay] = []
     var handlers: [RelayHandler] = []
     var request_queue: [QueuedRequest] = []
     var seen: Set<String> = Set()
     var counts: [String: UInt64] = [:]
+    private var retry_attempts_per_relay: [URL: Int] = [:]
 
     var descriptors: [RelayDescriptor] {
         relays.map { $0.descriptor }
@@ -99,15 +105,18 @@ class RelayPool {
     
     /// This is used to retry dead connections
     func connect_to_disconnected() {
-        for relay in relays {
+        for relay in relays where !relay.is_broken && !relay.connection.isConnected {
             let c = relay.connection
             
             let is_connecting = c.isReconnecting || c.isConnecting
             
-            if is_connecting && (Date.now.timeIntervalSince1970 - c.last_connection_attempt) > 5 {
-                print("stale connection detected (\(relay.descriptor.url.absoluteString)). retrying...")
+            let retry_attempts = retry_attempts_per_relay[c.url] ?? 0
+            let delay = pow(RelayPool.base_reconnect_delay, TimeInterval(retry_attempts_per_relay[c.url] ?? 0))
+            if is_connecting && (Date.now.timeIntervalSince1970 - c.last_connection_attempt) > delay {
+                print("stale connection detected (\(relay.descriptor.url.absoluteString)). retrying after \(delay) seconds...")
                 relay.connection.connect(force: true)
-            } else if relay.is_broken || is_connecting || c.isConnected {
+                retry_attempts_per_relay[c.url] = retry_attempts + 1
+            } else if is_connecting {
                 continue
             } else {
                 relay.connection.reconnect()
