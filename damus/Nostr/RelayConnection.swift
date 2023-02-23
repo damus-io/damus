@@ -26,7 +26,7 @@ final class RelayConnection: WebSocketDelegate {
         return socket
     }()
     private var handleEvent: (NostrConnectionEvent) -> ()
-    private let url: URL
+    let url: URL
 
     init(url: URL, handleEvent: @escaping (NostrConnectionEvent) -> ()) {
         self.url = url
