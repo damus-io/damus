@@ -835,7 +835,7 @@ func first_eref_mention(ev: NostrEvent, privkey: String?) -> Mention? {
 extension [ReferencedId] {
     var pRefs: [ReferencedId] {
         get {
-            self.filter { ref in
+            Set(self).filter { ref in
                 ref.key == "p"
             }
         }
