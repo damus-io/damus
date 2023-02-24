@@ -71,8 +71,10 @@ struct BuilderEventView: View {
             }
         }
         .frame(minWidth: 0, maxWidth: .infinity)
-        .cornerRadius(8)
-        .border(Color.gray.opacity(0.2), width: 1)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color.gray.opacity(0.2), lineWidth: 1.0)
+        )
         .onAppear {
             self.load()
         }

@@ -49,6 +49,16 @@ func follow_btn_enabled_state(_ fs: FollowState) -> Bool {
     }
 }
 
+func followersCountString(_ count: Int, locale: Locale = Locale.current) -> String {
+    let bundle = bundleForLocale(locale: locale)
+    return String(format: bundle.localizedString(forKey: "followers_count", value: nil, table: nil), locale: locale, count)
+}
+
+func relaysCountString(_ count: Int, locale: Locale = Locale.current) -> String {
+    let bundle = bundleForLocale(locale: locale)
+    return String(format: bundle.localizedString(forKey: "relays_count", value: nil, table: nil), locale: locale, count)
+}
+
 struct EditButton: View {
     let damus_state: DamusState
     
@@ -319,7 +329,9 @@ struct ProfileView: View {
                     .foregroundColor(.gray)
             } else {
                 let followerCount = followers.count!
-                Text("\(Text(verbatim: "\(followerCount)").font(.subheadline.weight(.medium))) \(Text(String(format: Bundle.main.localizedString(forKey: "followers_count", value: nil, table: nil), followerCount)).font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
+                let count_text = Text(verbatim: "\(formatInt(followerCount))").font(.subheadline.weight(.medium))
+                let noun_text = Text(verbatim: "\(followersCountString(followerCount))").font(.subheadline).foregroundColor(.gray)
+                Text("\(count_text) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
             }
         }
     }
@@ -343,7 +355,9 @@ struct ProfileView: View {
                     let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
                     NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model, whos: profile.pubkey)) {
                         HStack {
-                            Text("\(Text(verbatim: "\(profile.following)").font(.subheadline.weight(.medium))) \(Text("Following", comment: "Part of a larger sentence to describe how many profiles a user is following.").font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
+                            let count_text = Text(verbatim: "\(formatInt(profile.following))").font(.subheadline.weight(.medium))
+                            let noun_text = Text("Following", comment: "Text on the user profile page next to the number of accounts a user is following.").font(.subheadline).foregroundColor(.gray)
+                            Text("\(count_text) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
                         }
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -366,7 +380,9 @@ struct ProfileView: View {
                 
                 if let relays = profile.relays {
                     // Only open relay config view if the user is logged in with private key and they are looking at their own profile.
-                    let relay_text = Text("\(Text(verbatim: "\(relays.keys.count)").font(.subheadline.weight(.medium))) \(Text(String(format: Bundle.main.localizedString(forKey: "relays_count", value: nil, table: nil), relays.keys.count)).font(.subheadline).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
+                    let count_text = Text(verbatim: "\(formatInt(relays.keys.count))").font(.subheadline.weight(.medium))
+                    let noun_text = Text(verbatim: "\(relaysCountString(relays.keys.count))").font(.subheadline).foregroundColor(.gray)
+                    let relay_text = Text("\(count_text) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
                     if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
                         NavigationLink(destination: RelayConfigView(state: damus_state)) {
                             relay_text
@@ -506,7 +522,7 @@ struct KeyView: View {
                                 .symbolRenderingMode(.palette)
                         }
                         .padding(.leading,4)
-                        Text(abbrev_pubkey(bech32, amount: 16))
+                        Text(verbatim: "\(abbrev_pubkey(bech32, amount: 16))")
                             .font(.footnote)
                             .foregroundColor(keyColor())
                     }

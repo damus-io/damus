@@ -20,7 +20,8 @@ struct SearchedUser: Identifiable {
 struct UserSearch: View {
     let damus_state: DamusState
     let search: String
-    @Binding var post: String
+
+    @Binding var post: NSMutableAttributedString
     
     var users: [SearchedUser] {
         guard let contacts = damus_state.contacts.event else {
@@ -39,7 +40,25 @@ struct UserSearch: View {
                             guard let pk = bech32_pubkey(user.pubkey) else {
                                 return
                             }
-                            post = post.replacingOccurrences(of: "@"+search, with: "@"+pk+" ")
+
+                            while post.string.last != "@" {
+                                post.deleteCharacters(in: NSRange(location: post.length - 1, length: 1))
+                            }
+                            post.deleteCharacters(in: NSRange(location: post.length - 1, length: 1))
+
+
+                            var tagString = ""
+                            if let name = user.profile?.name {
+                                tagString = "@\(name)\u{200B} "
+                            }
+                            let tagAttributedString = NSMutableAttributedString(string: tagString,
+                                                   attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0),
+                                                                NSAttributedString.Key.link: "@\(pk)"])
+                            tagAttributedString.removeAttribute(.link, range: NSRange(location: tagAttributedString.length - 2, length: 2))
+                            let mutableString = NSMutableAttributedString()
+                            mutableString.append(post)
+                            mutableString.append(tagAttributedString)
+                            post = mutableString
                         }
                 }
             }
@@ -49,7 +68,7 @@ struct UserSearch: View {
 
 struct UserSearch_Previews: PreviewProvider {
     static let search: String = "jb55"
-    @State static var post: String = "some @jb55"
+    @State static var post: NSMutableAttributedString = NSMutableAttributedString(string: "some @jb55")
     
     static var previews: some View {
         UserSearch(damus_state: test_damus_state(), search: search, post: $post)

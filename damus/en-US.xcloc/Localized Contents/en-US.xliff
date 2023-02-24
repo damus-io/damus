@@ -73,16 +73,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>'%@' is an invalid NIP-05 identifier. It should look like an email.</target>
         <note>Description of why the nip05 identifier is invalid.</note>
       </trans-unit>
-      <trans-unit id="(Profile.displayName(profile: profile, pubkey: whos))'s Followers" xml:space="preserve">
-        <source>(Profile.displayName(profile: profile, pubkey: whos))'s Followers</source>
-        <target>(Profile.displayName(profile: profile, pubkey: whos))'s Followers</target>
-        <note>Navigation bar title for view that shows who is following a user.</note>
-      </trans-unit>
-      <trans-unit id="(who) following" xml:space="preserve">
-        <source>(who) following</source>
-        <target>(who) following</target>
-        <note>Navigation bar title for view that shows who a user is following.</note>
-      </trans-unit>
       <trans-unit id="API Key (optional)" xml:space="preserve">
         <source>API Key (optional)</source>
         <target>API Key (optional)</target>
@@ -211,6 +201,17 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Blue Wallet</target>
         <note>Dropdown option label for Lightning wallet, Blue Wallet.</note>
       </trans-unit>
+      <trans-unit id="Bookmark" xml:space="preserve">
+        <source>Bookmark</source>
+        <target>Bookmark</target>
+        <note>Context menu option for bookmarking a note</note>
+      </trans-unit>
+      <trans-unit id="Bookmarks" xml:space="preserve">
+        <source>Bookmarks</source>
+        <target>Bookmarks</target>
+        <note>Sidebar menu label for Bookmarks view.
+   Title of bookmarks view</note>
+      </trans-unit>
       <trans-unit id="Boosts" xml:space="preserve">
         <source>Boosts</source>
         <target>Boosts</target>
@@ -246,6 +247,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Clear</source>
         <target>Clear</target>
         <note>Button for clearing cached data.</note>
+      </trans-unit>
+      <trans-unit id="Clear All" xml:space="preserve">
+        <source>Clear All</source>
+        <target>Clear All</target>
+        <note>Button for clearing bookmarks data.</note>
       </trans-unit>
       <trans-unit id="Clear Cache" xml:space="preserve">
         <source>Clear Cache</source>
@@ -470,12 +476,12 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Followers" xml:space="preserve">
         <source>Followers</source>
         <target>Followers</target>
-        <note>Label describing followers of a user.</note>
+        <note>Navigation bar title for view that shows who is following a user.</note>
       </trans-unit>
       <trans-unit id="Following" xml:space="preserve">
         <source>Following</source>
         <target>Following</target>
-        <note>Part of a larger sentence to describe how many profiles a user is following.</note>
+        <note>Navigation bar title for view that shows who a user is following.</note>
       </trans-unit>
       <trans-unit id="Following..." xml:space="preserve">
         <source>Following...</source>
@@ -572,6 +578,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Like</source>
         <target>Like</target>
         <note>Accessibility Label for Like button</note>
+      </trans-unit>
+      <trans-unit id="Load %lld more" xml:space="preserve">
+        <source>Load %lld more</source>
+        <target>Load %lld more</target>
+        <note>Button text for loading more events, where the variable is the number of events.</note>
       </trans-unit>
       <trans-unit id="Local authentication to access private key" xml:space="preserve">
         <source>Local authentication to access private key</source>
@@ -1041,6 +1052,11 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <target>URL</target>
         <note>Example URL to LibreTranslate server</note>
       </trans-unit>
+      <trans-unit id="Un-Bookmark" xml:space="preserve">
+        <source>Un-Bookmark</source>
+        <target>Un-Bookmark</target>
+        <note>Context menu option for un-bookmarking a note</note>
+      </trans-unit>
       <trans-unit id="Unfollow" xml:space="preserve">
         <source>Unfollow</source>
         <target>Unfollow</target>
@@ -1122,6 +1138,11 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <source>Yes, Post with Private Key</source>
         <target>Yes, Post with Private Key</target>
         <note>Button to proceed with posting a note even though it looks like they might be posting a private key.</note>
+      </trans-unit>
+      <trans-unit id="You have no bookmarks yet, add them in the context menu" xml:space="preserve">
+        <source>You have no bookmarks yet, add them in the context menu</source>
+        <target>You have no bookmarks yet, add them in the context menu</target>
+        <note>Text indicating that there are no bookmarks to be viewed</note>
       </trans-unit>
       <trans-unit id="Your Name" xml:space="preserve">
         <source>Your Name</source>
@@ -1273,21 +1294,6 @@ Label for filter for seeing your posts and replies (instead of only your posts).
       <trans-unit id="/relays_count:dict/RELAYS:dict/other:dict/:string" xml:space="preserve">
         <source>Relays</source>
         <target>Relays</target>
-        <note/>
-      </trans-unit>
-      <trans-unit id="/replying_to_one_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
-        <source>%#@OTHERS@</source>
-        <target>%#@OTHERS@</target>
-        <note/>
-      </trans-unit>
-      <trans-unit id="/replying_to_one_and_others:dict/OTHERS:dict/one:dict/:string" xml:space="preserve">
-        <source>Replying to %2$@ &amp; %1$d other</source>
-        <target>Replying to %2$@ &amp; %1$d other</target>
-        <note/>
-      </trans-unit>
-      <trans-unit id="/replying_to_one_and_others:dict/OTHERS:dict/other:dict/:string" xml:space="preserve">
-        <source>Replying to %2$@ &amp; %1$d others</source>
-        <target>Replying to %2$@ &amp; %1$d others</target>
         <note/>
       </trans-unit>
       <trans-unit id="/replying_to_two_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">

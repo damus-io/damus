@@ -109,10 +109,12 @@ struct ZapButton: View {
                 }
             }
             .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
-            
-            Text(String("\(bar.zap_total > 0 ? "\(format_msats_abbrev(bar.zap_total))" : "")"))
-                .font(.footnote)
-                .foregroundColor(bar.zapped ? Color.orange : Color.gray)
+
+            if bar.zap_total > 0 {
+                Text(verbatim: format_msats_abbrev(bar.zap_total))
+                    .font(.footnote)
+                    .foregroundColor(bar.zapped ? Color.orange : Color.gray)
+            }
         }
         .sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
             SelectWalletView(showingSelectWallet: $showing_select_wallet, our_pubkey: damus_state.pubkey, invoice: invoice)

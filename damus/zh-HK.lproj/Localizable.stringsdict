@@ -12,10 +12,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>... %d andere Notiz ...</string>
 			<key>other</key>
-			<string>... %d andere Notizen ...</string>
+			<string>...還有%d 条便條...</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -28,10 +26,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>Follower</string>
 			<key>other</key>
-			<string>Follower</string>
+			<string>粉絲</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
@@ -44,10 +40,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>Reaktion</string>
 			<key>other</key>
-			<string>Reaktionen</string>
+			<string>回應</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -60,10 +54,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>Relay</string>
 			<key>other</key>
-			<string>Relays</string>
+			<string>中繼器</string>
 		</dict>
 	</dict>
 	<key>replying_to_one_and_others</key>
@@ -76,10 +68,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>Antwort an %2$@ &amp; %1$d andere</string>
 			<key>other</key>
-			<string>Antwort an %2$@ &amp; %1$d andere</string>
+			<string>正在回覆%2$@ &amp; %1$d 個其他用戶</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
@@ -92,10 +82,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>Antwort an %2$@, %3$@ &amp; %1$d andere</string>
 			<key>other</key>
-			<string>Antwort an %2$@, %3$@ &amp; %1$d andere</string>
+			<string>正在回覆%2$@, %3$@ &amp; %1$d 個其他用戶</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -108,10 +96,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>geteilter Beitrag</string>
 			<key>other</key>
-			<string>geteilte Beiträge</string>
+			<string>轉發</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -124,10 +110,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
-			<key>one</key>
-			<string>%2$@ sat</string>
 			<key>other</key>
-			<string>%2$@ sats</string>
+			<string>%2$@ 聰</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
@@ -140,10 +124,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>Zap</string>
 			<key>other</key>
-			<string>Zaps</string>
+			<string>電擊</string>
 		</dict>
 	</dict>
 </dict>
