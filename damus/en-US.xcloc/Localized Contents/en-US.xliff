@@ -119,6 +119,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <note>Button to add recommended relay server.
    Button to confirm adding user inputted relay.</note>
       </trans-unit>
+      <trans-unit id="Add Bookmark" xml:space="preserve">
+        <source>Add Bookmark</source>
+        <target>Add Bookmark</target>
+        <note>Context menu option for adding a note bookmark.</note>
+      </trans-unit>
       <trans-unit id="Add Relay" xml:space="preserve">
         <source>Add Relay</source>
         <target>Add Relay</target>
@@ -200,11 +205,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Blue Wallet</source>
         <target>Blue Wallet</target>
         <note>Dropdown option label for Lightning wallet, Blue Wallet.</note>
-      </trans-unit>
-      <trans-unit id="Bookmark" xml:space="preserve">
-        <source>Bookmark</source>
-        <target>Bookmark</target>
-        <note>Context menu option for bookmarking a note</note>
       </trans-unit>
       <trans-unit id="Bookmarks" xml:space="preserve">
         <source>Bookmarks</source>
@@ -785,6 +785,11 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <target>Relays have been notified and clients will be able to use this information to filter content. Thank you!</target>
         <note>Description of what was done as a result of sending a report to relay servers.</note>
       </trans-unit>
+      <trans-unit id="Remove Bookmark" xml:space="preserve">
+        <source>Remove Bookmark</source>
+        <target>Remove Bookmark</target>
+        <note>Context menu option for removing a note bookmark.</note>
+      </trans-unit>
       <trans-unit id="Remove all" xml:space="preserve">
         <source>Remove all</source>
         <target>Remove all</target>
@@ -1051,11 +1056,6 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <source>URL</source>
         <target>URL</target>
         <note>Example URL to LibreTranslate server</note>
-      </trans-unit>
-      <trans-unit id="Un-Bookmark" xml:space="preserve">
-        <source>Un-Bookmark</source>
-        <target>Un-Bookmark</target>
-        <note>Context menu option for un-bookmarking a note</note>
       </trans-unit>
       <trans-unit id="Unfollow" xml:space="preserve">
         <source>Unfollow</source>
