@@ -202,7 +202,20 @@ struct ContentView: View {
                 EmptyView()
             }
         }
-        .navigationBarTitle(selected_timeline == .home ?  NSLocalizedString("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.") : NSLocalizedString("Universe 🛸", comment: "Navigation bar title for universal view where posts from all connected relay servers appear."), displayMode: .inline)
+        .navigationBarTitle({
+            switch selected_timeline {
+            case .home:
+                return NSLocalizedString("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.")
+            case .dms:
+                return NSLocalizedString("DMs", comment: "Navigation bar title for DMs view, where DM is the English abbreviation for Direct Message.")
+            case .notifications:
+                return NSLocalizedString("Notifications", comment: "Navigation bar title for Notifications view.")
+            case .search:
+                return NSLocalizedString("Universe 🛸", comment: "Navigation bar title for the universal view where posts from all connected relay servers appear.")
+            case .none:
+                return NSLocalizedString("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
+            }
+        }(), displayMode: .inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
                 timelineNavItem
