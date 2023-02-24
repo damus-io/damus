@@ -9,12 +9,12 @@ import SwiftUI
 
 struct TextViewWrapper: UIViewRepresentable {
     @Binding var attributedText: NSMutableAttributedString
-
+    
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
         textView.delegate = context.coordinator
         textView.font = UIFont.systemFont(ofSize: 18)
-        textView.textColor = UIColor.black
+        //textView.textColor = UIColor.black
         let linkAttributes: [NSAttributedString.Key : Any] = [
             NSAttributedString.Key.foregroundColor: UIColor(Color.accentColor)]
         textView.linkTextAttributes = linkAttributes
