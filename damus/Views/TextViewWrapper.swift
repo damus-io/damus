@@ -14,7 +14,7 @@ struct TextViewWrapper: UIViewRepresentable {
         let textView = UITextView()
         textView.delegate = context.coordinator
         textView.font = UIFont.systemFont(ofSize: 18)
-        //textView.textColor = UIColor.black
+        textView.textColor = UIColor.label
         let linkAttributes: [NSAttributedString.Key : Any] = [
             NSAttributedString.Key.foregroundColor: UIColor(Color.accentColor)]
         textView.linkTextAttributes = linkAttributes
