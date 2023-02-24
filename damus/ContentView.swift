@@ -166,7 +166,7 @@ struct ContentView: View {
                 Text("Universe 🛸", comment: "Toolbar label for the universal view where posts from all connected relay servers appear.")
                     .bold()
             case .none:
-                Text("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
+                Text(verbatim: "")
             }
         }
     }

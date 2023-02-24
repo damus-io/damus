@@ -23,7 +23,7 @@ func scroll_after_load(thread: ThreadModel, proxy: ScrollViewProxy) {
 
 struct EventDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        let state = test_damus_state()
+        let _ = test_damus_state()
         EventDetailView()
     }
 }

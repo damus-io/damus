@@ -26,14 +26,18 @@ struct EventDetailBar: View {
         HStack {
             if bar.boosts > 0 {
                 NavigationLink(destination: RepostsView(damus_state: state, model: RepostsModel(state: state, target: target))) {
-                    Text("\(Text(verbatim: "\(bar.boosts)").font(.body.bold())) \(Text(String(format: Bundle.main.localizedString(forKey: "reposts_count", value: nil, table: nil), bar.boosts)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.")
+                    let count = Text(verbatim: "\(formatInt(bar.boosts))").font(.body.bold())
+                    let noun = Text(verbatim: "\(repostsCountString(bar.boosts))").foregroundColor(.gray)
+                    Text("\(count) \(noun)", comment: "Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.")
                 }
                 .buttonStyle(PlainButtonStyle())
             }
 
             if bar.likes > 0 {
                 NavigationLink(destination: ReactionsView(damus_state: state, model: ReactionsModel(state: state, target: target))) {
-                    Text("\(Text(verbatim: "\(bar.likes)").font(.body.bold())) \(Text(String(format: Bundle.main.localizedString(forKey: "reactions_count", value: nil, table: nil), bar.likes)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.")
+                    let count = Text(verbatim: "\(formatInt(bar.likes))").font(.body.bold())
+                    let noun = Text(verbatim: "\(reactionsCountString(bar.likes))").foregroundColor(.gray)
+                    Text("\(count) \(noun)", comment: "Sentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.")
                 }
                 .buttonStyle(PlainButtonStyle())
             }
@@ -41,12 +45,29 @@ struct EventDetailBar: View {
             if bar.zaps > 0 {
                 let dst = ZapsView(state: state, target: .note(id: target, author: target_pk))
                 NavigationLink(destination: dst) {
-                    Text("\(Text(verbatim: "\(bar.zaps)").font(.body.bold())) \(Text(String(format: Bundle.main.localizedString(forKey: "zaps_count", value: nil, table: nil), bar.zaps)).foregroundColor(.gray))", comment: "Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.")
+                    let count = Text(verbatim: "\(formatInt(bar.zaps))").font(.body.bold())
+                    let noun = Text(verbatim: "\(zapsCountString(bar.zaps))").foregroundColor(.gray)
+                    Text("\(count) \(noun)", comment: "Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.")
                 }
                 .buttonStyle(PlainButtonStyle())
             }
         }
     }
+}
+
+func repostsCountString(_ count: Int, locale: Locale = Locale.current) -> String {
+    let bundle = bundleForLocale(locale: locale)
+    return String(format: bundle.localizedString(forKey: "reposts_count", value: nil, table: nil), locale: locale, count)
+}
+
+func reactionsCountString(_ count: Int, locale: Locale = Locale.current) -> String {
+    let bundle = bundleForLocale(locale: locale)
+    return String(format: bundle.localizedString(forKey: "reactions_count", value: nil, table: nil), locale: locale, count)
+}
+
+func zapsCountString(_ count: Int, locale: Locale = Locale.current) -> String {
+    let bundle = bundleForLocale(locale: locale)
+    return String(format: bundle.localizedString(forKey: "zaps_count", value: nil, table: nil), locale: locale, count)
 }
 
 struct EventDetailBar_Previews: PreviewProvider {

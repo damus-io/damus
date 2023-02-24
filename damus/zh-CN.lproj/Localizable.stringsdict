@@ -4,51 +4,31 @@
 <dict>
 	<key>collapsed_event_view_other_notes</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@NOTES@</string>
 		<key>NOTES</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>%d other notes</string>
-			<key>many</key>
-			<string>%d other notes</string>
-			<key>one</key>
-			<string>%d 条更多推文</string>
 			<key>other</key>
-			<string>%d 条更多推文</string>
-			<key>two</key>
-			<string>%d other notes</string>
-			<key>zero</key>
-			<string>%d other notes</string>
+			<string>... %d 条更多推 ...</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>··· %#@NOTES@ ···</string>
 	</dict>
 	<key>followers_count</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWERS@</string>
 		<key>FOLLOWERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>Followers</string>
-			<key>many</key>
-			<string>Followers</string>
-			<key>one</key>
-			<string>粉丝</string>
 			<key>other</key>
 			<string>粉丝</string>
-			<key>two</key>
-			<string>Followers</string>
-			<key>zero</key>
-			<string>Followers</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@FOLLOWERS@</string>
 	</dict>
 	<key>reactions_count</key>
 	<dict>
@@ -60,18 +40,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>Reactions</string>
-			<key>many</key>
-			<string>Reactions</string>
-			<key>one</key>
-			<string>回应</string>
 			<key>other</key>
 			<string>回应</string>
-			<key>two</key>
-			<string>Reactions</string>
-			<key>zero</key>
-			<string>Reactions</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -84,66 +54,36 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>Relays</string>
-			<key>many</key>
-			<string>Relays</string>
-			<key>one</key>
-			<string>中继器</string>
 			<key>other</key>
 			<string>中继器</string>
-			<key>two</key>
-			<string>Relays</string>
-			<key>zero</key>
-			<string>Relays</string>
 		</dict>
 	</dict>
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>正在回复%@%#@OTHERS@</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string> &amp; %d others</string>
-			<key>many</key>
-			<string> &amp; %d others</string>
-			<key>one</key>
-			<string> &amp; %d 个其他用户</string>
 			<key>other</key>
-			<string> &amp; %d 个其他用户</string>
-			<key>two</key>
-			<string> &amp; %d others</string>
-			<key>zero</key>
-			<string></string>
+			<string>正在回复%2$@ &amp; %1$d 个其他用户</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>正在回复%@, %@%#@OTHERS@</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string> &amp; %d others</string>
-			<key>many</key>
-			<string> &amp; %d others</string>
-			<key>one</key>
-			<string> &amp; %d 个其他用户</string>
 			<key>other</key>
-			<string> &amp; %d 个其他用户</string>
-			<key>two</key>
-			<string> &amp; %d others</string>
-			<key>zero</key>
-			<string></string>
+			<string>正在回复%2$@, %3$@ &amp; %1$d 个其他用户</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -156,18 +96,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>Reposts</string>
-			<key>many</key>
-			<string>Reposts</string>
-			<key>one</key>
-			<string>转发</string>
 			<key>other</key>
 			<string>转发</string>
-			<key>two</key>
-			<string>Reposts</string>
-			<key>zero</key>
-			<string>Reposts</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -180,18 +110,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
-			<key>few</key>
-			<string>%2$@ sats</string>
-			<key>many</key>
-			<string>%2$@ sats</string>
-			<key>one</key>
-			<string>%2$@ 聪</string>
 			<key>other</key>
 			<string>%2$@ 聪</string>
-			<key>two</key>
-			<string>%2$@ sats</string>
-			<key>zero</key>
-			<string>%2$@ sats</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
@@ -204,18 +124,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>Zaps</string>
-			<key>many</key>
-			<string>Zaps</string>
-			<key>one</key>
-			<string>电击</string>
 			<key>other</key>
 			<string>电击</string>
-			<key>two</key>
-			<string>Zaps</string>
-			<key>zero</key>
-			<string>Zaps</string>
 		</dict>
 	</dict>
 </dict>

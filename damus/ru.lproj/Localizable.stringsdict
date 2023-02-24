@@ -4,43 +4,43 @@
 <dict>
 	<key>collapsed_event_view_other_notes</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@NOTES@</string>
 		<key>NOTES</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>%d other notes</string>
-			<key>many</key>
-			<string>%d other notes</string>
 			<key>one</key>
-			<string>%d другая заметка</string>
+			<string>... %d другая заметка ...</string>
+			<key>few</key>
+			<string>... %d other notes ...</string>
+			<key>many</key>
+			<string>... %d other notes ...</string>
 			<key>other</key>
-			<string>%d другие заметки</string>
+			<string>... %d другие заметки ...</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>··· %#@NOTES@ ···</string>
 	</dict>
 	<key>followers_count</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWERS@</string>
 		<key>FOLLOWERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>one</key>
+			<string>Подписчик</string>
 			<key>few</key>
 			<string>Followers</string>
 			<key>many</key>
 			<string>Followers</string>
-			<key>one</key>
-			<string>Подписчик</string>
 			<key>other</key>
 			<string>Подписчики</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@FOLLOWERS@</string>
 	</dict>
 	<key>reactions_count</key>
 	<dict>
@@ -52,12 +52,12 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>one</key>
+			<string>Реакция</string>
 			<key>few</key>
 			<string>Reactions</string>
 			<key>many</key>
 			<string>Reactions</string>
-			<key>one</key>
-			<string>Реакция</string>
 			<key>other</key>
 			<string>Реакции</string>
 		</dict>
@@ -72,12 +72,12 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>one</key>
+			<string>Релей</string>
 			<key>few</key>
 			<string>Relays</string>
 			<key>many</key>
 			<string>Relays</string>
-			<key>one</key>
-			<string>Релей</string>
 			<key>other</key>
 			<string>Релеи</string>
 		</dict>
@@ -85,45 +85,41 @@
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Replying to %@%#@OTHERS@</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string> &amp; %d others</string>
-			<key>many</key>
-			<string> &amp; %d others</string>
 			<key>one</key>
-			<string> и %d другим</string>
+			<string>В ответ %2$@ и %1$d другим</string>
+			<key>few</key>
+			<string>В ответ %2$@ и %1$d others</string>
+			<key>many</key>
+			<string>В ответ %2$@ и %1$d others</string>
 			<key>other</key>
-			<string> и %d другие</string>
-			<key>zero</key>
-			<string></string>
+			<string>В ответ %2$@ и %1$d другие</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>В ответ %@, %@%#@OTHERS@</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string> &amp; %d others</string>
-			<key>many</key>
-			<string> &amp; %d others</string>
 			<key>one</key>
-			<string> и %d другим</string>
+			<string>В ответ %2$@, %3$@ и %1$d другим</string>
+			<key>few</key>
+			<string>В ответ %2$@, %3$@ и %1$d others</string>
+			<key>many</key>
+			<string>В ответ %2$@, %3$@ и %1$d others</string>
 			<key>other</key>
-			<string> и %d другие</string>
-			<key>zero</key>
-			<string></string>
+			<string>В ответ %2$@, %3$@ и %1$d другие</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -136,12 +132,12 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>one</key>
+			<string>Репост</string>
 			<key>few</key>
 			<string>Reposts</string>
 			<key>many</key>
 			<string>Reposts</string>
-			<key>one</key>
-			<string>Репост</string>
 			<key>other</key>
 			<string>Репосты</string>
 		</dict>
@@ -156,12 +152,12 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
+			<key>one</key>
+			<string>%2$@ сат</string>
 			<key>few</key>
 			<string>%2$@ sats</string>
 			<key>many</key>
 			<string>%2$@ sats</string>
-			<key>one</key>
-			<string>%2$@ сат</string>
 			<key>other</key>
 			<string>%2$@ сат</string>
 		</dict>
@@ -176,12 +172,12 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>one</key>
+			<string>Зап</string>
 			<key>few</key>
 			<string>Zaps</string>
 			<key>many</key>
 			<string>Zaps</string>
-			<key>one</key>
-			<string>Зап</string>
 			<key>other</key>
 			<string>Запы</string>
 		</dict>
