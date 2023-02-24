@@ -263,17 +263,19 @@ func format_msats_abbrev(_ msats: Int64) -> String {
     return formatter.string(from: sats) ?? sats.stringValue
 }
 
-func format_msats(_ msat: Int64) -> String {
+func format_msats(_ msat: Int64, locale: Locale = Locale.current) -> String {
     let numberFormatter = NumberFormatter()
     numberFormatter.numberStyle = .decimal
     numberFormatter.minimumFractionDigits = 0
     numberFormatter.maximumFractionDigits = 3
     numberFormatter.roundingMode = .down
+    numberFormatter.locale = locale
 
     let sats = NSNumber(value: (Double(msat) / 1000.0))
     let formattedSats = numberFormatter.string(from: sats) ?? sats.stringValue
 
-    return String(format: Bundle.main.localizedString(forKey: "sats_count", value: nil, table: nil), sats.decimalValue as NSDecimalNumber, formattedSats)
+    let bundle = bundleForLocale(locale: locale)
+    return String(format: bundle.localizedString(forKey: "sats_count", value: nil, table: nil), locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats)
 }
 
 func convert_invoice_block(_ b: invoice_block) -> Block? {

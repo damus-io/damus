@@ -23,7 +23,7 @@ struct LoadMoreButton: View {
         Group {
             if events.queued > 0 {
                 Button(action: click) {
-                    Text("Load \(events.queued) more")
+                    Text("Load \(events.queued) more", comment: "Button text for loading more events, where the variable is the number of events.")
                 }
                 .font(.system(size: 14, weight: .bold))
                 .padding(10)

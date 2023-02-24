@@ -19,7 +19,7 @@ struct FollowButtonView: View {
         Button {
             follow_state = perform_follow_btn_action(follow_state, target: target)
         } label: {
-            Text(follow_btn_txt(follow_state, follows_you: follows_you))
+            Text(verbatim: "\(follow_btn_txt(follow_state, follows_you: follows_you))")
                 .frame(width: 105, height: 30)
                 //.padding(.vertical, 10)
                 .font(.caption.weight(.bold))

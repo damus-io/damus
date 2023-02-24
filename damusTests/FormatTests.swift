@@ -34,4 +34,23 @@ final class FormatTests: XCTestCase {
         XCTAssertEqual(format_msats_abbrev(1000), "1")
     }
 
+    func testFormatMsats() throws {
+        let enUsLocale = Locale(identifier: "en-US")
+        XCTAssertEqual(format_msats(0, locale: enUsLocale), "0 sats")
+        XCTAssertEqual(format_msats(1, locale: enUsLocale), "0.001 sats")
+        XCTAssertEqual(format_msats(1000, locale: enUsLocale), "1 sat")
+        XCTAssertEqual(format_msats(1001, locale: enUsLocale), "1.001 sats")
+        XCTAssertEqual(format_msats(2000, locale: enUsLocale), "2 sats")
+        XCTAssertEqual(format_msats(123456789, locale: enUsLocale), "123,456.789 sats")
+        // Sanity check that function call does not throw in any supported locale as the string format accepts arguments, and a mismatched format in any one of the locales could break the app.
+        Bundle.main.localizations.map { Locale(identifier: $0) }.forEach {
+            XCTAssertNoThrow(format_msats(0, locale: $0))
+            XCTAssertNoThrow(format_msats(1, locale: $0))
+            XCTAssertNoThrow(format_msats(1000, locale: $0))
+            XCTAssertNoThrow(format_msats(1001, locale: $0))
+            XCTAssertNoThrow(format_msats(2000, locale: $0))
+            XCTAssertNoThrow(format_msats(123456789, locale: $0))
+        }
+    }
+
 }

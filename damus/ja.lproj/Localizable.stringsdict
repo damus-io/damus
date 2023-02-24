@@ -4,6 +4,8 @@
 <dict>
 	<key>collapsed_event_view_other_notes</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@NOTES@</string>
 		<key>NOTES</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -11,13 +13,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%d その他のNote</string>
+			<string>... %d その他のNote ...</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>··· %#@NOTES@ ···</string>
 	</dict>
 	<key>followers_count</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWERS@</string>
 		<key>FOLLOWERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -27,8 +29,6 @@
 			<key>other</key>
 			<string>フォロワー</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@FOLLOWERS@</string>
 	</dict>
 	<key>reactions_count</key>
 	<dict>
@@ -61,7 +61,7 @@
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%@%#@OTHERS@ にリプライ</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -69,15 +69,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string> &amp; %d その他</string>
-			<key>zero</key>
-			<string></string>
+			<string>%2$@ &amp; %1$d その他にリプライ</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%@, %@%#@OTHERS@ にリプライ</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -85,9 +83,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string> &amp; %d その他</string>
-			<key>zero</key>
-			<string></string>
+			<string>%2$@, %3$@ &amp; %1$d その他 にリプライ</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>

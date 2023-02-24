@@ -48,7 +48,7 @@ struct EventMenuContext: View {
         } label: {
             let imageName = isBookmarked ? "bookmark.fill" : "bookmark"
             let unBookmarkString = NSLocalizedString("Un-Bookmark", comment: "Context menu option for un-bookmarking a note")
-            let bookmarkString = NSLocalizedString("Bookmark", comment: "Context menu optoin for bookmarking a note")
+            let bookmarkString = NSLocalizedString("Bookmark", comment: "Context menu option for bookmarking a note")
             Label(isBookmarked ? unBookmarkString : bookmarkString, systemImage: imageName)
         }
         .onAppear {
