@@ -29,7 +29,7 @@ class ZapsModel: ObservableObject {
         case .note(let note_target):
             filter.referenced_ids = [note_target.note_id]
         }
-        state.pool.subscribe(sub_id: zaps_subid, filters: [filter], handler: handle_event)
+        state.pool.subscribe_to(sub_id: zaps_subid, filters: [filter], handler: handle_event)
     }
     
     func unsubscribe() {

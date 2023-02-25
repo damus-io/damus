@@ -38,7 +38,7 @@ class SearchHomeModel: ObservableObject {
     func subscribe() {
         loading = true
         let to_relays = determine_to_relays(pool: damus_state.pool, filters: damus_state.relay_filters)
-        damus_state.pool.subscribe(sub_id: base_subid, filters: [get_base_filter()], handler: handle_event, to: to_relays)
+        damus_state.pool.subscribe_to(sub_id: base_subid, filters: [get_base_filter()], to: to_relays, handler: handle_event)
     }
 
     func unsubscribe(to: String? = nil) {

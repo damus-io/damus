@@ -83,8 +83,8 @@ class ProfileModel: ObservableObject, Equatable {
         
         print("subscribing to profile \(pubkey) with sub_id \(sub_id)")
         print_filters(relay_id: "profile", filters: [[text_filter], [profile_filter]])
-        damus.pool.subscribe(sub_id: sub_id, filters: [text_filter], handler: handle_event)
-        damus.pool.subscribe(sub_id: prof_subid, filters: [profile_filter], handler: handle_event)
+        damus.pool.subscribe_to(sub_id: sub_id, filters: [text_filter], handler: handle_event)
+        damus.pool.subscribe_to(sub_id: prof_subid, filters: [profile_filter], handler: handle_event)
     }
     
     func handle_profile_contact_event(_ ev: NostrEvent) {

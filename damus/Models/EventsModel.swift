@@ -31,9 +31,9 @@ class EventsModel: ObservableObject {
     }
     
     func subscribe() {
-        state.pool.subscribe(sub_id: sub_id,
-                             filters: [get_filter()],
-                             handler: handle_nostr_event)
+        state.pool.subscribe_to(sub_id: sub_id,
+                                filters: [get_filter()],
+                                handler: handle_nostr_event)
     }
     
     func unsubscribe() {

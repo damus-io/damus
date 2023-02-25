@@ -7,22 +7,6 @@
 
 import Foundation
 
-struct SubscriptionId: Identifiable, CustomStringConvertible {
-    let id: String
-
-    var description: String {
-        id
-    }
-}
-
-struct RelayId: Identifiable, CustomStringConvertible {
-    let id: String
-
-    var description: String {
-        id
-    }
-}
-
 struct RelayHandler {
     let sub_id: String
     let callback: (String, NostrConnectionEvent) -> ()
@@ -33,22 +17,21 @@ struct QueuedRequest {
     let relay: String
 }
 
-struct NostrRequestId: Equatable, Hashable {
-    let relay: String?
-    let sub_id: String
-}
-
-class RelayPool {
-    /// Used for an exponential backoff algorithm when retrying stale connections
-    /// Each retry attempt will be delayed by raising this base delay to an exponent
-    /// equal to the number of previous retries.
-    private static let base_reconnect_delay: TimeInterval = 2
+final class RelayPool {
+    private enum Constants {
+        /// Used for an exponential backoff algorithm when retrying stale connections
+        /// Each retry attempt will be delayed by raising this base delay to an exponent
+        /// equal to the number of previous retries.
+        static let base_reconnect_delay: TimeInterval = 2
+        static let max_queued_requests = 10
+        static let max_retry_attempts = 3
+    }
     
-    var relays: [Relay] = []
-    var handlers: [RelayHandler] = []
-    var request_queue: [QueuedRequest] = []
-    var seen: Set<String> = Set()
-    var counts: [String: UInt64] = [:]
+    private(set) var relays: [Relay] = []
+    private var handlers: [RelayHandler] = []
+    private var request_queue: [QueuedRequest] = []
+    private var seen: Set<String> = Set()
+    private var counts: [String: UInt64] = [:]
     private var retry_attempts_per_relay: [URL: Int] = [:]
 
     var descriptors: [RelayDescriptor] {
@@ -56,37 +39,28 @@ class RelayPool {
     }
     
     var num_connecting: Int {
-        return relays.reduce(0) { n, r in n + (r.connection.isConnecting ? 1 : 0) }
+        relays.reduce(0) { n, r in n + (r.connection.state == .connecting ? 1 : 0) }
     }
 
-    func remove_handler(sub_id: String) {
+    private func remove_handler(sub_id: String) {
         self.handlers = handlers.filter { $0.sub_id != sub_id }
         print("removing \(sub_id) handler, current: \(handlers.count)")
     }
 
     func register_handler(sub_id: String, handler: @escaping (String, NostrConnectionEvent) -> ()) {
-        for handler in handlers {
-            // don't add duplicate handlers
-            if handler.sub_id == sub_id {
-                return
-            }
+        guard !handlers.contains(where: { $0.sub_id == sub_id }) else {
+            return  // don't add duplicate handlers
         }
-        self.handlers.append(RelayHandler(sub_id: sub_id, callback: handler))
+        
+        handlers.append(RelayHandler(sub_id: sub_id, callback: handler))
         print("registering \(sub_id) handler, current: \(self.handlers.count)")
     }
     
     func remove_relay(_ relay_id: String) {
-        var i: Int = 0
+        disconnect(from: [relay_id])
         
-        self.disconnect(to: [relay_id])
-        
-        for relay in relays {
-            if relay.id == relay_id {
-                relays.remove(at: i)
-                break
-            }
-            
-            i += 1
+        if let index = relays.firstIndex(where: { $0.id == relay_id }) {
+            relays.remove(at: index)
         }
     }
     
@@ -105,38 +79,51 @@ class RelayPool {
     
     /// This is used to retry dead connections
     func connect_to_disconnected() {
-        for relay in relays where !relay.is_broken && !relay.connection.isConnected {
+        for relay in relays where !relay.is_broken && relay.connection.state != .connected {
             let c = relay.connection
             
-            let is_connecting = c.isReconnecting || c.isConnecting
+            let is_connecting = c.state == .reconnecting || c.state == .connecting
             
             let retry_attempts = retry_attempts_per_relay[c.url] ?? 0
-            let delay = pow(RelayPool.base_reconnect_delay, TimeInterval(retry_attempts_per_relay[c.url] ?? 0))
+            
+            let delay = pow(Constants.base_reconnect_delay, TimeInterval(retry_attempts + 1))   // the + 1 helps us avoid a 1-second delay for the first retry
             if is_connecting && (Date.now.timeIntervalSince1970 - c.last_connection_attempt) > delay {
-                print("stale connection detected (\(relay.descriptor.url.absoluteString)). retrying after \(delay) seconds...")
-                relay.connection.connect(force: true)
-                retry_attempts_per_relay[c.url] = retry_attempts + 1
+                if retry_attempts > Constants.max_retry_attempts {
+                    if c.state != .notConnected {
+                        c.disconnect()
+                        print("exceeded max connection attempts with \(relay.descriptor.url.absoluteString)")
+                        relay.mark_broken()
+                    }
+                    continue
+                } else {
+                    print("stale connection detected (\(relay.descriptor.url.absoluteString)). retrying after \(delay) seconds...")
+                    c.connect(force: true)
+                    retry_attempts_per_relay[c.url] = retry_attempts + 1
+                }
             } else if is_connecting {
                 continue
             } else {
-                relay.connection.reconnect()
+                c.reconnect()
             }
-            
         }
     }
     
-    func reconnect(to: [String]? = nil) {
-        let relays = to.map{ get_relays($0) } ?? self.relays
-        for relay in relays {
+    func reconnect(to relay_ids: [String]? = nil) {
+        let relays: [Relay]
+        if let relay_ids {
+            relays = get_relays(relay_ids)
+        } else {
+            relays = self.relays
+        }
+        
+        for relay in relays where !relay.is_broken {
             // don't try to reconnect to broken relays
             relay.connection.reconnect()
         }
     }
     
     func mark_broken(_ relay_id: String) {
-        for relay in relays {
-            relay.mark_broken()
-        }
+        relays.first(where: { $0.id == relay_id })?.mark_broken()
     }
 
     func connect(to: [String]? = nil) {
@@ -146,8 +133,8 @@ class RelayPool {
         }
     }
 
-    func disconnect(to: [String]? = nil) {
-        let relays = to.map{ get_relays($0) } ?? self.relays
+    private func disconnect(from: [String]? = nil) {
+        let relays = from.map{ get_relays($0) } ?? self.relays
         for relay in relays {
             relay.connection.disconnect()
         }
@@ -155,35 +142,23 @@ class RelayPool {
     
     func unsubscribe(sub_id: String, to: [String]? = nil) {
         if to == nil {
-            self.remove_handler(sub_id: sub_id)
+            remove_handler(sub_id: sub_id)
         }
-        self.send(.unsubscribe(sub_id), to: to)
+        send(.unsubscribe(sub_id), to: to)
     }
     
-    func subscribe(sub_id: String, filters: [NostrFilter], handler: @escaping (String, NostrConnectionEvent) -> (), to: [String]? = nil) {
+    func subscribe_to(sub_id: String, filters: [NostrFilter], to: [String]? = nil, handler: @escaping (String, NostrConnectionEvent) -> ()) {
         register_handler(sub_id: sub_id, handler: handler)
         send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
     }
     
-    func subscribe_to(sub_id: String, filters: [NostrFilter], to: [String]?, handler: @escaping (String, NostrConnectionEvent) -> ()) {
-        register_handler(sub_id: sub_id, handler: handler)
-        send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
-    }
-    
-    func count_queued(relay: String) -> Int {
-        var c = 0
-        for request in request_queue {
-            if request.relay == relay {
-                c += 1
-            }
-        }
-        
-        return c
+    private func count_queued(relay: String) -> Int {
+        request_queue.filter({ $0.relay == relay }).count
     }
     
     func queue_req(r: NostrRequest, relay: String) {
         let count = count_queued(relay: relay)
-        guard count <= 10 else {
+        guard count <= Constants.max_queued_requests else {
             print("can't queue, too many queued events for \(relay)")
             return
         }
@@ -193,10 +168,10 @@ class RelayPool {
     }
     
     func send(_ req: NostrRequest, to: [String]? = nil) {
-        let relays = to.map{ get_relays($0) } ?? self.relays
-
+        let relays = to.map { get_relays($0) } ?? self.relays
+        
         for relay in relays {
-            guard relay.connection.isConnected else {
+            guard relay.connection.state == .connected else {
                 queue_req(r: req, relay: relay.id)
                 continue
             }
@@ -216,17 +191,14 @@ class RelayPool {
     func record_last_pong(relay_id: String, event: NostrConnectionEvent) {
         if case .ws_event(let ws_event) = event {
             if case .pong = ws_event {
-                for relay in relays {
-                    if relay.id == relay_id {
-                        relay.last_pong = UInt32(Date.now.timeIntervalSince1970)
-                        return
-                    }
+                if let relay = relays.first(where: { $0.id == relay_id }) {
+                    relay.last_pong = UInt32(Date.now.timeIntervalSince1970)
                 }
             }
         }
     }
     
-    func run_queue(_ relay_id: String) {
+    private func run_queue(_ relay_id: String) {
         self.request_queue = request_queue.reduce(into: Array<QueuedRequest>()) { (q, req) in
             guard req.relay == relay_id else {
                 q.append(req)
@@ -238,23 +210,20 @@ class RelayPool {
         }
     }
     
-    func record_seen(relay_id: String, event: NostrConnectionEvent) {
+    private func record_seen(relay_id: String, event: NostrConnectionEvent) {
         if case .nostr_event(let ev) = event {
             if case .event(_, let nev) = ev {
                 let k = relay_id + nev.id
                 if !seen.contains(k) {
                     seen.insert(k)
-                    if counts[relay_id] == nil {
-                        counts[relay_id] = 1
-                    } else {
-                        counts[relay_id] = (counts[relay_id] ?? 0) + 1
-                    }
+                    let prev_count = counts[relay_id] ?? 0
+                    counts[relay_id] = prev_count + 1
                 }
             }
         }
     }
     
-    func handle_event(relay_id: String, event: NostrConnectionEvent) {
+    private func handle_event(relay_id: String, event: NostrConnectionEvent) {
         record_last_pong(relay_id: relay_id, event: event)
         record_seen(relay_id: relay_id, event: event)
         
@@ -276,5 +245,3 @@ func add_rw_relay(_ pool: RelayPool, _ url: String) {
     let url_ = URL(string: url)!
     try? pool.add_relay(url_, info: RelayInfo.rw)
 }
-
-
