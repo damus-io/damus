@@ -18,7 +18,7 @@ struct QueuedRequest {
 }
 
 final class RelayPool {
-    private enum Constants {
+    enum Constants {
         /// Used for an exponential backoff algorithm when retrying stale connections
         /// Each retry attempt will be delayed by raising this base delay to an exponent
         /// equal to the number of previous retries.
@@ -28,10 +28,10 @@ final class RelayPool {
     }
     
     private(set) var relays: [Relay] = []
-    private var handlers: [RelayHandler] = []
+    private(set) var handlers: [RelayHandler] = []
     private var request_queue: [QueuedRequest] = []
-    private var seen: Set<String> = Set()
-    private var counts: [String: UInt64] = [:]
+    private(set) var seen: Set<String> = Set()
+    private(set) var counts: [String: UInt64] = [:]
     private var retry_attempts_per_relay: [URL: Int] = [:]
 
     var descriptors: [RelayDescriptor] {
@@ -42,8 +42,11 @@ final class RelayPool {
         relays.reduce(0) { n, r in n + (r.connection.state == .connecting ? 1 : 0) }
     }
 
-    private func remove_handler(sub_id: String) {
-        self.handlers = handlers.filter { $0.sub_id != sub_id }
+    func remove_handler(sub_id: String) {
+        guard let index = handlers.firstIndex(where: { $0.sub_id == sub_id }) else {
+            return
+        }
+        handlers.remove(at: index)
         print("removing \(sub_id) handler, current: \(handlers.count)")
     }
 
@@ -64,7 +67,8 @@ final class RelayPool {
         }
     }
     
-    func add_relay(_ url: URL, info: RelayInfo) throws {
+    @discardableResult
+    func add_relay(_ url: URL, info: RelayInfo) throws -> Relay {
         let relay_id = get_relay_id(url)
         if get_relay(relay_id) != nil {
             throw RelayError.RelayAlreadyExists
@@ -74,7 +78,8 @@ final class RelayPool {
         }
         let descriptor = RelayDescriptor(url: url, info: info)
         let relay = Relay(descriptor: descriptor, connection: conn)
-        self.relays.append(relay)
+        relays.append(relay)
+        return relay
     }
     
     /// This is used to retry dead connections
@@ -152,13 +157,13 @@ final class RelayPool {
         send(.subscribe(.init(filters: filters, sub_id: sub_id)), to: to)
     }
     
-    private func count_queued(relay: String) -> Int {
+    func count_queued(relay: String) -> Int {
         request_queue.filter({ $0.relay == relay }).count
     }
     
     func queue_req(r: NostrRequest, relay: String) {
         let count = count_queued(relay: relay)
-        guard count <= Constants.max_queued_requests else {
+        guard count < Constants.max_queued_requests else {
             print("can't queue, too many queued events for \(relay)")
             return
         }
@@ -210,7 +215,7 @@ final class RelayPool {
         }
     }
     
-    private func record_seen(relay_id: String, event: NostrConnectionEvent) {
+    func record_seen(relay_id: String, event: NostrConnectionEvent) {
         if case .nostr_event(let ev) = event {
             if case .event(_, let nev) = ev {
                 let k = relay_id + nev.id
@@ -243,5 +248,5 @@ final class RelayPool {
 
 func add_rw_relay(_ pool: RelayPool, _ url: String) {
     let url_ = URL(string: url)!
-    try? pool.add_relay(url_, info: RelayInfo.rw)
+    let _ = try? pool.add_relay(url_, info: RelayInfo.rw)
 }
