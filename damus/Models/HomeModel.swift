@@ -125,6 +125,8 @@ class HomeModel: ObservableObject {
             handle_channel_meta(ev)
         case .zap:
             handle_zap_event(ev)
+        case .zap_request:
+            break
         }
     }
     

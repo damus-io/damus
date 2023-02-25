@@ -21,4 +21,5 @@ enum NostrKind: Int {
     case chat = 42
     case list = 30000
     case zap = 9735
+    case zap_request = 9734
 }

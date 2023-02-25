@@ -285,7 +285,7 @@ func fetch_static_payreq(_ lnurl: String) async -> LNUrlPayRequest? {
     return endpoint
 }
 
-func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent, sats: Int) async -> String? {
+func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent, sats: Int, zap_type: ZapType, comment: String?) async -> String? {
     guard var base_url = payreq.callback.flatMap({ URLComponents(string: $0) }) else {
         return nil
     }
@@ -295,11 +295,17 @@ func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent, sats: Int)
     
     var query = [URLQueryItem(name: "amount", value: "\(amount)")]
     
-    if zappable {
+    if zappable && zap_type != .non_zap {
         if let json = encode_json(zapreq) {
             print("zapreq json: \(json)")
             query.append(URLQueryItem(name: "nostr", value: json))
         }
+    }
+   
+    // add a lud12 comment as well if we have it
+    if let comment, let limit = payreq.commentAllowed, limit != 0 {
+        let limited_comment = String(comment.prefix(limit))
+        query.append(URLQueryItem(name: "comment", value: limited_comment))
     }
     
     base_url.queryItems = query

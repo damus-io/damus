@@ -577,14 +577,25 @@ func zap_target_to_tags(_ target: ZapTarget) -> [[String]] {
     }
 }
 
-func make_zap_request_event(pubkey: String, privkey: String, content: String, relays: [RelayDescriptor], target: ZapTarget) -> NostrEvent {
+func make_zap_request_event(pubkey: String, privkey: String, content: String, relays: [RelayDescriptor], target: ZapTarget, is_anon: Bool) -> NostrEvent {
     var tags = zap_target_to_tags(target)
     var relay_tag = ["relays"]
     relay_tag.append(contentsOf: relays.map { $0.url.absoluteString })
     tags.append(relay_tag)
-    let ev = NostrEvent(content: content, pubkey: pubkey, kind: 9734, tags: tags)
+    
+    var priv = privkey
+    var pub = pubkey
+    
+    if is_anon {
+        tags.append(["anon"])
+        let kp = generate_new_keypair()
+        pub = kp.pubkey
+        priv = kp.privkey!
+    }
+    
+    let ev = NostrEvent(content: content, pubkey: pub, kind: 9734, tags: tags)
     ev.id = calculate_event_id(ev: ev)
-    ev.sig = sign_event(privkey: privkey, ev: ev)
+    ev.sig = sign_event(privkey: priv, ev: ev)
     return ev
 }
 
