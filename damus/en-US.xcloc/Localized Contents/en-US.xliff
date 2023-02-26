@@ -32,6 +32,11 @@
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.2" build-num="14C18"/>
     </header>
     <body>
+      <trans-unit id="%@" xml:space="preserve">
+        <source>%@</source>
+        <target>%@</target>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
       <trans-unit id="%@ %@" xml:space="preserve">
         <source>%@ %@</source>
         <target>%@ %@</target>
@@ -144,6 +149,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Admin</target>
         <note>Label to display relay contact user.</note>
       </trans-unit>
+      <trans-unit id="Anonymous" xml:space="preserve">
+        <source>Anonymous</source>
+        <target>Anonymous</target>
+        <note>Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.</note>
+      </trans-unit>
       <trans-unit id="Any" xml:space="preserve">
         <source>Any</source>
         <target>Any</target>
@@ -153,6 +163,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Are you sure you want to repost this?</source>
         <target>Are you sure you want to repost this?</target>
         <note>Alert message to ask if user wants to repost a post.</note>
+      </trans-unit>
+      <trans-unit id="Awesome post!" xml:space="preserve">
+        <source>Awesome post!</source>
+        <target>Awesome post!</target>
+        <note>Placeholder text for a comment to send as part of a zap to the user.</note>
       </trans-unit>
       <trans-unit id="Banner Image" xml:space="preserve">
         <source>Banner Image</source>
@@ -263,6 +278,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Clear Cache</target>
         <note>Section title for clearing cached data.</note>
       </trans-unit>
+      <trans-unit id="Comment" xml:space="preserve">
+        <source>Comment</source>
+        <target>Comment</target>
+        <note>Header text to indicate that the text field below it is a comment that will be used to send as part of a zap to the user.</note>
+      </trans-unit>
       <trans-unit id="Contact" xml:space="preserve">
         <source>Contact</source>
         <target>Contact</target>
@@ -358,6 +378,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Custom</source>
         <target>Custom</target>
         <note>Dropdown option for selecting a custom translation server.</note>
+      </trans-unit>
+      <trans-unit id="Custom Zap Amount" xml:space="preserve">
+        <source>Custom Zap Amount</source>
+        <target>Custom Zap Amount</target>
+        <note>Header text to indicate that the text field below it is to enter a custom zap amount.</note>
       </trans-unit>
       <trans-unit id="DMs" xml:space="preserve">
         <source>DMs</source>
@@ -637,6 +662,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>No block list found, create a new one? This will overwrite any previous block lists.</target>
         <note>Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists.</note>
       </trans-unit>
+      <trans-unit id="Non-Zap" xml:space="preserve">
+        <source>Non-Zap</source>
+        <target>Non-Zap</target>
+        <note>Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.</note>
+      </trans-unit>
       <trans-unit id="None" xml:space="preserve">
         <source>None</source>
         <target>None</target>
@@ -743,6 +773,11 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <source>Profile Picture</source>
         <target>Profile Picture</target>
         <note>Label for Profile Picture section of user profile form.</note>
+      </trans-unit>
+      <trans-unit id="Public" xml:space="preserve">
+        <source>Public</source>
+        <target>Public</target>
+        <note>Picker option to indicate that a zap should be sent publicly and identify the user as who sent it.</note>
       </trans-unit>
       <trans-unit id="Public Account ID" xml:space="preserve">
         <source>Public Account ID</source>
@@ -1162,7 +1197,28 @@ Label for filter for seeing your posts and replies (instead of only your posts).
       <trans-unit id="Zap" xml:space="preserve">
         <source>Zap</source>
         <target>Zap</target>
-        <note>Accessibility label for zap button</note>
+        <note>Accessibility label for zap button
+   Button to send a zap.</note>
+      </trans-unit>
+      <trans-unit id="Zap Amount" xml:space="preserve">
+        <source>Zap Amount</source>
+        <target>Zap Amount</target>
+        <note>Title of picker that allows selection of predefined amounts to zap.</note>
+      </trans-unit>
+      <trans-unit id="Zap Amount in sats" xml:space="preserve">
+        <source>Zap Amount in sats</source>
+        <target>Zap Amount in sats</target>
+        <note>Header text to indicate that the picker below it is to choose a pre-defined amount of sats to zap.</note>
+      </trans-unit>
+      <trans-unit id="Zap Type" xml:space="preserve">
+        <source>Zap Type</source>
+        <target>Zap Type</target>
+        <note>Header text to indicate that the picker below it is to choose the type of zap to send.</note>
+      </trans-unit>
+      <trans-unit id="Zapping..." xml:space="preserve">
+        <source>Zapping...</source>
+        <target>Zapping...</target>
+        <note>Text to indicate that the app is in the process of sending a zap.</note>
       </trans-unit>
       <trans-unit id="Zaps" xml:space="preserve">
         <source>Zaps</source>
