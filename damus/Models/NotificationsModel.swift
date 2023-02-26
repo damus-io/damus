@@ -46,7 +46,6 @@ enum NotificationItem {
 }
 
 class NotificationsModel: ObservableObject, ScrollQueue {
-    
     var incoming_zaps: [Zap]
     var incoming_events: [NostrEvent]
     var should_queue: Bool
