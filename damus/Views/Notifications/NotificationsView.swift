@@ -30,6 +30,7 @@ struct NotificationsView: View {
                 })
                 .padding(.horizontal)
             }
+            .coordinateSpace(name: "scroll")
             .onReceive(handle_notify(.scroll_to_top)) { notif in
                 let _ = notifications.flush()
                 self.notifications.should_queue = false
