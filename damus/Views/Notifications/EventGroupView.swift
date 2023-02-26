@@ -46,62 +46,86 @@ func determine_reacting_to(our_pubkey: String, ev: NostrEvent?) -> ReactingTo {
     return .tagged_in
 }
 
-func determine_reacting_to_text(_ r: ReactingTo) -> String {
-    switch r {
-    case .tagged_in:
-        return "a post you were tagged in"
-    case .your_post:
-        return "your post"
-    case .your_profile:
-        return "your profile"
-    }
-}
-
 func event_author_name(profiles: Profiles, _ ev: NostrEvent) -> String {
     let alice_pk = ev.pubkey
     let alice_prof = profiles.lookup(id: alice_pk)
     return Profile.displayName(profile: alice_prof, pubkey: alice_pk)
 }
 
-func reacting_to_text(profiles: Profiles, our_pubkey: String, group: EventGroupType, ev: NostrEvent?) -> String {
+/**
+ Returns a notification string describing user actions in response to an event group type.
+
+ The localization keys read by this function are the following (although some keys may not actually be used in practice):
+
+ "??" - returned when there are no events associated with the specified event group type.
+
+ "reacted_tagged_in_1" - returned when 1 reaction occurred to a post that the current user was tagged in
+ "reacted_tagged_in_2" - returned when 2 reactions occurred to a post that the current user was tagged in
+ "reacted_tagged_in_3" - returned when 3 or more reactions occurred to a post that the current user was tagged in
+ "reacted_your_post_1" - returned when 1 reaction occurred to the current user's post
+ "reacted_your_post_2" - returned when 2 reactions occurred to the current user's post
+ "reacted_your_post_3" - returned when 3 or more reactions occurred to the current user's post
+ "reacted_your_profile_1" - returned when 1 reaction occurred to the current user's profile
+ "reacted_your_profile_2" - returned when 2 reactions occurred to the current user's profile
+ "reacted_your_profile_3" - returned when 3 or more reactions occurred to the current user's profile
+
+ "reposted_tagged_in_1" - returned when 1 repost occurred to a post that the current user was tagged in
+ "reposted_tagged_in_2" - returned when 2 reposts occurred to a post that the current user was tagged in
+ "reposted_tagged_in_3" - returned when 3 or more reposts occurred to a post that the current user was tagged in
+ "reposted_your_post_1" - returned when 1 repost occurred to the current user's post
+ "reposted_your_post_2" - returned when 2 reposts occurred to the current user's post
+ "reposted_your_post_3" - returned when 3 or more reposts occurred to the current user's post
+ "reposted_your_profile_1" - returned when 1 repost occurred to the current user's profile
+ "reposted_your_profile_2" - returned when 2 reposts occurred to the current user's profile
+ "reposted_your_profile_3" - returned when 3 or more reposts occurred to the current user's profile
+
+ "zapped_tagged_in_1" - returned when 1 zap occurred to a post that the current user was tagged in
+ "zapped_tagged_in_2" - returned when 2 zaps occurred to a post that the current user was tagged in
+ "zapped_tagged_in_3" - returned when 3 or more zaps occurred to a post that the current user was tagged in
+ "zapped_your_post_1" - returned when 1 zap occurred to the current user's post
+ "zapped_your_post_2" - returned when 2 zaps occurred to the current user's post
+ "zapped_your_post_3" - returned when 3 or more zaps occurred to the current user's post
+ "zapped_your_profile_1" - returned when 1 zap occurred to the current user's profile
+ "zapped_your_profile_2" - returned when 2 zaps occurred to the current user's profile
+ "zapped_your_profile_3" - returned when 3 or more zaps occurred to the current user's profile
+ */
+func reacting_to_text(profiles: Profiles, our_pubkey: String, group: EventGroupType, ev: NostrEvent?, locale: Locale? = nil) -> String {
     let verb = reacting_to_verb(group: group)
-    
     let reacting_to = determine_reacting_to(our_pubkey: our_pubkey, ev: ev)
-    let target = determine_reacting_to_text(reacting_to)
-    
-    if group.events.count == 1 {
+    let localization_key = "\(verb)_\(reacting_to)_\(min(group.events.count, 3))"
+    let bundle = bundleForLocale(locale: locale)
+
+    switch group.events.count {
+    case 0:
+        return NSLocalizedString("??", comment: "")
+    case 1:
         let ev = group.events.first!
         let profile = profiles.lookup(id: ev.pubkey)
         let display_name = Profile.displayName(profile: profile, pubkey: ev.pubkey)
-        return String(format: "%@ is %@ %@", display_name, verb, target)
-    }
-    
-    if group.events.count == 2 {
+
+        return String(format: bundle.localizedString(forKey: localization_key, value: bundleForLocale(locale: Locale(identifier: "en-US")).localizedString(forKey: localization_key, value: nil, table: nil), table: nil), locale: locale, display_name)
+    case 2:
         let alice_name = event_author_name(profiles: profiles, group.events[0])
         let bob_name = event_author_name(profiles: profiles, group.events[1])
-        
-        return String(format: "%@ and %@ are %@ %@", alice_name, bob_name, verb, target)
-    }
-    
-    if group.events.count > 2 {
+
+        return String(format: bundle.localizedString(forKey: localization_key, value: bundleForLocale(locale: Locale(identifier: "en-US")).localizedString(forKey: localization_key, value: nil, table: nil), table: nil), locale: locale, alice_name, bob_name)
+    default:
         let alice_name = event_author_name(profiles: profiles, group.events.first!)
         let count = group.events.count - 1
-        
-        return String(format: "%@ and %d other people are %@ %@", alice_name, count, verb, target)
+
+        return String(format: bundle.localizedString(forKey: localization_key, value: bundleForLocale(locale: Locale(identifier: "en-US")).localizedString(forKey: localization_key, value: nil, table: nil), table: nil), locale: locale, count, alice_name)
     }
-    
-    return "??"
 }
 
 func reacting_to_verb(group: EventGroupType) -> String {
     switch group {
     case .reaction:
-        return "reacting"
+        return "reacted"
     case .repost:
-        return "reposting"
+        return "reposted"
     case .zap: fallthrough
     case .profile_zap:
-        return "zapping"
+        return "zapped"
     }
 }
 
@@ -111,7 +135,7 @@ struct EventGroupView: View {
     let group: EventGroupType
     
     var GroupDescription: some View {
-        Text(reacting_to_text(profiles: state.profiles, our_pubkey: state.pubkey, group: group, ev: event))
+        Text(verbatim: "\(reacting_to_text(profiles: state.profiles, our_pubkey: state.pubkey, group: group, ev: event))")
     }
     
     func ZapIcon(_ zapgrp: ZapGroup) -> some View {
@@ -168,8 +192,9 @@ struct EventGroupView: View {
 }
 
 let test_encoded_post = "{\"id\": \"8ba545ab96959fe0ce7db31bc10f3ac3aa5353bc4428dbf1e56a7be7062516db\",\"pubkey\": \"7e27509ccf1e297e1df164912a43406218f8bd80129424c3ef798ca3ef5c8444\",\"created_at\": 1677013417,\"kind\": 1,\"tags\": [],\"content\": \"hello\",\"sig\": \"93684f15eddf11f42afbdd81828ee9fc35350344d8650c78909099d776e9ad8d959cd5c4bff7045be3b0b255144add43d0feef97940794a1bc9c309791bebe4a\"}"
-let test_repost = NostrEvent(id: "", content: test_encoded_post, pubkey: "", kind: 6, tags: [], createdAt: 1)
-let test_reposts = [test_repost, test_repost]
+let test_repost_1 = NostrEvent(id: "", content: test_encoded_post, pubkey: "pk1", kind: 6, tags: [], createdAt: 1)
+let test_repost_2 = NostrEvent(id: "", content: test_encoded_post, pubkey: "pk2", kind: 6, tags: [], createdAt: 1)
+let test_reposts = [test_repost_1, test_repost_2]
 let test_event_group = EventGroup(events: test_reposts)
 
 struct EventGroupView_Previews: PreviewProvider {
