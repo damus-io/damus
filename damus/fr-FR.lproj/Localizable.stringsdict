@@ -179,7 +179,7 @@
 			<key>many</key>
 			<string>%2$@ et %1$d autres ont cité votre publication</string>
 			<key>other</key>
-			<string>%2$@ et %1$d autres ont cité votre publication</string>
+			<string>%2$@ et %1$d autres ont republié votre publication</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
