@@ -692,6 +692,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Plan</target>
         <note>Prompt selection of DeepL subscription plan to perform machine translations on notes</note>
       </trans-unit>
+      <trans-unit id="Please choose relays from the list below to filter the current feed:" xml:space="preserve">
+        <source>Please choose relays from the list below to filter the current feed:</source>
+        <target>Please choose relays from the list below to filter the current feed:</target>
+        <note>Instructions on how to filter a specific timeline feed by choosing relay servers to filter on.</note>
+      </trans-unit>
       <trans-unit id="Post" xml:space="preserve">
         <source>Post</source>
         <target>Post</target>
@@ -1021,11 +1026,6 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <source>Thread</source>
         <target>Thread</target>
         <note>Navigation bar title for note thread.</note>
-      </trans-unit>
-      <trans-unit id="To filter your %@ feed, please choose applicable relays from the list below:" xml:space="preserve">
-        <source>To filter your %@ feed, please choose applicable relays from the list below:</source>
-        <target>To filter your %@ feed, please choose applicable relays from the list below:</target>
-        <note>Instructions on how to filter a specific timeline feed by choosing relay servers to filter on.</note>
       </trans-unit>
       <trans-unit id="Translate Note" xml:space="preserve">
         <source>Translate Note</source>
