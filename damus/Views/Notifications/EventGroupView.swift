@@ -96,7 +96,7 @@ func reacting_to_text(profiles: Profiles, our_pubkey: String, group: EventGroupT
 func reacting_to_verb(group: EventGroupType) -> String {
     switch group {
     case .reaction:
-        return "reacting"
+        return "reacting to"
     case .repost:
         return "reposting"
     case .zap: fallthrough
