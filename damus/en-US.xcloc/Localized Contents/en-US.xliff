@@ -1327,6 +1327,51 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <target>%#@FOLLOWERS@</target>
         <note/>
       </trans-unit>
+      <trans-unit id="/reacted_tagged_in_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@REACTED@</source>
+        <target>%#@REACTED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reacted_tagged_in_3:dict/REACTED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other reacted to a post you were tagged in</source>
+        <target>%2$@ and %1$d other reacted to a post you were tagged in</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reacted_tagged_in_3:dict/REACTED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others reacted to a post you were tagged in</source>
+        <target>%2$@ and %1$d others reacted to a post you were tagged in</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reacted_your_post_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@REACTED@</source>
+        <target>%#@REACTED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reacted_your_post_3:dict/REACTED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other reacted to your post</source>
+        <target>%2$@ and %1$d other reacted to your post</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reacted_your_post_3:dict/REACTED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others reacted to your post</source>
+        <target>%2$@ and %1$d others reacted to your post</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reacted_your_profile_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@REACTED@</source>
+        <target>%#@REACTED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reacted_your_profile_3:dict/REACTED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other reacted to your profile</source>
+        <target>%2$@ and %1$d other reacted to your profile</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reacted_your_profile_3:dict/REACTED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others reacted to your profile</source>
+        <target>%2$@ and %1$d others reacted to your profile</target>
+        <note/>
+      </trans-unit>
       <trans-unit id="/reactions_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@REACTIONS@</source>
         <target>%#@REACTIONS@</target>
@@ -1372,6 +1417,51 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <target>Replying to %2$@, %3$@ &amp; %1$d others</target>
         <note/>
       </trans-unit>
+      <trans-unit id="/reposted_tagged_in_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@REPOSTED@</source>
+        <target>%#@REPOSTED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_tagged_in_3:dict/REPOSTED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other reposted a post you were tagged in</source>
+        <target>%2$@ and %1$d other reposted a post you were tagged in</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_tagged_in_3:dict/REPOSTED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others reposted a post you were tagged in</source>
+        <target>%2$@ and %1$d others reposted a post you were tagged in</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_your_post_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@REPOSTED@</source>
+        <target>%#@REPOSTED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_your_post_3:dict/REPOSTED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other reposted your post</source>
+        <target>%2$@ and %1$d other reposted your post</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_your_post_3:dict/REPOSTED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others reposted your post</source>
+        <target>%2$@ and %1$d others reposted your post</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_your_profile_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@REPOSTED@</source>
+        <target>%#@REPOSTED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_your_profile_3:dict/REPOSTED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other reposted your profile</source>
+        <target>%2$@ and %1$d other reposted your profile</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_your_profile_3:dict/REPOSTED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others reposted your profile</source>
+        <target>%2$@ and %1$d others reposted your profile</target>
+        <note/>
+      </trans-unit>
       <trans-unit id="/reposts_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@REPOSTS@</source>
         <target>%#@REPOSTS@</target>
@@ -1400,6 +1490,51 @@ Label for filter for seeing your posts and replies (instead of only your posts).
       <trans-unit id="/sats_count:dict/SATS:dict/other:dict/:string" xml:space="preserve">
         <source>%2$@ sats</source>
         <target>%2$@ sats</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_tagged_in_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@ZAPPED@</source>
+        <target>%#@ZAPPED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_tagged_in_3:dict/ZAPPED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other zapped a post you were tagged in</source>
+        <target>%2$@ and %1$d other zapped a post you were tagged in</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_tagged_in_3:dict/ZAPPED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others zapped a post you were tagged in</source>
+        <target>%2$@ and %1$d others zapped a post you were tagged in</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_your_post_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@ZAPPED@</source>
+        <target>%#@ZAPPED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_your_post_3:dict/ZAPPED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other zapped your post</source>
+        <target>%2$@ and %1$d other zapped your post</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_your_post_3:dict/ZAPPED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others zapped your post</source>
+        <target>%2$@ and %1$d others zapped your post</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_your_profile_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@ZAPPED@</source>
+        <target>%#@ZAPPED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_your_profile_3:dict/ZAPPED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other zapped your profile</source>
+        <target>%2$@ and %1$d other zapped your profile</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_your_profile_3:dict/ZAPPED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others zapped your profile</source>
+        <target>%2$@ and %1$d others zapped your profile</target>
         <note/>
       </trans-unit>
       <trans-unit id="/zaps_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
