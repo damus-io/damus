@@ -1012,9 +1012,9 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <target>This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key.</target>
         <note>Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key.</note>
       </trans-unit>
-      <trans-unit id="This is your account ID, you can give this to your friends so that they can follow you. Click to copy." xml:space="preserve">
-        <source>This is your account ID, you can give this to your friends so that they can follow you. Click to copy.</source>
-        <target>This is your account ID, you can give this to your friends so that they can follow you. Click to copy.</target>
+      <trans-unit id="This is your account ID, you can give this to your friends so that they can follow you. Tap to copy." xml:space="preserve">
+        <source>This is your account ID, you can give this to your friends so that they can follow you. Tap to copy.</source>
+        <target>This is your account ID, you can give this to your friends so that they can follow you. Tap to copy.</target>
         <note>Label to describe that a public key is the user's account ID and what they can do with it.</note>
       </trans-unit>
       <trans-unit id="This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" xml:space="preserve">
