@@ -4,25 +4,27 @@ git:
     file_format: STRINGSDICT
     source_file_extension: stringsdict
     source_language: en_US
-    source_file_dir: damus/en-US.xcloc/Source Contents/damus/en-US.lproj/
-    translation_files_expression: damus/<lang>.lproj/
+    source_file_dir: 'damus/en-US.xcloc/Source Contents/damus/en-US.lproj/'
+    translation_files_expression: 'damus/<lang>.lproj/'
 
   - filter_type: dir
     file_format: STRINGS
     source_file_extension: strings
     source_language: en_US
-    source_file_dir: damus/en-US.xcloc/Source Contents/damus/en-US.lproj/
-    translation_files_expression: damus/<lang>.lproj/
+    source_file_dir: 'damus/en-US.xcloc/Source Contents/damus/en-US.lproj/'
+    translation_files_expression: 'damus/<lang>.lproj/'
 
-settings:
-  language_mapping:
-    de_AT: de-AT
-    el_GR: el-GR
-    es_419: es-419
-    fr_FR: fr-FR
-    it_IT: it-IT
-    lv_LV: lv-LV
-    pl_PL: pl-PL
-    pt_PT: pt-PT
-    tr_TR: tr-TR
-    zh_CN: zh-CN
+  settings:
+    language_mapping:
+      en_US: en-US
+      el_GR: el-GR
+      es_419: es-419
+      fr_FR: fr-FR
+      it_IT: it-IT
+      lv_LV: lv-LV
+      pl_PL: pl-PL
+      pt_PT: pt-PT
+      tr_TR: tr-TR
+      zh_CN: zh-CN
+      zh_HK: zh-HK
+      zh_TW: zh-TW

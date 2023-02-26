@@ -81,16 +81,16 @@ struct CustomizeZapView: View {
     }
     
     var ZapTypePicker: some View {
-        Picker("Zap Type", selection: $zap_type) {
-            Text("Public").tag(ZapType.pub)
-            Text("Anonymous").tag(ZapType.anon)
-            Text("Non-Zap").tag(ZapType.non_zap)
+        Picker(NSLocalizedString("Zap Type", comment: "Header text to indicate that the picker below it is to choose the type of zap to send."), selection: $zap_type) {
+            Text("Public", comment: "Picker option to indicate that a zap should be sent publicly and identify the user as who sent it.").tag(ZapType.pub)
+            Text("Anonymous", comment: "Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.").tag(ZapType.anon)
+            Text("Non-Zap", comment: "Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.").tag(ZapType.non_zap)
         }
         .pickerStyle(.segmented)
     }
     
     var AmountPicker: some View {
-        Picker("Zap Amount", selection: $selected_amount) {
+        Picker(NSLocalizedString("Zap Amount", comment: "Title of picker that allows selection of predefined amounts to zap."), selection: $selected_amount) {
             ForEach(zap_amounts) { entry in
                 let fmt = format_msats_abbrev(Int64(entry.amount) * 1000)
                 HStack(alignment: .firstTextBaseline) {
@@ -156,11 +156,11 @@ struct CustomizeZapView: View {
                 Section(content: {
                     AmountPicker
                 }, header: {
-                    Text("Zap Amount in sats")
+                    Text("Zap Amount in sats", comment: "Header text to indicate that the picker below it is to choose a pre-defined amount of sats to zap.")
                 })
                 
                 Section(content: {
-                    TextField("100000", text: $custom_amount)
+                    TextField(String("100000"), text: $custom_amount)
                         .keyboardType(.numberPad)
                         .onReceive(Just(custom_amount)) { newValue in
                             
@@ -170,27 +170,27 @@ struct CustomizeZapView: View {
                             }
                         }
                 }, header: {
-                    Text("Custom Zap Amount")
+                    Text("Custom Zap Amount", comment: "Header text to indicate that the text field below it is to enter a custom zap amount.")
                 })
                 .dismissKeyboardOnTap()
                 
                 Section(content: {
-                    TextField("Awesome post!", text: $comment)
+                    TextField(NSLocalizedString("Awesome post!", comment: "Placeholder text for a comment to send as part of a zap to the user."), text: $comment)
                 }, header: {
-                    Text("Comment")
+                    Text("Comment", comment: "Header text to indicate that the text field below it is a comment that will be used to send as part of a zap to the user.")
                 })
                 .dismissKeyboardOnTap()
                 
                 Section(content: {
                     ZapTypePicker
                 }, header: {
-                    Text("Zap Type")
+                    Text("Zap Type", comment: "Header text to indicate that the picker below it is to choose the type of zap to send.")
                 })
                 
                 if zapping {
-                    Text("Zapping...")
+                    Text("Zapping...", comment: "Text to indicate that the app is in the process of sending a zap.")
                 } else {
-                    Button("Zap") {
+                    Button(NSLocalizedString("Zap", comment: "Button to send a zap.")) {
                         let amount = custom_amount_sats ?? selected_amount.amount
                         send_zap(damus_state: state, event: event, lnurl: lnurl, is_custom: true, comment: comment, amount_sats: amount, zap_type: zap_type)
                         self.zapping = true

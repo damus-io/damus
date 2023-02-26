@@ -26,18 +26,16 @@ struct EventDetailBar: View {
         HStack {
             if bar.boosts > 0 {
                 NavigationLink(destination: RepostsView(damus_state: state, model: RepostsModel(state: state, target: target))) {
-                    let count = Text(verbatim: "\(formatInt(bar.boosts))").font(.body.bold())
                     let noun = Text(verbatim: "\(repostsCountString(bar.boosts))").foregroundColor(.gray)
-                    Text("\(count) \(noun)", comment: "Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.")
+                    Text("\(Text("\(bar.boosts)").font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.")
                 }
                 .buttonStyle(PlainButtonStyle())
             }
 
             if bar.likes > 0 {
                 NavigationLink(destination: ReactionsView(damus_state: state, model: ReactionsModel(state: state, target: target))) {
-                    let count = Text(verbatim: "\(formatInt(bar.likes))").font(.body.bold())
                     let noun = Text(verbatim: "\(reactionsCountString(bar.likes))").foregroundColor(.gray)
-                    Text("\(count) \(noun)", comment: "Sentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.")
+                    Text("\(Text("\(bar.likes)").font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.")
                 }
                 .buttonStyle(PlainButtonStyle())
             }
@@ -45,9 +43,8 @@ struct EventDetailBar: View {
             if bar.zaps > 0 {
                 let dst = ZapsView(state: state, target: .note(id: target, author: target_pk))
                 NavigationLink(destination: dst) {
-                    let count = Text(verbatim: "\(formatInt(bar.zaps))").font(.body.bold())
                     let noun = Text(verbatim: "\(zapsCountString(bar.zaps))").foregroundColor(.gray)
-                    Text("\(count) \(noun)", comment: "Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.")
+                    Text("\(Text("\(bar.zaps)").font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.")
                 }
                 .buttonStyle(PlainButtonStyle())
             }
