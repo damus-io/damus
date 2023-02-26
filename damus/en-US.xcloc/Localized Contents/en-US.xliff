@@ -83,6 +83,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>'%@' is an invalid NIP-05 identifier. It should look like an email.</target>
         <note>Description of why the nip05 identifier is invalid.</note>
       </trans-unit>
+      <trans-unit id="??" xml:space="preserve">
+        <source>??</source>
+        <target>??</target>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
       <trans-unit id="API Key (optional)" xml:space="preserve">
         <source>API Key (optional)</source>
         <target>API Key (optional)</target>
@@ -1270,6 +1275,66 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <target>optional</target>
         <note>Label indicating that a form input is optional.</note>
       </trans-unit>
+      <trans-unit id="reacted_tagged_in_1" xml:space="preserve">
+        <source>%@ reacted to a post you were tagged in</source>
+        <target>%@ reacted to a post you were tagged in</target>
+        <note>Notification that a user reacted to a post that the current user was tagged in</note>
+      </trans-unit>
+      <trans-unit id="reacted_tagged_in_2" xml:space="preserve">
+        <source>%@ and %@ reacted to a post you were tagged in</source>
+        <target>%@ and %@ reacted to a post you were tagged in</target>
+        <note>Notification that 2 users reacted to a post that the current user was tagged in</note>
+      </trans-unit>
+      <trans-unit id="reacted_your_post_1" xml:space="preserve">
+        <source>%@ reacted to your post</source>
+        <target>%@ reacted to your post</target>
+        <note>Notification that a user reacted to the current user's post</note>
+      </trans-unit>
+      <trans-unit id="reacted_your_post_2" xml:space="preserve">
+        <source>%@ and %@ reacted to your post</source>
+        <target>%@ and %@ reacted to your post</target>
+        <note>Notification that 2 users reacted to the current user's profile</note>
+      </trans-unit>
+      <trans-unit id="reacted_your_profile_1" xml:space="preserve">
+        <source>%@ reacted to your profile</source>
+        <target>%@ reacted to your profile</target>
+        <note>Notification that a user reacted to the current user's profile</note>
+      </trans-unit>
+      <trans-unit id="reacted_your_profile_2" xml:space="preserve">
+        <source>%@ and %@ reacted to your profile</source>
+        <target>%@ and %@ reacted to your profile</target>
+        <note>Notification that 2 users reacted to the current user's profile</note>
+      </trans-unit>
+      <trans-unit id="reposted_tagged_in_1" xml:space="preserve">
+        <source>%@ reposted a post you were tagged in</source>
+        <target>%@ reposted a post you were tagged in</target>
+        <note>Notification that a user reposted a post that the current user was tagged in</note>
+      </trans-unit>
+      <trans-unit id="reposted_tagged_in_2" xml:space="preserve">
+        <source>%@ and %@ reposted a post you were tagged in</source>
+        <target>%@ and %@ reposted a post you were tagged in</target>
+        <note>Notification that 2 users reposted a post that the current user was tagged in</note>
+      </trans-unit>
+      <trans-unit id="reposted_your_post_1" xml:space="preserve">
+        <source>%@ reposted your post</source>
+        <target>%@ reposted your post</target>
+        <note>Notification that a user reposted the current user's post</note>
+      </trans-unit>
+      <trans-unit id="reposted_your_post_2" xml:space="preserve">
+        <source>%@ and %@ reposted your post</source>
+        <target>%@ and %@ reposted your post</target>
+        <note>Notification that 2 users reposted the current user's post</note>
+      </trans-unit>
+      <trans-unit id="reposted_your_profile_1" xml:space="preserve">
+        <source>%@ reposted your profile</source>
+        <target>%@ reposted your profile</target>
+        <note>Notification that a user reposted the current user's profile</note>
+      </trans-unit>
+      <trans-unit id="reposted_your_profile_2" xml:space="preserve">
+        <source>%@ and %@ reposted your profile</source>
+        <target>%@ and %@ reposted your profile</target>
+        <note>Notification that 2 users reposted the current user's profile</note>
+      </trans-unit>
       <trans-unit id="satoshi" xml:space="preserve">
         <source>satoshi</source>
         <target>satoshi</target>
@@ -1284,6 +1349,36 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <source>you</source>
         <target>you</target>
         <note>You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself.</note>
+      </trans-unit>
+      <trans-unit id="zapped_tagged_in_1" xml:space="preserve">
+        <source>%@ zapped a post you were tagged in</source>
+        <target>%@ zapped a post you were tagged in</target>
+        <note>Notification that a user zapped a post that the current user was tagged in</note>
+      </trans-unit>
+      <trans-unit id="zapped_tagged_in_2" xml:space="preserve">
+        <source>%@ and %@ zapped a post you were tagged in</source>
+        <target>%@ and %@ zapped a post you were tagged in</target>
+        <note>Notification that 2 users zapped a post that the current user was tagged in</note>
+      </trans-unit>
+      <trans-unit id="zapped_your_post_1" xml:space="preserve">
+        <source>%@ zapped your post</source>
+        <target>%@ zapped your post</target>
+        <note>Notification that a user zapped the current user's post</note>
+      </trans-unit>
+      <trans-unit id="zapped_your_post_2" xml:space="preserve">
+        <source>%@ and %@ zapped your post</source>
+        <target>%@ and %@ zapped your post</target>
+        <note>Notification that 2 users zapped the current user's post</note>
+      </trans-unit>
+      <trans-unit id="zapped_your_profile_1" xml:space="preserve">
+        <source>%@ zapped your profile</source>
+        <target>%@ zapped your profile</target>
+        <note>Notification that a user zapped the current user's profile</note>
+      </trans-unit>
+      <trans-unit id="zapped_your_profile_2" xml:space="preserve">
+        <source>%@ and %@ zapped your profile</source>
+        <target>%@ and %@ zapped your profile</target>
+        <note>Notification that 2 users zapped the current user's profile</note>
       </trans-unit>
       <trans-unit id="⚡️ %@" xml:space="preserve">
         <source>⚡️ %@</source>
