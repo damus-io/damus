@@ -159,7 +159,7 @@
 			<key>one</key>
 			<string>%2$@ και %1$d ακόμα αναδημοσίευσε μια δημοσίευση σας</string>
 			<key>other</key>
-			<string>%2$@ και %1$d ακόμα αναδημοσίευσαν μια δημοσίευση σας</string>
+			<string>%2$@ και %1$d ακόμα αναδημοσίευσαν την δημοσίευση σας</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
