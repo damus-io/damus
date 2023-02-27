@@ -205,7 +205,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>zero</key>
-			<string>%2$@ و %1$d مستخدمون آخر نشر منشور تمت الإشارة لحسابك فيه</string>
+			<string>%2$@ و %1$d مستخدم آخر نشر منشور تمت الإشارة لك فيه فيه</string>
 			<key>one</key>
 			<string>%2$@ و %1$d مستخدم آخر نشر منشور تمت الإشارة لك فيه</string>
 			<key>two</key>
