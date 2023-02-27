@@ -257,7 +257,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d مستخدم آخر نشر حسابك</string>
 			<key>two</key>
-			<string>%2$@ و %1$d مستخدمان آخران نشرا حسابك</string>
+			<string>%2$@ و %1$d مستخدمان آخران نشروا حسابك</string>
 			<key>few</key>
 			<string>%2$@ و %1$d مستخدم آخر نشر حسابك</string>
 			<key>many</key>
