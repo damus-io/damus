@@ -9,8 +9,10 @@ import Foundation
 
 struct LNUrlPayRequest: Decodable {
     let allowsNostr: Bool?
+    let commentAllowed: Int?
     let nostrPubkey: String?
     
+    let metadata: String?
     let minSendable: Int64?
     let maxSendable: Int64?
     let status: String?

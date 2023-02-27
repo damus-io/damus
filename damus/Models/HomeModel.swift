@@ -50,22 +50,18 @@ class HomeModel: ObservableObject {
     let profiles_subid = UUID().description
 
     @Published var new_events: NewEventsBits = NewEventsBits()
-    @Published var notifications: EventHolder
+    @Published var notifications = NotificationsModel()
     @Published var dms: DirectMessagesModel
-    @Published var events: EventHolder
+    @Published var events = EventHolder()
     @Published var loading: Bool = false
     @Published var signal: SignalModel = SignalModel()
 
     init() {
-        self.events = EventHolder()
-        self.notifications = EventHolder()
         self.damus_state = DamusState.empty
         self.dms = DirectMessagesModel(our_pubkey: "")
     }
     
     init(damus_state: DamusState) {
-        self.events = EventHolder()
-        self.notifications = EventHolder()
         self.damus_state = damus_state
         self.dms = DirectMessagesModel(our_pubkey: damus_state.pubkey)
         self.setup_debouncer()
@@ -129,6 +125,8 @@ class HomeModel: ObservableObject {
             handle_channel_meta(ev)
         case .zap:
             handle_zap_event(ev)
+        case .zap_request:
+            break
         }
     }
     
@@ -143,7 +141,7 @@ class HomeModel: ObservableObject {
             return
         }
         
-        if !notifications.insert(ev) {
+        if !notifications.insert_zap(zap) {
             return
         }
         
@@ -229,7 +227,7 @@ class HomeModel: ObservableObject {
             guard inner_ev.is_valid else {
                 return
             }
-
+           
             if inner_ev.is_textlike {
                 handle_text_event(sub_id: sub_id, ev)
             }
@@ -255,12 +253,11 @@ class HomeModel: ObservableObject {
             return
         }
 
-        // CHECK SIGS ON THESE
-
         switch damus_state.likes.add_event(ev, target: e.ref_id) {
         case .already_counted:
             break
         case .success(let n):
+            handle_notification(ev: ev)
             let liked = Counted(event: ev, id: e.ref_id, total: n)
             notify(.liked, liked)
             notify(.update_stats, e.ref_id)
@@ -320,9 +317,9 @@ class HomeModel: ObservableObject {
                 if sub_id == dms_subid {
                     var dms = dms.dms.flatMap { $0.1.events }
                     dms.append(contentsOf: incoming_dms)
-                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: dms, damus_state: damus_state)
+                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(dms), damus_state: damus_state)
                 } else if sub_id == notifications_subid {
-                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: notifications.all_events, damus_state: damus_state)
+                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_keys(notifications.uniq_pubkeys()), damus_state: damus_state)
                 }
                 
                 self.loading = false
@@ -375,7 +372,6 @@ class HomeModel: ObservableObject {
         // TODO: separate likes?
         var home_filter = NostrFilter.filter_kinds([
             NostrKind.text.rawValue,
-            NostrKind.chat.rawValue,
             NostrKind.like.rawValue,
             NostrKind.boost.rawValue,
         ])
@@ -385,7 +381,6 @@ class HomeModel: ObservableObject {
 
         var notifications_filter = NostrFilter.filter_kinds([
             NostrKind.text.rawValue,
-            NostrKind.chat.rawValue,
             NostrKind.like.rawValue,
             NostrKind.boost.rawValue,
             NostrKind.zap.rawValue,
@@ -461,7 +456,16 @@ class HomeModel: ObservableObject {
             return
         }
         
-        if !notifications.insert(ev) {
+        guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
+            return
+        }
+        
+        damus_state.events.insert(ev)
+        if let inner_ev = ev.inner_event {
+            damus_state.events.insert(inner_ev)
+        }
+        
+        if !notifications.insert_event(ev) {
             return
         }
         
@@ -484,6 +488,8 @@ class HomeModel: ObservableObject {
         guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
             return
         }
+        
+        damus_state.events.insert(ev)
 
         if sub_id == home_subid {
             insert_home_event(ev)

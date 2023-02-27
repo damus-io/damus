@@ -4,4 +4,4 @@
 xcodebuild -exportLocalizations -project damus.xcodeproj -localizationPath "damus" -exportLanguage en-US
 
 # Generates all SwiftUI Text() wrapped localized strings.
-genstrings -o "damus/en-US.xcloc/Source Contents/damus/en-US.lproj/" -SwiftUI **/*.swift
+genstrings -a -d -o "damus/en-US.xcloc/Source Contents/damus/en-US.lproj/" -SwiftUI **/*.swift

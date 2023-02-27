@@ -129,26 +129,14 @@ struct ConfigView: View {
                     }
                 }
                 
-                
                 Section(NSLocalizedString("Default Zap Amount in sats", comment: "Section title for zap configuration")) {
                     TextField(String("1000"), text: $default_zap_amount)
                         .keyboardType(.numberPad)
                         .onReceive(Just(default_zap_amount)) { newValue in
-                            let filtered = newValue.filter { Set("0123456789").contains($0) }
-
-                            if filtered != newValue {
-                                default_zap_amount = filtered
+                            
+                            if let parsed = handle_string_amount(new_value: newValue) {
+                                self.default_zap_amount = String(parsed)
                             }
-
-                            if filtered == "" {
-                                set_default_zap_amount(pubkey: state.pubkey, amount: 1000)
-                                return
-                            }
-
-                            guard let amt = Int(filtered) else {
-                                return
-                            }
-                            set_default_zap_amount(pubkey: state.pubkey, amount: amt)
                         }
                 }
 
@@ -345,4 +333,19 @@ struct ConfigView_Previews: PreviewProvider {
             ConfigView(state: test_damus_state())
         }
     }
+}
+
+
+func handle_string_amount(new_value: String) -> Int? {
+    let filtered = new_value.filter { Set("0123456789").contains($0) }
+
+    if filtered == "" {
+        return nil
+    }
+
+    guard let amt = Int(filtered) else {
+        return nil
+    }
+    
+    return amt
 }

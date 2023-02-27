@@ -55,6 +55,7 @@ struct UserSearch: View {
                                                    attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0),
                                                                 NSAttributedString.Key.link: "@\(pk)"])
                             tagAttributedString.removeAttribute(.link, range: NSRange(location: tagAttributedString.length - 2, length: 2))
+                            tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 2, length: 2))
                             let mutableString = NSMutableAttributedString()
                             mutableString.append(post)
                             mutableString.append(tagAttributedString)

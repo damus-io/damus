@@ -110,8 +110,6 @@ struct ProfileView: View {
     static let markdown = Markdown()
     
     @State private var selected_tab: ProfileTab = .posts
-    @StateObject var profile: ProfileModel
-    @StateObject var followers: FollowersModel
     @State private var showingEditProfile = false
     @State var showing_select_wallet: Bool = false
     @State var is_zoomed: Bool = false
@@ -119,6 +117,21 @@ struct ProfileView: View {
     @State var action_sheet_presented: Bool = false
     @State var filter_state : FilterState = .posts
     @State var yOffset: CGFloat = 0
+    
+    @StateObject var profile: ProfileModel
+    @StateObject var followers: FollowersModel
+    
+    init(damus_state: DamusState, profile: ProfileModel, followers: FollowersModel) {
+        self.damus_state = damus_state
+        self._profile = StateObject(wrappedValue: profile)
+        self._followers = StateObject(wrappedValue: followers)
+    }
+    
+    init(damus_state: DamusState, pubkey: String) {
+        self.damus_state = damus_state
+        self._profile = StateObject(wrappedValue: ProfileModel(pubkey: pubkey, damus: damus_state))
+        self._followers = StateObject(wrappedValue: FollowersModel(damus_state: damus_state, target: pubkey))
+    }
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
@@ -329,9 +342,8 @@ struct ProfileView: View {
                     .foregroundColor(.gray)
             } else {
                 let followerCount = followers.count!
-                let count_text = Text(verbatim: "\(formatInt(followerCount))").font(.subheadline.weight(.medium))
                 let noun_text = Text(verbatim: "\(followersCountString(followerCount))").font(.subheadline).foregroundColor(.gray)
-                Text("\(count_text) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
+                Text("\(Text("\(followerCount)").font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
             }
         }
     }
@@ -355,9 +367,8 @@ struct ProfileView: View {
                     let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
                     NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model, whos: profile.pubkey)) {
                         HStack {
-                            let count_text = Text(verbatim: "\(formatInt(profile.following))").font(.subheadline.weight(.medium))
                             let noun_text = Text("Following", comment: "Text on the user profile page next to the number of accounts a user is following.").font(.subheadline).foregroundColor(.gray)
-                            Text("\(count_text) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
+                            Text("\(Text("\(profile.following)").font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
                         }
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -380,9 +391,8 @@ struct ProfileView: View {
                 
                 if let relays = profile.relays {
                     // Only open relay config view if the user is logged in with private key and they are looking at their own profile.
-                    let count_text = Text(verbatim: "\(formatInt(relays.keys.count))").font(.subheadline.weight(.medium))
                     let noun_text = Text(verbatim: "\(relaysCountString(relays.keys.count))").font(.subheadline).foregroundColor(.gray)
-                    let relay_text = Text("\(count_text) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
+                    let relay_text = Text("\(Text("\(relays.keys.count)").font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
                     if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
                         NavigationLink(destination: RelayConfigView(state: damus_state)) {
                             relay_text
@@ -459,9 +469,7 @@ struct ProfileView: View {
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state()
-        let followers = FollowersModel(damus_state: ds, target: ds.pubkey)
-        let profile_model = ProfileModel(pubkey: ds.pubkey, damus: ds)
-        ProfileView(damus_state: ds, profile: profile_model, followers: followers)
+        ProfileView(damus_state: ds, pubkey: ds.pubkey)
     }
 }
 

@@ -50,14 +50,14 @@ class ZapsModel: ObservableObject {
             break
         case .eose:
             let events = self.zaps.map { $0.request.ev }
-            load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: events, damus_state: state)
+            load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(events), damus_state: state)
         case .event(_, let ev):
             guard ev.kind == 9735 else {
                 return
             }
             
             if let zap = state.zaps.zaps[ev.id] {
-                if insert_uniq_sorted_zap(zaps: &zaps, new_zap: zap) {
+                if insert_uniq_sorted_zap_by_amount(zaps: &zaps, new_zap: zap) {
                     objectWillChange.send()
                 }
             } else {
@@ -71,7 +71,7 @@ class ZapsModel: ObservableObject {
                 
                 state.zaps.add_zap(zap: zap)
                 
-                if insert_uniq_sorted_zap(zaps: &zaps, new_zap: zap) {
+                if insert_uniq_sorted_zap_by_amount(zaps: &zaps, new_zap: zap) {
                     objectWillChange.send()
                 }
             }

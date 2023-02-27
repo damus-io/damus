@@ -47,9 +47,9 @@ struct EventMenuContext: View {
             notify(.update_bookmarks, event)
         } label: {
             let imageName = isBookmarked ? "bookmark.fill" : "bookmark"
-            let unBookmarkString = NSLocalizedString("Un-Bookmark", comment: "Context menu option for un-bookmarking a note")
-            let bookmarkString = NSLocalizedString("Bookmark", comment: "Context menu option for bookmarking a note")
-            Label(isBookmarked ? unBookmarkString : bookmarkString, systemImage: imageName)
+            let removeBookmarkString = NSLocalizedString("Remove Bookmark", comment: "Context menu option for removing a note bookmark.")
+            let addBookmarkString = NSLocalizedString("Add Bookmark", comment: "Context menu option for adding a note bookmark.")
+            Label(isBookmarked ? removeBookmarkString : addBookmarkString, systemImage: imageName)
         }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
