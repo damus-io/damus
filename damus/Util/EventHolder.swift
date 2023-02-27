@@ -8,11 +8,15 @@
 import Foundation
 
 /// Used for holding back events until they're ready to be displayed
-class EventHolder: ObservableObject {
+class EventHolder: ObservableObject, ScrollQueue {
     private var has_event: Set<String>
     @Published var events: [NostrEvent]
     @Published var incoming: [NostrEvent]
     var should_queue: Bool
+    
+    func set_should_queue(_ val: Bool) {
+        self.should_queue = val
+    }
     
     var queued: Int {
         return incoming.count

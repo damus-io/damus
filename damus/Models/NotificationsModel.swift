@@ -45,7 +45,7 @@ enum NotificationItem {
     }
 }
 
-class NotificationsModel: ObservableObject {
+class NotificationsModel: ObservableObject, ScrollQueue {
     var incoming_zaps: [Zap]
     var incoming_events: [NostrEvent]
     var should_queue: Bool
@@ -71,6 +71,10 @@ class NotificationsModel: ObservableObject {
         self.incoming_events = []
         self.profile_zaps = ZapGroup()
         self.notifications = []
+    }
+    
+    func set_should_queue(_ val: Bool) {
+        self.should_queue = val
     }
     
     func uniq_pubkeys() -> [String] {

@@ -456,6 +456,10 @@ class HomeModel: ObservableObject {
             return
         }
         
+        guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
+            return
+        }
+        
         damus_state.events.insert(ev)
         if let inner_ev = ev.inner_event {
             damus_state.events.insert(inner_ev)

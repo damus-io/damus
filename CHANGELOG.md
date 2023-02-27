@@ -1,3 +1,28 @@
+
+## [1.1.0-9] - 2023-02-26
+
+### Added
+
+- Customized zaps (William Casarin)
+- Add new Notifications View (William Casarin)
+- Bookmarking (Joel Klabo)
+
+### Changed
+
+- No more inline npubs when tagging users (Swift)
+
+
+### Fixed
+
+- Fix alignment of side menu labels (Joel Klabo)
+- Fix duplicated participants in reply-to view (Joel Klabo)
+- Load missing profiles in Zaps view (William Casarin)
+- Fix memory leak with inline videos (William Casarin)
+- Eliminate popping when scrolling (William Casarin)
+
+
+[1.1.0-9]: https://github.com/damus-io/damus/releases/tag/v1.1.0-9
+
 ## [1.1.0-3] - 2023-02-20
 
 ### Added

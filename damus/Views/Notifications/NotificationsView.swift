@@ -22,8 +22,15 @@ struct NotificationsView: View {
                         NotificationItemView(state: state, item: item)
                     }
                 }
+                .background(GeometryReader { proxy -> Color in
+                    DispatchQueue.main.async {
+                        handle_scroll_queue(proxy, queue: self.notifications)
+                    }
+                    return Color.clear
+                })
                 .padding(.horizontal)
             }
+            .coordinateSpace(name: "scroll")
             .onReceive(handle_notify(.scroll_to_top)) { notif in
                 let _ = notifications.flush()
                 self.notifications.should_queue = false
