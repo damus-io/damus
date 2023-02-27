@@ -113,7 +113,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d مستخدم آخر تفاعل مع حسابك</string>
 			<key>two</key>
-			<string>%2$@ و %1$d مستخدمان آخران تفاعلا مع حسابك</string>
+			<string>%2$@ و %1$d مستخدمان آخران تفاعلوا مع حسابك</string>
 			<key>few</key>
 			<string>%2$@ و %1$d آخرون تفاعلوا مع حسابك</string>
 			<key>many</key>
