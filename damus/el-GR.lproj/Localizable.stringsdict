@@ -63,7 +63,7 @@
 			<key>one</key>
 			<string>%2$@ και %1$d ακόμα αντέδρασε σε μια δημοσίευση σας</string>
 			<key>other</key>
-			<string>%2$@ και %1$d ακόμα αντέδρασαν σε μια δημοσίευση σας</string>
+			<string>%2$@ και %1$d ακόμα αντέδρασαν στη δημοσίευση σας</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
