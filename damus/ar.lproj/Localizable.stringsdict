@@ -237,7 +237,7 @@
 			<key>few</key>
 			<string>%2$@ و %1$d مستخدم آخر أعاد نشر منشورك</string>
 			<key>many</key>
-			<string>%2$@ و %1$d مستخدمون آخرون أعادوا نشر منشورك</string>
+			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورك</string>
 			<key>other</key>
 			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورك</string>
 		</dict>
