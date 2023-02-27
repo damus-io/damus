@@ -61,10 +61,8 @@ struct EventView: View {
             if event.known_kind == .boost {
                 if let inner_ev = event.inner_event {
                     VStack(alignment: .leading) {
-                        let prof_model = ProfileModel(pubkey: event.pubkey, damus: damus)
-                        let follow_model = FollowersModel(damus_state: damus, target: event.pubkey)
                         let prof = damus.profiles.lookup(id: event.pubkey)
-                        let booster_profile = ProfileView(damus_state: damus, profile: prof_model, followers: follow_model)
+                        let booster_profile = ProfileView(damus_state: damus, pubkey: event.pubkey)
                         
                         NavigationLink(destination: booster_profile) {
                             Reposted(damus: damus, pubkey: event.pubkey, profile: prof)
@@ -86,9 +84,6 @@ struct EventView: View {
                 TextEvent(damus: damus, event: event, pubkey: pubkey, has_action_bar: has_action_bar, booster_pubkey: nil)
                     .padding([.top], 6)
             }
-            
-            Divider()
-                .padding([.top], 4)
         }
     }
 }

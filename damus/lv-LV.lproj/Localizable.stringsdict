@@ -4,164 +4,164 @@
 <dict>
 	<key>collapsed_event_view_other_notes</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@NOTES@</string>
 		<key>NOTES</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>%d cita ziņa</string>
-			<key>other</key>
-			<string>%d citas ziņas</string>
 			<key>zero</key>
-			<string>%d other notes</string>
+			<string>... %d other notes ...</string>
+			<key>one</key>
+			<string>... %d cita ziņa ...</string>
+			<key>other</key>
+			<string>... %d citas ziņas ...</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>··· Ziņas ···</string>
 	</dict>
 	<key>followers_count</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWERS@</string>
 		<key>FOLLOWERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>zero</key>
+			<string>Followers</string>
 			<key>one</key>
 			<string>Sekotājs</string>
 			<key>other</key>
 			<string>Sekotāji</string>
-			<key>zero</key>
-			<string>Followers</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>Sekotāji</string>
 	</dict>
 	<key>reactions_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Reakcijas</string>
+		<string>%#@REACTIONS@</string>
 		<key>REACTIONS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>zero</key>
+			<string>Reactions</string>
 			<key>one</key>
 			<string>Reakcija</string>
 			<key>other</key>
 			<string>Reakcijas</string>
-			<key>zero</key>
-			<string>Reactions</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Releji</string>
+		<string>%#@RELAYS@</string>
 		<key>RELAYS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>zero</key>
+			<string>Relays</string>
 			<key>one</key>
 			<string>Relejs</string>
 			<key>other</key>
 			<string>Releji</string>
-			<key>zero</key>
-			<string>Relays</string>
 		</dict>
 	</dict>
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Atbildot %@% #Citam</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string> &amp; %d cits</string>
-			<key>other</key>
-			<string> &amp; %d citiem</string>
 			<key>zero</key>
-			<string></string>
+			<string>Atbildot %2$@ &amp; %1$d others</string>
+			<key>one</key>
+			<string>Atbildot %2$@ &amp; %1$d cits</string>
+			<key>other</key>
+			<string>Atbildot %2$@ &amp; %1$d citiem</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Atbildot %@, %@%#Citiem</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string> &amp; %d cits</string>
-			<key>other</key>
-			<string> &amp; %d citiem</string>
 			<key>zero</key>
-			<string></string>
+			<string>Atbildot %2$@, %3$@ &amp; %1$d others</string>
+			<key>one</key>
+			<string>Atbildot %2$@, %3$@ &amp; %1$d cits</string>
+			<key>other</key>
+			<string>Atbildot %2$@, %3$@ &amp; %1$d citiem</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Pārpublicējumi</string>
+		<string>%#@REPOSTS@</string>
 		<key>REPOSTS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>zero</key>
+			<string>Reposts</string>
 			<key>one</key>
 			<string>Pārpublicēt</string>
 			<key>other</key>
 			<string>Pārpublicējumi</string>
-			<key>zero</key>
-			<string>Reposts</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%1$#@Sats@</string>
+		<string>%1$#@SATS@</string>
 		<key>SATS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
+			<key>zero</key>
+			<string>%2$@ sats</string>
 			<key>one</key>
 			<string>%2$@ sati</string>
 			<key>other</key>
 			<string>%2$@ sati</string>
-			<key>zero</key>
-			<string>%2$@ sats</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Zapi</string>
+		<string>%#@ZAPS@</string>
 		<key>ZAPS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>zero</key>
+			<string>Zaps</string>
 			<key>one</key>
 			<string>Zaps</string>
 			<key>other</key>
 			<string>Zapi</string>
-			<key>zero</key>
-			<string>Zaps</string>
 		</dict>
 	</dict>
 </dict>

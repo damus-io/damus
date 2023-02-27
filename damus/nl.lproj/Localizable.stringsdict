@@ -4,6 +4,8 @@
 <dict>
 	<key>collapsed_event_view_other_notes</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@NOTES@</string>
 		<key>NOTES</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -11,15 +13,15 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%d andere notitie</string>
+			<string>... %d andere notitie ...</string>
 			<key>other</key>
-			<string>%d andere notities</string>
+			<string>... %d andere notities ...</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>··· %#@NOTES@ ···</string>
 	</dict>
 	<key>followers_count</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWERS@</string>
 		<key>FOLLOWERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -31,8 +33,6 @@
 			<key>other</key>
 			<string>Volgers</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@FOLLOWERS@</string>
 	</dict>
 	<key>reactions_count</key>
 	<dict>
@@ -69,7 +69,7 @@
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Antwoord aan %@%#@OTHERS@</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -77,17 +77,15 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>en %d andere gebruiker</string>
+			<string>Antwoord aan %2$@ en %1$d andere gebruiker</string>
 			<key>other</key>
-			<string>en %d andere gebruikers</string>
-			<key>zero</key>
-			<string></string>
+			<string>Antwoord aan %2$@ en %1$d andere gebruikers</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Antwoord aan %@ en %@%#@OTHERS@</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -95,11 +93,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>en %d andere gebruiker</string>
+			<string>Antwoord aan %2$@, %3$@ en %1$d andere gebruiker</string>
 			<key>other</key>
-			<string>en %d andere gebruikers</string>
-			<key>zero</key>
-			<string></string>
+			<string>Antwoord aan %2$@, %3$@ en %1$d andere gebruikers</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>

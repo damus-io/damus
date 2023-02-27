@@ -36,7 +36,7 @@ class Zaps {
                 if our_zaps[note_target.note_id] == nil {
                     our_zaps[note_target.note_id] = [zap]
                 } else {
-                    insert_uniq_sorted_zap(zaps: &(our_zaps[note_target.note_id]!), new_zap: zap)
+                    insert_uniq_sorted_zap_by_amount(zaps: &(our_zaps[note_target.note_id]!), new_zap: zap)
                 }
             case .profile(_):
                 break

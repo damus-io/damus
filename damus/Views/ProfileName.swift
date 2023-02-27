@@ -67,7 +67,7 @@ struct ProfileName: View {
     
     var body: some View {
         HStack(spacing: 2) {
-            Text(prefix + String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
+            Text(verbatim: "\(prefix)\(String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))")
                 .font(.body)
                 .fontWeight(prefix == "@" ? .none : .bold)
             if let nip05 = current_nip05 {
@@ -136,11 +136,11 @@ struct EventProfileName: View {
                     .font(.body.weight(.bold))
                     .padding([.trailing], 2)
                 
-                Text("@" + String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
+                Text(verbatim: "@\(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey))")
                     .foregroundColor(Color("DamusMediumGrey"))
                     .font(eventviewsize_to_font(size))
             } else {
-                Text(String(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)))
+                Text(verbatim: "\(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey))")
                     .font(eventviewsize_to_font(size))
                     .fontWeight(.bold)
             }

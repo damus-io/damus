@@ -4,51 +4,51 @@
 <dict>
 	<key>collapsed_event_view_other_notes</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@NOTES@</string>
 		<key>NOTES</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>%d منشورات اضافية</string>
-			<key>many</key>
-			<string>%d منشورات اضافية</string>
-			<key>one</key>
-			<string>%d منشور اضافي</string>
-			<key>other</key>
-			<string>%d منشورات اضافية</string>
-			<key>two</key>
-			<string>%d منشوران</string>
 			<key>zero</key>
-			<string>%d منشورات أخرى</string>
+			<string>... %d منشورات أخرى ...</string>
+			<key>one</key>
+			<string>... %d منشور اضافي ...</string>
+			<key>two</key>
+			<string>... %d منشوران ...</string>
+			<key>few</key>
+			<string>... %d منشورات اضافية ...</string>
+			<key>many</key>
+			<string>... %d منشورات اضافية ...</string>
+			<key>other</key>
+			<string>... %d منشورات اضافية ...</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>··· %#@NOTES@ ···</string>
 	</dict>
 	<key>followers_count</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWERS@</string>
 		<key>FOLLOWERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>المتابعون</string>
-			<key>many</key>
-			<string>المتابعون</string>
-			<key>one</key>
-			<string>متابع</string>
-			<key>other</key>
-			<string>المتابعون</string>
-			<key>two</key>
-			<string>متابعان</string>
 			<key>zero</key>
 			<string>متابع</string>
+			<key>one</key>
+			<string>متابع</string>
+			<key>two</key>
+			<string>متابعان</string>
+			<key>few</key>
+			<string>المتابِعون</string>
+			<key>many</key>
+			<string>المتابِعون</string>
+			<key>other</key>
+			<string>المتابِعون</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@FOLLOWERS@</string>
 	</dict>
 	<key>reactions_count</key>
 	<dict>
@@ -60,17 +60,17 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>zero</key>
+			<string>تفاعل</string>
+			<key>one</key>
+			<string>تفاعل</string>
+			<key>two</key>
+			<string>تفاعلان</string>
 			<key>few</key>
 			<string>تفاعلات</string>
 			<key>many</key>
 			<string>تفاعل</string>
-			<key>one</key>
-			<string>تفاعل</string>
 			<key>other</key>
-			<string>تفاعل</string>
-			<key>two</key>
-			<string>تفاعل</string>
-			<key>zero</key>
 			<string>تفاعل</string>
 		</dict>
 	</dict>
@@ -84,66 +84,66 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
+			<key>zero</key>
+			<string>موصّل</string>
+			<key>one</key>
+			<string>  موصّل</string>
+			<key>two</key>
+			<string>موصّلان</string>
 			<key>few</key>
 			<string>موصّلات</string>
 			<key>many</key>
-			<string>موصّلات</string>
-			<key>one</key>
-			<string>  موصّل</string>
+			<string>موصّل</string>
 			<key>other</key>
-			<string>موصّلات</string>
-			<key>two</key>
-			<string>موصّلان</string>
-			<key>zero</key>
 			<string>موصّل</string>
 		</dict>
 	</dict>
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>رد على %@%#@OTHERS@</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string> &amp; %d آخرون</string>
-			<key>many</key>
-			<string> &amp; %d آخرون</string>
-			<key>one</key>
-			<string>&amp; %d آخر</string>
-			<key>other</key>
-			<string>&amp; %d آخرين</string>
-			<key>two</key>
-			<string> &amp; %d آخران</string>
 			<key>zero</key>
-			<string></string>
+			<string>رد على %2$@</string>
+			<key>one</key>
+			<string>الرد على %2$@ &amp; %1$d آخر</string>
+			<key>two</key>
+			<string>الرد على %2$@ &amp; %1$d آخرين</string>
+			<key>few</key>
+			<string>الرد على %2$@ &amp; %1$d آخرين</string>
+			<key>many</key>
+			<string>الرد على %2$@ &amp; %1$d آخرين</string>
+			<key>other</key>
+			<string>الرد على %2$@ &amp; %1$d آخرين</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>رد على%@, %@%#@OTHERS@</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string> &amp; %d آخرون</string>
-			<key>many</key>
-			<string> &amp; %d آخرون</string>
-			<key>one</key>
-			<string>&amp; %d آخر</string>
-			<key>other</key>
-			<string>&amp; %d آخرين</string>
-			<key>two</key>
-			<string> &amp; %d آخران</string>
 			<key>zero</key>
-			<string></string>
+			<string>الرد على %2$@, %3$@ &amp; %1$d others</string>
+			<key>one</key>
+			<string>الرد على %2$@, %3$@ &amp; %1$d آخر</string>
+			<key>two</key>
+			<string>الرد على %2$@, %3$@ &amp; %1$d آخرين</string>
+			<key>few</key>
+			<string>الرد على %2$@, %3$@ &amp; %1$d آخرين</string>
+			<key>many</key>
+			<string>الرد على %2$@, %3$@ &amp; %1$d آخرين</string>
+			<key>other</key>
+			<string>الرد على %2$@, %3$@ &amp; %1$d آخرين</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -156,18 +156,18 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>اعادات نشر</string>
-			<key>many</key>
+			<key>zero</key>
 			<string>اعادات نشر</string>
 			<key>one</key>
 			<string>اعادة نشر</string>
-			<key>other</key>
-			<string>اعادات نشر</string>
 			<key>two</key>
+			<string>اعادتا نشر</string>
+			<key>few</key>
 			<string>اعادات نشر</string>
-			<key>zero</key>
-			<string>اعادات نشر</string>
+			<key>many</key>
+			<string>اعادة نشر</string>
+			<key>other</key>
+			<string>اعادة نشر</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -180,17 +180,17 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
+			<key>zero</key>
+			<string>%2$@ ساتوشي</string>
+			<key>one</key>
+			<string>%2$@ ساتوشي</string>
+			<key>two</key>
+			<string>%2$@ ساتوشي</string>
 			<key>few</key>
 			<string>%2$@ ساتوشي</string>
 			<key>many</key>
 			<string>%2$@ ساتوشي</string>
-			<key>one</key>
-			<string>%2$@ ساتوشي</string>
 			<key>other</key>
-			<string>%2$@ ساتوشي</string>
-			<key>two</key>
-			<string>%2$@ ساتوشي</string>
-			<key>zero</key>
 			<string>%2$@ ساتوشي</string>
 		</dict>
 	</dict>
@@ -204,18 +204,18 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>few</key>
-			<string>وميض</string>
-			<key>many</key>
+			<key>zero</key>
 			<string>وميض</string>
 			<key>one</key>
 			<string>ومضة</string>
-			<key>other</key>
-			<string>وميض</string>
 			<key>two</key>
-			<string>وميض</string>
-			<key>zero</key>
-			<string>وميض</string>
+			<string>ومضتان</string>
+			<key>few</key>
+			<string>ومضات</string>
+			<key>many</key>
+			<string>ومضة</string>
+			<key>other</key>
+			<string>ومضة</string>
 		</dict>
 	</dict>
 </dict>
