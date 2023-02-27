@@ -150,11 +150,13 @@ struct CustomizeZapView: View {
             .ignoresSafeArea()
     }
     
-    var MainContent: some View {
-        VStack(alignment: .leading) {
-            Form {
+    var TheForm: some View {
+        Form {
+                
+            Group {
                 Section(content: {
                     AmountPicker
+                        .frame(height: 120)
                 }, header: {
                     Text("Zap Amount in sats", comment: "Header text to indicate that the picker below it is to choose a pre-defined amount of sats to zap.")
                 })
@@ -172,14 +174,12 @@ struct CustomizeZapView: View {
                 }, header: {
                     Text("Custom Zap Amount", comment: "Header text to indicate that the text field below it is to enter a custom zap amount.")
                 })
-                .dismissKeyboardOnTap()
                 
                 Section(content: {
                     TextField(NSLocalizedString("Awesome post!", comment: "Placeholder text for a comment to send as part of a zap to the user."), text: $comment)
                 }, header: {
                     Text("Comment", comment: "Header text to indicate that the text field below it is a comment that will be used to send as part of a zap to the user.")
                 })
-                .dismissKeyboardOnTap()
                 
                 Section(content: {
                     ZapTypePicker
@@ -187,23 +187,30 @@ struct CustomizeZapView: View {
                     Text("Zap Type", comment: "Header text to indicate that the picker below it is to choose the type of zap to send.")
                 })
                 
-                if zapping {
-                    Text("Zapping...", comment: "Text to indicate that the app is in the process of sending a zap.")
-                } else {
-                    Button(NSLocalizedString("Zap", comment: "Button to send a zap.")) {
-                        let amount = custom_amount_sats ?? selected_amount.amount
-                        send_zap(damus_state: state, event: event, lnurl: lnurl, is_custom: true, comment: comment, amount_sats: amount, zap_type: zap_type)
-                        self.zapping = true
-                    }
-                    .zIndex(16)
-                }
-                
-                if let error {
-                    Text(error)
-                        .foregroundColor(.red)
-                }
             }
+            .dismissKeyboardOnTap()
+            
+            if zapping {
+                Text("Zapping...", comment: "Text to indicate that the app is in the process of sending a zap.")
+            } else {
+                Button(NSLocalizedString("Zap", comment: "Button to send a zap.")) {
+                    let amount = custom_amount_sats ?? selected_amount.amount
+                    send_zap(damus_state: state, event: event, lnurl: lnurl, is_custom: true, comment: comment, amount_sats: amount, zap_type: zap_type)
+                    self.zapping = true
+                }
+                .zIndex(16)
+            }
+            
+            if let error {
+                Text(error)
+                    .foregroundColor(.red)
+            }
+        
         }
+    }
+    
+    var MainContent: some View {
+        TheForm
     }
 }
 
