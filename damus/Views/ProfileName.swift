@@ -134,11 +134,13 @@ struct EventProfileName: View {
             if let real_name = profile?.display_name {
                 Text(real_name)
                     .font(.body.weight(.bold))
-                    .padding([.trailing], 2)
                 
-                Text(verbatim: "@\(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey))")
+                + Text(real_name.isEmpty ? "" : " ")
+
+                + Text(verbatim: "@\(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey))")
                     .foregroundColor(Color("DamusMediumGrey"))
                     .font(eventviewsize_to_font(size))
+                
             } else {
                 Text(verbatim: "\(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey))")
                     .font(eventviewsize_to_font(size))
