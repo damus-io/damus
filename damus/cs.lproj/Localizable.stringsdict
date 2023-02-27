@@ -193,13 +193,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ a další %1$d přesdíleli příspěvek</string>
+			<string>%2$@ a další %1$d přesdíleli váš příspěvek</string>
 			<key>few</key>
-			<string>%2$@ a další %1$d přesdíleli příspěvek</string>
+			<string>%2$@ a další %1$d přesdíleli váš příspěvek</string>
 			<key>many</key>
-			<string>%2$@ a další %1$d přesdíleli příspěvek</string>
+			<string>%2$@ a další %1$d přesdíleli váš příspěvek</string>
 			<key>other</key>
-			<string>%2$@ a dalších %1$d přesdíleli příspěvek</string>
+			<string>%2$@ a dalších %1$d přesdíleli váš příspěvek</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
