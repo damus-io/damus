@@ -136,6 +136,7 @@ struct ConfigView: View {
                             
                             if let parsed = handle_string_amount(new_value: newValue) {
                                 self.default_zap_amount = String(parsed)
+                                set_default_zap_amount(pubkey: self.state.pubkey, amount: parsed)
                             }
                         }
                 }
@@ -337,7 +338,8 @@ struct ConfigView_Previews: PreviewProvider {
 
 
 func handle_string_amount(new_value: String) -> Int? {
-    let filtered = new_value.filter { Set("0123456789").contains($0) }
+    let digits = Set("0123456789")
+    let filtered = new_value.filter { digits.contains($0) }
 
     if filtered == "" {
         return nil
