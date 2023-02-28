@@ -142,14 +142,14 @@ struct NoteContentView: View {
 func hashtag_str(_ htag: String) -> AttributedString {
      var attributedString = AttributedString(stringLiteral: "#\(htag)")
      attributedString.link = URL(string: "nostr:t:\(htag)")
-     attributedString.foregroundColor = .purple
+     attributedString.foregroundColor = Color("DamusPurple")
      return attributedString
  }
 
 func url_str(_ url: URL) -> AttributedString {
     var attributedString = AttributedString(stringLiteral: url.absoluteString)
     attributedString.link = url
-    attributedString.foregroundColor = .purple
+    attributedString.foregroundColor = Color("DamusPurple")
     return attributedString
  }
 
@@ -161,13 +161,13 @@ func mention_str(_ m: Mention, profiles: Profiles) -> AttributedString {
         let disp = Profile.displayName(profile: profile, pubkey: pk)
         var attributedString = AttributedString(stringLiteral: "@\(disp)")
         attributedString.link = URL(string: "nostr:\(encode_pubkey_uri(m.ref))")
-        attributedString.foregroundColor = .purple
+        attributedString.foregroundColor = Color("DamusPurple")
         return attributedString
     case .event:
         let bevid = bech32_note_id(m.ref.ref_id) ?? m.ref.ref_id
         var attributedString = AttributedString(stringLiteral: "@\(abbrev_pubkey(bevid))")
         attributedString.link = URL(string: "nostr:\(encode_event_id_uri(m.ref))")
-        attributedString.foregroundColor = .purple
+        attributedString.foregroundColor = Color("DamusPurple")
         return attributedString
     }
 }
