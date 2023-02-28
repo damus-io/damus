@@ -201,6 +201,7 @@ struct LikeButton: View {
             } else {
                 amountOfAngleIncrease -= 5
             }
+        }
     }
 }
 
