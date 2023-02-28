@@ -153,13 +153,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Odpovědět na %2$@, %3$@ &amp; %1$d další</string>
+			<string>Odpovědět na %2$@, %3$@ &amp; a další %1$d </string>
 			<key>few</key>
-			<string>Odpovědět na %2$@, %3$@ &amp; %1$d others</string>
+			<string>Odpovědět na %2$@, %3$@ &amp; a další %1$d</string>
 			<key>many</key>
-			<string>Odpovědět na %2$@, %3$@ &amp; %1$d others</string>
+			<string>Odpovědět na %2$@, %3$@ &amp; a další %1$d</string>
 			<key>other</key>
-			<string>Odpovědět na %2$@, %3$@ &amp; %1$d další</string>
+			<string>Odpovědět na %2$@, %3$@ &amp; a dalších %1$d</string>
 		</dict>
 	</dict>
 	<key>reposted_tagged_in_3</key>
