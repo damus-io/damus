@@ -4,6 +4,8 @@
 <dict>
 	<key>collapsed_event_view_other_notes</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@NOTES@</string>
 		<key>NOTES</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -11,15 +13,15 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%d άλλη σημείωση</string>
+			<string>... %d άλλη σημείωση ...</string>
 			<key>other</key>
-			<string>%d άλλες σημειώσεις</string>
+			<string>... %d άλλες σημειώσεις ...</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>··· %#@NOTES@ ···</string>
 	</dict>
 	<key>followers_count</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWERS@</string>
 		<key>FOLLOWERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -31,8 +33,6 @@
 			<key>other</key>
 			<string>Ακόλουθοι</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@FOLLOWERS@</string>
 	</dict>
 	<key>reactions_count</key>
 	<dict>
@@ -69,7 +69,7 @@
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Απάντηση προς %@%#@OTHERS@</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -77,17 +77,15 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string> &amp; %d άλλον</string>
+			<string>Replying to %2$@ &amp; %1$d other</string>
 			<key>other</key>
-			<string> &amp; %d άλλους</string>
-			<key>zero</key>
-			<string></string>
+			<string>Replying to %2$@ &amp; %1$d others</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>Απάντηση προς %@, %@%#@OTHERS@</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -95,11 +93,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string> &amp; %d άλλον</string>
+			<string>Απάντηση προς %2$@, %3$@ &amp; %1$d άλλον</string>
 			<key>other</key>
-			<string> &amp; %d άλλους</string>
-			<key>zero</key>
-			<string></string>
+			<string>Απάντηση προς %2$@, %3$@ &amp; %1$d άλλους</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>

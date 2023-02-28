@@ -66,19 +66,10 @@ struct ImageContextMenuModifier: ViewModifier {
 
 private struct ImageContainerView: View {
     
-    @ObservedObject var imageModel: KFImageModel
+    let url: URL?
     
     @State private var image: UIImage?
     @State private var showShareSheet = false
-    
-    init(url: URL?) {
-        self.imageModel = KFImageModel(
-            url: url,
-            fallbackUrl: nil,
-            maxByteSize: 2000000, // 2 MB
-            downsampleSize: CGSize(width: 400, height: 400)
-        )
-    }
     
     private struct ImageHandler: ImageModifier {
         @Binding var handler: UIImage?
@@ -91,30 +82,17 @@ private struct ImageContainerView: View {
     
     var body: some View {
         
-        KFAnimatedImage(imageModel.url)
-            .callbackQueue(.dispatch(.global(qos: .background)))
-            .processingQueue(.dispatch(.global(qos: .background)))
-            .cacheOriginalImage()
+        KFAnimatedImage(url)
+            .imageContext(.note)
             .configure { view in
-                view.framePreloadCount = 1
+                view.framePreloadCount = 3
             }
-            .scaleFactor(UIScreen.main.scale)
-            .loadDiskFileSynchronously()
-            .fade(duration: 0.1)
             .imageModifier(ImageHandler(handler: $image))
-            .onFailure { _ in
-                imageModel.downloadFailed()
-            }
-            .id(imageModel.refreshID)
             .clipped()
-            .modifier(ImageContextMenuModifier(url: imageModel.url, image: image, showShareSheet: $showShareSheet))
+            .modifier(ImageContextMenuModifier(url: url, image: image, showShareSheet: $showShareSheet))
             .sheet(isPresented: $showShareSheet) {
-                ShareSheet(activityItems: [imageModel.url])
+                ShareSheet(activityItems: [url])
             }
-        
-        // TODO: Update ImageCarousel with serializer and processor
-        // .serialize(by: imageModel.serializer)
-        // .setProcessor(imageModel.processor)
     }
 }
 
@@ -126,14 +104,6 @@ struct ImageView: View {
     
     @State private var selectedIndex = 0
     @State var showMenu = true
-    
-    var safeAreaInsets: UIEdgeInsets? {
-        return UIApplication
-                .shared
-                .connectedScenes
-                .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
-                .first { $0.isKeyWindow }?.safeAreaInsets
-    }
     
     var navBarView: some View {
         VStack {
@@ -180,8 +150,8 @@ struct ImageView: View {
                     ZoomableScrollView {
                         ImageContainerView(url: urls[index])
                             .aspectRatio(contentMode: .fit)
-                            .padding(.top, safeAreaInsets?.top)
-                            .padding(.bottom, safeAreaInsets?.bottom)
+                            .padding(.top, Theme.safeAreaInsets?.top)
+                            .padding(.bottom, Theme.safeAreaInsets?.bottom)
                     }
                     .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
                         presentationMode.wrappedValue.dismiss()
@@ -210,7 +180,7 @@ struct ImageView: View {
                     }
                 }
                 .animation(.easeInOut, value: showMenu)
-                .padding(.bottom, safeAreaInsets?.bottom)
+                .padding(.bottom, Theme.safeAreaInsets?.bottom)
             )
         }
     }
@@ -229,16 +199,13 @@ struct ImageCarousel: View {
                     .foregroundColor(Color.clear)
                     .overlay {
                         KFAnimatedImage(url)
-                            .callbackQueue(.dispatch(.global(qos: .background)))
-                            .processingQueue(.dispatch(.global(qos: .background)))
-                            .cacheOriginalImage()
-                            .loadDiskFileSynchronously()
-                            .scaleFactor(UIScreen.main.scale)
-                            .fade(duration: 0.1)
+                            .imageContext(.note)
+                            .cancelOnDisappear(true)
                             .configure { view in
                                 view.framePreloadCount = 3
                             }
                             .aspectRatio(contentMode: .fit)
+                            .cornerRadius(10)
                             .tabItem {
                                 Text(url.absoluteString)
                             }
@@ -251,11 +218,11 @@ struct ImageCarousel: View {
                     }
             }
         }
-        .cornerRadius(10)
         .fullScreenCover(isPresented: $open_sheet) {
             ImageView(urls: urls)
         }
         .frame(height: 200)
+        .clipped()
         .onTapGesture {
             open_sheet = true
         }

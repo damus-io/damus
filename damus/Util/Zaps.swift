@@ -36,7 +36,7 @@ class Zaps {
                 if our_zaps[note_target.note_id] == nil {
                     our_zaps[note_target.note_id] = [zap]
                 } else {
-                    let _ = insert_uniq_sorted_zap(zaps: &(our_zaps[note_target.note_id]!), new_zap: zap)
+                    insert_uniq_sorted_zap_by_amount(zaps: &(our_zaps[note_target.note_id]!), new_zap: zap)
                 }
             case .profile(_):
                 break
@@ -60,6 +60,6 @@ class Zaps {
         event_counts[id] = event_counts[id]! + 1
         event_totals[id] = event_totals[id]! + zap.invoice.amount
         
-        return
+        notify(.update_stats, zap.target.id)
     }
 }

@@ -211,6 +211,32 @@ enum Amount: Equatable {
     }
 }
 
+func format_actions_abbrev(_ actions: Int) -> String {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    formatter.positiveSuffix = "m"
+    formatter.positivePrefix = ""
+    formatter.minimumFractionDigits = 0
+    formatter.maximumFractionDigits = 3
+    formatter.roundingMode = .down
+    formatter.roundingIncrement = 0.1
+    formatter.multiplier = 1
+        
+    if actions >= 1_000_000 {
+        formatter.positiveSuffix = "m"
+        formatter.multiplier = 0.000001
+    } else if actions >= 1000 {
+        formatter.positiveSuffix = "k"
+        formatter.multiplier = 0.001
+    } else {
+        return "\(actions)"
+    }
+    
+    let actions = NSNumber(value: actions)
+    
+    return formatter.string(from: actions) ?? "\(actions)"
+}
+
 func format_msats_abbrev(_ msats: Int64) -> String {
     let formatter = NumberFormatter()
     formatter.numberStyle = .decimal
@@ -237,17 +263,19 @@ func format_msats_abbrev(_ msats: Int64) -> String {
     return formatter.string(from: sats) ?? sats.stringValue
 }
 
-func format_msats(_ msat: Int64) -> String {
+func format_msats(_ msat: Int64, locale: Locale = Locale.current) -> String {
     let numberFormatter = NumberFormatter()
     numberFormatter.numberStyle = .decimal
     numberFormatter.minimumFractionDigits = 0
     numberFormatter.maximumFractionDigits = 3
     numberFormatter.roundingMode = .down
+    numberFormatter.locale = locale
 
     let sats = NSNumber(value: (Double(msat) / 1000.0))
     let formattedSats = numberFormatter.string(from: sats) ?? sats.stringValue
 
-    return String(format: NSLocalizedString("sats_count", comment: "Amount of sats."), sats.decimalValue as NSDecimalNumber, formattedSats)
+    let bundle = bundleForLocale(locale: locale)
+    return String(format: bundle.localizedString(forKey: "sats_count", value: nil, table: nil), locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats)
 }
 
 func convert_invoice_block(_ b: invoice_block) -> Block? {

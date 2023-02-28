@@ -26,7 +26,7 @@ struct RelayFilterView: View {
     }
     
     var body: some View {
-        Text("To filter your \(timeline.rawValue) feed, please choose applicable relays from the list below:")
+        Text("Please choose relays from the list below to filter the current feed:", comment: "Instructions on how to filter a specific timeline feed by choosing relay servers to filter on.")
             .padding()
             .padding(.top, 20)
             .padding(.bottom, 0)

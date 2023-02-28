@@ -47,6 +47,7 @@ struct BuildThreadV2View: View {
     @State var thread: ThreadV2? = nil
     
     @State var current_events_uuid: String = ""
+    @State var extra_events_uuid: String = ""
     @State var childs_events_uuid: String = ""
     @State var parents_events_uuids: [String] = []
     
@@ -197,13 +198,15 @@ struct BuildThreadV2View: View {
         self.unsubscribe_all()
         print("ThreadV2View: Reload!")
         
+        var extra = NostrFilter.filter_kinds([9735, 6, 7])
+        extra.referenced_ids = [ self.event_id ]
+        
         // Get the current event
         current_events_uuid = subscribe(filters: [
-            NostrFilter(
-                ids: [self.event_id],
-                limit: 1
-            )
+            NostrFilter(ids: [self.event_id], limit: 1)
         ])
+        
+        extra_events_uuid = subscribe(filters: [extra])
         print("subscribing to threadV2 \(event_id) with sub_id \(current_events_uuid)")
     }
     
@@ -262,6 +265,10 @@ struct ThreadV2View: View {
                                            navigating: $navigating,
                                            selected: false
                             )
+                            
+                            Divider()
+                                .padding(.top, 4)
+                                .padding(.leading, 25 * 2)
                         }
                     }.background(GeometryReader { geometry in
                         // get the height and width of the EventView view
@@ -286,15 +293,20 @@ struct ThreadV2View: View {
                     ).id("main")
                     
                     // MARK: - Responses of the actual event view
-                    ForEach(thread.childEvents, id: \.id) { event in
-                        MutedEventView(
-                            damus_state: damus,
-                            event: event,
-                            scroller: reader,
-                            nav_target: $nav_target,
-                            navigating: $navigating,
-                            selected: false
-                        )
+                    LazyVStack {
+                        ForEach(thread.childEvents, id: \.id) { event in
+                            MutedEventView(
+                                damus_state: damus,
+                                event: event,
+                                scroller: nil,
+                                nav_target: $nav_target,
+                                navigating: $navigating,
+                                selected: false
+                            )
+
+                            Divider()
+                                .padding([.top], 4)
+                        }
                     }
                 }.padding()
             }.navigationBarTitle(NSLocalizedString("Thread", comment: "Navigation bar title for note thread."))

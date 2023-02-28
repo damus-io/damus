@@ -38,7 +38,7 @@ func insert_uniq_by_pubkey(events: inout [NostrEvent], new_ev: NostrEvent, cmp: 
     return true
 }
 
-func insert_uniq_sorted_zap(zaps: inout [Zap], new_zap: Zap) -> Bool {
+func insert_uniq_sorted_zap(zaps: inout [Zap], new_zap: Zap, cmp: (Zap, Zap) -> Bool) -> Bool {
     var i: Int = 0
     
     for zap in zaps {
@@ -47,7 +47,7 @@ func insert_uniq_sorted_zap(zaps: inout [Zap], new_zap: Zap) -> Bool {
             return false
         }
         
-        if new_zap.invoice.amount > zap.invoice.amount {
+        if cmp(new_zap, zap)  {
             zaps.insert(new_zap, at: i)
             return true
         }
@@ -58,6 +58,27 @@ func insert_uniq_sorted_zap(zaps: inout [Zap], new_zap: Zap) -> Bool {
     return true
 }
 
+@discardableResult
+func insert_uniq_sorted_zap_by_created(zaps: inout [Zap], new_zap: Zap) -> Bool {
+    return insert_uniq_sorted_zap(zaps: &zaps, new_zap: new_zap) { (a, b) in
+        a.event.created_at > b.event.created_at
+    }
+}
+
+@discardableResult
+func insert_uniq_sorted_zap_by_amount(zaps: inout [Zap], new_zap: Zap) -> Bool {
+    return insert_uniq_sorted_zap(zaps: &zaps, new_zap: new_zap) { (a, b) in
+        a.invoice.amount > b.invoice.amount
+    }
+}
+
+func insert_uniq_sorted_event_created(events: inout [NostrEvent], new_ev: NostrEvent) -> Bool {
+    return insert_uniq_sorted_event(events: &events, new_ev: new_ev) {
+        $0.created_at > $1.created_at
+    }
+}
+
+@discardableResult
 func insert_uniq_sorted_event(events: inout [NostrEvent], new_ev: NostrEvent, cmp: (NostrEvent, NostrEvent) -> Bool) -> Bool {
     var i: Int = 0
     

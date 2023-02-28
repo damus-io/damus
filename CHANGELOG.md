@@ -1,3 +1,124 @@
+
+## [1.1.0-9] - 2023-02-26
+
+### Added
+
+- Customized zaps (William Casarin)
+- Add new Notifications View (William Casarin)
+- Bookmarking (Joel Klabo)
+
+### Changed
+
+- No more inline npubs when tagging users (Swift)
+
+
+### Fixed
+
+- Fix alignment of side menu labels (Joel Klabo)
+- Fix duplicated participants in reply-to view (Joel Klabo)
+- Load missing profiles in Zaps view (William Casarin)
+- Fix memory leak with inline videos (William Casarin)
+- Eliminate popping when scrolling (William Casarin)
+
+
+[1.1.0-9]: https://github.com/damus-io/damus/releases/tag/v1.1.0-9
+
+## [1.1.0-3] - 2023-02-20
+
+### Added
+
+- Add a "load more" button instead of always inserting events in timelines (William Casarin)
+- Added the ability to select text on posts (OlegAba)
+- Added Posts or Post & Replies selector to Profile (ericholguin)
+- Improved profile navbar (OlegAba)
+
+
+### Changed
+
+- Rename global feed to universe (William Casarin)
+- Improve look of post view (ericholguin)
+- Added a 20MB content length limit for all image files (OlegAba)
+- Improved EventActionBar button spacing (Bryan Montz)
+- Polished profile key copy buttons, added animation (Bryan Montz)
+- Format large numbers of action bar actions (Joel Klabo)
+- Improved blur on images, especially in dark mode (Bryan Montz)
+
+
+### Fixed
+
+- Remove trailing slash when adding a relay (middlingphys)
+- Scroll to top of events instead of the bottom (OlegAba)
+- Fix lag on startup when you have lots of DMs (William Casarin)
+- Fix an issues where dm notifications appear without any new events (William Casarin)
+- Fix some hangs when scrolling by images (OlegAba)
+- Force default zap amount text field to accept only numbers (Terry Yiu)
+
+
+
+[1.1.0-3]: https://github.com/damus-io/damus/releases/tag/v1.1.0-3
+
+## [1.1.0-2] - 2023-02-14
+
+### Added
+
+- Save drafts to posts, replies and DMs (Terry Yiu)
+
+### Fixed
+
+- Ensure stats get updated in realtime on action bars (William Casarin)
+- Fix reposts not getting counted properly (William Casarin)
+- Fix a bug where zaps on other people's posts weren't showing (William Casarin)
+- Fix punctuation getting included in some urls (Gert Goet)
+- Improve language detection (Terry Yiu)
+- Fix some animated image crashes (William Casarin)
+
+
+[1.1.0-2]: https://github.com/damus-io/damus/releases/tag/v1.1.0-2
+## [1.0.0-15] - 2023-02-10
+
+### Added
+
+- Relay Filtering (William Casarin)
+- Japanese translations (Terry Yiu)
+- Add password autofill on account login and creation (Terry Yiu)
+- Show if relay is paid (William Casarin)
+- Add "Follows You" indicator on profile (William Casarin)
+- Add screen to select individual relays when posting/broadcasting (Andrii Sievrikov)
+- Relay Detail View (Joel Klabo)
+- Warn when attempting to post an nsec key (Terry Yiu)
+- DeepL translation integration (Terry Yiu)
+- Use local authentication (faceid) to access private key (Andrii Sievrikov)
+- Add accessibility labels to action bar (Bryan Montz)
+- Copy invoice button (Joel Klabo)
+- Receive Lightning Zaps (William Casarin)
+- Allow text selection in bio (Suhail Saqan)
+
+
+### Changed
+
+- Show "Follow Back" button on profile page (William Casarin)
+- When on your profile page, open relay view instead for your own relays (Terry Yiu)
+- Updated QR code view, include profile image, etc (ericholguin)
+- Clicking relay numbers now goes to relay config (radixrat)
+
+### Fixed
+
+- Load zaps, likes and reposts when you open a thread (William Casarin)
+- Fix bug where sidebar navigation fails to pop when switching timelines (William Casarin)
+- Use lnaddress before lnurl for tip addresses to avoid Anigma scamming (William Casarin)
+- Fix sidebar navigation bugs (OlegAba)
+- Fix issue where navigation fails pop to root when switching timelines (William Casarin)
+- Make @ mentions case insensitive (William Casarin)
+- Fix some lnurls not getting decoded properly (William Casarin)
+- Hide incoming DMs from blocked users (William Casarin)
+- Hide blocked users from search results (William Casarin)
+- Fix Cash App invoice payments (Rob Seward)
+- DM Padding (OlegAba)
+- Check for broken lnurls (William Casarin)
+
+
+
+[1.0.0-15]: https://github.com/damus-io/damus/releases/tag/v1.0.0-15
 ## [1.0.0-13] - 2023-01-30
 
 ### Added
@@ -513,6 +634,5 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
 
 

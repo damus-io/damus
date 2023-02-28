@@ -1,0 +1,723 @@
+/* Description of how the nip05 identifier would be used for verification. */
+"'%@' at '%@' will be used for verification" = "'%@' pada '%@' akan digunakan untuk verifikasi";
+
+/* Description of why the nip05 identifier is invalid. */
+"'%@' is an invalid NIP-05 identifier. It should look like an email." = "'%@' adalah pengenal NIP-05 yang tidak valid. Seharusnya terlihat seperti surel.";
+
+/* Navigation bar title for view that shows who is following a user. */
+"(Profile.displayName(profile: profile, pubkey: whos))'s Followers" = "(Profile.displayName(profile: profile, pubkey: whos))'s Pengikut";
+
+/* Navigation bar title for view that shows who a user is following. */
+"(who) following" = "(who) Mengikuti";
+
+/* Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
+Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'. */
+"%@ %@" = "%@ %@";
+
+/* Alert message that informs a user was blocked. */
+"%@ has been blocked" = "%@ telah diblokir";
+
+/* Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string. */
+"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. Membuat sebuah akun tidak memerlukan nomor telepon, surel atau nama. Mari bergabung tanpa perlu khawatir.";
+
+/* Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string. */
+"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. Pesan dienkripsi secara End-to-End. \"Big Tech\" tidak dapat membaca pesan anda.";
+
+/* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string. */
+"%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Beri tip pada postingan teman anda dan stack sats dengan Bitcoin⚡️, mata uang asli dari internet.";
+
+/* Fraction of how many of the user's relay servers that are operational. */
+"%lld/%lld" = "%lld/%lld";
+
+/* Text indicating the zap amount. i.e. number of satoshis that were tipped to a user */
+"⚡️ %@" = "⚡️ %@";
+
+/* Label to prompt for about text entry for user to describe about themself. */
+"About" = "Tentang";
+
+/* Label for About Me section of user profile form. */
+"About Me" = "Tentang Saya";
+
+/* Placeholder text for About Me description. */
+"Absolute Boss" = "Absolute Boss";
+
+/* Button to accept the end user license agreement before being allowed into the app. */
+"Accept" = "Terima";
+
+/* Label to indicate the public ID of the account. */
+"Account ID" = "ID Akun";
+
+/* Title for confirmation dialog to either share, report, or block a profile. */
+"Actions" = "Tindakan";
+
+/* Button to add recommended relay server.
+   Button to confirm adding user inputted relay. */
+"Add" = "Tambah";
+
+/* Button label to re-add all original participants as profiles to reply to in a note */
+"Add all" = "Tambahkan Semua";
+
+/* Label for section for adding a relay server. */
+"Add Relay" = "Tambahkan Relay";
+
+/* Label to display relay contact user. */
+"Admin" = "Admin";
+
+/* Any amount of sats */
+"Any" = "Berapa pun";
+
+/* Prompt for optional entry of API Key to use translation server. */
+"API Key (optional)" = "Kunci API (opsional)";
+
+/* Prompt for required entry of API Key to use translation server. */
+"API Key (required)" = "Kunci API (diperlukan)";
+
+/* Alert message to ask if user wants to repost a post. */
+"Are you sure you want to repost this?" = "Anda yakin ingin memposting ulang ini?";
+
+/* Label for Banner Image section of user profile form. */
+"Banner Image" = "Gambar Banner";
+
+/* Reminder to user that they should save their account information. */
+"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "Sebelum kita mulai, anda perlu menyimpan informasi akun anda. Jika tidak, anda tidak akan dapat kembali masuk ke akun anda apabila anda menghapus Damus.";
+
+/* Dropdown option label for Lightning wallet, Bitcoin Beach. */
+"Bitcoin Beach" = "Bitcoin Beach";
+
+/* Label for Bitcoin Lightning Tips section of user profile form. */
+"Bitcoin Lightning Tips" = "Bitcoin Lightning Tips";
+
+/* Dropdown option label for Lightning wallet, Blixt Wallet */
+"Blixt Wallet" = "Blixt Wallet";
+
+/* Alert button to block a user.
+   Button to block a profile.
+   Context menu option for blocking users. */
+"Block" = "Blokir";
+
+/* Alert message prompt to ask if a user should be blocked. */
+"Block %@?" = "Blokir %@?";
+
+/* Title of alert for blocking a user. */
+"Block User" = "Blokir Pengguna";
+
+/* Sidebar menu label for Profile view. */
+"Blocked" = "Diblokir";
+
+/* Navigation title of view to see list of blocked users. */
+"Blocked Users" = "Pengguna Diblokir";
+
+/* Dropdown option label for Lightning wallet, Blue Wallet. */
+"Blue Wallet" = "Blue Wallet";
+
+/* Accessibility label for boosts button */
+"Boosts" = "Tingkatkan";
+
+/* Dropdown option label for Lightning wallet, Breez. */
+"Breez" = "Breez";
+
+/* Context menu option for broadcasting the user's note to all of the user's connected relay servers. */
+"Broadcast" = "Siaran";
+
+/* Alert button to cancel out of alert for blocking a user.
+   Button to cancel out of alert that creates a new mutelist.
+   Button to cancel out of posting a note.
+   Button to cancel out of reposting a post.
+   Button to cancel out of view adding user inputted relay.
+   Cancel deleting the user.
+   Cancel out of logging out the user. */
+"Cancel" = "Batal";
+
+/* Dropdown option label for Lightning wallet, Cash App. */
+"Cash App" = "Cash App";
+
+/* Button for clearing cached data. */
+"Clear" = "Kosongkan";
+
+/* Section title for clearing cached data. */
+"Clear Cache" = "Kosongkan Cache";
+
+/* Label to display relay contact information. */
+"Contact" = "Kontak";
+
+/* Label indicating that a user's key was copied. */
+"Copied" = "Disalin";
+
+/* Button to copy a relay server address. */
+"Copy" = "Salin";
+
+/* Context menu option for copying the ID of the account that created the note. */
+"Copy Account ID" = "Salin ID Akun";
+
+/* Context menu option to copy an image into clipboard.
+   Context menu option to copy an image to clipboard. */
+"Copy Image" = "Salin Gambar";
+
+/* Context menu option to copy the URL of an image into clipboard. */
+"Copy Image URL" = "Salin URL Gambar";
+
+/* Title of section for copying a Lightning invoice identifier. */
+"Copy invoice" = "Salin Faktur";
+
+/* Context menu option for copying a user's Lightning URL. */
+"Copy LNURL" = "Salin LNURL";
+
+/* Context menu option for copying the ID of the note. */
+"Copy Note ID" = "Salin ID Note";
+
+/* Context menu option for copying the JSON text from the note. */
+"Copy Note JSON" = "Salin JSON Note";
+
+/* Button to copy report ID. */
+"Copy Report ID" = "Salin ID Laporan";
+
+/* Context menu option for copying the text from an note. */
+"Copy Text" = "Salin Text";
+
+/* Context menu option for copying the ID of the user who created the note. */
+"Copy User Pubkey" = "Salin Kunci Publik Pengguna";
+
+/* Alert message to indicate that the blocked user could not be found. */
+"Could not find user to block..." = "Tidak dapat menemukan pengguna untuk diblokir...";
+
+/* Button to create account. */
+"Create" = "Buat";
+
+/* Button to create an account. */
+"Create Account" = "Buat Akun";
+
+/* Title of alert prompting the user to create a new mutelist. */
+"Create new mutelist" = "Buat daftar bisu baru";
+
+/* Example description about Bitcoin creator(s), Satoshi Nakamoto. */
+"Creator(s) of Bitcoin. Absolute legend." = "Creator(s) of Bitcoin. Absolute legend.";
+
+/* Dropdown option for selecting a custom translation server. */
+"Custom" = "Kustom";
+
+/* Name of the app, shown on the first screen when user is not logged in. */
+"Damus" = "Damus";
+
+/* Dropdown option for selecting DeepL as the translation service. */
+"DeepL (Proprietary, Higher Accuracy)" = "DeepL (Kepemilikan, Lebih Akurat)";
+
+/* Button to pay a Lightning invoice with the user's default Lightning wallet. */
+"Default Wallet" = "Dompet default";
+
+/* Section title for zap configuration */
+"Default Zap Amount in sats" = "Jumlah Zap default dalam sats";
+
+/* Button for deleting the users account.
+   Button to delete a relay server that the user connects to.
+   Button to remove a user from their blocklist.
+   Section title for deleting the user */
+"Delete" = "Hapus";
+
+/* Button to delete the user's account. */
+"Delete Account" = "Hapus Akun";
+
+/* Alert message to indicate this is a deleted account */
+"Deleted Account" = "Akun Dihapus";
+
+/* Label to display relay description. */
+"Description" = "Deskripsi";
+
+/* Button to dismiss a text field alert. */
+"Dismiss" = "Abaikan";
+
+/* Label to prompt display name entry. */
+"Display Name" = "Nama Tampilan";
+
+/* Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
+   Navigation title for view of DMs, where DM is an English abbreviation for Direct Message. */
+"DMs" = "Pesan";
+
+/* Button to dismiss wallet selection view for paying Lightning invoice. */
+"Done" = "Selesai";
+
+/* Heading indicating that this application allows users to earn money. */
+"Earn Money" = "Dapatkan Uang";
+
+/* Button to edit user's profile. */
+"Edit" = "Edit";
+
+/* Text indicating that the view is used for editing which participants are replied to in a note. */
+"Edit participants" = "Edit Partisipan";
+
+/* Heading indicating that this application keeps private messaging end-to-end encrypted. */
+"Encrypted" = "Terenkripsi";
+
+/* Prompt for user to enter an account key to login. */
+"Enter your account key to login:" = "Masukkan Kunci Akun anda untuk masuk:";
+
+/* Error message indicating why saving keys failed. */
+"Error: %@" = "Galat: %@";
+
+/* Label indicating that the below text is the EULA, an acronym for End User License Agreement. */
+"EULA" = "EULA";
+
+/* No comment provided by engineer. */
+"Filter" = "Saring";
+
+/* Button to follow a user. */
+"Follow" = "Ikuti";
+
+/* Button to follow a user back. */
+"Follow Back" = "Ikuti Balik";
+
+/* Text on QR code view to prompt viewer looking at screen to follow the user. */
+"Follow me on nostr" = "Ikuti Saya di nostr";
+
+/* Label describing followers of a user. */
+"Followers" = "Pengikut";
+
+/* Text to indicate that the button next to it is in a state that indicates that it is in the process of following a profile.
+Part of a larger sentence to describe how many profiles a user is following. */
+"Following" = "Mengikuti";
+
+/* Label to indicate that the user is in the process of following another user. */
+"Following..." = "Mengikuti...";
+
+/* Text to indicate that button next to it is in a state that will follow a profile when tapped. */
+"Follows" = "Ikuti";
+
+/* Text to indicate that a user is following your profile. */
+"Follows you" = "Mengikuti Anda";
+
+/* Dropdown option for selecting Free plan for DeepL translation service. */
+"Free" = "Gratis";
+
+/* Button to navigate to DeepL website to get a translation API key. */
+"Get API Key" = "Dapatkan Kunci API";
+
+/* Navigation bar title for Global view where posts from all connected relay servers appear. */
+"Global" = "Global";
+
+/* Navigation link to go to post referenced by hex code. */
+"Goto post %@" = "Buka Kiriman %@";
+
+/* Navigation link to go to profile. */
+"Goto profile %@" = "Buka Profil %@";
+
+/* Button to hide a post from a user who has been blocked. */
+"Hide" = "Sembunyikan";
+
+/* Button to hide the DeepL translation API key.
+   Button to hide the LibreTranslate server API key. */
+"Hide API Key" = "Sembunyikan Kunci API";
+
+/* Navigation bar title for Home view where posts and replies appear from those who the user is following. */
+"Home" = "Beranda";
+
+/* Placeholder example text for profile picture URL. */
+"https://example.com/pic.jpg" = "https://example.com/pic.jpg";
+
+/* Placeholder example text for website URL for user profile. */
+"https://jb55.com" = "https://jb55.com";
+
+/* Button for user to report that the account or content has illegal content. */
+"Illegal content" = "Konten ilegal";
+
+/* Error message indicating that an invalid account key was entered for login. */
+"Invalid key" = "Kunci tidak valid";
+
+/* Button for user to report that the account or content has spam. */
+"It's spam" = "Ini Spam";
+
+/* Placeholder example text for identifier used for NIP-05 verification. */
+"jb55@jb55.com" = "jb55@jb55.com";
+
+/* Moves the post button to the left side of the screen */
+"Left Handed" = "Kidal";
+
+/* Button to complete account creation and start using the app. */
+"Let's go!" = "Mulai!";
+
+/* Dropdown option for selecting LibreTranslate as the translation service. */
+"LibreTranslate (Open Source)" = "LibreTranslate (Open Source)";
+
+/* Placeholder text for entry of Lightning Address or LNURL. */
+"Lightning Address or LNURL" = "Alamat Lightning atau LNURL";
+
+/* Indicates that the view is for paying a Lightning invoice. */
+"Lightning Invoice" = "Faktur Lightning";
+
+/* Accessibility Label for Like button */
+"Like" = "Suka";
+
+/* Dropdown option label for Lightning wallet, LNLink. */
+"LNLink" = "LNLink";
+
+/* Face ID usage description shown when trying to access private key */
+"Local authentication to access private key" = "Autentikasi lokal untuk mengakses kunci pribadi";
+
+/* Dropdown option label for system default for Lightning wallet. */
+"Local default" = "Default Lokal";
+
+/* Button to log into account.
+   Button to log into an account. */
+"Login" = "Masuk";
+
+/* Alert for logging out the user.
+   Button for logging out the user.
+   Button to close the alert that informs that the current account has been deleted. */
+"Logout" = "Keluar";
+
+/* Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out. */
+"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "Pastikan kunci akun nsec anda sudah tersimpan sebelum anda keluar atau anda akan kehilangan akses pada akun ini";
+
+/* Dropdown option label for Lightning wallet, Muun. */
+"Muun" = "Muun";
+
+/* Label for NIP-05 Verification section of user profile form. */
+"NIP-05 Verification" = "Verifikasi NIP-05";
+
+/* Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key. */
+"No" = "Tidak";
+
+/* Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists. */
+"No block list found, create a new one? This will overwrite any previous block lists." = "Daftar blokir tidak ditemukan, buat baru? Ini akan menimpa semua daftar blokir sebelumnya.";
+
+/* No search results. */
+"none" = "Nihil";
+
+/* Dropdown option for selecting no translation service. */
+"None" = "Tidak Ada";
+
+/* Alert user that they might be attempting to paste a private key and ask them to confirm. */
+"Note contains \"nsec1\" private key. Are you sure?" = "Note berisi kunci pribadi \"nsec1\". Apakah anda yakin?";
+
+/* Indicates that there are no notes in the timeline to view. */
+"Nothing to see here. Check back later!" = "Tidak ada apa disini. Periksa kembali nanti!";
+
+/* Toolbar label for Notifications view. */
+"Notifications" = "Notifikasi";
+
+/* String indicating that a given timestamp just occurred */
+"now" = "Baru Saja";
+
+/* Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key. */
+"nsec1..." = "nsec1...";
+
+/* Button for user to report that the account or content has nudity or explicit content. */
+"Nudity or explicit content" = "Konten dewasa atau eksplisit";
+
+/* Label indicating that a form input is optional. */
+"optional" = "Opsional";
+
+/* No comment provided by engineer. */
+"Paid Relay" = "Relay Berbayar";
+
+/* Button to pay a Lightning invoice. */
+"Pay" = "Bayar";
+
+/* Navigation bar title for view to pay Lightning invoice. */
+"Pay the Lightning invoice" = "Bayar Faktur Lightning";
+
+/* Alert for deleting the users account. */
+"Permanently Delete Account" = "Hapus Permanen Akun";
+
+/* Dropdown option label for Lightning wallet, Phoenix. */
+"Phoenix" = "Phoenix";
+
+/* Prompt selection of DeepL subscription plan to perform machine translations on notes */
+"Plan" = "Paket";
+
+/* Button to post a note. */
+"Post" = "Kirim";
+
+/* Text to indicate that what is being shown is a post from a user who has been blocked. */
+"Post from a user you've blocked" = "Kiriman dari pengguna yang anda blokir";
+
+/* Label for filter for seeing only posts (instead of posts and replies). */
+"Posts" = "Kiriman";
+
+/* Label for filter for seeing posts and replies (instead of only posts). */
+"Posts & Replies" = "Kiriman dan Balasan";
+
+/* Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading. */
+"Private" = "Pribadi";
+
+/* Title of the secure field that holds the user's private key. */
+"Private Key" = "Kunci Pribadi";
+
+/* Dropdown option for selecting Pro plan for DeepL translation service. */
+"Pro" = "Pro";
+
+/* Sidebar menu label for Profile view. */
+"Profile" = "Profil";
+
+/* Label for Profile Picture section of user profile form. */
+"Profile Picture" = "Foto Profil";
+
+/* Section title for the user's public account ID. */
+"Public Account ID" = "ID Akun Publik";
+
+/* Label indicating that the text is a user's public account key. */
+"Public key" = "Kunci Publik";
+
+/* Label indicating that the text is a user's public account key. */
+"Public Key" = "Kunci Publik";
+
+/* Prompt to ask user if the key they entered is a public key. */
+"Public Key?" = "Kunci Publik?";
+
+/* Navigation bar title for Reactions view. */
+"Reactions" = "Reaksi";
+
+/* Section title for recommend relay servers that could be added as part of configuration */
+"Recommended Relays" = "Rekomendasi Relay";
+
+/* Button to reject the end user license agreement, which disallows the user from being let into the app. */
+"Reject" = "Tolak";
+
+/* Label to display relay address.
+   Text field for relay server. Used for testing purposes. */
+"Relay" = "Relay";
+
+/* Sidebar menu label for Relays view. */
+"Relays" = "Relay";
+
+/* Description of what was done as a result of sending a report to relay servers. */
+"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "Relay telah diberitahukan dan klien akan dapat menggunakan informasi ini untuk menyaring konten. Terima Kasih!";
+
+/* Button label to remove all participants from a note reply. */
+"Remove all" = "Hapus Semua";
+
+/* Accessibility label for reply button */
+"Reply" = "Balas";
+
+/* Label to indicate that the user is replying to themself. */
+"Reply to self" = "Balas ke diri sendiri";
+
+/* Label to indicate that the user is replying to 2 users. */
+"Replying to %@ & %@" = "Membalas ke %1$@ & %2$@";
+
+/* Indicating that the user is replying to the following listed people. */
+"Replying to:" = "Membalas ke:";
+
+/* Button to report a profile.
+   Context menu option for reporting content. */
+"Report" = "Lapor";
+
+/* Label indicating that the text underneath is the identifier of the report that was sent to relay servers. */
+"Report ID:" = "ID Laporan:";
+
+/* Message indicating that a report was successfully sent to relay servers. */
+"Report sent!" = "Laporan Terkirim!";
+
+/* Button to confirm reposting a post.
+   Title of alert for confirming to repost a post. */
+"Repost" = "Posting Ulang";
+
+/* Text indicating that the post was reposted (i.e. re-shared). */
+"Reposted" = "Diposting Ulang";
+
+/* Navigation bar title for Reposts view. */
+"Reposts" = "Postingan Ulang";
+
+/* Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message. */
+"Requests" = "Permintaan";
+
+/* Button to retry completing account creation after an error occurred. */
+"Retry" = "Ulangi";
+
+/* Dropdown option label for Lightning wallet, River */
+"River" = "River";
+
+/* Example username of Bitcoin creator(s), Satoshi Nakamoto. */
+"satoshi" = "satoshi";
+
+/* Name of Bitcoin creator(s). */
+"Satoshi Nakamoto" = "Satoshi Nakamoto";
+
+/* Button for saving profile. */
+"Save" = "Simpan";
+
+/* Context menu option to save an image. */
+"Save Image" = "Simpan Gambar";
+
+/* Text on QR code view to prompt viewer to scan the QR code on screen with their device camera. */
+"Scan the code" = "Pindai Kode";
+
+/* Navigation link to search hashtag. */
+"Search hashtag: #%@" = "Cari Hashtag: #%@";
+
+/* Placeholder text to prompt entry of search query. */
+"Search..." = "Cari...";
+
+/* Section title for user's secret account login key. */
+"Secret Account Login Key" = "Kunci Login Akun Rahasia";
+
+/* Title of section for selecting a Lightning wallet to pay a Lightning invoice. */
+"Select a Lightning wallet" = "Pilih Dompet Lightning";
+
+/* Prompt selection of user's default wallet */
+"Select default wallet" = "Pilih Dompet Default";
+
+/* Text prompt for user to send a message to the other user. */
+"Send a message to start the conversation..." = "Kirim pesan untuk memulai percakapan...";
+
+/* Prompt selection of LibreTranslate server to perform machine translations on notes */
+"Server" = "Server";
+
+/* Prompt selection of translation service provider. */
+"Service" = "Layanan";
+
+/* Navigation title for Settings view.
+   Sidebar menu label for accessing the app settings */
+"Settings" = "Pengaturan";
+
+/* Button to share a post
+   Button to share an image.
+   Button to share the link to a profile. */
+"Share" = "Bagikan";
+
+/* Button to show a post from a user who has been blocked.
+   Toggle to show or hide user's secret account login key. */
+"Show" = "Tampilkan";
+
+/* Button to show the DeepL translation API key.
+   Button to show the LibreTranslate server API key. */
+"Show API Key" = "Tampilkan Kunci API";
+
+/* Toggle to show or hide selection of wallet. */
+"Show wallet selector" = "Tampilkan Pilihan Dompet";
+
+/* Sidebar menu label to sign out of the account. */
+"Sign out" = "Keluar";
+
+/* Label to display relay software. */
+"Software" = "Perangkat Lunak";
+
+/* Dropdown option label for Lightning wallet, Strike. */
+"Strike" = "Strike";
+
+/* Label to display relay's supported NIPs. */
+"Supported NIPs" = "NIP Didukung";
+
+/* Button to close out of alert that informs that the action to block a user was successful. */
+"Thanks!" = "Terima Kasih!";
+
+/* Button for user to report that the account is impersonating someone. */
+"They are impersonating someone" = "Dia Menirukan Seseorang";
+
+/* No comment provided by engineer. */
+"This is a paid relay, you must pay for posts to be accepted." = "Ini merupakan relay berbayar, anda harus membayar untuk postingan agar diterima.";
+
+/* Warning that the inputted account key is a public key and the result of what happens because of it. */
+"This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective." = "Ini adalah kunci publik, anda tidak bisa membuat postingan atau berinteraksi. Ini digunakan untuk melihat akun anda.";
+
+/* Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key. */
+"This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key." = "Ini merupakan kunci nostr versi lama. Kami tidak yakin jika ini adalah kunci publik atau kunci privat. Silakan aktifkan tombol di bawah ini jika ini adalah kunci publik.";
+
+/* Label to describe that a public key is the user's account ID and what they can do with it. */
+"This is your account ID, you can give this to your friends so that they can follow you. Click to copy." = "Ini adalah ID akun anda, anda dapat memberikan ini kepada teman anda agar mereka dapat mengikuti anda. Tekan untuk menyalin.";
+
+/* Label to describe that a private key is the user's secret account key and what they should do with it. */
+"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Ini adalah Kunci Rahasia Akun anda. Anda memerlukan ini untuk mengakses akun anda. Jangan Sebarkan Kunci ini kepada siapapun! Simpan Kunci ini dalam password manager dan jaga agar tetap aman!";
+
+/* Navigation bar title for note thread. */
+"Thread" = "Utas";
+
+/* No comment provided by engineer. */
+"To filter your %@ feed, please choose applicable relays from the list below:" = "Untuk menyaring feed anda, Silahkan Pilih Relay yang sesuai dari daftar di bawah ini:";
+
+/* Button to translate note from different language. */
+"Translate Note" = "Terjemahkan Note";
+
+/* Button to indicate that the note has been translated from a different language. */
+"Translated from (lang)" = "Diterjemahkan dari (lang)";
+
+/* Button to indicate that the note is in the process of being translated from a different language. */
+"Translating from (lang)..." = "Menerjemahkan dari (lang)...";
+
+/* Section title for selecting the translation service. */
+"Translations" = "Penerjemah";
+
+/* Text field prompt asking user to type the word DELETE to confirm that they want to proceed with deleting their account. The all caps lock DELETE word should not be translated. Everything else should. */
+"Type DELETE to delete" = "Ketik DELETE untuk menghapus";
+
+/* Text box prompt to ask user to type their post. */
+"Type your post here..." = "Ketik Post Anda disini...";
+
+/* Button to unfollow a user. */
+"Unfollow" = "Berhenti Ikuti";
+
+/* Text to indicate that the button next to it is in  a state that indicates that it is in the process of unfollowing a profile. */
+"Unfollowing" = "Berhenti Mengikuti";
+
+/* Label to indicate that the user is in the process of unfollowing another user. */
+"Unfollowing..." = "Berhenti Mengikuti...";
+
+/* Text to indicate that the button next to it is in a state that will unfollow a profile when tapped. */
+"Unfollows" = "Berhenti Mengikuti?";
+
+/* Example URL to LibreTranslate server */
+"URL" = "URL";
+
+/* Alert message to indicate the user has been blocked */
+"User blocked" = "Pengguna Diblokir";
+
+/* Alert message that informs a user was blocked. */
+"User has been blocked" = "Pengguna telah diblokir";
+
+/* Label for Username section of user profile form.
+   Label to prompt username entry. */
+"Username" = "Nama Pengguna";
+
+/* Label to display relay software version.
+   Section title for displaying the version number of the Damus app. */
+"Version" = "Versi";
+
+/* Sidebar menu label for Wallet view. */
+"Wallet" = "Dompet";
+
+/* Dropdown option label for Lightning wallet, Wallet of Satoshi. */
+"Wallet of Satoshi" = "Dompet Satoshi";
+
+/* Section title for selection of wallet. */
+"Wallet Selector" = "Pilihan Dompet";
+
+/* Label for Website section of user profile form. */
+"Website" = "Website";
+
+/* Welcoming message to the reader. The variable is 'you', the reader. */
+"Welcome to the social network %@ control." = "Selamat Datang ke Jejaring Sosial yang %@ kontrol.";
+
+/* Text to welcome user. */
+"Welcome, %@!" = "Selamat Datang, %@!";
+
+/* Header text to prompt user what issue they want to report. */
+"What do you want to report?" = "Apa yang ingin anda laporkan?";
+
+/* Placeholder example for relay server address. */
+"wss://some.relay.com" = "wss://some.relay.com";
+
+/* Text of button that confirms to overwrite the existing mutelist. */
+"Yes, Overwrite" = "Ya, Timpa";
+
+/* Button to proceed with posting a note even though it looks like they might be posting a private key. */
+"Yes, Post with Private Key" = "Ya, Kirim dengan Kunci Privat";
+
+/* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
+"you" = "Anda";
+
+/* Label for Your Name section of user profile form. */
+"Your Name" = "Nama Anda";
+
+/* Footer text to inform user what will happen when the report is submitted. */
+"Your report will be sent to the relays you are connected to" = "Laporan anda akan dikirim ke relay yang bersangkutan.";
+
+/* Accessibility label for zap button */
+"Zap" = "Zap";
+
+/* Navigation bar title for the Zaps view. */
+"Zaps" = "Zaps";
+
+/* Dropdown option label for Lightning wallet, Zebedee. */
+"Zebedee" = "Zebedee";
+
+/* Dropdown option label for Lightning wallet, Zeus LN. */
+"Zeus LN" = "Zeus LN";
+

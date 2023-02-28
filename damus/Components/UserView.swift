@@ -12,11 +12,7 @@ struct UserView: View {
     let pubkey: String
     
     var body: some View {
-        let pmodel = ProfileModel(pubkey: pubkey, damus: damus_state)
-        let followers = FollowersModel(damus_state: damus_state, target: pubkey)
-        let pv = ProfileView(damus_state: damus_state, profile: pmodel, followers: followers)
-        
-        NavigationLink(destination: pv) {
+        NavigationLink(destination: ProfileView(damus_state: damus_state, pubkey: pubkey)) {
             ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
         
             VStack(alignment: .leading) {

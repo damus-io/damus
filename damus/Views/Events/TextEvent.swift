@@ -18,22 +18,19 @@ struct TextEvent: View {
         HStack(alignment: .top) {
             let profile = damus.profiles.lookup(id: pubkey)
         
+            let is_anon = event_is_anonymous(ev: event)
             VStack {
-                let pmodel = ProfileModel(pubkey: pubkey, damus: damus)
-                let pv = ProfileView(damus_state: damus, profile: pmodel, followers: FollowersModel(damus_state: damus, target: pubkey))
-                
-                NavigationLink(destination: pv) {
-                    ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus.profiles)
-                }
+                MaybeAnonPfpView(state: damus, is_anon: is_anon, pubkey: pubkey)
                 
                 Spacer()
             }
 
             VStack(alignment: .leading) {
                 HStack(alignment: .center) {
-                    EventProfileName(pubkey: pubkey, profile: profile, damus: damus, show_friend_confirmed: true, size: .normal)
+                    let pk = is_anon ? "anon" : pubkey
+                    EventProfileName(pubkey: pk, profile: profile, damus: damus, show_friend_confirmed: true, size: .normal)
                     
-                    Text("\(format_relative_time(event.created_at))")
+                    Text(verbatim: "\(format_relative_time(event.created_at))")
                         .foregroundColor(.gray)
                     
                     Spacer()
@@ -54,9 +51,7 @@ struct TextEvent: View {
                 if has_action_bar {
                     Rectangle().frame(height: 2).opacity(0)
                     
-                    let bar = make_actionbar_model(ev: event, damus: damus)
-                    
-                    EventActionBar(damus_state: damus, event: event, bar: bar)
+                    EventActionBar(damus_state: damus, event: event)
                         .padding([.top], 4)
                 }
             }
@@ -74,4 +69,19 @@ struct TextEvent_Previews: PreviewProvider {
     static var previews: some View {
         TextEvent(damus: test_damus_state(), event: test_event, pubkey: "pk", has_action_bar: true, booster_pubkey: nil)
     }
+}
+
+func event_has_tag(ev: NostrEvent, tag: String) -> Bool {
+    for t in ev.tags {
+        if t.count >= 1 && t[0] == tag {
+            return true
+        }
+    }
+    
+    return false
+}
+
+
+func event_is_anonymous(ev: NostrEvent) -> Bool {
+    return ev.known_kind == .zap_request && event_has_tag(ev: ev, tag: "anon")
 }

@@ -13,6 +13,8 @@ class DirectMessageModel: ObservableObject {
             is_request = determine_is_request()
         }
     }
+
+    @Published var draft: String
     
     var is_request: Bool
     var our_pubkey: String
@@ -31,11 +33,13 @@ class DirectMessageModel: ObservableObject {
         self.events = events
         self.is_request = false
         self.our_pubkey = our_pubkey
+        self.draft = ""
     }
     
     init(our_pubkey: String) {
         self.events = []
         self.is_request = false
         self.our_pubkey = our_pubkey
+        self.draft = ""
     }
 }

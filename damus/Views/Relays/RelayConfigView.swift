@@ -13,6 +13,8 @@ struct RelayConfigView: View {
     @State var show_add_relay: Bool = false
     @State var relays: [RelayDescriptor]
     
+    @Environment(\.dismiss) var dismiss
+    
     init(state: DamusState) {
         self.state = state
         _relays = State(initialValue: state.pool.descriptors)
@@ -20,9 +22,8 @@ struct RelayConfigView: View {
     
     var recommended: [RelayDescriptor] {
         let rs: [RelayDescriptor] = []
-        return BOOTSTRAP_RELAYS.reduce(into: rs) { (xs, x) in
-            if let _ = state.pool.get_relay(x) {
-            } else {
+        return BOOTSTRAP_RELAYS.reduce(into: rs) { xs, x in
+            if state.pool.get_relay(x) == nil {
                 xs.append(RelayDescriptor(url: URL(string: x)!, info: .rw))
             }
         }
@@ -33,6 +34,9 @@ struct RelayConfigView: View {
         .onReceive(handle_notify(.relays_changed)) { _ in
             self.relays = state.pool.descriptors
         }
+        .onReceive(handle_notify(.switched_timeline)) { _ in
+            dismiss()
+        }
         .sheet(isPresented: $show_add_relay) {
             AddRelayView(show_add_relay: $show_add_relay, relay: $new_relay) { m_relay in
                 guard var relay = m_relay else {
@@ -41,6 +45,10 @@ struct RelayConfigView: View {
                 
                 if relay.starts(with: "wss://") == false && relay.starts(with: "ws://") == false {
                     relay = "wss://" + relay
+                }
+                
+                if relay.hasSuffix("/") {
+                    relay.removeLast();
                 }
                 
                 guard let url = URL(string: relay) else {

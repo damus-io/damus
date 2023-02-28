@@ -34,6 +34,8 @@ struct MenuItems: View {
     let keypair: Keypair
     let target_pubkey: String
     
+    @State private var isBookmarked: Bool = false
+    
     var body: some View {
         Group {
             Button {
@@ -41,25 +43,42 @@ struct MenuItems: View {
             } label: {
                 Label(NSLocalizedString("Copy Text", comment: "Context menu option for copying the text from an note."), systemImage: "doc.on.doc")
             }
-            
+
             Button {
                 UIPasteboard.general.string = bech32_pubkey(target_pubkey)
             } label: {
                 Label(NSLocalizedString("Copy User Pubkey", comment: "Context menu option for copying the ID of the user who created the note."), systemImage: "person")
             }
-            
+
             Button {
                 UIPasteboard.general.string = bech32_note_id(event.id) ?? event.id
             } label: {
                 Label(NSLocalizedString("Copy Note ID", comment: "Context menu option for copying the ID of the note."), systemImage: "note.text")
             }
-            
+
             Button {
                 UIPasteboard.general.string = event_to_json(ev: event)
             } label: {
                 Label(NSLocalizedString("Copy Note JSON", comment: "Context menu option for copying the JSON text from the note."), systemImage: "square.on.square")
             }
             
+            Button {
+                let event_json = event_to_json(ev: event)
+                BookmarksManager(pubkey: keypair.pubkey).updateBookmark(event_json)
+                isBookmarked = BookmarksManager(pubkey: keypair.pubkey).isBookmarked(event_json)
+                notify(.update_bookmarks, event)
+            } label: {
+                let imageName = isBookmarked ? "bookmark.fill" : "bookmark"
+                let removeBookmarkString = NSLocalizedString("Remove Bookmark", comment: "Context menu option for removing a note bookmark.")
+                let addBookmarkString = NSLocalizedString("Add Bookmark", comment: "Context menu option for adding a note bookmark.")
+                Label(isBookmarked ? removeBookmarkString : addBookmarkString, systemImage: imageName)
+            }
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    isBookmarked = BookmarksManager(pubkey: keypair.pubkey).isBookmarked(event_to_json(ev: event))
+                }
+            }
+
             Button {
                 NotificationCenter.default.post(name: .broadcast_event, object: event)
             } label: {

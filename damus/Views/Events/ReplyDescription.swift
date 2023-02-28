@@ -13,7 +13,7 @@ struct ReplyDescription: View {
     let profiles: Profiles
     
     var body: some View {
-        Text("\(reply_desc(profiles: profiles, event: event))")
+        Text(verbatim: "\(reply_desc(profiles: profiles, event: event))")
             .font(.footnote)
             .foregroundColor(.gray)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -26,13 +26,15 @@ struct ReplyDescription_Previews: PreviewProvider {
     }
 }
 
-func reply_desc(profiles: Profiles, event: NostrEvent) -> String {
+func reply_desc(profiles: Profiles, event: NostrEvent, locale: Locale = Locale.current) -> String {
     let desc = make_reply_description(event.tags)
     let pubkeys = desc.pubkeys
     let n = desc.others
 
+    let bundle = bundleForLocale(locale: locale)
+
     if desc.pubkeys.count == 0 {
-        return NSLocalizedString("Reply to self", comment: "Label to indicate that the user is replying to themself.")
+        return NSLocalizedString("Replying to self", bundle: bundle, comment: "Label to indicate that the user is replying to themself.")
     }
 
     let names: [String] = pubkeys.map {
@@ -40,16 +42,16 @@ func reply_desc(profiles: Profiles, event: NostrEvent) -> String {
         return Profile.displayName(profile: prof, pubkey: $0)
     }
 
-    if names.count == 2 {
-        if n > 2 {
-            let othersCount = n - pubkeys.count
-            return String(format: NSLocalizedString("replying_to_two_and_others", comment: "Label to indicate that the user is replying to 2 users and others."), names[0], names[1], othersCount)
+    if names.count > 1 {
+        let othersCount = n - pubkeys.count
+        if othersCount == 0 {
+            return String(format: NSLocalizedString("Replying to %@ & %@", bundle: bundle, comment: "Label to indicate that the user is replying to 2 users."), locale: locale, names[0], names[1])
+        } else {
+            return String(format: bundle.localizedString(forKey: "replying_to_two_and_others", value: nil, table: nil), locale: locale, othersCount, names[0], names[1])
         }
-        return String(format: NSLocalizedString("Replying to %@ & %@", comment: "Label to indicate that the user is replying to 2 users."), names[0], names[1])
     }
 
-    let othersCount = n - pubkeys.count
-    return String(format: NSLocalizedString("replying_to_one_and_others", comment: "Label to indicate that the user is replying to 1 user and others."), names[0], othersCount)
+    return String(format: NSLocalizedString("Replying to %@", bundle: bundle, comment: "Label to indicate that the user is replying to 1 user."), locale: locale, names[0])
 }
 
 

@@ -50,5 +50,6 @@ public func time_ago_since(_ date: Date, _ calendar: Calendar = Calendar.current
         return formatter.string(from: DateComponents(calendar: calendar, second: second))!
     }
 
-    return NSLocalizedString("now", comment: "String indicating that a given timestamp just occurred")
+    let bundle = bundleForLocale(locale: calendar.locale ?? Locale.current)
+    return NSLocalizedString("now", bundle: bundle, comment: "String indicating that a given timestamp just occurred")
 }

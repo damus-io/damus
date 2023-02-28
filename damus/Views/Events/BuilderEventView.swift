@@ -53,8 +53,7 @@ struct BuilderEventView: View {
             NostrFilter(ids: [self.event_id], limit: 1),
             NostrFilter(
                 kinds: [NostrKind.zap.rawValue],
-                referenced_ids: [self.event_id],
-                limit: 500
+                referenced_ids: [self.event_id]
             )
         ])
     }
@@ -72,8 +71,10 @@ struct BuilderEventView: View {
             }
         }
         .frame(minWidth: 0, maxWidth: .infinity)
-        .cornerRadius(8)
-        .border(Color.gray.opacity(0.2), width: 1)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color.gray.opacity(0.2), lineWidth: 1.0)
+        )
         .onAppear {
             self.load()
         }

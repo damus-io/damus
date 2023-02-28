@@ -23,7 +23,7 @@ struct DMView: View {
 
             let should_show_img = should_show_images(contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
 
-            NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, artifacts: .just_content(event.get_content(damus_state.keypair.privkey)), size: .normal)
+            NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, size: .normal, artifacts: .just_content(event.get_content(damus_state.keypair.privkey)))
                 .foregroundColor(is_ours ? Color.white : Color.primary)
                 .padding(10)
                 .background(is_ours ? Color.accentColor : Color.secondary.opacity(0.15))

@@ -37,11 +37,10 @@ struct SearchHomeView: View {
             RoundedRectangle(cornerRadius: 8)
                 .foregroundColor(.secondary.opacity(0.2))
         }
-        //.padding()
     }
     
     var GlobalContent: some View {
-        return TimelineView(events: $model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: { _ in true })
+        return TimelineView(events: model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: { _ in true })
             .refreshable {
                 // Fetch new information by unsubscribing and resubscribing to the relay
                 model.unsubscribe()
@@ -74,7 +73,7 @@ struct SearchHomeView: View {
         VStack {
             MainContent
         }
-        .safeAreaInset(edge: .top) {
+        .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
                 SearchInput
                     //.frame(maxWidth: 275)
@@ -91,7 +90,7 @@ struct SearchHomeView: View {
             self.model.filter_muted()
         }
         .onAppear {
-            if model.events.isEmpty {
+            if model.events.events.isEmpty {
                 model.subscribe()
             }
         }

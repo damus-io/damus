@@ -63,7 +63,7 @@ struct ChatView: View {
     }
     
     var ReplyDescription: some View {
-        Text("\(reply_desc(profiles: damus_state.profiles, event: event))")
+        Text(verbatim: "\(reply_desc(profiles: damus_state.profiles, event: event))")
             .font(.footnote)
             .foregroundColor(.gray)
             .frame(alignment: .leading)
@@ -89,12 +89,12 @@ struct ChatView: View {
                             ProfileName(pubkey: event.pubkey, profile: damus_state.profiles.lookup(id: event.pubkey), damus: damus_state, show_friend_confirmed: true)
                                 .foregroundColor(colorScheme == .dark ?  id_to_color(event.pubkey) : Color.black)
                                 //.shadow(color: Color.black, radius: 2)
-                            Text("\(format_relative_time(event.created_at))")
+                            Text(verbatim: "\(format_relative_time(event.created_at))")
                                     .foregroundColor(.gray)
                         }
                     }
                 
-                    if let ref_id = thread.replies.lookup(event.id) {
+                    if let _ = thread.replies.lookup(event.id) {
                         if !is_reply_to_prev() {
                             /*
                             ReplyQuoteView(keypair: damus_state.keypair, quoter: event, event_id: ref_id, profiles: damus_state.profiles, previews: damus_state.previews)
@@ -112,11 +112,11 @@ struct ChatView: View {
                     NoteContentView(damus_state: damus_state,
                                     event: event,
                                     show_images: show_images,
-                                    artifacts: .just_content(event.content),
-                                    size: .normal)
+                                    size: .normal,
+                                    artifacts: .just_content(event.content))
 
                     if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
-                        let bar = make_actionbar_model(ev: event, damus: damus_state)
+                        let bar = make_actionbar_model(ev: event.id, damus: damus_state)
                         EventActionBar(damus_state: damus_state, event: event, bar: bar)
                     }
 

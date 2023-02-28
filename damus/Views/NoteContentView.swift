@@ -9,60 +9,82 @@ import SwiftUI
 import LinkPresentation
 import NaturalLanguage
 
+struct Blur: UIViewRepresentable {
+    var style: UIBlurEffect.Style = .systemUltraThinMaterial
+
+    func makeUIView(context: Context) -> UIVisualEffectView {
+        return UIVisualEffectView(effect: UIBlurEffect(style: style))
+    }
+
+    func updateUIView(_ uiView: UIVisualEffectView, context: Context) {
+        uiView.effect = UIBlurEffect(style: style)
+    }
+}
+
 struct NoteContentView: View {
+    
     let damus_state: DamusState
     let event: NostrEvent
     let show_images: Bool
+    let size: EventViewKind
+    let preview_height: CGFloat?
 
     @State var artifacts: NoteArtifacts
+    @State var preview: LinkViewRepresentable?
     
-    let size: EventViewKind
-    
-    @State var preview: LinkViewRepresentable? = nil
+    init(damus_state: DamusState, event: NostrEvent, show_images: Bool, size: EventViewKind, artifacts: NoteArtifacts) {
+        self.damus_state = damus_state
+        self.event = event
+        self.show_images = show_images
+        self.size = size
+        self._artifacts = State(initialValue: artifacts)
+        self.preview_height = lookup_cached_preview_size(previews: damus_state.previews, evid: event.id)
+        self._preview = State(initialValue: load_cached_preview(previews: damus_state.previews, evid: event.id))
+        self._artifacts = State(initialValue: render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey))
+    }
     
     func MainContent() -> some View {
         return VStack(alignment: .leading) {
-            Text(artifacts.content)
-                .font(eventviewsize_to_font(size))
-                .fixedSize(horizontal: false, vertical: true)
-
+            
             if size == .selected {
-                TranslateView(damus_state: damus_state, event: event, size: size)
+                SelectableText(attributedString: artifacts.content)
+                TranslateView(damus_state: damus_state, event: event)
+            } else {
+                Text(artifacts.content)
+                    .font(eventviewsize_to_font(size))
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             if show_images && artifacts.images.count > 0 {
                 ImageCarousel(urls: artifacts.images)
             } else if !show_images && artifacts.images.count > 0 {
-                ImageCarousel(urls: artifacts.images)
-                    .blur(radius: 10)
-                    .overlay {
-                        Rectangle()
-                            .opacity(0.50)
-                    }
-                    .cornerRadius(10)
+                ZStack {
+                    ImageCarousel(urls: artifacts.images)
+                    Blur()
+                        .disabled(true)
+                }
+                .cornerRadius(10)
             }
             if artifacts.invoices.count > 0 {
                 InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: artifacts.invoices)
             }
             
             if let preview = self.preview, show_images {
-                preview
-            } else {
-                ForEach(artifacts.links, id:\.self) { link in
-                    if let url = link {
-                        LinkViewRepresentable(meta: .url(url))
-                            .frame(height: 50)
-                    }
+                if let preview_height {
+                    preview
+                        .frame(height: preview_height)
+                } else {
+                    preview
                 }
+            } else if let link = artifacts.links.first {
+                LinkViewRepresentable(meta: .url(link))
+                    .frame(height: 50)
             }
         }
     }
     
     var body: some View {
         MainContent()
-            .onAppear() {
-                self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
-            }
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let profile = notif.object as! ProfileUpdate
                 let blocks = event.blocks(damus_state.keypair.privkey)
@@ -80,21 +102,19 @@ struct NoteContentView: View {
                 }
             }
             .task {
-                if let preview = damus_state.previews.lookup(self.event.id) {
-                    switch preview {
-                    case .value(let view):
-                        self.preview = view
-                    case .failed:
-                        // don't try to refetch meta if we've failed
-                        return
-                    }
+                guard self.preview == nil else {
+                    return
                 }
                 
                 if show_images, artifacts.links.count == 1 {
                     let meta = await getMetaData(for: artifacts.links.first!)
                     
-                    let view = meta.map { LinkViewRepresentable(meta: .linkmeta($0)) }
-                    damus_state.previews.store(evid: self.event.id, preview: view)
+                    damus_state.previews.store(evid: self.event.id, preview: meta)
+                    guard case .value(let cached) = damus_state.previews.lookup(self.event.id) else {
+                        return
+                    }
+                    let view = LinkViewRepresentable(meta: .linkmeta(cached))
+                    
                     self.preview = view
                 }
 
@@ -155,7 +175,7 @@ struct NoteContentView_Previews: PreviewProvider {
         let state = test_damus_state()
         let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
         let artifacts = NoteArtifacts(content: AttributedString(stringLiteral: content), images: [], invoices: [], links: [])
-        NoteContentView(damus_state: state, event: NostrEvent(content: content, pubkey: "pk"), show_images: true, artifacts: artifacts, size: .normal)
+        NoteContentView(damus_state: state, event: NostrEvent(content: content, pubkey: "pk"), show_images: true, size: .normal, artifacts: artifacts)
     }
 }
 
@@ -221,3 +241,23 @@ func is_image_url(_ url: URL) -> Bool {
     return str.hasSuffix("png") || str.hasSuffix("jpg") || str.hasSuffix("jpeg") || str.hasSuffix("gif")
 }
 
+func lookup_cached_preview_size(previews: PreviewCache, evid: String) -> CGFloat? {
+    guard case .value(let cached) = previews.lookup(evid) else {
+        return nil
+    }
+    
+    guard let height = cached.intrinsic_height else {
+        return nil
+    }
+    
+    return height
+}
+    
+
+func load_cached_preview(previews: PreviewCache, evid: String) -> LinkViewRepresentable? {
+    guard case .value(let meta) = previews.lookup(evid) else {
+        return nil
+    }
+    
+    return LinkViewRepresentable(meta: .linkmeta(meta))
+}

@@ -72,7 +72,7 @@ func char_to_hex(_ c: UInt8) -> UInt8?
     return nil;
 }
 
-
+@discardableResult
 func hex_decode(_ str: String) -> [UInt8]?
 {
     if str.count == 0 {
