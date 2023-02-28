@@ -13,7 +13,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>... %d その他のNote ...</string>
+			<string>... 他%d件のNote ...</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
