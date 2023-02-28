@@ -41,7 +41,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@と他%1$d人があなたがタグづけされた投稿にリアクションしました</string>
+			<string>タグづけされた投稿に%2$@と他%1$d人がリアクションしました</string>
 		</dict>
 	</dict>
 	<key>reacted_your_post_3</key>
