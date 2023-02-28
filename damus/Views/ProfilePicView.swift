@@ -66,6 +66,7 @@ struct InnerProfilePicView: View {
                 .placeholder { _ in
                     Placeholder
                 }
+                .scaledToFill()
         }
         .frame(width: size, height: size)
         .clipShape(Circle())
