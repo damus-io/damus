@@ -69,7 +69,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@と他%1$d人があなたのプロフィールにリアクションしました</string>
+			<string>あなたのプロフィールに%2$@と他%1$d人がリアクションしました</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
