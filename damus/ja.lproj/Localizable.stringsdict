@@ -139,7 +139,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ と %1$d 他があなたの投稿をリポストしました</string>
+			<string>%2$@と他%1$d人があなたの投稿をリポストしました</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
