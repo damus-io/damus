@@ -223,7 +223,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>あなたのプロフィールに%2$@と他%1$d人がZapしました</string>
+			<string>%2$@と他%1$d人があなたのプロフィールにZapしました</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
