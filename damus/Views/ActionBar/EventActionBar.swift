@@ -167,13 +167,40 @@ struct LikeButton: View {
     let action: () -> ()
     
     @Environment(\.colorScheme) var colorScheme
+
+    // Following four are Shaka animation properties
+    let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
+    @State private var shouldAnimate = false
+    @State private var rotationAngle = 0.0
+    @State private var amountOfAngleIncrease: Double = 0.0
     
     var body: some View {
-        Button(action: action) {
+
+        Button(action: {
+            withAnimation(Animation.easeOut(duration: 0.15)) {
+                self.action()
+                shouldAnimate = true
+                amountOfAngleIncrease = 20.0
+            }
+        }) {
             Image(liked ? "shaka-full" : "shaka-line")
                 .foregroundColor(liked ? .accentColor : .gray)
         }
         .accessibilityLabel(NSLocalizedString("Like", comment: "Accessibility Label for Like button"))
+        .rotationEffect(Angle(degrees: shouldAnimate ? rotationAngle : 0))
+        .onReceive(self.timer) { _ in
+            // Shaka animation logic
+            rotationAngle = amountOfAngleIncrease
+            if amountOfAngleIncrease == 0 {
+                timer.upstream.connect().cancel()
+                return
+            }
+            amountOfAngleIncrease = -amountOfAngleIncrease
+            if amountOfAngleIncrease < 0 {
+                amountOfAngleIncrease += 5
+            } else {
+                amountOfAngleIncrease -= 5
+            }
     }
 }
 
