@@ -125,7 +125,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@と他%1$d人があなたがタグづけされた投稿をリポストしました</string>
+			<string>タグづけされた投稿を%2$@と他%1$d人がリポストしました</string>
 		</dict>
 	</dict>
 	<key>reposted_your_post_3</key>
@@ -139,7 +139,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@と他%1$d人があなたの投稿をリポストしました</string>
+			<string>あなたの投稿を%2$@と他%1$d人がリポストしました</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -153,7 +153,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@と他%1$d人があなたのプロフィールをリポストしました</string>
+			<string>あなたのプロフィールを%2$@と他%1$d人がリポストしました</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -195,7 +195,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@と他%1$d人があなたがタグづけされた投稿にZapしました</string>
+			<string>あなたがタグづけされた投稿に%2$@と他%1$d人がZapしました</string>
 		</dict>
 	</dict>
 	<key>zapped_your_post_3</key>
@@ -209,7 +209,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@と他%1$d人があなたの投稿にZapしました</string>
+			<string>あなたの投稿に%2$@と他%1$d人がZapしました</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -223,7 +223,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@と他%1$d人があなたのプロフィールにZapしました</string>
+			<string>あなたのプロフィールに%2$@と他%1$d人がZapしました</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
