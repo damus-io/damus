@@ -30,6 +30,48 @@
 			<string>フォロワー</string>
 		</dict>
 	</dict>
+	<key>reacted_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>%2$@ と %1$d 他があなたがタグづけされた投稿にリアクションしました</string>
+		</dict>
+	</dict>
+	<key>reacted_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>%2$@ と %1$d 他があなたの投稿にリアクションしました</string>
+		</dict>
+	</dict>
+	<key>reacted_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>%2$@ と %1$d 他があなたのプロフィールにリアクションしました</string>
+		</dict>
+	</dict>
 	<key>reactions_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -58,20 +100,6 @@
 			<string>リレー</string>
 		</dict>
 	</dict>
-	<key>replying_to_one_and_others</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@OTHERS@</string>
-		<key>OTHERS</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>other</key>
-			<string>%2$@ &amp; %1$d その他にリプライ</string>
-		</dict>
-	</dict>
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -84,6 +112,48 @@
 			<string>d</string>
 			<key>other</key>
 			<string>%2$@, %3$@ &amp; %1$d その他 にリプライ</string>
+		</dict>
+	</dict>
+	<key>reposted_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>%2$@ と %1$d 他があなたがタグづけされた投稿をリポストしました</string>
+		</dict>
+	</dict>
+	<key>reposted_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>%2$@ と %1$d 他があなたの投稿をリポストしました</string>
+		</dict>
+	</dict>
+	<key>reposted_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>%2$@ と %1$d 他があなたのプロフィールをリポストしました</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -112,6 +182,48 @@
 			<string>@</string>
 			<key>other</key>
 			<string>%2$@ sats</string>
+		</dict>
+	</dict>
+	<key>zapped_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>%2$@ と %1$d 他があなたがタグづけされた投稿にZapしました</string>
+		</dict>
+	</dict>
+	<key>zapped_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>%2$@ と %1$d 他があなたの投稿にZapしました</string>
+		</dict>
+	</dict>
+	<key>zapped_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>%2$@ と %1$d 他があなたのプロフィールにZapしました</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
