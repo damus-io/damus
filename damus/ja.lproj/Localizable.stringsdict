@@ -209,7 +209,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ と %1$d 他があなたの投稿にZapしました</string>
+			<string>%2$@と他%1$d人があなたの投稿にZapしました</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
