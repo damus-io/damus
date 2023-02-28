@@ -199,11 +199,15 @@ struct ConfigView: View {
                         .toggleStyle(.switch)
                 }
 
-                Section(NSLocalizedString("Clear Cache", comment: "Section title for clearing cached data.")) {
-                    Button(NSLocalizedString("Clear", comment: "Button for clearing cached data.")) {
-                        KingfisherManager.shared.cache.clearMemoryCache()
-                        KingfisherManager.shared.cache.clearDiskCache()
-                        KingfisherManager.shared.cache.cleanExpiredDiskCache()
+                Section(NSLocalizedString("Images", comment: "Section title for images configuration.")) {
+                    Toggle(NSLocalizedString("Disable animations", comment: "Button to disable image animation"), isOn: $settings.disable_animation)
+                        .toggleStyle(.switch)
+                        .onChange(of: settings.disable_animation) { _ in
+                            clear_kingfisher_cache()
+                        }
+
+                    Button(NSLocalizedString("Clear Cache", comment: "Button to clear image cache.")) {
+                        clear_kingfisher_cache()
                     }
                 }
                 
@@ -379,4 +383,10 @@ func handle_string_amount(new_value: String) -> Int? {
     }
     
     return amt
+}
+
+func clear_kingfisher_cache() -> Void {
+    KingfisherManager.shared.cache.clearMemoryCache()
+    KingfisherManager.shared.cache.clearDiskCache()
+    KingfisherManager.shared.cache.cleanExpiredDiskCache()
 }
