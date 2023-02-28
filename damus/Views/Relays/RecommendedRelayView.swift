@@ -25,24 +25,48 @@ struct RecommendedRelayView: View {
     }
     
     var body: some View {
-        HStack {
-            Text(relay)
-            Spacer()
-            if add_button {
-                if let privkey = damus.keypair.privkey {
-                    Button(NSLocalizedString("Add", comment: "Button to add recommended relay server.")) {
-                        guard let ev_before_add = damus.contacts.event else {
-                            return
-                        }
-                        guard let ev_after_add = add_relay(ev: ev_before_add, privkey: privkey, current_relays: damus.pool.descriptors, relay: relay, info: .rw) else {
-                            return
-                        }
-                        process_contact_event(state: damus, ev: ev_after_add)
-                        damus.pool.send(.event(ev_after_add))
+        ZStack {
+            HStack {
+                RelayType(is_paid: damus.relay_metadata.lookup(relay_id: relay)?.is_paid ?? false)
+                Text(relay).layoutPriority(1)
+
+                if let meta = damus.relay_metadata.lookup(relay_id: relay) {
+                    NavigationLink ( destination:
+                        RelayDetailView(state: damus, relay: relay, nip11: meta)
+                    ){
+                        EmptyView()
                     }
+                    .opacity(0.0)
+                    
+                    Spacer()
+                    Image(systemName: "info.circle")
+                        .foregroundColor(Color.accentColor)
                 }
             }
         }
+        .swipeActions {
+            if add_button {
+                if let privkey = damus.keypair.privkey {
+                    AddAction(privkey: privkey)
+                }
+            }
+        }
+    }
+    
+    func AddAction(privkey: String) -> some View {
+        Button {
+            guard let ev_before_add = damus.contacts.event else {
+                return
+            }
+            guard let ev_after_add = add_relay(ev: ev_before_add, privkey: privkey, current_relays: damus.pool.descriptors, relay: relay, info: .rw) else {
+                return
+            }
+            process_contact_event(state: damus, ev: ev_after_add)
+            damus.pool.send(.event(ev_after_add))
+        } label: {
+            Label(NSLocalizedString("Add Relay", comment: "Button to add recommended relay server."), systemImage: "plus.circle")
+        }
+        .tint(.accentColor)
     }
 }
 
