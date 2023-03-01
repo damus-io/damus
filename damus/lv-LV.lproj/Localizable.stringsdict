@@ -269,7 +269,7 @@
 			<key>one</key>
 			<string>%2$@ un %1$d cits sazapoja tavai ziņai</string>
 			<key>other</key>
-			<string>%2$@ un %1$d citi sazapoja tavai ziņai</string>
+			<string>%2$@ un %1$d citi sazapoja tavam ierakstam</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
