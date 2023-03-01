@@ -1,3 +1,18 @@
+## [1.1.0-10] - 2023-03-01
+
+### Added
+
+- Truncate large posts and add a show more button (OlegAba)
+- Private Zaps (William Casarin)
+
+
+### Fixed
+
+- Fix default zap amount setting not getting updated (William Casarin)
+- Fix issue where keyboard covers custom zap comment (William Casarin)
+
+
+[1.1.0-10]: https://github.com/damus-io/damus/releases/tag/v1.1.0-10
 
 ## [1.1.0-9] - 2023-02-26
 
