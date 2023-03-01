@@ -13,6 +13,7 @@ struct RelayStatus: View {
     
     let timer = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
     
+    @State var size: CGFloat = 8
     @State var conn_color: Color = .gray
     
     func update_connection_color() {
@@ -32,7 +33,7 @@ struct RelayStatus: View {
     
     var body: some View {
         Circle()
-            .frame(width: 8.0, height: 8.0)
+            .frame(width: size, height: size)
             .foregroundColor(conn_color)
             .onReceive(timer) { _ in
                 update_connection_color()

@@ -280,13 +280,13 @@ struct ContentView: View {
                                     
                                     ToolbarItem(placement: .navigationBarTrailing) {
                                         HStack(alignment: .center) {
-                                            NavigationLink(destination: RelayConfigView(state: damus_state!)) {
-                                                if let state = damus_state {
-                                                    RelayStatusGrid(pool: state.pool)
+                                            if home.signal.signal != home.signal.max_signal {
+                                                NavigationLink(destination: RelayConfigView(state: damus_state!)) {
+                                                    if let state = damus_state {
+                                                        RelayStatusGrid(pool: state.pool)
+                                                    }
                                                 }
                                             }
-//                                            if home.signal.signal != home.signal.max_signal {
-//                                            }
                                             
                                             // maybe expand this to other timelines in the future
                                             if selected_timeline == .search {

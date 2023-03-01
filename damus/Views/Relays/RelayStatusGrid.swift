@@ -11,20 +11,20 @@ struct RelayStatusGrid: View {
     let pool: RelayPool
     
     let timer = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
-    
-    let maxColumns = 4
+
     let columns = [
-        GridItem(.adaptive(minimum: 8, maximum: 16), spacing: 8),
-        GridItem(.adaptive(minimum: 8, maximum: 16), spacing: 8),
-        GridItem(.adaptive(minimum: 8, maximum: 16), spacing: 8),
-        GridItem(.adaptive(minimum: 8, maximum: 16), spacing: 8)
+        GridItem(.fixed(0)),
+        GridItem(.fixed(0)),
+        GridItem(.fixed(0)),
+        GridItem(.fixed(0)),
+        GridItem(.fixed(0))
     ]
     
     var body: some View {
-        LazyVGrid(columns: columns, spacing: 8) {
+        LazyVGrid(columns: columns, spacing: 2) {
             ForEach(pool.relays, id: \.id) { relay in
                 let relayString = relay.descriptor.url.absoluteString
-                RelayStatus(pool: pool, relay: relayString)
+                RelayStatus(pool: pool, relay: relayString, size: 4)
             }
         }
     }
