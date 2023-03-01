@@ -251,7 +251,7 @@
 			<key>one</key>
 			<string>%2$@ un %1$d cits sazapoja ziņu, kurā bijāt atzīmēts</string>
 			<key>other</key>
-			<string>%2$@ un %1$d citi sazapoja ziņu, kurā bijāt atzīmēts</string>
+			<string>%2$@ un %1$d citi zapoja ierakstam, kurā bijāt atzīmēts</string>
 		</dict>
 	</dict>
 	<key>zapped_your_post_3</key>
