@@ -29,7 +29,7 @@ struct EventBody: View {
             ReplyDescription(event: event, profiles: damus_state.profiles)
         }
 
-        NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, size: size, artifacts: .just_content(content))
+        NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, size: size, artifacts: .just_content(content), truncate: true)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
