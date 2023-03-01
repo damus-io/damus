@@ -287,7 +287,7 @@
 			<key>one</key>
 			<string>%2$@ un %1$d cits sazapoja tavam profilam</string>
 			<key>other</key>
-			<string>%2$@ un %1$d citi sazapoja tavam profilam</string>
+			<string>%2$@ un %1$d citi zapoja tavam profilam</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
