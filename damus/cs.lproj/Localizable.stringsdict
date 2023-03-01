@@ -42,6 +42,66 @@
 			<string>Sledují</string>
 		</dict>
 	</dict>
+	<key>reacted_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ a další %1$d reagovali na příspěvek, ve kterém jste byli označeni</string>
+			<key>few</key>
+			<string>%2$@ a další %1$d reagovali na příspěvek, ve kterém jste byli označeni</string>
+			<key>many</key>
+			<string>%2$@ a další %1$d reagovali na příspěvek, ve kterém jste byli označeni</string>
+			<key>other</key>
+			<string>%2$@ a dalších %1$d reagovali na příspěvek, ve kterém jste byli označeni</string>
+		</dict>
+	</dict>
+	<key>reacted_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ a další %1$d zareagovali na váš příspěvek</string>
+			<key>few</key>
+			<string>%2$@ a další %1$d zareagovali na váš příspěvek</string>
+			<key>many</key>
+			<string>%2$@ a další %1$d zareagovali na váš příspěvek</string>
+			<key>other</key>
+			<string>%2$@ a dalších %1$d zareagovali na váš příspěvek</string>
+		</dict>
+	</dict>
+	<key>reacted_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ a další %1$d zareagovali na váš profil</string>
+			<key>few</key>
+			<string>%2$@ a další %1$d zareagovali na váš profil</string>
+			<key>many</key>
+			<string>%2$@ a další %1$d zareagovali na váš profil</string>
+			<key>other</key>
+			<string>%2$@ a dalších %1$d zareagovali na váš profil</string>
+		</dict>
+	</dict>
 	<key>reactions_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -82,26 +142,6 @@
 			<string>Relé</string>
 		</dict>
 	</dict>
-	<key>replying_to_one_and_others</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@OTHERS@</string>
-		<key>OTHERS</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>Odpověď na %2$@ a %1$d další</string>
-			<key>few</key>
-			<string>Odpověď na %2$@ a %1$d others</string>
-			<key>many</key>
-			<string>Odpověď na %2$@ a %1$d others</string>
-			<key>other</key>
-			<string>Odpověď na %2$@ a %1$d další</string>
-		</dict>
-	</dict>
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -113,13 +153,73 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Odpovědět na %2$@, %3$@ &amp; %1$d další</string>
+			<string>Odpovědět na %2$@, %3$@ &amp; a další %1$d </string>
 			<key>few</key>
-			<string>Odpovědět na %2$@, %3$@ &amp; %1$d others</string>
+			<string>Odpovědět na %2$@, %3$@ &amp; a další %1$d</string>
 			<key>many</key>
-			<string>Odpovědět na %2$@, %3$@ &amp; %1$d others</string>
+			<string>Odpovědět na %2$@, %3$@ &amp; a další %1$d</string>
 			<key>other</key>
-			<string>Odpovědět na %2$@, %3$@ &amp; %1$d další</string>
+			<string>Odpovědět na %2$@, %3$@ &amp; a dalších %1$d</string>
+		</dict>
+	</dict>
+	<key>reposted_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ a další %1$d přesdíleli příspěvek, ve kterém jste byli označeni</string>
+			<key>few</key>
+			<string>%2$@ a další %1$d přesdíleli příspěvek, ve kterém jste byli označeni</string>
+			<key>many</key>
+			<string>%2$@ a další %1$d přesdíleli příspěvek, ve kterém jste byli označeni</string>
+			<key>other</key>
+			<string>%2$@ a dalších %1$d přesdíleli příspěvek, ve kterém jste byli označeni</string>
+		</dict>
+	</dict>
+	<key>reposted_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ a další %1$d přesdíleli váš příspěvek</string>
+			<key>few</key>
+			<string>%2$@ a další %1$d přesdíleli váš příspěvek</string>
+			<key>many</key>
+			<string>%2$@ a další %1$d přesdíleli váš příspěvek</string>
+			<key>other</key>
+			<string>%2$@ a dalších %1$d přesdíleli váš příspěvek</string>
+		</dict>
+	</dict>
+	<key>reposted_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ a další %1$d přesdíleli váš profil</string>
+			<key>few</key>
+			<string>%2$@ a další %1$d přesdíleli váš profil</string>
+			<key>many</key>
+			<string>%2$@ a další %1$d přesdíleli váš profil</string>
+			<key>other</key>
+			<string>%2$@ a dalších %1$d přesdíleli váš profil</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -160,6 +260,66 @@
 			<string>%2$@ sats</string>
 			<key>other</key>
 			<string>%2$@ satů</string>
+		</dict>
+	</dict>
+	<key>zapped_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ a další %1$d ZAP-nuli příspěvek, ve kterém jste byli označeni</string>
+			<key>few</key>
+			<string>%2$@ a další %1$d ZAP-nuli příspěvek, ve kterém jste byli označeni</string>
+			<key>many</key>
+			<string>%2$@ a další %1$d ZAP-nuli příspěvek, ve kterém jste byli označeni</string>
+			<key>other</key>
+			<string>%2$@ a dalších %1$d ZAP-nuli příspěvek, ve kterém jste byli označeni</string>
+		</dict>
+	</dict>
+	<key>zapped_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ a další %1$d ZAP-nuli váš příspěvek</string>
+			<key>few</key>
+			<string>%2$@ a další %1$d ZAP-nuli váš příspěvek</string>
+			<key>many</key>
+			<string>%2$@ a další %1$d ZAP-nuli váš příspěvek</string>
+			<key>other</key>
+			<string>%2$@ a dalších %1$d ZAP-nuli váš příspěvek</string>
+		</dict>
+	</dict>
+	<key>zapped_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ a další %1$d ZAP-nuli váš profil</string>
+			<key>few</key>
+			<string>%2$@ a další %1$d ZAP-nuli váš profil</string>
+			<key>many</key>
+			<string>%2$@ a další %1$d ZAP-nuli váš profil</string>
+			<key>other</key>
+			<string>%2$@ a dalších %1$d ZAP-nuli váš profil</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>

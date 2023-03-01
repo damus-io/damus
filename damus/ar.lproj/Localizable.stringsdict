@@ -50,6 +50,78 @@
 			<string>المتابِعون</string>
 		</dict>
 	</dict>
+	<key>reacted_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>%2$@ و %1$d مستخدم آخر تفاعل مع منشور تمت الإشارة لك فيه</string>
+			<key>one</key>
+			<string>%2$@ و %1$d مستخدم آخر تفاعل مع منشور تمت الإشارة لك فيه</string>
+			<key>two</key>
+			<string>%2$@ و %1$d آخران تفاعلوا مع منشور تمت الإشارة لك فيه</string>
+			<key>few</key>
+			<string>%2$@ و %1$d آخرون تفاعلوا مع منشور تمت الإشارة لك فيه</string>
+			<key>many</key>
+			<string>%2$@ و %1$d مستخدم آخر تفاعلوا مع منشور تمت الإشارة لك فيه</string>
+			<key>other</key>
+			<string>%2$@ و %1$d مستخدم آخر تفاعلوا مع منشور تمت الإشارة لك فيه</string>
+		</dict>
+	</dict>
+	<key>reacted_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>%2$@ و %1$d مستخدم آخر تفاعل مع منشورك</string>
+			<key>one</key>
+			<string>%2$@ و %1$d مستخدم آخر تفاعل مع منشورك</string>
+			<key>two</key>
+			<string>%2$@ و %1$d آخران تفاعلوا مع منشورك</string>
+			<key>few</key>
+			<string>%2$@ و %1$d آخرون تفاعلوا مع منشورك</string>
+			<key>many</key>
+			<string>%2$@ و %1$d مستخدم آخر تفاعلوا مع منشورك</string>
+			<key>other</key>
+			<string>%2$@ و %1$d مستخدم آخر تفاعلوا مع منشورك</string>
+		</dict>
+	</dict>
+	<key>reacted_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>%2$@ و %1$d مستخدم آخر تفاعل مع حسابك</string>
+			<key>one</key>
+			<string>%2$@ و %1$d مستخدم آخر تفاعل مع حسابك</string>
+			<key>two</key>
+			<string>%2$@ و %1$d مستخدمان آخران تفاعلوا مع حسابك</string>
+			<key>few</key>
+			<string>%2$@ و %1$d آخرون تفاعلوا مع حسابك</string>
+			<key>many</key>
+			<string>%2$@ و %1$d مستخدم آخر تفاعلوا مع حسابك</string>
+			<key>other</key>
+			<string>%2$@ و %1$d مستخدم آخر تفاعلوا مع حسابك</string>
+		</dict>
+	</dict>
 	<key>reactions_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -98,30 +170,6 @@
 			<string>موصّل</string>
 		</dict>
 	</dict>
-	<key>replying_to_one_and_others</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@OTHERS@</string>
-		<key>OTHERS</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>zero</key>
-			<string>رد على %2$@</string>
-			<key>one</key>
-			<string>الرد على %2$@ &amp; %1$d آخر</string>
-			<key>two</key>
-			<string>الرد على %2$@ &amp; %1$d آخرين</string>
-			<key>few</key>
-			<string>الرد على %2$@ &amp; %1$d آخرين</string>
-			<key>many</key>
-			<string>الرد على %2$@ &amp; %1$d آخرين</string>
-			<key>other</key>
-			<string>الرد على %2$@ &amp; %1$d آخرين</string>
-		</dict>
-	</dict>
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -144,6 +192,78 @@
 			<string>الرد على %2$@, %3$@ &amp; %1$d آخرين</string>
 			<key>other</key>
 			<string>الرد على %2$@, %3$@ &amp; %1$d آخرين</string>
+		</dict>
+	</dict>
+	<key>reposted_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>%2$@ و %1$d مستخدم آخر نشر منشورا تمت الإشارة لك فيه</string>
+			<key>one</key>
+			<string>%2$@ و %1$d مستخدم آخر نشر منشورا تمت الإشارة لك فيه</string>
+			<key>two</key>
+			<string>%2$@ و %1$d مستخدمان آخران نشروا منشورا تمت الإشارة لك فيه</string>
+			<key>few</key>
+			<string>%2$@ و %1$d مستخدم آخر نشر منشورا تمت الإشارة لك فيه</string>
+			<key>many</key>
+			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورا تمت الإشارة لك فيه</string>
+			<key>other</key>
+			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورا تمت الإشارة لك فيه</string>
+		</dict>
+	</dict>
+	<key>reposted_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>%2$@ و %1$d مستخدم آخر نشر منشورك</string>
+			<key>one</key>
+			<string>%2$@ و %1$d مستخدم آخر نشر منشورك</string>
+			<key>two</key>
+			<string>%2$@ و %1$d مستخدمان آخران نشروا منشورك</string>
+			<key>few</key>
+			<string>%2$@ و %1$d مستخدم آخر نشروا منشورك</string>
+			<key>many</key>
+			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورك</string>
+			<key>other</key>
+			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورك</string>
+		</dict>
+	</dict>
+	<key>reposted_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>%2$@ و %1$d مستخدم آخر نشر حسابك</string>
+			<key>one</key>
+			<string>%2$@ و %1$d مستخدم آخر نشر حسابك</string>
+			<key>two</key>
+			<string>%2$@ و %1$d مستخدمان آخران نشروا حسابك</string>
+			<key>few</key>
+			<string>%2$@ و %1$d مستخدم آخر نشر حسابك</string>
+			<key>many</key>
+			<string>%2$@ و %1$d مستخدمون آخرون نشروا حسابك</string>
+			<key>other</key>
+			<string>%2$@ و %1$d مستخدمون آخرون نشروا حسابك</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -192,6 +312,78 @@
 			<string>%2$@ ساتوشي</string>
 			<key>other</key>
 			<string>%2$@ ساتوشي</string>
+		</dict>
+	</dict>
+	<key>zapped_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>%2$@ و %1$d مستخدم آخر ومّض منشورا تمت الإشارة لك فيه</string>
+			<key>one</key>
+			<string>%2$@ و %1$d مستخدم آخر ومّض منشورا تمت الإشارة لك فيه</string>
+			<key>two</key>
+			<string>%2$@ و %1$d مستخدمان آخران ومّضوا منشورا تمت الإشارة لك فيه</string>
+			<key>few</key>
+			<string>%2$@ و %1$d مستخدم آخر ومّض منشورا تمت الإشارة لك فيه</string>
+			<key>many</key>
+			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا منشورا تمت الإشارة لك فيه</string>
+			<key>other</key>
+			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا منشورا تمت الإشارة لك فيه</string>
+		</dict>
+	</dict>
+	<key>zapped_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>%2$@ و %1$d مستخدم آخر ومّض منشورك</string>
+			<key>one</key>
+			<string>%2$@ و %1$d مستخدم آخر ومّض منشورك</string>
+			<key>two</key>
+			<string>%2$@ و %1$d مستخدمان آخران ومّضوا منشورك</string>
+			<key>few</key>
+			<string>%2$@ و %1$d مستخدم آخر ومّض منشورك</string>
+			<key>many</key>
+			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا منشورك</string>
+			<key>other</key>
+			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا منشورك</string>
+		</dict>
+	</dict>
+	<key>zapped_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>%2$@ و %1$d مستخدم آخر ومّض حسابك</string>
+			<key>one</key>
+			<string>%2$@ و %1$d مستخدم آخر ومّض حسابك</string>
+			<key>two</key>
+			<string>%2$@ و %1$d مستخدمان آخران ومّضوا حسابك</string>
+			<key>few</key>
+			<string>%2$@ و %1$d مستخدم آخر ومّض حسابك</string>
+			<key>many</key>
+			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا حسابك</string>
+			<key>other</key>
+			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا حسابك</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>

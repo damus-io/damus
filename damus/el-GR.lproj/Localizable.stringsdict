@@ -34,6 +34,54 @@
 			<string>Ακόλουθοι</string>
 		</dict>
 	</dict>
+	<key>reacted_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ και %1$d ακόμα αντέδρασε σε μια δημοσίευση που σας επισημαίνει</string>
+			<key>other</key>
+			<string>%2$@ και %1$d ακόμα αντέδρασαν σε μια δημοσίευση που σας επισημαίνει</string>
+		</dict>
+	</dict>
+	<key>reacted_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ και %1$d ακόμα αντέδρασε σε μια δημοσίευση σας</string>
+			<key>other</key>
+			<string>%2$@ και %1$d ακόμα αντέδρασαν στη δημοσίευση σας</string>
+		</dict>
+	</dict>
+	<key>reacted_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ και %1$d ακόμα αντέδρασε στο προφίλ σας</string>
+			<key>other</key>
+			<string>%2$@ και %1$d ακόμα αντέδρασαν στο προφίλ σας</string>
+		</dict>
+	</dict>
 	<key>reactions_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -66,22 +114,6 @@
 			<string>Διακομιστές Relays</string>
 		</dict>
 	</dict>
-	<key>replying_to_one_and_others</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@OTHERS@</string>
-		<key>OTHERS</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>Replying to %2$@ &amp; %1$d other</string>
-			<key>other</key>
-			<string>Replying to %2$@ &amp; %1$d others</string>
-		</dict>
-	</dict>
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -96,6 +128,54 @@
 			<string>Απάντηση προς %2$@, %3$@ &amp; %1$d άλλον</string>
 			<key>other</key>
 			<string>Απάντηση προς %2$@, %3$@ &amp; %1$d άλλους</string>
+		</dict>
+	</dict>
+	<key>reposted_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ και %1$d ακόμα αναδημοσίευσε μια δημοσίευση που σας επισημαίνει</string>
+			<key>other</key>
+			<string>%2$@ και %1$d ακόμα αναδημοσίευσαν μια δημοσίευση που σας επισημαίνει</string>
+		</dict>
+	</dict>
+	<key>reposted_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ και %1$d ακόμα αναδημοσίευσε μια δημοσίευση σας</string>
+			<key>other</key>
+			<string>%2$@ και %1$d ακόμα αναδημοσίευσαν την δημοσίευση σας</string>
+		</dict>
+	</dict>
+	<key>reposted_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ και %1$d ακόμα αναδημοσίευσε το προφίλ σας</string>
+			<key>other</key>
+			<string>%2$@ και %1$d ακόμα αναδημοσίευσαν το προφίλ σας</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -128,6 +208,54 @@
 			<string>%2$@ sat</string>
 			<key>other</key>
 			<string>%2$@ sats</string>
+		</dict>
+	</dict>
+	<key>zapped_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ και %1$d ακόμα έστειλε zap σε μια δημοσίευση που σας επισημαίνει</string>
+			<key>other</key>
+			<string>%2$@ και %1$d ακόμα έστειλαν zap σε μια δημοσίευση που σας επισημαίνει</string>
+		</dict>
+	</dict>
+	<key>zapped_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ και %1$d ακόμα έστειλε zap μια δημοσίευση σας</string>
+			<key>other</key>
+			<string>%2$@ και %1$d ακόμα έστειλαν zap στη δημοσίευση σας</string>
+		</dict>
+	</dict>
+	<key>zapped_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ και %1$d ακόμα έστειλε zap στο προφίλ σας</string>
+			<key>other</key>
+			<string>%2$@ και %1$d ακόμα έστειλαν zap στο προφίλ σας</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>

@@ -38,6 +38,60 @@
 			<string>Abonnés</string>
 		</dict>
 	</dict>
+	<key>reacted_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ et %1$d autre ont réagi à une publication dans laquelle vous apparaissez</string>
+			<key>many</key>
+			<string>%2$@ et %1$d autres ont réagi à une publication dans laquelle vous apparaissez</string>
+			<key>other</key>
+			<string>%2$@ et %1$d autres ont réagi à une publication dans laquelle vous apparaissez</string>
+		</dict>
+	</dict>
+	<key>reacted_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ et %1$d autre ont réagi à votre publication</string>
+			<key>many</key>
+			<string>%2$@ et %1$d autres ont réagi à votre publication</string>
+			<key>other</key>
+			<string>%2$@ et %1$d autres ont réagi à votre publication</string>
+		</dict>
+	</dict>
+	<key>reacted_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ et %1$d autre ont réagi à votre profil</string>
+			<key>many</key>
+			<string>%2$@ et %1$d autres ont réagi à votre profil</string>
+			<key>other</key>
+			<string>%2$@ et %1$d autres ont réagi à votre profil</string>
+		</dict>
+	</dict>
 	<key>reactions_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -74,24 +128,6 @@
 			<string>Relais</string>
 		</dict>
 	</dict>
-	<key>replying_to_one_and_others</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@OTHERS@</string>
-		<key>OTHERS</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>Réponse à %2$@ &amp; %1$d autre</string>
-			<key>many</key>
-			<string>Réponse à %2$@ &amp; %1$d autres</string>
-			<key>other</key>
-			<string>Réponse à %2$@ &amp; %1$d autres</string>
-		</dict>
-	</dict>
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -108,6 +144,60 @@
 			<string>Réponse à %2$@, %3$@ &amp; %1$d autres</string>
 			<key>other</key>
 			<string>Réponse à %2$@, %3$@ &amp; %1$d autres</string>
+		</dict>
+	</dict>
+	<key>reposted_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ et %1$d autre ont cité une publication dans laquelle vous apparaissez</string>
+			<key>many</key>
+			<string>%2$@ et %1$d autres ont cité une publication dans laquelle vous apparaissez</string>
+			<key>other</key>
+			<string>%2$@ et %1$d autres ont republié une publication dans laquelle vous apparaissez</string>
+		</dict>
+	</dict>
+	<key>reposted_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ et %1$d autre ont cité votre publication</string>
+			<key>many</key>
+			<string>%2$@ et %1$d autres ont cité votre publication</string>
+			<key>other</key>
+			<string>%2$@ et %1$d autres ont republié votre publication</string>
+		</dict>
+	</dict>
+	<key>reposted_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ et %1$d autre ont republié votre profile</string>
+			<key>many</key>
+			<string>%2$@ et %1$d autres ont republié votre profile</string>
+			<key>other</key>
+			<string>%2$@ et %1$d autres ont republié votre profile</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -144,6 +234,60 @@
 			<string>%2$@ sats</string>
 			<key>other</key>
 			<string>%2$@ sats</string>
+		</dict>
+	</dict>
+	<key>zapped_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ et %1$d autre ont zappé une publication dans laquelle vous apparaissez</string>
+			<key>many</key>
+			<string>%2$@ et %1$d autres ont zappé une publication dans laquelle vous apparaissez</string>
+			<key>other</key>
+			<string>%2$@ et %1$d autres ont zappé une publication dans laquelle vous apparaissez</string>
+		</dict>
+	</dict>
+	<key>zapped_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ et %1$d autre ont zappé votre publication</string>
+			<key>many</key>
+			<string>%2$@ et %1$d autres ont zappé votre publication</string>
+			<key>other</key>
+			<string>%2$@ et %1$d autres ont zappé votre publication</string>
+		</dict>
+	</dict>
+	<key>zapped_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ et %1$d autre ont zappé votre profile</string>
+			<key>many</key>
+			<string>%2$@ et %1$d autres ont zappé votre profile</string>
+			<key>other</key>
+			<string>%2$@ et %1$d autres ont zappé votre profile</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
