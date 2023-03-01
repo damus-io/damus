@@ -515,26 +515,25 @@ struct KeyView: View {
         let bech32 = bech32_pubkey(pubkey) ?? pubkey
         
         HStack {
-            RoundedRectangle(cornerRadius: 11)
-                .frame(height: 22)
-                .foregroundColor(fillColor())
-                .overlay(
-                    HStack {
-                        Button {
-                            copyPubkey(bech32)
-                        } label: {
-                            Label(NSLocalizedString("Public Key", comment: "Label indicating that the text is a user's public account key."), systemImage: "key.fill")
-                                .font(.custom("key", size: 12.0))
-                                .labelStyle(IconOnlyLabelStyle())
-                                .foregroundStyle(hex_to_rgb(pubkey))
-                                .symbolRenderingMode(.palette)
-                        }
-                        .padding(.leading,4)
-                        Text(verbatim: "\(abbrev_pubkey(bech32, amount: 16))")
-                            .font(.footnote)
-                            .foregroundColor(keyColor())
-                    }
-                )
+            HStack {
+                Button {
+                    copyPubkey(bech32)
+                } label: {
+                    Label(NSLocalizedString("Public Key", comment: "Label indicating that the text is a user's public account key."), systemImage: "key.fill")
+                        .font(.custom("key", size: 12.0))
+                        .labelStyle(IconOnlyLabelStyle())
+                        .foregroundStyle(hex_to_rgb(pubkey))
+                        .symbolRenderingMode(.palette)
+                }
+                .padding(.trailing, 2)
+                Text(verbatim: "\(abbrev_pubkey(bech32, amount: 16))")
+                    .font(.footnote)
+                    .foregroundColor(keyColor())
+            }
+            .padding(2)
+            .padding([.leading, .trailing], 3)
+            .background(RoundedRectangle(cornerRadius: 11).foregroundColor(fillColor()))
+                        
             if isCopied != true {
                 Button {
                     copyPubkey(bech32)
