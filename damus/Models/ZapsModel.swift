@@ -65,7 +65,7 @@ class ZapsModel: ObservableObject {
                     return
                 }
                 
-                guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper) else {
+                guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: state.keypair.privkey) else {
                     return
                 }
                 

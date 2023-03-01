@@ -130,14 +130,14 @@ class HomeModel: ObservableObject {
         }
     }
     
-    func handle_zap_event_with_zapper(_ ev: NostrEvent, our_pubkey: String, zapper: String) {
-        guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper) else {
+    func handle_zap_event_with_zapper(_ ev: NostrEvent, our_keypair: Keypair, zapper: String) {
+        guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: our_keypair.privkey) else {
             return
         }
         
         damus_state.zaps.add_zap(zap: zap)
         
-        guard zap.target.pubkey == our_pubkey else {
+        guard zap.target.pubkey == our_keypair.pubkey else {
             return
         }
         
@@ -155,8 +155,9 @@ class HomeModel: ObservableObject {
             return
         }
         
+        let our_keypair = damus_state.keypair
         if let local_zapper = damus_state.profiles.lookup_zapper(pubkey: ptag) {
-            handle_zap_event_with_zapper(ev, our_pubkey: damus_state.pubkey, zapper: local_zapper)
+            handle_zap_event_with_zapper(ev, our_keypair: our_keypair, zapper: local_zapper)
             return
         }
         
@@ -175,7 +176,7 @@ class HomeModel: ObservableObject {
             
             DispatchQueue.main.async {
                 self.damus_state.profiles.zappers[ptag] = zapper
-                self.handle_zap_event_with_zapper(ev, our_pubkey: self.damus_state.pubkey, zapper: zapper)
+                self.handle_zap_event_with_zapper(ev, our_keypair: our_keypair, zapper: zapper)
             }
         }
         

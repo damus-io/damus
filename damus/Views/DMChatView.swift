@@ -181,13 +181,12 @@ struct DMChatView_Previews: PreviewProvider {
     }
 }
 
+enum EncEncoding {
+    case base64
+    case bech32
+}
 
-func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair, created_at: Int64? = nil) -> NostrEvent?
-{
-    guard let privkey = keypair.privkey else {
-        return nil
-    }
-
+func encrypt_message(message: String, privkey: String, to_pk: String, encoding: EncEncoding = .base64) -> String? {
     let iv = random_bytes(count: 16).bytes
     guard let shared_sec = get_shared_secret(privkey: privkey, pubkey: to_pk) else {
         return nil
@@ -196,7 +195,26 @@ func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keyp
     guard let enc_message = aes_encrypt(data: utf8_message, iv: iv, shared_sec: shared_sec) else {
         return nil
     }
-    let enc_content = encode_dm_base64(content: enc_message.bytes, iv: iv)
+    
+    switch encoding {
+    case .base64:
+        return encode_dm_base64(content: enc_message.bytes, iv: iv)
+    case .bech32:
+        return encode_dm_bech32(content: enc_message.bytes, iv: iv)
+    }
+    
+}
+
+func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair, created_at: Int64? = nil) -> NostrEvent?
+{
+    guard let privkey = keypair.privkey else {
+        return nil
+    }
+
+    guard let enc_content = encrypt_message(message: message, privkey: privkey, to_pk: to_pk) else {
+        return nil
+    }
+    
     let created = created_at ?? Int64(Date().timeIntervalSince1970)
     let ev = NostrEvent(content: enc_content, pubkey: keypair.pubkey, kind: 4, tags: tags, createdAt: created)
     

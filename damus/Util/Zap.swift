@@ -7,12 +7,6 @@
 
 import Foundation
 
-enum ZapSource {
-    case author(String)
-    // TODO: anonymous
-    //case anonymous
-}
-
 public struct NoteZapTarget: Equatable {
     public let note_id: String
     public let author: String
@@ -55,8 +49,10 @@ struct Zap {
     public let zapper: String /// zap authorizer
     public let target: ZapTarget
     public let request: ZapRequest
+    public let is_anon: Bool
+    public let private_request: NostrEvent?
     
-    public static func from_zap_event(zap_ev: NostrEvent, zapper: String) -> Zap? {
+    public static func from_zap_event(zap_ev: NostrEvent, zapper: String, our_privkey: String?) -> Zap? {
         /// Make sure that we only create a zap event if it is authorized by the profile or event
         guard zapper == zap_ev.pubkey else {
             return nil
@@ -83,14 +79,26 @@ struct Zap {
         guard let desc = get_zap_description(zap_ev, inv_desc: zap_invoice.description) else {
             return nil
         }
+        
         guard let zap_req = decode_nostr_event_json(desc) else {
             return nil
         }
+        
+        guard validate_event(ev: zap_req) == .ok else {
+            return nil
+        }
+        
         guard let target = determine_zap_target(zap_req) else {
             return nil
         }
         
-        return Zap(event: zap_ev, invoice: zap_invoice, zapper: zapper, target: target, request: ZapRequest(ev: zap_req))
+        let private_request = our_privkey.flatMap {
+            decrypt_private_zap(our_privkey: $0, zapreq: zap_req, target: target)
+        }
+        
+        let is_anon = private_request == nil && event_is_anonymous(ev: zap_req)
+        
+        return Zap(event: zap_ev, invoice: zap_invoice, zapper: zapper, target: target, request: ZapRequest(ev: zap_req), is_anon: is_anon, private_request: private_request)
     }
 }
 
@@ -285,7 +293,7 @@ func fetch_static_payreq(_ lnurl: String) async -> LNUrlPayRequest? {
     return endpoint
 }
 
-func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent, sats: Int, zap_type: ZapType, comment: String?) async -> String? {
+func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, sats: Int, zap_type: ZapType, comment: String?) async -> String? {
     guard var base_url = payreq.callback.flatMap({ URLComponents(string: $0) }) else {
         return nil
     }
@@ -295,11 +303,10 @@ func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent, sats: Int,
     
     var query = [URLQueryItem(name: "amount", value: "\(amount)")]
     
-    if zappable && zap_type != .non_zap {
-        if let json = encode_json(zapreq) {
-            print("zapreq json: \(json)")
-            query.append(URLQueryItem(name: "nostr", value: json))
-        }
+    if let zapreq, zappable && zap_type != .non_zap {
+        let json = event_to_json(ev: zapreq)
+        print("zapreq json: \(json)")
+        query.append(URLQueryItem(name: "nostr", value: json))
     }
    
     // add a lud12 comment as well if we have it

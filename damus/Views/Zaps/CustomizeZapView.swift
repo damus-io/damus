@@ -11,6 +11,7 @@ import Combine
 enum ZapType {
     case pub
     case anon
+    case priv
     case non_zap
 }
 
@@ -80,11 +81,29 @@ struct CustomizeZapView: View {
         self.state = state
     }
     
+    var zap_type_desc: String {
+        switch zap_type {
+        case .pub:
+            return "Everyone on can see that you zapped"
+        case .anon:
+            return "Noone can see that you zapped"
+        case .priv:
+            let pk = event.pubkey
+            let prof = state.profiles.lookup(id: pk)
+            let name = Profile.displayName(profile: prof, pubkey: pk)
+            return String(format: "Only '%@' can see that you zapped them",
+                name)
+        case .non_zap:
+            return "No zaps are sent, only a lightning payment."
+        }
+    }
+    
     var ZapTypePicker: some View {
         Picker(NSLocalizedString("Zap Type", comment: "Header text to indicate that the picker below it is to choose the type of zap to send."), selection: $zap_type) {
             Text("Public", comment: "Picker option to indicate that a zap should be sent publicly and identify the user as who sent it.").tag(ZapType.pub)
-            Text("Anonymous", comment: "Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.").tag(ZapType.anon)
-            Text("Non-Zap", comment: "Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.").tag(ZapType.non_zap)
+            Text("Private", comment: "Picker option to indicate that a zap should be sent privately and not identify the user to the public.").tag(ZapType.priv)
+            Text("Anon", comment: "Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.").tag(ZapType.anon)
+            Text("None", comment: "Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.").tag(ZapType.non_zap)
         }
         .pickerStyle(.segmented)
     }
@@ -180,15 +199,17 @@ struct CustomizeZapView: View {
                 }, header: {
                     Text("Comment", comment: "Header text to indicate that the text field below it is a comment that will be used to send as part of a zap to the user.")
                 })
-                
-                Section(content: {
-                    ZapTypePicker
-                }, header: {
-                    Text("Zap Type", comment: "Header text to indicate that the picker below it is to choose the type of zap to send.")
-                })
-                
             }
             .dismissKeyboardOnTap()
+                
+            Section(content: {
+                ZapTypePicker
+            }, header: {
+                Text("Zap Type", comment: "Header text to indicate that the picker below it is to choose the type of zap to send.")
+            }, footer: {
+                Text(zap_type_desc)
+            })
+            
             
             if zapping {
                 Text("Zapping...", comment: "Text to indicate that the app is in the process of sending a zap.")

@@ -57,7 +57,7 @@ struct MutedEventView: View {
             if selected {
                 SelectedEventView(damus: damus_state, event: event)
             } else {
-                EventView(damus: damus_state, event: event, has_action_bar: true)
+                EventView(damus: damus_state, event: event)
                     .onTapGesture {
                         nav_target = event.id
                         navigating = true

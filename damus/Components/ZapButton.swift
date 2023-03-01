@@ -138,7 +138,7 @@ struct ZapButton_Previews: PreviewProvider {
 
 
 func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_custom: Bool, comment: String?, amount_sats: Int?, zap_type: ZapType) {
-    guard let privkey = damus_state.keypair.privkey else {
+    guard let keypair = damus_state.keypair.to_full() else {
         return
     }
     
@@ -146,7 +146,8 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
     let relays = Array(damus_state.pool.descriptors.prefix(10))
     let target = ZapTarget.note(id: event.id, author: event.pubkey)
     let content = comment ?? ""
-    let zapreq = make_zap_request_event(pubkey: damus_state.pubkey, privkey: privkey, content: content, relays: relays, target: target, is_anon: zap_type == .anon)
+    
+    let zapreq = make_zap_request_event(keypair: keypair, content: content, relays: relays, target: target, zap_type: zap_type)
     
     Task {
         var mpayreq = damus_state.lnurls.lookup(target.pubkey)
