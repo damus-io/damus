@@ -21,7 +21,7 @@ struct ZapsView: View {
             LazyVStack {
                 ForEach(model.zaps, id: \.event.id) { zap in
                     ZapEvent(damus: state, zap: zap)
-                        .padding()
+                        .padding([.horizontal])
                 }
             }
         }

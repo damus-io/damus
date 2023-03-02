@@ -40,7 +40,7 @@ struct SearchHomeView: View {
     }
     
     var GlobalContent: some View {
-        return TimelineView(events: $model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: { _ in true })
+        return TimelineView(events: model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: { _ in true })
             .refreshable {
                 // Fetch new information by unsubscribing and resubscribing to the relay
                 model.unsubscribe()
@@ -90,7 +90,7 @@ struct SearchHomeView: View {
             self.model.filter_muted()
         }
         .onAppear {
-            if model.events.isEmpty {
+            if model.events.events.isEmpty {
                 model.subscribe()
             }
         }

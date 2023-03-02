@@ -50,18 +50,17 @@ class HomeModel: ObservableObject {
     let profiles_subid = UUID().description
 
     @Published var new_events: NewEventsBits = NewEventsBits()
-    @Published var notifications: [NostrEvent] = []
+    @Published var notifications = NotificationsModel()
     @Published var dms: DirectMessagesModel
-    @Published var events: [NostrEvent] = []
+    @Published var events = EventHolder()
     @Published var loading: Bool = false
     @Published var signal: SignalModel = SignalModel()
 
     init() {
         self.damus_state = DamusState.empty
-        self.dms = DirectMessagesModel(our_pubkey: damus_state.pubkey)
-        self.setup_debouncer()
+        self.dms = DirectMessagesModel(our_pubkey: "")
     }
-
+    
     init(damus_state: DamusState) {
         self.damus_state = damus_state
         self.dms = DirectMessagesModel(our_pubkey: damus_state.pubkey)
@@ -126,21 +125,23 @@ class HomeModel: ObservableObject {
             handle_channel_meta(ev)
         case .zap:
             handle_zap_event(ev)
+        case .zap_request:
+            break
         }
     }
     
-    func handle_zap_event_with_zapper(_ ev: NostrEvent, our_pubkey: String, zapper: String) {
-        guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper) else {
+    func handle_zap_event_with_zapper(_ ev: NostrEvent, our_keypair: Keypair, zapper: String) {
+        guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: our_keypair.privkey) else {
             return
         }
         
         damus_state.zaps.add_zap(zap: zap)
         
-        guard zap.target.pubkey == our_pubkey else {
+        guard zap.target.pubkey == our_keypair.pubkey else {
             return
         }
         
-        if !insert_uniq_sorted_event(events: &notifications, new_ev: ev, cmp: { $0.created_at > $1.created_at }) {
+        if !notifications.insert_zap(zap) {
             return
         }
         
@@ -154,8 +155,9 @@ class HomeModel: ObservableObject {
             return
         }
         
+        let our_keypair = damus_state.keypair
         if let local_zapper = damus_state.profiles.lookup_zapper(pubkey: ptag) {
-            handle_zap_event_with_zapper(ev, our_pubkey: damus_state.pubkey, zapper: local_zapper)
+            handle_zap_event_with_zapper(ev, our_keypair: our_keypair, zapper: local_zapper)
             return
         }
         
@@ -174,7 +176,7 @@ class HomeModel: ObservableObject {
             
             DispatchQueue.main.async {
                 self.damus_state.profiles.zappers[ptag] = zapper
-                self.handle_zap_event_with_zapper(ev, our_pubkey: self.damus_state.pubkey, zapper: zapper)
+                self.handle_zap_event_with_zapper(ev, our_keypair: our_keypair, zapper: zapper)
             }
         }
         
@@ -192,9 +194,9 @@ class HomeModel: ObservableObject {
     }
     
     func filter_muted() {
-        self.events = events.filter { !damus_state.contacts.is_muted($0.pubkey) }
+        events.filter { !damus_state.contacts.is_muted($0.pubkey) }
         self.dms.dms = dms.dms.filter { !damus_state.contacts.is_muted($0.0) }
-        self.notifications = notifications.filter { !damus_state.contacts.is_muted($0.pubkey) }
+        notifications.filter { !damus_state.contacts.is_muted($0.pubkey) }
     }
     
     func handle_delete_event(_ ev: NostrEvent) {
@@ -226,7 +228,7 @@ class HomeModel: ObservableObject {
             guard inner_ev.is_valid else {
                 return
             }
-
+           
             if inner_ev.is_textlike {
                 handle_text_event(sub_id: sub_id, ev)
             }
@@ -252,12 +254,11 @@ class HomeModel: ObservableObject {
             return
         }
 
-        // CHECK SIGS ON THESE
-
         switch damus_state.likes.add_event(ev, target: e.ref_id) {
         case .already_counted:
             break
         case .success(let n):
+            handle_notification(ev: ev)
             let liked = Counted(event: ev, id: e.ref_id, total: n)
             notify(.liked, liked)
             notify(.update_stats, e.ref_id)
@@ -317,9 +318,9 @@ class HomeModel: ObservableObject {
                 if sub_id == dms_subid {
                     var dms = dms.dms.flatMap { $0.1.events }
                     dms.append(contentsOf: incoming_dms)
-                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: dms, damus_state: damus_state)
+                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(dms), damus_state: damus_state)
                 } else if sub_id == notifications_subid {
-                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, events: notifications, damus_state: damus_state)
+                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_keys(notifications.uniq_pubkeys()), damus_state: damus_state)
                 }
                 
                 self.loading = false
@@ -372,7 +373,6 @@ class HomeModel: ObservableObject {
         // TODO: separate likes?
         var home_filter = NostrFilter.filter_kinds([
             NostrKind.text.rawValue,
-            NostrKind.chat.rawValue,
             NostrKind.like.rawValue,
             NostrKind.boost.rawValue,
         ])
@@ -382,7 +382,6 @@ class HomeModel: ObservableObject {
 
         var notifications_filter = NostrFilter.filter_kinds([
             NostrKind.text.rawValue,
-            NostrKind.chat.rawValue,
             NostrKind.like.rawValue,
             NostrKind.boost.rawValue,
             NostrKind.zap.rawValue,
@@ -458,10 +457,19 @@ class HomeModel: ObservableObject {
             return
         }
         
-        if !insert_uniq_sorted_event(events: &notifications, new_ev: ev, cmp: { $0.created_at > $1.created_at }) {
+        guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
             return
         }
-
+        
+        damus_state.events.insert(ev)
+        if let inner_ev = ev.inner_event {
+            damus_state.events.insert(inner_ev)
+        }
+        
+        if !notifications.insert_event(ev) {
+            return
+        }
+        
         handle_last_event(ev: ev, timeline: .notifications)
     }
     
@@ -471,21 +479,21 @@ class HomeModel: ObservableObject {
         }
     }
 
-    func insert_home_event(_ ev: NostrEvent) -> Bool {
-        let ok = insert_uniq_sorted_event(events: &self.events, new_ev: ev, cmp: { $0.created_at > $1.created_at })
-        if ok {
+    func insert_home_event(_ ev: NostrEvent) {
+        if events.insert(ev) {
             handle_last_event(ev: ev, timeline: .home)
         }
-        return ok
     }
 
     func handle_text_event(sub_id: String, _ ev: NostrEvent) {
         guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
             return
         }
+        
+        damus_state.events.insert(ev)
 
         if sub_id == home_subid {
-            let _ = insert_home_event(ev)
+            insert_home_event(ev)
         } else if sub_id == notifications_subid {
             handle_notification(ev: ev)
         }
@@ -657,14 +665,14 @@ func process_metadata_event(our_pubkey: String, profiles: Profiles, ev: NostrEve
     
     // load pfps asap
     let picture = tprof.profile.picture ?? robohash(ev.pubkey)
-    if let _ = URL(string: picture) {
+    if URL(string: picture) != nil {
         DispatchQueue.main.async {
             notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
         }
     }
     
     let banner = tprof.profile.banner ?? ""
-    if let _ = URL(string: banner) {
+    if URL(string: banner) != nil {
         DispatchQueue.main.async {
             notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
         }

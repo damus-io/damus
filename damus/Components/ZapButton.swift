@@ -7,6 +7,22 @@
 
 import SwiftUI
 
+enum ZappingEventType {
+    case failed(ZappingError)
+    case got_zap_invoice(String)
+}
+
+enum ZappingError {
+    case fetching_invoice
+    case bad_lnurl
+}
+
+struct ZappingEvent {
+    let is_custom: Bool
+    let type: ZappingEventType
+    let event: NostrEvent
+}
+
 struct ZapButton: View {
     let damus_state: DamusState
     let event: NostrEvent
@@ -19,61 +35,8 @@ struct ZapButton: View {
     @State var slider_value: Double = 0.0
     @State var slider_visible: Bool = false
     @State var showing_select_wallet: Bool = false
-    
-    func send_zap() {
-        guard let privkey = damus_state.keypair.privkey else {
-            return
-        }
-        
-        // Only take the first 10 because reasons
-        let relays = Array(damus_state.pool.descriptors.prefix(10))
-        let target = ZapTarget.note(id: event.id, author: event.pubkey)
-        // TODO: gather comment?
-        let content = ""
-        let zapreq = make_zap_request_event(pubkey: damus_state.pubkey, privkey: privkey, content: content, relays: relays, target: target)
-        
-        zapping = true
-        
-        Task {
-            var mpayreq = damus_state.lnurls.lookup(target.pubkey)
-            if mpayreq == nil {
-                mpayreq = await fetch_static_payreq(lnurl)
-            }
-            
-            guard let payreq = mpayreq else {
-                // TODO: show error
-                DispatchQueue.main.async {
-                    zapping = false
-                }
-                return
-            }
-            
-            DispatchQueue.main.async {
-                damus_state.lnurls.endpoints[target.pubkey] = payreq
-            }
-            
-            let zap_amount = get_default_zap_amount(pubkey: damus_state.pubkey) ?? 1000
-            guard let inv = await fetch_zap_invoice(payreq, zapreq: zapreq, sats: zap_amount) else {
-                DispatchQueue.main.async {
-                    zapping = false
-                }
-                return
-            }
-            
-            DispatchQueue.main.async {
-                zapping = false
-                
-                if should_show_wallet_selector(damus_state.pubkey) {
-                    self.invoice = inv
-                    self.showing_select_wallet = true
-                } else {
-                    open_with_wallet(wallet: get_default_wallet(damus_state.pubkey).model, invoice: inv)
-                }
-            }
-        }
-        
-        //damus_state.pool.send(.event(zapreq))
-    }
+    @State var showing_zap_customizer: Bool = false
+    @State var is_charging: Bool = false
     
     var zap_img: String {
         if bar.zapped {
@@ -92,6 +55,10 @@ struct ZapButton: View {
             return Color.orange
         }
         
+        if is_charging {
+            return Color.yellow
+        }
+        
         if !zapping {
             return nil
         }
@@ -101,21 +68,61 @@ struct ZapButton: View {
     
     var body: some View {
         HStack(spacing: 4) {
-            EventActionButton(img: zap_img, col: zap_color) {
-                if bar.zapped {
-                    //notify(.delete, bar.our_tip)
-                } else if !zapping {
-                    send_zap()
+            Image(systemName: zap_img)
+                .foregroundColor(zap_color == nil ? Color.gray : zap_color!)
+                .font(.footnote.weight(.medium))
+                .onTapGesture {
+                    if bar.zapped {
+                        //notify(.delete, bar.our_tip)
+                    } else if !zapping {
+                        self.showing_zap_customizer = true
+                        //send_zap(damus_state: damus_state, event: event, lnurl: lnurl, is_custom: false)
+                        //self.zapping = true
+                    }
                 }
+                .onLongPressGesture(minimumDuration: 0, pressing: { is_charing in
+                    self.is_charging = is_charging
+                }, perform: {
+                    self.showing_zap_customizer = true
+                })
+                .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
+
+            if bar.zap_total > 0 {
+                Text(verbatim: format_msats_abbrev(bar.zap_total))
+                    .font(.footnote)
+                    .foregroundColor(bar.zapped ? Color.orange : Color.gray)
             }
-            .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
-            
-            Text(String("\(bar.zap_total > 0 ? "\(format_msats_abbrev(bar.zap_total))" : "")"))
-                .font(.footnote)
-                .foregroundColor(bar.zapped ? Color.orange : Color.gray)
+        }
+        .sheet(isPresented: $showing_zap_customizer) {
+            CustomizeZapView(state: damus_state, event: event, lnurl: lnurl)
         }
         .sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
             SelectWalletView(showingSelectWallet: $showing_select_wallet, our_pubkey: damus_state.pubkey, invoice: invoice)
+        }
+        .onReceive(handle_notify(.zapping)) { notif in
+            let zap_ev = notif.object as! ZappingEvent
+            
+            guard zap_ev.event.id == self.event.id else {
+                return
+            }
+            
+            guard !zap_ev.is_custom else {
+                return
+            }
+            
+            switch zap_ev.type {
+            case .failed:
+                break
+            case .got_zap_invoice(let inv):
+                if should_show_wallet_selector(damus_state.pubkey) {
+                    self.invoice = inv
+                    self.showing_select_wallet = true
+                } else {
+                    open_with_wallet(wallet: get_default_wallet(damus_state.pubkey).model, invoice: inv)
+                }
+            }
+            
+            self.zapping = false
         }
     }
 }
@@ -128,3 +135,56 @@ struct ZapButton_Previews: PreviewProvider {
     }
 }
 
+
+
+func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_custom: Bool, comment: String?, amount_sats: Int?, zap_type: ZapType) {
+    guard let keypair = damus_state.keypair.to_full() else {
+        return
+    }
+    
+    // Only take the first 10 because reasons
+    let relays = Array(damus_state.pool.descriptors.prefix(10))
+    let target = ZapTarget.note(id: event.id, author: event.pubkey)
+    let content = comment ?? ""
+    
+    let zapreq = make_zap_request_event(keypair: keypair, content: content, relays: relays, target: target, zap_type: zap_type)
+    
+    Task {
+        var mpayreq = damus_state.lnurls.lookup(target.pubkey)
+        if mpayreq == nil {
+            mpayreq = await fetch_static_payreq(lnurl)
+        }
+        
+        guard let payreq = mpayreq else {
+            // TODO: show error
+            DispatchQueue.main.async {
+                let typ = ZappingEventType.failed(.bad_lnurl)
+                let ev = ZappingEvent(is_custom: is_custom, type: typ, event: event)
+                notify(.zapping, ev)
+            }
+            return
+        }
+        
+        DispatchQueue.main.async {
+            damus_state.lnurls.endpoints[target.pubkey] = payreq
+        }
+        
+        let zap_amount = amount_sats ?? get_default_zap_amount(pubkey: damus_state.pubkey) ?? 1000
+        
+        guard let inv = await fetch_zap_invoice(payreq, zapreq: zapreq, sats: zap_amount, zap_type: zap_type, comment: comment) else {
+            DispatchQueue.main.async {
+                let typ = ZappingEventType.failed(.fetching_invoice)
+                let ev = ZappingEvent(is_custom: is_custom, type: typ, event: event)
+                notify(.zapping, ev)
+            }
+            return
+        }
+        
+        DispatchQueue.main.async {
+            let ev = ZappingEvent(is_custom: is_custom, type: .got_zap_invoice(inv), event: event)
+            notify(.zapping, ev)
+        }
+    }
+    
+    return
+}

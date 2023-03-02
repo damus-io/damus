@@ -143,6 +143,7 @@ func eightToFiveBits(_ input: [UInt8]) -> [UInt8] {
 }
     
     /// Decode Bech32 string
+@discardableResult
 public func bech32_decode(_ str: String) throws -> (hrp: String, data: Data)? {
     guard let strBytes = str.data(using: .utf8) else {
         throw Bech32Error.nonUTF8String

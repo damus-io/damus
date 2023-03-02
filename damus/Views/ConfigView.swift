@@ -128,27 +128,25 @@ struct ConfigView: View {
                         }
                     }
                 }
-                
+
+                Section(NSLocalizedString("Image Uploader", comment: "Section title for selection of image uploader.")) {
+                    Picker(NSLocalizedString("Select image uplodaer", comment: "Prompt selection of user's image uplodaer"),
+                           selection: $settings.default_image_uploader) {
+                        ForEach(ImageUploader.allCases, id: \.self) { uploader in
+                            Text(uploader.model.displayName)
+                                .tag(uploader.model.tag)
+                        }
+                    }
+                }
                 
                 Section(NSLocalizedString("Default Zap Amount in sats", comment: "Section title for zap configuration")) {
                     TextField(String("1000"), text: $default_zap_amount)
                         .keyboardType(.numberPad)
                         .onReceive(Just(default_zap_amount)) { newValue in
-                            let filtered = newValue.filter { Set("0123456789").contains($0) }
-
-                            if filtered != newValue {
-                                default_zap_amount = filtered
+                            if let parsed = handle_string_amount(new_value: newValue) {
+                                self.default_zap_amount = String(parsed)
+                                set_default_zap_amount(pubkey: self.state.pubkey, amount: parsed)
                             }
-
-                            if filtered == "" {
-                                set_default_zap_amount(pubkey: state.pubkey, amount: 1000)
-                                return
-                            }
-
-                            guard let amt = Int(filtered) else {
-                                return
-                            }
-                            set_default_zap_amount(pubkey: state.pubkey, amount: amt)
                         }
                 }
 
@@ -220,10 +218,10 @@ struct ConfigView: View {
                     }
                 }
 
-                let bundleShortVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String
-                let bundleVersion = Bundle.main.infoDictionary?["CFBundleVersion"] as! String
-                Section(NSLocalizedString("Version", comment: "Section title for displaying the version number of the Damus app.")) {
-                    Text(verbatim: "\(bundleShortVersion) (\(bundleVersion))")
+                if let bundleShortVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"], let bundleVersion = Bundle.main.infoDictionary?["CFBundleVersion"] {
+                    Section(NSLocalizedString("Version", comment: "Section title for displaying the version number of the Damus app.")) {
+                        Text(verbatim: "\(bundleShortVersion) (\(bundleVersion))")
+                    }
                 }
             }
         }
@@ -345,4 +343,20 @@ struct ConfigView_Previews: PreviewProvider {
             ConfigView(state: test_damus_state())
         }
     }
+}
+
+
+func handle_string_amount(new_value: String) -> Int? {
+    let digits = Set("0123456789")
+    let filtered = new_value.filter { digits.contains($0) }
+
+    if filtered == "" {
+        return nil
+    }
+
+    guard let amt = Int(filtered) else {
+        return nil
+    }
+    
+    return amt
 }

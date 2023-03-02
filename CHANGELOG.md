@@ -1,3 +1,76 @@
+## [1.1.0-10] - 2023-03-01
+
+### Added
+
+- Truncate large posts and add a show more button (OlegAba)
+- Private Zaps (William Casarin)
+
+
+### Fixed
+
+- Fix default zap amount setting not getting updated (William Casarin)
+- Fix issue where keyboard covers custom zap comment (William Casarin)
+
+
+[1.1.0-10]: https://github.com/damus-io/damus/releases/tag/v1.1.0-10
+
+## [1.1.0-9] - 2023-02-26
+
+### Added
+
+- Customized zaps (William Casarin)
+- Add new Notifications View (William Casarin)
+- Bookmarking (Joel Klabo)
+
+### Changed
+
+- No more inline npubs when tagging users (Swift)
+
+
+### Fixed
+
+- Fix alignment of side menu labels (Joel Klabo)
+- Fix duplicated participants in reply-to view (Joel Klabo)
+- Load missing profiles in Zaps view (William Casarin)
+- Fix memory leak with inline videos (William Casarin)
+- Eliminate popping when scrolling (William Casarin)
+
+
+[1.1.0-9]: https://github.com/damus-io/damus/releases/tag/v1.1.0-9
+
+## [1.1.0-3] - 2023-02-20
+
+### Added
+
+- Add a "load more" button instead of always inserting events in timelines (William Casarin)
+- Added the ability to select text on posts (OlegAba)
+- Added Posts or Post & Replies selector to Profile (ericholguin)
+- Improved profile navbar (OlegAba)
+
+
+### Changed
+
+- Rename global feed to universe (William Casarin)
+- Improve look of post view (ericholguin)
+- Added a 20MB content length limit for all image files (OlegAba)
+- Improved EventActionBar button spacing (Bryan Montz)
+- Polished profile key copy buttons, added animation (Bryan Montz)
+- Format large numbers of action bar actions (Joel Klabo)
+- Improved blur on images, especially in dark mode (Bryan Montz)
+
+
+### Fixed
+
+- Remove trailing slash when adding a relay (middlingphys)
+- Scroll to top of events instead of the bottom (OlegAba)
+- Fix lag on startup when you have lots of DMs (William Casarin)
+- Fix an issues where dm notifications appear without any new events (William Casarin)
+- Fix some hangs when scrolling by images (OlegAba)
+- Force default zap amount text field to accept only numbers (Terry Yiu)
+
+
+
+[1.1.0-3]: https://github.com/damus-io/damus/releases/tag/v1.1.0-3
 
 ## [1.1.0-2] - 2023-02-14
 

@@ -265,6 +265,10 @@ struct ThreadV2View: View {
                                            navigating: $navigating,
                                            selected: false
                             )
+                            
+                            Divider()
+                                .padding(.top, 4)
+                                .padding(.leading, 25 * 2)
                         }
                     }.background(GeometryReader { geometry in
                         // get the height and width of the EventView view
@@ -289,15 +293,20 @@ struct ThreadV2View: View {
                     ).id("main")
                     
                     // MARK: - Responses of the actual event view
-                    ForEach(thread.childEvents, id: \.id) { event in
-                        MutedEventView(
-                            damus_state: damus,
-                            event: event,
-                            scroller: reader,
-                            nav_target: $nav_target,
-                            navigating: $navigating,
-                            selected: false
-                        )
+                    LazyVStack {
+                        ForEach(thread.childEvents, id: \.id) { event in
+                            MutedEventView(
+                                damus_state: damus,
+                                event: event,
+                                scroller: nil,
+                                nav_target: $nav_target,
+                                navigating: $navigating,
+                                selected: false
+                            )
+
+                            Divider()
+                                .padding([.top], 4)
+                        }
                     }
                 }.padding()
             }.navigationBarTitle(NSLocalizedString("Thread", comment: "Navigation bar title for note thread."))

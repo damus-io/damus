@@ -207,7 +207,7 @@ class ThreadModel: ObservableObject {
         }
         
         if sub_id == self.base_subid {
-            load_profiles(profiles_subid: self.profiles_subid, relay_id: relay_id, events: events, damus_state: damus_state)
+            load_profiles(profiles_subid: self.profiles_subid, relay_id: relay_id, load: .from_events(events), damus_state: damus_state)
         }
     }
 

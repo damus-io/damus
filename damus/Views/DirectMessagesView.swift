@@ -41,6 +41,9 @@ struct DirectMessagesView: View {
                     ForEach(dms, id: \.0) { tup in
                         MaybeEvent(tup)
                             .padding(.top, 10)
+                        
+                        Divider()
+                            .padding([.top], 10)
                     }
                 }
             }
