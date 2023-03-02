@@ -208,7 +208,7 @@ struct EventGroupView: View {
                 
                 if let event {
                     NavigationLink(destination: BuildThreadV2View(damus: state, event_id: event.id)) {
-                        Text(event.content)
+                        Text(render_note_content(ev: event, profiles: state.profiles, privkey: state.keypair.privkey).content)
                             .padding([.top], 1)
                             .foregroundColor(.gray)
                     }
