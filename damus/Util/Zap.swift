@@ -303,8 +303,7 @@ func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, sats: Int
     
     var query = [URLQueryItem(name: "amount", value: "\(amount)")]
     
-    if let zapreq, zappable && zap_type != .non_zap {
-        let json = event_to_json(ev: zapreq)
+    if let zapreq, zappable && zap_type != .non_zap, let json = encode_json(zapreq) {
         print("zapreq json: \(json)")
         query.append(URLQueryItem(name: "nostr", value: json))
     }
