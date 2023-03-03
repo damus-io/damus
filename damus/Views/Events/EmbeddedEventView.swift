@@ -32,7 +32,6 @@ struct EmbeddedEventView: View {
             
             EventBody(damus_state: damus_state, event: event, size: .small)
         }
-        //.event_context_menu(event, keypair: damus_state.keypair, target_pubkey: pubkey, bookmarks: damus_state.bookmarks)
     }
 }
 
