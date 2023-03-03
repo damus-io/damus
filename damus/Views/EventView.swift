@@ -126,9 +126,9 @@ extension View {
         }
     }
     
-    func event_context_menu(_ event: NostrEvent, keypair: Keypair, target_pubkey: String) -> some View {
+    func event_context_menu(_ event: NostrEvent, keypair: Keypair, target_pubkey: String, bookmarks: BookmarksManager) -> some View {
         return self.contextMenu {
-            EventMenuContext(event: event, keypair: keypair, target_pubkey: target_pubkey)
+            EventMenuContext(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks)
         }
 
     }

@@ -66,7 +66,7 @@ struct TextEvent: View {
         .id(event.id)
         .frame(maxWidth: .infinity, minHeight: PFP_SIZE)
         .padding([.bottom], 2)
-        .event_context_menu(event, keypair: damus.keypair, target_pubkey: pubkey)
+        .event_context_menu(event, keypair: damus.keypair, target_pubkey: pubkey, bookmarks: damus.bookmarks)
     }
 }
 

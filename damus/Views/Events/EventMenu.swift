@@ -11,8 +11,19 @@ struct EventMenuContext: View {
     let event: NostrEvent
     let keypair: Keypair
     let target_pubkey: String
+    let bookmarks: BookmarksManager
     
     @State private var isBookmarked: Bool = false
+    
+    init(event: NostrEvent, keypair: Keypair, target_pubkey: String, bookmarks: BookmarksManager) {
+        let bookmarked = bookmarks.isBookmarked(event)
+        self._isBookmarked = State(initialValue: bookmarked)
+        
+        self.bookmarks = bookmarks
+        self.event = event
+        self.keypair = keypair
+        self.target_pubkey = target_pubkey
+    }
     
     var body: some View {
     
@@ -41,20 +52,13 @@ struct EventMenuContext: View {
         }
         
         Button {
-            let event_json = event_to_json(ev: event)
-            BookmarksManager(pubkey: keypair.pubkey).updateBookmark(event_json)
-            isBookmarked = BookmarksManager(pubkey: keypair.pubkey).isBookmarked(event_json)
-            notify(.update_bookmarks, event)
+            self.bookmarks.updateBookmark(event)
+            isBookmarked = self.bookmarks.isBookmarked(event)
         } label: {
             let imageName = isBookmarked ? "bookmark.fill" : "bookmark"
             let removeBookmarkString = NSLocalizedString("Remove Bookmark", comment: "Context menu option for removing a note bookmark.")
             let addBookmarkString = NSLocalizedString("Add Bookmark", comment: "Context menu option for adding a note bookmark.")
             Label(isBookmarked ? removeBookmarkString : addBookmarkString, systemImage: imageName)
-        }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                isBookmarked = BookmarksManager(pubkey: keypair.pubkey).isBookmarked(event_to_json(ev: event))
-            }
         }
 
         Button {

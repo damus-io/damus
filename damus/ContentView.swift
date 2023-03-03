@@ -616,7 +616,8 @@ struct ContentView: View {
                                       relay_filters: relay_filters,
                                       relay_metadata: metadatas,
                                       drafts: Drafts(),
-                                      events: EventCache()
+                                      events: EventCache(),
+                                      bookmarks: BookmarksManager(pubkey: pubkey)
         )
         home.damus_state = self.damus_state!
         
