@@ -210,11 +210,11 @@ struct ImageCarousel: View {
                                 Text(url.absoluteString)
                             }
                             .id(url.absoluteString)
-                            .contextMenu {
-                                Button(NSLocalizedString("Copy Image", comment: "Context menu option to copy an image to clipboard.")) {
-                                    UIPasteboard.general.string = url.absoluteString
-                                }
-                            }
+//                            .contextMenu {
+//                                Button(NSLocalizedString("Copy Image", comment: "Context menu option to copy an image to clipboard.")) {
+//                                    UIPasteboard.general.string = url.absoluteString
+//                                }
+//                            }
                     }
             }
         }
