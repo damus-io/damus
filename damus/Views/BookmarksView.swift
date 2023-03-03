@@ -12,15 +12,20 @@ struct BookmarksView: View {
     private let noneFilter: (NostrEvent) -> Bool = { _ in true }
     private let bookmarksTitle = NSLocalizedString("Bookmarks", comment: "Title of bookmarks view")
     
-    @State private var bookmarkEvents: [NostrEvent] = []
+    @ObservedObject var manager: BookmarksManager
 
     init(state: DamusState) {
         self.state = state
+        self._manager = ObservedObject(initialValue: state.bookmarks)
+    }
+    
+    var bookmarks: [NostrEvent] {
+        manager.bookmarks
     }
         
     var body: some View {
         Group {
-            if bookmarkEvents.isEmpty {
+            if bookmarks.isEmpty {
                 VStack {
                     Image(systemName: "bookmark")
                         .resizable()
@@ -28,12 +33,9 @@ struct BookmarksView: View {
                         .frame(width: 32.0, height: 32.0)
                     Text(NSLocalizedString("You have no bookmarks yet, add them in the context menu", comment: "Text indicating that there are no bookmarks to be viewed"))
                 }
-                .task {
-                    updateBookmarks()
-                }
             } else {
                 ScrollView {
-                    InnerTimelineView(events: EventHolder(events: bookmarkEvents, incoming: []), damus: state, show_friend_icon: true, filter: noneFilter)
+                    InnerTimelineView(events: EventHolder(events: bookmarks, incoming: []), damus: state, show_friend_icon: true, filter: noneFilter)
 
                 }
             }
@@ -41,21 +43,11 @@ struct BookmarksView: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(bookmarksTitle)
         .toolbar {
-            if !bookmarkEvents.isEmpty {
+            if !bookmarks.isEmpty {
                 Button(NSLocalizedString("Clear All", comment: "Button for clearing bookmarks data.")) {
-                    BookmarksManager(pubkey: state.pubkey).clearAll()
-                    bookmarkEvents = []
-                }                
+                    manager.clearAll()
+                }
             }
-        }
-        .onReceive(handle_notify(.update_bookmarks)) { _ in
-            updateBookmarks()
-        }
-    }
-    
-    private func updateBookmarks() {
-        bookmarkEvents = BookmarksManager(pubkey: state.pubkey).bookmarks.compactMap { bookmark_json in
-            event_from_json(dat: bookmark_json)
         }
     }
 }

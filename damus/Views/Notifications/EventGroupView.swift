@@ -14,6 +14,19 @@ enum EventGroupType {
     case zap(ZapGroup)
     case profile_zap(ZapGroup)
     
+    var zap_group: ZapGroup? {
+        switch self {
+        case .profile_zap(let grp):
+            return grp
+        case .zap(let grp):
+            return grp
+        case .reaction:
+            return nil
+        case .repost:
+            return nil
+        }
+    }
+    
     var events: [NostrEvent] {
         switch self {
         case .repost(let grp):
@@ -46,10 +59,28 @@ func determine_reacting_to(our_pubkey: String, ev: NostrEvent?) -> ReactingTo {
     return .tagged_in
 }
 
-func event_author_name(profiles: Profiles, _ ev: NostrEvent) -> String {
-    let alice_pk = ev.pubkey
-    let alice_prof = profiles.lookup(id: alice_pk)
-    return Profile.displayName(profile: alice_prof, pubkey: alice_pk)
+func event_author_name(profiles: Profiles, pubkey: String) -> String {
+    let alice_prof = profiles.lookup(id: pubkey)
+    return Profile.displayName(profile: alice_prof, pubkey: pubkey)
+}
+
+func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType) -> String {
+    if let zapgrp = group.zap_group {
+        let zap = zapgrp.zaps[ind]
+        
+        if let privzap = zap.private_request {
+            return event_author_name(profiles: profiles, pubkey: privzap.pubkey)
+        }
+        
+        if zap.is_anon {
+            return "Anonymous"
+        }
+        
+        return event_author_name(profiles: profiles, pubkey: zap.request.ev.pubkey)
+    } else {
+        let ev = group.events[ind]
+        return event_author_name(profiles: profiles, pubkey: ev.pubkey)
+    }
 }
 
 /**
@@ -99,18 +130,16 @@ func reacting_to_text(profiles: Profiles, our_pubkey: String, group: EventGroupT
     case 0:
         return NSLocalizedString("??", comment: "")
     case 1:
-        let ev = group.events.first!
-        let profile = profiles.lookup(id: ev.pubkey)
-        let display_name = Profile.displayName(profile: profile, pubkey: ev.pubkey)
+        let display_name = event_group_author_name(profiles: profiles, ind: 0, group: group)
 
         return String(format: bundle.localizedString(forKey: localization_key, value: bundleForLocale(locale: Locale(identifier: "en-US")).localizedString(forKey: localization_key, value: nil, table: nil), table: nil), locale: locale, display_name)
     case 2:
-        let alice_name = event_author_name(profiles: profiles, group.events[0])
-        let bob_name = event_author_name(profiles: profiles, group.events[1])
+        let alice_name = event_group_author_name(profiles: profiles, ind: 0, group: group)
+        let bob_name = event_group_author_name(profiles: profiles, ind: 1, group: group)
 
         return String(format: bundle.localizedString(forKey: localization_key, value: bundleForLocale(locale: Locale(identifier: "en-US")).localizedString(forKey: localization_key, value: nil, table: nil), table: nil), locale: locale, alice_name, bob_name)
     default:
-        let alice_name = event_author_name(profiles: profiles, group.events.first!)
+        let alice_name = event_group_author_name(profiles: profiles, ind: 0, group: group)
         let count = group.events.count - 1
 
         return String(format: bundle.localizedString(forKey: localization_key, value: bundleForLocale(locale: Locale(identifier: "en-US")).localizedString(forKey: localization_key, value: nil, table: nil), table: nil), locale: locale, count, alice_name)

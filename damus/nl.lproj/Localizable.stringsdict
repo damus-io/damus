@@ -34,6 +34,54 @@
 			<string>Volgers</string>
 		</dict>
 	</dict>
+	<key>reacted_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ en %1$d ander hebben gereageerd op een bericht waarin je getagd bent</string>
+			<key>other</key>
+			<string>%2$@ en %1$d anderen hebben gereageerd op een bericht waarin je getagd bent</string>
+		</dict>
+	</dict>
+	<key>reacted_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ en %1$d ander hebben gereageerd op je bericht</string>
+			<key>other</key>
+			<string>%2$@ en %1$d anderen hebben gereageerd op je bericht</string>
+		</dict>
+	</dict>
+	<key>reacted_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ en %1$d ander hebben gereageerd op je bericht</string>
+			<key>other</key>
+			<string>%2$@ en %1$d anderen hebben gereageerd op je profiel</string>
+		</dict>
+	</dict>
 	<key>reactions_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -66,22 +114,6 @@
 			<string>Relays</string>
 		</dict>
 	</dict>
-	<key>replying_to_one_and_others</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@OTHERS@</string>
-		<key>OTHERS</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>Antwoord aan %2$@ en %1$d andere gebruiker</string>
-			<key>other</key>
-			<string>Antwoord aan %2$@ en %1$d andere gebruikers</string>
-		</dict>
-	</dict>
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -96,6 +128,54 @@
 			<string>Antwoord aan %2$@, %3$@ en %1$d andere gebruiker</string>
 			<key>other</key>
 			<string>Antwoord aan %2$@, %3$@ en %1$d andere gebruikers</string>
+		</dict>
+	</dict>
+	<key>reposted_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ en %1$d ander hebben een bericht waarin je getagd bent herplaatst</string>
+			<key>other</key>
+			<string>%2$@ en %1$d anderen hebben een bericht waarin je getagd bent herplaatst</string>
+		</dict>
+	</dict>
+	<key>reposted_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ en %1$d ander hebben je bericht herplaatst</string>
+			<key>other</key>
+			<string>%2$@ en %1$d anderen hebben je bericht herplaatst</string>
+		</dict>
+	</dict>
+	<key>reposted_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ en %1$d ander hebben je profiel herplaatst</string>
+			<key>other</key>
+			<string>%2$@ en %1$d anderen hebben je profiel herplaatst</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -128,6 +208,54 @@
 			<string>%2$@ sat</string>
 			<key>other</key>
 			<string>%2$@ sats</string>
+		</dict>
+	</dict>
+	<key>zapped_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ en %1$d ander hebben een bericht waarin je getagd bent gezapt</string>
+			<key>other</key>
+			<string>%2$@ en %1$d anderen hebben een bericht waarin je getagd bent gezapt</string>
+		</dict>
+	</dict>
+	<key>zapped_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ en %1$d ander hebben je bericht gezapt</string>
+			<key>other</key>
+			<string>%2$@ en %1$d anderen hebben je bericht gezapt</string>
+		</dict>
+	</dict>
+	<key>zapped_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ en %1$d ander hebben je profiel gezapt</string>
+			<key>other</key>
+			<string>%2$@ en %1$d anderen hebben je profiel gezapt</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>

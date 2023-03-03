@@ -21,7 +21,13 @@ class ZapGroup {
     }
     
     func zap_requests() -> [NostrEvent] {
-        zaps.map { z in z.request.ev }
+        zaps.map { z in
+            if let priv = z.private_request {
+                return priv
+            } else {
+                return z.request.ev
+            }
+        }
     }
     
     init(zaps: [Zap]) {

@@ -33,7 +33,7 @@ struct SelectedEventView: View {
                     
                     Spacer()
                     
-                    EventMenuContext(event: event, keypair: damus.keypair, target_pubkey: event.pubkey)
+                    EventMenuContext(event: event, keypair: damus.keypair, target_pubkey: event.pubkey, bookmarks: damus.bookmarks)
                         .padding([.bottom], 4)
 
                 }
@@ -71,6 +71,7 @@ struct SelectedEventView: View {
                 self.bar.update(damus: self.damus, evid: target)
             }
             .padding([.leading], 2)
+            //.event_context_menu(event, keypair: damus.keypair, target_pubkey: event.pubkey, bookmarks: damus.bookmarks)
         }
     }
 }

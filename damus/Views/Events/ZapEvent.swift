@@ -13,21 +13,44 @@ struct ZapEvent: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("⚡️ \(format_msats(zap.invoice.amount))", comment: "Text indicating the zap amount. i.e. number of satoshis that were tipped to a user")
-                .font(.headline)
-                .padding([.top], 2)
+            HStack(alignment: .center) {
+                Text("⚡️ \(format_msats(zap.invoice.amount))", comment: "Text indicating the zap amount. i.e. number of satoshis that were tipped to a user")
+                    .font(.headline)
+                    .padding([.top], 2)
+                
+                if zap.private_request != nil {
+                    Image(systemName: "lock.fill")
+                        .foregroundColor(Color("DamusGreen"))
+                        .help("Only you can see this message and who sent it.")
+                }
+            }
 
-            TextEvent(damus: damus, event: zap.request.ev, pubkey: zap.request.ev.pubkey, has_action_bar: false, booster_pubkey: nil)
-                .padding([.top], 1)
+            if let priv = zap.private_request {
+                
+                TextEvent(damus: damus, event: priv, pubkey: priv.pubkey, options: [.no_action_bar, .no_replying_to])
+                    .padding([.top], 1)
+            } else {
+                TextEvent(damus: damus, event: zap.request.ev, pubkey: zap.request.ev.pubkey, options: [.no_action_bar, .no_replying_to])
+                    .padding([.top], 1)
+            }
         }
     }
 }
 
-/*
+
+let test_zap_invoice = ZapInvoice(description: .description("description"), amount: 10000, string: "lnbc1", expiry: 1000000, payment_hash: Data(), created_at: 1000000)
+let test_zap_request_ev = NostrEvent(content: "hi", pubkey: "pk", kind: 9734)
+let test_zap_request = ZapRequest(ev: test_zap_request_ev)
+let test_zap = Zap(event: test_event, invoice: test_zap_invoice, zapper: "zapper", target: .profile("pk"), request: test_zap_request, is_anon: false, private_request: nil)
+
+let test_private_zap = Zap(event: test_event, invoice: test_zap_invoice, zapper: "zapper", target: .profile("pk"), request: test_zap_request, is_anon: false, private_request: test_event)
+
 struct ZapEvent_Previews: PreviewProvider {
     static var previews: some View {
-        ZapEvent()
+        VStack {
+            ZapEvent(damus: test_damus_state(), zap: test_zap)
+            
+            ZapEvent(damus: test_damus_state(), zap: test_private_zap)
+        }
     }
 }
-
-*/

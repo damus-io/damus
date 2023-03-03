@@ -7,12 +7,22 @@
 
 import SwiftUI
 
+struct EventViewOptions: OptionSet {
+    let rawValue: UInt8
+    static let no_action_bar = EventViewOptions(rawValue: 1 << 0)
+    static let no_replying_to = EventViewOptions(rawValue: 1 << 1)
+    static let no_images = EventViewOptions(rawValue: 1 << 2)
+}
+
 struct TextEvent: View {
     let damus: DamusState
     let event: NostrEvent
     let pubkey: String
-    let has_action_bar: Bool
-    let booster_pubkey: String?
+    let options: EventViewOptions
+    
+    var has_action_bar: Bool {
+        !options.contains(.no_action_bar)
+    }
     
     var body: some View {
         HStack(alignment: .top) {
@@ -35,7 +45,7 @@ struct TextEvent: View {
                     
                     Spacer()
                     
-                    EventMenuContext(event: event, keypair: damus.keypair, target_pubkey: event.pubkey)
+                    EventMenuContext(event: event, keypair: damus.keypair, target_pubkey: event.pubkey, bookmarks: damus.bookmarks)
                         .padding([.bottom], 4)
 
                 }
@@ -62,12 +72,13 @@ struct TextEvent: View {
         .id(event.id)
         .frame(maxWidth: .infinity, minHeight: PFP_SIZE)
         .padding([.bottom], 2)
+        //.event_context_menu(event, keypair: damus.keypair, target_pubkey: pubkey, bookmarks: damus.bookmarks)
     }
 }
 
 struct TextEvent_Previews: PreviewProvider {
     static var previews: some View {
-        TextEvent(damus: test_damus_state(), event: test_event, pubkey: "pk", has_action_bar: true, booster_pubkey: nil)
+        TextEvent(damus: test_damus_state(), event: test_event, pubkey: "pk", options: [])
     }
 }
 

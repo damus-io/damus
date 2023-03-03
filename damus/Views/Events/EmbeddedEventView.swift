@@ -23,7 +23,7 @@ struct EmbeddedEventView: View {
                 
                 Spacer()
                 
-                EventMenuContext(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey)
+                EventMenuContext(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks)
                     .padding([.bottom], 4)
 
             }
@@ -32,6 +32,7 @@ struct EmbeddedEventView: View {
             
             EventBody(damus_state: damus_state, event: event, size: .small)
         }
+        //.event_context_menu(event, keypair: damus_state.keypair, target_pubkey: pubkey, bookmarks: damus_state.bookmarks)
     }
 }
 

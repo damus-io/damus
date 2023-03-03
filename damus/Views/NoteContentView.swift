@@ -28,11 +28,12 @@ struct NoteContentView: View {
     let show_images: Bool
     let size: EventViewKind
     let preview_height: CGFloat?
+    let truncate: Bool
 
     @State var artifacts: NoteArtifacts
     @State var preview: LinkViewRepresentable?
     
-    init(damus_state: DamusState, event: NostrEvent, show_images: Bool, size: EventViewKind, artifacts: NoteArtifacts) {
+    init(damus_state: DamusState, event: NostrEvent, show_images: Bool, size: EventViewKind, artifacts: NoteArtifacts, truncate: Bool) {
         self.damus_state = damus_state
         self.event = event
         self.show_images = show_images
@@ -41,6 +42,7 @@ struct NoteContentView: View {
         self.preview_height = lookup_cached_preview_size(previews: damus_state.previews, evid: event.id)
         self._preview = State(initialValue: load_cached_preview(previews: damus_state.previews, evid: event.id))
         self._artifacts = State(initialValue: render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey))
+        self.truncate = truncate
     }
     
     func MainContent() -> some View {
@@ -50,9 +52,8 @@ struct NoteContentView: View {
                 SelectableText(attributedString: artifacts.content)
                 TranslateView(damus_state: damus_state, event: event)
             } else {
-                Text(artifacts.content)
+                TruncatedText(text: artifacts.content, maxChars: (truncate ? 280 : nil))
                     .font(eventviewsize_to_font(size))
-                    .fixedSize(horizontal: false, vertical: true)
             }
 
             if show_images && artifacts.images.count > 0 {
@@ -65,6 +66,7 @@ struct NoteContentView: View {
                 }
                 .cornerRadius(10)
             }
+            
             if artifacts.invoices.count > 0 {
                 InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: artifacts.invoices)
             }
@@ -140,14 +142,14 @@ struct NoteContentView: View {
 func hashtag_str(_ htag: String) -> AttributedString {
      var attributedString = AttributedString(stringLiteral: "#\(htag)")
      attributedString.link = URL(string: "nostr:t:\(htag)")
-     attributedString.foregroundColor = .purple
+     attributedString.foregroundColor = Color("DamusPurple")
      return attributedString
  }
 
 func url_str(_ url: URL) -> AttributedString {
     var attributedString = AttributedString(stringLiteral: url.absoluteString)
     attributedString.link = url
-    attributedString.foregroundColor = .purple
+    attributedString.foregroundColor = Color("DamusPurple")
     return attributedString
  }
 
@@ -159,13 +161,13 @@ func mention_str(_ m: Mention, profiles: Profiles) -> AttributedString {
         let disp = Profile.displayName(profile: profile, pubkey: pk)
         var attributedString = AttributedString(stringLiteral: "@\(disp)")
         attributedString.link = URL(string: "nostr:\(encode_pubkey_uri(m.ref))")
-        attributedString.foregroundColor = .purple
+        attributedString.foregroundColor = Color("DamusPurple")
         return attributedString
     case .event:
         let bevid = bech32_note_id(m.ref.ref_id) ?? m.ref.ref_id
         var attributedString = AttributedString(stringLiteral: "@\(abbrev_pubkey(bevid))")
         attributedString.link = URL(string: "nostr:\(encode_event_id_uri(m.ref))")
-        attributedString.foregroundColor = .purple
+        attributedString.foregroundColor = Color("DamusPurple")
         return attributedString
     }
 }
@@ -175,7 +177,7 @@ struct NoteContentView_Previews: PreviewProvider {
         let state = test_damus_state()
         let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
         let artifacts = NoteArtifacts(content: AttributedString(stringLiteral: content), images: [], invoices: [], links: [])
-        NoteContentView(damus_state: state, event: NostrEvent(content: content, pubkey: "pk"), show_images: true, size: .normal, artifacts: artifacts)
+        NoteContentView(damus_state: state, event: NostrEvent(content: content, pubkey: "pk"), show_images: true, size: .normal, artifacts: artifacts, truncate: false)
     }
 }
 
@@ -260,4 +262,34 @@ func load_cached_preview(previews: PreviewCache, evid: String) -> LinkViewRepres
     }
     
     return LinkViewRepresentable(meta: .linkmeta(meta))
+}
+
+struct TruncatedText: View {
+    
+    let text: AttributedString
+    let maxChars: Int?
+    
+    var body: some View {
+        let truncatedAttributedString: AttributedString? = getTruncatedString()
+        
+        Text(truncatedAttributedString ?? text)
+            .fixedSize(horizontal: false, vertical: true)
+        
+        if truncatedAttributedString != nil {
+            Spacer()
+            Button(NSLocalizedString("Show more", comment: "Button to show entire note.")) { }
+                .allowsHitTesting(false)
+        }
+    }
+    
+    func getTruncatedString() -> AttributedString? {
+        guard let maxChars = maxChars else { return nil }
+        let nsAttributedString = NSAttributedString(text)
+        if nsAttributedString.length < maxChars { return nil }
+        
+        let range = NSRange(location: 0, length: maxChars)
+        let truncatedAttributedString = nsAttributedString.attributedSubstring(from: range)
+        
+        return AttributedString(truncatedAttributedString) + "..."
+    }
 }
