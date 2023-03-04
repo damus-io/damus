@@ -359,7 +359,7 @@
 			<key>many</key>
 			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا منشورك</string>
 			<key>other</key>
-			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا منشورك</string>
+			<string>%2$@ و %1$d مستخدم آخر ومّضوا منشورك</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
