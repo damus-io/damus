@@ -49,6 +49,7 @@ struct SelectableText: View {
         view.isEditable = false
         view.dataDetectorTypes = .all
         view.isSelectable = true
+        view.backgroundColor = .clear
         view.textContainer.lineFragmentPadding = 0
         view.textContainerInset = .zero
         return view
