@@ -83,11 +83,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>'%@' is an invalid NIP-05 identifier. It should look like an email.</target>
         <note>Description of why the nip05 identifier is invalid.</note>
       </trans-unit>
-      <trans-unit id="??" xml:space="preserve">
-        <source>??</source>
-        <target>??</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="API Key (optional)" xml:space="preserve">
         <source>API Key (optional)</source>
         <target>API Key (optional)</target>
@@ -483,10 +478,20 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Enter your account key to login:</target>
         <note>Prompt for user to enter an account key to login.</note>
       </trans-unit>
+      <trans-unit id="Error fetching lightning invoice" xml:space="preserve">
+        <source>Error fetching lightning invoice</source>
+        <target>Error fetching lightning invoice</target>
+        <note>Message to display when there was an error fetching a lightning invoice while attempting to zap.</note>
+      </trans-unit>
       <trans-unit id="Error: %@" xml:space="preserve">
         <source>Error: %@</source>
         <target>Error: %@</target>
         <note>Error message indicating why saving keys failed.</note>
+      </trans-unit>
+      <trans-unit id="Everyone on can see that you zapped" xml:space="preserve">
+        <source>Everyone on can see that you zapped</source>
+        <target>Everyone on can see that you zapped</target>
+        <note>Description of public zap type where the zap is sent publicly and identifies the user who sent it.</note>
       </trans-unit>
       <trans-unit id="Filter" xml:space="preserve">
         <source>Filter</source>
@@ -573,6 +578,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Invalid key</source>
         <target>Invalid key</target>
         <note>Error message indicating that an invalid account key was entered for login.</note>
+      </trans-unit>
+      <trans-unit id="Invalid lightning address" xml:space="preserve">
+        <source>Invalid lightning address</source>
+        <target>Invalid lightning address</target>
+        <note>Message to display when there was an error attempting to zap due to an invalid lightning address.</note>
       </trans-unit>
       <trans-unit id="It's spam" xml:space="preserve">
         <source>It's spam</source>
@@ -667,10 +677,15 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>No block list found, create a new one? This will overwrite any previous block lists.</target>
         <note>Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists.</note>
       </trans-unit>
-      <trans-unit id="Non-Zap" xml:space="preserve">
-        <source>Non-Zap</source>
-        <target>Non-Zap</target>
-        <note>Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.</note>
+      <trans-unit id="No one can see that you zapped" xml:space="preserve">
+        <source>No one can see that you zapped</source>
+        <target>No one can see that you zapped</target>
+        <note>Description of anonymous zap type where the zap is sent anonymously and does not identify the user who sent it.</note>
+      </trans-unit>
+      <trans-unit id="No zaps are sent, only a lightning payment." xml:space="preserve">
+        <source>No zaps are sent, only a lightning payment.</source>
+        <target>No zaps are sent, only a lightning payment.</target>
+        <note>Description of non-zap type where sats are sent to the user's wallet as a regular Lightning payment, not as a zap.</note>
       </trans-unit>
       <trans-unit id="None" xml:space="preserve">
         <source>None</source>
@@ -696,6 +711,16 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Nudity or explicit content</source>
         <target>Nudity or explicit content</target>
         <note>Button for user to report that the account or content has nudity or explicit content.</note>
+      </trans-unit>
+      <trans-unit id="Only '(name)' can see that you zapped them" xml:space="preserve">
+        <source>Only '(name)' can see that you zapped them</source>
+        <target>Only '(name)' can see that you zapped them</target>
+        <note>Description of private zap type where the zap is sent privately and does not identify the user to the public.</note>
+      </trans-unit>
+      <trans-unit id="Only you can see this message and who sent it." xml:space="preserve">
+        <source>Only you can see this message and who sent it.</source>
+        <target>Only you can see this message and who sent it.</target>
+        <note>Help text on green lock icon that explains that only the current user can see the message of a zap event and who sent the zap.</note>
       </trans-unit>
       <trans-unit id="Paid Relay" xml:space="preserve">
         <source>Paid Relay</source>
@@ -757,7 +782,8 @@ Label for filter for seeing your posts and replies (instead of only your posts).
       <trans-unit id="Private" xml:space="preserve">
         <source>Private</source>
         <target>Private</target>
-        <note>Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading.</note>
+        <note>Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading.
+Picker option to indicate that a zap should be sent privately and not identify the user to the public.</note>
       </trans-unit>
       <trans-unit id="Private Key" xml:space="preserve">
         <source>Private Key</source>
@@ -1001,6 +1027,11 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <target>Show API Key</target>
         <note>Button to show the DeepL translation API key.
    Button to show the LibreTranslate server API key.</note>
+      </trans-unit>
+      <trans-unit id="Show more" xml:space="preserve">
+        <source>Show more</source>
+        <target>Show more</target>
+        <note>Button to show entire note.</note>
       </trans-unit>
       <trans-unit id="Show wallet selector" xml:space="preserve">
         <source>Show wallet selector</source>

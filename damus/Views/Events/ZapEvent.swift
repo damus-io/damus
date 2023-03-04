@@ -21,7 +21,7 @@ struct ZapEvent: View {
                 if zap.private_request != nil {
                     Image(systemName: "lock.fill")
                         .foregroundColor(Color("DamusGreen"))
-                        .help("Only you can see this message and who sent it.")
+                        .help(NSLocalizedString("Only you can see this message and who sent it.", comment: "Help text on green lock icon that explains that only the current user can see the message of a zap event and who sent the zap."))
                 }
             }
 

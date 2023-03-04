@@ -211,11 +211,11 @@
 			<key>two</key>
 			<string>%2$@ و %1$d مستخدمان آخران نشروا منشورا تمت الإشارة لك فيه</string>
 			<key>few</key>
-			<string>%2$@ و %1$d مستخدم آخر نشر منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورا تمت الإشارة لك فيه</string>
 			<key>many</key>
-			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d مستخدم آخر نشروا منشورا تمت الإشارة لك فيه</string>
 			<key>other</key>
-			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d مستخدم آخر نشروا منشورا تمت الإشارة لك فيه</string>
 		</dict>
 	</dict>
 	<key>reposted_your_post_3</key>
@@ -235,11 +235,11 @@
 			<key>two</key>
 			<string>%2$@ و %1$d مستخدمان آخران نشروا منشورك</string>
 			<key>few</key>
-			<string>%2$@ و %1$d مستخدم آخر نشروا منشورك</string>
+			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورك</string>
 			<key>many</key>
-			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورك</string>
+			<string>%2$@ و %1$d مستخدم آخر نشروا منشورك</string>
 			<key>other</key>
-			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورك</string>
+			<string>%2$@ و %1$d مستخدم آخر نشروا منشورك</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -259,11 +259,11 @@
 			<key>two</key>
 			<string>%2$@ و %1$d مستخدمان آخران نشروا حسابك</string>
 			<key>few</key>
-			<string>%2$@ و %1$d مستخدم آخر نشر حسابك</string>
+			<string>%2$@ و %1$d مستخدمون آخرون نشروا حسابك</string>
 			<key>many</key>
-			<string>%2$@ و %1$d مستخدمون آخرون نشروا حسابك</string>
+			<string>%2$@ و %1$d مستخدم آخر نشروا حسابك</string>
 			<key>other</key>
-			<string>%2$@ و %1$d مستخدمون آخرون نشروا حسابك</string>
+			<string>%2$@ و %1$d مستخدم آخر نشروا حسابك</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -331,11 +331,11 @@
 			<key>two</key>
 			<string>%2$@ و %1$d مستخدمان آخران ومّضوا منشورا تمت الإشارة لك فيه</string>
 			<key>few</key>
-			<string>%2$@ و %1$d مستخدم آخر ومّض منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d مستخدم آخر ومّضوا منشورا تمت الإشارة لك فيه</string>
 			<key>many</key>
-			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d مستخدم آخر ومّضوا منشورا تمت الإشارة لك فيه</string>
 			<key>other</key>
-			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d مستخدم آخر ومّضوا منشورا تمت الإشارة لك فيه</string>
 		</dict>
 	</dict>
 	<key>zapped_your_post_3</key>
@@ -355,11 +355,11 @@
 			<key>two</key>
 			<string>%2$@ و %1$d مستخدمان آخران ومّضوا منشورك</string>
 			<key>few</key>
-			<string>%2$@ و %1$d مستخدم آخر ومّض منشورك</string>
+			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا منشورك</string>
 			<key>many</key>
-			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا منشورك</string>
+			<string>%2$@ و %1$d مستخدم آخر ومّضوا منشورك</string>
 			<key>other</key>
-			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا منشورك</string>
+			<string>%2$@ و %1$d مستخدم آخر ومّضوا منشورك</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -379,11 +379,11 @@
 			<key>two</key>
 			<string>%2$@ و %1$d مستخدمان آخران ومّضوا حسابك</string>
 			<key>few</key>
-			<string>%2$@ و %1$d مستخدم آخر ومّض حسابك</string>
+			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا حسابك</string>
 			<key>many</key>
-			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا حسابك</string>
+			<string>%2$@ و %1$d مستخدم آخر ومّضوا حسابك</string>
 			<key>other</key>
-			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا حسابك</string>
+			<string>%2$@ و %1$d مستخدم آخر ومّضوا حسابك</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>

@@ -84,17 +84,16 @@ struct CustomizeZapView: View {
     var zap_type_desc: String {
         switch zap_type {
         case .pub:
-            return "Everyone on can see that you zapped"
+            return NSLocalizedString("Everyone on can see that you zapped", comment: "Description of public zap type where the zap is sent publicly and identifies the user who sent it.")
         case .anon:
-            return "Noone can see that you zapped"
+            return NSLocalizedString("No one can see that you zapped", comment: "Description of anonymous zap type where the zap is sent anonymously and does not identify the user who sent it.")
         case .priv:
             let pk = event.pubkey
             let prof = state.profiles.lookup(id: pk)
             let name = Profile.displayName(profile: prof, pubkey: pk)
-            return String(format: "Only '%@' can see that you zapped them",
-                name)
+            return NSLocalizedString("Only '\(name)' can see that you zapped them", comment: "Description of private zap type where the zap is sent privately and does not identify the user to the public.")
         case .non_zap:
-            return "No zaps are sent, only a lightning payment."
+            return NSLocalizedString("No zaps are sent, only a lightning payment.", comment: "Description of non-zap type where sats are sent to the user's wallet as a regular Lightning payment, not as a zap.")
         }
     }
     
@@ -102,10 +101,10 @@ struct CustomizeZapView: View {
         Picker(NSLocalizedString("Zap Type", comment: "Header text to indicate that the picker below it is to choose the type of zap to send."), selection: $zap_type) {
             Text("Public", comment: "Picker option to indicate that a zap should be sent publicly and identify the user as who sent it.").tag(ZapType.pub)
             Text("Private", comment: "Picker option to indicate that a zap should be sent privately and not identify the user to the public.").tag(ZapType.priv)
-            Text("Anon", comment: "Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.").tag(ZapType.anon)
+            Text("Anonymous", comment: "Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.").tag(ZapType.anon)
             Text("None", comment: "Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.").tag(ZapType.non_zap)
         }
-        .pickerStyle(.segmented)
+        .pickerStyle(.menu)
     }
     
     var AmountPicker: some View {
@@ -139,9 +138,9 @@ struct CustomizeZapView: View {
         case .failed(let err):
             switch err {
             case .fetching_invoice:
-                self.error = "Error fetching lightning invoice"
+                self.error = NSLocalizedString("Error fetching lightning invoice", comment: "Message to display when there was an error fetching a lightning invoice while attempting to zap.")
             case .bad_lnurl:
-                self.error = "Invalid lightning address"
+                self.error = NSLocalizedString("Invalid lightning address", comment: "Message to display when there was an error attempting to zap due to an invalid lightning address.")
             }
             break
         case .got_zap_invoice(let inv):
