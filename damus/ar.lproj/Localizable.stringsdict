@@ -383,7 +383,7 @@
 			<key>many</key>
 			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا حسابك</string>
 			<key>other</key>
-			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا حسابك</string>
+			<string>%2$@ و %1$d مستخدم آخر ومّضوا حسابك</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
