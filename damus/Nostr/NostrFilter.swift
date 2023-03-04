@@ -43,7 +43,11 @@ struct NostrFilter: Codable, Equatable {
     public static var filter_text: NostrFilter {
         return filter_kinds([1])
     }
-
+    
+    public static func filter_ids(_ ids: [String]) -> NostrFilter {
+        return NostrFilter(ids: ids, kinds: nil, referenced_ids: nil, pubkeys: nil, since: nil, until: nil, authors: nil, hashtag: nil)
+    }
+    
     public static var filter_profiles: NostrFilter {
         return filter_kinds([0])
     }

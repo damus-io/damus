@@ -207,7 +207,9 @@ struct EventGroupView: View {
                 GroupDescription
                 
                 if let event {
-                    NavigationLink(destination: BuildThreadV2View(damus: state, event_id: event.id)) {
+                    let thread = ThreadModel(event: event, damus_state: state)
+                    let dest = ThreadView(state: state, thread: thread)
+                    NavigationLink(destination: dest) {
                         Text(event.content)
                             .padding([.top], 1)
                             .foregroundColor(.gray)

@@ -8,12 +8,25 @@
 import Foundation
 
 class ReplyMap {
-    var replies: [String: String] = [:]
+    var replies: [String: Set<String>] = [:]
     
-    func lookup(_ id: String) -> String? {
+    func lookup(_ id: String) -> Set<String>? {
         return replies[id]
     }
-    func add(id: String, reply_id: String) {
-        replies[id] = reply_id
+    
+    private func ensure_set(id: String) {
+        if replies[id] == nil {
+            replies[id] = Set()
+        }
+    }
+    
+    @discardableResult
+    func add(id: String, reply_id: String) -> Bool {
+        ensure_set(id: id)
+        if (replies[id]!).contains(reply_id) {
+            return false
+        }
+        replies[id]!.insert(reply_id)
+        return true
     }
 }

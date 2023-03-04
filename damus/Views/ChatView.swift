@@ -35,14 +35,14 @@ struct ChatView: View {
         }
         
         if let rep = thread.replies.lookup(event.id) {
-            return rep == prev.id
+            return rep.contains(prev.id)
         }
         
         return false
     }
     
     var is_active: Bool {
-        return thread.initial_event.id == event.id
+        return thread.event.id == event.id
     }
     
     func prev_reply_is_same() -> String? {
@@ -161,7 +161,7 @@ func prev_reply_is_same(event: NostrEvent, prev_ev: NostrEvent?, replies: ReplyM
         if let prev_reply_id = replies.lookup(prev.id) {
             if let cur_reply_id = replies.lookup(event.id) {
                 if prev_reply_id != cur_reply_id {
-                    return cur_reply_id
+                    return cur_reply_id.first
                 }
             }
         }

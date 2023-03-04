@@ -51,7 +51,7 @@ struct NotificationItemView: View {
                 EventGroupView(state: state, event: ev, group: .reaction(evgrp))
             
             case .reply(let ev):
-                NavigationLink(destination: BuildThreadV2View(damus: state, event_id: ev.id)) {
+                NavigationLink(destination: ThreadView(state: state, thread: ThreadModel(event: ev, damus_state: state))) {
                     EventView(damus: state, event: ev)
                 }
                 .buttonStyle(.plain)
