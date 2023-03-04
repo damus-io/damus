@@ -235,11 +235,11 @@
 			<key>two</key>
 			<string>%2$@ و %1$d مستخدمان آخران نشروا منشورك</string>
 			<key>few</key>
-			<string>%2$@ و %1$d مستخدم آخر نشروا منشورك</string>
+			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورك</string>
 			<key>many</key>
-			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورك</string>
+			<string>%2$@ و %1$d مستخدم آخر نشروا منشورك</string>
 			<key>other</key>
-			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورك</string>
+			<string>%2$@ و %1$d مستخدم آخر نشروا منشورك</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
