@@ -11,7 +11,7 @@ import XCTest
 final class TimeAgoTests: XCTestCase {
 
     func testTimeAgoSince() {
-        let locale = Locale(identifier: "en_US")
+        let locale = Locale(identifier: "en-US")
         let calendar = locale.calendar
 
         XCTAssertEqual(time_ago_since(Date.now, calendar), "now")

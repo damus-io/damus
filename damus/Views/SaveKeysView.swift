@@ -38,7 +38,7 @@ struct SaveKeysView: View {
                     .foregroundColor(.white)
                     .padding(.bottom, 10)
                 
-                Text("This is your account ID, you can give this to your friends so that they can follow you. Click to copy.", comment: "Label to describe that a public key is the user's account ID and what they can do with it.")
+                Text("This is your account ID, you can give this to your friends so that they can follow you. Tap to copy.", comment: "Label to describe that a public key is the user's account ID and what they can do with it.")
                     .foregroundColor(.white)
                     .padding(.bottom, 10)
                 

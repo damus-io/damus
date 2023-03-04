@@ -27,17 +27,6 @@ struct TimelineView: View {
         MainContent
     }
     
-    func handle_scroll(_ proxy: GeometryProxy) {
-        let offset = -proxy.frame(in: .named("scroll")).origin.y
-        guard offset >= 0 else {
-            return
-        }
-        let val = offset > 0
-        if self.events.should_queue != val {
-            self.events.should_queue = val
-        }
-    }
-    
     var realtime_bar_opacity: Double {
         colorScheme == .dark ? 0.2 : 0.1
     }
@@ -55,7 +44,7 @@ struct TimelineView: View {
                     .disabled(loading)
                     .background(GeometryReader { proxy -> Color in
                         DispatchQueue.main.async {
-                            handle_scroll(proxy)
+                            handle_scroll_queue(proxy, queue: self.events)
                         }
                         return Color.clear
                     })
@@ -82,3 +71,18 @@ struct TimelineView_Previews: PreviewProvider {
 }
 
 
+protocol ScrollQueue {
+    var should_queue: Bool { get }
+    func set_should_queue(_ val: Bool)
+}
+    
+func handle_scroll_queue(_ proxy: GeometryProxy, queue: ScrollQueue) {
+    let offset = -proxy.frame(in: .named("scroll")).origin.y
+    guard offset >= 0 else {
+        return
+    }
+    let val = offset > 0
+    if queue.should_queue != val {
+        queue.set_should_queue(val)
+    }
+}

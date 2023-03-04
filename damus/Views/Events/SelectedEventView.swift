@@ -61,7 +61,7 @@ struct SelectedEventView: View {
             }
             .padding([.leading], 2)
             .compositingGroup()
-            .event_context_menu(event, keypair: damus.keypair, target_pubkey: event.pubkey)
+            .event_context_menu(event, keypair: damus.keypair, target_pubkey: event.pubkey, bookmarks: damus.bookmarks)
         }
     }
 }

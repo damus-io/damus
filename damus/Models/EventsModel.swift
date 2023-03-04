@@ -65,7 +65,7 @@ class EventsModel: ObservableObject {
         case .notice(_):
             break
         case .eose(_):
-            load_profiles(profiles_subid: profiles_id, relay_id: relay_id, events: events, damus_state: state)
+            load_profiles(profiles_subid: profiles_id, relay_id: relay_id, load: .from_events(events), damus_state: state)
         }
     }
 }

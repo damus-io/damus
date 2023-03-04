@@ -100,10 +100,15 @@ struct SideMenuView: View {
                                     navLabel(title: NSLocalizedString("Relays", comment: "Sidebar menu label for Relays view."), systemImage: "network")
                                 }
                                 
+                                NavigationLink(destination: BookmarksView(state: damus_state)) {
+                                    navLabel(title: NSLocalizedString("Bookmarks", comment: "Sidebar menu label for Bookmarks view."), systemImage: "bookmark")
+                                }
+                                
                                 NavigationLink(destination: ConfigView(state: damus_state)) {
                                     navLabel(title: NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), systemImage: "gear")
                                 }
                             }
+                            .labelStyle(SideMenuLabelStyle())
                             .padding([.top, .bottom], verticalSpacing)
                         }
                     }
@@ -170,6 +175,17 @@ struct SideMenuView: View {
             .font(.title2)
             .foregroundColor(textColor())
             .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    struct SideMenuLabelStyle: LabelStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            HStack(alignment: .center, spacing: 8) {
+                configuration.icon
+                    .frame(width: 24, height: 24)
+                    .aspectRatio(contentMode: .fit)
+                configuration.title
+            }
+        }
     }
 }
 

@@ -166,7 +166,7 @@ struct ContentView: View {
                 Text("Universe 🛸", comment: "Toolbar label for the universal view where posts from all connected relay servers appear.")
                     .bold()
             case .none:
-                Text("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
+                Text(verbatim: "")
             }
         }
     }
@@ -192,7 +192,7 @@ struct ContentView: View {
             case .notifications:
                 VStack(spacing: 0) {
                     Divider()
-                    TimelineView(events: home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
+                    NotificationsView(state: damus, notifications: home.notifications)
                 }
             case .dms:
                 DirectMessagesView(damus_state: damus_state!)
@@ -615,7 +615,9 @@ struct ContentView: View {
                                       settings: UserSettingsStore(),
                                       relay_filters: relay_filters,
                                       relay_metadata: metadatas,
-                                      drafts: Drafts()
+                                      drafts: Drafts(),
+                                      events: EventCache(),
+                                      bookmarks: BookmarksManager(pubkey: pubkey)
         )
         home.damus_state = self.damus_state!
         

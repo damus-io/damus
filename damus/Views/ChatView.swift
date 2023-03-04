@@ -113,7 +113,8 @@ struct ChatView: View {
                                     event: event,
                                     show_images: show_images,
                                     size: .normal,
-                                    artifacts: .just_content(event.content))
+                                    artifacts: .just_content(event.content),
+                                    truncate: false)
 
                     if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
                         let bar = make_actionbar_model(ev: event.id, damus: damus_state)
