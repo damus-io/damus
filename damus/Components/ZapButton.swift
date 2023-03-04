@@ -71,20 +71,24 @@ struct ZapButton: View {
             Image(systemName: zap_img)
                 .foregroundColor(zap_color == nil ? Color.gray : zap_color!)
                 .font(.footnote.weight(.medium))
-                .onTapGesture {
+                .gesture(TapGesture(count: 2).onEnded {
                     if bar.zapped {
-                        //notify(.delete, bar.our_tip)
                     } else if !zapping {
                         self.showing_zap_customizer = true
-                        //send_zap(damus_state: damus_state, event: event, lnurl: lnurl, is_custom: false)
-                        //self.zapping = true
                     }
-                }
-                .onLongPressGesture(minimumDuration: 0, pressing: { is_charing in
-                    self.is_charging = is_charging
-                }, perform: {
-                    self.showing_zap_customizer = true
                 })
+                .gesture(TapGesture(count: 1).onEnded {
+                    if bar.zapped {
+                    } else if !zapping {
+                        send_zap(damus_state: damus_state, event: event, lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: ZapType.pub)
+                        self.zapping = true
+                    }
+                })
+//                .onLongPressGesture(minimumDuration: 0, pressing: { is_charing in
+//                    self.is_charging = is_charging
+//                }, perform: {
+//                    self.showing_zap_customizer = true
+//                })
                 .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
 
             if bar.zap_total > 0 {
