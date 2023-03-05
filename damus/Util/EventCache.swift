@@ -5,17 +5,23 @@
 //  Created by William Casarin on 2023-02-21.
 //
 
+import Combine
 import Foundation
+import UIKit
 
 class EventCache {
-    private var events: [String: NostrEvent]
-    private var replies: ReplyMap = ReplyMap()
+    private var events: [String: NostrEvent] = [:]
+    private var replies = ReplyMap()
+    private var cancellable: AnyCancellable?
     
     //private var thread_latest: [String: Int64]
     
     init() {
-        self.events = [:]
-        self.replies = ReplyMap()
+        cancellable = NotificationCenter.default.publisher(
+            for: UIApplication.didReceiveMemoryWarningNotification
+        ).sink { [weak self] _ in
+            self?.prune()
+        }
     }
     
     func parent_events(event: NostrEvent) -> [NostrEvent] {
@@ -79,4 +85,8 @@ class EventCache {
         events[ev.id] = ev
     }
     
+    private func prune() {
+        events = [:]
+        replies.replies = [:]
+    }
 }
