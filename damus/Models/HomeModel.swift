@@ -397,10 +397,9 @@ class HomeModel: ObservableObject {
 
     /// Send the initial filters, just our contact list mostly
     func send_initial_filters(relay_id: String) {
-        var filter = NostrFilter.filter_contacts
-        filter.authors = [self.damus_state.pubkey]
-        filter.limit = 1
-
+        var filter = NostrFilter(kinds: [.contacts],
+                                 limit: 1,
+                                 authors: [damus_state.pubkey])
         pool.send(.subscribe(.init(filters: [filter], sub_id: init_subid)), to: [relay_id])
     }
 
@@ -411,23 +410,19 @@ class HomeModel: ObservableObject {
         var friends = damus_state.contacts.get_friend_list()
         friends.append(damus_state.pubkey)
 
-        var contacts_filter = NostrFilter.filter_kinds([NostrKind.metadata.rawValue])
+        var contacts_filter = NostrFilter(kinds: [.metadata])
         contacts_filter.authors = friends
         
-        var our_contacts_filter = NostrFilter.filter_kinds([NostrKind.contacts.rawValue, NostrKind.metadata.rawValue])
+        var our_contacts_filter = NostrFilter(kinds: [.contacts, .metadata])
         our_contacts_filter.authors = [damus_state.pubkey]
         
-        var our_blocklist_filter = NostrFilter.filter_kinds([NostrKind.list.rawValue])
+        var our_blocklist_filter = NostrFilter(kinds: [.list])
         our_blocklist_filter.parameter = ["mute"]
         our_blocklist_filter.authors = [damus_state.pubkey]
         
-        var dms_filter = NostrFilter.filter_kinds([
-            NostrKind.dm.rawValue,
-        ])
+        var dms_filter = NostrFilter(kinds: [.dm])
 
-        var our_dms_filter = NostrFilter.filter_kinds([
-            NostrKind.dm.rawValue,
-        ])
+        var our_dms_filter = NostrFilter(kinds: [.dm])
 
         // friends only?...
         //dms_filter.authors = friends
@@ -436,27 +431,27 @@ class HomeModel: ObservableObject {
         our_dms_filter.authors = [ damus_state.pubkey ]
 
         // TODO: separate likes?
-        var home_filter_kinds = [
-            NostrKind.text.rawValue,
-            NostrKind.boost.rawValue
+        var home_filter_kinds: [NostrKind] = [
+            .text,
+            .boost
         ]
         if !damus_state.settings.onlyzaps_mode {
-            home_filter_kinds.append(NostrKind.like.rawValue)
+            home_filter_kinds.append(.like)
         }
-        var home_filter = NostrFilter.filter_kinds(home_filter_kinds)
+        var home_filter = NostrFilter(kinds: home_filter_kinds)
         // include our pubkey as well even if we're not technically a friend
         home_filter.authors = friends
         home_filter.limit = 500
 
-        var notifications_filter_kinds = [
-            NostrKind.text.rawValue,
-            NostrKind.boost.rawValue,
-            NostrKind.zap.rawValue,
+        var notifications_filter_kinds: [NostrKind] = [
+            .text,
+            .boost,
+            .zap,
         ]
         if !damus_state.settings.onlyzaps_mode {
-            notifications_filter_kinds.append(NostrKind.like.rawValue)
+            notifications_filter_kinds.append(.like)
         }
-        var notifications_filter = NostrFilter.filter_kinds(notifications_filter_kinds)
+        var notifications_filter = NostrFilter(kinds: notifications_filter_kinds)
         notifications_filter.pubkeys = [damus_state.pubkey]
         notifications_filter.limit = 500
 

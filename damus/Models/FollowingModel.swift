@@ -21,7 +21,7 @@ class FollowingModel {
     }
     
     func get_filter() -> NostrFilter {
-        var f = NostrFilter.filter_kinds([NostrKind.metadata.rawValue])
+        var f = NostrFilter(kinds: [.metadata])
         f.authors = self.contacts.reduce(into: Array<String>()) { acc, pk in
             // don't fetch profiles we already have
             if damus_state.profiles.has_fresh_profile(id: pk) {

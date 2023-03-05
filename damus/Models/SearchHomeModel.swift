@@ -27,7 +27,7 @@ class SearchHomeModel: ObservableObject {
     }
     
     func get_base_filter() -> NostrFilter {
-        var filter = NostrFilter.filter_kinds([NostrKind.text.rawValue, NostrKind.chat.rawValue])
+        var filter = NostrFilter(kinds: [.text, .chat])
         filter.limit = self.limit
         filter.until = Int64(Date.now.timeIntervalSince1970)
         return filter
@@ -126,15 +126,15 @@ enum PubkeysToLoad {
 }
 
 func load_profiles(profiles_subid: String, relay_id: String, load: PubkeysToLoad, damus_state: DamusState) {
-    var filter = NostrFilter.filter_profiles
     let authors = find_profiles_to_fetch(profiles: damus_state.profiles, load: load, cache: damus_state.events)
-    filter.authors = authors
-    
     guard !authors.isEmpty else {
         return
     }
     
     print("loading \(authors.count) profiles from \(relay_id)")
+    
+    let filter = NostrFilter(kinds: [.metadata],
+                             authors: authors)
     
     damus_state.pool.subscribe_to(sub_id: profiles_subid, filters: [filter], to: [relay_id]) { sub_id, conn_ev in
         let (sid, done) = handle_subid_event(pool: damus_state.pool, relay_id: relay_id, ev: conn_ev) { sub_id, ev in
