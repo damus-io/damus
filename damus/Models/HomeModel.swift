@@ -346,23 +346,19 @@ class HomeModel: ObservableObject {
         var friends = damus_state.contacts.get_friend_list()
         friends.append(damus_state.pubkey)
 
-        var contacts_filter = NostrFilter.filter_kinds([0])
+        var contacts_filter = NostrFilter(kinds: [.metadata])
         contacts_filter.authors = friends
         
-        var our_contacts_filter = NostrFilter.filter_kinds([3, 0])
+        var our_contacts_filter = NostrFilter(kinds: [.contacts, .metadata])
         our_contacts_filter.authors = [damus_state.pubkey]
         
-        var our_blocklist_filter = NostrFilter.filter_kinds([30000])
+        var our_blocklist_filter = NostrFilter(kinds: [.list])
         our_blocklist_filter.parameter = ["mute"]
         our_blocklist_filter.authors = [damus_state.pubkey]
         
-        var dms_filter = NostrFilter.filter_kinds([
-            NostrKind.dm.rawValue,
-        ])
+        var dms_filter = NostrFilter(kinds: [.dm])
 
-        var our_dms_filter = NostrFilter.filter_kinds([
-            NostrKind.dm.rawValue,
-        ])
+        var our_dms_filter = NostrFilter(kinds: [.dm])
 
         // friends only?...
         //dms_filter.authors = friends
@@ -371,21 +367,12 @@ class HomeModel: ObservableObject {
         our_dms_filter.authors = [ damus_state.pubkey ]
 
         // TODO: separate likes?
-        var home_filter = NostrFilter.filter_kinds([
-            NostrKind.text.rawValue,
-            NostrKind.like.rawValue,
-            NostrKind.boost.rawValue,
-        ])
+        var home_filter = NostrFilter(kinds: [.text, .like, .boost])
         // include our pubkey as well even if we're not technically a friend
         home_filter.authors = friends
         home_filter.limit = 500
 
-        var notifications_filter = NostrFilter.filter_kinds([
-            NostrKind.text.rawValue,
-            NostrKind.like.rawValue,
-            NostrKind.boost.rawValue,
-            NostrKind.zap.rawValue,
-        ])
+        var notifications_filter = NostrFilter(kinds: [.text, .like, .boost, .zap])
         notifications_filter.pubkeys = [damus_state.pubkey]
         notifications_filter.limit = 100
 

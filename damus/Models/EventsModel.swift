@@ -24,7 +24,7 @@ class EventsModel: ObservableObject {
     }
     
     private func get_filter() -> NostrFilter {
-        var filter = NostrFilter.filter_kinds([kind.rawValue])
+        var filter = NostrFilter(kinds: [kind])
         filter.referenced_ids = [target]
         filter.limit = 500
         return filter

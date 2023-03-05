@@ -77,18 +77,18 @@ class ThreadModel: ObservableObject {
         var meta_events = NostrFilter()
         var event_filter = NostrFilter()
         var ref_events = NostrFilter()
-        //var likes_filter = NostrFilter.filter_kinds(7])
+        //var likes_filter = NostrFilter(kinds: [.like])
 
         let thread_id = event.thread_id(privkey: nil)
         
         ref_events.referenced_ids = [thread_id, event.id]
-        ref_events.kinds = [1]
+        ref_events.kinds = [.text]
         ref_events.limit = 1000
         
         event_filter.ids = [thread_id, event.id]
         
         meta_events.referenced_ids = [event.id]
-        meta_events.kinds = [9735, 1, 6, 7]
+        meta_events.kinds = [.zap, .text, .boost, .like]
         meta_events.limit = 1000
         
         /*

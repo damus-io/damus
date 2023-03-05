@@ -716,7 +716,7 @@ func update_filters_with_since(last_of_kind: [Int: NostrEvent], filters: [NostrF
         let kinds = filter.kinds ?? []
         let initial: Int64? = nil
         let earliest = kinds.reduce(initial) { earliest, kind in
-            let last = last_of_kind[kind]
+            let last = last_of_kind[kind.rawValue]
             let since: Int64? = get_since_time(last_event: last)
             
             if earliest == nil {
@@ -771,7 +771,7 @@ func find_event(state: DamusState, evid: String, find_from: [String]?, callback:
     let subid = UUID().description
     
     var has_event = false
-    var filter = NostrFilter.filter_ids([ evid ])
+    var filter = NostrFilter(ids: [evid])
     filter.limit = 1
     var attempts = 0
     

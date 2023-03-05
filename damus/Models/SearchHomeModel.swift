@@ -24,7 +24,7 @@ class SearchHomeModel: ObservableObject {
     }
     
     func get_base_filter() -> NostrFilter {
-        var filter = NostrFilter.filter_kinds([1, 42])
+        var filter = NostrFilter(kinds: [.text, .chat])
         filter.limit = self.limit
         filter.until = Int64(Date.now.timeIntervalSince1970)
         return filter
