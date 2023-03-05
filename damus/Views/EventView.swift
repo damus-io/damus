@@ -29,29 +29,29 @@ func eventviewsize_to_font(_ size: EventViewKind) -> Font {
 
 struct EventView: View {
     let event: NostrEvent
-    let has_action_bar: Bool
+    let options: EventViewOptions
     let damus: DamusState
     let pubkey: String
 
     @EnvironmentObject var action_bar: ActionBarModel
 
-    init(damus: DamusState, event: NostrEvent, has_action_bar: Bool) {
+    init(damus: DamusState, event: NostrEvent, options: EventViewOptions) {
         self.event = event
-        self.has_action_bar = has_action_bar
+        self.options = options
         self.damus = damus
         self.pubkey = event.pubkey
     }
 
     init(damus: DamusState, event: NostrEvent) {
         self.event = event
-        self.has_action_bar = false
+        self.options = []
         self.damus = damus
         self.pubkey = event.pubkey
     }
 
     init(damus: DamusState, event: NostrEvent, pubkey: String) {
         self.event = event
-        self.has_action_bar = false
+        self.options = [.no_action_bar]
         self.damus = damus
         self.pubkey = pubkey
     }
@@ -61,16 +61,14 @@ struct EventView: View {
             if event.known_kind == .boost {
                 if let inner_ev = event.inner_event {
                     VStack(alignment: .leading) {
-                        let prof_model = ProfileModel(pubkey: event.pubkey, damus: damus)
-                        let follow_model = FollowersModel(damus_state: damus, target: event.pubkey)
                         let prof = damus.profiles.lookup(id: event.pubkey)
-                        let booster_profile = ProfileView(damus_state: damus, profile: prof_model, followers: follow_model)
+                        let booster_profile = ProfileView(damus_state: damus, pubkey: event.pubkey)
                         
                         NavigationLink(destination: booster_profile) {
                             Reposted(damus: damus, pubkey: event.pubkey, profile: prof)
                         }
                         .buttonStyle(PlainButtonStyle())
-                        TextEvent(damus: damus, event: inner_ev, pubkey: inner_ev.pubkey, has_action_bar: has_action_bar, booster_pubkey: event.pubkey)
+                        TextEvent(damus: damus, event: inner_ev, pubkey: inner_ev.pubkey, options: options)
                             .padding([.top], 1)
                     }
                 } else {
@@ -83,12 +81,9 @@ struct EventView: View {
                     EmptyView()
                 }
             } else {
-                TextEvent(damus: damus, event: event, pubkey: pubkey, has_action_bar: has_action_bar, booster_pubkey: nil)
+                TextEvent(damus: damus, event: event, pubkey: pubkey, options: options)
                     .padding([.top], 6)
             }
-            
-            Divider()
-                .padding([.top], 4)
         }
     }
 }
@@ -131,9 +126,9 @@ extension View {
         }
     }
     
-    func event_context_menu(_ event: NostrEvent, keypair: Keypair, target_pubkey: String) -> some View {
+    func event_context_menu(_ event: NostrEvent, keypair: Keypair, target_pubkey: String, bookmarks: BookmarksManager) -> some View {
         return self.contextMenu {
-            EventMenuContext(event: event, keypair: keypair, target_pubkey: target_pubkey)
+            EventMenuContext(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks)
         }
 
     }
@@ -181,11 +176,7 @@ struct EventView_Previews: PreviewProvider {
             EventView(damus: test_damus_state(), event: NostrEvent(content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool", pubkey: "pk"), show_friend_icon: true, size: .big)
             
              */
-            EventView(
-                damus: test_damus_state(),
-                event: test_event,
-                has_action_bar: true
-            )
+            EventView( damus: test_damus_state(), event: test_event )
         }
         .padding()
     }

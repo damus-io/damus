@@ -141,6 +141,9 @@ struct Profile: Codable {
     }
     
     static func displayName(profile: Profile?, pubkey: String) -> String {
+        if pubkey == "anon" {
+            return "Anonymous"
+        }
         let pk = bech32_nopre_pubkey(pubkey) ?? pubkey
         return profile?.name ?? abbrev_pubkey(pk)
     }

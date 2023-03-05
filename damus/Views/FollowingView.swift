@@ -29,7 +29,6 @@ struct FollowersView: View {
     @EnvironmentObject var followers: FollowersModel
     
     var body: some View {
-        let profile = damus_state.profiles.lookup(id: whos)
         ScrollView {
             LazyVStack(alignment: .leading) {
                 ForEach(followers.contacts ?? [], id: \.self) { pk in
@@ -38,7 +37,7 @@ struct FollowersView: View {
             }
             .padding()
         }
-        .navigationBarTitle(NSLocalizedString("\(Profile.displayName(profile: profile, pubkey: whos))'s Followers", comment: "Navigation bar title for view that shows who is following a user."))
+        .navigationBarTitle(NSLocalizedString("Followers", comment: "Navigation bar title for view that shows who is following a user."))
         .onAppear {
             followers.subscribe()
         }
@@ -56,8 +55,6 @@ struct FollowingView: View {
     let whos: String
     
     var body: some View {
-        let profile = damus_state.profiles.lookup(id: whos)
-        let who = Profile.displayName(profile: profile, pubkey: whos)
         ScrollView {
             LazyVStack(alignment: .leading) {
                 ForEach(following.contacts, id: \.self) { pk in
@@ -72,7 +69,7 @@ struct FollowingView: View {
         .onDisappear {
             following.unsubscribe()
         }
-        .navigationBarTitle(NSLocalizedString("\(who) following", comment: "Navigation bar title for view that shows who a user is following."))
+        .navigationBarTitle(NSLocalizedString("Following", comment: "Navigation bar title for view that shows who a user is following."))
     }
 }
 

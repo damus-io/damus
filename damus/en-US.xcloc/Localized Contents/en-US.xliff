@@ -32,6 +32,11 @@
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.2" build-num="14C18"/>
     </header>
     <body>
+      <trans-unit id="%@" xml:space="preserve">
+        <source>%@</source>
+        <target>%@</target>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
       <trans-unit id="%@ %@" xml:space="preserve">
         <source>%@ %@</source>
         <target>%@ %@</target>
@@ -58,6 +63,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet.</target>
         <note>Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string.</note>
       </trans-unit>
+      <trans-unit id="%lld" xml:space="preserve">
+        <source>%lld</source>
+        <target>%lld</target>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
       <trans-unit id="%lld/%lld" xml:space="preserve">
         <source>%lld/%lld</source>
         <target>%lld/%lld</target>
@@ -72,16 +82,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>'%@' is an invalid NIP-05 identifier. It should look like an email.</source>
         <target>'%@' is an invalid NIP-05 identifier. It should look like an email.</target>
         <note>Description of why the nip05 identifier is invalid.</note>
-      </trans-unit>
-      <trans-unit id="(Profile.displayName(profile: profile, pubkey: whos))'s Followers" xml:space="preserve">
-        <source>(Profile.displayName(profile: profile, pubkey: whos))'s Followers</source>
-        <target>(Profile.displayName(profile: profile, pubkey: whos))'s Followers</target>
-        <note>Navigation bar title for view that shows who is following a user.</note>
-      </trans-unit>
-      <trans-unit id="(who) following" xml:space="preserve">
-        <source>(who) following</source>
-        <target>(who) following</target>
-        <note>Navigation bar title for view that shows who a user is following.</note>
       </trans-unit>
       <trans-unit id="API Key (optional)" xml:space="preserve">
         <source>API Key (optional)</source>
@@ -129,6 +129,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <note>Button to add recommended relay server.
    Button to confirm adding user inputted relay.</note>
       </trans-unit>
+      <trans-unit id="Add Bookmark" xml:space="preserve">
+        <source>Add Bookmark</source>
+        <target>Add Bookmark</target>
+        <note>Context menu option for adding a note bookmark.</note>
+      </trans-unit>
       <trans-unit id="Add Relay" xml:space="preserve">
         <source>Add Relay</source>
         <target>Add Relay</target>
@@ -144,6 +149,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Admin</target>
         <note>Label to display relay contact user.</note>
       </trans-unit>
+      <trans-unit id="Anonymous" xml:space="preserve">
+        <source>Anonymous</source>
+        <target>Anonymous</target>
+        <note>Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.</note>
+      </trans-unit>
       <trans-unit id="Any" xml:space="preserve">
         <source>Any</source>
         <target>Any</target>
@@ -153,6 +163,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Are you sure you want to repost this?</source>
         <target>Are you sure you want to repost this?</target>
         <note>Alert message to ask if user wants to repost a post.</note>
+      </trans-unit>
+      <trans-unit id="Awesome post!" xml:space="preserve">
+        <source>Awesome post!</source>
+        <target>Awesome post!</target>
+        <note>Placeholder text for a comment to send as part of a zap to the user.</note>
       </trans-unit>
       <trans-unit id="Banner Image" xml:space="preserve">
         <source>Banner Image</source>
@@ -211,6 +226,12 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Blue Wallet</target>
         <note>Dropdown option label for Lightning wallet, Blue Wallet.</note>
       </trans-unit>
+      <trans-unit id="Bookmarks" xml:space="preserve">
+        <source>Bookmarks</source>
+        <target>Bookmarks</target>
+        <note>Sidebar menu label for Bookmarks view.
+   Title of bookmarks view</note>
+      </trans-unit>
       <trans-unit id="Boosts" xml:space="preserve">
         <source>Boosts</source>
         <target>Boosts</target>
@@ -247,10 +268,20 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Clear</target>
         <note>Button for clearing cached data.</note>
       </trans-unit>
+      <trans-unit id="Clear All" xml:space="preserve">
+        <source>Clear All</source>
+        <target>Clear All</target>
+        <note>Button for clearing bookmarks data.</note>
+      </trans-unit>
       <trans-unit id="Clear Cache" xml:space="preserve">
         <source>Clear Cache</source>
         <target>Clear Cache</target>
         <note>Section title for clearing cached data.</note>
+      </trans-unit>
+      <trans-unit id="Comment" xml:space="preserve">
+        <source>Comment</source>
+        <target>Comment</target>
+        <note>Header text to indicate that the text field below it is a comment that will be used to send as part of a zap to the user.</note>
       </trans-unit>
       <trans-unit id="Contact" xml:space="preserve">
         <source>Contact</source>
@@ -348,6 +379,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Custom</target>
         <note>Dropdown option for selecting a custom translation server.</note>
       </trans-unit>
+      <trans-unit id="Custom Zap Amount" xml:space="preserve">
+        <source>Custom Zap Amount</source>
+        <target>Custom Zap Amount</target>
+        <note>Header text to indicate that the text field below it is to enter a custom zap amount.</note>
+      </trans-unit>
       <trans-unit id="DMs" xml:space="preserve">
         <source>DMs</source>
         <target>DMs</target>
@@ -442,10 +478,20 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Enter your account key to login:</target>
         <note>Prompt for user to enter an account key to login.</note>
       </trans-unit>
+      <trans-unit id="Error fetching lightning invoice" xml:space="preserve">
+        <source>Error fetching lightning invoice</source>
+        <target>Error fetching lightning invoice</target>
+        <note>Message to display when there was an error fetching a lightning invoice while attempting to zap.</note>
+      </trans-unit>
       <trans-unit id="Error: %@" xml:space="preserve">
         <source>Error: %@</source>
         <target>Error: %@</target>
         <note>Error message indicating why saving keys failed.</note>
+      </trans-unit>
+      <trans-unit id="Everyone on can see that you zapped" xml:space="preserve">
+        <source>Everyone on can see that you zapped</source>
+        <target>Everyone on can see that you zapped</target>
+        <note>Description of public zap type where the zap is sent publicly and identifies the user who sent it.</note>
       </trans-unit>
       <trans-unit id="Filter" xml:space="preserve">
         <source>Filter</source>
@@ -470,12 +516,12 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Followers" xml:space="preserve">
         <source>Followers</source>
         <target>Followers</target>
-        <note>Label describing followers of a user.</note>
+        <note>Navigation bar title for view that shows who is following a user.</note>
       </trans-unit>
       <trans-unit id="Following" xml:space="preserve">
         <source>Following</source>
         <target>Following</target>
-        <note>Part of a larger sentence to describe how many profiles a user is following.</note>
+        <note>Navigation bar title for view that shows who a user is following.</note>
       </trans-unit>
       <trans-unit id="Following..." xml:space="preserve">
         <source>Following...</source>
@@ -533,6 +579,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Invalid key</target>
         <note>Error message indicating that an invalid account key was entered for login.</note>
       </trans-unit>
+      <trans-unit id="Invalid lightning address" xml:space="preserve">
+        <source>Invalid lightning address</source>
+        <target>Invalid lightning address</target>
+        <note>Message to display when there was an error attempting to zap due to an invalid lightning address.</note>
+      </trans-unit>
       <trans-unit id="It's spam" xml:space="preserve">
         <source>It's spam</source>
         <target>It's spam</target>
@@ -572,6 +623,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Like</source>
         <target>Like</target>
         <note>Accessibility Label for Like button</note>
+      </trans-unit>
+      <trans-unit id="Load %lld more" xml:space="preserve">
+        <source>Load %lld more</source>
+        <target>Load %lld more</target>
+        <note>Button text for loading more events, where the variable is the number of events.</note>
       </trans-unit>
       <trans-unit id="Local authentication to access private key" xml:space="preserve">
         <source>Local authentication to access private key</source>
@@ -621,6 +677,16 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>No block list found, create a new one? This will overwrite any previous block lists.</target>
         <note>Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists.</note>
       </trans-unit>
+      <trans-unit id="No one can see that you zapped" xml:space="preserve">
+        <source>No one can see that you zapped</source>
+        <target>No one can see that you zapped</target>
+        <note>Description of anonymous zap type where the zap is sent anonymously and does not identify the user who sent it.</note>
+      </trans-unit>
+      <trans-unit id="No zaps are sent, only a lightning payment." xml:space="preserve">
+        <source>No zaps are sent, only a lightning payment.</source>
+        <target>No zaps are sent, only a lightning payment.</target>
+        <note>Description of non-zap type where sats are sent to the user's wallet as a regular Lightning payment, not as a zap.</note>
+      </trans-unit>
       <trans-unit id="None" xml:space="preserve">
         <source>None</source>
         <target>None</target>
@@ -645,6 +711,16 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Nudity or explicit content</source>
         <target>Nudity or explicit content</target>
         <note>Button for user to report that the account or content has nudity or explicit content.</note>
+      </trans-unit>
+      <trans-unit id="Only '(name)' can see that you zapped them" xml:space="preserve">
+        <source>Only '(name)' can see that you zapped them</source>
+        <target>Only '(name)' can see that you zapped them</target>
+        <note>Description of private zap type where the zap is sent privately and does not identify the user to the public.</note>
+      </trans-unit>
+      <trans-unit id="Only you can see this message and who sent it." xml:space="preserve">
+        <source>Only you can see this message and who sent it.</source>
+        <target>Only you can see this message and who sent it.</target>
+        <note>Help text on green lock icon that explains that only the current user can see the message of a zap event and who sent the zap.</note>
       </trans-unit>
       <trans-unit id="Paid Relay" xml:space="preserve">
         <source>Paid Relay</source>
@@ -676,6 +752,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Plan</target>
         <note>Prompt selection of DeepL subscription plan to perform machine translations on notes</note>
       </trans-unit>
+      <trans-unit id="Please choose relays from the list below to filter the current feed:" xml:space="preserve">
+        <source>Please choose relays from the list below to filter the current feed:</source>
+        <target>Please choose relays from the list below to filter the current feed:</target>
+        <note>Instructions on how to filter a specific timeline feed by choosing relay servers to filter on.</note>
+      </trans-unit>
       <trans-unit id="Post" xml:space="preserve">
         <source>Post</source>
         <target>Post</target>
@@ -701,7 +782,8 @@ Label for filter for seeing your posts and replies (instead of only your posts).
       <trans-unit id="Private" xml:space="preserve">
         <source>Private</source>
         <target>Private</target>
-        <note>Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading.</note>
+        <note>Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading.
+Picker option to indicate that a zap should be sent privately and not identify the user to the public.</note>
       </trans-unit>
       <trans-unit id="Private Key" xml:space="preserve">
         <source>Private Key</source>
@@ -722,6 +804,11 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <source>Profile Picture</source>
         <target>Profile Picture</target>
         <note>Label for Profile Picture section of user profile form.</note>
+      </trans-unit>
+      <trans-unit id="Public" xml:space="preserve">
+        <source>Public</source>
+        <target>Public</target>
+        <note>Picker option to indicate that a zap should be sent publicly and identify the user as who sent it.</note>
       </trans-unit>
       <trans-unit id="Public Account ID" xml:space="preserve">
         <source>Public Account ID</source>
@@ -773,6 +860,11 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <source>Relays have been notified and clients will be able to use this information to filter content. Thank you!</source>
         <target>Relays have been notified and clients will be able to use this information to filter content. Thank you!</target>
         <note>Description of what was done as a result of sending a report to relay servers.</note>
+      </trans-unit>
+      <trans-unit id="Remove Bookmark" xml:space="preserve">
+        <source>Remove Bookmark</source>
+        <target>Remove Bookmark</target>
+        <note>Context menu option for removing a note bookmark.</note>
       </trans-unit>
       <trans-unit id="Remove all" xml:space="preserve">
         <source>Remove all</source>
@@ -936,6 +1028,11 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <note>Button to show the DeepL translation API key.
    Button to show the LibreTranslate server API key.</note>
       </trans-unit>
+      <trans-unit id="Show more" xml:space="preserve">
+        <source>Show more</source>
+        <target>Show more</target>
+        <note>Button to show entire note.</note>
+      </trans-unit>
       <trans-unit id="Show wallet selector" xml:space="preserve">
         <source>Show wallet selector</source>
         <target>Show wallet selector</target>
@@ -986,9 +1083,9 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <target>This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key.</target>
         <note>Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key.</note>
       </trans-unit>
-      <trans-unit id="This is your account ID, you can give this to your friends so that they can follow you. Click to copy." xml:space="preserve">
-        <source>This is your account ID, you can give this to your friends so that they can follow you. Click to copy.</source>
-        <target>This is your account ID, you can give this to your friends so that they can follow you. Click to copy.</target>
+      <trans-unit id="This is your account ID, you can give this to your friends so that they can follow you. Tap to copy." xml:space="preserve">
+        <source>This is your account ID, you can give this to your friends so that they can follow you. Tap to copy.</source>
+        <target>This is your account ID, you can give this to your friends so that they can follow you. Tap to copy.</target>
         <note>Label to describe that a public key is the user's account ID and what they can do with it.</note>
       </trans-unit>
       <trans-unit id="This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" xml:space="preserve">
@@ -1000,11 +1097,6 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <source>Thread</source>
         <target>Thread</target>
         <note>Navigation bar title for note thread.</note>
-      </trans-unit>
-      <trans-unit id="To filter your %@ feed, please choose applicable relays from the list below:" xml:space="preserve">
-        <source>To filter your %@ feed, please choose applicable relays from the list below:</source>
-        <target>To filter your %@ feed, please choose applicable relays from the list below:</target>
-        <note>Instructions on how to filter a specific timeline feed by choosing relay servers to filter on.</note>
       </trans-unit>
       <trans-unit id="Translate Note" xml:space="preserve">
         <source>Translate Note</source>
@@ -1123,6 +1215,11 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <target>Yes, Post with Private Key</target>
         <note>Button to proceed with posting a note even though it looks like they might be posting a private key.</note>
       </trans-unit>
+      <trans-unit id="You have no bookmarks yet, add them in the context menu" xml:space="preserve">
+        <source>You have no bookmarks yet, add them in the context menu</source>
+        <target>You have no bookmarks yet, add them in the context menu</target>
+        <note>Text indicating that there are no bookmarks to be viewed</note>
+      </trans-unit>
       <trans-unit id="Your Name" xml:space="preserve">
         <source>Your Name</source>
         <target>Your Name</target>
@@ -1136,7 +1233,28 @@ Label for filter for seeing your posts and replies (instead of only your posts).
       <trans-unit id="Zap" xml:space="preserve">
         <source>Zap</source>
         <target>Zap</target>
-        <note>Accessibility label for zap button</note>
+        <note>Accessibility label for zap button
+   Button to send a zap.</note>
+      </trans-unit>
+      <trans-unit id="Zap Amount" xml:space="preserve">
+        <source>Zap Amount</source>
+        <target>Zap Amount</target>
+        <note>Title of picker that allows selection of predefined amounts to zap.</note>
+      </trans-unit>
+      <trans-unit id="Zap Amount in sats" xml:space="preserve">
+        <source>Zap Amount in sats</source>
+        <target>Zap Amount in sats</target>
+        <note>Header text to indicate that the picker below it is to choose a pre-defined amount of sats to zap.</note>
+      </trans-unit>
+      <trans-unit id="Zap Type" xml:space="preserve">
+        <source>Zap Type</source>
+        <target>Zap Type</target>
+        <note>Header text to indicate that the picker below it is to choose the type of zap to send.</note>
+      </trans-unit>
+      <trans-unit id="Zapping..." xml:space="preserve">
+        <source>Zapping...</source>
+        <target>Zapping...</target>
+        <note>Text to indicate that the app is in the process of sending a zap.</note>
       </trans-unit>
       <trans-unit id="Zaps" xml:space="preserve">
         <source>Zaps</source>
@@ -1188,6 +1306,66 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <target>optional</target>
         <note>Label indicating that a form input is optional.</note>
       </trans-unit>
+      <trans-unit id="reacted_tagged_in_1" xml:space="preserve">
+        <source>%@ reacted to a post you were tagged in</source>
+        <target>%@ reacted to a post you were tagged in</target>
+        <note>Notification that a user reacted to a post that the current user was tagged in</note>
+      </trans-unit>
+      <trans-unit id="reacted_tagged_in_2" xml:space="preserve">
+        <source>%@ and %@ reacted to a post you were tagged in</source>
+        <target>%@ and %@ reacted to a post you were tagged in</target>
+        <note>Notification that 2 users reacted to a post that the current user was tagged in</note>
+      </trans-unit>
+      <trans-unit id="reacted_your_post_1" xml:space="preserve">
+        <source>%@ reacted to your post</source>
+        <target>%@ reacted to your post</target>
+        <note>Notification that a user reacted to the current user's post</note>
+      </trans-unit>
+      <trans-unit id="reacted_your_post_2" xml:space="preserve">
+        <source>%@ and %@ reacted to your post</source>
+        <target>%@ and %@ reacted to your post</target>
+        <note>Notification that 2 users reacted to the current user's profile</note>
+      </trans-unit>
+      <trans-unit id="reacted_your_profile_1" xml:space="preserve">
+        <source>%@ reacted to your profile</source>
+        <target>%@ reacted to your profile</target>
+        <note>Notification that a user reacted to the current user's profile</note>
+      </trans-unit>
+      <trans-unit id="reacted_your_profile_2" xml:space="preserve">
+        <source>%@ and %@ reacted to your profile</source>
+        <target>%@ and %@ reacted to your profile</target>
+        <note>Notification that 2 users reacted to the current user's profile</note>
+      </trans-unit>
+      <trans-unit id="reposted_tagged_in_1" xml:space="preserve">
+        <source>%@ reposted a post you were tagged in</source>
+        <target>%@ reposted a post you were tagged in</target>
+        <note>Notification that a user reposted a post that the current user was tagged in</note>
+      </trans-unit>
+      <trans-unit id="reposted_tagged_in_2" xml:space="preserve">
+        <source>%@ and %@ reposted a post you were tagged in</source>
+        <target>%@ and %@ reposted a post you were tagged in</target>
+        <note>Notification that 2 users reposted a post that the current user was tagged in</note>
+      </trans-unit>
+      <trans-unit id="reposted_your_post_1" xml:space="preserve">
+        <source>%@ reposted your post</source>
+        <target>%@ reposted your post</target>
+        <note>Notification that a user reposted the current user's post</note>
+      </trans-unit>
+      <trans-unit id="reposted_your_post_2" xml:space="preserve">
+        <source>%@ and %@ reposted your post</source>
+        <target>%@ and %@ reposted your post</target>
+        <note>Notification that 2 users reposted the current user's post</note>
+      </trans-unit>
+      <trans-unit id="reposted_your_profile_1" xml:space="preserve">
+        <source>%@ reposted your profile</source>
+        <target>%@ reposted your profile</target>
+        <note>Notification that a user reposted the current user's profile</note>
+      </trans-unit>
+      <trans-unit id="reposted_your_profile_2" xml:space="preserve">
+        <source>%@ and %@ reposted your profile</source>
+        <target>%@ and %@ reposted your profile</target>
+        <note>Notification that 2 users reposted the current user's profile</note>
+      </trans-unit>
       <trans-unit id="satoshi" xml:space="preserve">
         <source>satoshi</source>
         <target>satoshi</target>
@@ -1202,6 +1380,36 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <source>you</source>
         <target>you</target>
         <note>You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself.</note>
+      </trans-unit>
+      <trans-unit id="zapped_tagged_in_1" xml:space="preserve">
+        <source>%@ zapped a post you were tagged in</source>
+        <target>%@ zapped a post you were tagged in</target>
+        <note>Notification that a user zapped a post that the current user was tagged in</note>
+      </trans-unit>
+      <trans-unit id="zapped_tagged_in_2" xml:space="preserve">
+        <source>%@ and %@ zapped a post you were tagged in</source>
+        <target>%@ and %@ zapped a post you were tagged in</target>
+        <note>Notification that 2 users zapped a post that the current user was tagged in</note>
+      </trans-unit>
+      <trans-unit id="zapped_your_post_1" xml:space="preserve">
+        <source>%@ zapped your post</source>
+        <target>%@ zapped your post</target>
+        <note>Notification that a user zapped the current user's post</note>
+      </trans-unit>
+      <trans-unit id="zapped_your_post_2" xml:space="preserve">
+        <source>%@ and %@ zapped your post</source>
+        <target>%@ and %@ zapped your post</target>
+        <note>Notification that 2 users zapped the current user's post</note>
+      </trans-unit>
+      <trans-unit id="zapped_your_profile_1" xml:space="preserve">
+        <source>%@ zapped your profile</source>
+        <target>%@ zapped your profile</target>
+        <note>Notification that a user zapped the current user's profile</note>
+      </trans-unit>
+      <trans-unit id="zapped_your_profile_2" xml:space="preserve">
+        <source>%@ and %@ zapped your profile</source>
+        <target>%@ and %@ zapped your profile</target>
+        <note>Notification that 2 users zapped the current user's profile</note>
       </trans-unit>
       <trans-unit id="⚡️ %@" xml:space="preserve">
         <source>⚡️ %@</source>
@@ -1245,6 +1453,51 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <target>%#@FOLLOWERS@</target>
         <note/>
       </trans-unit>
+      <trans-unit id="/reacted_tagged_in_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@REACTED@</source>
+        <target>%#@REACTED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reacted_tagged_in_3:dict/REACTED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other reacted to a post you were tagged in</source>
+        <target>%2$@ and %1$d other reacted to a post you were tagged in</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reacted_tagged_in_3:dict/REACTED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others reacted to a post you were tagged in</source>
+        <target>%2$@ and %1$d others reacted to a post you were tagged in</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reacted_your_post_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@REACTED@</source>
+        <target>%#@REACTED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reacted_your_post_3:dict/REACTED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other reacted to your post</source>
+        <target>%2$@ and %1$d other reacted to your post</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reacted_your_post_3:dict/REACTED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others reacted to your post</source>
+        <target>%2$@ and %1$d others reacted to your post</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reacted_your_profile_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@REACTED@</source>
+        <target>%#@REACTED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reacted_your_profile_3:dict/REACTED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other reacted to your profile</source>
+        <target>%2$@ and %1$d other reacted to your profile</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reacted_your_profile_3:dict/REACTED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others reacted to your profile</source>
+        <target>%2$@ and %1$d others reacted to your profile</target>
+        <note/>
+      </trans-unit>
       <trans-unit id="/reactions_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@REACTIONS@</source>
         <target>%#@REACTIONS@</target>
@@ -1275,21 +1528,6 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <target>Relays</target>
         <note/>
       </trans-unit>
-      <trans-unit id="/replying_to_one_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
-        <source>%#@OTHERS@</source>
-        <target>%#@OTHERS@</target>
-        <note/>
-      </trans-unit>
-      <trans-unit id="/replying_to_one_and_others:dict/OTHERS:dict/one:dict/:string" xml:space="preserve">
-        <source>Replying to %2$@ &amp; %1$d other</source>
-        <target>Replying to %2$@ &amp; %1$d other</target>
-        <note/>
-      </trans-unit>
-      <trans-unit id="/replying_to_one_and_others:dict/OTHERS:dict/other:dict/:string" xml:space="preserve">
-        <source>Replying to %2$@ &amp; %1$d others</source>
-        <target>Replying to %2$@ &amp; %1$d others</target>
-        <note/>
-      </trans-unit>
       <trans-unit id="/replying_to_two_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@OTHERS@</source>
         <target>%#@OTHERS@</target>
@@ -1303,6 +1541,51 @@ Label for filter for seeing your posts and replies (instead of only your posts).
       <trans-unit id="/replying_to_two_and_others:dict/OTHERS:dict/other:dict/:string" xml:space="preserve">
         <source>Replying to %2$@, %3$@ &amp; %1$d others</source>
         <target>Replying to %2$@, %3$@ &amp; %1$d others</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_tagged_in_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@REPOSTED@</source>
+        <target>%#@REPOSTED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_tagged_in_3:dict/REPOSTED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other reposted a post you were tagged in</source>
+        <target>%2$@ and %1$d other reposted a post you were tagged in</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_tagged_in_3:dict/REPOSTED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others reposted a post you were tagged in</source>
+        <target>%2$@ and %1$d others reposted a post you were tagged in</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_your_post_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@REPOSTED@</source>
+        <target>%#@REPOSTED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_your_post_3:dict/REPOSTED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other reposted your post</source>
+        <target>%2$@ and %1$d other reposted your post</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_your_post_3:dict/REPOSTED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others reposted your post</source>
+        <target>%2$@ and %1$d others reposted your post</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_your_profile_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@REPOSTED@</source>
+        <target>%#@REPOSTED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_your_profile_3:dict/REPOSTED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other reposted your profile</source>
+        <target>%2$@ and %1$d other reposted your profile</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/reposted_your_profile_3:dict/REPOSTED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others reposted your profile</source>
+        <target>%2$@ and %1$d others reposted your profile</target>
         <note/>
       </trans-unit>
       <trans-unit id="/reposts_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
@@ -1333,6 +1616,51 @@ Label for filter for seeing your posts and replies (instead of only your posts).
       <trans-unit id="/sats_count:dict/SATS:dict/other:dict/:string" xml:space="preserve">
         <source>%2$@ sats</source>
         <target>%2$@ sats</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_tagged_in_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@ZAPPED@</source>
+        <target>%#@ZAPPED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_tagged_in_3:dict/ZAPPED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other zapped a post you were tagged in</source>
+        <target>%2$@ and %1$d other zapped a post you were tagged in</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_tagged_in_3:dict/ZAPPED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others zapped a post you were tagged in</source>
+        <target>%2$@ and %1$d others zapped a post you were tagged in</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_your_post_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@ZAPPED@</source>
+        <target>%#@ZAPPED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_your_post_3:dict/ZAPPED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other zapped your post</source>
+        <target>%2$@ and %1$d other zapped your post</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_your_post_3:dict/ZAPPED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others zapped your post</source>
+        <target>%2$@ and %1$d others zapped your post</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_your_profile_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@ZAPPED@</source>
+        <target>%#@ZAPPED@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_your_profile_3:dict/ZAPPED:dict/one:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d other zapped your profile</source>
+        <target>%2$@ and %1$d other zapped your profile</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zapped_your_profile_3:dict/ZAPPED:dict/other:dict/:string" xml:space="preserve">
+        <source>%2$@ and %1$d others zapped your profile</source>
+        <target>%2$@ and %1$d others zapped your profile</target>
         <note/>
       </trans-unit>
       <trans-unit id="/zaps_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">

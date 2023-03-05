@@ -8,6 +8,6 @@
 import Foundation
 
 class Drafts: ObservableObject {
-    @Published var post: String = ""
-    @Published var replies: [NostrEvent: String] = [:]
+    @Published var post: NSMutableAttributedString = NSMutableAttributedString(string: "")
+    @Published var replies: [NostrEvent: NSMutableAttributedString] = [:]
 }

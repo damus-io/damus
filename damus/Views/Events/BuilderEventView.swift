@@ -62,7 +62,9 @@ struct BuilderEventView: View {
         VStack {
             if let event = event {
                 let ev = event.inner_event ?? event
-                NavigationLink(destination: BuildThreadV2View(damus: damus, event_id: ev.id)) {
+                let thread = ThreadModel(event: ev, damus_state: damus)
+                let dest = ThreadView(state: damus, thread: thread)
+                NavigationLink(destination: dest) {
                     EmbeddedEventView(damus_state: damus, event: event)
                         .padding(8)
                 }.buttonStyle(.plain)
@@ -71,8 +73,10 @@ struct BuilderEventView: View {
             }
         }
         .frame(minWidth: 0, maxWidth: .infinity)
-        .cornerRadius(8)
-        .border(Color.gray.opacity(0.2), width: 1)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color.gray.opacity(0.2), lineWidth: 1.0)
+        )
         .onAppear {
             self.load()
         }

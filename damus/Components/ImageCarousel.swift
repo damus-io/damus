@@ -205,6 +205,7 @@ struct ImageCarousel: View {
                                 view.framePreloadCount = 3
                             }
                             .aspectRatio(contentMode: .fit)
+                            .cornerRadius(10)
                             .tabItem {
                                 Text(url.absoluteString)
                             }
@@ -217,11 +218,11 @@ struct ImageCarousel: View {
                     }
             }
         }
-        .cornerRadius(10)
         .fullScreenCover(isPresented: $open_sheet) {
             ImageView(urls: urls)
         }
         .frame(height: 200)
+        .clipped()
         .onTapGesture {
             open_sheet = true
         }

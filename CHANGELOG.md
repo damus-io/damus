@@ -1,3 +1,65 @@
+## [1.2.0-3] - 2023-03-04
+
+### Added
+
+- Add additional info to recommended relay view (ericholguin)
+- Add shaka animation (Swift)
+- Add option to disable image animation (OlegAba)
+- Add additional warning when deleting account (ericholguin)
+- Threads now load instantly and are cached (William Casarin)
+
+
+### Fixed
+
+- Wrap long profile display names (OlegAba)
+- Fixed weird scaling on profile pictures (OlegAba)
+- Fixed width of copy pubkey on profile page (Joel Klabo)
+- Make damus purple use more consistent in mentions (Joel Klabo)
+
+
+
+[1.2.0-3]: https://github.com/damus-io/damus/releases/tag/v1.2.0-3
+
+## [1.1.0-10] - 2023-03-01
+
+### Added
+
+- Truncate large posts and add a show more button (OlegAba)
+- Private Zaps (William Casarin)
+
+
+### Fixed
+
+- Fix default zap amount setting not getting updated (William Casarin)
+- Fix issue where keyboard covers custom zap comment (William Casarin)
+
+
+[1.1.0-10]: https://github.com/damus-io/damus/releases/tag/v1.1.0-10
+
+## [1.1.0-9] - 2023-02-26
+
+### Added
+
+- Customized zaps (William Casarin)
+- Add new Notifications View (William Casarin)
+- Bookmarking (Joel Klabo)
+
+### Changed
+
+- No more inline npubs when tagging users (Swift)
+
+
+### Fixed
+
+- Fix alignment of side menu labels (Joel Klabo)
+- Fix duplicated participants in reply-to view (Joel Klabo)
+- Load missing profiles in Zaps view (William Casarin)
+- Fix memory leak with inline videos (William Casarin)
+- Eliminate popping when scrolling (William Casarin)
+
+
+[1.1.0-9]: https://github.com/damus-io/damus/releases/tag/v1.1.0-9
+
 ## [1.1.0-3] - 2023-02-20
 
 ### Added

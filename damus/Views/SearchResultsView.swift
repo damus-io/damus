@@ -43,39 +43,36 @@ struct SearchResultsView: View {
                 case .profile(let prof):
                     let decoded = try? bech32_decode(prof)
                     let hex = hex_encode(decoded!.data)
-                    let prof_model = ProfileModel(pubkey: hex, damus: damus_state)
-                    let f = FollowersModel(damus_state: damus_state, target: prof)
-                    let dst = ProfileView(damus_state: damus_state, profile: prof_model, followers: f)
-                    NavigationLink(destination: dst) {
+                    let prof_view = ProfileView(damus_state: damus_state, pubkey: hex)
+                    NavigationLink(destination: prof_view) {
                         Text("Goto profile \(prof)", comment: "Navigation link to go to profile.")
                     }
                 case .hex(let h):
-                    let prof_model = ProfileModel(pubkey: h, damus: damus_state)
-                    let f = FollowersModel(damus_state: damus_state, target: h)
-                    let prof_view = ProfileView(damus_state: damus_state, profile: prof_model, followers: f)
-                    let ev_view = BuildThreadV2View(
-                        damus: damus_state,
-                        event_id: h
-                    )
+                    let prof_view = ProfileView(damus_state: damus_state, pubkey: h)
+                    //let ev_view = ThreadView(damus: damus_state, event_id: h)
 
+                    NavigationLink(destination: prof_view) {
+                        Text("Goto profile \(h)", comment: "Navigation link to go to profile referenced by hex code.")
+                    }
+                        /*
                     VStack(spacing: 50) {
-                        NavigationLink(destination: prof_view) {
-                            Text("Goto profile \(h)", comment: "Navigation link to go to profile referenced by hex code.")
-                        }
                         NavigationLink(destination: ev_view) {
                             Text("Goto post \(h)", comment: "Navigation link to go to post referenced by hex code.")
                         }
                     }
+                         */
                 case .note(let nid):
+                    /*
                     let decoded = try? bech32_decode(nid)
                     let hex = hex_encode(decoded!.data)
-                    let ev_view = BuildThreadV2View(
-                        damus: damus_state,
-                        event_id: hex
-                    )
+                    let ev_view = ThreadView(state: state, ev: ev)
+                     */
+                    Text("Todo: fix this")
+                    /*
                     NavigationLink(destination: ev_view) {
                         Text("Goto post \(nid)", comment: "Navigation link to go to post referenced by note ID.")
                     }
+                     */
                 case .none:
                     Text("none", comment: "No search results.")
                 }

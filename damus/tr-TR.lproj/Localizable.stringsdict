@@ -4,6 +4,8 @@
 <dict>
 	<key>collapsed_event_view_other_notes</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@NOTES@</string>
 		<key>NOTES</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -11,15 +13,15 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%d diğer not</string>
+			<string>... %d diğer not ...</string>
 			<key>other</key>
-			<string>%d diğer notlar</string>
+			<string>... %d diğer notlar ...</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>··· %#@NOTES@ ···</string>
 	</dict>
 	<key>followers_count</key>
 	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWERS@</string>
 		<key>FOLLOWERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -29,10 +31,8 @@
 			<key>one</key>
 			<string>Takipçi</string>
 			<key>other</key>
-			<string>Takipçiler</string>
+			<string>Takipçi</string>
 		</dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@FOLLOWERS@</string>
 	</dict>
 	<key>reactions_count</key>
 	<dict>
@@ -47,7 +47,7 @@
 			<key>one</key>
 			<string>Tepki</string>
 			<key>other</key>
-			<string>Tepkiler</string>
+			<string>Tepki</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -63,13 +63,13 @@
 			<key>one</key>
 			<string>Röle</string>
 			<key>other</key>
-			<string>Röleler</string>
+			<string>Röle</string>
 		</dict>
 	</dict>
 	<key>replying_to_one_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%@%#@OTHERS@'lara yanıt</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -77,17 +77,15 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>&amp; %d diğer</string>
+			<string>%2$@ &amp; %1$d diğer'lara yanıt</string>
 			<key>other</key>
-			<string>&amp; %d diğerleri</string>
-			<key>zero</key>
-			<string></string>
+			<string>%2$@ &amp; %1$d ve diğerlerine yanıt</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%@, %@%#@OTHERS@'a yanıt</string>
+		<string>%#@OTHERS@</string>
 		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
@@ -95,11 +93,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>&amp; %d diğer</string>
+			<string>%2$@, %3$@ &amp; %1$d diğer'a yanıt</string>
 			<key>other</key>
-			<string>&amp; %d diğerleri</string>
-			<key>zero</key>
-			<string></string>
+			<string>%2$@, %3$@ &amp; %1$d ve diğerlerine yanıt</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -115,7 +111,7 @@
 			<key>one</key>
 			<string>Yineleme</string>
 			<key>other</key>
-			<string>Yinelemeler</string>
+			<string>Yineleme</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -131,7 +127,7 @@
 			<key>one</key>
 			<string>%2$@ sat</string>
 			<key>other</key>
-			<string>%2$@ sat</string>
+			<string>%2$@ sats</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>

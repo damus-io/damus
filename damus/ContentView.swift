@@ -81,7 +81,7 @@ struct ContentView: View {
     @State var event: NostrEvent? = nil
     @State var active_profile: String? = nil
     @State var active_search: NostrFilter? = nil
-    @State var active_event_id: String? = nil
+    @State var active_event: NostrEvent = test_event
     @State var profile_open: Bool = false
     @State var thread_open: Bool = false
     @State var search_open: Bool = false
@@ -163,8 +163,7 @@ struct ContentView: View {
             return Text("Universe 🛸", comment: "Toolbar label for the universal view where posts from all connected relay servers appear.")
                 .bold()
         case .none:
-            return Text("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
-                .bold()
+            return Text(verbatim: "")
         }
     }
     
@@ -173,7 +172,8 @@ struct ContentView: View {
             NavigationLink(destination: MaybeProfileView, isActive: $profile_open) {
                 EmptyView()
             }
-            NavigationLink(destination: MaybeThreadView, isActive: $thread_open) {
+            let thread = ThreadModel(event: active_event, damus_state: damus_state!)
+            NavigationLink(destination: ThreadView(state: damus_state!, thread: thread), isActive: $thread_open) {
                 EmptyView()
             }
             NavigationLink(destination: MaybeSearchView, isActive: $search_open) {
@@ -189,7 +189,7 @@ struct ContentView: View {
             case .notifications:
                 VStack(spacing: 0) {
                     Divider()
-                    TimelineView(events: home.notifications, loading: $home.loading, damus: damus, show_friend_icon: true, filter: { _ in true })
+                    NotificationsView(state: damus, notifications: home.notifications)
                 }
             case .dms:
                 DirectMessagesView(damus_state: damus_state!)
@@ -223,16 +223,6 @@ struct ContentView: View {
         Group {
             if let search = self.active_search {
                 SearchView(appstate: damus_state!, search: SearchModel(contacts: damus_state!.contacts, pool: damus_state!.pool, search: search))
-            } else {
-                EmptyView()
-            }
-        }
-    }
-    
-    var MaybeThreadView: some View {
-        Group {
-            if let evid = self.active_event_id {
-                BuildThreadV2View(damus: damus_state!, event_id: evid)
             } else {
                 EmptyView()
             }
@@ -358,7 +348,11 @@ struct ContentView: View {
                     active_profile = ref.ref_id
                     profile_open = true
                 } else if ref.key == "e" {
-                    active_event_id = ref.ref_id
+                    find_event(state: damus_state!, evid: ref.ref_id, find_from: nil) { ev in
+                        if let ev {
+                            active_event = ev
+                        }
+                    }
                     thread_open = true
                 }
             case .filter(let filt):
@@ -621,7 +615,9 @@ struct ContentView: View {
                                       settings: UserSettingsStore(),
                                       relay_filters: relay_filters,
                                       relay_metadata: metadatas,
-                                      drafts: Drafts()
+                                      drafts: Drafts(),
+                                      events: EventCache(),
+                                      bookmarks: BookmarksManager(pubkey: pubkey)
         )
         home.damus_state = self.damus_state!
         
@@ -770,3 +766,45 @@ func setup_notifications() {
     }
 }
 
+
+func find_event(state: DamusState, evid: String, find_from: [String]?, callback: @escaping (NostrEvent?) -> ()) {
+    if let ev = state.events.lookup(evid) {
+        callback(ev)
+        return
+    }
+    
+    let subid = UUID().description
+    
+    var has_event = false
+    var filter = NostrFilter.filter_ids([ evid ])
+    filter.limit = 1
+    var attempts = 0
+    
+    state.pool.subscribe_to(sub_id: subid, filters: [filter], to: find_from) { relay_id, res  in
+        guard case .nostr_event(let ev) = res else {
+            return
+        }
+        
+        guard ev.subid == subid else {
+            return
+        }
+        
+        switch ev {
+        case .event(_, let ev):
+            has_event = true
+            callback(ev)
+            state.pool.unsubscribe(sub_id: subid)
+        case .eose:
+            if !has_event {
+                attempts += 1
+                if attempts == state.pool.descriptors.count / 2 {
+                    callback(nil)
+                }
+                state.pool.unsubscribe(sub_id: subid, to: [relay_id])
+            }
+        case .notice(_):
+            break
+        }
+
+    }
+}
