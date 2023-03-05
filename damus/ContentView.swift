@@ -148,26 +148,23 @@ struct ContentView: View {
         isSideBarOpened = false
     }
 
-    var timelineNavItem: some View {
-        VStack {
-            switch selected_timeline {
-            case .home:
-                Image("damus-home")
-                .resizable()
-                .frame(width:30,height:30)
-                .shadow(color: Color("DamusPurple"), radius: 2)
-            case .dms:
-                Text("DMs", comment: "Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.")
-                    .bold()
-            case .notifications:
-                Text("Notifications", comment: "Toolbar label for Notifications view.")
-                    .bold()
-            case .search:
-                Text("Universe 🛸", comment: "Toolbar label for the universal view where posts from all connected relay servers appear.")
-                    .bold()
-            case .none:
-                Text("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
-            }
+    var timelineNavItem: Text {
+        switch selected_timeline {
+        case .home:
+            return Text("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.")
+                .bold()
+        case .dms:
+            return Text("DMs", comment: "Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.")
+                .bold()
+        case .notifications:
+            return Text("Notifications", comment: "Toolbar label for Notifications view.")
+                .bold()
+        case .search:
+            return Text("Universe 🛸", comment: "Toolbar label for the universal view where posts from all connected relay servers appear.")
+                .bold()
+        case .none:
+            return Text("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
+                .bold()
         }
     }
     
@@ -202,25 +199,21 @@ struct ContentView: View {
                 EmptyView()
             }
         }
-        .navigationBarTitle({
-            switch selected_timeline {
-            case .home:
-                return NSLocalizedString("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.")
-            case .dms:
-                return NSLocalizedString("DMs", comment: "Navigation bar title for DMs view, where DM is the English abbreviation for Direct Message.")
-            case .notifications:
-                return NSLocalizedString("Notifications", comment: "Navigation bar title for Notifications view.")
-            case .search:
-                return NSLocalizedString("Universe 🛸", comment: "Navigation bar title for the universal view where posts from all connected relay servers appear.")
-            case .none:
-                return NSLocalizedString("", comment: "Toolbar label for unknown views. This label would be displayed only if a new timeline view is added but a toolbar label was not explicitly assigned to it yet.")
-            }
-        }(), displayMode: .inline)
+        .navigationBarTitle(timelineNavItem, displayMode: .inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                timelineNavItem
-                    .opacity(isSideBarOpened ? 0 : 1)
-                    .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
+                VStack {
+                    if selected_timeline == .home {
+                        Image("damus-home")
+                            .resizable()
+                            .frame(width:30,height:30)
+                            .shadow(color: Color("DamusPurple"), radius: 2)
+                    } else {
+                        timelineNavItem
+                            .opacity(isSideBarOpened ? 0 : 1)
+                            .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
+                    }
+                }
             }
         }
         .ignoresSafeArea(.keyboard)
