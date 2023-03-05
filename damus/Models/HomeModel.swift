@@ -453,6 +453,11 @@ class HomeModel: ObservableObject {
     }
 
     func handle_notification(ev: NostrEvent) {
+        // don't show notifications from ourselves
+        guard ev.pubkey != damus_state.pubkey else {
+            return
+        }
+        
         guard event_has_our_pubkey(ev, our_pubkey: self.damus_state.pubkey) else {
             return
         }
