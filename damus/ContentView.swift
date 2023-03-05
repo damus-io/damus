@@ -147,7 +147,7 @@ struct ContentView: View {
         search_open = false
         isSideBarOpened = false
     }
-
+    
     var timelineNavItem: Text {
         switch selected_timeline {
         case .home:
@@ -199,7 +199,7 @@ struct ContentView: View {
                 EmptyView()
             }
         }
-        .navigationBarTitle(timelineNavItem, displayMode: .inline)
+        .navigationBarTitle(timeline_name(selected_timeline), displayMode: .inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
                 VStack {
@@ -348,7 +348,7 @@ struct ContentView: View {
                     active_profile = ref.ref_id
                     profile_open = true
                 } else if ref.key == "e" {
-                    find_event(state: damus_state!, evid: ref.ref_id, find_from: nil) { ev in
+                    find_event(state: damus_state!, evid: ref.ref_id, search_type: .event, find_from: nil) { ev in
                         if let ev {
                             active_event = ev
                         }
@@ -767,7 +767,7 @@ func setup_notifications() {
 }
 
 
-func find_event(state: DamusState, evid: String, find_from: [String]?, callback: @escaping (NostrEvent?) -> ()) {
+func find_event(state: DamusState, evid: String, search_type: SearchType, find_from: [String]?, callback: @escaping (NostrEvent?) -> ()) {
     if let ev = state.events.lookup(evid) {
         callback(ev)
         return
@@ -776,7 +776,13 @@ func find_event(state: DamusState, evid: String, find_from: [String]?, callback:
     let subid = UUID().description
     
     var has_event = false
-    var filter = NostrFilter.filter_ids([ evid ])
+    
+    var filter = search_type == .event ? NostrFilter.filter_ids([ evid ]) : NostrFilter.filter_authors([ evid ])
+    
+    if search_type == .profile {
+        filter.kinds = [0]
+    }
+    
     filter.limit = 1
     var attempts = 0
     
@@ -806,5 +812,22 @@ func find_event(state: DamusState, evid: String, find_from: [String]?, callback:
             break
         }
 
+    }
+}
+
+
+func timeline_name(_ timeline: Timeline?) -> String {
+    guard let timeline else {
+        return ""
+    }
+    switch timeline {
+    case .home:
+        return "Home"
+    case .notifications:
+        return "Notifications"
+    case .search:
+        return "Universe 🛸"
+    case .dms:
+        return "DMs"
     }
 }

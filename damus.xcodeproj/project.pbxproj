@@ -171,7 +171,8 @@
 		4CC7AAF8297F1CEE00430951 /* EventProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAF7297F1CEE00430951 /* EventProfile.swift */; };
 		4CC7AAFA297F64AC00430951 /* EventMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAF9297F64AC00430951 /* EventMenu.swift */; };
 		4CCEB7A929B29DD50078AA28 /* SearchResultsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CCEB7A829B29DD50078AA28 /* SearchResultsModel.swift */; };
-		4CCEB7AB29B2A1320078AA28 /* SearchedEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CCEB7AA29B2A1320078AA28 /* SearchedEventView.swift */; };
+		4CCEB7AE29B53D260078AA28 /* SearchingEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CCEB7AD29B53D260078AA28 /* SearchingEventView.swift */; };
+		4CCEB7B029B5415A0078AA28 /* SearchingProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CCEB7AF29B5415A0078AA28 /* SearchingProfileView.swift */; };
 		4CD7641B28A1641400B6928F /* EndBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD7641A28A1641400B6928F /* EndBlock.swift */; };
 		4CE0E2AF29A2E82100DB4CA2 /* EventHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0E2AE29A2E82100DB4CA2 /* EventHolder.swift */; };
 		4CE0E2B229A3DF6900DB4CA2 /* LoadMoreButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0E2B129A3DF6900DB4CA2 /* LoadMoreButton.swift */; };
@@ -513,7 +514,8 @@
 		4CC7AAF7297F1CEE00430951 /* EventProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventProfile.swift; sourceTree = "<group>"; };
 		4CC7AAF9297F64AC00430951 /* EventMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventMenu.swift; sourceTree = "<group>"; };
 		4CCEB7A829B29DD50078AA28 /* SearchResultsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsModel.swift; sourceTree = "<group>"; };
-		4CCEB7AA29B2A1320078AA28 /* SearchedEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SearchedEventView.swift; path = ../../Models/SearchedEventView.swift; sourceTree = "<group>"; };
+		4CCEB7AD29B53D260078AA28 /* SearchingEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchingEventView.swift; sourceTree = "<group>"; };
+		4CCEB7AF29B5415A0078AA28 /* SearchingProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchingProfileView.swift; sourceTree = "<group>"; };
 		4CD7641A28A1641400B6928F /* EndBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndBlock.swift; sourceTree = "<group>"; };
 		4CE0E2AE29A2E82100DB4CA2 /* EventHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventHolder.swift; sourceTree = "<group>"; };
 		4CE0E2B129A3DF6900DB4CA2 /* LoadMoreButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadMoreButton.swift; sourceTree = "<group>"; };
@@ -761,6 +763,7 @@
 		4C75EFA227FA576C0006080F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4CCEB7AC29B53D180078AA28 /* Search */,
 				4C30AC7029A5676F00E2BD5A /* Notifications */,
 				4CE0E2B029A3DF4700DB4CA2 /* Timeline */,
 				4CE879562996C44A00F758CC /* Zaps */,
@@ -930,7 +933,6 @@
 			isa = PBXGroup;
 			children = (
 				4CC7AAEF297F11C700430951 /* SelectedEventView.swift */,
-				4CCEB7AA29B2A1320078AA28 /* SearchedEventView.swift */,
 				4CC7AAF1297F129C00430951 /* EmbeddedEventView.swift */,
 				4CC7AAF3297F18B400430951 /* ReplyDescription.swift */,
 				4CC7AAF5297F1A6A00430951 /* EventBody.swift */,
@@ -948,6 +950,15 @@
 			isa = PBXGroup;
 			children = (
 				4CCEB7A829B29DD50078AA28 /* SearchResultsModel.swift */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
+		4CCEB7AC29B53D180078AA28 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				4CCEB7AD29B53D260078AA28 /* SearchingEventView.swift */,
+				4CCEB7AF29B5415A0078AA28 /* SearchingProfileView.swift */,
 			);
 			path = Search;
 			sourceTree = "<group>";
@@ -1388,6 +1399,7 @@
 				4CE8794829941DA700F758CC /* RelayFilters.swift in Sources */,
 				4CEE2B02280B39E800AB5EEF /* EventActionBar.swift in Sources */,
 				4C3BEFE0281DE1ED00B3DE84 /* DamusState.swift in Sources */,
+				4CCEB7AE29B53D260078AA28 /* SearchingEventView.swift in Sources */,
 				4CF0ABE929844AF100D66079 /* AnyCodable.swift in Sources */,
 				4C0A3F8F280F640A000448DE /* ThreadModel.swift in Sources */,
 				4CC7AAF2297F129C00430951 /* EmbeddedEventView.swift in Sources */,
@@ -1396,6 +1408,7 @@
 				4C3BEFD22819DB9B00B3DE84 /* ProfileModel.swift in Sources */,
 				4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */,
 				7C95CAEE299DCEF1009DCB67 /* KFOptionSetter+.swift in Sources */,
+				4CCEB7B029B5415A0078AA28 /* SearchingProfileView.swift in Sources */,
 				BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */,
 				3169CAE6294E69C000EE4006 /* EmptyTimelineView.swift in Sources */,
 				4CC7AAF0297F11C700430951 /* SelectedEventView.swift in Sources */,
@@ -1408,7 +1421,6 @@
 				4C3A1D3729637E0500558C0F /* PreviewCache.swift in Sources */,
 				4C3EA67528FF7A5A00C48A62 /* take.c in Sources */,
 				4C3AC7A12835A81400E1F516 /* SetupView.swift in Sources */,
-				4CCEB7AB29B2A1320078AA28 /* SearchedEventView.swift in Sources */,
 				4C06670128FC7C5900038D2A /* RelayView.swift in Sources */,
 				4C285C8C28398BC7008A31F1 /* Keys.swift in Sources */,
 				4CACA9DC280C38C000D9BBE8 /* Profiles.swift in Sources */,
