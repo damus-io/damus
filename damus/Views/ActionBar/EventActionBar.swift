@@ -169,7 +169,7 @@ struct LikeButton: View {
     @Environment(\.colorScheme) var colorScheme
 
     // Following four are Shaka animation properties
-    let timer = Timer.publish(every: 0.05, on: .main, in: .common).autoconnect()
+    let timer = Timer.publish(every: 0.10, on: .main, in: .common).autoconnect()
     @State private var shouldAnimate = false
     @State private var rotationAngle = 0.0
     @State private var amountOfAngleIncrease: Double = 0.0
@@ -197,9 +197,9 @@ struct LikeButton: View {
             }
             amountOfAngleIncrease = -amountOfAngleIncrease
             if amountOfAngleIncrease < 0 {
-                amountOfAngleIncrease += 5
+                amountOfAngleIncrease += 2.5
             } else {
-                amountOfAngleIncrease -= 5
+                amountOfAngleIncrease -= 2.5
             }
         }
     }
