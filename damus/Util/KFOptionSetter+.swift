@@ -17,6 +17,7 @@ extension KFOptionSetter {
         options.backgroundDecode = true
         options.cacheOriginalImage = true
         options.scaleFactor = UIScreen.main.scale
+        options.onlyLoadFirstFrame = should_disable_image_animation()
         
         options.processor = CustomImageProcessor(
             maxSize: imageContext.maxMebibyteSize(),

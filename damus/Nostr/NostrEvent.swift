@@ -215,6 +215,16 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
             }
         }
     }
+    
+    public func thread_id(privkey: String?) -> String {
+        for ref in event_refs(privkey) {
+            if let thread_id = ref.is_thread_id {
+                return thread_id.ref_id
+            }
+        }
+        
+        return self.id
+    }
 
     public func last_refid() -> ReferencedId? {
         var mlast: Int? = nil
