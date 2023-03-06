@@ -329,7 +329,7 @@ struct ProfileView: View {
                 actionSection(profile_data: profile_data)
             }
             
-            let follows_you = profile.follows(pubkey: damus_state.pubkey)
+            let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
             ProfileNameView(pubkey: profile.pubkey, profile: profile_data, follows_you: follows_you, damus: damus_state)
         }
     }
