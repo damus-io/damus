@@ -103,6 +103,8 @@ Contributors welcome! Start by examining known issues: https://github.com/damus-
 ### Privacy
 Your internet protocol (IP) address is exposed to the relays you connect to, and third party media hosters (e.g. nostr.build, imgur.com, giphy.com, youtube.com etc.) that render on Damus. If you want to improve your privacy, consider utilizing a service that masks your IP address (e.g. a VPN) from trackers online.
 
+The relay also learns which public keys you are requesting, meaning your public key will be tied to your IP address.
+
 ### Translations
 
 Translators welcome! Join the [Transifex][transifex] project.
