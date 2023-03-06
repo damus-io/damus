@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum NotificationFilterState {
+enum NotificationFilterState: String {
     case all
     case zaps
     case replies
@@ -27,9 +27,15 @@ enum NotificationFilterState {
 struct NotificationsView: View {
     let state: DamusState
     @ObservedObject var notifications: NotificationsModel
-    @State var filter_state: NotificationFilterState = .all
+    @State var filter_state: NotificationFilterState
     
     @Environment(\.colorScheme) var colorScheme
+    
+    init(state: DamusState, notifications: NotificationsModel) {
+        self.state = state
+        self._notifications = ObservedObject(initialValue: notifications)
+        self._filter_state = State(initialValue: load_notification_filter_state(pubkey: state.pubkey))
+    }
     
     var body: some View {
         TabView(selection: $filter_state) {
@@ -44,6 +50,9 @@ struct NotificationsView: View {
             NotificationTab(NotificationFilterState.replies)
                 .tag(NotificationFilterState.replies)
                 .id(NotificationFilterState.replies)
+        }
+        .onChange(of: filter_state) { val in
+            save_notification_filter_state(pubkey: state.pubkey, state: val)
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
@@ -99,6 +108,30 @@ struct NotificationsView: View {
 
 struct NotificationsView_Previews: PreviewProvider {
     static var previews: some View {
-        NotificationsView(state: test_damus_state(), notifications: NotificationsModel(), filter_state: .all )
+        NotificationsView(state: test_damus_state(), notifications: NotificationsModel())
     }
+}
+
+func notification_filter_state_key(pubkey: String) -> String {
+    return pk_setting_key(pubkey, key: "notification_filter_state")
+}
+
+func load_notification_filter_state(pubkey: String) -> NotificationFilterState {
+    let key = notification_filter_state_key(pubkey: pubkey)
+    
+    guard let state_str = UserDefaults.standard.string(forKey: key) else {
+        return .all
+    }
+    
+    guard let state = NotificationFilterState(rawValue: state_str) else {
+        return .all
+    }
+    
+    return state
+}
+
+
+func save_notification_filter_state(pubkey: String, state: NotificationFilterState)  {
+    let key = notification_filter_state_key(pubkey: pubkey)
+    UserDefaults.standard.set(state.rawValue, forKey: key)
 }
