@@ -14,6 +14,28 @@ enum NotificationItem {
     case event_zap(String, ZapGroup)
     case reply(NostrEvent)
     
+    var is_reply: NostrEvent? {
+        if case .reply(let ev) = self {
+            return ev
+        }
+        return nil
+    }
+    
+    var is_zap: ZapGroup? {
+        switch self {
+        case .profile_zap(let zapgrp):
+            return zapgrp
+        case .event_zap(_, let zapgrp):
+            return zapgrp
+        case .reaction:
+            return nil
+        case .reply:
+            return nil
+        case .repost:
+            return nil
+        }
+    }
+    
     var id: String {
         switch self {
         case .repost(let evid, _):

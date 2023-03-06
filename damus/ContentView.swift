@@ -187,10 +187,8 @@ struct ContentView: View {
                 PostingTimelineView
                 
             case .notifications:
-                VStack(spacing: 0) {
-                    Divider()
-                    NotificationsView(state: damus, notifications: home.notifications)
-                }
+                NotificationsView(state: damus, notifications: home.notifications)
+                
             case .dms:
                 DirectMessagesView(damus_state: damus_state!)
                     .environmentObject(home.dms)
