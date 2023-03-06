@@ -26,7 +26,6 @@ struct EventActionBar: View {
     
     // just used for previews
     @State var sheet: ActionBarSheet? = nil
-    @State var confirm_boost: Bool = false
     @State var show_share_sheet: Bool = false
     @State var show_share_action: Bool = false
     
@@ -60,7 +59,7 @@ struct EventActionBar: View {
                     if bar.boosted {
                         notify(.delete, bar.our_boost)
                     } else {
-                        self.confirm_boost = true
+                        send_boost()
                     }
                 }
                 .accessibilityLabel(NSLocalizedString("Boosts", comment: "Accessibility label for boosts button"))
@@ -115,16 +114,6 @@ struct EventActionBar: View {
                 }
             }
         }
-        .alert(NSLocalizedString("Repost", comment: "Title of alert for confirming to repost a post."), isPresented: $confirm_boost) {
-            Button(NSLocalizedString("Cancel", comment: "Button to cancel out of reposting a post.")) {
-                confirm_boost = false
-            }
-            Button(NSLocalizedString("Repost", comment: "Button to confirm reposting a post.")) {
-                send_boost()
-            }
-        } message: {
-            Text("Are you sure you want to repost this?", comment: "Alert message to ask if user wants to repost a post.")
-        }
         .onReceive(handle_notify(.update_stats)) { n in
             let target = n.object as! String
             guard target == self.event.id else { return }
@@ -151,7 +140,7 @@ struct EventActionBar: View {
         
         self.bar.our_boost = boost
         
-        damus_state.pool.send(.event(boost))
+        notify(.boost, boost)
     }
     
     func send_like() {

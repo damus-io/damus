@@ -89,6 +89,7 @@ struct ContentView: View {
     @State var confirm_block: Bool = false
     @State var user_blocked_confirm: Bool = false
     @State var confirm_overwrite_mutelist: Bool = false
+    @State var current_boost: NostrEvent? = nil
     @State var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
@@ -369,12 +370,7 @@ struct ContentView: View {
             
         }
         .onReceive(handle_notify(.boost)) { notif in
-            guard let privkey = self.privkey else {
-                return
-            }
-            let ev = notif.object as! NostrEvent
-            let boost = make_boost_event(pubkey: pubkey, privkey: privkey, boosted: ev)
-            self.damus_state?.pool.send(.event(boost))
+            current_boost = (notif.object as? NostrEvent)
         }
         .onReceive(handle_notify(.open_thread)) { obj in
             //let ev = obj.object as! NostrEvent
@@ -565,6 +561,16 @@ struct ContentView: View {
                 Text("Could not find user to block...", comment: "Alert message to indicate that the blocked user could not be found.")
             }
         })
+        .alert(NSLocalizedString("Repost", comment: "Title of alert for confirming to repost a post."), isPresented: $current_boost.mappedToBool()) {
+            Button(NSLocalizedString("Cancel", comment: "Button to cancel out of reposting a post.")) {
+                current_boost = nil
+            }
+            Button(NSLocalizedString("Repost", comment: "Button to confirm reposting a post.")) {
+                self.damus_state?.pool.send(.event(current_boost!))
+            }
+        } message: {
+            Text("Are you sure you want to repost this?", comment: "Alert message to ask if user wants to repost a post.")
+        }
     }
     
     func switch_timeline(_ timeline: Timeline) {
