@@ -24,6 +24,7 @@ struct SelectableText: View {
                 fixedWidth: selectedTextWidth,
                 height: $selectedTextHeight
             )
+            .padding([.leading, .trailing], -1.0)
             .onAppear {
                 self.selectedTextWidth = geo.size.width
             }
@@ -52,6 +53,8 @@ struct SelectableText: View {
         view.backgroundColor = .clear
         view.textContainer.lineFragmentPadding = 0
         view.textContainerInset = .zero
+        view.textContainerInset.left = 1.0
+        view.textContainerInset.right = 1.0
         return view
     }
 
