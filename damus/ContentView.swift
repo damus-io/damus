@@ -181,7 +181,13 @@ struct ContentView: View {
             }
             switch selected_timeline {
             case .search:
-                SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
+                if #available(iOS 16.0, *) {
+                    SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
+                        .scrollDismissesKeyboard(.immediately)
+                } else {
+                    // Fallback on earlier versions
+                    SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
+                }
                 
             case .home:
                 PostingTimelineView
