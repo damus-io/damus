@@ -65,6 +65,8 @@ struct EditMetadataView: View {
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
+
+    @State var confirm_ln_address: Bool = false
     
     init (damus_state: DamusState) {
         self.damus_state = damus_state
@@ -101,6 +103,14 @@ struct EditMetadataView: View {
         
         if let metadata_ev = m_metadata_ev {
             damus_state.pool.send(.event(metadata_ev))
+        }
+    }
+
+    func is_ln_valid(ln: String) -> Bool {
+        if ln.contains("@") || ln.lowercased().starts(with: "lnurl") {
+            return true
+        } else {
+            return false
         }
     }
     
@@ -201,8 +211,18 @@ struct EditMetadataView: View {
                 })
 
                 Button(NSLocalizedString("Save", comment: "Button for saving profile.")) {
-                    save()
-                    dismiss()
+                    if !ln.isEmpty && !is_ln_valid(ln: ln) {
+                        confirm_ln_address = true
+                    } else {
+                        save()
+                        dismiss()
+                    }
+                }
+                .alert(NSLocalizedString("Invalid Tip Address", comment: "Title of alerting as invalid tip address."), isPresented: $confirm_ln_address) {
+                    Button(NSLocalizedString("Ok", comment: "Button to dismiss the alert.")) {
+                    }
+                } message: {
+                    Text("The address should either begin with LNURL or should look like an email address.", comment: "Giving the description of the alert message.")
                 }
             }
         }
@@ -215,3 +235,8 @@ struct EditMetadataView_Previews: PreviewProvider {
         EditMetadataView(damus_state: test_damus_state())
     }
 }
+
+// presenttyphoon59@walletofsatoshi.com
+// lnbc10u1pjq0f3zpp53c7k6nhu582t0fg5tfcmhhyst5dg5dhjv8ssvar59wjlcz2qtsvqdqu2askcmr9wssx7e3q2dshgmmndp5scqzpgxqyz5vqsp5ntcns4unjsdsaupht022day0crwka39e0cg8wjp8vkhylcf3hcvs9qyyssqnfkn80lelc7xwsax9gr5a7u6mj8y0jv56ny8tzd2xhgvyphys88xycqtre5f5uc3htxn3phdcx0vnjngf4fdmdp3zw0anp7emf6l2hspv6jwvu
+
+// lnurl1dp68gurn8ghj7ampd3kx2ar0veekzar0wd5xjtnrdakj7tnhv4kxctttdehhwm30d3h82unvwqhhqun9wdjkuar509cxsmm0dc6njs8xgfl
