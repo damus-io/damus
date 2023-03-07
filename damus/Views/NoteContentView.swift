@@ -32,6 +32,7 @@ struct NoteContentView: View {
 
     @State var artifacts: NoteArtifacts
     @State var preview: LinkViewRepresentable?
+    @State private var blur_images: Bool = true
     
     init(damus_state: DamusState, event: NostrEvent, show_images: Bool, size: EventViewKind, artifacts: NoteArtifacts, truncate: Bool) {
         self.damus_state = damus_state
@@ -46,6 +47,8 @@ struct NoteContentView: View {
     }
     
     func MainContent() -> some View {
+        
+        
         return VStack(alignment: .leading) {
             
             if size == .selected {
@@ -60,9 +63,12 @@ struct NoteContentView: View {
                 ImageCarousel(urls: artifacts.images)
             } else if !show_images && artifacts.images.count > 0 {
                 ZStack {
-                    ImageCarousel(urls: artifacts.images)
-                    Blur()
-                        .disabled(true)
+                    ImageCarousel(urls: artifacts.images).onLongPressGesture {
+                        blur_images = false
+                    }
+                    if blur_images {
+                        Blur().disabled(true)
+                    }
                 }
                 .cornerRadius(10)
             }
