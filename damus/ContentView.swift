@@ -210,6 +210,7 @@ struct ContentView: View {
                             .shadow(color: Color("DamusPurple"), radius: 2)
                     } else {
                         timelineNavItem
+                            .frame(width:300,height:30)
                             .opacity(isSideBarOpened ? 0 : 1)
                             .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
                     }
