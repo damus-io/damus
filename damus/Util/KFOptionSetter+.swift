@@ -14,20 +14,18 @@ extension KFOptionSetter {
         options.callbackQueue = .dispatch(.global(qos: .background))
         options.processingQueue = .dispatch(.global(qos: .background))
         options.downloader = CustomImageDownloader.shared
-        options.backgroundDecode = true
-        options.cacheOriginalImage = true
-        options.scaleFactor = UIScreen.main.scale
-        options.onlyLoadFirstFrame = should_disable_image_animation()
-        
         options.processor = CustomImageProcessor(
             maxSize: imageContext.maxMebibyteSize(),
             downsampleSize: imageContext.downsampleSize()
         )
-        
         options.cacheSerializer = CustomCacheSerializer(
             maxSize: imageContext.maxMebibyteSize(),
             downsampleSize: imageContext.downsampleSize()
         )
+        options.backgroundDecode = true
+        options.cacheOriginalImage = true
+        options.scaleFactor = UIScreen.main.scale
+        options.onlyLoadFirstFrame = should_disable_image_animation()
         
         return self
     }
