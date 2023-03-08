@@ -138,7 +138,7 @@ struct EventProfileName: View {
                 + Text(real_name.isEmpty ? "" : " ")
 
                 + Text(verbatim: "@\(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey))")
-                    .foregroundColor(Color("DamusMediumGrey"))
+                    .foregroundColor(.gray)
                     .font(eventviewsize_to_font(size))
                 
             } else {
