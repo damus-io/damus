@@ -36,11 +36,15 @@ struct TextEvent: View {
             }
 
             VStack(alignment: .leading) {
-                HStack(alignment: .center) {
+                HStack(alignment: .center, spacing: 0) {
                     let pk = is_anon ? "anon" : pubkey
                     EventProfileName(pubkey: pk, profile: profile, damus: damus, show_friend_confirmed: true, size: .normal)
                     
+                    Text("⋅")
+                        .font(.footnote)
+                        .foregroundColor(.gray)
                     Text(verbatim: "\(format_relative_time(event.created_at))")
+                        .font(.system(size: 16))
                         .foregroundColor(.gray)
                     
                     Spacer()
