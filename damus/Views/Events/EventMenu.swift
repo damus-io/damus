@@ -13,6 +13,8 @@ struct EventMenuContext: View {
     let target_pubkey: String
     let bookmarks: BookmarksManager
     
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
         HStack {
             Menu {
@@ -21,12 +23,11 @@ struct EventMenuContext: View {
                 
             } label: {
                 Label(NSLocalizedString("", comment: "Context menu"), systemImage: "ellipsis")
-                    .foregroundColor(Color.gray)
+                    .foregroundColor(colorScheme == .light ? Color(.lightGray) : Color("DamusMediumGrey"))
             }
         }
         .contentShape(Rectangle())
         .onTapGesture {}
-        
     }
 }
 
