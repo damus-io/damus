@@ -148,6 +148,7 @@ struct CustomizeZapView: View {
                 self.invoice = inv
                 self.showing_wallet_selector = true
             } else {
+                end_editing()
                 open_with_wallet(wallet: get_default_wallet(state.pubkey).model, invoice: inv)
                 self.showing_wallet_selector = false
                 dismiss()
