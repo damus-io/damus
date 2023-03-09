@@ -28,8 +28,11 @@ struct EventActionBar: View {
     @State var sheet: ActionBarSheet? = nil
     @State var confirm_boost: Bool = false
     @State var show_share_sheet: Bool = false
+    @State var show_share_action: Bool = false
     
     @ObservedObject var bar: ActionBarModel
+    
+    @Environment(\.colorScheme) var colorScheme
     
     init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil, test_lnurl: String? = nil) {
         self.damus_state = damus_state
@@ -88,9 +91,22 @@ struct EventActionBar: View {
 
             Spacer()
             EventActionButton(img: "square.and.arrow.up", col: Color.gray) {
-                show_share_sheet = true
+                show_share_action = true
             }
             .accessibilityLabel(NSLocalizedString("Share", comment: "Button to share a post"))
+        }
+        .sheet(isPresented: $show_share_action) {
+            if #available(iOS 16.0, *) {
+                ShareAction(event: event, bookmarks: damus_state.bookmarks, show_share_sheet: $show_share_sheet, show_share_action: $show_share_action)
+                    .presentationDetents([.height(300)])
+                    .presentationDragIndicator(.visible)
+            } else {
+                if let note_id = bech32_note_id(event.id) {
+                    if let url = URL(string: "https://damus.io/" + note_id) {
+                        ShareSheet(activityItems: [url])
+                    }
+                }
+            }
         }
         .sheet(isPresented: $show_share_sheet) {
             if let note_id = bech32_note_id(event.id) {
