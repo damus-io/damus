@@ -4,10 +4,10 @@ run-name: Testing ${{ github.ref }} by @${{ github.actor }}
 on:
   push:
     branches:
-      - "master"
+      - "**"
   pull_request:
     branches:
-      - "*"
+      - "**"
 
 
 jobs:
