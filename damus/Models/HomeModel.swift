@@ -144,9 +144,27 @@ class HomeModel: ObservableObject {
         if !notifications.insert_zap(zap) {
             return
         }
-        
-        handle_last_event(ev: ev, timeline: .notifications)
+
+        if handle_last_event(ev: ev, timeline: .notifications) {
+            // Generate zap vibration
+            handle_zap_vibrate(equivalent_to: zap.invoice.amount)
+        }
+
         return
+    }
+
+    func handle_zap_vibrate(equivalent_to zap_amount: Int64) {
+        let sats = zap_amount / 1000
+        var vibration_generator: UIImpactFeedbackGenerator
+        if sats >= 10000 {
+            vibration_generator = UIImpactFeedbackGenerator(style: .heavy)
+        } else if sats >= 1000 {
+            vibration_generator = UIImpactFeedbackGenerator(style: .medium)
+        } else {
+            vibration_generator = UIImpactFeedbackGenerator(style: .light)
+        }
+        vibration_generator.impactOccurred()
+        print("Vibrate")
     }
     
     func handle_zap_event(_ ev: NostrEvent) {
@@ -477,10 +495,14 @@ class HomeModel: ObservableObject {
         
         handle_last_event(ev: ev, timeline: .notifications)
     }
-    
-    func handle_last_event(ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) {
+
+    @discardableResult
+    func handle_last_event(ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) -> Bool {
         if let new_bits = handle_last_events(new_events: self.new_events, ev: ev, timeline: timeline, shouldNotify: shouldNotify) {
             new_events = new_bits
+            return true
+        } else {
+            return false
         }
     }
 
