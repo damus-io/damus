@@ -194,8 +194,10 @@ struct ConfigView: View {
                     }
                 }
 
-                Section(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen")) {
+                Section(NSLocalizedString("Miscellaneous", comment: "Section header for miscellaneous user configuration")) {
                     Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)
+                        .toggleStyle(.switch)
+                    Toggle(NSLocalizedString("Zap Vibration", comment: "Setting to enable vibration on zap"), isOn: $settings.zap_vibration)
                         .toggleStyle(.switch)
                 }
 
