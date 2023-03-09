@@ -206,7 +206,7 @@ struct EditMetadataView: View {
                 }
             }
         }
-        .ignoresSafeArea()
+        .ignoresSafeArea(edges: .top)
     }
 }
 
