@@ -50,6 +50,30 @@
 			<string>المتابِعون</string>
 		</dict>
 	</dict>
+	<key>following_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWING@</string>
+		<key>FOLLOWING</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>المتابَعون</string>
+			<key>one</key>
+			<string>المتابَعون</string>
+			<key>two</key>
+			<string>المتابَعون</string>
+			<key>few</key>
+			<string>المتابَعون</string>
+			<key>many</key>
+			<string>المتابَعون</string>
+			<key>other</key>
+			<string>المتابَعون</string>
+		</dict>
+	</dict>
 	<key>reacted_tagged_in_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -89,7 +113,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d مستخدم آخر تفاعل مع منشورك</string>
 			<key>two</key>
-			<string>%2$@ و %1$d آخران تفاعلوا مع منشورك</string>
+			<string>%2$@ و %1$d آخران تفاعلا مع منشورك</string>
 			<key>few</key>
 			<string>%2$@ و %1$d آخرون تفاعلوا مع منشورك</string>
 			<key>many</key>
@@ -211,7 +235,7 @@
 			<key>two</key>
 			<string>%2$@ و %1$d مستخدمان آخران نشروا منشورا تمت الإشارة لك فيه</string>
 			<key>few</key>
-			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d آخرون نشروا منشورا تمت الإشارة لك فيه</string>
 			<key>many</key>
 			<string>%2$@ و %1$d مستخدم آخر نشروا منشورا تمت الإشارة لك فيه</string>
 			<key>other</key>
@@ -235,7 +259,7 @@
 			<key>two</key>
 			<string>%2$@ و %1$d مستخدمان آخران نشروا منشورك</string>
 			<key>few</key>
-			<string>%2$@ و %1$d مستخدمون آخرون نشروا منشورك</string>
+			<string>%2$@ و %1$d آخرون نشروا منشورك</string>
 			<key>many</key>
 			<string>%2$@ و %1$d مستخدم آخر نشروا منشورك</string>
 			<key>other</key>
@@ -259,7 +283,7 @@
 			<key>two</key>
 			<string>%2$@ و %1$d مستخدمان آخران نشروا حسابك</string>
 			<key>few</key>
-			<string>%2$@ و %1$d مستخدمون آخرون نشروا حسابك</string>
+			<string>%2$@ و %1$d آخرون نشروا حسابك</string>
 			<key>many</key>
 			<string>%2$@ و %1$d مستخدم آخر نشروا حسابك</string>
 			<key>other</key>
@@ -331,7 +355,7 @@
 			<key>two</key>
 			<string>%2$@ و %1$d مستخدمان آخران ومّضوا منشورا تمت الإشارة لك فيه</string>
 			<key>few</key>
-			<string>%2$@ و %1$d مستخدم آخر ومّضوا منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d آخررن ومّضوا منشورا تمت الإشارة لك فيه</string>
 			<key>many</key>
 			<string>%2$@ و %1$d مستخدم آخر ومّضوا منشورا تمت الإشارة لك فيه</string>
 			<key>other</key>
@@ -355,7 +379,7 @@
 			<key>two</key>
 			<string>%2$@ و %1$d مستخدمان آخران ومّضوا منشورك</string>
 			<key>few</key>
-			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا منشورك</string>
+			<string>%2$@ و %1$d آخرون ومّضوا منشورك</string>
 			<key>many</key>
 			<string>%2$@ و %1$d مستخدم آخر ومّضوا منشورك</string>
 			<key>other</key>
@@ -379,7 +403,7 @@
 			<key>two</key>
 			<string>%2$@ و %1$d مستخدمان آخران ومّضوا حسابك</string>
 			<key>few</key>
-			<string>%2$@ و %1$d مستخدمون آخرون ومّضوا حسابك</string>
+			<string>%2$@ و %1$d آخرون ومّضوا حسابك</string>
 			<key>many</key>
 			<string>%2$@ و %1$d مستخدم آخر ومّضوا حسابك</string>
 			<key>other</key>

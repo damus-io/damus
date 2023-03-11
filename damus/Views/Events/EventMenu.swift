@@ -20,7 +20,7 @@ struct EventMenuContext: View {
                 MenuItems(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks)
                 
             } label: {
-                Label(NSLocalizedString("", comment: "Context menu"), systemImage: "ellipsis")
+                Label("", systemImage: "ellipsis")
                     .foregroundColor(Color.gray)
             }
         }
