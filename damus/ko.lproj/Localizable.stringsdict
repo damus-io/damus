@@ -223,7 +223,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 외 %1$d 명이 내 포스트에 잽을 날렸습니다</string>
+			<string>%2$@ 님 외 %1$d 명이 내 포스트에 잽을 날렸습니다</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -237,7 +237,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 외 %1$d 명이 내 프로필에 잽을 날렸습니다</string>
+			<string>%2$@ 님 외 %1$d 명이 내 프로필에 잽을 날렸습니다</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
