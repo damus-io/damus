@@ -209,7 +209,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 외 %1$d 명이 내가 태그된 포스트에 잽을 날렸습니다</string>
+			<string>%2$@ 님 외 %1$d 명이 내가 태그된 포스트에 잽을 날렸습니다</string>
 		</dict>
 	</dict>
 	<key>zapped_your_post_3</key>
