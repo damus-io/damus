@@ -96,7 +96,7 @@ func search_changed(profiles: Profiles, _ new: String) -> Search? {
     }
     
     if new.first! == "#" {
-        let ht = String(new.dropFirst())
+        let ht = String(new.dropFirst().filter{$0 != " "})
         return .hashtag(ht)
     }
     
