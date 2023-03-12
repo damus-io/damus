@@ -125,7 +125,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@, %3$@ 외 %1$d 명에게 보내는 답글</string>
+			<string>%2$@, %3$@ 님 외 %1$d 명에게 보내는 답글</string>
 		</dict>
 	</dict>
 	<key>reposted_tagged_in_3</key>
