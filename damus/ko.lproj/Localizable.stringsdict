@@ -83,7 +83,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 외 %1$d 명이 내 프로필에 리액션을 보냈습니다</string>
+			<string>%2$@ 님 외 %1$d 명이 내 프로필에 리액션을 보냈습니다</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
