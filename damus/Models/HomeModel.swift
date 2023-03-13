@@ -145,7 +145,7 @@ class HomeModel: ObservableObject {
             return
         }
 
-        if handle_last_event(ev: ev, timeline: .notifications) {
+        if handle_last_event(ev: ev, timeline: .notifications) && damus_state.settings.zap_vibration {
             // Generate zap vibration
             handle_zap_vibrate(equivalent_to: zap.invoice.amount)
         }

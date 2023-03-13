@@ -101,6 +101,12 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
+    @Published var zap_vibration: Bool {
+        didSet {
+            UserDefaults.standard.set(zap_vibration, forKey: "zap_vibration")
+        }
+    }
+
     @Published var translation_service: TranslationService {
         didSet {
             UserDefaults.standard.set(translation_service.rawValue, forKey: "translation_service")
@@ -178,6 +184,7 @@ class UserSettingsStore: ObservableObject {
         show_wallet_selector = should_show_wallet_selector(pubkey)
 
         left_handed = UserDefaults.standard.object(forKey: "left_handed") as? Bool ?? false
+        zap_vibration = UserDefaults.standard.object(forKey: "zap_vibration") as? Bool ?? false
         disable_animation = should_disable_image_animation()
 
         // Note from @tyiu:

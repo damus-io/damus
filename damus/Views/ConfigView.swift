@@ -26,7 +26,7 @@ struct ConfigView: View {
     @State var delete_text: String = ""
     @State var default_zap_amount: String
     
-    @ObservedObject var settings: UserSettingsStore
+    @ObservedObject var settings: UserSettingsStore = UserSettingsStore()
     
     let generator = UIImpactFeedbackGenerator(style: .light)
     
@@ -194,8 +194,10 @@ struct ConfigView: View {
                     }
                 }
 
-                Section(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen")) {
+                Section(NSLocalizedString("Basic Configuration", comment: "Contains basic user configuration")) {
                     Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)
+                        .toggleStyle(.switch)
+                    Toggle(NSLocalizedString("Zap Vibration", comment: "Enables Zap Vibration Feature"), isOn: $settings.zap_vibration)
                         .toggleStyle(.switch)
                 }
 
