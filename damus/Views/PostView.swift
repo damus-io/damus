@@ -170,24 +170,20 @@ struct PostView: View {
 }
 
 func get_searching_string(_ post: String) -> String? {
-    guard let last_word = post.components(separatedBy: .whitespacesAndNewlines).last else {
+    guard let handle = post.components(separatedBy: .whitespacesAndNewlines).first(where: {$0.first == "@"}) else {
         return nil
     }
     
-    guard last_word.count >= 2 else {
-        return nil
-    }
-    
-    guard last_word.first! == "@" else {
+    guard handle.count >= 2 else {
         return nil
     }
     
     // don't include @npub... strings
-    guard last_word.count != 64 else {
+    guard handle.count != 64 else {
         return nil
     }
     
-    return String(last_word.dropFirst())
+    return String(handle.dropFirst())
 }
 
 struct PostView_Previews: PreviewProvider {
