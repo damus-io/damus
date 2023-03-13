@@ -42,6 +42,26 @@
 			<string>Obserwujący</string>
 		</dict>
 	</dict>
+	<key>following_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWING@</string>
+		<key>FOLLOWING</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Obserwujący</string>
+			<key>few</key>
+			<string>Obserwujących</string>
+			<key>many</key>
+			<string>Obserwujących</string>
+			<key>other</key>
+			<string>Obserwujących</string>
+		</dict>
+	</dict>
 	<key>reacted_tagged_in_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

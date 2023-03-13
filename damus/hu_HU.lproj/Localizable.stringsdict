@@ -13,9 +13,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>... %d other note ...</string>
+			<string>... %d egyéb bejegyzés ...</string>
 			<key>other</key>
-			<string>... %d other notes ...</string>
+			<string>... %d további bejegyzések ...</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -29,9 +29,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Follower</string>
+			<string>Követő</string>
 			<key>other</key>
-			<string>Followers</string>
+			<string>Követők</string>
 		</dict>
 	</dict>
 	<key>following_count</key>
@@ -45,9 +45,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Following</string>
+			<string>Követem</string>
 			<key>other</key>
-			<string>Following</string>
+			<string>Követek</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -61,9 +61,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reacted to a post you were tagged in</string>
+			<string>%2$@ és %1$d más reagált egy bejegyzésre amiben meg voltál jelölve</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reacted to a post you were tagged in</string>
+			<string>%2$@ és %1$d mások reagáltak egy bejegyzésre amiben meg voltál jelölve</string>
 		</dict>
 	</dict>
 	<key>reacted_your_post_3</key>
@@ -77,9 +77,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reacted to your post</string>
+			<string>%2$@ és %1$d más reagált a bejegyzésedre</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reacted to your post</string>
+			<string>%2$@ és %1$d mások reagáltak a bejegyzésedre</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -93,9 +93,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reacted to your profile</string>
+			<string>%2$@ és %1$d más reagált a profilodra</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reacted to your profile</string>
+			<string>%2$@ és %1$d mások reagáltak a profilodra</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
@@ -109,9 +109,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Reaction</string>
+			<string>Reakció</string>
 			<key>other</key>
-			<string>Reactions</string>
+			<string>Reakciók</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -125,9 +125,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Relay</string>
+			<string>Csomópont</string>
 			<key>other</key>
-			<string>Relays</string>
+			<string>Csomópontok</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
@@ -141,9 +141,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Replying to %2$@, %3$@ &amp; %1$d other</string>
+			<string>Válasz a %2$@, %3$@ &amp; %1$d más</string>
 			<key>other</key>
-			<string>Replying to %2$@, %3$@ &amp; %1$d others</string>
+			<string>Válasz a %2$@, %3$@ &amp; %1$d mások</string>
 		</dict>
 	</dict>
 	<key>reposted_tagged_in_3</key>
@@ -157,9 +157,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reposted a post you were tagged in</string>
+			<string>%2$@ és %1$d más megosztotta azt a bejegyzést amiben meg voltál jelölve</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reposted a post you were tagged in</string>
+			<string>%2$@ és %1$d mások megosztották azt a bejegyzést amiben meg voltál jelölve</string>
 		</dict>
 	</dict>
 	<key>reposted_your_post_3</key>
@@ -173,9 +173,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reposted your post</string>
+			<string>%2$@ és %1$d más megosztotta a bejegyzésed</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reposted your post</string>
+			<string>%2$@ és %1$d mások megosztották a bejegyzésed</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -189,9 +189,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reposted your profile</string>
+			<string>%2$@ és %1$d más megosztotta a profilodat</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reposted your profile</string>
+			<string>%2$@ és %1$d mások megosztották a profilodat</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -205,9 +205,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Repost</string>
+			<string>Megosztás</string>
 			<key>other</key>
-			<string>Reposts</string>
+			<string>Megosztások</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -237,9 +237,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other zapped a post you were tagged in</string>
+			<string>%2$@ és %1$d más Zap-elt egy bejegyzést amiben meg voltál jelölve</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others zapped a post you were tagged in</string>
+			<string>%2$@ és %1$d mások Zap-eltek egy bejegyzést amiben meg voltál jelölve</string>
 		</dict>
 	</dict>
 	<key>zapped_your_post_3</key>
@@ -253,9 +253,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other zapped your post</string>
+			<string>%2$@ és %1$d más Zap-elte a bejegyzésed</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others zapped your post</string>
+			<string>%2$@ és %1$d mások Zap-elték a bejegyzésed</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -269,9 +269,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other zapped your profile</string>
+			<string>%2$@ és %1$d más Zap-elte a profilodat</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others zapped your profile</string>
+			<string>%2$@ és %1$d mások Zap-elték a profilodat</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
@@ -287,7 +287,7 @@
 			<key>one</key>
 			<string>Zap</string>
 			<key>other</key>
-			<string>Zaps</string>
+			<string>Zap-ek</string>
 		</dict>
 	</dict>
 </dict>

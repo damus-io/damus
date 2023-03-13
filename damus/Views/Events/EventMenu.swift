@@ -23,7 +23,7 @@ struct EventMenuContext: View {
                 
             } label: {
                 Label(NSLocalizedString("", comment: "Context menu"), systemImage: "ellipsis")
-                    .foregroundColor(colorScheme == .light ? Color(.lightGray) : Color("DamusMediumGrey"))
+                    .foregroundColor(Color.gray)
             }
         }
         .contentShape(Rectangle())

@@ -13,9 +13,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>... %d other note ...</string>
+			<string>... %d یادداشت دیگر ...</string>
 			<key>other</key>
-			<string>... %d other notes ...</string>
+			<string>... %d یادداشت‌های دیگر ...</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -29,9 +29,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Follower</string>
+			<string>دنبال‌کننده</string>
 			<key>other</key>
-			<string>Followers</string>
+			<string>دنبال‌کنندگان</string>
 		</dict>
 	</dict>
 	<key>following_count</key>
@@ -45,9 +45,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Following</string>
+			<string>دنبال‌شونده</string>
 			<key>other</key>
-			<string>Following</string>
+			<string>دنبال‌شوندگان</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -61,9 +61,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reacted to a post you were tagged in</string>
+			<string>%2$@ و %1$d نفر دیگر به یک مطلب که شما در آن تگ شده‌اید بازخورد داده‌اند</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reacted to a post you were tagged in</string>
+			<string>%2$@ و %1$d نفر دیگر به یک مطلب که شما در آن تگ شده‌اید بازخورد داده‌اند</string>
 		</dict>
 	</dict>
 	<key>reacted_your_post_3</key>
@@ -77,9 +77,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reacted to your post</string>
+			<string>%2$@ و %1$d نفر دیگر به مطلب شما بازخورد داده‌اند</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reacted to your post</string>
+			<string>%2$@ و %1$d نفر دیگر به مطلب شما بازخورد داده‌اند</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -93,9 +93,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reacted to your profile</string>
+			<string>%2$@ و %1$d نفر دیگر به نمایه‌ی شما بازخورد داده‌اند</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reacted to your profile</string>
+			<string>%2$@ و %1$d نفر دیگر به نمایه‌ی شما بازخورد داده‌اند</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
@@ -109,9 +109,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Reaction</string>
+			<string>بازخورد</string>
 			<key>other</key>
-			<string>Reactions</string>
+			<string>بازخوردها</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -125,9 +125,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Relay</string>
+			<string>ریلی</string>
 			<key>other</key>
-			<string>Relays</string>
+			<string>رله‌ها</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
@@ -141,9 +141,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Replying to %2$@, %3$@ &amp; %1$d other</string>
+			<string>پاسخ به %2$@، %3$@ و %1$d نفر دیگر</string>
 			<key>other</key>
-			<string>Replying to %2$@, %3$@ &amp; %1$d others</string>
+			<string>پاسخ به %2$@، %3$@ و %1$d نفر دیگر</string>
 		</dict>
 	</dict>
 	<key>reposted_tagged_in_3</key>
@@ -157,9 +157,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reposted a post you were tagged in</string>
+			<string>%2$@ و %1$d نفر دیگر یک مطلب که شما در آن تگ شده‌اید را بازنشر کرده‌اند</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reposted a post you were tagged in</string>
+			<string>%2$@ و %1$d نفر دیگر یک مطلب که شما در آن تگ شده‌اید را بازنشر کرده‌اند</string>
 		</dict>
 	</dict>
 	<key>reposted_your_post_3</key>
@@ -173,9 +173,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reposted your post</string>
+			<string>%2$@ و %1$d نفر دیگر مطلب شما را بازنشر کرده‌اند</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reposted your post</string>
+			<string>%2$@ و %1$d نفر دیگر مطلب شما را بازنشر کرده‌اند</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -189,9 +189,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reposted your profile</string>
+			<string>%2$@ و %1$d نفر دیگر نمایه‌ی شما را بازنشر کرده‌اند</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reposted your profile</string>
+			<string>%2$@ و %1$d نفر دیگر نمایه‌ی شما را بازنشر کرده‌اند</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -205,9 +205,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Repost</string>
+			<string>بازنشر</string>
 			<key>other</key>
-			<string>Reposts</string>
+			<string>بازنشرها</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -221,9 +221,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>%2$@ sat</string>
+			<string>%2$@ ساتوشی</string>
 			<key>other</key>
-			<string>%2$@ sats</string>
+			<string>%2$@ ساتوشی</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -237,9 +237,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other zapped a post you were tagged in</string>
+			<string>%2$@ و %1$d نفر دیگر یک مطلب که شما در آن تگ شده‌اید را زپ کرده‌اند</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others zapped a post you were tagged in</string>
+			<string>%2$@ و %1$d نفر دیگر یک مطلب که شما در آن تگ شده‌اید را زپ کرده‌اند</string>
 		</dict>
 	</dict>
 	<key>zapped_your_post_3</key>
@@ -253,9 +253,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other zapped your post</string>
+			<string>%2$@ و %1$d نفر دیگر مطلب شما را زپ کرده‌اند</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others zapped your post</string>
+			<string>%2$@ و %1$d نفر دیگر مطلب شما را زپ کرده‌اند</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -269,9 +269,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other zapped your profile</string>
+			<string>%2$@ و %1$d نفر دیگر نمایه‌ی شما را زپ کرده‌اند</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others zapped your profile</string>
+			<string>%2$@ و %1$d نفر دیگر نمایه‌ی شما را زپ کرده‌اند</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>

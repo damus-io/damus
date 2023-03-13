@@ -13,9 +13,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>... %d other note ...</string>
+			<string>... %d інша нотатка ...</string>
+			<key>few</key>
+			<string>... %d інші нотатки ...</string>
+			<key>many</key>
+			<string>... %d інших нотаток ...</string>
 			<key>other</key>
-			<string>... %d other notes ...</string>
+			<string>... %d інші нотатки ...</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -29,25 +33,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Follower</string>
+			<string>Читач</string>
+			<key>few</key>
+			<string>Читача</string>
+			<key>many</key>
+			<string>Читачів</string>
 			<key>other</key>
-			<string>Followers</string>
-		</dict>
-	</dict>
-	<key>following_count</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@FOLLOWING@</string>
-		<key>FOLLOWING</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>Following</string>
-			<key>other</key>
-			<string>Following</string>
+			<string>Читач</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -61,9 +53,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reacted to a post you were tagged in</string>
+			<string>%2$@ та %1$d відреагувли на публікацію, у якій Ви булі відмічені</string>
+			<key>few</key>
+			<string>%2$@ та %1$d інші відреагувли на публікацію, у якій Ви булі відмічені</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших відреагувли на публікацію, у якій Ви булі відмічені</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reacted to a post you were tagged in</string>
+			<string>%2$@ та %1$d інший відреагував на публікацію, у якій Ви булі відмічені</string>
 		</dict>
 	</dict>
 	<key>reacted_your_post_3</key>
@@ -77,9 +73,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reacted to your post</string>
+			<string>%2$@ та %1$d відреагували на Вашу публікацію</string>
+			<key>few</key>
+			<string>%2$@ та %1$d інші відреагувли на Вашу публікацію</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших відреагували на Вашу публікацію</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reacted to your post</string>
+			<string>%2$@ та %1$d інший відреагував на Вашу публікацію</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -93,9 +93,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reacted to your profile</string>
+			<string>%2$@ та %1$d відреагувалі на Ваш профіль</string>
+			<key>few</key>
+			<string>%2$@ та %1$d інших відреагували на Ваш профіль</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших відреагували на Ваш профіль</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reacted to your profile</string>
+			<string>%2$@ та %1$d інший відреагував на Ваш профіль</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
@@ -109,9 +113,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Reaction</string>
+			<string>Реакція</string>
+			<key>few</key>
+			<string>Реакції</string>
+			<key>many</key>
+			<string>Реакцій</string>
 			<key>other</key>
-			<string>Reactions</string>
+			<string>Реакція</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -125,9 +133,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Relay</string>
+			<string>Релей</string>
+			<key>few</key>
+			<string>Релея</string>
+			<key>many</key>
+			<string>Релеї</string>
 			<key>other</key>
-			<string>Relays</string>
+			<string>Релей</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
@@ -141,9 +153,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Replying to %2$@, %3$@ &amp; %1$d other</string>
+			<string>У відповідь %2$@, %3$@ &amp; %1$d іншим</string>
+			<key>few</key>
+			<string>У відповідь %2$@, %3$@ &amp; %1$d іншим</string>
+			<key>many</key>
+			<string>У відповідь %2$@, %3$@ &amp; %1$d іншим</string>
 			<key>other</key>
-			<string>Replying to %2$@, %3$@ &amp; %1$d others</string>
+			<string>У відповідь %2$@, %3$@ &amp; %1$d іншим</string>
 		</dict>
 	</dict>
 	<key>reposted_tagged_in_3</key>
@@ -157,9 +173,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reposted a post you were tagged in</string>
+			<string>%2$@ та %1$d зробили репост публікації, у якій Ви булі відмічені</string>
+			<key>few</key>
+			<string>%2$@ та %1$d інші зробили репост публікації, у якій Ви булі відмічені</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших зробили репост публікації, у якій Ви булі відмічені</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reposted a post you were tagged in</string>
+			<string>%2$@ та %1$d інший зробив репост публікації, у якій Ви булі відмічені</string>
 		</dict>
 	</dict>
 	<key>reposted_your_post_3</key>
@@ -173,9 +193,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reposted your post</string>
+			<string>%2$@ та %1$d зробили репост Вашої публікації</string>
+			<key>few</key>
+			<string>%2$@ та %1$d інші зробили репост Вашої публікації</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших зробили репост Вашої публікації</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reposted your post</string>
+			<string>%2$@ та %1$d інший зробив репост Вашої публікації</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -189,9 +213,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other reposted your profile</string>
+			<string>%2$@ та %1$d зробили репост Вашого профілю</string>
+			<key>few</key>
+			<string>%2$@ та %1$d інші зробили репост Вашого профілю</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших зробили репост Вашого профілю</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reposted your profile</string>
+			<string>%2$@ та %1$d інший зробив репост Вашого профілю</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -205,9 +233,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Repost</string>
+			<string>Репост</string>
+			<key>few</key>
+			<string>Репосту</string>
+			<key>many</key>
+			<string>Репосів</string>
 			<key>other</key>
-			<string>Reposts</string>
+			<string>Репост</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -221,9 +253,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>%2$@ sat</string>
+			<string>%2$@ сат</string>
+			<key>few</key>
+			<string>%2$@ сату</string>
+			<key>many</key>
+			<string>%2$@ сатів</string>
 			<key>other</key>
-			<string>%2$@ sats</string>
+			<string>%2$@ сат</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -237,9 +273,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other zapped a post you were tagged in</string>
+			<string>%2$@ та %1$d запнули публікацію, у якій Ви булі відмічені</string>
+			<key>few</key>
+			<string>%2$@ та %1$d інші запнули публікацію, у якій Ви булі відмічені</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших запнули публікацію, у якій Ви булі відмічені</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others zapped a post you were tagged in</string>
+			<string>%2$@ та %1$d інший запнув публікацію, у якій Ви булі відмічені</string>
 		</dict>
 	</dict>
 	<key>zapped_your_post_3</key>
@@ -253,9 +293,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other zapped your post</string>
+			<string>%2$@ та %1$d запнули Вашу публікацію</string>
+			<key>few</key>
+			<string>%2$@ та %1$d інші запнули Вашу публікацію</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших запнули Вашу публікацію</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others zapped your post</string>
+			<string>%2$@ та %1$d інший запнув Вашу публікацію</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -269,9 +313,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other zapped your profile</string>
+			<string>%2$@ та %1$d запнули Вашу публікацію</string>
+			<key>few</key>
+			<string>%2$@ та %1$d іншиі запнули Вашу публікацію</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших запнули Вашу публікацію</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others zapped your profile</string>
+			<string>%2$@ та %1$d інший запнув Вашу публікацію</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
@@ -285,9 +333,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Zap</string>
+			<string>Зап</string>
+			<key>few</key>
+			<string>Запа</string>
+			<key>many</key>
+			<string>Запів</string>
 			<key>other</key>
-			<string>Zaps</string>
+			<string>Зап</string>
 		</dict>
 	</dict>
 </dict>

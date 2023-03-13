@@ -12,10 +12,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>... %d other note ...</string>
 			<key>other</key>
-			<string>... %d other notes ...</string>
+			<string>... %d 개의 노트 ...</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -28,10 +26,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>Follower</string>
 			<key>other</key>
-			<string>Followers</string>
+			<string>팔로워</string>
 		</dict>
 	</dict>
 	<key>following_count</key>
@@ -44,10 +40,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>Following</string>
 			<key>other</key>
-			<string>Following</string>
+			<string>팔로우 중</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -60,10 +54,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>%2$@ and %1$d other reacted to a post you were tagged in</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reacted to a post you were tagged in</string>
+			<string>%2$@ 님 외 %1$d 명이 내가 태그된 포스트에 리액션을 보냈습니다</string>
 		</dict>
 	</dict>
 	<key>reacted_your_post_3</key>
@@ -76,10 +68,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>%2$@ and %1$d other reacted to your post</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reacted to your post</string>
+			<string>%2$@ 님 외 %1$d 명이 내 포스트에 리액션을 보냈습니다</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -92,10 +82,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>%2$@ and %1$d other reacted to your profile</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reacted to your profile</string>
+			<string>%2$@ 님 외 %1$d 명이 내 프로필에 리액션을 보냈습니다</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
@@ -108,10 +96,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>Reaction</string>
 			<key>other</key>
-			<string>Reactions</string>
+			<string>리액션</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -124,10 +110,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>Relay</string>
 			<key>other</key>
-			<string>Relays</string>
+			<string>릴레이</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
@@ -140,10 +124,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>Replying to %2$@, %3$@ &amp; %1$d other</string>
 			<key>other</key>
-			<string>Replying to %2$@, %3$@ &amp; %1$d others</string>
+			<string>%2$@, %3$@ 님 외 %1$d 명에게 보내는 답글</string>
 		</dict>
 	</dict>
 	<key>reposted_tagged_in_3</key>
@@ -156,10 +138,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>%2$@ and %1$d other reposted a post you were tagged in</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reposted a post you were tagged in</string>
+			<string>%2$@ 님 외 %1$d 명이 내가 태그된 포스트를 리포스팅했습니다</string>
 		</dict>
 	</dict>
 	<key>reposted_your_post_3</key>
@@ -172,10 +152,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>%2$@ and %1$d other reposted your post</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reposted your post</string>
+			<string>%2$@ 님 외 %1$d 명이 내 포스트를 리포스팅했습니다</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -188,10 +166,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>%2$@ and %1$d other reposted your profile</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others reposted your profile</string>
+			<string>%2$@ 님 외 %1$d 명이 내 프로필을 리포스팅했습니다</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -204,10 +180,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>Repost</string>
 			<key>other</key>
-			<string>Reposts</string>
+			<string>신고</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -220,8 +194,6 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
-			<key>one</key>
-			<string>%2$@ sat</string>
 			<key>other</key>
 			<string>%2$@ sats</string>
 		</dict>
@@ -236,10 +208,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>%2$@ and %1$d other zapped a post you were tagged in</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others zapped a post you were tagged in</string>
+			<string>%2$@ 님 외 %1$d 명이 내가 태그된 포스트에 잽을 날렸습니다</string>
 		</dict>
 	</dict>
 	<key>zapped_your_post_3</key>
@@ -252,10 +222,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>%2$@ and %1$d other zapped your post</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others zapped your post</string>
+			<string>%2$@ 님 외 %1$d 명이 내 포스트에 잽을 날렸습니다</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -268,10 +236,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>%2$@ and %1$d other zapped your profile</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others zapped your profile</string>
+			<string>%2$@ 님 외 %1$d 명이 내 프로필에 잽을 날렸습니다</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
@@ -284,10 +250,8 @@
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
-			<key>one</key>
-			<string>Zap</string>
 			<key>other</key>
-			<string>Zaps</string>
+			<string>잽</string>
 		</dict>
 	</dict>
 </dict>

@@ -91,7 +91,7 @@ struct CustomizeZapView: View {
             let pk = event.pubkey
             let prof = state.profiles.lookup(id: pk)
             let name = Profile.displayName(profile: prof, pubkey: pk)
-            return NSLocalizedString("Only '\(name)' can see that you zapped them", comment: "Description of private zap type where the zap is sent privately and does not identify the user to the public.")
+            return String.localizedStringWithFormat(NSLocalizedString("private_zap_description", value: "Only '%@' can see that you zapped them", comment: "Description of private zap type where the zap is sent privately and does not identify the user to the public."), name)
         case .non_zap:
             return NSLocalizedString("No zaps are sent, only a lightning payment.", comment: "Description of non-zap type where sats are sent to the user's wallet as a regular Lightning payment, not as a zap.")
         }
@@ -102,7 +102,7 @@ struct CustomizeZapView: View {
             Text("Public", comment: "Picker option to indicate that a zap should be sent publicly and identify the user as who sent it.").tag(ZapType.pub)
             Text("Private", comment: "Picker option to indicate that a zap should be sent privately and not identify the user to the public.").tag(ZapType.priv)
             Text("Anonymous", comment: "Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.").tag(ZapType.anon)
-            Text("None", comment: "Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.").tag(ZapType.non_zap)
+            Text(verbatim: NSLocalizedString("none_zap_type", value: "None", comment: "Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.")).tag(ZapType.non_zap)
         }
         .pickerStyle(.menu)
     }
