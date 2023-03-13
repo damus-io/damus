@@ -32,11 +32,6 @@
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.2" build-num="14C18"/>
     </header>
     <body>
-      <trans-unit id=" " xml:space="preserve">
-        <source> </source>
-        <target> </target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="%@" xml:space="preserve">
         <source>%@</source>
         <target>%@</target>
@@ -52,11 +47,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>%@ has been blocked</source>
         <target>%@ has been blocked</target>
         <note>Alert message that informs a user was blocked.</note>
-      </trans-unit>
-      <trans-unit id="%@ not found" xml:space="preserve">
-        <source>%@ not found</source>
-        <target>%@ not found</target>
-        <note>When a note or profile is not found when searching for it via its note id</note>
       </trans-unit>
       <trans-unit id="%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." xml:space="preserve">
         <source>%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction.</source>
@@ -136,7 +126,8 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Add" xml:space="preserve">
         <source>Add</source>
         <target>Add</target>
-        <note>Button to confirm adding user inputted relay.</note>
+        <note>Button to add recommended relay server.
+   Button to confirm adding user inputted relay.</note>
       </trans-unit>
       <trans-unit id="Add Bookmark" xml:space="preserve">
         <source>Add Bookmark</source>
@@ -146,8 +137,7 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Add Relay" xml:space="preserve">
         <source>Add Relay</source>
         <target>Add Relay</target>
-        <note>Button to add recommended relay server.
-   Label for section for adding a relay server.</note>
+        <note>Label for section for adding a relay server.</note>
       </trans-unit>
       <trans-unit id="Add all" xml:space="preserve">
         <source>Add all</source>
@@ -158,11 +148,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Admin</source>
         <target>Admin</target>
         <note>Label to display relay contact user.</note>
-      </trans-unit>
-      <trans-unit id="All" xml:space="preserve">
-        <source>All</source>
-        <target>All</target>
-        <note>Label for filter for all notifications.</note>
       </trans-unit>
       <trans-unit id="Anonymous" xml:space="preserve">
         <source>Anonymous</source>
@@ -278,6 +263,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Cash App</target>
         <note>Dropdown option label for Lightning wallet, Cash App.</note>
       </trans-unit>
+      <trans-unit id="Clear" xml:space="preserve">
+        <source>Clear</source>
+        <target>Clear</target>
+        <note>Button for clearing cached data.</note>
+      </trans-unit>
       <trans-unit id="Clear All" xml:space="preserve">
         <source>Clear All</source>
         <target>Clear All</target>
@@ -286,7 +276,7 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Clear Cache" xml:space="preserve">
         <source>Clear Cache</source>
         <target>Clear Cache</target>
-        <note>Button to clear image cache.</note>
+        <note>Section title for clearing cached data.</note>
       </trans-unit>
       <trans-unit id="Comment" xml:space="preserve">
         <source>Comment</source>
@@ -297,11 +287,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Contact</source>
         <target>Contact</target>
         <note>Label to display relay contact information.</note>
-      </trans-unit>
-      <trans-unit id="Continue" xml:space="preserve">
-        <source>Continue</source>
-        <target>Continue</target>
-        <note>Continue with deleting the user.</note>
       </trans-unit>
       <trans-unit id="Copied" xml:space="preserve">
         <source>Copied</source>
@@ -430,7 +415,8 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Delete</target>
         <note>Button for deleting the users account.
    Button to delete a relay server that the user connects to.
-   Button to remove a user from their blocklist.</note>
+   Button to remove a user from their blocklist.
+   Section title for deleting the user</note>
       </trans-unit>
       <trans-unit id="Delete Account" xml:space="preserve">
         <source>Delete Account</source>
@@ -446,11 +432,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Description</source>
         <target>Description</target>
         <note>Label to display relay description.</note>
-      </trans-unit>
-      <trans-unit id="Disable animations" xml:space="preserve">
-        <source>Disable animations</source>
-        <target>Disable animations</target>
-        <note>Button to disable image animation</note>
       </trans-unit>
       <trans-unit id="Dismiss" xml:space="preserve">
         <source>Dismiss</source>
@@ -562,10 +543,15 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Get API Key</target>
         <note>Button to navigate to DeepL website to get a translation API key.</note>
       </trans-unit>
-      <trans-unit id="Hello, World!" xml:space="preserve">
-        <source>Hello, World!</source>
-        <target>Hello, World!</target>
-        <note>No comment provided by engineer.</note>
+      <trans-unit id="Goto post %@" xml:space="preserve">
+        <source>Goto post %@</source>
+        <target>Goto post %@</target>
+        <note>Navigation link to go to post referenced by hex code.</note>
+      </trans-unit>
+      <trans-unit id="Goto profile %@" xml:space="preserve">
+        <source>Goto profile %@</source>
+        <target>Goto profile %@</target>
+        <note>Navigation link to go to profile.</note>
       </trans-unit>
       <trans-unit id="Hide" xml:space="preserve">
         <source>Hide</source>
@@ -587,11 +573,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Illegal content</source>
         <target>Illegal content</target>
         <note>Button for user to report that the account or content has illegal content.</note>
-      </trans-unit>
-      <trans-unit id="Images" xml:space="preserve">
-        <source>Images</source>
-        <target>Images</target>
-        <note>Section title for images configuration.</note>
       </trans-unit>
       <trans-unit id="Invalid key" xml:space="preserve">
         <source>Invalid key</source>
@@ -671,20 +652,10 @@ Sentence composed of 2 variables to describe how many people are following a use
    Button for logging out the user.
    Button to close the alert that informs that the current account has been deleted.</note>
       </trans-unit>
-      <trans-unit id="Looking for %@..." xml:space="preserve">
-        <source>Looking for %@...</source>
-        <target>Looking for %@...</target>
-        <note>Label that appears when searching for note or profile</note>
-      </trans-unit>
       <trans-unit id="Make sure your nsec account key is saved before you logout or you will lose access to this account" xml:space="preserve">
         <source>Make sure your nsec account key is saved before you logout or you will lose access to this account</source>
         <target>Make sure your nsec account key is saved before you logout or you will lose access to this account</target>
         <note>Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.</note>
-      </trans-unit>
-      <trans-unit id="Mentions" xml:space="preserve">
-        <source>Mentions</source>
-        <target>Mentions</target>
-        <note>Label for filter for seeing mention notifications (replies, etc).</note>
       </trans-unit>
       <trans-unit id="Muun" xml:space="preserve">
         <source>Muun</source>
@@ -769,8 +740,7 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Permanently Delete Account" xml:space="preserve">
         <source>Permanently Delete Account</source>
         <target>Permanently Delete Account</target>
-        <note>Alert for deleting the users account.
-   Section title for deleting the user</note>
+        <note>Alert for deleting the users account.</note>
       </trans-unit>
       <trans-unit id="Phoenix" xml:space="preserve">
         <source>Phoenix</source>
@@ -1068,11 +1038,6 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <target>Show wallet selector</target>
         <note>Toggle to show or hide selection of wallet.</note>
       </trans-unit>
-      <trans-unit id="Sign Out" xml:space="preserve">
-        <source>Sign Out</source>
-        <target>Sign Out</target>
-        <note>Section title for signing out</note>
-      </trans-unit>
       <trans-unit id="Sign out" xml:space="preserve">
         <source>Sign out</source>
         <target>Sign out</target>
@@ -1181,7 +1146,7 @@ Picker option to indicate that a zap should be sent privately and not identify t
       <trans-unit id="Universe 🛸" xml:space="preserve">
         <source>Universe 🛸</source>
         <target>Universe 🛸</target>
-        <note>Toolbar label for the universal view where posts from all connected relay servers appear.</note>
+        <note>Navigation bar title for universal view where posts from all connected relay servers appear.</note>
       </trans-unit>
       <trans-unit id="User blocked" xml:space="preserve">
         <source>User blocked</source>
@@ -1204,23 +1169,6 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <target>Version</target>
         <note>Label to display relay software version.
    Section title for displaying the version number of the Damus app.</note>
-      </trans-unit>
-      <trans-unit id="WARNING:&#10;&#10;THIS WILL SIGN AN EVENT THAT DELETES THIS ACCOUNT.&#10;&#10;YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.&#10;&#10; ARE YOU SURE YOU WANT TO CONTINUE?" xml:space="preserve">
-        <source>WARNING:
-
-THIS WILL SIGN AN EVENT THAT DELETES THIS ACCOUNT.
-
-YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
-
- ARE YOU SURE YOU WANT TO CONTINUE?</source>
-        <target>WARNING:
-
-THIS WILL SIGN AN EVENT THAT DELETES THIS ACCOUNT.
-
-YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
-
- ARE YOU SURE YOU WANT TO CONTINUE?</target>
-        <note>Alert for deleting the users account.</note>
       </trans-unit>
       <trans-unit id="Wallet" xml:space="preserve">
         <source>Wallet</source>
