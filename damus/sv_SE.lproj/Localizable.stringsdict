@@ -61,7 +61,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ och %1$d till reagerade på ett inlägg du var taggad i</string>
+			<string>%2$@ och %1$d till reagerade på ett inlägg som du var taggad i</string>
 			<key>other</key>
 			<string>%2$@ och %1$d andra reagerade på ett inlägg som du var taggad i</string>
 		</dict>
