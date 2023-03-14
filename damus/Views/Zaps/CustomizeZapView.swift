@@ -90,7 +90,7 @@ struct CustomizeZapView: View {
         case .priv:
             let pk = event.pubkey
             let prof = state.profiles.lookup(id: pk)
-            let name = Profile.displayName(profile: prof, pubkey: pk)
+            let name = Profile.displayName(profile: prof, pubkey: pk).username
             return String.localizedStringWithFormat(NSLocalizedString("private_zap_description", value: "Only '%@' can see that you zapped them", comment: "Description of private zap type where the zap is sent privately and does not identify the user to the public."), name)
         case .non_zap:
             return NSLocalizedString("No zaps are sent, only a lightning payment.", comment: "Description of non-zap type where sats are sent to the user's wallet as a regular Lightning payment, not as a zap.")

@@ -487,7 +487,7 @@ struct ContentView: View {
         }, message: {
             if let pubkey = self.blocking {
                 let profile = damus_state!.profiles.lookup(id: pubkey)
-                let name = Profile.displayName(profile: profile, pubkey: pubkey)
+                let name = Profile.displayName(profile: profile, pubkey: pubkey).username
                 Text("\(name) has been blocked", comment: "Alert message that informs a user was blocked.")
             } else {
                 Text("User has been blocked", comment: "Alert message that informs a user was blocked.")
@@ -555,7 +555,7 @@ struct ContentView: View {
         }, message: {
             if let pubkey = blocking {
                 let profile = damus_state?.profiles.lookup(id: pubkey)
-                let name = Profile.displayName(profile: profile, pubkey: pubkey)
+                let name = Profile.displayName(profile: profile, pubkey: pubkey).username
                 Text("Block \(name)?", comment: "Alert message prompt to ask if a user should be blocked.")
             } else {
                 Text("Could not find user to block...", comment: "Alert message to indicate that the blocked user could not be found.")

@@ -140,17 +140,8 @@ struct Profile: Codable {
         try container.encode(value)
     }
     
-    static func displayName(profile: Profile?, pubkey: String) -> String {
-        if pubkey == "anon" {
-            return "Anonymous"
-        }
-        
-        if let name = profile?.name, !name.isEmpty {
-            return name
-        } else {
-            let pk = bech32_nopre_pubkey(pubkey) ?? pubkey
-            return abbrev_pubkey(pk)
-        }
+    static func displayName(profile: Profile?, pubkey: String) -> DisplayName {
+        return parse_display_name(profile: profile, pubkey: pubkey)
     }
 }
 
