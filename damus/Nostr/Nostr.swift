@@ -144,8 +144,13 @@ struct Profile: Codable {
         if pubkey == "anon" {
             return "Anonymous"
         }
-        let pk = bech32_nopre_pubkey(pubkey) ?? pubkey
-        return profile?.name ?? abbrev_pubkey(pk)
+        
+        if let name = profile?.name, !name.isEmpty {
+            return name
+        } else {
+            let pk = bech32_nopre_pubkey(pubkey) ?? pubkey
+            return abbrev_pubkey(pk)
+        }
     }
 }
 
