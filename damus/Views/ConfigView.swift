@@ -72,12 +72,18 @@ struct ConfigView: View {
                 self.pubkey_copied = is_pk
                 generator.impactOccurred()
             }
-            if has_authenticated_locally {
+            if is_pk {
+                // When trying to copy npub
                 copyKey()
             } else {
-                authenticateLocally { success in
-                    if success {
-                        copyKey()
+                // When trying to copy nsec
+                if has_authenticated_locally {
+                    copyKey()
+                } else {
+                    authenticateLocally { success in
+                        if success {
+                            copyKey()
+                        }
                     }
                 }
             }
