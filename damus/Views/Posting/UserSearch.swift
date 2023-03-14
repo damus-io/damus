@@ -31,35 +31,39 @@ struct UserSearch: View {
         return search_users(profiles: damus_state.profiles, tags: contacts.tags, search: search)
     }
     
+    func on_user_tapped(user: SearchedUser) {
+        guard let pk = bech32_pubkey(user.pubkey) else {
+            return
+        }
+
+        while post.string.last != "@" {
+            post.deleteCharacters(in: NSRange(location: post.length - 1, length: 1))
+        }
+        post.deleteCharacters(in: NSRange(location: post.length - 1, length: 1))
+
+
+        var tagString = ""
+        if let name = user.profile?.name {
+            tagString = "@\(name)\u{200B} "
+        }
+        let tagAttributedString = NSMutableAttributedString(string: tagString,
+                               attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0),
+                                            NSAttributedString.Key.link: "@\(pk)"])
+        tagAttributedString.removeAttribute(.link, range: NSRange(location: tagAttributedString.length - 2, length: 2))
+        tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 2, length: 2))
+        let mutableString = NSMutableAttributedString()
+        mutableString.append(post)
+        mutableString.append(tagAttributedString)
+        post = mutableString
+    }
+    
     var body: some View {
         ScrollView {
             LazyVStack {
                 ForEach(users) { user in
                     UserView(damus_state: damus_state, pubkey: user.pubkey)
                         .onTapGesture {
-                            guard let pk = bech32_pubkey(user.pubkey) else {
-                                return
-                            }
-
-                            while post.string.last != "@" {
-                                post.deleteCharacters(in: NSRange(location: post.length - 1, length: 1))
-                            }
-                            post.deleteCharacters(in: NSRange(location: post.length - 1, length: 1))
-
-
-                            var tagString = ""
-                            if let name = user.profile?.name {
-                                tagString = "@\(name)\u{200B} "
-                            }
-                            let tagAttributedString = NSMutableAttributedString(string: tagString,
-                                                   attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0),
-                                                                NSAttributedString.Key.link: "@\(pk)"])
-                            tagAttributedString.removeAttribute(.link, range: NSRange(location: tagAttributedString.length - 2, length: 2))
-                            tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 2, length: 2))
-                            let mutableString = NSMutableAttributedString()
-                            mutableString.append(post)
-                            mutableString.append(tagAttributedString)
-                            post = mutableString
+                            on_user_tapped(user: user)
                         }
                 }
             }
