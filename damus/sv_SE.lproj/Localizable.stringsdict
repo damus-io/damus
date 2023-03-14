@@ -13,7 +13,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>...%d andra inägg...</string>
+			<string>...%d andra inlägg...</string>
 			<key>other</key>
 			<string>...%d andra inlägg...</string>
 		</dict>
