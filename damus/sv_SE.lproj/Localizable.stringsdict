@@ -237,7 +237,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ och %1$d annan zappade ett inlägg du var taggad i</string>
+			<string>%2$@ och %1$d annan zappade ett inlägg du som var taggad i</string>
 			<key>other</key>
 			<string>%2$@ och %1$d andra zappade ett inlägg som du var taggad i</string>
 		</dict>
