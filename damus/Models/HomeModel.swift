@@ -920,11 +920,23 @@ func zap_vibrate(zap_amount: Int64) {
     var vibration_generator: UIImpactFeedbackGenerator
     if sats >= 10000 {
         vibration_generator = UIImpactFeedbackGenerator(style: .heavy)
+        DispatchQueue.global(qos: .userInitiated).async {
+            let repetition = sats / 10000
+            for _ in 1...repetition {
+                let intensity = 50
+                for _ in 0...intensity {
+                    vibration_generator.impactOccurred()
+                }
+                Thread.sleep(forTimeInterval: 0.4)
+            }
+        }
+
     } else if sats >= 1000 {
-        vibration_generator = UIImpactFeedbackGenerator(style: .medium)
+        vibration_generator = UIImpactFeedbackGenerator(style: .heavy)
+        vibration_generator.impactOccurred()
     } else {
-        vibration_generator = UIImpactFeedbackGenerator(style: .light)
+        vibration_generator = UIImpactFeedbackGenerator(style: .medium)
+        vibration_generator.impactOccurred()
     }
-    vibration_generator.impactOccurred()
 }
 
