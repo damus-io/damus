@@ -73,10 +73,10 @@ struct SearchResultsView: View {
         MainContent
             .frame(maxHeight: .infinity)
             .onAppear {
-                self.result = search_changed(profiles: damus_state.profiles, search)
+                self.result = search_for_string(profiles: damus_state.profiles, search)
             }
             .onChange(of: search) { new in
-                self.result = search_changed(profiles: damus_state.profiles, new)
+                self.result = search_for_string(profiles: damus_state.profiles, new)
             }
     }
 }
@@ -90,7 +90,7 @@ struct SearchResultsView_Previews: PreviewProvider {
  */
 
 
-func search_changed(profiles: Profiles, _ new: String) -> Search? {
+func search_for_string(profiles: Profiles, _ new: String) -> Search? {
     guard new.count != 0 else {
         return nil
     }
@@ -116,8 +116,11 @@ func search_changed(profiles: Profiles, _ new: String) -> Search? {
         }
     }
     
-    let profs = profiles.profiles.enumerated()
-    let results: [(String, Profile)] = profs.reduce(into: []) { acc, els in
+    return .profiles(search_profiles(profiles: profiles, search: new))
+}
+
+func search_profiles(profiles: Profiles, search new: String) -> [(String, Profile)] {
+    return profiles.profiles.enumerated().reduce(into: []) { acc, els in
         let pk = els.element.key
         let prof = els.element.value.profile
         let lowname = prof.name.map { $0.lowercased() }
@@ -134,6 +137,4 @@ func search_changed(profiles: Profiles, _ new: String) -> Search? {
             acc.append((pk, prof))
         }
     }
-        
-    return .profiles(results)
 }
