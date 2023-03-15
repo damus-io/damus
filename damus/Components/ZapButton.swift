@@ -81,7 +81,7 @@ struct ZapButton: View {
                 
                 self.showing_zap_customizer = true
             })
-            .simultaneousGesture(TapGesture().onEnded {_  in
+            .highPriorityGesture(TapGesture().onEnded {_  in
                 guard !zapping else {
                     return
                 }
