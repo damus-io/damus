@@ -39,19 +39,19 @@ final class ReplyDescriptionTests: XCTestCase {
         
         // replying to one
         XCTAssertEqual(descriptionForEvent(withTags: [["p", "123"]]),
-                       "Replying to \(Profile.displayName(profile: nil, pubkey: "123"))")
+                       "Replying to \(Profile.displayName(profile: nil, pubkey: "123").username)")
         
         // replying to two
         XCTAssertEqual(descriptionForEvent(withTags: [["p", "123"], ["p", "456"]]),
-                       "Replying to \(Profile.displayName(profile: nil, pubkey: "456")) & \(Profile.displayName(profile: nil, pubkey: "123"))")
+                       "Replying to \(Profile.displayName(profile: nil, pubkey: "456").username) & \(Profile.displayName(profile: nil, pubkey: "123").username)")
         
         // replying to two that are the same
         XCTAssertEqual(descriptionForEvent(withTags: [["p", "123"], ["p", "123"]]),
-                       "Replying to \(Profile.displayName(profile: nil, pubkey: "123"))")
+                       "Replying to \(Profile.displayName(profile: nil, pubkey: "123").username)")
         
         // replying to two and one other
         XCTAssertEqual(descriptionForEvent(withTags: [["p", "123"], ["p", "456"], ["p", "789"]]),
-                       "Replying to \(Profile.displayName(profile: nil, pubkey: "789")), \(Profile.displayName(profile: nil, pubkey: "456")) & 1 other")
+                       "Replying to \(Profile.displayName(profile: nil, pubkey: "789").username), \(Profile.displayName(profile: nil, pubkey: "456").username) & 1 other")
 
         for othersCount in 2...10 {
             var tags: [[String]] = [["e", "123"]]
@@ -67,7 +67,7 @@ final class ReplyDescriptionTests: XCTestCase {
                 tags: tags,
                 createdAt: Int64(Date().timeIntervalSince1970 - 100)
             )
-            XCTAssertEqual(reply_desc(profiles: profiles, event: replyingToTwoAndMultipleOthers, locale: enUsLocale), "Replying to \(Profile.displayName(profile: nil, pubkey: "789")), \(Profile.displayName(profile: nil, pubkey: "456")) & \(othersCount) others")
+            XCTAssertEqual(reply_desc(profiles: profiles, event: replyingToTwoAndMultipleOthers, locale: enUsLocale), "Replying to \(Profile.displayName(profile: nil, pubkey: "789").username), \(Profile.displayName(profile: nil, pubkey: "456").username) & \(othersCount) others")
             Bundle.main.localizations.map { Locale(identifier: $0) }.forEach {
                 XCTAssertNoThrow(reply_desc(profiles: profiles, event: replyingToTwoAndMultipleOthers, locale: $0))
             }
