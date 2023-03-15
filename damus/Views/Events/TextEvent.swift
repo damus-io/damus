@@ -36,15 +36,25 @@ struct TextEvent: View {
             }
 
             VStack(alignment: .leading) {
-                HStack(alignment: .center) {
+                HStack(alignment: .center, spacing: 0) {
                     let pk = is_anon ? "anon" : pubkey
                     EventProfileName(pubkey: pk, profile: profile, damus: damus, show_friend_confirmed: true, size: .normal)
                     
+                    Text("⋅")
+                        .font(.footnote)
+                        .foregroundColor(.gray)
                     Text(verbatim: "\(format_relative_time(event.created_at))")
+                        .font(.system(size: 16))
                         .foregroundColor(.gray)
                     
                     Spacer()
+                    
+                    EventMenuContext(event: event, keypair: damus.keypair, target_pubkey: event.pubkey, bookmarks: damus.bookmarks)
+                        .padding([.bottom], 4)
+
                 }
+                .minimumScaleFactor(0.75)
+                .lineLimit(1)
                 
                 EventBody(damus_state: damus, event: event, size: .normal)
                 
@@ -66,7 +76,6 @@ struct TextEvent: View {
         .id(event.id)
         .frame(maxWidth: .infinity, minHeight: PFP_SIZE)
         .padding([.bottom], 2)
-        .event_context_menu(event, keypair: damus.keypair, target_pubkey: pubkey)
     }
 }
 

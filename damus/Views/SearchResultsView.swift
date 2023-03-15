@@ -18,6 +18,7 @@ enum Search {
 struct SearchResultsView: View {
     let damus_state: DamusState
     @Binding var search: String
+    
     @State var result: Search? = nil
     
     func ProfileSearchResult(pk: String, res: Profile) -> some View {
@@ -43,39 +44,23 @@ struct SearchResultsView: View {
                 case .profile(let prof):
                     let decoded = try? bech32_decode(prof)
                     let hex = hex_encode(decoded!.data)
-                    let prof_model = ProfileModel(pubkey: hex, damus: damus_state)
-                    let f = FollowersModel(damus_state: damus_state, target: prof)
-                    let dst = ProfileView(damus_state: damus_state, profile: prof_model, followers: f)
-                    NavigationLink(destination: dst) {
-                        Text("Goto profile \(prof)", comment: "Navigation link to go to profile.")
-                    }
-                case .hex(let h):
-                    let prof_model = ProfileModel(pubkey: h, damus: damus_state)
-                    let f = FollowersModel(damus_state: damus_state, target: h)
-                    let prof_view = ProfileView(damus_state: damus_state, profile: prof_model, followers: f)
-                    let ev_view = BuildThreadV2View(
-                        damus: damus_state,
-                        event_id: h
-                    )
 
-                    VStack(spacing: 50) {
-                        NavigationLink(destination: prof_view) {
-                            Text("Goto profile \(h)", comment: "Navigation link to go to profile referenced by hex code.")
-                        }
-                        NavigationLink(destination: ev_view) {
-                            Text("Goto post \(h)", comment: "Navigation link to go to post referenced by hex code.")
-                        }
+                    SearchingEventView(state: damus_state, evid: hex, search_type: .profile)
+                case .hex(let h):
+                    //let prof_view = ProfileView(damus_state: damus_state, pubkey: h)
+                    //let ev_view = ThreadView(damus: damus_state, event_id: h)
+                    
+                    VStack(spacing: 10) {
+                        SearchingEventView(state: damus_state, evid: h, search_type: .event)
+                        
+                        SearchingEventView(state: damus_state, evid: h, search_type: .profile)
                     }
+                    
                 case .note(let nid):
                     let decoded = try? bech32_decode(nid)
                     let hex = hex_encode(decoded!.data)
-                    let ev_view = BuildThreadV2View(
-                        damus: damus_state,
-                        event_id: hex
-                    )
-                    NavigationLink(destination: ev_view) {
-                        Text("Goto post \(nid)", comment: "Navigation link to go to post referenced by note ID.")
-                    }
+                    
+                    SearchingEventView(state: damus_state, evid: hex, search_type: .event)
                 case .none:
                     Text("none", comment: "No search results.")
                 }
@@ -84,66 +69,14 @@ struct SearchResultsView: View {
         }
     }
     
-    func search_changed(_ new: String) {
-        guard new.count != 0 else {
-            return
-        }
-        
-        if new.first! == "#" {
-            let ht = String(new.dropFirst())
-            self.result = .hashtag(ht)
-            return
-        }
-        
-        if hex_decode(new) != nil, new.count == 64 {
-            self.result = .hex(new)
-            return
-        }
-        
-        if new.starts(with: "npub") {
-            if (try? bech32_decode(new)) != nil {
-                self.result = .profile(new)
-                return
-            }
-        }
-        
-        if new.starts(with: "note") {
-            if (try? bech32_decode(new)) != nil {
-                self.result = .note(new)
-                return
-            }
-        }
-        
-        let profs = damus_state.profiles.profiles.enumerated()
-        let results: [(String, Profile)] = profs.reduce(into: []) { acc, els in
-            let pk = els.element.key
-            let prof = els.element.value.profile
-            let lowname = prof.name.map { $0.lowercased() }
-            let lownip05 = damus_state.profiles.is_validated(pk).map { $0.host.lowercased() }
-            let lowdisp = prof.display_name.map { $0.lowercased() }
-            let ok = new.count == 1 ?
-            ((lowname?.starts(with: new) ?? false) ||
-             (lownip05?.starts(with: new) ?? false) ||
-             (lowdisp?.starts(with: new) ?? false)) : (pk.starts(with: new) || String(new.dropFirst()) == pk
-                || lowname?.contains(new) ?? false
-                || lownip05?.contains(new) ?? false
-                || lowdisp?.contains(new) ?? false)
-            if ok {
-                acc.append((pk, prof))
-            }
-        }
-            
-        self.result = .profiles(results)
-    }
-    
     var body: some View {
         MainContent
             .frame(maxHeight: .infinity)
             .onAppear {
-                search_changed(search)
+                self.result = search_changed(profiles: damus_state.profiles, search)
             }
             .onChange(of: search) { new in
-                search_changed(new)
+                self.result = search_changed(profiles: damus_state.profiles, new)
             }
     }
 }
@@ -155,3 +88,52 @@ struct SearchResultsView_Previews: PreviewProvider {
     }
 }
  */
+
+
+func search_changed(profiles: Profiles, _ new: String) -> Search? {
+    guard new.count != 0 else {
+        return nil
+    }
+    
+    if new.first! == "#" {
+        let ht = String(new.dropFirst().filter{$0 != " "})
+        return .hashtag(ht)
+    }
+    
+    if hex_decode(new) != nil, new.count == 64 {
+        return .hex(new)
+    }
+    
+    if new.starts(with: "npub") {
+        if (try? bech32_decode(new)) != nil {
+            return .profile(new)
+        }
+    }
+    
+    if new.starts(with: "note") {
+        if (try? bech32_decode(new)) != nil {
+            return .note(new)
+        }
+    }
+    
+    let profs = profiles.profiles.enumerated()
+    let results: [(String, Profile)] = profs.reduce(into: []) { acc, els in
+        let pk = els.element.key
+        let prof = els.element.value.profile
+        let lowname = prof.name.map { $0.lowercased() }
+        let lownip05 = profiles.is_validated(pk).map { $0.host.lowercased() }
+        let lowdisp = prof.display_name.map { $0.lowercased() }
+        let ok = new.count == 1 ?
+        ((lowname?.starts(with: new) ?? false) ||
+         (lownip05?.starts(with: new) ?? false) ||
+         (lowdisp?.starts(with: new) ?? false)) : (pk.starts(with: new) || String(new.dropFirst()) == pk
+            || lowname?.contains(new) ?? false
+            || lownip05?.contains(new) ?? false
+            || lowdisp?.contains(new) ?? false)
+        if ok {
+            acc.append((pk, prof))
+        }
+    }
+        
+    return .profiles(results)
+}

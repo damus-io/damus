@@ -7,6 +7,7 @@
 
 import Foundation
 import Vault
+import UIKit
 
 func should_show_wallet_selector(_ pubkey: String) -> Bool {
     return UserDefaults.standard.object(forKey: "show_wallet_selector") as? Bool ?? true
@@ -34,6 +35,10 @@ func get_default_zap_amount(pubkey: String) -> Int? {
     return amt
 }
 
+func should_disable_image_animation() -> Bool {
+    return (UserDefaults.standard.object(forKey: "disable_animation") as? Bool)
+            ?? UIAccessibility.isReduceMotionEnabled
+ }
 
 func get_default_wallet(_ pubkey: String) -> Wallet {
     if let defaultWalletName = UserDefaults.standard.string(forKey: "default_wallet"),
@@ -111,6 +116,12 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
+    @Published var zap_vibration: Bool {
+        didSet {
+            UserDefaults.standard.set(zap_vibration, forKey: "zap_vibration")
+        }
+    }
+
     @Published var translation_service: TranslationService {
         didSet {
             UserDefaults.standard.set(translation_service.rawValue, forKey: "translation_service")
@@ -174,6 +185,12 @@ class UserSettingsStore: ObservableObject {
             }
         }
     }
+    
+    @Published var disable_animation: Bool {
+        didSet {
+            UserDefaults.standard.set(disable_animation, forKey: "disable_animation")
+        }
+     }
 
     init() {
         // TODO: pubkey-scoped settings
@@ -184,6 +201,8 @@ class UserSettingsStore: ObservableObject {
         default_image_uploader = get_image_uploader(pubkey)
 
         left_handed = UserDefaults.standard.object(forKey: "left_handed") as? Bool ?? false
+        zap_vibration = UserDefaults.standard.object(forKey: "zap_vibration") as? Bool ?? false
+        disable_animation = should_disable_image_animation()
 
         // Note from @tyiu:
         // Default translation service is disabled by default for now until we gain some confidence that it is working well in production.

@@ -54,6 +54,11 @@ func followersCountString(_ count: Int, locale: Locale = Locale.current) -> Stri
     return String(format: bundle.localizedString(forKey: "followers_count", value: nil, table: nil), locale: locale, count)
 }
 
+func followingCountString(_ count: Int, locale: Locale = Locale.current) -> String {
+    let bundle = bundleForLocale(locale: locale)
+    return String(format: bundle.localizedString(forKey: "following_count", value: nil, table: nil), locale: locale, count)
+}
+
 func relaysCountString(_ count: Int, locale: Locale = Locale.current) -> String {
     let bundle = bundleForLocale(locale: locale)
     return String(format: bundle.localizedString(forKey: "relays_count", value: nil, table: nil), locale: locale, count)
@@ -179,6 +184,7 @@ struct ProfileView: View {
 
         }
         .frame(height: bannerHeight)
+        .allowsHitTesting(false)
     }
     
     var navbarHeight: CGFloat {
@@ -328,7 +334,7 @@ struct ProfileView: View {
                 actionSection(profile_data: profile_data)
             }
             
-            let follows_you = profile.follows(pubkey: damus_state.pubkey)
+            let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
             ProfileNameView(pubkey: profile.pubkey, profile: profile_data, follows_you: follows_you, damus: damus_state)
         }
     }
@@ -367,7 +373,7 @@ struct ProfileView: View {
                     let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
                     NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model, whos: profile.pubkey)) {
                         HStack {
-                            let noun_text = Text("Following", comment: "Text on the user profile page next to the number of accounts a user is following.").font(.subheadline).foregroundColor(.gray)
+                            let noun_text = Text(verbatim: "\(followingCountString(profile.following))").font(.subheadline).foregroundColor(.gray)
                             Text("\(Text("\(profile.following)").font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
                         }
                     }
@@ -515,26 +521,25 @@ struct KeyView: View {
         let bech32 = bech32_pubkey(pubkey) ?? pubkey
         
         HStack {
-            RoundedRectangle(cornerRadius: 11)
-                .frame(height: 22)
-                .foregroundColor(fillColor())
-                .overlay(
-                    HStack {
-                        Button {
-                            copyPubkey(bech32)
-                        } label: {
-                            Label(NSLocalizedString("Public Key", comment: "Label indicating that the text is a user's public account key."), systemImage: "key.fill")
-                                .font(.custom("key", size: 12.0))
-                                .labelStyle(IconOnlyLabelStyle())
-                                .foregroundStyle(hex_to_rgb(pubkey))
-                                .symbolRenderingMode(.palette)
-                        }
-                        .padding(.leading,4)
-                        Text(verbatim: "\(abbrev_pubkey(bech32, amount: 16))")
-                            .font(.footnote)
-                            .foregroundColor(keyColor())
-                    }
-                )
+            HStack {
+                Button {
+                    copyPubkey(bech32)
+                } label: {
+                    Label(NSLocalizedString("Public Key", comment: "Label indicating that the text is a user's public account key."), systemImage: "key.fill")
+                        .font(.custom("key", size: 12.0))
+                        .labelStyle(IconOnlyLabelStyle())
+                        .foregroundStyle(hex_to_rgb(pubkey))
+                        .symbolRenderingMode(.palette)
+                }
+                .padding(.trailing, 2)
+                Text(verbatim: "\(abbrev_pubkey(bech32, amount: 16))")
+                    .font(.footnote)
+                    .foregroundColor(keyColor())
+            }
+            .padding(2)
+            .padding([.leading, .trailing], 3)
+            .background(RoundedRectangle(cornerRadius: 11).foregroundColor(fillColor()))
+                        
             if isCopied != true {
                 Button {
                     copyPubkey(bech32)

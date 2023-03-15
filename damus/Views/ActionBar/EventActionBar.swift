@@ -26,10 +26,12 @@ struct EventActionBar: View {
     
     // just used for previews
     @State var sheet: ActionBarSheet? = nil
-    @State var confirm_boost: Bool = false
     @State var show_share_sheet: Bool = false
+    @State var show_share_action: Bool = false
     
     @ObservedObject var bar: ActionBarModel
+    
+    @Environment(\.colorScheme) var colorScheme
     
     init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil, test_lnurl: String? = nil) {
         self.damus_state = damus_state
@@ -56,8 +58,8 @@ struct EventActionBar: View {
                 EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
                     if bar.boosted {
                         notify(.delete, bar.our_boost)
-                    } else if damus_state.is_privkey_user {
-                        self.confirm_boost = true
+                    } else {
+                        send_boost()
                     }
                 }
                 .accessibilityLabel(NSLocalizedString("Boosts", comment: "Accessibility label for boosts button"))
@@ -88,9 +90,22 @@ struct EventActionBar: View {
 
             Spacer()
             EventActionButton(img: "square.and.arrow.up", col: Color.gray) {
-                show_share_sheet = true
+                show_share_action = true
             }
             .accessibilityLabel(NSLocalizedString("Share", comment: "Button to share a post"))
+        }
+        .sheet(isPresented: $show_share_action) {
+            if #available(iOS 16.0, *) {
+                ShareAction(event: event, bookmarks: damus_state.bookmarks, show_share_sheet: $show_share_sheet, show_share_action: $show_share_action)
+                    .presentationDetents([.height(300)])
+                    .presentationDragIndicator(.visible)
+            } else {
+                if let note_id = bech32_note_id(event.id) {
+                    if let url = URL(string: "https://damus.io/" + note_id) {
+                        ShareSheet(activityItems: [url])
+                    }
+                }
+            }
         }
         .sheet(isPresented: $show_share_sheet) {
             if let note_id = bech32_note_id(event.id) {
@@ -98,16 +113,6 @@ struct EventActionBar: View {
                     ShareSheet(activityItems: [url])
                 }
             }
-        }
-        .alert(NSLocalizedString("Repost", comment: "Title of alert for confirming to repost a post."), isPresented: $confirm_boost) {
-            Button(NSLocalizedString("Cancel", comment: "Button to cancel out of reposting a post.")) {
-                confirm_boost = false
-            }
-            Button(NSLocalizedString("Repost", comment: "Button to confirm reposting a post.")) {
-                send_boost()
-            }
-        } message: {
-            Text("Are you sure you want to repost this?", comment: "Alert message to ask if user wants to repost a post.")
         }
         .onReceive(handle_notify(.update_stats)) { n in
             let target = n.object as! String
@@ -135,7 +140,7 @@ struct EventActionBar: View {
         
         self.bar.our_boost = boost
         
-        damus_state.pool.send(.event(boost))
+        notify(.boost, boost)
     }
     
     func send_like() {
@@ -167,13 +172,41 @@ struct LikeButton: View {
     let action: () -> ()
     
     @Environment(\.colorScheme) var colorScheme
+
+    // Following four are Shaka animation properties
+    let timer = Timer.publish(every: 0.10, on: .main, in: .common).autoconnect()
+    @State private var shouldAnimate = false
+    @State private var rotationAngle = 0.0
+    @State private var amountOfAngleIncrease: Double = 0.0
     
     var body: some View {
-        Button(action: action) {
+
+        Button(action: {
+            withAnimation(Animation.easeOut(duration: 0.15)) {
+                self.action()
+                shouldAnimate = true
+                amountOfAngleIncrease = 20.0
+            }
+        }) {
             Image(liked ? "shaka-full" : "shaka-line")
                 .foregroundColor(liked ? .accentColor : .gray)
         }
         .accessibilityLabel(NSLocalizedString("Like", comment: "Accessibility Label for Like button"))
+        .rotationEffect(Angle(degrees: shouldAnimate ? rotationAngle : 0))
+        .onReceive(self.timer) { _ in
+            // Shaka animation logic
+            rotationAngle = amountOfAngleIncrease
+            if amountOfAngleIncrease == 0 {
+                timer.upstream.connect().cancel()
+                return
+            }
+            amountOfAngleIncrease = -amountOfAngleIncrease
+            if amountOfAngleIncrease < 0 {
+                amountOfAngleIncrease += 2.5
+            } else {
+                amountOfAngleIncrease -= 2.5
+            }
+        }
     }
 }
 

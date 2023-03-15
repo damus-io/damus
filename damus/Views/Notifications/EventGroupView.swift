@@ -128,7 +128,7 @@ func reacting_to_text(profiles: Profiles, our_pubkey: String, group: EventGroupT
 
     switch group.events.count {
     case 0:
-        return NSLocalizedString("??", comment: "")
+        return "??"
     case 1:
         let display_name = event_group_author_name(profiles: profiles, ind: 0, group: group)
 
@@ -207,8 +207,10 @@ struct EventGroupView: View {
                 GroupDescription
                 
                 if let event {
-                    NavigationLink(destination: BuildThreadV2View(damus: state, event_id: event.id)) {
-                        Text(event.content)
+                    let thread = ThreadModel(event: event, damus_state: state)
+                    let dest = ThreadView(state: state, thread: thread)
+                    NavigationLink(destination: dest) {
+                        Text(render_note_content(ev: event, profiles: state.profiles, privkey: state.keypair.privkey).content)
                             .padding([.top], 1)
                             .foregroundColor(.gray)
                     }

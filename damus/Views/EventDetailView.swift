@@ -16,7 +16,7 @@ struct EventDetailView: View {
 
 func scroll_after_load(thread: ThreadModel, proxy: ScrollViewProxy) {
     if !thread.loading {
-        let id = thread.initial_event.id
+        let id = thread.event.id
         scroll_to_event(scroller: proxy, id: id, delay: 0.1, animate: false)
     }
 }

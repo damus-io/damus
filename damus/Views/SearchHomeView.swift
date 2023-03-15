@@ -12,30 +12,31 @@ struct SearchHomeView: View {
     let damus_state: DamusState
     @StateObject var model: SearchHomeModel
     @State var search: String = ""
+    @FocusState private var isFocused: Bool
     
     var SearchInput: some View {
-        ZStack(alignment: .leading) {
+        HStack {
             HStack{
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.gray)
                 TextField(NSLocalizedString("Search...", comment: "Placeholder text to prompt entry of search query."), text: $search)
-                    .padding(8)
-                    .padding(.leading, 35)
                     .autocorrectionDisabled(true)
                     .textInputAutocapitalization(.never)
+                    .focused($isFocused)
+            }
+            .padding(10)
+            .background(.secondary.opacity(0.2))
+            .cornerRadius(20)
+            
+            if(!search.isEmpty) {
                 Text("Cancel", comment: "Cancel out of search view.")
-                    .foregroundColor(.blue)
+                    .foregroundColor(.accentColor)
                     .padding(EdgeInsets(top: 0.0, leading: 0.0, bottom: 0.0, trailing: 10.0))
-                    .opacity((search == "") ? 0.0 : 1.0)
                     .onTapGesture {
                         self.search = ""
+                        isFocused = false
                     }
             }
-                
-            Label("", systemImage: "magnifyingglass")
-                .padding(.leading, 10)
-        }
-        .background {
-            RoundedRectangle(cornerRadius: 8)
-                .foregroundColor(.secondary.opacity(0.2))
         }
     }
     
@@ -82,9 +83,6 @@ struct SearchHomeView: View {
                     .frame(height: 1)
             }
             .background(colorScheme == .dark ? Color.black : Color.white)
-        }
-        .onChange(of: search) { s in
-            print("search change 1")
         }
         .onReceive(handle_notify(.new_mutes)) { _ in
             self.model.filter_muted()

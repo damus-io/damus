@@ -13,7 +13,7 @@ struct TextViewWrapper: UIViewRepresentable {
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
         textView.delegate = context.coordinator
-        textView.font = UIFont.systemFont(ofSize: 18)
+        textView.font = UIFont.preferredFont(forTextStyle: .body)
         textView.textColor = UIColor.label
         let linkAttributes: [NSAttributedString.Key : Any] = [
             NSAttributedString.Key.foregroundColor: UIColor(Color.accentColor)]
@@ -22,7 +22,11 @@ struct TextViewWrapper: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UITextView, context: Context) {
+        let selectedRange = uiView.selectedRange
+        uiView.isScrollEnabled = false
         uiView.attributedText = attributedText
+        uiView.selectedRange = selectedRange
+        uiView.isScrollEnabled = true
     }
 
     func makeCoordinator() -> Coordinator {

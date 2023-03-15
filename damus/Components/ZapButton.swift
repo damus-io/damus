@@ -68,24 +68,28 @@ struct ZapButton: View {
     
     var body: some View {
         HStack(spacing: 4) {
-            Image(systemName: zap_img)
-                .foregroundColor(zap_color == nil ? Color.gray : zap_color!)
-                .font(.footnote.weight(.medium))
-                .onTapGesture {
-                    if bar.zapped {
-                        //notify(.delete, bar.our_tip)
-                    } else if !zapping {
-                        self.showing_zap_customizer = true
-                        //send_zap(damus_state: damus_state, event: event, lnurl: lnurl, is_custom: false)
-                        //self.zapping = true
-                    }
+            Button(action: {
+            }, label: {
+                Image(systemName: zap_img)
+                    .foregroundColor(zap_color == nil ? Color.gray : zap_color!)
+                    .font(.footnote.weight(.medium))
+            })
+            .simultaneousGesture(LongPressGesture().onEnded {_  in
+                guard !zapping else {
+                    return
                 }
-                .onLongPressGesture(minimumDuration: 0, pressing: { is_charing in
-                    self.is_charging = is_charging
-                }, perform: {
-                    self.showing_zap_customizer = true
-                })
-                .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
+                
+                self.showing_zap_customizer = true
+            })
+            .simultaneousGesture(TapGesture().onEnded {_  in
+                guard !zapping else {
+                    return
+                }
+                
+                send_zap(damus_state: damus_state, event: event, lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: ZapType.pub)
+                self.zapping = true
+            })
+            .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
 
             if bar.zap_total > 0 {
                 Text(verbatim: format_msats_abbrev(bar.zap_total))

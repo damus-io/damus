@@ -1,3 +1,52 @@
+## [1.2.0-4] - 2023-03-05
+
+### Added
+
+- Add ellipsis button to notes (ericholguin)
+
+
+### Changed
+
+- Immediately search for events and profiles (William Casarin)
+- Use long-press for custom zaps (William Casarin)
+- Make shaka animation smoother (Swift)
+
+
+### Fixed
+
+- Fixed hit detection bugs on profile page (OlegAba)
+- Fix disappearing text on Thread view (Bryan Montz)
+- Render links in notification summaries (Joel Klabo)
+- Don't show notifications from ourselves (William Casarin)
+- Fix issue where navbar back button would show the wrong text (Jack Chakany)
+- Fix case sensitivity when searching hashtags (randymcmillan)
+- Fix issue where opening reposts shows json (William Casarin)
+
+
+[1.2.0-4]: https://github.com/damus-io/damus/releases/tag/v1.2.0-4
+
+## [1.2.0-3] - 2023-03-04
+
+### Added
+
+- Add additional info to recommended relay view (ericholguin)
+- Add shaka animation (Swift)
+- Add option to disable image animation (OlegAba)
+- Add additional warning when deleting account (ericholguin)
+- Threads now load instantly and are cached (William Casarin)
+
+
+### Fixed
+
+- Wrap long profile display names (OlegAba)
+- Fixed weird scaling on profile pictures (OlegAba)
+- Fixed width of copy pubkey on profile page (Joel Klabo)
+- Make damus purple use more consistent in mentions (Joel Klabo)
+
+
+
+[1.2.0-3]: https://github.com/damus-io/damus/releases/tag/v1.2.0-3
+
 ## [1.1.0-10] - 2023-03-01
 
 ### Added

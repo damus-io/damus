@@ -303,14 +303,13 @@ func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, sats: Int
     
     var query = [URLQueryItem(name: "amount", value: "\(amount)")]
     
-    if let zapreq, zappable && zap_type != .non_zap {
-        let json = event_to_json(ev: zapreq)
+    if let zapreq, zappable && zap_type != .non_zap, let json = encode_json(zapreq) {
         print("zapreq json: \(json)")
         query.append(URLQueryItem(name: "nostr", value: json))
     }
    
     // add a lud12 comment as well if we have it
-    if let comment, let limit = payreq.commentAllowed, limit != 0 {
+    if zap_type != .priv, let comment, let limit = payreq.commentAllowed, limit != 0 {
         let limited_comment = String(comment.prefix(limit))
         query.append(URLQueryItem(name: "comment", value: limited_comment))
     }
@@ -323,7 +322,15 @@ func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, sats: Int
     
     print("url \(url)")
     
-    guard let ret = try? await URLSession.shared.data(from: url) else {
+    var ret: (Data, URLResponse)? = nil
+    do {
+        ret = try await URLSession.shared.data(from: url)
+    } catch {
+        print(error.localizedDescription)
+        return nil
+    }
+    
+    guard let ret else {
         return nil
     }
     

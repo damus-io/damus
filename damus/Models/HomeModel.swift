@@ -144,11 +144,15 @@ class HomeModel: ObservableObject {
         if !notifications.insert_zap(zap) {
             return
         }
-        
-        handle_last_event(ev: ev, timeline: .notifications)
+
+        if handle_last_event(ev: ev, timeline: .notifications) && damus_state.settings.zap_vibration {
+            // Generate zap vibration
+            zap_vibrate(zap_amount: zap.invoice.amount)
+        }
+
         return
     }
-    
+
     func handle_zap_event(_ ev: NostrEvent) {
         // These are zap notifications
         guard let ptag = event_tag(ev, name: "p") else {
@@ -453,6 +457,11 @@ class HomeModel: ObservableObject {
     }
 
     func handle_notification(ev: NostrEvent) {
+        // don't show notifications from ourselves
+        guard ev.pubkey != damus_state.pubkey else {
+            return
+        }
+        
         guard event_has_our_pubkey(ev, our_pubkey: self.damus_state.pubkey) else {
             return
         }
@@ -472,10 +481,14 @@ class HomeModel: ObservableObject {
         
         handle_last_event(ev: ev, timeline: .notifications)
     }
-    
-    func handle_last_event(ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) {
+
+    @discardableResult
+    func handle_last_event(ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) -> Bool {
         if let new_bits = handle_last_events(new_events: self.new_events, ev: ev, timeline: timeline, shouldNotify: shouldNotify) {
             new_events = new_bits
+            return true
+        } else {
+            return false
         }
     }
 
@@ -900,5 +913,18 @@ func should_show_event(contacts: Contacts, ev: NostrEvent) -> Bool {
         return false
     }
     return ev.should_show_event
+}
+
+func zap_vibrate(zap_amount: Int64) {
+    let sats = zap_amount / 1000
+    var vibration_generator: UIImpactFeedbackGenerator
+    if sats >= 10000 {
+        vibration_generator = UIImpactFeedbackGenerator(style: .heavy)
+    } else if sats >= 1000 {
+        vibration_generator = UIImpactFeedbackGenerator(style: .medium)
+    } else {
+        vibration_generator = UIImpactFeedbackGenerator(style: .light)
+    }
+    vibration_generator.impactOccurred()
 }
 

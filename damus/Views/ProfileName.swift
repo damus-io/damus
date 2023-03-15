@@ -134,11 +134,13 @@ struct EventProfileName: View {
             if let real_name = profile?.display_name {
                 Text(real_name)
                     .font(.body.weight(.bold))
-                    .padding([.trailing], 2)
                 
-                Text(verbatim: "@\(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey))")
-                    .foregroundColor(Color("DamusMediumGrey"))
+                + Text(verbatim: real_name.isEmpty ? "" : " ")
+
+                + Text(verbatim: "@\(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey))")
+                    .foregroundColor(.gray)
                     .font(eventviewsize_to_font(size))
+                
             } else {
                 Text(verbatim: "\(display_name ?? Profile.displayName(profile: profile, pubkey: pubkey))")
                     .font(eventviewsize_to_font(size))
@@ -166,3 +168,9 @@ struct EventProfileName: View {
     }
 }
 
+struct ProfileName_Previews: PreviewProvider {
+    static var previews: some View {
+        ProfileName(pubkey:
+                        test_damus_state().pubkey, profile: make_test_profile(), damus: test_damus_state(), show_friend_confirmed: true)
+    }
+}

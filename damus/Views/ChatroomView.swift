@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+/*
 struct ChatroomView: View {
     @EnvironmentObject var thread: ThreadModel
     @Environment(\.dismiss) var dismiss
@@ -24,9 +25,9 @@ struct ChatroomView: View {
                                  next_ev: ind == count-1 ? nil : thread.events[ind+1],
                                  damus_state: damus
                         )
-                        .event_context_menu(ev, keypair: damus.keypair, target_pubkey: ev.pubkey)
+                        .contextMenu{MenuItems(event: ev, keypair: damus.keypair, target_pubkey: ev.pubkey, bookmarks: damus.bookmarks)}
                         .onTapGesture {
-                            if thread.initial_event.id == ev.id {
+                            if thread.event.id == ev.id {
                                 //dismiss()
                                 toggle_thread_view()
                             } else {
@@ -44,7 +45,7 @@ struct ChatroomView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .select_quote)) { notif in
                 let ev = notif.object as! NostrEvent
-                if ev.id != thread.initial_event.id {
+                if ev.id != thread.event.id {
                     thread.set_active_event(ev, privkey: damus.keypair.privkey)
                 }
                 scroll_to_event(scroller: scroller, id: ev.id, delay: 0, animate: true)
@@ -57,7 +58,7 @@ struct ChatroomView: View {
                 once = true
             }
             .onAppear() {
-                scroll_to_event(scroller: scroller, id: thread.initial_event.id, delay: 0.1, animate: false)
+                scroll_to_event(scroller: scroller, id: thread.event.id, delay: 0.1, animate: false)
             }
         }
     }
@@ -76,7 +77,9 @@ struct ChatroomView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
         ChatroomView(damus: state)
-            .environmentObject(ThreadModel(evid: "&849ab9bb263ed2819db06e05f1a1a3b72878464e8c7146718a2fc1bf1912f893", damus_state: state))
+            .environmentObject(ThreadModel(event: test_event, damus_state: state))
         
     }
 }
+
+*/
