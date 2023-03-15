@@ -8,8 +8,6 @@
 import XCTest
 @testable import damus
 
-/* The Github test suite is failing below.
-
 final class ReplyDescriptionTests: XCTestCase {
 
     let enUsLocale = Locale(identifier: "en-US")
@@ -86,4 +84,3 @@ final class ReplyDescriptionTests: XCTestCase {
         }
     }
 }
-*/
