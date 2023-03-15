@@ -22,15 +22,25 @@ extension PostView {
 
         let task = URLSession.shared.dataTask(with: request as URLRequest) {
             data, response, error in
-            if error != nil {
-                print("error=\(error!)")
+            if let error {
+                print("error=\(error)")
+                return
+            }
+            
+            guard let data else {
+                return
+            }
+            
+            guard let responseString = String(data: data, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue)) else {
+                return
+            }
+            print("response data = \(responseString)")
+            
+            guard let url = imageUploader.getImageURL(from: responseString) else {
                 return
             }
 
-            let responseString = String(data: data!, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))
-            print("response data = \(responseString!)")
-
-            let uploadedImageURL = NSMutableAttributedString(string: imageUploader.getImageURL(from: responseString), attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0), NSAttributedString.Key.foregroundColor: UIColor.label])
+            let uploadedImageURL = NSMutableAttributedString(string: url, attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0), NSAttributedString.Key.foregroundColor: UIColor.label])
             let combinedAttributedString = NSMutableAttributedString()
             combinedAttributedString.append(post)
             combinedAttributedString.append(uploadedImageURL)
@@ -118,8 +128,10 @@ extension PostView {
 
 extension NSMutableData {
     func appendString(string: String) {
-        let data = string.data(using: String.Encoding.utf8, allowLossyConversion: true)
-        append(data!)
+        guard let data = string.data(using: String.Encoding.utf8, allowLossyConversion: true) else {
+            return
+        }
+        append(data)
     }
 }
 
@@ -172,29 +184,32 @@ enum ImageUploader: String, CaseIterable, Identifiable {
         }
     }
 
-    func getImageURL(from responseString: String?) -> String {
+    func getImageURL(from responseString: String) -> String? {
         switch self {
         case .nostrBuild:
-            if let startIndex = responseString?.range(of: "nostr.build_")?.lowerBound,
-               let stringContainingName = responseString?[startIndex..<responseString!.endIndex],
-               let endIndex = stringContainingName.range(of: "<")?.lowerBound,
-               let nostrBuildImageName = responseString?[startIndex..<endIndex] {
-                let nostrBuildURL = "https://nostr.build/i/\(nostrBuildImageName)"
-                return nostrBuildURL
-            } else {
-                return ""
+            guard let startIndex = responseString.range(of: "nostr.build_")?.lowerBound else {
+                return nil
             }
+            
+            let stringContainingName = responseString[startIndex..<responseString.endIndex]
+            guard let endIndex = stringContainingName.range(of: "<")?.lowerBound else {
+                return nil
+            }
+            let nostrBuildImageName = responseString[startIndex..<endIndex]
+            let nostrBuildURL = "https://nostr.build/i/\(nostrBuildImageName)"
+            return nostrBuildURL
+                
         case .nostrImg:
-            if let startIndex = responseString?.range(of: "https://i.nostrimg.com/")?.lowerBound,
-               let stringContainingName = responseString?[startIndex..<responseString!.endIndex],
-               let endIndex = stringContainingName.range(of: "\"")?.lowerBound,
-               let nostrBuildImageName = responseString?[startIndex..<endIndex] {
-                let nostrBuildURL = "\(nostrBuildImageName)"
-                return nostrBuildURL
-            } else {
-                return ""
+            guard let startIndex = responseString.range(of: "https://i.nostrimg.com/")?.lowerBound else {
+                    return nil
+                }
+            let stringContainingName = responseString[startIndex..<responseString.endIndex]
+            guard let endIndex = stringContainingName.range(of: "\"")?.lowerBound else {
+                return nil
             }
-
+            let nostrBuildImageName = responseString[startIndex..<endIndex]
+            let nostrBuildURL = "\(nostrBuildImageName)"
+            return nostrBuildURL
         }
     }
 }
