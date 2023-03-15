@@ -100,6 +100,12 @@ class UserSettingsStore: ObservableObject {
             UserDefaults.standard.set(left_handed, forKey: "left_handed")
         }
     }
+    
+    @Published var always_show_images: Bool {
+        didSet {
+            UserDefaults.standard.set(always_show_images, forKey: "always_show_images")
+        }
+    }
 
     @Published var zap_vibration: Bool {
         didSet {
@@ -182,6 +188,7 @@ class UserSettingsStore: ObservableObject {
         let pubkey = ""
         self.default_wallet = get_default_wallet(pubkey)
         show_wallet_selector = should_show_wallet_selector(pubkey)
+        always_show_images = UserDefaults.standard.object(forKey: "always_show_images") as? Bool ?? false
 
         left_handed = UserDefaults.standard.object(forKey: "left_handed") as? Bool ?? false
         zap_vibration = UserDefaults.standard.object(forKey: "zap_vibration") as? Bool ?? false

@@ -207,6 +207,8 @@ struct ConfigView: View {
                         .onChange(of: settings.disable_animation) { _ in
                             clear_kingfisher_cache()
                         }
+                    Toggle(NSLocalizedString("Always show images", comment: "Setting to always show and never blur images"), isOn: $settings.always_show_images)
+                        .toggleStyle(.switch)
 
                     Button(NSLocalizedString("Clear Cache", comment: "Button to clear image cache.")) {
                         clear_kingfisher_cache()

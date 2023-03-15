@@ -21,7 +21,7 @@ struct DMView: View {
                 Spacer(minLength: UIScreen.main.bounds.width * 0.2)
             }
 
-            let should_show_img = should_show_images(contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
+            let should_show_img = should_show_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
 
             NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, size: .normal, artifacts: .just_content(event.get_content(damus_state.keypair.privkey)), truncate: false)
                 .padding(10)

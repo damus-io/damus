@@ -89,7 +89,11 @@ struct EventView: View {
 }
 
 // blame the porn bots for this code
-func should_show_images(contacts: Contacts, ev: NostrEvent, our_pubkey: String, booster_pubkey: String? = nil) -> Bool {
+func should_show_images(settings: UserSettingsStore, contacts: Contacts, ev: NostrEvent, our_pubkey: String, booster_pubkey: String? = nil) -> Bool {
+    if settings.always_show_images {
+        return true
+    }
+    
     if ev.pubkey == our_pubkey {
         return true
     }
