@@ -38,7 +38,7 @@ struct PostView: View {
     func dismiss() {
         self.presentationMode.wrappedValue.dismiss()
     }
-
+    
     func send_post() {
         var kind: NostrKind = .text
         if replying_to?.known_kind == .chat {
@@ -68,69 +68,84 @@ struct PostView: View {
     var is_post_empty: Bool {
         return post.string.allSatisfy { $0.isWhitespace }
     }
+    
+    var ImageButton: some View {
+        Button(action: {
+            attach_media = true
+        }, label: {
+            Image(systemName: "photo")
+        })
+    }
+    
+    var AttachmentBar: some View {
+        HStack(alignment: .center) {
+            ImageButton
+        }
+    }
+    
+    var PostButton: some View {
+        Button(NSLocalizedString("Post", comment: "Button to post a note.")) {
+            showPrivateKeyWarning = contentContainsPrivateKey(self.post.string)
 
-    var body: some View {
-        VStack {
-            HStack {
-                Button(NSLocalizedString("Cancel", comment: "Button to cancel out of posting a note.")) {
-                    self.cancel()
-                }
-                .foregroundColor(.primary)
-
-                Spacer()
-                    .frame(width: 70)
-
-                Button(NSLocalizedString("Attach image", comment: "Button to attach image.")) {
-                    attach_media = true
-                }.foregroundColor(.primary)
-
-                Spacer()
-
-                if !is_post_empty {
-                    Button(NSLocalizedString("Post", comment: "Button to post a note.")) {
-                        showPrivateKeyWarning = contentContainsPrivateKey(self.post.string)
-
-                        if !showPrivateKeyWarning {
-                            self.send_post()
-                        }
-                    }
-                    .font(.system(size: 14, weight: .bold))
-                    .frame(width: 80, height: 30)
-                    .foregroundColor(.white)
-                    .background(LINEAR_GRADIENT)
-                    .clipShape(Capsule())
-                }
+            if !showPrivateKeyWarning {
+                self.send_post()
             }
-            .frame(height: 30)
-            .padding([.top, .bottom], 4)
+        }
+        .font(.system(size: 14, weight: .bold))
+        .frame(width: 80, height: 30)
+        .foregroundColor(.white)
+        .background(LINEAR_GRADIENT)
+        .clipShape(Capsule())
+    }
+    
+    var TextEntry: some View {
+        ZStack(alignment: .topLeading) {
+            TextViewWrapper(attributedText: $post)
+                .focused($focus)
+                .textInputAutocapitalization(.sentences)
+                .onChange(of: post) { _ in
+                    if let replying_to {
+                        damus_state.drafts.replies[replying_to] = post
+                    } else {
+                        damus_state.drafts.post = post
+                    }
+                }
+            
+            if post.string.isEmpty {
+                Text(POST_PLACEHOLDER)
+                    .padding(.top, 8)
+                    .padding(.leading, 4)
+                    .foregroundColor(Color(uiColor: .placeholderText))
+                    .allowsHitTesting(false)
+            }
+        }
+    }
+    
+    var TopBar: some View {
+        HStack {
+            Button(NSLocalizedString("Cancel", comment: "Button to cancel out of posting a note.")) {
+                self.cancel()
+            }
+            .foregroundColor(.primary)
+
+            Spacer()
+
+            if !is_post_empty {
+                PostButton
+            }
+        }
+        .frame(height: 30)
+        .padding([.top, .bottom], 4)
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            TopBar
             
             HStack(alignment: .top) {
-                
                 ProfilePicView(pubkey: damus_state.pubkey, size: 45.0, highlight: .none, profiles: damus_state.profiles)
                 
-                VStack(alignment: .leading) {
-                    ZStack(alignment: .topLeading) {
-                        
-                        TextViewWrapper(attributedText: $post)
-                            .focused($focus)
-                            .textInputAutocapitalization(.sentences)
-                            .onChange(of: post) { _ in
-                                if let replying_to {
-                                    damus_state.drafts.replies[replying_to] = post
-                                } else {
-                                    damus_state.drafts.post = post
-                                }
-                            }
-                        
-                        if post.string.isEmpty {
-                            Text(POST_PLACEHOLDER)
-                                .padding(.top, 8)
-                                .padding(.leading, 4)
-                                .foregroundColor(Color(uiColor: .placeholderText))
-                                .allowsHitTesting(false)
-                        }
-                    }
-                }
+                TextEntry
             }
 
             // This if-block observes @ for tagging
@@ -140,6 +155,11 @@ struct PostView: View {
                     UserSearch(damus_state: damus_state, search: searching, post: $post)
                 }.zIndex(1)
             }
+            
+            Divider()
+                .padding([.bottom], 10)
+            
+            AttachmentBar
         }
         .sheet(isPresented: $attach_media) {
             ImagePicker(sourceType: .photoLibrary) { image in
