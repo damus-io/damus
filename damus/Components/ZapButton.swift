@@ -75,19 +75,22 @@ struct ZapButton: View {
                     .font(.footnote.weight(.medium))
             })
             .simultaneousGesture(LongPressGesture().onEnded {_  in
-                guard !zapping else {
+                guard !zapping, get_zap_sheet_display(pubkey: damus_state.pubkey) == false else {
                     return
                 }
-                
-                self.showing_zap_customizer = true
+                showing_zap_customizer = true
             })
             .simultaneousGesture(TapGesture().onEnded {_  in
                 guard !zapping else {
                     return
                 }
-                
-                send_zap(damus_state: damus_state, event: event, lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: ZapType.pub)
-                self.zapping = true
+
+                if get_zap_sheet_display(pubkey: damus_state.pubkey) {
+                    showing_zap_customizer = true
+                } else {
+                    send_zap(damus_state: damus_state, event: event, lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: ZapType.pub)
+                    zapping = true
+                }
             })
             .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
 

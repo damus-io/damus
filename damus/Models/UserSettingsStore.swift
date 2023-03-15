@@ -26,6 +26,16 @@ func set_default_zap_amount(pubkey: String, amount: Int) {
     UserDefaults.standard.setValue(amount, forKey: key)
 }
 
+func set_zap_sheet_display(pubkey: String, display: Bool) {
+    let key = pk_setting_key(pubkey, key: "zap_sheet_display_key")
+    UserDefaults.standard.setValue(display, forKey: key)
+}
+
+func get_zap_sheet_display(pubkey: String) -> Bool {
+    let key = pk_setting_key(pubkey, key: "zap_sheet_display_key")
+    return UserDefaults.standard.bool(forKey: key)
+}
+
 func get_default_zap_amount(pubkey: String) -> Int? {
     let key = default_zap_setting_key(pubkey: pubkey)
     let amt = UserDefaults.standard.integer(forKey: key)

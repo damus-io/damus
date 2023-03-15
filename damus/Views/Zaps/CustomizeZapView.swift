@@ -59,6 +59,8 @@ struct CustomizeZapView: View {
     @State var error: String?
     @State var showing_wallet_selector: Bool
     @State var zapping: Bool
+    @State var display_zap_sheet: Bool
+    @State var default_zap_amount: String = ""
     
     let zap_amounts: [ZapAmountItem]
     
@@ -79,6 +81,7 @@ struct CustomizeZapView: View {
         self._zapping = State(initialValue: false)
         self.lnurl = lnurl
         self.state = state
+        self._display_zap_sheet = State(initialValue: get_zap_sheet_display(pubkey: state.pubkey))
     }
     
     var zap_type_desc: String {
@@ -221,7 +224,39 @@ struct CustomizeZapView: View {
                 }
                 .zIndex(16)
             }
-            
+
+            Section (content: {
+                HStack {
+                    Section {
+                        Toggle(isOn: $display_zap_sheet) {
+                            Text("Always display this page?", comment: "Ask the user whether to always display this page.")
+                        }
+                        .onChange(of: display_zap_sheet) { newValue in
+                            set_zap_sheet_display(pubkey: state.pubkey, display: newValue)
+                        }
+                    }
+
+                    if !display_zap_sheet {
+                        Section {
+                            TextField("Type default zap", text: $default_zap_amount)
+                                .keyboardType(.numberPad)
+                                .onReceive(Just(default_zap_amount)) { newValue in
+                                    if let parsed = handle_string_amount(new_value: newValue) {
+                                        self.default_zap_amount = String(parsed)
+                                        set_default_zap_amount(pubkey: self.state.pubkey, amount: parsed)
+                                    }
+                                }
+                        }
+                    }
+                }
+            }, header: {
+                    Text("Optional")
+            }, footer: {
+                if !display_zap_sheet {
+                    Text("However, a long press on zap icon will trigger this page.")
+                }
+            })
+
             if let error {
                 Text(error)
                     .foregroundColor(.red)
