@@ -1,3 +1,36 @@
+## [1.3.0] - 2023-03-15
+
+### Added
+
+- Extend user tagging search to all local profiles (William Casarin)
+- Vibrate when a zap is received (Swift)
+- New and Improved Share sheet (ericholguin)
+
+
+### Changed
+
+- Reduce battery usage by using exp backoff on connections (Bryan Montz)
+- Don't show both realname and username if they are the same (William Casarin)
+- Show error on invalid lightning tip address (Swift)
+- Make DM Content More Visible (Joel Klabo)
+- Remove spaces from hashtag searches (gladiusKatana)
+
+
+### Fixed
+
+- Show @ mentions for users with display_names and no username (William Casarin)
+- Make user search case insensitive (William Casarin)
+- Fix repost button sometimes not working (OlegAba)
+- Don't show follows you for your own profile (benthecarman)
+- Fix json appearing in profile searches (gladiusKatana)
+- Fix unexpected font size when posting (Bryan Montz)
+- Fix keyboard sticking issues (OlegAba)
+- Fixed tab bar background color on macOS (Joel Klabo)
+- Fix some links getting interpreted as images (gladiusKatana)
+
+
+[1.3.0]: https://github.com/damus-io/damus/releases/tag/v1.3.0
+
 ## [1.2.0-4] - 2023-03-05
 
 ### Added
@@ -698,5 +731,7 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
+
+
 
 
