@@ -41,7 +41,6 @@ struct NoteContentView: View {
         self._artifacts = State(initialValue: artifacts)
         self.preview_height = lookup_cached_preview_size(previews: damus_state.previews, evid: event.id)
         self._preview = State(initialValue: load_cached_preview(previews: damus_state.previews, evid: event.id))
-        self._artifacts = State(initialValue: render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey))
         self.truncate = truncate
     }
     
@@ -104,6 +103,8 @@ struct NoteContentView: View {
                 }
             }
             .task {
+                self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+                
                 guard self.preview == nil else {
                     return
                 }
