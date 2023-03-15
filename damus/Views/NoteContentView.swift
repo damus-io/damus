@@ -158,7 +158,7 @@ func mention_str(_ m: Mention, profiles: Profiles) -> AttributedString {
     case .pubkey:
         let pk = m.ref.ref_id
         let profile = profiles.lookup(id: pk)
-        let disp = Profile.displayName(profile: profile, pubkey: pk)
+        let disp = Profile.displayName(profile: profile, pubkey: pk).username
         var attributedString = AttributedString(stringLiteral: "@\(disp)")
         attributedString.link = URL(string: "nostr:\(encode_pubkey_uri(m.ref))")
         attributedString.foregroundColor = Color("DamusPurple")

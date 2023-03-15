@@ -135,6 +135,8 @@
 		4C90BD1C283AC38E008EE7EF /* Bech32Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD1B283AC38E008EE7EF /* Bech32Tests.swift */; };
 		4C987B57283FD07F0042CE38 /* FollowersModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C987B56283FD07F0042CE38 /* FollowersModel.swift */; };
 		4C99737B28C92A9200E53835 /* ChatroomMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C99737A28C92A9200E53835 /* ChatroomMetadata.swift */; };
+		4C9BB83129C0ED4F00FC4E37 /* DisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9BB83029C0ED4F00FC4E37 /* DisplayName.swift */; };
+		4C9BB83429C12D9900FC4E37 /* EventProfileName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9BB83329C12D9900FC4E37 /* EventProfileName.swift */; };
 		4C9F18E229AA9B6C008C55EC /* CustomizeZapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */; };
 		4C9F18E429ABDE6D008C55EC /* MaybeAnonPfpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9F18E329ABDE6D008C55EC /* MaybeAnonPfpView.swift */; };
 		4CA2EFA0280E37AC0044ACD8 /* TimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA2EF9F280E37AC0044ACD8 /* TimelineView.swift */; };
@@ -490,6 +492,8 @@
 		4C90BD1B283AC38E008EE7EF /* Bech32Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32Tests.swift; sourceTree = "<group>"; };
 		4C987B56283FD07F0042CE38 /* FollowersModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowersModel.swift; sourceTree = "<group>"; };
 		4C99737A28C92A9200E53835 /* ChatroomMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatroomMetadata.swift; sourceTree = "<group>"; };
+		4C9BB83029C0ED4F00FC4E37 /* DisplayName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayName.swift; sourceTree = "<group>"; };
+		4C9BB83329C12D9900FC4E37 /* EventProfileName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventProfileName.swift; sourceTree = "<group>"; };
 		4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomizeZapView.swift; sourceTree = "<group>"; };
 		4C9F18E329ABDE6D008C55EC /* MaybeAnonPfpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaybeAnonPfpView.swift; sourceTree = "<group>"; };
 		4CA2EF9F280E37AC0044ACD8 /* TimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineView.swift; sourceTree = "<group>"; };
@@ -899,6 +903,7 @@
 				4CE0E2AE29A2E82100DB4CA2 /* EventHolder.swift */,
 				3A3040F029A8FF97008A0F29 /* LocalizationUtil.swift */,
 				4C30AC7729A577AB00E2BD5A /* EventCache.swift */,
+				4C9BB83029C0ED4F00FC4E37 /* DisplayName.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -942,6 +947,7 @@
 				4CB9D4A62992D02B00A9A7E4 /* ProfileNameView.swift */,
 				4CB9D4A82992D2F400A9A7E4 /* FollowsYou.swift */,
 				4C9F18E329ABDE6D008C55EC /* MaybeAnonPfpView.swift */,
+				4C9BB83329C12D9900FC4E37 /* EventProfileName.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -1398,6 +1404,7 @@
 				4CE4F9DE2852768D00C00DD9 /* ConfigView.swift in Sources */,
 				4C285C8E28399BFE008A31F1 /* SaveKeysView.swift in Sources */,
 				F7F0BA25297892BD009531F3 /* SwipeToDismiss.swift in Sources */,
+				4C9BB83429C12D9900FC4E37 /* EventProfileName.swift in Sources */,
 				4CB8838F296F781C00DC99E7 /* ReactionsView.swift in Sources */,
 				4C649844285A952100EAE2B3 /* LocalUserConfig.swift in Sources */,
 				4C75EFB328049D640006080F /* NostrEvent.swift in Sources */,
@@ -1518,6 +1525,7 @@
 				4CE8794E2996B16A00F758CC /* RelayToggle.swift in Sources */,
 				4C3AC79B28306D7B00E1F516 /* Contacts.swift in Sources */,
 				4C3EA63D28FF52D600C48A62 /* bolt11.c in Sources */,
+				4C9BB83129C0ED4F00FC4E37 /* DisplayName.swift in Sources */,
 				7CFF6317299FEFE5005D382A /* SelectableText.swift in Sources */,
 				4C54AA0729A540BA003E4487 /* NotificationsModel.swift in Sources */,
 				4CB55EF3295E5D59007FD187 /* RecommendedRelayView.swift in Sources */,

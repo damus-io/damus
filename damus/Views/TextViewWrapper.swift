@@ -22,11 +22,7 @@ struct TextViewWrapper: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UITextView, context: Context) {
-        let selectedRange = uiView.selectedRange
-        uiView.isScrollEnabled = false
         uiView.attributedText = attributedText
-        uiView.selectedRange = selectedRange
-        uiView.isScrollEnabled = true
     }
 
     func makeCoordinator() -> Coordinator {
