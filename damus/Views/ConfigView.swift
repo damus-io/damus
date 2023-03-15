@@ -134,16 +134,6 @@ struct ConfigView: View {
                         }
                     }
                 }
-
-                Section(NSLocalizedString("Image Uploader", comment: "Section title for selection of image uploader.")) {
-                    Picker(NSLocalizedString("Select image uplodaer", comment: "Prompt selection of user's image uplodaer"),
-                           selection: $settings.default_image_uploader) {
-                        ForEach(ImageUploader.allCases, id: \.self) { uploader in
-                            Text(uploader.model.displayName)
-                                .tag(uploader.model.tag)
-                        }
-                    }
-                }
                 
                 Section(NSLocalizedString("Default Zap Amount in sats", comment: "Section title for zap configuration")) {
                     TextField(String("1000"), text: $default_zap_amount)
@@ -219,6 +209,14 @@ struct ConfigView: View {
 
                     Button(NSLocalizedString("Clear Cache", comment: "Button to clear image cache.")) {
                         clear_kingfisher_cache()
+                    }
+                    
+                    Picker(NSLocalizedString("Select image uplodaer", comment: "Prompt selection of user's image uplodaer"),
+                           selection: $settings.default_image_uploader) {
+                        ForEach(ImageUploader.allCases, id: \.self) { uploader in
+                            Text(uploader.model.displayName)
+                                .tag(uploader.model.tag)
+                        }
                     }
                 }
                 
