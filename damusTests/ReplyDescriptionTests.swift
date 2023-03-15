@@ -83,5 +83,4 @@ final class ReplyDescriptionTests: XCTestCase {
             }
         }
     }
-
 }
