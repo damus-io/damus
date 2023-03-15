@@ -13,11 +13,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>... %d otra nota ...</string>
-			<key>many</key>
-			<string>... %d otras notas ...</string>
+			<string>...%d andra inlägg...</string>
 			<key>other</key>
-			<string>... %d otras notas...</string>
+			<string>...%d andra inlägg...</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -31,11 +29,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Seguidor</string>
-			<key>many</key>
-			<string>Seguidores</string>
+			<string>Följare</string>
 			<key>other</key>
-			<string>Seguidores</string>
+			<string>Följare</string>
 		</dict>
 	</dict>
 	<key>following_count</key>
@@ -49,11 +45,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Siguiendo</string>
-			<key>many</key>
-			<string>Siguiendo</string>
+			<string>Följer</string>
 			<key>other</key>
-			<string>Siguiendo</string>
+			<string>Följer</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -67,11 +61,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ y %1$d persona más reaccionaron a una publicación en la que te etiquetaron</string>
-			<key>many</key>
-			<string>%2$@ y %1$d personas más reaccionaron a una publicación en la que te etiquetaron</string>
+			<string>%2$@ och %1$d till reagerade på ett inlägg som du var taggad i</string>
 			<key>other</key>
-			<string>%2$@ y %1$d personas más reaccionaron a una publicación en la que te etiquetaron</string>
+			<string>%2$@ och %1$d andra reagerade på ett inlägg som du var taggad i</string>
 		</dict>
 	</dict>
 	<key>reacted_your_post_3</key>
@@ -85,11 +77,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ y %1$d persona más reaccionaron a tu publicación</string>
-			<key>many</key>
-			<string>%2$@ y %1$d personas más reaccionaron a tu publicación</string>
+			<string>%2$@ och %1$d till reagerade på ditt inlägg</string>
 			<key>other</key>
-			<string>%2$@ y %1$d personas más reaccionaron a tu publicación</string>
+			<string>%2$@ och %1$d andra reagerade på ditt inlägg</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -103,11 +93,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ y %1$d persona más reaccionaron a tu perfil</string>
-			<key>many</key>
-			<string>%2$@ y %1$d personas más reaccionaron a tu perfil</string>
+			<string>%2$@ och %1$d till reagerade på din profil</string>
 			<key>other</key>
-			<string>%2$@ y %1$d personas más reaccionaron a tu perfil</string>
+			<string>%2$@ och %1$d andra reagerade på din profil</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
@@ -121,11 +109,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Reacción</string>
-			<key>many</key>
-			<string>Reacciones</string>
+			<string>Reaktion</string>
 			<key>other</key>
-			<string>Reacciones</string>
+			<string>Reaktioner</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -139,11 +125,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Relé</string>
-			<key>many</key>
-			<string>Relés</string>
+			<string>Relä</string>
 			<key>other</key>
-			<string>Relés</string>
+			<string>Reläer</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
@@ -157,11 +141,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Respondiendo a %2$@, %3$@ y %1$d otro</string>
-			<key>many</key>
-			<string>Respondiendo a %2$@, %3$@ y %1$d otros</string>
+			<string>Svar till %2$@, %3$@ &amp; %1$d till</string>
 			<key>other</key>
-			<string>Respondiendo a %2$@, %3$@ y %1$d otros</string>
+			<string>Svar till %2$@, %3$@ &amp; %1$d andra</string>
 		</dict>
 	</dict>
 	<key>reposted_tagged_in_3</key>
@@ -175,11 +157,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ y %1$d persona más republicaron una publicación en la que te etiquetaron</string>
-			<key>many</key>
-			<string>%2$@ y %1$d personas más republicaron una publicación en la que te etiquetaron</string>
+			<string>%2$@ och %1$d annan delade ett inlägg som du var taggad i</string>
 			<key>other</key>
-			<string>%2$@ y %1$d personas más republicaron una publicación en la que te etiquetaron</string>
+			<string>%2$@ och %1$d andra delade ett inlägg som du var taggad i</string>
 		</dict>
 	</dict>
 	<key>reposted_your_post_3</key>
@@ -193,11 +173,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ y %1$d persona más republicaron tu publicación</string>
-			<key>many</key>
-			<string>%2$@ y %1$d personas más republicaron tu publicación</string>
+			<string>%2$@ och %1$d annan delade ditt inlägg</string>
 			<key>other</key>
-			<string>%2$@ y %1$d personas más republicaron tu publicación</string>
+			<string>%2$@ och %1$d andra delade ditt inlägg</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -211,11 +189,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ y %1$d persona más republicaron tu perfil</string>
-			<key>many</key>
-			<string>%2$@ y %1$d personas más republicaron tu perfil</string>
+			<string>%2$@ och %1$d annan delade din profil</string>
 			<key>other</key>
-			<string>%2$@ y %1$d personas más republicaron tu perfil</string>
+			<string>%2$@ och %1$d andra delade din profil</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -229,11 +205,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Republicación</string>
-			<key>many</key>
-			<string>Republicaciones</string>
+			<string>Dela</string>
 			<key>other</key>
-			<string>Republicaciones</string>
+			<string>Delningar</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -248,8 +222,6 @@
 			<string>@</string>
 			<key>one</key>
 			<string>%2$@ sat</string>
-			<key>many</key>
-			<string>%2$@ sats</string>
 			<key>other</key>
 			<string>%2$@ sats</string>
 		</dict>
@@ -265,11 +237,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ y %1$d persona más zapearon una publicación en la que te etiquetaron</string>
-			<key>many</key>
-			<string>%2$@ y %1$d personas más zapearon una publicación en la que te etiquetaron</string>
+			<string>%2$@ och %1$d annan zappade ett inlägg du som var taggad i</string>
 			<key>other</key>
-			<string>%2$@ y %1$d personas más zapearon una publicación en la que te etiquetaron</string>
+			<string>%2$@ och %1$d andra zappade ett inlägg som du var taggad i</string>
 		</dict>
 	</dict>
 	<key>zapped_your_post_3</key>
@@ -283,11 +253,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ y %1$d persona más zapearon tu publicación</string>
-			<key>many</key>
-			<string>%2$@ y %1$d personas más zapearon tu publicación</string>
+			<string>%2$@ och %1$d annan zappade ditt inlägg</string>
 			<key>other</key>
-			<string>%2$@ y %1$d personas más zapearon tu publicación</string>
+			<string>%2$@ och %1$d andra zappade ditt inlägg</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -301,11 +269,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ y %1$d persona más zapearon tu perfil</string>
-			<key>many</key>
-			<string>%2$@ y %1$d personas más zapearon tu perfil</string>
+			<string>%2$@ och %1$d annan zappade din profil</string>
 			<key>other</key>
-			<string>%2$@ y %1$d personas más zapearon tu perfil</string>
+			<string>%2$@ och %1$d andra zappade din profil</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
@@ -320,8 +286,6 @@
 			<string>d</string>
 			<key>one</key>
 			<string>Zap</string>
-			<key>many</key>
-			<string>Zaps</string>
 			<key>other</key>
 			<string>Zaps</string>
 		</dict>
