@@ -391,7 +391,7 @@ class HomeModel: ObservableObject {
             NostrKind.zap.rawValue,
         ])
         notifications_filter.pubkeys = [damus_state.pubkey]
-        notifications_filter.limit = 100
+        notifications_filter.limit = 500
 
         var home_filters = [home_filter]
         var notifications_filters = [notifications_filter]
