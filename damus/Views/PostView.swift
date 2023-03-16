@@ -169,6 +169,9 @@ struct PostView: View {
                     combinedAttributedString.append(NSAttributedString(string: " "))
                 }
                 combinedAttributedString.append(uploadedImageURL)
+                
+                // make sure we have a space at the end
+                combinedAttributedString.append(NSAttributedString(string: " "))
                 post = combinedAttributedString
                 
             case .failed(let error):
