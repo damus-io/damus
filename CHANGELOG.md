@@ -1,3 +1,24 @@
+## [1.3.0-2] - 2023-03-16
+
+### Added
+
+- Add image uploader (Swift)
+- Add option to always show images (never blur) (William Casarin)
+
+
+### Changed
+
+- Fixed embedded note popping (William Casarin)
+- Bump notification limit from 100 to 500 (William Casarin)
+
+
+### Fixed
+
+- Fix zap button preventing scrolling (William Casarin)
+
+
+[1.3.0-2]: https://github.com/damus-io/damus/releases/tag/v1.3.0-2
+
 ## [1.3.0] - 2023-03-15
 
 ### Added
@@ -731,7 +752,6 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
 
 
 
