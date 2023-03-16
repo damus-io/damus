@@ -239,9 +239,20 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
 }
 
 func is_image_url(_ url: URL) -> Bool {
-    let str = url.lastPathComponent.lowercased()
-    let isUrl = str.hasSuffix(".png") || str.hasSuffix(".jpg") || str.hasSuffix(".jpeg") || str.hasSuffix(".gif")
-    return isUrl
+    // Some media hosts provide links to an "image preview" with
+    // ads and other content instead of directly to an image file,
+    // which causes problems with rendering in an image view.
+    let hostsThatWrapImages = [
+        "pasteboard.co"
+    ]
+    guard let comps = URLComponents(url: url, resolvingAgainstBaseURL: false),
+          let host = comps.host,
+          !hostsThatWrapImages.contains(host) else {
+        return false
+    }
+    
+    let path = comps.path.lowercased()
+    return path.hasSuffix(".png") || path.hasSuffix(".jpg") || path.hasSuffix(".jpeg") || path.hasSuffix(".gif")
 }
 
 func lookup_cached_preview_size(previews: PreviewCache, evid: String) -> CGFloat? {
