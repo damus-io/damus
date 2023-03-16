@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>collapsed_event_view_other_notes</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@NOTES@</string>
+		<key>NOTES</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>... %d інша нотатка ...</string>
+			<key>few</key>
+			<string>... %d інші нотатки ...</string>
+			<key>many</key>
+			<string>... %d інших нотаток ...</string>
+			<key>other</key>
+			<string>... %d інші нотатки ...</string>
+		</dict>
+	</dict>
+	<key>followers_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWERS@</string>
+		<key>FOLLOWERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Читач</string>
+			<key>few</key>
+			<string>Читача</string>
+			<key>many</key>
+			<string>Читачів</string>
+			<key>other</key>
+			<string>Читач</string>
+		</dict>
+	</dict>
+	<key>reacted_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ та %1$d відреагувли на публікацію, у якій Ви булі відмічені</string>
+			<key>few</key>
+			<string>%2$@ та %1$d інші відреагувли на публікацію, у якій Ви булі відмічені</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших відреагувли на публікацію, у якій Ви булі відмічені</string>
+			<key>other</key>
+			<string>%2$@ та %1$d інший відреагував на публікацію, у якій Ви булі відмічені</string>
+		</dict>
+	</dict>
+	<key>reacted_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ та %1$d відреагували на Вашу публікацію</string>
+			<key>few</key>
+			<string>%2$@ та %1$d інші відреагувли на Вашу публікацію</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших відреагували на Вашу публікацію</string>
+			<key>other</key>
+			<string>%2$@ та %1$d інший відреагував на Вашу публікацію</string>
+		</dict>
+	</dict>
+	<key>reacted_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ та %1$d відреагувалі на Ваш профіль</string>
+			<key>few</key>
+			<string>%2$@ та %1$d інших відреагували на Ваш профіль</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших відреагували на Ваш профіль</string>
+			<key>other</key>
+			<string>%2$@ та %1$d інший відреагував на Ваш профіль</string>
+		</dict>
+	</dict>
+	<key>reactions_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTIONS@</string>
+		<key>REACTIONS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Реакція</string>
+			<key>few</key>
+			<string>Реакції</string>
+			<key>many</key>
+			<string>Реакцій</string>
+			<key>other</key>
+			<string>Реакція</string>
+		</dict>
+	</dict>
+	<key>relays_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@RELAYS@</string>
+		<key>RELAYS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Релей</string>
+			<key>few</key>
+			<string>Релея</string>
+			<key>many</key>
+			<string>Релеї</string>
+			<key>other</key>
+			<string>Релей</string>
+		</dict>
+	</dict>
+	<key>replying_to_two_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>У відповідь %2$@, %3$@ &amp; %1$d іншим</string>
+			<key>few</key>
+			<string>У відповідь %2$@, %3$@ &amp; %1$d іншим</string>
+			<key>many</key>
+			<string>У відповідь %2$@, %3$@ &amp; %1$d іншим</string>
+			<key>other</key>
+			<string>У відповідь %2$@, %3$@ &amp; %1$d іншим</string>
+		</dict>
+	</dict>
+	<key>reposted_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ та %1$d зробили репост публікації, у якій Ви булі відмічені</string>
+			<key>few</key>
+			<string>%2$@ та %1$d інші зробили репост публікації, у якій Ви булі відмічені</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших зробили репост публікації, у якій Ви булі відмічені</string>
+			<key>other</key>
+			<string>%2$@ та %1$d інший зробив репост публікації, у якій Ви булі відмічені</string>
+		</dict>
+	</dict>
+	<key>reposted_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ та %1$d зробили репост Вашої публікації</string>
+			<key>few</key>
+			<string>%2$@ та %1$d інші зробили репост Вашої публікації</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших зробили репост Вашої публікації</string>
+			<key>other</key>
+			<string>%2$@ та %1$d інший зробив репост Вашої публікації</string>
+		</dict>
+	</dict>
+	<key>reposted_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ та %1$d зробили репост Вашого профілю</string>
+			<key>few</key>
+			<string>%2$@ та %1$d інші зробили репост Вашого профілю</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших зробили репост Вашого профілю</string>
+			<key>other</key>
+			<string>%2$@ та %1$d інший зробив репост Вашого профілю</string>
+		</dict>
+	</dict>
+	<key>reposts_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTS@</string>
+		<key>REPOSTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Репост</string>
+			<key>few</key>
+			<string>Репосту</string>
+			<key>many</key>
+			<string>Репосів</string>
+			<key>other</key>
+			<string>Репост</string>
+		</dict>
+	</dict>
+	<key>sats_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@SATS@</string>
+		<key>SATS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>%2$@ сат</string>
+			<key>few</key>
+			<string>%2$@ сату</string>
+			<key>many</key>
+			<string>%2$@ сатів</string>
+			<key>other</key>
+			<string>%2$@ сат</string>
+		</dict>
+	</dict>
+	<key>zapped_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ та %1$d запнули публікацію, у якій Ви булі відмічені</string>
+			<key>few</key>
+			<string>%2$@ та %1$d інші запнули публікацію, у якій Ви булі відмічені</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших запнули публікацію, у якій Ви булі відмічені</string>
+			<key>other</key>
+			<string>%2$@ та %1$d інший запнув публікацію, у якій Ви булі відмічені</string>
+		</dict>
+	</dict>
+	<key>zapped_your_post_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ та %1$d запнули Вашу публікацію</string>
+			<key>few</key>
+			<string>%2$@ та %1$d інші запнули Вашу публікацію</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших запнули Вашу публікацію</string>
+			<key>other</key>
+			<string>%2$@ та %1$d інший запнув Вашу публікацію</string>
+		</dict>
+	</dict>
+	<key>zapped_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ та %1$d запнули Вашу публікацію</string>
+			<key>few</key>
+			<string>%2$@ та %1$d іншиі запнули Вашу публікацію</string>
+			<key>many</key>
+			<string>%2$@ та %1$d інших запнули Вашу публікацію</string>
+			<key>other</key>
+			<string>%2$@ та %1$d інший запнув Вашу публікацію</string>
+		</dict>
+	</dict>
+	<key>zaps_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPS@</string>
+		<key>ZAPS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Зап</string>
+			<key>few</key>
+			<string>Запа</string>
+			<key>many</key>
+			<string>Запів</string>
+			<key>other</key>
+			<string>Зап</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

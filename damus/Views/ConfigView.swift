@@ -194,8 +194,10 @@ struct ConfigView: View {
                     }
                 }
 
-                Section(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen")) {
+                Section(NSLocalizedString("Miscellaneous", comment: "Section header for miscellaneous user configuration")) {
                     Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)
+                        .toggleStyle(.switch)
+                    Toggle(NSLocalizedString("Zap Vibration", comment: "Setting to enable vibration on zap"), isOn: $settings.zap_vibration)
                         .toggleStyle(.switch)
                 }
 
@@ -205,6 +207,8 @@ struct ConfigView: View {
                         .onChange(of: settings.disable_animation) { _ in
                             clear_kingfisher_cache()
                         }
+                    Toggle(NSLocalizedString("Always show images", comment: "Setting to always show and never blur images"), isOn: $settings.always_show_images)
+                        .toggleStyle(.switch)
 
                     Button(NSLocalizedString("Clear Cache", comment: "Button to clear image cache.")) {
                         clear_kingfisher_cache()

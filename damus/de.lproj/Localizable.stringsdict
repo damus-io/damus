@@ -125,7 +125,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Antwort an %2$@, %3$@ &amp; %1$d anderen</string>
+			<string>Antwort an %2$@, %3$@ &amp; %1$d andere:r</string>
 			<key>other</key>
 			<string>Antwort an %2$@, %3$@ &amp; %1$d andere</string>
 		</dict>

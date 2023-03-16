@@ -13,6 +13,8 @@ struct EventMenuContext: View {
     let target_pubkey: String
     let bookmarks: BookmarksManager
     
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
         HStack {
             Menu {
@@ -26,7 +28,6 @@ struct EventMenuContext: View {
         }
         .contentShape(Rectangle())
         .onTapGesture {}
-        
     }
 }
 

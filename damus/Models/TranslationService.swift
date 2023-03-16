@@ -23,7 +23,7 @@ enum TranslationService: String, CaseIterable, Identifiable {
     var model: Model {
         switch self {
         case .none:
-            return .init(tag: self.rawValue, displayName: NSLocalizedString("None", comment: "Dropdown option for selecting no translation service."))
+            return .init(tag: self.rawValue, displayName: NSLocalizedString("none_translation_service", value: "None", comment: "Dropdown option for selecting no translation service."))
         case .libretranslate:
             return .init(tag: self.rawValue, displayName: NSLocalizedString("LibreTranslate (Open Source)", comment: "Dropdown option for selecting LibreTranslate as the translation service."))
         case .deepl:

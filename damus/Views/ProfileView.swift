@@ -54,6 +54,11 @@ func followersCountString(_ count: Int, locale: Locale = Locale.current) -> Stri
     return String(format: bundle.localizedString(forKey: "followers_count", value: nil, table: nil), locale: locale, count)
 }
 
+func followingCountString(_ count: Int, locale: Locale = Locale.current) -> String {
+    let bundle = bundleForLocale(locale: locale)
+    return String(format: bundle.localizedString(forKey: "following_count", value: nil, table: nil), locale: locale, count)
+}
+
 func relaysCountString(_ count: Int, locale: Locale = Locale.current) -> String {
     let bundle = bundleForLocale(locale: locale)
     return String(format: bundle.localizedString(forKey: "relays_count", value: nil, table: nil), locale: locale, count)
@@ -329,7 +334,7 @@ struct ProfileView: View {
                 actionSection(profile_data: profile_data)
             }
             
-            let follows_you = profile.follows(pubkey: damus_state.pubkey)
+            let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
             ProfileNameView(pubkey: profile.pubkey, profile: profile_data, follows_you: follows_you, damus: damus_state)
         }
     }
@@ -368,7 +373,7 @@ struct ProfileView: View {
                     let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
                     NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model, whos: profile.pubkey)) {
                         HStack {
-                            let noun_text = Text("Following", comment: "Text on the user profile page next to the number of accounts a user is following.").font(.subheadline).foregroundColor(.gray)
+                            let noun_text = Text(verbatim: "\(followingCountString(profile.following))").font(.subheadline).foregroundColor(.gray)
                             Text("\(Text("\(profile.following)").font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
                         }
                     }

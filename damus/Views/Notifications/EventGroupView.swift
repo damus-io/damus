@@ -61,7 +61,7 @@ func determine_reacting_to(our_pubkey: String, ev: NostrEvent?) -> ReactingTo {
 
 func event_author_name(profiles: Profiles, pubkey: String) -> String {
     let alice_prof = profiles.lookup(id: pubkey)
-    return Profile.displayName(profile: alice_prof, pubkey: pubkey)
+    return Profile.displayName(profile: alice_prof, pubkey: pubkey).username
 }
 
 func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType) -> String {

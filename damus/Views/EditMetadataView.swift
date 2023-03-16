@@ -65,6 +65,8 @@ struct EditMetadataView: View {
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
+
+    @State var confirm_ln_address: Bool = false
     
     init (damus_state: DamusState) {
         self.damus_state = damus_state
@@ -102,6 +104,10 @@ struct EditMetadataView: View {
         if let metadata_ev = m_metadata_ev {
             damus_state.pool.send(.event(metadata_ev))
         }
+    }
+
+    func is_ln_valid(ln: String) -> Bool {
+        return ln.contains("@") || ln.lowercased().starts(with: "lnurl")
     }
     
     var nip05_parts: NIP05? {
@@ -201,12 +207,22 @@ struct EditMetadataView: View {
                 })
 
                 Button(NSLocalizedString("Save", comment: "Button for saving profile.")) {
-                    save()
-                    dismiss()
+                    if !ln.isEmpty && !is_ln_valid(ln: ln) {
+                        confirm_ln_address = true
+                    } else {
+                        save()
+                        dismiss()
+                    }
+                }
+                .alert(NSLocalizedString("Invalid Tip Address", comment: "Title of alerting as invalid tip address."), isPresented: $confirm_ln_address) {
+                    Button(NSLocalizedString("Ok", comment: "Button to dismiss the alert.")) {
+                    }
+                } message: {
+                    Text("The address should either begin with LNURL or should look like an email address.", comment: "Giving the description of the alert message.")
                 }
             }
         }
-        .ignoresSafeArea()
+        .ignoresSafeArea(edges: .top)
     }
 }
 

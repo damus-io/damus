@@ -8,7 +8,7 @@
 import SwiftUI
 
 enum Search {
-    case profiles([(String, Profile)])
+    case profiles([SearchedUser])
     case hashtag(String)
     case profile(String)
     case note(String)
@@ -21,7 +21,7 @@ struct SearchResultsView: View {
     
     @State var result: Search? = nil
     
-    func ProfileSearchResult(pk: String, res: Profile) -> some View {
+    func ProfileSearchResult(pk: String) -> some View {
         FollowUserView(target: .pubkey(pk), damus_state: damus_state)
     }
     
@@ -31,8 +31,8 @@ struct SearchResultsView: View {
                 switch result {
                 case .profiles(let results):
                     LazyVStack {
-                        ForEach(results, id: \.0) { prof in
-                            ProfileSearchResult(pk: prof.0, res: prof.1)
+                        ForEach(results) { prof in
+                            ProfileSearchResult(pk: prof.pubkey)
                         }
                     }
                 case .hashtag(let ht):
@@ -73,10 +73,10 @@ struct SearchResultsView: View {
         MainContent
             .frame(maxHeight: .infinity)
             .onAppear {
-                self.result = search_changed(profiles: damus_state.profiles, search)
+                self.result = search_for_string(profiles: damus_state.profiles, search)
             }
             .onChange(of: search) { new in
-                self.result = search_changed(profiles: damus_state.profiles, new)
+                self.result = search_for_string(profiles: damus_state.profiles, new)
             }
     }
 }
@@ -90,13 +90,13 @@ struct SearchResultsView_Previews: PreviewProvider {
  */
 
 
-func search_changed(profiles: Profiles, _ new: String) -> Search? {
+func search_for_string(profiles: Profiles, _ new: String) -> Search? {
     guard new.count != 0 else {
         return nil
     }
     
     if new.first! == "#" {
-        let ht = String(new.dropFirst())
+        let ht = String(new.dropFirst().filter{$0 != " "})
         return .hashtag(ht)
     }
     
@@ -116,24 +116,37 @@ func search_changed(profiles: Profiles, _ new: String) -> Search? {
         }
     }
     
-    let profs = profiles.profiles.enumerated()
-    let results: [(String, Profile)] = profs.reduce(into: []) { acc, els in
+    return .profiles(search_profiles(profiles: profiles, search: new))
+}
+
+func search_profiles(profiles: Profiles, search: String) -> [SearchedUser] {
+    let new = search.lowercased()
+    return profiles.profiles.enumerated().reduce(into: []) { acc, els in
         let pk = els.element.key
         let prof = els.element.value.profile
-        let lowname = prof.name.map { $0.lowercased() }
-        let lownip05 = profiles.is_validated(pk).map { $0.host.lowercased() }
-        let lowdisp = prof.display_name.map { $0.lowercased() }
-        let ok = new.count == 1 ?
-        ((lowname?.starts(with: new) ?? false) ||
-         (lownip05?.starts(with: new) ?? false) ||
-         (lowdisp?.starts(with: new) ?? false)) : (pk.starts(with: new) || String(new.dropFirst()) == pk
-            || lowname?.contains(new) ?? false
-            || lownip05?.contains(new) ?? false
-            || lowdisp?.contains(new) ?? false)
-        if ok {
-            acc.append((pk, prof))
+        
+        if let searched = profile_search_matches(profiles: profiles, profile: prof, pubkey: pk, search: new) {
+            acc.append(searched)
         }
     }
-        
-    return .profiles(results)
+}
+
+
+func profile_search_matches(profiles: Profiles, profile prof: Profile, pubkey pk: String, search new: String) -> SearchedUser? {
+    let lowname = prof.name.map { $0.lowercased() }
+    let lownip05 = profiles.is_validated(pk).map { $0.host.lowercased() }
+    let lowdisp = prof.display_name.map { $0.lowercased() }
+    let ok = new.count == 1 ?
+    ((lowname?.starts(with: new) ?? false) ||
+     (lownip05?.starts(with: new) ?? false) ||
+     (lowdisp?.starts(with: new) ?? false)) : (pk.starts(with: new) || String(new.dropFirst()) == pk
+        || lowname?.contains(new) ?? false
+        || lownip05?.contains(new) ?? false
+        || lowdisp?.contains(new) ?? false)
+    
+    if ok {
+        return SearchedUser(petname: nil, profile: prof, pubkey: pk)
+    }
+    
+    return nil
 }
