@@ -37,32 +37,43 @@ struct ImageCarousel: View {
     var urls: [URL]
     
     @State var open_sheet: Bool = false
-    @State var current_url: URL? = nil
-    
+
     var body: some View {
         TabView {
             ForEach(urls, id: \.absoluteString) { url in
-                Rectangle()
-                    .foregroundColor(Color.clear)
-                    .overlay {
-                        KFAnimatedImage(url)
-                            .imageContext(.note)
-                            .cancelOnDisappear(true)
-                            .configure { view in
-                                view.framePreloadCount = 3
-                            }
-                            .aspectRatio(contentMode: .fill)
-                            //.cornerRadius(10)
-                            .tabItem {
-                                Text(url.absoluteString)
-                            }
-                            .id(url.absoluteString)
+                if FailedImageURLsCache.shared.urls.contains(url) {
+                    ZStack {
+                        Rectangle()
+                            .foregroundColor(Color("DamusDarkGrey"))
+                            .cornerRadius(10)
+                        ProgressView()
+                    }
+                } else {
+                    Rectangle()
+                        .foregroundColor(Color.clear)
+                        .overlay {
+                            KFAnimatedImage(url)
+                                .imageContext(.note)
+                                .cancelOnDisappear(true)
+                                .configure { view in
+                                    view.framePreloadCount = 3
+                                }
+                                .onFailure { error in
+                                    FailedImageURLsCache.shared.add(url)
+                                }
+                                .aspectRatio(contentMode: .fill)
+                                //.cornerRadius(10)
+                                .tabItem {
+                                    Text(url.absoluteString)
+                                }
+                                .id(url.absoluteString)
 //                            .contextMenu {
 //                                Button(NSLocalizedString("Copy Image", comment: "Context menu option to copy an image to clipboard.")) {
 //                                    UIPasteboard.general.string = url.absoluteString
 //                                }
 //                            }
-                    }
+                        }
+                }
             }
         }
         .fullScreenCover(isPresented: $open_sheet) {

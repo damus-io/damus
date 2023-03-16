@@ -30,7 +30,13 @@ struct NoteContentView: View {
     let preview_height: CGFloat?
     let options: EventViewOptions
 
-    @State var artifacts: NoteArtifacts
+    @State var artifacts: NoteArtifacts {
+        didSet {
+            Task {
+                await refreshPreview()
+            }
+        }
+    }
     @State var preview: LinkViewRepresentable?
     
     init(damus_state: DamusState, event: NostrEvent, show_images: Bool, size: EventViewKind, artifacts: NoteArtifacts, options: EventViewOptions) {
@@ -142,7 +148,7 @@ struct NoteContentView: View {
                     switch block {
                     case .mention(let m):
                         if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
-                            self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+                            self.refreshArtifacts()
                         }
                     case .text: return
                     case .hashtag: return
@@ -151,27 +157,38 @@ struct NoteContentView: View {
                     }
                 }
             }
+            .onReceive(handle_notify(FailedImageURLsCache.notification)) { _ in
+                if (Set(artifacts.images) as NSSet).intersects(FailedImageURLsCache.shared.urls) {
+                    refreshArtifacts()
+                }
+            }
             .task {
-                guard self.preview == nil else {
-                    return
-                }
-                
-                if show_images, artifacts.links.count == 1 {
-                    let meta = await getMetaData(for: artifacts.links.first!)
-                    
-                    damus_state.previews.store(evid: self.event.id, preview: meta)
-                    guard case .value(let cached) = damus_state.previews.lookup(self.event.id) else {
-                        return
-                    }
-                    let view = LinkViewRepresentable(meta: .linkmeta(cached))
-                    
-                    self.preview = view
-                }
-
+                refreshArtifacts()
+                await refreshPreview()
             }
     }
     
-    func getMetaData(for url: URL) async -> LPLinkMetadata? {
+    private func refreshArtifacts() {
+        artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+    }
+    
+    private func refreshPreview() async {
+        guard preview == nil, show_images && artifacts.links.count == 1 else {
+            return
+        }
+        
+        let meta = await getMetaData(for: artifacts.links.first!)
+        
+        damus_state.previews.store(evid: self.event.id, preview: meta)
+        guard case .value(let cached) = damus_state.previews.lookup(self.event.id) else {
+            return
+        }
+        let view = LinkViewRepresentable(meta: .linkmeta(cached))
+        
+        self.preview = view
+    }
+    
+    private func getMetaData(for url: URL) async -> LPLinkMetadata? {
         // iOS 15 is crashing for some reason
         guard #available(iOS 16, *) else {
             return nil
@@ -271,7 +288,7 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
             return str
         case .url(let url):
             // Handle Image URLs
-            if is_image_url(url) {
+            if is_image_url(url) && !FailedImageURLsCache.shared.urls.contains(url) {
                 // Append Image
                 img_urls.append(url)
                 return str
@@ -286,21 +303,19 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
 }
 
 func is_image_url(_ url: URL) -> Bool {
-    let str = url.lastPathComponent.lowercased()
-    let isUrl = str.hasSuffix(".png") || str.hasSuffix(".jpg") || str.hasSuffix(".jpeg") || str.hasSuffix(".gif")
-    return isUrl
+    guard let comps = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+        return false
+    }
+    
+    let path = comps.path.lowercased()
+    return path.hasSuffix(".png") || path.hasSuffix(".jpg") || path.hasSuffix(".jpeg") || path.hasSuffix(".gif")
 }
 
 func lookup_cached_preview_size(previews: PreviewCache, evid: String) -> CGFloat? {
     guard case .value(let cached) = previews.lookup(evid) else {
         return nil
     }
-    
-    guard let height = cached.intrinsic_height else {
-        return nil
-    }
-    
-    return height
+    return cached.intrinsic_height
 }
     
 
