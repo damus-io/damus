@@ -6,50 +6,16 @@
 //
 
 import SwiftUI
+import UIKit
+import CoreGraphics
+import UniformTypeIdentifiers
 
-extension PostView {
-    func myImageUploadRequest(imageToUpload: UIImage, imageUploader: ImageUploader) {
-        let myUrl = NSURL(string: imageUploader.postAPI);
-        let request = NSMutableURLRequest(url:myUrl! as URL);
-        request.httpMethod = "POST";
-        let boundary = generateBoundaryString()
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        let imageData = imageToUpload.jpegData(compressionQuality: 1)
-        if imageData == nil  {
-            return
-        }
-        request.httpBody = createBodyWithParameters(imageDataKey: imageData! as NSData, boundary: boundary, imageUploader: imageUploader) as Data
+enum ImageUploadResult {
+    case success(String)
+    case failed(Error?)
+}
 
-        let task = URLSession.shared.dataTask(with: request as URLRequest) {
-            data, response, error in
-            if let error {
-                print("error=\(error)")
-                return
-            }
-            
-            guard let data else {
-                return
-            }
-            
-            guard let responseString = String(data: data, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue)) else {
-                return
-            }
-            print("response data = \(responseString)")
-            
-            guard let url = imageUploader.getImageURL(from: responseString) else {
-                return
-            }
-
-            let uploadedImageURL = NSMutableAttributedString(string: url, attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0), NSAttributedString.Key.foregroundColor: UIColor.label])
-            let combinedAttributedString = NSMutableAttributedString()
-            combinedAttributedString.append(post)
-            combinedAttributedString.append(uploadedImageURL)
-            post = combinedAttributedString
-        }
-        task.resume()
-    }
-
-    func createBodyWithParameters(imageDataKey: NSData, boundary: String, imageUploader: ImageUploader) -> NSData {
+fileprivate func create_upload_body(imageDataKey: Data, boundary: String, imageUploader: ImageUploader) -> Data {
         let body = NSMutableData();
         let contentType = "image/jpg"
         body.appendString(string: "Content-Type: multipart/form-data; boundary=\(boundary)\r\n\r\n")
@@ -59,14 +25,51 @@ extension PostView {
         body.append(imageDataKey as Data)
         body.appendString(string: "\r\n")
         body.appendString(string: "--\(boundary)--\r\n")
-        return body
+        return body as Data
     }
 
-    func generateBoundaryString() -> String {
-        return "Boundary-\(NSUUID().uuidString)"
 
+func create_image_upload_request(imageToUpload: UIImage, imageUploader: ImageUploader, progress: URLSessionTaskDelegate) async -> ImageUploadResult {
+    
+    guard let url = URL(string: imageUploader.postAPI) else {
+        return .failed(nil)
     }
+    
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST";
+    let boundary = "Boundary-\(UUID().description)"
+    request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+    
+    // otherwise convert to jpg
+    guard let jpegData = imageToUpload.jpegData(compressionQuality: 0.8) else {
+        // somehow failed, just return original
+        return .failed(nil)
+    }
+    
+    request.httpBody = create_upload_body(imageDataKey: jpegData, boundary: boundary, imageUploader: imageUploader)
+    
+    do {
+        let (data, _) = try await URLSession.shared.data(for: request, delegate: progress)
+        
+        guard let responseString = String(data: data, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue)) else {
+            print("Upload failed getting response string")
+            return .failed(nil)
+        }
+        
+        guard let url = imageUploader.getImageURL(from: responseString) else {
+            print("Upload failed getting image url")
+            return .failed(nil)
+        }
+        
+        return .success(url)
+        
+    } catch {
+        return .failed(error)
+    }
+    
+}
 
+extension PostView {
     struct ImagePicker: UIViewControllerRepresentable {
 
         @Environment(\.presentationMode)

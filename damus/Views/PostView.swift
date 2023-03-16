@@ -19,6 +19,9 @@ struct PostView: View {
     @FocusState var focus: Bool
     @State var showPrivateKeyWarning: Bool = false
     @State var attach_media: Bool = false
+    @State var error: String? = nil
+    
+    @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
 
     let replying_to: NostrEvent?
     let references: [ReferencedId]
@@ -80,6 +83,7 @@ struct PostView: View {
     var AttachmentBar: some View {
         HStack(alignment: .center) {
             ImageButton
+                .disabled(image_upload.progress != nil)
         }
     }
     
@@ -122,20 +126,60 @@ struct PostView: View {
     }
     
     var TopBar: some View {
-        HStack {
-            Button(NSLocalizedString("Cancel", comment: "Button to cancel out of posting a note.")) {
-                self.cancel()
+        VStack {
+            HStack(spacing: 5.0) {
+                Button(NSLocalizedString("Cancel", comment: "Button to cancel out of posting a note.")) {
+                    self.cancel()
+                }
+                .foregroundColor(.primary)
+                
+                if let error {
+                    Text(error)
+                        .foregroundColor(.red)
+                }
+
+                Spacer()
+
+                if !is_post_empty {
+                    PostButton
+                }
             }
-            .foregroundColor(.primary)
-
-            Spacer()
-
-            if !is_post_empty {
-                PostButton
+            
+            if let progress = image_upload.progress {
+                ProgressView(value: progress, total: 1.0)
+                    .progressViewStyle(.linear)
             }
         }
         .frame(height: 30)
         .padding([.top, .bottom], 4)
+    }
+    
+    func handle_upload(image: UIImage) {
+        let uploader = get_image_uploader(damus_state.pubkey)
+        
+        Task.init {
+            let res = await image_upload.start(img: image, uploader: uploader)
+            
+            switch res {
+            case .success(let url):
+                let uploadedImageURL = NSMutableAttributedString(string: url, attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0), NSAttributedString.Key.foregroundColor: UIColor.label])
+                let combinedAttributedString = NSMutableAttributedString()
+                combinedAttributedString.append(post)
+                if !post.string.hasSuffix(" ") {
+                    combinedAttributedString.append(NSAttributedString(string: " "))
+                }
+                combinedAttributedString.append(uploadedImageURL)
+                post = combinedAttributedString
+                
+            case .failed(let error):
+                if let error {
+                    self.error = error.localizedDescription
+                } else {
+                    self.error = "Error uploading image :("
+                }
+            }
+            
+        }
     }
     
     var body: some View {
@@ -162,9 +206,8 @@ struct PostView: View {
             AttachmentBar
         }
         .sheet(isPresented: $attach_media) {
-            ImagePicker(sourceType: .photoLibrary) { image in
-                let imageUploader = get_image_uploader(damus_state.pubkey)
-                myImageUploadRequest(imageToUpload: image, imageUploader: imageUploader)
+            ImagePicker(sourceType: .photoLibrary) { img in
+                handle_upload(image: img)
             }
         }
         .onAppear() {

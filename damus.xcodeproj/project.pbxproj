@@ -175,6 +175,7 @@
 		4CCEB7A929B29DD50078AA28 /* SearchResultsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CCEB7A829B29DD50078AA28 /* SearchResultsModel.swift */; };
 		4CCEB7AE29B53D260078AA28 /* SearchingEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CCEB7AD29B53D260078AA28 /* SearchingEventView.swift */; };
 		4CCEB7B029B5415A0078AA28 /* SearchingProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CCEB7AF29B5415A0078AA28 /* SearchingProfileView.swift */; };
+		4CD348EF29C3659D00497EB2 /* ImageUploadModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD348EE29C3659D00497EB2 /* ImageUploadModel.swift */; };
 		4CD7641B28A1641400B6928F /* EndBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD7641A28A1641400B6928F /* EndBlock.swift */; };
 		4CE0E2AF29A2E82100DB4CA2 /* EventHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0E2AE29A2E82100DB4CA2 /* EventHolder.swift */; };
 		4CE0E2B229A3DF6900DB4CA2 /* LoadMoreButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0E2B129A3DF6900DB4CA2 /* LoadMoreButton.swift */; };
@@ -238,8 +239,8 @@
 		7C95CAEE299DCEF1009DCB67 /* KFOptionSetter+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C95CAED299DCEF1009DCB67 /* KFOptionSetter+.swift */; };
 		7CFF6317299FEFE5005D382A /* SelectableText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CFF6316299FEFE5005D382A /* SelectableText.swift */; };
 		9609F058296E220800069BF3 /* BannerImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9609F057296E220800069BF3 /* BannerImageView.swift */; };
-		9CA876E229A00CEA0003B9A3 /* AttachMediaUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */; };
 		9C83F89329A937B900136C08 /* TextViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C83F89229A937B900136C08 /* TextViewWrapper.swift */; };
+		9CA876E229A00CEA0003B9A3 /* AttachMediaUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */; };
 		BA693074295D649800ADDB87 /* UserSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA693073295D649800ADDB87 /* UserSettingsStore.swift */; };
 		BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
 		DD597CBD2963D85A00C64D32 /* MarkdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD597CBC2963D85A00C64D32 /* MarkdownTests.swift */; };
@@ -542,6 +543,7 @@
 		4CCEB7A829B29DD50078AA28 /* SearchResultsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsModel.swift; sourceTree = "<group>"; };
 		4CCEB7AD29B53D260078AA28 /* SearchingEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchingEventView.swift; sourceTree = "<group>"; };
 		4CCEB7AF29B5415A0078AA28 /* SearchingProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchingProfileView.swift; sourceTree = "<group>"; };
+		4CD348EE29C3659D00497EB2 /* ImageUploadModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageUploadModel.swift; sourceTree = "<group>"; };
 		4CD7641A28A1641400B6928F /* EndBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndBlock.swift; sourceTree = "<group>"; };
 		4CE0E2AE29A2E82100DB4CA2 /* EventHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventHolder.swift; sourceTree = "<group>"; };
 		4CE0E2B129A3DF6900DB4CA2 /* LoadMoreButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadMoreButton.swift; sourceTree = "<group>"; };
@@ -607,8 +609,8 @@
 		7C95CAED299DCEF1009DCB67 /* KFOptionSetter+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KFOptionSetter+.swift"; sourceTree = "<group>"; };
 		7CFF6316299FEFE5005D382A /* SelectableText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectableText.swift; sourceTree = "<group>"; };
 		9609F057296E220800069BF3 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
-		9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachMediaUtility.swift; sourceTree = "<group>"; };
 		9C83F89229A937B900136C08 /* TextViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewWrapper.swift; sourceTree = "<group>"; };
+		9CA876E129A00CE90003B9A3 /* AttachMediaUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachMediaUtility.swift; sourceTree = "<group>"; };
 		BA693073295D649800ADDB87 /* UserSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsStore.swift; sourceTree = "<group>"; };
 		BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectWalletView.swift; sourceTree = "<group>"; };
 		DD597CBC2963D85A00C64D32 /* MarkdownTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkdownTests.swift; sourceTree = "<group>"; };
@@ -766,6 +768,7 @@
 				4CE8795A2996C47A00F758CC /* ZapsModel.swift */,
 				3AA59D1C2999B0400061C48E /* DraftsModel.swift */,
 				4C54AA0629A540BA003E4487 /* NotificationsModel.swift */,
+				4CD348EE29C3659D00497EB2 /* ImageUploadModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1434,6 +1437,7 @@
 				4CB8838B296F6E1E00DC99E7 /* NIP05Badge.swift in Sources */,
 				4C3EA66828FF5F9900C48A62 /* hex.c in Sources */,
 				E9E4ED0B295867B900DD7078 /* ThreadView.swift in Sources */,
+				4CD348EF29C3659D00497EB2 /* ImageUploadModel.swift in Sources */,
 				4C3BEFDC281DCE6100B3DE84 /* Liked.swift in Sources */,
 				4CF0ABE7298444FD00D66079 /* MutedEventView.swift in Sources */,
 				9C83F89329A937B900136C08 /* TextViewWrapper.swift in Sources */,
