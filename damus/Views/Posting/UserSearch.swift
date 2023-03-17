@@ -36,9 +36,9 @@ struct UserSearch: View {
             return
         }
         
+        //TODO: move above method-call & constant outside this ForEach loop, optimize property scopes
         let components = post.string.components(separatedBy: .whitespacesAndNewlines)
         let (tagLength,tagIndex,tagWordIndex) = tagProperties(from: components)
-        ///TODO - move above method-call & constant outside this ForEach loop, optimize property scopes
         
         let mutableString = NSMutableAttributedString()
         mutableString.append(post)
