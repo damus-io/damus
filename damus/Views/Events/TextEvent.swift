@@ -40,7 +40,7 @@ struct TextEvent: View {
                     let pk = is_anon ? "anon" : pubkey
                     EventProfileName(pubkey: pk, profile: profile, damus: damus, show_friend_confirmed: true, size: .normal)
                     
-                    Text("⋅")
+                    Text(verbatim: "⋅")
                         .font(.footnote)
                         .foregroundColor(.gray)
                     Text(verbatim: "\(format_relative_time(event.created_at))")

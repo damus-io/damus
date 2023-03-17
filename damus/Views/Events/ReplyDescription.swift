@@ -49,7 +49,7 @@ func reply_desc(profiles: Profiles, event: NostrEvent, locale: Locale = Locale.c
         if othersCount == 0 {
             return String(format: NSLocalizedString("Replying to %@ & %@", bundle: bundle, comment: "Label to indicate that the user is replying to 2 users."), locale: locale, uniqueNames[0], uniqueNames[1])
         } else {
-            return String(format: bundle.localizedString(forKey: "replying_to_two_and_others", value: nil, table: nil), locale: locale, othersCount, uniqueNames[0], uniqueNames[1])
+            return String(format: localizedStringFormat(key: "replying_to_two_and_others", locale: locale), locale: locale, othersCount, uniqueNames[0], uniqueNames[1])
         }
     }
 
