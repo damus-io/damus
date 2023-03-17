@@ -40,30 +40,65 @@ struct UserSearch: View {
                             guard let pk = bech32_pubkey(user.pubkey) else {
                                 return
                             }
-
-                            while post.string.last != "@" {
-                                post.deleteCharacters(in: NSRange(location: post.length - 1, length: 1))
-                            }
-                            post.deleteCharacters(in: NSRange(location: post.length - 1, length: 1))
-
-
-                            var tagString = ""
-                            if let name = user.profile?.name {
-                                tagString = "@\(name)\u{200B} "
-                            }
-                            let tagAttributedString = NSMutableAttributedString(string: tagString,
-                                                   attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0),
-                                                                NSAttributedString.Key.link: "@\(pk)"])
-                            tagAttributedString.removeAttribute(.link, range: NSRange(location: tagAttributedString.length - 2, length: 2))
-                            tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 2, length: 2))
+                            
+                            ///TODO - move below constant & method-call outside this ForEach loop (and optimize property scopes)
+                            let components = post.string.components(separatedBy: .whitespacesAndNewlines)
+                            let (tagLength,tagIndex,tagWordIndex) = tagProperties(from: components)
+                            
                             let mutableString = NSMutableAttributedString()
                             mutableString.append(post)
-                            mutableString.append(tagAttributedString)
+                            
+                            // replace tag-search word with tag attributed string
+                            mutableString.deleteCharacters(in: NSRange(location: tagIndex, length: tagLength))
+                            let tagAttributedString = tagAttributedString(user, pk: pk)
+                            mutableString.insert(tagAttributedString, at: tagIndex)
+                            
+                            // if no tag at end of post, insert extra space at end
+                            if mutableString.string.last != " ", tagWordIndex != components.count - 1 {
+                                let endSpace = plainAttributedString(string: " ")
+                                mutableString.insert(endSpace, at: mutableString.length)
+                            }
                             post = mutableString
                         }
                 }
             }
         }
+    }
+    
+    private func tagProperties(from components: [String]) -> (Int,Int,Int) {
+        var tagLength = 0, tagIndex = 0 // index of the start of a tag in a post
+        var tagWordIndex = 0            // index of the word containing a tag
+        
+        for (index,word) in components.enumerated() {
+            if word.first == "@" {
+                tagLength = word.count
+                tagWordIndex = index
+                break // this logic can be updated to support tagging multiple users
+            }
+            tagIndex += (word.count == 0) ? (1) : (1 + word.count)
+        }
+        return (tagLength,tagIndex,tagWordIndex)
+    }
+    
+    private func tagAttributedString(_ user: SearchedUser, pk: String) -> NSMutableAttributedString {
+        var tagString = ""
+        if let name = user.profile?.name {
+            searchedNames.append("@\(name)")
+            tagString = "@\(name)\u{200B} "
+        }
+        let tagAttributedString = NSMutableAttributedString(string: tagString,
+                                                            attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0),
+                                                                         NSAttributedString.Key.link: "@\(pk)"])
+        tagAttributedString.removeAttribute(.link, range: NSRange(location: tagAttributedString.length - 2, length: 2))
+        tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 2, length: 2))
+        return tagAttributedString
+    }
+    
+    private func plainAttributedString(string: String) -> NSMutableAttributedString {
+        let tagAttributedString = NSMutableAttributedString(string: string,
+                                                            attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0)])
+        tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 1, length: 1))
+        return tagAttributedString
     }
 }
 
@@ -104,6 +139,8 @@ func search_users(profiles: Profiles, tags: [[String]], search _search: String) 
         }
         
         let searched_user = SearchedUser(petname: petname, profile: profile, pubkey: pubkey)
-        arr.append(searched_user)
+        if !searchedNames.contains("@\(searched_user.profile?.name ?? "")") {
+            arr.append(searched_user)
+        }
     }
 }
