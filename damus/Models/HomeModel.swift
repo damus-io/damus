@@ -917,26 +917,29 @@ func should_show_event(contacts: Contacts, ev: NostrEvent) -> Bool {
 
 func zap_vibrate(zap_amount: Int64) {
     let sats = zap_amount / 1000
-    var vibration_generator: UIImpactFeedbackGenerator
+    var vibration_generator = UINotificationFeedbackGenerator()
     if sats >= 10000 {
-        vibration_generator = UIImpactFeedbackGenerator(style: .heavy)
         DispatchQueue.global(qos: .userInitiated).async {
             let repetition = sats / 10000
             for _ in 1...repetition {
                 let intensity = 50
                 for _ in 0...intensity {
-                    vibration_generator.impactOccurred()
+                    vibration_generator.notificationOccurred(.success)
                 }
                 Thread.sleep(forTimeInterval: 0.4)
             }
         }
 
     } else if sats >= 1000 {
-        vibration_generator = UIImpactFeedbackGenerator(style: .heavy)
-        vibration_generator.impactOccurred()
+        let intensity = 30
+        for _ in 0...intensity {
+            vibration_generator.notificationOccurred(.success)
+        }
     } else {
-        vibration_generator = UIImpactFeedbackGenerator(style: .medium)
-        vibration_generator.impactOccurred()
+        let intensity = 20
+        for _ in 0...intensity {
+            vibration_generator.notificationOccurred(.success)
+        }
     }
 }
 
