@@ -25,10 +25,50 @@ struct UserSearch: View {
     
     var users: [SearchedUser] {
         guard let contacts = damus_state.contacts.event else {
-            return []
+            return search_profiles(profiles: damus_state.profiles, search: search)
         }
         
-        return search_users(profiles: damus_state.profiles, tags: contacts.tags, search: search)
+        return search_users_for_autocomplete(profiles: damus_state.profiles, tags: contacts.tags, search: search)
+    }
+    
+    func on_user_tapped(user: SearchedUser) {
+        guard let pk = bech32_pubkey(user.pubkey) else {
+            return
+        }
+
+        // Remove all characters after the last '@'
+        removeCharactersAfterLastAtSymbol()
+
+        // Create and append the user tag
+        let tagAttributedString = createUserTag(for: user, with: pk)
+        appendUserTag(tagAttributedString)
+    }
+    
+    private func removeCharactersAfterLastAtSymbol() {
+        while post.string.last != "@" {
+            post.deleteCharacters(in: NSRange(location: post.length - 1, length: 1))
+        }
+        post.deleteCharacters(in: NSRange(location: post.length - 1, length: 1))
+    }
+
+    private func createUserTag(for user: SearchedUser, with pk: String) -> NSMutableAttributedString {
+        let name = Profile.displayName(profile: user.profile, pubkey: pk).username
+        let tagString = "@\(name)\u{200B} "
+
+        let tagAttributedString = NSMutableAttributedString(string: tagString,
+                                   attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0),
+                                                NSAttributedString.Key.link: "@\(pk)"])
+        tagAttributedString.removeAttribute(.link, range: NSRange(location: tagAttributedString.length - 2, length: 2))
+        tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 2, length: 2))
+        
+        return tagAttributedString
+    }
+
+    private func appendUserTag(_ tagAttributedString: NSMutableAttributedString) {
+        let mutableString = NSMutableAttributedString()
+        mutableString.append(post)
+        mutableString.append(tagAttributedString)
+        post = mutableString
     }
     
     var body: some View {
@@ -37,28 +77,7 @@ struct UserSearch: View {
                 ForEach(users) { user in
                     UserView(damus_state: damus_state, pubkey: user.pubkey)
                         .onTapGesture {
-                            guard let pk = bech32_pubkey(user.pubkey) else {
-                                return
-                            }
-                            
-                            ///TODO - move below constant & method-call outside this ForEach loop (and optimize property scopes)
-                            let components = post.string.components(separatedBy: .whitespacesAndNewlines)
-                            let (tagLength,tagIndex,tagWordIndex) = tagProperties(from: components)
-                            
-                            let mutableString = NSMutableAttributedString()
-                            mutableString.append(post)
-                            
-                            // replace tag-search word with tag attributed string
-                            mutableString.deleteCharacters(in: NSRange(location: tagIndex, length: tagLength))
-                            let tagAttributedString = tagAttributedString(user, pk: pk)
-                            mutableString.insert(tagAttributedString, at: tagIndex)
-                            
-                            // if no tag at end of post, insert extra space at end
-                            if mutableString.string.last != " ", tagWordIndex != components.count - 1 {
-                                let endSpace = plainAttributedString(string: " ")
-                                mutableString.insert(endSpace, at: mutableString.length)
-                            }
-                            post = mutableString
+                            on_user_tapped(user: user)
                         }
                 }
             }
@@ -112,11 +131,11 @@ struct UserSearch_Previews: PreviewProvider {
 }
 
 
-func search_users(profiles: Profiles, tags: [[String]], search _search: String) -> [SearchedUser] {
+func search_users_for_autocomplete(profiles: Profiles, tags: [[String]], search _search: String) -> [SearchedUser] {
     var seen_user = Set<String>()
     let search = _search.lowercased()
     
-    return tags.reduce(into: Array<SearchedUser>()) { arr, tag in
+    var matches = tags.reduce(into: Array<SearchedUser>()) { arr, tag in
         guard tag.count >= 2 && tag[0] == "p" else {
             return
         }
@@ -134,7 +153,9 @@ func search_users(profiles: Profiles, tags: [[String]], search _search: String) 
         
         let profile = profiles.lookup(id: pubkey)
         
-        guard ((petname?.lowercased().hasPrefix(search) ?? false) || (profile?.name?.lowercased().hasPrefix(search) ?? false)) else {
+        guard ((petname?.lowercased().hasPrefix(search) ?? false) ||
+            (profile?.name?.lowercased().hasPrefix(search) ?? false) ||
+            (profile?.display_name?.lowercased().hasPrefix(search) ?? false)) else {
             return
         }
         
@@ -143,4 +164,20 @@ func search_users(profiles: Profiles, tags: [[String]], search _search: String) 
             arr.append(searched_user)
         }
     }
+    
+    // search profile cache as well
+    for tup in profiles.profiles.enumerated() {
+        let pk = tup.element.key
+        let prof = tup.element.value.profile
+        
+        guard !seen_user.contains(pk) else {
+            continue
+        }
+        
+        if let match = profile_search_matches(profiles: profiles, profile: prof, pubkey: pk, search: search) {
+            matches.append(match)
+        }
+    }
+    
+    return matches
 }

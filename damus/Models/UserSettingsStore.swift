@@ -50,6 +50,15 @@ func get_default_wallet(_ pubkey: String) -> Wallet {
     }
 }
 
+func get_image_uploader(_ pubkey: String) -> ImageUploader {
+    if let defaultImageUploader = UserDefaults.standard.string(forKey: "default_image_uploader"),
+       let defaultImageUploader = ImageUploader(rawValue: defaultImageUploader) {
+        return defaultImageUploader
+    } else {
+        return .nostrBuild
+    }
+}
+
 private func get_translation_service(_ pubkey: String) -> TranslationService? {
     guard let translation_service = UserDefaults.standard.string(forKey: "translation_service") else {
         return nil
@@ -88,6 +97,12 @@ class UserSettingsStore: ObservableObject {
             UserDefaults.standard.set(default_wallet.rawValue, forKey: "default_wallet")
         }
     }
+
+    @Published var default_image_uploader: ImageUploader {
+        didSet {
+            UserDefaults.standard.set(default_image_uploader.rawValue, forKey: "default_image_uploader")
+        }
+    }
     
     @Published var show_wallet_selector: Bool {
         didSet {
@@ -98,6 +113,18 @@ class UserSettingsStore: ObservableObject {
     @Published var left_handed: Bool {
         didSet {
             UserDefaults.standard.set(left_handed, forKey: "left_handed")
+        }
+    }
+    
+    @Published var always_show_images: Bool {
+        didSet {
+            UserDefaults.standard.set(always_show_images, forKey: "always_show_images")
+        }
+    }
+
+    @Published var zap_vibration: Bool {
+        didSet {
+            UserDefaults.standard.set(zap_vibration, forKey: "zap_vibration")
         }
     }
 
@@ -176,8 +203,12 @@ class UserSettingsStore: ObservableObject {
         let pubkey = ""
         self.default_wallet = get_default_wallet(pubkey)
         show_wallet_selector = should_show_wallet_selector(pubkey)
+        always_show_images = UserDefaults.standard.object(forKey: "always_show_images") as? Bool ?? false
+
+        default_image_uploader = get_image_uploader(pubkey)
 
         left_handed = UserDefaults.standard.object(forKey: "left_handed") as? Bool ?? false
+        zap_vibration = UserDefaults.standard.object(forKey: "zap_vibration") as? Bool ?? false
         disable_animation = should_disable_image_animation()
 
         // Note from @tyiu:

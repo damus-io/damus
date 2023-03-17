@@ -17,7 +17,7 @@ struct EventBody: View {
         self.damus_state = damus_state
         self.event = event
         self.size = size
-        self.should_show_img = should_show_img ?? should_show_images(contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
+        self.should_show_img = should_show_img ?? should_show_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
     }
     
     var content: String {

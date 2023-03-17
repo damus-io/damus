@@ -7,6 +7,16 @@
 
 import SwiftUI
 
+extension RelayConnection.State {
+    var indicatorColor: Color {
+        switch self {
+        case .connected: return .green
+        case .connecting, .reconnecting: return .yellow
+        default: return .red
+        }
+    }
+}
+
 struct RelayStatus: View {
     let pool: RelayPool
     let relay: String
@@ -16,18 +26,10 @@ struct RelayStatus: View {
     @State var conn_color: Color = .gray
     
     func update_connection_color() {
-        for relay in pool.relays {
-            if relay.id == self.relay {
-                let c = relay.connection
-                if c.isConnected {
-                    conn_color = .green
-                } else if c.isConnecting || c.isReconnecting {
-                    conn_color = .yellow
-                } else {
-                    conn_color = .red
-                }
-            }
+        guard let relay = pool.relays.first(where: { $0.id == relay }) else {
+            return
         }
+        conn_color = relay.connection.state.indicatorColor
     }
     
     var body: some View {

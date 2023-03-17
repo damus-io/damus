@@ -108,7 +108,7 @@ struct ChatView: View {
                         }
                     }
                     
-                    let show_images = should_show_images(contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
+                    let show_images = should_show_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
                     NoteContentView(damus_state: damus_state,
                                     event: event,
                                     show_images: show_images,

@@ -31,7 +31,7 @@ struct ReplyView: View {
                     .map { pubkey in
                         let pk = pubkey.ref_id
                         let prof = damus.profiles.lookup(id: pk)
-                        return Profile.displayName(profile: prof, pubkey: pk)
+                        return Profile.displayName(profile: prof, pubkey: pk).username
                     }
                     .joined(separator: ", ")
                 Text(names)

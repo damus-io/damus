@@ -139,7 +139,6 @@ struct ConfigView: View {
                     TextField(String("1000"), text: $default_zap_amount)
                         .keyboardType(.numberPad)
                         .onReceive(Just(default_zap_amount)) { newValue in
-                            
                             if let parsed = handle_string_amount(new_value: newValue) {
                                 self.default_zap_amount = String(parsed)
                                 set_default_zap_amount(pubkey: self.state.pubkey, amount: parsed)
@@ -194,8 +193,10 @@ struct ConfigView: View {
                     }
                 }
 
-                Section(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen")) {
+                Section(NSLocalizedString("Miscellaneous", comment: "Section header for miscellaneous user configuration")) {
                     Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)
+                        .toggleStyle(.switch)
+                    Toggle(NSLocalizedString("Zap Vibration", comment: "Setting to enable vibration on zap"), isOn: $settings.zap_vibration)
                         .toggleStyle(.switch)
                 }
 
@@ -205,9 +206,19 @@ struct ConfigView: View {
                         .onChange(of: settings.disable_animation) { _ in
                             clear_kingfisher_cache()
                         }
+                    Toggle(NSLocalizedString("Always show images", comment: "Setting to always show and never blur images"), isOn: $settings.always_show_images)
+                        .toggleStyle(.switch)
 
                     Button(NSLocalizedString("Clear Cache", comment: "Button to clear image cache.")) {
                         clear_kingfisher_cache()
+                    }
+                    
+                    Picker(NSLocalizedString("Select image uplodaer", comment: "Prompt selection of user's image uplodaer"),
+                           selection: $settings.default_image_uploader) {
+                        ForEach(ImageUploader.allCases, id: \.self) { uploader in
+                            Text(uploader.model.displayName)
+                                .tag(uploader.model.tag)
+                        }
                     }
                 }
                 
