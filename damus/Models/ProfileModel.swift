@@ -12,9 +12,11 @@ class ProfileModel: ObservableObject, Equatable {
     @Published var contacts: NostrEvent? = nil
     @Published var following: Int = 0
     @Published var relays: [String: RelayInfo]? = nil
+    @Published var progress: Int = 0
     
     let pubkey: String
     let damus: DamusState
+    
     
     var seen_event: Set<String> = Set()
     var sub_id = UUID().description
@@ -127,15 +129,16 @@ class ProfileModel: ObservableObject, Equatable {
         case .ws_event:
             return
         case .nostr_event(let resp):
+            guard resp.subid == self.sub_id || resp.subid == self.prof_subid else {
+                return
+            }
             switch resp {
-            case .event(let sid, let ev):
-                if sid != self.sub_id && sid != self.prof_subid {
-                    return
-                }
+            case .event(_, let ev):
                 add_event(ev)
             case .notice(let notice):
                 notify(.notice, notice)
             case .eose:
+                progress += 1
                 break
             }
         }

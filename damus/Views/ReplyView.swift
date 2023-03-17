@@ -26,6 +26,7 @@ struct ReplyView: View {
     var body: some View {
         VStack {
             Text("Replying to:", comment: "Indicating that the user is replying to the following listed people.")
+            
             HStack(alignment: .top) {
                 let names = references.pRefs
                     .map { pubkey in
@@ -44,16 +45,25 @@ struct ReplyView: View {
             .sheet(isPresented: $participantsShown) {
                 ParticipantsView(damus_state: damus, references: $references, originalReferences: $originalReferences)
             }
-            ScrollView {
-                EventView(damus: damus, event: replying_to, options: [.no_action_bar])
+            
+            ScrollViewReader { scroller in
+                ScrollView {
+                    EventView(damus: damus, event: replying_to, options: [.no_action_bar])
+                
+                    PostView(replying_to: replying_to, references: references, damus_state: damus)
+                        .frame(minHeight: 500, maxHeight: .infinity)
+                        .id("post")
+                }
+                .frame(maxHeight: .infinity)
+                .onAppear {
+                    scroll_to_event(scroller: scroller, id: "post", delay: 1.0, animate: true, anchor: .top)
+                }
             }
-            PostView(replying_to: replying_to, references: references, damus_state: damus)
         }
         .onAppear {
             references =  gather_reply_ids(our_pubkey: damus.pubkey, from: replying_to)
             originalReferences = references
         }
-        .padding()
     }
     
     

@@ -190,7 +190,9 @@ struct PostView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 0) {
+            let searching = get_searching_string(post.string)
+            
             TopBar
             
             HStack(alignment: .top) {
@@ -198,20 +200,20 @@ struct PostView: View {
                 
                 TextEntry
             }
-
+            .frame(maxHeight: searching == nil ? .infinity : 50)
+            
             // This if-block observes @ for tagging
-            if let searching = get_searching_string(post.string) {
-                VStack {
-                    Spacer()
-                    UserSearch(damus_state: damus_state, search: searching, post: $post)
-                }.zIndex(1)
+            if let searching {
+                UserSearch(damus_state: damus_state, search: searching, post: $post)
+                    .frame(maxHeight: .infinity)
+            } else {
+                Divider()
+                    .padding([.bottom], 10)
+                
+                AttachmentBar
             }
-            
-            Divider()
-                .padding([.bottom], 10)
-            
-            AttachmentBar
         }
+        .padding()
         .sheet(isPresented: $attach_media) {
             ImagePicker(sourceType: .photoLibrary) { img in
                 handle_upload(image: img)
@@ -240,7 +242,6 @@ struct PostView: View {
                 damus_state.drafts.post = NSMutableAttributedString(string : "")
             }
         }
-        .padding()
         .alert(NSLocalizedString("Note contains \"nsec1\" private key. Are you sure?", comment: "Alert user that they might be attempting to paste a private key and ask them to confirm."), isPresented: $showPrivateKeyWarning, actions: {
             Button(NSLocalizedString("No", comment: "Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key."), role: .cancel) {
                 showPrivateKeyWarning = false
