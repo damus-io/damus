@@ -13,6 +13,7 @@ enum NostrPostResult {
 }
 
 let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Text box prompt to ask user to type their post.")
+var searchedNames = [String]()
 
 struct PostView: View {
     @State var post: NSMutableAttributedString = NSMutableAttributedString()
@@ -247,7 +248,10 @@ struct PostView: View {
 
 func get_searching_string(_ post: String) -> String? {
     let components = post.components(separatedBy: .whitespacesAndNewlines)
-
+    
+    // allow User View to show again if a tag is deleted from a post then searched again
+    searchedNames = searchedNames.filter{components.contains($0)}
+    
     guard let handle = components.first(where: {$0.first == "@"}) else {
         return nil
     }

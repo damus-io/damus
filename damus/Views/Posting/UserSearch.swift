@@ -80,6 +80,7 @@ struct UserSearch: View {
 
     private func createUserTag(for user: SearchedUser, with pk: String) -> NSMutableAttributedString {
         let name = Profile.displayName(profile: user.profile, pubkey: pk).username
+        searchedNames.append("@\(name)")
         let tagString = "@\(name)\u{200B} "
 
         let tagAttributedString = NSMutableAttributedString(string: tagString,
@@ -161,5 +162,5 @@ func search_users_for_autocomplete(profiles: Profiles, tags: [[String]], search 
         }
     }
     
-    return matches
+    return matches.filter{!searchedNames.contains("@\($0.profile?.name ?? "")")}
 }
