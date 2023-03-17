@@ -154,6 +154,20 @@ struct PostView: View {
         .padding([.top, .bottom], 4)
     }
     
+    func append_url(_ url: String) {
+        let uploadedImageURL = NSMutableAttributedString(string: url)
+        let combinedAttributedString = NSMutableAttributedString()
+        combinedAttributedString.append(post)
+        if !post.string.hasSuffix(" ") {
+            combinedAttributedString.append(NSAttributedString(string: " "))
+        }
+        combinedAttributedString.append(uploadedImageURL)
+        
+        // make sure we have a space at the end
+        combinedAttributedString.append(NSAttributedString(string: " "))
+        post = combinedAttributedString
+    }
+    
     func handle_upload(image: UIImage) {
         let uploader = get_image_uploader(damus_state.pubkey)
         
@@ -162,17 +176,7 @@ struct PostView: View {
             
             switch res {
             case .success(let url):
-                let uploadedImageURL = NSMutableAttributedString(string: url, attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0), NSAttributedString.Key.foregroundColor: UIColor.label])
-                let combinedAttributedString = NSMutableAttributedString()
-                combinedAttributedString.append(post)
-                if !post.string.hasSuffix(" ") {
-                    combinedAttributedString.append(NSAttributedString(string: " "))
-                }
-                combinedAttributedString.append(uploadedImageURL)
-                
-                // make sure we have a space at the end
-                combinedAttributedString.append(NSAttributedString(string: " "))
-                post = combinedAttributedString
+                append_url(url)
                 
             case .failed(let error):
                 if let error {
