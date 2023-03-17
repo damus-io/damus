@@ -14,15 +14,9 @@ enum NostrConnectionEvent {
 }
 
 final class RelayConnection: WebSocketDelegate {
-    enum State {
-        case notConnected
-        case connecting
-        case reconnecting
-        case connected
-        case failed
-    }
-    
-    private(set) var state: State = .notConnected
+    private(set) var isConnected = false
+    private(set) var isConnecting = false
+    private(set) var isReconnecting = false
     
     private(set) var last_connection_attempt: TimeInterval = 0
     private lazy var socket = {
@@ -31,36 +25,38 @@ final class RelayConnection: WebSocketDelegate {
         socket.delegate = self
         return socket
     }()
-    private let eventHandler: (NostrConnectionEvent) -> ()
-    let url: URL
-    
-    init(url: URL, eventHandler: @escaping (NostrConnectionEvent) -> ()) {
+    private var handleEvent: (NostrConnectionEvent) -> ()
+    private let url: URL
+
+    init(url: URL, handleEvent: @escaping (NostrConnectionEvent) -> ()) {
         self.url = url
-        self.eventHandler = eventHandler
+        self.handleEvent = handleEvent
     }
     
     func reconnect() {
-        if state == .connected {
-            state = .reconnecting
+        if isConnected {
+            isReconnecting = true
             disconnect()
         } else {
             // we're already disconnected, so just connect
-            connect()
+            connect(force: true)
         }
     }
     
     func connect(force: Bool = false) {
-        if !force && (state == .connected || state == .connecting) {
+        if !force && (isConnected || isConnecting) {
             return
         }
         
-        state = .connecting
+        isConnecting = true
         last_connection_attempt = Date().timeIntervalSince1970
         socket.connect()
     }
 
     func disconnect() {
         socket.disconnect()
+        isConnected = false
+        isConnecting = false
     }
 
     func send(_ req: NostrRequest) {
@@ -72,52 +68,51 @@ final class RelayConnection: WebSocketDelegate {
         socket.write(string: req)
     }
     
-    private func decodeEvent(_ txt: String) throws -> NostrConnectionEvent {
-        if let ev = decode_nostr_event(txt: txt) {
-            return .nostr_event(ev)
-        } else {
-            throw DecodingError.dataCorrupted(.init(codingPath: [], debugDescription: "decoding event failed"))
-        }
-    }
-    
-    @MainActor
-    private func handleEvent(_ event: NostrConnectionEvent) async {
-        eventHandler(event)
-    }
-    
     // MARK: - WebSocketDelegate
     
     func didReceive(event: WebSocketEvent, client: WebSocket) {
         switch event {
         case .connected:
-            state = .connected
+            self.isConnected = true
+            self.isConnecting = false
 
         case .disconnected:
-            if state == .reconnecting {
-                connect()
-            } else {
-                state = .notConnected
+            self.isConnecting = false
+            self.isConnected = false
+            if self.isReconnecting {
+                self.isReconnecting = false
+                self.connect()
             }
 
         case .cancelled, .error:
-            state = .failed
+            self.isConnecting = false
+            self.isConnected = false
 
         case .text(let txt):
-            Task(priority: .userInitiated) {
-                do {
-                    let event = try decodeEvent(txt)
-                    await handleEvent(event)
-                } catch {
-                    print("decode failed for \(txt): \(error)")
-                    // TODO: trigger event error
+            if txt.count > 2000 {
+                DispatchQueue.global(qos: .default).async {
+                    if let ev = decode_nostr_event(txt: txt) {
+                        DispatchQueue.main.async {
+                            self.handleEvent(.nostr_event(ev))
+                        }
+                        return
+                    }
+                }
+            } else {
+                if let ev = decode_nostr_event(txt: txt) {
+                    handleEvent(.nostr_event(ev))
+                    return
                 }
             }
+
+            print("decode failed for \(txt)")
+            // TODO: trigger event error
 
         default:
             break
         }
 
-        eventHandler(.ws_event(event))
+        handleEvent(.ws_event(event))
     }
 }
 
