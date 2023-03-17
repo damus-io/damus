@@ -13,13 +13,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>... %d inna notatka ...</string>
-			<key>few</key>
-			<string>... %d innych notatek ...</string>
+			<string>... %d autre note ...</string>
 			<key>many</key>
-			<string>... %d innych notatek ...</string>
+			<string>... %d autres notes ...</string>
 			<key>other</key>
-			<string>... %d inne notatki ...</string>
+			<string>... %d autres notes ...</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -33,13 +31,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Obserwujący</string>
-			<key>few</key>
-			<string>Followers</string>
+			<string>Abonné</string>
 			<key>many</key>
-			<string>Followers</string>
+			<string>Abonnés</string>
 			<key>other</key>
-			<string>Obserwujący</string>
+			<string>Abonnés</string>
 		</dict>
 	</dict>
 	<key>following_count</key>
@@ -53,13 +49,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Obserwujący</string>
-			<key>few</key>
-			<string>Obserwujących</string>
+			<string>Abonnement</string>
 			<key>many</key>
-			<string>Obserwujących</string>
+			<string>Abonnements</string>
 			<key>other</key>
-			<string>Obserwujących</string>
+			<string>Abonnements</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -73,13 +67,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ i %1$d inna osoba zareagowała na wiadomość, w której jesteś oznaczony</string>
-			<key>few</key>
-			<string>%2$@ i %1$d inne osoby zareagowały na wiadomość, w której jesteś oznaczony</string>
+			<string>%2$@ et %1$d autre ont réagi à une note dans laquelle vous apparaissez</string>
 			<key>many</key>
-			<string>%2$@ i %1$d innych osób zareagowało na wiadomość, w której jesteś oznaczony</string>
+			<string>%2$@ et %1$d autres ont réagi à une note dans laquelle vous apparaissez</string>
 			<key>other</key>
-			<string>%2$@ i %1$d innych osób zareagowało na wiadomość, w której jesteś oznaczony</string>
+			<string>%2$@ et %1$d autres ont réagi à une note dans laquelle vous apparaissez</string>
 		</dict>
 	</dict>
 	<key>reacted_your_post_3</key>
@@ -93,13 +85,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ i %1$d inna osoba zareagowała na Twoją wiadomość</string>
-			<key>few</key>
-			<string>%2$@ i %1$d inne osoby zareagowały na Twoją wiadomość</string>
+			<string>%2$@ et %1$d autre ont réagi à votre note</string>
 			<key>many</key>
-			<string>%2$@ i %1$d innych osób zareagowało na Twoją wiadomość</string>
+			<string>%2$@ et %1$d autres ont réagi à votre note</string>
 			<key>other</key>
-			<string>%2$@ i %1$d innych osób zareagowało na Twoją wiadomość</string>
+			<string>%2$@ et %1$d autres ont réagi à votre note</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -113,13 +103,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ i %1$d inna osoba zareagowała na Twój profil</string>
-			<key>few</key>
-			<string>%2$@ i %1$d innych osób zareagowało na Twój profil</string>
+			<string>%2$@ et %1$d autre ont réagi à votre profil</string>
 			<key>many</key>
-			<string>%2$@ i %1$d inne osoby zareagowało na Twój profil</string>
+			<string>%2$@ et %1$d autres ont réagi à votre profil</string>
 			<key>other</key>
-			<string>%2$@ i %1$d inne osoby zareagowało na Twój profil</string>
+			<string>%2$@ et %1$d autres ont réagi à votre profil</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
@@ -133,13 +121,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Reakcja</string>
-			<key>few</key>
-			<string>Reactions</string>
+			<string>Réaction</string>
 			<key>many</key>
-			<string>Reactions</string>
+			<string>Réactions</string>
 			<key>other</key>
-			<string>Reakcje</string>
+			<string>Réactions</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -153,13 +139,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Przekaźnik</string>
-			<key>few</key>
-			<string>Przekaźniki</string>
+			<string>Relai</string>
 			<key>many</key>
-			<string>Przekaźników</string>
+			<string>Relais</string>
 			<key>other</key>
-			<string>Przekaźniki</string>
+			<string>Relais</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
@@ -173,13 +157,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Replying to %2$@, %3$@ i %1$d innej osoba</string>
-			<key>few</key>
-			<string>Replying to %2$@, %3$@ i %1$d others</string>
+			<string>Réponse à %2$@, %3$@ &amp; %1$d autre</string>
 			<key>many</key>
-			<string>Replying to %2$@, %3$@ i %1$d others</string>
+			<string>Réponse à %2$@, %3$@ &amp; %1$d autres</string>
 			<key>other</key>
-			<string>Replying to %2$@, %3$@ i %1$d innym osobom</string>
+			<string>Réponse à %2$@, %3$@ &amp; %1$d autres</string>
 		</dict>
 	</dict>
 	<key>reposted_tagged_in_3</key>
@@ -193,13 +175,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ i %1$d inna osoba opublikowała wiadomość, w której jesteś oznaczony</string>
-			<key>few</key>
-			<string>%2$@ i %1$d inne osobe opublikowały wiadomość, w której jesteś oznaczony</string>
+			<string>%2$@ et %1$d autre ont cité une note dans laquelle vous apparaissez</string>
 			<key>many</key>
-			<string>%2$@ i %1$d innych osób opublikowało wiadomość, w której jesteś oznaczony</string>
+			<string>%2$@ et %1$d autres ont cité une note dans laquelle vous apparaissez</string>
 			<key>other</key>
-			<string>%2$@ i %1$d innych osób opublikowało wiadomość, w której jesteś oznaczony</string>
+			<string>%2$@ et %1$d autres ont republié une note dans laquelle vous apparaissez</string>
 		</dict>
 	</dict>
 	<key>reposted_your_post_3</key>
@@ -213,13 +193,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ i %1$d inna osoba opublikowała Twoją wiadomość</string>
-			<key>few</key>
-			<string>%2$@ i %1$d inne osoby opublikowały Twoją wiadomość</string>
+			<string>%2$@ et %1$d autre ont cité votre note</string>
 			<key>many</key>
-			<string>%2$@ i %1$d innych osób opublikowało Twoją wiadomość</string>
+			<string>%2$@ et %1$d autres ont cité votre note</string>
 			<key>other</key>
-			<string>%2$@ i %1$d innych osób opublikowało Twoją wiadomość</string>
+			<string>%2$@ et %1$d autres ont republié votre note</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -233,13 +211,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ i %1$d inna osoba opublikowała Twój profil</string>
-			<key>few</key>
-			<string>%2$@ i %1$d inne osoby opublikowały Twój profil</string>
+			<string>%2$@ et %1$d autre ont republié votre profile</string>
 			<key>many</key>
-			<string>%2$@ i %1$d innych osób opublikowało Twój profil</string>
+			<string>%2$@ et %1$d autres ont republié votre profile</string>
 			<key>other</key>
-			<string>%2$@ i %1$d innych osób opublikowało Twój profil</string>
+			<string>%2$@ et %1$d autres ont republié votre profile</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -253,13 +229,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Podany dalej</string>
-			<key>few</key>
-			<string>Reposts</string>
+			<string>Republication</string>
 			<key>many</key>
-			<string>Reposts</string>
+			<string>Republications</string>
 			<key>other</key>
-			<string>Podane dalej</string>
+			<string>Republications</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -274,12 +248,10 @@
 			<string>@</string>
 			<key>one</key>
 			<string>%2$@ sat</string>
-			<key>few</key>
-			<string>%2$@ sats</string>
 			<key>many</key>
 			<string>%2$@ sats</string>
 			<key>other</key>
-			<string>%2$@ satoszy</string>
+			<string>%2$@ sats</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -293,13 +265,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ i %1$d inna osoba zapuje wiadomość, w której jesteś oznaczony</string>
-			<key>few</key>
-			<string>%2$@ i %1$d inne osoby zapują wiadomość, w której jesteś oznaczony</string>
+			<string>%2$@ et %1$d autre ont zappé une note dans laquelle vous apparaissez</string>
 			<key>many</key>
-			<string>%2$@ i %1$d innych osób zapuje wiadomość, w której jesteś oznaczony</string>
+			<string>%2$@ et %1$d autres ont zappé une note dans laquelle vous apparaissez</string>
 			<key>other</key>
-			<string>%2$@ i %1$d innych osób zapuje wiadomość, w której jesteś oznaczony</string>
+			<string>%2$@ et %1$d autres ont zappé une note dans laquelle vous apparaissez</string>
 		</dict>
 	</dict>
 	<key>zapped_your_post_3</key>
@@ -313,13 +283,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ i %1$d inna osoba zapuje Twoją wiadomość</string>
-			<key>few</key>
-			<string>%2$@ i %1$d inne osoby zapują Twoją wiadomość</string>
+			<string>%2$@ et %1$d autre ont zappé votre note</string>
 			<key>many</key>
-			<string>%2$@ i %1$d innych osób zapuje Twoją wiadomość</string>
+			<string>%2$@ et %1$d autres ont zappé votre note</string>
 			<key>other</key>
-			<string>%2$@ i %1$d innych osób zapuje Twoją wiadomość</string>
+			<string>%2$@ et %1$d autres ont zappé votre note</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -333,13 +301,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ i %1$d inna osoba zapuje Twój profil</string>
-			<key>few</key>
-			<string>%2$@ i %1$d inne osoby zapują Twój profil</string>
+			<string>%2$@ et %1$d autre ont zappé votre profile</string>
 			<key>many</key>
-			<string>%2$@ i %1$d innych osób zapuje Twój profil</string>
+			<string>%2$@ et %1$d autres ont zappé votre profile</string>
 			<key>other</key>
-			<string>%2$@ i %1$d innych osób zapuje Twój profil</string>
+			<string>%2$@ et %1$d autres ont zappé votre profile</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
@@ -354,12 +320,10 @@
 			<string>d</string>
 			<key>one</key>
 			<string>Zap</string>
-			<key>few</key>
-			<string>Zapy</string>
 			<key>many</key>
-			<string>Zapów</string>
+			<string>Zaps</string>
 			<key>other</key>
-			<string>Zapy</string>
+			<string>Zaps</string>
 		</dict>
 	</dict>
 </dict>

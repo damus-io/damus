@@ -213,7 +213,7 @@ struct ConfigView: View {
                         clear_kingfisher_cache()
                     }
                     
-                    Picker(NSLocalizedString("Select image uplodaer", comment: "Prompt selection of user's image uplodaer"),
+                    Picker(NSLocalizedString("Select image uploader", comment: "Prompt selection of user's image uploader"),
                            selection: $settings.default_image_uploader) {
                         ForEach(ImageUploader.allCases, id: \.self) { uploader in
                             Text(uploader.model.displayName)

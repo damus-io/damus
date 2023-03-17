@@ -53,18 +53,18 @@ struct EventDetailBar: View {
 }
 
 func repostsCountString(_ count: Int, locale: Locale = Locale.current) -> String {
-    let bundle = bundleForLocale(locale: locale)
-    return String(format: bundle.localizedString(forKey: "reposts_count", value: nil, table: nil), locale: locale, count)
+    let format = localizedStringFormat(key: "reposts_count", locale: locale)
+    return String(format: format, locale: locale, count)
 }
 
 func reactionsCountString(_ count: Int, locale: Locale = Locale.current) -> String {
-    let bundle = bundleForLocale(locale: locale)
-    return String(format: bundle.localizedString(forKey: "reactions_count", value: nil, table: nil), locale: locale, count)
+    let format = localizedStringFormat(key: "reactions_count", locale: locale)
+    return String(format: format, locale: locale, count)
 }
 
 func zapsCountString(_ count: Int, locale: Locale = Locale.current) -> String {
-    let bundle = bundleForLocale(locale: locale)
-    return String(format: bundle.localizedString(forKey: "zaps_count", value: nil, table: nil), locale: locale, count)
+    let format = localizedStringFormat(key: "zaps_count", locale: locale)
+    return String(format: format, locale: locale, count)
 }
 
 struct EventDetailBar_Previews: PreviewProvider {

@@ -50,18 +50,18 @@ func follow_btn_enabled_state(_ fs: FollowState) -> Bool {
 }
 
 func followersCountString(_ count: Int, locale: Locale = Locale.current) -> String {
-    let bundle = bundleForLocale(locale: locale)
-    return String(format: bundle.localizedString(forKey: "followers_count", value: nil, table: nil), locale: locale, count)
+    let format = localizedStringFormat(key: "followers_count", locale: locale)
+    return String(format: format, locale: locale, count)
 }
 
 func followingCountString(_ count: Int, locale: Locale = Locale.current) -> String {
-    let bundle = bundleForLocale(locale: locale)
-    return String(format: bundle.localizedString(forKey: "following_count", value: nil, table: nil), locale: locale, count)
+    let format = localizedStringFormat(key: "following_count", locale: locale)
+    return String(format: format, locale: locale, count)
 }
 
 func relaysCountString(_ count: Int, locale: Locale = Locale.current) -> String {
-    let bundle = bundleForLocale(locale: locale)
-    return String(format: bundle.localizedString(forKey: "relays_count", value: nil, table: nil), locale: locale, count)
+    let format = localizedStringFormat(key: "relays_count", locale: locale)
+    return String(format: format, locale: locale, count)
 }
 
 struct EditButton: View {
