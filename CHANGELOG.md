@@ -1,3 +1,17 @@
+## [1.3.0-4] - 2023-03-17
+
+### Changed
+
+- It's much easier to tag users in replies and posts (William Casarin)
+
+
+### Fixed
+
+- Fix bug where small black text appears during image upload (William Casarin)
+
+
+[1.3.0-4]: https://github.com/damus-io/damus/releases/tag/v1.3.0-4
+
 ## [1.3.0-3] - 2023-03-17
 
 ### Fixed
