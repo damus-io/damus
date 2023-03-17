@@ -78,7 +78,7 @@ struct ContentView: View {
     @State var event: NostrEvent? = nil
     @State var active_profile: String? = nil
     @State var active_search: NostrFilter? = nil
-    @State var active_event: NostrEvent = test_event
+    @State var active_event: NostrEvent? = nil
     @State var profile_open: Bool = false
     @State var thread_open: Bool = false
     @State var search_open: Bool = false
@@ -170,9 +170,11 @@ struct ContentView: View {
             NavigationLink(destination: MaybeProfileView, isActive: $profile_open) {
                 EmptyView()
             }
-            let thread = ThreadModel(event: active_event, damus_state: damus_state!)
-            NavigationLink(destination: ThreadView(state: damus_state!, thread: thread), isActive: $thread_open) {
-                EmptyView()
+            if let active_event {
+                let thread = ThreadModel(event: active_event, damus_state: damus_state!)
+                NavigationLink(destination: ThreadView(state: damus_state!, thread: thread), isActive: $thread_open) {
+                    EmptyView()
+                }
             }
             NavigationLink(destination: MaybeSearchView, isActive: $search_open) {
                 EmptyView()
