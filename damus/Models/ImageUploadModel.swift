@@ -14,7 +14,9 @@ class ImageUploadModel: NSObject, URLSessionTaskDelegate, ObservableObject {
     
     func start(img: UIImage, uploader: ImageUploader) async -> ImageUploadResult {
         let res = await create_image_upload_request(imageToUpload: img, imageUploader: uploader, progress: self)
-        progress = nil
+        DispatchQueue.main.async {
+            self.progress = nil
+        }
         return res
     }
     
