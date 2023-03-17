@@ -1,3 +1,12 @@
+## [1.3.0-3] - 2023-03-17
+
+### Fixed
+
+- Fix image upload url delay after progress bar disappears (William Casarin)
+- Fix issue where damus stops trying to reconnect (William Casarin)
+
+[1.3.0-3]: https://github.com/damus-io/damus/releases/tag/v1.3.0-3
+
 ## [1.3.0-2] - 2023-03-16
 
 ### Added
@@ -752,6 +761,4 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
-
 
