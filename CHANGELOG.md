@@ -1,3 +1,18 @@
+## [1.3.0-5] - 2023-03-20
+
+### Added
+
+- Add Time Ago to DM View (Joel Klabo)
+
+
+### Fixed
+
+- Fixed internal links opening in other nostr clients (William Casarin)
+- Remove authentication for copying npub (Swift)
+
+
+[1.3.0-5]: https://github.com/damus-io/damus/releases/tag/v1.3.0-5
+
 ## [1.3.0-4] - 2023-03-17
 
 ### Changed
@@ -775,4 +790,5 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
+
 
