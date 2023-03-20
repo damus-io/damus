@@ -33,7 +33,7 @@ struct DMView: View {
                 .tint(is_ours ? Color.white : Color.accentColor)
                 .overlay(Text(format_relative_time(event.created_at))
                                .font(.footnote)
-                               .foregroundColor(.white)
+                               .foregroundColor(.gray)
                                .opacity(0.8)
                                .offset(x: -10, y: -5), alignment: .bottomTrailing)
             if !is_ours {
