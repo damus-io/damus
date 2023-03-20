@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 let PPM_SIZE: CGFloat = 80.0
 let BANNER_HEIGHT: CGFloat = 150.0;
@@ -196,6 +197,9 @@ struct EditMetadataView: View {
                     TextField(NSLocalizedString("jb55@jb55.com", comment: "Placeholder example text for identifier used for NIP-05 verification."), text: $nip05)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
+                        .onReceive(Just(nip05)) { newValue in
+                            self.nip05 = newValue.trimmingCharacters(in: .whitespaces)
+                        }
                 }, header: {
                     Text("NIP-05 Verification", comment: "Label for NIP-05 Verification section of user profile form.")
                 }, footer: {
