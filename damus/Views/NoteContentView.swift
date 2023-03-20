@@ -141,7 +141,7 @@ struct NoteContentView: View {
 
 func hashtag_str(_ htag: String) -> AttributedString {
      var attributedString = AttributedString(stringLiteral: "#\(htag)")
-     attributedString.link = URL(string: "nostr:t:\(htag)")
+     attributedString.link = URL(string: "damus:t:\(htag)")
      attributedString.foregroundColor = Color("DamusPurple")
      return attributedString
  }
@@ -160,13 +160,13 @@ func mention_str(_ m: Mention, profiles: Profiles) -> AttributedString {
         let profile = profiles.lookup(id: pk)
         let disp = Profile.displayName(profile: profile, pubkey: pk).username
         var attributedString = AttributedString(stringLiteral: "@\(disp)")
-        attributedString.link = URL(string: "nostr:\(encode_pubkey_uri(m.ref))")
+        attributedString.link = URL(string: "damus:\(encode_pubkey_uri(m.ref))")
         attributedString.foregroundColor = Color("DamusPurple")
         return attributedString
     case .event:
         let bevid = bech32_note_id(m.ref.ref_id) ?? m.ref.ref_id
         var attributedString = AttributedString(stringLiteral: "@\(abbrev_pubkey(bevid))")
-        attributedString.link = URL(string: "nostr:\(encode_event_id_uri(m.ref))")
+        attributedString.link = URL(string: "damus:\(encode_event_id_uri(m.ref))")
         attributedString.foregroundColor = Color("DamusPurple")
         return attributedString
     }
