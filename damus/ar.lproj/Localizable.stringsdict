@@ -233,7 +233,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d مستخدم آخر نشر منشورا تمت الإشارة لك فيه</string>
 			<key>two</key>
-			<string>%2$@ و %1$d مستخدمان آخران نشروا منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d آخران نشروا منشورا تمت الإشارة لك فيه</string>
 			<key>few</key>
 			<string>%2$@ و %1$d آخرون نشروا منشورا تمت الإشارة لك فيه</string>
 			<key>many</key>
@@ -257,7 +257,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d مستخدم آخر نشر منشورك</string>
 			<key>two</key>
-			<string>%2$@ و %1$d مستخدمان آخران نشروا منشورك</string>
+			<string>%2$@ و %1$d آخران نشروا منشورك</string>
 			<key>few</key>
 			<string>%2$@ و %1$d آخرون نشروا منشورك</string>
 			<key>many</key>
@@ -353,7 +353,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d مستخدم آخر ومّض منشورا تمت الإشارة لك فيه</string>
 			<key>two</key>
-			<string>%2$@ و %1$d مستخدمان آخران ومّضوا منشورا تمت الإشارة لك فيه</string>
+			<string>%2$@ و %1$d آخران ومّضوا منشورا تمت الإشارة لك فيه</string>
 			<key>few</key>
 			<string>%2$@ و %1$d آخررن ومّضوا منشورا تمت الإشارة لك فيه</string>
 			<key>many</key>
@@ -377,7 +377,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d مستخدم آخر ومّض منشورك</string>
 			<key>two</key>
-			<string>%2$@ و %1$d مستخدمان آخران ومّضوا منشورك</string>
+			<string>%2$@ و %1$d آخران ومّضوا منشورك</string>
 			<key>few</key>
 			<string>%2$@ و %1$d آخرون ومّضوا منشورك</string>
 			<key>many</key>
@@ -401,7 +401,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d مستخدم آخر ومّض حسابك</string>
 			<key>two</key>
-			<string>%2$@ و %1$d مستخدمان آخران ومّضوا حسابك</string>
+			<string>%2$@ و %1$d آخران ومّضوا حسابك</string>
 			<key>few</key>
 			<string>%2$@ و %1$d آخرون ومّضوا حسابك</string>
 			<key>many</key>

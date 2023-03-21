@@ -28,7 +28,7 @@ struct TranslateView: View {
     
     func Translated(lang: String, artifacts: NoteArtifacts) -> some View {
         return Group {
-            Button(NSLocalizedString("Translated from \(lang)", comment: "Button to indicate that the note has been translated from a different language.")) {
+            Button(String(format: NSLocalizedString("Translated from %@", comment: "Button to indicate that the note has been translated from a different language."), lang)) {
                 show_translated_note = false
             }
             .translate_button_style()
@@ -38,7 +38,7 @@ struct TranslateView: View {
     }
     
     func CheckingStatus(lang: String) -> some View {
-        return Button(NSLocalizedString("Translating from \(lang)...", comment: "Button to indicate that the note is in the process of being translated from a different language.")) {
+        return Button(String(format: NSLocalizedString("Translating from %@...", comment: "Button to indicate that the note is in the process of being translated from a different language."), lang)) {
             show_translated_note = false
         }
         .translate_button_style()

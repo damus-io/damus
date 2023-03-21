@@ -46,9 +46,9 @@ struct ShareAction: View {
                 }
                 
                 let bookmarkImg = isBookmarked ? "bookmark.slash" : "bookmark"
-                let bookmarkTxt = isBookmarked ? "Remove\nBookmark" : "Bookmark"
+                let bookmarkTxt = isBookmarked ? NSLocalizedString("Remove Bookmark", comment: "Button text to remove bookmark from a note.") : NSLocalizedString("Add Bookmark", comment: "Button text to add bookmark to a note.")
                 let boomarkCol = isBookmarked ? Color(.red) : col
-                ShareActionButton(img: bookmarkImg, text: NSLocalizedString(bookmarkTxt, comment: "Button to bookmark to note"), col: boomarkCol) {
+                ShareActionButton(img: bookmarkImg, text: bookmarkTxt, col: boomarkCol) {
                     show_share_action = false
                     self.bookmarks.updateBookmark(event)
                     isBookmarked = self.bookmarks.isBookmarked(event)
