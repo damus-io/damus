@@ -55,7 +55,7 @@ func get_image_uploader(_ pubkey: String) -> ImageUploader {
        let defaultImageUploader = ImageUploader(rawValue: defaultImageUploader) {
         return defaultImageUploader
     } else {
-        return .nostrBuild
+        return .nostrbuild
     }
 }
 

@@ -140,24 +140,24 @@ extension NSMutableData {
 
 enum ImageUploader: String, CaseIterable, Identifiable {
     var id: String { self.rawValue }
-    case nostrBuild
-    case nostrImg
+    case nostrbuild
+    case nostrimg
 
     var nameParam: String {
         switch self {
-        case .nostrBuild:
+        case .nostrbuild:
             return "\"fileToUpload\""
-        case .nostrImg:
+        case .nostrimg:
             return "\"image\""
         }
     }
 
     var displayImageUploaderName: String {
         switch self {
-        case .nostrBuild:
-            return "NostrBuild"
-        case .nostrImg:
-            return "NostrImg"
+        case .nostrbuild:
+            return "nostr.build"
+        case .nostrimg:
+            return "nostrimg"
         }
     }
 
@@ -170,26 +170,26 @@ enum ImageUploader: String, CaseIterable, Identifiable {
 
     var model: Model {
         switch self {
-        case .nostrBuild:
-            return .init(index: -1, tag: "nostrBuild", displayName: NSLocalizedString("NostrBuild", comment: "Dropdown option label for system default for NostrBuild image uploader."))
-        case .nostrImg:
-            return .init(index: 0, tag: "nostrImg", displayName: NSLocalizedString("NostrImg", comment: "Dropdown option label for system default for NostrImg image uploader."))
+        case .nostrbuild:
+            return .init(index: -1, tag: "nostr.build", displayName: NSLocalizedString("nostr.build", comment: "Dropdown option label for system default for nostr.build image uploader."))
+        case .nostrimg:
+            return .init(index: 0, tag: "nostrimg", displayName: NSLocalizedString("nostrimg", comment: "Dropdown option label for system default for nostrimg image uploader."))
         }
     }
 
 
     var postAPI: String {
         switch self {
-        case .nostrBuild:
+        case .nostrbuild:
             return "https://nostr.build/upload.php"
-        case .nostrImg:
+        case .nostrimg:
             return "https://nostrimg.com/api/upload"
         }
     }
 
     func getImageURL(from responseString: String) -> String? {
         switch self {
-        case .nostrBuild:
+        case .nostrbuild:
             guard let startIndex = responseString.range(of: "nostr.build_")?.lowerBound else {
                 return nil
             }
@@ -202,7 +202,7 @@ enum ImageUploader: String, CaseIterable, Identifiable {
             let nostrBuildURL = "https://nostr.build/i/\(nostrBuildImageName)"
             return nostrBuildURL
                 
-        case .nostrImg:
+        case .nostrimg:
             guard let startIndex = responseString.range(of: "https://i.nostrimg.com/")?.lowerBound else {
                     return nil
                 }
