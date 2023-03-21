@@ -1,3 +1,12 @@
+## [1.3.0-6] - 2023-03-21
+
+### Fixed
+
+- Fix bug where nostr: links and QRs stopped working (William Casarin)
+
+
+[1.3.0-6]: https://github.com/damus-io/damus/releases/tag/v1.3.0-6
+
 ## [1.3.0-5] - 2023-03-20
 
 ### Added
@@ -790,5 +799,4 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
 
