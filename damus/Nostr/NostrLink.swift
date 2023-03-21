@@ -127,7 +127,7 @@ func decode_nostr_uri(_ s: String) -> NostrLink? {
     var uri = s.replacingOccurrences(of: "nostr://", with: "")
     uri = uri.replacingOccurrences(of: "nostr:", with: "")
     
-    uri = s.replacingOccurrences(of: "damus://", with: "")
+    uri = uri.replacingOccurrences(of: "damus://", with: "")
     uri = uri.replacingOccurrences(of: "damus:", with: "")
     
     let parts = uri.split(separator: ":")
