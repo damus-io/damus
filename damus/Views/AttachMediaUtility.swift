@@ -152,7 +152,7 @@ enum ImageUploader: String, CaseIterable, Identifiable {
         }
     }
 
-    var displayImageUploaderName: String {
+    var displayNameForUploader: String {
         switch self {
         case .nostrbuild:
             return "nostr.build"
@@ -171,9 +171,9 @@ enum ImageUploader: String, CaseIterable, Identifiable {
     var model: Model {
         switch self {
         case .nostrbuild:
-            return .init(index: -1, tag: "nostr.build", displayName: NSLocalizedString("nostr.build", comment: "Dropdown option label for system default for nostr.build image uploader."))
+            return .init(index: -1, tag: "nostr.build", displayName: displayNameForUploader)
         case .nostrimg:
-            return .init(index: 0, tag: "nostrimg", displayName: NSLocalizedString("nostrimg", comment: "Dropdown option label for system default for nostrimg image uploader."))
+            return .init(index: 0, tag: "nostrimg", displayName: displayNameForUploader)
         }
     }
 
