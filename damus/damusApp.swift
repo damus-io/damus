@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import StoreKit
 
 @main
 struct damusApp: App {
@@ -61,6 +62,8 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
+        
+        SKPaymentQueue.default().add(StoreObserver.standard)
         return true
     }
     
@@ -84,7 +87,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         let json: [String: Any] = ["deviceToken": token, "pubkey": pubkey.hex()]
 
         // create post request
-        let url = URL(string: settings.send_device_token_to_localhost ? "http://localhost:8000/user-info" : "https://notify.damus.io:8000/user-info")!
+        let url = settings.send_device_token_to_localhost ? Constants.DEVICE_TOKEN_RECEIVER_TEST_URL : Constants.DEVICE_TOKEN_RECEIVER_PRODUCTION_URL
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
 

@@ -208,6 +208,10 @@ struct NoteContentView: View {
     }
     
     func load(force_artifacts: Bool = false) {
+        if case .loading = damus_state.events.get_cache_data(event.id).artifacts_model.state {
+            return
+        }
+        
         // always reload artifacts on load
         let plan = get_preload_plan(evcache: damus_state.events, ev: event, our_keypair: damus_state.keypair, settings: damus_state.settings)
         

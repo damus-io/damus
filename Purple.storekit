@@ -1,0 +1,125 @@
+{
+  "identifier" : "64C21A2D",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "1628663131",
+    "_developerTeamID" : "XK7H4JAB3D",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 704848066.26849198,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21283177",
+      "localizations" : [
+
+      ],
+      "name" : "Purple",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "6.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6446591615",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Support damus development with Damus Purple!",
+              "displayName" : "Damus Purple",
+              "locale" : "en_CA"
+            }
+          ],
+          "productID" : "purple",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Purple",
+          "subscriptionGroupID" : "21283177",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "69.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "6448764101",
+          "introductoryOffer" : null,
+          "localizations" : [
+
+          ],
+          "productID" : "purpleyearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Purple Yearly",
+          "subscriptionGroupID" : "21283177",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

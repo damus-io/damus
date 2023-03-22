@@ -87,7 +87,6 @@ struct LoginView: View {
                 }
 
                 if let p = parsed {
-                    
                     Button(action: {
                         Task {
                             do {

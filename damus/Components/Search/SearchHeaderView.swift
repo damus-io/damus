@@ -101,7 +101,7 @@ struct NonImageAvatar<Content: View>: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(Color(red: 0xF8/255.0, green: 0xE7/255.0, blue: 0xF8/255.0))
+                .fill(DamusColors.lightBackgroundPink)
                 .frame(width: 54, height: 54)
             
             content

@@ -39,6 +39,7 @@ struct SideMenuView: View {
             .onTapGesture {
                 isSidebarVisible.toggle()
             }
+
             content
         }
     }
@@ -51,17 +52,18 @@ struct SideMenuView: View {
 
             NavigationLink(value: Route.Wallet(wallet: damus_state.wallet)) {
                 navLabel(title: NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), img: "wallet")
-                /*
-                HStack {
-                    Image("wallet")
-                        .tint(DamusColors.adaptableBlack)
+            }
 
-                    Text(NSLocalizedString("wallet", comment: "Sidebar menu label for Wallet view."))
-                        .font(.title2)
-                        .foregroundColor(textColor())
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .dynamicTypeSize(.xSmall)
-                }*/
+            if damus_state.settings.enable_experimental_purple_api {
+                NavigationLink(destination: DamusPurpleView(purple: damus_state.purple, keypair: damus_state.keypair)) {
+                    HStack(spacing: 13) {
+                        Image("nostr-hashtag")
+                        Text("Purple")
+                            .foregroundColor(DamusColors.purple)
+                            .font(.title2.weight(.bold))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
 
             NavigationLink(value: Route.MuteList(users: get_mutelist_users(damus_state.contacts.mutelist))) {

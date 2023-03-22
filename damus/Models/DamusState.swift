@@ -34,6 +34,39 @@ struct DamusState {
     let music: MusicController?
     let video: VideoController
     let ndb: Ndb
+    var purple: DamusPurple
+    
+    init(pool: RelayPool, keypair: Keypair, likes: EventCounter, boosts: EventCounter, contacts: Contacts, profiles: Profiles, dms: DirectMessagesModel, previews: PreviewCache, zaps: Zaps, lnurls: LNUrls, settings: UserSettingsStore, relay_filters: RelayFilters, relay_model_cache: RelayModelCache, drafts: Drafts, events: EventCache, bookmarks: BookmarksManager, postbox: PostBox, bootstrap_relays: [String], replies: ReplyCounter, muted_threads: MutedThreadsManager, wallet: WalletModel, nav: NavigationCoordinator, music: MusicController?, video: VideoController, ndb: Ndb, purple: DamusPurple? = nil) {
+        self.pool = pool
+        self.keypair = keypair
+        self.likes = likes
+        self.boosts = boosts
+        self.contacts = contacts
+        self.profiles = profiles
+        self.dms = dms
+        self.previews = previews
+        self.zaps = zaps
+        self.lnurls = lnurls
+        self.settings = settings
+        self.relay_filters = relay_filters
+        self.relay_model_cache = relay_model_cache
+        self.drafts = drafts
+        self.events = events
+        self.bookmarks = bookmarks
+        self.postbox = postbox
+        self.bootstrap_relays = bootstrap_relays
+        self.replies = replies
+        self.muted_threads = muted_threads
+        self.wallet = wallet
+        self.nav = nav
+        self.music = music
+        self.video = video
+        self.ndb = ndb
+        self.purple = purple ?? DamusPurple(
+            environment: settings.purple_api_local_test_mode ? .local_test : .production,
+            keypair: keypair
+        )
+    }
 
     @discardableResult
     func add_zap(zap: Zapping) -> Bool {

@@ -71,6 +71,7 @@ struct ContentView: View {
     @SceneStorage("ContentView.selected_timeline") var selected_timeline: Timeline = .home
     @State var muting: Pubkey? = nil
     @State var confirm_mute: Bool = false
+    @State var hide_bar: Bool = false
     @State var user_muted_confirm: Bool = false
     @State var confirm_overwrite_mutelist: Bool = false
     @SceneStorage("ContentView.filter_state") var filter_state : FilterState = .posts_and_replies
@@ -284,12 +285,17 @@ struct ContentView: View {
                 }
                 .navigationViewStyle(.stack)
             
-                TabBar(nstatus: home.notification_status, selected: $selected_timeline, settings: damus.settings, action: switch_timeline)
-                    .padding([.bottom], 8)
-                    .background(Color(uiColor: .systemBackground).ignoresSafeArea())
+                if !hide_bar {
+                    TabBar(nstatus: home.notification_status, selected: $selected_timeline, settings: damus.settings, action: switch_timeline)
+                        .padding([.bottom], 8)
+                        .background(Color(uiColor: .systemBackground).ignoresSafeArea())
+                } else {
+                    Text("")
+                }
             }
         }
         .ignoresSafeArea(.keyboard)
+        .edgesIgnoringSafeArea(hide_bar ? [.bottom] : [])
         .onAppear() {
             self.connect()
             try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default, options: .mixWithOthers)
@@ -343,6 +349,10 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.compose)) { action in
             self.active_sheet = .post(action)
+        }
+        .onReceive(handle_notify(.display_tabbar)) { display in
+            let show = display
+            self.hide_bar = !show
         }
         .onReceive(timer) { n in
             self.damus_state?.postbox.try_flushing_events()
@@ -668,7 +678,16 @@ struct ContentView: View {
                                       video: VideoController(),
                                       ndb: ndb
         )
+        
         home.damus_state = self.damus_state!
+        
+        if let damus_state, damus_state.settings.enable_experimental_purple_api {
+            // Assign delegate so that we can send receipts to the Purple API server as soon as we get updates from user's purchases
+            StoreObserver.standard.delegate = damus_state.purple
+        }
+        else {
+            // Purple API is an experimental feature. If not enabled, do not connect `StoreObserver` with Purple API to avoid leaking receipts
+        }
         
         pool.connect()
     }

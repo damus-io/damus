@@ -41,5 +41,8 @@ class DamusColors {
     static let neutral1 = Color("DamusNeutral1")
     static let neutral3 = Color("DamusNeutral3")
     static let neutral6 = Color("DamusNeutral6")
+    static let pink = Color(red: 211/255.0, green: 76/255.0, blue: 217/255.0)
+    static let lighterPink = Color(red: 248/255.0, green: 105/255.0, blue: 182/255.0)
+    static let lightBackgroundPink = Color(red: 0xF8/255.0, green: 0xE7/255.0, blue: 0xF8/255.0)
 }
 
