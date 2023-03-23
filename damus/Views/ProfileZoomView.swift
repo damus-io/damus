@@ -7,7 +7,7 @@
 import SwiftUI
 import Kingfisher
 
-private struct ImageContainerView: View {
+struct ProfileImageContainerView: View {
     
     let url: URL?
     
@@ -68,7 +68,7 @@ struct ProfileZoomView: View {
                 .ignoresSafeArea()
             
             ZoomableScrollView {
-                ImageContainerView(url: get_profile_url(picture: nil, pubkey: pubkey, profiles: profiles))
+                ProfileImageContainerView(url: get_profile_url(picture: nil, pubkey: pubkey, profiles: profiles))
                     .aspectRatio(contentMode: .fit)
                     .padding(.top, Theme.safeAreaInsets?.top)
                     .padding(.bottom, Theme.safeAreaInsets?.bottom)
