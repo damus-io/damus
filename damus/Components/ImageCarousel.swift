@@ -108,8 +108,10 @@ struct ImageView: View {
     var navBarView: some View {
         VStack {
             HStack {
+                /*
                 Text(urls[selectedIndex]?.lastPathComponent ?? "")
                     .bold()
+                 */
                 
                 Spacer()
                 
@@ -120,11 +122,7 @@ struct ImageView: View {
                 })
             }
             .padding()
-            
-            Divider()
-                .ignoresSafeArea()
         }
-        .background(.regularMaterial)
     }
     
     var tabViewIndicator: some View {
