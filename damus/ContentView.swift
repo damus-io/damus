@@ -776,7 +776,6 @@ func setup_notifications() {
     }
 }
 
-
 func find_event(state: DamusState, evid: String, search_type: SearchType, find_from: [String]?, callback: @escaping (NostrEvent?) -> ()) {
     if let ev = state.events.lookup(evid) {
         callback(ev)

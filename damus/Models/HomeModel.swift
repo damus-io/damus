@@ -145,9 +145,13 @@ class HomeModel: ObservableObject {
             return
         }
 
-        if handle_last_event(ev: ev, timeline: .notifications) && damus_state.settings.zap_vibration {
-            // Generate zap vibration
-            zap_vibrate(zap_amount: zap.invoice.amount)
+        if handle_last_event(ev: ev, timeline: .notifications) {
+            if damus_state.settings.zap_vibration {
+                // Generate zap vibration
+                zap_vibrate(zap_amount: zap.invoice.amount)
+            }
+            // Create in-app local notification for zap received.
+            create_in_app_zap_notification(zap_amount: zap.invoice.amount)
         }
 
         return
@@ -926,5 +930,26 @@ func zap_vibrate(zap_amount: Int64) {
         vibration_generator = UIImpactFeedbackGenerator(style: .light)
     }
     vibration_generator.impactOccurred()
+}
+
+func create_in_app_zap_notification(zap_amount: Int64) {
+    let sats = zap_amount / 1000
+    let content = UNMutableNotificationContent()
+    content.title = "Zap"
+    let satString = sats == 1 ? "sat" : "sats"
+    content.body = "You have just received \(sats) \(satString)"
+    content.sound = UNNotificationSound.default
+
+    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+
+    let request = UNNotificationRequest(identifier: "myZapNotification", content: content, trigger: trigger)
+
+    UNUserNotificationCenter.current().add(request) { error in
+        if let error = error {
+            print("Error: \(error)")
+        } else {
+            print("Local notification scheduled")
+        }
+    }
 }
 
