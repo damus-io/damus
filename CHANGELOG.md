@@ -1,3 +1,9 @@
+## [1.3.0-7] - 2023-03-24
+
+- New experimental timeline view
+
+[1.3.0-7]: https://github.com/damus-io/damus/releases/tag/v1.3.0-7
+
 ## [1.3.0-6] - 2023-03-21
 
 ### Fixed
