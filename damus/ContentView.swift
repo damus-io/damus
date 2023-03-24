@@ -320,6 +320,7 @@ struct ContentView: View {
         .onAppear() {
             self.connect()
             setup_notifications()
+            setup_notifications_permission()
         }
         .sheet(item: $active_sheet) { item in
             switch item {
@@ -774,8 +775,21 @@ func setup_notifications() {
             return
         }
     }
+
 }
 
+func setup_notifications_permission() {
+    // Request permission to display notifications
+    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+        if let error = error {
+            print("Error: \(error)")
+        } else if granted {
+            print("Notification permission granted")
+        } else {
+            print("Notification permission denied")
+        }
+    }
+}
 
 func find_event(state: DamusState, evid: String, search_type: SearchType, find_from: [String]?, callback: @escaping (NostrEvent?) -> ()) {
     if let ev = state.events.lookup(evid) {
