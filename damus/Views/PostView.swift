@@ -168,11 +168,11 @@ struct PostView: View {
         post = combinedAttributedString
     }
     
-    func handle_upload(image: UIImage) {
-        let uploader = get_image_uploader(damus_state.pubkey)
+    func handle_upload(media: Any) {
+        let uploader = get_media_uploader(damus_state.pubkey)
         
         Task.init {
-            let res = await image_upload.start(img: image, uploader: uploader)
+            let res = await image_upload.start(media: media, uploader: uploader)
             
             switch res {
             case .success(let url):
@@ -215,8 +215,10 @@ struct PostView: View {
         }
         .padding()
         .sheet(isPresented: $attach_media) {
-            ImagePicker(sourceType: .photoLibrary) { img in
-                handle_upload(image: img)
+            ImagePicker(sourceType: .photoLibrary, damusState: damus_state) { img in
+                handle_upload(media: img)
+            } onVideoPicked: { url in
+                handle_upload(media: url)
             }
         }
         .onAppear() {
