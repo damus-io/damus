@@ -220,8 +220,8 @@ struct ConfigView: View {
                     }
                     
                     Picker(NSLocalizedString("Select image uploader", comment: "Prompt selection of user's image uploader"),
-                           selection: $settings.default_image_uploader) {
-                        ForEach(ImageUploader.allCases, id: \.self) { uploader in
+                           selection: $settings.default_media_uploader) {
+                        ForEach(MediaUploader.allCases, id: \.self) { uploader in
                             Text(uploader.model.displayName)
                                 .tag(uploader.model.tag)
                         }

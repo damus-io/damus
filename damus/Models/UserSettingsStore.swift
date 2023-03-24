@@ -50,10 +50,10 @@ func get_default_wallet(_ pubkey: String) -> Wallet {
     }
 }
 
-func get_image_uploader(_ pubkey: String) -> ImageUploader {
-    if let defaultImageUploader = UserDefaults.standard.string(forKey: "default_image_uploader"),
-       let defaultImageUploader = ImageUploader(rawValue: defaultImageUploader) {
-        return defaultImageUploader
+func get_media_uploader(_ pubkey: String) -> MediaUploader {
+    if let defaultMediaUploader = UserDefaults.standard.string(forKey: "default_media_uploader"),
+       let defaultMediaUploader = MediaUploader(rawValue: defaultMediaUploader) {
+        return defaultMediaUploader
     } else {
         return .nostrBuild
     }
@@ -98,9 +98,9 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
-    @Published var default_image_uploader: ImageUploader {
+    @Published var default_media_uploader: MediaUploader {
         didSet {
-            UserDefaults.standard.set(default_image_uploader.rawValue, forKey: "default_image_uploader")
+            UserDefaults.standard.set(default_media_uploader.rawValue, forKey: "default_media_uploader")
         }
     }
     
@@ -205,7 +205,7 @@ class UserSettingsStore: ObservableObject {
         show_wallet_selector = should_show_wallet_selector(pubkey)
         always_show_images = UserDefaults.standard.object(forKey: "always_show_images") as? Bool ?? false
 
-        default_image_uploader = get_image_uploader(pubkey)
+        default_media_uploader = get_media_uploader(pubkey)
 
         left_handed = UserDefaults.standard.object(forKey: "left_handed") as? Bool ?? false
         zap_vibration = UserDefaults.standard.object(forKey: "zap_vibration") as? Bool ?? false
