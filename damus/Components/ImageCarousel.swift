@@ -42,12 +42,7 @@ struct ImageCarousel: View {
         TabView {
             ForEach(urls, id: \.absoluteString) { url in
                 if FailedImageURLsCache.shared.urls.contains(url) {
-                    ZStack {
-                        Rectangle()
-                            .foregroundColor(Color("DamusDarkGrey"))
-                            .cornerRadius(10)
-                        ProgressView()
-                    }
+                    EmptyView()
                 } else {
                     Rectangle()
                         .foregroundColor(Color.clear)
