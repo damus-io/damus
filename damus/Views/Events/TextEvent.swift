@@ -35,9 +35,10 @@ struct TextEvent: View {
                 Spacer()
             }
 
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 1) {
                 HStack(alignment: .center, spacing: 0) {
                     let pk = is_anon ? "anon" : pubkey
+                    
                     EventProfileName(pubkey: pk, profile: profile, damus: damus, show_friend_confirmed: true, size: .normal)
                     
                     Text(verbatim: "⋅")
@@ -53,7 +54,6 @@ struct TextEvent: View {
                         .padding([.bottom], 4)
 
                 }
-                .minimumScaleFactor(0.75)
                 .lineLimit(1)
                 
                 EventBody(damus_state: damus, event: event, size: .normal)

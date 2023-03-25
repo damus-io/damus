@@ -42,10 +42,10 @@ struct InnerTimelineView: View {
                             nav_target = ev.inner_event ?? ev
                             navigating = true
                         }
-                        .padding(.top, 10)
+                        .padding(.top, 5)
                     
                     Divider()
-                        .padding([.top], 10)
+                        .padding([.top], 5)
                 }
             }
         }
