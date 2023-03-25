@@ -28,48 +28,32 @@ struct NoteContentView: View {
     let show_images: Bool
     let size: EventViewKind
     let preview_height: CGFloat?
-    let options: EventViewOptions
+    let truncate: Bool
 
     @State var artifacts: NoteArtifacts
     @State var preview: LinkViewRepresentable?
     
-    init(damus_state: DamusState, event: NostrEvent, show_images: Bool, size: EventViewKind, artifacts: NoteArtifacts, options: EventViewOptions) {
+    init(damus_state: DamusState, event: NostrEvent, show_images: Bool, size: EventViewKind, artifacts: NoteArtifacts, truncate: Bool) {
         self.damus_state = damus_state
         self.event = event
         self.show_images = show_images
         self.size = size
-        self.options = options
         self._artifacts = State(initialValue: artifacts)
         self.preview_height = lookup_cached_preview_size(previews: damus_state.previews, evid: event.id)
         self._preview = State(initialValue: load_cached_preview(previews: damus_state.previews, evid: event.id))
         self._artifacts = State(initialValue: render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey))
-    }
-    
-    var truncate: Bool {
-        return options.contains(.truncate_content)
-    }
-    
-    var with_padding: Bool {
-        return options.contains(.pad_content)
-    }
-    
-    var truncatedText: some View {
-        TruncatedText(text: artifacts.content, maxChars: (truncate ? 280 : nil))
-            .font(eventviewsize_to_font(size))
+        self.truncate = truncate
     }
     
     func MainContent() -> some View {
         return VStack(alignment: .leading) {
+            
             if size == .selected {
                 SelectableText(attributedString: artifacts.content)
                 TranslateView(damus_state: damus_state, event: event)
             } else {
-                if with_padding {
-                    truncatedText
-                        .padding(.horizontal)
-                } else {
-                    truncatedText
-                }
+                TruncatedText(text: artifacts.content, maxChars: (truncate ? 280 : nil))
+                    .font(eventviewsize_to_font(size))
             }
 
             if show_images && artifacts.images.count > 0 {
@@ -80,7 +64,7 @@ struct NoteContentView: View {
                     Blur()
                         .disabled(true)
                 }
-                //.cornerRadius(10)
+                .cornerRadius(10)
             }
             
             if artifacts.invoices.count > 0 {
@@ -193,7 +177,7 @@ struct NoteContentView_Previews: PreviewProvider {
         let state = test_damus_state()
         let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
         let artifacts = NoteArtifacts(content: AttributedString(stringLiteral: content), images: [], invoices: [], links: [])
-        NoteContentView(damus_state: state, event: NostrEvent(content: content, pubkey: "pk"), show_images: true, size: .normal, artifacts: artifacts, options: [])
+        NoteContentView(damus_state: state, event: NostrEvent(content: content, pubkey: "pk"), show_images: true, size: .normal, artifacts: artifacts, truncate: false)
     }
 }
 

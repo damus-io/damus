@@ -10,7 +10,6 @@ import SwiftUI
 struct SelectedEventView: View {
     let damus: DamusState
     let event: NostrEvent
-    let size: EventViewKind
     
     var pubkey: String {
         event.pubkey
@@ -18,10 +17,9 @@ struct SelectedEventView: View {
     
     @StateObject var bar: ActionBarModel
     
-    init(damus: DamusState, event: NostrEvent, size: EventViewKind) {
+    init(damus: DamusState, event: NostrEvent) {
         self.damus = damus
         self.event = event
-        self.size = size
         self._bar = StateObject(wrappedValue: make_actionbar_model(ev: event.id, damus: damus))
     }
     
@@ -42,7 +40,7 @@ struct SelectedEventView: View {
                 .minimumScaleFactor(0.75)
                 .lineLimit(1)
                 
-                EventBody(damus_state: damus, event: event, size: size, options: [])
+                EventBody(damus_state: damus, event: event, size: .selected)
                 
                 if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
                     BuilderEventView(damus: damus, event_id: mention.ref.id)
@@ -80,7 +78,7 @@ struct SelectedEventView: View {
 
 struct SelectedEventView_Previews: PreviewProvider {
     static var previews: some View {
-        SelectedEventView(damus: test_damus_state(), event: test_event, size: .selected)
+        SelectedEventView(damus: test_damus_state(), event: test_event)
             .padding()
     }
 }

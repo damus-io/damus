@@ -33,6 +33,8 @@ struct ShareSheet: UIViewControllerRepresentable {
 
 
 
+
+
 struct ImageCarousel: View {
     var urls: [URL]
     
@@ -51,8 +53,8 @@ struct ImageCarousel: View {
                             .configure { view in
                                 view.framePreloadCount = 3
                             }
-                            .aspectRatio(contentMode: .fill)
-                            //.cornerRadius(10)
+                            .aspectRatio(contentMode: .fit)
+                            .cornerRadius(10)
                             .tabItem {
                                 Text(url.absoluteString)
                             }
@@ -68,7 +70,8 @@ struct ImageCarousel: View {
         .fullScreenCover(isPresented: $open_sheet) {
             ImageView(urls: urls)
         }
-        .frame(height: 350)
+        .frame(height: 200)
+        .clipped()
         .onTapGesture {
             open_sheet = true
         }

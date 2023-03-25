@@ -37,7 +37,7 @@ struct InnerTimelineView: View {
                 EmptyTimelineView()
             } else {
                 ForEach(events.filter(filter), id: \.id) { (ev: NostrEvent) in
-                    EventView(damus: damus, event: ev, options: [.wide])
+                    EventView(damus: damus, event: ev)
                         .onTapGesture {
                             nav_target = ev.inner_event ?? ev
                             navigating = true
@@ -49,7 +49,7 @@ struct InnerTimelineView: View {
                 }
             }
         }
-        //.padding(.horizontal)
+        .padding(.horizontal)
     }
 }
 

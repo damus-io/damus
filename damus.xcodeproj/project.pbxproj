@@ -225,8 +225,6 @@
 		4CFF8F6329CC9AD7008DB934 /* ImageContextMenuModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8F6229CC9AD7008DB934 /* ImageContextMenuModifier.swift */; };
 		4CFF8F6729CC9E3A008DB934 /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8F6629CC9E3A008DB934 /* ImageView.swift */; };
 		4CFF8F6929CC9ED1008DB934 /* ImageContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8F6829CC9ED1008DB934 /* ImageContainerView.swift */; };
-		4CFF8F6B29CD0079008DB934 /* RepostedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8F6A29CD0079008DB934 /* RepostedEvent.swift */; };
-		4CFF8F6D29CD022E008DB934 /* WideEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8F6C29CD022E008DB934 /* WideEventView.swift */; };
 		4FE60CDD295E1C5E00105A1F /* Wallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE60CDC295E1C5E00105A1F /* Wallet.swift */; };
 		50A50A8D29A09E1C00C01BE7 /* RequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */; };
 		5C513FBA297F72980072348F /* CustomPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FB9297F72980072348F /* CustomPicker.swift */; };
@@ -603,8 +601,6 @@
 		4CFF8F6229CC9AD7008DB934 /* ImageContextMenuModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageContextMenuModifier.swift; sourceTree = "<group>"; };
 		4CFF8F6629CC9E3A008DB934 /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		4CFF8F6829CC9ED1008DB934 /* ImageContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageContainerView.swift; sourceTree = "<group>"; };
-		4CFF8F6A29CD0079008DB934 /* RepostedEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepostedEvent.swift; sourceTree = "<group>"; };
-		4CFF8F6C29CD022E008DB934 /* WideEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WideEventView.swift; sourceTree = "<group>"; };
 		4FE60CDC295E1C5E00105A1F /* Wallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wallet.swift; sourceTree = "<group>"; };
 		50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestTests.swift; sourceTree = "<group>"; };
 		5C513FB9297F72980072348F /* CustomPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPicker.swift; sourceTree = "<group>"; };
@@ -676,7 +672,6 @@
 			isa = PBXGroup;
 			children = (
 				3AA24801297E3DC20090C62D /* RepostView.swift */,
-				4CFF8F6A29CD0079008DB934 /* RepostedEvent.swift */,
 			);
 			path = Reposts;
 			sourceTree = "<group>";
@@ -992,7 +987,6 @@
 				4CF0ABE6298444FC00D66079 /* MutedEventView.swift */,
 				4C3D52B5298DB4E6001C5831 /* ZapEvent.swift */,
 				4C3D52B7298DB5C6001C5831 /* TextEvent.swift */,
-				4CFF8F6C29CD022E008DB934 /* WideEventView.swift */,
 			);
 			path = Events;
 			sourceTree = "<group>";
@@ -1508,7 +1502,6 @@
 				4CE879582996C45300F758CC /* ZapsView.swift in Sources */,
 				4C30AC7429A5680900E2BD5A /* EventGroupView.swift in Sources */,
 				4C633352283D419F00B1C9C3 /* SignalModel.swift in Sources */,
-				4CFF8F6D29CD022E008DB934 /* WideEventView.swift in Sources */,
 				9609F058296E220800069BF3 /* BannerImageView.swift in Sources */,
 				4C363A94282704FA006E126D /* Post.swift in Sources */,
 				4C216F32286E388800040376 /* DMChatView.swift in Sources */,
@@ -1537,7 +1530,6 @@
 				4C3EA64F28FF59F200C48A62 /* tal.c in Sources */,
 				4CB88393296F798300DC99E7 /* ReactionsModel.swift in Sources */,
 				4CB88396296F7F8B00DC99E7 /* ReactionView.swift in Sources */,
-				4CFF8F6B29CD0079008DB934 /* RepostedEvent.swift in Sources */,
 				4C8682872814DE470026224F /* ProfileView.swift in Sources */,
 				4C5F9114283D694D0052CD1C /* FollowTarget.swift in Sources */,
 				4CF0ABD629817F5B00D66079 /* ReportView.swift in Sources */,
