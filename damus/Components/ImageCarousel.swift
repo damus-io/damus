@@ -59,7 +59,9 @@ struct ImageCarousel: View {
                                     view.framePreloadCount = 3
                                 }
                                 .onFailure { error in
-                                    FailedImageURLsCache.shared.add(url)
+                                    if case .processorError(_) = error {
+                                        FailedImageURLsCache.shared.add(url)
+                                    }
                                 }
                                 .aspectRatio(contentMode: .fill)
                                 //.cornerRadius(10)
