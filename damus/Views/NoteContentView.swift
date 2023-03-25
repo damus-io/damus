@@ -58,28 +58,8 @@ struct NoteContentView: View {
             .font(eventviewsize_to_font(size))
     }
     
-    var invoicesView: some View {
-        InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: artifacts.invoices)
-    }
-    
-    var previewView: some View {
-        Group {
-            if let preview = self.preview, show_images {
-                if let preview_height {
-                    preview
-                        .frame(height: preview_height)
-                } else {
-                    preview
-                }
-            } else if let link = artifacts.links.first {
-                LinkViewRepresentable(meta: .url(link))
-                    .frame(height: 50)
-            }
-        }
-    }
-    
-    var MainContent: some View {
-        VStack(alignment: .leading) {
+    func MainContent() -> some View {
+        return VStack(alignment: .leading) {
             if size == .selected {
                 SelectableText(attributedString: artifacts.content)
                 TranslateView(damus_state: damus_state, event: event)
@@ -104,25 +84,25 @@ struct NoteContentView: View {
             }
             
             if artifacts.invoices.count > 0 {
-                if with_padding {
-                    invoicesView
-                        .padding(.horizontal)
+                InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: artifacts.invoices)
+            }
+            
+            if let preview = self.preview, show_images {
+                if let preview_height {
+                    preview
+                        .frame(height: preview_height)
                 } else {
-                    invoicesView
+                    preview
                 }
+            } else if let link = artifacts.links.first {
+                LinkViewRepresentable(meta: .url(link))
+                    .frame(height: 50)
             }
-            
-            if with_padding {
-                previewView.padding(.horizontal)
-            } else {
-                previewView
-            }
-            
         }
     }
     
     var body: some View {
-        MainContent
+        MainContent()
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let profile = notif.object as! ProfileUpdate
                 let blocks = event.blocks(damus_state.keypair.privkey)
