@@ -47,7 +47,7 @@ struct TabButton: View {
                     .frame(width: 10, height: 10, alignment: .topTrailing)
                     .alignmentGuide(VerticalAlignment.center) { a in a.height + 2.0 }
                     .alignmentGuide(HorizontalAlignment.center) { a in a.width - 12.0 }
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(LINEAR_GRADIENT)
             }
         }
     }
