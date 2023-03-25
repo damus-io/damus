@@ -14,7 +14,7 @@ struct RelayStatus: View {
     let timer = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
     
     @State var conn_color: Color = .gray
-    @State var conn_image: String = "wifi.slash"
+    @State var conn_image: String = "network"
     @State var connecting: Bool = false
     
     func update_connection() {
@@ -22,13 +22,12 @@ struct RelayStatus: View {
             if relay.id == self.relay {
                 let c = relay.connection
                 if c.isConnected {
-                    conn_image = "checkmark"
-                    conn_color = .accentColor
+                    conn_image = "network"
+                    conn_color = .green
                 } else if c.isConnecting || c.isReconnecting {
                     connecting = true
                 } else {
-                    //conn_image = "wifi.exclamationmark"
-                    conn_image = "xmark"
+                    conn_image = "exclamationmark.circle.fill"
                     conn_color = .red
                 }
             }
@@ -39,7 +38,7 @@ struct RelayStatus: View {
         HStack {
             if connecting {
                 ProgressView()
-                    .padding(.trailing, 5)
+                    .padding(.trailing, 4)
             } else {
                 Image(systemName: conn_image)
                     .frame(width: 8.0, height: 8.0)

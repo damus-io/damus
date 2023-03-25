@@ -53,13 +53,13 @@ struct RecommendedRelayView: View {
                     Spacer()
                     
                     Image(systemName: "info.circle")
-                        .font(.system(size: 20, weight: .medium))
+                        .font(.system(size: 20, weight: .regular))
                         .foregroundColor(Color.accentColor)
                 } else {
                     Spacer()
 
                     Image(systemName: "questionmark.circle")
-                        .font(.system(size: 20, weight: .medium))
+                        .font(.system(size: 20, weight: .regular))
                         .foregroundColor(.gray)
                 }
             }
