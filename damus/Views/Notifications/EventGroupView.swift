@@ -206,17 +206,20 @@ struct EventGroupView: View {
             VStack(alignment: .leading) {
                 ProfilePicturesView(state: state, events: group.events)
                 
-                GroupDescription
-                
                 if let event {
                     let thread = ThreadModel(event: event, damus_state: state)
                     let dest = ThreadView(state: state, thread: thread)
                     NavigationLink(destination: dest) {
-                        Text(render_note_content(ev: event, profiles: state.profiles, privkey: state.keypair.privkey).content)
-                            .padding([.top], 1)
-                            .foregroundColor(.gray)
+                        VStack(alignment: .leading) {
+                            GroupDescription
+                            EventBody(damus_state: state, event: event, size: .normal, options: [])
+                                .padding([.top], 1)
+                                .foregroundColor(.gray)
+                        }
                     }
                     .buttonStyle(.plain)
+                } else {
+                    GroupDescription
                 }
             }
         }
