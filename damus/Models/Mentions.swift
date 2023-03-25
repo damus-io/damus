@@ -94,6 +94,14 @@ enum Block {
         return nil
     }
     
+    var is_note_mention: Bool {
+        guard case .mention(let mention) = self else {
+            return false
+        }
+        
+        return mention.type == .event
+    }
+    
     var is_mention: Bool {
         if case .mention = self {
             return true

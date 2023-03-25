@@ -204,6 +204,7 @@ struct NoteArtifacts {
 
 func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -> NoteArtifacts {
     let blocks = ev.blocks(privkey)
+    
     return render_blocks(blocks: blocks, profiles: profiles, privkey: privkey)
 }
 
@@ -211,9 +212,17 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
     var invoices: [Invoice] = []
     var img_urls: [URL] = []
     var link_urls: [URL] = []
+    
+    let one_note_ref = blocks
+        .filter({ $0.is_note_mention })
+        .count == 1
+    
     let txt: AttributedString = blocks.reduce("") { str, block in
         switch block {
         case .mention(let m):
+            if m.type == .event && one_note_ref {
+                return str
+            }
             return str + mention_str(m, profiles: profiles)
         case .text(let txt):
             return str + AttributedString(stringLiteral: txt)
