@@ -143,10 +143,6 @@ struct ProfileView: View {
     @Environment(\.openURL) var openURL
     @Environment(\.presentationMode) var presentationMode
     
-    func fillColor() -> Color {
-        colorScheme == .light ? Color("DamusLightGrey") : Color("DamusDarkGrey")
-    }
-    
     func imageBorderColor() -> Color {
         colorScheme == .light ? Color("DamusWhite") : Color("DamusBlack")
     }
@@ -496,10 +492,6 @@ struct KeyView: View {
     
     @State private var isCopied = false
     
-    func fillColor() -> Color {
-        colorScheme == .light ? Color("DamusLightGrey") : Color("DamusDarkGrey")
-    }
-    
     func keyColor() -> Color {
         colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite")
     }
@@ -538,7 +530,7 @@ struct KeyView: View {
             }
             .padding(2)
             .padding([.leading, .trailing], 3)
-            .background(RoundedRectangle(cornerRadius: 11).foregroundColor(fillColor()))
+            .background(RoundedRectangle(cornerRadius: 11).foregroundColor(Color("DamusAdaptableGrey")))
                         
             if isCopied != true {
                 Button {
