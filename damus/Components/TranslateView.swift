@@ -18,6 +18,8 @@ struct TranslateView: View {
     @State var translated_note: String? = nil
     @State var show_translated_note: Bool = false
     @State var translated_artifacts: NoteArtifacts? = nil
+
+    let preferredLanguages = Set(Locale.preferredLanguages.map { localeToLanguage($0) })
     
     var TranslateButton: some View {
         Button(NSLocalizedString("Translate Note", comment: "Button to translate note from different language.")) {
@@ -89,9 +91,9 @@ struct TranslateView: View {
                 return
             }
             
-            if note_lang != currentLanguage {
+            if !preferredLanguages.contains(note_lang) {
                 do {
-                    // If the note language is different from our language, send a translation request.
+                    // If the note language is different from our preferred languages, send a translation request.
                     let translator = Translator(damus_state.settings)
                     let originalContent = event.get_content(damus_state.keypair.privkey)
                     translated_note = try await translator.translate(originalContent, from: note_lang, to: currentLanguage)
@@ -115,8 +117,18 @@ struct TranslateView: View {
             }
 
             checkingTranslationStatus = false
-        
+
+            show_translated_note = damus_state.settings.auto_translate
         }
+    }
+}
+
+extension View {
+    func translate_button_style() -> some View {
+        return self
+            .font(.footnote)
+            .contentShape(Rectangle())
+            .padding([.top, .bottom], 10)
     }
 }
 
