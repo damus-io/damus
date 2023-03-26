@@ -80,24 +80,7 @@ struct TranslateView: View {
                 currentLanguage = Locale.current.languageCode ?? "en"
             }
 
-            // Rely on Apple's NLLanguageRecognizer to tell us which language it thinks the note is in
-            // and filter on only the text portions of the content as URLs and hashtags confuse the language recognizer.
-            let originalBlocks = event.blocks(damus_state.keypair.privkey)
-            let originalOnlyText = originalBlocks.compactMap { $0.is_text }.joined(separator: " ")
-
-            // Only accept language recognition hypothesis if there's at least a 50% probability that it's accurate.
-            let languageRecognizer = NLLanguageRecognizer()
-            languageRecognizer.processString(originalOnlyText)
-            noteLanguage = languageRecognizer.languageHypotheses(withMaximum: 1).first(where: { $0.value >= 0.5 })?.key.rawValue ?? currentLanguage
-
-            if let lang = noteLanguage, noteLanguage != currentLanguage {
-                // If the detected dominant language is a variant, remove the variant component and just take the language part as translation services typically only supports the variant-less language.
-                if #available(iOS 16, *) {
-                    noteLanguage = Locale.LanguageCode(stringLiteral: lang).identifier(.alpha2)
-                } else {
-                    noteLanguage = NSLocale(localeIdentifier: lang).languageCode
-                }
-            }
+            noteLanguage = event.note_language(damus_state.keypair.privkey) ?? currentLanguage
             
             guard let note_lang = noteLanguage else {
                 noteLanguage = currentLanguage

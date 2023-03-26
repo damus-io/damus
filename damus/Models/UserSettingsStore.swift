@@ -128,6 +128,12 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
+    @Published var show_only_preferred_languages: Bool {
+        didSet {
+            UserDefaults.standard.set(show_only_preferred_languages, forKey: "show_only_preferred_languages")
+        }
+    }
+
     @Published var translation_service: TranslationService {
         didSet {
             UserDefaults.standard.set(translation_service.rawValue, forKey: "translation_service")
@@ -210,6 +216,7 @@ class UserSettingsStore: ObservableObject {
         left_handed = UserDefaults.standard.object(forKey: "left_handed") as? Bool ?? false
         zap_vibration = UserDefaults.standard.object(forKey: "zap_vibration") as? Bool ?? false
         disable_animation = should_disable_image_animation()
+        show_only_preferred_languages = UserDefaults.standard.object(forKey: "show_only_preferred_languages") as? Bool ?? false
 
         // Note from @tyiu:
         // Default translation service is disabled by default for now until we gain some confidence that it is working well in production.
