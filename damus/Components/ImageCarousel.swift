@@ -70,7 +70,7 @@ struct ImageCarousel: View {
         .fullScreenCover(isPresented: $open_sheet) {
             ImageView(urls: urls)
         }
-        .frame(height: 350)
+        .frame(height: 200)
         .clipped()
         .onTapGesture {
             open_sheet = true
