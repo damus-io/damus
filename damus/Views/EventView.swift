@@ -60,17 +60,7 @@ struct EventView: View {
         VStack {
             if event.known_kind == .boost {
                 if let inner_ev = event.inner_event {
-                    VStack(alignment: .leading) {
-                        let prof = damus.profiles.lookup(id: event.pubkey)
-                        let booster_profile = ProfileView(damus_state: damus, pubkey: event.pubkey)
-                        
-                        NavigationLink(destination: booster_profile) {
-                            Reposted(damus: damus, pubkey: event.pubkey, profile: prof)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        TextEvent(damus: damus, event: inner_ev, pubkey: inner_ev.pubkey, options: options)
-                            .padding([.top], 1)
-                    }
+                    RepostedEvent(damus: damus, event: event, inner_ev: inner_ev, options: options)
                 } else {
                     EmptyView()
                 }
@@ -82,7 +72,7 @@ struct EventView: View {
                 }
             } else {
                 TextEvent(damus: damus, event: event, pubkey: pubkey, options: options)
-                    .padding([.top], 6)
+                    //.padding([.top], 6)
             }
         }
     }

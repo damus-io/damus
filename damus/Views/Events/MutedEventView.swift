@@ -51,7 +51,7 @@ struct MutedEventView: View {
     var Event: some View {
         Group {
             if selected {
-                SelectedEventView(damus: damus_state, event: event)
+                SelectedEventView(damus: damus_state, event: event, size: .selected)
             } else {
                 EventView(damus: damus_state, event: event)
             }
