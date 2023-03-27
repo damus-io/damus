@@ -245,7 +245,10 @@ func decode_zap_request(_ desc: String) -> ZapRequest? {
 }
 
 
-
+/// Use a lnurl to identify a zapper
+/// A zapper is the lightning node or service that sends zap confirmation notes (kind 9735)
+/// See NIP-57 Section "Client side" step 2.
+/// - lnurl: the lnurl that will be used to lookup a zapper
 func fetch_zapper_from_lnurl(_ lnurl: String) async -> String? {
     guard let endpoint = await fetch_static_payreq(lnurl) else {
         return nil

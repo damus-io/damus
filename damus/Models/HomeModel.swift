@@ -153,33 +153,50 @@ class HomeModel: ObservableObject {
         return
     }
 
+    /// Handle zap notifications (kind 9735)
     func handle_zap_event(_ ev: NostrEvent) {
-        // These are zap notifications
+        /// The p-tag on the 9735 event points to the profile who authored the event that got zapped
         guard let ptag = event_tag(ev, name: "p") else {
             return
         }
         
+        /// our keypair is the keypair of the current damus user
+        /// it will be used to identify zaps on posts of the current user
+        /// so that appropriate notifications (like vibrating) can be dispatched
         let our_keypair = damus_state.keypair
+        
+        /// lookup if we already know the zapper in our local cache
+        /// in this case we don't have call the http endpoint again and can handle it and be done
         if let local_zapper = damus_state.profiles.lookup_zapper(pubkey: ptag) {
             handle_zap_event_with_zapper(ev, our_keypair: our_keypair, zapper: local_zapper)
             return
         }
         
+        /// ok, we didn't have the zapper in our local cache
+        /// first let's lookup the profile of the author of the zapped event
+        /// bail if we don't have it
         guard let profile = damus_state.profiles.lookup(id: ptag) else {
             return
         }
         
+        /// make sure the profile of the author of the zapped event has a lnurl set
+        /// bail if it doesn't
         guard let lnurl = profile.lnurl else {
             return
         }
         
+        /// the next part will involve a http callback, so we will dispatch it in a task
         Task {
+            /// now get the zapper (a pubkey) for the above author's lnurl
+            /// see NIP-57 section "Client Side" step 2. for details
             guard let zapper = await fetch_zapper_from_lnurl(lnurl) else {
                 return
             }
             
             DispatchQueue.main.async {
+                /// add the zapper to our local cache for next time
                 self.damus_state.profiles.zappers[ptag] = zapper
+                /// now handle the zap event
                 self.handle_zap_event_with_zapper(ev, our_keypair: our_keypair, zapper: zapper)
             }
         }
