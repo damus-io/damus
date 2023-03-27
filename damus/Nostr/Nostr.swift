@@ -105,16 +105,8 @@ struct Profile: Codable {
         guard let addr = lud16 ?? lud06 else {
             return nil;
         }
-        
-        if addr.contains("@") {
-            return lnaddress_to_lnurl(addr);
-        }
-        
-        if !addr.lowercased().hasPrefix("lnurl") {
-            return nil
-        }
-        
-        return addr;
+
+        return lnurl_from_string(addr);
     }
     
     var nip05: String? {
@@ -170,4 +162,16 @@ func lnaddress_to_lnurl(_ lnaddr: String) -> String? {
     }
     
     return bech32_encode(hrp: "lnurl", Array(dat))
+}
+
+func lnurl_from_string(_ addr: String) -> String? {
+    if addr.contains("@") {
+        return lnaddress_to_lnurl(addr);
+    }
+    
+    if !addr.lowercased().hasPrefix("lnurl") {
+        return nil
+    }
+    
+    return addr;
 }

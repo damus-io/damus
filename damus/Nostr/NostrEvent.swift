@@ -954,6 +954,16 @@ func last_etag(tags: [[String]]) -> String? {
     return e
 }
 
+func zaptag(tags: [[String]]) -> String? {
+    var lnurl: String? = nil
+    for tag in tags {
+        if tag[0] == "zap" && tag.count > 1 {
+            lnurl = lnurl_from_string(tag[1])
+        }
+    }
+    return lnurl
+}
+
 func inner_event_or_self(ev: NostrEvent) -> NostrEvent {
     guard let inner_ev = ev.inner_event else {
         return ev

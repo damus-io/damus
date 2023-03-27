@@ -41,7 +41,13 @@ struct EventActionBar: View {
     }
     
     var lnurl: String? {
-        test_lnurl ?? damus_state.profiles.lookup(id: event.pubkey)?.lnurl
+        if let zaptag = zaptag(tags: event.tags) {
+            return zaptag
+        } else if let profile = damus_state.profiles.lookup(id: event.pubkey)?.lnurl {
+            return profile
+        } else {
+            return test_lnurl
+        }
     }
     
     var body: some View {
