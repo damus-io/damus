@@ -29,7 +29,7 @@ fileprivate func create_upload_body(mediaData: Data, boundary: String, mediaUplo
         return body as Data
     }
 
-func create_upload_request(mediaToUpload: Any, mediaUploader: MediaUploader, progress: URLSessionTaskDelegate) async -> ImageUploadResult {
+func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploader, progress: URLSessionTaskDelegate) async -> ImageUploadResult {
     var mediaIsImage: Bool = false
     var mediaData: Data?
     guard let url = URL(string: mediaUploader.postAPI) else {
@@ -40,15 +40,19 @@ func create_upload_request(mediaToUpload: Any, mediaUploader: MediaUploader, pro
     request.httpMethod = "POST";
     let boundary = "Boundary-\(UUID().description)"
     request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-
-    if let imageToUpload = mediaToUpload as? UIImage {
-        mediaData = imageToUpload.jpegData(compressionQuality: 0.8)
-        mediaIsImage = true
-    } else if let videoToUpload = mediaToUpload as? URL {
-        mediaData = try? Data(contentsOf: videoToUpload)
+    
+    switch mediaToUpload {
+    case .image(let img):
+        mediaData = img.jpegData(compressionQuality: 0.8)
+    case .video(let url):
+        do {
+            mediaData = try Data(contentsOf: url)
+        } catch {
+            return .failed(error)
+        }
     }
 
-    guard let mediaData = mediaData else {
+    guard let mediaData else {
         return .failed(nil)
     }
 

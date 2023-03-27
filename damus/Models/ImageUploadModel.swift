@@ -9,10 +9,23 @@ import Foundation
 import UIKit
 
 
+enum MediaUpload {
+    case image(UIImage)
+    case video(URL)
+    
+    var is_image: Bool {
+        guard case .image = self else {
+            return true
+        }
+        
+        return false
+    }
+}
+
 class ImageUploadModel: NSObject, URLSessionTaskDelegate, ObservableObject {
     @Published var progress: Double? = nil
     
-    func start(media: Any, uploader: MediaUploader) async -> ImageUploadResult {
+    func start(media: MediaUpload, uploader: MediaUploader) async -> ImageUploadResult {
         let res = await create_upload_request(mediaToUpload: media, mediaUploader: uploader, progress: self)
         DispatchQueue.main.async {
             self.progress = nil

@@ -168,7 +168,7 @@ struct PostView: View {
         post = combinedAttributedString
     }
     
-    func handle_upload(media: Any) {
+    func handle_upload(media: MediaUpload) {
         let uploader = get_media_uploader(damus_state.pubkey)
         
         Task.init {
@@ -216,9 +216,9 @@ struct PostView: View {
         .padding()
         .sheet(isPresented: $attach_media) {
             ImagePicker(sourceType: .photoLibrary, damusState: damus_state) { img in
-                handle_upload(media: img)
+                handle_upload(media: .image(img))
             } onVideoPicked: { url in
-                handle_upload(media: url)
+                handle_upload(media: .video(url))
             }
         }
         .onAppear() {
