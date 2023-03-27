@@ -12,10 +12,14 @@ import UIKit
 class Profiles {
     var profiles: [String: TimestampedProfile] = [:]
     var validated: [String: NIP05] = [:]
-    var zappers: [String: String] = [:]
+    private var zappers: [String: String] = [:]
     
     func is_validated(_ pk: String) -> NIP05? {
         return validated[pk]
+    }
+    
+    func insert_zapper(pubkey: String, zapper: String) {
+        zappers[pubkey] = zapper
     }
     
     func lookup_zapper(pubkey: String) -> String? {

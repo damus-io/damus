@@ -156,6 +156,7 @@ class HomeModel: ObservableObject {
     /// Handle zap notifications (kind 9735)
     func handle_zap_event(_ ev: NostrEvent) {
         /// The p-tag on the 9735 event points to the profile who authored the event that got zapped
+        /// NIP-57 states that there must be a "p" tag on this event
         guard let ptag = event_tag(ev, name: "p") else {
             return
         }
@@ -165,41 +166,92 @@ class HomeModel: ObservableObject {
         /// so that appropriate notifications (like vibrating) can be dispatched
         let our_keypair = damus_state.keypair
         
-        /// lookup if we already know the zapper in our local cache
-        /// in this case we don't have call the http endpoint again and can handle it and be done
-        if let local_zapper = damus_state.profiles.lookup_zapper(pubkey: ptag) {
-            handle_zap_event_with_zapper(ev, our_keypair: our_keypair, zapper: local_zapper)
-            return
+        /// see if the zapper returned an 'e' tag
+        let etag = event_tag(ev, name: "e")
+        
+        /// "zap" tag lnurl if used
+        var zaptag_lnurl: String? {
+            // only if the zapper returned an 'e' tag
+            if etag != nil {
+                /// we need the original event for this
+                if let zapped_event = damus_state.events.lookup(etag!) {
+                    return zaptag(tags: zapped_event.tags)
+                } else {
+                    return nil
+                }
+            } else {
+                return nil
+            }
         }
         
-        /// ok, we didn't have the zapper in our local cache
-        /// first let's lookup the profile of the author of the zapped event
-        /// bail if we don't have it
-        guard let profile = damus_state.profiles.lookup(id: ptag) else {
-            return
+        /// profile lnurl if used
+        var profile_lnurl: String? {
+            if let profile = damus_state.profiles.lookup(id: ptag) {
+                /// make sure the profile of the author of the zapped event has a lnurl set
+                if let lnurl = profile.lnurl {
+                    return lnurl
+                } else {
+                    return nil
+                }
+            } else {
+                return nil
+            }
         }
         
-        /// make sure the profile of the author of the zapped event has a lnurl set
-        /// bail if it doesn't
-        guard let lnurl = profile.lnurl else {
-            return
-        }
-        
-        /// the next part will involve a http callback, so we will dispatch it in a task
-        Task {
-            /// now get the zapper (a pubkey) for the above author's lnurl
-            /// see NIP-57 section "Client Side" step 2. for details
-            guard let zapper = await fetch_zapper_from_lnurl(lnurl) else {
+        /// we need a lnurl to continue, and we will prefer the `zaptag_lnurl` over the `profile_lnurl`
+        if zaptag_lnurl != nil {
+            /// lookup if we already know the zapper in our local cache
+            /// in this case we don't have call the http endpoint again and can handle it and be done
+            if let cached_event_zapper = damus_state.events.lookup_zapper(event: etag!) {
+                handle_zap_event_with_zapper(ev, our_keypair: our_keypair, zapper: cached_event_zapper)
+                return
+            }
+
+            /// ok, we didn't have the zapper in our cache yet
+            /// the next part will involve a http callback, so we will dispatch it in a task
+            Task {
+                /// now get the zapper (a pubkey) for the above lnurl
+                /// see NIP-57 section "Client Side" step 2. for details
+                guard let zapper = await fetch_zapper_from_lnurl(zaptag_lnurl!) else {
+                    return
+                }
+
+                DispatchQueue.main.async {
+                    /// add the zapper to our local cache for next time
+                    self.damus_state.events.insert_zapper(event: etag!, zapper: zapper)
+                    /// now handle the zap event
+                    self.handle_zap_event_with_zapper(ev, our_keypair: our_keypair, zapper: zapper)
+                }
+            }
+        } else if profile_lnurl != nil {
+            /// lookup if we already know the zapper in our local cache
+            /// in this case we don't have call the http endpoint again and can handle it and be done
+            if let cached_profile_zapper = damus_state.profiles.lookup_zapper(pubkey: ptag) {
+                handle_zap_event_with_zapper(ev, our_keypair: our_keypair, zapper: cached_profile_zapper)
                 return
             }
             
-            DispatchQueue.main.async {
-                /// add the zapper to our local cache for next time
-                self.damus_state.profiles.zappers[ptag] = zapper
-                /// now handle the zap event
-                self.handle_zap_event_with_zapper(ev, our_keypair: our_keypair, zapper: zapper)
+            /// ok, we didn't have the zapper in our cache yet
+            /// the next part will involve a http callback, so we will dispatch it in a task
+            Task {
+                /// now get the zapper (a pubkey) for the above lnurl
+                /// see NIP-57 section "Client Side" step 2. for details
+                guard let zapper = await fetch_zapper_from_lnurl(profile_lnurl!) else {
+                    return
+                }
+                
+                DispatchQueue.main.async {
+                    /// add the zapper to our local cache for next time
+                    self.damus_state.profiles.insert_zapper(pubkey: ptag, zapper: zapper)
+                    /// now handle the zap event
+                    self.handle_zap_event_with_zapper(ev, our_keypair: our_keypair, zapper: zapper)
+                }
             }
+        } else {
+            return
         }
+        
+
         
     }
     

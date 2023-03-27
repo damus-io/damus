@@ -13,6 +13,7 @@ class EventCache {
     private var events: [String: NostrEvent] = [:]
     private var replies = ReplyMap()
     private var cancellable: AnyCancellable?
+    private var zappers: [String: String] = [:]
     
     //private var thread_latest: [String: Int64]
     
@@ -88,5 +89,17 @@ class EventCache {
     private func prune() {
         events = [:]
         replies.replies = [:]
+    }
+    
+    func insert_zapper(event: String, zapper: String) {
+        zappers[event] = zapper
+    }
+    
+    func lookup_zapper(event: String) -> String? {
+        if let zapper = zappers[event] {
+            return zapper
+        }
+        
+        return nil
     }
 }
