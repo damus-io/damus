@@ -14,16 +14,20 @@ struct RelayStatus: View {
     let timer = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
     
     @State var conn_color: Color = .gray
+    @State var conn_image: String = "network"
+    @State var connecting: Bool = false
     
-    func update_connection_color() {
+    func update_connection() {
         for relay in pool.relays {
             if relay.id == self.relay {
                 let c = relay.connection
                 if c.isConnected {
+                    conn_image = "network"
                     conn_color = .green
                 } else if c.isConnecting || c.isReconnecting {
-                    conn_color = .yellow
+                    connecting = true
                 } else {
+                    conn_image = "exclamationmark.circle.fill"
                     conn_color = .red
                 }
             }
@@ -31,15 +35,25 @@ struct RelayStatus: View {
     }
     
     var body: some View {
-        Circle()
-            .frame(width: 8.0, height: 8.0)
-            .foregroundColor(conn_color)
-            .onReceive(timer) { _ in
-                update_connection_color()
+        HStack {
+            if connecting {
+                ProgressView()
+                    .padding(.trailing, 4)
+            } else {
+                Image(systemName: conn_image)
+                    .frame(width: 8.0, height: 8.0)
+                    .foregroundColor(conn_color)
+                    .padding(.leading, 5)
+                    .padding(.trailing, 10)
             }
-            .onAppear() {
-                update_connection_color()
-            }
+        }
+        .onReceive(timer) { _ in
+            update_connection()
+        }
+        .onAppear() {
+            update_connection()
+        }
+        
     }
 }
 
