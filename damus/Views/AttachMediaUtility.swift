@@ -30,7 +30,6 @@ fileprivate func create_upload_body(mediaData: Data, boundary: String, mediaUplo
     }
 
 func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploader, progress: URLSessionTaskDelegate) async -> ImageUploadResult {
-    var mediaIsImage: Bool = false
     var mediaData: Data?
     guard let url = URL(string: mediaUploader.postAPI) else {
         return .failed(nil)
@@ -56,7 +55,7 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
         return .failed(nil)
     }
 
-    request.httpBody = create_upload_body(mediaData: mediaData, boundary: boundary, mediaUploader: mediaUploader, mediaIsImage: mediaIsImage)
+    request.httpBody = create_upload_body(mediaData: mediaData, boundary: boundary, mediaUploader: mediaUploader, mediaIsImage: mediaToUpload.is_image)
     
     do {
         let (data, _) = try await URLSession.shared.data(for: request, delegate: progress)
@@ -66,7 +65,7 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
             return .failed(nil)
         }
         
-        guard let url = mediaUploader.getMediaURL(from: responseString, mediaIsImage: mediaIsImage) else {
+        guard let url = mediaUploader.getMediaURL(from: responseString, mediaIsImage: mediaToUpload.is_image) else {
             print("Upload failed getting media url")
             return .failed(nil)
         }

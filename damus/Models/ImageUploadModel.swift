@@ -14,7 +14,7 @@ enum MediaUpload {
     case video(URL)
     
     var is_image: Bool {
-        guard case .image = self else {
+        if case .image = self {
             return true
         }
         
