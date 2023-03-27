@@ -60,6 +60,7 @@ struct ReplyView: View {
                 }
             }
         }
+        .padding()
         .onAppear {
             references =  gather_reply_ids(our_pubkey: damus.pubkey, from: replying_to)
             originalReferences = references
