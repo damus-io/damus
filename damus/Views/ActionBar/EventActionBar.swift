@@ -77,9 +77,15 @@ struct EventActionBar: View {
                         send_like()
                     }
                 }
-                Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
-                    .font(.footnote.weight(.medium))
-                    .foregroundColor(bar.liked ? Color.accentColor : Color.gray)
+                if bar.liked {
+                    Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
+                        .font(.footnote.weight(.medium))
+                        .foregroundStyle(LINEAR_GRADIENT)
+                } else {
+                    Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
+                        .font(.footnote.weight(.medium))
+                        .foregroundColor(Color.gray)
+                }
                 
             }
             
@@ -188,8 +194,15 @@ struct LikeButton: View {
                 amountOfAngleIncrease = 20.0
             }
         }) {
-            Image(liked ? "shaka-full" : "shaka-line")
-                .foregroundColor(liked ? .accentColor : .gray)
+            if liked {
+                LINEAR_GRADIENT
+                    .mask(Image("shaka-full")
+                        .resizable()
+                    ).frame(width: 14, height: 14)
+            } else {
+                Image("shaka-line")
+                    .foregroundColor(.gray)
+            }
         }
         .accessibilityLabel(NSLocalizedString("Like", comment: "Accessibility Label for Like button"))
         .rotationEffect(Angle(degrees: shouldAnimate ? rotationAngle : 0))

@@ -60,11 +60,7 @@ struct ProfileName: View {
     var current_nip05: NIP05? {
         nip05 ?? damus_state.profiles.is_validated(pubkey)
     }
-    
-    var nip05_color: Color {
-        return get_nip05_color(pubkey: pubkey, contacts: damus_state.contacts)
-    }
-    
+        
     var current_display_name: DisplayName {
         return display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)
     }

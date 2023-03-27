@@ -186,10 +186,10 @@ struct EventGroupView: View {
                 Image(systemName: "arrow.2.squarepath")
                     .foregroundColor(Color("DamusGreen"))
             case .reaction:
-                Image("shaka-full")
-                    .resizable()
-                    .frame(width: 24, height: 24)
-                    .foregroundColor(.accentColor)
+                LINEAR_GRADIENT
+                    .mask(Image("shaka-full")
+                        .resizable()
+                    ).frame(width: 24, height: 24)
             case .profile_zap(let zapgrp):
                 ZapIcon(zapgrp)
             case .zap(let zapgrp):

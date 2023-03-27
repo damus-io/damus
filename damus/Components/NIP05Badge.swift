@@ -24,27 +24,45 @@ struct NIP05Badge: View {
         self.clickable = clickable
     }
     
-    var nip05_color: Color {
-       return get_nip05_color(pubkey: pubkey, contacts: contacts)
+    var nip05_color: Bool {
+       return use_nip05_color(pubkey: pubkey, contacts: contacts)
     }
     
     var body: some View {
         HStack(spacing: 2) {
-            Image(systemName: "checkmark.seal.fill")
-                .font(.footnote)
-                .foregroundColor(nip05_color)
+            if nip05_color {
+                LINEAR_GRADIENT
+                    .mask(Image(systemName: "checkmark.seal.fill")
+                        .resizable()
+                    ).frame(width: 14, height: 14)
+            } else {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.footnote)
+                    .foregroundColor(.gray)
+            }
+            
             if show_domain {
                 if clickable {
-                    Text(nip05.host)
-                        .foregroundColor(nip05_color)
-                        .onTapGesture {
-                            if let nip5url = nip05.siteUrl {
-                                openURL(nip5url)
+                    if nip05_color {
+                        Text(nip05.host)
+                            .foregroundStyle(LINEAR_GRADIENT)
+                            .onTapGesture {
+                                if let nip5url = nip05.siteUrl {
+                                    openURL(nip5url)
+                                }
                             }
-                        }
+                    } else {
+                        Text(nip05.host)
+                            .foregroundColor(.gray)
+                            .onTapGesture {
+                                if let nip5url = nip05.siteUrl {
+                                    openURL(nip5url)
+                                }
+                            }
+                    }
                 } else {
                     Text(nip05.host)
-                        .foregroundColor(nip05_color)
+                        .foregroundColor(.gray)
                 }
             }
         }
@@ -52,8 +70,8 @@ struct NIP05Badge: View {
     }
 }
 
-func get_nip05_color(pubkey: String, contacts: Contacts) -> Color {
-    return contacts.is_friend_or_self(pubkey) ? .accentColor : .gray
+func use_nip05_color(pubkey: String, contacts: Contacts) -> Bool {
+    return contacts.is_friend_or_self(pubkey) ? true : false
 }
 
 struct NIP05Badge_Previews: PreviewProvider {

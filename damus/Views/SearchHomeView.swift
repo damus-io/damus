@@ -30,7 +30,7 @@ struct SearchHomeView: View {
             
             if(!search.isEmpty) {
                 Text("Cancel", comment: "Cancel out of search view.")
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(LINEAR_GRADIENT)
                     .padding(EdgeInsets(top: 0.0, leading: 0.0, bottom: 0.0, trailing: 10.0))
                     .onTapGesture {
                         self.search = ""
