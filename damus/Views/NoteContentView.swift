@@ -61,6 +61,10 @@ struct NoteContentView: View {
     var invoicesView: some View {
         InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: artifacts.invoices)
     }
+
+    var translateView: some View {
+        TranslateView(damus_state: damus_state, event: event)
+    }
     
     var previewView: some View {
         Group {
@@ -82,13 +86,21 @@ struct NoteContentView: View {
         VStack(alignment: .leading) {
             if size == .selected {
                 SelectableText(attributedString: artifacts.content)
-                TranslateView(damus_state: damus_state, event: event)
             } else {
                 if with_padding {
                     truncatedText
                         .padding(.horizontal)
                 } else {
                     truncatedText
+                }
+            }
+
+            if size == .selected || damus_state.settings.auto_translate {
+                if with_padding {
+                    translateView
+                        .padding(.horizontal)
+                } else {
+                    translateView
                 }
             }
 
@@ -214,16 +226,6 @@ struct NoteContentView_Previews: PreviewProvider {
         let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
         let artifacts = NoteArtifacts(content: AttributedString(stringLiteral: content), images: [], invoices: [], links: [])
         NoteContentView(damus_state: state, event: NostrEvent(content: content, pubkey: "pk"), show_images: true, size: .normal, artifacts: artifacts, options: [])
-    }
-}
-
-
-extension View {
-    func translate_button_style() -> some View {
-        return self
-            .font(.footnote)
-            .contentShape(Rectangle())
-            .padding([.top, .bottom], 10)
     }
 }
 

@@ -10,6 +10,7 @@ import CommonCrypto
 import secp256k1
 import secp256k1_implementation
 import CryptoKit
+import NaturalLanguage
 
 
 
@@ -257,6 +258,25 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
 
     func is_reply(_ privkey: String?) -> Bool {
         return event_is_reply(self, privkey: privkey)
+    }
+
+    func note_language(_ privkey: String?) -> String? {
+        // Rely on Apple's NLLanguageRecognizer to tell us which language it thinks the note is in
+        // and filter on only the text portions of the content as URLs and hashtags confuse the language recognizer.
+        let originalBlocks = blocks(privkey)
+        let originalOnlyText = originalBlocks.compactMap { $0.is_text }.joined(separator: " ")
+
+        // Only accept language recognition hypothesis if there's at least a 50% probability that it's accurate.
+        let languageRecognizer = NLLanguageRecognizer()
+        languageRecognizer.processString(originalOnlyText)
+
+        guard let locale = languageRecognizer.languageHypotheses(withMaximum: 1).first(where: { $0.value >= 0.5 })?.key.rawValue else {
+            return nil
+        }
+
+        // Remove the variant component and just take the language part as translation services typically only supports the variant-less language.
+        // Moreover, speakers of one variant can generally understand other variants.
+        return localeToLanguage(locale)
     }
 
     public var referenced_ids: [ReferencedId] {
