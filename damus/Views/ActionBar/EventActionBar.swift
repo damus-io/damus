@@ -77,16 +77,10 @@ struct EventActionBar: View {
                         send_like()
                     }
                 }
-                if bar.liked {
-                    Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
-                        .font(.footnote.weight(.medium))
-                        .foregroundStyle(LINEAR_GRADIENT)
-                } else {
-                    Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
-                        .font(.footnote.weight(.medium))
-                        .foregroundColor(Color.gray)
-                }
                 
+                Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
+                    .font(.footnote.weight(.medium))
+                    .nip05_colorized(gradient: bar.liked)
             }
             
             if let lnurl = self.lnurl {

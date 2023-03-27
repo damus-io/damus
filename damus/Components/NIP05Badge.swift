@@ -28,8 +28,8 @@ struct NIP05Badge: View {
        return use_nip05_color(pubkey: pubkey, contacts: contacts)
     }
     
-    var body: some View {
-        HStack(spacing: 2) {
+    var Seal: some View {
+        Group {
             if nip05_color {
                 LINEAR_GRADIENT
                     .mask(Image(systemName: "checkmark.seal.fill")
@@ -40,26 +40,22 @@ struct NIP05Badge: View {
                     .font(.footnote)
                     .foregroundColor(.gray)
             }
+        }
+    }
+    
+    var body: some View {
+        HStack(spacing: 2) {
+            Seal
             
             if show_domain {
                 if clickable {
-                    if nip05_color {
-                        Text(nip05.host)
-                            .foregroundStyle(LINEAR_GRADIENT)
-                            .onTapGesture {
-                                if let nip5url = nip05.siteUrl {
-                                    openURL(nip5url)
-                                }
+                    Text(nip05.host)
+                        .nip05_colorized(gradient: nip05_color)
+                        .onTapGesture {
+                            if let nip5url = nip05.siteUrl {
+                                openURL(nip5url)
                             }
-                    } else {
-                        Text(nip05.host)
-                            .foregroundColor(.gray)
-                            .onTapGesture {
-                                if let nip5url = nip05.siteUrl {
-                                    openURL(nip5url)
-                                }
-                            }
-                    }
+                        }
                 } else {
                     Text(nip05.host)
                         .foregroundColor(.gray)
@@ -67,6 +63,17 @@ struct NIP05Badge: View {
             }
         }
 
+    }
+}
+
+extension View {
+    func nip05_colorized(gradient: Bool) -> some View {
+        if gradient {
+            return AnyView(self.foregroundStyle(LINEAR_GRADIENT))
+        } else {
+            return AnyView(self.foregroundColor(.gray))
+        }
+        
     }
 }
 
