@@ -136,7 +136,8 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Add Bookmark" xml:space="preserve">
         <source>Add Bookmark</source>
         <target>Add Bookmark</target>
-        <note>Context menu option for adding a note bookmark.</note>
+        <note>Button text to add bookmark to a note.
+   Context menu option for adding a note bookmark.</note>
       </trans-unit>
       <trans-unit id="Add Relay" xml:space="preserve">
         <source>Add Relay</source>
@@ -911,7 +912,8 @@ Picker option to indicate that a zap should be sent privately and not identify t
       <trans-unit id="Remove Bookmark" xml:space="preserve">
         <source>Remove Bookmark</source>
         <target>Remove Bookmark</target>
-        <note>Context menu option for removing a note bookmark.</note>
+        <note>Button text to remove bookmark from a note.
+   Context menu option for removing a note bookmark.</note>
       </trans-unit>
       <trans-unit id="Remove all" xml:space="preserve">
         <source>Remove all</source>
@@ -1175,14 +1177,14 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <target>Translate Note</target>
         <note>Button to translate note from different language.</note>
       </trans-unit>
-      <trans-unit id="Translated from (lang)" xml:space="preserve">
-        <source>Translated from (lang)</source>
-        <target>Translated from (lang)</target>
+      <trans-unit id="Translated from %@" xml:space="preserve">
+        <source>Translated from %@</source>
+        <target>Translated from %@</target>
         <note>Button to indicate that the note has been translated from a different language.</note>
       </trans-unit>
-      <trans-unit id="Translating from (lang)..." xml:space="preserve">
-        <source>Translating from (lang)...</source>
-        <target>Translating from (lang)...</target>
+      <trans-unit id="Translating from %@..." xml:space="preserve">
+        <source>Translating from %@...</source>
+        <target>Translating from %@...</target>
         <note>Button to indicate that the note is in the process of being translated from a different language.</note>
       </trans-unit>
       <trans-unit id="Translations" xml:space="preserve">
@@ -1190,10 +1192,10 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <target>Translations</target>
         <note>Section title for selecting the translation service.</note>
       </trans-unit>
-      <trans-unit id="Type DELETE to delete" xml:space="preserve">
-        <source>Type DELETE to delete</source>
-        <target>Type DELETE to delete</target>
-        <note>Text field prompt asking user to type the word DELETE to confirm that they want to proceed with deleting their account. The all caps lock DELETE word should not be translated. Everything else should.</note>
+      <trans-unit id="Type %@ to delete" xml:space="preserve">
+        <source>Type %@ to delete</source>
+        <target>Type %@ to delete</target>
+        <note>Text field prompt asking user to type DELETE in all caps to confirm that they want to proceed with deleting their account.</note>
       </trans-unit>
       <trans-unit id="Type your post here..." xml:space="preserve">
         <source>Type your post here...</source>
