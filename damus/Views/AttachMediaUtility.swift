@@ -44,6 +44,7 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
     switch mediaToUpload {
     case .image(let img):
         mediaData = img.jpegData(compressionQuality: 0.8)
+        mediaIsImage = true
     case .video(let url):
         do {
             mediaData = try Data(contentsOf: url)
