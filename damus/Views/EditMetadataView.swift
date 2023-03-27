@@ -83,7 +83,7 @@ struct EditMetadataView: View {
     }
     
     func imageBorderColor() -> Color {
-            colorScheme == .light ? Color("DamusWhite") : Color("DamusBlack")
+            colorScheme == .light ? DamusColors.white : DamusColors.black
         }
     
     func save() {

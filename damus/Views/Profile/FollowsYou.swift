@@ -16,7 +16,7 @@ struct FollowsYou: View {
             .foregroundColor(.gray)
             .background {
                 RoundedRectangle(cornerRadius: 5.0)
-                    .foregroundColor(Color("DamusAdaptableGrey"))
+                    .foregroundColor(DamusColors.adaptableGrey)
             }
             .font(.footnote)
     }

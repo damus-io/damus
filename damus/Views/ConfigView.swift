@@ -39,7 +39,7 @@ struct ConfigView: View {
     }
     
     func textColor() -> Color {
-        colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite")
+        colorScheme == .light ? DamusColors.black : DamusColors.white
     }
 
     func authenticateLocally(completion: @escaping (Bool) -> Void) {

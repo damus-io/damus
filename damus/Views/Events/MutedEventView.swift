@@ -30,7 +30,7 @@ struct MutedEventView: View {
     var MutedBox: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 20)
-                .foregroundColor(Color("DamusAdaptableGrey"))
+                .foregroundColor(DamusColors.adaptableGrey)
             
             HStack {
                 Text("Post from a user you've blocked", comment: "Text to indicate that what is being shown is a post from a user who has been blocked.")

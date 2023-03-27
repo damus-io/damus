@@ -29,7 +29,7 @@ struct InvoiceView: View {
                     .foregroundColor(.gray)
             } else {
                 Image(systemName: "checkmark.circle")
-                    .foregroundColor(Color("DamusGreen"))
+                    .foregroundColor(DamusColors.green)
             }
         }
     }

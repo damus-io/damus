@@ -20,11 +20,11 @@ struct SideMenuView: View {
     let verticalSpacing: CGFloat = 20
     
     func fillColor() -> Color {
-        colorScheme == .light ? Color("DamusWhite") : Color("DamusBlack")
+        colorScheme == .light ? DamusColors.white : DamusColors.black
     }
     
     func textColor() -> Color {
-        colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite")
+        colorScheme == .light ? DamusColors.black : DamusColors.white
     }
     
     var body: some View {
@@ -32,7 +32,7 @@ struct SideMenuView: View {
             GeometryReader { _ in
                 EmptyView()
             }
-            .background(Color("DamusDarkGrey").opacity(0.6))
+            .background(DamusColors.darkGrey.opacity(0.6))
             .opacity(isSidebarVisible ? 1 : 0)
             .animation(.default, value: isSidebarVisible)
             .onTapGesture {
@@ -69,7 +69,7 @@ struct SideMenuView: View {
                                     }
                                     if let name = profile?.name {
                                         Text("@" + name)
-                                            .foregroundColor(Color("DamusMediumGrey"))
+                                            .foregroundColor(DamusColors.mediumGrey)
                                             .font(.body)
                                             .lineLimit(1)
                                     }

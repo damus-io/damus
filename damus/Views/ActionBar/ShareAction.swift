@@ -29,7 +29,7 @@ struct ShareAction: View {
     
     var body: some View {
         
-        let col = colorScheme == .light ? Color("DamusMediumGrey") : Color("DamusWhite")
+        let col = colorScheme == .light ? DamusColors.mediumGrey : DamusColors.white
         
         VStack {
             Text("Share Note", comment: "Title text to indicate that the buttons below are meant to be used to share a note with others.")
@@ -75,10 +75,10 @@ struct ShareAction: View {
                 }) {
                     Text(NSLocalizedString("Cancel", comment: "Button to cancel a repost."))
                     .frame(minWidth: 300, maxWidth: .infinity, minHeight: 50, maxHeight: 50, alignment: .center)
-                    .foregroundColor(colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite"))
+                    .foregroundColor(colorScheme == .light ? DamusColors.black : DamusColors.white)
                     .overlay {
                         RoundedRectangle(cornerRadius: 24)
-                            .stroke(colorScheme == .light ? Color("DamusMediumGrey") : Color("DamusWhite"), lineWidth: 1)
+                            .stroke(colorScheme == .light ? DamusColors.mediumGrey : DamusColors.white, lineWidth: 1)
                     }
                     .padding(EdgeInsets(top: 10, leading: 50, bottom: 25, trailing: 50))
                 }

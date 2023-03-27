@@ -87,11 +87,11 @@ struct EditButton: View {
     }
     
     func fillColor() -> Color {
-        colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite")
+        colorScheme == .light ? DamusColors.black : DamusColors.white
     }
     
     func borderColor() -> Color {
-        colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite")
+        colorScheme == .light ? DamusColors.black : DamusColors.white
     }
 }
 
@@ -144,7 +144,7 @@ struct ProfileView: View {
     @Environment(\.presentationMode) var presentationMode
     
     func imageBorderColor() -> Color {
-        colorScheme == .light ? Color("DamusWhite") : Color("DamusBlack")
+        colorScheme == .light ? DamusColors.white : DamusColors.black
     }
     
     func bannerBlurViewOpacity() -> Double  {
@@ -236,7 +236,7 @@ struct ProfileView: View {
         }
         .padding(.top, 5)
         .padding(.horizontal)
-        .accentColor(Color("DamusWhite"))
+        .accentColor(DamusColors.white)
     }
     
     func lnButton(lnurl: String, profile: Profile) -> some View {
@@ -493,7 +493,7 @@ struct KeyView: View {
     @State private var isCopied = false
     
     func keyColor() -> Color {
-        colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite")
+        colorScheme == .light ? DamusColors.black : DamusColors.white
     }
     
     private func copyPubkey(_ pubkey: String) {
@@ -530,7 +530,7 @@ struct KeyView: View {
             }
             .padding(2)
             .padding([.leading, .trailing], 3)
-            .background(RoundedRectangle(cornerRadius: 11).foregroundColor(Color("DamusAdaptableGrey")))
+            .background(RoundedRectangle(cornerRadius: 11).foregroundColor(DamusColors.adaptableGrey))
                         
             if isCopied != true {
                 Button {
@@ -555,7 +555,7 @@ struct KeyView: View {
                         .font(.footnote)
                         .layoutPriority(1)
                 }
-                .foregroundColor(Color("DamusGreen"))
+                .foregroundColor(DamusColors.green)
             }
         }
     }

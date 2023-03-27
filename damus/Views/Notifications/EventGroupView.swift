@@ -184,7 +184,7 @@ struct EventGroupView: View {
             switch group {
             case .repost:
                 Image(systemName: "arrow.2.squarepath")
-                    .foregroundColor(Color("DamusGreen"))
+                    .foregroundColor(DamusColors.green)
             case .reaction:
                 LINEAR_GRADIENT
                     .mask(Image("shaka-full")
