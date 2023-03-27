@@ -1,3 +1,18 @@
+## [1.4.0] - 2023-03-27
+
+### Added
+
+- Local zap notifications (Swift)
+- Add support for video uploads (Swift)
+- Auto Translation (Terry Yiu)
+
+
+### Fixed
+
+- Fixed small notification hit boxes (Terry Yiu)
+
+[1.4.0]: https://github.com/damus-io/damus/releases/tag/v1.4.0
+
 ## [1.3.0-7] - 2023-03-24
 
 - New experimental timeline view
@@ -805,4 +820,5 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
+
 
