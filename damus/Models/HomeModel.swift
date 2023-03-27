@@ -130,7 +130,7 @@ class HomeModel: ObservableObject {
         }
     }
     
-    func handle_zap_event_with_zapper(_ ev: NostrEvent, our_keypair: Keypair, zapper: String) {
+    func handle_zap_event_with_zapper(profiles: Profiles, ev: NostrEvent, our_keypair: Keypair, zapper: String) {
         guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: our_keypair.privkey) else {
             return
         }
@@ -151,7 +151,7 @@ class HomeModel: ObservableObject {
                 zap_vibrate(zap_amount: zap.invoice.amount)
             }
             // Create in-app local notification for zap received.
-            create_in_app_zap_notification(zap_amount: zap.invoice.amount)
+            create_in_app_zap_notification(profiles: profiles, zap: zap)
         }
 
         return
@@ -165,7 +165,7 @@ class HomeModel: ObservableObject {
         
         let our_keypair = damus_state.keypair
         if let local_zapper = damus_state.profiles.lookup_zapper(pubkey: ptag) {
-            handle_zap_event_with_zapper(ev, our_keypair: our_keypair, zapper: local_zapper)
+            handle_zap_event_with_zapper(profiles: self.damus_state.profiles, ev: ev, our_keypair: our_keypair, zapper: local_zapper)
             return
         }
         
@@ -184,7 +184,7 @@ class HomeModel: ObservableObject {
             
             DispatchQueue.main.async {
                 self.damus_state.profiles.zappers[ptag] = zapper
-                self.handle_zap_event_with_zapper(ev, our_keypair: our_keypair, zapper: zapper)
+                self.handle_zap_event_with_zapper(profiles: self.damus_state.profiles, ev: ev, our_keypair: our_keypair, zapper: zapper)
             }
         }
         
@@ -932,12 +932,30 @@ func zap_vibrate(zap_amount: Int64) {
     vibration_generator.impactOccurred()
 }
 
-func create_in_app_zap_notification(zap_amount: Int64) {
-    let sats = zap_amount / 1000
+func describe_zap_type(_ zap: Zap) -> String? {
+    if zap.private_request != nil {
+        return "Private"
+    }
+    
+    return nil
+}
+
+func create_in_app_zap_notification(profiles: Profiles, zap: Zap) {
     let content = UNMutableNotificationContent()
-    content.title = "Zap"
-    let satString = sats == 1 ? "sat" : "sats"
-    content.body = "You have just received \(sats) \(satString)"
+    let typ = describe_zap_type(zap).map({ "\($0) " }) ?? ""
+    
+    content.title = typ + "Zap"
+    let satString = zap.invoice.amount == 1000 ? "sat" : "sats"
+    
+    let src = zap.private_request ?? zap.request.ev
+    let anon = event_is_anonymous(ev: src)
+    let pk = anon ? "anon" : src.pubkey
+    let profile = profiles.lookup(id: pk)
+    let sats = format_msats_abbrev(zap.invoice.amount)
+    let name = Profile.displayName(profile: profile, pubkey: pk).display_name
+    let message = src.content.count == 0 ? "" : ": \"\(src.content)\""
+    
+    content.body = "You received \(sats) \(satString) from \(name)\(message)"
     content.sound = UNNotificationSound.default
 
     let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
