@@ -675,6 +675,7 @@ func process_metadata_event(our_pubkey: String, profiles: Profiles, ev: NostrEve
             
             DispatchQueue.main.async {
                 profiles.validated[ev.pubkey] = validated
+                profiles.nip05_pubkey[nip05] = ev.pubkey
                 notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
             }
         }
