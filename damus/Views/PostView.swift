@@ -55,8 +55,8 @@ struct PostView: View {
         }
 
         var content = post.string
-        content = content.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         content = content.replacingOccurrences(of: "\u{200B}", with: "")
+        content = content.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         let new_post = NostrPost(content: content, references: references, kind: kind)
 
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
