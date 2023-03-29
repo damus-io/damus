@@ -541,7 +541,7 @@ struct KeyView: View {
                     } icon: {
                         Image(systemName: "square.on.square.dashed")
                             .contentShape(Rectangle())
-                            .foregroundColor(.gray)
+                            .foregroundColor(.accentColor)
                             .frame(width: 20, height: 20)
                     }
                     .labelStyle(IconOnlyLabelStyle())
