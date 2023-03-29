@@ -39,14 +39,11 @@ struct ProfileImageContainerView: View {
     }
 }
 
-struct ProfilePicImageView: View {
-    
-    let pubkey: String
-    let profiles: Profiles
+struct NavDismissBarView: View {
     
     @Environment(\.presentationMode) var presentationMode
     
-    var navBarView: some View {
+    var body: some View {
         HStack {
             Button(action: {
                 presentationMode.wrappedValue.dismiss()
@@ -61,6 +58,14 @@ struct ProfilePicImageView: View {
         }
         .padding()
     }
+}
+
+struct ProfilePicImageView: View {
+    
+    let pubkey: String
+    let profiles: Profiles
+    
+    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         ZStack {
@@ -79,7 +84,7 @@ struct ProfilePicImageView: View {
                 presentationMode.wrappedValue.dismiss()
             }))
         }
-        .overlay(navBarView, alignment: .top)
+        .overlay(NavDismissBarView(), alignment: .top)
     }
 }
 
