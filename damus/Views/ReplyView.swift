@@ -22,21 +22,22 @@ struct ReplyView: View {
     @State var references: [ReferencedId] = []
     
     @State var participantsShown: Bool = false
-        
-    var body: some View {
-        VStack {
-            Text("Replying to:", comment: "Indicating that the user is replying to the following listed people.")
-            
-            HStack(alignment: .top) {
+    
+    var ReplyingToSection: some View {
+        VStack(alignment: .leading) {
+            HStack(alignment: .bottom) {
+                Text("Replying to", comment: "Indicating that the user is replying to the following listed people.")
+                    .foregroundColor(.gray)
+                    .font(.footnote)
                 let names = references.pRefs
                     .map { pubkey in
                         let pk = pubkey.ref_id
                         let prof = damus.profiles.lookup(id: pk)
-                        return Profile.displayName(profile: prof, pubkey: pk).username
+                        return "@" + Profile.displayName(profile: prof, pubkey: pk).username
                     }
-                    .joined(separator: ", ")
+                    .joined(separator: " ")
                 Text(names)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.accentColor)
                     .font(.footnote)
             }
             .onTapGesture {
@@ -45,10 +46,25 @@ struct ReplyView: View {
             .sheet(isPresented: $participantsShown) {
                 ParticipantsView(damus_state: damus, references: $references, originalReferences: $originalReferences)
             }
-            
+        }
+    }
+        
+    var body: some View {
+        VStack {
             ScrollViewReader { scroller in
                 ScrollView {
+
                     EventView(damus: damus, event: replying_to, options: [.no_action_bar])
+                        .background(GeometryReader { geometry in
+                            let eventHeight = geometry.frame(in: .global).height
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.25))
+                                .frame(width: 2, height: eventHeight)
+                                .offset(x: 25, y: 40)
+                        })
+                    
+                    ReplyingToSection
+
                 
                     PostView(replying_to: replying_to, references: references, damus_state: damus)
                         .frame(minHeight: 500, maxHeight: .infinity)
