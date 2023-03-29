@@ -13,6 +13,7 @@ struct TextViewWrapper: UIViewRepresentable {
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
         textView.delegate = context.coordinator
+        textView.showsVerticalScrollIndicator = false
         TextViewWrapper.setTextProperties(textView)
         return textView
     }
