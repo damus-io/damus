@@ -483,7 +483,18 @@ class HomeModel: ObservableObject {
             return
         }
         
-        handle_last_event(ev: ev, timeline: .notifications)
+        if handle_last_event(ev: ev, timeline: .notifications),
+           damus_state.contacts.follow_state(ev.pubkey) == .follows,
+           ev.known_kind == .text {
+            for block in ev.blocks(damus_state.keypair.privkey) {
+                if case .mention(let mention) = block, mention.ref.ref_id == damus_state.keypair.pubkey {
+                    let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name
+                    let justContent = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content).string
+                    createNotification(displayName: displayName!, conversation: justContent)
+                }
+            }
+
+        }
     }
 
     @discardableResult
@@ -499,6 +510,25 @@ class HomeModel: ObservableObject {
     func insert_home_event(_ ev: NostrEvent) {
         if events.insert(ev) {
             handle_last_event(ev: ev, timeline: .home)
+        }
+    }
+
+    func createNotification(displayName: String, conversation: String) {
+        let content = UNMutableNotificationContent()
+        content.title = "Mentioned by \(displayName)"
+        content.body = "\(conversation)"
+        content.sound = UNNotificationSound.default
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+
+        let request = UNNotificationRequest(identifier: "myMentionNotification", content: content, trigger: trigger)
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error: \(error)")
+            } else {
+                print("Local notification scheduled")
+            }
         }
     }
 
