@@ -36,15 +36,15 @@ struct UserRelaysView: View {
         .onReceive(handle_notify(.relays_changed)) { _ in
             self.relay_state = UserRelaysView.make_relay_state(pool: state.pool, relays: self.relays)
         }
-        .navigationBarTitle("Relays")
+        .navigationBarTitle(NSLocalizedString("Relays", comment: "Navigation bar title that shows the list of relays for a user."))
         .toolbar{
             if state.keypair.privkey != nil {
                 if showAddButton {
-                    Button("Done") {
+                    Button(NSLocalizedString("Done", comment: "Button that, when tapped, will finish adding a different user's relays to your relay by hiding the + buttons next to the relays.")) {
                         showAddButton.toggle()
                     }
                 } else {
-                    Button("Show Add") {
+                    Button(NSLocalizedString("Show +", comment: "Button that, when tapped, will show + buttons next to a user's relays.")) {
                         showAddButton.toggle()
                     }
                 }

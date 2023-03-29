@@ -147,22 +147,8 @@ struct ContentView: View {
     }
     
     var timelineNavItem: Text {
-        switch selected_timeline {
-        case .home:
-            return Text("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.")
-                .bold()
-        case .dms:
-            return Text("DMs", comment: "Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.")
-                .bold()
-        case .notifications:
-            return Text("Notifications", comment: "Toolbar label for Notifications view.")
-                .bold()
-        case .search:
-            return Text("Universe 🛸", comment: "Toolbar label for the universal view where posts from all connected relay servers appear.")
-                .bold()
-        case .none:
-            return Text(verbatim: "")
-        }
+        return Text(timeline_name(selected_timeline))
+            .bold()
     }
     
     func MainContent(damus: DamusState) -> some View {
@@ -831,12 +817,12 @@ func timeline_name(_ timeline: Timeline?) -> String {
     }
     switch timeline {
     case .home:
-        return "Home"
+        return NSLocalizedString("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.")
     case .notifications:
-        return "Notifications"
+        return NSLocalizedString("Notifications", comment: "Toolbar label for Notifications view.")
     case .search:
-        return "Universe 🛸"
+        return NSLocalizedString("Universe 🛸", comment: "Toolbar label for the universal view where posts from all connected relay servers appear.")
     case .dms:
-        return "DMs"
+        return NSLocalizedString("DMs", comment: "Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.")
     }
 }
