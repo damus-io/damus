@@ -128,6 +128,36 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
+    @Published var zap_notification: Bool {
+        didSet {
+            UserDefaults.standard.set(zap_notification, forKey: "zap_notification")
+        }
+    }
+
+    @Published var mention_notification: Bool {
+        didSet {
+            UserDefaults.standard.set(mention_notification, forKey: "mention_notification")
+        }
+    }
+
+    @Published var repost_notification: Bool {
+        didSet {
+            UserDefaults.standard.set(repost_notification, forKey: "repost_notification")
+        }
+    }
+
+    @Published var dm_notification: Bool {
+        didSet {
+            UserDefaults.standard.set(repost_notification, forKey: "dm_notification")
+        }
+    }
+
+    @Published var like_notification: Bool {
+        didSet {
+            UserDefaults.standard.set(like_notification, forKey: "like_notification")
+        }
+    }
+
     @Published var truncate_timeline_text: Bool {
         didSet {
             UserDefaults.standard.set(truncate_timeline_text, forKey: "truncate_timeline_text")
@@ -227,6 +257,11 @@ class UserSettingsStore: ObservableObject {
 
         left_handed = UserDefaults.standard.object(forKey: "left_handed") as? Bool ?? false
         zap_vibration = UserDefaults.standard.object(forKey: "zap_vibration") as? Bool ?? false
+        zap_notification = UserDefaults.standard.object(forKey: "zap_notification") as? Bool ?? true
+        mention_notification = UserDefaults.standard.object(forKey: "mention_notification") as? Bool ?? true
+        repost_notification = UserDefaults.standard.object(forKey: "repost_notification") as? Bool ?? true
+        like_notification = UserDefaults.standard.object(forKey: "like_notification") as? Bool ?? true
+        dm_notification = UserDefaults.standard.object(forKey: "dm_notification") as? Bool ?? true
         truncate_timeline_text = UserDefaults.standard.object(forKey: "truncate_timeline_text") as? Bool ?? false
         disable_animation = should_disable_image_animation()
         auto_translate = UserDefaults.standard.object(forKey: "auto_translate") as? Bool ?? true

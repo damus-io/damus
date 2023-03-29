@@ -132,7 +132,7 @@ struct ConfigView: View {
                     }
                 }
 
-                Section(NSLocalizedString("Wallet Selector", comment: "Section title for selection of wallet.")) {
+                Section(NSLocalizedString("Wallet and others", comment: "Section header for miscellaneous user configuration")) {
                     Toggle(NSLocalizedString("Show wallet selector", comment: "Toggle to show or hide selection of wallet."), isOn: $settings.show_wallet_selector).toggleStyle(.switch)
                     Picker(NSLocalizedString("Select default wallet", comment: "Prompt selection of user's default wallet"),
                            selection: $settings.default_wallet) {
@@ -141,8 +141,17 @@ struct ConfigView: View {
                                 .tag(wallet.model.tag)
                         }
                     }
+                    Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)
+                        .toggleStyle(.switch)
+                    Toggle(NSLocalizedString("Zap Vibration", comment: "Setting to enable vibration on zap"), isOn: $settings.zap_vibration)
+                        .toggleStyle(.switch)
                 }
                 
+                NavigationLink(destination: NotificationView(settings: settings)) {
+                    Section(NSLocalizedString("Local Notifications", comment: "Section header for damus local notifications user configuration")) {
+                    }
+                }
+
                 Section(NSLocalizedString("Default Zap Amount in sats", comment: "Section title for zap configuration")) {
                     TextField(String("1000"), text: $default_zap_amount)
                         .keyboardType(.numberPad)
@@ -207,15 +216,6 @@ struct ConfigView: View {
                         Toggle(NSLocalizedString("Automatically translate notes", comment: "Toggle to automatically translate notes."), isOn: $settings.auto_translate)
                             .toggleStyle(.switch)
                     }
-                }
-
-                Section(NSLocalizedString("Miscellaneous", comment: "Section header for miscellaneous user configuration")) {
-                    Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)
-                        .toggleStyle(.switch)
-                    Toggle(NSLocalizedString("Zap Vibration", comment: "Setting to enable vibration on zap"), isOn: $settings.zap_vibration)
-                        .toggleStyle(.switch)
-                    Toggle(NSLocalizedString("Truncate text in timeline", comment: "Truncate text in timeline"), isOn: $settings.truncate_timeline_text)
-                        .toggleStyle(.switch)
                 }
 
                 Section(NSLocalizedString("Images", comment: "Section title for images configuration.")) {
@@ -385,6 +385,27 @@ struct ConfigView: View {
                 if settings.deepl_api_key == "" {
                     Link(NSLocalizedString("Get API Key", comment: "Button to navigate to DeepL website to get a translation API key."), destination: URL(string: "https://www.deepl.com/pro-api")!)
                 }
+            }
+        }
+    }
+}
+
+struct NotificationView: View {
+    @ObservedObject var settings: UserSettingsStore
+
+    var body: some View {
+        Form {
+            Section(header: Text(NSLocalizedString("Local Notifications", comment: "Section header for damus local notifications user configuration"))) {
+                Toggle(NSLocalizedString("Zap Notification", comment: "Setting to enable Zap Local Notification"), isOn: $settings.zap_notification)
+                    .toggleStyle(.switch)
+                Toggle(NSLocalizedString("Mention Notification", comment: "Setting to enable Mention Local Notification"), isOn: $settings.mention_notification)
+                    .toggleStyle(.switch)
+                Toggle(NSLocalizedString("Repost Notification", comment: "Setting to enable Repost Local Notification"), isOn: $settings.repost_notification)
+                    .toggleStyle(.switch)
+                Toggle(NSLocalizedString("Like Notification", comment: "Setting to enable Like Local Notification"), isOn: $settings.like_notification)
+                    .toggleStyle(.switch)
+                Toggle(NSLocalizedString("DM Notification", comment: "Setting to enable DM Local Notification"), isOn: $settings.dm_notification)
+                    .toggleStyle(.switch)
             }
         }
     }
