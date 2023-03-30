@@ -15,8 +15,6 @@ struct SearchHomeView: View {
     @State var search: String = ""
     @FocusState private var isFocused: Bool
 
-    let preferredLanguages = Set(Locale.preferredLanguages.map { localeToLanguage($0) })
-    
     var SearchInput: some View {
         HStack {
             HStack{
@@ -54,12 +52,17 @@ struct SearchHomeView: View {
                     return true
                 }
 
-                // If we can't determine the note's language with 50%+ confidence, lean on the side of caution and show it anyway.
-                guard let noteLanguage = $0.note_language(damus_state.keypair.privkey) else {
+                // Always show your own posts.
+                if $0.pubkey == damus_state.pubkey {
                     return true
                 }
 
-                return preferredLanguages.contains(noteLanguage)
+                // If we can't determine the note's language with 50%+ confidence, lean on the side of caution and show it anyway.
+                guard let noteLanguage = damus_state.translations.detectLanguage($0, state: damus_state) else {
+                    return true
+                }
+
+                return damus_state.translations.preferredLanguages.contains(noteLanguage)
             }
         )
         .refreshable {

@@ -280,17 +280,6 @@ class UserSettingsStore: ObservableObject {
     private func clearDeepLApiKey() throws {
         try Vault.deletePrivateKey(keychainConfiguration: DamusDeepLKeychainConfiguration())
     }
-
-    func can_translate(_ pubkey: String) -> Bool {
-        switch translation_service {
-        case .none:
-            return false
-        case .libretranslate:
-            return URLComponents(string: libretranslate_url) != nil
-        case .deepl:
-            return deepl_api_key != ""
-        }
-    }
 }
 
 struct DamusLibreTranslateKeychainConfiguration: KeychainConfiguration {
