@@ -128,6 +128,18 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
+    @Published var zap_notification: Bool {
+        didSet {
+            UserDefaults.standard.set(zap_notification, forKey: "zap_notification")
+        }
+    }
+
+    @Published var mention_notification: Bool {
+        didSet {
+            UserDefaults.standard.set(mention_notification, forKey: "mention_notification")
+        }
+    }
+
     @Published var auto_translate: Bool {
         didSet {
             UserDefaults.standard.set(auto_translate, forKey: "auto_translate")
@@ -221,6 +233,9 @@ class UserSettingsStore: ObservableObject {
 
         left_handed = UserDefaults.standard.object(forKey: "left_handed") as? Bool ?? false
         zap_vibration = UserDefaults.standard.object(forKey: "zap_vibration") as? Bool ?? false
+        zap_notification = UserDefaults.standard.object(forKey: "zap_notification") as? Bool ?? true
+        mention_notification = UserDefaults.standard.object(forKey: "mention_notification") as? Bool ?? true
+
         disable_animation = should_disable_image_animation()
         auto_translate = UserDefaults.standard.object(forKey: "auto_translate") as? Bool ?? true
         show_only_preferred_languages = UserDefaults.standard.object(forKey: "show_only_preferred_languages") as? Bool ?? false

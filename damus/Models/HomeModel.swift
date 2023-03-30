@@ -150,8 +150,10 @@ class HomeModel: ObservableObject {
                 // Generate zap vibration
                 zap_vibrate(zap_amount: zap.invoice.amount)
             }
-            // Create in-app local notification for zap received.
-            create_in_app_zap_notification(profiles: profiles, zap: zap)
+            if damus_state.settings.zap_notification {
+                // Create in-app local notification for zap received.
+                create_in_app_zap_notification(profiles: profiles, zap: zap)
+            }
         }
 
         return
@@ -484,6 +486,7 @@ class HomeModel: ObservableObject {
         }
         
         if handle_last_event(ev: ev, timeline: .notifications),
+           damus_state.settings.mention_notification,
            damus_state.contacts.follow_state(ev.pubkey) == .follows,
            ev.known_kind == .text {
             for block in ev.blocks(damus_state.keypair.privkey) {
@@ -516,7 +519,7 @@ class HomeModel: ObservableObject {
     func createNotification(displayName: String, conversation: String) {
         let content = UNMutableNotificationContent()
         content.title = String(format: NSLocalizedString("Mentioned by %@", comment: "Mentioned by heading in local notification"), displayName)
-	content.body = conversation
+        content.body = conversation
         content.sound = UNNotificationSound.default
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)

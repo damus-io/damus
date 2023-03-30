@@ -214,6 +214,10 @@ struct ConfigView: View {
                         .toggleStyle(.switch)
                     Toggle(NSLocalizedString("Zap Vibration", comment: "Setting to enable vibration on zap"), isOn: $settings.zap_vibration)
                         .toggleStyle(.switch)
+                    Toggle(NSLocalizedString("Zap Notification", comment: "Setting to enable Zap Local Notification"), isOn: $settings.zap_notification)
+                        .toggleStyle(.switch)
+                    Toggle(NSLocalizedString("Mention Notification", comment: "Setting to enable Mention Local Notification"), isOn: $settings.mention_notification)
+                        .toggleStyle(.switch)
                 }
 
                 Section(NSLocalizedString("Images", comment: "Section title for images configuration.")) {
