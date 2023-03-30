@@ -46,6 +46,63 @@ struct SearchingEventView: View {
         }
     }
     
+    func handle_search(_ evid: String) {
+        self.search_state = .searching
+        
+        switch search_type {
+        case .nip05:
+            if let pk = state.profiles.nip05_pubkey[evid] {
+                if state.profiles.lookup(id: pk) != nil {
+                    self.search_state = .found_profile(pk)
+                }
+            } else {
+                Task.init {
+                    guard let nip05 = NIP05.parse(evid) else {
+                        self.search_state = .not_found
+                        return
+                    }
+                    guard let nip05_resp = await fetch_nip05(nip05: nip05) else {
+                        DispatchQueue.main.async {
+                            self.search_state = .not_found
+                        }
+                        return
+                    }
+                    
+                    DispatchQueue.main.async {
+                        guard let pk = nip05_resp.names[nip05.username] else {
+                            self.search_state = .not_found
+                            return
+                        }
+                        
+                        self.search_state = .found_profile(pk)
+                    }
+                }
+            }
+            
+        case .event:
+            if let ev = state.events.lookup(evid) {
+                self.search_state = .found(ev)
+                return
+            }
+            find_event(state: state, evid: evid, search_type: search_type, find_from: nil) { ev in
+                if let ev {
+                    self.search_state = .found(ev)
+                } else {
+                    self.search_state = .not_found
+                }
+            }
+        case .profile:
+            find_event(state: state, evid: evid, search_type: search_type, find_from: nil) { _ in
+                if state.profiles.lookup(id: evid) != nil {
+                    self.search_state = .found_profile(evid)
+                    return
+                } else {
+                    self.search_state = .not_found
+                }
+            }
+        }
+    }
+    
     var body: some View {
         Group {
             switch search_state {
@@ -72,60 +129,10 @@ struct SearchingEventView: View {
             }
         }
         .onChange(of: evid, debounceTime: 0.5) { evid in
-            self.search_state = .searching
-            
-            switch search_type {
-            case .nip05:
-                if let pk = state.profiles.nip05_pubkey[evid] {
-                    if state.profiles.lookup(id: pk) != nil {
-                        self.search_state = .found_profile(pk)
-                    }
-                } else {
-                    Task.init {
-                        guard let nip05 = NIP05.parse(evid) else {
-                            self.search_state = .not_found
-                            return
-                        }
-                        guard let nip05_resp = await fetch_nip05(nip05: nip05) else {
-                            DispatchQueue.main.async {
-                                self.search_state = .not_found
-                            }
-                            return
-                        }
-                        
-                        DispatchQueue.main.async {
-                            guard let pk = nip05_resp.names[nip05.username] else {
-                                self.search_state = .not_found
-                                return
-                            }
-                            
-                            self.search_state = .found_profile(pk)
-                        }
-                    }
-                }
-                
-            case .event:
-                if let ev = state.events.lookup(evid) {
-                    self.search_state = .found(ev)
-                    return
-                }
-                find_event(state: state, evid: evid, search_type: search_type, find_from: nil) { ev in
-                    if let ev {
-                        self.search_state = .found(ev)
-                    } else {
-                        self.search_state = .not_found
-                    }
-                }
-            case .profile:
-                find_event(state: state, evid: evid, search_type: search_type, find_from: nil) { _ in
-                    if state.profiles.lookup(id: evid) != nil {
-                        self.search_state = .found_profile(evid)
-                        return
-                    } else {
-                        self.search_state = .not_found
-                    }
-                }
-            }
+            handle_search(evid)
+        }
+        .onAppear {
+            handle_search(evid)
         }
     }
 }
