@@ -515,9 +515,8 @@ class HomeModel: ObservableObject {
 
     func createNotification(displayName: String, conversation: String) {
         let content = UNMutableNotificationContent()
-        let title = NSLocalizedString("Mentioned by", comment: "Mentioned by heading in local notifcation")
-        content.title = "\(title) \(displayName)"
-        content.body = "\(conversation)"
+        content.title = String(format: NSLocalizedString("Mentioned by %@", comment: "Mentioned by heading in local notification"), displayName)
+		content.body = conversation
         content.sound = UNNotificationSound.default
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
