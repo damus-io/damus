@@ -22,23 +22,9 @@ enum MentionType {
 }
 
 struct Mention {
-    let index: Int
+    let index: Int?
     let type: MentionType
     let ref: ReferencedId
-}
-
-struct MentionBech32 {
-    enum Entity {
-        case note(ReferencedId)
-        case npub(ReferencedId)
-        case nprofile(ReferencedId)
-        case nevent(ReferencedId, ReferencedId?)
-        case nrelay(String)
-        case naddr(ReferencedId, String, UInt32?)
-    }
-
-    let entity: Entity
-    let raw: String
 }
 
 struct IdBlock: Identifiable {
@@ -75,7 +61,6 @@ struct LightningInvoice<T> {
 enum Block {
     case text(String)
     case mention(Mention)
-    case mention_bech32(MentionBech32)
     case hashtag(String)
     case url(URL)
     case invoice(Invoice)
@@ -123,22 +108,19 @@ enum Block {
         }
         return false
     }
-
-    var is_mention_bech32: MentionBech32? {
-        if case .mention_bech32(let m) = self {
-            return m
-        }
-        return nil
-    }
 }
 
 func render_blocks(blocks: [Block]) -> String {
     return blocks.reduce("") { str, block in
         switch block {
         case .mention(let m):
-            return str + "#[\(m.index)]"
-        case .mention_bech32(let nurl):
-            return str + nurl.raw
+            if let idx = m.index {
+                return str + "#[\(idx)]"
+            } else if m.type == .pubkey {
+                return str + "nostr:\(bech32_pubkey(m.ref.ref_id)!)"
+            } else {
+                return str + "nostr:\(bech32_note_id(m.ref.ref_id)!)"
+            }
         case .text(let txt):
             return str + txt
         case .hashtag(let htag):
@@ -335,44 +317,28 @@ func convert_invoice_block(_ b: invoice_block) -> Block? {
 
 func convert_mention_bech32_block(_ b: mention_bech32_block) -> Block?
 {
-    let raw = strblock_to_string(b.str)!
-
-    lazy var relay_id = b.relays_count > 0 ? String(cString: b.relays.0!) : nil
+    let relay_id = b.relays_count > 0 ? String(cString: b.relays.0!) : nil
 
     switch b.type {
     case NOSTR_BECH32_NOTE:
-        let event_id = hex_encode(Data(bytes: b.event_id, count: 32))
-        let event_id_ref = ReferencedId(ref_id: event_id, relay_id: nil, key: "e")
-        return .mention_bech32(MentionBech32(entity: .note(event_id_ref), raw: raw))
-    case NOSTR_BECH32_NPUB:
-        let pubkey = hex_encode(Data(bytes: b.pubkey, count: 32))
-        let pubkey_ref = ReferencedId(ref_id: pubkey, relay_id: nil, key: "p")
-        return .mention_bech32(MentionBech32(entity: .npub(pubkey_ref), raw: raw))
-    case NOSTR_BECH32_NPROFILE:
-        let pubkey = hex_encode(Data(bytes: b.pubkey, count: 32))
-        let pubkey_ref = ReferencedId(ref_id: pubkey, relay_id: relay_id, key: "p")
-        return .mention_bech32(MentionBech32(entity: .nprofile(pubkey_ref), raw: raw))
+        fallthrough
     case NOSTR_BECH32_NEVENT:
         let event_id = hex_encode(Data(bytes: b.event_id, count: 32))
         let event_id_ref = ReferencedId(ref_id: event_id, relay_id: relay_id, key: "e")
+        return .mention(Mention(index: nil, type: .event, ref: event_id_ref))
 
-        var pubkey_ref: ReferencedId?
-        if b.pubkey != nil {
-            let pubkey = hex_encode(Data(bytes: b.pubkey, count: 32))
-            pubkey_ref = ReferencedId(ref_id: pubkey, relay_id: relay_id, key: "p")
-        }
-
-        return .mention_bech32(MentionBech32(entity: .nevent(event_id_ref, pubkey_ref), raw: raw))
-    case NOSTR_BECH32_NRELAY:
-        return .mention_bech32(MentionBech32(entity: .nrelay(relay_id!), raw: raw))
-    case NOSTR_BECH32_NADDR:
+    case NOSTR_BECH32_NPUB:
+        fallthrough
+    case NOSTR_BECH32_NPROFILE:
         let pubkey = hex_encode(Data(bytes: b.pubkey, count: 32))
         let pubkey_ref = ReferencedId(ref_id: pubkey, relay_id: relay_id, key: "p")
+        return .mention(Mention(index: nil, type: .pubkey, ref: pubkey_ref))
 
-        let identifier = String(cString: b.identifier)
-        let kind = b.kind == -1 ? nil : UInt32(b.kind)
+    case NOSTR_BECH32_NRELAY:
+        fallthrough
+    case NOSTR_BECH32_NADDR:
+        return .text(strblock_to_string(b.str)!)
 
-        return .mention_bech32(MentionBech32(entity: .naddr(pubkey_ref, identifier, kind), raw: raw))
     default:
         return nil
     }
