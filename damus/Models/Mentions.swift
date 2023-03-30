@@ -22,7 +22,7 @@ enum MentionType {
 }
 
 struct Mention {
-    let index: Int
+    let index: Int?
     let type: MentionType
     let ref: ReferencedId
 }
@@ -114,7 +114,13 @@ func render_blocks(blocks: [Block]) -> String {
     return blocks.reduce("") { str, block in
         switch block {
         case .mention(let m):
-            return str + "#[\(m.index)]"
+            if let idx = m.index {
+                return str + "#[\(idx)]"
+            } else if m.type == .pubkey {
+                return str + "nostr:\(bech32_pubkey(m.ref.ref_id)!)"
+            } else {
+                return str + "nostr:\(bech32_note_id(m.ref.ref_id)!)"
+            }
         case .text(let txt):
             return str + txt
         case .hashtag(let htag):
@@ -177,14 +183,16 @@ func convert_block(_ b: block_t, tags: [[String]]) -> Block? {
             return nil
         }
         return .text(str)
-    } else if b.type == BLOCK_MENTION {
-        return convert_mention_block(ind: b.block.mention, tags: tags)
+    } else if b.type == BLOCK_MENTION_INDEX {
+        return convert_mention_index_block(ind: b.block.mention_index, tags: tags)
     } else if b.type == BLOCK_URL {
         return convert_url_block(b.block.str)
     } else if b.type == BLOCK_INVOICE {
         return convert_invoice_block(b.block.invoice)
+    } else if b.type == BLOCK_MENTION_BECH32 {
+        return convert_mention_bech32_block(b.block.mention_bech32)
     }
-    
+
     return nil
 }
 
@@ -307,6 +315,35 @@ func convert_invoice_block(_ b: invoice_block) -> Block? {
     return .invoice(Invoice(description: description, amount: amount, string: invstr, expiry: b11.expiry, payment_hash: payment_hash, created_at: created_at))
 }
 
+func convert_mention_bech32_block(_ b: mention_bech32_block) -> Block?
+{
+    let relay_id = b.relays_count > 0 ? String(cString: b.relays.0!) : nil
+
+    switch b.type {
+    case NOSTR_BECH32_NOTE:
+        fallthrough
+    case NOSTR_BECH32_NEVENT:
+        let event_id = hex_encode(Data(bytes: b.event_id, count: 32))
+        let event_id_ref = ReferencedId(ref_id: event_id, relay_id: relay_id, key: "e")
+        return .mention(Mention(index: nil, type: .event, ref: event_id_ref))
+
+    case NOSTR_BECH32_NPUB:
+        fallthrough
+    case NOSTR_BECH32_NPROFILE:
+        let pubkey = hex_encode(Data(bytes: b.pubkey, count: 32))
+        let pubkey_ref = ReferencedId(ref_id: pubkey, relay_id: relay_id, key: "p")
+        return .mention(Mention(index: nil, type: .pubkey, ref: pubkey_ref))
+
+    case NOSTR_BECH32_NRELAY:
+        fallthrough
+    case NOSTR_BECH32_NADDR:
+        return .text(strblock_to_string(b.str)!)
+
+    default:
+        return nil
+    }
+}
+
 func convert_invoice_description(b11: bolt11) -> InvoiceDescription? {
     if let desc = b11.description {
         return .description(String(cString: desc))
@@ -319,7 +356,7 @@ func convert_invoice_description(b11: bolt11) -> InvoiceDescription? {
     return nil
 }
 
-func convert_mention_block(ind: Int32, tags: [[String]]) -> Block?
+func convert_mention_index_block(ind: Int32, tags: [[String]]) -> Block?
 {
     let ind = Int(ind)
     
