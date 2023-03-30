@@ -33,6 +33,7 @@ struct FollowersView: View {
             LazyVStack(alignment: .leading) {
                 ForEach(followers.contacts ?? [], id: \.self) { pk in
                     FollowUserView(target: .pubkey(pk), damus_state: damus_state)
+                    Divider()
                 }
             }
             .padding()
@@ -45,7 +46,6 @@ struct FollowersView: View {
             followers.unsubscribe()
         }
     }
-    
 }
 
 struct FollowingView: View {
