@@ -1,5 +1,5 @@
 //
-//  DraftsModel.swift
+//  Drafts.swift
 //  damus
 //
 //  Created by Terry Yiu on 2/12/23.

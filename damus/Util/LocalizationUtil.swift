@@ -22,6 +22,14 @@ func localizedStringFormat(key: String, locale: Locale?) -> String {
     return bundle.localizedString(forKey: key, value: fallback, table: nil)
 }
 
+func currentLanguage() -> String {
+    if #available(iOS 16, *) {
+        return Locale.current.language.languageCode?.identifier ?? "en"
+    } else {
+        return Locale.current.languageCode ?? "en"
+    }
+}
+
 /**
  Removes the variant part of a locale code so that it contains only the language code.
  */
