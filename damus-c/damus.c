@@ -7,10 +7,14 @@
 
 #include "damus.h"
 #include "bolt11.h"
+#include "bech32.h"
 #include <stdlib.h>
 #include <string.h>
 
-typedef unsigned char u8;
+#define TLV_SPECIAL 0
+#define TLV_RELAY 1
+#define TLV_AUTHOR 2
+#define TLV_KIND 3
 
 struct cursor {
     const u8 *p;
@@ -126,7 +130,7 @@ static int parse_str(struct cursor *cur, const char *str) {
     return 1;
 }
 
-static int parse_mention(struct cursor *cur, struct block *block) {
+static int parse_mention_index(struct cursor *cur, struct block *block) {
     int d1, d2, d3, ind;
     const u8 *start = cur->p;
     
@@ -151,8 +155,8 @@ static int parse_mention(struct cursor *cur, struct block *block) {
         return 0;
     }
     
-    block->type = BLOCK_MENTION;
-    block->block.mention = ind;
+    block->type = BLOCK_MENTION_INDEX;
+    block->block.mention_index = ind;
     
     return 1;
 }
@@ -274,6 +278,164 @@ static int parse_invoice(struct cursor *cur, struct block *block) {
     return 1;
 }
 
+static int parse_mention_bech32(struct cursor *cur, struct block *block) {
+    const u8 *start, *start_entity, *end;
+
+    start = cur->p;
+    if (!parse_str(cur, "nostr:"))
+        return 0;
+
+    start_entity = cur->p;
+    if (!consume_until_whitespace(cur, 1)) {
+        cur->p = start;
+        return 0;
+    }
+
+    end = cur->p;
+
+    char str[end - start_entity + 1];
+    str[end - start_entity] = 0;
+    memcpy(str, start_entity, end - start_entity);
+
+    char prefix[end - start_entity];
+    u8 data[end - start_entity];
+    size_t data_len;
+    size_t max_input_len = end - start_entity + 2;
+
+    if (bech32_decode(prefix, data, &data_len, str, max_input_len) == BECH32_ENCODING_NONE) {
+        cur->p = start;
+        return 0;
+    }
+
+    struct mention_bech32_block mention = { 0 };
+    mention.kind = -1;
+    mention.buffer = (u8*)malloc(data_len);
+    mention.str.start = (const char*)start;
+    mention.str.end = (const char*)end;
+
+    size_t len = 0;
+    if (!bech32_convert_bits(mention.buffer, &len, 8, data, data_len, 5, 0)) {
+        goto fail;
+    }
+
+    // Parse type
+    if (strcmp(prefix, "note") == 0) {
+        mention.type = NOSTR_BECH32_NOTE;
+    } else if (strcmp(prefix, "npub") == 0) {
+        mention.type = NOSTR_BECH32_NPUB;
+    } else if (strcmp(prefix, "nprofile") == 0) {
+        mention.type = NOSTR_BECH32_NPROFILE;
+    } else if (strcmp(prefix, "nevent") == 0) {
+        mention.type = NOSTR_BECH32_NEVENT;
+    } else if (strcmp(prefix, "nrelay") == 0) {
+        mention.type = NOSTR_BECH32_NRELAY;
+    } else if (strcmp(prefix, "naddr") == 0) {
+        mention.type = NOSTR_BECH32_NADDR;
+    } else {
+        goto fail;
+    }
+
+    // Parse notes and npubs (non-TLV)
+    if (mention.type == NOSTR_BECH32_NOTE || mention.type == NOSTR_BECH32_NPUB) {
+        if (len != 32) goto fail;
+        if (mention.type == NOSTR_BECH32_NOTE) {
+            mention.event_id = mention.buffer;
+        } else {
+            mention.pubkey = mention.buffer;
+        }
+        goto ok;
+    }
+
+    // Parse TLV entities
+    const int MAX_VALUES = 16;
+    int values_count = 0;
+    u8 Ts[MAX_VALUES];
+    u8 Ls[MAX_VALUES];
+    u8* Vs[MAX_VALUES];
+    for (int i = 0; i < len - 1;) {
+        if (values_count == MAX_VALUES) goto fail;
+
+        Ts[values_count] = mention.buffer[i++];
+        Ls[values_count] = mention.buffer[i++];
+        if (Ls[values_count] > len - i) goto fail;
+
+        Vs[values_count] = &mention.buffer[i];
+        i += Ls[values_count];
+        ++values_count;
+    }
+
+    // Decode and validate all TLV-type entities
+    if (mention.type == NOSTR_BECH32_NPROFILE) {
+        for (int i = 0; i < values_count; ++i) {
+            if (Ts[i] == TLV_SPECIAL) {
+                if (Ls[i] != 32 || mention.pubkey) goto fail;
+                mention.pubkey = Vs[i];
+            } else if (Ts[i] == TLV_RELAY) {
+                if (mention.relays_count == MAX_RELAYS) goto fail;
+                Vs[i][Ls[i]] = 0;
+                mention.relays[mention.relays_count++] = (char*)Vs[i];
+            } else {
+                goto fail;
+            }
+        }
+        if (!mention.pubkey) goto fail;
+
+    } else if (mention.type == NOSTR_BECH32_NEVENT) {
+        for (int i = 0; i < values_count; ++i) {
+            if (Ts[i] == TLV_SPECIAL) {
+                if (Ls[i] != 32 || mention.event_id) goto fail;
+                mention.event_id = Vs[i];
+            } else if (Ts[i] == TLV_RELAY) {
+                if (mention.relays_count == MAX_RELAYS) goto fail;
+                Vs[i][Ls[i]] = 0;
+                mention.relays[mention.relays_count++] = (char*)Vs[i];
+            } else if (Ts[i] == TLV_AUTHOR) {
+                if (Ls[i] != 32 || mention.pubkey) goto fail;
+                mention.pubkey = Vs[i];
+            } else {
+                goto fail;
+            }
+        }
+        if (!mention.event_id) goto fail;
+
+    } else if (mention.type == NOSTR_BECH32_NRELAY) {
+        if (values_count != 1 || Ts[0] != TLV_SPECIAL) goto fail;
+        Vs[0][Ls[0]] = 0;
+        mention.relays[mention.relays_count++] = (char*)Vs[0];
+
+    } else { // entity.type == NOSTR_BECH32_NADDR
+        for (int i = 0; i < values_count; ++i) {
+            if (Ts[i] == TLV_SPECIAL) {
+                Vs[i][Ls[i]] = 0;
+                mention.identifier = (char*)Vs[i];
+            } else if (Ts[i] == TLV_RELAY) {
+                if (mention.relays_count == MAX_RELAYS) goto fail;
+                Vs[i][Ls[i]] = 0;
+                mention.relays[mention.relays_count++] = (char*)Vs[i];
+            } else if (Ts[i] == TLV_AUTHOR) {
+                if (Ls[i] != 32 || mention.pubkey) goto fail;
+                mention.pubkey = Vs[i];
+            } else if (Ts[i] == TLV_KIND) {
+                if (Ls[i] != sizeof(int) || mention.kind != -1) goto fail;
+                mention.kind = *(int*)Vs[i];
+            } else {
+                goto fail;
+            }
+        }
+        if (!mention.identifier || mention.kind == -1 || !mention.pubkey) goto fail;
+    }
+
+ok:
+    block->type = BLOCK_MENTION_BECH32;
+    block->block.mention_bech32 = mention;
+    return 1;
+
+fail:
+    free(mention.buffer);
+    cur->p = start;
+    return 0;
+}
+
 static int add_text_then_block(struct cursor *cur, struct blocks *blocks, struct block block, const u8 **start, const u8 *pre_mention)
 {
     if (!add_text_block(blocks, *start, pre_mention))
@@ -303,7 +465,7 @@ int damus_parse_content(struct blocks *blocks, const char *content) {
         
         pre_mention = cur.p;
         if (cp == -1 || is_whitespace(cp)) {
-            if (c == '#' && (parse_mention(&cur, &block) || parse_hashtag(&cur, &block))) {
+            if (c == '#' && (parse_mention_index(&cur, &block) || parse_hashtag(&cur, &block))) {
                 if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;
                 continue;
@@ -312,6 +474,10 @@ int damus_parse_content(struct blocks *blocks, const char *content) {
                     return 0;
                 continue;
             } else if ((c == 'l' || c == 'L') && parse_invoice(&cur, &block)) {
+                if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
+                    return 0;
+                continue;
+            } else if (c == 'n' && parse_mention_bech32(&cur, &block)) {
                 if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;
                 continue;
@@ -335,8 +501,17 @@ void blocks_init(struct blocks *blocks) {
 }
 
 void blocks_free(struct blocks *blocks) {
-    if (blocks->blocks) {
-        free(blocks->blocks);
-        blocks->num_blocks = 0;
+    if (!blocks->blocks) {
+        return;
     }
+
+    for (int i = 0; i < blocks->num_blocks; ++i) {
+        if (blocks->blocks[i].type == BLOCK_MENTION_BECH32) {
+            free(blocks->blocks[i].block.mention_bech32.buffer);
+            blocks->blocks[i].block.mention_bech32.buffer = NULL;
+        }
+    }
+
+    free(blocks->blocks);
+    blocks->num_blocks = 0;
 }

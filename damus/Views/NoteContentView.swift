@@ -144,6 +144,13 @@ struct NoteContentView: View {
                         if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
                             self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
                         }
+                    case .mention_bech32(let n):
+                        guard case .npub(let ref) = n.entity else {
+                            return
+                        }
+                        if ref.ref_id == profile.pubkey {
+                            self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+                        }
                     case .text: return
                     case .hashtag: return
                     case .url: return
@@ -220,6 +227,43 @@ func mention_str(_ m: Mention, profiles: Profiles) -> AttributedString {
     }
 }
 
+func mention_bech32_str(_ n: MentionBech32, profiles: Profiles) -> AttributedString {
+    switch n.entity {
+    case .note(let ref):
+        let bevid = bech32_note_id(ref.ref_id) ?? ref.ref_id
+        var attributedString = AttributedString(stringLiteral: "@\(abbrev_pubkey(bevid))")
+        attributedString.link = URL(string: "damus:\(encode_event_id_uri(ref))")
+        attributedString.foregroundColor = Color("DamusPurple")
+        return attributedString
+    case .npub(let ref):
+        let pk = ref.ref_id
+        let profile = profiles.lookup(id: pk)
+        let disp = Profile.displayName(profile: profile, pubkey: pk).username
+        var attributedString = AttributedString(stringLiteral: "@\(disp)")
+        attributedString.link = URL(string: "damus:\(encode_pubkey_uri(ref))")
+        attributedString.foregroundColor = Color("DamusPurple")
+        return attributedString
+    case .nprofile(let ref):
+        let pk = ref.ref_id
+        let profile = profiles.lookup(id: pk)
+        let disp = Profile.displayName(profile: profile, pubkey: pk).username
+        var attributedString = AttributedString(stringLiteral: "@\(disp)")
+        attributedString.link = URL(string: "damus:\(encode_pubkey_uri(ref))")
+        attributedString.foregroundColor = Color("DamusPurple")
+        return attributedString
+    case .nevent(let ref, _):
+        let bevid = bech32_note_id(ref.ref_id) ?? ref.ref_id
+        var attributedString = AttributedString(stringLiteral: "@\(abbrev_pubkey(bevid))")
+        attributedString.link = URL(string: "damus:\(encode_event_id_uri(ref))")
+        attributedString.foregroundColor = Color("DamusPurple")
+        return attributedString
+    case .nrelay(_):
+        return AttributedString(stringLiteral: n.raw)
+    case .naddr(_, _, _):
+        return AttributedString(stringLiteral: n.raw)
+    }
+}
+
 struct NoteContentView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
@@ -279,6 +323,8 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
                 link_urls.append(url)
                 return str + url_str(url)
             }
+        case .mention_bech32(let n):
+            return str + mention_bech32_str(n, profiles: profiles)
         }
     }
 

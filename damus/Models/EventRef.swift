@@ -76,6 +76,8 @@ func build_mention_indices(_ blocks: [Block], type: MentionType) -> Set<Int> {
             if m.type == type {
                 acc.insert(m.index)
             }
+        case .mention_bech32:
+            return
         case .text:
             return
         case .hashtag:
