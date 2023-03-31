@@ -246,14 +246,14 @@ struct PostView: View {
             }
             .padding()
             .sheet(isPresented: $attach_media) {
-                ImagePicker(sourceType: .photoLibrary, damusState: damus_state) { img in
+                ImagePicker(sourceType: .photoLibrary, pubkey: damus_state.pubkey) { img in
                     handle_upload(media: .image(img))
                 } onVideoPicked: { url in
                     handle_upload(media: .video(url))
                 }
             }
             .sheet(isPresented: $attach_camera) {
-                ImagePicker(sourceType: .camera, damusState: damus_state) { img in
+                ImagePicker(sourceType: .camera, pubkey: damus_state.pubkey) { img in
                     handle_upload(media: .image(img))
                 } onVideoPicked: { url in
                     handle_upload(media: .video(url))
