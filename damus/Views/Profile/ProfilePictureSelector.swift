@@ -31,3 +31,12 @@ struct ProfilePictureSelector: View {
         }
     }
 }
+
+struct ProfilePictureSelector_Previews: PreviewProvider {
+    static var previews: some View {
+        let test_pubkey = "ff48854ac6555fed8e439ebb4fa2d928410e0eef13fa41164ec45aaaa132d846"
+        ProfilePictureSelector(pubkey: test_pubkey, viewModel: ProfileUploadingViewModel()) { _ in
+            //
+        }
+    }
+}
