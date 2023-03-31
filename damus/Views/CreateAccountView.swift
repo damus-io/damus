@@ -9,11 +9,12 @@ import SwiftUI
 
 struct CreateAccountView: View {
     @StateObject var account: CreateAccountModel = CreateAccountModel()
+    @StateObject var profileUploadViewModel = ProfileUploadingViewModel()
+    
     @State var is_light: Bool = false
     @State var is_done: Bool = false
     @State var reading_eula: Bool = false
     @State var profile_image: URL? = nil
-    @State var image_uploading: Bool = false
     
     func SignupForm<FormContent: View>(@ViewBuilder content: () -> FormContent) -> some View {
         return VStack(alignment: .leading, spacing: 10.0, content: content)
@@ -34,7 +35,7 @@ struct CreateAccountView: View {
                     .font(.title.bold())
                     .foregroundColor(.white)
                 
-                ProfilePictureSelector(pubkey: account.pubkey, callback: uploadedProfilePicture(image_url:))
+                ProfilePictureSelector(pubkey: account.pubkey, viewModel: profileUploadViewModel, callback: uploadedProfilePicture(image_url:))
                 
                 HStack(alignment: .top) {
                     VStack {
@@ -83,8 +84,8 @@ struct CreateAccountView: View {
                     self.is_done = true
                 }
                 .padding()
-                .disabled(image_uploading)
-                .opacity(image_uploading ? 0.5 : 1)
+                .disabled(profileUploadViewModel.isLoading)
+                .opacity(profileUploadViewModel.isLoading ? 0.5 : 1)
             }
             .padding(.leading, 14.0)
             .padding(.trailing, 20.0)

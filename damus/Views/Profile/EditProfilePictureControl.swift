@@ -11,11 +11,11 @@ struct EditProfilePictureControl: View {
     
     let pubkey: String
     @Binding var profile_image: URL?
+    @ObservedObject var viewModel: ProfileUploadingViewModel
     let callback: (URL?) -> Void
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
     
-    @State private var uploading = false
     @State private var show_camera = false
     @State private var show_library = false
     
@@ -33,7 +33,7 @@ struct EditProfilePictureControl: View {
                 Text("Take Photo")
             }
         } label: {
-            if uploading {
+            if viewModel.isLoading {
                 ProgressView()
             } else {
                 Image(systemName: "camera")
@@ -60,7 +60,7 @@ struct EditProfilePictureControl: View {
     }
     
     private func handle_upload(media: MediaUpload) {
-        uploading = true
+        viewModel.isLoading = true
         let uploader = get_media_uploader(pubkey)
         Task {
             let res = await image_upload.start(media: media, uploader: uploader)
@@ -78,14 +78,7 @@ struct EditProfilePictureControl: View {
                 }
                 callback(nil)
             }
-            uploading = false
+            viewModel.isLoading = false
         }
     }
 }
-
-//struct ProfilePictureEditView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        let model = CreateAccountModel(real: "", nick: "jb55", about: "")
-//        ProfilePictureEditView(account: model)
-//    }
-//}

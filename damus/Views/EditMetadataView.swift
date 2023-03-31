@@ -67,6 +67,7 @@ struct EditMetadataView: View {
     @Environment(\.colorScheme) var colorScheme
 
     @State var confirm_ln_address: Bool = false
+    @StateObject var profileUploadViewModel = ProfileUploadingViewModel()
     
     init (damus_state: DamusState) {
         self.damus_state = damus_state
@@ -126,7 +127,7 @@ struct EditMetadataView: View {
                 let pfp_size: CGFloat = 90.0
 
                 HStack(alignment: .center) {
-                    ProfilePictureSelector(pubkey: damus_state.pubkey, callback: uploadedProfilePicture(image_url:))
+                    ProfilePictureSelector(pubkey: damus_state.pubkey, damus_state: damus_state, viewModel: profileUploadViewModel, callback: uploadedProfilePicture(image_url:))
                         .offset(y: -(pfp_size/2.0)) // Increase if set a frame
 
                    Spacer()
@@ -214,6 +215,7 @@ struct EditMetadataView: View {
                         dismiss()
                     }
                 }
+                .disabled(profileUploadViewModel.isLoading)
                 .alert(NSLocalizedString("Invalid Tip Address", comment: "Title of alerting as invalid tip address."), isPresented: $confirm_ln_address) {
                     Button(NSLocalizedString("Ok", comment: "Button to dismiss the alert.")) {
                     }
