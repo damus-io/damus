@@ -9,7 +9,8 @@ import SwiftUI
 
 struct EditProfilePictureControl: View {
     
-    @StateObject var account: CreateAccountModel
+    let pubkey: String
+    
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
     
     @Binding var profile_image: URL?
@@ -39,14 +40,14 @@ struct EditProfilePictureControl: View {
                 .foregroundColor(DamusColors.white)
         }
         .sheet(isPresented: $show_camera) {
-            PostView.ImagePicker(sourceType: .camera, pubkey: account.pubkey, imagesOnly: true) { img in
+            PostView.ImagePicker(sourceType: .camera, pubkey: pubkey, imagesOnly: true) { img in
                 handle_upload(media: .image(img))
             } onVideoPicked: { url in
                 print("Cannot upload videos as profile image")
             }
         }
         .sheet(isPresented: $show_library) {
-            PostView.ImagePicker(sourceType: .photoLibrary, pubkey: account.pubkey, imagesOnly: true) { img in
+            PostView.ImagePicker(sourceType: .photoLibrary, pubkey: pubkey, imagesOnly: true) { img in
                 handle_upload(media: .image(img))
             } onVideoPicked: { url in
                 print("Cannot upload videos as profile image")
@@ -55,7 +56,7 @@ struct EditProfilePictureControl: View {
     }
     
     private func handle_upload(media: MediaUpload) {
-        let uploader = get_media_uploader(account.pubkey)
+        let uploader = get_media_uploader(pubkey)
         image_uploading = true
         Task {
             let res = await image_upload.start(media: media, uploader: uploader)

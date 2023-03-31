@@ -34,7 +34,7 @@ struct CreateAccountView: View {
                     .font(.title.bold())
                     .foregroundColor(.white)
                 
-                ProfilePictureSelector(account: account, profile_image: $profile_image, image_uploading: $image_uploading)
+                CreateProfilePictureSelector(pubkey: account.pubkey, profile_image: $profile_image, image_uploading: $image_uploading)
                 
                 HStack(alignment: .top) {
                     VStack {
@@ -94,6 +94,9 @@ struct CreateAccountView: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackNav())
+        .onChange(of: profile_image) { newValue in
+            account.profile_image = newValue?.absoluteString
+        }
     }
 }
 
