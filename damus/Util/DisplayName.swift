@@ -39,7 +39,7 @@ enum DisplayName {
 
 func parse_display_name(profile: Profile?, pubkey: String) -> DisplayName {
     if pubkey == "anon" {
-        return .one("Anonymous")
+        return .one(NSLocalizedString("Anonymous", comment: "Placeholder display name of anonymous user."))
     }
     
     guard let profile else {

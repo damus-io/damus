@@ -275,11 +275,51 @@
 			<key>one</key>
 			<string>%2$@ сат</string>
 			<key>few</key>
-			<string>%2$@ sats</string>
+			<string>%2$@ сат</string>
 			<key>many</key>
-			<string>%2$@ sats</string>
+			<string>%2$@ сат</string>
 			<key>other</key>
 			<string>%2$@ сат</string>
+		</dict>
+	</dict>
+	<key>zap_notification_no_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>Вы получили %2$@ сат от %3$@</string>
+			<key>few</key>
+			<string>Вы получили %2$@ сат от %3$@</string>
+			<key>many</key>
+			<string>Вы получили %2$@ сат от %3$@</string>
+			<key>other</key>
+			<string>Вы получили %2$@ сат от %3$@</string>
+		</dict>
+	</dict>
+	<key>zap_notification_with_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>Вы получили %2$@ сат от %3$@: "%4$@"</string>
+			<key>few</key>
+			<string>Вы получили %2$@ сат от %3$@: "%4$@"</string>
+			<key>many</key>
+			<string>Вы получили %2$@ сат от %3$@: "%4$@"</string>
+			<key>other</key>
+			<string>Вы получили %2$@ сат от %3$@: "%4$@"</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>

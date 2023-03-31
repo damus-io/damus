@@ -73,7 +73,7 @@ func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType
         }
         
         if zap.is_anon {
-            return "Anonymous"
+            return NSLocalizedString("Anonymous", comment: "Placeholder author name of the anonymous person who zapped an event.")
         }
         
         return event_author_name(profiles: profiles, pubkey: zap.request.ev.pubkey)
