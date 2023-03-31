@@ -69,10 +69,11 @@ enum NostrResponse: Decodable {
                 throw error
             }
             self = .ok(cr)
+            return
             //ev.pow = count_hash_leading_zero_bits(ev.id)
         }
 
-        throw DecodingError.dataCorrupted(.init(codingPath: [], debugDescription: "expected EVENT or NOTICE, got \(typ)"))
+        throw DecodingError.dataCorrupted(.init(codingPath: [], debugDescription: "expected EVENT, NOTICE or OK, got \(typ)"))
     }
 }
 
