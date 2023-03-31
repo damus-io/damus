@@ -34,7 +34,7 @@ struct CreateAccountView: View {
                     .font(.title.bold())
                     .foregroundColor(.white)
                 
-                ProfilePictureSelector(pubkey: account.pubkey, callback: uploadedProfilePicture(picture:))
+                ProfilePictureSelector(pubkey: account.pubkey, callback: uploadedProfilePicture(image_url:))
                 
                 HStack(alignment: .top) {
                     VStack {
@@ -96,8 +96,8 @@ struct CreateAccountView: View {
         .navigationBarItems(leading: BackNav())
     }
     
-    func uploadedProfilePicture(picture: URL?) {
-        account.profile_image = picture?.absoluteString
+    func uploadedProfilePicture(image_url: URL?) {
+        account.profile_image = image_url?.absoluteString
     }
 }
 

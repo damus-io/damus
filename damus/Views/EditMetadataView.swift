@@ -126,7 +126,7 @@ struct EditMetadataView: View {
                 let pfp_size: CGFloat = 90.0
 
                 HStack(alignment: .center) {
-                    ProfilePicView(pubkey: damus_state.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles)
+                    ProfilePictureSelector(pubkey: damus_state.pubkey, callback: uploadedProfilePicture(image_url:))
                         .offset(y: -(pfp_size/2.0)) // Increase if set a frame
 
                    Spacer()
@@ -223,6 +223,10 @@ struct EditMetadataView: View {
             }
         }
         .ignoresSafeArea(edges: .top)
+    }
+    
+    func uploadedProfilePicture(image_url: URL?) {
+        picture = image_url?.absoluteString ?? ""
     }
 }
 
