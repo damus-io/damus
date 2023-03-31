@@ -10,12 +10,12 @@ import SwiftUI
 struct EditProfilePictureControl: View {
     
     let pubkey: String
+    @Binding var profile_image: URL?
+    let callback: (URL?) -> Void
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
     
-    @Binding var profile_image: URL?
-    @Binding var image_uploading: Bool
-    
+    @State private var uploading = false
     @State private var show_camera = false
     @State private var show_library = false
     
@@ -33,11 +33,15 @@ struct EditProfilePictureControl: View {
                 Text("Take Photo")
             }
         } label: {
-            Image(systemName: "camera")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 25, height: 25)
-                .foregroundColor(DamusColors.white)
+            if uploading {
+                ProgressView()
+            } else {
+                Image(systemName: "camera")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 25, height: 25)
+                    .foregroundColor(DamusColors.white)
+            }
         }
         .sheet(isPresented: $show_camera) {
             PostView.ImagePicker(sourceType: .camera, pubkey: pubkey, imagesOnly: true) { img in
@@ -56,24 +60,25 @@ struct EditProfilePictureControl: View {
     }
     
     private func handle_upload(media: MediaUpload) {
+        uploading = true
         let uploader = get_media_uploader(pubkey)
-        image_uploading = true
         Task {
             let res = await image_upload.start(media: media, uploader: uploader)
             
             switch res {
-            case .success(let url):
-                account.profile_image = url
-                profile_image = URL(string: url)
+            case .success(let urlString):
+                let url = URL(string: urlString)
+                profile_image = url
+                callback(url)
             case .failed(let error):
                 if let error {
                     print("Error uploading profile image \(error.localizedDescription)")
                 } else {
                     print("Error uploading image :(")
                 }
+                callback(nil)
             }
-            
-            image_uploading = false
+            uploading = false
         }
     }
 }
