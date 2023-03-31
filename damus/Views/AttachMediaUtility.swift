@@ -40,9 +40,9 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
     request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
     
     switch mediaToUpload {
-    case .image(let img):
+    case .image(let url):
         do {
-            mediaData = try Data(contentsOf: img)
+            mediaData = try Data(contentsOf: url)
         } catch {
             return .failed(error)
         }
@@ -113,13 +113,50 @@ extension PostView {
                     onVideoPicked(videoURL)
                 } else if let imageURL = info[UIImagePickerController.InfoKey.imageURL] as? URL {
                     // Handle the selected image
-                    self.onImagePicked(imageURL)
+                    onImagePicked(imageURL)
+                } else if let cameraImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
+                    if let imageURL = saveImageToTemporaryFolder(image: cameraImage, imageType: "jpeg") {
+                        onImagePicked(imageURL)
+                    }
+                } else if let editedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage {
+                    if let editedImageURL = saveImageToTemporaryFolder(image: editedImage) {
+                        onImagePicked(editedImageURL)
+                    }
                 }
                 presentationMode.dismiss()
             }
 
             func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
                 presentationMode.dismiss()
+            }
+            
+            func saveImageToTemporaryFolder(image: UIImage, imageType: String = "png") -> URL? {
+                // Convert UIImage to Data
+                let imageData: Data?
+                if imageType.lowercased() == "jpeg" {
+                    imageData = image.jpegData(compressionQuality: 1.0)
+                } else {
+                    imageData = image.pngData()
+                }
+
+                guard let data = imageData else {
+                    print("Failed to convert UIImage to Data.")
+                    return nil
+                }
+
+                // Generate a temporary URL with a unique filename
+                let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+                let uniqueImageName = "\(UUID().uuidString).\(imageType)"
+                let temporaryImageURL = temporaryDirectoryURL.appendingPathComponent(uniqueImageName)
+
+                // Save the image data to the temporary URL
+                do {
+                    try data.write(to: temporaryImageURL)
+                    return temporaryImageURL
+                } catch {
+                    print("Error saving image data to temporary URL: \(error.localizedDescription)")
+                    return nil
+                }
             }
         }
 
