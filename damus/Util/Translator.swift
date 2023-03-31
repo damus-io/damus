@@ -20,18 +20,18 @@ public struct Translator {
         self.userSettingsStore = userSettingsStore
     }
 
-    public func translate(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> TranslationWithLanguage? {
+    public func translate(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> String? {
         switch userSettingsStore.translation_service {
         case .libretranslate:
             return try await translateWithLibreTranslate(text, from: sourceLanguage, to: targetLanguage)
         case .deepl:
             return try await translateWithDeepL(text, from: sourceLanguage, to: targetLanguage)
         case .none:
-            return nil
+            return text
         }
     }
 
-    private func translateWithLibreTranslate(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> TranslationWithLanguage? {
+    private func translateWithLibreTranslate(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> String? {
         let url = try makeURL(userSettingsStore.libretranslate_url, path: "/translate")
 
         var request = URLRequest(url: url)
@@ -51,12 +51,10 @@ public struct Translator {
             let translatedText: String
         }
         let response: Response = try await decodedData(for: request)
-        let translation = response.translatedText
-
-        return TranslationWithLanguage(translation: translation, language: targetLanguage)
+        return response.translatedText
     }
 
-    private func translateWithDeepL(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> TranslationWithLanguage? {
+    private func translateWithDeepL(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> String? {
         if userSettingsStore.deepl_api_key == "" {
             return nil
         }
@@ -70,9 +68,10 @@ public struct Translator {
 
         struct RequestBody: Encodable {
             let text: [String]
+            let source_lang: String
             let target_lang: String
         }
-        let body = RequestBody(text: [text], target_lang: targetLanguage.uppercased())
+        let body = RequestBody(text: [text], source_lang: sourceLanguage.uppercased(), target_lang: targetLanguage.uppercased())
         request.httpBody = try encoder.encode(body)
 
         struct Response: Decodable {
@@ -84,13 +83,7 @@ public struct Translator {
         }
 
         let response: Response = try await decodedData(for: request)
-
-        if response.translations.isEmpty {
-            return nil
-        }
-
-        let translation = response.translations.map { $0.text }.joined(separator: " ")
-        return TranslationWithLanguage(translation: translation, language: response.translations.first!.detected_source_language)
+        return response.translations.map { $0.text }.joined(separator: " ")
     }
 
     private func makeURL(_ baseUrl: String, path: String) throws -> URL {
@@ -109,11 +102,6 @@ public struct Translator {
         let result = try decoder.decode(Output.self, from: data)
         return result
     }
-}
-
-public struct TranslationWithLanguage {
-    let translation: String
-    let language: String
 }
 
 private extension URLSession {

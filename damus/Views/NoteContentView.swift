@@ -95,11 +95,13 @@ struct NoteContentView: View {
                 }
             }
 
-            if with_padding {
-                translateView
-                    .padding(.horizontal)
-            } else {
-                translateView
+            if size == .selected || damus_state.settings.auto_translate {
+                if with_padding {
+                    translateView
+                        .padding(.horizontal)
+                } else {
+                    translateView
+                }
             }
 
             if show_images && artifacts.images.count > 0 {
