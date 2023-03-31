@@ -127,12 +127,12 @@ extension View {
     }
 }
 
-//struct CreateAccountView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        let model = CreateAccountModel(real: "", nick: "jb55", about: "")
-//        return CreateAccountView(account: model)
-//    }
-//}
+struct CreateAccountView_Previews: PreviewProvider {
+    static var previews: some View {
+        let model = CreateAccountModel(real: "", nick: "jb55", about: "")
+        return CreateAccountView(account: model)
+    }
+}
 
 func KeyText(_ text: Binding<String>) -> some View {
     let decoded = hex_decode(text.wrappedValue)!
