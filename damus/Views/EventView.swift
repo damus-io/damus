@@ -25,7 +25,16 @@ func eventviewsize_to_font(_ size: EventViewKind) -> Font {
     }
 }
 
-
+func eventviewsize_to_uifont(_ size: EventViewKind) -> UIFont {
+    switch size {
+    case .small:
+        return .preferredFont(forTextStyle: .body)
+    case .normal:
+        return .preferredFont(forTextStyle: .body)
+    case .selected:
+        return .preferredFont(forTextStyle: .title2)
+    }
+}
 
 struct EventView: View {
     let event: NostrEvent

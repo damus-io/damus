@@ -63,7 +63,7 @@ struct NoteContentView: View {
     }
 
     var translateView: some View {
-        TranslateView(damus_state: damus_state, event: event)
+        TranslateView(damus_state: damus_state, event: event, size: self.size)
     }
     
     var previewView: some View {
@@ -85,7 +85,7 @@ struct NoteContentView: View {
     var MainContent: some View {
         VStack(alignment: .leading) {
             if size == .selected {
-                SelectableText(attributedString: artifacts.content)
+                SelectableText(attributedString: artifacts.content, size: self.size)
             } else {
                 if with_padding {
                     truncatedText
