@@ -10,6 +10,7 @@ import SwiftUI
 struct ProfilePictureSelector: View {
 
     let pubkey: String
+    var size: CGFloat = 80.0
     let callback: (URL?) -> Void
 
     @State var profile_image: URL?
@@ -17,8 +18,7 @@ struct ProfilePictureSelector: View {
     var body: some View {
         let highlight: Highlight = .custom(Color.white, 2.0)
         ZStack {
-            EditProfilePictureView(url: $profile_image, fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: 80.0, highlight: highlight)
-                .opacity(0.5)
+            EditProfilePictureView(url: $profile_image, fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: size, highlight: highlight)
             EditProfilePictureControl(pubkey: pubkey, profile_image: $profile_image, callback: callback)
         }
     }
