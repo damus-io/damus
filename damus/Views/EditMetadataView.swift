@@ -102,7 +102,7 @@ struct EditMetadataView: View {
         let m_metadata_ev = make_metadata_event(keypair: damus_state.keypair, metadata: metadata)
         
         if let metadata_ev = m_metadata_ev {
-            damus_state.pool.send(.event(metadata_ev))
+            damus_state.postbox.send(metadata_ev)
         }
     }
 

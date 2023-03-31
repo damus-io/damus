@@ -130,7 +130,8 @@ struct DMChatView: View {
 
         dms.draft = ""
 
-        damus_state.pool.send(.event(dm))
+        damus_state.postbox.send(dm)
+
         end_editing()
     }
 

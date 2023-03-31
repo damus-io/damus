@@ -182,6 +182,7 @@
 		4CE0E2B229A3DF6900DB4CA2 /* LoadMoreButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0E2B129A3DF6900DB4CA2 /* LoadMoreButton.swift */; };
 		4CE0E2B629A3ED5500DB4CA2 /* InnerTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0E2B529A3ED5500DB4CA2 /* InnerTimelineView.swift */; };
 		4CE4F0F229D4FCFA005914DB /* DebouncedOnChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE4F0F129D4FCFA005914DB /* DebouncedOnChange.swift */; };
+		4CE4F0F429D779B5005914DB /* PostBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE4F0F329D779B5005914DB /* PostBox.swift */; };
 		4CE4F8CD281352B30009DFBB /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE4F8CC281352B30009DFBB /* Notifications.swift */; };
 		4CE4F9DE2852768D00C00DD9 /* ConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE4F9DD2852768D00C00DD9 /* ConfigView.swift */; };
 		4CE4F9E1285287B800C00DD9 /* TextFieldAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE4F9E0285287B800C00DD9 /* TextFieldAlert.swift */; };
@@ -568,6 +569,7 @@
 		4CE0E2B129A3DF6900DB4CA2 /* LoadMoreButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadMoreButton.swift; sourceTree = "<group>"; };
 		4CE0E2B529A3ED5500DB4CA2 /* InnerTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InnerTimelineView.swift; sourceTree = "<group>"; };
 		4CE4F0F129D4FCFA005914DB /* DebouncedOnChange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebouncedOnChange.swift; sourceTree = "<group>"; };
+		4CE4F0F329D779B5005914DB /* PostBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostBox.swift; sourceTree = "<group>"; };
 		4CE4F8CC281352B30009DFBB /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
 		4CE4F9DD2852768D00C00DD9 /* ConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigView.swift; sourceTree = "<group>"; };
 		4CE4F9E0285287B800C00DD9 /* TextFieldAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldAlert.swift; sourceTree = "<group>"; };
@@ -907,6 +909,7 @@
 		4C7FF7D628233637009601DB /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				4CE4F0F329D779B5005914DB /* PostBox.swift */,
 				7C0F392D29B57C8F0039859C /* Extensions */,
 				4CE879492995B58700F758CC /* Relays */,
 				4CF0ABEA29844B2F00D66079 /* AnyCodable */,
@@ -1630,6 +1633,7 @@
 				3AA59D1D2999B0400061C48E /* DraftsModel.swift in Sources */,
 				3169CAED294FCCFC00EE4006 /* Constants.swift in Sources */,
 				4CB9D4A72992D02B00A9A7E4 /* ProfileNameView.swift in Sources */,
+				4CE4F0F429D779B5005914DB /* PostBox.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

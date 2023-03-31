@@ -234,9 +234,9 @@ struct ContentView: View {
     
     func MaybeReportView(target: ReportTarget) -> some View {
         Group {
-            if let ds = damus_state {
-                if let sec = ds.keypair.privkey {
-                    ReportView(pool: ds.pool, target: target, privkey: sec)
+            if let damus_state {
+                if let sec = damus_state.keypair.privkey {
+                    ReportView(postbox: damus_state.postbox, target: target, privkey: sec)
                 } else {
                     EmptyView()
                 }
@@ -396,7 +396,7 @@ struct ContentView: View {
             let target = notif.object as! FollowTarget
             let pk = target.pubkey
             
-            if let ev = unfollow_user(pool: damus.pool,
+            if let ev = unfollow_user(postbox: damus.postbox,
                                       our_contacts: damus.contacts.event,
                                       pubkey: damus.pubkey,
                                       privkey: privkey,
@@ -447,7 +447,7 @@ struct ContentView: View {
                 //let to_relays = tup.1
                 print("post \(post.content)")
                 let new_ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
-                self.damus_state?.pool.send(.event(new_ev))
+                self.damus_state?.postbox.send(new_ev)
             case .cancel:
                 active_sheet = nil
                 print("post cancelled")
@@ -502,7 +502,7 @@ struct ContentView: View {
                 }
                 
                 damus_state?.contacts.set_mutelist(mutelist)
-                ds.pool.send(.event(mutelist))
+                ds.postbox.send(mutelist)
 
                 confirm_overwrite_mutelist = false
                 confirm_block = false
@@ -534,7 +534,7 @@ struct ContentView: View {
                         return
                     }
                     damus_state?.contacts.set_mutelist(ev)
-                    ds.pool.send(.event(ev))
+                    ds.postbox.send(ev)
                 }
             }
         }, message: {
@@ -615,7 +615,8 @@ struct ContentView: View {
                                       relay_metadata: metadatas,
                                       drafts: Drafts(),
                                       events: EventCache(),
-                                      bookmarks: BookmarksManager(pubkey: pubkey)
+                                      bookmarks: BookmarksManager(pubkey: pubkey),
+                                      postbox: PostBox(pool: pool)
         )
         home.damus_state = self.damus_state!
         
@@ -793,6 +794,8 @@ func find_event(state: DamusState, evid: String, search_type: SearchType, find_f
         }
         
         switch ev {
+        case .ok:
+            break
         case .event(_, let ev):
             has_event = true
             callback(ev)

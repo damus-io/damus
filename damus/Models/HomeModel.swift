@@ -333,7 +333,11 @@ class HomeModel: ObservableObject {
                 
                 self.loading = false
                 break
+                
+            case .ok:
+                break
             }
+            
         }
     }
 

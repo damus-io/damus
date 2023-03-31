@@ -256,7 +256,6 @@ class RelayPool {
             }
         }
         
-        // handle reconnect logic, etc?
         for handler in handlers {
             handler.callback(relay_id, event)
         }

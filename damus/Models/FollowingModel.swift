@@ -58,6 +58,8 @@ class FollowingModel {
             break
         case .nostr_event(let nev):
             switch nev {
+            case .ok:
+                break
             case .event(_, let ev):
                 if ev.kind == 0 {
                     process_metadata_event(our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)

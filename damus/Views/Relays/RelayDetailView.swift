@@ -46,7 +46,7 @@ struct RelayDetailView: View {
                             }
 
                             process_contact_event(state: state, ev: new_ev)
-                            state.pool.send(.event(new_ev))
+                            state.postbox.send(new_ev)
                             dismiss()
                         }) {
                             Text("Disconnect From Relay", comment: "Button to disconnect from the relay.")
@@ -60,7 +60,7 @@ struct RelayDetailView: View {
                                 return
                             }
                             process_contact_event(state: state, ev: ev_after_add)
-                            state.pool.send(.event(ev_after_add))
+                            state.postbox.send(ev_after_add)
                             dismiss()
                         }) {
                             Text("Connect To Relay", comment: "Button to connect to the relay.")

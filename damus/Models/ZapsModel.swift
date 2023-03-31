@@ -46,6 +46,8 @@ class ZapsModel: ObservableObject {
         }
         
         switch resp {
+        case .ok:
+            break
         case .notice:
             break
         case .eose:

@@ -154,7 +154,7 @@ struct EventActionBar: View {
 
         generator.impactOccurred()
         
-        damus_state.pool.send(.event(like_ev))
+        damus_state.postbox.send(like_ev)
     }
 }
 

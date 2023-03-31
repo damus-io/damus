@@ -94,6 +94,9 @@ class FollowersModel: ObservableObject {
             } else if sub_id == self.profiles_id {
                 damus_state.pool.unsubscribe(sub_id: profiles_id, to: [relay_id])
             }
+            
+        case .ok:
+            break
         }
     }
 }

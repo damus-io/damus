@@ -133,6 +133,8 @@ class ProfileModel: ObservableObject, Equatable {
                 return
             }
             switch resp {
+            case .ok:
+                break
             case .event(_, let ev):
                 add_event(ev)
             case .notice(let notice):
