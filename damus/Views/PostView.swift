@@ -232,7 +232,7 @@ struct PostView: View {
             }
         }
         .sheet(isPresented: $attach_camera) {
-            ImagePicker(sourceType: .camera, damusState: damus_state) { img in
+            ImagePicker(sourceType: .camera, pubkey: damus_state.pubkey, imagesOnly: false) { img in
                 handle_upload(media: .image(img))
             } onVideoPicked: { url in
                 handle_upload(media: .video(url))

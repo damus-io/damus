@@ -32,6 +32,49 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
     }
 }
 
+struct EditProfilePictureView: View {
+    
+    @Binding var url: URL?
+    
+    let fallbackUrl: URL?
+    let pubkey: String
+    let size: CGFloat
+    let highlight: Highlight
+
+    var PlaceholderColor: Color {
+        return id_to_color(pubkey)
+    }
+
+    var Placeholder: some View {
+        PlaceholderColor
+            .frame(width: size, height: size)
+            .clipShape(Circle())
+            .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
+            .padding(2)
+    }
+
+    var body: some View {
+        ZStack {
+            Color(uiColor: .systemBackground)
+    
+            KFAnimatedImage(url)
+                .imageContext(.pfp)
+                .onFailure(fallbackUrl: fallbackUrl, cacheKey: url?.absoluteString)
+                .cancelOnDisappear(true)
+                .configure { view in
+                    view.framePreloadCount = 3
+                }
+                .placeholder { _ in
+                    Placeholder
+                }
+                .scaledToFill()
+        }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+        .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
+    }
+}
+
 struct InnerProfilePicView: View {
     
     let url: URL?

@@ -12,6 +12,8 @@ struct CreateAccountView: View {
     @State var is_light: Bool = false
     @State var is_done: Bool = false
     @State var reading_eula: Bool = false
+    @State var profile_image: URL? = nil
+    @State var image_uploading: Bool = false
     
     func SignupForm<FormContent: View>(@ViewBuilder content: () -> FormContent) -> some View {
         return VStack(alignment: .leading, spacing: 10.0, content: content)
@@ -32,7 +34,7 @@ struct CreateAccountView: View {
                     .font(.title.bold())
                     .foregroundColor(.white)
                 
-                ProfilePictureSelector(account: account)
+                ProfilePictureSelector(account: account, profile_image: $profile_image, image_uploading: $image_uploading)
                 
                 HStack(alignment: .top) {
                     VStack {
@@ -81,6 +83,8 @@ struct CreateAccountView: View {
                     self.is_done = true
                 }
                 .padding()
+                .disabled(image_uploading)
+                .opacity(image_uploading ? 0.5 : 1)
             }
             .padding(.leading, 14.0)
             .padding(.trailing, 20.0)
@@ -118,12 +122,12 @@ extension View {
     }
 }
 
-struct CreateAccountView_Previews: PreviewProvider {
-    static var previews: some View {
-        let model = CreateAccountModel(real: "", nick: "jb55", about: "")
-        return CreateAccountView(account: model)
-    }
-}
+//struct CreateAccountView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        let model = CreateAccountModel(real: "", nick: "jb55", about: "")
+//        return CreateAccountView(account: model)
+//    }
+//}
 
 func KeyText(_ text: Binding<String>) -> some View {
     let decoded = hex_decode(text.wrappedValue)!

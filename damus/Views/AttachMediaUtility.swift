@@ -89,7 +89,7 @@ extension PostView {
         let sourceType: UIImagePickerController.SourceType
         let pubkey: String
         let imagesOnly: Bool
-        let onImagePicked: (UIImage) -> Void
+        let onImagePicked: (URL) -> Void
         let onVideoPicked: (URL) -> Void
 
         final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {

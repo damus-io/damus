@@ -7,15 +7,17 @@
 
 import SwiftUI
 
-struct ProfilePictureEditView: View {
+struct EditProfilePictureControl: View {
     
     @StateObject var account: CreateAccountModel
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
-
+    
+    @Binding var profile_image: URL?
+    @Binding var image_uploading: Bool
     
     @State private var show_camera = false
     @State private var show_library = false
-
+    
     var body: some View {
         Menu {
             Button(action: {
@@ -54,15 +56,14 @@ struct ProfilePictureEditView: View {
     
     private func handle_upload(media: MediaUpload) {
         let uploader = get_media_uploader(account.pubkey)
-        
+        image_uploading = true
         Task {
             let res = await image_upload.start(media: media, uploader: uploader)
             
             switch res {
             case .success(let url):
-                print("GOT URL: \(url)")
                 account.profile_image = url
-                
+                profile_image = URL(string: url)
             case .failed(let error):
                 if let error {
                     print("Error uploading profile image \(error.localizedDescription)")
@@ -70,13 +71,15 @@ struct ProfilePictureEditView: View {
                     print("Error uploading image :(")
                 }
             }
+            
+            image_uploading = false
         }
     }
 }
 
-struct ProfilePictureEditView_Previews: PreviewProvider {
-    static var previews: some View {
-        let model = CreateAccountModel(real: "", nick: "jb55", about: "")
-        ProfilePictureEditView(account: model)
-    }
-}
+//struct ProfilePictureEditView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        let model = CreateAccountModel(real: "", nick: "jb55", about: "")
+//        ProfilePictureEditView(account: model)
+//    }
+//}
