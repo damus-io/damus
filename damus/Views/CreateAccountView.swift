@@ -32,7 +32,7 @@ struct CreateAccountView: View {
                     .font(.title.bold())
                     .foregroundColor(.white)
                 
-                ProfilePictureSelector(pubkey: account.pubkey)
+                ProfilePictureSelector(account: account)
                 
                 HStack(alignment: .top) {
                     VStack {

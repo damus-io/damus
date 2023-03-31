@@ -87,8 +87,9 @@ extension PostView {
         private var presentationMode
 
         let sourceType: UIImagePickerController.SourceType
-        let damusState: DamusState
-        let onImagePicked: (URL) -> Void
+        let pubkey: String
+        let imagesOnly: Bool
+        let onImagePicked: (UIImage) -> Void
         let onVideoPicked: (URL) -> Void
 
         final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
@@ -139,9 +140,9 @@ extension PostView {
         func makeUIViewController(context: UIViewControllerRepresentableContext<ImagePicker>) -> UIImagePickerController {
             let picker = UIImagePickerController()
             picker.sourceType = sourceType
-            let mediaUploader = get_media_uploader(damusState.keypair.pubkey)
-            picker.mediaTypes = ["public.image", "com.compuserve.gif"]
-            if mediaUploader.supportsVideo {
+            let mediaUploader = get_media_uploader(pubkey)
+            picker.mediaTypes = ["public.image"]
+            if mediaUploader.supportsVideo && !imagesOnly {
                 picker.mediaTypes.append("public.movie")
             }
             picker.delegate = context.coordinator
