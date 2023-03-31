@@ -131,6 +131,8 @@ struct DMChatView: View {
         dms.draft = ""
 
         damus_state.postbox.send(dm)
+        
+        handle_incoming_dm(ev: dm, our_pubkey: damus_state.pubkey, dms: damus_state.dms, prev_events: NewEventsBits())
 
         end_editing()
     }
