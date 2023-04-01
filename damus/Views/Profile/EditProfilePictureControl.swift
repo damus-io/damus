@@ -24,13 +24,13 @@ struct EditProfilePictureControl: View {
             Button(action: {
                 self.show_library = true
             }) {
-                Text("Choose from Library")
+                Text("Choose from Library", comment: "Option to select photo from library")
             }
             
             Button(action: {
                 self.show_camera = true
             }) {
-                Text("Take Photo")
+                Text("Take Photo", comment: "Option to take a photo with the camera")
             }
         } label: {
             if viewModel.isLoading {
