@@ -18,17 +18,13 @@ struct ReplyView: View {
     let replying_to: NostrEvent
     let damus: DamusState
     
-    @State var originalReferences: [ReferencedId] = []
-    @State var references: [ReferencedId] = []
-    
+    @Binding var originalReferences: [ReferencedId]
+    @Binding var references: [ReferencedId]
     @State var participantsShown: Bool = false
     
     var ReplyingToSection: some View {
-        VStack(alignment: .leading) {
-            HStack(alignment: .bottom) {
-                Text("Replying to", comment: "Indicating that the user is replying to the following listed people.")
-                    .foregroundColor(.gray)
-                    .font(.footnote)
+        HStack {
+            Group {
                 let names = references.pRefs
                     .map { pubkey in
                         let pk = pubkey.ref_id
@@ -36,6 +32,9 @@ struct ReplyView: View {
                         return "@" + Profile.displayName(profile: prof, pubkey: pk).username
                     }
                     .joined(separator: " ")
+                Text("Replying to ", comment: "Indicating that the user is replying to the following listed people.")
+                    .foregroundColor(.gray)
+                    .font(.footnote) +
                 Text(names)
                     .foregroundColor(.accentColor)
                     .font(.footnote)
@@ -44,50 +43,42 @@ struct ReplyView: View {
                 participantsShown.toggle()
             }
             .sheet(isPresented: $participantsShown) {
-                ParticipantsView(damus_state: damus, references: $references, originalReferences: $originalReferences)
+                if #available(iOS 16.0, *) {
+                    ParticipantsView(damus_state: damus, references: $references, originalReferences: $originalReferences)
+                        .presentationDetents([.medium, .large])
+                        .presentationDragIndicator(.visible)
+                } else {
+                    ParticipantsView(damus_state: damus, references: $references, originalReferences: $originalReferences)
+                }
             }
+            .padding(.leading, 75)
+            Spacer()
         }
     }
         
     var body: some View {
-        VStack {
-            ScrollViewReader { scroller in
-                ScrollView {
+        VStack(alignment: .leading) {
 
-                    EventView(damus: damus, event: replying_to, options: [.no_action_bar])
-                        .background(GeometryReader { geometry in
-                            let eventHeight = geometry.frame(in: .global).height
-                            Rectangle()
-                                .fill(Color.gray.opacity(0.25))
-                                .frame(width: 2, height: eventHeight)
-                                .offset(x: 25, y: 40)
-                        })
-                    
-                    ReplyingToSection
-
-                
-                    PostView(replying_to: replying_to, references: references, damus_state: damus)
-                        .frame(minHeight: 500, maxHeight: .infinity)
-                        .id("post")
-                }
-                .frame(maxHeight: .infinity)
-                .onAppear {
-                    scroll_to_event(scroller: scroller, id: "post", delay: 1.0, animate: true, anchor: .top)
-                }
-            }
+            EventView(damus: damus, event: replying_to, options: [.no_action_bar])
+                .padding()
+                .background(GeometryReader { geometry in
+                    let eventHeight = geometry.frame(in: .global).height
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.25))
+                        .frame(width: 2, height: eventHeight + 7)
+                        .offset(x: 25, y: 40)
+                        .padding(.leading)
+                })
+            
+            ReplyingToSection
+                .background(GeometryReader { geometry in
+                    let replyingToHeight = geometry.frame(in: .global).height
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.25))
+                        .frame(width: 2, height: replyingToHeight)
+                        .offset(x: 25, y: 40)
+                        .padding(.leading)
+                })
         }
-        .padding()
-        .onAppear {
-            references =  gather_reply_ids(our_pubkey: damus.pubkey, from: replying_to)
-            originalReferences = references
-        }
-    }
-    
-    
-}
-
-struct ReplyView_Previews: PreviewProvider {
-    static var previews: some View {
-        ReplyView(replying_to: NostrEvent(content: "hi", pubkey: "pubkey"), damus: test_damus_state(), references: [])
     }
 }
