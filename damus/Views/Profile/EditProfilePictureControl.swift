@@ -44,14 +44,14 @@ struct EditProfilePictureControl: View {
             }
         }
         .sheet(isPresented: $show_camera) {
-            PostView.ImagePicker(sourceType: .camera, pubkey: pubkey, imagesOnly: true) { img in
+            ImagePicker(sourceType: .camera, pubkey: pubkey, imagesOnly: true) { img in
                 handle_upload(media: .image(img))
             } onVideoPicked: { url in
                 print("Cannot upload videos as profile image")
             }
         }
         .sheet(isPresented: $show_library) {
-            PostView.ImagePicker(sourceType: .photoLibrary, pubkey: pubkey, imagesOnly: true) { img in
+            ImagePicker(sourceType: .photoLibrary, pubkey: pubkey, imagesOnly: true) { img in
                 handle_upload(media: .image(img))
             } onVideoPicked: { url in
                 print("Cannot upload videos as profile image")
