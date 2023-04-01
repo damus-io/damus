@@ -39,14 +39,11 @@ struct ProfileImageContainerView: View {
     }
 }
 
-struct ProfileZoomView: View {
-    
-    let pubkey: String
-    let profiles: Profiles
+struct NavDismissBarView: View {
     
     @Environment(\.presentationMode) var presentationMode
     
-    var navBarView: some View {
+    var body: some View {
         HStack {
             Button(action: {
                 presentationMode.wrappedValue.dismiss()
@@ -61,6 +58,14 @@ struct ProfileZoomView: View {
         }
         .padding()
     }
+}
+
+struct ProfilePicImageView: View {
+    
+    let pubkey: String
+    let profiles: Profiles
+    
+    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         ZStack {
@@ -79,7 +84,7 @@ struct ProfileZoomView: View {
                 presentationMode.wrappedValue.dismiss()
             }))
         }
-        .overlay(navBarView, alignment: .top)
+        .overlay(NavDismissBarView(), alignment: .top)
     }
 }
 
@@ -87,7 +92,7 @@ struct ProfileZoomView_Previews: PreviewProvider {
     static let pubkey = "ca48854ac6555fed8e439ebb4fa2d928410e0eef13fa41164ec45aaaa132d846"
     
     static var previews: some View {
-        ProfileZoomView(
+        ProfilePicImageView(
             pubkey: pubkey,
             profiles: make_preview_profiles(pubkey))
     }

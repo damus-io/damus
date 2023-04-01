@@ -10,8 +10,21 @@ import UIKit
 
 
 enum MediaUpload {
-    case image(UIImage)
+    case image(URL)
     case video(URL)
+
+    var genericFileName: String {
+        "damus_generic_filename.\(file_extension)"
+    }
+
+    var file_extension: String {
+        switch self {
+        case .image(let url):
+            return url.pathExtension
+        case .video(let url):
+            return url.pathExtension
+        }
+    }
     
     var is_image: Bool {
         if case .image = self {

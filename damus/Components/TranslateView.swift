@@ -11,6 +11,7 @@ import NaturalLanguage
 struct TranslateView: View {
     let damus_state: DamusState
     let event: NostrEvent
+    let size: EventViewKind
     
     @State var checkingTranslationStatus: Bool = false
     @State var currentLanguage: String = "en"
@@ -35,7 +36,7 @@ struct TranslateView: View {
             }
             .translate_button_style()
             
-            SelectableText(attributedString: artifacts.content)
+            SelectableText(attributedString: artifacts.content, size: self.size)
         }
     }
     
@@ -135,6 +136,6 @@ extension View {
 struct TranslateView_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state()
-        TranslateView(damus_state: ds, event: test_event)
+        TranslateView(damus_state: ds, event: test_event, size: .normal)
     }
 }

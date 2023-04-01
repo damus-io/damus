@@ -111,7 +111,7 @@ struct RecommendedRelayView: View {
             return
         }
         process_contact_event(state: damus, ev: ev_after_add)
-        damus.pool.send(.event(ev_after_add))
+        damus.postbox.send(ev_after_add)
     }
 }
 

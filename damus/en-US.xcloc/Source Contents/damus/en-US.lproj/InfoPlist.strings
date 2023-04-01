@@ -2,7 +2,11 @@
 "CFBundleDisplayName" = "Damus";
 /* Bundle name */
 "CFBundleName" = "damus";
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "Damus needs access to your camera if you want to upload photos from it";
 /* Privacy - Face ID Usage Description */
 "NSFaceIDUsageDescription" = "Local authentication to access private key";
+/* Privacy - Microphone Usage Description */
+"NSMicrophoneUsageDescription" = "Damus needs access to your microphone if you want to upload recorded videos from it";
 /* Privacy - Photo Library Additions Usage Description */
 "NSPhotoLibraryAddUsageDescription" = "Granting Damus access to your photos allows you to save images.";

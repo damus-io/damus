@@ -2,7 +2,7 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
   <file original="damus/en-US.lproj/InfoPlist.strings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.2" build-num="14C18"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.3" build-num="14E222b"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
@@ -15,10 +15,20 @@
         <target>damus</target>
         <note>Bundle name</note>
       </trans-unit>
+      <trans-unit id="NSCameraUsageDescription" xml:space="preserve">
+        <source>Damus needs access to your camera if you want to upload photos from it</source>
+        <target>Damus needs access to your camera if you want to upload photos from it</target>
+        <note>Privacy - Camera Usage Description</note>
+      </trans-unit>
       <trans-unit id="NSFaceIDUsageDescription" xml:space="preserve">
         <source>Local authentication to access private key</source>
         <target>Local authentication to access private key</target>
         <note>Privacy - Face ID Usage Description</note>
+      </trans-unit>
+      <trans-unit id="NSMicrophoneUsageDescription" xml:space="preserve">
+        <source>Damus needs access to your microphone if you want to upload recorded videos from it</source>
+        <target>Damus needs access to your microphone if you want to upload recorded videos from it</target>
+        <note>Privacy - Microphone Usage Description</note>
       </trans-unit>
       <trans-unit id="NSPhotoLibraryAddUsageDescription" xml:space="preserve">
         <source>Granting Damus access to your photos allows you to save images.</source>
@@ -29,7 +39,7 @@
   </file>
   <file original="damus/en-US.lproj/Localizable.strings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.2" build-num="14C18"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.3" build-num="14E222b"/>
     </header>
     <body>
       <trans-unit id="%@" xml:space="preserve">
@@ -139,12 +149,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <note>Button text to add bookmark to a note.
    Context menu option for adding a note bookmark.</note>
       </trans-unit>
-      <trans-unit id="Add Relay" xml:space="preserve">
-        <source>Add Relay</source>
-        <target>Add Relay</target>
-        <note>Button to add recommended relay server.
-   Label for section for adding a relay server.</note>
-      </trans-unit>
       <trans-unit id="Add all" xml:space="preserve">
         <source>Add all</source>
         <target>Add all</target>
@@ -168,7 +172,8 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Anonymous" xml:space="preserve">
         <source>Anonymous</source>
         <target>Anonymous</target>
-        <note>Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.</note>
+        <note>Placeholder author name of the anonymous person who zapped an event.
+   Placeholder display name of anonymous user.</note>
       </trans-unit>
       <trans-unit id="Any" xml:space="preserve">
         <source>Any</source>
@@ -179,6 +184,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Are you sure you want to repost this?</source>
         <target>Are you sure you want to repost this?</target>
         <note>Alert message to ask if user wants to repost a post.</note>
+      </trans-unit>
+      <trans-unit id="Automatically translate notes" xml:space="preserve">
+        <source>Automatically translate notes</source>
+        <target>Automatically translate notes</target>
+        <note>Toggle to automatically translate notes.</note>
       </trans-unit>
       <trans-unit id="Awesome post!" xml:space="preserve">
         <source>Awesome post!</source>
@@ -296,6 +306,21 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Comment</target>
         <note>Header text to indicate that the text field below it is a comment that will be used to send as part of a zap to the user.</note>
       </trans-unit>
+      <trans-unit id="Connect" xml:space="preserve">
+        <source>Connect</source>
+        <target>Connect</target>
+        <note>Button to connect to recommended relay server.</note>
+      </trans-unit>
+      <trans-unit id="Connect To Relay" xml:space="preserve">
+        <source>Connect To Relay</source>
+        <target>Connect To Relay</target>
+        <note>Label for section for adding a relay server.</note>
+      </trans-unit>
+      <trans-unit id="Connected Relays" xml:space="preserve">
+        <source>Connected Relays</source>
+        <target>Connected Relays</target>
+        <note>Section title for relay servers that are connected.</note>
+      </trans-unit>
       <trans-unit id="Contact" xml:space="preserve">
         <source>Contact</source>
         <target>Contact</target>
@@ -411,7 +436,8 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>DMs</source>
         <target>DMs</target>
         <note>Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
-   Navigation title for view of DMs, where DM is an English abbreviation for Direct Message.</note>
+   Navigation title for view of DMs, where DM is an English abbreviation for Direct Message.
+   Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="Damus" xml:space="preserve">
         <source>Damus</source>
@@ -437,7 +463,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Delete</source>
         <target>Delete</target>
         <note>Button for deleting the users account.
-   Button to delete a relay server that the user connects to.
    Button to remove a user from their blocklist.</note>
       </trans-unit>
       <trans-unit id="Delete Account" xml:space="preserve">
@@ -460,6 +485,16 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Disable animations</target>
         <note>Button to disable image animation</note>
       </trans-unit>
+      <trans-unit id="Disconnect" xml:space="preserve">
+        <source>Disconnect</source>
+        <target>Disconnect</target>
+        <note>Button to disconnect from a relay server.</note>
+      </trans-unit>
+      <trans-unit id="Disconnect From Relay" xml:space="preserve">
+        <source>Disconnect From Relay</source>
+        <target>Disconnect From Relay</target>
+        <note>Button to disconnect from the relay.</note>
+      </trans-unit>
       <trans-unit id="Dismiss" xml:space="preserve">
         <source>Dismiss</source>
         <target>Dismiss</target>
@@ -473,7 +508,7 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Done" xml:space="preserve">
         <source>Done</source>
         <target>Done</target>
-        <note>Button to dismiss wallet selection view for paying Lightning invoice.</note>
+        <note>Button that, when tapped, will finish adding a different user's relays to your relay by hiding the + buttons next to the relays.</note>
       </trans-unit>
       <trans-unit id="EULA" xml:space="preserve">
         <source>EULA</source>
@@ -838,6 +873,11 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <target>Private Key</target>
         <note>Title of the secure field that holds the user's private key.</note>
       </trans-unit>
+      <trans-unit id="Private Zap" xml:space="preserve">
+        <source>Private Zap</source>
+        <target>Private Zap</target>
+        <note>Title of notification when a private zap is received.</note>
+      </trans-unit>
       <trans-unit id="Pro" xml:space="preserve">
         <source>Pro</source>
         <target>Pro</target>
@@ -902,7 +942,9 @@ Picker option to indicate that a zap should be sent privately and not identify t
       <trans-unit id="Relays" xml:space="preserve">
         <source>Relays</source>
         <target>Relays</target>
-        <note>Sidebar menu label for Relays view.</note>
+        <note>Navigation bar title that shows the list of relays for a user.
+   Sidebar menu label for Relays view.
+   Title of relays view</note>
       </trans-unit>
       <trans-unit id="Relays have been notified and clients will be able to use this information to filter content. Thank you!" xml:space="preserve">
         <source>Relays have been notified and clients will be able to use this information to filter content. Thank you!</source>
@@ -1086,6 +1128,11 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <note>Button to show a post from a user who has been blocked.
    Toggle to show or hide user's secret account login key.</note>
       </trans-unit>
+      <trans-unit id="Show +" xml:space="preserve">
+        <source>Show +</source>
+        <target>Show +</target>
+        <note>Button that, when tapped, will show + buttons next to a user's relays.</note>
+      </trans-unit>
       <trans-unit id="Show API Key" xml:space="preserve">
         <source>Show API Key</source>
         <target>Show API Key</target>
@@ -1096,6 +1143,11 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <source>Show more</source>
         <target>Show more</target>
         <note>Button to show entire note.</note>
+      </trans-unit>
+      <trans-unit id="Show only preferred languages on Universe feed" xml:space="preserve">
+        <source>Show only preferred languages on Universe feed</source>
+        <target>Show only preferred languages on Universe feed</target>
+        <note>Toggle to show notes that are only in the device's preferred languages on the Universe feed and hide notes that are in other languages.</note>
       </trans-unit>
       <trans-unit id="Show wallet selector" xml:space="preserve">
         <source>Show wallet selector</source>
@@ -1325,7 +1377,8 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <source>Zap</source>
         <target>Zap</target>
         <note>Accessibility label for zap button
-   Button to send a zap.</note>
+   Button to send a zap.
+   Title of notification when a non-private zap is received.</note>
       </trans-unit>
       <trans-unit id="Zap Amount" xml:space="preserve">
         <source>Zap Amount</source>
@@ -1531,7 +1584,7 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
   </file>
   <file original="damus/en-US.lproj/Localizable.stringsdict" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.2" build-num="14C18"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.3" build-num="14E222b"/>
     </header>
     <body>
       <trans-unit id="/collapsed_event_view_other_notes:dict/NOTES:dict/one:dict/:string" xml:space="preserve">
@@ -1742,6 +1795,36 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
       <trans-unit id="/sats_count:dict/SATS:dict/other:dict/:string" xml:space="preserve">
         <source>%2$@ sats</source>
         <target>%2$@ sats</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zap_notification_no_message:dict/NOTIFICATION:dict/one:dict/:string" xml:space="preserve">
+        <source>You received %2$@ sat from %3$@</source>
+        <target>You received %2$@ sat from %3$@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zap_notification_no_message:dict/NOTIFICATION:dict/other:dict/:string" xml:space="preserve">
+        <source>You received %2$@ sats from %3$@</source>
+        <target>You received %2$@ sats from %3$@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zap_notification_no_message:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%1$#@NOTIFICATION@</source>
+        <target>%1$#@NOTIFICATION@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zap_notification_with_message:dict/NOTIFICATION:dict/one:dict/:string" xml:space="preserve">
+        <source>You received %2$@ sat from %3$@: "%4$@"</source>
+        <target>You received %2$@ sat from %3$@: "%4$@"</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zap_notification_with_message:dict/NOTIFICATION:dict/other:dict/:string" xml:space="preserve">
+        <source>You received %2$@ sats from %3$@: "%4$@"</source>
+        <target>You received %2$@ sats from %3$@: "%4$@"</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/zap_notification_with_message:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%1$#@NOTIFICATION@</source>
+        <target>%1$#@NOTIFICATION@</target>
         <note/>
       </trans-unit>
       <trans-unit id="/zapped_tagged_in_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">

@@ -323,7 +323,7 @@ struct ProfileView: View {
                         is_zoomed.toggle()
                     }
                     .fullScreenCover(isPresented: $is_zoomed) {
-                        ProfileZoomView(pubkey: profile.pubkey, profiles: damus_state.profiles)                        }
+                        ProfilePicImageView(pubkey: profile.pubkey, profiles: damus_state.profiles)                        }
                 
                 Spacer()
                 
@@ -541,7 +541,7 @@ struct KeyView: View {
                     } icon: {
                         Image(systemName: "square.on.square.dashed")
                             .contentShape(Rectangle())
-                            .foregroundColor(.gray)
+                            .foregroundColor(.accentColor)
                             .frame(width: 20, height: 20)
                     }
                     .labelStyle(IconOnlyLabelStyle())

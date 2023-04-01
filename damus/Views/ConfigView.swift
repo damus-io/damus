@@ -293,7 +293,7 @@ struct ConfigView: View {
                 }
                 
                 let ev = created_deleted_account_profile(keypair: full_kp)
-                state.pool.send(.event(ev))
+                state.postbox.send(ev)
                 notify(.logout, ())
             }
         }

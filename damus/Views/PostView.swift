@@ -19,6 +19,7 @@ struct PostView: View {
     @FocusState var focus: Bool
     @State var showPrivateKeyWarning: Bool = false
     @State var attach_media: Bool = false
+    @State var attach_camera: Bool = false
     @State var error: String? = nil
     
     @State var originalReferences: [ReferencedId] = []
@@ -82,11 +83,20 @@ struct PostView: View {
         })
     }
     
+    var CameraButton: some View {
+        Button(action: {
+            attach_camera = true
+        }, label: {
+            Image(systemName: "camera")
+        })
+    }
+    
     var AttachmentBar: some View {
         HStack(alignment: .center) {
             ImageButton
-                .disabled(image_upload.progress != nil)
+            CameraButton
         }
+        .disabled(image_upload.progress != nil)
     }
     
     var PostButton: some View {
@@ -246,6 +256,13 @@ struct PostView: View {
             .padding()
             .sheet(isPresented: $attach_media) {
                 ImagePicker(sourceType: .photoLibrary, damusState: damus_state) { img in
+                    handle_upload(media: .image(img))
+                } onVideoPicked: { url in
+                    handle_upload(media: .video(url))
+                }
+            }
+            .sheet(isPresented: $attach_camera) {
+                ImagePicker(sourceType: .camera, damusState: damus_state) { img in
                     handle_upload(media: .image(img))
                 } onVideoPicked: { url in
                     handle_upload(media: .video(url))

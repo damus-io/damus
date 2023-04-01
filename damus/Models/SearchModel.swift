@@ -131,6 +131,9 @@ func handle_subid_event(pool: RelayPool, relay_id: String, ev: NostrConnectionEv
         case .event(let ev_subid, let ev):
             handle(ev_subid, ev)
             return (ev_subid, false)
+        
+        case .ok:
+            return (nil, false)
 
         case .notice(let note):
             if note.contains("Too many subscription filters") {

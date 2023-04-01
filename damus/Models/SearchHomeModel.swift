@@ -68,6 +68,8 @@ class SearchHomeModel: ObservableObject {
             }
         case .notice(let msg):
             print("search home notice: \(msg)")
+        case .ok:
+            break
         case .eose(let sub_id):
             loading = false
             

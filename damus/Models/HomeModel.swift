@@ -333,7 +333,11 @@ class HomeModel: ObservableObject {
                 
                 self.loading = false
                 break
+                
+            case .ok:
+                break
             }
+            
         }
     }
 
@@ -675,6 +679,7 @@ func process_metadata_event(our_pubkey: String, profiles: Profiles, ev: NostrEve
             
             DispatchQueue.main.async {
                 profiles.validated[ev.pubkey] = validated
+                profiles.nip05_pubkey[nip05] = ev.pubkey
                 notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
             }
         }
@@ -932,30 +937,37 @@ func zap_vibrate(zap_amount: Int64) {
     vibration_generator.impactOccurred()
 }
 
-func describe_zap_type(_ zap: Zap) -> String? {
+func zap_notification_title(_ zap: Zap) -> String {
     if zap.private_request != nil {
-        return "Private"
+        return NSLocalizedString("Private Zap", comment: "Title of notification when a private zap is received.")
+    } else {
+        return NSLocalizedString("Zap", comment: "Title of notification when a non-private zap is received.")
     }
-    
-    return nil
 }
 
-func create_in_app_zap_notification(profiles: Profiles, zap: Zap) {
-    let content = UNMutableNotificationContent()
-    let typ = describe_zap_type(zap).map({ "\($0) " }) ?? ""
-    
-    content.title = typ + "Zap"
-    let satString = zap.invoice.amount == 1000 ? "sat" : "sats"
-    
+func zap_notification_body(profiles: Profiles, zap: Zap, locale: Locale = Locale.current) -> String {
     let src = zap.private_request ?? zap.request.ev
     let anon = event_is_anonymous(ev: src)
     let pk = anon ? "anon" : src.pubkey
     let profile = profiles.lookup(id: pk)
-    let sats = format_msats_abbrev(zap.invoice.amount)
+    let sats = NSNumber(value: (Double(zap.invoice.amount) / 1000.0))
+    let formattedSats = format_msats_abbrev(zap.invoice.amount)
     let name = Profile.displayName(profile: profile, pubkey: pk).display_name
-    let message = src.content.count == 0 ? "" : ": \"\(src.content)\""
-    
-    content.body = "You received \(sats) \(satString) from \(name)\(message)"
+
+    if src.content.isEmpty {
+        let format = localizedStringFormat(key: "zap_notification_no_message", locale: locale)
+        return String(format: format, locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats, name)
+    } else {
+        let format = localizedStringFormat(key: "zap_notification_with_message", locale: locale)
+        return String(format: format, locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats, name, src.content)
+    }
+}
+
+func create_in_app_zap_notification(profiles: Profiles, zap: Zap, locale: Locale = Locale.current) {
+    let content = UNMutableNotificationContent()
+
+    content.title = zap_notification_title(zap)
+    content.body = zap_notification_body(profiles: profiles, zap: zap, locale: locale)
     content.sound = UNNotificationSound.default
 
     let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)

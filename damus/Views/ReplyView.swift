@@ -7,13 +7,6 @@
 
 import SwiftUI
 
-func all_referenced_pubkeys(_ ev: NostrEvent) -> [ReferencedId] {
-    var keys = ev.referenced_pubkeys
-    let ref = ReferencedId(ref_id: ev.pubkey, relay_id: nil, key: "p")
-    keys.insert(ref, at: 0)
-    return keys
-}
-
 struct ReplyView: View {
     let replying_to: NostrEvent
     let damus: DamusState
@@ -35,7 +28,7 @@ struct ReplyView: View {
                 Text("Replying to ", comment: "Indicating that the user is replying to the following listed people.")
                     .foregroundColor(.gray)
                     .font(.footnote) +
-                Text(names)
+                Text(names.isEmpty ? "self" : names)
                     .foregroundColor(.accentColor)
                     .font(.footnote)
             }

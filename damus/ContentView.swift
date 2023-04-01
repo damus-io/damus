@@ -147,22 +147,8 @@ struct ContentView: View {
     }
     
     var timelineNavItem: Text {
-        switch selected_timeline {
-        case .home:
-            return Text("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.")
-                .bold()
-        case .dms:
-            return Text("DMs", comment: "Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.")
-                .bold()
-        case .notifications:
-            return Text("Notifications", comment: "Toolbar label for Notifications view.")
-                .bold()
-        case .search:
-            return Text("Universe 🛸", comment: "Toolbar label for the universal view where posts from all connected relay servers appear.")
-                .bold()
-        case .none:
-            return Text(verbatim: "")
-        }
+        return Text(timeline_name(selected_timeline))
+            .bold()
     }
     
     func MainContent(damus: DamusState) -> some View {
@@ -248,9 +234,9 @@ struct ContentView: View {
     
     func MaybeReportView(target: ReportTarget) -> some View {
         Group {
-            if let ds = damus_state {
-                if let sec = ds.keypair.privkey {
-                    ReportView(pool: ds.pool, target: target, privkey: sec)
+            if let damus_state {
+                if let sec = damus_state.keypair.privkey {
+                    ReportView(postbox: damus_state.postbox, target: target, privkey: sec)
                 } else {
                     EmptyView()
                 }
@@ -326,9 +312,9 @@ struct ContentView: View {
             case .report(let target):
                 MaybeReportView(target: target)
             case .post:
-                PostView(replying_to: nil, references: [], damus_state: damus_state!)
+                PostView(replying_to: nil, damus_state: damus_state!)
             case .reply(let event):
-                ReplyView(replying_to: event, damus: damus_state!)
+                PostView(replying_to: event, damus_state: damus_state!)
             case .event:
                 EventDetailView()
             case .filter:
@@ -410,7 +396,7 @@ struct ContentView: View {
             let target = notif.object as! FollowTarget
             let pk = target.pubkey
             
-            if let ev = unfollow_user(pool: damus.pool,
+            if let ev = unfollow_user(postbox: damus.postbox,
                                       our_contacts: damus.contacts.event,
                                       pubkey: damus.pubkey,
                                       privkey: privkey,
@@ -461,7 +447,7 @@ struct ContentView: View {
                 //let to_relays = tup.1
                 print("post \(post.content)")
                 let new_ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
-                self.damus_state?.pool.send(.event(new_ev))
+                self.damus_state?.postbox.send(new_ev)
             case .cancel:
                 active_sheet = nil
                 print("post cancelled")
@@ -516,7 +502,7 @@ struct ContentView: View {
                 }
                 
                 damus_state?.contacts.set_mutelist(mutelist)
-                ds.pool.send(.event(mutelist))
+                ds.postbox.send(mutelist)
 
                 confirm_overwrite_mutelist = false
                 confirm_block = false
@@ -548,7 +534,7 @@ struct ContentView: View {
                         return
                     }
                     damus_state?.contacts.set_mutelist(ev)
-                    ds.pool.send(.event(ev))
+                    ds.postbox.send(ev)
                 }
             }
         }, message: {
@@ -565,7 +551,9 @@ struct ContentView: View {
                 current_boost = nil
             }
             Button(NSLocalizedString("Repost", comment: "Button to confirm reposting a post.")) {
-                self.damus_state?.pool.send(.event(current_boost!))
+                if let current_boost {
+                    self.damus_state?.pool.send(.event(current_boost))
+                }
             }
         } message: {
             Text("Are you sure you want to repost this?", comment: "Alert message to ask if user wants to repost a post.")
@@ -627,7 +615,8 @@ struct ContentView: View {
                                       relay_metadata: metadatas,
                                       drafts: Drafts(),
                                       events: EventCache(),
-                                      bookmarks: BookmarksManager(pubkey: pubkey)
+                                      bookmarks: BookmarksManager(pubkey: pubkey),
+                                      postbox: PostBox(pool: pool)
         )
         home.damus_state = self.damus_state!
         
@@ -805,6 +794,8 @@ func find_event(state: DamusState, evid: String, search_type: SearchType, find_f
         }
         
         switch ev {
+        case .ok:
+            break
         case .event(_, let ev):
             has_event = true
             callback(ev)
@@ -831,12 +822,12 @@ func timeline_name(_ timeline: Timeline?) -> String {
     }
     switch timeline {
     case .home:
-        return "Home"
+        return NSLocalizedString("Home", comment: "Navigation bar title for Home view where posts and replies appear from those who the user is following.")
     case .notifications:
-        return "Notifications"
+        return NSLocalizedString("Notifications", comment: "Toolbar label for Notifications view.")
     case .search:
-        return "Universe 🛸"
+        return NSLocalizedString("Universe 🛸", comment: "Toolbar label for the universal view where posts from all connected relay servers appear.")
     case .dms:
-        return "DMs"
+        return NSLocalizedString("DMs", comment: "Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.")
     }
 }
