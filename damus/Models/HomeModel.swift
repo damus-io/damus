@@ -507,9 +507,16 @@ class HomeModel: ObservableObject {
                    let content = jsonDict["content"] as? String {
                     create_notification_repost(displayName: displayName, conversation: content)
                 }
-
+                
+            } else if ev.known_kind == .like,
+                      damus_state.settings.like_notification,
+                      let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name,
+                      let eRef = ev.referenced_ids.eRefs.first?.ref_id,
+                      let content = damus_state.events.lookup(eRef)?.content {
+                create_notification_like(displayName: displayName, conversation: content)
             }
         }
+        
     }
 
     @discardableResult
@@ -537,6 +544,25 @@ class HomeModel: ObservableObject {
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
 
         let request = UNNotificationRequest(identifier: "myMentionNotification", content: content, trigger: trigger)
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error: \(error)")
+            } else {
+                print("Local notification scheduled")
+            }
+        }
+    }
+
+    func create_notification_like(displayName: String, conversation: String) {
+        let content = UNMutableNotificationContent()
+        content.title = String(format: NSLocalizedString("Liked by %@", comment: "Liked by heading in local notification"), displayName)
+        content.body = conversation
+        content.sound = UNNotificationSound.default
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+
+        let request = UNNotificationRequest(identifier: "myLikeNotification", content: content, trigger: trigger)
 
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {

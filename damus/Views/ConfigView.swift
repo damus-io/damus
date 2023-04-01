@@ -220,6 +220,8 @@ struct ConfigView: View {
                         .toggleStyle(.switch)
                     Toggle(NSLocalizedString("Repost Notification", comment: "Setting to enable Repost Local Notification"), isOn: $settings.repost_notification)
                         .toggleStyle(.switch)
+                    Toggle(NSLocalizedString("Like Notification", comment: "Setting to enable Like Local Notification"), isOn: $settings.like_notification)
+                        .toggleStyle(.switch)
                 }
 
                 Section(NSLocalizedString("Images", comment: "Section title for images configuration.")) {
