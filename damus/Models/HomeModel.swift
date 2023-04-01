@@ -486,17 +486,29 @@ class HomeModel: ObservableObject {
         }
         
         if handle_last_event(ev: ev, timeline: .notifications),
-           damus_state.settings.mention_notification,
-           damus_state.contacts.follow_state(ev.pubkey) == .follows,
-           ev.known_kind == .text {
-            for block in ev.blocks(damus_state.keypair.privkey) {
-                if case .mention(let mention) = block, mention.ref.ref_id == damus_state.keypair.pubkey {
-                    let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name
-                    let justContent = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content).string
-                    createNotification(displayName: displayName!, conversation: justContent)
-                }
-            }
+           damus_state.contacts.follow_state(ev.pubkey) == .follows {
 
+
+            if ev.known_kind == .text,
+               damus_state.settings.mention_notification {
+                for block in ev.blocks(damus_state.keypair.privkey) {
+                    if case .mention(let mention) = block, mention.ref.ref_id == damus_state.keypair.pubkey {
+                        let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name
+                        let justContent = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content).string
+                        create_notification_mention(displayName: displayName!, conversation: justContent)
+                    }
+                }
+            } else if ev.known_kind == .boost,
+                      damus_state.settings.repost_notification,
+                      let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name {
+                let justContent = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content).string
+                if let jsonData = justContent.data(using: .utf8),
+                   let jsonDict = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any],
+                   let content = jsonDict["content"] as? String {
+                    create_notification_repost(displayName: displayName, conversation: content)
+                }
+
+            }
         }
     }
 
@@ -516,7 +528,7 @@ class HomeModel: ObservableObject {
         }
     }
 
-    func createNotification(displayName: String, conversation: String) {
+    func create_notification_mention(displayName: String, conversation: String) {
         let content = UNMutableNotificationContent()
         content.title = String(format: NSLocalizedString("Mentioned by %@", comment: "Mentioned by heading in local notification"), displayName)
         content.body = conversation
@@ -534,6 +546,26 @@ class HomeModel: ObservableObject {
             }
         }
     }
+
+    func create_notification_repost(displayName: String, conversation: String) {
+        let content = UNMutableNotificationContent()
+        content.title = String(format: NSLocalizedString("Reposted by %@", comment: "Reposted by heading in local notification"), displayName)
+        content.body = conversation
+        content.sound = UNNotificationSound.default
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+
+        let request = UNNotificationRequest(identifier: "myRopostedNotification", content: content, trigger: trigger)
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error: \(error)")
+            } else {
+                print("Local notification scheduled")
+            }
+        }
+    }
+
 
     func handle_text_event(sub_id: String, _ ev: NostrEvent) {
         guard should_show_event(contacts: damus_state.contacts, ev: ev) else {

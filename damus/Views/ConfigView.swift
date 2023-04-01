@@ -218,6 +218,8 @@ struct ConfigView: View {
                         .toggleStyle(.switch)
                     Toggle(NSLocalizedString("Mention Notification", comment: "Setting to enable Mention Local Notification"), isOn: $settings.mention_notification)
                         .toggleStyle(.switch)
+                    Toggle(NSLocalizedString("Repost Notification", comment: "Setting to enable Repost Local Notification"), isOn: $settings.repost_notification)
+                        .toggleStyle(.switch)
                 }
 
                 Section(NSLocalizedString("Images", comment: "Section title for images configuration.")) {

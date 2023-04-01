@@ -140,6 +140,12 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
+    @Published var repost_notification: Bool {
+        didSet {
+            UserDefaults.standard.set(repost_notification, forKey: "repost_notification")
+        }
+    }
+
     @Published var auto_translate: Bool {
         didSet {
             UserDefaults.standard.set(auto_translate, forKey: "auto_translate")
@@ -235,6 +241,7 @@ class UserSettingsStore: ObservableObject {
         zap_vibration = UserDefaults.standard.object(forKey: "zap_vibration") as? Bool ?? false
         zap_notification = UserDefaults.standard.object(forKey: "zap_notification") as? Bool ?? true
         mention_notification = UserDefaults.standard.object(forKey: "mention_notification") as? Bool ?? true
+        repost_notification = UserDefaults.standard.object(forKey: "repost_notification") as? Bool ?? true
 
         disable_animation = should_disable_image_animation()
         auto_translate = UserDefaults.standard.object(forKey: "auto_translate") as? Bool ?? true
