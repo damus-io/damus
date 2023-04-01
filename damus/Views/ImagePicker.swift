@@ -68,7 +68,7 @@ struct ImagePicker: UIViewControllerRepresentable {
         let picker = UIImagePickerController()
         picker.sourceType = sourceType
         let mediaUploader = get_media_uploader(pubkey)
-        picker.mediaTypes = ["public.image"]
+        picker.mediaTypes = ["public.image", "com.compuserve.gif"]
         if mediaUploader.supportsVideo && !imagesOnly {
             picker.mediaTypes.append("public.movie")
         }
