@@ -226,6 +226,38 @@
 			<string>%2$@ sats</string>
 		</dict>
 	</dict>
+	<key>zap_notification_no_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>Λάβατε %2$@ sat από %3$@</string>
+			<key>other</key>
+			<string>Λάβατε %2$@ sats από %3$@</string>
+		</dict>
+	</dict>
+	<key>zap_notification_with_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>Λάβατε %2$@ sat από %3$@: "%4$@"</string>
+			<key>other</key>
+			<string>Λάβατε %2$@ sats από %3$@: "%4$@"</string>
+		</dict>
+	</dict>
 	<key>zapped_tagged_in_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
