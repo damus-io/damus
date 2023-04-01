@@ -216,12 +216,8 @@ struct PostView: View {
                         }
                         VStack(alignment: .leading, spacing: 0) {
                             HStack(alignment: .top) {
-                                if replying_to != nil {
-                                    ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
-                                        .padding(.leading)
-                                } else {
-                                    ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
-                                }
+                                ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
+                                    .padding(.leading, replying_to != nil ? 15 : 0)
                                 
                                 TextEntry
                             }
@@ -237,14 +233,9 @@ struct PostView: View {
                 
                 // This if-block observes @ for tagging
                 if let searching {
-                    if replying_to != nil {
-                        UserSearch(damus_state: damus_state, search: searching, post: $post)
-                            .padding(.leading)
-                            .frame(maxHeight: .infinity)
-                    } else {
-                        UserSearch(damus_state: damus_state, search: searching, post: $post)
-                            .frame(maxHeight: .infinity)
-                    }
+                    UserSearch(damus_state: damus_state, search: searching, post: $post)
+                        .padding(.leading, replying_to != nil ? 15 : 0)
+                        .frame(maxHeight: .infinity)
                 } else {
                     Divider()
                         .padding([.top, .bottom], 10)
