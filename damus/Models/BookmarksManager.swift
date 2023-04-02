@@ -61,7 +61,7 @@ class BookmarksManager: ObservableObject {
         if isBookmarked(ev) {
             bookmarks = bookmarks.filter { $0 != ev }
         } else {
-            bookmarks.append(ev)
+            bookmarks.insert(ev, at: 0)
         }
     }
     
