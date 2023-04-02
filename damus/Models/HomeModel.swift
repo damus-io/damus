@@ -486,34 +486,36 @@ class HomeModel: ObservableObject {
         }
         
         if handle_last_event(ev: ev, timeline: .notifications),
-           damus_state.contacts.follow_state(ev.pubkey) == .follows {
+           damus_state.contacts.follow_state(ev.pubkey) == .follows,
+            let type = ev.known_kind {
 
-
-            if ev.known_kind == .text,
+            if type == .text,
                damus_state.settings.mention_notification {
                 for block in ev.blocks(damus_state.keypair.privkey) {
-                    if case .mention(let mention) = block, mention.ref.ref_id == damus_state.keypair.pubkey {
-                        let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name
+                    if case .mention(let mention) = block, mention.ref.ref_id == damus_state.keypair.pubkey,
+                       let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name {
                         let justContent = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content).string
-                        create_notification_mention(displayName: displayName!, conversation: justContent)
+                        create_notification(displayName: displayName, conversation: justContent, type: type)
                     }
                 }
-            } else if ev.known_kind == .boost,
+            } else if type == .boost,
                       damus_state.settings.repost_notification,
                       let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name {
+
                 let justContent = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content).string
                 if let jsonData = justContent.data(using: .utf8),
                    let jsonDict = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any],
                    let content = jsonDict["content"] as? String {
-                    create_notification_repost(displayName: displayName, conversation: content)
+                    create_notification(displayName: displayName, conversation: content, type: type)
                 }
                 
-            } else if ev.known_kind == .like,
+            } else if type == .like,
                       damus_state.settings.like_notification,
                       let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name,
                       let eRef = ev.referenced_ids.eRefs.first?.ref_id,
                       let content = damus_state.events.lookup(eRef)?.content {
-                create_notification_like(displayName: displayName, conversation: content)
+                
+                create_notification(displayName: displayName, conversation: content, type: type)
             }
         }
         
@@ -535,53 +537,30 @@ class HomeModel: ObservableObject {
         }
     }
 
-    func create_notification_mention(displayName: String, conversation: String) {
+    func create_notification(displayName: String, conversation: String, type: NostrKind) {
         let content = UNMutableNotificationContent()
-        content.title = String(format: NSLocalizedString("Mentioned by %@", comment: "Mentioned by heading in local notification"), displayName)
-        content.body = conversation
-        content.sound = UNNotificationSound.default
-
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-
-        let request = UNNotificationRequest(identifier: "myMentionNotification", content: content, trigger: trigger)
-
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("Error: \(error)")
-            } else {
-                print("Local notification scheduled")
-            }
+        var title = ""
+        var identifier = ""
+        switch type {
+        case .text:
+            title = String(format: NSLocalizedString("Mentioned by %@", comment: "Mentioned by heading in local notification"), displayName)
+            identifier = "myMentionNotification"
+        case .boost:
+            title = String(format: NSLocalizedString("Reposted by %@", comment: "Reposted by heading in local notification"), displayName)
+            identifier = "myBoostNotification"
+        case .like:
+            title = String(format: NSLocalizedString("Liked by %@", comment: "Liked by heading in local notification"), displayName)
+            identifier = "myLikeNotification"
+        default:
+            break
         }
-    }
-
-    func create_notification_like(displayName: String, conversation: String) {
-        let content = UNMutableNotificationContent()
-        content.title = String(format: NSLocalizedString("Liked by %@", comment: "Liked by heading in local notification"), displayName)
+        content.title = title
         content.body = conversation
         content.sound = UNNotificationSound.default
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
 
-        let request = UNNotificationRequest(identifier: "myLikeNotification", content: content, trigger: trigger)
-
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("Error: \(error)")
-            } else {
-                print("Local notification scheduled")
-            }
-        }
-    }
-
-    func create_notification_repost(displayName: String, conversation: String) {
-        let content = UNMutableNotificationContent()
-        content.title = String(format: NSLocalizedString("Reposted by %@", comment: "Reposted by heading in local notification"), displayName)
-        content.body = conversation
-        content.sound = UNNotificationSound.default
-
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-
-        let request = UNNotificationRequest(identifier: "myRopostedNotification", content: content, trigger: trigger)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
 
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
