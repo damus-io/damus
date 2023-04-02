@@ -36,8 +36,19 @@ struct ShareSheet: UIViewControllerRepresentable {
 struct ImageCarousel: View {
     var urls: [URL]
     
-    @State var open_sheet: Bool = false
-    @State var current_url: URL? = nil
+    enum ImageShape {
+        case square
+        case landscape
+        case portrait
+        case unknown
+    }
+    
+    @State private var open_sheet: Bool = false
+    @State private var current_url: URL? = nil
+    @State private var height: CGFloat = .zero
+    @State private var minHeight: CGFloat = 150
+    @State private var maxHeight: CGFloat = 500
+    @State private var filling: Bool = false
     
     var body: some View {
         TabView {
@@ -45,30 +56,60 @@ struct ImageCarousel: View {
                 Rectangle()
                     .foregroundColor(Color.clear)
                     .overlay {
-                        KFAnimatedImage(url)
-                            .imageContext(.note)
-                            .cancelOnDisappear(true)
-                            .configure { view in
-                                view.framePreloadCount = 3
-                            }
-                            .aspectRatio(contentMode: .fill)
-                            //.cornerRadius(10)
-                            .tabItem {
-                                Text(url.absoluteString)
-                            }
-                            .id(url.absoluteString)
-//                            .contextMenu {
-//                                Button(NSLocalizedString("Copy Image", comment: "Context menu option to copy an image to clipboard.")) {
-//                                    UIPasteboard.general.string = url.absoluteString
-//                                }
-//                            }
+                        GeometryReader { geo in
+                            KFAnimatedImage(url)
+                                .imageContext(.note)
+                                .cancelOnDisappear(true)
+                                .configure { view in
+                                    view.framePreloadCount = 3
+                                }
+                                .imageModifier({ img in
+                                    // get the fitting scale factor
+                                    let shape: ImageShape = {
+                                        let imageRatio = img.size.width / img.size.height
+                                        switch imageRatio {
+                                        case 1.0: return .square
+                                        case ..<1.0: return .portrait
+                                        case 1.0...: return .landscape
+                                        default: return .unknown
+                                        }
+                                    }()
+                                    
+                                    let xfactor = geo.size.width / img.size.width
+                                    let yfactor = maxHeight / img.size.height
+                                    // calculate scaled image height
+                                    // set scale factor and constrain images to minimum 150
+                                    // and animations to scaled factor for dynamic size adjustment
+                                    switch shape {
+                                    case .portrait:
+                                        filling = yfactor <= 1.0
+                                        let scaled = img.size.height * xfactor
+                                        height = filling ? maxHeight : max(scaled, minHeight)
+                                    case .square:
+                                        filling = yfactor <= 1.0 && xfactor <= 1.0
+                                        let scaled = img.size.height * xfactor
+                                        height = filling ? maxHeight : max(scaled, minHeight)
+                                    case .landscape:
+                                        let scaled = img.size.height * xfactor
+                                        filling = scaled > maxHeight || xfactor < 1.0
+                                        height = img.kf.imageFrameCount != nil ? scaled : filling ? min(maxHeight, scaled) : max(scaled, minHeight)
+                                    case .unknown:
+                                        height = max(img.size.height, minHeight)
+                                    }
+                                })
+                                .aspectRatio(contentMode: filling ? .fill : .fit)
+                                .tabItem {
+                                    Text(url.absoluteString)
+                                }
+                                .id(url.absoluteString)
+                        }
                     }
             }
         }
         .fullScreenCover(isPresented: $open_sheet) {
             ImageView(urls: urls)
         }
-        .frame(height: 350)
+        .frame(height: height)
         .onTapGesture {
             open_sheet = true
         }
