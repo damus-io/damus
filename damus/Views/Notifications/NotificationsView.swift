@@ -91,7 +91,6 @@ struct NotificationsView: View {
                     }
                     return Color.clear
                 })
-                .padding(.horizontal)
             }
             .coordinateSpace(name: "scroll")
             .onReceive(handle_notify(.scroll_to_top)) { notif in

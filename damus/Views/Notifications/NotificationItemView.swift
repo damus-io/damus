@@ -52,7 +52,7 @@ struct NotificationItemView: View {
             
             case .reply(let ev):
                 NavigationLink(destination: ThreadView(state: state, thread: ThreadModel(event: ev, damus_state: state))) {
-                    EventView(damus: state, event: ev)
+                    EventView(damus: state, event: ev, options: [.wide, .truncate_content])
                 }
                 .buttonStyle(.plain)
             }
