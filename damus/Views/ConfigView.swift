@@ -222,6 +222,8 @@ struct ConfigView: View {
                         .toggleStyle(.switch)
                     Toggle(NSLocalizedString("Like Notification", comment: "Setting to enable Like Local Notification"), isOn: $settings.like_notification)
                         .toggleStyle(.switch)
+                    Toggle(NSLocalizedString("DM Notification", comment: "Setting to enable DM Local Notification"), isOn: $settings.dm_notification)
+                        .toggleStyle(.switch)
                 }
 
                 Section(NSLocalizedString("Images", comment: "Section title for images configuration.")) {

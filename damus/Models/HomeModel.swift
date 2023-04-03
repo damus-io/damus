@@ -551,6 +551,9 @@ class HomeModel: ObservableObject {
         case .like:
             title = String(format: NSLocalizedString("Liked by %@", comment: "Liked by heading in local notification"), displayName)
             identifier = "myLikeNotification"
+        case .dm:
+            title = String(format: NSLocalizedString("DM by %@", comment: "DM by heading in local notification"), displayName)
+            identifier = "myDMNotification"
         default:
             break
         }
@@ -602,9 +605,13 @@ class HomeModel: ObservableObject {
         
         incoming_dms.append(ev)
         
-        dm_debouncer.debounce {
+        dm_debouncer.debounce { [self] in
             if let notifs = handle_incoming_dms(prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
                 self.new_events = notifs
+                if  damus_state.settings.dm_notification,
+                    let displayName = damus_state.profiles.lookup(id: self.incoming_dms.last!.pubkey)?.display_name {
+                    create_notification(displayName: displayName, conversation: "You have received a direct message", type: .dm)
+                }
             }
             self.incoming_dms = []
         }

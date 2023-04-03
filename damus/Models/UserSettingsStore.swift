@@ -146,6 +146,12 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
+    @Published var dm_notification: Bool {
+        didSet {
+            UserDefaults.standard.set(repost_notification, forKey: "dm_notification")
+        }
+    }
+
     @Published var like_notification: Bool {
         didSet {
             UserDefaults.standard.set(like_notification, forKey: "like_notification")
@@ -249,6 +255,7 @@ class UserSettingsStore: ObservableObject {
         mention_notification = UserDefaults.standard.object(forKey: "mention_notification") as? Bool ?? true
         repost_notification = UserDefaults.standard.object(forKey: "repost_notification") as? Bool ?? true
         like_notification = UserDefaults.standard.object(forKey: "like_notification") as? Bool ?? true
+        dm_notification = UserDefaults.standard.object(forKey: "dm_notification") as? Bool ?? true
 
         disable_animation = should_disable_image_animation()
         auto_translate = UserDefaults.standard.object(forKey: "auto_translate") as? Bool ?? true
