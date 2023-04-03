@@ -214,6 +214,7 @@ struct EventGroupView: View {
                             GroupDescription
                             EventBody(damus_state: state, event: event, size: .normal, options: [])
                                 .padding([.top], 1)
+                                .padding([.trailing])
                                 .foregroundColor(.gray)
                         }
                     }
