@@ -39,11 +39,20 @@ enum NIP05Validation {
     case valid
 }
 
-func validate_nip05(pubkey: String, nip05_str: String) async -> NIP05? {
+struct FetchedNIP05 {
+    let response: NIP05Response
+    let nip05: NIP05Response
+}
+
+func fetch_nip05_str(nip05_str: String) async -> NIP05Response? {
     guard let nip05 = NIP05.parse(nip05_str) else {
         return nil
     }
     
+    return await fetch_nip05(nip05: nip05)
+}
+
+func fetch_nip05(nip05: NIP05) async -> NIP05Response? {
     guard let url = nip05.url else {
         return nil
     }
@@ -54,6 +63,18 @@ func validate_nip05(pubkey: String, nip05_str: String) async -> NIP05? {
     let dat = ret.0
     
     guard let decoded = try? JSONDecoder().decode(NIP05Response.self, from: dat) else {
+        return nil
+    }
+    
+    return decoded
+}
+
+func validate_nip05(pubkey: String, nip05_str: String) async -> NIP05? {
+    guard let nip05 = NIP05.parse(nip05_str) else {
+        return nil
+    }
+    
+    guard let decoded = await fetch_nip05(nip05: nip05) else {
         return nil
     }
     

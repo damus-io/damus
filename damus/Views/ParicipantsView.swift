@@ -16,23 +16,34 @@ struct ParticipantsView: View {
     
     var body: some View {
         VStack {
-            Text("Edit participants", comment: "Text indicating that the view is used for editing which participants are replied to in a note.")
+            Text("Replying to", comment: "Text indicating that the view is used for editing which participants are replied to in a note.")
+                .font(.headline)
             HStack {
                 Spacer()
+                
                 Button {
                     // Remove all "p" refs, keep "e" refs
                     references = originalReferences.eRefs
                 } label: {
                     Text("Remove all", comment: "Button label to remove all participants from a note reply.")
                 }
-                .buttonStyle(.borderedProminent)
-                Spacer()
+                .font(.system(size: 14, weight: .bold))
+                .frame(width: 100, height: 30)
+                .foregroundColor(.white)
+                .background(LINEAR_GRADIENT)
+                .clipShape(Capsule())
+
                 Button {
                     references = originalReferences
                 } label: {
                     Text("Add all", comment: "Button label to re-add all original participants as profiles to reply to in a note")
                 }
-                .buttonStyle(.borderedProminent)
+                .font(.system(size: 14, weight: .bold))
+                .frame(width: 80, height: 30)
+                .foregroundColor(.white)
+                .background(LINEAR_GRADIENT)
+                .clipShape(Capsule())
+                
                 Spacer()
             }
             VStack {
@@ -56,7 +67,7 @@ struct ParticipantsView: View {
                             
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.system(size: 30))
-                                .foregroundColor(references.contains(participant) ? .purple : .gray)
+                                .foregroundColor(references.contains(participant) ? DamusColors.purple : .gray)
                         }
                         .onTapGesture {
                             if references.contains(participant) {

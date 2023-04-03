@@ -15,12 +15,14 @@ struct SelectableText: View {
     @State private var selectedTextHeight: CGFloat = .zero
     @State private var selectedTextWidth: CGFloat = .zero
     
+    let size: EventViewKind
+    
     var body: some View {
         GeometryReader { geo in
             TextViewRepresentable(
                 attributedString: attributedString,
                 textColor: UIColor.label,
-                font: UIFont.preferredFont(forTextStyle: .title2),
+                font: eventviewsize_to_uifont(size),
                 fixedWidth: selectedTextWidth,
                 height: $selectedTextHeight
             )

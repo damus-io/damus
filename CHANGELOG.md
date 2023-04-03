@@ -1,3 +1,37 @@
+## [1.4.1] - 2023-04-03
+
+### Added
+
+- Profile Picture Upload (Joel Klabo)
+- Enable offline posting (William Casarin)
+- Add auto-translation caching to ruduce api usage (Terry Yiu)
+- Added support for gif uploads (Swift)
+- Add a Divider in the Follows List for Large Screens (Joel Klabo)
+- Upload Photos and Videos from Camera (Joel Klabo)
+- Added ability to lookup users by nip05 identifiers (William Casarin)
+
+### Changed
+
+- Only truncate timeline text if enabled in settings (William Casarin)
+- Make mentions wide in notifications like in timeline (William Casarin)
+- Broadcast events you are replying to (William Casarin)
+- Broadcast now also broadcasts event user's profile (William Casarin)
+- Improved look of reply view (ericholguin)
+- Remove gradient in some places for visibility (ericholguin)
+
+
+### Fixed
+
+- Fix cropped images (mainvolume)
+- Truncate long text in notification items (William Casarin)
+- Restore missing reply description on selected events (William Casarin)
+- Show sent DMs immediately (William Casarin)
+- Fixed size of translated text (William Casarin)
+- Fix crash when reposting (William Casarin)
+- Fix unclickable image dismiss button (OlegAba)
+
+
+[1.4.1]: https://github.com/damus-io/damus/releases/tag/v1.4.1
 ## [1.4.0] - 2023-03-27
 
 ### Added
@@ -5,6 +39,9 @@
 - Local zap notifications (Swift)
 - Add support for video uploads (Swift)
 - Auto Translation (Terry Yiu)
+- Portuguese (Brazil) translations (Andressa Munturo)
+- Spanish (Spain) translations (Max Pleb)
+- Vietnamese translations (ShiryoRyo)
 
 
 ### Fixed
@@ -72,6 +109,10 @@
 
 - Add image uploader (Swift)
 - Add option to always show images (never blur) (William Casarin)
+- Canadian French (Pierre - synoptic_okubo)
+- Hungarian translations (Zoltan)
+- Korean translations (sogoagain)
+- Swedish translations (Pextar)
 
 
 ### Changed
@@ -94,6 +135,9 @@
 - Extend user tagging search to all local profiles (William Casarin)
 - Vibrate when a zap is received (Swift)
 - New and Improved Share sheet (ericholguin)
+- Bulgarian translations (elsat)
+- Persian translations (Mahdi Taghizadeh)
+- Ukrainian translations (Valeriia Khudiakova, Tony B)
 
 
 ### Changed
@@ -192,6 +236,8 @@
 - Customized zaps (William Casarin)
 - Add new Notifications View (William Casarin)
 - Bookmarking (Joel Klabo)
+- Chinese, Traditional (Hong Kong) translations (rasputin)
+- Chinese, Traditional (Taiwan) translations (rasputin)
 
 ### Changed
 
@@ -217,6 +263,9 @@
 - Added the ability to select text on posts (OlegAba)
 - Added Posts or Post & Replies selector to Profile (ericholguin)
 - Improved profile navbar (OlegAba)
+- Czech translations (Martin Gabrhel)
+- Indonesian translations (johnybergzy)
+- Russian translations (Tony B)
 
 
 ### Changed
@@ -265,7 +314,6 @@
 ### Added
 
 - Relay Filtering (William Casarin)
-- Japanese translations (Terry Yiu)
 - Add password autofill on account login and creation (Terry Yiu)
 - Show if relay is paid (William Casarin)
 - Add "Follows You" indicator on profile (William Casarin)
@@ -278,6 +326,10 @@
 - Copy invoice button (Joel Klabo)
 - Receive Lightning Zaps (William Casarin)
 - Allow text selection in bio (Suhail Saqan)
+- Chinese, Simplified (China mainland) translations (haolong, rasputin)
+- Dutch translations (Heimen Stoffels - Vistaus)
+- Greek translations (milicode)
+- Japanese translations (akiomik, foxytanuki, Guetsu Ren - Nighthaven, h3y6e, middlingphys)
 
 
 ### Changed
@@ -312,6 +364,7 @@
 - LibreTranslate note translations (Terry Yiu)
 - Added support for account deletion (William Casarin)
 - User tagging and autocompletion in posts (Swift)
+- Polish translations (pysiak)
 
 
 ### Changed
@@ -334,7 +387,8 @@
 
 ### Added
 
-- Added Arabic and Portuguese translations (Barodane, Antonio Chagas)
+- Arabic translations (Barodane)
+- Portuguese translations (Antonio Chagas)
 - Add QRCode view for sharing your pubkey (ericholguin)
 - Added nostr: uri handling (William Casarin)
 
@@ -361,7 +415,8 @@
 ### Added
 
 - Reposts view (Terry Yiu)
-- Translations for it_IT, it_CH, fr_FR, de_DE, de_AT and lv_LV (Nicolò Carcagnì, Solobalbo, Gregor, Peter Gerstbach, SYX)
+- Italian translations (Nicolò Carcagnì)
+- Latvian translations (SYX)
 - Added ability to block users (William Casarin)
 - Added a way to report content (William Casarin)
 - Stretchable profile cover header (Swift)
@@ -388,7 +443,9 @@
 
 - Show website on profiles (William Casarin)
 - Add the ability to choose participants when replying (Joel Klabo)
-- Translations for de_AT, de_DE, tr_TR, fr_FR (Gregor, Peter Gerstbach, Taylan Benli, Solobalbo)
+- German translations (Gregor, Peter Gerstbach)
+- Turkish translations (Taylan Benli)
+- French (France) translations (Solobalbo)
 - Add DM Message Requests (William Casarin)
 
 
@@ -820,5 +877,4 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
 

@@ -82,7 +82,7 @@ struct RelayView: View {
             }
             
             process_contact_event(state: state, ev: new_ev)
-            state.pool.send(.event(new_ev))
+            state.postbox.send(new_ev)
         }) {
             if showText {
                 Text(NSLocalizedString("Disconnect", comment: "Button to disconnect from a relay server."))

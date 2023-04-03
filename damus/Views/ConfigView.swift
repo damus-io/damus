@@ -224,6 +224,8 @@ struct ConfigView: View {
                         .toggleStyle(.switch)
                     Toggle(NSLocalizedString("DM Notification", comment: "Setting to enable DM Local Notification"), isOn: $settings.dm_notification)
                         .toggleStyle(.switch)
+                    Toggle(NSLocalizedString("Truncate text in timeline", comment: "Truncate text in timeline"), isOn: $settings.truncate_timeline_text)
+                        .toggleStyle(.switch)
                 }
 
                 Section(NSLocalizedString("Images", comment: "Section title for images configuration.")) {
@@ -303,7 +305,7 @@ struct ConfigView: View {
                 }
                 
                 let ev = created_deleted_account_profile(keypair: full_kp)
-                state.pool.send(.event(ev))
+                state.postbox.send(ev)
                 notify(.logout, ())
             }
         }

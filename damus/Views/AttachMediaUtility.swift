@@ -15,13 +15,12 @@ enum ImageUploadResult {
     case failed(Error?)
 }
 
-fileprivate func create_upload_body(mediaData: Data, boundary: String, mediaUploader: MediaUploader, mediaIsImage: Bool) -> Data {
+fileprivate func create_upload_body(mediaData: Data, boundary: String, mediaUploader: MediaUploader, mediaToUpload: MediaUpload) -> Data {
         let body = NSMutableData();
-        let contentType = mediaIsImage ? "image/jpg" : "video/mp4"
-        let genericFileName = mediaIsImage ? "damus_generic_filename.jpg" : "damus_generic_filename.mp4"
+        let contentType = mediaToUpload.is_image ? "image/jpg" : "video/mp4"
         body.appendString(string: "Content-Type: multipart/form-data; boundary=\(boundary)\r\n\r\n")
         body.appendString(string: "--\(boundary)\r\n")
-        body.appendString(string: "Content-Disposition: form-data; name=\(mediaUploader.nameParam); filename=\(genericFileName)\r\n")
+        body.appendString(string: "Content-Disposition: form-data; name=\(mediaUploader.nameParam); filename=\(mediaToUpload.genericFileName)\r\n")
         body.appendString(string: "Content-Type: \(contentType)\r\n\r\n")
         body.append(mediaData as Data)
         body.appendString(string: "\r\n")
@@ -41,8 +40,12 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
     request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
     
     switch mediaToUpload {
-    case .image(let img):
-        mediaData = img.jpegData(compressionQuality: 0.8)
+    case .image(let url):
+        do {
+            mediaData = try Data(contentsOf: url)
+        } catch {
+            return .failed(error)
+        }
     case .video(let url):
         do {
             mediaData = try Data(contentsOf: url)
@@ -55,7 +58,7 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
         return .failed(nil)
     }
 
-    request.httpBody = create_upload_body(mediaData: mediaData, boundary: boundary, mediaUploader: mediaUploader, mediaIsImage: mediaToUpload.is_image)
+    request.httpBody = create_upload_body(mediaData: mediaData, boundary: boundary, mediaUploader: mediaUploader, mediaToUpload: mediaToUpload)
     
     do {
         let (data, _) = try await URLSession.shared.data(for: request, delegate: progress)
@@ -74,81 +77,6 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
         
     } catch {
         return .failed(error)
-    }
-}
-
-extension PostView {
-    struct ImagePicker: UIViewControllerRepresentable {
-
-        @Environment(\.presentationMode)
-        private var presentationMode
-
-        let sourceType: UIImagePickerController.SourceType
-        let damusState: DamusState
-        let onImagePicked: (UIImage) -> Void
-        let onVideoPicked: (URL) -> Void
-
-        final class Coordinator: NSObject,
-                                 UINavigationControllerDelegate,
-                                 UIImagePickerControllerDelegate {
-
-            @Binding
-            private var presentationMode: PresentationMode
-            private let sourceType: UIImagePickerController.SourceType
-            private let onImagePicked: (UIImage) -> Void
-            private let onVideoPicked: (URL) -> Void
-
-            init(presentationMode: Binding<PresentationMode>,
-                 sourceType: UIImagePickerController.SourceType,
-                 onImagePicked: @escaping (UIImage) -> Void,
-                 onVideoPicked: @escaping (URL) -> Void) {
-                _presentationMode = presentationMode
-                self.sourceType = sourceType
-                self.onImagePicked = onImagePicked
-                self.onVideoPicked = onVideoPicked
-            }
-
-            func imagePickerController(_ picker: UIImagePickerController,
-                                       didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-                if let videoURL = info[UIImagePickerController.InfoKey.mediaURL] as? URL {
-                    // Handle the selected video
-                    onVideoPicked(videoURL)
-                } else if let uiImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-                    // Handle the selected image
-                    onImagePicked(uiImage)
-                }
-                presentationMode.dismiss()
-
-            }
-
-            func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-                presentationMode.dismiss()
-            }
-
-        }
-
-        func makeCoordinator() -> Coordinator {
-            return Coordinator(presentationMode: presentationMode,
-                               sourceType: sourceType,
-                               onImagePicked: onImagePicked, onVideoPicked: onVideoPicked)
-        }
-
-        func makeUIViewController(context: UIViewControllerRepresentableContext<ImagePicker>) -> UIImagePickerController {
-            let picker = UIImagePickerController()
-            picker.sourceType = sourceType
-            let mediaUploader = get_media_uploader(damusState.keypair.pubkey)
-            picker.mediaTypes = ["public.image"]
-            if mediaUploader.supportsVideo {
-                picker.mediaTypes.append("public.movie")
-            }
-            picker.delegate = context.coordinator
-            return picker
-        }
-
-        func updateUIViewController(_ uiViewController: UIImagePickerController,
-                                    context: UIViewControllerRepresentableContext<ImagePicker>) {
-
-        }
     }
 }
 

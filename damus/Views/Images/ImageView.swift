@@ -16,26 +16,6 @@ struct ImageView: View {
     @State private var selectedIndex = 0
     @State var showMenu = true
     
-    var navBarView: some View {
-        VStack {
-            HStack {
-                /*
-                Text(urls[selectedIndex]?.lastPathComponent ?? "")
-                    .bold()
-                 */
-                
-                Spacer()
-                
-                Button(action: {
-                    presentationMode.wrappedValue.dismiss()
-                }, label: {
-                    Image(systemName: "xmark")
-                })
-            }
-            .padding()
-        }
-    }
-    
     var tabViewIndicator: some View {
         HStack(spacing: 10) {
             ForEach(urls.indices, id: \.self) { index in
@@ -80,7 +60,7 @@ struct ImageView: View {
             .overlay(
                 VStack {
                     if showMenu {
-                        navBarView
+                        NavDismissBarView()
                         Spacer()
                         
                         if (urls.count > 1) {

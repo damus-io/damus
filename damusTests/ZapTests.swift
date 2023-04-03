@@ -65,6 +65,9 @@ final class ZapTests: XCTestCase {
         
         XCTAssertEqual(zap.zapper, "9630f464cca6a5147aa8a35f0bcdd3ce485324e732fd39e09233b1d848238f31")
         XCTAssertEqual(zap.target, ZapTarget.profile("32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"))
+
+        XCTAssertEqual(zap_notification_title(zap), "Zap")
+        XCTAssertEqual(zap_notification_body(profiles: Profiles(), zap: zap), "You received 1k sats from 107jk7ht:2qlu3nfm")
     }
 
 }

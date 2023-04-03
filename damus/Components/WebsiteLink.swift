@@ -22,7 +22,7 @@ struct WebsiteLink: View {
             }, label: {
                 Text(link_text)
                     .font(.footnote)
-                    .foregroundStyle(LINEAR_GRADIENT)
+                    .foregroundColor(.accentColor)
             })
         }
     }

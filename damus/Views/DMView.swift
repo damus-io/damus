@@ -14,8 +14,18 @@ struct DMView: View {
     var is_ours: Bool {
         event.pubkey == damus_state.pubkey
     }
-
-    var body: some View {
+    
+    var Mention: some View {
+        Group {
+            if let mention = first_eref_mention(ev: event, privkey: damus_state.keypair.privkey) {
+                BuilderEventView(damus: damus_state, event_id: mention.ref.id)
+            } else {
+                EmptyView()
+            }
+        }
+    }
+    
+    var DM: some View {
         HStack {
             if is_ours {
                 Spacer(minLength: UIScreen.main.bounds.width * 0.2)
@@ -36,10 +46,19 @@ struct DMView: View {
                                .foregroundColor(.gray)
                                .opacity(0.8)
                                .offset(x: -10, y: -5), alignment: .bottomTrailing)
+            
             if !is_ours {
                 Spacer(minLength: UIScreen.main.bounds.width * 0.2)
             }
         }
+    }
+    
+    var body: some View {
+        VStack {
+            Mention
+            DM
+        }
+        
     }
 }
 

@@ -26,7 +26,7 @@ struct MutelistView: View {
             }
             
             damus_state.contacts.set_mutelist(new_ev)
-            damus_state.pool.send(.event(new_ev))
+            damus_state.postbox.send(new_ev)
             users = get_mutelist_users(new_ev)
         } label: {
             Label(NSLocalizedString("Delete", comment: "Button to remove a user from their blocklist."), systemImage: "trash")

@@ -12,6 +12,7 @@ enum Search {
     case hashtag(String)
     case profile(String)
     case note(String)
+    case nip05(String)
     case hex(String)
 }
 
@@ -41,6 +42,10 @@ struct SearchResultsView: View {
                     NavigationLink(destination: dst) {
                         Text("Search hashtag: #\(ht)", comment: "Navigation link to search hashtag.")
                     }
+                    
+                case .nip05(let addr):
+                    SearchingEventView(state: damus_state, evid: addr, search_type: .nip05)
+                    
                 case .profile(let prof):
                     let decoded = try? bech32_decode(prof)
                     let hex = hex_encode(decoded!.data)
@@ -93,6 +98,12 @@ struct SearchResultsView_Previews: PreviewProvider {
 func search_for_string(profiles: Profiles, _ new: String) -> Search? {
     guard new.count != 0 else {
         return nil
+    }
+    
+    let splitted = new.split(separator: "@")
+    
+    if splitted.count == 2 {
+        return .nip05(new)
     }
     
     if new.first! == "#" {

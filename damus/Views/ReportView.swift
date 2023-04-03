@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ReportView: View {
-    let pool: RelayPool
+    let postbox: PostBox
     let target: ReportTarget
     let privkey: String
      
@@ -44,7 +44,7 @@ struct ReportView: View {
     }
     
     func do_send_report(type: ReportType) {
-        guard let ev = send_report(privkey: privkey, pool: pool, target: target, type: type) else {
+        guard let ev = send_report(privkey: privkey, postbox: postbox, target: target, type: type) else {
             return
         }
         
@@ -92,12 +92,12 @@ struct ReportView: View {
     }
 }
 
-func send_report(privkey: String, pool: RelayPool, target: ReportTarget, type: ReportType) -> NostrEvent? {
+func send_report(privkey: String, postbox: PostBox, target: ReportTarget, type: ReportType) -> NostrEvent? {
     let report = Report(type: type, target: target, message: "")
     guard let ev = create_report_event(privkey: privkey, report: report) else {
         return nil
     }
-    pool.send(.event(ev))
+    postbox.send(ev)
     return ev
 }
 
@@ -106,9 +106,9 @@ struct ReportView_Previews: PreviewProvider {
         let ds = test_damus_state()
         VStack {
         
-        ReportView(pool: ds.pool, target: ReportTarget.user(""), privkey: "")
+        ReportView(postbox: ds.postbox, target: ReportTarget.user(""), privkey: "")
         
-            ReportView(pool: ds.pool, target: ReportTarget.user(""), privkey: "", report_sent: true, report_id: "report_id")
+            ReportView(postbox: ds.postbox, target: ReportTarget.user(""), privkey: "", report_sent: true, report_id: "report_id")
             
         }
     }
