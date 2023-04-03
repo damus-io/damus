@@ -25,18 +25,18 @@ enum Preview {
 
 class PreviewCache {
     private var previews: [String: Preview]
-    private var image_heights: [String: CGFloat]
+    private var image_meta: [String: ImageFill]
     
     func lookup(_ evid: String) -> Preview? {
         return previews[evid]
     }
     
-    func lookup_image_height(_ evid: String) -> CGFloat? {
-        return image_heights[evid]
+    func lookup_image_meta(_ evid: String) -> ImageFill? {
+        return image_meta[evid]
     }
     
-    func cache_image_height(evid: String, height: CGFloat) {
-        self.image_heights[evid] = height
+    func cache_image_meta(evid: String, image_fill: ImageFill) {
+        self.image_meta[evid] = image_fill
     }
     
     func store(evid: String, preview: LPLinkMetadata?)  {
@@ -50,6 +50,6 @@ class PreviewCache {
     
     init() {
         self.previews = [:]
-        self.image_heights = [:]
+        self.image_meta = [:]
     }
 }

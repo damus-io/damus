@@ -50,17 +50,19 @@ struct ImageCarousel: View {
     
     @State private var open_sheet: Bool = false
     @State private var current_url: URL? = nil
-    @State private var height: CGFloat? = nil
-    @State private var filling: Bool = false
+    @State private var image_fill: ImageFill? = nil
     
     init(previews: PreviewCache, evid: String, urls: [URL]) {
         _open_sheet = State(initialValue: false)
         _current_url = State(initialValue: nil)
-        _height = State(initialValue: previews.lookup_image_height(evid))
-        _filling = State(initialValue: false)
+        _image_fill = State(initialValue: previews.lookup_image_meta(evid))
         self.urls = urls
         self.evid = evid
         self.previews = previews
+    }
+    
+    var filling: Bool {
+        image_fill?.filling == true
     }
     
     var body: some View {
@@ -77,7 +79,7 @@ struct ImageCarousel: View {
                                     view.framePreloadCount = 3
                                 }
                                 .imageModifier({ img in
-                                    guard self.height == nil else {
+                                    guard self.image_fill == nil else {
                                         return
                                     }
                                     let img_size = img.size
@@ -86,12 +88,8 @@ struct ImageCarousel: View {
                                     DispatchQueue.main.async {
                                         let fill = calculate_image_fill(geo: geo, img_size: img_size, is_animated: is_animated, maxHeight: maxHeight, minHeight: minHeight)
                                         
-                                        if let filling = fill.filling {
-                                            self.filling = filling
-                                        }
-
-                                        self.previews.cache_image_height(evid: evid, height: fill.height)
-                                        self.height = fill.height
+                                        self.previews.cache_image_meta(evid: evid, image_fill: fill)
+                                        self.image_fill = fill
                                     }
                                 })
                                 .aspectRatio(contentMode: filling ? .fill : .fit)
@@ -106,7 +104,7 @@ struct ImageCarousel: View {
         .fullScreenCover(isPresented: $open_sheet) {
             ImageView(urls: urls)
         }
-        .frame(height: height ?? 0)
+        .frame(height: image_fill?.height ?? 0)
         .onTapGesture {
             open_sheet = true
         }
