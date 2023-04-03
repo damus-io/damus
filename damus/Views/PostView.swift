@@ -238,7 +238,7 @@ struct PostView: View {
                         .frame(maxHeight: .infinity)
                 } else {
                     Divider()
-                        .padding([.top, .bottom], 10)
+                        .padding([.bottom], 10)
                     VStack(alignment: .leading) {
                         AttachmentBar
                     }
