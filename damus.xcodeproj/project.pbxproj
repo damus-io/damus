@@ -233,6 +233,7 @@
 		4CFF8F6D29CD022E008DB934 /* WideEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8F6C29CD022E008DB934 /* WideEventView.swift */; };
 		4FE60CDD295E1C5E00105A1F /* Wallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE60CDC295E1C5E00105A1F /* Wallet.swift */; };
 		50A50A8D29A09E1C00C01BE7 /* RequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */; };
+		5C42E78C29DB76D90086AAC1 /* EmptyUserSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */; };
 		5C513FBA297F72980072348F /* CustomPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FB9297F72980072348F /* CustomPicker.swift */; };
 		5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FCB2984ACA60072348F /* QRCodeView.swift */; };
 		5CF72FC229B9142F00124A13 /* ShareAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF72FC129B9142F00124A13 /* ShareAction.swift */; };
@@ -626,6 +627,7 @@
 		4CFF8F6C29CD022E008DB934 /* WideEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WideEventView.swift; sourceTree = "<group>"; };
 		4FE60CDC295E1C5E00105A1F /* Wallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wallet.swift; sourceTree = "<group>"; };
 		50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestTests.swift; sourceTree = "<group>"; };
+		5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyUserSearchView.swift; sourceTree = "<group>"; };
 		5C513FB9297F72980072348F /* CustomPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPicker.swift; sourceTree = "<group>"; };
 		5C513FCB2984ACA60072348F /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		5CF72FC129B9142F00124A13 /* ShareAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareAction.swift; sourceTree = "<group>"; };
@@ -689,6 +691,7 @@
 			isa = PBXGroup;
 			children = (
 				3169CAE5294E69C000EE4006 /* EmptyTimelineView.swift */,
+				5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */,
 			);
 			path = "Empty Views";
 			sourceTree = "<group>";
@@ -1569,6 +1572,7 @@
 				5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */,
 				4C3EA64F28FF59F200C48A62 /* tal.c in Sources */,
 				4CB88393296F798300DC99E7 /* ReactionsModel.swift in Sources */,
+				5C42E78C29DB76D90086AAC1 /* EmptyUserSearchView.swift in Sources */,
 				4CB88396296F7F8B00DC99E7 /* ReactionView.swift in Sources */,
 				4CFF8F6B29CD0079008DB934 /* RepostedEvent.swift in Sources */,
 				4C8682872814DE470026224F /* ProfileView.swift in Sources */,
