@@ -132,7 +132,7 @@ struct ConfigView: View {
                     }
                 }
 
-                Section(NSLocalizedString("Wallet Selector", comment: "Section title for selection of wallet.")) {
+                Section(NSLocalizedString("Wallet and others", comment: "Section header for miscellaneous user configuration")) {
                     Toggle(NSLocalizedString("Show wallet selector", comment: "Toggle to show or hide selection of wallet."), isOn: $settings.show_wallet_selector).toggleStyle(.switch)
                     Picker(NSLocalizedString("Select default wallet", comment: "Prompt selection of user's default wallet"),
                            selection: $settings.default_wallet) {
@@ -141,6 +141,10 @@ struct ConfigView: View {
                                 .tag(wallet.model.tag)
                         }
                     }
+                    Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)
+                        .toggleStyle(.switch)
+                    Toggle(NSLocalizedString("Zap Vibration", comment: "Setting to enable vibration on zap"), isOn: $settings.zap_vibration)
+                        .toggleStyle(.switch)
                 }
                 
                 Section(NSLocalizedString("Default Zap Amount in sats", comment: "Section title for zap configuration")) {
@@ -209,11 +213,7 @@ struct ConfigView: View {
                     }
                 }
 
-                Section(NSLocalizedString("Miscellaneous", comment: "Section header for miscellaneous user configuration")) {
-                    Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)
-                        .toggleStyle(.switch)
-                    Toggle(NSLocalizedString("Zap Vibration", comment: "Setting to enable vibration on zap"), isOn: $settings.zap_vibration)
-                        .toggleStyle(.switch)
+                Section(NSLocalizedString("Damus Local Notifications", comment: "Section header for damus local notifications user configuration")) {
                     Toggle(NSLocalizedString("Zap Notification", comment: "Setting to enable Zap Local Notification"), isOn: $settings.zap_notification)
                         .toggleStyle(.switch)
                     Toggle(NSLocalizedString("Mention Notification", comment: "Setting to enable Mention Local Notification"), isOn: $settings.mention_notification)
