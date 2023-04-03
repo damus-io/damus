@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+class ImageUploadingObserver: ObservableObject {
+    @Published var isLoading: Bool = false
+}
+
 struct EditPictureControl: View {
     
     let pubkey: String
