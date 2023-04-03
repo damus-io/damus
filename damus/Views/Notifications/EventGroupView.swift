@@ -212,7 +212,7 @@ struct EventGroupView: View {
                     NavigationLink(destination: dest) {
                         VStack(alignment: .leading) {
                             GroupDescription
-                            EventBody(damus_state: state, event: event, size: .normal, options: [])
+                            EventBody(damus_state: state, event: event, size: .normal, options: [.truncate_content])
                                 .padding([.top], 1)
                                 .foregroundColor(.gray)
                         }
