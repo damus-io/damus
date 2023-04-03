@@ -42,6 +42,10 @@ struct SelectedEventView: View {
                 .minimumScaleFactor(0.75)
                 .lineLimit(1)
                 
+                if event_is_reply(event, privkey: damus.keypair.privkey) {
+                    ReplyDescription(event: event, profiles: damus.profiles)
+                }
+                
                 EventBody(damus_state: damus, event: event, size: size, options: [])
                 
                 if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
