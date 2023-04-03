@@ -667,7 +667,7 @@ func process_metadata_event(our_pubkey: String, profiles: Profiles, ev: NostrEve
         }
     }
 
-    let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at)
+    let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at, event: ev)
     profiles.add(id: ev.pubkey, profile: tprof)
     
     if let nip05 = profile.nip05, old_nip05 != profile.nip05 {

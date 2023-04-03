@@ -18,6 +18,7 @@ var BOOTSTRAP_RELAYS = [
 struct TimestampedProfile {
     let profile: Profile
     let timestamp: Int64
+    let event: NostrEvent
 }
 
 enum Sheets: Identifiable {
@@ -382,7 +383,13 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.broadcast_event)) { obj in
             let ev = obj.object as! NostrEvent
-            self.damus_state?.pool.send(.event(ev))
+            guard let ds = self.damus_state else {
+                return
+            }
+            ds.postbox.send(ev)
+            if let profile = ds.profiles.profiles[ev.pubkey] {
+                ds.postbox.send(profile.event)
+            }
         }
         .onReceive(handle_notify(.unfollow)) { notif in
             guard let privkey = self.privkey else {

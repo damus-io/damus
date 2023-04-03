@@ -480,7 +480,7 @@ func test_damus_state() -> DamusState {
     let damus = DamusState.empty
     
     let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", banner: "", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io")
-    let tsprof = TimestampedProfile(profile: prof, timestamp: 0)
+    let tsprof = TimestampedProfile(profile: prof, timestamp: 0, event: test_event)
     damus.profiles.add(id: pubkey, profile: tsprof)
     return damus
 }
