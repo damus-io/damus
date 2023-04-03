@@ -317,26 +317,26 @@ func convert_invoice_block(_ b: invoice_block) -> Block? {
 
 func convert_mention_bech32_block(_ b: mention_bech32_block) -> Block?
 {
-    let relay_id = b.relays_count > 0 ? String(cString: b.relays.0!) : nil
+    let relay_id = b.mention.relays_count > 0 ? String(cString: b.mention.relays.0!) : nil
 
-    switch b.type {
-    case NOSTR_BECH32_NOTE:
+    switch b.mention.type {
+    case BECH32_MENTION_NOTE:
         fallthrough
-    case NOSTR_BECH32_NEVENT:
-        let event_id = hex_encode(Data(bytes: b.event_id, count: 32))
+    case BECH32_MENTION_NEVENT:
+        let event_id = hex_encode(Data(bytes: b.mention.event_id, count: 32))
         let event_id_ref = ReferencedId(ref_id: event_id, relay_id: relay_id, key: "e")
         return .mention(Mention(index: nil, type: .event, ref: event_id_ref))
 
-    case NOSTR_BECH32_NPUB:
+    case BECH32_MENTION_NPUB:
         fallthrough
-    case NOSTR_BECH32_NPROFILE:
-        let pubkey = hex_encode(Data(bytes: b.pubkey, count: 32))
+    case BECH32_MENTION_NPROFILE:
+        let pubkey = hex_encode(Data(bytes: b.mention.pubkey, count: 32))
         let pubkey_ref = ReferencedId(ref_id: pubkey, relay_id: relay_id, key: "p")
         return .mention(Mention(index: nil, type: .pubkey, ref: pubkey_ref))
 
-    case NOSTR_BECH32_NRELAY:
+    case BECH32_MENTION_NRELAY:
         fallthrough
-    case NOSTR_BECH32_NADDR:
+    case BECH32_MENTION_NADDR:
         return .text(strblock_to_string(b.str)!)
 
     default:
