@@ -40,12 +40,21 @@ struct EditPictureControl: View {
         } label: {
             if uploadObserver.isLoading {
                 ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: DamusColors.purple))
+                    .padding(10)
+                    .background(DamusColors.white.opacity(0.7))
+                    .clipShape(Circle())
+                    .shadow(color: DamusColors.purple, radius: 15, x: 0, y: 0)
             } else {
                 Image(systemName: "camera")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 25, height: 25)
-                    .foregroundColor(DamusColors.white)
+                    .foregroundColor(DamusColors.purple)
+                    .padding(10)
+                    .background(DamusColors.white.opacity(0.7))
+                    .clipShape(Circle())
+                    .shadow(color: DamusColors.purple, radius: 15, x: 0, y: 0)
             }
         }
         .sheet(isPresented: $show_camera) {
@@ -86,6 +95,20 @@ struct EditPictureControl: View {
                 callback(nil)
             }
             uploadObserver.isLoading = false
+        }
+    }
+}
+
+struct EditPictureControl_Previews: PreviewProvider {
+    static var previews: some View {
+        let pubkey = "123"
+        let url = Binding<URL?>.constant(URL(string: "https://damus.io")!)
+        let observer = ImageUploadingObserver()
+        ZStack {
+            Color.gray
+            EditPictureControl(pubkey: pubkey, image_url: url, uploadObserver: observer) { _ in
+                //
+            }
         }
     }
 }
