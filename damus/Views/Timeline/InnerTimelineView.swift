@@ -52,7 +52,7 @@ struct InnerTimelineView: View {
                         }
                         .padding(.top, 7)
                     
-                    Divider()
+                    ThiccDivider()
                         .padding([.top], 7)
                 }
             }

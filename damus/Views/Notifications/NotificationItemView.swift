@@ -57,8 +57,7 @@ struct NotificationItemView: View {
                 .buttonStyle(.plain)
             }
             
-            Divider()
-                .padding([.top,.bottom], 5)
+            ThiccDivider()
         }
     }
     
