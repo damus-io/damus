@@ -1,5 +1,5 @@
 //
-//  ProfilePictureEditView.swift
+//  EditPictureControl.swift
 //  damus
 //
 //  Created by Joel Klabo on 3/30/23.
@@ -7,11 +7,11 @@
 
 import SwiftUI
 
-struct EditProfilePictureControl: View {
+struct EditPictureControl: View {
     let uploader: MediaUploader
     let pubkey: String
-    @Binding var profile_image: URL?
-    @ObservedObject var viewModel: ProfileUploadingViewModel
+    @Binding var image_url: URL?
+    @ObservedObject var uploadObserver: ImageUploadingObserver
     let callback: (URL?) -> Void
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
@@ -36,7 +36,7 @@ struct EditProfilePictureControl: View {
                 Text("Take Photo", comment: "Option to take a photo with the camera")
             }
         } label: {
-            if viewModel.isLoading {
+            if uploadObserver.isLoading {
                 ProgressView()
             } else {
                 Image("camera")
@@ -83,14 +83,14 @@ struct EditProfilePictureControl: View {
     }
     
     private func handle_upload(media: MediaUpload) {
-        viewModel.isLoading = true
+        uploadObserver.isLoading = true
         Task {
             let res = await image_upload.start(media: media, uploader: uploader)
             
             switch res {
             case .success(let urlString):
                 let url = URL(string: urlString)
-                profile_image = url
+                image_url = url
                 callback(url)
             case .failed(let error):
                 if let error {
@@ -100,7 +100,7 @@ struct EditProfilePictureControl: View {
                 }
                 callback(nil)
             }
-            viewModel.isLoading = false
+            uploadObserver.isLoading = false
         }
     }
 }
