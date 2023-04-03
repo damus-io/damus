@@ -64,9 +64,12 @@ struct ImageCarousel: View {
                                     view.framePreloadCount = 3
                                 }
                                 .imageModifier({ img in
-                                    let fill = calculate_image_fill(geo: geo, img: img, maxHeight: maxHeight, minHeight: minHeight)
-
+                                    let img_size = img.size
+                                    let is_animated = img.kf.imageFrameCount != nil
+                                    
                                     DispatchQueue.main.async {
+                                        let fill = calculate_image_fill(geo: geo, img_size: img_size, is_animated: is_animated, maxHeight: maxHeight, minHeight: minHeight)
+                                        
                                         if let filling = fill.filling {
                                             self.filling = filling
                                         }
@@ -112,32 +115,32 @@ struct ImageFill {
     let height: CGFloat
 }
 
-func calculate_image_fill(geo: GeometryProxy, img: UIImage, maxHeight: CGFloat, minHeight: CGFloat) -> ImageFill {
-    let shape = determine_image_shape(img.size)
+func calculate_image_fill(geo: GeometryProxy, img_size: CGSize, is_animated: Bool, maxHeight: CGFloat, minHeight: CGFloat) -> ImageFill {
+    let shape = determine_image_shape(img_size)
 
-    let xfactor = geo.size.width / img.size.width
-    let yfactor = maxHeight / img.size.height
+    let xfactor = geo.size.width / img_size.width
+    let yfactor = maxHeight / img_size.height
     // calculate scaled image height
     // set scale factor and constrain images to minimum 150
     // and animations to scaled factor for dynamic size adjustment
     switch shape {
     case .portrait:
         let filling = yfactor <= 1.0
-        let scaled = img.size.height * xfactor
+        let scaled = img_size.height * xfactor
         let height = filling ? maxHeight : max(scaled, minHeight)
         return ImageFill(filling: filling, height: height)
     case .square:
         let filling = yfactor <= 1.0 && xfactor <= 1.0
-        let scaled = img.size.height * xfactor
+        let scaled = img_size.height * xfactor
         let height = filling ? maxHeight : max(scaled, minHeight)
         return ImageFill(filling: filling, height: height)
     case .landscape:
-        let scaled = img.size.height * xfactor
+        let scaled = img_size.height * xfactor
         let filling = scaled > maxHeight || xfactor < 1.0
-        let height = img.kf.imageFrameCount != nil ? scaled : filling ? min(maxHeight, scaled) : max(scaled, minHeight)
+        let height = is_animated ? scaled : filling ? min(maxHeight, scaled) : max(scaled, minHeight)
         return ImageFill(filling: filling, height: height)
     case .unknown:
-        let height = max(img.size.height, minHeight)
+        let height = max(img_size.height, minHeight)
         return ImageFill(filling: nil, height: height)
     }
 }
