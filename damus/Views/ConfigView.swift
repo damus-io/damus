@@ -214,6 +214,8 @@ struct ConfigView: View {
                         .toggleStyle(.switch)
                     Toggle(NSLocalizedString("Zap Vibration", comment: "Setting to enable vibration on zap"), isOn: $settings.zap_vibration)
                         .toggleStyle(.switch)
+                    Toggle(NSLocalizedString("Truncate text in timeline", comment: "Truncate text in timeline"), isOn: $settings.truncate_timeline_text)
+                        .toggleStyle(.switch)
                 }
 
                 Section(NSLocalizedString("Images", comment: "Section title for images configuration.")) {

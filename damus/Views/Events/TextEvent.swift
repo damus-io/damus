@@ -80,7 +80,7 @@ struct TextEvent: View {
             }
             .padding(.horizontal)
 
-            EvBody(options: [.truncate_content, .pad_content])
+            EvBody(options: self.options.union(.pad_content))
             
             if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
                 Mention(mention)
@@ -149,7 +149,7 @@ struct TextEvent: View {
                 TopPart(is_anon: is_anon)
                 
                 ReplyPart
-                EvBody(options: [])
+                EvBody(options: self.options)
                 
                 if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
                     Mention(mention)

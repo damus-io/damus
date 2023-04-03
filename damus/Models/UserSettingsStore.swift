@@ -128,6 +128,12 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
+    @Published var truncate_timeline_text: Bool {
+        didSet {
+            UserDefaults.standard.set(truncate_timeline_text, forKey: "truncate_timeline_text")
+        }
+    }
+
     @Published var auto_translate: Bool {
         didSet {
             UserDefaults.standard.set(auto_translate, forKey: "auto_translate")
@@ -221,6 +227,7 @@ class UserSettingsStore: ObservableObject {
 
         left_handed = UserDefaults.standard.object(forKey: "left_handed") as? Bool ?? false
         zap_vibration = UserDefaults.standard.object(forKey: "zap_vibration") as? Bool ?? false
+        truncate_timeline_text = UserDefaults.standard.object(forKey: "truncate_timeline_text") as? Bool ?? false
         disable_animation = should_disable_image_animation()
         auto_translate = UserDefaults.standard.object(forKey: "auto_translate") as? Bool ?? true
         show_only_preferred_languages = UserDefaults.standard.object(forKey: "show_only_preferred_languages") as? Bool ?? false
