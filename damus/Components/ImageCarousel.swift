@@ -39,16 +39,29 @@ enum ImageShape {
     case unknown
 }
 
+
 struct ImageCarousel: View {
     var urls: [URL]
     
+    let evid: String
+    let previews: PreviewCache
+    let minHeight: CGFloat = 150
+    let maxHeight: CGFloat = 500
     
     @State private var open_sheet: Bool = false
     @State private var current_url: URL? = nil
-    @State private var height: CGFloat = .zero
-    @State private var minHeight: CGFloat = 150
-    @State private var maxHeight: CGFloat = 500
+    @State private var height: CGFloat? = nil
     @State private var filling: Bool = false
+    
+    init(previews: PreviewCache, evid: String, urls: [URL]) {
+        _open_sheet = State(initialValue: false)
+        _current_url = State(initialValue: nil)
+        _height = State(initialValue: previews.lookup_image_height(evid))
+        _filling = State(initialValue: false)
+        self.urls = urls
+        self.evid = evid
+        self.previews = previews
+    }
     
     var body: some View {
         TabView {
@@ -64,6 +77,9 @@ struct ImageCarousel: View {
                                     view.framePreloadCount = 3
                                 }
                                 .imageModifier({ img in
+                                    guard self.height == nil else {
+                                        return
+                                    }
                                     let img_size = img.size
                                     let is_animated = img.kf.imageFrameCount != nil
                                     
@@ -74,6 +90,7 @@ struct ImageCarousel: View {
                                             self.filling = filling
                                         }
 
+                                        self.previews.cache_image_height(evid: evid, height: fill.height)
                                         self.height = fill.height
                                     }
                                 })
@@ -89,7 +106,7 @@ struct ImageCarousel: View {
         .fullScreenCover(isPresented: $open_sheet) {
             ImageView(urls: urls)
         }
-        .frame(height: height)
+        .frame(height: height ?? 0)
         .onTapGesture {
             open_sheet = true
         }
@@ -147,6 +164,7 @@ func calculate_image_fill(geo: GeometryProxy, img_size: CGSize, is_animated: Boo
 
 struct ImageCarousel_Previews: PreviewProvider {
     static var previews: some View {
-        ImageCarousel(urls: [URL(string: "https://jb55.com/red-me.jpg")!,URL(string: "https://jb55.com/red-me.jpg")!])
+        ImageCarousel(previews: test_damus_state().previews, evid: "evid", urls: [URL(string: "https://jb55.com/red-me.jpg")!,URL(string: "https://jb55.com/red-me.jpg")!])
     }
 }
+

@@ -105,10 +105,10 @@ struct NoteContentView: View {
             }
 
             if show_images && artifacts.images.count > 0 {
-                ImageCarousel(urls: artifacts.images)
+                ImageCarousel(previews: damus_state.previews, evid: event.id, urls: artifacts.images)
             } else if !show_images && artifacts.images.count > 0 {
                 ZStack {
-                    ImageCarousel(urls: artifacts.images)
+                    ImageCarousel(previews: damus_state.previews, evid: event.id, urls: artifacts.images)
                     Blur()
                         .disabled(true)
                 }
