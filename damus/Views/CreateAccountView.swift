@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CreateAccountView: View {
     @StateObject var account: CreateAccountModel = CreateAccountModel()
-    @StateObject var profileUploadViewModel = ProfileUploadingViewModel()
+    @StateObject var profileUploadViewModel = ImageUploadingObserver()
     
     @State var is_light: Bool = false
     @State var is_done: Bool = false
@@ -35,7 +35,7 @@ struct CreateAccountView: View {
                     .font(.title.bold())
                     .foregroundColor(.white)
                 
-                ProfilePictureSelector(pubkey: account.pubkey, viewModel: profileUploadViewModel, callback: uploadedProfilePicture(image_url:))
+                ProfilePictureSelector(pubkey: account.pubkey, uploadObserver: profileUploadViewModel, callback: uploadedProfilePicture(image_url:))
                 
                 HStack(alignment: .top) {
                     VStack {
