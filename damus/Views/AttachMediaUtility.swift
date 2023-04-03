@@ -205,6 +205,7 @@ enum MediaUploader: String, CaseIterable, Identifiable {
     var id: String { self.rawValue }
     case nostrBuild
     case nostrImg
+    case nostrcheck
 
     var nameParam: String {
         switch self {
@@ -212,6 +213,9 @@ enum MediaUploader: String, CaseIterable, Identifiable {
             return "\"fileToUpload\""
         case .nostrImg:
             return "\"image\""
+        }
+        case .nostrcheck:
+            return "\"publicgallery\""
         }
     }
 
@@ -221,6 +225,8 @@ enum MediaUploader: String, CaseIterable, Identifiable {
             return true
         case .nostrImg:
             return false
+        case .nostrcheck:
+            return true
         }
     }
 
@@ -237,6 +243,8 @@ enum MediaUploader: String, CaseIterable, Identifiable {
             return .init(index: -1, tag: "nostrBuild", displayName: NSLocalizedString("NostrBuild", comment: "Dropdown option label for system default for NostrBuild image uploader."))
         case .nostrImg:
             return .init(index: 0, tag: "nostrImg", displayName: NSLocalizedString("NostrImg", comment: "Dropdown option label for system default for NostrImg image uploader."))
+         case .nostrcheck:
+            return .init(index: 0, tag: "Nostrcheck", displayName: NSLocalizedString("Nostrcheck", comment: "Dropdown option label for system default for Nostrcheck image uploader."))
         }
     }
 
@@ -247,6 +255,8 @@ enum MediaUploader: String, CaseIterable, Identifiable {
             return "https://nostr.build/upload.php"
         case .nostrImg:
             return "https://nostrimg.com/api/upload"
+        case .nostrcheck:
+            return "https://nostrcheck.me/api/media.php"
         }
     }
 
@@ -267,6 +277,21 @@ enum MediaUploader: String, CaseIterable, Identifiable {
                 
         case .nostrImg:
             guard let startIndex = responseString.range(of: "https://i.nostrimg.com/")?.lowerBound else {
+                    return nil
+                }
+            let stringContainingName = responseString[startIndex..<responseString.endIndex]
+            guard let endIndex = stringContainingName.range(of: "\"")?.lowerBound else {
+                return nil
+            }
+            let nostrBuildImageName = responseString[startIndex..<endIndex]
+            let nostrBuildURL = "\(nostrBuildImageName)"
+            return nostrBuildURL
+        
+        // For sure it doesn't work. I need help here. Our API returns a formatted JSON with he URL and other data.
+        // Can someone help me? 
+        //https://github.com/quentintaranpino/nostrcheck-api
+        case .nostrcheck:
+            guard let startIndex = responseString.range(of: "https://nostrcheck.me/media/public/")?.lowerBound else {
                     return nil
                 }
             let stringContainingName = responseString[startIndex..<responseString.endIndex]
