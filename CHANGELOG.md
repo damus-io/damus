@@ -1,3 +1,37 @@
+## [1.4.1] - 2023-04-03
+
+### Added
+
+- Profile Picture Upload (Joel Klabo)
+- Enable offline posting (William Casarin)
+- Add auto-translation caching to ruduce api usage (Terry Yiu)
+- Added support for gif uploads (Swift)
+- Add a Divider in the Follows List for Large Screens (Joel Klabo)
+- Upload Photos and Videos from Camera (Joel Klabo)
+- Added ability to lookup users by nip05 identifiers (William Casarin)
+
+### Changed
+
+- Only truncate timeline text if enabled in settings (William Casarin)
+- Make mentions wide in notifications like in timeline (William Casarin)
+- Broadcast events you are replying to (William Casarin)
+- Broadcast now also broadcasts event user's profile (William Casarin)
+- Improved look of reply view (ericholguin)
+- Remove gradient in some places for visibility (ericholguin)
+
+
+### Fixed
+
+- Fix cropped images (mainvolume)
+- Truncate long text in notification items (William Casarin)
+- Restore missing reply description on selected events (William Casarin)
+- Show sent DMs immediately (William Casarin)
+- Fixed size of translated text (William Casarin)
+- Fix crash when reposting (William Casarin)
+- Fix unclickable image dismiss button (OlegAba)
+
+
+[1.4.1]: https://github.com/damus-io/damus/releases/tag/v1.4.1
 ## [1.4.0] - 2023-03-27
 
 ### Added
@@ -843,5 +877,4 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
 
