@@ -89,7 +89,7 @@ struct EditMetadataView: View {
                 let pfp_size: CGFloat = 90.0
 
                 HStack(alignment: .center) {
-                    ProfilePictureSelector(pubkey: damus_state.pubkey, damus_state: damus_state, uploadObserver: profileUploadObserver, callback: uploadedProfilePicture(image_url:))
+                    EditProfilePictureView(pubkey: damus_state.pubkey, damus_state: damus_state, size: pfp_size, uploadObserver: profileUploadObserver, callback: uploadedProfilePicture(image_url:))
                         .offset(y: -(pfp_size/2.0)) // Increase if set a frame
 
                    Spacer()

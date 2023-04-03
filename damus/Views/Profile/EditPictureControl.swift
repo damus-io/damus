@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+class ImageUploadingObserver: ObservableObject {
+    @Published var isLoading: Bool = false
+}
+
 struct EditPictureControl: View {
     let uploader: MediaUploader
     let pubkey: String
@@ -101,6 +105,20 @@ struct EditPictureControl: View {
                 callback(nil)
             }
             uploadObserver.isLoading = false
+        }
+    }
+}
+
+struct EditPictureControl_Previews: PreviewProvider {
+    static var previews: some View {
+        let pubkey = "123"
+        let url = Binding<URL?>.constant(URL(string: "https://damus.io")!)
+        let observer = ImageUploadingObserver()
+        ZStack {
+            Color.gray
+            EditPictureControl(uploader: .nostrBuild, pubkey: pubkey, image_url: url, uploadObserver: observer) { _ in
+                //
+            }
         }
     }
 }
