@@ -32,16 +32,16 @@ struct ShareSheet: UIViewControllerRepresentable {
 }
 
 
+enum ImageShape {
+    case square
+    case landscape
+    case portrait
+    case unknown
+}
 
 struct ImageCarousel: View {
     var urls: [URL]
     
-    enum ImageShape {
-        case square
-        case landscape
-        case portrait
-        case unknown
-    }
     
     @State private var open_sheet: Bool = false
     @State private var current_url: URL? = nil
@@ -64,37 +64,14 @@ struct ImageCarousel: View {
                                     view.framePreloadCount = 3
                                 }
                                 .imageModifier({ img in
-                                    // get the fitting scale factor
-                                    let shape: ImageShape = {
-                                        let imageRatio = img.size.width / img.size.height
-                                        switch imageRatio {
-                                        case 1.0: return .square
-                                        case ..<1.0: return .portrait
-                                        case 1.0...: return .landscape
-                                        default: return .unknown
+                                    let fill = calculate_image_fill(geo: geo, img: img, maxHeight: maxHeight, minHeight: minHeight)
+
+                                    DispatchQueue.main.async {
+                                        if let filling = fill.filling {
+                                            self.filling = filling
                                         }
-                                    }()
-                                    
-                                    let xfactor = geo.size.width / img.size.width
-                                    let yfactor = maxHeight / img.size.height
-                                    // calculate scaled image height
-                                    // set scale factor and constrain images to minimum 150
-                                    // and animations to scaled factor for dynamic size adjustment
-                                    switch shape {
-                                    case .portrait:
-                                        filling = yfactor <= 1.0
-                                        let scaled = img.size.height * xfactor
-                                        height = filling ? maxHeight : max(scaled, minHeight)
-                                    case .square:
-                                        filling = yfactor <= 1.0 && xfactor <= 1.0
-                                        let scaled = img.size.height * xfactor
-                                        height = filling ? maxHeight : max(scaled, minHeight)
-                                    case .landscape:
-                                        let scaled = img.size.height * xfactor
-                                        filling = scaled > maxHeight || xfactor < 1.0
-                                        height = img.kf.imageFrameCount != nil ? scaled : filling ? min(maxHeight, scaled) : max(scaled, minHeight)
-                                    case .unknown:
-                                        height = max(img.size.height, minHeight)
+
+                                        self.height = fill.height
                                     }
                                 })
                                 .aspectRatio(contentMode: filling ? .fill : .fit)
@@ -114,6 +91,54 @@ struct ImageCarousel: View {
             open_sheet = true
         }
         .tabViewStyle(PageTabViewStyle())
+    }
+}
+
+func determine_image_shape(_ size: CGSize) -> ImageShape {
+    guard size.height > 0 else {
+        return .unknown
+    }
+    let imageRatio = size.width / size.height
+    switch imageRatio {
+        case 1.0: return .square
+        case ..<1.0: return .portrait
+        case 1.0...: return .landscape
+        default: return .unknown
+    }
+}
+
+struct ImageFill {
+    let filling: Bool?
+    let height: CGFloat
+}
+
+func calculate_image_fill(geo: GeometryProxy, img: UIImage, maxHeight: CGFloat, minHeight: CGFloat) -> ImageFill {
+    let shape = determine_image_shape(img.size)
+
+    let xfactor = geo.size.width / img.size.width
+    let yfactor = maxHeight / img.size.height
+    // calculate scaled image height
+    // set scale factor and constrain images to minimum 150
+    // and animations to scaled factor for dynamic size adjustment
+    switch shape {
+    case .portrait:
+        let filling = yfactor <= 1.0
+        let scaled = img.size.height * xfactor
+        let height = filling ? maxHeight : max(scaled, minHeight)
+        return ImageFill(filling: filling, height: height)
+    case .square:
+        let filling = yfactor <= 1.0 && xfactor <= 1.0
+        let scaled = img.size.height * xfactor
+        let height = filling ? maxHeight : max(scaled, minHeight)
+        return ImageFill(filling: filling, height: height)
+    case .landscape:
+        let scaled = img.size.height * xfactor
+        let filling = scaled > maxHeight || xfactor < 1.0
+        let height = img.kf.imageFrameCount != nil ? scaled : filling ? min(maxHeight, scaled) : max(scaled, minHeight)
+        return ImageFill(filling: filling, height: height)
+    case .unknown:
+        let height = max(img.size.height, minHeight)
+        return ImageFill(filling: nil, height: height)
     }
 }
 
