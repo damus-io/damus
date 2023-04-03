@@ -68,7 +68,9 @@ struct EditMetadataView: View {
     @Environment(\.colorScheme) var colorScheme
 
     @State var confirm_ln_address: Bool = false
-    @StateObject var profileUploadViewModel = ProfileUploadingViewModel()
+    
+    @StateObject var profileUploadObserver = ImageUploadingObserver()
+    @StateObject var bannerUploadObserver = ImageUploadingObserver()
     
     init (damus_state: DamusState) {
         self.damus_state = damus_state
@@ -119,7 +121,7 @@ struct EditMetadataView: View {
     var TopSection: some View {
         ZStack(alignment: .top) {
             GeometryReader { geo in
-                BannerImageView(pubkey: damus_state.pubkey, profiles: damus_state.profiles)
+                EditBannerImageView(damus_state: damus_state, viewModel: bannerUploadObserver, callback: uploadedBanner(image_url:))
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: BANNER_HEIGHT)
                     .clipped()
@@ -128,7 +130,7 @@ struct EditMetadataView: View {
                 let pfp_size: CGFloat = 90.0
 
                 HStack(alignment: .center) {
-                    ProfilePictureSelector(pubkey: damus_state.pubkey, damus_state: damus_state, viewModel: profileUploadViewModel, callback: uploadedProfilePicture(image_url:))
+                    EditProfilePictureView(pubkey: damus_state.pubkey, damus_state: damus_state, size: pfp_size, uploadObserver: profileUploadObserver, callback: uploadedProfilePicture(image_url:))
                         .offset(y: -(pfp_size/2.0)) // Increase if set a frame
 
                    Spacer()
@@ -221,7 +223,7 @@ struct EditMetadataView: View {
                         dismiss()
                     }
                 }
-                .disabled(profileUploadViewModel.isLoading)
+                .disabled(profileUploadObserver.isLoading || bannerUploadObserver.isLoading)
                 .alert(NSLocalizedString("Invalid Tip Address", comment: "Title of alerting as invalid tip address."), isPresented: $confirm_ln_address) {
                     Button(NSLocalizedString("Ok", comment: "Button to dismiss the alert.")) {
                     }
@@ -236,6 +238,10 @@ struct EditMetadataView: View {
     
     func uploadedProfilePicture(image_url: URL?) {
         picture = image_url?.absoluteString ?? ""
+    }
+    
+    func uploadedBanner(image_url: URL?) {
+        banner = image_url?.absoluteString ?? ""
     }
 }
 

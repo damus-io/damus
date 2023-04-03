@@ -8,6 +8,33 @@
 import SwiftUI
 import Kingfisher
 
+struct EditBannerImageView: View {
+    
+    var damus_state: DamusState
+    @ObservedObject var viewModel: ImageUploadingObserver
+    let callback: (URL?) -> Void
+    let defaultImage = UIImage(named: "profile-banner") ?? UIImage()
+    
+    @State var banner_image: URL? = nil
+
+    var body: some View {
+        ZStack {
+            Color(uiColor: .systemBackground)
+            KFAnimatedImage(get_banner_url(banner: banner_image?.absoluteString, pubkey: damus_state.pubkey, profiles: damus_state.profiles))
+                .imageContext(.banner)
+                .configure { view in
+                    view.framePreloadCount = 3
+                }
+                .placeholder { _ in
+                    Color(uiColor: .secondarySystemBackground)
+                }
+                .onFailureImage(defaultImage)
+            
+            EditPictureControl(pubkey: damus_state.pubkey, image_url: $banner_image, uploadObserver: viewModel, callback: callback)
+        }
+    }
+}
+
 struct InnerBannerImageView: View {
     
     let url: URL?

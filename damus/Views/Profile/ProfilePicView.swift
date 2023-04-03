@@ -32,60 +32,6 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
     }
 }
 
-struct EditProfilePictureView: View {
-    
-    @Binding var url: URL?
-    
-    let pubkey: String
-    let size: CGFloat
-    let highlight: Highlight
-    
-    var damus_state: DamusState?
-
-    var PlaceholderColor: Color {
-        return id_to_color(pubkey)
-    }
-
-    var Placeholder: some View {
-        PlaceholderColor
-            .frame(width: size, height: size)
-            .clipShape(Circle())
-            .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
-            .padding(2)
-    }
-
-    var body: some View {
-        ZStack {
-            Color(uiColor: .systemBackground)
-    
-            KFAnimatedImage(get_profile_url())
-                .imageContext(.pfp)
-                .cancelOnDisappear(true)
-                .configure { view in
-                    view.framePreloadCount = 3
-                }
-                .placeholder { _ in
-                    Placeholder
-                }
-                .scaledToFill()
-                .opacity(0.5)
-        }
-        .frame(width: size, height: size)
-        .clipShape(Circle())
-        .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
-    }
-    
-    private func get_profile_url() -> URL? {
-        if let url {
-            return url
-        } else if let state = damus_state, let picture = state.profiles.lookup(id: pubkey)?.picture {
-            return URL(string: picture)
-        } else {
-            return url ?? URL(string: robohash(pubkey))
-        }
-    }
-}
-
 struct InnerProfilePicView: View {
     
     let url: URL?
