@@ -1,5 +1,5 @@
 //
-//  ProfilePictureSelector.swift
+//  EditProfilePictureView.swift
 //  damus
 //
 //  Created by William Casarin on 2022-05-20.
@@ -31,7 +31,6 @@ struct EditProfilePictureView: View {
                     view.framePreloadCount = 3
                 }
                 .scaledToFill()
-                .opacity(0.5)
     
             EditPictureControl(uploader: damus_state?.settings.default_media_uploader ?? .nostrBuild, pubkey: pubkey, image_url: $profile_url, uploadObserver: uploadObserver, callback: callback)
         }

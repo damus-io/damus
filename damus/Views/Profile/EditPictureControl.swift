@@ -42,12 +42,21 @@ struct EditPictureControl: View {
         } label: {
             if uploadObserver.isLoading {
                 ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: DamusColors.purple))
+                    .padding(10)
+                    .background(DamusColors.white.opacity(0.7))
+                    .clipShape(Circle())
+                    .shadow(color: DamusColors.purple, radius: 15, x: 0, y: 0)
             } else {
                 Image("camera")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 25, height: 25)
-                    .foregroundColor(DamusColors.white)
+                    .foregroundColor(DamusColors.purple)
+                    .padding(10)
+                    .background(DamusColors.white.opacity(0.7))
+                    .clipShape(Circle())
+                    .shadow(color: DamusColors.purple, radius: 15, x: 0, y: 0)
             }
         }
         .sheet(isPresented: $show_camera) {
