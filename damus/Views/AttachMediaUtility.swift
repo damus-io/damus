@@ -199,7 +199,7 @@ extension NSMutableData {
         }
         append(data)
     }
-}
+} 
 
 enum MediaUploader: String, CaseIterable, Identifiable {
     var id: String { self.rawValue }
