@@ -454,7 +454,16 @@ struct ContentView: View {
                 //let to_relays = tup.1
                 print("post \(post.content)")
                 let new_ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
-                self.damus_state?.postbox.send(new_ev)
+                guard let ds = self.damus_state else {
+                    return
+                }
+                ds.postbox.send(new_ev)
+                for eref in new_ev.referenced_ids.prefix(3) {
+                    // also broadcast at most 3 referenced events
+                    if let ev = ds.events.lookup(eref.ref_id) {
+                        ds.postbox.send(ev)
+                    }
+                }
             case .cancel:
                 active_sheet = nil
                 print("post cancelled")
