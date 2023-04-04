@@ -517,6 +517,7 @@ class HomeModel: ObservableObject {
             return
         }
         
+        damus_state.replies.count_replies(ev)
         damus_state.events.insert(ev)
 
         if sub_id == home_subid {

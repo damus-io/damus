@@ -47,10 +47,15 @@ struct EventActionBar: View {
     var body: some View {
         HStack {
             if damus_state.keypair.privkey != nil {
-                EventActionButton(img: "bubble.left", col: nil) {
-                    notify(.reply, event)
+                HStack(spacing: 4) {
+                    EventActionButton(img: "bubble.left", col: bar.replied ? Color.pink : Color.gray) {
+                        notify(.reply, event)
+                    }
+                    .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
+                    Text(verbatim: "\(bar.replies > 0 ? "\(bar.replies)" : "")")
+                        .font(.footnote.weight(.medium))
+                        .foregroundColor(bar.replied ? Color.pink : Color.gray)
                 }
-                .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
             }
             Spacer()
             HStack(spacing: 4) {
@@ -225,12 +230,12 @@ struct EventActionBar_Previews: PreviewProvider {
         let ev = NostrEvent(content: "hi", pubkey: pk)
         
         let bar = ActionBarModel.empty()
-        let likedbar = ActionBarModel(likes: 10, boosts: 0, zaps: 0, zap_total: 0, our_like: nil, our_boost: nil, our_zap: nil)
-        let likedbar_ours = ActionBarModel(likes: 10, boosts: 0, zaps: 0, zap_total: 0, our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: nil, our_zap: nil)
-        let maxed_bar = ActionBarModel(likes: 999, boosts: 999, zaps: 999, zap_total: 99999999,  our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: NostrEvent(id: "", content: "", pubkey: ""), our_zap: nil)
-        let extra_max_bar = ActionBarModel(likes: 9999, boosts: 9999, zaps: 9999, zap_total: 99999999,  our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: NostrEvent(id: "", content: "", pubkey: ""), our_zap: nil)
-        let mega_max_bar = ActionBarModel(likes: 9999999, boosts: 99999, zaps: 9999, zap_total: 99999999,  our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: NostrEvent(id: "", content: "", pubkey: ""), our_zap: nil)
-        let zapbar = ActionBarModel(likes: 0, boosts: 0, zaps: 5, zap_total: 10000000, our_like: nil, our_boost: nil, our_zap: nil)
+        let likedbar = ActionBarModel(likes: 10, boosts: 0, zaps: 0, zap_total: 0, replies: 0, our_like: nil, our_boost: nil, our_zap: nil, our_reply: nil)
+        let likedbar_ours = ActionBarModel(likes: 10, boosts: 0, zaps: 0, zap_total: 0, replies: 0, our_like: test_event, our_boost: nil, our_zap: nil, our_reply: nil)
+        let maxed_bar = ActionBarModel(likes: 999, boosts: 999, zaps: 999, zap_total: 99999999, replies: 999, our_like: test_event, our_boost: test_event, our_zap: nil, our_reply: nil)
+        let extra_max_bar = ActionBarModel(likes: 9999, boosts: 9999, zaps: 9999, zap_total: 99999999, replies: 9999, our_like: test_event, our_boost: test_event, our_zap: nil, our_reply: test_event)
+        let mega_max_bar = ActionBarModel(likes: 9999999, boosts: 99999, zaps: 9999, zap_total: 99999999, replies: 9999999,  our_like: test_event, our_boost: test_event, our_zap: test_zap, our_reply: test_event)
+        let zapbar = ActionBarModel(likes: 0, boosts: 0, zaps: 5, zap_total: 10000000, replies: 0, our_like: nil, our_boost: nil, our_zap: nil, our_reply: nil)
         
         VStack(spacing: 50) {
             EventActionBar(damus_state: ds, event: ev, bar: bar)

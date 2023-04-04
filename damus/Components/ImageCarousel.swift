@@ -81,9 +81,9 @@ struct ImageCarousel: View {
                                 .imageModifier({ img in
                                     let img_size = img.size
                                     let is_animated = img.kf.imageFrameCount != nil
-                                    let geo_size = geo.size
                                     
                                     DispatchQueue.main.async {
+                                        let geo_size = geo.size
                                         let fill = calculate_image_fill(geo_size: geo_size, img_size: img_size, is_animated: is_animated, maxHeight: maxHeight, minHeight: minHeight)
                                         
                                         self.previews.cache_image_meta(evid: evid, image_fill: fill)
