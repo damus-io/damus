@@ -32,6 +32,7 @@ struct NoteContentView: View {
 
     @State var artifacts: NoteArtifacts
     @State var preview: LinkViewRepresentable?
+    @State var blur_images = true
     
     init(damus_state: DamusState, event: NostrEvent, show_images: Bool, size: EventViewKind, artifacts: NoteArtifacts, options: EventViewOptions) {
         self.damus_state = damus_state
@@ -113,9 +114,21 @@ struct NoteContentView: View {
                 ImageCarousel(previews: damus_state.previews, evid: event.id, urls: artifacts.images)
             } else if !show_images && artifacts.images.count > 0 {
                 ZStack {
-                    ImageCarousel(previews: damus_state.previews, evid: event.id, urls: artifacts.images)
-                    Blur()
-                        .disabled(true)
+                    ImageCarousel(previews: damus_state.previews, evid: event.id, urls: artifacts.images).gesture(LongPressGesture()
+                        .onEnded { _ in
+                            blur_images = false
+                        }
+                        .sequenced(
+                            before: DragGesture(minimumDistance: 0)
+                                .onEnded { _ in
+                                    blur_images = true
+                                }
+                        )
+                    )
+                    if blur_images {
+                        Blur()
+                            .disabled(true)
+                    }
                 }
                 //.cornerRadius(10)
             }
