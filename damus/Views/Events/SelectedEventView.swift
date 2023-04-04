@@ -39,21 +39,24 @@ struct SelectedEventView: View {
                         .padding([.bottom], 4)
 
                 }
+                .padding(.horizontal)
                 .minimumScaleFactor(0.75)
                 .lineLimit(1)
                 
                 if event_is_reply(event, privkey: damus.keypair.privkey) {
                     ReplyDescription(event: event, profiles: damus.profiles)
+                        .padding(.horizontal)
                 }
                 
-                EventBody(damus_state: damus, event: event, size: size, options: [])
+                EventBody(damus_state: damus, event: event, size: size, options: [.pad_content])
                 
                 if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
                     BuilderEventView(damus: damus, event_id: mention.ref.id)
+                        .padding(.horizontal)
                 }
                 
                 Text(verbatim: "\(format_date(event.created_at))")
-                    .padding(.top, 10)
+                    .padding([.top, .leading, .trailing])
                     .font(.footnote)
                     .foregroundColor(.gray)
                 
@@ -62,11 +65,13 @@ struct SelectedEventView: View {
                 
                 if !bar.is_empty {
                     EventDetailBar(state: damus, target: event.id, target_pk: event.pubkey)
+                        .padding(.horizontal)
                     Divider()
                 }
                 
                 EventActionBar(damus_state: damus, event: event)
                     .padding([.top], 4)
+                    .padding(.horizontal)
 
                 Divider()
                     .padding([.top], 4)
@@ -76,7 +81,6 @@ struct SelectedEventView: View {
                 guard target == self.event.id else { return }
                 self.bar.update(damus: self.damus, evid: target)
             }
-            .padding([.leading], 2)
             .compositingGroup()
         }
     }
