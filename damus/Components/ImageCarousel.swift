@@ -134,23 +134,20 @@ func calculate_image_fill(geo: GeometryProxy, img_size: CGSize, is_animated: Boo
     let shape = determine_image_shape(img_size)
 
     let xfactor = geo.size.width / img_size.width
-    let yfactor = maxHeight / img_size.height
+    let scaled = img_size.height * xfactor
+    let yfactor = maxHeight / scaled
     // calculate scaled image height
     // set scale factor and constrain images to minimum 150
     // and animations to scaled factor for dynamic size adjustment
     switch shape {
     case .portrait:
         let filling = yfactor <= 1.0
-        let scaled = img_size.height * xfactor
         let height = filling ? maxHeight : max(scaled, minHeight)
         return ImageFill(filling: filling, height: height)
     case .square:
-        let filling = yfactor <= 1.0 && xfactor <= 1.0
-        let scaled = img_size.height * xfactor
-        let height = filling ? maxHeight : max(scaled, minHeight)
-        return ImageFill(filling: filling, height: height)
+        let height = max(min(maxHeight, scaled), minHeight)
+        return ImageFill(filling: nil, height: height)
     case .landscape:
-        let scaled = img_size.height * xfactor
         let filling = scaled > maxHeight || xfactor < 1.0
         let height = is_animated ? scaled : filling ? min(maxHeight, scaled) : max(scaled, minHeight)
         return ImageFill(filling: filling, height: height)
