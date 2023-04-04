@@ -143,8 +143,7 @@ func calculate_image_fill(geo_size: CGSize, img_size: CGSize, is_animated: Bool,
         let height = filling ? maxHeight : max(scaled, minHeight)
         return ImageFill(filling: filling, height: height)
     case .square:
-        let height = max(min(maxHeight, scaled), minHeight)
-        return ImageFill(filling: nil, height: height)
+        return ImageFill(filling: nil, height: scaled)
     case .landscape:
         let filling = scaled > maxHeight || xfactor < 1.0
         let height = is_animated ? scaled : filling ? min(maxHeight, scaled) : max(scaled, minHeight)
