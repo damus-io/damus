@@ -998,7 +998,13 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
     guard let type = ev.known_kind else {
         return
     }
-    
+
+    if damus_state.settings.notification_only_from_following,
+       damus_state.contacts.follow_state(ev.pubkey) != .follows
+        {
+        return
+    }
+
     if type == .text && damus_state.settings.mention_notification {
         for block in ev.blocks(damus_state.keypair.privkey) {
             if case .mention(let mention) = block, mention.ref.ref_id == damus_state.keypair.pubkey,

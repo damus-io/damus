@@ -158,6 +158,12 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
+    @Published var notification_only_from_following: Bool {
+        didSet {
+            UserDefaults.standard.set(like_notification, forKey: "notification_only_from_following")
+        }
+    }
+
     @Published var truncate_timeline_text: Bool {
         didSet {
             UserDefaults.standard.set(truncate_timeline_text, forKey: "truncate_timeline_text")
@@ -262,6 +268,7 @@ class UserSettingsStore: ObservableObject {
         repost_notification = UserDefaults.standard.object(forKey: "repost_notification") as? Bool ?? true
         like_notification = UserDefaults.standard.object(forKey: "like_notification") as? Bool ?? true
         dm_notification = UserDefaults.standard.object(forKey: "dm_notification") as? Bool ?? true
+        notification_only_from_following = UserDefaults.standard.object(forKey: "notification_only_from_following") as? Bool ?? false
         truncate_timeline_text = UserDefaults.standard.object(forKey: "truncate_timeline_text") as? Bool ?? false
         disable_animation = should_disable_image_animation()
         auto_translate = UserDefaults.standard.object(forKey: "auto_translate") as? Bool ?? true
