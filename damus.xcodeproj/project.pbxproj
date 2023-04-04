@@ -164,6 +164,7 @@
 		4CB9D4A72992D02B00A9A7E4 /* ProfileNameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB9D4A62992D02B00A9A7E4 /* ProfileNameView.swift */; };
 		4CB9D4A92992D2F400A9A7E4 /* FollowsYou.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB9D4A82992D2F400A9A7E4 /* FollowsYou.swift */; };
 		4CBCA930297DB57F00EC6B2F /* WebsiteLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBCA92F297DB57F00EC6B2F /* WebsiteLink.swift */; };
+		4CC6193A29DC777C006A86D1 /* RelayBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC6193929DC777C006A86D1 /* RelayBootstrap.swift */; };
 		4CC7AAE7297EFA7B00430951 /* Zap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAE6297EFA7B00430951 /* Zap.swift */; };
 		4CC7AAEB297F0AEC00430951 /* BuilderEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAEA297F0AEC00430951 /* BuilderEventView.swift */; };
 		4CC7AAED297F0B9E00430951 /* Highlight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAEC297F0B9E00430951 /* Highlight.swift */; };
@@ -555,6 +556,7 @@
 		4CB9D4A62992D02B00A9A7E4 /* ProfileNameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileNameView.swift; sourceTree = "<group>"; };
 		4CB9D4A82992D2F400A9A7E4 /* FollowsYou.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowsYou.swift; sourceTree = "<group>"; };
 		4CBCA92F297DB57F00EC6B2F /* WebsiteLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteLink.swift; sourceTree = "<group>"; };
+		4CC6193929DC777C006A86D1 /* RelayBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayBootstrap.swift; sourceTree = "<group>"; };
 		4CC7AAE6297EFA7B00430951 /* Zap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Zap.swift; sourceTree = "<group>"; };
 		4CC7AAEA297F0AEC00430951 /* BuilderEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuilderEventView.swift; sourceTree = "<group>"; };
 		4CC7AAEC297F0B9E00430951 /* Highlight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Highlight.swift; sourceTree = "<group>"; };
@@ -1164,6 +1166,7 @@
 			children = (
 				4CE8794729941DA700F758CC /* RelayFilters.swift */,
 				4CE8794B2995B59E00F758CC /* RelayMetadatas.swift */,
+				4CC6193929DC777C006A86D1 /* RelayBootstrap.swift */,
 			);
 			path = Relays;
 			sourceTree = "<group>";
@@ -1451,6 +1454,7 @@
 				4CB55EF5295E679D007FD187 /* UserRelaysView.swift in Sources */,
 				4C363AA228296A7E006E126D /* SearchView.swift in Sources */,
 				4CC7AAED297F0B9E00430951 /* Highlight.swift in Sources */,
+				4CC6193A29DC777C006A86D1 /* RelayBootstrap.swift in Sources */,
 				4C285C8A2838B985008A31F1 /* ProfilePictureSelector.swift in Sources */,
 				4C9F18E429ABDE6D008C55EC /* MaybeAnonPfpView.swift in Sources */,
 				4C75EFB92804A2740006080F /* EventView.swift in Sources */,

@@ -79,11 +79,15 @@ struct LoginView: View {
                     return
                 }
 
+                // this is a weird way to login anyways
+                /*
+                var bootstrap_relays = load_bootstrap_relays(pubkey: nip05.pubkey)
                 for relay in nip05.relays {
-                    if !(BOOTSTRAP_RELAYS.contains { $0 == relay }) {
-                        BOOTSTRAP_RELAYS.append(relay)
+                    if !(bootstrap_relays.contains { $0 == relay }) {
+                        bootstrap_relays.append(relay)
                     }
                 }
+                 */
                 save_pubkey(pubkey: nip05.pubkey)
 
                 notify(.login, ())

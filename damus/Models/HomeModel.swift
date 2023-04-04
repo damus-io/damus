@@ -743,7 +743,7 @@ func process_contact_event(state: DamusState, ev: NostrEvent) {
 
 func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     let bootstrap_dict: [String: RelayInfo] = [:]
-    let old_decoded = m_old_ev.flatMap { decode_json_relays($0.content) } ?? BOOTSTRAP_RELAYS.reduce(into: bootstrap_dict) { (d, r) in
+    let old_decoded = m_old_ev.flatMap { decode_json_relays($0.content) } ?? state.bootstrap_relays.reduce(into: bootstrap_dict) { (d, r) in
         d[r] = .rw
     }
     
@@ -778,6 +778,7 @@ func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     }
     
     if changed {
+        save_bootstrap_relays(pubkey: state.pubkey, relays: Array(new))
         notify(.relays_changed, ())
     }
 }

@@ -90,7 +90,8 @@ struct SaveKeysView: View {
     }
     
     func complete_account_creation(_ account: CreateAccountModel) {
-        for relay in BOOTSTRAP_RELAYS {
+        let bootstrap_relays = load_bootstrap_relays(pubkey: account.pubkey)
+        for relay in bootstrap_relays {
             add_rw_relay(self.pool, relay)
         }
 

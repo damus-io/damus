@@ -8,13 +8,6 @@
 import SwiftUI
 import Starscream
 
-var BOOTSTRAP_RELAYS = [
-    "wss://relay.damus.io",
-    "wss://eden.nostr.land",
-    "wss://nostr.wine",
-    "wss://nos.lol",
-]
-
 struct TimestampedProfile {
     let profile: Profile
     let timestamp: Int64
@@ -605,9 +598,10 @@ struct ContentView: View {
         let pool = RelayPool()
         let metadatas = RelayMetadatas()
         let relay_filters = RelayFilters(our_pubkey: pubkey)
+        let bootstrap_relays = load_bootstrap_relays(pubkey: pubkey)
         
         let new_relay_filters = load_relay_filters(pubkey) == nil
-        for relay in BOOTSTRAP_RELAYS {
+        for relay in bootstrap_relays {
             if let url = URL(string: relay) {
                 add_new_relay(relay_filters: relay_filters, metadatas: metadatas, pool: pool, url: url, info: .rw, new_relay_filters: new_relay_filters)
             }
@@ -632,7 +626,8 @@ struct ContentView: View {
                                       drafts: Drafts(),
                                       events: EventCache(),
                                       bookmarks: BookmarksManager(pubkey: pubkey),
-                                      postbox: PostBox(pool: pool)
+                                      postbox: PostBox(pool: pool),
+                                      bootstrap_relays: bootstrap_relays
         )
         home.damus_state = self.damus_state!
         
