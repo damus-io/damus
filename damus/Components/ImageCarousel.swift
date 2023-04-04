@@ -45,12 +45,12 @@ struct ImageCarousel: View {
     
     let evid: String
     let previews: PreviewCache
-    let minHeight: CGFloat = 150
-    let maxHeight: CGFloat = 500
     
     @State private var open_sheet: Bool = false
     @State private var current_url: URL? = nil
     @State private var image_fill: ImageFill? = nil
+    @State private var fillHeight: CGFloat = 350
+    @State private var maxHeight: CGFloat = UIScreen.main.bounds.height * 0.85
     
     init(previews: PreviewCache, evid: String, urls: [URL]) {
         _open_sheet = State(initialValue: false)
@@ -81,10 +81,9 @@ struct ImageCarousel: View {
                                 .imageModifier({ img in
                                     let img_size = img.size
                                     let is_animated = img.kf.imageFrameCount != nil
-                                    
+                                    let geo_size = geo.size
                                     DispatchQueue.main.async {
-                                        let geo_size = geo.size
-                                        let fill = calculate_image_fill(geo_size: geo_size, img_size: img_size, is_animated: is_animated, maxHeight: maxHeight, minHeight: minHeight)
+                                        let fill = calculate_image_fill(geo_size: geo_size, img_size: img_size, is_animated: is_animated, maxHeight: maxHeight, fillHeight: fillHeight)
                                         
                                         self.previews.cache_image_meta(evid: evid, image_fill: fill)
                                         self.image_fill = fill
@@ -128,29 +127,21 @@ struct ImageFill {
     let height: CGFloat
 }
 
-func calculate_image_fill(geo_size: CGSize, img_size: CGSize, is_animated: Bool, maxHeight: CGFloat, minHeight: CGFloat) -> ImageFill {
+func calculate_image_fill(geo_size: CGSize, img_size: CGSize, is_animated: Bool, maxHeight: CGFloat, fillHeight: CGFloat) -> ImageFill {
     let shape = determine_image_shape(img_size)
 
     let xfactor = geo_size.width / img_size.width
     let scaled = img_size.height * xfactor
-    let yfactor = maxHeight / scaled
     // calculate scaled image height
     // set scale factor and constrain images to minimum 150
     // and animations to scaled factor for dynamic size adjustment
     switch shape {
-    case .portrait:
-        let filling = yfactor <= 1.0
-        let height = filling ? maxHeight : max(scaled, minHeight)
+    case .portrait, .landscape:
+        let filling = scaled > maxHeight
+        let height = filling ? fillHeight : scaled
         return ImageFill(filling: filling, height: height)
-    case .square:
+    case .square, .unknown:
         return ImageFill(filling: nil, height: scaled)
-    case .landscape:
-        let filling = scaled > maxHeight || xfactor < 1.0
-        let height = is_animated ? scaled : filling ? min(maxHeight, scaled) : max(scaled, minHeight)
-        return ImageFill(filling: filling, height: height)
-    case .unknown:
-        let height = max(img_size.height, minHeight)
-        return ImageFill(filling: nil, height: height)
     }
 }
 
