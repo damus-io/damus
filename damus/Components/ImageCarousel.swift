@@ -79,9 +79,6 @@ struct ImageCarousel: View {
                                     view.framePreloadCount = 3
                                 }
                                 .imageModifier({ img in
-                                    guard self.image_fill == nil else {
-                                        return
-                                    }
                                     let img_size = img.size
                                     let is_animated = img.kf.imageFrameCount != nil
                                     let geo_size = geo.size
