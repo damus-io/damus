@@ -338,6 +338,54 @@
 			<string>%2$@ ساتوشي</string>
 		</dict>
 	</dict>
+	<key>zap_notification_no_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>zero</key>
+			<string>تم استلام %2$@ ساتوشي من %3$@</string>
+			<key>one</key>
+			<string>تم استلام %2$@ ساتوشي من %3$@</string>
+			<key>two</key>
+			<string>تم استلام %2$@ ساتوشي من %3$@</string>
+			<key>few</key>
+			<string>تم استلام %2$@ ساتوشي من %3$@</string>
+			<key>many</key>
+			<string>تم استلام %2$@ ساتوشي من %3$@</string>
+			<key>other</key>
+			<string>تم استلام %2$@ ساتوشي من %3$@</string>
+		</dict>
+	</dict>
+	<key>zap_notification_with_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>zero</key>
+			<string>تم استلام %2$@ من %3$@: "%4$@"</string>
+			<key>one</key>
+			<string>تم استلام %2$@ من %3$@: "%4$@"</string>
+			<key>two</key>
+			<string>تم استلام %2$@ من %3$@: "%4$@"</string>
+			<key>few</key>
+			<string>تم استلام %2$@ من %3$@: "%4$@"</string>
+			<key>many</key>
+			<string>تم استلام %2$@ من %3$@: "%4$@"</string>
+			<key>other</key>
+			<string>تم استلام %2$@ من %3$@: "%4$@"</string>
+		</dict>
+	</dict>
 	<key>zapped_tagged_in_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
