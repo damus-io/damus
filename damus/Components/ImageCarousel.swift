@@ -77,20 +77,17 @@ struct ImageCarousel: View {
                                     
                                     let xfactor = geo.size.width / img.size.width
                                     let yfactor = maxHeight / img.size.height
+                                    let scaled = img.size.height * xfactor
                                     // calculate scaled image height
                                     // set scale factor and constrain images to minimum 150
                                     // and animations to scaled factor for dynamic size adjustment
                                     switch shape {
                                     case .portrait:
                                         filling = yfactor <= 1.0
-                                        let scaled = img.size.height * xfactor
                                         height = filling ? maxHeight : max(scaled, minHeight)
                                     case .square:
-                                        filling = yfactor <= 1.0 && xfactor <= 1.0
-                                        let scaled = img.size.height * xfactor
-                                        height = filling ? maxHeight : max(scaled, minHeight)
+                                        height = max(min(maxHeight, scaled), minHeight)
                                     case .landscape:
-                                        let scaled = img.size.height * xfactor
                                         filling = scaled > maxHeight || xfactor < 1.0
                                         height = img.kf.imageFrameCount != nil ? scaled : filling ? min(maxHeight, scaled) : max(scaled, minHeight)
                                     case .unknown:
