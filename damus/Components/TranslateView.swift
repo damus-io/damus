@@ -40,22 +40,11 @@ struct TranslateView: View {
         }
     }
     
-    func CheckingStatus(lang: String) -> some View {
-        return Button(String(format: NSLocalizedString("Translating from %@...", comment: "Button to indicate that the note is in the process of being translated from a different language."), lang)) {
-            show_translated_note = false
-        }
-        .translate_button_style()
-    }
-    
     func MainContent(note_lang: String) -> some View {
         return Group {
             let languageName = Locale.current.localizedString(forLanguageCode: note_lang)
-            if let lang = languageName, show_translated_note {
-                if checkingTranslationStatus {
-                    CheckingStatus(lang: lang)
-                } else if let artifacts = translated_artifacts {
-                    Translated(lang: lang, artifacts: artifacts)
-                }
+            if let languageName, let translated_artifacts, show_translated_note {
+                Translated(lang: languageName, artifacts: translated_artifacts)
             } else {
                 TranslateButton
             }
