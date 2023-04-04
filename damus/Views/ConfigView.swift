@@ -407,6 +407,11 @@ struct NotificationView: View {
                 Toggle(NSLocalizedString("DMs", comment: "Setting to enable DM Local Notification"), isOn: $settings.dm_notification)
                     .toggleStyle(.switch)
             }
+
+            Section(header: Text(NSLocalizedString("Notification Preference", comment: "Section header for Notification Preferences"))) {
+                Toggle(NSLocalizedString("Show only from users you follow", comment: "Setting to Show notifications only associated to users your follow"), isOn: $settings.notification_only_from_following)
+                    .toggleStyle(.switch)
+            }
         }
     }
 }
