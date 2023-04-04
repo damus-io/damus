@@ -84,9 +84,10 @@ struct ImageCarousel: View {
                                     }
                                     let img_size = img.size
                                     let is_animated = img.kf.imageFrameCount != nil
+                                    let geo_size = geo.size
                                     
                                     DispatchQueue.main.async {
-                                        let fill = calculate_image_fill(geo: geo, img_size: img_size, is_animated: is_animated, maxHeight: maxHeight, minHeight: minHeight)
+                                        let fill = calculate_image_fill(geo_size: geo_size, img_size: img_size, is_animated: is_animated, maxHeight: maxHeight, minHeight: minHeight)
                                         
                                         self.previews.cache_image_meta(evid: evid, image_fill: fill)
                                         self.image_fill = fill
@@ -130,10 +131,10 @@ struct ImageFill {
     let height: CGFloat
 }
 
-func calculate_image_fill(geo: GeometryProxy, img_size: CGSize, is_animated: Bool, maxHeight: CGFloat, minHeight: CGFloat) -> ImageFill {
+func calculate_image_fill(geo_size: CGSize, img_size: CGSize, is_animated: Bool, maxHeight: CGFloat, minHeight: CGFloat) -> ImageFill {
     let shape = determine_image_shape(img_size)
 
-    let xfactor = geo.size.width / img_size.width
+    let xfactor = geo_size.width / img_size.width
     let scaled = img_size.height * xfactor
     let yfactor = maxHeight / scaled
     // calculate scaled image height
