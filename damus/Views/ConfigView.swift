@@ -396,15 +396,15 @@ struct NotificationView: View {
     var body: some View {
         Form {
             Section(header: Text(NSLocalizedString("Local Notifications", comment: "Section header for damus local notifications user configuration"))) {
-                Toggle(NSLocalizedString("Zap Notification", comment: "Setting to enable Zap Local Notification"), isOn: $settings.zap_notification)
+                Toggle(NSLocalizedString("Zaps", comment: "Setting to enable Zap Local Notification"), isOn: $settings.zap_notification)
                     .toggleStyle(.switch)
-                Toggle(NSLocalizedString("Mention Notification", comment: "Setting to enable Mention Local Notification"), isOn: $settings.mention_notification)
+                Toggle(NSLocalizedString("Mentions", comment: "Setting to enable Mention Local Notification"), isOn: $settings.mention_notification)
                     .toggleStyle(.switch)
-                Toggle(NSLocalizedString("Repost Notification", comment: "Setting to enable Repost Local Notification"), isOn: $settings.repost_notification)
+                Toggle(NSLocalizedString("Reposts", comment: "Setting to enable Repost Local Notification"), isOn: $settings.repost_notification)
                     .toggleStyle(.switch)
-                Toggle(NSLocalizedString("Like Notification", comment: "Setting to enable Like Local Notification"), isOn: $settings.like_notification)
+                Toggle(NSLocalizedString("Likes", comment: "Setting to enable Like Local Notification"), isOn: $settings.like_notification)
                     .toggleStyle(.switch)
-                Toggle(NSLocalizedString("DM Notification", comment: "Setting to enable DM Local Notification"), isOn: $settings.dm_notification)
+                Toggle(NSLocalizedString("DMs", comment: "Setting to enable DM Local Notification"), isOn: $settings.dm_notification)
                     .toggleStyle(.switch)
             }
         }
