@@ -627,7 +627,8 @@ struct ContentView: View {
                                       events: EventCache(),
                                       bookmarks: BookmarksManager(pubkey: pubkey),
                                       postbox: PostBox(pool: pool),
-                                      bootstrap_relays: bootstrap_relays
+                                      bootstrap_relays: bootstrap_relays,
+                                      replies: ReplyCounter(our_pubkey: pubkey)
         )
         home.damus_state = self.damus_state!
         

@@ -114,6 +114,7 @@ class ThreadModel: ObservableObject {
         }
         
         let the_ev = damus_state.events.upsert(ev)
+        damus_state.replies.count_replies(the_ev)
         damus_state.events.add_replies(ev: the_ev)
         
         event_map.insert(ev)
