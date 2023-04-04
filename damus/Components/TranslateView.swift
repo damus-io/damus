@@ -45,8 +45,10 @@ struct TranslateView: View {
             let languageName = Locale.current.localizedString(forLanguageCode: note_lang)
             if let languageName, let translated_artifacts, show_translated_note {
                 Translated(lang: languageName, artifacts: translated_artifacts)
-            } else {
+            } else if !damus_state.settings.auto_translate {
                 TranslateButton
+            } else {
+                EmptyView()
             }
         }
     }
