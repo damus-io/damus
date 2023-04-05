@@ -189,7 +189,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere:r teilten dein Profil</string>
+			<string>%2$@ und %1$d andere*r teilten dein Profil</string>
 			<key>other</key>
 			<string>%2$@ und %1$d andere teilten dein Profil</string>
 		</dict>
