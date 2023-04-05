@@ -104,6 +104,9 @@ extension Notification.Name {
     static var zapping: Notification.Name {
         return Notification.Name("zapping")
     }
+    static var local_notification: Notification.Name {
+        return Notification.Name("local_notification")
+    }
 }
 
 func handle_notify(_ name: Notification.Name) -> NotificationCenter.Publisher {

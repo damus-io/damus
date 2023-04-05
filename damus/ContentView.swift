@@ -84,6 +84,8 @@ struct ContentView: View {
     @State var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
+    @State var nav_local_notif_active: Bool = false
+    @State var ev_local_notif: NostrEvent? = nil
     
     // connect retry timer
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
@@ -153,6 +155,13 @@ struct ContentView: View {
             if let active_event {
                 let thread = ThreadModel(event: active_event, damus_state: damus_state!)
                 NavigationLink(destination: ThreadView(state: damus_state!, thread: thread), isActive: $thread_open) {
+                    EmptyView()
+                }
+            }
+            // Navigation when clicking local notification
+            if nav_local_notif_active {
+                let thread = ThreadModel(event: ev_local_notif!, damus_state: damus_state!)
+                NavigationLink(destination: ThreadView(state: damus_state!, thread: thread), isActive: $nav_local_notif_active) {
                     EmptyView()
                 }
             }
@@ -467,6 +476,16 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.new_mutes)) { notif in
             home.filter_muted()
+        }
+        .onReceive(handle_notify(.local_notification)) { notif in
+            if let obj = notif.object as? String {
+                if obj == "dm_local_notification" {
+                    selected_timeline = .dms
+                } else if let notif = damus_state?.events.lookup(obj) {
+                    ev_local_notif = notif
+                    nav_local_notif_active = true
+                }
+            }
         }
         .alert(NSLocalizedString("Deleted Account", comment: "Alert message to indicate this is a deleted account"), isPresented: $is_deleted_account) {
             Button(NSLocalizedString("Logout", comment: "Button to close the alert that informs that the current account has been deleted.")) {

@@ -55,6 +55,14 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         // Display the notification in the foreground
         completionHandler([.banner, .list, .sound, .badge])
     }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let userInfo = response.notification.request.content.userInfo
+        if let deepLinkString = userInfo["evId"] as? String {
+            notify(.local_notification, deepLinkString)
+        }
+        completionHandler()
+    }
 }
 
 func needs_setup() -> Keypair? {
