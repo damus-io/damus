@@ -260,7 +260,10 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
         .filter({ $0.is_note_mention })
         .count == 1
     
+    var ind: Int = -1
     let txt: AttributedString = blocks.reduce("") { str, block in
+        ind = ind + 1
+        
         switch block {
         case .mention(let m):
             if m.type == .event && one_note_ref {
@@ -268,7 +271,14 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
             }
             return str + mention_str(m, profiles: profiles)
         case .text(let txt):
-            return str + AttributedString(stringLiteral: txt)
+            var trimmed = txt
+            if let prev = blocks[safe: ind-1], case .url(let u) = prev, is_image_url(u) {
+                trimmed = " " + trim_prefix(trimmed)
+            }
+            if let next = blocks[safe: ind+1], case .url(let u) = next, is_image_url(u) {
+                trimmed = trim_suffix(trimmed)
+            }
+            return str + AttributedString(stringLiteral: trimmed)
         case .hashtag(let htag):
             return str + hashtag_str(htag)
         case .invoice(let invoice):
