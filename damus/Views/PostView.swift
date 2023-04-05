@@ -165,7 +165,7 @@ struct PostView: View {
             }
         }
         .frame(height: 30)
-        .padding([.bottom], 10)
+        .padding()
     }
     
     func append_url(_ url: String) {
@@ -219,13 +219,13 @@ struct PostView: View {
                         VStack(alignment: .leading, spacing: 0) {
                             HStack(alignment: .top) {
                                 ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
-                                    .padding(.leading, replying_to != nil ? 15 : 0)
                                 
                                 TextEntry
                             }
                             .frame(height: deviceSize.size.height*0.78)
                             .id("post")
                         }
+                        .padding(.horizontal)
                     }
                     .frame(maxHeight: searching == nil ? .infinity : 70)
                     .onAppear {
@@ -236,17 +236,16 @@ struct PostView: View {
                 // This if-block observes @ for tagging
                 if let searching {
                     UserSearch(damus_state: damus_state, search: searching, post: $post)
-                        .padding(.leading, replying_to != nil ? 15 : 0)
                         .frame(maxHeight: .infinity)
                 } else {
                     Divider()
-                        .padding([.bottom], 10)
                     VStack(alignment: .leading) {
                         AttachmentBar
+                            .padding(.vertical, 5)
+                            .padding(.horizontal)
                     }
                 }
             }
-            .padding()
             .sheet(isPresented: $attach_media) {
                 ImagePicker(sourceType: .photoLibrary, pubkey: damus_state.pubkey) { img in
                     handle_upload(media: .image(img))
