@@ -473,6 +473,29 @@ struct ContentView: View {
         .onReceive(handle_notify(.unmute_thread)) { notif in
             home.filter_muted()
         }
+        .onReceive(handle_notify(.local_notification)) { notif in
+            let local = notif.object as! LossyLocalNotification
+            
+            guard let damus_state else {
+                return
+            }
+            
+            guard let target = damus_state.events.lookup(local.event_id) else {
+                return
+            }
+            
+            switch local.type {
+            case .dm:
+                selected_timeline = .dms
+                damus_state.dms.open_dm_by_pk(target.pubkey)
+                
+            case .like: fallthrough
+            case .zap: fallthrough
+            case .mention: fallthrough
+            case .repost:
+                open_event(ev: target)
+            }
+        }
         .alert(NSLocalizedString("Deleted Account", comment: "Alert message to indicate this is a deleted account"), isPresented: $is_deleted_account) {
             Button(NSLocalizedString("Logout", comment: "Button to close the alert that informs that the current account has been deleted.")) {
                 is_deleted_account = false

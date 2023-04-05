@@ -110,6 +110,9 @@ extension Notification.Name {
     static var unmute_thread: Notification.Name {
         return Notification.Name("unmute_thread")
     }
+    static var local_notification: Notification.Name {
+        return Notification.Name("local_notification")
+    }
 }
 
 func handle_notify(_ name: Notification.Name) -> NotificationCenter.Publisher {
