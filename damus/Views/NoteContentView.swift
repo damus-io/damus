@@ -275,9 +275,15 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
             if let prev = blocks[safe: ind-1], case .url(let u) = prev, is_image_url(u) {
                 trimmed = " " + trim_prefix(trimmed)
             }
-            if let next = blocks[safe: ind+1], case .url(let u) = next, is_image_url(u) {
-                trimmed = trim_suffix(trimmed)
+            
+            if let next = blocks[safe: ind+1] {
+                if case .url(let u) = next, is_image_url(u) {
+                    trimmed = trim_suffix(trimmed)
+                } else if case .mention(let m) = next, m.type == .event, one_note_ref {
+                    trimmed = trim_suffix(trimmed)
+                }
             }
+            
             return str + AttributedString(stringLiteral: trimmed)
         case .hashtag(let htag):
             return str + hashtag_str(htag)
