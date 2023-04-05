@@ -169,6 +169,12 @@ class UserSettingsStore: ObservableObject {
             UserDefaults.standard.set(truncate_timeline_text, forKey: "truncate_timeline_text")
         }
     }
+    
+    @Published var truncate_mention_text: Bool {
+        didSet {
+            UserDefaults.standard.set(truncate_mention_text, forKey: "truncate_mention_text")
+        }
+    }
 
     @Published var auto_translate: Bool {
         didSet {
@@ -270,6 +276,7 @@ class UserSettingsStore: ObservableObject {
         dm_notification = UserDefaults.standard.object(forKey: "dm_notification") as? Bool ?? true
         notification_only_from_following = UserDefaults.standard.object(forKey: "notification_only_from_following") as? Bool ?? false
         truncate_timeline_text = UserDefaults.standard.object(forKey: "truncate_timeline_text") as? Bool ?? false
+        truncate_mention_text = UserDefaults.standard.object(forKey: "truncate_mention_text") as? Bool ?? true
         disable_animation = should_disable_image_animation()
         auto_translate = UserDefaults.standard.object(forKey: "auto_translate") as? Bool ?? true
         show_only_preferred_languages = UserDefaults.standard.object(forKey: "show_only_preferred_languages") as? Bool ?? false

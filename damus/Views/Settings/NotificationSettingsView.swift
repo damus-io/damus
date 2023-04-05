@@ -9,6 +9,8 @@ import SwiftUI
 
 struct NotificationSettingsView: View {
     @ObservedObject var settings: UserSettingsStore
+    
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
         Form {
@@ -29,6 +31,10 @@ struct NotificationSettingsView: View {
                 Toggle(NSLocalizedString("Show only from users you follow", comment: "Setting to Show notifications only associated to users your follow"), isOn: $settings.notification_only_from_following)
                     .toggleStyle(.switch)
             }
+        }
+        .navigationTitle("Notifications")
+        .onReceive(handle_notify(.switched_timeline)) { _ in
+            dismiss()
         }
     }
 }

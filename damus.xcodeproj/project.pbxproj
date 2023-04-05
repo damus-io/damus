@@ -39,6 +39,11 @@
 		4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F92280F66F5000448DE /* ReplyMap.swift */; };
 		4C1A9A1A29DCA17E00516EAC /* ReplyCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A1929DCA17E00516EAC /* ReplyCounter.swift */; };
 		4C1A9A1D29DDCF9B00516EAC /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A1C29DDCF9B00516EAC /* NotificationSettingsView.swift */; };
+		4C1A9A1F29DDD24B00516EAC /* AppearanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A1E29DDD24B00516EAC /* AppearanceSettingsView.swift */; };
+		4C1A9A2129DDD3E100516EAC /* KeySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2029DDD3E100516EAC /* KeySettingsView.swift */; };
+		4C1A9A2329DDDB8100516EAC /* IconLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2229DDDB8100516EAC /* IconLabel.swift */; };
+		4C1A9A2529DDDF2600516EAC /* ZapSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2429DDDF2600516EAC /* ZapSettingsView.swift */; };
+		4C1A9A2729DDE31900516EAC /* TranslationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2629DDE31900516EAC /* TranslationSettingsView.swift */; };
 		4C216F32286E388800040376 /* DMChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F31286E388800040376 /* DMChatView.swift */; };
 		4C216F34286F5ACD00040376 /* DMView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F33286F5ACD00040376 /* DMView.swift */; };
 		4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F352870A9A700040376 /* InputDismissKeyboard.swift */; };
@@ -403,6 +408,11 @@
 		4C0A3F92280F66F5000448DE /* ReplyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyMap.swift; sourceTree = "<group>"; };
 		4C1A9A1929DCA17E00516EAC /* ReplyCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyCounter.swift; sourceTree = "<group>"; };
 		4C1A9A1C29DDCF9B00516EAC /* NotificationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
+		4C1A9A1E29DDD24B00516EAC /* AppearanceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettingsView.swift; sourceTree = "<group>"; };
+		4C1A9A2029DDD3E100516EAC /* KeySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySettingsView.swift; sourceTree = "<group>"; };
+		4C1A9A2229DDDB8100516EAC /* IconLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconLabel.swift; sourceTree = "<group>"; };
+		4C1A9A2429DDDF2600516EAC /* ZapSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapSettingsView.swift; sourceTree = "<group>"; };
+		4C1A9A2629DDE31900516EAC /* TranslationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationSettingsView.swift; sourceTree = "<group>"; };
 		4C216F31286E388800040376 /* DMChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMChatView.swift; sourceTree = "<group>"; };
 		4C216F33286F5ACD00040376 /* DMView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMView.swift; sourceTree = "<group>"; };
 		4C216F352870A9A700040376 /* InputDismissKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputDismissKeyboard.swift; sourceTree = "<group>"; };
@@ -819,6 +829,10 @@
 			isa = PBXGroup;
 			children = (
 				4C1A9A1C29DDCF9B00516EAC /* NotificationSettingsView.swift */,
+				4C1A9A1E29DDD24B00516EAC /* AppearanceSettingsView.swift */,
+				4C1A9A2029DDD3E100516EAC /* KeySettingsView.swift */,
+				4C1A9A2429DDDF2600516EAC /* ZapSettingsView.swift */,
+				4C1A9A2629DDE31900516EAC /* TranslationSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -1087,6 +1101,7 @@
 				7CFF6316299FEFE5005D382A /* SelectableText.swift */,
 				4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */,
 				4CE4F0F729DB7399005914DB /* ThiccDivider.swift */,
+				4C1A9A2229DDDB8100516EAC /* IconLabel.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -1547,6 +1562,7 @@
 				4CC7AAF0297F11C700430951 /* SelectedEventView.swift in Sources */,
 				4CC7AAF8297F1CEE00430951 /* EventProfile.swift in Sources */,
 				64FBD06F296255C400D9D3B2 /* Theme.swift in Sources */,
+				4C1A9A2329DDDB8100516EAC /* IconLabel.swift in Sources */,
 				4C3EA64928FF597700C48A62 /* bech32.c in Sources */,
 				4CE879522996B68900F758CC /* RelayType.swift in Sources */,
 				4C90BD162839DB54008EE7EF /* NostrMetadata.swift in Sources */,
@@ -1596,6 +1612,7 @@
 				4C8682872814DE470026224F /* ProfileView.swift in Sources */,
 				4C5F9114283D694D0052CD1C /* FollowTarget.swift in Sources */,
 				4CF0ABD629817F5B00D66079 /* ReportView.swift in Sources */,
+				4C1A9A2729DDE31900516EAC /* TranslationSettingsView.swift in Sources */,
 				4CB8838629656C8B00DC99E7 /* NIP05.swift in Sources */,
 				4CF0ABD82981980C00D66079 /* Lists.swift in Sources */,
 				4C30AC8029A6A53F00E2BD5A /* ProfilePicturesView.swift in Sources */,
@@ -1649,6 +1666,7 @@
 				4CE879552996BAB900F758CC /* RelayPaidDetail.swift in Sources */,
 				4CF0ABD42980996B00D66079 /* Report.swift in Sources */,
 				4C06670B28FDE64700038D2A /* damus.c in Sources */,
+				4C1A9A2529DDDF2600516EAC /* ZapSettingsView.swift in Sources */,
 				4C2CDDF7299D4A5E00879FD5 /* Debouncer.swift in Sources */,
 				3AAA95CC298E07E900F3D526 /* DeepLPlan.swift in Sources */,
 				4FE60CDD295E1C5E00105A1F /* Wallet.swift in Sources */,
@@ -1659,6 +1677,7 @@
 				4CC7AAF4297F18B400430951 /* ReplyDescription.swift in Sources */,
 				4C75EFA427FA577B0006080F /* PostView.swift in Sources */,
 				4C30AC7229A5677A00E2BD5A /* NotificationsView.swift in Sources */,
+				4C1A9A2129DDD3E100516EAC /* KeySettingsView.swift in Sources */,
 				4C1A9A1D29DDCF9B00516EAC /* NotificationSettingsView.swift in Sources */,
 				4C75EFB528049D790006080F /* Relay.swift in Sources */,
 				4CEE2AF1280B216B00AB5EEF /* EventDetailView.swift in Sources */,
@@ -1666,6 +1685,7 @@
 				4C75EFBB2804A34C0006080F /* ProofOfWork.swift in Sources */,
 				4C3AC7A52836987600E1F516 /* MainTabView.swift in Sources */,
 				7C0F392F29B57CAF0039859C /* Binding+.swift in Sources */,
+				4C1A9A1F29DDD24B00516EAC /* AppearanceSettingsView.swift in Sources */,
 				3AA59D1D2999B0400061C48E /* DraftsModel.swift in Sources */,
 				3169CAED294FCCFC00EE4006 /* Constants.swift in Sources */,
 				4CB9D4A72992D02B00A9A7E4 /* ProfileNameView.swift in Sources */,
