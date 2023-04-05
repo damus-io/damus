@@ -392,26 +392,76 @@ struct ConfigView: View {
 
 struct NotificationView: View {
     @ObservedObject var settings: UserSettingsStore
+    @State private var showAlert = false
 
     var body: some View {
         Form {
             Section(header: Text(NSLocalizedString("Local Notifications", comment: "Section header for damus local notifications user configuration"))) {
                 Toggle(NSLocalizedString("Zaps", comment: "Setting to enable Zap Local Notification"), isOn: $settings.zap_notification)
                     .toggleStyle(.switch)
+                    .onChange(of: settings.zap_notification) { newValue in
+                        if newValue {
+                            setup_notifications(showAlert: $showAlert)
+                        }
+                    }
+
                 Toggle(NSLocalizedString("Mentions", comment: "Setting to enable Mention Local Notification"), isOn: $settings.mention_notification)
                     .toggleStyle(.switch)
+                    .onChange(of: settings.mention_notification) { newValue in
+                        if newValue {
+                            setup_notifications(showAlert: $showAlert)
+                        }
+                    }
+
                 Toggle(NSLocalizedString("Reposts", comment: "Setting to enable Repost Local Notification"), isOn: $settings.repost_notification)
                     .toggleStyle(.switch)
+                    .onChange(of: settings.repost_notification) { newValue in
+                        if newValue {
+                            setup_notifications(showAlert: $showAlert)
+                        }
+                    }
+
                 Toggle(NSLocalizedString("Likes", comment: "Setting to enable Like Local Notification"), isOn: $settings.like_notification)
                     .toggleStyle(.switch)
+                    .onChange(of: settings.like_notification) { newValue in
+                        if newValue {
+                            setup_notifications(showAlert: $showAlert)
+                        }
+                    }
+
                 Toggle(NSLocalizedString("DMs", comment: "Setting to enable DM Local Notification"), isOn: $settings.dm_notification)
                     .toggleStyle(.switch)
+                    .onChange(of: settings.dm_notification) { newValue in
+                        if newValue {
+                            setup_notifications(showAlert: $showAlert)
+                        }
+                    }
             }
 
             Section(header: Text(NSLocalizedString("Notification Preference", comment: "Section header for Notification Preferences"))) {
                 Toggle(NSLocalizedString("Show only from users you follow", comment: "Setting to Show notifications only associated to users your follow"), isOn: $settings.notification_only_from_following)
                     .toggleStyle(.switch)
+                    .onChange(of: settings.notification_only_from_following) { newValue in
+                        if newValue {
+                            setup_notifications(showAlert: $showAlert)
+                        }
+                    }
             }
+        }
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text(NSLocalizedString("Notifications Disabled", comment: "Notifications Disabled heading of alert view")),
+                message: Text(NSLocalizedString("Please enable notifications to receive important updates.", comment: "Description of alert view")),
+                primaryButton: .default(Text(NSLocalizedString("Settings", comment: "Settings button")), action: {
+                    guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
+                        return
+                    }
+                    if UIApplication.shared.canOpenURL(settingsUrl) {
+                        UIApplication.shared.open(settingsUrl)
+                    }
+                }),
+                secondaryButton: .cancel()
+            )
         }
     }
 }

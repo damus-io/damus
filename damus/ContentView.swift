@@ -761,7 +761,7 @@ func update_filters_with_since(last_of_kind: [Int: NostrEvent], filters: [NostrF
 
 
 
-func setup_notifications() {
+func setup_notifications(showAlert: Binding<Bool>? = nil) {
     
     UIApplication.shared.registerForRemoteNotifications()
     let center = UNUserNotificationCenter.current()
@@ -771,7 +771,11 @@ func setup_notifications() {
             center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
                 
             }
-            
+
+            if let al = showAlert {
+                al.wrappedValue = true
+            }
+
             return
         }
     }
