@@ -147,7 +147,7 @@ struct ConfigView: View {
                         .toggleStyle(.switch)
                 }
                 
-                NavigationLink(destination: NotificationView(settings: settings)) {
+                NavigationLink(destination: NotificationSettingsView(settings: settings)) {
                     Section(NSLocalizedString("Local Notifications", comment: "Section header for damus local notifications user configuration")) {
                     }
                 }

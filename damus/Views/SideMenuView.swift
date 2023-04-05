@@ -93,7 +93,7 @@ struct SideMenuView: View {
                                 */
                                  
                                 NavigationLink(destination: MutelistView(damus_state: damus_state, users: get_mutelist_users(damus_state.contacts.mutelist) )) {
-                                    navLabel(title: NSLocalizedString("Blocked", comment: "Sidebar menu label for Profile view."), systemImage: "exclamationmark.octagon")
+                                    navLabel(title: NSLocalizedString("Muted", comment: "Sidebar menu label for muted users view."), systemImage: "exclamationmark.octagon")
                                 }
                                 
                                 NavigationLink(destination: RelayConfigView(state: damus_state)) {

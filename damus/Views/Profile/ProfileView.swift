@@ -221,8 +221,8 @@ struct ProfileView: View {
                     notify(.report, target)
                 }
 
-                Button(NSLocalizedString("Block", comment: "Button to block a profile."), role: .destructive) {
-                    notify(.block, profile.pubkey)
+                Button(NSLocalizedString("Mute", comment: "Button to mute a profile."), role: .destructive) {
+                    notify(.mute, profile.pubkey)
                 }
             }
         }

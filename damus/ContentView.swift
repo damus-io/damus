@@ -76,9 +76,9 @@ struct ContentView: View {
     @State var profile_open: Bool = false
     @State var thread_open: Bool = false
     @State var search_open: Bool = false
-    @State var blocking: String? = nil
-    @State var confirm_block: Bool = false
-    @State var user_blocked_confirm: Bool = false
+    @State var muting: String? = nil
+    @State var confirm_mute: Bool = false
+    @State var user_muted_confirm: Bool = false
     @State var confirm_overwrite_mutelist: Bool = false
     @State var current_boost: NostrEvent? = nil
     @State var filter_state : FilterState = .posts_and_replies
@@ -369,10 +369,10 @@ struct ContentView: View {
             let target = notif.object as! ReportTarget
             self.active_sheet = .report(target)
         }
-        .onReceive(handle_notify(.block)) { notif in
+        .onReceive(handle_notify(.mute)) { notif in
             let pubkey = notif.object as! String
-            self.blocking = pubkey
-            self.confirm_block = true
+            self.muting = pubkey
+            self.confirm_mute = true
         }
         .onReceive(handle_notify(.broadcast_event)) { obj in
             let ev = obj.object as! NostrEvent
@@ -474,23 +474,23 @@ struct ContentView: View {
                 notify(.logout, ())
             }
         }
-        .alert(NSLocalizedString("User blocked", comment: "Alert message to indicate the user has been blocked"), isPresented: $user_blocked_confirm, actions: {
-            Button(NSLocalizedString("Thanks!", comment: "Button to close out of alert that informs that the action to block a user was successful.")) {
-                user_blocked_confirm = false
+        .alert(NSLocalizedString("User muted", comment: "Alert message to indicate the user has been muted"), isPresented: $user_muted_confirm, actions: {
+            Button(NSLocalizedString("Thanks!", comment: "Button to close out of alert that informs that the action to muted a user was successful.")) {
+                user_muted_confirm = false
             }
         }, message: {
-            if let pubkey = self.blocking {
+            if let pubkey = self.muting {
                 let profile = damus_state!.profiles.lookup(id: pubkey)
                 let name = Profile.displayName(profile: profile, pubkey: pubkey).username
-                Text("\(name) has been blocked", comment: "Alert message that informs a user was blocked.")
+                Text("\(name) has been muted", comment: "Alert message that informs a user was muted.")
             } else {
-                Text("User has been blocked", comment: "Alert message that informs a user was blocked.")
+                Text("User has been muted", comment: "Alert message that informs a user was d.")
             }
         })
         .alert(NSLocalizedString("Create new mutelist", comment: "Title of alert prompting the user to create a new mutelist."), isPresented: $confirm_overwrite_mutelist, actions: {
             Button(NSLocalizedString("Cancel", comment: "Button to cancel out of alert that creates a new mutelist.")) {
                 confirm_overwrite_mutelist = false
-                confirm_block = false
+                confirm_mute = false
             }
 
             Button(NSLocalizedString("Yes, Overwrite", comment: "Text of button that confirms to overwrite the existing mutelist.")) {
@@ -502,7 +502,7 @@ struct ContentView: View {
                     return
                 }
                 
-                guard let pubkey = blocking else {
+                guard let pubkey = muting else {
                     return
                 }
                 
@@ -514,17 +514,17 @@ struct ContentView: View {
                 ds.postbox.send(mutelist)
 
                 confirm_overwrite_mutelist = false
-                confirm_block = false
-                user_blocked_confirm = true
+                confirm_mute = false
+                user_muted_confirm = true
             }
         }, message: {
-            Text("No block list found, create a new one? This will overwrite any previous block lists.", comment: "Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists.")
+            Text("No mute list found, create a new one? This will overwrite any previous mute lists.", comment: "Alert message prompt that asks if the user wants to create a new mute list, overwriting previous mute lists.")
         })
-        .alert(NSLocalizedString("Block User", comment: "Title of alert for blocking a user."), isPresented: $confirm_block, actions: {
-            Button(NSLocalizedString("Cancel", comment: "Alert button to cancel out of alert for blocking a user."), role: .cancel) {
-                confirm_block = false
+        .alert(NSLocalizedString("Mute User", comment: "Title of alert for muting a user."), isPresented: $confirm_mute, actions: {
+            Button(NSLocalizedString("Cancel", comment: "Alert button to cancel out of alert for muting a user."), role: .cancel) {
+                confirm_mute = false
             }
-            Button(NSLocalizedString("Block", comment: "Alert button to block a user."), role: .destructive) {
+            Button(NSLocalizedString("Mute", comment: "Alert button to mute a user."), role: .destructive) {
                 guard let ds = damus_state else {
                     return
                 }
@@ -535,7 +535,7 @@ struct ContentView: View {
                     guard let keypair = ds.keypair.to_full() else {
                         return
                     }
-                    guard let pubkey = blocking else {
+                    guard let pubkey = muting else {
                         return
                     }
 
@@ -547,12 +547,12 @@ struct ContentView: View {
                 }
             }
         }, message: {
-            if let pubkey = blocking {
+            if let pubkey = muting {
                 let profile = damus_state?.profiles.lookup(id: pubkey)
                 let name = Profile.displayName(profile: profile, pubkey: pubkey).username
-                Text("Block \(name)?", comment: "Alert message prompt to ask if a user should be blocked.")
+                Text("Mute \(name)?", comment: "Alert message prompt to ask if a user should be muted.")
             } else {
-                Text("Could not find user to block...", comment: "Alert message to indicate that the blocked user could not be found.")
+                Text("Could not find user to mute...", comment: "Alert message to indicate that the muted user could not be found.")
             }
         })
         .alert(NSLocalizedString("Repost", comment: "Title of alert for confirming to repost a post."), isPresented: $current_boost.mappedToBool()) {

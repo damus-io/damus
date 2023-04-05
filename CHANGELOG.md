@@ -12,6 +12,7 @@
 ### Changed
 
 - Show full bleed images on selected events in threads (William Casarin)
+- Improvement to square image displaying (mainvolume)
 
 
 ### Fixed
