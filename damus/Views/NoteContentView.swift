@@ -346,3 +346,14 @@ struct TruncatedText: View {
         return AttributedString(truncatedAttributedString) + "..."
     }
 }
+
+
+// trim suffix whitespace and newlines
+func trim_suffix(_ str: String) -> String {
+    return str.replacingOccurrences(of: "\\s+$", with: "", options: .regularExpression)
+}
+
+// trim prefix whitespace and newlines
+func trim_prefix(_ str: String) -> String {
+    return str.replacingOccurrences(of: "^\\s+", with: "", options: .regularExpression)
+}
