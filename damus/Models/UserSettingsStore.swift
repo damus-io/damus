@@ -148,7 +148,7 @@ class UserSettingsStore: ObservableObject {
 
     @Published var dm_notification: Bool {
         didSet {
-            UserDefaults.standard.set(repost_notification, forKey: "dm_notification")
+            UserDefaults.standard.set(dm_notification, forKey: "dm_notification")
         }
     }
 
@@ -160,7 +160,7 @@ class UserSettingsStore: ObservableObject {
 
     @Published var notification_only_from_following: Bool {
         didSet {
-            UserDefaults.standard.set(like_notification, forKey: "notification_only_from_following")
+            UserDefaults.standard.set(notification_only_from_following, forKey: "notification_only_from_following")
         }
     }
 
