@@ -48,13 +48,13 @@ struct EventActionBar: View {
         HStack {
             if damus_state.keypair.privkey != nil {
                 HStack(spacing: 4) {
-                    EventActionButton(img: "bubble.left", col: bar.replied ? Color.pink : Color.gray) {
+                    EventActionButton(img: "bubble.left", col: bar.replied ? Color.blue : Color.gray) {
                         notify(.reply, event)
                     }
                     .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
                     Text(verbatim: "\(bar.replies > 0 ? "\(bar.replies)" : "")")
                         .font(.footnote.weight(.medium))
-                        .foregroundColor(bar.replied ? Color.pink : Color.gray)
+                        .foregroundColor(bar.replied ? Color.blue : Color.gray)
                 }
             }
             Spacer()
