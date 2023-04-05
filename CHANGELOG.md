@@ -1,3 +1,22 @@
+## [1.4.1-3] - 2023-04-05
+
+### Added
+
+- Added text truncation settings (William Casarin)
+
+### Changed
+
+- Rename block to mute (William Casarin)
+
+### Fixed
+
+- Reduce chopping of images (mainvolume)
+- Fix some notification settings not saving (William Casarin)
+- Fix broken camera uploads (again) (Joel Klabo)
+
+
+[1.4.1-3]: https://github.com/damus-io/damus/releases/tag/v1.4.1-3
+
 ## [1.4.1-2] - 2023-04-04
 
 ### Added
