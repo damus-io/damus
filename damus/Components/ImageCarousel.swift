@@ -65,6 +65,10 @@ struct ImageCarousel: View {
         image_fill?.filling == true
     }
     
+    var height: CGFloat {
+        image_fill?.height ?? 0
+    }
+    
     var body: some View {
         TabView {
             ForEach(urls, id: \.absoluteString) { url in
@@ -73,22 +77,17 @@ struct ImageCarousel: View {
                     .overlay {
                         GeometryReader { geo in
                             KFAnimatedImage(url)
+                                .callbackQueue(.dispatch(.global(qos:.background)))
+                                .backgroundDecode(true)
                                 .imageContext(.note)
                                 .cancelOnDisappear(true)
                                 .configure { view in
                                     view.framePreloadCount = 3
                                 }
-                                .imageModifier({ img in
-                                    let img_size = img.size
-                                    let is_animated = img.kf.imageFrameCount != nil
-                                    let geo_size = geo.size
-                                    DispatchQueue.main.async {
-                                        let fill = calculate_image_fill(geo_size: geo_size, img_size: img_size, is_animated: is_animated, maxHeight: maxHeight, fillHeight: fillHeight)
-                                        
-                                        self.previews.cache_image_meta(evid: evid, image_fill: fill)
-                                        self.image_fill = fill
-                                    }
-                                })
+                                .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
+                                    previews.cache_image_meta(evid: evid, image_fill: fill)
+                                    image_fill = fill
+                                }
                                 .aspectRatio(contentMode: filling ? .fill : .fit)
                                 .tabItem {
                                     Text(url.absoluteString)
@@ -101,7 +100,7 @@ struct ImageCarousel: View {
         .fullScreenCover(isPresented: $open_sheet) {
             ImageView(urls: urls)
         }
-        .frame(height: image_fill?.height ?? 0)
+        .frame(height: height)
         .onTapGesture {
             open_sheet = true
         }
@@ -109,39 +108,65 @@ struct ImageCarousel: View {
     }
 }
 
-func determine_image_shape(_ size: CGSize) -> ImageShape {
-    guard size.height > 0 else {
-        return .unknown
-    }
-    let imageRatio = size.width / size.height
-    switch imageRatio {
-        case 1.0: return .square
-        case ..<1.0: return .portrait
-        case 1.0...: return .landscape
-        default: return .unknown
+// MARK: - Image Modifier
+extension KFOptionSetter {
+    /// Sets a block to get image size
+    ///
+    /// - Parameter block: The block which is used to read the image object.
+    /// - Returns: `Self` value after read size
+    public func imageFill(for size: CGSize, max: CGFloat, fill: CGFloat, block: @escaping (ImageFill) throws -> Void) -> Self {
+        let modifier = AnyImageModifier { image -> KFCrossPlatformImage in
+            let img_size = image.size
+            let geo_size = size
+            let fill = ImageFill.calculate_image_fill(geo_size: geo_size,
+                                                      img_size: img_size,
+                                                      maxHeight: max,
+                                                      fillHeight: fill)
+            DispatchQueue.main.async { [block, fill] in
+                try? block(fill)
+            }
+            return image
+        }
+        options.imageModifier = modifier
+        return self
     }
 }
 
-struct ImageFill {
+
+public struct ImageFill {
     let filling: Bool?
     let height: CGFloat
-}
+        
+    
+    static func determine_image_shape(_ size: CGSize) -> ImageShape {
+        guard size.height > 0 else {
+            return .unknown
+        }
+        let imageRatio = size.width / size.height
+        switch imageRatio {
+            case 1.0: return .square
+            case ..<1.0: return .portrait
+            case 1.0...: return .landscape
+            default: return .unknown
+        }
+    }
+    
+    static func calculate_image_fill(geo_size: CGSize, img_size: CGSize, maxHeight: CGFloat, fillHeight: CGFloat) -> ImageFill {
+        let shape = determine_image_shape(img_size)
 
-func calculate_image_fill(geo_size: CGSize, img_size: CGSize, is_animated: Bool, maxHeight: CGFloat, fillHeight: CGFloat) -> ImageFill {
-    let shape = determine_image_shape(img_size)
-
-    let xfactor = geo_size.width / img_size.width
-    let scaled = img_size.height * xfactor
-    // calculate scaled image height
-    // set scale factor and constrain images to minimum 150
-    // and animations to scaled factor for dynamic size adjustment
-    switch shape {
-    case .portrait, .landscape:
-        let filling = scaled > maxHeight
-        let height = filling ? fillHeight : scaled
-        return ImageFill(filling: filling, height: height)
-    case .square, .unknown:
-        return ImageFill(filling: nil, height: scaled)
+        let xfactor = geo_size.width / img_size.width
+        let scaled = img_size.height * xfactor
+        // calculate scaled image height
+        // set scale factor and constrain images to minimum 150
+        // and animations to scaled factor for dynamic size adjustment
+        switch shape {
+        case .portrait, .landscape:
+            let filling = scaled > maxHeight
+            let height = filling ? fillHeight : scaled
+            return ImageFill(filling: filling, height: height)
+        case .square, .unknown:
+            return ImageFill(filling: nil, height: scaled)
+        }
     }
 }
 
