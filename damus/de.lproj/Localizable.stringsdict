@@ -93,7 +93,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere:r reagierten auf dein Profil</string>
+			<string>%2$@ und %1$d andere*r reagierten auf dein Profil</string>
 			<key>other</key>
 			<string>%2$@ und %1$d andere reagierten auf dein Profil</string>
 		</dict>
