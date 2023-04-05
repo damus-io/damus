@@ -774,6 +774,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Nothing to see here. Check back later!</target>
         <note>Indicates that there are no notes in the timeline to view.</note>
       </trans-unit>
+      <trans-unit id="Notification Preference" xml:space="preserve">
+        <source>Notification Preference</source>
+        <target>Notification Preference</target>
+        <note>Section header for Notification Preferences</note>
+      </trans-unit>
       <trans-unit id="Notifications" xml:space="preserve">
         <source>Notifications</source>
         <target>Notifications</target>
@@ -1129,6 +1134,11 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <source>Show more</source>
         <target>Show more</target>
         <note>Button to show entire note.</note>
+      </trans-unit>
+      <trans-unit id="Show only from users you follow" xml:space="preserve">
+        <source>Show only from users you follow</source>
+        <target>Show only from users you follow</target>
+        <note>Setting to Show notifications only associated to users your follow</note>
       </trans-unit>
       <trans-unit id="Show only preferred languages on Universe feed" xml:space="preserve">
         <source>Show only preferred languages on Universe feed</source>
