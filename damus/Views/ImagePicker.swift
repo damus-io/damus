@@ -47,11 +47,13 @@ struct ImagePicker: UIViewControllerRepresentable {
                 // Handle the selected image
                 onImagePicked(imageURL)
             } else if let cameraImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-                if let imageURL = saveImageToTemporaryFolder(image: cameraImage, imageType: "jpeg") {
+                let orientedImage = cameraImage.fixOrientation()
+                if let imageURL = saveImageToTemporaryFolder(image: orientedImage, imageType: "jpeg") {
                     onImagePicked(imageURL)
                 }
             } else if let editedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage {
-                if let editedImageURL = saveImageToTemporaryFolder(image: editedImage) {
+                let orientedImage = editedImage.fixOrientation()
+                if let editedImageURL = saveImageToTemporaryFolder(image: orientedImage, imageType: "jpeg") {
                     onImagePicked(editedImageURL)
                 }
             }
@@ -120,5 +122,18 @@ struct ImagePicker: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UIImagePickerController,
                                 context: UIViewControllerRepresentableContext<ImagePicker>) {
 
+    }
+}
+
+extension UIImage {
+    func fixOrientation() -> UIImage {
+        guard imageOrientation != .up else { return self }
+        
+        UIGraphicsBeginImageContextWithOptions(size, false, scale)
+        draw(in: CGRect(origin: .zero, size: size))
+        let normalizedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return normalizedImage ?? self
     }
 }
