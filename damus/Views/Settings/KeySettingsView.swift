@@ -29,7 +29,8 @@ struct KeySettingsView: View {
             .onChange(of: show_privkey) { newValue in
                 if newValue {
                     authenticate_locally(has_authenticated_locally) { success in
-                        show_privkey = success
+                        self.has_authenticated_locally = success
+                        self.show_privkey = success
                     }
                 }
             }
@@ -58,6 +59,7 @@ struct KeySettingsView: View {
             }
             
             authenticate_locally(has_authenticated_locally) { success in
+                self.has_authenticated_locally = success
                 if success {
                     copyKey()
                 }
