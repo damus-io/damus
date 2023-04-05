@@ -1,3 +1,27 @@
+## [1.4.1-2] - 2023-04-04
+
+### Added
+
+- Reply counts (William Casarin)
+- Add option to only show notification from people you follow (Swift)
+- Added local notifications for other events (Swift)
+- Show a custom view when tagged user isn't found (ericholguin)
+- Show referenced notes in DMs (William Casarin)
+
+
+### Changed
+
+- Show full bleed images on selected events in threads (William Casarin)
+
+
+### Fixed
+
+- Fix broken website links that have missing https:// prefixes (William Casarin)
+- Get around CCP bootstrap relay banning by caching user's relays as their bootstrap relays (William Casarin)
+
+
+[1.4.1-2]: https://github.com/damus-io/damus/releases/tag/v1.4.1-2
+
 ## [1.4.1] - 2023-04-03
 
 ### Added
