@@ -98,6 +98,9 @@ struct Profile: Codable {
     }
     
     var website_url: URL? {
+        if self.website?.trimmingCharacters(in: .whitespacesAndNewlines) == "" {
+            return nil
+        }
         return self.website.flatMap { url in
             let trim = url.trimmingCharacters(in: .whitespacesAndNewlines)
             if !(trim.hasPrefix("http://") || trim.hasPrefix("https://")) {
