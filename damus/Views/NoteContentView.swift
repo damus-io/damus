@@ -106,7 +106,7 @@ struct NoteContentView: View {
                 }
             }
 
-            if size == .selected || damus_state.settings.auto_translate {
+            if !options.contains(.no_translate) && (size == .selected || damus_state.settings.auto_translate) {
                 if with_padding {
                     translateView
                         .padding(.horizontal)

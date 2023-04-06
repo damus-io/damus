@@ -22,25 +22,11 @@ struct EventView: View {
 
     @EnvironmentObject var action_bar: ActionBarModel
 
-    init(damus: DamusState, event: NostrEvent, options: EventViewOptions) {
+    init(damus: DamusState, event: NostrEvent, pubkey: String? = nil, options: EventViewOptions = []) {
         self.event = event
         self.options = options
         self.damus = damus
-        self.pubkey = event.pubkey
-    }
-
-    init(damus: DamusState, event: NostrEvent) {
-        self.event = event
-        self.options = []
-        self.damus = damus
-        self.pubkey = event.pubkey
-    }
-
-    init(damus: DamusState, event: NostrEvent, pubkey: String) {
-        self.event = event
-        self.options = [.no_action_bar]
-        self.damus = damus
-        self.pubkey = pubkey
+        self.pubkey = pubkey ?? event.pubkey
     }
 
     var body: some View {
