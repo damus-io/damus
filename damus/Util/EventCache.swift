@@ -13,6 +13,8 @@ class EventCache {
     private var events: [String: NostrEvent] = [:]
     private var replies = ReplyMap()
     private var cancellable: AnyCancellable?
+    private var translations: [String: TranslateStatus] = [:]
+    private var artifacts: [String: NoteArtifacts] = [:]
     
     //private var thread_latest: [String: Int64]
     
@@ -22,6 +24,22 @@ class EventCache {
         ).sink { [weak self] _ in
             self?.prune()
         }
+    }
+    
+    func store_translation_artifacts(evid: String, translated: TranslateStatus) {
+        self.translations[evid] = translated
+    }
+    
+    func store_artifacts(evid: String, artifacts: NoteArtifacts) {
+        self.artifacts[evid] = artifacts
+    }
+    
+    func lookup_artifacts(evid: String) -> NoteArtifacts? {
+        return self.artifacts[evid]
+    }
+    
+    func lookup_translated_artifacts(evid: String) -> TranslateStatus? {
+        return self.translations[evid]
     }
     
     func parent_events(event: NostrEvent) -> [NostrEvent] {
@@ -87,6 +105,8 @@ class EventCache {
     
     private func prune() {
         events = [:]
+        translations = [:]
+        artifacts = [:]
         replies.replies = [:]
     }
 }

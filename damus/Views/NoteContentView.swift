@@ -234,7 +234,11 @@ struct NoteContentView_Previews: PreviewProvider {
     }
 }
 
-struct NoteArtifacts {
+struct NoteArtifacts: Equatable {
+    static func == (lhs: NoteArtifacts, rhs: NoteArtifacts) -> Bool {
+        return lhs.content == rhs.content
+    }
+    
     let content: AttributedString
     let images: [URL]
     let invoices: [Invoice]
