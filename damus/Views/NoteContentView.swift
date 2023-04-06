@@ -60,8 +60,15 @@ struct NoteContentView: View {
     }
     
     var truncatedText: some View {
-        TruncatedText(text: artifacts.content, maxChars: (truncate ? 280 : nil))
-            .font(eventviewsize_to_font(size))
+        Group {
+            if truncate {
+                TruncatedText(text: artifacts.content)
+                    .font(eventviewsize_to_font(size))
+            } else {
+                artifacts.content.text
+                    .font(eventviewsize_to_font(size))
+            }
+        }
     }
     
     var invoicesView: some View {
@@ -92,10 +99,10 @@ struct NoteContentView: View {
         VStack(alignment: .leading) {
             if size == .selected {
                 if with_padding {
-                    SelectableText(attributedString: artifacts.content, size: self.size)
+                    SelectableText(attributedString: artifacts.content.attributed, size: self.size)
                         .padding(.horizontal)
                 } else {
-                    SelectableText(attributedString: artifacts.content, size: self.size)
+                    SelectableText(attributedString: artifacts.content.attributed, size: self.size)
                 }
             } else {
                 if with_padding {
@@ -198,27 +205,49 @@ struct NoteContentView: View {
     }
 }
 
-func hashtag_str(_ htag: String) -> AttributedString {
+enum ImageName {
+    case systemImage(String)
+    case image(String)
+}
+
+func attributed_string_attach_icon(_ astr: inout AttributedString, img: UIImage) {
+    let attachment = NSTextAttachment()
+    attachment.image = img
+    let attachmentString = NSAttributedString(attachment: attachment)
+    let wrapped = AttributedString(attachmentString)
+    astr.append(wrapped)
+}
+
+func hashtag_str(_ htag: String) -> CompatibleText {
     var attributedString = AttributedString(stringLiteral: "#\(htag)")
     attributedString.link = URL(string: "damus:t:\(htag)")
     
+    var text = Text(attributedString)
+    
     if htag.lowercased() == "bitcoin" {
         attributedString.foregroundColor = Color.orange
+        if let img = UIImage(named: "bitcoin-hashtag") {
+            attributedString = attributedString + " "
+            attributed_string_attach_icon(&attributedString, img: img)
+        }
+        let img = Image("bitcoin-hashtag")
+        text = text.foregroundColor(.orange) + Text(" \(img)")
     } else {
         attributedString.foregroundColor = DamusColors.purple
     }
     
-    return attributedString
+    return CompatibleText(text: text, attributed: attributedString)
  }
 
-func url_str(_ url: URL) -> AttributedString {
+func url_str(_ url: URL) -> CompatibleText {
     var attributedString = AttributedString(stringLiteral: url.absoluteString)
     attributedString.link = url
     attributedString.foregroundColor = DamusColors.purple
-    return attributedString
+    
+    return CompatibleText(attributed: attributedString)
  }
 
-func mention_str(_ m: Mention, profiles: Profiles) -> AttributedString {
+func mention_str(_ m: Mention, profiles: Profiles) -> CompatibleText {
     switch m.type {
     case .pubkey:
         let pk = m.ref.ref_id
@@ -227,13 +256,15 @@ func mention_str(_ m: Mention, profiles: Profiles) -> AttributedString {
         var attributedString = AttributedString(stringLiteral: "@\(disp)")
         attributedString.link = URL(string: "damus:\(encode_pubkey_uri(m.ref))")
         attributedString.foregroundColor = DamusColors.purple
-        return attributedString
+        
+        return CompatibleText(attributed: attributedString)
     case .event:
         let bevid = bech32_note_id(m.ref.ref_id) ?? m.ref.ref_id
         var attributedString = AttributedString(stringLiteral: "@\(abbrev_pubkey(bevid))")
         attributedString.link = URL(string: "damus:\(encode_event_id_uri(m.ref))")
         attributedString.foregroundColor = DamusColors.purple
-        return attributedString
+
+        return CompatibleText(attributed: attributedString)
     }
 }
 
@@ -241,7 +272,8 @@ struct NoteContentView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
         let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
-        let artifacts = NoteArtifacts(content: AttributedString(stringLiteral: content), images: [], invoices: [], links: [])
+        let txt = CompatibleText(attributed: AttributedString(stringLiteral: content))
+        let artifacts = NoteArtifacts(content: txt, images: [], invoices: [], links: [])
         NoteContentView(damus_state: state, event: NostrEvent(content: content, pubkey: "pk"), show_images: true, size: .normal, artifacts: artifacts, options: [])
     }
 }
@@ -251,13 +283,14 @@ struct NoteArtifacts: Equatable {
         return lhs.content == rhs.content
     }
     
-    let content: AttributedString
+    let content: CompatibleText
     let images: [URL]
     let invoices: [Invoice]
     let links: [URL]
     
     static func just_content(_ content: String) -> NoteArtifacts {
-        NoteArtifacts(content: AttributedString(stringLiteral: content), images: [], invoices: [], links: [])
+        let txt = CompatibleText(attributed: AttributedString(stringLiteral: content))
+        return NoteArtifacts(content: txt, images: [], invoices: [], links: [])
     }
 }
 
@@ -277,7 +310,7 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
         .count == 1
     
     var ind: Int = -1
-    let txt: AttributedString = blocks.reduce("") { str, block in
+    let txt: CompatibleText = blocks.reduce(CompatibleText()) { str, block in
         ind = ind + 1
         
         switch block {
@@ -300,7 +333,7 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
                 }
             }
             
-            return str + AttributedString(stringLiteral: trimmed)
+            return str + CompatibleText(stringLiteral: trimmed)
         case .hashtag(let htag):
             return str + hashtag_str(htag)
         case .invoice(let invoice):
@@ -347,36 +380,6 @@ func load_cached_preview(previews: PreviewCache, evid: String) -> LinkViewRepres
     }
     
     return LinkViewRepresentable(meta: .linkmeta(meta))
-}
-
-struct TruncatedText: View {
-    
-    let text: AttributedString
-    let maxChars: Int?
-    
-    var body: some View {
-        let truncatedAttributedString: AttributedString? = getTruncatedString()
-        
-        Text(truncatedAttributedString ?? text)
-            .fixedSize(horizontal: false, vertical: true)
-        
-        if truncatedAttributedString != nil {
-            Spacer()
-            Button(NSLocalizedString("Show more", comment: "Button to show entire note.")) { }
-                .allowsHitTesting(false)
-        }
-    }
-    
-    func getTruncatedString() -> AttributedString? {
-        guard let maxChars = maxChars else { return nil }
-        let nsAttributedString = NSAttributedString(text)
-        if nsAttributedString.length < maxChars { return nil }
-        
-        let range = NSRange(location: 0, length: maxChars)
-        let truncatedAttributedString = nsAttributedString.attributedSubstring(from: range)
-        
-        return AttributedString(truncatedAttributedString) + "..."
-    }
 }
 
 

@@ -65,9 +65,9 @@ struct TranslateView: View {
                 .padding([.top, .bottom], 10)
             
             if self.size == .selected {
-                SelectableText(attributedString: artifacts.content, size: self.size)
+                SelectableText(attributedString: artifacts.content.attributed, size: self.size)
             } else {
-                Text(artifacts.content)
+                artifacts.content.text
                     .font(eventviewsize_to_font(self.size))
             }
         }

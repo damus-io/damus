@@ -136,6 +136,8 @@
 		4C75EFBB2804A34C0006080F /* ProofOfWork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFBA2804A34C0006080F /* ProofOfWork.swift */; };
 		4C7FF7D52823313F009601DB /* Mentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7FF7D42823313F009601DB /* Mentions.swift */; };
 		4C8682872814DE470026224F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8682862814DE470026224F /* ProfileView.swift */; };
+		4C8D00C829DF791C0036AF10 /* CompatibleAttribute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00C729DF791C0036AF10 /* CompatibleAttribute.swift */; };
+		4C8D00CA29DF80350036AF10 /* TruncatedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00C929DF80350036AF10 /* TruncatedText.swift */; };
 		4C8EC52529D1FA6C0085D9A8 /* DamusColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */; };
 		4C90BD162839DB54008EE7EF /* NostrMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD152839DB54008EE7EF /* NostrMetadata.swift */; };
 		4C90BD18283A9EE5008EE7EF /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD17283A9EE5008EE7EF /* LoginView.swift */; };
@@ -535,6 +537,8 @@
 		4C75EFBA2804A34C0006080F /* ProofOfWork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProofOfWork.swift; sourceTree = "<group>"; };
 		4C7FF7D42823313F009601DB /* Mentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mentions.swift; sourceTree = "<group>"; };
 		4C8682862814DE470026224F /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		4C8D00C729DF791C0036AF10 /* CompatibleAttribute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibleAttribute.swift; sourceTree = "<group>"; };
+		4C8D00C929DF80350036AF10 /* TruncatedText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TruncatedText.swift; sourceTree = "<group>"; };
 		4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusColors.swift; sourceTree = "<group>"; };
 		4C90BD152839DB54008EE7EF /* NostrMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrMetadata.swift; sourceTree = "<group>"; };
 		4C90BD17283A9EE5008EE7EF /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -983,6 +987,7 @@
 				4C9BB83029C0ED4F00FC4E37 /* DisplayName.swift */,
 				4CE4F0F129D4FCFA005914DB /* DebouncedOnChange.swift */,
 				4C1A9A1929DCA17E00516EAC /* ReplyCounter.swift */,
+				4C8D00C729DF791C0036AF10 /* CompatibleAttribute.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -1102,6 +1107,7 @@
 				4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */,
 				4CE4F0F729DB7399005914DB /* ThiccDivider.swift */,
 				4C1A9A2229DDDB8100516EAC /* IconLabel.swift */,
+				4C8D00C929DF80350036AF10 /* TruncatedText.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -1487,6 +1493,7 @@
 				4C285C8A2838B985008A31F1 /* ProfilePictureSelector.swift in Sources */,
 				4C9F18E429ABDE6D008C55EC /* MaybeAnonPfpView.swift in Sources */,
 				4C75EFB92804A2740006080F /* EventView.swift in Sources */,
+				4C8D00C829DF791C0036AF10 /* CompatibleAttribute.swift in Sources */,
 				3AA247FD297E3CFF0090C62D /* RepostsModel.swift in Sources */,
 				F75BA12F29A18EF500E10810 /* BookmarksView.swift in Sources */,
 				4CB883B6297730E400DC99E7 /* LNUrls.swift in Sources */,
@@ -1513,6 +1520,7 @@
 				4CE4F9DE2852768D00C00DD9 /* ConfigView.swift in Sources */,
 				4C285C8E28399BFE008A31F1 /* SaveKeysView.swift in Sources */,
 				F7F0BA25297892BD009531F3 /* SwipeToDismiss.swift in Sources */,
+				4C8D00CA29DF80350036AF10 /* TruncatedText.swift in Sources */,
 				4C9BB83429C12D9900FC4E37 /* EventProfileName.swift in Sources */,
 				4CB8838F296F781C00DC99E7 /* ReactionsView.swift in Sources */,
 				4C649844285A952100EAE2B3 /* LocalUserConfig.swift in Sources */,
