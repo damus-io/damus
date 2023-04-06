@@ -152,7 +152,7 @@ class HomeModel: ObservableObject {
             }
             if damus_state.settings.zap_notification {
                 // Create in-app local notification for zap received.
-                create_in_app_zap_notification(profiles: profiles, zap: zap, evId: ev.id)
+                create_in_app_zap_notification(profiles: profiles, zap: zap, evId: ev.referenced_ids.first?.id ?? "")
             }
         }
 
