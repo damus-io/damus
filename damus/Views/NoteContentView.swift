@@ -199,10 +199,16 @@ struct NoteContentView: View {
 }
 
 func hashtag_str(_ htag: String) -> AttributedString {
-     var attributedString = AttributedString(stringLiteral: "#\(htag)")
-     attributedString.link = URL(string: "damus:t:\(htag)")
-     attributedString.foregroundColor = DamusColors.purple
-     return attributedString
+    var attributedString = AttributedString(stringLiteral: "#\(htag)")
+    attributedString.link = URL(string: "damus:t:\(htag)")
+    
+    if htag.lowercased() == "bitcoin" {
+        attributedString.foregroundColor = Color.orange
+    } else {
+        attributedString.foregroundColor = DamusColors.purple
+    }
+    
+    return attributedString
  }
 
 func url_str(_ url: URL) -> AttributedString {
