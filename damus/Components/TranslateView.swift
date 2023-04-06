@@ -102,10 +102,10 @@ struct TranslateView: View {
                 }
             }
 
-            if let translated = translated_note {
+            if let translated_note {
                 // Render translated note.
-                let translatedBlocks = event.get_blocks(content: translated)
-                translated_artifacts = render_blocks(blocks: translatedBlocks, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+                let translated_blocks = event.get_blocks(content: translated_note)
+                translated_artifacts = render_blocks(blocks: translated_blocks, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
             }
 
             checkingTranslationStatus = false
