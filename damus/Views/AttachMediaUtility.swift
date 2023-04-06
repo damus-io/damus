@@ -122,7 +122,7 @@ enum MediaUploader: String, CaseIterable, Identifiable {
     var model: Model {
         switch self {
         case .nostrBuild:
-            return .init(index: -1, tag: "nostrBuild", displayName: NSLocalizedString("NostrBuild", comment: "Dropdown option label for system default for NostrBuild image uploader."))
+            return .init(index: -1, tag: "nostrBuild", displayName: "nostr.build")
         case .nostrImg:
             return .init(index: 0, tag: "nostrImg", displayName: NSLocalizedString("NostrImg", comment: "Dropdown option label for system default for NostrImg image uploader."))
         }
