@@ -15,6 +15,7 @@ struct ImagePicker: UIViewControllerRepresentable {
 
     let sourceType: UIImagePickerController.SourceType
     let pubkey: String
+    @Binding var image_upload_confirm: Bool
     var imagesOnly: Bool = false
     let onImagePicked: (URL) -> Void
     let onVideoPicked: (URL) -> Void
@@ -24,15 +25,18 @@ struct ImagePicker: UIViewControllerRepresentable {
         private let sourceType: UIImagePickerController.SourceType
         private let onImagePicked: (URL) -> Void
         private let onVideoPicked: (URL) -> Void
+        @Binding var image_upload_confirm: Bool
 
         init(presentationMode: Binding<PresentationMode>,
              sourceType: UIImagePickerController.SourceType,
              onImagePicked: @escaping (URL) -> Void,
-             onVideoPicked: @escaping (URL) -> Void) {
+             onVideoPicked: @escaping (URL) -> Void,
+             image_upload_confirm: Binding<Bool>) {
             _presentationMode = presentationMode
             self.sourceType = sourceType
             self.onImagePicked = onImagePicked
             self.onVideoPicked = onVideoPicked
+            self._image_upload_confirm = image_upload_confirm
         }
         
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
@@ -51,9 +55,9 @@ struct ImagePicker: UIViewControllerRepresentable {
                     onImagePicked(editedImageURL)
                 }
             }
-            presentationMode.dismiss()
+            image_upload_confirm = true
         }
-        
+
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
             presentationMode.dismiss()
         }
@@ -98,7 +102,7 @@ struct ImagePicker: UIViewControllerRepresentable {
                            onVideoPicked: { videoURL in
             // Handle the selected video URL
             onVideoPicked(videoURL)
-        })
+        }, image_upload_confirm: $image_upload_confirm)
     }
 
     func makeUIViewController(context: UIViewControllerRepresentableContext<ImagePicker>) -> UIImagePickerController {
