@@ -23,8 +23,11 @@ struct PostView: View {
     @State var attach_camera: Bool = false
     @State var error: String? = nil
     @State var uploadedMedias: [UploadedMedia] = []
+    @State var image_upload_confirm: Bool = false
     @State var originalReferences: [ReferencedId] = []
     @State var references: [ReferencedId] = []
+
+    @State var mediaToUpload: MediaUpload? = nil
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
 
@@ -254,14 +257,22 @@ struct PostView: View {
                 }
             }
             .sheet(isPresented: $attach_media) {
-                ImagePicker(sourceType: .photoLibrary, pubkey: damus_state.pubkey) { img in
-                    handle_upload(media: .image(img))
+                ImagePicker(sourceType: .photoLibrary, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
+                    self.mediaToUpload = .image(img)
                 } onVideoPicked: { url in
-                    handle_upload(media: .video(url))
+                    self.mediaToUpload = .video(url)
+                }
+                .alert("Confirm upload?", isPresented: $image_upload_confirm) {
+                    Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
+                        self.handle_upload(media: mediaToUpload!)
+                        self.attach_media = false
+                    }
+                    Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
                 }
             }
             .sheet(isPresented: $attach_camera) {
-                ImagePicker(sourceType: .camera, pubkey: damus_state.pubkey) { img in
+                // image_upload_confirm isn't handled here, I don't know we need to display it here too tbh
+                ImagePicker(sourceType: .camera, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
                     handle_upload(media: .image(img))
                 } onVideoPicked: { url in
                     handle_upload(media: .video(url))
