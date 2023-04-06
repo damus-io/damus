@@ -42,7 +42,13 @@ struct NoteContentView: View {
         self._artifacts = State(initialValue: artifacts)
         self.preview_height = lookup_cached_preview_size(previews: damus_state.previews, evid: event.id)
         self._preview = State(initialValue: load_cached_preview(previews: damus_state.previews, evid: event.id))
-        self._artifacts = State(initialValue: render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey))
+        if let cache = damus_state.events.lookup_artifacts(evid: event.id) {
+            self._artifacts = State(initialValue: cache)
+        } else {
+            let artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+            damus_state.events.store_artifacts(evid: event.id, artifacts: artifacts)
+            self._artifacts = State(initialValue: artifacts)
+        }
     }
     
     var truncate: Bool {
