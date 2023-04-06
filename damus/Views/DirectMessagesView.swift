@@ -53,10 +53,10 @@ struct DirectMessagesView: View {
     
     var options: EventViewOptions {
         if self.damus_state.settings.translate_dms {
-            return [.truncate_content]
+            return [.truncate_content, .no_action_bar]
         }
         
-        return [.truncate_content, .no_translate]
+        return [.truncate_content, .no_action_bar, .no_translate]
     }
     
     func MaybeEvent(_ tup: (String, DirectMessageModel)) -> some View {
