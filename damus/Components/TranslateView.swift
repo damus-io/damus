@@ -48,7 +48,7 @@ struct TranslateView: View {
             } else if !damus_state.settings.auto_translate {
                 TranslateButton
             } else {
-                EmptyView()
+                Text("")
             }
         }
     }
