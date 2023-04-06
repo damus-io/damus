@@ -1,3 +1,18 @@
+## [1.4.1-4] - 2023-04-06
+
+### Added
+
+- Cache translations (William Casarin)
+
+### Fixed
+
+- Fix translation text popping (William Casarin)
+- Fix broken auto-translations (William Casarin)
+- Fix extraneous padding on some image posts (William Casarin)
+- Fix crash in relay list view (William Casarin)
+
+[1.4.1-4]: https://github.com/damus-io/damus/releases/tag/v1.4.1-4
+
 ## [1.4.1-3] - 2023-04-05
 
 ### Added
