@@ -262,9 +262,7 @@ struct PostView: View {
                         self.attach_media = false
                     }
                     .foregroundColor(.red)
-                    Button(NSLocalizedString("No", comment: "Button to cancel the upload."), role: .cancel) {
-                        showPrivateKeyWarning = false
-                    }
+                    Button(NSLocalizedString("No", comment: "Button to cancel the upload."), role: .cancel) {}
                 }
             }
             .sheet(isPresented: $attach_camera) {
