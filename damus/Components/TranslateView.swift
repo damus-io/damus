@@ -74,8 +74,10 @@ struct TranslateView: View {
     }
     
     func failed_attempt() {
-        self.translated = .not_needed
-        damus_state.events.store_translation_artifacts(evid: event.id, translated: .not_needed)
+        DispatchQueue.main.async {
+            self.translated = .not_needed
+            damus_state.events.store_translation_artifacts(evid: event.id, translated: .not_needed)
+        }
     }
     
     func attempt_translation() async {
@@ -117,8 +119,10 @@ struct TranslateView: View {
         let artifacts = render_blocks(blocks: translated_blocks, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
         
         // and cache it
-        self.translated = .translated(Translated(artifacts: artifacts, language: note_lang))
-        damus_state.events.store_translation_artifacts(evid: event.id, translated: self.translated)
+        DispatchQueue.main.async {
+            self.translated = .translated(Translated(artifacts: artifacts, language: note_lang))
+            damus_state.events.store_translation_artifacts(evid: event.id, translated: self.translated)
+        }
     }
     
     var body: some View {
