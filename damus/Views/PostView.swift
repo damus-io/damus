@@ -261,7 +261,6 @@ struct PostView: View {
                         self.handle_upload(media: mediaToUpload!)
                         self.attach_media = false
                     }
-                    .foregroundColor(.red)
                     Button(NSLocalizedString("No", comment: "Button to cancel the upload."), role: .cancel) {}
                 }
             }
