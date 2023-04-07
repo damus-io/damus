@@ -227,6 +227,7 @@ struct EditMetadataView: View {
             }
         }
         .ignoresSafeArea(edges: .top)
+        .background(Color(.systemGroupedBackground))
     }
     
     func uploadedProfilePicture(image_url: URL?) {

@@ -159,8 +159,8 @@ struct ContentView: View {
                 }
             }
             // Navigation when clicking local notification
-            if nav_local_notif_active {
-                let thread = ThreadModel(event: ev_local_notif!, damus_state: damus_state!)
+            if let ev_local_notif {
+                let thread = ThreadModel(event: ev_local_notif, damus_state: damus_state!)
                 NavigationLink(destination: ThreadView(state: damus_state!, thread: thread), isActive: $nav_local_notif_active) {
                     EmptyView()
                 }
@@ -478,13 +478,14 @@ struct ContentView: View {
             home.filter_muted()
         }
         .onReceive(handle_notify(.local_notification)) { notif in
-            if let obj = notif.object as? String {
-                if obj == "dm_local_notification" {
-                    selected_timeline = .dms
-                } else if let notif = damus_state?.events.lookup(obj) {
-                    ev_local_notif = notif
-                    nav_local_notif_active = true
-                }
+            guard let obj = notif.object as? String else {
+                return
+            }
+            if obj == "dm_local_notification" {
+                selected_timeline = .dms
+            } else if let notif = damus_state?.events.lookup(obj) {
+                ev_local_notif = notif
+                nav_local_notif_active = true
             }
         }
         .alert(NSLocalizedString("Deleted Account", comment: "Alert message to indicate this is a deleted account"), isPresented: $is_deleted_account) {

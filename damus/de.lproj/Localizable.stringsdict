@@ -61,7 +61,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere:r reagierten auf einen Beitrag in dem Du markiert warst</string>
+			<string>%2$@ und %1$d andere*r reagierten auf einen Beitrag in dem Du markiert warst</string>
 			<key>other</key>
 			<string>%2$@ und %1$d andere reagierten auf einen Beitrag in dem Du markiert warst</string>
 		</dict>
@@ -77,7 +77,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere:r reagierten auf deinen Beitrag</string>
+			<string>%2$@ und %1$d andere*r reagierten auf deinen Beitrag</string>
 			<key>other</key>
 			<string>%2$@ und %1$d andere reagierten auf deinen Beitrag</string>
 		</dict>
@@ -93,7 +93,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere:r reagierten auf dein Profil</string>
+			<string>%2$@ und %1$d andere*r reagierten auf dein Profil</string>
 			<key>other</key>
 			<string>%2$@ und %1$d andere reagierten auf dein Profil</string>
 		</dict>
@@ -141,7 +141,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Antwort an %2$@, %3$@ &amp; %1$d andere:r</string>
+			<string>Antwort an %2$@, %3$@ &amp; %1$d andere*r</string>
 			<key>other</key>
 			<string>Antwort an %2$@, %3$@ &amp; %1$d andere</string>
 		</dict>
@@ -157,7 +157,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere:r teilten einen Beitrag in dem Du markiert warst</string>
+			<string>%2$@ und %1$d andere*r teilten einen Beitrag in dem Du markiert warst</string>
 			<key>other</key>
 			<string>%2$@ und %1$d andere teilten ein Beitrag in dem Du markiert warst</string>
 		</dict>
@@ -173,7 +173,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere:r teilten deinen Beitrag</string>
+			<string>%2$@ und %1$d andere*r teilten deinen Beitrag</string>
 			<key>other</key>
 			<string>%2$@ und %1$d andere teilten deinen Beitrag</string>
 		</dict>
@@ -189,7 +189,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere:r teilten dein Profil</string>
+			<string>%2$@ und %1$d andere*r teilten dein Profil</string>
 			<key>other</key>
 			<string>%2$@ und %1$d andere teilten dein Profil</string>
 		</dict>

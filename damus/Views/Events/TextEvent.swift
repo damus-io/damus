@@ -15,6 +15,7 @@ struct EventViewOptions: OptionSet {
     static let wide = EventViewOptions(rawValue: 1 << 3)
     static let truncate_content = EventViewOptions(rawValue: 1 << 4)
     static let pad_content = EventViewOptions(rawValue: 1 << 5)
+    static let no_translate = EventViewOptions(rawValue: 1 << 6)
 }
 
 struct TextEvent: View {
