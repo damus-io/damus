@@ -20,10 +20,12 @@ struct PostView: View {
     @State var showPrivateKeyWarning: Bool = false
     @State var attach_media: Bool = false
     @State var attach_camera: Bool = false
+    @State var add_zap_target: Bool = false
     @State var error: String? = nil
     
     @State var originalReferences: [ReferencedId] = []
     @State var references: [ReferencedId] = []
+    @State var zaptarget: String = ""
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
 
@@ -91,10 +93,19 @@ struct PostView: View {
         })
     }
     
+    var ZapTargetButton: some View {
+        Button(action: {
+            add_zap_target = true
+        }, label: {
+            Image(systemName: "bolt")
+        })
+    }
+    
     var AttachmentBar: some View {
         HStack(alignment: .center) {
             ImageButton
             CameraButton
+            ZapTargetButton
         }
         .disabled(image_upload.progress != nil)
     }
@@ -237,6 +248,22 @@ struct PostView: View {
                         .padding(.leading, replying_to != nil ? 15 : 0)
                         .frame(maxHeight: .infinity)
                 } else {
+                    if !zaptarget.isEmpty {
+                        HStack {
+                            (Text(Image(systemName: "bolt")) + Text("Zaps going to \(zaptarget)"))
+                                .font(.footnote)
+                                .foregroundColor(.gray)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.bottom, 5)
+                            Spacer()
+                            Button(NSLocalizedString("Remove", comment: "Button to remove zap target")) {
+                                zaptarget = ""
+                            }
+                            .font(.footnote)
+                            .foregroundColor(.accentColor)
+                            .padding(.bottom, 5)
+                        }
+                    }
                     Divider()
                         .padding([.bottom], 10)
                     VStack(alignment: .leading) {
@@ -258,6 +285,9 @@ struct PostView: View {
                 } onVideoPicked: { url in
                     handle_upload(media: .video(url))
                 }
+            }
+            .sheet(isPresented: $add_zap_target) {
+                ZapTargetView(damus_state: damus_state, zaptarget: $zaptarget)
             }
             .onAppear() {
                 if let replying_to {
