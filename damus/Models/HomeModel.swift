@@ -1007,25 +1007,25 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
         return
     }
 
+    let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name ?? "someone"
+
     if type == .text && damus_state.settings.mention_notification {
         for block in ev.blocks(damus_state.keypair.privkey) {
-            if case .mention(let mention) = block, mention.ref.ref_id == damus_state.keypair.pubkey,
-               let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name {
+            if case .mention(let mention) = block, mention.ref.ref_id == damus_state.keypair.pubkey
+                {
                 let justContent = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content.attributed).string
                 create_local_notification(displayName: displayName, conversation: justContent, type: type)
             }
         }
-    } else if type == .boost && damus_state.settings.repost_notification,
-              let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name {
+    } else if type == .boost && damus_state.settings.repost_notification {
 
         if let inner_ev = ev.inner_event {
-            create_local_notification(displayName: displayName, conversation: inner_ev.content, type: type)
+            let content = inner_ev.content
+            create_local_notification(displayName: displayName, conversation: content, type: type)
         }
     } else if type == .like && damus_state.settings.like_notification,
-              let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name,
-              let e_ref = ev.referenced_ids.first?.ref_id,
-              let content = damus_state.events.lookup(e_ref)?.content {
-        
+              let e_ref = ev.referenced_ids.first?.ref_id {
+              let content = damus_state.events.lookup(e_ref)?.content ?? ""
         create_local_notification(displayName: displayName, conversation: content, type: type)
     }
 
