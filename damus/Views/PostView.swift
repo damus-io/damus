@@ -257,11 +257,11 @@ struct PostView: View {
                     self.mediaToUpload = .video(url)
                 }
                 .alert("Confirm upload?", isPresented: $image_upload_confirm) {
-                    Button(NSLocalizedString("Yes", comment: "Button to proceed with uploading."), role: .none) {
+                    Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
                         self.handle_upload(media: mediaToUpload!)
                         self.attach_media = false
                     }
-                    Button(NSLocalizedString("No", comment: "Button to cancel the upload."), role: .cancel) {}
+                    Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
                 }
             }
             .sheet(isPresented: $attach_camera) {
