@@ -14,28 +14,6 @@ enum EventViewKind {
     case selected
 }
 
-func eventviewsize_to_font(_ size: EventViewKind) -> Font {
-    switch size {
-    case .small:
-        return .body
-    case .normal:
-        return .body
-    case .selected:
-        return .custom("selected", size: 21.0)
-    }
-}
-
-func eventviewsize_to_uifont(_ size: EventViewKind) -> UIFont {
-    switch size {
-    case .small:
-        return .preferredFont(forTextStyle: .body)
-    case .normal:
-        return .preferredFont(forTextStyle: .body)
-    case .selected:
-        return .preferredFont(forTextStyle: .title2)
-    }
-}
-
 struct EventView: View {
     let event: NostrEvent
     let options: EventViewOptions
@@ -44,25 +22,11 @@ struct EventView: View {
 
     @EnvironmentObject var action_bar: ActionBarModel
 
-    init(damus: DamusState, event: NostrEvent, options: EventViewOptions) {
+    init(damus: DamusState, event: NostrEvent, pubkey: String? = nil, options: EventViewOptions = []) {
         self.event = event
         self.options = options
         self.damus = damus
-        self.pubkey = event.pubkey
-    }
-
-    init(damus: DamusState, event: NostrEvent) {
-        self.event = event
-        self.options = []
-        self.damus = damus
-        self.pubkey = event.pubkey
-    }
-
-    init(damus: DamusState, event: NostrEvent, pubkey: String) {
-        self.event = event
-        self.options = [.no_action_bar]
-        self.damus = damus
-        self.pubkey = pubkey
+        self.pubkey = pubkey ?? event.pubkey
     }
 
     var body: some View {
@@ -154,6 +118,28 @@ func make_actionbar_model(ev: String, damus: DamusState) -> ActionBarModel {
     let model = ActionBarModel.empty()
     model.update(damus: damus, evid: ev)
     return model
+}
+
+func eventviewsize_to_font(_ size: EventViewKind) -> Font {
+    switch size {
+    case .small:
+        return .body
+    case .normal:
+        return .body
+    case .selected:
+        return .custom("selected", size: 21.0)
+    }
+}
+
+func eventviewsize_to_uifont(_ size: EventViewKind) -> UIFont {
+    switch size {
+    case .small:
+        return .preferredFont(forTextStyle: .body)
+    case .normal:
+        return .preferredFont(forTextStyle: .body)
+    case .selected:
+        return .preferredFont(forTextStyle: .title2)
+    }
 }
 
 
