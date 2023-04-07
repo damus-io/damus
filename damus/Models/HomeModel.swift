@@ -547,7 +547,8 @@ class HomeModel: ObservableObject {
             if let notifs = handle_incoming_dms(prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
                 self.new_events = notifs
                 if  damus_state.settings.dm_notification,
-                    let displayName = damus_state.profiles.lookup(id: self.incoming_dms.last!.pubkey)?.display_name {
+                    let last = self.incoming_dms.last,
+                    let displayName = damus_state.profiles.lookup(id: last.pubkey)?.display_name {
                     create_local_notification(displayName: displayName, conversation: "You have received a direct message", type: .dm, evId: "dm_local_notification")
                 }
             }
