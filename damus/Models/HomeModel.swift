@@ -1007,7 +1007,8 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
         return
     }
 
-    let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name ?? "someone"
+    var displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name ?? "someone"
+    displayName = displayName.isEmpty ? "someone" : displayName
 
     if type == .text && damus_state.settings.mention_notification {
         for block in ev.blocks(damus_state.keypair.privkey) {
