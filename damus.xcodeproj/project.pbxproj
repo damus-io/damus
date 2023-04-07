@@ -236,6 +236,9 @@
 		4FE60CDD295E1C5E00105A1F /* Wallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE60CDC295E1C5E00105A1F /* Wallet.swift */; };
 		50A50A8D29A09E1C00C01BE7 /* RequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */; };
 		5C42E78C29DB76D90086AAC1 /* EmptyUserSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */; };
+		5C42E78E29DDC3EF0086AAC1 /* ZapDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C42E78D29DDC3EF0086AAC1 /* ZapDescription.swift */; };
+		5C42E79029DDC4FA0086AAC1 /* ZapDesc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C42E78F29DDC4FA0086AAC1 /* ZapDesc.swift */; };
+		5C42E79229DDD8380086AAC1 /* ZapTargetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C42E79129DDD8380086AAC1 /* ZapTargetView.swift */; };
 		5C513FBA297F72980072348F /* CustomPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FB9297F72980072348F /* CustomPicker.swift */; };
 		5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FCB2984ACA60072348F /* QRCodeView.swift */; };
 		5CF72FC229B9142F00124A13 /* ShareAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF72FC129B9142F00124A13 /* ShareAction.swift */; };
@@ -632,6 +635,9 @@
 		4FE60CDC295E1C5E00105A1F /* Wallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wallet.swift; sourceTree = "<group>"; };
 		50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestTests.swift; sourceTree = "<group>"; };
 		5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyUserSearchView.swift; sourceTree = "<group>"; };
+		5C42E78D29DDC3EF0086AAC1 /* ZapDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapDescription.swift; sourceTree = "<group>"; };
+		5C42E78F29DDC4FA0086AAC1 /* ZapDesc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapDesc.swift; sourceTree = "<group>"; };
+		5C42E79129DDD8380086AAC1 /* ZapTargetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapTargetView.swift; sourceTree = "<group>"; };
 		5C513FB9297F72980072348F /* CustomPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPicker.swift; sourceTree = "<group>"; };
 		5C513FCB2984ACA60072348F /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		5CF72FC129B9142F00124A13 /* ShareAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareAction.swift; sourceTree = "<group>"; };
@@ -809,6 +815,7 @@
 				3AA59D1C2999B0400061C48E /* DraftsModel.swift */,
 				4C54AA0629A540BA003E4487 /* NotificationsModel.swift */,
 				4CD348EE29C3659D00497EB2 /* ImageUploadModel.swift */,
+				5C42E78F29DDC4FA0086AAC1 /* ZapDesc.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -896,6 +903,7 @@
 				3AA247FE297E3D900090C62D /* RepostsView.swift */,
 				5C513FCB2984ACA60072348F /* QRCodeView.swift */,
 				643EA5C7296B764E005081BB /* RelayFilterView.swift */,
+				5C42E79129DDD8380086AAC1 /* ZapTargetView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1025,6 +1033,7 @@
 				4C3D52B5298DB4E6001C5831 /* ZapEvent.swift */,
 				4C3D52B7298DB5C6001C5831 /* TextEvent.swift */,
 				4CFF8F6C29CD022E008DB934 /* WideEventView.swift */,
+				5C42E78D29DDC3EF0086AAC1 /* ZapDescription.swift */,
 			);
 			path = Events;
 			sourceTree = "<group>";
@@ -1454,6 +1463,7 @@
 				4CE6DEE927F7A08100C66700 /* ContentView.swift in Sources */,
 				4CEE2AF5280B29E600AB5EEF /* TimeAgo.swift in Sources */,
 				4C75EFAD28049CFB0006080F /* PostButton.swift in Sources */,
+				5C42E78E29DDC3EF0086AAC1 /* ZapDescription.swift in Sources */,
 				4CB55EF5295E679D007FD187 /* UserRelaysView.swift in Sources */,
 				4C363AA228296A7E006E126D /* SearchView.swift in Sources */,
 				4CC7AAED297F0B9E00430951 /* Highlight.swift in Sources */,
@@ -1507,6 +1517,7 @@
 				4C3BEFDC281DCE6100B3DE84 /* Liked.swift in Sources */,
 				4CF0ABE7298444FD00D66079 /* MutedEventView.swift in Sources */,
 				9C83F89329A937B900136C08 /* TextViewWrapper.swift in Sources */,
+				5C42E79029DDC4FA0086AAC1 /* ZapDesc.swift in Sources */,
 				4CF0ABE12981A83900D66079 /* MutelistView.swift in Sources */,
 				4CB883A82975FC1800DC99E7 /* Zaps.swift in Sources */,
 				4C75EFB128049D510006080F /* NostrResponse.swift in Sources */,
@@ -1558,6 +1569,7 @@
 				4C54AA0A29A55429003E4487 /* EventGroup.swift in Sources */,
 				4C3EA67928FF7ABF00C48A62 /* list.c in Sources */,
 				4C64987E286D082C00EAE2B3 /* DirectMessagesModel.swift in Sources */,
+				5C42E79229DDD8380086AAC1 /* ZapTargetView.swift in Sources */,
 				9CA876E229A00CEA0003B9A3 /* AttachMediaUtility.swift in Sources */,
 				4CE4F0F829DB7399005914DB /* ThiccDivider.swift in Sources */,
 				4CE0E2B629A3ED5500DB4CA2 /* InnerTimelineView.swift in Sources */,
