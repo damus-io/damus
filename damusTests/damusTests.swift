@@ -40,6 +40,13 @@ class damusTests: XCTestCase {
         XCTAssertEqual(bytes.count, 32)
     }
     
+    func testTrimmingFunctions() {
+        let txt = "   bobs   "
+        
+        XCTAssertEqual(trim_prefix(txt), "bobs   ")
+        XCTAssertEqual(trim_suffix(txt), "   bobs")
+    }
+    
     func testParseMentionWithMarkdown() {
         let md = """
         Testing markdown in damus

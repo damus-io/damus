@@ -25,6 +25,14 @@ struct DMView: View {
         }
     }
     
+    var dm_options: EventViewOptions {
+        if self.damus_state.settings.translate_dms {
+            return []
+        }
+        
+        return [.no_translate]
+    }
+    
     var DM: some View {
         HStack {
             if is_ours {
@@ -33,7 +41,7 @@ struct DMView: View {
 
             let should_show_img = should_show_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
 
-            NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, size: .normal, artifacts: .just_content(event.get_content(damus_state.keypair.privkey)), options: [])
+            NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, size: .normal, artifacts: .just_content(event.get_content(damus_state.keypair.privkey)), options: dm_options)
                 .padding([.top, .leading, .trailing], 10)
                 .padding([.bottom], 25)
                 .background(VisualEffectView(effect: UIBlurEffect(style: .prominent))

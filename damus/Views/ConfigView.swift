@@ -17,26 +17,14 @@ struct ConfigView: View {
     @State var confirm_logout: Bool = false
     @State var delete_account_warning: Bool = false
     @State var confirm_delete_account: Bool = false
-    @State var show_privkey: Bool = false
-    @State var has_authenticated_locally: Bool = false
-    @State var show_api_key: Bool = false
-    @State var privkey: String
-    @State var privkey_copied: Bool = false
-    @State var pubkey_copied: Bool = false
     @State var delete_text: String = ""
-    @State var default_zap_amount: String
     
     @ObservedObject var settings: UserSettingsStore
-    
-    let generator = UIImpactFeedbackGenerator(style: .light)
 
     private let DELETE_KEYWORD = "DELETE"
     
     init(state: DamusState) {
         self.state = state
-        let zap_amt = get_default_zap_amount(pubkey: state.pubkey).map({ "\($0)" }) ?? "1000"
-        _default_zap_amount = State(initialValue: zap_amt)
-        _privkey = State(initialValue: self.state.keypair.privkey_bech32 ?? "")
         _settings = ObservedObject(initialValue: state.settings)
     }
     
@@ -44,202 +32,32 @@ struct ConfigView: View {
         colorScheme == .light ? DamusColors.black : DamusColors.white
     }
 
-    func authenticateLocally(completion: @escaping (Bool) -> Void) {
-        // Need to authenticate only once while ConfigView is presented
-        guard !has_authenticated_locally else {
-            completion(true)
-            return
-        }
-        let context = LAContext()
-        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) {
-            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: NSLocalizedString("Local authentication to access private key", comment: "Face ID usage description shown when trying to access private key")) { success, error in
-                DispatchQueue.main.async {
-                    has_authenticated_locally = success
-                    completion(success)
-                }
-            }
-        } else {
-            // If there's no authentication set up on the device, let the user copy the key without it
-            has_authenticated_locally = true
-            completion(true)
-        }
-    }
-    
-    // TODO: (jb55) could be more general but not gonna worry about it atm
-    func CopyButton(is_pk: Bool) -> some View {
-        return Button(action: {
-            let copyKey = {
-                UIPasteboard.general.string = is_pk ? self.state.keypair.pubkey_bech32 : self.privkey
-                self.privkey_copied = !is_pk
-                self.pubkey_copied = is_pk
-                generator.impactOccurred()
-            }
-            if is_pk {
-                // When trying to copy npub
-                copyKey()
-            } else {
-                // When trying to copy nsec
-                if has_authenticated_locally {
-                    copyKey()
-                } else {
-                    authenticateLocally { success in
-                        if success {
-                            copyKey()
-                        }
-                    }
-                }
-            }
-        }) {
-            let copied = is_pk ? self.pubkey_copied : self.privkey_copied
-            Image(systemName: copied ? "checkmark.circle" : "doc.on.doc")
-        }
-    }
-
     var body: some View {
         ZStack(alignment: .leading) {
             Form {
-                Section(NSLocalizedString("Public Account ID", comment: "Section title for the user's public account ID.")) {
-                    HStack {
-                        Text(state.keypair.pubkey_bech32)
-
-                        CopyButton(is_pk: true)
-                    }
-                    .clipShape(RoundedRectangle(cornerRadius: 5))
-                }
-
-                if let sec = state.keypair.privkey_bech32 {
-                    Section(NSLocalizedString("Secret Account Login Key", comment: "Section title for user's secret account login key.")) {
-                        HStack {
-                            if show_privkey == false || !has_authenticated_locally {
-                                SecureField(NSLocalizedString("Private Key", comment: "Title of the secure field that holds the user's private key."), text: $privkey)
-                                    .disabled(true)
-                            } else {
-                                Text(sec)
-                                    .clipShape(RoundedRectangle(cornerRadius: 5))
-                            }
-
-                            CopyButton(is_pk: false)
-                        }
-
-                        Toggle(NSLocalizedString("Show", comment: "Toggle to show or hide user's secret account login key."), isOn: $show_privkey)
-                            .onChange(of: show_privkey) { newValue in
-                                if newValue {
-                                    authenticateLocally { success in
-                                        show_privkey = success
-                                    }
-                                }
-                            }
-                    }
-                }
-
-                Section(NSLocalizedString("Wallet and others", comment: "Section header for miscellaneous user configuration")) {
-                    Toggle(NSLocalizedString("Show wallet selector", comment: "Toggle to show or hide selection of wallet."), isOn: $settings.show_wallet_selector).toggleStyle(.switch)
-                    Picker(NSLocalizedString("Select default wallet", comment: "Prompt selection of user's default wallet"),
-                           selection: $settings.default_wallet) {
-                        ForEach(Wallet.allCases, id: \.self) { wallet in
-                            Text(wallet.model.displayName)
-                                .tag(wallet.model.tag)
-                        }
-                    }
-                    Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)
-                        .toggleStyle(.switch)
-                    Toggle(NSLocalizedString("Zap Vibration", comment: "Setting to enable vibration on zap"), isOn: $settings.zap_vibration)
-                        .toggleStyle(.switch)
-                }
-                
-                NavigationLink(destination: NotificationView(settings: settings)) {
-                    Section(NSLocalizedString("Local Notifications", comment: "Section header for damus local notifications user configuration")) {
-                    }
-                }
-
-                Section(NSLocalizedString("Default Zap Amount in sats", comment: "Section title for zap configuration")) {
-                    TextField(String("1000"), text: $default_zap_amount)
-                        .keyboardType(.numberPad)
-                        .onReceive(Just(default_zap_amount)) { newValue in
-                            if let parsed = handle_string_amount(new_value: newValue) {
-                                self.default_zap_amount = String(parsed)
-                                set_default_zap_amount(pubkey: self.state.pubkey, amount: parsed)
-                            }
-                        }
-                }
-
-                Section(NSLocalizedString("Translations", comment: "Section title for selecting the translation service.")) {
-                    Toggle(NSLocalizedString("Show only preferred languages on Universe feed", comment: "Toggle to show notes that are only in the device's preferred languages on the Universe feed and hide notes that are in other languages."), isOn: $settings.show_only_preferred_languages)
-                        .toggleStyle(.switch)
-
-                    Picker(NSLocalizedString("Service", comment: "Prompt selection of translation service provider."), selection: $settings.translation_service) {
-                        ForEach(TranslationService.allCases, id: \.self) { server in
-                            Text(server.model.displayName)
-                                .tag(server.model.tag)
-                        }
-                    }
-
-                    if settings.translation_service == .libretranslate {
-                        Picker(NSLocalizedString("Server", comment: "Prompt selection of LibreTranslate server to perform machine translations on notes"), selection: $settings.libretranslate_server) {
-                            ForEach(LibreTranslateServer.allCases, id: \.self) { server in
-                                Text(server.model.displayName)
-                                    .tag(server.model.tag)
-                            }
-                        }
-
-                        if settings.libretranslate_server == .custom {
-                            TextField(NSLocalizedString("URL", comment: "Example URL to LibreTranslate server"), text: $settings.libretranslate_url)
-                                .disableAutocorrection(true)
-                                .autocapitalization(UITextAutocapitalizationType.none)
-                        }
-
-                        SecureField(NSLocalizedString("API Key (optional)", comment: "Prompt for optional entry of API Key to use translation server."), text: $settings.libretranslate_api_key)
-                            .disableAutocorrection(true)
-                            .disabled(settings.translation_service != .libretranslate)
-                            .autocapitalization(UITextAutocapitalizationType.none)
-                    }
-
-                    if settings.translation_service == .deepl {
-                        Picker(NSLocalizedString("Plan", comment: "Prompt selection of DeepL subscription plan to perform machine translations on notes"), selection: $settings.deepl_plan) {
-                            ForEach(DeepLPlan.allCases, id: \.self) { server in
-                                Text(server.model.displayName)
-                                    .tag(server.model.tag)
-                            }
-                        }
-
-                        SecureField(NSLocalizedString("API Key (required)", comment: "Prompt for required entry of API Key to use translation server."), text: $settings.deepl_api_key)
-                            .disableAutocorrection(true)
-                            .disabled(settings.translation_service != .deepl)
-                            .autocapitalization(UITextAutocapitalizationType.none)
-
-                        if settings.deepl_api_key == "" {
-                            Link(NSLocalizedString("Get API Key", comment: "Button to navigate to DeepL website to get a translation API key."), destination: URL(string: "https://www.deepl.com/pro-api")!)
-                        }
-                    }
-
-                    if settings.translation_service != .none {
-                        Toggle(NSLocalizedString("Automatically translate notes", comment: "Toggle to automatically translate notes."), isOn: $settings.auto_translate)
-                            .toggleStyle(.switch)
-                    }
-                }
-
-                Section(NSLocalizedString("Images", comment: "Section title for images configuration.")) {
-                    Toggle(NSLocalizedString("Disable animations", comment: "Button to disable image animation"), isOn: $settings.disable_animation)
-                        .toggleStyle(.switch)
-                        .onChange(of: settings.disable_animation) { _ in
-                            clear_kingfisher_cache()
-                        }
-                    Toggle(NSLocalizedString("Always show images", comment: "Setting to always show and never blur images"), isOn: $settings.always_show_images)
-                        .toggleStyle(.switch)
-
-                    Button(NSLocalizedString("Clear Cache", comment: "Button to clear image cache.")) {
-                        clear_kingfisher_cache()
+                Section {
+                    NavigationLink(destination: KeySettingsView(keypair: state.keypair)) {
+                        IconLabel(NSLocalizedString("Keys", comment: "Settings section for managing keys"), img_name: "key.fill", color: .purple)
                     }
                     
-                    Picker(NSLocalizedString("Select image uploader", comment: "Prompt selection of user's image uploader"),
-                           selection: $settings.default_media_uploader) {
-                        ForEach(MediaUploader.allCases, id: \.self) { uploader in
-                            Text(uploader.model.displayName)
-                                .tag(uploader.model.tag)
-                        }
+                    NavigationLink(destination: AppearanceSettingsView(settings: settings)) {
+                        IconLabel(NSLocalizedString("Appearance", comment: "Section header for text and appearance settings"), img_name: "textformat", color: .red)
+                    }
+                    
+                    NavigationLink(destination: NotificationSettingsView(settings: settings)) {
+                        IconLabel(NSLocalizedString("Local Notifications", comment: "Section header for damus local notifications user configuration"), img_name: "bell.fill", color: .blue)
+                    }
+                    
+                    NavigationLink(destination: ZapSettingsView(pubkey: state.pubkey, settings: settings)) {
+                        IconLabel(NSLocalizedString("Zaps", comment: "Section header for zap settings"), img_name: "bolt.fill", color: .orange)
+                    }
+                    
+                    NavigationLink(destination: TranslationSettingsView(settings: settings)) {
+                        IconLabel(NSLocalizedString("Translation", comment: "Section header for text and appearance settings"), img_name: "globe.americas.fill", color: .green)
                     }
                 }
                 
+
                 Section(NSLocalizedString("Sign Out", comment: "Section title for signing out")) {
                     Button(action: {
                         if state.keypair.privkey == nil {
@@ -314,106 +132,6 @@ struct ConfigView: View {
         }
     }
 
-    var libretranslate_view: some View {
-        VStack {
-            Picker(NSLocalizedString("Server", comment: "Prompt selection of LibreTranslate server to perform machine translations on notes"), selection: $settings.libretranslate_server) {
-                ForEach(LibreTranslateServer.allCases, id: \.self) { server in
-                    Text(server.model.displayName)
-                        .tag(server.model.tag)
-                }
-            }
-
-            TextField(NSLocalizedString("URL", comment: "Example URL to LibreTranslate server"), text: $settings.libretranslate_url)
-                .disableAutocorrection(true)
-                .disabled(settings.libretranslate_server != .custom)
-                .autocapitalization(UITextAutocapitalizationType.none)
-            HStack {
-                let libretranslate_api_key_placeholder = NSLocalizedString("API Key (optional)", comment: "Prompt for optional entry of API Key to use translation server.")
-                if show_api_key {
-                    TextField(libretranslate_api_key_placeholder, text: $settings.libretranslate_api_key)
-                        .disableAutocorrection(true)
-                        .autocapitalization(UITextAutocapitalizationType.none)
-                    if settings.libretranslate_api_key != "" {
-                        Button(NSLocalizedString("Hide API Key", comment: "Button to hide the LibreTranslate server API key.")) {
-                            show_api_key = false
-                        }
-                    }
-                } else {
-                    SecureField(libretranslate_api_key_placeholder, text: $settings.libretranslate_api_key)
-                        .disableAutocorrection(true)
-                        .autocapitalization(UITextAutocapitalizationType.none)
-                    if settings.libretranslate_api_key != "" {
-                        Button(NSLocalizedString("Show API Key", comment: "Button to show the LibreTranslate server API key.")) {
-                            show_api_key = true
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    var deepl_view: some View {
-        VStack {
-            Picker(NSLocalizedString("Plan", comment: "Prompt selection of DeepL subscription plan to perform machine translations on notes"), selection: $settings.deepl_plan) {
-                ForEach(DeepLPlan.allCases, id: \.self) { server in
-                    Text(server.model.displayName)
-                        .tag(server.model.tag)
-                }
-            }
-
-            HStack {
-                let deepl_api_key_placeholder = NSLocalizedString("API Key (required)", comment: "Prompt for required entry of API Key to use translation server.")
-                if show_api_key {
-                    TextField(deepl_api_key_placeholder, text: $settings.deepl_api_key)
-                        .disableAutocorrection(true)
-                        .autocapitalization(UITextAutocapitalizationType.none)
-                    if settings.deepl_api_key != "" {
-                        Button(NSLocalizedString("Hide API Key", comment: "Button to hide the DeepL translation API key.")) {
-                            show_api_key = false
-                        }
-                    }
-                } else {
-                    SecureField(deepl_api_key_placeholder, text: $settings.deepl_api_key)
-                        .disableAutocorrection(true)
-                        .autocapitalization(UITextAutocapitalizationType.none)
-                    if settings.deepl_api_key != "" {
-                        Button(NSLocalizedString("Show API Key", comment: "Button to show the DeepL translation API key.")) {
-                            show_api_key = true
-                        }
-                    }
-                }
-                if settings.deepl_api_key == "" {
-                    Link(NSLocalizedString("Get API Key", comment: "Button to navigate to DeepL website to get a translation API key."), destination: URL(string: "https://www.deepl.com/pro-api")!)
-                }
-            }
-        }
-    }
-}
-
-struct NotificationView: View {
-    @ObservedObject var settings: UserSettingsStore
-
-    var body: some View {
-        Form {
-            Section(header: Text(NSLocalizedString("Local Notifications", comment: "Section header for damus local notifications user configuration"))) {
-                Toggle(NSLocalizedString("Zaps", comment: "Setting to enable Zap Local Notification"), isOn: $settings.zap_notification)
-                    .toggleStyle(.switch)
-                Toggle(NSLocalizedString("Mentions", comment: "Setting to enable Mention Local Notification"), isOn: $settings.mention_notification)
-                    .toggleStyle(.switch)
-                Toggle(NSLocalizedString("Reposts", comment: "Setting to enable Repost Local Notification"), isOn: $settings.repost_notification)
-                    .toggleStyle(.switch)
-                Toggle(NSLocalizedString("Likes", comment: "Setting to enable Like Local Notification"), isOn: $settings.like_notification)
-                    .toggleStyle(.switch)
-                Toggle(NSLocalizedString("DMs", comment: "Setting to enable DM Local Notification"), isOn: $settings.dm_notification)
-                    .toggleStyle(.switch)
-            }
-
-            Section(header: Text(NSLocalizedString("Notification Preference", comment: "Section header for Notification Preferences"))) {
-                Toggle(NSLocalizedString("Show only from users you follow", comment: "Setting to Show notifications only associated to users your follow"), isOn: $settings.notification_only_from_following)
-                    .toggleStyle(.switch)
-            }
-        }
-    }
 }
 
 struct ConfigView_Previews: PreviewProvider {

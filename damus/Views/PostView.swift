@@ -82,6 +82,7 @@ struct PostView: View {
             attach_media = true
         }, label: {
             Image(systemName: "photo")
+                .padding(6)
         })
     }
     
@@ -90,6 +91,7 @@ struct PostView: View {
             attach_camera = true
         }, label: {
             Image(systemName: "camera")
+                .padding(6)
         })
     }
     

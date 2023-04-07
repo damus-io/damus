@@ -1011,7 +1011,7 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
         for block in ev.blocks(damus_state.keypair.privkey) {
             if case .mention(let mention) = block, mention.ref.ref_id == damus_state.keypair.pubkey,
                let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name {
-                let justContent = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content).string
+                let justContent = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content.attributed).string
                 create_local_notification(displayName: displayName, conversation: justContent, type: type)
             }
         }

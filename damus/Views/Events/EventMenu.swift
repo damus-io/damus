@@ -102,9 +102,9 @@ struct MenuItems: View {
                 }
                 
                 Button(role: .destructive) {
-                    notify(.block, target_pubkey)
+                    notify(.mute, target_pubkey)
                 } label: {
-                    Label(NSLocalizedString("Block", comment: "Context menu option for blocking users."), systemImage: "exclamationmark.octagon")
+                    Label(NSLocalizedString("Mute", comment: "Context menu option for muting users."), systemImage: "exclamationmark.octagon")
                 }
             }
         }

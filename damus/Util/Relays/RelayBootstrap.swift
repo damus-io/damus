@@ -7,7 +7,7 @@
 
 import Foundation
 
-fileprivate let BOOTSTRAP_RELAYS = [
+let BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
     "wss://eden.nostr.land",
     "wss://nostr.wine",
