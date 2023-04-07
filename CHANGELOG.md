@@ -1,3 +1,25 @@
+## [1.4.1-7] - 2023-04-07
+
+### Added
+
+- Add #zap and #zapathon custom hashtags (William Casarin)
+- Add custom #plebchain icon (William Casarin)
+
+
+### Changed
+
+- Add validation to prevent whitespaces be inputted on NIP-05 input field (Terry Yiu)
+- Change reply color from blue to purple. Blue is banned from Damus. (William Casarin)
+
+
+### Fixed
+
+- Fix padding in post view (OlegAba)
+- Show most recently bookmarked notes at the top (Bryan Montz)
+
+
+[1.4.1-7]: https://github.com/damus-io/damus/releases/tag/v1.4.1-7
+
 ## [1.4.1-6] - 2023-04-06
 
 ### Added
@@ -953,5 +975,4 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
 
