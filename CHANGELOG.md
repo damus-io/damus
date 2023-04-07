@@ -1,3 +1,20 @@
+## [1.4.1-6] - 2023-04-06
+
+### Added
+
+- Custom hashtags for #bitcoin, #nostr and #coffeechain (William Casarin)
+
+### Changed
+
+- Disable translations in DMs by default (William Casarin)
+
+### Fixed
+
+- Don't show Translating... if we're not actually translating (William Casarin)
+
+
+[1.4.1-6]: https://github.com/damus-io/damus/releases/tag/v1.4.1-6
+
 ## [1.4.1-4] - 2023-04-06
 
 ### Added
@@ -936,4 +953,5 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
+
 
