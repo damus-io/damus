@@ -33,6 +33,10 @@ struct EmbeddedEventView: View {
             if event_is_reply(event, privkey: damus_state.keypair.privkey) {
                 ReplyDescription(event: event, profiles: damus_state.profiles)
             }
+            
+            if event_has_tag(ev: event, tag: "zap") {
+                ZapDescription(event: event)
+            }
 
             EventBody(damus_state: damus_state, event: event, size: .small, options: [.truncate_content])
         }

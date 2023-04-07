@@ -67,6 +67,16 @@ struct TextEvent: View {
         }
     }
     
+    var ZapTargetPart: some View {
+        Group {
+            if event_has_tag(ev: event, tag: "zap") {
+                ZapDescription(event: event)
+            } else {
+                EmptyView()
+            }
+        }
+    }
+    
     var WideStyle: some View {
         VStack(alignment: .leading) {
             let is_anon = event_is_anonymous(ev: event)
@@ -76,6 +86,7 @@ struct TextEvent: View {
                 VStack {
                     TopPart(is_anon: is_anon)
                     ReplyPart
+                    ZapTargetPart
                 }
             }
             .padding(.horizontal)
@@ -149,6 +160,7 @@ struct TextEvent: View {
                 TopPart(is_anon: is_anon)
                 
                 ReplyPart
+                ZapTargetPart
                 EvBody(options: self.options)
                 
                 if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
@@ -173,6 +185,16 @@ func event_has_tag(ev: NostrEvent, tag: String) -> Bool {
     }
     
     return false
+}
+
+func event_tag_value(ev: NostrEvent, tag: String) -> String {
+    for t in ev.tags {
+        if t.count >= 2 && t[0] == tag {
+            return t[1]
+        }
+    }
+    
+    return ""
 }
 
 

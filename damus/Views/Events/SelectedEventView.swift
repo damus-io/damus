@@ -48,6 +48,10 @@ struct SelectedEventView: View {
                         .padding(.horizontal)
                 }
                 
+                if event_has_tag(ev: event, tag: "zap") {
+                    ZapDescription(event: event)
+                }
+                
                 EventBody(damus_state: damus, event: event, size: size, options: [.pad_content])
                 
                 if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
