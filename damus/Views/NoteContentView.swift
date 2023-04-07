@@ -218,27 +218,6 @@ func attributed_string_attach_icon(_ astr: inout AttributedString, img: UIImage)
     astr.append(wrapped)
 }
 
-func hashtag_str(_ htag: String) -> CompatibleText {
-    var attributedString = AttributedString(stringLiteral: "#\(htag)")
-    attributedString.link = URL(string: "damus:t:\(htag)")
-    
-    var text = Text(attributedString)
-    
-    if htag.lowercased() == "bitcoin" {
-        attributedString.foregroundColor = Color.orange
-        if let img = UIImage(named: "bitcoin-hashtag") {
-            attributedString = attributedString + " "
-            attributed_string_attach_icon(&attributedString, img: img)
-        }
-        let img = Image("bitcoin-hashtag")
-        text = text.foregroundColor(.orange) + Text(" \(img)")
-    } else {
-        attributedString.foregroundColor = DamusColors.purple
-    }
-    
-    return CompatibleText(text: text, attributed: attributedString)
- }
-
 func url_str(_ url: URL) -> CompatibleText {
     var attributedString = AttributedString(stringLiteral: url.absoluteString)
     attributedString.link = url

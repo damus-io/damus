@@ -12,6 +12,7 @@ class DamusColors {
     static let adaptableGrey = Color("DamusAdaptableGrey")
     static let white = Color("DamusWhite")
     static let black = Color("DamusBlack")
+    static let brown = Color("DamusBrown")
     static let lightGrey = Color("DamusLightGrey")
     static let mediumGrey = Color("DamusMediumGrey")
     static let darkGrey = Color("DamusDarkGrey")
