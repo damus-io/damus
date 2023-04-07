@@ -124,7 +124,7 @@ enum MediaUploader: String, CaseIterable, Identifiable {
         case .nostrBuild:
             return .init(index: -1, tag: "nostrBuild", displayName: "nostr.build")
         case .nostrImg:
-            return .init(index: 0, tag: "nostrImg", displayName: NSLocalizedString("NostrImg", comment: "Dropdown option label for system default for NostrImg image uploader."))
+            return .init(index: 0, tag: "nostrImg", displayName: "nostrimg.com")
         }
     }
 
