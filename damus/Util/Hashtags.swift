@@ -10,16 +10,18 @@ import SwiftUI
 
 struct CustomHashtag {
     let name: String
+    let offset: CGFloat?
     let color: Color?
     
-    init(name: String, color: Color? = nil) {
+    init(name: String, color: Color? = nil, offset: CGFloat? = nil) {
         self.name = name
         self.color = color
+        self.offset = offset
     }
     
-    static let coffee = CustomHashtag(name: "coffee", color: DamusColors.brown)
-    static let bitcoin = CustomHashtag(name: "bitcoin", color: Color.orange)
-    static let nostr = CustomHashtag(name: "nostr", color: DamusColors.purple)
+    static let coffee = CustomHashtag(name: "coffee", color: DamusColors.brown, offset: -1.0)
+    static let bitcoin = CustomHashtag(name: "bitcoin", color: Color.orange, offset: -3.0)
+    static let nostr = CustomHashtag(name: "nostr", color: DamusColors.purple, offset: -2.0)
 }
 
 
@@ -44,13 +46,13 @@ func hashtag_str(_ htag: String) -> CompatibleText {
         
         let name = custom_hashtag.name
         
-        text = Text(attributedString)
         if let img = UIImage(named: "\(name)-hashtag") {
             attributedString = attributedString + " "
             attributed_string_attach_icon(&attributedString, img: img)
         }
+        text = Text(attributedString)
         let img = Image("\(name)-hashtag")
-        text = text + Text(" \(img)")
+        text = text + Text("\(img)").baselineOffset(custom_hashtag.offset ?? 0.0)
     } else {
         attributedString.foregroundColor = DamusColors.purple
     }
