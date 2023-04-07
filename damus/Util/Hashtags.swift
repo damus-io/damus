@@ -22,6 +22,7 @@ struct CustomHashtag {
     static let coffee = CustomHashtag(name: "coffee", color: DamusColors.brown, offset: -1.0)
     static let bitcoin = CustomHashtag(name: "bitcoin", color: Color.orange, offset: -3.0)
     static let nostr = CustomHashtag(name: "nostr", color: DamusColors.purple, offset: -2.0)
+    static let plebchain = CustomHashtag(name: "plebchain", color: DamusColors.deepPurple, offset: -3.0)
 }
 
 
@@ -30,6 +31,7 @@ let custom_hashtags: [String: CustomHashtag] = [
     "nostr": CustomHashtag.nostr,
     "coffee": CustomHashtag.coffee,
     "coffeechain": CustomHashtag.coffee,
+    "plebchain": CustomHashtag.plebchain,
 ]
 
 func hashtag_str(_ htag: String) -> CompatibleText {
