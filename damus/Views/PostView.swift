@@ -265,6 +265,7 @@ struct PostView: View {
                 }
             }
             .sheet(isPresented: $attach_camera) {
+                // image_upload_confirm isn't handled here, I don't know we need to display it here too tbh
                 ImagePicker(sourceType: .camera, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
                     handle_upload(media: .image(img))
                 } onVideoPicked: { url in
