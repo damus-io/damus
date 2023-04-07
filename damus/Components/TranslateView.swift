@@ -17,6 +17,7 @@ struct Translated: Equatable {
 enum TranslateStatus: Equatable {
     case havent_tried
     case trying
+    case translating
     case translated(Translated)
     case not_needed
 }
@@ -88,13 +89,17 @@ struct TranslateView: View {
         guard damus_state.settings.can_translate(damus_state.pubkey) else {
             return
         }
-
+        
         let note_lang = event.note_language(damus_state.keypair.privkey) ?? currentLanguage
         
         // Don't translate if its in our preferred languages
         guard !preferredLanguages.contains(note_lang) else {
             failed_attempt()
             return
+        }
+        
+        DispatchQueue.main.async {
+            self.translated = .translating
         }
         
         // If the note language is different from our preferred languages, send a translation request.
@@ -135,6 +140,8 @@ struct TranslateView: View {
                     TranslateButton
                 }
             case .trying:
+                Text("")
+            case .translating:
                 Text("Translating...")
                     .foregroundColor(.gray)
                     .font(.footnote)
