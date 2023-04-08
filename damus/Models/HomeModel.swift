@@ -52,12 +52,14 @@ class HomeModel: ObservableObject {
     init() {
         self.damus_state = DamusState.empty
         self.dms = DirectMessagesModel(our_pubkey: "")
+        filter_muted()
     }
     
     init(damus_state: DamusState) {
         self.damus_state = damus_state
         self.dms = DirectMessagesModel(our_pubkey: damus_state.pubkey)
         self.setup_debouncer()
+        filter_muted()
     }
 
     var pool: RelayPool {
@@ -134,7 +136,7 @@ class HomeModel: ObservableObject {
             return
         }
         
-        if !notifications.insert_zap(zap) {
+        if !notifications.insert_zap(zap, damus_state: damus_state) {
             return
         }
 
@@ -197,9 +199,9 @@ class HomeModel: ObservableObject {
     }
     
     func filter_muted() {
-        events.filter { !damus_state.contacts.is_muted($0.pubkey) }
+        events.filter { !damus_state.contacts.is_muted($0.pubkey) && !damus_state.muted_threads.isMutedThread($0) }
         self.dms.dms = dms.dms.filter { !damus_state.contacts.is_muted($0.0) }
-        notifications.filter { !damus_state.contacts.is_muted($0.pubkey) }
+        notifications.filter_and_build_notifications(damus_state)
     }
     
     func handle_delete_event(_ ev: NostrEvent) {
@@ -478,7 +480,7 @@ class HomeModel: ObservableObject {
             damus_state.events.insert(inner_ev)
         }
         
-        if !notifications.insert_event(ev) {
+        if !notifications.insert_event(ev, damus_state: damus_state) {
             return
         }
         
@@ -1036,6 +1038,11 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
     if damus_state.settings.notification_only_from_following,
        damus_state.contacts.follow_state(ev.pubkey) != .follows
         {
+        return
+    }
+
+    // Don't show notifications from muted threads.
+    if damus_state.muted_threads.isMutedThread(ev) {
         return
     }
 

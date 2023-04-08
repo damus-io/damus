@@ -96,13 +96,13 @@ struct NotificationsView: View {
             }
             .coordinateSpace(name: "scroll")
             .onReceive(handle_notify(.scroll_to_top)) { notif in
-                let _ = notifications.flush()
+                let _ = notifications.flush(state)
                 self.notifications.should_queue = false
                 scroll_to_event(scroller: scroller, id: "startblock", delay: 0.0, animate: true, anchor: .top)
             }
         }
         .onAppear {
-            let _ = notifications.flush()
+            let _ = notifications.flush(state)
         }
     }
 }

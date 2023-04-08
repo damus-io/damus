@@ -109,7 +109,7 @@ struct TextEvent: View {
     }
     
     var ContextButton: some View {
-        EventMenuContext(event: event, keypair: damus.keypair, target_pubkey: event.pubkey, bookmarks: damus.bookmarks)
+        EventMenuContext(event: event, keypair: damus.keypair, target_pubkey: event.pubkey, bookmarks: damus.bookmarks, muted_threads: damus.muted_threads)
             .padding([.bottom], 4)
     }
     

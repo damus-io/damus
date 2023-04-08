@@ -471,6 +471,12 @@ struct ContentView: View {
         .onReceive(handle_notify(.new_mutes)) { notif in
             home.filter_muted()
         }
+        .onReceive(handle_notify(.mute_thread)) { notif in
+            home.filter_muted()
+        }
+        .onReceive(handle_notify(.unmute_thread)) { notif in
+            home.filter_muted()
+        }
         .alert(NSLocalizedString("Deleted Account", comment: "Alert message to indicate this is a deleted account"), isPresented: $is_deleted_account) {
             Button(NSLocalizedString("Logout", comment: "Button to close the alert that informs that the current account has been deleted.")) {
                 is_deleted_account = false
@@ -633,7 +639,8 @@ struct ContentView: View {
                                       bookmarks: BookmarksManager(pubkey: pubkey),
                                       postbox: PostBox(pool: pool),
                                       bootstrap_relays: bootstrap_relays,
-                                      replies: ReplyCounter(our_pubkey: pubkey)
+                                      replies: ReplyCounter(our_pubkey: pubkey),
+                                      muted_threads: MutedThreadsManager(pubkey: pubkey)
         )
         home.damus_state = self.damus_state!
         
