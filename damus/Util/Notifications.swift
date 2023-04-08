@@ -104,6 +104,12 @@ extension Notification.Name {
     static var zapping: Notification.Name {
         return Notification.Name("zapping")
     }
+    static var mute_thread: Notification.Name {
+        return Notification.Name("mute_thread")
+    }
+    static var unmute_thread: Notification.Name {
+        return Notification.Name("unmute_thread")
+    }
 }
 
 func handle_notify(_ name: Notification.Name) -> NotificationCenter.Publisher {
