@@ -7,12 +7,15 @@
 
 import SwiftUI
 import CryptoKit
+import NaturalLanguage
 
 struct SearchHomeView: View {
     let damus_state: DamusState
     @StateObject var model: SearchHomeModel
     @State var search: String = ""
     @FocusState private var isFocused: Bool
+
+    let preferredLanguages = Set(Locale.preferredLanguages.map { localeToLanguage($0) })
     
     var SearchInput: some View {
         HStack {
@@ -41,12 +44,29 @@ struct SearchHomeView: View {
     }
     
     var GlobalContent: some View {
-        return TimelineView(events: model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: { _ in true })
-            .refreshable {
-                // Fetch new information by unsubscribing and resubscribing to the relay
-                model.unsubscribe()
-                model.subscribe()
+        return TimelineView(
+            events: model.events,
+            loading: $model.loading,
+            damus: damus_state,
+            show_friend_icon: true,
+            filter: {
+                if damus_state.settings.show_only_preferred_languages == false {
+                    return true
+                }
+
+                // If we can't determine the note's language with 50%+ confidence, lean on the side of caution and show it anyway.
+                guard let noteLanguage = $0.note_language(damus_state.keypair.privkey) else {
+                    return true
+                }
+
+                return preferredLanguages.contains(noteLanguage)
             }
+        )
+        .refreshable {
+            // Fetch new information by unsubscribing and resubscribing to the relay
+            model.unsubscribe()
+            model.subscribe()
+        }
     }
     
     var SearchContent: some View {

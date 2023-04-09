@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Profile: Codable {
+class Profile: Codable {
     var value: [String: AnyCodable]
     
     init (name: String?, display_name: String?, about: String?, picture: String?, banner: String?, website: String?, lud06: String?, lud16: String?, nip05: String?) {
@@ -39,7 +39,7 @@ struct Profile: Codable {
         return s
     }
     
-    private mutating func set_val<T>(_ key: String, _ val: T?) {
+    private func set_val<T>(_ key: String, _ val: T?) {
         if val == nil {
             self.value.removeValue(forKey: key)
             return
@@ -48,7 +48,7 @@ struct Profile: Codable {
         self.value[key] = AnyCodable.init(val)
     }
     
-    private mutating func set_str(_ key: String, _ val: String?) {
+    private func set_str(_ key: String, _ val: String?) {
         set_val(key, val)
     }
     
@@ -98,16 +98,33 @@ struct Profile: Codable {
     }
     
     var website_url: URL? {
-        return self.website.flatMap { URL(string: $0) }
+        if self.website?.trimmingCharacters(in: .whitespacesAndNewlines) == "" {
+            return nil
+        }
+        return self.website.flatMap { url in
+            let trim = url.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !(trim.hasPrefix("http://") || trim.hasPrefix("https://")) {
+                return URL(string: "https://" + trim)
+            }
+            return URL(string: trim)
+        }
     }
     
+    private var _lnurl: String? = nil
     var lnurl: String? {
+        if let _lnurl {
+            return _lnurl
+        }
+        
         guard let addr = lud16 ?? lud06 else {
             return nil;
         }
         
         if addr.contains("@") {
-            return lnaddress_to_lnurl(addr);
+            // this is a heavy op and is used a lot in views, cache it!
+            let addr = lnaddress_to_lnurl(addr);
+            self._lnurl = addr
+            return addr
         }
         
         if !addr.lowercased().hasPrefix("lnurl") {
@@ -130,7 +147,7 @@ struct Profile: Codable {
         self.value = [:]
     }
     
-    init(from decoder: Decoder) throws {
+    required init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         self.value = try container.decode([String: AnyCodable].self)
     }

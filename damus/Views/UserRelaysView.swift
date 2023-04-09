@@ -13,6 +13,7 @@ struct UserRelaysView: View {
     let relays: [String]
     
     @State var relay_state: [(String, Bool)]
+    @State private var showAddButton = false
     
     init (state: DamusState, pubkey: String, relays: [String]) {
         self.state = state
@@ -30,12 +31,25 @@ struct UserRelaysView: View {
     
     var body: some View {
         List(relay_state, id: \.0) { (r, add) in
-            RecommendedRelayView(damus: state, relay: r, add_button: add)
+            RecommendedRelayView(damus: state, relay: r, add_button: add, showActionButtons: $showAddButton)
         }
         .onReceive(handle_notify(.relays_changed)) { _ in
             self.relay_state = UserRelaysView.make_relay_state(pool: state.pool, relays: self.relays)
         }
-        .navigationBarTitle("Relays")
+        .navigationBarTitle(NSLocalizedString("Relays", comment: "Navigation bar title that shows the list of relays for a user."))
+        .toolbar{
+            if state.keypair.privkey != nil {
+                if showAddButton {
+                    Button(NSLocalizedString("Done", comment: "Button that, when tapped, will finish adding a different user's relays to your relay by hiding the + buttons next to the relays.")) {
+                        showAddButton.toggle()
+                    }
+                } else {
+                    Button(NSLocalizedString("Show +", comment: "Button that, when tapped, will show + buttons next to a user's relays.")) {
+                        showAddButton.toggle()
+                    }
+                }
+            }
+        }
     }
 }
 

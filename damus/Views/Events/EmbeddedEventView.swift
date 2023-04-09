@@ -30,7 +30,11 @@ struct EmbeddedEventView: View {
             .minimumScaleFactor(0.75)
             .lineLimit(1)
             
-            EventBody(damus_state: damus_state, event: event, size: .small)
+            if event_is_reply(event, privkey: damus_state.keypair.privkey) {
+                ReplyDescription(event: event, profiles: damus_state.profiles)
+            }
+
+            EventBody(damus_state: damus_state, event: event, size: .small, options: [.truncate_content])
         }
     }
 }

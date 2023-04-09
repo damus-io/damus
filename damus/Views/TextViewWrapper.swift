@@ -13,16 +13,22 @@ struct TextViewWrapper: UIViewRepresentable {
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
         textView.delegate = context.coordinator
-        textView.font = UIFont.preferredFont(forTextStyle: .body)
-        textView.textColor = UIColor.label
+        textView.showsVerticalScrollIndicator = false
+        TextViewWrapper.setTextProperties(textView)
+        return textView
+    }
+    
+    static func setTextProperties(_ uiView: UITextView) {
+        uiView.textColor = UIColor.label
+        uiView.font = UIFont.preferredFont(forTextStyle: .body)
         let linkAttributes: [NSAttributedString.Key : Any] = [
             NSAttributedString.Key.foregroundColor: UIColor(Color.accentColor)]
-        textView.linkTextAttributes = linkAttributes
-        return textView
+        uiView.linkTextAttributes = linkAttributes
     }
 
     func updateUIView(_ uiView: UITextView, context: Context) {
         uiView.attributedText = attributedText
+        TextViewWrapper.setTextProperties(uiView)
     }
 
     func makeCoordinator() -> Coordinator {

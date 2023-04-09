@@ -86,8 +86,8 @@ extension Notification.Name {
     static var report: Notification.Name {
         return Notification.Name("report")
     }
-    static var block: Notification.Name {
-        return Notification.Name("block")
+    static var mute: Notification.Name {
+        return Notification.Name("mute")
     }
     static var new_mutes: Notification.Name {
         return Notification.Name("new_mutes")

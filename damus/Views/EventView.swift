@@ -14,19 +14,6 @@ enum EventViewKind {
     case selected
 }
 
-func eventviewsize_to_font(_ size: EventViewKind) -> Font {
-    switch size {
-    case .small:
-        return .body
-    case .normal:
-        return .body
-    case .selected:
-        return .custom("selected", size: 21.0)
-    }
-}
-
-
-
 struct EventView: View {
     let event: NostrEvent
     let options: EventViewOptions
@@ -35,42 +22,18 @@ struct EventView: View {
 
     @EnvironmentObject var action_bar: ActionBarModel
 
-    init(damus: DamusState, event: NostrEvent, options: EventViewOptions) {
+    init(damus: DamusState, event: NostrEvent, pubkey: String? = nil, options: EventViewOptions = []) {
         self.event = event
         self.options = options
         self.damus = damus
-        self.pubkey = event.pubkey
-    }
-
-    init(damus: DamusState, event: NostrEvent) {
-        self.event = event
-        self.options = []
-        self.damus = damus
-        self.pubkey = event.pubkey
-    }
-
-    init(damus: DamusState, event: NostrEvent, pubkey: String) {
-        self.event = event
-        self.options = [.no_action_bar]
-        self.damus = damus
-        self.pubkey = pubkey
+        self.pubkey = pubkey ?? event.pubkey
     }
 
     var body: some View {
         VStack {
             if event.known_kind == .boost {
                 if let inner_ev = event.inner_event {
-                    VStack(alignment: .leading) {
-                        let prof = damus.profiles.lookup(id: event.pubkey)
-                        let booster_profile = ProfileView(damus_state: damus, pubkey: event.pubkey)
-                        
-                        NavigationLink(destination: booster_profile) {
-                            Reposted(damus: damus, pubkey: event.pubkey, profile: prof)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        TextEvent(damus: damus, event: inner_ev, pubkey: inner_ev.pubkey, options: options)
-                            .padding([.top], 1)
-                    }
+                    RepostedEvent(damus: damus, event: event, inner_ev: inner_ev, options: options)
                 } else {
                     EmptyView()
                 }
@@ -82,7 +45,7 @@ struct EventView: View {
                 }
             } else {
                 TextEvent(damus: damus, event: event, pubkey: pubkey, options: options)
-                    .padding([.top], 6)
+                    //.padding([.top], 6)
             }
         }
     }
@@ -152,22 +115,31 @@ func format_date(_ created_at: Int64) -> String {
 }
 
 func make_actionbar_model(ev: String, damus: DamusState) -> ActionBarModel {
-    let likes = damus.likes.counts[ev]
-    let boosts = damus.boosts.counts[ev]
-    let zaps = damus.zaps.event_counts[ev]
-    let zap_total = damus.zaps.event_totals[ev]
-    let our_like = damus.likes.our_events[ev]
-    let our_boost = damus.boosts.our_events[ev]
-    let our_zap = damus.zaps.our_zaps[ev]
+    let model = ActionBarModel.empty()
+    model.update(damus: damus, evid: ev)
+    return model
+}
 
-    return ActionBarModel(likes: likes ?? 0,
-                          boosts: boosts ?? 0,
-                          zaps: zaps ?? 0,
-                          zap_total: zap_total ?? 0,
-                          our_like: our_like,
-                          our_boost: our_boost,
-                          our_zap: our_zap?.first
-    )
+func eventviewsize_to_font(_ size: EventViewKind) -> Font {
+    switch size {
+    case .small:
+        return .body
+    case .normal:
+        return .body
+    case .selected:
+        return .custom("selected", size: 21.0)
+    }
+}
+
+func eventviewsize_to_uifont(_ size: EventViewKind) -> UIFont {
+    switch size {
+    case .small:
+        return .preferredFont(forTextStyle: .body)
+    case .normal:
+        return .preferredFont(forTextStyle: .body)
+    case .selected:
+        return .preferredFont(forTextStyle: .title2)
+    }
 }
 
 

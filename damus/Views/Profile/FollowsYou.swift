@@ -8,11 +8,6 @@
 import SwiftUI
 
 struct FollowsYou: View {
-    @Environment(\.colorScheme) var colorScheme
-
-    var fill_color: Color {
-        colorScheme == .light ? Color("DamusLightGrey") : Color("DamusDarkGrey")
-    }
     
     var body: some View {
         Text("Follows you", comment: "Text to indicate that a user is following your profile.")
@@ -21,7 +16,7 @@ struct FollowsYou: View {
             .foregroundColor(.gray)
             .background {
                 RoundedRectangle(cornerRadius: 5.0)
-                    .foregroundColor(fill_color)
+                    .foregroundColor(DamusColors.adaptableGrey)
             }
             .font(.footnote)
     }

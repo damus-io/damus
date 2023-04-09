@@ -35,6 +35,14 @@ struct NotificationItemView: View {
         notification_item_event(events: state.events, notif: item)
     }
     
+    var options: EventViewOptions {
+        if state.settings.truncate_mention_text {
+            return [.wide, .truncate_content]
+        }
+        
+        return [.wide]
+    }
+    
     func Item(_ ev: NostrEvent?) -> some View {
         Group {
             switch item {
@@ -52,13 +60,12 @@ struct NotificationItemView: View {
             
             case .reply(let ev):
                 NavigationLink(destination: ThreadView(state: state, thread: ThreadModel(event: ev, damus_state: state))) {
-                    EventView(damus: state, event: ev)
+                    EventView(damus: state, event: ev, options: options)
                 }
                 .buttonStyle(.plain)
             }
             
-            Divider()
-                .padding([.top,.bottom], 5)
+            ThiccDivider()
         }
     }
     

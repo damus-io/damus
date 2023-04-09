@@ -40,7 +40,7 @@ class FollowersModel: ObservableObject {
         let filter = get_filter()
         let filters = [filter]
         print_filters(relay_id: "following", filters: [filters])
-        self.damus_state.pool.subscribe_to(sub_id: sub_id, filters: filters, handler: handle_event)
+        self.damus_state.pool.subscribe(sub_id: sub_id, filters: filters, handler: handle_event)
     }
     
     func unsubscribe() {
@@ -94,6 +94,9 @@ class FollowersModel: ObservableObject {
             } else if sub_id == self.profiles_id {
                 damus_state.pool.unsubscribe(sub_id: profiles_id, to: [relay_id])
             }
+            
+        case .ok:
+            break
         }
     }
 }

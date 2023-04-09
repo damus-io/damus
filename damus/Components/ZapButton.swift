@@ -134,7 +134,7 @@ struct ZapButton: View {
 
 struct ZapButton_Previews: PreviewProvider {
     static var previews: some View {
-        let bar = ActionBarModel(likes: 0, boosts: 0, zaps: 10, zap_total: 15623414, our_like: nil, our_boost: nil, our_zap: nil)
+        let bar = ActionBarModel(likes: 0, boosts: 0, zaps: 10, zap_total: 15623414, replies: 2, our_like: nil, our_boost: nil, our_zap: nil, our_reply: nil)
         ZapButton(damus_state: test_damus_state(), event: test_event, lnurl: "lnurl", bar: bar)
     }
 }

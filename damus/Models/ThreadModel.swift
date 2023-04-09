@@ -104,8 +104,8 @@ class ThreadModel: ObservableObject {
 
         print("subscribing to thread \(event.id) with sub_id \(base_subid)")
         loading = true
-        damus_state.pool.subscribe_to(sub_id: base_subid, filters: base_filters, handler: handle_event)
-        damus_state.pool.subscribe_to(sub_id: meta_subid, filters: meta_filters, handler: handle_event)
+        damus_state.pool.subscribe(sub_id: base_subid, filters: base_filters, handler: handle_event)
+        damus_state.pool.subscribe(sub_id: meta_subid, filters: meta_filters, handler: handle_event)
     }
     
     func add_event(_ ev: NostrEvent, privkey: String?) {
@@ -114,6 +114,7 @@ class ThreadModel: ObservableObject {
         }
         
         let the_ev = damus_state.events.upsert(ev)
+        damus_state.replies.count_replies(the_ev)
         damus_state.events.add_replies(ev: the_ev)
         
         event_map.insert(ev)

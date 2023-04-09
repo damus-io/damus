@@ -8,138 +8,178 @@
 import SwiftUI
 import NaturalLanguage
 
+
+struct Translated: Equatable {
+    let artifacts: NoteArtifacts
+    let language: String
+}
+
+enum TranslateStatus: Equatable {
+    case havent_tried
+    case trying
+    case translating
+    case translated(Translated)
+    case not_needed
+}
+
 struct TranslateView: View {
     let damus_state: DamusState
     let event: NostrEvent
+    let size: EventViewKind
+    let currentLanguage: String
     
-    @State var checkingTranslationStatus: Bool = false
-    @State var currentLanguage: String = "en"
-    @State var noteLanguage: String? = nil
-    @State var translated_note: String? = nil
-    @State var show_translated_note: Bool = false
-    @State var translated_artifacts: NoteArtifacts? = nil
+    @State var translated: TranslateStatus
+    
+    init(damus_state: DamusState, event: NostrEvent, size: EventViewKind) {
+        self.damus_state = damus_state
+        self.event = event
+        self.size = size
+        
+        if #available(iOS 16, *) {
+            self.currentLanguage = Locale.current.language.languageCode?.identifier ?? "en"
+        } else {
+            self.currentLanguage = Locale.current.languageCode ?? "en"
+        }
+        
+        if let cached = damus_state.events.lookup_translated_artifacts(evid: event.id) {
+            self._translated = State(initialValue: cached)
+        } else {
+            let initval: TranslateStatus = self.damus_state.settings.auto_translate ? .trying : .havent_tried
+            self._translated = State(initialValue: initval)
+        }
+    }
+    
+    let preferredLanguages = Set(Locale.preferredLanguages.map { localeToLanguage($0) })
     
     var TranslateButton: some View {
         Button(NSLocalizedString("Translate Note", comment: "Button to translate note from different language.")) {
-            show_translated_note = true
+            self.translated = .trying
         }
         .translate_button_style()
     }
     
-    func Translated(lang: String, artifacts: NoteArtifacts) -> some View {
-        return Group {
-            Button(NSLocalizedString("Translated from \(lang)", comment: "Button to indicate that the note has been translated from a different language.")) {
-                show_translated_note = false
-            }
-            .translate_button_style()
+    func TranslatedView(lang: String?, artifacts: NoteArtifacts) -> some View {
+        return VStack(alignment: .leading) {
+            Text(String(format: NSLocalizedString("Translated from %@", comment: "Button to indicate that the note has been translated from a different language."), lang ?? "ja"))
+                .foregroundColor(.gray)
+                .font(.footnote)
+                .padding([.top, .bottom], 10)
             
-            SelectableText(attributedString: artifacts.content)
-        }
-    }
-    
-    func CheckingStatus(lang: String) -> some View {
-        return Button(NSLocalizedString("Translating from \(lang)...", comment: "Button to indicate that the note is in the process of being translated from a different language.")) {
-            show_translated_note = false
-        }
-        .translate_button_style()
-    }
-    
-    func MainContent(note_lang: String) -> some View {
-        return Group {
-            let languageName = Locale.current.localizedString(forLanguageCode: note_lang)
-            if let lang = languageName, show_translated_note {
-                if checkingTranslationStatus {
-                    CheckingStatus(lang: lang)
-                } else if let artifacts = translated_artifacts {
-                    Translated(lang: lang, artifacts: artifacts)
-                }
+            if self.size == .selected {
+                SelectableText(attributedString: artifacts.content.attributed, size: self.size)
             } else {
-                TranslateButton
+                artifacts.content.text
+                    .font(eventviewsize_to_font(self.size))
             }
+        }
+    }
+    
+    func failed_attempt() {
+        DispatchQueue.main.async {
+            self.translated = .not_needed
+            damus_state.events.store_translation_artifacts(evid: event.id, translated: .not_needed)
+        }
+    }
+    
+    func attempt_translation() async {
+        guard case .trying = translated else {
+            return
+        }
+        
+        guard damus_state.settings.can_translate(damus_state.pubkey) else {
+            return
+        }
+        
+        let note_lang = event.note_language(damus_state.keypair.privkey) ?? currentLanguage
+        
+        // Don't translate if its in our preferred languages
+        guard !preferredLanguages.contains(note_lang) else {
+            failed_attempt()
+            return
+        }
+        
+        DispatchQueue.main.async {
+            self.translated = .translating
+        }
+        
+        // If the note language is different from our preferred languages, send a translation request.
+        let translator = Translator(damus_state.settings)
+        let originalContent = event.get_content(damus_state.keypair.privkey)
+        let translated_note = try? await translator.translate(originalContent, from: note_lang, to: currentLanguage)
+        
+        guard let translated_note else {
+            // if its the same, give up and don't retry
+            failed_attempt()
+            return
+        }
+        
+        guard originalContent != translated_note else {
+            // if its the same, give up and don't retry
+            failed_attempt()
+            return
+        }
+
+        // Render translated note
+        let translated_blocks = event.get_blocks(content: translated_note)
+        let artifacts = render_blocks(blocks: translated_blocks, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+        
+        // and cache it
+        DispatchQueue.main.async {
+            self.translated = .translated(Translated(artifacts: artifacts, language: note_lang))
+            damus_state.events.store_translation_artifacts(evid: event.id, translated: self.translated)
         }
     }
     
     var body: some View {
         Group {
-            if let note_lang = noteLanguage, noteLanguage != currentLanguage {
-                MainContent(note_lang: note_lang)
-            } else {
+            switch translated {
+            case .havent_tried:
+                if damus_state.settings.auto_translate {
+                    Text("")
+                } else {
+                    TranslateButton
+                }
+            case .trying:
+                Text("")
+            case .translating:
+                Text("Translating...", comment: "Text to display when waiting for the translation of a note to finish processing before showing it.")
+                    .foregroundColor(.gray)
+                    .font(.footnote)
+                    .padding([.top, .bottom], 10)
+            case .translated(let translated):
+                let languageName = Locale.current.localizedString(forLanguageCode: translated.language)
+                TranslatedView(lang: languageName, artifacts: translated.artifacts)
+            case .not_needed:
                 Text("")
             }
         }
-        .task {
-            guard noteLanguage == nil && !checkingTranslationStatus && damus_state.settings.can_translate(damus_state.pubkey) else {
+        .onChange(of: translated) { val in
+            guard case .trying = translated else {
                 return
             }
             
-            checkingTranslationStatus = true
-
-            if #available(iOS 16, *) {
-                currentLanguage = Locale.current.language.languageCode?.identifier ?? "en"
-            } else {
-                currentLanguage = Locale.current.languageCode ?? "en"
+            Task {
+                await attempt_translation()
             }
-
-            // Rely on Apple's NLLanguageRecognizer to tell us which language it thinks the note is in
-            // and filter on only the text portions of the content as URLs and hashtags confuse the language recognizer.
-            let originalBlocks = event.blocks(damus_state.keypair.privkey)
-            let originalOnlyText = originalBlocks.compactMap { $0.is_text }.joined(separator: " ")
-
-            // Only accept language recognition hypothesis if there's at least a 50% probability that it's accurate.
-            let languageRecognizer = NLLanguageRecognizer()
-            languageRecognizer.processString(originalOnlyText)
-            noteLanguage = languageRecognizer.languageHypotheses(withMaximum: 1).first(where: { $0.value >= 0.5 })?.key.rawValue ?? currentLanguage
-
-            if let lang = noteLanguage, noteLanguage != currentLanguage {
-                // If the detected dominant language is a variant, remove the variant component and just take the language part as translation services typically only supports the variant-less language.
-                if #available(iOS 16, *) {
-                    noteLanguage = Locale.LanguageCode(stringLiteral: lang).identifier(.alpha2)
-                } else {
-                    noteLanguage = NSLocale(localeIdentifier: lang).languageCode
-                }
-            }
-            
-            guard let note_lang = noteLanguage else {
-                noteLanguage = currentLanguage
-                translated_note = nil
-                checkingTranslationStatus = false
-                return
-            }
-            
-            if note_lang != currentLanguage {
-                do {
-                    // If the note language is different from our language, send a translation request.
-                    let translator = Translator(damus_state.settings)
-                    let originalContent = event.get_content(damus_state.keypair.privkey)
-                    translated_note = try await translator.translate(originalContent, from: note_lang, to: currentLanguage)
-
-                    if originalContent == translated_note {
-                        // If the translation is the same as the original, don't bother showing it.
-                        noteLanguage = currentLanguage
-                        translated_note = nil
-                    }
-                } catch {
-                    // If for whatever reason we're not able to figure out the language of the note, or translate the note, fail gracefully and do not retry. It's not the end of the world. Don't want to take down someone's translation server with an accidental denial of service attack.
-                    noteLanguage = currentLanguage
-                    translated_note = nil
-                }
-            }
-
-            if let translated = translated_note {
-                // Render translated note.
-                let translatedBlocks = event.get_blocks(content: translated)
-                translated_artifacts = render_blocks(blocks: translatedBlocks, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
-            }
-
-            checkingTranslationStatus = false
-        
         }
+        .task {
+            await attempt_translation()
+        }
+    }
+}
+
+extension View {
+    func translate_button_style() -> some View {
+        return self
+            .font(.footnote)
+            .contentShape(Rectangle())
+            .padding([.top, .bottom], 10)
     }
 }
 
 struct TranslateView_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state()
-        TranslateView(damus_state: ds, event: test_event)
+        TranslateView(damus_state: ds, event: test_event, size: .normal)
     }
 }

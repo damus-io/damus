@@ -130,7 +130,7 @@ class HomeModel: ObservableObject {
         }
     }
     
-    func handle_zap_event_with_zapper(_ ev: NostrEvent, our_keypair: Keypair, zapper: String) {
+    func handle_zap_event_with_zapper(profiles: Profiles, ev: NostrEvent, our_keypair: Keypair, zapper: String) {
         guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: our_keypair.privkey) else {
             return
         }
@@ -145,9 +145,15 @@ class HomeModel: ObservableObject {
             return
         }
 
-        if handle_last_event(ev: ev, timeline: .notifications) && damus_state.settings.zap_vibration {
-            // Generate zap vibration
-            zap_vibrate(zap_amount: zap.invoice.amount)
+        if handle_last_event(ev: ev, timeline: .notifications) {
+            if damus_state.settings.zap_vibration {
+                // Generate zap vibration
+                zap_vibrate(zap_amount: zap.invoice.amount)
+            }
+            if damus_state.settings.zap_notification {
+                // Create in-app local notification for zap received.
+                create_in_app_zap_notification(profiles: profiles, zap: zap)
+            }
         }
 
         return
@@ -161,7 +167,7 @@ class HomeModel: ObservableObject {
         
         let our_keypair = damus_state.keypair
         if let local_zapper = damus_state.profiles.lookup_zapper(pubkey: ptag) {
-            handle_zap_event_with_zapper(ev, our_keypair: our_keypair, zapper: local_zapper)
+            handle_zap_event_with_zapper(profiles: self.damus_state.profiles, ev: ev, our_keypair: our_keypair, zapper: local_zapper)
             return
         }
         
@@ -180,7 +186,7 @@ class HomeModel: ObservableObject {
             
             DispatchQueue.main.async {
                 self.damus_state.profiles.zappers[ptag] = zapper
-                self.handle_zap_event_with_zapper(ev, our_keypair: our_keypair, zapper: zapper)
+                self.handle_zap_event_with_zapper(profiles: self.damus_state.profiles, ev: ev, our_keypair: our_keypair, zapper: zapper)
             }
         }
         
@@ -329,7 +335,11 @@ class HomeModel: ObservableObject {
                 
                 self.loading = false
                 break
+                
+            case .ok:
+                break
             }
+            
         }
     }
 
@@ -455,7 +465,7 @@ class HomeModel: ObservableObject {
 
         return m[kind]
     }
-
+    
     func handle_notification(ev: NostrEvent) {
         // don't show notifications from ourselves
         guard ev.pubkey != damus_state.pubkey else {
@@ -479,7 +489,10 @@ class HomeModel: ObservableObject {
             return
         }
         
-        handle_last_event(ev: ev, timeline: .notifications)
+        if handle_last_event(ev: ev, timeline: .notifications) {
+            process_local_notification(damus_state: damus_state, event: ev)
+        }
+        
     }
 
     @discardableResult
@@ -498,11 +511,13 @@ class HomeModel: ObservableObject {
         }
     }
 
+
     func handle_text_event(sub_id: String, _ ev: NostrEvent) {
         guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
             return
         }
         
+        damus_state.replies.count_replies(ev)
         damus_state.events.insert(ev)
 
         if sub_id == home_subid {
@@ -528,9 +543,13 @@ class HomeModel: ObservableObject {
         
         incoming_dms.append(ev)
         
-        dm_debouncer.debounce {
+        dm_debouncer.debounce { [self] in
             if let notifs = handle_incoming_dms(prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
                 self.new_events = notifs
+                if  damus_state.settings.dm_notification,
+                    let displayName = damus_state.profiles.lookup(id: self.incoming_dms.last!.pubkey)?.display_name {
+                    create_local_notification(displayName: displayName, conversation: "You have received a direct message", type: .dm)
+                }
             }
             self.incoming_dms = []
         }
@@ -659,7 +678,7 @@ func process_metadata_event(our_pubkey: String, profiles: Profiles, ev: NostrEve
         }
     }
 
-    let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at)
+    let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at, event: ev)
     profiles.add(id: ev.pubkey, profile: tprof)
     
     if let nip05 = profile.nip05, old_nip05 != profile.nip05 {
@@ -671,6 +690,7 @@ func process_metadata_event(our_pubkey: String, profiles: Profiles, ev: NostrEve
             
             DispatchQueue.main.async {
                 profiles.validated[ev.pubkey] = validated
+                profiles.nip05_pubkey[nip05] = ev.pubkey
                 notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
             }
         }
@@ -724,7 +744,7 @@ func process_contact_event(state: DamusState, ev: NostrEvent) {
 
 func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     let bootstrap_dict: [String: RelayInfo] = [:]
-    let old_decoded = m_old_ev.flatMap { decode_json_relays($0.content) } ?? BOOTSTRAP_RELAYS.reduce(into: bootstrap_dict) { (d, r) in
+    let old_decoded = m_old_ev.flatMap { decode_json_relays($0.content) } ?? state.bootstrap_relays.reduce(into: bootstrap_dict) { (d, r) in
         d[r] = .rw
     }
     
@@ -759,6 +779,7 @@ func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     }
     
     if changed {
+        save_bootstrap_relays(pubkey: state.pubkey, relays: Array(new))
         notify(.relays_changed, ())
     }
 }
@@ -926,5 +947,124 @@ func zap_vibrate(zap_amount: Int64) {
         vibration_generator = UIImpactFeedbackGenerator(style: .light)
     }
     vibration_generator.impactOccurred()
+}
+
+func zap_notification_title(_ zap: Zap) -> String {
+    if zap.private_request != nil {
+        return NSLocalizedString("Private Zap", comment: "Title of notification when a private zap is received.")
+    } else {
+        return NSLocalizedString("Zap", comment: "Title of notification when a non-private zap is received.")
+    }
+}
+
+func zap_notification_body(profiles: Profiles, zap: Zap, locale: Locale = Locale.current) -> String {
+    let src = zap.private_request ?? zap.request.ev
+    let anon = event_is_anonymous(ev: src)
+    let pk = anon ? "anon" : src.pubkey
+    let profile = profiles.lookup(id: pk)
+    let sats = NSNumber(value: (Double(zap.invoice.amount) / 1000.0))
+    let formattedSats = format_msats_abbrev(zap.invoice.amount)
+    let name = Profile.displayName(profile: profile, pubkey: pk).display_name
+
+    if src.content.isEmpty {
+        let format = localizedStringFormat(key: "zap_notification_no_message", locale: locale)
+        return String(format: format, locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats, name)
+    } else {
+        let format = localizedStringFormat(key: "zap_notification_with_message", locale: locale)
+        return String(format: format, locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats, name, src.content)
+    }
+}
+
+func create_in_app_zap_notification(profiles: Profiles, zap: Zap, locale: Locale = Locale.current) {
+    let content = UNMutableNotificationContent()
+
+    content.title = zap_notification_title(zap)
+    content.body = zap_notification_body(profiles: profiles, zap: zap, locale: locale)
+    content.sound = UNNotificationSound.default
+
+    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+
+    let request = UNNotificationRequest(identifier: "myZapNotification", content: content, trigger: trigger)
+
+    UNUserNotificationCenter.current().add(request) { error in
+        if let error = error {
+            print("Error: \(error)")
+        } else {
+            print("Local notification scheduled")
+        }
+    }
+}
+
+    
+func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
+    guard let type = ev.known_kind else {
+        return
+    }
+
+    if damus_state.settings.notification_only_from_following,
+       damus_state.contacts.follow_state(ev.pubkey) != .follows
+        {
+        return
+    }
+
+    if type == .text && damus_state.settings.mention_notification {
+        for block in ev.blocks(damus_state.keypair.privkey) {
+            if case .mention(let mention) = block, mention.ref.ref_id == damus_state.keypair.pubkey,
+               let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name {
+                let justContent = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content.attributed).string
+                create_local_notification(displayName: displayName, conversation: justContent, type: type)
+            }
+        }
+    } else if type == .boost && damus_state.settings.repost_notification,
+              let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name {
+
+        if let inner_ev = ev.inner_event {
+            create_local_notification(displayName: displayName, conversation: inner_ev.content, type: type)
+        }
+    } else if type == .like && damus_state.settings.like_notification,
+              let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name,
+              let e_ref = ev.referenced_ids.first?.ref_id,
+              let content = damus_state.events.lookup(e_ref)?.content {
+        
+        create_local_notification(displayName: displayName, conversation: content, type: type)
+    }
+
+}
+
+func create_local_notification(displayName: String, conversation: String, type: NostrKind) {
+    let content = UNMutableNotificationContent()
+    var title = ""
+    var identifier = ""
+    switch type {
+    case .text:
+        title = String(format: NSLocalizedString("Mentioned by %@", comment: "Mentioned by heading in local notification"), displayName)
+        identifier = "myMentionNotification"
+    case .boost:
+        title = String(format: NSLocalizedString("Reposted by %@", comment: "Reposted by heading in local notification"), displayName)
+        identifier = "myBoostNotification"
+    case .like:
+        title = String(format: NSLocalizedString("Liked by %@", comment: "Liked by heading in local notification"), displayName)
+        identifier = "myLikeNotification"
+    case .dm:
+        title = String(format: NSLocalizedString("DM by %@", comment: "DM by heading in local notification"), displayName)
+        identifier = "myDMNotification"
+    default:
+        break
+    }
+    content.title = title
+    content.body = conversation
+    content.sound = UNNotificationSound.default
+
+    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+
+    let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+
+    UNUserNotificationCenter.current().add(request) { error in
+        if let error = error {
+            print("Error: \(error)")
+        } else {
+            print("Local notification scheduled")
+        }
+    }
 }
 

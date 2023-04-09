@@ -22,6 +22,7 @@ struct WebsiteLink: View {
             }, label: {
                 Text(link_text)
                     .font(.footnote)
+                    .foregroundColor(.accentColor)
             })
         }
     }

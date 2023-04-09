@@ -20,12 +20,15 @@ struct PostView: View {
     @FocusState var focus: Bool
     @State var showPrivateKeyWarning: Bool = false
     @State var attach_media: Bool = false
+    @State var attach_camera: Bool = false
     @State var error: String? = nil
+    
+    @State var originalReferences: [ReferencedId] = []
+    @State var references: [ReferencedId] = []
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
 
     let replying_to: NostrEvent?
-    let references: [ReferencedId]
     let damus_state: DamusState
 
     @Environment(\.presentationMode) var presentationMode
@@ -78,14 +81,25 @@ struct PostView: View {
             attach_media = true
         }, label: {
             Image(systemName: "photo")
+                .padding(6)
+        })
+    }
+    
+    var CameraButton: some View {
+        Button(action: {
+            attach_camera = true
+        }, label: {
+            Image(systemName: "camera")
+                .padding(6)
         })
     }
     
     var AttachmentBar: some View {
         HStack(alignment: .center) {
             ImageButton
-                .disabled(image_upload.progress != nil)
+            CameraButton
         }
+        .disabled(image_upload.progress != nil)
     }
     
     var PostButton: some View {
@@ -96,10 +110,12 @@ struct PostView: View {
                 self.send_post()
             }
         }
+        .disabled(is_post_empty)
         .font(.system(size: 14, weight: .bold))
         .frame(width: 80, height: 30)
         .foregroundColor(.white)
         .background(LINEAR_GRADIENT)
+        .opacity(is_post_empty ? 0.5 : 1.0)
         .clipShape(Capsule())
     }
     
@@ -141,9 +157,7 @@ struct PostView: View {
 
                 Spacer()
 
-                if !is_post_empty {
-                    PostButton
-                }
+                PostButton
             }
             
             if let progress = image_upload.progress {
@@ -152,25 +166,32 @@ struct PostView: View {
             }
         }
         .frame(height: 30)
-        .padding([.top, .bottom], 4)
+        .padding()
     }
     
-    func handle_upload(image: UIImage) {
-        let uploader = get_image_uploader(damus_state.pubkey)
+    func append_url(_ url: String) {
+        let uploadedImageURL = NSMutableAttributedString(string: url)
+        let combinedAttributedString = NSMutableAttributedString()
+        combinedAttributedString.append(post)
+        if !post.string.hasSuffix(" ") {
+            combinedAttributedString.append(NSAttributedString(string: " "))
+        }
+        combinedAttributedString.append(uploadedImageURL)
+        
+        // make sure we have a space at the end
+        combinedAttributedString.append(NSAttributedString(string: " "))
+        post = combinedAttributedString
+    }
+    
+    func handle_upload(media: MediaUpload) {
+        let uploader = get_media_uploader(damus_state.pubkey)
         
         Task.init {
-            let res = await image_upload.start(img: image, uploader: uploader)
+            let res = await image_upload.start(media: media, uploader: uploader)
             
             switch res {
             case .success(let url):
-                let uploadedImageURL = NSMutableAttributedString(string: url, attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0), NSAttributedString.Key.foregroundColor: UIColor.label])
-                let combinedAttributedString = NSMutableAttributedString()
-                combinedAttributedString.append(post)
-                if !post.string.hasSuffix(" ") {
-                    combinedAttributedString.append(NSAttributedString(string: " "))
-                }
-                combinedAttributedString.append(uploadedImageURL)
-                post = combinedAttributedString
+                append_url(url)
                 
             case .failed(let error):
                 if let error {
@@ -184,65 +205,96 @@ struct PostView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading) {
-            TopBar
-            
-            HStack(alignment: .top) {
-                ProfilePicView(pubkey: damus_state.pubkey, size: 45.0, highlight: .none, profiles: damus_state.profiles)
+        GeometryReader { (deviceSize: GeometryProxy) in
+            VStack(alignment: .leading, spacing: 0) {
                 
-                TextEntry
-            }
-
-            // This if-block observes @ for tagging
-            if let searching = get_searching_string(post.string) {
-                VStack {
-                    Spacer()
+                let searching = get_searching_string(post.string)
+                
+                TopBar
+                
+                ScrollViewReader { scroller in
+                    ScrollView {
+                        if let replying_to = replying_to {
+                            ReplyView(replying_to: replying_to, damus: damus_state, originalReferences: $originalReferences, references: $references)
+                        }
+                        VStack(alignment: .leading, spacing: 0) {
+                            HStack(alignment: .top) {
+                                ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
+                                
+                                TextEntry
+                            }
+                            .frame(height: deviceSize.size.height*0.78)
+                            .id("post")
+                        }
+                        .padding(.horizontal)
+                    }
+                    .frame(maxHeight: searching == nil ? .infinity : 70)
+                    .onAppear {
+                        scroll_to_event(scroller: scroller, id: "post", delay: 1.0, animate: true, anchor: .top)
+                    }
+                }
+                
+                // This if-block observes @ for tagging
+                if let searching {
                     UserSearch(damus_state: damus_state, search: searching, post: $post)
-                }.zIndex(1)
-            }
-            
-            Divider()
-                .padding([.bottom], 10)
-            
-            AttachmentBar
-        }
-        .sheet(isPresented: $attach_media) {
-            ImagePicker(sourceType: .photoLibrary) { img in
-                handle_upload(image: img)
-            }
-        }
-        .onAppear() {
-            if let replying_to {
-                if damus_state.drafts.replies[replying_to] == nil {
-                    damus_state.drafts.post = NSMutableAttributedString(string: "")
+                        .frame(maxHeight: .infinity)
+                } else {
+                    Divider()
+                    VStack(alignment: .leading) {
+                        AttachmentBar
+                            .padding(.vertical, 5)
+                            .padding(.horizontal)
+                    }
                 }
-                if let p = damus_state.drafts.replies[replying_to] {
-                    post = p
+            }
+            .sheet(isPresented: $attach_media) {
+                ImagePicker(sourceType: .photoLibrary, pubkey: damus_state.pubkey) { img in
+                    handle_upload(media: .image(img))
+                } onVideoPicked: { url in
+                    handle_upload(media: .video(url))
                 }
-            } else {
-                post = damus_state.drafts.post
             }
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                self.focus = true
+            .sheet(isPresented: $attach_camera) {
+                ImagePicker(sourceType: .camera, pubkey: damus_state.pubkey) { img in
+                    handle_upload(media: .image(img))
+                } onVideoPicked: { url in
+                    handle_upload(media: .video(url))
+                }
             }
+            .onAppear() {
+                if let replying_to {
+                    references =  gather_reply_ids(our_pubkey: damus_state.pubkey, from: replying_to)
+                    originalReferences = references
+                    if damus_state.drafts.replies[replying_to] == nil {
+                        damus_state.drafts.post = NSMutableAttributedString(string: "")
+                    }
+                    if let p = damus_state.drafts.replies[replying_to] {
+                        post = p
+                    }
+                } else {
+                    post = damus_state.drafts.post
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self.focus = true
+                }
+            }
+            .onDisappear {
+                if let replying_to, let reply = damus_state.drafts.replies[replying_to], reply.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    damus_state.drafts.replies.removeValue(forKey: replying_to)
+                } else if replying_to == nil && damus_state.drafts.post.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    damus_state.drafts.post = NSMutableAttributedString(string : "")
+                }
+            }
+            .alert(NSLocalizedString("Note contains \"nsec1\" private key. Are you sure?", comment: "Alert user that they might be attempting to paste a private key and ask them to confirm."), isPresented: $showPrivateKeyWarning, actions: {
+                Button(NSLocalizedString("No", comment: "Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key."), role: .cancel) {
+                    showPrivateKeyWarning = false
+                }
+                Button(NSLocalizedString("Yes, Post with Private Key", comment: "Button to proceed with posting a note even though it looks like they might be posting a private key."), role: .destructive) {
+                    self.send_post()
+                }
+            })
         }
-        .onDisappear {
-            if let replying_to, let reply = damus_state.drafts.replies[replying_to], reply.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                damus_state.drafts.replies.removeValue(forKey: replying_to)
-            } else if replying_to == nil && damus_state.drafts.post.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                damus_state.drafts.post = NSMutableAttributedString(string : "")
-            }
-        }
-        .padding()
-        .alert(NSLocalizedString("Note contains \"nsec1\" private key. Are you sure?", comment: "Alert user that they might be attempting to paste a private key and ask them to confirm."), isPresented: $showPrivateKeyWarning, actions: {
-            Button(NSLocalizedString("No", comment: "Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key."), role: .cancel) {
-                showPrivateKeyWarning = false
-            }
-            Button(NSLocalizedString("Yes, Post with Private Key", comment: "Button to proceed with posting a note even though it looks like they might be posting a private key."), role: .destructive) {
-                self.send_post()
-            }
-        })
     }
 }
 
@@ -270,6 +322,6 @@ func get_searching_string(_ post: String) -> String? {
 
 struct PostView_Previews: PreviewProvider {
     static var previews: some View {
-        PostView(replying_to: nil, references: [], damus_state: test_damus_state())
+        PostView(replying_to: nil, damus_state: test_damus_state())
     }
 }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 let PPM_SIZE: CGFloat = 80.0
 let BANNER_HEIGHT: CGFloat = 150.0;
@@ -67,6 +68,7 @@ struct EditMetadataView: View {
     @Environment(\.colorScheme) var colorScheme
 
     @State var confirm_ln_address: Bool = false
+    @StateObject var profileUploadViewModel = ProfileUploadingViewModel()
     
     init (damus_state: DamusState) {
         self.damus_state = damus_state
@@ -83,7 +85,7 @@ struct EditMetadataView: View {
     }
     
     func imageBorderColor() -> Color {
-            colorScheme == .light ? Color("DamusWhite") : Color("DamusBlack")
+            colorScheme == .light ? DamusColors.white : DamusColors.black
         }
     
     func save() {
@@ -102,7 +104,7 @@ struct EditMetadataView: View {
         let m_metadata_ev = make_metadata_event(keypair: damus_state.keypair, metadata: metadata)
         
         if let metadata_ev = m_metadata_ev {
-            damus_state.pool.send(.event(metadata_ev))
+            damus_state.postbox.send(metadata_ev)
         }
     }
 
@@ -126,7 +128,7 @@ struct EditMetadataView: View {
                 let pfp_size: CGFloat = 90.0
 
                 HStack(alignment: .center) {
-                    ProfilePicView(pubkey: damus_state.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles)
+                    ProfilePictureSelector(pubkey: damus_state.pubkey, damus_state: damus_state, viewModel: profileUploadViewModel, callback: uploadedProfilePicture(image_url:))
                         .offset(y: -(pfp_size/2.0)) // Increase if set a frame
 
                    Spacer()
@@ -196,13 +198,18 @@ struct EditMetadataView: View {
                     TextField(NSLocalizedString("jb55@jb55.com", comment: "Placeholder example text for identifier used for NIP-05 verification."), text: $nip05)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
+                        .onReceive(Just(nip05)) { newValue in
+                            self.nip05 = newValue.trimmingCharacters(in: .whitespaces)
+                        }
                 }, header: {
                     Text("NIP-05 Verification", comment: "Label for NIP-05 Verification section of user profile form.")
                 }, footer: {
                     if let parts = nip05_parts {
                         Text("'\(parts.username)' at '\(parts.host)' will be used for verification", comment: "Description of how the nip05 identifier would be used for verification.")
-                    } else {
+                    } else if !nip05.isEmpty {
                         Text("'\(nip05)' is an invalid NIP-05 identifier. It should look like an email.", comment: "Description of why the nip05 identifier is invalid.")
+                    } else {
+                        Text("")    // without this, the keyboard dismisses unnecessarily when the footer changes state
                     }
                 })
 
@@ -214,6 +221,7 @@ struct EditMetadataView: View {
                         dismiss()
                     }
                 }
+                .disabled(profileUploadViewModel.isLoading)
                 .alert(NSLocalizedString("Invalid Tip Address", comment: "Title of alerting as invalid tip address."), isPresented: $confirm_ln_address) {
                     Button(NSLocalizedString("Ok", comment: "Button to dismiss the alert.")) {
                     }
@@ -223,6 +231,11 @@ struct EditMetadataView: View {
             }
         }
         .ignoresSafeArea(edges: .top)
+        .background(Color(.systemGroupedBackground))
+    }
+    
+    func uploadedProfilePicture(image_url: URL?) {
+        picture = image_url?.absoluteString ?? ""
     }
 }
 

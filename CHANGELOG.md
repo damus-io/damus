@@ -1,9 +1,216 @@
+## [1.4.1-7] - 2023-04-07
+
+### Added
+
+- Add #zap and #zapathon custom hashtags (William Casarin)
+- Add custom #plebchain icon (William Casarin)
+
+
+### Changed
+
+- Add validation to prevent whitespaces be inputted on NIP-05 input field (Terry Yiu)
+- Change reply color from blue to purple. Blue is banned from Damus. (William Casarin)
+
+
+### Fixed
+
+- Fix padding in post view (OlegAba)
+- Show most recently bookmarked notes at the top (Bryan Montz)
+
+
+[1.4.1-7]: https://github.com/damus-io/damus/releases/tag/v1.4.1-7
+
+## [1.4.1-6] - 2023-04-06
+
+### Added
+
+- Custom hashtags for #bitcoin, #nostr and #coffeechain (William Casarin)
+
+### Changed
+
+- Disable translations in DMs by default (William Casarin)
+
+### Fixed
+
+- Don't show Translating... if we're not actually translating (William Casarin)
+
+
+[1.4.1-6]: https://github.com/damus-io/damus/releases/tag/v1.4.1-6
+
+## [1.4.1-4] - 2023-04-06
+
+### Added
+
+- Cache translations (William Casarin)
+
+### Fixed
+
+- Fix translation text popping (William Casarin)
+- Fix broken auto-translations (William Casarin)
+- Fix extraneous padding on some image posts (William Casarin)
+- Fix crash in relay list view (William Casarin)
+
+[1.4.1-4]: https://github.com/damus-io/damus/releases/tag/v1.4.1-4
+
+## [1.4.1-3] - 2023-04-05
+
+### Added
+
+- Added text truncation settings (William Casarin)
+
+### Changed
+
+- Rename block to mute (William Casarin)
+
+### Fixed
+
+- Reduce chopping of images (mainvolume)
+- Fix some notification settings not saving (William Casarin)
+- Fix broken camera uploads (again) (Joel Klabo)
+
+
+[1.4.1-3]: https://github.com/damus-io/damus/releases/tag/v1.4.1-3
+
+## [1.4.1-2] - 2023-04-04
+
+### Added
+
+- Reply counts (William Casarin)
+- Add option to only show notification from people you follow (Swift)
+- Added local notifications for other events (Swift)
+- Show a custom view when tagged user isn't found (ericholguin)
+- Show referenced notes in DMs (William Casarin)
+
+
+### Changed
+
+- Show full bleed images on selected events in threads (William Casarin)
+- Improvement to square image displaying (mainvolume)
+
+
+### Fixed
+
+- Fix broken website links that have missing https:// prefixes (William Casarin)
+- Get around CCP bootstrap relay banning by caching user's relays as their bootstrap relays (William Casarin)
+
+
+[1.4.1-2]: https://github.com/damus-io/damus/releases/tag/v1.4.1-2
+
+## [1.4.1] - 2023-04-03
+
+### Added
+
+- Profile Picture Upload (Joel Klabo)
+- Enable offline posting (William Casarin)
+- Add auto-translation caching to ruduce api usage (Terry Yiu)
+- Added support for gif uploads (Swift)
+- Add a Divider in the Follows List for Large Screens (Joel Klabo)
+- Upload Photos and Videos from Camera (Joel Klabo)
+- Added ability to lookup users by nip05 identifiers (William Casarin)
+
+### Changed
+
+- Only truncate timeline text if enabled in settings (William Casarin)
+- Make mentions wide in notifications like in timeline (William Casarin)
+- Broadcast events you are replying to (William Casarin)
+- Broadcast now also broadcasts event user's profile (William Casarin)
+- Improved look of reply view (ericholguin)
+- Remove gradient in some places for visibility (ericholguin)
+
+
+### Fixed
+
+- Fix cropped images (mainvolume)
+- Truncate long text in notification items (William Casarin)
+- Restore missing reply description on selected events (William Casarin)
+- Show sent DMs immediately (William Casarin)
+- Fixed size of translated text (William Casarin)
+- Fix crash when reposting (William Casarin)
+- Fix unclickable image dismiss button (OlegAba)
+
+
+[1.4.1]: https://github.com/damus-io/damus/releases/tag/v1.4.1
+## [1.4.0] - 2023-03-27
+
+### Added
+
+- Local zap notifications (Swift)
+- Add support for video uploads (Swift)
+- Auto Translation (Terry Yiu)
+- Portuguese (Brazil) translations (Andressa Munturo)
+- Spanish (Spain) translations (Max Pleb)
+- Vietnamese translations (ShiryoRyo)
+
+
+### Fixed
+
+- Fixed small notification hit boxes (Terry Yiu)
+
+[1.4.0]: https://github.com/damus-io/damus/releases/tag/v1.4.0
+
+## [1.3.0-7] - 2023-03-24
+
+- New experimental timeline view
+
+[1.3.0-7]: https://github.com/damus-io/damus/releases/tag/v1.3.0-7
+
+## [1.3.0-6] - 2023-03-21
+
+### Fixed
+
+- Fix bug where nostr: links and QRs stopped working (William Casarin)
+
+
+[1.3.0-6]: https://github.com/damus-io/damus/releases/tag/v1.3.0-6
+
+## [1.3.0-5] - 2023-03-20
+
+### Added
+
+- Add Time Ago to DM View (Joel Klabo)
+
+
+### Fixed
+
+- Fixed internal links opening in other nostr clients (William Casarin)
+- Remove authentication for copying npub (Swift)
+
+
+[1.3.0-5]: https://github.com/damus-io/damus/releases/tag/v1.3.0-5
+
+## [1.3.0-4] - 2023-03-17
+
+### Changed
+
+- It's much easier to tag users in replies and posts (William Casarin)
+
+
+### Fixed
+
+- Fix bug where small black text appears during image upload (William Casarin)
+
+
+[1.3.0-4]: https://github.com/damus-io/damus/releases/tag/v1.3.0-4
+
+## [1.3.0-3] - 2023-03-17
+
+### Fixed
+
+- Fix image upload url delay after progress bar disappears (William Casarin)
+- Fix issue where damus stops trying to reconnect (William Casarin)
+
+[1.3.0-3]: https://github.com/damus-io/damus/releases/tag/v1.3.0-3
+
 ## [1.3.0-2] - 2023-03-16
 
 ### Added
 
 - Add image uploader (Swift)
 - Add option to always show images (never blur) (William Casarin)
+- Canadian French (Pierre - synoptic_okubo)
+- Hungarian translations (Zoltan)
+- Korean translations (sogoagain)
+- Swedish translations (Pextar)
 
 
 ### Changed
@@ -26,6 +233,9 @@
 - Extend user tagging search to all local profiles (William Casarin)
 - Vibrate when a zap is received (Swift)
 - New and Improved Share sheet (ericholguin)
+- Bulgarian translations (elsat)
+- Persian translations (Mahdi Taghizadeh)
+- Ukrainian translations (Valeriia Khudiakova, Tony B)
 
 
 ### Changed
@@ -124,6 +334,8 @@
 - Customized zaps (William Casarin)
 - Add new Notifications View (William Casarin)
 - Bookmarking (Joel Klabo)
+- Chinese, Traditional (Hong Kong) translations (rasputin)
+- Chinese, Traditional (Taiwan) translations (rasputin)
 
 ### Changed
 
@@ -149,6 +361,9 @@
 - Added the ability to select text on posts (OlegAba)
 - Added Posts or Post & Replies selector to Profile (ericholguin)
 - Improved profile navbar (OlegAba)
+- Czech translations (Martin Gabrhel)
+- Indonesian translations (johnybergzy)
+- Russian translations (Tony B)
 
 
 ### Changed
@@ -197,7 +412,6 @@
 ### Added
 
 - Relay Filtering (William Casarin)
-- Japanese translations (Terry Yiu)
 - Add password autofill on account login and creation (Terry Yiu)
 - Show if relay is paid (William Casarin)
 - Add "Follows You" indicator on profile (William Casarin)
@@ -210,6 +424,10 @@
 - Copy invoice button (Joel Klabo)
 - Receive Lightning Zaps (William Casarin)
 - Allow text selection in bio (Suhail Saqan)
+- Chinese, Simplified (China mainland) translations (haolong, rasputin)
+- Dutch translations (Heimen Stoffels - Vistaus)
+- Greek translations (milicode)
+- Japanese translations (akiomik, foxytanuki, Guetsu Ren - Nighthaven, h3y6e, middlingphys)
 
 
 ### Changed
@@ -244,6 +462,7 @@
 - LibreTranslate note translations (Terry Yiu)
 - Added support for account deletion (William Casarin)
 - User tagging and autocompletion in posts (Swift)
+- Polish translations (pysiak)
 
 
 ### Changed
@@ -266,7 +485,8 @@
 
 ### Added
 
-- Added Arabic and Portuguese translations (Barodane, Antonio Chagas)
+- Arabic translations (Barodane)
+- Portuguese translations (Antonio Chagas)
 - Add QRCode view for sharing your pubkey (ericholguin)
 - Added nostr: uri handling (William Casarin)
 
@@ -293,7 +513,8 @@
 ### Added
 
 - Reposts view (Terry Yiu)
-- Translations for it_IT, it_CH, fr_FR, de_DE, de_AT and lv_LV (Nicolò Carcagnì, Solobalbo, Gregor, Peter Gerstbach, SYX)
+- Italian translations (Nicolò Carcagnì)
+- Latvian translations (SYX)
 - Added ability to block users (William Casarin)
 - Added a way to report content (William Casarin)
 - Stretchable profile cover header (Swift)
@@ -320,7 +541,9 @@
 
 - Show website on profiles (William Casarin)
 - Add the ability to choose participants when replying (Joel Klabo)
-- Translations for de_AT, de_DE, tr_TR, fr_FR (Gregor, Peter Gerstbach, Taylan Benli, Solobalbo)
+- German translations (Gregor, Peter Gerstbach)
+- Turkish translations (Taylan Benli)
+- French (France) translations (Solobalbo)
 - Add DM Message Requests (William Casarin)
 
 
@@ -752,6 +975,4 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
-
 

@@ -90,7 +90,8 @@ struct SaveKeysView: View {
     }
     
     func complete_account_creation(_ account: CreateAccountModel) {
-        for relay in BOOTSTRAP_RELAYS {
+        let bootstrap_relays = load_bootstrap_relays(pubkey: account.pubkey)
+        for relay in bootstrap_relays {
             add_rw_relay(self.pool, relay)
         }
 
@@ -107,13 +108,13 @@ struct SaveKeysView: View {
             switch wsev {
             case .connected:
                 let metadata = create_account_to_metadata(account)
-                let m_metadata_ev = make_metadata_event(keypair: account.keypair, metadata: metadata)
-                let m_contacts_ev = make_first_contact_event(keypair: account.keypair)
+                let metadata_ev = make_metadata_event(keypair: account.keypair, metadata: metadata)
+                let contacts_ev = make_first_contact_event(keypair: account.keypair)
                 
-                if let metadata_ev = m_metadata_ev {
+                if let metadata_ev {
                     self.pool.send(.event(metadata_ev))
                 }
-                if let contacts_ev = m_contacts_ev {
+                if let contacts_ev {
                     self.pool.send(.event(contacts_ev))
                 }
                 
@@ -140,6 +141,8 @@ struct SaveKeysView: View {
             case .event:
                 print("event in signup?")
             case .eose:
+                break
+            case .ok:
                 break
             }
         }

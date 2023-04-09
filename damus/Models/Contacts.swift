@@ -140,7 +140,7 @@ func follow_user(pool: RelayPool, our_contacts: NostrEvent?, pubkey: String, pri
     return ev
 }
 
-func unfollow_user(pool: RelayPool, our_contacts: NostrEvent?, pubkey: String, privkey: String, unfollow: String) -> NostrEvent? {
+func unfollow_user(postbox: PostBox, our_contacts: NostrEvent?, pubkey: String, privkey: String, unfollow: String) -> NostrEvent? {
     guard let cs = our_contacts else {
         return nil
     }
@@ -149,7 +149,7 @@ func unfollow_user(pool: RelayPool, our_contacts: NostrEvent?, pubkey: String, p
     ev.calculate_id()
     ev.sign(privkey: privkey)
     
-    pool.send(.event(ev))
+    postbox.send(ev)
     
     return ev
 }

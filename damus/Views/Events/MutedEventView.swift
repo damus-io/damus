@@ -14,7 +14,6 @@ struct MutedEventView: View {
     
     let selected: Bool
     @State var shown: Bool
-    @Environment(\.colorScheme) var colorScheme
     
     init(damus_state: DamusState, event: NostrEvent, scroller: ScrollViewProxy?, selected: Bool) {
         self.damus_state = damus_state
@@ -28,14 +27,10 @@ struct MutedEventView: View {
         return !should_show_event(contacts: damus_state.contacts, ev: event)
     }
     
-    var FillColor: Color {
-        colorScheme == .light ? Color("DamusLightGrey") : Color("DamusDarkGrey")
-    }
-    
     var MutedBox: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 20)
-                .foregroundColor(FillColor)
+                .foregroundColor(DamusColors.adaptableGrey)
             
             HStack {
                 Text("Post from a user you've blocked", comment: "Text to indicate that what is being shown is a post from a user who has been blocked.")
@@ -51,7 +46,7 @@ struct MutedEventView: View {
     var Event: some View {
         Group {
             if selected {
-                SelectedEventView(damus: damus_state, event: event)
+                SelectedEventView(damus: damus_state, event: event, size: .selected)
             } else {
                 EventView(damus: damus_state, event: event)
             }

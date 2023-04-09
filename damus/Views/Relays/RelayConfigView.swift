@@ -10,8 +10,8 @@ import SwiftUI
 struct RelayConfigView: View {
     let state: DamusState
     @State var new_relay: String = ""
-    @State var show_add_relay: Bool = false
     @State var relays: [RelayDescriptor]
+    @State private var showActionButtons = false
     
     @Environment(\.dismiss) var dismiss
     
@@ -23,8 +23,8 @@ struct RelayConfigView: View {
     var recommended: [RelayDescriptor] {
         let rs: [RelayDescriptor] = []
         return BOOTSTRAP_RELAYS.reduce(into: rs) { xs, x in
-            if state.pool.get_relay(x) == nil {
-                xs.append(RelayDescriptor(url: URL(string: x)!, info: .rw))
+            if state.pool.get_relay(x) == nil, let url = URL(string: x) {
+                xs.append(RelayDescriptor(url: url, info: .rw))
             }
         }
     }
@@ -37,72 +37,122 @@ struct RelayConfigView: View {
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
         }
-        .sheet(isPresented: $show_add_relay) {
-            AddRelayView(show_add_relay: $show_add_relay, relay: $new_relay) { m_relay in
-                guard var relay = m_relay else {
-                    return
-                }
-                
-                if relay.starts(with: "wss://") == false && relay.starts(with: "ws://") == false {
-                    relay = "wss://" + relay
-                }
-                
-                if relay.hasSuffix("/") {
-                    relay.removeLast();
-                }
-                
-                guard let url = URL(string: relay) else {
-                    return
-                }
-                
-                guard let ev = state.contacts.event else {
-                    return
-                }
-                
-                guard let privkey = state.keypair.privkey else {
-                    return
-                }
-                
-                let info = RelayInfo.rw
-                
-                guard (try? state.pool.add_relay(url, info: info)) != nil else {
-                    return
-                }
-                
-                state.pool.connect(to: [relay])
-                
-                guard let new_ev = add_relay(ev: ev, privkey: privkey, current_relays: state.pool.descriptors, relay: relay, info: info) else {
-                    return
-                }
-                
-                process_contact_event(state: state, ev: ev)
-                
-                state.pool.send(.event(new_ev))
-            }
-        }
     }
     
     var MainContent: some View {
         Form {
             Section {
-                List(Array(relays), id: \.url) { relay in
-                    RelayView(state: state, relay: relay.url.absoluteString)
-                }
+                AddRelayView(relay: $new_relay)
             } header: {
                 HStack {
-                    Text("Relays", comment: "Header text for relay server list for configuration.")
-                    Spacer()
-                    Button(action: { show_add_relay = true }) {
-                        Image(systemName: "plus")
-                            .foregroundColor(.accentColor)
+                    Text(NSLocalizedString("Connect To Relay", comment: "Label for section for adding a relay server."))
+                        .font(.system(size: 18, weight: .heavy))
+                        .padding(.bottom, 5)
+                }
+            } footer: {
+                VStack {
+                    HStack {
+                        Spacer()
+                        if(!new_relay.isEmpty) {
+                            Button(NSLocalizedString("Cancel", comment: "Button to cancel out of view adding user inputted relay.")) {
+                                new_relay = ""
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            }
+                            .font(.system(size: 14, weight: .bold))
+                            .frame(width: 80, height: 30)
+                            .foregroundColor(.white)
+                            .background(LINEAR_GRADIENT)
+                            .clipShape(Capsule())
+                            .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 0))
+                            
+                            Button(NSLocalizedString("Add", comment: "Button to confirm adding user inputted relay.")) {
+
+                                if new_relay.starts(with: "wss://") == false && new_relay.starts(with: "ws://") == false {
+                                    new_relay = "wss://" + new_relay
+                                }
+                                
+                                if new_relay.hasSuffix("/") {
+                                    new_relay.removeLast();
+                                }
+                                
+                                guard let url = URL(string: new_relay) else {
+                                    return
+                                }
+                                
+                                guard let ev = state.contacts.event else {
+                                    return
+                                }
+                                
+                                guard let privkey = state.keypair.privkey else {
+                                    return
+                                }
+                                
+                                let info = RelayInfo.rw
+                                
+                                guard (try? state.pool.add_relay(url, info: info)) != nil else {
+                                    return
+                                }
+                                
+                                state.pool.connect(to: [new_relay])
+                                
+                                guard let new_ev = add_relay(ev: ev, privkey: privkey, current_relays: state.pool.descriptors, relay: new_relay, info: info) else {
+                                    return
+                                }
+                                
+                                process_contact_event(state: state, ev: ev)
+                                
+                                state.pool.send(.event(new_ev))
+                                
+                                new_relay = ""
+                                
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            }
+                            .font(.system(size: 14, weight: .bold))
+                            .frame(width: 80, height: 30)
+                            .foregroundColor(.white)
+                            .background(LINEAR_GRADIENT)
+                            .clipShape(Capsule())
+                            .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 0))
+                        }
                     }
                 }
             }
             
+            Section {
+                List(Array(relays), id: \.url) { relay in
+                    RelayView(state: state, relay: relay.url.absoluteString, showActionButtons: $showActionButtons)
+                }
+            } header: {
+                HStack {
+                    Text(NSLocalizedString("Connected Relays", comment: "Section title for relay servers that are connected."))
+                        .font(.system(size: 18, weight: .heavy))
+                        .padding(.bottom, 5)
+                }
+            }
+            
             if recommended.count > 0 {
-                Section(NSLocalizedString("Recommended Relays", comment: "Section title for recommend relay servers that could be added as part of configuration")) {
+                Section {
                     List(recommended, id: \.url) { r in
-                        RecommendedRelayView(damus: state, relay: r.url.absoluteString)
+                        RecommendedRelayView(damus: state, relay: r.url.absoluteString, showActionButtons: $showActionButtons)
+                    }
+                } header: {
+                    Text(NSLocalizedString("Recommended Relays", comment: "Section title for recommend relay servers that could be added as part of configuration"))
+                        .font(.system(size: 18, weight: .heavy))
+                        .padding(.bottom, 5)
+                }
+            }
+        }
+        .navigationTitle(NSLocalizedString("Relays", comment: "Title of relays view"))
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            if state.keypair.privkey != nil {
+                if showActionButtons {
+                    Button("Done") {
+                        showActionButtons.toggle()
+                    }
+                } else {
+                    Button("Edit") {
+                        showActionButtons.toggle()
                     }
                 }
             }

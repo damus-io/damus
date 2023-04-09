@@ -15,23 +15,22 @@ enum ImageUploadResult {
     case failed(Error?)
 }
 
-fileprivate func create_upload_body(imageDataKey: Data, boundary: String, imageUploader: ImageUploader) -> Data {
+fileprivate func create_upload_body(mediaData: Data, boundary: String, mediaUploader: MediaUploader, mediaToUpload: MediaUpload) -> Data {
         let body = NSMutableData();
-        let contentType = "image/jpg"
+        let contentType = mediaToUpload.is_image ? "image/jpg" : "video/mp4"
         body.appendString(string: "Content-Type: multipart/form-data; boundary=\(boundary)\r\n\r\n")
         body.appendString(string: "--\(boundary)\r\n")
-        body.appendString(string: "Content-Disposition: form-data; name=\(imageUploader.nameParam); filename=\"damus_generic_filename.jpg\"\r\n")
+        body.appendString(string: "Content-Disposition: form-data; name=\(mediaUploader.nameParam); filename=\(mediaToUpload.genericFileName)\r\n")
         body.appendString(string: "Content-Type: \(contentType)\r\n\r\n")
-        body.append(imageDataKey as Data)
+        body.append(mediaData as Data)
         body.appendString(string: "\r\n")
         body.appendString(string: "--\(boundary)--\r\n")
         return body as Data
     }
 
-
-func create_image_upload_request(imageToUpload: UIImage, imageUploader: ImageUploader, progress: URLSessionTaskDelegate) async -> ImageUploadResult {
-    
-    guard let url = URL(string: imageUploader.postAPI) else {
+func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploader, progress: URLSessionTaskDelegate) async -> ImageUploadResult {
+    var mediaData: Data?
+    guard let url = URL(string: mediaUploader.postAPI) else {
         return .failed(nil)
     }
     
@@ -40,13 +39,26 @@ func create_image_upload_request(imageToUpload: UIImage, imageUploader: ImageUpl
     let boundary = "Boundary-\(UUID().description)"
     request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
     
-    // otherwise convert to jpg
-    guard let jpegData = imageToUpload.jpegData(compressionQuality: 0.8) else {
-        // somehow failed, just return original
+    switch mediaToUpload {
+    case .image(let url):
+        do {
+            mediaData = try Data(contentsOf: url)
+        } catch {
+            return .failed(error)
+        }
+    case .video(let url):
+        do {
+            mediaData = try Data(contentsOf: url)
+        } catch {
+            return .failed(error)
+        }
+    }
+
+    guard let mediaData else {
         return .failed(nil)
     }
-    
-    request.httpBody = create_upload_body(imageDataKey: jpegData, boundary: boundary, imageUploader: imageUploader)
+
+    request.httpBody = create_upload_body(mediaData: mediaData, boundary: boundary, mediaUploader: mediaUploader, mediaToUpload: mediaToUpload)
     
     do {
         let (data, _) = try await URLSession.shared.data(for: request, delegate: progress)
@@ -56,8 +68,8 @@ func create_image_upload_request(imageToUpload: UIImage, imageUploader: ImageUpl
             return .failed(nil)
         }
         
-        guard let url = imageUploader.getImageURL(from: responseString) else {
-            print("Upload failed getting image url")
+        guard let url = mediaUploader.getMediaURL(from: responseString, mediaIsImage: mediaToUpload.is_image) else {
+            print("Upload failed getting media url")
             return .failed(nil)
         }
         
@@ -65,67 +77,6 @@ func create_image_upload_request(imageToUpload: UIImage, imageUploader: ImageUpl
         
     } catch {
         return .failed(error)
-    }
-    
-}
-
-extension PostView {
-    struct ImagePicker: UIViewControllerRepresentable {
-
-        @Environment(\.presentationMode)
-        private var presentationMode
-
-        let sourceType: UIImagePickerController.SourceType
-        let onImagePicked: (UIImage) -> Void
-
-        final class Coordinator: NSObject,
-                                 UINavigationControllerDelegate,
-                                 UIImagePickerControllerDelegate {
-
-            @Binding
-            private var presentationMode: PresentationMode
-            private let sourceType: UIImagePickerController.SourceType
-            private let onImagePicked: (UIImage) -> Void
-
-            init(presentationMode: Binding<PresentationMode>,
-                 sourceType: UIImagePickerController.SourceType,
-                 onImagePicked: @escaping (UIImage) -> Void) {
-                _presentationMode = presentationMode
-                self.sourceType = sourceType
-                self.onImagePicked = onImagePicked
-            }
-
-            func imagePickerController(_ picker: UIImagePickerController,
-                                       didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-                let uiImage = info[UIImagePickerController.InfoKey.originalImage] as! UIImage
-                onImagePicked(uiImage)
-                presentationMode.dismiss()
-
-            }
-
-            func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-                presentationMode.dismiss()
-            }
-
-        }
-
-        func makeCoordinator() -> Coordinator {
-            return Coordinator(presentationMode: presentationMode,
-                               sourceType: sourceType,
-                               onImagePicked: onImagePicked)
-        }
-
-        func makeUIViewController(context: UIViewControllerRepresentableContext<ImagePicker>) -> UIImagePickerController {
-            let picker = UIImagePickerController()
-            picker.sourceType = sourceType
-            picker.delegate = context.coordinator
-            return picker
-        }
-
-        func updateUIViewController(_ uiViewController: UIImagePickerController,
-                                    context: UIViewControllerRepresentableContext<ImagePicker>) {
-
-        }
     }
 }
 
@@ -138,7 +89,7 @@ extension NSMutableData {
     }
 }
 
-enum ImageUploader: String, CaseIterable, Identifiable {
+enum MediaUploader: String, CaseIterable, Identifiable {
     var id: String { self.rawValue }
     case nostrBuild
     case nostrImg
@@ -152,12 +103,12 @@ enum ImageUploader: String, CaseIterable, Identifiable {
         }
     }
 
-    var displayImageUploaderName: String {
+    var supportsVideo: Bool {
         switch self {
         case .nostrBuild:
-            return "NostrBuild"
+            return true
         case .nostrImg:
-            return "NostrImg"
+            return false
         }
     }
 
@@ -171,9 +122,9 @@ enum ImageUploader: String, CaseIterable, Identifiable {
     var model: Model {
         switch self {
         case .nostrBuild:
-            return .init(index: -1, tag: "nostrBuild", displayName: NSLocalizedString("NostrBuild", comment: "Dropdown option label for system default for NostrBuild image uploader."))
+            return .init(index: -1, tag: "nostrBuild", displayName: "nostr.build")
         case .nostrImg:
-            return .init(index: 0, tag: "nostrImg", displayName: NSLocalizedString("NostrImg", comment: "Dropdown option label for system default for NostrImg image uploader."))
+            return .init(index: 0, tag: "nostrImg", displayName: "nostrimg.com")
         }
     }
 
@@ -187,7 +138,7 @@ enum ImageUploader: String, CaseIterable, Identifiable {
         }
     }
 
-    func getImageURL(from responseString: String) -> String? {
+    func getMediaURL(from responseString: String, mediaIsImage: Bool) -> String? {
         switch self {
         case .nostrBuild:
             guard let startIndex = responseString.range(of: "nostr.build_")?.lowerBound else {
@@ -199,7 +150,7 @@ enum ImageUploader: String, CaseIterable, Identifiable {
                 return nil
             }
             let nostrBuildImageName = responseString[startIndex..<endIndex]
-            let nostrBuildURL = "https://nostr.build/i/\(nostrBuildImageName)"
+            let nostrBuildURL = mediaIsImage ? "https://nostr.build/i/\(nostrBuildImageName)" : "https://nostr.build/av/\(nostrBuildImageName)"
             return nostrBuildURL
                 
         case .nostrImg:

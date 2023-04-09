@@ -11,9 +11,12 @@ struct RelayType: View {
     let is_paid: Bool
     
     var body: some View {
-
-        Image(systemName: is_paid ? "dollarsign.circle.fill" : "globe.americas.fill")
-            .foregroundColor(is_paid ? Color("DamusGreen") : .gray)
+        if is_paid {
+            Image("bitcoin-logo")
+        } else {
+            Image(systemName: "globe.americas.fill")
+                .foregroundColor(.gray)
+        }
     }
 }
 

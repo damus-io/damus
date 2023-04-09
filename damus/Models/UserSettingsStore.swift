@@ -50,10 +50,10 @@ func get_default_wallet(_ pubkey: String) -> Wallet {
     }
 }
 
-func get_image_uploader(_ pubkey: String) -> ImageUploader {
-    if let defaultImageUploader = UserDefaults.standard.string(forKey: "default_image_uploader"),
-       let defaultImageUploader = ImageUploader(rawValue: defaultImageUploader) {
-        return defaultImageUploader
+func get_media_uploader(_ pubkey: String) -> MediaUploader {
+    if let defaultMediaUploader = UserDefaults.standard.string(forKey: "default_media_uploader"),
+       let defaultMediaUploader = MediaUploader(rawValue: defaultMediaUploader) {
+        return defaultMediaUploader
     } else {
         return .nostrBuild
     }
@@ -98,9 +98,9 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
-    @Published var default_image_uploader: ImageUploader {
+    @Published var default_media_uploader: MediaUploader {
         didSet {
-            UserDefaults.standard.set(default_image_uploader.rawValue, forKey: "default_image_uploader")
+            UserDefaults.standard.set(default_media_uploader.rawValue, forKey: "default_media_uploader")
         }
     }
     
@@ -125,6 +125,72 @@ class UserSettingsStore: ObservableObject {
     @Published var zap_vibration: Bool {
         didSet {
             UserDefaults.standard.set(zap_vibration, forKey: "zap_vibration")
+        }
+    }
+
+    @Published var zap_notification: Bool {
+        didSet {
+            UserDefaults.standard.set(zap_notification, forKey: "zap_notification")
+        }
+    }
+
+    @Published var mention_notification: Bool {
+        didSet {
+            UserDefaults.standard.set(mention_notification, forKey: "mention_notification")
+        }
+    }
+
+    @Published var repost_notification: Bool {
+        didSet {
+            UserDefaults.standard.set(repost_notification, forKey: "repost_notification")
+        }
+    }
+
+    @Published var dm_notification: Bool {
+        didSet {
+            UserDefaults.standard.set(dm_notification, forKey: "dm_notification")
+        }
+    }
+
+    @Published var like_notification: Bool {
+        didSet {
+            UserDefaults.standard.set(like_notification, forKey: "like_notification")
+        }
+    }
+
+    @Published var notification_only_from_following: Bool {
+        didSet {
+            UserDefaults.standard.set(notification_only_from_following, forKey: "notification_only_from_following")
+        }
+    }
+    
+    @Published var translate_dms: Bool {
+        didSet {
+            UserDefaults.standard.set(translate_dms, forKey: "translate_dms")
+        }
+    }
+
+    @Published var truncate_timeline_text: Bool {
+        didSet {
+            UserDefaults.standard.set(truncate_timeline_text, forKey: "truncate_timeline_text")
+        }
+    }
+    
+    @Published var truncate_mention_text: Bool {
+        didSet {
+            UserDefaults.standard.set(truncate_mention_text, forKey: "truncate_mention_text")
+        }
+    }
+
+    @Published var auto_translate: Bool {
+        didSet {
+            UserDefaults.standard.set(auto_translate, forKey: "auto_translate")
+        }
+    }
+
+    @Published var show_only_preferred_languages: Bool {
+        didSet {
+            UserDefaults.standard.set(show_only_preferred_languages, forKey: "show_only_preferred_languages")
         }
     }
 
@@ -205,11 +271,22 @@ class UserSettingsStore: ObservableObject {
         show_wallet_selector = should_show_wallet_selector(pubkey)
         always_show_images = UserDefaults.standard.object(forKey: "always_show_images") as? Bool ?? false
 
-        default_image_uploader = get_image_uploader(pubkey)
+        default_media_uploader = get_media_uploader(pubkey)
 
         left_handed = UserDefaults.standard.object(forKey: "left_handed") as? Bool ?? false
         zap_vibration = UserDefaults.standard.object(forKey: "zap_vibration") as? Bool ?? false
+        zap_notification = UserDefaults.standard.object(forKey: "zap_notification") as? Bool ?? true
+        mention_notification = UserDefaults.standard.object(forKey: "mention_notification") as? Bool ?? true
+        repost_notification = UserDefaults.standard.object(forKey: "repost_notification") as? Bool ?? true
+        like_notification = UserDefaults.standard.object(forKey: "like_notification") as? Bool ?? true
+        dm_notification = UserDefaults.standard.object(forKey: "dm_notification") as? Bool ?? true
+        notification_only_from_following = UserDefaults.standard.object(forKey: "notification_only_from_following") as? Bool ?? false
+        translate_dms = UserDefaults.standard.object(forKey: "translate_dms") as? Bool ?? false
+        truncate_timeline_text = UserDefaults.standard.object(forKey: "truncate_timeline_text") as? Bool ?? false
+        truncate_mention_text = UserDefaults.standard.object(forKey: "truncate_mention_text") as? Bool ?? false
         disable_animation = should_disable_image_animation()
+        auto_translate = UserDefaults.standard.object(forKey: "auto_translate") as? Bool ?? true
+        show_only_preferred_languages = UserDefaults.standard.object(forKey: "show_only_preferred_languages") as? Bool ?? false
 
         // Note from @tyiu:
         // Default translation service is disabled by default for now until we gain some confidence that it is working well in production.

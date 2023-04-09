@@ -15,11 +15,11 @@
 			<key>one</key>
 			<string>... %d inna notatka ...</string>
 			<key>few</key>
-			<string>... %d other notes ...</string>
-			<key>many</key>
-			<string>... %d other notes ...</string>
-			<key>other</key>
 			<string>... %d inne notatki ...</string>
+			<key>many</key>
+			<string>... %d innych notatek ...</string>
+			<key>other</key>
+			<string>... %d innych notatek ...</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -35,11 +35,11 @@
 			<key>one</key>
 			<string>Obserwujący</string>
 			<key>few</key>
-			<string>Followers</string>
+			<string>Obserwujących</string>
 			<key>many</key>
-			<string>Followers</string>
+			<string>Obserwujących</string>
 			<key>other</key>
-			<string>Obserwujący</string>
+			<string>Obserwujących</string>
 		</dict>
 	</dict>
 	<key>following_count</key>
@@ -53,13 +53,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Obserwujący</string>
+			<string>Obserwuje</string>
 			<key>few</key>
-			<string>Obserwujących</string>
+			<string>Obserwuje</string>
 			<key>many</key>
-			<string>Obserwujących</string>
+			<string>Obserwuje</string>
 			<key>other</key>
-			<string>Obserwujących</string>
+			<string>Obserwuje</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -135,11 +135,11 @@
 			<key>one</key>
 			<string>Reakcja</string>
 			<key>few</key>
-			<string>Reactions</string>
-			<key>many</key>
-			<string>Reactions</string>
-			<key>other</key>
 			<string>Reakcje</string>
+			<key>many</key>
+			<string>Reakcji</string>
+			<key>other</key>
+			<string>Reakcji</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -155,9 +155,9 @@
 			<key>one</key>
 			<string>Przekaźnik</string>
 			<key>few</key>
-			<string>Relays</string>
+			<string>Przekaźniki</string>
 			<key>many</key>
-			<string>Relays</string>
+			<string>Przekaźników</string>
 			<key>other</key>
 			<string>Przekaźników</string>
 		</dict>
@@ -173,13 +173,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Replying to %2$@, %3$@ i %1$d innej osoba</string>
+			<string>W odpowiedzi do %2$@, %3$@ i %1$d innej osobie</string>
 			<key>few</key>
-			<string>Replying to %2$@, %3$@ i %1$d others</string>
+			<string>W odpowiedzi do %2$@, %3$@ i %1$d innych osób</string>
 			<key>many</key>
-			<string>Replying to %2$@, %3$@ i %1$d others</string>
+			<string>W odpowiedzi do %2$@, %3$@ i %1$d innych osób</string>
 			<key>other</key>
-			<string>Replying to %2$@, %3$@ i %1$d innym osobom</string>
+			<string>W odpowiedzi do %2$@, %3$@ i %1$d innych osób</string>
 		</dict>
 	</dict>
 	<key>reposted_tagged_in_3</key>
@@ -195,7 +195,7 @@
 			<key>one</key>
 			<string>%2$@ i %1$d inna osoba opublikowała wiadomość, w której jesteś oznaczony</string>
 			<key>few</key>
-			<string>%2$@ i %1$d inne osobe opublikowały wiadomość, w której jesteś oznaczony</string>
+			<string>%2$@ i %1$d inne osoby opublikowały wiadomość, w której jesteś oznaczony</string>
 			<key>many</key>
 			<string>%2$@ i %1$d innych osób opublikowało wiadomość, w której jesteś oznaczony</string>
 			<key>other</key>
@@ -255,11 +255,11 @@
 			<key>one</key>
 			<string>Podany dalej</string>
 			<key>few</key>
-			<string>Reposts</string>
-			<key>many</key>
-			<string>Reposts</string>
-			<key>other</key>
 			<string>Podane dalej</string>
+			<key>many</key>
+			<string>Podanych dalej</string>
+			<key>other</key>
+			<string>Podanych dalej</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -275,11 +275,51 @@
 			<key>one</key>
 			<string>%2$@ sat</string>
 			<key>few</key>
-			<string>%2$@ sats</string>
+			<string>%2$@ satsy</string>
 			<key>many</key>
-			<string>%2$@ sats</string>
+			<string>%2$@ satsów</string>
 			<key>other</key>
-			<string>%2$@ satoszy</string>
+			<string>%2$@ satsa</string>
+		</dict>
+	</dict>
+	<key>zap_notification_no_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>Otrzymano %2$@ sat od %3$@</string>
+			<key>few</key>
+			<string>Otrzymano %2$@ satsy od %3$@</string>
+			<key>many</key>
+			<string>Otrzymano %2$@ satsów od %3$@</string>
+			<key>other</key>
+			<string>Otrzymano %2$@ satsa od %3$@</string>
+		</dict>
+	</dict>
+	<key>zap_notification_with_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>Otrzymano %2$@ sat od %3$@: "%4$@"</string>
+			<key>few</key>
+			<string>Otrzymano %2$@ satsy od %3$@: "%4$@"</string>
+			<key>many</key>
+			<string>Otrzymano %2$@ satsów od %3$@: "%4$@"</string>
+			<key>other</key>
+			<string>Otrzymano %2$@ satsa od %3$@: "%4$@"</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -355,11 +395,11 @@
 			<key>one</key>
 			<string>Zap</string>
 			<key>few</key>
-			<string>Zaps</string>
+			<string>Zapy</string>
 			<key>many</key>
-			<string>Zaps</string>
-			<key>other</key>
 			<string>Zapów</string>
+			<key>other</key>
+			<string>Zapa</string>
 		</dict>
 	</dict>
 </dict>

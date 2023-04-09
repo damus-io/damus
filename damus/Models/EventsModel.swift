@@ -31,9 +31,9 @@ class EventsModel: ObservableObject {
     }
     
     func subscribe() {
-        state.pool.subscribe_to(sub_id: sub_id,
-                                filters: [get_filter()],
-                                handler: handle_nostr_event)
+        state.pool.subscribe(sub_id: sub_id,
+                             filters: [get_filter()],
+                             handler: handle_nostr_event)
     }
     
     func unsubscribe() {
@@ -63,6 +63,8 @@ class EventsModel: ObservableObject {
         case .event(_, let ev):
             handle_event(relay_id: relay_id, ev: ev)
         case .notice(_):
+            break
+        case .ok:
             break
         case .eose(_):
             load_profiles(profiles_subid: profiles_id, relay_id: relay_id, load: .from_events(events), damus_state: state)

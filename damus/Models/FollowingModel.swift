@@ -41,7 +41,7 @@ class FollowingModel {
         }
         let filters = [filter]
         print_filters(relay_id: "following", filters: [filters])
-        self.damus_state.pool.subscribe_to(sub_id: sub_id, filters: filters, handler: handle_event)
+        self.damus_state.pool.subscribe(sub_id: sub_id, filters: filters, handler: handle_event)
     }
     
     func unsubscribe() {
@@ -58,6 +58,8 @@ class FollowingModel {
             break
         case .nostr_event(let nev):
             switch nev {
+            case .ok:
+                break
             case .event(_, let ev):
                 if ev.kind == 0 {
                     process_metadata_event(our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)

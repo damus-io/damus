@@ -31,166 +31,43 @@ struct ShareSheet: UIViewControllerRepresentable {
     }
 }
 
-struct ImageContextMenuModifier: ViewModifier {
-    let url: URL?
-    let image: UIImage?
-    @Binding var showShareSheet: Bool
-    
-    func body(content: Content) -> some View {
-        return content.contextMenu {
-            Button {
-                UIPasteboard.general.url = url
-            } label: {
-                Label(NSLocalizedString("Copy Image URL", comment: "Context menu option to copy the URL of an image into clipboard."), systemImage: "doc.on.doc")
-            }
-            if let someImage = image {
-                Button {
-                    UIPasteboard.general.image = someImage
-                } label: {
-                    Label(NSLocalizedString("Copy Image", comment: "Context menu option to copy an image into clipboard."), systemImage: "photo.on.rectangle")
-                }
-                Button {
-                    UIImageWriteToSavedPhotosAlbum(someImage, nil, nil, nil)
-                } label: {
-                    Label(NSLocalizedString("Save Image", comment: "Context menu option to save an image."), systemImage: "square.and.arrow.down")
-                }
-            }
-            Button {
-                showShareSheet = true
-            } label: {
-                Label(NSLocalizedString("Share", comment: "Button to share an image."), systemImage: "square.and.arrow.up")
-            }
-        }
-    }
+
+enum ImageShape {
+    case square
+    case landscape
+    case portrait
+    case unknown
 }
 
-private struct ImageContainerView: View {
-    
-    let url: URL?
-    
-    @State private var image: UIImage?
-    @State private var showShareSheet = false
-    
-    private struct ImageHandler: ImageModifier {
-        @Binding var handler: UIImage?
-        
-        func modify(_ image: UIImage) -> UIImage {
-            handler = image
-            return image
-        }
-    }
-    
-    var body: some View {
-        
-        KFAnimatedImage(url)
-            .imageContext(.note)
-            .configure { view in
-                view.framePreloadCount = 3
-            }
-            .imageModifier(ImageHandler(handler: $image))
-            .clipped()
-            .modifier(ImageContextMenuModifier(url: url, image: image, showShareSheet: $showShareSheet))
-            .sheet(isPresented: $showShareSheet) {
-                ShareSheet(activityItems: [url])
-            }
-    }
-}
-
-struct ImageView: View {
-    
-    let urls: [URL?]
-    
-    @Environment(\.presentationMode) var presentationMode
-    
-    @State private var selectedIndex = 0
-    @State var showMenu = true
-    
-    var navBarView: some View {
-        VStack {
-            HStack {
-                Text(urls[selectedIndex]?.lastPathComponent ?? "")
-                    .bold()
-                
-                Spacer()
-                
-                Button(action: {
-                    presentationMode.wrappedValue.dismiss()
-                }, label: {
-                    Image(systemName: "xmark")
-                })
-            }
-            .padding()
-            
-            Divider()
-                .ignoresSafeArea()
-        }
-        .background(.regularMaterial)
-    }
-    
-    var tabViewIndicator: some View {
-        HStack(spacing: 10) {
-            ForEach(urls.indices, id: \.self) { index in
-                Capsule()
-                    .fill(index == selectedIndex ? Color(UIColor.label) : Color.secondary)
-                    .frame(width: 7, height: 7)
-            }
-        }
-        .padding()
-        .background(.regularMaterial)
-        .clipShape(Capsule())
-    }
-    
-    var body: some View {
-        ZStack {
-            Color(.systemBackground)
-                .ignoresSafeArea()
-            
-            TabView(selection: $selectedIndex) {
-                ForEach(urls.indices, id: \.self) { index in
-                    ZoomableScrollView {
-                        ImageContainerView(url: urls[index])
-                            .aspectRatio(contentMode: .fit)
-                            .padding(.top, Theme.safeAreaInsets?.top)
-                            .padding(.bottom, Theme.safeAreaInsets?.bottom)
-                    }
-                    .modifier(SwipeToDismissModifier(minDistance: 50, onDismiss: {
-                        presentationMode.wrappedValue.dismiss()
-                    }))
-                    .ignoresSafeArea()
-                    .tag(index)
-                }
-            }
-            .ignoresSafeArea()
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            .gesture(TapGesture(count: 2).onEnded {
-                // Prevents menu from hiding on double tap
-            })
-            .gesture(TapGesture(count: 1).onEnded {
-                showMenu.toggle()
-            })
-            .overlay(
-                VStack {
-                    if showMenu {
-                        navBarView
-                        Spacer()
-                        
-                        if (urls.count > 1) {
-                            tabViewIndicator
-                        }
-                    }
-                }
-                .animation(.easeInOut, value: showMenu)
-                .padding(.bottom, Theme.safeAreaInsets?.bottom)
-            )
-        }
-    }
-}
 
 struct ImageCarousel: View {
     var urls: [URL]
     
-    @State var open_sheet: Bool = false
-    @State var current_url: URL? = nil
+    let evid: String
+    let previews: PreviewCache
+    
+    @State private var open_sheet: Bool = false
+    @State private var current_url: URL? = nil
+    @State private var image_fill: ImageFill? = nil
+    @State private var fillHeight: CGFloat = 350
+    @State private var maxHeight: CGFloat = UIScreen.main.bounds.height * 0.85
+    
+    init(previews: PreviewCache, evid: String, urls: [URL]) {
+        _open_sheet = State(initialValue: false)
+        _current_url = State(initialValue: nil)
+        _image_fill = State(initialValue: previews.lookup_image_meta(evid))
+        self.urls = urls
+        self.evid = evid
+        self.previews = previews
+    }
+    
+    var filling: Bool {
+        image_fill?.filling == true
+    }
+    
+    var height: CGFloat {
+        image_fill?.height ?? 0
+    }
     
     var body: some View {
         TabView {
@@ -198,31 +75,32 @@ struct ImageCarousel: View {
                 Rectangle()
                     .foregroundColor(Color.clear)
                     .overlay {
-                        KFAnimatedImage(url)
-                            .imageContext(.note)
-                            .cancelOnDisappear(true)
-                            .configure { view in
-                                view.framePreloadCount = 3
-                            }
-                            .aspectRatio(contentMode: .fit)
-                            .cornerRadius(10)
-                            .tabItem {
-                                Text(url.absoluteString)
-                            }
-                            .id(url.absoluteString)
-//                            .contextMenu {
-//                                Button(NSLocalizedString("Copy Image", comment: "Context menu option to copy an image to clipboard.")) {
-//                                    UIPasteboard.general.string = url.absoluteString
-//                                }
-//                            }
+                        GeometryReader { geo in
+                            KFAnimatedImage(url)
+                                .callbackQueue(.dispatch(.global(qos:.background)))
+                                .backgroundDecode(true)
+                                .imageContext(.note)
+                                .cancelOnDisappear(true)
+                                .configure { view in
+                                    view.framePreloadCount = 3
+                                }
+                                .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
+                                    previews.cache_image_meta(evid: evid, image_fill: fill)
+                                    image_fill = fill
+                                }
+                                .aspectRatio(contentMode: filling ? .fill : .fit)
+                                .tabItem {
+                                    Text(url.absoluteString)
+                                }
+                                .id(url.absoluteString)
+                        }
                     }
             }
         }
         .fullScreenCover(isPresented: $open_sheet) {
             ImageView(urls: urls)
         }
-        .frame(height: 200)
-        .clipped()
+        .frame(height: height)
         .onTapGesture {
             open_sheet = true
         }
@@ -230,8 +108,71 @@ struct ImageCarousel: View {
     }
 }
 
-struct ImageCarousel_Previews: PreviewProvider {
-    static var previews: some View {
-        ImageCarousel(urls: [URL(string: "https://jb55.com/red-me.jpg")!,URL(string: "https://jb55.com/red-me.jpg")!])
+// MARK: - Image Modifier
+extension KFOptionSetter {
+    /// Sets a block to get image size
+    ///
+    /// - Parameter block: The block which is used to read the image object.
+    /// - Returns: `Self` value after read size
+    public func imageFill(for size: CGSize, max: CGFloat, fill: CGFloat, block: @escaping (ImageFill) throws -> Void) -> Self {
+        let modifier = AnyImageModifier { image -> KFCrossPlatformImage in
+            let img_size = image.size
+            let geo_size = size
+            let fill = ImageFill.calculate_image_fill(geo_size: geo_size,
+                                                      img_size: img_size,
+                                                      maxHeight: max,
+                                                      fillHeight: fill)
+            DispatchQueue.main.async { [block, fill] in
+                try? block(fill)
+            }
+            return image
+        }
+        options.imageModifier = modifier
+        return self
     }
 }
+
+
+public struct ImageFill {
+    let filling: Bool?
+    let height: CGFloat
+        
+    
+    static func determine_image_shape(_ size: CGSize) -> ImageShape {
+        guard size.height > 0 else {
+            return .unknown
+        }
+        let imageRatio = size.width / size.height
+        switch imageRatio {
+            case 1.0: return .square
+            case ..<1.0: return .portrait
+            case 1.0...: return .landscape
+            default: return .unknown
+        }
+    }
+    
+    static func calculate_image_fill(geo_size: CGSize, img_size: CGSize, maxHeight: CGFloat, fillHeight: CGFloat) -> ImageFill {
+        let shape = determine_image_shape(img_size)
+
+        let xfactor = geo_size.width / img_size.width
+        let scaled = img_size.height * xfactor
+        // calculate scaled image height
+        // set scale factor and constrain images to minimum 150
+        // and animations to scaled factor for dynamic size adjustment
+        switch shape {
+        case .portrait, .landscape:
+            let filling = scaled > maxHeight
+            let height = filling ? fillHeight : scaled
+            return ImageFill(filling: filling, height: height)
+        case .square, .unknown:
+            return ImageFill(filling: nil, height: scaled)
+        }
+    }
+}
+
+struct ImageCarousel_Previews: PreviewProvider {
+    static var previews: some View {
+        ImageCarousel(previews: test_damus_state().previews, evid: "evid", urls: [URL(string: "https://jb55.com/red-me.jpg")!,URL(string: "https://jb55.com/red-me.jpg")!])
+    }
+}
+

@@ -94,6 +94,14 @@ enum Block {
         return nil
     }
     
+    var is_note_mention: Bool {
+        guard case .mention(let mention) = self else {
+            return false
+        }
+        
+        return mention.type == .event
+    }
+    
     var is_mention: Bool {
         if case .mention = self {
             return true
@@ -274,8 +282,8 @@ func format_msats(_ msat: Int64, locale: Locale = Locale.current) -> String {
     let sats = NSNumber(value: (Double(msat) / 1000.0))
     let formattedSats = numberFormatter.string(from: sats) ?? sats.stringValue
 
-    let bundle = bundleForLocale(locale: locale)
-    return String(format: bundle.localizedString(forKey: "sats_count", value: nil, table: nil), locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats)
+    let format = localizedStringFormat(key: "sats_count", locale: locale)
+    return String(format: format, locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats)
 }
 
 func convert_invoice_block(_ b: invoice_block) -> Block? {

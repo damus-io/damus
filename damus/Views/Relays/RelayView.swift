@@ -11,32 +11,53 @@ struct RelayView: View {
     let state: DamusState
     let relay: String
     
+    @Binding var showActionButtons: Bool
+    
     var body: some View {
         Group {
             HStack {
-                RelayStatus(pool: state.pool, relay: relay)
-                RelayType(is_paid: state.relay_metadata.lookup(relay_id: relay)?.is_paid ?? false)
-                if let meta = state.relay_metadata.lookup(relay_id: relay) {
-                    NavigationLink {
-                        RelayDetailView(state: state, relay: relay, nip11: meta)
-                    } label: {
-                        Text(relay)
+                if let privkey = state.keypair.privkey {
+                    if showActionButtons {
+                        RemoveButton(privkey: privkey, showText: false)
                     }
+                    else {
+                        RelayStatus(pool: state.pool, relay: relay)
+                    }
+                }
+                
+                RelayType(is_paid: state.relay_metadata.lookup(relay_id: relay)?.is_paid ?? false)
+                
+                if let meta = state.relay_metadata.lookup(relay_id: relay) {
+                    Text(relay)
+                        .background(
+                            NavigationLink("", destination: RelayDetailView(state: state, relay: relay, nip11: meta)).opacity(0.0)
+                                .disabled(showActionButtons)
+                        )
+                    Spacer()
+
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 20, weight: .regular))
+                        .foregroundColor(Color.accentColor)
                 } else {
                     Text(relay)
+                    Spacer()
+                    Image(systemName: "questionmark.circle")
+                        .font(.system(size: 20, weight: .regular))
+                        .foregroundColor(.gray)
                 }
             }
         }
         .swipeActions {
             if let privkey = state.keypair.privkey {
-                RemoveAction(privkey: privkey)
+                RemoveButton(privkey: privkey, showText: false)
+                    .tint(.red)
             }
         }
         .contextMenu {
             CopyAction(relay: relay)
             
             if let privkey = state.keypair.privkey {
-                RemoveAction(privkey: privkey)
+                RemoveButton(privkey: privkey, showText: true)
             }
         }
     }
@@ -48,9 +69,9 @@ struct RelayView: View {
             Label(NSLocalizedString("Copy", comment: "Button to copy a relay server address."), systemImage: "doc.on.doc")
         }
     }
-    
-    func RemoveAction(privkey: String) -> some View {
-        Button {
+        
+    func RemoveButton(privkey: String, showText: Bool) -> some View {
+        Button(action: {
             guard let ev = state.contacts.event else {
                 return
             }
@@ -61,16 +82,21 @@ struct RelayView: View {
             }
             
             process_contact_event(state: state, ev: new_ev)
-            state.pool.send(.event(new_ev))
-        } label: {
-            Label(NSLocalizedString("Delete", comment: "Button to delete a relay server that the user connects to."), systemImage: "trash")
+            state.postbox.send(new_ev)
+        }) {
+            if showText {
+                Text(NSLocalizedString("Disconnect", comment: "Button to disconnect from a relay server."))
+            }
+            Image(systemName: "minus.circle.fill")
+                .font(.system(size: 20, weight: .medium))
+                .foregroundColor(.red)
+                .padding(.leading, 5)
         }
-        .tint(.red)
     }
 }
 
 struct RelayView_Previews: PreviewProvider {
     static var previews: some View {
-        RelayView(state: test_damus_state(), relay: "wss://relay.damus.io")
+        RelayView(state: test_damus_state(), relay: "wss://relay.damus.io", showActionButtons: .constant(false))
     }
 }

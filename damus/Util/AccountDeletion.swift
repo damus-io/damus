@@ -9,7 +9,7 @@ import Foundation
 
 
 func created_deleted_account_profile(keypair: FullKeypair) -> NostrEvent {
-    var profile = Profile()
+    let profile = Profile()
     profile.deleted = true
     profile.about = "account deleted"
     profile.name = "nobody"
