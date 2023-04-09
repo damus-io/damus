@@ -7,11 +7,34 @@
 
 import SwiftUI
 
+struct UserViewRow: View {
+    let damus_state: DamusState
+    let pubkey: String
+    
+    @State var navigating: Bool = false
+    
+    var body: some View {
+        let dest = ProfileView(damus_state: damus_state, pubkey: pubkey)
+        
+        UserView(damus_state: damus_state, pubkey: pubkey)
+            .contentShape(Rectangle())
+            .background(
+                NavigationLink(destination: dest, isActive: $navigating) {
+                    EmptyView()
+                }
+            )
+            .onTapGesture {
+                navigating = true
+            }
+    }
+}
+
 struct UserView: View {
     let damus_state: DamusState
     let pubkey: String
     
     var body: some View {
+        
         VStack {
             HStack {
                 ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
@@ -28,7 +51,6 @@ struct UserView: View {
                 
                 Spacer()
             }
-            Spacer()
         }
     }
 }
