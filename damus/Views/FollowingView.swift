@@ -66,7 +66,7 @@ struct FollowingView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading) {
-                ForEach(following.contacts, id: \.self) { pk in
+                ForEach(following.contacts.reversed(), id: \.self) { pk in
                     FollowUserView(target: .pubkey(pk), damus_state: damus_state)
                 }
             }
