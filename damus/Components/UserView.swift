@@ -7,27 +7,51 @@
 
 import SwiftUI
 
+struct UserViewRow: View {
+    let damus_state: DamusState
+    let pubkey: String
+    
+    @State var navigating: Bool = false
+    
+    var body: some View {
+        let dest = ProfileView(damus_state: damus_state, pubkey: pubkey)
+        
+        UserView(damus_state: damus_state, pubkey: pubkey)
+            .contentShape(Rectangle())
+            .background(
+                NavigationLink(destination: dest, isActive: $navigating) {
+                    EmptyView()
+                }
+            )
+            .onTapGesture {
+                navigating = true
+            }
+    }
+}
+
 struct UserView: View {
     let damus_state: DamusState
     let pubkey: String
     
     var body: some View {
-        NavigationLink(destination: ProfileView(damus_state: damus_state, pubkey: pubkey)) {
-            ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
         
-            VStack(alignment: .leading) {
-                let profile = damus_state.profiles.lookup(id: pubkey)
-                ProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_friend_confirmed: false, show_nip5_domain: false)
-                if let about = profile?.about {
-                    Text(about)
-                        .lineLimit(3)
-                        .font(.footnote)
-                }
-            }
+        VStack {
+            HStack {
+                ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
             
-            Spacer()
+                VStack(alignment: .leading) {
+                    let profile = damus_state.profiles.lookup(id: pubkey)
+                    ProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_friend_confirmed: false, show_nip5_domain: false)
+                    if let about = profile?.about {
+                        Text(about)
+                            .lineLimit(3)
+                            .font(.footnote)
+                    }
+                }
+                
+                Spacer()
+            }
         }
-        .buttonStyle(PlainButtonStyle())
     }
 }
 

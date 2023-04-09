@@ -37,7 +37,7 @@ struct MutelistView: View {
     
     var body: some View {
         List(users, id: \.self) { pubkey in
-            UserView(damus_state: damus_state, pubkey: pubkey)
+            UserViewRow(damus_state: damus_state, pubkey: pubkey)
                 .id(pubkey)
                 .swipeActions {
                     RemoveAction(pubkey: pubkey)

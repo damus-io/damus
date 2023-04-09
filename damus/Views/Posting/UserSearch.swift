@@ -81,6 +81,7 @@ struct UserSearch: View {
                     } else {
                         ForEach(users) { user in
                             UserView(damus_state: damus_state, pubkey: user.pubkey)
+                                .contentShape(Rectangle())
                                 .onTapGesture {
                                     on_user_tapped(user: user)
                                 }
