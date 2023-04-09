@@ -9,18 +9,15 @@ import SwiftUI
 
 struct TruncatedText: View {
     let text: CompatibleText
+    let size: EventViewKind
+    @Binding var tappedUniversalLink: URL?
     let maxChars: Int = 280
     
     var body: some View {
         let truncatedAttributedString: AttributedString? = getTruncatedString()
         
-        if let truncatedAttributedString {
-            Text(truncatedAttributedString)
-                .fixedSize(horizontal: false, vertical: true)
-        } else {
-            text.text
-                .fixedSize(horizontal: false, vertical: true)
-        }
+        SelectableText(attributedString: truncatedAttributedString ?? text.attributed, size: size, tappedUniversalLink: $tappedUniversalLink)
+            .fixedSize(horizontal: false, vertical: true)
         
         if truncatedAttributedString != nil {
             Spacer()
@@ -43,10 +40,10 @@ struct TruncatedText: View {
 struct TruncatedText_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 100) {
-            TruncatedText(text: CompatibleText(stringLiteral: "hello\nthere\none\ntwo\nthree\nfour\nfive\nsix\nseven\neight\nnine\nten\neleven"))
+            TruncatedText(text: CompatibleText(stringLiteral: "hello\nthere\none\ntwo\nthree\nfour\nfive\nsix\nseven\neight\nnine\nten\neleven"), size: .normal, tappedUniversalLink: .constant(nil))
                 .frame(width: 200, height: 200)
             
-            TruncatedText(text: CompatibleText(stringLiteral: "hello\nthere\none\ntwo\nthree\nfour"))
+            TruncatedText(text: CompatibleText(stringLiteral: "hello\nthere\none\ntwo\nthree\nfour"), size: .normal, tappedUniversalLink: .constant(nil))
                 .frame(width: 200, height: 200)
         }
     }

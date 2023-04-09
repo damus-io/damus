@@ -17,6 +17,8 @@ struct SelectableText: View {
     
     let size: EventViewKind
     
+    @Binding var tappedUniversalLink: URL?
+    
     var body: some View {
         GeometryReader { geo in
             TextViewRepresentable(
@@ -24,6 +26,7 @@ struct SelectableText: View {
                 textColor: UIColor.label,
                 font: eventviewsize_to_uifont(size),
                 fixedWidth: selectedTextWidth,
+                tappedUniversalLink: $tappedUniversalLink,
                 height: $selectedTextHeight
             )
             .padding([.leading, .trailing], -1.0)
@@ -38,13 +41,39 @@ struct SelectableText: View {
     }
 }
 
- fileprivate struct TextViewRepresentable: UIViewRepresentable {
-
+fileprivate struct TextViewRepresentable: UIViewRepresentable {
+    
+    class Coordinator: NSObject, UITextViewDelegate {
+        private let parent: TextViewRepresentable
+        
+        init(parent: TextViewRepresentable) {
+            self.parent = parent
+        }
+        
+        func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
+            guard let comps = URLComponents(url: URL, resolvingAgainstBaseURL: false) else {
+                return true
+            }
+            
+            if comps.host == "damus.io" {
+                parent.tappedUniversalLink = URL
+                return false
+            } else {
+                return true
+            }
+        }
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
+    }
+     
     let attributedString: AttributedString
     let textColor: UIColor
     let font: UIFont
     let fixedWidth: CGFloat
-
+    
+    @Binding var tappedUniversalLink: URL?
     @Binding var height: CGFloat
 
     func makeUIView(context: UIViewRepresentableContext<Self>) -> UITextView {
@@ -57,6 +86,7 @@ struct SelectableText: View {
         view.textContainerInset = .zero
         view.textContainerInset.left = 1.0
         view.textContainerInset.right = 1.0
+        view.delegate = context.coordinator
         return view
     }
 

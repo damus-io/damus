@@ -29,7 +29,15 @@ struct NoteContentView: View {
     let size: EventViewKind
     let preview_height: CGFloat?
     let options: EventViewOptions
-
+    
+    @State var tapped_universal_link: URL?
+    @State var active_profile: String? = nil
+    @State var active_search: NostrFilter? = nil
+    @State var active_event: NostrEvent? = nil
+    @State var profile_open: Bool = false
+    @State var thread_open: Bool = false
+    @State var search_open: Bool = false
+    
     @State var artifacts: NoteArtifacts
     @State var preview: LinkViewRepresentable?
     
@@ -39,7 +47,6 @@ struct NoteContentView: View {
         self.show_images = show_images
         self.size = size
         self.options = options
-        self._artifacts = State(initialValue: artifacts)
         self.preview_height = lookup_cached_preview_size(previews: damus_state.previews, evid: event.id)
         self._preview = State(initialValue: load_cached_preview(previews: damus_state.previews, evid: event.id))
         if let cache = damus_state.events.lookup_artifacts(evid: event.id) {
@@ -60,15 +67,7 @@ struct NoteContentView: View {
     }
     
     var truncatedText: some View {
-        Group {
-            if truncate {
-                TruncatedText(text: artifacts.content)
-                    .font(eventviewsize_to_font(size))
-            } else {
-                artifacts.content.text
-                    .font(eventviewsize_to_font(size))
-            }
-        }
+        TruncatedText(text: artifacts.content, size: size, tappedUniversalLink: $tapped_universal_link)
     }
     
     var invoicesView: some View {
@@ -76,7 +75,7 @@ struct NoteContentView: View {
     }
 
     var translateView: some View {
-        TranslateView(damus_state: damus_state, event: event, size: self.size)
+        TranslateView(damus_state: damus_state, event: event, size: self.size, tappedUniversalLink: $tapped_universal_link)
     }
     
     var previewView: some View {
@@ -88,7 +87,7 @@ struct NoteContentView: View {
                 } else {
                     preview
                 }
-            } else if let link = artifacts.links.first {
+            } else if let link = renderableLinks.first {
                 LinkViewRepresentable(meta: .url(link))
                     .frame(height: 50)
             }
@@ -97,19 +96,20 @@ struct NoteContentView: View {
     
     var MainContent: some View {
         VStack(alignment: .leading) {
-            if size == .selected {
+            if truncate {
                 if with_padding {
-                    SelectableText(attributedString: artifacts.content.attributed, size: self.size)
+                    truncatedText
                         .padding(.horizontal)
                 } else {
-                    SelectableText(attributedString: artifacts.content.attributed, size: self.size)
+                    truncatedText
                 }
             } else {
+                let text = SelectableText(attributedString: artifacts.content.attributed, size: size, tappedUniversalLink: $tapped_universal_link)
                 if with_padding {
-                    truncatedText
+                    text
                         .padding(.horizontal)
                 } else {
-                    truncatedText
+                    text
                 }
             }
 
@@ -151,42 +151,123 @@ struct NoteContentView: View {
         }
     }
     
+    var MaybeThreadView: some View {
+        Group {
+            if let active_event {
+                let thread = ThreadModel(event: active_event, damus_state: damus_state)
+                ThreadView(state: damus_state, thread: thread)
+            } else {
+                EmptyView()
+            }
+        }
+    }
+    
+    var MaybeSearchView: some View {
+        Group {
+            if let search = self.active_search {
+                SearchView(appstate: damus_state, search: SearchModel(contacts: damus_state.contacts, pool: damus_state.pool, search: search))
+            } else {
+                EmptyView()
+            }
+        }
+    }
+    
+    var MaybeProfileView: some View {
+        Group {
+            if let pk = self.active_profile {
+                let profile_model = ProfileModel(pubkey: pk, damus: damus_state)
+                let followers = FollowersModel(damus_state: damus_state, target: pk)
+                ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)
+            } else {
+                EmptyView()
+            }
+        }
+    }
+    
     var body: some View {
-        MainContent
-            .onReceive(handle_notify(.profile_updated)) { notif in
-                let profile = notif.object as! ProfileUpdate
-                let blocks = event.blocks(damus_state.keypair.privkey)
-                for block in blocks {
-                    switch block {
-                    case .mention(let m):
-                        if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
-                            self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
-                        }
-                    case .text: return
-                    case .hashtag: return
-                    case .url: return
-                    case .invoice: return
+        VStack {
+            NavigationLink(destination: MaybeProfileView, isActive: $profile_open) {
+                EmptyView()
+            }
+            NavigationLink(destination: MaybeThreadView, isActive: $thread_open) {
+                EmptyView()
+            }
+            NavigationLink(destination: MaybeSearchView, isActive: $search_open) {
+                EmptyView()
+            }
+            MainContent
+        }
+        .onReceive(handle_notify(.profile_updated)) { notif in
+            let profile = notif.object as! ProfileUpdate
+            let blocks = event.blocks(damus_state.keypair.privkey)
+            for block in blocks {
+                switch block {
+                case .mention(let m):
+                    if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
+                        self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
                     }
+                case .text: return
+                case .hashtag: return
+                case .url: return
+                case .invoice: return
                 }
             }
-            .task {
-                guard self.preview == nil else {
+        }
+        .onChange(of: tapped_universal_link) { value in
+            guard let url = value, let link = decode_nostr_uri(url.absoluteString) else {
+                return
+            }
+            
+            switch link {
+            case .ref(let ref):
+                if ref.key == "p" {
+                    active_profile = ref.ref_id
+                    profile_open = true
+                } else if ref.key == "e" {
+                    find_event(state: damus_state, evid: ref.ref_id, search_type: .event, find_from: nil) { ev in
+                        if let ev {
+                            active_event = ev
+                        }
+                    }
+                    thread_open = true
+                }
+            case .filter(let filt):
+                active_search = filt
+                search_open = true
+            }
+        }
+        .onAppear {
+            tapped_universal_link = nil
+            active_event = nil
+            thread_open = false
+        }
+        .task {
+            guard self.preview == nil else {
+                return
+            }
+            
+            if show_images, renderableLinks.count == 1 {
+                let meta = await getMetaData(for: renderableLinks.first!)
+                
+                damus_state.previews.store(evid: self.event.id, preview: meta)
+                guard case .value(let cached) = damus_state.previews.lookup(self.event.id) else {
                     return
                 }
+                let view = LinkViewRepresentable(meta: .linkmeta(cached))
                 
-                if show_images, artifacts.links.count == 1 {
-                    let meta = await getMetaData(for: artifacts.links.first!)
-                    
-                    damus_state.previews.store(evid: self.event.id, preview: meta)
-                    guard case .value(let cached) = damus_state.previews.lookup(self.event.id) else {
-                        return
-                    }
-                    let view = LinkViewRepresentable(meta: .linkmeta(cached))
-                    
-                    self.preview = view
-                }
-
+                self.preview = view
             }
+            
+        }
+    }
+    
+    private var renderableLinks: [URL] {
+        artifacts.links.filter { link in
+            guard let components = URLComponents(url: link, resolvingAgainstBaseURL: false) else {
+                return true
+            }
+            return components.host != "damus.io" || (!components.path.hasPrefix("/note") && !components.path.hasPrefix("/npub"))
+        }
     }
     
     func getMetaData(for url: URL) async -> LPLinkMetadata? {
@@ -218,8 +299,8 @@ func attributed_string_attach_icon(_ astr: inout AttributedString, img: UIImage)
     astr.append(wrapped)
 }
 
-func url_str(_ url: URL) -> CompatibleText {
-    var attributedString = AttributedString(stringLiteral: url.absoluteString)
+func url_str(_ url: URL, representation: String? = nil) -> CompatibleText {
+    var attributedString = AttributedString(representation ?? url.absoluteString)
     attributedString.link = url
     attributedString.foregroundColor = DamusColors.purple
     
@@ -326,7 +407,22 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
                 return str
             } else {
                 link_urls.append(url)
-                return str + url_str(url)
+                if let decoded = decode_universal_link(url.absoluteString) {
+                    switch decoded {
+                    case .ref(let ref):
+                        if ref.key == "p" {
+                            return str + url_str(url, representation: url.absoluteString.replacingOccurrences(of: "https://damus.io/npub", with: "@npub"))
+                        } else if ref.key == "e" {
+                            return str + url_str(url, representation: url.absoluteString.replacingOccurrences(of: "https://damus.io/note", with: "@note"))
+                        } else {
+                            return str + url_str(url)
+                        }
+                    default:
+                        return str + url_str(url)
+                    }
+                } else {
+                    return str + url_str(url)
+                }
             }
         }
     }
@@ -360,7 +456,6 @@ func load_cached_preview(previews: PreviewCache, evid: String) -> LinkViewRepres
     
     return LinkViewRepresentable(meta: .linkmeta(meta))
 }
-
 
 // trim suffix whitespace and newlines
 func trim_suffix(_ str: String) -> String {

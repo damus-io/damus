@@ -27,13 +27,15 @@ struct TranslateView: View {
     let event: NostrEvent
     let size: EventViewKind
     let currentLanguage: String
+    @Binding var tappedUniversalLink: URL?
     
     @State var translated: TranslateStatus
     
-    init(damus_state: DamusState, event: NostrEvent, size: EventViewKind) {
+    init(damus_state: DamusState, event: NostrEvent, size: EventViewKind, tappedUniversalLink: Binding<URL?>) {
         self.damus_state = damus_state
         self.event = event
         self.size = size
+        _tappedUniversalLink = tappedUniversalLink
         
         if #available(iOS 16, *) {
             self.currentLanguage = Locale.current.language.languageCode?.identifier ?? "en"
@@ -65,12 +67,7 @@ struct TranslateView: View {
                 .font(.footnote)
                 .padding([.top, .bottom], 10)
             
-            if self.size == .selected {
-                SelectableText(attributedString: artifacts.content.attributed, size: self.size)
-            } else {
-                artifacts.content.text
-                    .font(eventviewsize_to_font(self.size))
-            }
+            SelectableText(attributedString: artifacts.content.attributed, size: size, tappedUniversalLink: $tappedUniversalLink)
         }
     }
     
@@ -180,6 +177,6 @@ extension View {
 struct TranslateView_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state()
-        TranslateView(damus_state: ds, event: test_event, size: .normal)
+        TranslateView(damus_state: ds, event: test_event, size: .normal, tappedUniversalLink: .constant(nil))
     }
 }
