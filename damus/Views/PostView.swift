@@ -304,7 +304,7 @@ func get_searching_string(_ post: String) -> String? {
     // allow User View to show again if a tag is deleted from a post then searched again
     searchedNames = searchedNames.filter{components.contains($0)}
     
-    guard let handle = components.first(where: {$0.first == "@"}) else {
+    guard let handle = components.first(where: {$0.first == "@" && !searchedNames.contains($0)}) else {
         return nil
     }
     

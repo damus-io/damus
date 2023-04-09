@@ -61,10 +61,10 @@ struct UserSearch: View {
         var tagWordIndex = 0            // index of the word containing a tag
         
         for (index,word) in components.enumerated() {
-            if word.first == "@" {
+            if word.first == "@" && !searchedNames.contains(word) {
                 tagLength = word.count
                 tagWordIndex = index
-                break // logic can be updated to support tagging multiple users
+                break
             }
             tagIndex += (word.count == 0) ? (1) : (1 + word.count)
         }
