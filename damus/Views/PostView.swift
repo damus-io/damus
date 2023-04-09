@@ -223,7 +223,7 @@ struct PostView: View {
                                 
                                 TextEntry
                             }
-                            .frame(height: deviceSize.size.height*0.40)
+                            .frame(height: mediaInCarousel.count > 0 ? deviceSize.size.height*0.40 : deviceSize.size.height*0.78)
                             .id("post")
 
                             MediaCarouselView(mediaInCarousel: $mediaInCarousel, uploadedMedia: $uploadedMedia)
