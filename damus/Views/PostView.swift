@@ -12,34 +12,11 @@ enum NostrPostResult {
     case cancel
 }
 
-struct Post: Equatable {
-    var attributedString: NSMutableAttributedString
-    
-    var components : [String] {
-        attributedString.string.components(separatedBy: .whitespacesAndNewlines)
-    }
-    
-    var tagProperties : (Int,Int,Int) {
-        var tagLength = 0, tagIndex = 0 // index of the start of a tag in a post
-        var tagWordIndex = 0            // index of the word containing a tag
-        
-        for (index,word) in components.enumerated() {
-            if word.first == "@" {
-                tagLength = word.count
-                tagWordIndex = index
-                break // logic can be updated to support tagging multiple users
-            }
-            tagIndex += (word.count == 0) ? (1) : (1 + word.count)
-        }
-        return (tagLength,tagIndex,tagWordIndex)
-    }
-}
-
 let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Text box prompt to ask user to type their post.")
 var searchedNames = [String]()
 
 struct PostView: View {
-    @State var post: Post
+    @State var post: NSMutableAttributedString = NSMutableAttributedString()
     @FocusState var focus: Bool
     @State var showPrivateKeyWarning: Bool = false
     @State var attach_media: Bool = false
@@ -72,13 +49,13 @@ struct PostView: View {
             kind = .chat
         }
 
-        post.attributedString.enumerateAttributes(in: NSRange(location: 0, length: post.attributedString.length), options: []) { attributes, range, stop in
+        post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
             if let link = attributes[.link] as? String {
-                post.attributedString.replaceCharacters(in: range, with: link)
+                post.replaceCharacters(in: range, with: link)
             }
         }
 
-        let content = self.post.attributedString.string.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        let content = self.post.string.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         let new_post = NostrPost(content: content, references: references, kind: kind)
 
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
@@ -93,7 +70,7 @@ struct PostView: View {
     }
 
     var is_post_empty: Bool {
-        return post.attributedString.string.allSatisfy { $0.isWhitespace }
+        return post.string.allSatisfy { $0.isWhitespace }
     }
     
     var ImageButton: some View {
@@ -113,7 +90,7 @@ struct PostView: View {
     
     var PostButton: some View {
         Button(NSLocalizedString("Post", comment: "Button to post a note.")) {
-            showPrivateKeyWarning = contentContainsPrivateKey(self.post.attributedString.string)
+            showPrivateKeyWarning = contentContainsPrivateKey(self.post.string)
 
             if !showPrivateKeyWarning {
                 self.send_post()
@@ -128,18 +105,18 @@ struct PostView: View {
     
     var TextEntry: some View {
         ZStack(alignment: .topLeading) {
-            TextViewWrapper(attributedText: $post.attributedString)
+            TextViewWrapper(attributedText: $post)
                 .focused($focus)
                 .textInputAutocapitalization(.sentences)
                 .onChange(of: post) { _ in
                     if let replying_to {
-                        damus_state.drafts.replies[replying_to] = post.attributedString
+                        damus_state.drafts.replies[replying_to] = post
                     } else {
-                        damus_state.drafts.post = post.attributedString
+                        damus_state.drafts.post = post
                     }
                 }
             
-            if post.attributedString.string.isEmpty {
+            if post.string.isEmpty {
                 Text(POST_PLACEHOLDER)
                     .padding(.top, 8)
                     .padding(.leading, 4)
@@ -188,12 +165,12 @@ struct PostView: View {
             case .success(let url):
                 let uploadedImageURL = NSMutableAttributedString(string: url, attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0), NSAttributedString.Key.foregroundColor: UIColor.label])
                 let combinedAttributedString = NSMutableAttributedString()
-                combinedAttributedString.append(post.attributedString)
-                if !post.attributedString.string.hasSuffix(" ") {
+                combinedAttributedString.append(post)
+                if !post.string.hasSuffix(" ") {
                     combinedAttributedString.append(NSAttributedString(string: " "))
                 }
                 combinedAttributedString.append(uploadedImageURL)
-                post.attributedString = combinedAttributedString
+                post = combinedAttributedString
                 
             case .failed(let error):
                 if let error {
@@ -217,7 +194,7 @@ struct PostView: View {
             }
 
             // This if-block observes @ for tagging
-            if let searching = get_searching_string(post.attributedString.string) {
+            if let searching = get_searching_string(post.string) {
                 VStack {
                     Spacer()
                     UserSearch(damus_state: damus_state, search: searching, post: $post)
@@ -240,10 +217,10 @@ struct PostView: View {
                     damus_state.drafts.post = NSMutableAttributedString(string: "")
                 }
                 if let p = damus_state.drafts.replies[replying_to] {
-                    post.attributedString = p
+                    post = p
                 }
             } else {
-                post.attributedString = damus_state.drafts.post
+                post = damus_state.drafts.post
             }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -292,8 +269,7 @@ func get_searching_string(_ post: String) -> String? {
 }
 
 struct PostView_Previews: PreviewProvider {
-    @State static var post = Post(attributedString: NSMutableAttributedString(string: ""))
     static var previews: some View {
-        PostView(post: post, replying_to: nil, references: [], damus_state: test_damus_state())
+        PostView(replying_to: nil, references: [], damus_state: test_damus_state())
     }
 }

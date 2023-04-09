@@ -21,7 +21,7 @@ struct UserSearch: View {
     let damus_state: DamusState
     let search: String
 
-    @Binding var post: Post
+    @Binding var post: NSMutableAttributedString
     
     var users: [SearchedUser] {
         guard let contacts = damus_state.contacts.event else {
@@ -36,10 +36,12 @@ struct UserSearch: View {
             return
         }
         
-        let (tagLength,tagIndex,tagWordIndex) = post.tagProperties
+        //TODO: move below method-call & constant outside this ForEach loop, optimize property scopes
+        let components = post.string.components(separatedBy: .whitespacesAndNewlines)
+        let (tagLength,tagIndex,tagWordIndex) = tagProperties(from: components)
         
         let mutableString = NSMutableAttributedString()
-        mutableString.append(post.attributedString)
+        mutableString.append(post)
         
         // replace tag-search word with tag attributed string
         mutableString.deleteCharacters(in: NSRange(location: tagIndex, length: tagLength))
@@ -47,11 +49,26 @@ struct UserSearch: View {
         mutableString.insert(tagAttributedString, at: tagIndex)
         
         // if no tag at end of post, insert extra space at end
-        if mutableString.string.last != " ", tagWordIndex != post.components.count - 1 {
+        if mutableString.string.last != " ", tagWordIndex != components.count - 1 {
             let endSpace = plainAttributedString(string: " ")
             mutableString.insert(endSpace, at: mutableString.length)
         }
-        post.attributedString = mutableString
+        post = mutableString
+    }
+    
+    private func tagProperties(from components: [String]) -> (Int,Int,Int) {
+        var tagLength = 0, tagIndex = 0 // index of the start of a tag in a post
+        var tagWordIndex = 0            // index of the word containing a tag
+        
+        for (index,word) in components.enumerated() {
+            if word.first == "@" {
+                tagLength = word.count
+                tagWordIndex = index
+                break // logic can be updated to support tagging multiple users
+            }
+            tagIndex += (word.count == 0) ? (1) : (1 + word.count)
+        }
+        return (tagLength,tagIndex,tagWordIndex)
     }
     
     private func plainAttributedString(string: String) -> NSMutableAttributedString {
@@ -91,7 +108,7 @@ struct UserSearch: View {
 
 struct UserSearch_Previews: PreviewProvider {
     static let search: String = "jb55"
-    @State static var post = Post(attributedString: NSMutableAttributedString(string: "some @jb55"))
+    @State static var post: NSMutableAttributedString = NSMutableAttributedString(string: "some @jb55")
     
     static var previews: some View {
         UserSearch(damus_state: test_damus_state(), search: search, post: $post)

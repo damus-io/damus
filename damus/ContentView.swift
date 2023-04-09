@@ -324,8 +324,7 @@ struct ContentView: View {
             case .report(let target):
                 MaybeReportView(target: target)
             case .post:
-                let initialPost = Post(attributedString: NSMutableAttributedString(string: ""))
-                PostView(post: initialPost, replying_to: nil, references: [], damus_state: damus_state!)
+                PostView(replying_to: nil, references: [], damus_state: damus_state!)
             case .reply(let event):
                 ReplyView(replying_to: event, damus: damus_state!)
             case .event:

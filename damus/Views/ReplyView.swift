@@ -47,8 +47,7 @@ struct ReplyView: View {
             ScrollView {
                 EventView(damus: damus, event: replying_to, options: [.no_action_bar])
             }
-            let initialReplyPost = Post(attributedString: NSMutableAttributedString(string: ""))
-            PostView(post: initialReplyPost, replying_to: replying_to, references: references, damus_state: damus)
+            PostView(replying_to: replying_to, references: references, damus_state: damus)
         }
         .onAppear {
             references =  gather_reply_ids(our_pubkey: damus.pubkey, from: replying_to)
