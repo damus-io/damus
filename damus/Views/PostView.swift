@@ -24,10 +24,10 @@ struct Post: Equatable {
         var tagWordIndex = 0            // index of the word containing a tag
         
         for (index,word) in components.enumerated() {
-            if word.first == "@" && !searchedNames.contains(word) {
+            if word.first == "@" {
                 tagLength = word.count
                 tagWordIndex = index
-                break
+                break // logic can be updated to support tagging multiple users
             }
             tagIndex += (word.count == 0) ? (1) : (1 + word.count)
         }
@@ -275,7 +275,7 @@ func get_searching_string(_ post: String) -> String? {
     // allow User View to show again if a tag is deleted from a post then searched again
     searchedNames = searchedNames.filter{components.contains($0)}
     
-    guard let handle = components.first(where: {$0.first == "@" && !searchedNames.contains($0)}) else {
+    guard let handle = components.first(where: {$0.first == "@"}) else {
         return nil
     }
     
