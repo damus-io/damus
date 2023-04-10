@@ -1,3 +1,15 @@
+## [1.4.1-8] - 2023-04-10
+
+### Added
+
+- Add support for nostr: bech32 urls in posts and DMs (NIP19) (Bartholomew Joyce)
+
+### Fixed
+
+- Don't leak mentions in DMs (William Casarin)
+- Fix tap area when mentioning users (OlegAba)
+
+[1.4.1-8]: https://github.com/damus-io/damus/releases/tag/v1.4.1-8
 ## [1.4.1-7] - 2023-04-07
 
 ### Added
@@ -975,4 +987,3 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
