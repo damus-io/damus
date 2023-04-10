@@ -81,6 +81,7 @@ enum Block: Equatable {
     case hashtag(String)
     case url(URL)
     case invoice(Invoice)
+    case relay(String)
     
     var is_invoice: Invoice? {
         if case .invoice(let invoice) = self {
@@ -138,6 +139,8 @@ func render_blocks(blocks: [Block]) -> String {
             } else {
                 return str + "nostr:\(bech32_note_id(m.ref.ref_id)!)"
             }
+        case .relay(let relay):
+            return str + relay
         case .text(let txt):
             return str + txt
         case .hashtag(let htag):
@@ -362,9 +365,18 @@ func convert_mention_bech32_block(_ b: mention_bech32_block) -> Block?
         return .mention(Mention(index: nil, type: .pubkey, ref: pubkey_ref))
 
     case NOSTR_BECH32_NRELAY:
-        fallthrough
+        let nrelay = b.bech32.data.nrelay
+        guard let relay_str = strblock_to_string(nrelay.relay) else {
+            return nil
+        }
+        return .relay(relay_str)
+        
     case NOSTR_BECH32_NADDR:
-        return .text(strblock_to_string(b.str)!)
+        // TODO: wtf do I do with this
+        guard let naddr = strblock_to_string(b.str) else {
+            return nil
+        }
+        return .text("nostr:" + naddr)
 
     default:
         return nil

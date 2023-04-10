@@ -162,6 +162,7 @@ struct NoteContentView: View {
                         if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
                             self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
                         }
+                    case .relay: return
                     case .text: return
                     case .hashtag: return
                     case .url: return
@@ -313,6 +314,9 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
             }
             
             return str + CompatibleText(stringLiteral: trimmed)
+        case .relay(let relay):
+            return str + CompatibleText(stringLiteral: relay)
+            
         case .hashtag(let htag):
             return str + hashtag_str(htag)
         case .invoice(let invoice):

@@ -78,6 +78,8 @@ func build_mention_indices(_ blocks: [Block], type: MentionType) -> Set<Int> {
                     acc.insert(idx)
                 }
             }
+        case .relay:
+            return
         case .text:
             return
         case .hashtag:
