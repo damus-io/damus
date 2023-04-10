@@ -116,7 +116,7 @@ class ReplyTests: XCTestCase {
         let tags: [[String]] = []
         let blocks = parse_mentions(content: content, tags: tags)
         let post_blocks = parse_post_blocks(content: content)
-        let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
+        let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags, silent_mentions: false)
         let event_refs = interpret_event_refs(blocks: blocks, tags: tags)
         
         XCTAssertEqual(event_refs.count, 0)
@@ -298,7 +298,7 @@ class ReplyTests: XCTestCase {
         let pk = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
         let content = "this is a @\(pk) mention"
         let parsed = parse_post_blocks(content: content)
-        let post_tags = make_post_tags(post_blocks: parsed, tags: [])
+        let post_tags = make_post_tags(post_blocks: parsed, tags: [], silent_mentions: false)
         
         XCTAssertEqual(post_tags.blocks.count, 3)
         XCTAssertEqual(post_tags.tags.count, 1)
