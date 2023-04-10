@@ -134,10 +134,12 @@ func render_blocks(blocks: [Block]) -> String {
         case .mention(let m):
             if let idx = m.index {
                 return str + "#[\(idx)]"
-            } else if m.type == .pubkey {
-                return str + "nostr:\(bech32_pubkey(m.ref.ref_id)!)"
+            } else if m.type == .pubkey, let pk = bech32_pubkey(m.ref.ref_id) {
+                return str + "nostr:\(pk)"
+            } else if let note_id = bech32_note_id(m.ref.ref_id) {
+                return str + "nostr:\(note_id)"
             } else {
-                return str + "nostr:\(bech32_note_id(m.ref.ref_id)!)"
+                return str + m.ref.ref_id
             }
         case .relay(let relay):
             return str + relay
@@ -633,7 +635,7 @@ func parse_mention_type(_ c: String) -> MentionType? {
 }
 
 /// Convert
-func make_post_tags(post_blocks: [PostBlock], tags: [[String]]) -> PostTags {
+func make_post_tags(post_blocks: [PostBlock], tags: [[String]], silent_mentions: Bool) -> PostTags {
     var new_tags = tags
     var blocks: [Block] = []
     
@@ -643,6 +645,14 @@ func make_post_tags(post_blocks: [PostBlock], tags: [[String]]) -> PostTags {
             guard let mention_type = parse_mention_type(ref.key) else {
                 continue
             }
+            
+            if silent_mentions || mention_type == .event {
+                let mention = Mention(index: nil, type: mention_type, ref: ref)
+                let block = Block.mention(mention)
+                blocks.append(block)
+                continue
+            }
+            
             if let ind = find_tag_ref(type: ref.key, id: ref.ref_id, tags: tags) {
                 let mention = Mention(index: ind, type: mention_type, ref: ref)
                 let block = Block.mention(mention)
@@ -668,7 +678,7 @@ func make_post_tags(post_blocks: [PostBlock], tags: [[String]]) -> PostTags {
 func post_to_event(post: NostrPost, privkey: String, pubkey: String) -> NostrEvent {
     let tags = post.references.map(refid_to_tag)
     let post_blocks = parse_post_blocks(content: post.content)
-    let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
+    let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags, silent_mentions: false)
     let content = render_blocks(blocks: post_tags.blocks)
     let new_ev = NostrEvent(content: content, pubkey: pubkey, kind: post.kind.rawValue, tags: post_tags.tags)
     new_ev.calculate_id()
