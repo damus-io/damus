@@ -112,13 +112,6 @@ struct EventActionBar: View {
                 }
             }
         }
-        .sheet(isPresented: $show_share_sheet) {
-            if let note_id = bech32_note_id(event.id) {
-                if let url = URL(string: "https://damus.io/" + note_id) {
-                    ShareSheet(activityItems: [url])
-                }
-            }
-        }
         .onReceive(handle_notify(.update_stats)) { n in
             let target = n.object as! String
             guard target == self.event.id else { return }
