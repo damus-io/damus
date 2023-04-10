@@ -21,7 +21,7 @@ enum MentionType {
     }
 }
 
-struct Mention {
+struct Mention: Equatable {
     let index: Int?
     let type: MentionType
     let ref: ReferencedId
@@ -58,7 +58,24 @@ struct LightningInvoice<T> {
     }
 }
 
-enum Block {
+enum Block: Equatable {
+    static func == (lhs: Block, rhs: Block) -> Bool {
+        switch (lhs, rhs) {
+        case (.text(let a), .text(let b)):
+            return a == b
+        case (.mention(let a), .mention(let b)):
+            return a == b
+        case (.hashtag(let a), .hashtag(let b)):
+            return a == b
+        case (.url(let a), .url(let b)):
+            return a == b
+        case (.invoice(let a), .invoice(let b)):
+            return a.string == b.string
+        case (_, _):
+            return false
+        }
+    }
+    
     case text(String)
     case mention(Mention)
     case hashtag(String)
@@ -317,20 +334,30 @@ func convert_invoice_block(_ b: invoice_block) -> Block? {
 
 func convert_mention_bech32_block(_ b: mention_bech32_block) -> Block?
 {
-    let relay_id = b.relays_count > 0 ? String(cString: b.relays.0!) : nil
-
-    switch b.type {
+    switch b.bech32.type {
     case NOSTR_BECH32_NOTE:
-        fallthrough
+        let note = b.bech32.data.note;
+        let event_id = hex_encode(Data(bytes: note.event_id, count: 32))
+        let event_id_ref = ReferencedId(ref_id: event_id, relay_id: nil, key: "e")
+        return .mention(Mention(index: nil, type: .event, ref: event_id_ref))
+        
     case NOSTR_BECH32_NEVENT:
-        let event_id = hex_encode(Data(bytes: b.event_id, count: 32))
+        let nevent = b.bech32.data.nevent;
+        let event_id = hex_encode(Data(bytes: nevent.event_id, count: 32))
+        let relay_id = strblock_to_string(nevent.relays.relays.0)
         let event_id_ref = ReferencedId(ref_id: event_id, relay_id: relay_id, key: "e")
         return .mention(Mention(index: nil, type: .event, ref: event_id_ref))
 
     case NOSTR_BECH32_NPUB:
-        fallthrough
+        let npub = b.bech32.data.npub
+        let pubkey = hex_encode(Data(bytes: npub.pubkey, count: 32))
+        let pubkey_ref = ReferencedId(ref_id: pubkey, relay_id: nil, key: "p")
+        return .mention(Mention(index: nil, type: .pubkey, ref: pubkey_ref))
+        
     case NOSTR_BECH32_NPROFILE:
-        let pubkey = hex_encode(Data(bytes: b.pubkey, count: 32))
+        let nprofile = b.bech32.data.nprofile
+        let pubkey = hex_encode(Data(bytes: nprofile.pubkey, count: 32))
+        let relay_id = strblock_to_string(nprofile.relays.relays.0)
         let pubkey_ref = ReferencedId(ref_id: pubkey, relay_id: relay_id, key: "p")
         return .mention(Mention(index: nil, type: .pubkey, ref: pubkey_ref))
 
