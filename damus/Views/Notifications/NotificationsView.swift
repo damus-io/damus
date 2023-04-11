@@ -39,15 +39,12 @@ struct NotificationsView: View {
         TabView(selection: $filter_state) {
             NotificationTab(NotificationFilterState.all)
                 .tag(NotificationFilterState.all)
-                .id(NotificationFilterState.all)
             
             NotificationTab(NotificationFilterState.zaps)
                 .tag(NotificationFilterState.zaps)
-                .id(NotificationFilterState.zaps)
             
             NotificationTab(NotificationFilterState.replies)
                 .tag(NotificationFilterState.replies)
-                .id(NotificationFilterState.replies)
         }
         .onChange(of: filter_state) { val in
             save_notification_filter_state(pubkey: state.pubkey, state: val)
