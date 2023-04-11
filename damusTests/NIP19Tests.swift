@@ -42,6 +42,16 @@ final class NIP19Tests: XCTestCase {
         XCTAssertEqual(res[1], .mention(expected_mention))
     }
     
+    func test_mention_with_adjacent() throws {
+        let res = parse_mentions(content: " nostr:note1s4p70596lv50x0zftuses32t6ck8x6wgd4edwacyetfxwns2jtysux7vep?", tags: [])
+        XCTAssertEqual(res.count, 3)
+        let expected_ref = ReferencedId(ref_id: "8543e7d0bafb28f33c495f2198454bd62c7369c86d72d77704cad2674e0a92c9", relay_id: nil, key: "e")
+        let expected_mention = Mention(index: nil, type: .event, ref: expected_ref)
+        XCTAssertEqual(res[0], .text(" "))
+        XCTAssertEqual(res[1], .mention(expected_mention))
+        XCTAssertEqual(res[2], .text("?"))
+    }
+    
     func testPerformanceExample() throws {
         // This is an example of a performance test case.
         self.measure {
