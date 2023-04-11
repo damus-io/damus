@@ -167,10 +167,14 @@ static int parse_mention_bech32(struct cursor *cur, struct block *block) {
     if (!parse_str(cur, "nostr:"))
         return 0;
     
+    block->block.str.start = (const char *)cur->p;
+    
     if (!parse_nostr_bech32(cur, &block->block.mention_bech32.bech32)) {
         cur->p = start;
         return 0;
     }
+    
+    block->block.str.end = (const char *)cur->p;
     
     block->type = BLOCK_MENTION_BECH32;
 
