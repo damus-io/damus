@@ -291,7 +291,7 @@ struct ContentView: View {
                 }
                 .navigationViewStyle(.stack)
             
-                TabBar(new_events: $home.new_events, selected: $selected_timeline, isSidebarVisible: $isSideBarOpened, settings: damus.settings, action: switch_timeline)
+                TabBar(new_events: $home.new_events, selected: $selected_timeline, settings: damus.settings, action: switch_timeline)
                     .padding([.bottom], 8)
                     .background(Color(uiColor: .systemBackground).ignoresSafeArea())
             }
@@ -570,6 +570,8 @@ struct ContentView: View {
     }
     
     func switch_timeline(_ timeline: Timeline) {
+        self.isSideBarOpened = false
+        
         self.popToRoot()
         NotificationCenter.default.post(name: .switched_timeline, object: timeline)
         
