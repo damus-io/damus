@@ -222,7 +222,7 @@ int parse_nostr_bech32(struct cursor *cur, struct nostr_bech32 *obj) {
     
     start = cur->p;
     
-    if (!consume_until_whitespace(cur, 1)) {
+    if (!consume_until_non_bech32_character(cur, 1)) {
         cur->p = start;
         return 0;
     }
