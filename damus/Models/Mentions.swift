@@ -349,7 +349,10 @@ func convert_mention_bech32_block(_ b: mention_bech32_block) -> Block?
     case NOSTR_BECH32_NEVENT:
         let nevent = b.bech32.data.nevent;
         let event_id = hex_encode(Data(bytes: nevent.event_id, count: 32))
-        let relay_id = strblock_to_string(nevent.relays.relays.0)
+        var relay_id: String? = nil
+        if nevent.relays.num_relays > 0 {
+            relay_id = strblock_to_string(nevent.relays.relays.0)
+        }
         let event_id_ref = ReferencedId(ref_id: event_id, relay_id: relay_id, key: "e")
         return .mention(Mention(index: nil, type: .event, ref: event_id_ref))
 
@@ -362,7 +365,10 @@ func convert_mention_bech32_block(_ b: mention_bech32_block) -> Block?
     case NOSTR_BECH32_NPROFILE:
         let nprofile = b.bech32.data.nprofile
         let pubkey = hex_encode(Data(bytes: nprofile.pubkey, count: 32))
-        let relay_id = strblock_to_string(nprofile.relays.relays.0)
+        var relay_id: String? = nil
+        if nprofile.relays.num_relays > 0 {
+            relay_id = strblock_to_string(nprofile.relays.relays.0)
+        }
         let pubkey_ref = ReferencedId(ref_id: pubkey, relay_id: relay_id, key: "p")
         return .mention(Mention(index: nil, type: .pubkey, ref: pubkey_ref))
 

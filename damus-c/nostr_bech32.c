@@ -135,7 +135,7 @@ static int tlvs_to_relays(struct nostr_tlvs *tlvs, struct relays *relays) {
         str->end = (const char*)(tlv->value + tlv->len);
     }
     
-    return relays->num_relays > 0;
+    return 1;
 }
 
 static int parse_nostr_bech32_nevent(struct cursor *cur, struct bech32_nevent *nevent) {
