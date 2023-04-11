@@ -259,11 +259,11 @@ class ReplyTests: XCTestCase {
         let post = NostrPost(content: content, references: [reply_ref])
         let ev = post_to_event(post: post, privkey: evid, pubkey: pk)
         
-        XCTAssertEqual(ev.tags.count, 3)
+        XCTAssertEqual(ev.tags.count, 1)
         XCTAssertEqual(blocks.count, 5)
         XCTAssertEqual(blocks[1].is_ref, ReferencedId(ref_id: hex_note_id, relay_id: nil, key: "e"))
         XCTAssertEqual(blocks[3].is_ref, ReferencedId(ref_id: hex_note_id, relay_id: nil, key: "e"))
-        XCTAssertEqual(ev.content, "this is a #[1] #[2] mention")
+        XCTAssertEqual(ev.content, "this is a nostr:\(pk) nostr:\(pk) mention")
     }
     
     func testNsecMention() throws {
