@@ -176,6 +176,12 @@ class UserSettingsStore: ObservableObject {
         }
     }
     
+    @Published var notification_indicators: Int {
+        didSet {
+            UserDefaults.standard.set(notification_indicators, forKey: "notification_indicators")
+        }
+    }
+    
     @Published var truncate_mention_text: Bool {
         didSet {
             UserDefaults.standard.set(truncate_mention_text, forKey: "truncate_mention_text")
@@ -280,6 +286,7 @@ class UserSettingsStore: ObservableObject {
         repost_notification = UserDefaults.standard.object(forKey: "repost_notification") as? Bool ?? true
         like_notification = UserDefaults.standard.object(forKey: "like_notification") as? Bool ?? true
         dm_notification = UserDefaults.standard.object(forKey: "dm_notification") as? Bool ?? true
+        notification_indicators = UserDefaults.standard.object(forKey: "notification_indicators") as? Int ?? NewEventsBits.all.rawValue
         notification_only_from_following = UserDefaults.standard.object(forKey: "notification_only_from_following") as? Bool ?? false
         translate_dms = UserDefaults.standard.object(forKey: "translate_dms") as? Bool ?? false
         truncate_timeline_text = UserDefaults.standard.object(forKey: "truncate_timeline_text") as? Bool ?? false

@@ -291,7 +291,7 @@ struct ContentView: View {
                 }
                 .navigationViewStyle(.stack)
             
-                TabBar(new_events: $home.new_events, selected: $selected_timeline, isSidebarVisible: $isSideBarOpened, action: switch_timeline)
+                TabBar(new_events: $home.new_events, selected: $selected_timeline, isSidebarVisible: $isSideBarOpened, settings: damus.settings, action: switch_timeline)
                     .padding([.bottom], 8)
                     .background(Color(uiColor: .systemBackground).ignoresSafeArea())
             }
