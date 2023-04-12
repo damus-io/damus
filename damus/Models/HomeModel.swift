@@ -8,26 +8,19 @@
 import Foundation
 import UIKit
 
-struct NewEventsBits {
-    let bits: Int
-
-    init() {
-        bits = 0
-    }
-
-    init (prev: NewEventsBits, setting: Timeline) {
-        self.bits = prev.bits | timeline_bit(setting)
-    }
-
-    init (prev: NewEventsBits, unsetting: Timeline) {
-        self.bits = prev.bits & ~timeline_bit(unsetting)
-    }
-
-    func is_set(_ timeline: Timeline) -> Bool {
-        let notification_bit = timeline_bit(timeline)
-        return (bits & notification_bit) == notification_bit
-    }
-
+struct NewEventsBits: OptionSet {
+    let rawValue: Int
+    
+    static let home = NewEventsBits(rawValue: 1 << 0)
+    static let zaps = NewEventsBits(rawValue: 1 << 1)
+    static let mentions = NewEventsBits(rawValue: 1 << 2)
+    static let reposts = NewEventsBits(rawValue: 1 << 3)
+    static let likes = NewEventsBits(rawValue: 1 << 4)
+    static let search = NewEventsBits(rawValue: 1 << 5)
+    static let dms = NewEventsBits(rawValue: 1 << 6)
+    
+    static let all = NewEventsBits(rawValue: 0xFFFFFFFF)
+    static let notifications: NewEventsBits = [.zaps, .likes, .reposts, .mentions]
 }
 
 class HomeModel: ObservableObject {
@@ -901,6 +894,45 @@ func handle_incoming_dms(prev_events: NewEventsBits, dms: DirectMessagesModel, o
     return new_events
 }
 
+func determine_event_notifications(_ ev: NostrEvent) -> NewEventsBits {
+    guard let kind = ev.known_kind else {
+        return []
+    }
+    
+    if kind == .zap {
+        return [.zaps]
+    }
+    
+    if kind == .boost {
+        return [.reposts]
+    }
+    
+    if kind == .text {
+        return [.mentions]
+    }
+    
+    if kind == .like {
+        return [.likes]
+    }
+    
+    return []
+}
+
+func timeline_to_notification_bits(_ timeline: Timeline, ev: NostrEvent?) -> NewEventsBits {
+    switch timeline {
+    case .home:
+        return [.home]
+    case .notifications:
+        if let ev {
+            return determine_event_notifications(ev)
+        }
+        return [.notifications]
+    case .search:
+        return [.search]
+    case .dms:
+        return [.dms]
+    }
+}
 
 /// A helper to determine if we need to notify the user of new events
 func handle_last_events(new_events: NewEventsBits, ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) -> NewEventsBits? {
@@ -909,7 +941,7 @@ func handle_last_events(new_events: NewEventsBits, ev: NostrEvent, timeline: Tim
     if last_ev == nil || last_ev!.created_at < ev.created_at {
         save_last_event(ev, timeline: timeline)
         if shouldNotify {
-            return NewEventsBits(prev: new_events, setting: timeline)
+            return new_events.union(timeline_to_notification_bits(timeline, ev: ev))
         }
     }
     

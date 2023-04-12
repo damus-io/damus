@@ -12,6 +12,10 @@ enum NotificationFilterState: String {
     case zaps
     case replies
     
+    func is_other( item: NotificationItem) -> Bool {
+        return item.is_zap == nil && item.is_reply == nil
+    }
+    
     func filter(_ item: NotificationItem) -> Bool {
         switch self {
         case .all:
@@ -27,32 +31,30 @@ enum NotificationFilterState: String {
 struct NotificationsView: View {
     let state: DamusState
     @ObservedObject var notifications: NotificationsModel
-    @State var filter_state: NotificationFilterState
+    @State var filter_state: NotificationFilterState = .all
     
     @Environment(\.colorScheme) var colorScheme
     
-    init(state: DamusState, notifications: NotificationsModel) {
-        self.state = state
-        self._notifications = ObservedObject(initialValue: notifications)
-        self._filter_state = State(initialValue: load_notification_filter_state(pubkey: state.pubkey))
-    }
-    
     var body: some View {
         TabView(selection: $filter_state) {
+            // This is needed or else there is a bug when switching from the 3rd or 2nd tab to first. no idea why.
+            Text("")
+                .id("what")
+
             NotificationTab(NotificationFilterState.all)
                 .tag(NotificationFilterState.all)
-                .id(NotificationFilterState.all)
             
             NotificationTab(NotificationFilterState.zaps)
                 .tag(NotificationFilterState.zaps)
-                .id(NotificationFilterState.zaps)
             
             NotificationTab(NotificationFilterState.replies)
                 .tag(NotificationFilterState.replies)
-                .id(NotificationFilterState.replies)
         }
         .onChange(of: filter_state) { val in
             save_notification_filter_state(pubkey: state.pubkey, state: val)
+        }
+        .onAppear {
+            self.filter_state = load_notification_filter_state(pubkey: state.pubkey)
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
@@ -107,7 +109,7 @@ struct NotificationsView: View {
 
 struct NotificationsView_Previews: PreviewProvider {
     static var previews: some View {
-        NotificationsView(state: test_damus_state(), notifications: NotificationsModel())
+        NotificationsView(state: test_damus_state(), notifications: NotificationsModel(), filter_state: NotificationFilterState.all)
     }
 }
 

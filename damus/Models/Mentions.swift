@@ -21,8 +21,8 @@ enum MentionType {
     }
 }
 
-struct Mention {
-    let index: Int
+struct Mention: Equatable {
+    let index: Int?
     let type: MentionType
     let ref: ReferencedId
 }
@@ -58,12 +58,30 @@ struct LightningInvoice<T> {
     }
 }
 
-enum Block {
+enum Block: Equatable {
+    static func == (lhs: Block, rhs: Block) -> Bool {
+        switch (lhs, rhs) {
+        case (.text(let a), .text(let b)):
+            return a == b
+        case (.mention(let a), .mention(let b)):
+            return a == b
+        case (.hashtag(let a), .hashtag(let b)):
+            return a == b
+        case (.url(let a), .url(let b)):
+            return a == b
+        case (.invoice(let a), .invoice(let b)):
+            return a.string == b.string
+        case (_, _):
+            return false
+        }
+    }
+    
     case text(String)
     case mention(Mention)
     case hashtag(String)
     case url(URL)
     case invoice(Invoice)
+    case relay(String)
     
     var is_invoice: Invoice? {
         if case .invoice(let invoice) = self {
@@ -114,7 +132,17 @@ func render_blocks(blocks: [Block]) -> String {
     return blocks.reduce("") { str, block in
         switch block {
         case .mention(let m):
-            return str + "#[\(m.index)]"
+            if let idx = m.index {
+                return str + "#[\(idx)]"
+            } else if m.type == .pubkey, let pk = bech32_pubkey(m.ref.ref_id) {
+                return str + "nostr:\(pk)"
+            } else if let note_id = bech32_note_id(m.ref.ref_id) {
+                return str + "nostr:\(note_id)"
+            } else {
+                return str + m.ref.ref_id
+            }
+        case .relay(let relay):
+            return str + relay
         case .text(let txt):
             return str + txt
         case .hashtag(let htag):
@@ -177,14 +205,16 @@ func convert_block(_ b: block_t, tags: [[String]]) -> Block? {
             return nil
         }
         return .text(str)
-    } else if b.type == BLOCK_MENTION {
-        return convert_mention_block(ind: b.block.mention, tags: tags)
+    } else if b.type == BLOCK_MENTION_INDEX {
+        return convert_mention_index_block(ind: b.block.mention_index, tags: tags)
     } else if b.type == BLOCK_URL {
         return convert_url_block(b.block.str)
     } else if b.type == BLOCK_INVOICE {
         return convert_invoice_block(b.block.invoice)
+    } else if b.type == BLOCK_MENTION_BECH32 {
+        return convert_mention_bech32_block(b.block.mention_bech32)
     }
-    
+
     return nil
 }
 
@@ -307,6 +337,60 @@ func convert_invoice_block(_ b: invoice_block) -> Block? {
     return .invoice(Invoice(description: description, amount: amount, string: invstr, expiry: b11.expiry, payment_hash: payment_hash, created_at: created_at))
 }
 
+func convert_mention_bech32_block(_ b: mention_bech32_block) -> Block?
+{
+    switch b.bech32.type {
+    case NOSTR_BECH32_NOTE:
+        let note = b.bech32.data.note;
+        let event_id = hex_encode(Data(bytes: note.event_id, count: 32))
+        let event_id_ref = ReferencedId(ref_id: event_id, relay_id: nil, key: "e")
+        return .mention(Mention(index: nil, type: .event, ref: event_id_ref))
+        
+    case NOSTR_BECH32_NEVENT:
+        let nevent = b.bech32.data.nevent;
+        let event_id = hex_encode(Data(bytes: nevent.event_id, count: 32))
+        var relay_id: String? = nil
+        if nevent.relays.num_relays > 0 {
+            relay_id = strblock_to_string(nevent.relays.relays.0)
+        }
+        let event_id_ref = ReferencedId(ref_id: event_id, relay_id: relay_id, key: "e")
+        return .mention(Mention(index: nil, type: .event, ref: event_id_ref))
+
+    case NOSTR_BECH32_NPUB:
+        let npub = b.bech32.data.npub
+        let pubkey = hex_encode(Data(bytes: npub.pubkey, count: 32))
+        let pubkey_ref = ReferencedId(ref_id: pubkey, relay_id: nil, key: "p")
+        return .mention(Mention(index: nil, type: .pubkey, ref: pubkey_ref))
+        
+    case NOSTR_BECH32_NPROFILE:
+        let nprofile = b.bech32.data.nprofile
+        let pubkey = hex_encode(Data(bytes: nprofile.pubkey, count: 32))
+        var relay_id: String? = nil
+        if nprofile.relays.num_relays > 0 {
+            relay_id = strblock_to_string(nprofile.relays.relays.0)
+        }
+        let pubkey_ref = ReferencedId(ref_id: pubkey, relay_id: relay_id, key: "p")
+        return .mention(Mention(index: nil, type: .pubkey, ref: pubkey_ref))
+
+    case NOSTR_BECH32_NRELAY:
+        let nrelay = b.bech32.data.nrelay
+        guard let relay_str = strblock_to_string(nrelay.relay) else {
+            return nil
+        }
+        return .relay(relay_str)
+        
+    case NOSTR_BECH32_NADDR:
+        // TODO: wtf do I do with this
+        guard let naddr = strblock_to_string(b.str) else {
+            return nil
+        }
+        return .text("nostr:" + naddr)
+
+    default:
+        return nil
+    }
+}
+
 func convert_invoice_description(b11: bolt11) -> InvoiceDescription? {
     if let desc = b11.description {
         return .description(String(cString: desc))
@@ -319,7 +403,7 @@ func convert_invoice_description(b11: bolt11) -> InvoiceDescription? {
     return nil
 }
 
-func convert_mention_block(ind: Int32, tags: [[String]]) -> Block?
+func convert_mention_index_block(ind: Int32, tags: [[String]]) -> Block?
 {
     let ind = Int(ind)
     
@@ -557,7 +641,7 @@ func parse_mention_type(_ c: String) -> MentionType? {
 }
 
 /// Convert
-func make_post_tags(post_blocks: [PostBlock], tags: [[String]]) -> PostTags {
+func make_post_tags(post_blocks: [PostBlock], tags: [[String]], silent_mentions: Bool) -> PostTags {
     var new_tags = tags
     var blocks: [Block] = []
     
@@ -567,6 +651,14 @@ func make_post_tags(post_blocks: [PostBlock], tags: [[String]]) -> PostTags {
             guard let mention_type = parse_mention_type(ref.key) else {
                 continue
             }
+            
+            if silent_mentions || mention_type == .event {
+                let mention = Mention(index: nil, type: mention_type, ref: ref)
+                let block = Block.mention(mention)
+                blocks.append(block)
+                continue
+            }
+            
             if let ind = find_tag_ref(type: ref.key, id: ref.ref_id, tags: tags) {
                 let mention = Mention(index: ind, type: mention_type, ref: ref)
                 let block = Block.mention(mention)
@@ -592,7 +684,7 @@ func make_post_tags(post_blocks: [PostBlock], tags: [[String]]) -> PostTags {
 func post_to_event(post: NostrPost, privkey: String, pubkey: String) -> NostrEvent {
     let tags = post.references.map(refid_to_tag)
     let post_blocks = parse_post_blocks(content: post.content)
-    let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
+    let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags, silent_mentions: false)
     let content = render_blocks(blocks: post_tags.blocks)
     let new_ev = NostrEvent(content: content, pubkey: pubkey, kind: post.kind.rawValue, tags: post_tags.tags)
     new_ev.calculate_id()

@@ -142,7 +142,7 @@ struct TranslateView: View {
             case .trying:
                 Text("")
             case .translating:
-                Text("Translating...")
+                Text("Translating...", comment: "Text to display when waiting for the translation of a note to finish processing before showing it.")
                     .foregroundColor(.gray)
                     .font(.footnote)
                     .padding([.top, .bottom], 10)

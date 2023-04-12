@@ -73,7 +73,7 @@ struct BuilderEventView: View {
     
     var body: some View {
         VStack {
-            if let event = event {
+            if let event {
                 let ev = event.inner_event ?? event
                 let thread = ThreadModel(event: ev, damus_state: damus)
                 let dest = ThreadView(state: damus, thread: thread)

@@ -769,16 +769,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>No zaps are sent, only a lightning payment.</target>
         <note>Description of non-zap type where sats are sent to the user's wallet as a regular Lightning payment, not as a zap.</note>
       </trans-unit>
-      <trans-unit id="NostrBuild" xml:space="preserve">
-        <source>NostrBuild</source>
-        <target>NostrBuild</target>
-        <note>Dropdown option label for system default for NostrBuild image uploader.</note>
-      </trans-unit>
-      <trans-unit id="NostrImg" xml:space="preserve">
-        <source>NostrImg</source>
-        <target>NostrImg</target>
-        <note>Dropdown option label for system default for NostrImg image uploader.</note>
-      </trans-unit>
       <trans-unit id="Note contains &quot;nsec1&quot; private key. Are you sure?" xml:space="preserve">
         <source>Note contains "nsec1" private key. Are you sure?</source>
         <target>Note contains "nsec1" private key. Are you sure?</target>
@@ -1240,6 +1230,11 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <target>Thread</target>
         <note>Navigation bar title for note thread.</note>
       </trans-unit>
+      <trans-unit id="Translate DMs" xml:space="preserve">
+        <source>Translate DMs</source>
+        <target>Translate DMs</target>
+        <note>Toggle to translate direct messages.</note>
+      </trans-unit>
       <trans-unit id="Translate Note" xml:space="preserve">
         <source>Translate Note</source>
         <target>Translate Note</target>
@@ -1249,6 +1244,11 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <source>Translated from %@</source>
         <target>Translated from %@</target>
         <note>Button to indicate that the note has been translated from a different language.</note>
+      </trans-unit>
+      <trans-unit id="Translating..." xml:space="preserve">
+        <source>Translating...</source>
+        <target>Translating...</target>
+        <note>Text to display when waiting for the translation of a note to finish processing before showing it.</note>
       </trans-unit>
       <trans-unit id="Translation" xml:space="preserve">
         <source>Translation</source>

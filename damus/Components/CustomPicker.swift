@@ -37,6 +37,8 @@ struct CustomPicker<SelectionValue: Hashable, Content: View>: View {
                     text
                         .padding(EdgeInsets(top: 15, leading: 0, bottom: 10, trailing: 0))
                         .font(.system(size: 14, weight: .heavy))
+                        .contentShape(Rectangle())
+                        .frame(maxWidth: .infinity)
                 }
                 .background(
                     Group {
@@ -48,7 +50,6 @@ struct CustomPicker<SelectionValue: Hashable, Content: View>: View {
                     },
                     alignment: .bottom
                 )
-                .frame(maxWidth: .infinity)
                 .accentColor(tag == selection ? textColor() : .gray)
             }
         }

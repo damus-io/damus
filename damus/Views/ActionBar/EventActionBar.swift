@@ -48,13 +48,13 @@ struct EventActionBar: View {
         HStack {
             if damus_state.keypair.privkey != nil {
                 HStack(spacing: 4) {
-                    EventActionButton(img: "bubble.left", col: bar.replied ? Color.blue : Color.gray) {
+                    EventActionButton(img: "bubble.left", col: bar.replied ? DamusColors.purple : Color.gray) {
                         notify(.reply, event)
                     }
                     .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
                     Text(verbatim: "\(bar.replies > 0 ? "\(bar.replies)" : "")")
                         .font(.footnote.weight(.medium))
-                        .foregroundColor(bar.replied ? Color.blue : Color.gray)
+                        .foregroundColor(bar.replied ? DamusColors.purple : Color.gray)
                 }
             }
             Spacer()
@@ -109,13 +109,6 @@ struct EventActionBar: View {
                     if let url = URL(string: "https://damus.io/" + note_id) {
                         ShareSheet(activityItems: [url])
                     }
-                }
-            }
-        }
-        .sheet(isPresented: $show_share_sheet) {
-            if let note_id = bech32_note_id(event.id) {
-                if let url = URL(string: "https://damus.io/" + note_id) {
-                    ShareSheet(activityItems: [url])
                 }
             }
         }
