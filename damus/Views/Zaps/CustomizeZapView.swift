@@ -200,7 +200,6 @@ struct CustomizeZapView: View {
                     Text("Comment", comment: "Header text to indicate that the text field below it is a comment that will be used to send as part of a zap to the user.")
                 })
             }
-            .dismissKeyboardOnTap()
                 
             Section(content: {
                 ZapTypePicker
@@ -228,6 +227,7 @@ struct CustomizeZapView: View {
             }
         
         }
+        .dismissKeyboardOnTap()
     }
     
     var MainContent: some View {
