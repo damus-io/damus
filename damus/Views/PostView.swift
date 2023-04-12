@@ -22,9 +22,7 @@ struct PostView: View {
     @State var attach_media: Bool = false
     @State var attach_camera: Bool = false
     @State var error: String? = nil
-    @State var mediaSelected: [UIImage] = []
-    @State var uploadedMedia: [URL] = []
-    
+    @State var uploadedMedias: [UploadedMedia] = []
     @State var originalReferences: [ReferencedId] = []
     @State var references: [ReferencedId] = []
     
@@ -64,7 +62,7 @@ struct PostView: View {
 
         var content = self.post.string.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 
-        let imagesString = uploadedMedia.map { $0.absoluteString }.joined(separator: " ")
+        let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
 
         content.append(" " + imagesString + " ")
 
@@ -76,13 +74,14 @@ struct PostView: View {
             damus_state.drafts.replies.removeValue(forKey: replying_to)
         } else {
             damus_state.drafts.post = NSMutableAttributedString(string: "")
+            damus_state.drafts.medias = uploadedMedias
         }
 
         dismiss()
     }
 
     var is_post_empty: Bool {
-        return post.string.allSatisfy { $0.isWhitespace } && uploadedMedia.isEmpty
+        return post.string.allSatisfy { $0.isWhitespace } && uploadedMedias.isEmpty
     }
     
     var ImageButton: some View {
@@ -190,8 +189,8 @@ struct PostView: View {
                     self.error = "Error uploading image :("
                     return
                 }
-                mediaSelected.append(img)
-                uploadedMedia.append(url)
+                let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, representingImage: img)
+                uploadedMedias.append(uploadedMedia)
                 
             case .failed(let error):
                 if let error {
@@ -224,10 +223,10 @@ struct PostView: View {
                                 
                                 TextEntry
                             }
-                            .frame(height: mediaSelected.count > 0 ? deviceSize.size.height*0.2 : deviceSize.size.height*0.78)
+                            .frame(height: uploadedMedias.count > 0 ? deviceSize.size.height*0.2 : deviceSize.size.height*0.78)
                             .id("post")
 
-                            PVImageCarouselView(mediaSelected: $mediaSelected, uploadedMedia: $uploadedMedia, deviceWidth: deviceSize.size.width)
+                            PVImageCarouselView(media: $uploadedMedias, deviceWidth: deviceSize.size.width)
                                 .frame(height: 300)
                         }
                     }
@@ -277,6 +276,7 @@ struct PostView: View {
                     }
                 } else {
                     post = damus_state.drafts.post
+                    uploadedMedias = damus_state.drafts.medias
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -288,6 +288,7 @@ struct PostView: View {
                     damus_state.drafts.replies.removeValue(forKey: replying_to)
                 } else if replying_to == nil && damus_state.drafts.post.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     damus_state.drafts.post = NSMutableAttributedString(string : "")
+                    damus_state.drafts.medias = uploadedMedias
                 }
             }
             .alert(NSLocalizedString("Note contains \"nsec1\" private key. Are you sure?", comment: "Alert user that they might be attempting to paste a private key and ask them to confirm."), isPresented: $showPrivateKeyWarning, actions: {
@@ -330,31 +331,29 @@ struct PostView_Previews: PreviewProvider {
 }
 
 struct PVImageCarouselView: View {
-    @Binding var mediaSelected: [UIImage]
-    @Binding var uploadedMedia: [URL]
+    @Binding var media: [UploadedMedia]
+
     let deviceWidth: CGFloat
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
-                ForEach(mediaSelected, id: \.self) { image in
+                ForEach(media.map({$0.representingImage}), id: \.self) { image in
                     ZStack(alignment: .topTrailing) {
                         Image(uiImage: image)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .frame(width: mediaSelected.count == 1 ? deviceWidth*0.8 : 250, height: mediaSelected.count == 1 ? 400 : 250)
+                            .frame(width: media.count == 1 ? deviceWidth*0.8 : 250, height: media.count == 1 ? 400 : 250)
                             .cornerRadius(10)
                             .padding()
                         Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.white)
-                                .padding(20)
-                                .onTapGesture {
-                                    if let index = mediaSelected.firstIndex(of: image) {
-                                        // sync both the media selected and uploaded media
-                                        mediaSelected.remove(at: index)
-                                        uploadedMedia.remove(at: index)
-                                    }
+                            .foregroundColor(.white)
+                            .padding(20)
+                            .onTapGesture {
+                                if let index = media.map({$0.representingImage}).firstIndex(of: image) {
+                                    media.remove(at: index)
                                 }
+                            }
                     }
                 }
             }
@@ -396,4 +395,10 @@ fileprivate func getImage(media: MediaUpload) -> UIImage {
         uiimage = newImage ?? UIImage()
     }
     return uiimage
+}
+
+struct UploadedMedia {
+    let localURL: URL
+    let uploadedURL: URL
+    let representingImage: UIImage
 }
