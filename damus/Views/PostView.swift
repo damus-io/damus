@@ -22,7 +22,7 @@ struct PostView: View {
     @State var attach_media: Bool = false
     @State var attach_camera: Bool = false
     @State var error: String? = nil
-    @State var mediaInCarousel: [MediaUpload] = []
+    @State var mediaSelected: [UIImage] = []
     @State var uploadedMedia: [URL] = []
     
     @State var originalReferences: [ReferencedId] = []
@@ -181,6 +181,7 @@ struct PostView: View {
     func handle_upload(media: MediaUpload) {
         let uploader = get_media_uploader(damus_state.pubkey)
         Task.init {
+            let img = getImage(media: media)
             let res = await image_upload.start(media: media, uploader: uploader)
             
             switch res {
@@ -189,7 +190,7 @@ struct PostView: View {
                     self.error = "Error uploading image :("
                     return
                 }
-                mediaInCarousel.append(media)
+                mediaSelected.append(img)
                 uploadedMedia.append(url)
                 
             case .failed(let error):
@@ -223,10 +224,10 @@ struct PostView: View {
                                 
                                 TextEntry
                             }
-                            .frame(height: mediaInCarousel.count > 0 ? deviceSize.size.height*0.40 : deviceSize.size.height*0.78)
+                            .frame(height: mediaSelected.count > 0 ? deviceSize.size.height*0.2 : deviceSize.size.height*0.78)
                             .id("post")
 
-                            MediaCarouselView(mediaInCarousel: $mediaInCarousel, uploadedMedia: $uploadedMedia)
+                            PVImageCarouselView(mediaSelected: $mediaSelected, uploadedMedia: $uploadedMedia, deviceWidth: deviceSize.size.width)
                                 .frame(height: 300)
                         }
                     }
@@ -328,97 +329,71 @@ struct PostView_Previews: PreviewProvider {
     }
 }
 
-
-struct MediaCarouselView: View {
-
-    @Binding var mediaInCarousel: [MediaUpload]
+struct PVImageCarouselView: View {
+    @Binding var mediaSelected: [UIImage]
     @Binding var uploadedMedia: [URL]
-
-    @State private var imageCache = [String: UIImage]()
-
-    @State private var currentIndex: Int = 0
-
-    private func getImage() -> UIImage {
-        guard let urlString = mediaInCarousel[safe: currentIndex]?.localURL.absoluteString else {
-            return UIImage()
-        }
-        var uiimage: UIImage = UIImage()
-        if mediaInCarousel[currentIndex].is_image {
-            // cache check
-            if let cachedImage = imageCache[urlString] {
-                return cachedImage
-            }
-            // fetch the image data
-            if let url = URL(string: urlString),
-               let data = try? Data(contentsOf: url) {
-                uiimage = UIImage(data: data) ?? UIImage()
-            }
-        } else {
-            let asset = AVURLAsset(url: mediaInCarousel[currentIndex].localURL)
-            let generator = AVAssetImageGenerator(asset: asset)
-            generator.appliesPreferredTrackTransform = true
-            let time = CMTimeMake(value: 1, timescale: 60) // get the thumbnail image at the 1st second
-            do {
-                let cgImage = try generator.copyCGImage(at: time, actualTime: nil)
-                uiimage = UIImage(cgImage: cgImage)
-            } catch {
-                print("No thumbnail: \(error)")
-            }
-
-            let playIcon = UIImage(systemName: "play.fill")?.withTintColor(.white, renderingMode: .alwaysOriginal)
-            let size = uiimage.size
-            let scale = UIScreen.main.scale
-            UIGraphicsBeginImageContextWithOptions(size, false, scale)
-            uiimage.draw(at: .zero)
-            let playIconSize = CGSize(width: 60, height: 60)
-            let playIconOrigin = CGPoint(x: (size.width - playIconSize.width) / 2, y: (size.height - playIconSize.height) / 2)
-            playIcon?.draw(in: CGRect(origin: playIconOrigin, size: playIconSize))
-            let newImage = UIGraphicsGetImageFromCurrentImageContext()
-            UIGraphicsEndImageContext()
-            uiimage = newImage ?? UIImage()
-        }
-
-        imageCache[urlString] = uiimage
-
-        return uiimage
-    }
+    let deviceWidth: CGFloat
 
     var body: some View {
-        VStack {
-            TabView(selection: $currentIndex) {
-                ForEach(mediaInCarousel.indices, id: \.self) { index in
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack {
+                ForEach(mediaSelected, id: \.self) { image in
                     ZStack(alignment: .topTrailing) {
-                        Image(uiImage: getImage())
+                        Image(uiImage: image)
                             .resizable()
-                            .scaledToFit()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: mediaSelected.count == 1 ? deviceWidth*0.8 : 250, height: mediaSelected.count == 1 ? 400 : 250)
                             .cornerRadius(10)
-                        Button(action: {
-                            withAnimation {
-                                // Remove the image and update currentIndex
-                                mediaInCarousel.remove(at: index)
-                                uploadedMedia.remove(at: index)
-                                if currentIndex >= mediaInCarousel.count {
-                                    currentIndex = mediaInCarousel.count - 1
-                                }
-                            }
-                        }, label: {
-                            Image(systemName: "xmark.circle.fill")
+                            .padding()
+                        Image(systemName: "xmark.circle.fill")
                                 .foregroundColor(.white)
-                                .padding()
-                        })
+                                .padding(20)
+                                .onTapGesture {
+                                    if let index = mediaSelected.firstIndex(of: image) {
+                                        // sync both the media selected and uploaded media
+                                        mediaSelected.remove(at: index)
+                                        uploadedMedia.remove(at: index)
+                                    }
+                                }
                     }
                 }
             }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
-            .onChange(of: mediaInCarousel.count) { count in
-                if count < currentIndex + 1 {
-                    currentIndex = count - 1
-                }
-                if currentIndex < 0 {
-                    currentIndex = 0
-                }
-            }
-            Spacer()
+            .padding()
         }
     }
+}
+
+
+fileprivate func getImage(media: MediaUpload) -> UIImage {
+    var uiimage: UIImage = UIImage()
+    if media.is_image {
+        // fetch the image data
+        if let data = try? Data(contentsOf: media.localURL) {
+            uiimage = UIImage(data: data) ?? UIImage()
+        }
+    } else {
+        let asset = AVURLAsset(url: media.localURL)
+        let generator = AVAssetImageGenerator(asset: asset)
+        generator.appliesPreferredTrackTransform = true
+        let time = CMTimeMake(value: 1, timescale: 60) // get the thumbnail image at the 1st second
+        do {
+            let cgImage = try generator.copyCGImage(at: time, actualTime: nil)
+            uiimage = UIImage(cgImage: cgImage)
+        } catch {
+            print("No thumbnail: \(error)")
+        }
+        // create a play icon on the top to differentiate if media upload is image or a video, gif is an image
+        let playIcon = UIImage(systemName: "play.fill")?.withTintColor(.white, renderingMode: .alwaysOriginal)
+        let size = uiimage.size
+        let scale = UIScreen.main.scale
+        UIGraphicsBeginImageContextWithOptions(size, false, scale)
+        uiimage.draw(at: .zero)
+        let playIconSize = CGSize(width: 60, height: 60)
+        let playIconOrigin = CGPoint(x: (size.width - playIconSize.width) / 2, y: (size.height - playIconSize.height) / 2)
+        playIcon?.draw(in: CGRect(origin: playIconOrigin, size: playIconSize))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        uiimage = newImage ?? UIImage()
+    }
+    return uiimage
 }
