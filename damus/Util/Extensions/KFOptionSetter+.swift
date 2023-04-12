@@ -22,6 +22,7 @@ extension KFOptionSetter {
             maxSize: imageContext.maxMebibyteSize(),
             downsampleSize: imageContext.downsampleSize()
         )
+        options.loadDiskFileSynchronously = false
         options.backgroundDecode = true
         options.cacheOriginalImage = true
         options.scaleFactor = UIScreen.main.scale
