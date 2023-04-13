@@ -651,60 +651,65 @@ func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
 }
 
 func process_metadata_event(our_pubkey: String, profiles: Profiles, ev: NostrEvent) {
-    guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
-        return
-    }
-    
-    if our_pubkey == ev.pubkey && (profile.deleted ?? false) {
-        DispatchQueue.main.async {
-            notify(.deleted_account, ())
-        }
-        return
-    }
-
-    var old_nip05: String? = nil
-    if let mprof = profiles.lookup_with_timestamp(id: ev.pubkey) {
-        old_nip05 = mprof.profile.nip05
-        if mprof.timestamp > ev.created_at {
-            // skip if we already have an newer profile
+    DispatchQueue.global(qos: .background).async {
+        guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
             return
         }
-    }
+        
+        DispatchQueue.main.async {
+            if our_pubkey == ev.pubkey && (profile.deleted ?? false) {
+                DispatchQueue.main.async {
+                    notify(.deleted_account, ())
+                }
+                return
+            }
 
-    let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at, event: ev)
-    profiles.add(id: ev.pubkey, profile: tprof)
-    
-    if let nip05 = profile.nip05, old_nip05 != profile.nip05 {
-        Task.detached(priority: .background) {
-            let validated = await validate_nip05(pubkey: ev.pubkey, nip05_str: nip05)
-            if validated != nil {
-                print("validated nip05 for '\(nip05)'")
+            var old_nip05: String? = nil
+            if let mprof = profiles.lookup_with_timestamp(id: ev.pubkey) {
+                old_nip05 = mprof.profile.nip05
+                if mprof.timestamp > ev.created_at {
+                    // skip if we already have an newer profile
+                    return
+                }
+            }
+
+            let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at, event: ev)
+            profiles.add(id: ev.pubkey, profile: tprof)
+            
+            if let nip05 = profile.nip05, old_nip05 != profile.nip05 {
+                Task.detached(priority: .background) {
+                    let validated = await validate_nip05(pubkey: ev.pubkey, nip05_str: nip05)
+                    if validated != nil {
+                        print("validated nip05 for '\(nip05)'")
+                    }
+                    
+                    DispatchQueue.main.async {
+                        profiles.validated[ev.pubkey] = validated
+                        profiles.nip05_pubkey[nip05] = ev.pubkey
+                        notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+                    }
+                }
             }
             
-            DispatchQueue.main.async {
-                profiles.validated[ev.pubkey] = validated
-                profiles.nip05_pubkey[nip05] = ev.pubkey
-                notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+            // load pfps asap
+            let picture = tprof.profile.picture ?? robohash(ev.pubkey)
+            if URL(string: picture) != nil {
+                DispatchQueue.main.async {
+                    notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+                }
             }
-        }
-    }
-    
-    // load pfps asap
-    let picture = tprof.profile.picture ?? robohash(ev.pubkey)
-    if URL(string: picture) != nil {
-        DispatchQueue.main.async {
+            
+            let banner = tprof.profile.banner ?? ""
+            if URL(string: banner) != nil {
+                DispatchQueue.main.async {
+                    notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+                }
+            }
+            
             notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
         }
     }
     
-    let banner = tprof.profile.banner ?? ""
-    if URL(string: banner) != nil {
-        DispatchQueue.main.async {
-            notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-        }
-    }
-    
-    notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
 }
 
 func robohash(_ pk: String) -> String {
