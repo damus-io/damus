@@ -35,12 +35,19 @@ struct NotificationsView: View {
     
     @Environment(\.colorScheme) var colorScheme
     
+    var mystery: some View {
+        VStack(spacing: 20) {
+            Text("Wake up \(Profile.displayName(profile: state.profiles.lookup(id: state.pubkey), pubkey: state.pubkey).display_name)")
+            Text("You are dreaming...")
+        }
+        .id("what")
+    }
+    
     var body: some View {
         TabView(selection: $filter_state) {
+            mystery
+            
             // This is needed or else there is a bug when switching from the 3rd or 2nd tab to first. no idea why.
-            Text("")
-                .id("what")
-
             NotificationTab(NotificationFilterState.all)
                 .tag(NotificationFilterState.all)
             

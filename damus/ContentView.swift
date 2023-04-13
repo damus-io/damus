@@ -91,14 +91,19 @@ struct ContentView: View {
     let sub_id = UUID().description
     
     @Environment(\.colorScheme) var colorScheme
-
+    
+    var mystery: some View {
+        Text("Are you lost?")
+        .id("what")
+    }
+    
     var PostingTimelineView: some View {
         VStack {
             ZStack {
                 TabView(selection: $filter_state) {
                     // This is needed or else there is a bug when switching from the 3rd or 2nd tab to first. no idea why.
-                    Text("")
-                        .id("what")
+                    mystery
+                    
                     contentTimelineView(filter: FilterState.posts.filter)
                         .tag(FilterState.posts)
                         .id(FilterState.posts)
