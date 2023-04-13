@@ -89,7 +89,7 @@ final class RelayConnection: WebSocketDelegate {
             self.isConnected = false
 
         case .text(let txt):
-            if txt.underestimatedCount > 2000 {
+            if txt.utf8.count > 2000 {
                 DispatchQueue.global(qos: .default).async {
                     if let ev = decode_nostr_event(txt: txt) {
                         DispatchQueue.main.async {
