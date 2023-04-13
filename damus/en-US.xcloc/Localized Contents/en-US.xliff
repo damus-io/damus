@@ -779,6 +779,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Nothing to see here. Check back later!</target>
         <note>Indicates that there are no notes in the timeline to view.</note>
       </trans-unit>
+      <trans-unit id="Notification Dots" xml:space="preserve">
+        <source>Notification Dots</source>
+        <target>Notification Dots</target>
+        <note>Section header for notification indicator dot settings</note>
+      </trans-unit>
       <trans-unit id="Notification Preference" xml:space="preserve">
         <source>Notification Preference</source>
         <target>Notification Preference</target>
