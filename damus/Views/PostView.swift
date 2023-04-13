@@ -14,6 +14,7 @@ enum NostrPostResult {
 
 let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Text box prompt to ask user to type their post.")
 var searchedNames = [String]()
+fileprivate var composing = false
 
 struct PostView: View {
     @State var post: NSMutableAttributedString = NSMutableAttributedString()
@@ -39,6 +40,7 @@ struct PostView: View {
 
     func cancel() {
         NotificationCenter.default.post(name: .post, object: NostrPostResult.cancel)
+        composing = false
         dismiss()
     }
 
@@ -69,6 +71,7 @@ struct PostView: View {
             damus_state.drafts.post = NSMutableAttributedString(string: "")
         }
 
+        composing = false
         dismiss()
     }
 
@@ -301,8 +304,13 @@ struct PostView: View {
 func get_searching_string(_ post: String) -> String? {
     let components = post.components(separatedBy: .whitespacesAndNewlines)
     
-    // allow User View to show again if a tag is deleted from a post then searched again
-    searchedNames = searchedNames.filter{components.contains($0)}
+    /// allow UserSearch to reappear, within a post-composing session, IF a tag is deleted then searched again
+    if composing {
+        searchedNames = searchedNames.filter{components.contains($0)}
+    }
+    if components.count >= 1 {
+        composing = true
+    }
     
     guard let handle = components.first(where: {$0.first == "@" && !searchedNames.contains($0)}) else {
         return nil
