@@ -169,5 +169,5 @@ func search_users_for_autocomplete(profiles: Profiles, tags: [[String]], search 
         }
     }
     
-    return matches.filter{!searchedNames.contains("@\($0.profile?.name ?? "")")}
+    return matches
 }
