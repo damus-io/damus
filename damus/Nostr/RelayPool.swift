@@ -208,19 +208,6 @@ class RelayPool {
         relays.first(where: { $0.id == id })
     }
     
-    func record_last_pong(relay_id: String, event: NostrConnectionEvent) {
-        if case .ws_event(let ws_event) = event {
-            if case .pong = ws_event {
-                for relay in relays {
-                    if relay.id == relay_id {
-                        relay.last_pong = UInt32(Date.now.timeIntervalSince1970)
-                        return
-                    }
-                }
-            }
-        }
-    }
-    
     func run_queue(_ relay_id: String) {
         self.request_queue = request_queue.reduce(into: Array<QueuedRequest>()) { (q, req) in
             guard req.relay == relay_id else {
@@ -250,7 +237,6 @@ class RelayPool {
     }
     
     func handle_event(relay_id: String, event: NostrConnectionEvent) {
-        record_last_pong(relay_id: relay_id, event: event)
         record_seen(relay_id: relay_id, event: event)
         
         // run req queue when we reconnect

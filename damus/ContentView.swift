@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Starscream
 
 struct TimestampedProfile {
     let profile: Profile
@@ -681,31 +680,6 @@ func get_since_time(last_event: NostrEvent?) -> Int64? {
     }
     
     return nil
-}
-
-func ws_nostr_event(relay: String, ev: WebSocketEvent) -> NostrEvent? {
-    switch ev {
-    case .binary(let dat):
-        return NostrEvent(content: "binary data? \(dat.count) bytes", pubkey: relay)
-    case .cancelled:
-        return NostrEvent(content: "cancelled", pubkey: relay)
-    case .connected:
-        return NostrEvent(content: "connected", pubkey: relay)
-    case .disconnected:
-        return NostrEvent(content: "disconnected", pubkey: relay)
-    case .error(let err):
-        return NostrEvent(content: "error \(err.debugDescription)", pubkey: relay)
-    case .text(let txt):
-        return NostrEvent(content: "text \(txt)", pubkey: relay)
-    case .pong:
-        return NostrEvent(content: "pong", pubkey: relay)
-    case .ping:
-        return NostrEvent(content: "ping", pubkey: relay)
-    case .viabilityChanged(let b):
-        return NostrEvent(content: "viabilityChanged \(b)", pubkey: relay)
-    case .reconnectSuggested(let b):
-        return NostrEvent(content: "reconnectSuggested \(b)", pubkey: relay)
-    }
 }
 
 func is_notification(ev: NostrEvent, pubkey: String) -> Bool {

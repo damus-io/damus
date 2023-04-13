@@ -283,17 +283,12 @@ class HomeModel: ObservableObject {
                     send_home_filters(relay_id: relay_id)
                 }
             case .error(let merr):
-                let desc = merr.debugDescription
+                let desc = String(describing: merr)
                 if desc.contains("Software caused connection abort") {
                     pool.reconnect(to: [relay_id])
                 }
-            case .disconnected: fallthrough
-            case .cancelled:
+            case .disconnected:
                 pool.reconnect(to: [relay_id])
-            case .reconnectSuggested(let t):
-                if t {
-                    pool.reconnect(to: [relay_id])
-                }
             default:
                 break
             }
