@@ -223,11 +223,11 @@ struct PostView: View {
                                 
                                 TextEntry
                             }
-                            .frame(height: uploadedMedias.count > 0 ? deviceSize.size.height*0.2 : deviceSize.size.height*0.78)
+                            .frame(height: uploadedMedias.isEmpty ? deviceSize.size.height*0.78 : deviceSize.size.height*0.2)
                             .id("post")
 
                             PVImageCarouselView(media: $uploadedMedias, deviceWidth: deviceSize.size.width)
-                                .frame(height: 300)
+                            
                         }
                     }
                     .frame(maxHeight: searching == nil ? .infinity : 70)
