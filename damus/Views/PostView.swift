@@ -228,6 +228,9 @@ struct PostView: View {
                             .id("post")
 
                             PVImageCarouselView(media: $uploadedMedias, deviceWidth: deviceSize.size.width)
+                                .onChange(of: uploadedMedias) { _ in
+                                    damus_state.drafts.medias = uploadedMedias
+                                }
                             
                         }
                     }
@@ -398,7 +401,7 @@ fileprivate func getImage(media: MediaUpload) -> UIImage {
     return uiimage
 }
 
-struct UploadedMedia {
+struct UploadedMedia: Equatable {
     let localURL: URL
     let uploadedURL: URL
     let representingImage: UIImage
