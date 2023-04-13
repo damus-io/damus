@@ -12,6 +12,8 @@ struct DMChatView: View {
     let pubkey: String
     @EnvironmentObject var dms: DirectMessageModel
     @State var showPrivateKeyWarning: Bool = false
+    @State var showImagePicker: Bool = false
+    @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
 
     var Messages: some View {
         ScrollViewReader { scroller in
@@ -49,20 +51,27 @@ struct DMChatView: View {
     }
 
     var InputField: some View {
-        TextEditor(text: $dms.draft)
-            .textEditorBackground {
-                InputBackground()
+        VStack {
+            TextEditor(text: $dms.draft)
+                .textEditorBackground {
+                    InputBackground()
+                }
+                .cornerRadius(8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(style: .init(lineWidth: 2))
+                        .foregroundColor(.secondary.opacity(0.2))
+                )
+                .padding(16)
+                .foregroundColor(Color.primary)
+                .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if let progress = image_upload.progress {
+                ProgressView(value: progress, total: 1.0)
+                    .progressViewStyle(.linear)
             }
-            .cornerRadius(8)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(style: .init(lineWidth: 2))
-                    .foregroundColor(.secondary.opacity(0.2))
-            )
-            .padding(16)
-            .foregroundColor(Color.primary)
-            .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
-            .fixedSize(horizontal: false, vertical: true)
+        }
     }
 
     @Environment(\.colorScheme) var colorScheme
@@ -88,6 +97,17 @@ struct DMChatView: View {
             BackgroundColor()
             
             HStack(spacing: 0) {
+                Spacer(minLength: 10.0)
+                Button(
+                    role: .none,
+                    action: {
+                        showImagePicker = true
+                    }
+                ) {
+                    Label("", systemImage: "paperclip")
+                        .font(.system(size: 25))
+                }
+
                 InputField
 
                 if !dms.draft.isEmpty {
@@ -115,6 +135,13 @@ struct DMChatView: View {
         }
         .fixedSize(horizontal: false, vertical: true)
         .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
+        .sheet(isPresented: $showImagePicker) {
+            ImagePicker(sourceType: .photoLibrary, pubkey: pubkey, imagesOnly: false) { img in
+                handle_upload(media: .image(img))
+            } onVideoPicked: { url in
+                handle_upload(media: .video(url))
+            }
+        }
     }
 
     func send_message() {
@@ -170,6 +197,23 @@ struct DMChatView: View {
                 send_message()
             }
         })
+    }
+
+    private func handle_upload(media: MediaUpload) {
+        let uploader = get_media_uploader(pubkey)
+        Task {
+            let res = await image_upload.start(media: media, uploader: uploader)
+            switch res {
+            case .success(let urlString):
+                dms.draft.append(" " + urlString + " ")
+            case .failed(let error):
+                if let error {
+                    print("Error uploading profile image \(error.localizedDescription)")
+                } else {
+                    print("Error uploading image :(")
+                }
+            }
+        }
     }
 }
 
