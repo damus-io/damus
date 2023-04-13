@@ -74,7 +74,8 @@ struct PostView: View {
             damus_state.drafts.replies.removeValue(forKey: replying_to)
         } else {
             damus_state.drafts.post = NSMutableAttributedString(string: "")
-            damus_state.drafts.medias = uploadedMedias
+            uploadedMedias = []
+            damus_state.drafts.medias = []
         }
 
         dismiss()
