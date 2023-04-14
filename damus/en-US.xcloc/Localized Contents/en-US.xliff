@@ -726,8 +726,7 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Mute</source>
         <target>Mute</target>
         <note>Alert button to mute a user.
-   Button to mute a profile.
-   Context menu option for muting users.</note>
+   Button to mute a profile.</note>
       </trans-unit>
       <trans-unit id="Mute %@?" xml:space="preserve">
         <source>Mute %@?</source>
@@ -737,7 +736,13 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Mute User" xml:space="preserve">
         <source>Mute User</source>
         <target>Mute User</target>
-        <note>Title of alert for muting a user.</note>
+        <note>Context menu option for muting users.
+   Title of alert for muting a user.</note>
+      </trans-unit>
+      <trans-unit id="Mute conversation" xml:space="preserve">
+        <source>Mute conversation</source>
+        <target>Mute conversation</target>
+        <note>Context menu option for muting a conversation.</note>
       </trans-unit>
       <trans-unit id="Muted" xml:space="preserve">
         <source>Muted</source>
@@ -922,6 +927,11 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <source>Public key</source>
         <target>Public key</target>
         <note>Label indicating that the text is a user's public account key.</note>
+      </trans-unit>
+      <trans-unit id="QR Code" xml:space="preserve">
+        <source>QR Code</source>
+        <target>QR Code</target>
+        <note>Button to view profile's qr code.</note>
       </trans-unit>
       <trans-unit id="Reactions" xml:space="preserve">
         <source>Reactions</source>
@@ -1309,6 +1319,11 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <source>Universe 🛸</source>
         <target>Universe 🛸</target>
         <note>Toolbar label for the universal view where posts from all connected relay servers appear.</note>
+      </trans-unit>
+      <trans-unit id="Unmute conversation" xml:space="preserve">
+        <source>Unmute conversation</source>
+        <target>Unmute conversation</target>
+        <note>Context menu option for unmuting a conversation.</note>
       </trans-unit>
       <trans-unit id="User has been muted" xml:space="preserve">
         <source>User has been muted</source>
