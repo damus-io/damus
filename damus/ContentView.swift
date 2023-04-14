@@ -93,7 +93,7 @@ struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
     
     var mystery: some View {
-        Text("Are you lost?")
+        Text("Are you lost?", comment: "Text asking the user if they are lost in the app.")
         .id("what")
     }
     

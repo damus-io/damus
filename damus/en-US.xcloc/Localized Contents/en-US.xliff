@@ -190,6 +190,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Appearance</target>
         <note>Section header for text and appearance settings</note>
       </trans-unit>
+      <trans-unit id="Are you lost?" xml:space="preserve">
+        <source>Are you lost?</source>
+        <target>Are you lost?</target>
+        <note>Text asking the user if they are lost in the app.</note>
+      </trans-unit>
       <trans-unit id="Are you sure you want to repost this?" xml:space="preserve">
         <source>Are you sure you want to repost this?</source>
         <target>Are you sure you want to repost this?</target>
@@ -779,6 +784,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Nothing to see here. Check back later!</target>
         <note>Indicates that there are no notes in the timeline to view.</note>
       </trans-unit>
+      <trans-unit id="Notification Dots" xml:space="preserve">
+        <source>Notification Dots</source>
+        <target>Notification Dots</target>
+        <note>Section header for notification indicator dot settings</note>
+      </trans-unit>
       <trans-unit id="Notification Preference" xml:space="preserve">
         <source>Notification Preference</source>
         <target>Notification Preference</target>
@@ -1339,6 +1349,11 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
  ARE YOU SURE YOU WANT TO CONTINUE?</target>
         <note>Alert for deleting the users account.</note>
       </trans-unit>
+      <trans-unit id="Wake up, %@" xml:space="preserve">
+        <source>Wake up, %@</source>
+        <target>Wake up, %@</target>
+        <note>Text telling the user to wake up, where the argument is their display name.</note>
+      </trans-unit>
       <trans-unit id="Wallet" xml:space="preserve">
         <source>Wallet</source>
         <target>Wallet</target>
@@ -1373,6 +1388,11 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <source>Yes, Post with Private Key</source>
         <target>Yes, Post with Private Key</target>
         <note>Button to proceed with posting a note even though it looks like they might be posting a private key.</note>
+      </trans-unit>
+      <trans-unit id="You are dreaming..." xml:space="preserve">
+        <source>You are dreaming...</source>
+        <target>You are dreaming...</target>
+        <note>Text telling the user that they are dreaming.</note>
       </trans-unit>
       <trans-unit id="You have no bookmarks yet, add them in the context menu" xml:space="preserve">
         <source>You have no bookmarks yet, add them in the context menu</source>

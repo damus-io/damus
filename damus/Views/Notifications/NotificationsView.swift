@@ -37,8 +37,8 @@ struct NotificationsView: View {
     
     var mystery: some View {
         VStack(spacing: 20) {
-            Text("Wake up \(Profile.displayName(profile: state.profiles.lookup(id: state.pubkey), pubkey: state.pubkey).display_name)")
-            Text("You are dreaming...")
+            Text("Wake up, \(Profile.displayName(profile: state.profiles.lookup(id: state.pubkey), pubkey: state.pubkey).display_name)", comment: "Text telling the user to wake up, where the argument is their display name.")
+            Text("You are dreaming...", comment: "Text telling the user that they are dreaming.")
         }
         .id("what")
     }
