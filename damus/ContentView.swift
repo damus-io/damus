@@ -568,7 +568,7 @@ struct ContentView: View {
             }
             Button(NSLocalizedString("Repost", comment: "Button to confirm reposting a post.")) {
                 if let current_boost {
-                    self.damus_state?.pool.send(.event(current_boost))
+                    self.damus_state?.postbox.send(current_boost)
                 }
             }
         } message: {
