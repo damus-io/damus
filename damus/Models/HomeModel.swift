@@ -519,9 +519,9 @@ class HomeModel: ObservableObject {
     
     func got_new_dm(notifs: NewEventsBits, ev: NostrEvent) {
         self.new_events = notifs
-        if damus_state.settings.dm_notification,
-            let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name {
-            create_local_notification(displayName: displayName, conversation: "You have received a direct message", type: .dm)
+        if damus_state.settings.dm_notification {
+            let convo = ev.decrypted(privkey: self.damus_state.keypair.privkey) ?? NSLocalizedString("New encrypted direct message", comment: "Notification that the user has received a new direct message")
+            create_local_notification(profiles: damus_state.profiles, pubkey: ev.pubkey, conversation: convo, type: .dm)
         }
     }
     
@@ -1051,33 +1051,36 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
     }
 
     if type == .text && damus_state.settings.mention_notification {
-        for block in ev.blocks(damus_state.keypair.privkey) {
-            if case .mention(let mention) = block, mention.ref.ref_id == damus_state.keypair.pubkey,
-               let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name {
-                let justContent = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content.attributed).string
-                create_local_notification(displayName: displayName, conversation: justContent, type: type)
-            }
+        let blocks = ev.blocks(damus_state.keypair.privkey)
+        for case .mention(let mention) in blocks where mention.ref.ref_id == damus_state.keypair.pubkey {
+            let content = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content.attributed).string
+            
+            create_local_notification(profiles: damus_state.profiles,
+                                      pubkey: ev.pubkey,
+                                      conversation: content,
+                                      type: type)
         }
-    } else if type == .boost && damus_state.settings.repost_notification,
-              let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name {
-
-        if let inner_ev = ev.inner_event {
-            create_local_notification(displayName: displayName, conversation: inner_ev.content, type: type)
-        }
+    } else if type == .boost && damus_state.settings.repost_notification, let inner_ev = ev.inner_event {
+        create_local_notification(profiles: damus_state.profiles,
+                                  pubkey: inner_ev.pubkey,
+                                  conversation: inner_ev.content,
+                                  type: type)
     } else if type == .like && damus_state.settings.like_notification,
-              let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name,
               let e_ref = ev.referenced_ids.first?.ref_id,
               let content = damus_state.events.lookup(e_ref)?.content {
-        
-        create_local_notification(displayName: displayName, conversation: content, type: type)
+        create_local_notification(profiles: damus_state.profiles, pubkey: ev.pubkey, conversation: content, type: type)
     }
 
 }
 
-func create_local_notification(displayName: String, conversation: String, type: NostrKind) {
+func create_local_notification(profiles: Profiles, pubkey: String, conversation: String, type: NostrKind) {
     let content = UNMutableNotificationContent()
     var title = ""
     var identifier = ""
+    
+    let profile = profiles.lookup(id: pubkey)
+    let displayName = Profile.displayName(profile: profile, pubkey: pubkey).display_name
+    
     switch type {
     case .text:
         title = String(format: NSLocalizedString("Mentioned by %@", comment: "Mentioned by heading in local notification"), displayName)
@@ -1089,7 +1092,7 @@ func create_local_notification(displayName: String, conversation: String, type: 
         title = String(format: NSLocalizedString("Liked by %@", comment: "Liked by heading in local notification"), displayName)
         identifier = "myLikeNotification"
     case .dm:
-        title = String(format: NSLocalizedString("DM by %@", comment: "DM by heading in local notification"), displayName)
+        title = String(format: NSLocalizedString("%@", comment: "DM by heading in local notification"), displayName)
         identifier = "myDMNotification"
     default:
         break
