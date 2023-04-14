@@ -119,6 +119,7 @@ struct ProfileView: View {
     @State var showing_select_wallet: Bool = false
     @State var is_zoomed: Bool = false
     @State var show_share_sheet: Bool = false
+    @State var show_qr_code: Bool = false
     @State var action_sheet_presented: Bool = false
     @State var filter_state : FilterState = .posts
     @State var yOffset: CGFloat = 0
@@ -212,6 +213,10 @@ struct ProfileView: View {
         .confirmationDialog(NSLocalizedString("Actions", comment: "Title for confirmation dialog to either share, report, or block a profile."), isPresented: $action_sheet_presented) {
             Button(NSLocalizedString("Share", comment: "Button to share the link to a profile.")) {
                 show_share_sheet = true
+            }
+            
+            Button(NSLocalizedString("QR Code", comment: "Button to view profile's qr code.")) {
+                show_qr_code = true
             }
 
             // Only allow reporting if logged in with private key and the currently viewed profile is not the logged in profile.
@@ -464,6 +469,9 @@ struct ProfileView: View {
                     ShareSheet(activityItems: [url])
                 }
             }
+        }
+        .fullScreenCover(isPresented: $show_qr_code) {
+            QRCodeView(damus_state: damus_state, pubkey: profile.pubkey)
         }
     }
 }
