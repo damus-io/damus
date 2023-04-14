@@ -53,38 +53,12 @@ final class RelayConnection {
             .sink { [weak self] completion in
                 switch completion {
                 case .failure(let error):
-                    self?.isConnected = false
-                    self?.isConnecting = false
-                    self?.handleEvent(.ws_event(.error(error)))
+                    self?.receive(event: .error(error))
                 case .finished:
-                    self?.isConnected = false
-                    self?.isConnecting = false
-                    self?.handleEvent(.ws_event(.disconnected(.normalClosure, nil)))
+                    self?.receive(event: .disconnected(.normalClosure, nil))
                 }
-                
             } receiveValue: { [weak self] event in
-                guard let self else { return }
-                switch event {
-                case .connected:
-                    self.isConnected = true
-                    self.isConnecting = false
-                case .message(let message):
-                    self.receive(message: message)
-                case .disconnected(let closeCode, let reason):
-                    if closeCode != .normalClosure {
-                        print("⚠️ Warning: RelayConnection (\(self.url)) closed with code \(closeCode), reason: \(String(describing: reason))")
-                    }
-                    self.isConnected = false
-                    self.isConnecting = false
-                    
-                    if self.isReconnecting {
-                        self.isReconnecting = false
-                        self.connect()
-                    }
-                default:
-                    break
-                }
-                self.handleEvent(.ws_event(event))
+                self?.receive(event: event)
             }
             
         socket.connect()
@@ -104,6 +78,35 @@ final class RelayConnection {
             return
         }
         socket.send(.string(req))
+    }
+    
+    private func receive(event: WebSocketEvent) {
+        switch event {
+        case .connected:
+            self.isConnected = true
+            self.isConnecting = false
+        case .message(let message):
+            self.receive(message: message)
+        case .disconnected(let closeCode, let reason):
+            if closeCode != .normalClosure {
+                print("⚠️ Warning: RelayConnection (\(self.url)) closed with code \(closeCode), reason: \(String(describing: reason))")
+            }
+            handleReconnect()
+        case .error(let error):
+            print("⚠️ Warning: RelayConnection (\(self.url)) error: \(error)")
+            handleReconnect()
+        }
+        self.handleEvent(.ws_event(event))
+    }
+    
+    private func handleReconnect() {
+        self.isConnected = false
+        self.isConnecting = false
+        
+        if self.isReconnecting {
+            self.isReconnecting = false
+            self.connect()
+        }
     }
     
     private func receive(message: URLSessionWebSocketTask.Message) {
