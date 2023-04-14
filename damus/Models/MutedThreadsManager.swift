@@ -30,7 +30,7 @@ func saveMutedThreads(pubkey: String, currentValue: [String], value: [String]) -
 class MutedThreadsManager: ObservableObject {
 
     private let userDefaults = UserDefaults.standard
-    private let pubkey: String
+    private let keypair: Keypair
 
     private var _mutedThreadsSet: Set<String>
     private var _mutedThreads: [String]
@@ -39,26 +39,26 @@ class MutedThreadsManager: ObservableObject {
             return _mutedThreads
         }
         set {
-            if saveMutedThreads(pubkey: pubkey, currentValue: _mutedThreads, value: newValue) {
+            if saveMutedThreads(pubkey: keypair.pubkey, currentValue: _mutedThreads, value: newValue) {
                 self._mutedThreads = newValue
                 self.objectWillChange.send()
             }
         }
     }
 
-    init(pubkey: String) {
-        self._mutedThreads = loadMutedThreads(pubkey: pubkey)
+    init(keypair: Keypair) {
+        self._mutedThreads = loadMutedThreads(pubkey: keypair.pubkey)
         self._mutedThreadsSet = Set(_mutedThreads)
-        self.pubkey = pubkey
+        self.keypair = keypair
     }
 
-    func isMutedThread(_ ev: NostrEvent) -> Bool {
-        return _mutedThreadsSet.contains(ev.thread_id(privkey: nil))
+    func isMutedThread(_ ev: NostrEvent, privkey: String?) -> Bool {
+        return _mutedThreadsSet.contains(ev.thread_id(privkey: privkey))
     }
 
     func updateMutedThread(_ ev: NostrEvent) {
         let threadId = ev.thread_id(privkey: nil)
-        if isMutedThread(ev) {
+        if isMutedThread(ev, privkey: keypair.privkey) {
             mutedThreads = mutedThreads.filter { $0 != threadId }
             _mutedThreadsSet.remove(threadId)
             notify(.unmute_thread, ev)

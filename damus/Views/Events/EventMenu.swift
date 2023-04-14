@@ -46,7 +46,7 @@ struct MenuItems: View {
         let bookmarked = bookmarks.isBookmarked(event)
         self._isBookmarked = State(initialValue: bookmarked)
 
-        let muted_thread = muted_threads.isMutedThread(event)
+        let muted_thread = muted_threads.isMutedThread(event, privkey: keypair.privkey)
         self._isMutedThread = State(initialValue: muted_thread)
         
         self.bookmarks = bookmarks
@@ -96,7 +96,7 @@ struct MenuItems: View {
             if event.known_kind != .dm {
                 Button {
                     self.muted_threads.updateMutedThread(event)
-                    let muted = self.muted_threads.isMutedThread(event)
+                    let muted = self.muted_threads.isMutedThread(event, privkey: self.keypair.privkey)
                     isMutedThread = muted
                 } label: {
                     let imageName = isMutedThread ? "speaker" : "speaker.slash"

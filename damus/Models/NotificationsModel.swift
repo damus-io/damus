@@ -319,6 +319,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
     }
 
     func include_event(_ event: NostrEvent, damus_state: DamusState) -> Bool {
-        return should_show_event(contacts: damus_state.contacts, ev: event) && !damus_state.muted_threads.isMutedThread(event)
+        let privkey = damus_state.keypair.privkey
+        return should_show_event(contacts: damus_state.contacts, ev: event) && !damus_state.muted_threads.isMutedThread(event, privkey: privkey)
     }
 }

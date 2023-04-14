@@ -199,7 +199,7 @@ class HomeModel: ObservableObject {
     }
     
     func filter_muted() {
-        events.filter { !damus_state.contacts.is_muted($0.pubkey) && !damus_state.muted_threads.isMutedThread($0) }
+        events.filter { !damus_state.contacts.is_muted($0.pubkey) && !damus_state.muted_threads.isMutedThread($0, privkey: self.damus_state.keypair.privkey) }
         self.dms.dms = dms.dms.filter { !damus_state.contacts.is_muted($0.0) }
         notifications.filter_and_build_notifications(damus_state)
     }
@@ -1047,7 +1047,7 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
     }
 
     // Don't show notifications from muted threads.
-    if damus_state.muted_threads.isMutedThread(ev) {
+    if damus_state.muted_threads.isMutedThread(ev, privkey: damus_state.keypair.privkey) {
         return
     }
 

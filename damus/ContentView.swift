@@ -644,7 +644,7 @@ struct ContentView: View {
                                       postbox: PostBox(pool: pool),
                                       bootstrap_relays: bootstrap_relays,
                                       replies: ReplyCounter(our_pubkey: pubkey),
-                                      muted_threads: MutedThreadsManager(pubkey: pubkey)
+                                      muted_threads: MutedThreadsManager(keypair: keypair)
         )
         home.damus_state = self.damus_state!
         
