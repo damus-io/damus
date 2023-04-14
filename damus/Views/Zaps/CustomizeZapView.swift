@@ -59,6 +59,8 @@ struct CustomizeZapView: View {
     @State var error: String?
     @State var showing_wallet_selector: Bool
     @State var zapping: Bool
+    @State var zap_button_previous_element_y_coordinate: CGFloat = 0.0
+
     
     let zap_amounts: [ZapAmountItem]
     
@@ -171,7 +173,6 @@ struct CustomizeZapView: View {
     
     var TheForm: some View {
         Form {
-                
             Group {
                 Section(content: {
                     AmountPicker
@@ -200,11 +201,15 @@ struct CustomizeZapView: View {
                     Text("Comment", comment: "Header text to indicate that the text field below it is a comment that will be used to send as part of a zap to the user.")
                 })
             }
-                
             Section(content: {
                 ZapTypePicker
             }, header: {
-                Text("Zap Type", comment: "Header text to indicate that the picker below it is to choose the type of zap to send.")
+                GeometryReader{ geo in
+                    Text("Zap Type", comment: "Header text to indicate that the picker below it is to choose the type of zap to send.")
+                        .onAppear {
+                            self.zap_button_previous_element_y_coordinate = geo.frame(in: .global).maxY
+                        }
+                }
             }, footer: {
                 Text(zap_type_desc)
             })
@@ -225,9 +230,13 @@ struct CustomizeZapView: View {
                 Text(error)
                     .foregroundColor(.red)
             }
-        
         }
-        .dismissKeyboardOnTap()
+        .overlay(
+            Color.clear
+                .frame(width: UIScreen.main.bounds.width, height: self.zap_button_previous_element_y_coordinate, alignment: .top)
+                .contentShape(Rectangle())
+                .dismissKeyboardOnTap()
+            , alignment: .top)
     }
     
     var MainContent: some View {
