@@ -41,13 +41,15 @@ class HomeModel: ObservableObject {
     let dms_subid = UUID().description
     let init_subid = UUID().description
     let profiles_subid = UUID().description
+    
+    var loading: Bool = false
 
+    var signal = SignalModel()
+    
     @Published var new_events: NewEventsBits = NewEventsBits()
     @Published var notifications = NotificationsModel()
     @Published var dms: DirectMessagesModel
     @Published var events = EventHolder()
-    @Published var loading: Bool = false
-    @Published var signal: SignalModel = SignalModel()
 
     init() {
         self.damus_state = DamusState.empty
@@ -299,7 +301,7 @@ class HomeModel: ObservableObject {
                 break
             }
             
-            update_signal_from_pool(signal: signal, pool: damus_state.pool)
+            update_signal_from_pool(signal: self.signal, pool: damus_state.pool)
 
             print("ws_event \(ev)")
 
@@ -557,8 +559,8 @@ func update_signal_from_pool(signal: SignalModel, pool: RelayPool) {
         signal.max_signal = pool.relays.count
     }
 
-    if signal.signal != pool.num_connecting {
-        signal.signal = signal.max_signal - pool.num_connecting
+    if signal.signal != pool.num_connected {
+        signal.signal = pool.num_connected
     }
 }
 
