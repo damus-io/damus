@@ -28,7 +28,6 @@ struct UserView: View {
                 
                 Spacer()
             }
-            Spacer()
         }
     }
 }

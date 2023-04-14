@@ -43,6 +43,7 @@ struct FollowersView: View {
             LazyVStack(alignment: .leading) {
                 ForEach(followers.contacts ?? [], id: \.self) { pk in
                     FollowUserView(target: .pubkey(pk), damus_state: damus_state)
+                    Spacer()
                 }
             }
             .padding(.horizontal)
@@ -68,6 +69,7 @@ struct FollowingView: View {
             LazyVStack(alignment: .leading) {
                 ForEach(following.contacts.reversed(), id: \.self) { pk in
                     FollowUserView(target: .pubkey(pk), damus_state: damus_state)
+                    Spacer()
                 }
             }
             .padding()

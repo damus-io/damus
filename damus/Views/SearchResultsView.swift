@@ -34,6 +34,7 @@ struct SearchResultsView: View {
                     LazyVStack {
                         ForEach(results) { prof in
                             ProfileSearchResult(pk: prof.pubkey)
+                            Spacer()
                         }
                     }
                 case .hashtag(let ht):
