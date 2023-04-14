@@ -48,31 +48,20 @@ class HomeModel: ObservableObject {
     
     @Published var new_events: NewEventsBits = NewEventsBits()
     @Published var notifications = NotificationsModel()
-    @Published var dms: DirectMessagesModel
     @Published var events = EventHolder()
 
     init() {
         self.damus_state = DamusState.empty
-        self.dms = DirectMessagesModel(our_pubkey: "")
         filter_muted()
+        self.setup_debouncer()
     }
     
-    init(damus_state: DamusState) {
-        self.damus_state = damus_state
-        self.dms = DirectMessagesModel(our_pubkey: damus_state.pubkey)
-        self.setup_debouncer()
-        filter_muted()
-    }
-
     var pool: RelayPool {
         return damus_state.pool
     }
     
-    func setup_debouncer() {
-        // turn off debouncer after initial load
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-            self.should_debounce_dms = false
-        }
+    var dms: DirectMessagesModel {
+        return damus_state.dms
     }
 
     func has_sub_id_event(sub_id: String, ev_id: String) -> Bool {
@@ -82,6 +71,13 @@ class HomeModel: ObservableObject {
         }
 
         return has_event[sub_id]!.contains(ev_id)
+    }
+    
+    func setup_debouncer() {
+        // turn off debouncer after initial load
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+            self.should_debounce_dms = false
+        }
     }
 
     func process_event(sub_id: String, relay_id: String, ev: NostrEvent) {
@@ -524,6 +520,14 @@ class HomeModel: ObservableObject {
         }
     }
     
+    func got_new_dm(notifs: NewEventsBits, ev: NostrEvent) {
+        self.new_events = notifs
+        if damus_state.settings.dm_notification,
+            let displayName = damus_state.profiles.lookup(id: ev.pubkey)?.display_name {
+            create_local_notification(displayName: displayName, conversation: "You have received a direct message", type: .dm)
+        }
+    }
+    
     func handle_dm(_ ev: NostrEvent) {
         guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
             return
@@ -532,7 +536,7 @@ class HomeModel: ObservableObject {
         if !should_debounce_dms {
             self.incoming_dms.append(ev)
             if let notifs = handle_incoming_dms(prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
-                self.new_events = notifs
+                got_new_dm(notifs: notifs, ev: ev)
             }
             self.incoming_dms = []
             return
@@ -542,11 +546,7 @@ class HomeModel: ObservableObject {
         
         dm_debouncer.debounce { [self] in
             if let notifs = handle_incoming_dms(prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
-                self.new_events = notifs
-                if  damus_state.settings.dm_notification,
-                    let displayName = damus_state.profiles.lookup(id: self.incoming_dms.last!.pubkey)?.display_name {
-                    create_local_notification(displayName: displayName, conversation: "You have received a direct message", type: .dm)
-                }
+                got_new_dm(notifs: notifs, ev: ev)
             }
             self.incoming_dms = []
         }
