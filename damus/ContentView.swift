@@ -185,7 +185,6 @@ struct ContentView: View {
                 
             case .dms:
                 DirectMessagesView(damus_state: damus_state!)
-                    .environmentObject(home.dms)
             
             case .none:
                 EmptyView()
