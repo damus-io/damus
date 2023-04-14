@@ -10,7 +10,7 @@ import CoreImage.CIFilterBuiltins
 
 struct QRCodeView: View {
     let damus_state: DamusState
-    @State var pubkey: String = ""
+    @State var pubkey: String
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.presentationMode) var presentationMode
@@ -94,11 +94,6 @@ struct QRCodeView: View {
             }
             
         }
-        .onAppear() {
-            if pubkey.isEmpty {
-                pubkey = damus_state.pubkey
-            }
-        }
         .modifier(SwipeToDismissModifier(minDistance: nil, onDismiss: {
             presentationMode.wrappedValue.dismiss()
         }))
@@ -126,6 +121,6 @@ struct QRCodeView: View {
 
 struct QRCodeView_Previews: PreviewProvider {
     static var previews: some View {
-        QRCodeView(damus_state: test_damus_state())
+        QRCodeView(damus_state: test_damus_state(), pubkey: test_event.pubkey)
     }
 }
