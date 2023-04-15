@@ -262,7 +262,7 @@ struct PostView: View {
                 } onVideoPicked: { url in
                     self.mediaToUpload = .video(url)
                 }
-                .alert("Confirm upload?", isPresented: $image_upload_confirm) {
+                .alert("Are you sure you want to upload this image?", isPresented: $image_upload_confirm) {
                     Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
                         if let mediaToUpload {
                             self.handle_upload(media: mediaToUpload)
