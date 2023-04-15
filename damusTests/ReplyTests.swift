@@ -116,7 +116,7 @@ class ReplyTests: XCTestCase {
         let tags: [[String]] = []
         let blocks = parse_mentions(content: content, tags: tags)
         let post_blocks = parse_post_blocks(content: content)
-        let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
+        let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags, silent_mentions: false)
         let event_refs = interpret_event_refs(blocks: blocks, tags: tags)
         
         XCTAssertEqual(event_refs.count, 0)
@@ -259,11 +259,11 @@ class ReplyTests: XCTestCase {
         let post = NostrPost(content: content, references: [reply_ref])
         let ev = post_to_event(post: post, privkey: evid, pubkey: pk)
         
-        XCTAssertEqual(ev.tags.count, 3)
+        XCTAssertEqual(ev.tags.count, 1)
         XCTAssertEqual(blocks.count, 5)
         XCTAssertEqual(blocks[1].is_ref, ReferencedId(ref_id: hex_note_id, relay_id: nil, key: "e"))
         XCTAssertEqual(blocks[3].is_ref, ReferencedId(ref_id: hex_note_id, relay_id: nil, key: "e"))
-        XCTAssertEqual(ev.content, "this is a #[1] #[2] mention")
+        XCTAssertEqual(ev.content, "this is a nostr:\(pk) nostr:\(pk) mention")
     }
     
     func testNsecMention() throws {
@@ -298,7 +298,7 @@ class ReplyTests: XCTestCase {
         let pk = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
         let content = "this is a @\(pk) mention"
         let parsed = parse_post_blocks(content: content)
-        let post_tags = make_post_tags(post_blocks: parsed, tags: [])
+        let post_tags = make_post_tags(post_blocks: parsed, tags: [], silent_mentions: false)
         
         XCTAssertEqual(post_tags.blocks.count, 3)
         XCTAssertEqual(post_tags.tags.count, 1)

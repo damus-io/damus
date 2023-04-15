@@ -8,26 +8,19 @@
 import Foundation
 import UIKit
 
-struct NewEventsBits {
-    let bits: Int
-
-    init() {
-        bits = 0
-    }
-
-    init (prev: NewEventsBits, setting: Timeline) {
-        self.bits = prev.bits | timeline_bit(setting)
-    }
-
-    init (prev: NewEventsBits, unsetting: Timeline) {
-        self.bits = prev.bits & ~timeline_bit(unsetting)
-    }
-
-    func is_set(_ timeline: Timeline) -> Bool {
-        let notification_bit = timeline_bit(timeline)
-        return (bits & notification_bit) == notification_bit
-    }
-
+struct NewEventsBits: OptionSet {
+    let rawValue: Int
+    
+    static let home = NewEventsBits(rawValue: 1 << 0)
+    static let zaps = NewEventsBits(rawValue: 1 << 1)
+    static let mentions = NewEventsBits(rawValue: 1 << 2)
+    static let reposts = NewEventsBits(rawValue: 1 << 3)
+    static let likes = NewEventsBits(rawValue: 1 << 4)
+    static let search = NewEventsBits(rawValue: 1 << 5)
+    static let dms = NewEventsBits(rawValue: 1 << 6)
+    
+    static let all = NewEventsBits(rawValue: 0xFFFFFFFF)
+    static let notifications: NewEventsBits = [.zaps, .likes, .reposts, .mentions]
 }
 
 class HomeModel: ObservableObject {
@@ -59,12 +52,14 @@ class HomeModel: ObservableObject {
     init() {
         self.damus_state = DamusState.empty
         self.dms = DirectMessagesModel(our_pubkey: "")
+        filter_muted()
     }
     
     init(damus_state: DamusState) {
         self.damus_state = damus_state
         self.dms = DirectMessagesModel(our_pubkey: damus_state.pubkey)
         self.setup_debouncer()
+        filter_muted()
     }
 
     var pool: RelayPool {
@@ -141,7 +136,7 @@ class HomeModel: ObservableObject {
             return
         }
         
-        if !notifications.insert_zap(zap) {
+        if !notifications.insert_zap(zap, damus_state: damus_state) {
             return
         }
 
@@ -204,9 +199,9 @@ class HomeModel: ObservableObject {
     }
     
     func filter_muted() {
-        events.filter { !damus_state.contacts.is_muted($0.pubkey) }
+        events.filter { !damus_state.contacts.is_muted($0.pubkey) && !damus_state.muted_threads.isMutedThread($0, privkey: self.damus_state.keypair.privkey) }
         self.dms.dms = dms.dms.filter { !damus_state.contacts.is_muted($0.0) }
-        notifications.filter { !damus_state.contacts.is_muted($0.pubkey) }
+        notifications.filter_and_build_notifications(damus_state)
     }
     
     func handle_delete_event(_ ev: NostrEvent) {
@@ -485,7 +480,7 @@ class HomeModel: ObservableObject {
             damus_state.events.insert(inner_ev)
         }
         
-        if !notifications.insert_event(ev) {
+        if !notifications.insert_event(ev, damus_state: damus_state) {
             return
         }
         
@@ -658,60 +653,65 @@ func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
 }
 
 func process_metadata_event(our_pubkey: String, profiles: Profiles, ev: NostrEvent) {
-    guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
-        return
-    }
-    
-    if our_pubkey == ev.pubkey && (profile.deleted ?? false) {
-        DispatchQueue.main.async {
-            notify(.deleted_account, ())
-        }
-        return
-    }
-
-    var old_nip05: String? = nil
-    if let mprof = profiles.lookup_with_timestamp(id: ev.pubkey) {
-        old_nip05 = mprof.profile.nip05
-        if mprof.timestamp > ev.created_at {
-            // skip if we already have an newer profile
+    DispatchQueue.global(qos: .background).async {
+        guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
             return
         }
-    }
+        
+        DispatchQueue.main.async {
+            if our_pubkey == ev.pubkey && (profile.deleted ?? false) {
+                DispatchQueue.main.async {
+                    notify(.deleted_account, ())
+                }
+                return
+            }
 
-    let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at, event: ev)
-    profiles.add(id: ev.pubkey, profile: tprof)
-    
-    if let nip05 = profile.nip05, old_nip05 != profile.nip05 {
-        Task.detached(priority: .background) {
-            let validated = await validate_nip05(pubkey: ev.pubkey, nip05_str: nip05)
-            if validated != nil {
-                print("validated nip05 for '\(nip05)'")
+            var old_nip05: String? = nil
+            if let mprof = profiles.lookup_with_timestamp(id: ev.pubkey) {
+                old_nip05 = mprof.profile.nip05
+                if mprof.timestamp > ev.created_at {
+                    // skip if we already have an newer profile
+                    return
+                }
+            }
+
+            let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at, event: ev)
+            profiles.add(id: ev.pubkey, profile: tprof)
+            
+            if let nip05 = profile.nip05, old_nip05 != profile.nip05 {
+                Task.detached(priority: .background) {
+                    let validated = await validate_nip05(pubkey: ev.pubkey, nip05_str: nip05)
+                    if validated != nil {
+                        print("validated nip05 for '\(nip05)'")
+                    }
+                    
+                    DispatchQueue.main.async {
+                        profiles.validated[ev.pubkey] = validated
+                        profiles.nip05_pubkey[nip05] = ev.pubkey
+                        notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+                    }
+                }
             }
             
-            DispatchQueue.main.async {
-                profiles.validated[ev.pubkey] = validated
-                profiles.nip05_pubkey[nip05] = ev.pubkey
-                notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+            // load pfps asap
+            let picture = tprof.profile.picture ?? robohash(ev.pubkey)
+            if URL(string: picture) != nil {
+                DispatchQueue.main.async {
+                    notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+                }
             }
-        }
-    }
-    
-    // load pfps asap
-    let picture = tprof.profile.picture ?? robohash(ev.pubkey)
-    if URL(string: picture) != nil {
-        DispatchQueue.main.async {
+            
+            let banner = tprof.profile.banner ?? ""
+            if URL(string: banner) != nil {
+                DispatchQueue.main.async {
+                    notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+                }
+            }
+            
             notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
         }
     }
     
-    let banner = tprof.profile.banner ?? ""
-    if URL(string: banner) != nil {
-        DispatchQueue.main.async {
-            notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-        }
-    }
-    
-    notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
 }
 
 func robohash(_ pk: String) -> String {
@@ -901,6 +901,45 @@ func handle_incoming_dms(prev_events: NewEventsBits, dms: DirectMessagesModel, o
     return new_events
 }
 
+func determine_event_notifications(_ ev: NostrEvent) -> NewEventsBits {
+    guard let kind = ev.known_kind else {
+        return []
+    }
+    
+    if kind == .zap {
+        return [.zaps]
+    }
+    
+    if kind == .boost {
+        return [.reposts]
+    }
+    
+    if kind == .text {
+        return [.mentions]
+    }
+    
+    if kind == .like {
+        return [.likes]
+    }
+    
+    return []
+}
+
+func timeline_to_notification_bits(_ timeline: Timeline, ev: NostrEvent?) -> NewEventsBits {
+    switch timeline {
+    case .home:
+        return [.home]
+    case .notifications:
+        if let ev {
+            return determine_event_notifications(ev)
+        }
+        return [.notifications]
+    case .search:
+        return [.search]
+    case .dms:
+        return [.dms]
+    }
+}
 
 /// A helper to determine if we need to notify the user of new events
 func handle_last_events(new_events: NewEventsBits, ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) -> NewEventsBits? {
@@ -909,7 +948,7 @@ func handle_last_events(new_events: NewEventsBits, ev: NostrEvent, timeline: Tim
     if last_ev == nil || last_ev!.created_at < ev.created_at {
         save_last_event(ev, timeline: timeline)
         if shouldNotify {
-            return NewEventsBits(prev: new_events, setting: timeline)
+            return new_events.union(timeline_to_notification_bits(timeline, ev: ev))
         }
     }
     
@@ -1004,6 +1043,11 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
     if damus_state.settings.notification_only_from_following,
        damus_state.contacts.follow_state(ev.pubkey) != .follows
         {
+        return
+    }
+
+    // Don't show notifications from muted threads.
+    if damus_state.muted_threads.isMutedThread(ev, privkey: damus_state.keypair.privkey) {
         return
     }
 

@@ -12,8 +12,14 @@ struct FollowUserView: View {
     let damus_state: DamusState
 
     static let markdown = Markdown()
+    @State var navigating: Bool = false
 
     var body: some View {
+        let dest = ProfileView(damus_state: damus_state, pubkey: target.pubkey)
+        NavigationLink(destination: dest, isActive: $navigating) {
+            EmptyView()
+        }
+        
         HStack {
             UserViewRow(damus_state: damus_state, pubkey: target.pubkey)
             
@@ -57,7 +63,7 @@ struct FollowingView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading) {
-                ForEach(following.contacts, id: \.self) { pk in
+                ForEach(following.contacts.reversed(), id: \.self) { pk in
                     FollowUserView(target: .pubkey(pk), damus_state: damus_state)
                 }
             }

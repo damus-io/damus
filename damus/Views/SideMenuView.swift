@@ -142,7 +142,7 @@ struct SideMenuView: View {
                                 .font(.title)
                                 .foregroundColor(textColor())
                         }).fullScreenCover(isPresented: $showQRCode) {
-                            QRCodeView(damus_state: damus_state)
+                            QRCodeView(damus_state: damus_state, pubkey: damus_state.pubkey)
                         }
                     }
                     .padding(.top, verticalSpacing)

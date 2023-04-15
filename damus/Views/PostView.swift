@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 enum NostrPostResult {
     case post(NostrPost)
@@ -21,7 +22,7 @@ struct PostView: View {
     @State var attach_media: Bool = false
     @State var attach_camera: Bool = false
     @State var error: String? = nil
-    
+    @State var uploadedMedias: [UploadedMedia] = []
     @State var originalReferences: [ReferencedId] = []
     @State var references: [ReferencedId] = []
     
@@ -57,7 +58,14 @@ struct PostView: View {
             }
         }
 
-        let content = self.post.string.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+
+
+        var content = self.post.string.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+
+        let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
+
+        content.append(" " + imagesString + " ")
+
         let new_post = NostrPost(content: content, references: references, kind: kind)
 
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
@@ -66,13 +74,15 @@ struct PostView: View {
             damus_state.drafts.replies.removeValue(forKey: replying_to)
         } else {
             damus_state.drafts.post = NSMutableAttributedString(string: "")
+            uploadedMedias = []
+            damus_state.drafts.medias = []
         }
 
         dismiss()
     }
 
     var is_post_empty: Bool {
-        return post.string.allSatisfy { $0.isWhitespace }
+        return post.string.allSatisfy { $0.isWhitespace } && uploadedMedias.isEmpty
     }
     
     var ImageButton: some View {
@@ -168,29 +178,20 @@ struct PostView: View {
         .padding()
     }
     
-    func append_url(_ url: String) {
-        let uploadedImageURL = NSMutableAttributedString(string: url)
-        let combinedAttributedString = NSMutableAttributedString()
-        combinedAttributedString.append(post)
-        if !post.string.hasSuffix(" ") {
-            combinedAttributedString.append(NSAttributedString(string: " "))
-        }
-        combinedAttributedString.append(uploadedImageURL)
-        
-        // make sure we have a space at the end
-        combinedAttributedString.append(NSAttributedString(string: " "))
-        post = combinedAttributedString
-    }
-    
     func handle_upload(media: MediaUpload) {
         let uploader = get_media_uploader(damus_state.pubkey)
-        
         Task.init {
+            let img = getImage(media: media)
             let res = await image_upload.start(media: media, uploader: uploader)
             
             switch res {
             case .success(let url):
-                append_url(url)
+                guard let url = URL(string: url) else {
+                    self.error = "Error uploading image :("
+                    return
+                }
+                let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, representingImage: img)
+                uploadedMedias.append(uploadedMedia)
                 
             case .failed(let error):
                 if let error {
@@ -206,7 +207,7 @@ struct PostView: View {
     var body: some View {
         GeometryReader { (deviceSize: GeometryProxy) in
             VStack(alignment: .leading, spacing: 0) {
-                
+
                 let searching = get_searching_string(post.string)
                 
                 TopBar
@@ -222,8 +223,14 @@ struct PostView: View {
                                 
                                 TextEntry
                             }
-                            .frame(height: deviceSize.size.height*0.78)
+                            .frame(height: uploadedMedias.isEmpty ? deviceSize.size.height*0.78 : deviceSize.size.height*0.2)
                             .id("post")
+
+                            PVImageCarouselView(media: $uploadedMedias, deviceWidth: deviceSize.size.width)
+                                .onChange(of: uploadedMedias) { _ in
+                                    damus_state.drafts.medias = uploadedMedias
+                                }
+                            
                         }
                         .padding(.horizontal)
                     }
@@ -272,6 +279,7 @@ struct PostView: View {
                     }
                 } else {
                     post = damus_state.drafts.post
+                    uploadedMedias = damus_state.drafts.medias
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -283,6 +291,7 @@ struct PostView: View {
                     damus_state.drafts.replies.removeValue(forKey: replying_to)
                 } else if replying_to == nil && damus_state.drafts.post.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     damus_state.drafts.post = NSMutableAttributedString(string : "")
+                    damus_state.drafts.medias = uploadedMedias
                 }
             }
             .alert(NSLocalizedString("Note contains \"nsec1\" private key. Are you sure?", comment: "Alert user that they might be attempting to paste a private key and ask them to confirm."), isPresented: $showPrivateKeyWarning, actions: {
@@ -322,4 +331,77 @@ struct PostView_Previews: PreviewProvider {
     static var previews: some View {
         PostView(replying_to: nil, damus_state: test_damus_state())
     }
+}
+
+struct PVImageCarouselView: View {
+    @Binding var media: [UploadedMedia]
+
+    let deviceWidth: CGFloat
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack {
+                ForEach(media.map({$0.representingImage}), id: \.self) { image in
+                    ZStack(alignment: .topTrailing) {
+                        Image(uiImage: image)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: media.count == 1 ? deviceWidth*0.8 : 250, height: media.count == 1 ? 400 : 250)
+                            .cornerRadius(10)
+                            .padding()
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.white)
+                            .padding(20)
+                            .onTapGesture {
+                                if let index = media.map({$0.representingImage}).firstIndex(of: image) {
+                                    media.remove(at: index)
+                                }
+                            }
+                    }
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+
+fileprivate func getImage(media: MediaUpload) -> UIImage {
+    var uiimage: UIImage = UIImage()
+    if media.is_image {
+        // fetch the image data
+        if let data = try? Data(contentsOf: media.localURL) {
+            uiimage = UIImage(data: data) ?? UIImage()
+        }
+    } else {
+        let asset = AVURLAsset(url: media.localURL)
+        let generator = AVAssetImageGenerator(asset: asset)
+        generator.appliesPreferredTrackTransform = true
+        let time = CMTimeMake(value: 1, timescale: 60) // get the thumbnail image at the 1st second
+        do {
+            let cgImage = try generator.copyCGImage(at: time, actualTime: nil)
+            uiimage = UIImage(cgImage: cgImage)
+        } catch {
+            print("No thumbnail: \(error)")
+        }
+        // create a play icon on the top to differentiate if media upload is image or a video, gif is an image
+        let playIcon = UIImage(systemName: "play.fill")?.withTintColor(.white, renderingMode: .alwaysOriginal)
+        let size = uiimage.size
+        let scale = UIScreen.main.scale
+        UIGraphicsBeginImageContextWithOptions(size, false, scale)
+        uiimage.draw(at: .zero)
+        let playIconSize = CGSize(width: 60, height: 60)
+        let playIconOrigin = CGPoint(x: (size.width - playIconSize.width) / 2, y: (size.height - playIconSize.height) / 2)
+        playIcon?.draw(in: CGRect(origin: playIconOrigin, size: playIconSize))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        uiimage = newImage ?? UIImage()
+    }
+    return uiimage
+}
+
+struct UploadedMedia: Equatable {
+    let localURL: URL
+    let uploadedURL: URL
+    let representingImage: UIImage
 }

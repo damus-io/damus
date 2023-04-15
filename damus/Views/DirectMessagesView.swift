@@ -17,13 +17,14 @@ struct DirectMessagesView: View {
     
     @State var dm_type: DMType = .friend
     @State var open_dm: Bool = false
-    @State var pubkey: String = ""
-    @EnvironmentObject var model: DirectMessagesModel
-    @State var active_model: DirectMessageModel
+    @State var pubkey: String
+    @ObservedObject var model: DirectMessagesModel
+    @State var active_model: DirectMessageModel = DirectMessageModel(our_pubkey: "")
     
     init(damus_state: DamusState) {
         self.damus_state = damus_state
-        self._active_model = State(initialValue: DirectMessageModel(our_pubkey: damus_state.pubkey))
+        self._model = ObservedObject(initialValue: damus_state.dms)
+        self.pubkey = damus_state.pubkey
     }
     
     func MainContent(requests: Bool) -> some View {
@@ -106,8 +107,6 @@ struct DirectMessagesView_Previews: PreviewProvider {
                                kind: 4,
                                tags: [])
         let ds = test_damus_state()
-        let model = DirectMessageModel(events: [ev], our_pubkey: ds.pubkey)
         DirectMessagesView(damus_state: ds)
-            .environmentObject(model)
     }
 }
