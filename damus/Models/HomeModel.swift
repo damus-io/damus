@@ -197,9 +197,18 @@ class HomeModel: ObservableObject {
     }
     
     func filter_muted() {
-        events.filter { !damus_state.contacts.is_muted($0.pubkey) && !damus_state.muted_threads.isMutedThread($0, privkey: self.damus_state.keypair.privkey) }
-        self.dms.dms = dms.dms.filter { !damus_state.contacts.is_muted($0.pubkey) }
-        notifications.filter_and_build_notifications(damus_state)
+        events.filter { ev in
+            !damus_state.contacts.is_muted(ev.pubkey)
+        }
+        
+        self.dms.dms = dms.dms.filter { ev in
+            !damus_state.contacts.is_muted(ev.pubkey)
+        }
+        
+        notifications.filter { ev in
+            !damus_state.contacts.is_muted(ev.pubkey) &&
+            !damus_state.muted_threads.isMutedThread(ev, privkey: damus_state.keypair.privkey)
+        }
     }
     
     func handle_delete_event(_ ev: NostrEvent) {
@@ -466,11 +475,12 @@ class HomeModel: ObservableObject {
             return
         }
         
-        guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
+        guard should_show_event(contacts: damus_state.contacts, ev: ev) && !damus_state.muted_threads.isMutedThread(ev, privkey: damus_state.keypair.privkey) else {
             return
         }
         
         damus_state.events.insert(ev)
+        
         if let inner_ev = ev.inner_event {
             damus_state.events.insert(inner_ev)
         }
