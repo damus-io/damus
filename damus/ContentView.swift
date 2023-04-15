@@ -66,7 +66,6 @@ struct ContentView: View {
     @State var active_sheet: Sheets? = nil
     @State var damus_state: DamusState? = nil
     @State var selected_timeline: Timeline? = .home
-    @State var is_thread_open: Bool = false
     @State var is_deleted_account: Bool = false
     @State var is_profile_open: Bool = false
     @State var event: NostrEvent? = nil
@@ -247,6 +246,11 @@ struct ContentView: View {
         }
     }
     
+    func open_event(ev: NostrEvent) {
+        self.active_event = ev
+        self.thread_open = true
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
@@ -336,10 +340,9 @@ struct ContentView: View {
                 } else if ref.key == "e" {
                     find_event(state: damus_state!, evid: ref.ref_id, search_type: .event, find_from: nil) { ev in
                         if let ev {
-                            active_event = ev
+                            open_event(ev: ev)
                         }
                     }
-                    thread_open = true
                 }
             case .filter(let filt):
                 active_search = filt
@@ -351,11 +354,6 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.boost)) { notif in
             current_boost = (notif.object as? NostrEvent)
-        }
-        .onReceive(handle_notify(.open_thread)) { obj in
-            //let ev = obj.object as! NostrEvent
-            //thread.set_active_event(ev)
-            //is_thread_open = true
         }
         .onReceive(handle_notify(.reply)) { notif in
             let ev = notif.object as! NostrEvent
