@@ -474,9 +474,9 @@ struct ContentView: View {
             home.filter_muted()
         }
         .onReceive(handle_notify(.local_notification)) { notif in
-            let local = notif.object as! LossyLocalNotification
             
-            guard let damus_state else {
+            guard let local = notif.object as? LossyLocalNotification,
+                let damus_state else {
                 return
             }
             

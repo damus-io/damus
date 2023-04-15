@@ -362,9 +362,19 @@ struct PVImageCarouselView: View {
                             .frame(width: media.count == 1 ? deviceWidth*0.8 : 250, height: media.count == 1 ? 400 : 250)
                             .cornerRadius(10)
                             .padding()
+                            .contextMenu {
+                                if let uploadedURL = media.first(where: { $0.representingImage == image })?.uploadedURL {
+                                    Button(action: {
+                                        UIPasteboard.general.string = uploadedURL.absoluteString
+                                    }) {
+                                        Label("Copy URL", systemImage: "doc.on.doc")
+                                    }
+                                }
+                            }
                         Image(systemName: "xmark.circle.fill")
                             .foregroundColor(.white)
                             .padding(20)
+                            .shadow(radius: 5)
                             .onTapGesture {
                                 if let index = media.map({$0.representingImage}).firstIndex(of: image) {
                                     media.remove(at: index)
@@ -377,7 +387,6 @@ struct PVImageCarouselView: View {
         }
     }
 }
-
 
 fileprivate func getImage(media: MediaUpload) -> UIImage {
     var uiimage: UIImage = UIImage()
