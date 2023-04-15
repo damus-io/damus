@@ -1,3 +1,28 @@
+## [1.4.3-1] - 2023-04-15
+
+### Added
+
+- Add deep links for local notifications (Swift + Will)
+- Add thread muting (Terry Yiu)
+- Preview media uploads when posting (Swift)
+- Add QR Code in profiles (ericholguin)
+
+
+### Changed
+
+- Ask permission before uploading media (Swift)
+- Show DM message in local notification (William Casarin)
+
+
+### Fixed
+
+- Fix tap area when mentioning users (OlegAba)
+- Fix invalid DM author notifications (William Casarin)
+- Fix relay signal indicator, properly show how many relays you are connected to (William Casarin)
+
+
+[1.4.3-1]: https://github.com/damus-io/damus/releases/tag/v1.4.3-1
+
 ## [1.4.2-2] - 2023-04-12
 
 ### Added
