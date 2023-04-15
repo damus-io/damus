@@ -158,6 +158,8 @@ struct LoginView: View {
                         .foregroundColor(.white)
                         .padding()
                 }
+                
+                Spacer()
 
                 if let p = parsed {
                     DamusWhiteButton(NSLocalizedString("Login", comment: "Button to log into account.")) {
@@ -268,18 +270,29 @@ struct KeyInput: View {
     }
 
     var body: some View {
-        TextField("", text: key)
-            .placeholder(when: key.wrappedValue.isEmpty) {
-                Text(title).foregroundColor(.white.opacity(0.6))
+        ZStack(alignment: .leading) {
+            TextField("", text: key)
+                .placeholder(when: key.wrappedValue.isEmpty) {
+                    Text(title).foregroundColor(.white.opacity(0.6))
+                }
+                .padding()
+                .padding(.leading, 20)
+                .background {
+                    RoundedRectangle(cornerRadius: 4.0).opacity(0.2)
+                }
+                .autocapitalization(.none)
+                .foregroundColor(.white)
+                .font(.body.monospaced())
+                .textContentType(.password)
+
+            Label("", systemImage: "doc.on.clipboard")
+                .padding(.leading, 10)
+                .onTapGesture {
+                if let pastedkey = UIPasteboard.general.string {
+                    self.key.wrappedValue = pastedkey
+                }
             }
-            .padding()
-            .background {
-                RoundedRectangle(cornerRadius: 4.0).opacity(0.2)
-            }
-            .autocapitalization(.none)
-            .foregroundColor(.white)
-            .font(.body.monospaced())
-            .textContentType(.password)
+        }
     }
 }
 
