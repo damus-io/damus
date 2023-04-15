@@ -389,14 +389,6 @@ struct PVImageCarouselView: View {
     }
 }
 
-struct UploadedMedia: Equatable {
-    let localURL: URL
-    let uploadedURL: URL
-    let representingImage: UIImage
-}
-
-
-
 fileprivate func getImage(media: MediaUpload) -> UIImage {
     var uiimage: UIImage = UIImage()
     if media.is_image {
@@ -429,4 +421,10 @@ fileprivate func getImage(media: MediaUpload) -> UIImage {
         uiimage = newImage ?? UIImage()
     }
     return uiimage
+}
+
+struct UploadedMedia: Equatable {
+    let localURL: URL
+    let uploadedURL: URL
+    let representingImage: UIImage
 }
