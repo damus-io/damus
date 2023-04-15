@@ -19,7 +19,7 @@ struct DMChatView: View {
                 VStack(alignment: .leading) {
                     ForEach(Array(zip(dms.events, dms.events.indices)), id: \.0.id) { (ev, ind) in
                         DMView(event: dms.events[ind], damus_state: damus_state)
-                            .contextMenu{MenuItems(event: ev, keypair: damus_state.keypair, target_pubkey: ev.pubkey, bookmarks: damus_state.bookmarks)}
+                            .contextMenu{MenuItems(event: ev, keypair: damus_state.keypair, target_pubkey: ev.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads)}
                     }
                     EndBlock(height: 80)
                 }
@@ -120,7 +120,7 @@ struct DMChatView: View {
     func send_message() {
         let tags = [["p", pubkey]]
         let post_blocks = parse_post_blocks(content: dms.draft)
-        let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
+        let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags, silent_mentions: true)
         let content = render_blocks(blocks: post_tags.blocks)
         
         guard let dm = create_dm(content, to_pk: pubkey, tags: post_tags.tags, keypair: damus_state.keypair) else {

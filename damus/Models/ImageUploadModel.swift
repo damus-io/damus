@@ -25,6 +25,15 @@ enum MediaUpload {
             return url.pathExtension
         }
     }
+
+    var localURL: URL {
+        switch self {
+        case .image(let url):
+            return url
+        case .video(let url):
+            return url
+        }
+    }
     
     var is_image: Bool {
         if case .image = self {

@@ -18,7 +18,8 @@ struct EditProfilePictureControl: View {
     
     @State private var show_camera = false
     @State private var show_library = false
-    
+    @State var image_upload_confirm: Bool = false
+
     var body: some View {
         Menu {
             Button(action: {
@@ -44,14 +45,16 @@ struct EditProfilePictureControl: View {
             }
         }
         .sheet(isPresented: $show_camera) {
-            ImagePicker(sourceType: .camera, pubkey: pubkey, imagesOnly: true) { img in
+            // The alert may not be required for the profile pic upload case. Not showing the confirm check alert for this scenario
+            ImagePicker(sourceType: .camera, pubkey: pubkey, image_upload_confirm: $image_upload_confirm, imagesOnly: true) { img in
                 handle_upload(media: .image(img))
             } onVideoPicked: { url in
                 print("Cannot upload videos as profile image")
             }
         }
         .sheet(isPresented: $show_library) {
-            ImagePicker(sourceType: .photoLibrary, pubkey: pubkey, imagesOnly: true) { img in
+            // The alert may not be required for the profile pic upload case. Not showing the confirm check alert for this scenario
+            ImagePicker(sourceType: .photoLibrary, pubkey: pubkey, image_upload_confirm: $image_upload_confirm, imagesOnly: true) { img in
                 handle_upload(media: .image(img))
             } onVideoPicked: { url in
                 print("Cannot upload videos as profile image")

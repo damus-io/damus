@@ -91,11 +91,19 @@ struct ContentView: View {
     let sub_id = UUID().description
     
     @Environment(\.colorScheme) var colorScheme
-
+    
+    var mystery: some View {
+        Text("Are you lost?", comment: "Text asking the user if they are lost in the app.")
+        .id("what")
+    }
+    
     var PostingTimelineView: some View {
         VStack {
             ZStack {
                 TabView(selection: $filter_state) {
+                    // This is needed or else there is a bug when switching from the 3rd or 2nd tab to first. no idea why.
+                    mystery
+                    
                     contentTimelineView(filter: FilterState.posts.filter)
                         .tag(FilterState.posts)
                         .id(FilterState.posts)
@@ -177,7 +185,6 @@ struct ContentView: View {
                 
             case .dms:
                 DirectMessagesView(damus_state: damus_state!)
-                    .environmentObject(home.dms)
             
             case .none:
                 EmptyView()
@@ -260,13 +267,7 @@ struct ContentView: View {
                                 
                                 ToolbarItem(placement: .navigationBarTrailing) {
                                     HStack(alignment: .center) {
-                                        if home.signal.signal != home.signal.max_signal {
-                                            NavigationLink(destination: RelayConfigView(state: damus_state!)) {
-                                                Text("\(home.signal.signal)/\(home.signal.max_signal)", comment: "Fraction of how many of the user's relay servers that are operational.")
-                                                    .font(.callout)
-                                                    .foregroundColor(.gray)
-                                            }
-                                        }
+                                        SignalView(state: damus_state!, signal: home.signal)
                                         
                                         // maybe expand this to other timelines in the future
                                         if selected_timeline == .search {
@@ -291,7 +292,7 @@ struct ContentView: View {
                 }
                 .navigationViewStyle(.stack)
             
-                TabBar(new_events: $home.new_events, selected: $selected_timeline, isSidebarVisible: $isSideBarOpened, action: switch_timeline)
+                TabBar(new_events: $home.new_events, selected: $selected_timeline, settings: damus.settings, action: switch_timeline)
                     .padding([.bottom], 8)
                     .background(Color(uiColor: .systemBackground).ignoresSafeArea())
             }
@@ -468,6 +469,12 @@ struct ContentView: View {
         .onReceive(handle_notify(.new_mutes)) { notif in
             home.filter_muted()
         }
+        .onReceive(handle_notify(.mute_thread)) { notif in
+            home.filter_muted()
+        }
+        .onReceive(handle_notify(.unmute_thread)) { notif in
+            home.filter_muted()
+        }
         .alert(NSLocalizedString("Deleted Account", comment: "Alert message to indicate this is a deleted account"), isPresented: $is_deleted_account) {
             Button(NSLocalizedString("Logout", comment: "Button to close the alert that informs that the current account has been deleted.")) {
                 is_deleted_account = false
@@ -561,7 +568,7 @@ struct ContentView: View {
             }
             Button(NSLocalizedString("Repost", comment: "Button to confirm reposting a post.")) {
                 if let current_boost {
-                    self.damus_state?.pool.send(.event(current_boost))
+                    self.damus_state?.postbox.send(current_boost)
                 }
             }
         } message: {
@@ -570,6 +577,8 @@ struct ContentView: View {
     }
     
     func switch_timeline(_ timeline: Timeline) {
+        self.isSideBarOpened = false
+        
         self.popToRoot()
         NotificationCenter.default.post(name: .switched_timeline, object: timeline)
         
@@ -628,7 +637,8 @@ struct ContentView: View {
                                       bookmarks: BookmarksManager(pubkey: pubkey),
                                       postbox: PostBox(pool: pool),
                                       bootstrap_relays: bootstrap_relays,
-                                      replies: ReplyCounter(our_pubkey: pubkey)
+                                      replies: ReplyCounter(our_pubkey: pubkey),
+                                      muted_threads: MutedThreadsManager(keypair: keypair)
         )
         home.damus_state = self.damus_state!
         

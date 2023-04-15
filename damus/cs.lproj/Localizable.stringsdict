@@ -39,7 +39,7 @@
 			<key>many</key>
 			<string>Followers</string>
 			<key>other</key>
-			<string>Sledují</string>
+			<string>Sledující</string>
 		</dict>
 	</dict>
 	<key>following_count</key>

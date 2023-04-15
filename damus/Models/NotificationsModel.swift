@@ -129,7 +129,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         for el in zaps {
             let evid = el.key
             let zapgrp = el.value
-            
+
             let notif: NotificationItem = .event_zap(evid, zapgrp)
             notifs.append(notif)
         }
@@ -233,66 +233,66 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
     }
     
-    func insert_event(_ ev: NostrEvent) -> Bool {
+    func insert_event(_ ev: NostrEvent, damus_state: DamusState) -> Bool {
         if should_queue {
             return insert_uniq_sorted_event_created(events: &incoming_events, new_ev: ev)
         }
         
         if insert_event_immediate(ev) {
-            self.notifications = build_notifications()
+            filter_and_build_notifications(damus_state)
             return true
         }
         
         return false
     }
     
-    func insert_zap(_ zap: Zap) -> Bool {
+    func insert_zap(_ zap: Zap, damus_state: DamusState) -> Bool {
         if should_queue {
             return insert_uniq_sorted_zap_by_created(zaps: &incoming_zaps, new_zap: zap)
         }
         
         if insert_zap_immediate(zap) {
-            self.notifications = build_notifications()
+            filter_and_build_notifications(damus_state)
             return true
         }
         
         return false
     }
     
-    func filter(_ isIncluded: (NostrEvent) -> Bool)  {
+    func filter_and_build_notifications(_ damus_state: DamusState)  {
         var changed = false
         var count = 0
         
         count = incoming_events.count
-        incoming_events = incoming_events.filter(isIncluded)
+        incoming_events = incoming_events.filter { include_event($0, damus_state: damus_state) }
         changed = changed || incoming_events.count != count
         
         count = profile_zaps.zaps.count
-        profile_zaps.zaps = profile_zaps.zaps.filter { zap in isIncluded(zap.request.ev) }
+        profile_zaps.zaps = profile_zaps.zaps.filter { zap in include_event(zap.request.ev, damus_state: damus_state) }
         changed = changed || profile_zaps.zaps.count != count
         
         for el in reactions {
             count = el.value.events.count
-            el.value.events = el.value.events.filter(isIncluded)
+            el.value.events = el.value.events.filter { include_event($0, damus_state: damus_state) }
             changed = changed || el.value.events.count != count
         }
         
         for el in reposts {
             count = el.value.events.count
-            el.value.events = el.value.events.filter(isIncluded)
+            el.value.events = el.value.events.filter { include_event($0, damus_state: damus_state) }
             changed = changed || el.value.events.count != count
         }
         
         for el in zaps {
             count = el.value.zaps.count
             el.value.zaps = el.value.zaps.filter {
-                isIncluded($0.request.ev)
+                include_event($0.request.ev, damus_state: damus_state)
             }
             changed = changed || el.value.zaps.count != count
         }
         
         count = replies.count
-        replies = replies.filter(isIncluded)
+        replies = replies.filter { include_event($0, damus_state: damus_state) }
         changed = changed || replies.count != count
         
         if changed {
@@ -300,7 +300,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
     }
     
-    func flush() -> Bool {
+    func flush(_ damus_state: DamusState) -> Bool {
         var inserted = false
         
         for zap in incoming_zaps {
@@ -312,9 +312,14 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
         
         if inserted {
-            self.notifications = build_notifications()
+            filter_and_build_notifications(damus_state)
         }
         
         return inserted
+    }
+
+    func include_event(_ event: NostrEvent, damus_state: DamusState) -> Bool {
+        let privkey = damus_state.keypair.privkey
+        return should_show_event(contacts: damus_state.contacts, ev: event) && !damus_state.muted_threads.isMutedThread(event, privkey: privkey)
     }
 }

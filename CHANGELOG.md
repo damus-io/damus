@@ -1,3 +1,35 @@
+## [1.4.2-2] - 2023-04-12
+
+### Added
+
+- Include #btc in custom #bitcoin hashtag (William Casarin)
+- Make notification dots configurable (William Casarin)
+
+
+### Changed
+
+- Display follows in most recent to oldest (Luis Cabrera)
+
+### Fixed
+
+- Fix hitches caused by syncronous loading of cached images (William Casarin)
+- Fix tabs sometimes not switching (William Casarin)
+
+
+[1.4.2-2]: https://github.com/damus-io/damus/releases/tag/v1.4.2-2
+
+## [1.4.1-8] - 2023-04-10
+
+### Added
+
+- Add support for nostr: bech32 urls in posts and DMs (NIP19) (Bartholomew Joyce)
+
+### Fixed
+
+- Don't leak mentions in DMs (William Casarin)
+- Fix tap area when mentioning users (OlegAba)
+
+[1.4.1-8]: https://github.com/damus-io/damus/releases/tag/v1.4.1-8
 ## [1.4.1-7] - 2023-04-07
 
 ### Added

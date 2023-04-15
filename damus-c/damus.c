@@ -6,127 +6,13 @@
 //
 
 #include "damus.h"
+#include "cursor.h"
 #include "bolt11.h"
+#include "bech32.h"
 #include <stdlib.h>
 #include <string.h>
 
-typedef unsigned char u8;
-
-struct cursor {
-    const u8 *p;
-    const u8 *start;
-    const u8 *end;
-};
-
-static inline int is_whitespace(char c) {
-    return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
-}
-
-static inline int is_boundary(char c) {
-    return !isalnum(c);
-}
-
-static inline int is_invalid_url_ending(char c) {
-    return c == '!' || c == '?' || c == ')' || c == '.' || c == ',' || c == ';';
-}
-
-static void make_cursor(struct cursor *c, const u8 *content, size_t len)
-{
-    c->start = content;
-    c->end = content + len;
-    c->p = content;
-}
-
-static int consume_until_boundary(struct cursor *cur) {
-    char c;
-    
-    while (cur->p < cur->end) {
-        c = *cur->p;
-        
-        if (is_boundary(c))
-            return 1;
-        
-        cur->p++;
-    }
-    
-    return 1;
-}
-
-static int consume_until_whitespace(struct cursor *cur, int or_end) {
-    char c;
-    bool consumedAtLeastOne = false;
-    
-    while (cur->p < cur->end) {
-        c = *cur->p;
-        
-        if (is_whitespace(c))
-            return consumedAtLeastOne;
-        
-        cur->p++;
-        consumedAtLeastOne = true;
-    }
-    
-    return or_end;
-}
-
-static int parse_char(struct cursor *cur, char c) {
-    if (cur->p >= cur->end)
-        return 0;
-        
-    if (*cur->p == c) {
-        cur->p++;
-        return 1;
-    }
-    
-    return 0;
-}
-
-static inline int peek_char(struct cursor *cur, int ind) {
-    if ((cur->p + ind < cur->start) || (cur->p + ind >= cur->end))
-        return -1;
-    
-    return *(cur->p + ind);
-}
-
-static int parse_digit(struct cursor *cur, int *digit) {
-    int c;
-    if ((c = peek_char(cur, 0)) == -1)
-        return 0;
-    
-    c -= '0';
-    
-    if (c >= 0 && c <= 9) {
-        *digit = c;
-        cur->p++;
-        return 1;
-    }
-    return 0;
-}
-
-static int parse_str(struct cursor *cur, const char *str) {
-    int i;
-    char c, cs;
-    unsigned long len;
-    
-    len = strlen(str);
-    
-    if (cur->p + len >= cur->end)
-        return 0;
-    
-    for (i = 0; i < len; i++) {
-        c = tolower(cur->p[i]);
-        cs = tolower(str[i]);
-        
-        if (c != cs)
-            return 0;
-    }
-    
-    cur->p += len;
-    
-    return 1;
-}
-
-static int parse_mention(struct cursor *cur, struct block *block) {
+static int parse_mention_index(struct cursor *cur, struct block *block) {
     int d1, d2, d3, ind;
     const u8 *start = cur->p;
     
@@ -151,8 +37,8 @@ static int parse_mention(struct cursor *cur, struct block *block) {
         return 0;
     }
     
-    block->type = BLOCK_MENTION;
-    block->block.mention = ind;
+    block->type = BLOCK_MENTION_INDEX;
+    block->block.mention_index = ind;
     
     return 1;
 }
@@ -274,6 +160,27 @@ static int parse_invoice(struct cursor *cur, struct block *block) {
     return 1;
 }
 
+
+static int parse_mention_bech32(struct cursor *cur, struct block *block) {
+    const u8 *start = cur->p;
+    
+    if (!parse_str(cur, "nostr:"))
+        return 0;
+    
+    block->block.str.start = (const char *)cur->p;
+    
+    if (!parse_nostr_bech32(cur, &block->block.mention_bech32.bech32)) {
+        cur->p = start;
+        return 0;
+    }
+    
+    block->block.str.end = (const char *)cur->p;
+    
+    block->type = BLOCK_MENTION_BECH32;
+
+    return 1;
+}
+
 static int add_text_then_block(struct cursor *cur, struct blocks *blocks, struct block block, const u8 **start, const u8 *pre_mention)
 {
     if (!add_text_block(blocks, *start, pre_mention))
@@ -303,7 +210,7 @@ int damus_parse_content(struct blocks *blocks, const char *content) {
         
         pre_mention = cur.p;
         if (cp == -1 || is_whitespace(cp)) {
-            if (c == '#' && (parse_mention(&cur, &block) || parse_hashtag(&cur, &block))) {
+            if (c == '#' && (parse_mention_index(&cur, &block) || parse_hashtag(&cur, &block))) {
                 if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;
                 continue;
@@ -312,6 +219,10 @@ int damus_parse_content(struct blocks *blocks, const char *content) {
                     return 0;
                 continue;
             } else if ((c == 'l' || c == 'L') && parse_invoice(&cur, &block)) {
+                if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
+                    return 0;
+                continue;
+            } else if (c == 'n' && parse_mention_bech32(&cur, &block)) {
                 if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;
                 continue;
@@ -335,8 +246,17 @@ void blocks_init(struct blocks *blocks) {
 }
 
 void blocks_free(struct blocks *blocks) {
-    if (blocks->blocks) {
-        free(blocks->blocks);
-        blocks->num_blocks = 0;
+    if (!blocks->blocks) {
+        return;
     }
+    
+    for (int i = 0; i < blocks->num_blocks; ++i) {
+        if (blocks->blocks[i].type == BLOCK_MENTION_BECH32) {
+            free(blocks->blocks[i].block.mention_bech32.bech32.buffer);
+            blocks->blocks[i].block.mention_bech32.bech32.buffer = NULL;
+        }
+    }
+
+    free(blocks->blocks);
+    blocks->num_blocks = 0;
 }
