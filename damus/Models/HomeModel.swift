@@ -298,9 +298,6 @@ class HomeModel: ObservableObject {
             }
             
             update_signal_from_pool(signal: self.signal, pool: damus_state.pool)
-
-            print("ws_event \(ev)")
-
         case .nostr_event(let ev):
             switch ev {
             case .event(let sub_id, let ev):
