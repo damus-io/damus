@@ -292,6 +292,7 @@
 		F79C7FAD29D5E9620000F946 /* EditProfilePictureControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = F79C7FAC29D5E9620000F946 /* EditProfilePictureControl.swift */; };
 		F7F0BA25297892BD009531F3 /* SwipeToDismiss.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F0BA24297892BD009531F3 /* SwipeToDismiss.swift */; };
 		F7F0BA272978E54D009531F3 /* ParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F0BA262978E54D009531F3 /* ParticipantsView.swift */; };
+		F944F56E29EA9CCC0067B3BF /* DamusParseContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F944F56D29EA9CCC0067B3BF /* DamusParseContentTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -717,6 +718,7 @@
 		F79C7FAC29D5E9620000F946 /* EditProfilePictureControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfilePictureControl.swift; sourceTree = "<group>"; };
 		F7F0BA24297892BD009531F3 /* SwipeToDismiss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeToDismiss.swift; sourceTree = "<group>"; };
 		F7F0BA262978E54D009531F3 /* ParticipantsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsView.swift; sourceTree = "<group>"; };
+		F944F56D29EA9CCC0067B3BF /* DamusParseContentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusParseContentTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1259,6 +1261,7 @@
 		4CE6DEF627F7A08200C66700 /* damusTests */ = {
 			isa = PBXGroup;
 			children = (
+				F944F56C29EA9CB20067B3BF /* Models */,
 				50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */,
 				DD597CBC2963D85A00C64D32 /* MarkdownTests.swift */,
 				4C90BD1B283AC38E008EE7EF /* Bech32Tests.swift */,
@@ -1379,6 +1382,14 @@
 				F7F0BA24297892BD009531F3 /* SwipeToDismiss.swift */,
 			);
 			path = Modifiers;
+			sourceTree = "<group>";
+		};
+		F944F56C29EA9CB20067B3BF /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				F944F56D29EA9CCC0067B3BF /* DamusParseContentTests.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1826,6 +1837,7 @@
 				4C363A9E2828A822006E126D /* ReplyTests.swift in Sources */,
 				4CB883AA297612FF00DC99E7 /* ZapTests.swift in Sources */,
 				4CB8839A297322D200DC99E7 /* DMTests.swift in Sources */,
+				F944F56E29EA9CCC0067B3BF /* DamusParseContentTests.swift in Sources */,
 				4CB883AE2976FA9300DC99E7 /* FormatTests.swift in Sources */,
 				4C363AA02828A8DD006E126D /* LikeTests.swift in Sources */,
 				4C90BD1C283AC38E008EE7EF /* Bech32Tests.swift in Sources */,
