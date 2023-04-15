@@ -13,11 +13,15 @@ import CryptoKit
 import NaturalLanguage
 
 
-
 enum ValidationResult: Decodable {
+    case unknown
     case ok
     case bad_id
     case bad_sig
+    
+    var is_bad: Bool {
+        return self == .bad_id || self == .bad_sig
+    }
 }
 
 struct OtherEvent {
@@ -92,14 +96,6 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     var is_valid_id: Bool {
         return calculate_event_id(ev: self) == self.id
     }
-    
-    var is_valid: Bool {
-        return validity == .ok
-    }
-    
-    lazy var validity: ValidationResult = {
-        return .ok //validate_event(ev: self)
-    }()
     
     private var _blocks: [Block]? = nil
     func blocks(_ privkey: String?) -> [Block] {

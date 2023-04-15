@@ -37,7 +37,6 @@ struct TextEvent: View {
             }
         }
         .contentShape(Rectangle())
-        .background(event_validity_color(event.validity))
         .id(event.id)
         .frame(maxWidth: .infinity, minHeight: PFP_SIZE)
         .padding([.bottom], 2)
