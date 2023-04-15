@@ -264,8 +264,10 @@ struct PostView: View {
                 }
                 .alert("Confirm upload?", isPresented: $image_upload_confirm) {
                     Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
-                        self.handle_upload(media: mediaToUpload!)
-                        self.attach_media = false
+                        if let mediaToUpload {
+                            self.handle_upload(media: mediaToUpload)
+                            self.attach_media = false
+                        }
                     }
                     Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
                 }
