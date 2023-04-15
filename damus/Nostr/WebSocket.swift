@@ -40,6 +40,14 @@ final class WebSocket: NSObject, URLSessionWebSocketDelegate {
         webSocketTask.cancel(with: .normalClosure, reason: nil)
     }
     
+    private func reset() {
+        disconnect()
+        
+        let task = session.webSocketTask(with: url)
+        task.delegate = self
+        webSocketTask = task
+    }
+    
     func send(_ message: URLSessionWebSocketTask.Message) {
         webSocketTask.send(message) { [weak self] error in
             guard let self, let error else {
@@ -77,5 +85,6 @@ final class WebSocket: NSObject, URLSessionWebSocketDelegate {
             reason_str = nil
         }
         subject.send(.disconnected(closeCode, reason_str))
+        reset()
     }
 }
