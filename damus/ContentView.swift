@@ -295,6 +295,12 @@ struct ContentView: View {
                     )
                 }
                 .navigationViewStyle(.stack)
+                .gesture(
+                    DragGesture()
+                        .onEnded { gesture in
+                            self.onSwipeEnded(gesture.translation.width)
+                        }
+                )
             
                 TabBar(new_events: $home.new_events, selected: $selected_timeline, settings: damus.settings, action: switch_timeline)
                     .padding([.bottom], 8)
@@ -594,6 +600,22 @@ struct ContentView: View {
             }
         } message: {
             Text("Are you sure you want to repost this?", comment: "Alert message to ask if user wants to repost a post.")
+        }
+    }
+    
+    func onSwipeEnded(_ xTranslation: CGFloat){
+        let navigation_stack_size = NavigationUtil.getNavigationStackSize()
+
+        // don't open sidebar if we are deep inside the NavigationView stack
+        guard navigation_stack_size == 1 else {
+            return
+        }
+
+        if (xTranslation > 20){
+            self.isSideBarOpened = true
+        }
+        if (xTranslation < -20){
+            self.isSideBarOpened = false
         }
     }
     
