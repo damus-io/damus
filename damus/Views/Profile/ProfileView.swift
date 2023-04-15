@@ -271,8 +271,7 @@ struct ProfileView: View {
     
     var dmButton: some View {
         let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
-        let dmview = DMChatView(damus_state: damus_state, pubkey: profile.pubkey)
-            .environmentObject(dm_model)
+        let dmview = DMChatView(damus_state: damus_state, dms: dm_model)
         return NavigationLink(destination: dmview) {
             Image(systemName: "bubble.left.circle")
                 .profile_button_style(scheme: colorScheme)

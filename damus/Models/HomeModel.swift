@@ -198,7 +198,7 @@ class HomeModel: ObservableObject {
     
     func filter_muted() {
         events.filter { !damus_state.contacts.is_muted($0.pubkey) && !damus_state.muted_threads.isMutedThread($0, privkey: self.damus_state.keypair.privkey) }
-        self.dms.dms = dms.dms.filter { !damus_state.contacts.is_muted($0.0) }
+        self.dms.dms = dms.dms.filter { !damus_state.contacts.is_muted($0.pubkey) }
         notifications.filter_and_build_notifications(damus_state)
     }
     
@@ -316,7 +316,7 @@ class HomeModel: ObservableObject {
             case .eose(let sub_id):
                 
                 if sub_id == dms_subid {
-                    var dms = dms.dms.flatMap { $0.1.events }
+                    var dms = dms.dms.flatMap { $0.events }
                     dms.append(contentsOf: incoming_dms)
                     load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(dms), damus_state: damus_state)
                 } else if sub_id == notifications_subid {
@@ -851,10 +851,10 @@ func handle_incoming_dm(ev: NostrEvent, our_pubkey: String, dms: DirectMessagesM
         }
     }
 
-    for (pk, _) in dms.dms {
-        if pk == the_pk {
+    for model in dms.dms {
+        if model.pubkey == the_pk {
             found = true
-            inserted = insert_uniq_sorted_event(events: &(dms.dms[i].1.events), new_ev: ev) {
+            inserted = insert_uniq_sorted_event(events: &(dms.dms[i].events), new_ev: ev) {
                 $0.created_at < $1.created_at
             }
 
@@ -864,8 +864,8 @@ func handle_incoming_dm(ev: NostrEvent, our_pubkey: String, dms: DirectMessagesM
     }
 
     if !found {
-        let model = DirectMessageModel(events: [ev], our_pubkey: our_pubkey)
-        dms.dms.append((the_pk, model))
+        let model = DirectMessageModel(events: [ev], our_pubkey: our_pubkey, pubkey: the_pk)
+        dms.dms.append(model)
         inserted = true
     }
     
@@ -892,8 +892,8 @@ func handle_incoming_dms(prev_events: NewEventsBits, dms: DirectMessagesModel, o
     }
     
     if inserted {
-        dms.dms = dms.dms.filter({ $0.1.events.count > 0 }).sorted { a, b in
-            return a.1.events.last!.created_at > b.1.events.last!.created_at
+        dms.dms = dms.dms.filter({ $0.events.count > 0 }).sorted { a, b in
+            return a.events.last!.created_at > b.events.last!.created_at
         }
     }
     
