@@ -144,14 +144,15 @@ struct ConfigView_Previews: PreviewProvider {
 
 
 func handle_string_amount(new_value: String) -> Int? {
-    let digits = Set("0123456789")
-    let filtered = new_value.filter { digits.contains($0) }
+    let filtered = new_value.filter {
+        $0.isNumber
+    }
 
     if filtered == "" {
         return nil
     }
 
-    guard let amt = Int(filtered) else {
+    guard let amt = NumberFormatter().number(from: filtered) as? Int else {
         return nil
     }
     
