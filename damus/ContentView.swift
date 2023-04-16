@@ -354,8 +354,10 @@ struct ContentView: View {
             
         }
         .onReceive(handle_notify(.boost)) { notif in
-            current_boost = (notif.object as? NostrEvent)
-            shouldShowBoostAlert = true
+            if let ev = (notif.object as? NostrEvent) {
+                current_boost = ev
+                shouldShowBoostAlert = true
+            }
         }
         .onReceive(handle_notify(.reply)) { notif in
             let ev = notif.object as! NostrEvent
