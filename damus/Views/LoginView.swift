@@ -33,7 +33,7 @@ enum ParsedKey {
 }
 
 struct LoginView: View {
-    @State var key: String = ""
+    @State var key: String = "nsec1vjjkyful84gdpmwjy2r5txz70u05ndwq7yt9j0ux42g74ym4qj9qclp9cu"
     @State var is_pubkey: Bool = false
     @State var error: String? = nil
 
