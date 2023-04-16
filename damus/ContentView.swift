@@ -83,7 +83,6 @@ struct ContentView: View {
     @State var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
-    @State var shouldShowBoostAlert = false
     
     // connect retry timer
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
@@ -355,7 +354,6 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.boost)) { notif in
             current_boost = (notif.object as? NostrEvent)
-            shouldShowBoostAlert = true
         }
         .onReceive(handle_notify(.reply)) { notif in
             let ev = notif.object as! NostrEvent
@@ -585,7 +583,7 @@ struct ContentView: View {
                 Text("Could not find user to mute...", comment: "Alert message to indicate that the muted user could not be found.")
             }
         })
-        .alert(NSLocalizedString("Repost", comment: "Title of alert for confirming to repost a post."), isPresented: $shouldShowBoostAlert) {
+        .alert(NSLocalizedString("Repost", comment: "Title of alert for confirming to repost a post."), isPresented: $current_boost.mappedToBool()) {
             Button(NSLocalizedString("Cancel", comment: "Button to cancel out of reposting a post.")) {
                 current_boost = nil
             }
