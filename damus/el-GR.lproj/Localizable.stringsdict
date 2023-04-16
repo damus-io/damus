@@ -127,7 +127,7 @@
 			<key>one</key>
 			<string>Διακομιστής Relay</string>
 			<key>other</key>
-			<string>Διακομιστές Relays</string>
+			<string>Relays</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
