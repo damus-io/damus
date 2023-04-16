@@ -16,7 +16,6 @@ enum NostrConnectionEvent {
 final class RelayConnection {
     private(set) var isConnected = false
     private(set) var isConnecting = false
-    private(set) var isReconnecting = false
     
     private(set) var last_connection_attempt: TimeInterval = 0
     private lazy var socket = WebSocket(url)
@@ -28,16 +27,6 @@ final class RelayConnection {
     init(url: URL, handleEvent: @escaping (NostrConnectionEvent) -> ()) {
         self.url = url
         self.handleEvent = handleEvent
-    }
-    
-    func reconnect() {
-        if isConnected {
-            isReconnecting = true
-            disconnect()
-        } else {
-            // we're already disconnected, so just connect
-            connect(force: true)
-        }
     }
     
     func connect(force: Bool = false) {
@@ -91,22 +80,20 @@ final class RelayConnection {
             if closeCode != .normalClosure {
                 print("⚠️ Warning: RelayConnection (\(self.url)) closed with code \(closeCode), reason: \(String(describing: reason))")
             }
-            handleReconnect()
+            reconnect()
         case .error(let error):
             print("⚠️ Warning: RelayConnection (\(self.url)) error: \(error)")
-            handleReconnect()
+            reconnect()
         }
         self.handleEvent(.ws_event(event))
     }
     
-    private func handleReconnect() {
-        self.isConnected = false
-        self.isConnecting = false
-        
-        if self.isReconnecting {
-            self.isReconnecting = false
-            self.connect()
+    func reconnect() {
+        guard !isConnecting else {
+            return  // we're already trying to connect
         }
+        disconnect()
+        connect()
     }
     
     private func receive(message: URLSessionWebSocketTask.Message) {

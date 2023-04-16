@@ -36,21 +36,28 @@ final class WebSocket: NSObject, URLSessionWebSocketDelegate {
         resume()
     }
     
-    func disconnect() {
-        webSocketTask.cancel(with: .normalClosure, reason: nil)
+    func disconnect(closeCode: URLSessionWebSocketTask.CloseCode = .normalClosure, reason: Data? = nil) {
+        webSocketTask.cancel(with: closeCode, reason: reason)
         
-        // need to reset after cancelling
+        // reset after disconnecting to be ready for reconnecting
         let task = session.webSocketTask(with: url)
         task.delegate = self
         webSocketTask = task
+        
+        let reason_str: String?
+        if let reason {
+            reason_str = String(data: reason, encoding: .utf8)
+        } else {
+            reason_str = nil
+        }
+        subject.send(.disconnected(closeCode, reason_str))
     }
     
     func send(_ message: URLSessionWebSocketTask.Message) {
         webSocketTask.send(message) { [weak self] error in
-            guard let self, let error else {
-                return
+            if let error {
+                self?.subject.send(.error(error))
             }
-            print("⚠️ Warning: WebSocket: (\(self.url)) message failed to send: \(error)")
         }
     }
     
@@ -75,13 +82,6 @@ final class WebSocket: NSObject, URLSessionWebSocketDelegate {
     }
     
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
-        let reason_str: String?
-        if let reason {
-            reason_str = String(data: reason, encoding: .utf8)
-        } else {
-            reason_str = nil
-        }
-        subject.send(.disconnected(closeCode, reason_str))
-        disconnect()
+        disconnect(closeCode: closeCode, reason: reason)
     }
 }

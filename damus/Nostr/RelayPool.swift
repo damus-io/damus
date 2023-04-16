@@ -106,7 +106,7 @@ class RelayPool {
         for relay in relays {
             let c = relay.connection
             
-            let is_connecting = c.isReconnecting || c.isConnecting
+            let is_connecting = c.isConnecting
             
             if is_connecting && (Date.now.timeIntervalSince1970 - c.last_connection_attempt) > 5 {
                 print("stale connection detected (\(relay.descriptor.url.absoluteString)). retrying...")
