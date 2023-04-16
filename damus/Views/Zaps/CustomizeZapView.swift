@@ -25,7 +25,7 @@ struct ZapAmountItem: Identifiable, Hashable {
 }
 
 func get_default_zap_amount_item(_ pubkey: String) -> ZapAmountItem {
-    let def = get_default_zap_amount(pubkey: pubkey) ?? 1000
+    let def = get_default_zap_amount(pubkey: pubkey)
     return ZapAmountItem(amount: def, icon: "🤙")
 }
 
@@ -181,13 +181,17 @@ struct CustomizeZapView: View {
                 })
                 
                 Section(content: {
-                    TextField(String("100000"), text: $custom_amount)
+                    // Use the selected sats amount as the placeholder text so that the UI is less confusing.
+                    // User can type in their custom amount, which hides the placeholder.
+                    TextField(selected_amount.amount.formatted(), text: $custom_amount)
                         .keyboardType(.numberPad)
                         .onReceive(Just(custom_amount)) { newValue in
-                            
                             if let parsed = handle_string_amount(new_value: newValue) {
-                                self.custom_amount = String(parsed)
+                                self.custom_amount = parsed.formatted()
                                 self.custom_amount_sats = parsed
+                            } else {
+                                self.custom_amount = ""
+                                self.custom_amount_sats = nil
                             }
                         }
                 }, header: {
