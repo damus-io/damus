@@ -80,9 +80,13 @@ final class RelayConnection {
             if closeCode != .normalClosure {
                 print("⚠️ Warning: RelayConnection (\(self.url)) closed with code \(closeCode), reason: \(String(describing: reason))")
             }
+            isConnected = false
+            isConnecting = false
             reconnect()
         case .error(let error):
             print("⚠️ Warning: RelayConnection (\(self.url)) error: \(error)")
+            isConnected = false
+            isConnecting = false
             reconnect()
         }
         self.handleEvent(.ws_event(event))

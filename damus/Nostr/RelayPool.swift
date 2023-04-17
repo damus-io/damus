@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Network
 
 struct SubscriptionId: Identifiable, CustomStringConvertible {
     let id: String
@@ -44,7 +45,24 @@ class RelayPool {
     var request_queue: [QueuedRequest] = []
     var seen: Set<String> = Set()
     var counts: [String: UInt64] = [:]
+    
+    private let network_monitor = NWPathMonitor()
+    private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
+    private var last_network_status: NWPath.Status = .unsatisfied
 
+    init() {
+        network_monitor.pathUpdateHandler = { [weak self] path in
+            if (path.status == .satisfied || path.status == .requiresConnection) && self?.last_network_status != path.status {
+                DispatchQueue.main.async {
+                    self?.connect_to_disconnected()
+                }
+            }
+            
+            self?.last_network_status = path.status
+        }
+        network_monitor.start(queue: network_monitor_queue)
+    }
+    
     var descriptors: [RelayDescriptor] {
         relays.map { $0.descriptor }
     }
@@ -110,7 +128,7 @@ class RelayPool {
             
             if is_connecting && (Date.now.timeIntervalSince1970 - c.last_connection_attempt) > 5 {
                 print("stale connection detected (\(relay.descriptor.url.absoluteString)). retrying...")
-                relay.connection.connect(force: true)
+                relay.connection.reconnect()
             } else if relay.is_broken || is_connecting || c.isConnected {
                 continue
             } else {
