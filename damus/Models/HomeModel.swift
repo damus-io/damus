@@ -201,7 +201,7 @@ class HomeModel: ObservableObject {
             !damus_state.contacts.is_muted(ev.pubkey)
         }
         
-        notifications.filter { ev in
+        notifications.filter(damus_state) { ev in
             !damus_state.contacts.is_muted(ev.pubkey) &&
             !damus_state.muted_threads.isMutedThread(ev, privkey: damus_state.keypair.privkey)
         }
@@ -1099,7 +1099,7 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
     } else if type == .boost && damus_state.settings.repost_notification, let inner_ev = ev.inner_event {
         let notify = LocalNotification(type: .repost, event: ev, target: inner_ev, content: inner_ev.content)
         create_local_notification(profiles: damus_state.profiles, notify: notify)
-    } else if type == .like && damus_state.settings.like_notification,
+    } else if type == .like && damus_state.settings.like_notification && !damus_state.settings.hide_reactions,
               let evid = ev.referenced_ids.first?.ref_id,
               let liked_event = damus_state.events.lookup(evid)
     {

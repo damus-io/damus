@@ -200,6 +200,12 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
+    @Published var hide_reactions: Bool {
+        didSet {
+            UserDefaults.standard.set(hide_reactions, forKey: "hide_reactions")
+        }
+    }
+
     @Published var translation_service: TranslationService {
         didSet {
             UserDefaults.standard.set(translation_service.rawValue, forKey: "translation_service")
@@ -294,6 +300,7 @@ class UserSettingsStore: ObservableObject {
         disable_animation = should_disable_image_animation()
         auto_translate = UserDefaults.standard.object(forKey: "auto_translate") as? Bool ?? true
         show_only_preferred_languages = UserDefaults.standard.object(forKey: "show_only_preferred_languages") as? Bool ?? false
+        hide_reactions = UserDefaults.standard.object(forKey: "hide_reactions") as? Bool ?? false
 
         // Note from @tyiu:
         // Default translation service is disabled by default for now until we gain some confidence that it is working well in production.

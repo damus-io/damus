@@ -123,7 +123,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         return Array(pks)
     }
     
-    func build_notifications() -> [NotificationItem] {
+    func build_notifications(_ damus_state: DamusState) -> [NotificationItem] {
         var notifs: [NotificationItem] = []
         
         for el in zaps {
@@ -144,12 +144,14 @@ class NotificationsModel: ObservableObject, ScrollQueue {
             
             notifs.append(.repost(evid, evgrp))
         }
-        
-        for el in reactions {
-            let evid = el.key
-            let evgrp = el.value
-            
-            notifs.append(.reaction(evid, evgrp))
+
+        if !damus_state.settings.hide_reactions {
+            for el in reactions {
+                let evid = el.key
+                let evgrp = el.value
+
+                notifs.append(.reaction(evid, evgrp))
+            }
         }
         
         for reply in replies {
@@ -239,7 +241,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
         
         if insert_event_immediate(ev) {
-            self.notifications = build_notifications()
+            self.notifications = build_notifications(damus_state)
             return true
         }
         
@@ -252,14 +254,14 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
         
         if insert_zap_immediate(zap) {
-            self.notifications = build_notifications()
+            self.notifications = build_notifications(damus_state)
             return true
         }
         
         return false
     }
     
-    func filter(_ isIncluded: (NostrEvent) -> Bool)  {
+    func filter(_ damus_state: DamusState, isIncluded: (NostrEvent) -> Bool)  {
         var changed = false
         var count = 0
         
@@ -296,7 +298,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         changed = changed || replies.count != count
         
         if changed {
-            self.notifications = build_notifications()
+            self.notifications = build_notifications(damus_state)
         }
     }
     
@@ -312,7 +314,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
         
         if inserted {
-            self.notifications = build_notifications()
+            self.notifications = build_notifications(damus_state)
         }
         
         return inserted
