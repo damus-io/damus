@@ -467,13 +467,13 @@ struct ContentView: View {
             self.damus_state?.pool.connect_to_disconnected()
         }
         .onReceive(handle_notify(.new_mutes)) { notif in
-            home.filter_muted()
+            home.filter_events()
         }
         .onReceive(handle_notify(.mute_thread)) { notif in
-            home.filter_muted()
+            home.filter_events()
         }
         .onReceive(handle_notify(.unmute_thread)) { notif in
-            home.filter_muted()
+            home.filter_events()
         }
         .onReceive(handle_notify(.local_notification)) { notif in
             
@@ -497,6 +497,9 @@ struct ContentView: View {
             case .repost:
                 open_event(ev: target)
             }
+        }
+        .onReceive(handle_notify(.hide_reactions)) { notif in
+            home.filter_events()
         }
         .alert(NSLocalizedString("Deleted Account", comment: "Alert message to indicate this is a deleted account"), isPresented: $is_deleted_account) {
             Button(NSLocalizedString("Logout", comment: "Button to close the alert that informs that the current account has been deleted.")) {
@@ -841,7 +844,7 @@ func find_event(state: DamusState, evid: String, search_type: SearchType, find_f
     var filter = search_type == .event ? NostrFilter.filter_ids([ evid ]) : NostrFilter.filter_authors([ evid ])
     
     if search_type == .profile {
-        filter.kinds = [0]
+        filter.kinds = [NostrKind.metadata.rawValue]
     }
     
     filter.limit = 1

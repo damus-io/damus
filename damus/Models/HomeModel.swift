@@ -52,7 +52,7 @@ class HomeModel: ObservableObject {
 
     init() {
         self.damus_state = DamusState.empty
-        filter_muted()
+        filter_events()
         self.setup_debouncer()
     }
     
@@ -192,7 +192,7 @@ class HomeModel: ObservableObject {
     func handle_channel_meta(_ ev: NostrEvent) {
     }
     
-    func filter_muted() {
+    func filter_events() {
         events.filter { ev in
             !damus_state.contacts.is_muted(ev.pubkey)
         }
@@ -203,7 +203,8 @@ class HomeModel: ObservableObject {
         
         notifications.filter { ev in
             !damus_state.contacts.is_muted(ev.pubkey) &&
-            !damus_state.muted_threads.isMutedThread(ev, privkey: damus_state.keypair.privkey)
+            !damus_state.muted_threads.isMutedThread(ev, privkey: damus_state.keypair.privkey) &&
+            (ev.kind != NostrKind.like.rawValue || !damus_state.settings.hide_reactions)
         }
     }
     
@@ -255,6 +256,10 @@ class HomeModel: ObservableObject {
     func handle_like_event(_ ev: NostrEvent) {
         guard let e = ev.last_refid() else {
             // no id ref? invalid like event
+            return
+        }
+
+        if damus_state.settings.hide_reactions {
             return
         }
 
@@ -353,13 +358,13 @@ class HomeModel: ObservableObject {
         var friends = damus_state.contacts.get_friend_list()
         friends.append(damus_state.pubkey)
 
-        var contacts_filter = NostrFilter.filter_kinds([0])
+        var contacts_filter = NostrFilter.filter_kinds([NostrKind.metadata.rawValue])
         contacts_filter.authors = friends
         
-        var our_contacts_filter = NostrFilter.filter_kinds([3, 0])
+        var our_contacts_filter = NostrFilter.filter_kinds([NostrKind.contacts.rawValue, NostrKind.metadata.rawValue])
         our_contacts_filter.authors = [damus_state.pubkey]
         
-        var our_blocklist_filter = NostrFilter.filter_kinds([30000])
+        var our_blocklist_filter = NostrFilter.filter_kinds([NostrKind.list.rawValue])
         our_blocklist_filter.parameter = ["mute"]
         our_blocklist_filter.authors = [damus_state.pubkey]
         
@@ -378,21 +383,27 @@ class HomeModel: ObservableObject {
         our_dms_filter.authors = [ damus_state.pubkey ]
 
         // TODO: separate likes?
-        var home_filter = NostrFilter.filter_kinds([
+        var home_filter_kinds = [
             NostrKind.text.rawValue,
-            NostrKind.like.rawValue,
-            NostrKind.boost.rawValue,
-        ])
+            NostrKind.boost.rawValue
+        ]
+        if !damus_state.settings.hide_reactions {
+            home_filter_kinds.append(NostrKind.like.rawValue)
+        }
+        var home_filter = NostrFilter.filter_kinds(home_filter_kinds)
         // include our pubkey as well even if we're not technically a friend
         home_filter.authors = friends
         home_filter.limit = 500
 
-        var notifications_filter = NostrFilter.filter_kinds([
+        var notifications_filter_kinds = [
             NostrKind.text.rawValue,
-            NostrKind.like.rawValue,
             NostrKind.boost.rawValue,
             NostrKind.zap.rawValue,
-        ])
+        ]
+        if !damus_state.settings.hide_reactions {
+            notifications_filter_kinds.append(NostrKind.like.rawValue)
+        }
+        var notifications_filter = NostrFilter.filter_kinds(notifications_filter_kinds)
         notifications_filter.pubkeys = [damus_state.pubkey]
         notifications_filter.limit = 500
 
