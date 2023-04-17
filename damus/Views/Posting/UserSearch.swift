@@ -19,16 +19,16 @@ struct SearchedUser: Identifiable {
 
 struct UserSearch: View {
     let damus_state: DamusState
-    let search: String
+    let search: (String,Int,Int,Int)
 
     @Binding var post: NSMutableAttributedString
     
     var users: [SearchedUser] {
         guard let contacts = damus_state.contacts.event else {
-            return search_profiles(profiles: damus_state.profiles, search: search)
+            return search_profiles(profiles: damus_state.profiles, search: search.0) /// 0th tuple value is the search string itself
         }
         
-        return search_users_for_autocomplete(profiles: damus_state.profiles, tags: contacts.tags, search: search)
+        return search_users_for_autocomplete(profiles: damus_state.profiles, tags: contacts.tags, search: search.0)
     }
     
     func on_user_tapped(user: SearchedUser) {
@@ -37,12 +37,12 @@ struct UserSearch: View {
         }
         
         let components = post.string.components(separatedBy: .whitespacesAndNewlines)
-        let (tagLength,tagIndex,tagWordIndex) = tagProperties(from: components)
+        let (tagLength,tagIndex,tagWordIndex) = (search.1,search.2,search.3)
         
         let mutableString = NSMutableAttributedString()
         mutableString.append(post)
         
-        // replace tag-search word with tag attributed string
+        // replace tag-search word with the full-length tag selected
         mutableString.deleteCharacters(in: NSRange(location: tagIndex, length: tagLength))
         let tagAttributedString = createUserTag(for: user, with: pk)
         mutableString.insert(tagAttributedString, at: tagIndex)
@@ -52,34 +52,17 @@ struct UserSearch: View {
             let endSpace = plainAttributedString(string: " ")
             mutableString.insert(endSpace, at: mutableString.length)
         }
-        post = mutableString
-    }
-    
-    private func tagProperties(from components: [String]) -> (Int,Int,Int) {
-        var tagLength = 0, tagIndex = 0 // index of the start of a tag in a post
-        var tagWordIndex = 0            // index of the word containing a tag
         
-        for (index,word) in components.enumerated() {
-            if word.first == "@" && !searchedNames.contains(word) {
-                tagLength = word.count
-                tagWordIndex = index
-                break
-            }
-            tagIndex += (word.count == 0) ? (1) : (1 + word.count)
-        }
-        return (tagLength,tagIndex,tagWordIndex)
-    }
-    
-    private func plainAttributedString(string: String) -> NSMutableAttributedString {
-        let tagAttributedString = NSMutableAttributedString(string: string,
-                                                            attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0)])
-        tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 1, length: 1))
-        return tagAttributedString
+        post = mutableString
     }
 
     private func createUserTag(for user: SearchedUser, with pk: String) -> NSMutableAttributedString {
         let name = Profile.displayName(profile: user.profile, pubkey: pk).username
-        searchedNames.append("@\(name)")
+        let tag = "@\(name)"
+        if !searchedNames.contains(tag) {
+            searchedNames.append(tag)
+        }
+        
         let tagString = "@\(name)\u{200B} "
 
         let tagAttributedString = NSMutableAttributedString(string: tagString,
@@ -88,6 +71,13 @@ struct UserSearch: View {
         tagAttributedString.removeAttribute(.link, range: NSRange(location: tagAttributedString.length - 2, length: 2))
         tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 2, length: 2))
         
+        return tagAttributedString
+    }
+    
+    private func plainAttributedString(string: String) -> NSMutableAttributedString {
+        let tagAttributedString = NSMutableAttributedString(string: string,
+                                                            attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0)])
+        tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 1, length: 1))
         return tagAttributedString
     }
     
@@ -115,7 +105,7 @@ struct UserSearch: View {
 }
 
 struct UserSearch_Previews: PreviewProvider {
-    static let search: String = "jb55"
+    static let search: (String,Int,Int,Int) = ("jb55",0,0,0)
     @State static var post: NSMutableAttributedString = NSMutableAttributedString(string: "some @jb55")
     
     static var previews: some View {

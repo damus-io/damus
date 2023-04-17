@@ -44,7 +44,6 @@ struct PostView: View {
 
     func cancel() {
         NotificationCenter.default.post(name: .post, object: NostrPostResult.cancel)
-        composing = false
         dismiss()
     }
 
@@ -84,7 +83,6 @@ struct PostView: View {
             damus_state.drafts.medias = []
         }
 
-        composing = false
         dismiss()
     }
 
@@ -325,31 +323,35 @@ struct PostView: View {
     }
 }
 
-func get_searching_string(_ post: String) -> String? {
+func get_searching_string(_ post: String) -> (String,Int,Int,Int)? { /// could refactor to return a Struct w/ these properties
     let components = post.components(separatedBy: .whitespacesAndNewlines)
     
-    /// allow UserSearch to reappear, within a post-composing session, IF a tag is deleted then searched again
-    if composing {
-        searchedNames = searchedNames.filter{components.contains($0)}
-    }
-    if components.count >= 1 {
-        composing = true
+    var searching = ""
+    var tagLength = 0, tagIndex = 0 // index of the start of a tag in a post
+    var tagWordIndex = 0            // index of the word containing a tag
+    
+tagLoop:
+    for (index,word) in components.enumerated() {
+        if word.first == "@" && !searchedNames.contains(word) {
+            searching = word
+            tagLength = word.count
+            tagWordIndex = index
+            break tagLoop
+        }
+        tagIndex += (word.count == 0) ? (1) : (1 + word.count)
     }
     
-    guard let handle = components.first(where: {$0.first == "@" && !searchedNames.contains($0)}) else {
-        return nil
-    }
-    
-    guard handle.count >= 2 else {
+    guard searching.count >= 2 else {
         return nil
     }
     
     // don't include @npub... strings
-    guard handle.count != 64 else {
+    guard searching.count != 64 else {
         return nil
     }
     
-    return String(handle.dropFirst())
+    searching = String(searching.dropFirst())
+    return (searching,tagLength,tagIndex,tagWordIndex)
 }
 
 struct PostView_Previews: PreviewProvider {
