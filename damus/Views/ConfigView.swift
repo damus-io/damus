@@ -45,7 +45,7 @@ struct ConfigView: View {
                     }
                     
                     NavigationLink(destination: NotificationSettingsView(settings: settings)) {
-                        IconLabel(NSLocalizedString("Local Notifications", comment: "Section header for damus local notifications user configuration"), img_name: "bell.fill", color: .blue)
+                        IconLabel(NSLocalizedString("Notifications", comment: "Section header for Damus notifications"), img_name: "bell.fill", color: .blue)
                     }
                     
                     NavigationLink(destination: ZapSettingsView(pubkey: state.pubkey, settings: settings)) {
