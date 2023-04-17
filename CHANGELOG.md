@@ -3,7 +3,6 @@
 ### Added
 
 - Add deep links for local notifications (Swift)
-- Banner Image Upload (Joel Klabo)
 - Add thread muting (Terry Yiu)
 - Preview media uploads when posting (Swift)
 - Add QR Code in profiles (ericholguin)
