@@ -128,11 +128,16 @@ func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent]
     var pubkeys = Set<String>()
     
     for ev in events {
-        if profiles.lookup(id: ev.pubkey) != nil {
-            continue
+        // lookup profiles from boosted events
+        if let bev = ev.inner_event {
+            if profiles.lookup(id: bev.pubkey) == nil {
+                pubkeys.insert(bev.pubkey)
+            }
         }
         
-        pubkeys.insert(ev.pubkey)
+        if profiles.lookup(id: ev.pubkey) == nil {
+            pubkeys.insert(ev.pubkey)
+        }
     }
     
     return Array(pubkeys)
