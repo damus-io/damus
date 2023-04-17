@@ -65,6 +65,17 @@ struct TranslationSettingsView: View {
                     }
                 }
 
+                if settings.translation_service == .nokyctranslate {
+                    SecureField(NSLocalizedString("API Key (required)", comment: "Prompt for optional entry of API Key to use translation server."), text: $settings.nokyctranslate_api_key)
+                        .disableAutocorrection(true)
+                        .disabled(settings.translation_service != .nokyctranslate)
+                        .autocapitalization(UITextAutocapitalizationType.none)
+                    
+                    if settings.nokyctranslate_api_key == "" {
+                        Link(NSLocalizedString("Get API Key with BTC/Lightning", comment: "Button to navigate to nokyctranslate website to get a translation API key."), destination: URL(string: "https://nokyctranslate.com")!)
+                    }
+                }
+                
                 if settings.translation_service != .none {
                     Toggle(NSLocalizedString("Automatically translate notes", comment: "Toggle to automatically translate notes."), isOn: $settings.auto_translate)
                         .toggleStyle(.switch)

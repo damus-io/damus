@@ -264,6 +264,20 @@ class UserSettingsStore: ObservableObject {
         }
     }
     
+    @Published var nokyctranslate_api_key: String {
+        didSet {
+            do {
+                if nokyctranslate_api_key == "" {
+                    try clearNoKYCTranslateApiKey()
+                } else {
+                    try saveNoKYCTranslateApiKey(nokyctranslate_api_key)
+                }
+            } catch {
+                // No-op.
+            }
+        }
+    }
+    
     @Published var disable_animation: Bool {
         didSet {
             UserDefaults.standard.set(disable_animation, forKey: "disable_animation")
@@ -333,6 +347,13 @@ class UserSettingsStore: ObservableObject {
         } catch {
             deepl_api_key = ""
         }
+        
+        do {
+            nokyctranslate_api_key = try Vault.getPrivateKey(keychainConfiguration: DamusNoKYCTranslateKeychainConfiguration())
+        } catch {
+            nokyctranslate_api_key = ""
+        }
+        
     }
 
     private func saveLibreTranslateApiKey(_ apiKey: String) throws {
@@ -343,6 +364,14 @@ class UserSettingsStore: ObservableObject {
         try Vault.deletePrivateKey(keychainConfiguration: DamusLibreTranslateKeychainConfiguration())
     }
 
+    private func saveNoKYCTranslateApiKey(_ apiKey: String) throws {
+        try Vault.savePrivateKey(apiKey, keychainConfiguration: DamusNoKYCTranslateKeychainConfiguration())
+    }
+    
+    private func clearNoKYCTranslateApiKey() throws {
+        try Vault.deletePrivateKey(keychainConfiguration: DamusNoKYCTranslateKeychainConfiguration())
+    }
+    
     private func saveDeepLApiKey(_ apiKey: String) throws {
         try Vault.savePrivateKey(apiKey, keychainConfiguration: DamusDeepLKeychainConfiguration())
     }
@@ -359,6 +388,8 @@ class UserSettingsStore: ObservableObject {
             return URLComponents(string: libretranslate_url) != nil
         case .deepl:
             return deepl_api_key != ""
+        case .nokyctranslate:
+            return nokyctranslate_api_key != ""
         }
     }
 }
@@ -373,4 +404,10 @@ struct DamusDeepLKeychainConfiguration: KeychainConfiguration {
     var serviceName = "damus"
     var accessGroup: String? = nil
     var accountName = "deepl_apikey"
+}
+
+struct DamusNoKYCTranslateKeychainConfiguration: KeychainConfiguration {
+    var serviceName = "damus"
+    var accessGroup: String? = nil
+    var accountName = "nokyctranslate_apikey"
 }
