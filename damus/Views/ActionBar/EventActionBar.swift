@@ -142,8 +142,10 @@ struct EventActionBar: View {
         }
 
         let boost = make_boost_event(pubkey: damus_state.keypair.pubkey, privkey: privkey, boosted: self.event)
-        
-        self.bar.our_boost = boost
+
+        // As we will still have to wait for the confirmation from alert for repost, we do not turn it green yet.
+        // However, turning green handled from EventActionBar spontaneously once reposted
+        // self.bar.our_boost = boost
         
         notify(.boost, boost)
     }

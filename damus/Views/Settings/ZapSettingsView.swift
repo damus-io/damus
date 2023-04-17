@@ -24,7 +24,7 @@ struct ZapSettingsView: View {
     
     var body: some View {
         Form {
-            Section("Wallet") {
+            Section(NSLocalizedString("Wallet", comment: "Title for section in zap settings that controls the Lightning wallet selection.")) {
                 
                 Toggle(NSLocalizedString("Show wallet selector", comment: "Toggle to show or hide selection of wallet."), isOn: $settings.show_wallet_selector).toggleStyle(.switch)
                 Picker(NSLocalizedString("Select default wallet", comment: "Prompt selection of user's default wallet"),
@@ -36,12 +36,12 @@ struct ZapSettingsView: View {
                 }
             }
             
-            Section("Zaps") {
+            Section(NSLocalizedString("Zaps", comment: "Title for section in zap settings that controls general zap preferences.")) {
                 Toggle(NSLocalizedString("Zap Vibration", comment: "Setting to enable vibration on zap"), isOn: $settings.zap_vibration)
                     .toggleStyle(.switch)
             }
             
-            Section("Default Zap Amount in sats") {
+            Section(NSLocalizedString("Default Zap Amount in sats", comment: "Title for section in zap settings that controls the default zap amount in sats.")) {
                 TextField(String("1000"), text: $default_zap_amount)
                     .keyboardType(.numberPad)
                     .onReceive(Just(default_zap_amount)) { newValue in
@@ -52,7 +52,7 @@ struct ZapSettingsView: View {
                     }
             }
         }
-        .navigationTitle("Zaps")
+        .navigationTitle(NSLocalizedString("Zaps", comment: "Navigation title for zap settings."))
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
         }

@@ -235,7 +235,9 @@ struct PostView: View {
 
                             PVImageCarouselView(media: $uploadedMedias, deviceWidth: deviceSize.size.width)
                                 .onChange(of: uploadedMedias) { _ in
-                                    damus_state.drafts.medias = uploadedMedias
+                                    if replying_to == nil {
+                                        damus_state.drafts.medias = uploadedMedias
+                                    }
                                 }
                             
                         }
@@ -266,7 +268,7 @@ struct PostView: View {
                 } onVideoPicked: { url in
                     self.mediaToUpload = .video(url)
                 }
-                .alert("Are you sure you want to upload this image?", isPresented: $image_upload_confirm) {
+                .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
                     Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
                         if let mediaToUpload {
                             self.handle_upload(media: mediaToUpload)
@@ -372,9 +374,19 @@ struct PVImageCarouselView: View {
                             .frame(width: media.count == 1 ? deviceWidth*0.8 : 250, height: media.count == 1 ? 400 : 250)
                             .cornerRadius(10)
                             .padding()
+                            .contextMenu {
+                                if let uploadedURL = media.first(where: { $0.representingImage == image })?.uploadedURL {
+                                    Button(action: {
+                                        UIPasteboard.general.string = uploadedURL.absoluteString
+                                    }) {
+                                        Label("Copy URL", systemImage: "doc.on.doc")
+                                    }
+                                }
+                            }
                         Image(systemName: "xmark.circle.fill")
                             .foregroundColor(.white)
                             .padding(20)
+                            .shadow(radius: 5)
                             .onTapGesture {
                                 if let index = media.map({$0.representingImage}).firstIndex(of: image) {
                                     media.remove(at: index)
@@ -387,7 +399,6 @@ struct PVImageCarouselView: View {
         }
     }
 }
-
 
 fileprivate func getImage(media: MediaUpload) -> UIImage {
     var uiimage: UIImage = UIImage()

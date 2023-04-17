@@ -10,7 +10,6 @@
 
 #include <ctype.h>
 #include <string.h>
-#include "bech32.h"
 
 typedef unsigned char u8;
 
@@ -32,8 +31,8 @@ static inline int is_invalid_url_ending(char c) {
     return c == '!' || c == '?' || c == ')' || c == '.' || c == ',' || c == ';';
 }
 
-static inline int is_bech32_character(char c) {
-    return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || bech32_charset_rev[c] != -1;
+static inline int is_alphanumeric(char c) {
+    return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9');
 }
 
 static inline void make_cursor(struct cursor *c, const u8 *content, size_t len)
@@ -75,14 +74,14 @@ static inline int consume_until_whitespace(struct cursor *cur, int or_end) {
     return or_end;
 }
 
-static inline int consume_until_non_bech32_character(struct cursor *cur, int or_end) {
+static inline int consume_until_non_alphanumeric(struct cursor *cur, int or_end) {
     char c;
     int consumedAtLeastOne = 0;
 
     while (cur->p < cur->end) {
         c = *cur->p;
 
-        if (!is_bech32_character(c))
+        if (!is_alphanumeric(c))
             return consumedAtLeastOne;
 
         cur->p++;
