@@ -231,7 +231,9 @@ struct PostView: View {
 
                             PVImageCarouselView(media: $uploadedMedias, deviceWidth: deviceSize.size.width)
                                 .onChange(of: uploadedMedias) { _ in
-                                    damus_state.drafts.medias = uploadedMedias
+                                    if replying_to == nil {
+                                        damus_state.drafts.medias = uploadedMedias
+                                    }
                                 }
                             
                         }
