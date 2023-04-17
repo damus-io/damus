@@ -296,7 +296,7 @@ struct ContentView: View {
                 }
                 .navigationViewStyle(.stack)
                 .gesture(
-                    DragGesture()
+                    DragGesture(minimumDistance: 35)
                         .onEnded { gesture in
                             self.onSwipeEnded(gesture.translation.width)
                         }
@@ -611,10 +611,10 @@ struct ContentView: View {
             return
         }
 
-        if (xTranslation > 20){
+        if (xTranslation > 35){
             self.isSideBarOpened = true
         }
-        if (xTranslation < -20){
+        if (xTranslation < -35){
             self.isSideBarOpened = false
         }
     }
