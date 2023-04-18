@@ -69,19 +69,6 @@ func should_show_images(settings: UserSettingsStore, contacts: Contacts, ev: Nos
     return false
 }
 
-func event_validity_color(_ validation: ValidationResult) -> some View {
-    Group {
-        switch validation {
-        case .ok:
-            EmptyView()
-        case .bad_id:
-            Color.orange.opacity(0.4)
-        case .bad_sig:
-            Color.red.opacity(0.4)
-        }
-    }
-}
-
 extension View {
     func pubkey_context_menu(bech32_pubkey: String) -> some View {
         return self.contextMenu {

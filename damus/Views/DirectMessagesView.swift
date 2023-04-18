@@ -16,22 +16,12 @@ struct DirectMessagesView: View {
     let damus_state: DamusState
     
     @State var dm_type: DMType = .friend
-    @State var open_dm: Bool = false
-    @State var pubkey: String
     @ObservedObject var model: DirectMessagesModel
-    @State var active_model: DirectMessageModel = DirectMessageModel(our_pubkey: "")
-    
-    init(damus_state: DamusState) {
-        self.damus_state = damus_state
-        self._model = ObservedObject(initialValue: damus_state.dms)
-        self.pubkey = damus_state.pubkey
-    }
     
     func MainContent(requests: Bool) -> some View {
         ScrollView {
-            let chat = DMChatView(damus_state: damus_state, pubkey: pubkey)
-                .environmentObject(active_model)
-            NavigationLink(destination: chat, isActive: $open_dm) {
+            let chat = DMChatView(damus_state: damus_state, dms: model.active_model)
+            NavigationLink(destination: chat, isActive: $model.open_dm) {
                 EmptyView()
             }
             LazyVStack(spacing: 0) {
@@ -39,7 +29,7 @@ struct DirectMessagesView: View {
                     EmptyTimelineView()
                 } else {
                     let dms = requests ? model.message_requests : model.friend_dms
-                    ForEach(dms, id: \.0) { tup in
+                    ForEach(dms, id: \.pubkey) { tup in
                         MaybeEvent(tup)
                             .padding(.top, 10)
                         
@@ -60,14 +50,12 @@ struct DirectMessagesView: View {
         return [.truncate_content, .no_action_bar, .no_translate]
     }
     
-    func MaybeEvent(_ tup: (String, DirectMessageModel)) -> some View {
+    func MaybeEvent(_ model: DirectMessageModel) -> some View {
         Group {
-            if let ev = tup.1.events.last {
-                EventView(damus: damus_state, event: ev, pubkey: tup.0, options: options)
+            if let ev = model.events.last {
+                EventView(damus: damus_state, event: ev, pubkey: model.pubkey, options: options)
                     .onTapGesture {
-                        pubkey = tup.0
-                        active_model = tup.1
-                        open_dm = true
+                        self.model.open_dm_by_model(model)
                     }
             } else {
                 EmptyView()
@@ -107,6 +95,6 @@ struct DirectMessagesView_Previews: PreviewProvider {
                                kind: 4,
                                tags: [])
         let ds = test_damus_state()
-        DirectMessagesView(damus_state: ds)
+        DirectMessagesView(damus_state: ds, model: ds.dms)
     }
 }

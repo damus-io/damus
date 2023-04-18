@@ -119,7 +119,7 @@ class ProfileModel: ObservableObject, Equatable {
         } else if ev.known_kind == .contacts {
             handle_profile_contact_event(ev)
         } else if ev.known_kind == .metadata {
-            process_metadata_event(our_pubkey: damus.pubkey, profiles: damus.profiles, ev: ev)
+            process_metadata_event(events: damus.events, our_pubkey: damus.pubkey, profiles: damus.profiles, ev: ev)
         }
         seen_event.insert(ev.id)
     }
@@ -140,6 +140,9 @@ class ProfileModel: ObservableObject, Equatable {
             case .notice(let notice):
                 notify(.notice, notice)
             case .eose:
+                if resp.subid == sub_id {
+                    load_profiles(profiles_subid: prof_subid, relay_id: relay_id, load: .from_events(events.events), damus_state: damus)
+                }
                 progress += 1
                 break
             }

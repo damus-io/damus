@@ -70,7 +70,7 @@ struct RelayDetailView: View {
                 
                 if let pubkey = nip11.pubkey {
                     Section(NSLocalizedString("Admin", comment: "Label to display relay contact user.")) {
-                        UserView(damus_state: state, pubkey: pubkey)
+                        UserViewRow(damus_state: state, pubkey: pubkey)
                     }
                 }
                 Section(NSLocalizedString("Relay", comment: "Label to display relay address.")) {

@@ -66,7 +66,6 @@ struct ContentView: View {
     @State var active_sheet: Sheets? = nil
     @State var damus_state: DamusState? = nil
     @State var selected_timeline: Timeline? = .home
-    @State var is_thread_open: Bool = false
     @State var is_deleted_account: Bool = false
     @State var is_profile_open: Bool = false
     @State var event: NostrEvent? = nil
@@ -84,6 +83,7 @@ struct ContentView: View {
     @State var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
+    @State var shouldShowBoostAlert = false
     
     // connect retry timer
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
@@ -184,7 +184,7 @@ struct ContentView: View {
                 NotificationsView(state: damus, notifications: home.notifications)
                 
             case .dms:
-                DirectMessagesView(damus_state: damus_state!)
+                DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms)
             
             case .none:
                 EmptyView()
@@ -247,6 +247,11 @@ struct ContentView: View {
         }
     }
     
+    func open_event(ev: NostrEvent) {
+        self.active_event = ev
+        self.thread_open = true
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
@@ -267,13 +272,7 @@ struct ContentView: View {
                                 
                                 ToolbarItem(placement: .navigationBarTrailing) {
                                     HStack(alignment: .center) {
-                                        if home.signal.signal != home.signal.max_signal {
-                                            NavigationLink(destination: RelayConfigView(state: damus_state!)) {
-                                                Text("\(home.signal.signal)/\(home.signal.max_signal)", comment: "Fraction of how many of the user's relay servers that are operational.")
-                                                    .font(.callout)
-                                                    .foregroundColor(.gray)
-                                            }
-                                        }
+                                        SignalView(state: damus_state!, signal: home.signal)
                                         
                                         // maybe expand this to other timelines in the future
                                         if selected_timeline == .search {
@@ -342,10 +341,9 @@ struct ContentView: View {
                 } else if ref.key == "e" {
                     find_event(state: damus_state!, evid: ref.ref_id, search_type: .event, find_from: nil) { ev in
                         if let ev {
-                            active_event = ev
+                            open_event(ev: ev)
                         }
                     }
-                    thread_open = true
                 }
             case .filter(let filt):
                 active_search = filt
@@ -356,12 +354,10 @@ struct ContentView: View {
             
         }
         .onReceive(handle_notify(.boost)) { notif in
-            current_boost = (notif.object as? NostrEvent)
-        }
-        .onReceive(handle_notify(.open_thread)) { obj in
-            //let ev = obj.object as! NostrEvent
-            //thread.set_active_event(ev)
-            //is_thread_open = true
+            if let ev = (notif.object as? NostrEvent) {
+                current_boost = ev
+                shouldShowBoostAlert = true
+            }
         }
         .onReceive(handle_notify(.reply)) { notif in
             let ev = notif.object as! NostrEvent
@@ -481,6 +477,29 @@ struct ContentView: View {
         .onReceive(handle_notify(.unmute_thread)) { notif in
             home.filter_muted()
         }
+        .onReceive(handle_notify(.local_notification)) { notif in
+            
+            guard let local = notif.object as? LossyLocalNotification,
+                let damus_state else {
+                return
+            }
+            
+            guard let target = damus_state.events.lookup(local.event_id) else {
+                return
+            }
+            
+            switch local.type {
+            case .dm:
+                selected_timeline = .dms
+                damus_state.dms.open_dm_by_pk(target.pubkey)
+                
+            case .like: fallthrough
+            case .zap: fallthrough
+            case .mention: fallthrough
+            case .repost:
+                open_event(ev: target)
+            }
+        }
         .alert(NSLocalizedString("Deleted Account", comment: "Alert message to indicate this is a deleted account"), isPresented: $is_deleted_account) {
             Button(NSLocalizedString("Logout", comment: "Button to close the alert that informs that the current account has been deleted.")) {
                 is_deleted_account = false
@@ -568,13 +587,13 @@ struct ContentView: View {
                 Text("Could not find user to mute...", comment: "Alert message to indicate that the muted user could not be found.")
             }
         })
-        .alert(NSLocalizedString("Repost", comment: "Title of alert for confirming to repost a post."), isPresented: $current_boost.mappedToBool()) {
+        .alert(NSLocalizedString("Repost", comment: "Title of alert for confirming to repost a post."), isPresented: $shouldShowBoostAlert) {
             Button(NSLocalizedString("Cancel", comment: "Button to cancel out of reposting a post.")) {
                 current_boost = nil
             }
             Button(NSLocalizedString("Repost", comment: "Button to confirm reposting a post.")) {
                 if let current_boost {
-                    self.damus_state?.pool.send(.event(current_boost))
+                    self.damus_state?.postbox.send(current_boost)
                 }
             }
         } message: {

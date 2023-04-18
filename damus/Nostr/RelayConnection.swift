@@ -105,8 +105,6 @@ final class RelayConnection: WebSocketDelegate {
                 }
             }
 
-            print("decode failed for \(txt)")
-            // TODO: trigger event error
 
         default:
             break

@@ -55,6 +55,13 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         // Display the notification in the foreground
         completionHandler([.banner, .list, .sound, .badge])
     }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let userInfo = response.notification.request.content.userInfo
+        let notification = LossyLocalNotification.from_user_info(user_info: userInfo)
+        notify(.local_notification, notification)
+        completionHandler()
+    }
 }
 
 func needs_setup() -> Keypair? {
