@@ -748,7 +748,6 @@ func gather_reply_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
 
 func gather_quote_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
     var ids: [ReferencedId] = []
-    ids.append(contentsOf: uniq(from.referenced_pubkeys.filter { $0.ref_id != our_pubkey }))
     if from.pubkey != our_pubkey {
         ids.append(ReferencedId(ref_id: from.pubkey, relay_id: nil, key: "p"))
     }
