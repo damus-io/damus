@@ -15,17 +15,15 @@ struct TimestampedProfile {
 }
 
 enum Sheets: Identifiable {
-    case post
+    case post(PostAction)
     case report(ReportTarget)
-    case reply(NostrEvent)
     case event(NostrEvent)
     case filter
 
     var id: String {
         switch self {
         case .report: return "report"
-        case .post: return "post"
-        case .reply(let ev): return "reply-" + ev.id
+        case .post(let action): return "post-" + (action.ev?.id ?? "")
         case .event(let ev): return "event-" + ev.id
         case .filter: return "filter"
         }
@@ -115,7 +113,7 @@ struct ContentView: View {
                 
                 if privkey != nil {
                     PostButtonContainer(is_left_handed: damus_state?.settings.left_handed ?? false) {
-                        self.active_sheet = .post
+                        self.active_sheet = .post(.posting)
                     }
                 }
             }
@@ -311,10 +309,8 @@ struct ContentView: View {
             switch item {
             case .report(let target):
                 MaybeReportView(target: target)
-            case .post:
-                PostView(replying_to: nil, damus_state: damus_state!)
-            case .reply(let event):
-                PostView(replying_to: event, damus_state: damus_state!)
+            case .post(let action):
+                PostView(action: action, damus_state: damus_state!)
             case .event:
                 EventDetailView()
             case .filter:
@@ -354,14 +350,16 @@ struct ContentView: View {
             
         }
         .onReceive(handle_notify(.boost)) { notif in
-            if let ev = (notif.object as? NostrEvent) {
-                current_boost = ev
-                shouldShowBoostAlert = true
+            guard let ev = notif.object as? NostrEvent else {
+                return
             }
+
+            current_boost = ev
+            shouldShowBoostAlert = true
         }
         .onReceive(handle_notify(.reply)) { notif in
             let ev = notif.object as! NostrEvent
-            self.active_sheet = .reply(ev)
+            self.active_sheet = .post(.replying_to(ev))
         }
         .onReceive(handle_notify(.like)) { like in
         }
@@ -587,17 +585,35 @@ struct ContentView: View {
                 Text("Could not find user to mute...", comment: "Alert message to indicate that the muted user could not be found.")
             }
         })
-        .alert(NSLocalizedString("Repost", comment: "Title of alert for confirming to repost a post."), isPresented: $shouldShowBoostAlert) {
-            Button(NSLocalizedString("Cancel", comment: "Button to cancel out of reposting a post.")) {
-                current_boost = nil
-            }
-            Button(NSLocalizedString("Repost", comment: "Button to confirm reposting a post.")) {
-                if let current_boost {
-                    self.damus_state?.postbox.send(current_boost)
+        .confirmationDialog("Repost", isPresented: $shouldShowBoostAlert) {
+            Button(NSLocalizedString("Repost", comment: "Title of alert for confirming to repost a post.")) {
+                guard let current_boost else {
+                    return
                 }
+                            
+                guard let privkey = self.damus_state?.keypair.privkey else {
+                    return
+                }
+                
+                guard let damus_state else {
+                    return
+                }
+                
+                let boost = make_boost_event(pubkey: damus_state.keypair.pubkey, privkey: privkey, boosted: current_boost)
+                damus_state.postbox.send(boost)
             }
-        } message: {
-            Text("Are you sure you want to repost this?", comment: "Alert message to ask if user wants to repost a post.")
+            
+            Button(NSLocalizedString("Quote", comment: "Title of alert for confirming to make a quoted post.")) {
+                guard let current_boost else {
+                    return
+                }
+                self.active_sheet = .post(.quoting(current_boost))
+            }
+        }
+        .onChange(of: shouldShowBoostAlert) { v in
+            if v == false {
+                self.current_boost = nil
+            }
         }
     }
     

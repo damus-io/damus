@@ -15,6 +15,23 @@ enum NostrPostResult {
 
 let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Text box prompt to ask user to type their post.")
 
+enum PostAction {
+    case replying_to(NostrEvent)
+    case quoting(NostrEvent)
+    case posting
+    
+    var ev: NostrEvent? {
+        switch self {
+        case .replying_to(let ev):
+            return ev
+        case .quoting(let ev):
+            return ev
+        case .posting:
+            return nil
+        }
+    }
+}
+
 struct PostView: View {
     @State var post: NSMutableAttributedString = NSMutableAttributedString()
     @FocusState var focus: Bool
@@ -31,7 +48,7 @@ struct PostView: View {
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
 
-    let replying_to: NostrEvent?
+    let action: PostAction
     let damus_state: DamusState
 
     @Environment(\.presentationMode) var presentationMode
@@ -51,7 +68,8 @@ struct PostView: View {
     
     func send_post() {
         var kind: NostrKind = .text
-        if replying_to?.known_kind == .chat {
+
+        if case .replying_to(let ev) = action, ev.known_kind == .chat {
             kind = .chat
         }
 
@@ -61,25 +79,21 @@ struct PostView: View {
             }
         }
 
-
-
         var content = self.post.string.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 
         let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
 
         content.append(" " + imagesString + " ")
 
+        if case .quoting(let ev) = action, let id = bech32_note_id(ev.id) {
+            content.append(" nostr:" + id)
+        }
+        
         let new_post = NostrPost(content: content, references: references, kind: kind)
 
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
-
-        if let replying_to {
-            damus_state.drafts.replies.removeValue(forKey: replying_to)
-        } else {
-            damus_state.drafts.post = NSMutableAttributedString(string: "")
-            uploadedMedias = []
-            damus_state.drafts.medias = []
-        }
+        
+        clear_draft()
 
         dismiss()
     }
@@ -131,17 +145,67 @@ struct PostView: View {
         .clipShape(Capsule())
     }
     
+    var isEmpty: Bool {
+        self.uploadedMedias.count == 0 &&
+        self.post.mutableString.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
+    func clear_draft() {
+        switch action {
+            case .replying_to(let replying_to):
+                damus_state.drafts.replies.removeValue(forKey: replying_to)
+            case .quoting(let quoting):
+                damus_state.drafts.quotes.removeValue(forKey: quoting)
+            case .posting:
+                damus_state.drafts.post = nil
+        }
+
+    }
+    
+    func load_draft() {
+        guard let draft = load_draft_for_post(drafts: self.damus_state.drafts, action: self.action) else {
+            self.post = NSMutableAttributedString("")
+            self.uploadedMedias = []
+            return
+        }
+        
+        self.uploadedMedias = draft.media
+        self.post = draft.content
+    }
+    
+    func post_changed(post: NSMutableAttributedString, media: [UploadedMedia]) {
+        switch action {
+        case .replying_to(let ev):
+            if let draft = damus_state.drafts.replies[ev] {
+                draft.content = post
+                draft.media = media
+            } else {
+                damus_state.drafts.replies[ev] = DraftArtifacts(content: post, media: media)
+            }
+        case .quoting(let ev):
+            if let draft = damus_state.drafts.quotes[ev] {
+                draft.content = post
+                draft.media = media
+            } else {
+                damus_state.drafts.quotes[ev] = DraftArtifacts(content: post, media: media)
+            }
+        case .posting:
+            if let draft = damus_state.drafts.post {
+                draft.content = post
+                draft.media = media
+            } else {
+                damus_state.drafts.post = DraftArtifacts(content: post, media: media)
+            }
+        }
+    }
+    
     var TextEntry: some View {
         ZStack(alignment: .topLeading) {
             TextViewWrapper(attributedText: $post)
                 .focused($focus)
                 .textInputAutocapitalization(.sentences)
-                .onChange(of: post) { _ in
-                    if let replying_to {
-                        damus_state.drafts.replies[replying_to] = post
-                    } else {
-                        damus_state.drafts.post = post
-                    }
+                .onChange(of: post) { p in
+                    post_changed(post: p, media: uploadedMedias)
                 }
             
             if post.string.isEmpty {
@@ -207,6 +271,35 @@ struct PostView: View {
         }
     }
     
+    var has_artifacts: Bool {
+        if case .quoting = action {
+            return true
+        }
+        return !uploadedMedias.isEmpty
+    }
+    
+    func Editor(deviceSize: GeometryProxy) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .top) {
+                ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
+                
+                TextEntry
+            }
+            .frame(height: has_artifacts ? deviceSize.size.height*0.4 : deviceSize.size.height)
+            .id("post")
+                
+            PVImageCarouselView(media: $uploadedMedias, deviceWidth: deviceSize.size.width)
+                .onChange(of: uploadedMedias) { media in
+                    post_changed(post: post, media: media)
+                }
+            
+            if case .quoting(let ev) = action {
+                BuilderEventView(damus: damus_state, event: ev)
+            }
+        }
+        .padding(.horizontal)
+    }
+    
     var body: some View {
         GeometryReader { (deviceSize: GeometryProxy) in
             VStack(alignment: .leading, spacing: 0) {
@@ -217,27 +310,11 @@ struct PostView: View {
                 
                 ScrollViewReader { scroller in
                     ScrollView {
-                        if let replying_to = replying_to {
+                        if case .replying_to(let replying_to) = self.action {
                             ReplyView(replying_to: replying_to, damus: damus_state, originalReferences: $originalReferences, references: $references)
                         }
-                        VStack(alignment: .leading, spacing: 0) {
-                            HStack(alignment: .top) {
-                                ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
-                                
-                                TextEntry
-                            }
-                            .frame(height: uploadedMedias.isEmpty ? deviceSize.size.height*0.78 : deviceSize.size.height*0.2)
-                            .id("post")
-
-                            PVImageCarouselView(media: $uploadedMedias, deviceWidth: deviceSize.size.width)
-                                .onChange(of: uploadedMedias) { _ in
-                                    if replying_to == nil {
-                                        damus_state.drafts.medias = uploadedMedias
-                                    }
-                                }
-                            
-                        }
-                        .padding(.horizontal)
+                        
+                        Editor(deviceSize: deviceSize)
                     }
                     .frame(maxHeight: searching == nil ? .infinity : 70)
                     .onAppear {
@@ -283,18 +360,17 @@ struct PostView: View {
                 }
             }
             .onAppear() {
-                if let replying_to {
-                    references =  gather_reply_ids(our_pubkey: damus_state.pubkey, from: replying_to)
+                load_draft()
+                
+                switch action {
+                case .replying_to(let replying_to):
+                    references = gather_reply_ids(our_pubkey: damus_state.pubkey, from: replying_to)
                     originalReferences = references
-                    if damus_state.drafts.replies[replying_to] == nil {
-                        damus_state.drafts.post = NSMutableAttributedString(string: "")
-                    }
-                    if let p = damus_state.drafts.replies[replying_to] {
-                        post = p
-                    }
-                } else {
-                    post = damus_state.drafts.post
-                    uploadedMedias = damus_state.drafts.medias
+                case .quoting(let quoting):
+                    references = gather_quote_ids(our_pubkey: damus_state.pubkey, from: quoting)
+                    originalReferences = references
+                case .posting:
+                    break
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -302,11 +378,8 @@ struct PostView: View {
                 }
             }
             .onDisappear {
-                if let replying_to, let reply = damus_state.drafts.replies[replying_to], reply.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    damus_state.drafts.replies.removeValue(forKey: replying_to)
-                } else if replying_to == nil && damus_state.drafts.post.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    damus_state.drafts.post = NSMutableAttributedString(string : "")
-                    damus_state.drafts.medias = uploadedMedias
+                if isEmpty {
+                    clear_draft()
                 }
             }
             .alert(NSLocalizedString("Note contains \"nsec1\" private key. Are you sure?", comment: "Alert user that they might be attempting to paste a private key and ask them to confirm."), isPresented: $showPrivateKeyWarning, actions: {
@@ -344,7 +417,7 @@ func get_searching_string(_ post: String) -> String? {
 
 struct PostView_Previews: PreviewProvider {
     static var previews: some View {
-        PostView(replying_to: nil, damus_state: test_damus_state())
+        PostView(action: .posting, damus_state: test_damus_state())
     }
 }
 
@@ -428,4 +501,16 @@ struct UploadedMedia: Equatable {
     let localURL: URL
     let uploadedURL: URL
     let representingImage: UIImage
+}
+
+
+func load_draft_for_post(drafts: Drafts, action: PostAction) -> DraftArtifacts? {
+    switch action {
+    case .replying_to(let ev):
+        return drafts.replies[ev]
+    case .quoting(let ev):
+        return drafts.quotes[ev]
+    case .posting:
+        return drafts.post
+    }
 }
