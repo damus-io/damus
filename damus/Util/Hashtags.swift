@@ -30,6 +30,7 @@ struct CustomHashtag {
 let custom_hashtags: [String: CustomHashtag] = [
     "bitcoin": CustomHashtag.bitcoin,
     "btc": CustomHashtag.bitcoin,
+    "₿itcoin": CustomHashtag.bitcoin,
     "nostr": CustomHashtag.nostr,
     "coffee": CustomHashtag.coffee,
     "coffeechain": CustomHashtag.coffee,
