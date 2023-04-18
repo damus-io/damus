@@ -186,10 +186,6 @@ class HomeModel: ObservableObject {
     }
     
     func handle_channel_create(_ ev: NostrEvent) {
-        guard ev.is_valid else {
-            return
-        }
-        
         self.channels[ev.id] = ev
     }
     
@@ -212,10 +208,6 @@ class HomeModel: ObservableObject {
     }
     
     func handle_delete_event(_ ev: NostrEvent) {
-        guard ev.is_valid else {
-            return
-        }
-        
         self.deleted_events.insert(ev.id)
     }
 
@@ -237,7 +229,7 @@ class HomeModel: ObservableObject {
         if let inner_ev = ev.inner_event {
             boost_ev_id = inner_ev.id
             
-            guard inner_ev.is_valid else {
+            guard validate_event(ev: inner_ev) == .ok else {
                 return
             }
            
@@ -330,6 +322,8 @@ class HomeModel: ObservableObject {
                     load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(dms), damus_state: damus_state)
                 } else if sub_id == notifications_subid {
                     load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_keys(notifications.uniq_pubkeys()), damus_state: damus_state)
+                } else if sub_id == home_subid {
+                    load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(events.events), damus_state: damus_state)
                 }
                 
                 self.loading = false
@@ -453,7 +447,7 @@ class HomeModel: ObservableObject {
     }
     
     func handle_metadata_event(_ ev: NostrEvent) {
-        process_metadata_event(our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
+        process_metadata_event(events: damus_state.events, our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
     }
 
     func get_last_event_of_kind(relay_id: String, kind: Int) -> NostrEvent? {
@@ -664,66 +658,98 @@ func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
     print("-----")
 }
 
-func process_metadata_event(our_pubkey: String, profiles: Profiles, ev: NostrEvent) {
-    DispatchQueue.global(qos: .background).async {
-        guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
+func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: Profile, ev: NostrEvent) {
+    if our_pubkey == ev.pubkey && (profile.deleted ?? false) {
+        DispatchQueue.main.async {
+            notify(.deleted_account, ())
+        }
+        return
+    }
+
+    var old_nip05: String? = nil
+    if let mprof = profiles.lookup_with_timestamp(id: ev.pubkey) {
+        old_nip05 = mprof.profile.nip05
+        if mprof.timestamp > ev.created_at {
+            // skip if we already have an newer profile
             return
         }
-        
+    }
+
+    let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at, event: ev)
+    profiles.add(id: ev.pubkey, profile: tprof)
+    
+    if let nip05 = profile.nip05, old_nip05 != profile.nip05 {
+        Task.detached(priority: .background) {
+            let validated = await validate_nip05(pubkey: ev.pubkey, nip05_str: nip05)
+            if validated != nil {
+                print("validated nip05 for '\(nip05)'")
+            }
+            
+            DispatchQueue.main.async {
+                profiles.validated[ev.pubkey] = validated
+                profiles.nip05_pubkey[nip05] = ev.pubkey
+                notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+            }
+        }
+    }
+    
+    // load pfps asap
+    let picture = tprof.profile.picture ?? robohash(ev.pubkey)
+    if URL(string: picture) != nil {
         DispatchQueue.main.async {
-            if our_pubkey == ev.pubkey && (profile.deleted ?? false) {
-                DispatchQueue.main.async {
-                    notify(.deleted_account, ())
-                }
-                return
-            }
-
-            var old_nip05: String? = nil
-            if let mprof = profiles.lookup_with_timestamp(id: ev.pubkey) {
-                old_nip05 = mprof.profile.nip05
-                if mprof.timestamp > ev.created_at {
-                    // skip if we already have an newer profile
-                    return
-                }
-            }
-
-            let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at, event: ev)
-            profiles.add(id: ev.pubkey, profile: tprof)
-            
-            if let nip05 = profile.nip05, old_nip05 != profile.nip05 {
-                Task.detached(priority: .background) {
-                    let validated = await validate_nip05(pubkey: ev.pubkey, nip05_str: nip05)
-                    if validated != nil {
-                        print("validated nip05 for '\(nip05)'")
-                    }
-                    
-                    DispatchQueue.main.async {
-                        profiles.validated[ev.pubkey] = validated
-                        profiles.nip05_pubkey[nip05] = ev.pubkey
-                        notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-                    }
-                }
-            }
-            
-            // load pfps asap
-            let picture = tprof.profile.picture ?? robohash(ev.pubkey)
-            if URL(string: picture) != nil {
-                DispatchQueue.main.async {
-                    notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-                }
-            }
-            
-            let banner = tprof.profile.banner ?? ""
-            if URL(string: banner) != nil {
-                DispatchQueue.main.async {
-                    notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-                }
-            }
-            
             notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
         }
     }
     
+    let banner = tprof.profile.banner ?? ""
+    if URL(string: banner) != nil {
+        DispatchQueue.main.async {
+            notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+        }
+    }
+    
+    notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+
+}
+
+func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping () -> Void) {
+    let validated = events.is_event_valid(ev.id)
+    
+    switch validated {
+    case .unknown:
+        Task {
+            let result = validate_event(ev: ev)
+            
+            DispatchQueue.main.async {
+                events.validation[ev.id] = result
+                guard result == .ok else {
+                    return
+                }
+                callback()
+            }
+        }
+        
+    case .ok:
+        callback()
+        
+    case .bad_id: fallthrough
+    case .bad_sig:
+        break
+    }
+}
+
+func process_metadata_event(events: EventCache, our_pubkey: String, profiles: Profiles, ev: NostrEvent) {
+    guard_valid_event(events: events, ev: ev) {
+        DispatchQueue.global(qos: .background).async {
+            guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                process_metadata_profile(our_pubkey: our_pubkey, profiles: profiles, profile: profile, ev: ev)
+            }
+        }
+    }
 }
 
 func robohash(_ pk: String) -> String {

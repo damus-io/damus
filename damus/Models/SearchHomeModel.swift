@@ -128,11 +128,14 @@ func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent]
     var pubkeys = Set<String>()
     
     for ev in events {
-        if profiles.lookup(id: ev.pubkey) != nil {
-            continue
+        // lookup profiles from boosted events
+        if ev.known_kind == .boost, let bev = ev.inner_event, profiles.lookup(id: bev.pubkey) == nil {
+            pubkeys.insert(bev.pubkey)
         }
         
-        pubkeys.insert(ev.pubkey)
+        if profiles.lookup(id: ev.pubkey) == nil {
+            pubkeys.insert(ev.pubkey)
+        }
     }
     
     return Array(pubkeys)
@@ -161,7 +164,7 @@ func load_profiles(profiles_subid: String, relay_id: String, load: PubkeysToLoad
             }
             
             if ev.known_kind == .metadata {
-                process_metadata_event(our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
+                process_metadata_event(events: damus_state.events, our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
             }
             
         }
