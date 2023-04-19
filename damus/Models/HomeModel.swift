@@ -1106,7 +1106,7 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
                 let notify = LocalNotification(type: .reply, event: ev, target: ev, content: content)
                 create_local_notification(profiles: damus_state.profiles, notify: notify)
         }
-        
+
     } else if type == .boost && damus_state.settings.repost_notification, let inner_ev = ev.inner_event {
         let notify = LocalNotification(type: .repost, event: ev, target: inner_ev, content: inner_ev.content)
         create_local_notification(profiles: damus_state.profiles, notify: notify)
@@ -1145,7 +1145,7 @@ func create_local_notification(profiles: Profiles, notify: LocalNotification) {
         break
     case .reply:
         title = String(format: NSLocalizedString("Replied by %@", comment: "Replied by heading in local notification"), displayName)
-        identifier = "myDMNotification"
+        identifier = "myReplyNotification"
     }
     content.title = title
     content.body = notify.content
