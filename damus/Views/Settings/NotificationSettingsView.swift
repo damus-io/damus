@@ -33,6 +33,8 @@ struct NotificationSettingsView: View {
                     .toggleStyle(.switch)
                 Toggle(NSLocalizedString("Reposts", comment: "Setting to enable Repost Local Notification"), isOn: $settings.repost_notification)
                     .toggleStyle(.switch)
+                Toggle(NSLocalizedString("Replies", comment: "Setting to enable Replies Local Notification"), isOn: $settings.reply_notification)
+                    .toggleStyle(.switch)
                 Toggle(NSLocalizedString("Likes", comment: "Setting to enable Like Local Notification"), isOn: $settings.like_notification)
                     .toggleStyle(.switch)
                 Toggle(NSLocalizedString("DMs", comment: "Setting to enable DM Local Notification"), isOn: $settings.dm_notification)

@@ -1090,14 +1090,23 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
         return
     }
 
-    if type == .text && damus_state.settings.mention_notification {
+    if type == .text {
+
         let blocks = ev.blocks(damus_state.keypair.privkey)
-        for case .mention(let mention) in blocks where mention.ref.ref_id == damus_state.keypair.pubkey {
-            let content = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content.attributed).string
-            
-            let notify = LocalNotification(type: .mention, event: ev, target: ev, content: content)
-            create_local_notification(profiles: damus_state.profiles, notify: notify )
+        let content = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content.attributed).string
+        if damus_state.settings.mention_notification {
+            for case .mention(let mention) in blocks where mention.ref.ref_id == damus_state.keypair.pubkey {
+                let notify = LocalNotification(type: .mention, event: ev, target: ev, content: content)
+                create_local_notification(profiles: damus_state.profiles, notify: notify )
+                return
+            }
         }
+        if damus_state.settings.reply_notification,
+           ev.tags.contains(where: { $0.contains("e") }) {
+                let notify = LocalNotification(type: .reply, event: ev, target: ev, content: content)
+                create_local_notification(profiles: damus_state.profiles, notify: notify)
+        }
+        
     } else if type == .boost && damus_state.settings.repost_notification, let inner_ev = ev.inner_event {
         let notify = LocalNotification(type: .repost, event: ev, target: inner_ev, content: inner_ev.content)
         create_local_notification(profiles: damus_state.profiles, notify: notify)
@@ -1134,6 +1143,9 @@ func create_local_notification(profiles: Profiles, notify: LocalNotification) {
     case .zap:
         // not handled here
         break
+    case .reply:
+        title = String(format: NSLocalizedString("Replied by %@", comment: "Replied by heading in local notification"), displayName)
+        identifier = "myDMNotification"
     }
     content.title = title
     content.body = notify.content
@@ -1152,4 +1164,3 @@ func create_local_notification(profiles: Profiles, notify: LocalNotification) {
         }
     }
 }
-

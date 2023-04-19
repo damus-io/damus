@@ -142,6 +142,12 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
+    @Published var reply_notification: Bool {
+        didSet {
+            UserDefaults.standard.set(reply_notification, forKey: "reply_notification")
+        }
+    }
+
     @Published var repost_notification: Bool {
         didSet {
             UserDefaults.standard.set(repost_notification, forKey: "repost_notification")
@@ -285,6 +291,7 @@ class UserSettingsStore: ObservableObject {
         zap_vibration = UserDefaults.standard.object(forKey: "zap_vibration") as? Bool ?? false
         zap_notification = UserDefaults.standard.object(forKey: "zap_notification") as? Bool ?? true
         mention_notification = UserDefaults.standard.object(forKey: "mention_notification") as? Bool ?? true
+        reply_notification = UserDefaults.standard.object(forKey: "reply_notification") as? Bool ?? true
         repost_notification = UserDefaults.standard.object(forKey: "repost_notification") as? Bool ?? true
         like_notification = UserDefaults.standard.object(forKey: "like_notification") as? Bool ?? true
         dm_notification = UserDefaults.standard.object(forKey: "dm_notification") as? Bool ?? true

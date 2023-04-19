@@ -494,6 +494,7 @@ struct ContentView: View {
             case .like: fallthrough
             case .zap: fallthrough
             case .mention: fallthrough
+            case .reply: fallthrough
             case .repost:
                 open_event(ev: target)
             }
