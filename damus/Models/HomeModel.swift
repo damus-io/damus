@@ -1094,6 +1094,8 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
 
         let blocks = ev.blocks(damus_state.keypair.privkey)
         let content = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content.attributed).string
+
+        // Mention using npub explicitly
         if damus_state.settings.mention_notification {
             for case .mention(let mention) in blocks where mention.ref.ref_id == damus_state.keypair.pubkey {
                 let notify = LocalNotification(type: .mention, event: ev, target: ev, content: content)
@@ -1101,10 +1103,19 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
                 return
             }
         }
+
+        // Reply having e tag
         if damus_state.settings.reply_notification,
            ev.tags.contains(where: { $0.contains("e") }) {
                 let notify = LocalNotification(type: .reply, event: ev, target: ev, content: content)
                 create_local_notification(profiles: damus_state.profiles, notify: notify)
+                return
+        }
+
+        // Quote repost
+        if damus_state.settings.repost_notification {
+            let notify = LocalNotification(type: .repost, event: ev, target: ev, content: content)
+            create_local_notification(profiles: damus_state.profiles, notify: notify)
         }
 
     } else if type == .boost && damus_state.settings.repost_notification, let inner_ev = ev.inner_event {
