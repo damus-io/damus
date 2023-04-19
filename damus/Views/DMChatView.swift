@@ -9,17 +9,20 @@ import SwiftUI
 
 struct DMChatView: View {
     let damus_state: DamusState
-    let pubkey: String
-    @EnvironmentObject var dms: DirectMessageModel
+    @ObservedObject var dms: DirectMessageModel
     @State var showPrivateKeyWarning: Bool = false
-
+    
+    var pubkey: String {
+        dms.pubkey
+    }
+    
     var Messages: some View {
         ScrollViewReader { scroller in
             ScrollView {
                 VStack(alignment: .leading) {
                     ForEach(Array(zip(dms.events, dms.events.indices)), id: \.0.id) { (ev, ind) in
                         DMView(event: dms.events[ind], damus_state: damus_state)
-                            .contextMenu{MenuItems(event: ev, keypair: damus_state.keypair, target_pubkey: ev.pubkey, bookmarks: damus_state.bookmarks)}
+                            .contextMenu{MenuItems(event: ev, keypair: damus_state.keypair, target_pubkey: ev.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads)}
                     }
                     EndBlock(height: 80)
                 }
@@ -177,10 +180,9 @@ struct DMChatView_Previews: PreviewProvider {
     static var previews: some View {
         let ev = NostrEvent(content: "hi", pubkey: "pubkey", kind: 1, tags: [])
 
-        let model = DirectMessageModel(events: [ev], our_pubkey: "pubkey")
+        let model = DirectMessageModel(events: [ev], our_pubkey: "pubkey", pubkey: "the_pk")
 
-        DMChatView(damus_state: test_damus_state(), pubkey: "pubkey")
-            .environmentObject(model)
+        DMChatView(damus_state: test_damus_state(), dms: model)
     }
 }
 

@@ -129,7 +129,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         for el in zaps {
             let evid = el.key
             let zapgrp = el.value
-            
+
             let notif: NotificationItem = .event_zap(evid, zapgrp)
             notifs.append(notif)
         }
@@ -233,7 +233,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
     }
     
-    func insert_event(_ ev: NostrEvent) -> Bool {
+    func insert_event(_ ev: NostrEvent, damus_state: DamusState) -> Bool {
         if should_queue {
             return insert_uniq_sorted_event_created(events: &incoming_events, new_ev: ev)
         }
@@ -246,7 +246,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         return false
     }
     
-    func insert_zap(_ zap: Zap) -> Bool {
+    func insert_zap(_ zap: Zap, damus_state: DamusState) -> Bool {
         if should_queue {
             return insert_uniq_sorted_zap_by_created(zaps: &incoming_zaps, new_zap: zap)
         }
@@ -300,7 +300,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
     }
     
-    func flush() -> Bool {
+    func flush(_ damus_state: DamusState) -> Bool {
         var inserted = false
         
         for zap in incoming_zaps {

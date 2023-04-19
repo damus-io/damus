@@ -15,7 +15,7 @@
 			<key>one</key>
 			<string>...%d andra inlägg...</string>
 			<key>other</key>
-			<string>...%d andra inlägg...</string>
+			<string>...%d andra anteckningar...</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>

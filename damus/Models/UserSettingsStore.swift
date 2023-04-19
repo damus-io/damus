@@ -26,11 +26,13 @@ func set_default_zap_amount(pubkey: String, amount: Int) {
     UserDefaults.standard.setValue(amount, forKey: key)
 }
 
-func get_default_zap_amount(pubkey: String) -> Int? {
+let fallback_zap_amount = 1000
+
+func get_default_zap_amount(pubkey: String) -> Int {
     let key = default_zap_setting_key(pubkey: pubkey)
     let amt = UserDefaults.standard.integer(forKey: key)
     if amt == 0 {
-        return nil
+        return fallback_zap_amount
     }
     return amt
 }

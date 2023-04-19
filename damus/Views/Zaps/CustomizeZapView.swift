@@ -25,7 +25,7 @@ struct ZapAmountItem: Identifiable, Hashable {
 }
 
 func get_default_zap_amount_item(_ pubkey: String) -> ZapAmountItem {
-    let def = get_default_zap_amount(pubkey: pubkey) ?? 1000
+    let def = get_default_zap_amount(pubkey: pubkey)
     return ZapAmountItem(amount: def, icon: "🤙")
 }
 
@@ -164,8 +164,7 @@ struct CustomizeZapView: View {
         }
         .font(.headline)
         .foregroundColor(fontColor())
-        .padding(.vertical, 5)
-        .padding(.horizontal, 15)
+        .padding(EdgeInsets(top: 5, leading: 15, bottom: 5, trailing: 15))
         .background(DamusColors.adaptableGrey)
         .cornerRadius(15)
     }
@@ -197,12 +196,7 @@ struct CustomizeZapView: View {
     
     var CustomZapTextField: some View {
         VStack(alignment: .center, spacing: 0) {
-            TextField("", text: $custom_amount, onEditingChanged: { (editing) in
-                if editing {
-                    custom_amount_sats = 0
-                    custom_amount = ""
-                }
-            })
+            TextField("", text: $custom_amount)
             .placeholder(when: custom_amount.isEmpty, alignment: .center) {
                 Text(String("0"))
             }
@@ -213,9 +207,12 @@ struct CustomizeZapView: View {
             .multilineTextAlignment(.center)
             .onReceive(Just(custom_amount)) { newValue in
                 if let parsed = handle_string_amount(new_value: newValue) {
-                    self.custom_amount = String(parsed)
+                    self.custom_amount = parsed.formatted()
                     self.custom_amount_sats = parsed
-                }
+                } else {
+                   self.custom_amount = ""
+                   self.custom_amount_sats = nil
+               }
             }
             Text("sats")
                 .font(.system(size: 18, weight: .heavy))
@@ -310,8 +307,11 @@ struct CustomizeZapView: View {
                 receive_zap(notif: notif)
             }
             .background(fillColor().edgesIgnoringSafeArea(.all))
+            .onTapGesture {
+                hideKeyboard()
+            }
     }
-        
+
     var CustomZap: some View {
         VStack(alignment: .center, spacing: 20) {
             
@@ -331,9 +331,7 @@ struct CustomizeZapView: View {
             Spacer()
             
             Spacer()
-
         }
-        .dismissKeyboardOnTap()
         .sheet(isPresented: $show_zap_types) {
             if #available(iOS 16.0, *) {
                 ZapTypePicker
@@ -347,6 +345,13 @@ struct CustomizeZapView: View {
     
     var MainContent: some View {
         CustomZap
+    }
+}
+
+extension View {
+    func hideKeyboard() {
+        let resign = #selector(UIResponder.resignFirstResponder)
+        UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
     }
 }
 
