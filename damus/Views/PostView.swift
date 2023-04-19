@@ -207,6 +207,7 @@ struct PostView: View {
                 .onChange(of: post) { p in
                     post_changed(post: p, media: uploadedMedias)
                 }
+                .accessibility(identifier: "post_text_view")
             
             if post.string.isEmpty {
                 Text(POST_PLACEHOLDER)

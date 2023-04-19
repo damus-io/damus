@@ -180,6 +180,7 @@ struct SaveKeyView: View {
                             }
                         }
                 }
+                .accessibility(identifier: textContentType == .username ? "save_pub_key_button" : "save_priv_key_button")
             }
 
             TextField("", text: .constant(text))

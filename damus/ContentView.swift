@@ -262,6 +262,7 @@ struct ContentView: View {
                                         isSideBarOpened.toggle()
                                     } label: {
                                         ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles)
+                                            .accessibility(identifier: "profile_drawer_button")
                                             .opacity(isSideBarOpened ? 0 : 1)
                                             .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
                                     }
@@ -813,6 +814,11 @@ func update_filters_with_since(last_of_kind: [Int: NostrEvent], filters: [NostrF
 
 
 func setup_notifications() {
+    
+    if CommandLine.arguments.contains("--disable-notifications") {
+        print("Skipping notifications permissions request (for UI Testing)")
+        return
+    }
     
     UIApplication.shared.registerForRemoteNotifications()
     let center = UNUserNotificationCenter.current()

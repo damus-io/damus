@@ -86,6 +86,7 @@ struct CreateAccountView: View {
                 .padding()
                 .disabled(profileUploadViewModel.isLoading)
                 .opacity(profileUploadViewModel.isLoading ? 0.5 : 1)
+                .accessibilityIdentifier("create_account_button")
             }
             .padding(.leading, 14.0)
             .padding(.trailing, 20.0)
