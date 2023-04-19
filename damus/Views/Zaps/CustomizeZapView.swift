@@ -53,16 +53,25 @@ struct CustomizeZapView: View {
     @State var comment: String
     @State var custom_amount: String
     @State var custom_amount_sats: Int?
-    @State var selected_amount: ZapAmountItem
     @State var zap_type: ZapType
     @State var invoice: String
     @State var error: String?
     @State var showing_wallet_selector: Bool
     @State var zapping: Bool
+    @State var show_zap_types: Bool = false
     
     let zap_amounts: [ZapAmountItem]
     
     @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) var colorScheme
+    
+    func fillColor() -> Color {
+        colorScheme == .light ? DamusColors.white : DamusColors.black
+    }
+    
+    func fontColor() -> Color {
+        colorScheme == .light ? DamusColors.black : DamusColors.white
+    }
     
     init(state: DamusState, event: NostrEvent, lnurl: String) {
         self._comment = State(initialValue: "")
@@ -71,56 +80,192 @@ struct CustomizeZapView: View {
         self._error = State(initialValue: nil)
         self._invoice = State(initialValue: "")
         self._showing_wallet_selector = State(initialValue: false)
-        self._custom_amount = State(initialValue: "")
         self._zap_type = State(initialValue: .pub)
-        let selected = get_default_zap_amount_item(state.pubkey)
-        self._selected_amount = State(initialValue: selected)
-        self._custom_amount_sats = State(initialValue: nil)
+        let default_amount = (get_default_zap_amount_item(state.pubkey)).amount
+        self._custom_amount = State(initialValue: String(default_amount))
+        self._custom_amount_sats = State(initialValue: default_amount)
         self._zapping = State(initialValue: false)
         self.lnurl = lnurl
         self.state = state
     }
     
-    var zap_type_desc: String {
-        switch zap_type {
+    func zap_type_desc(type: ZapType) -> String {
+        switch type {
         case .pub:
-            return NSLocalizedString("Everyone on can see that you zapped", comment: "Description of public zap type where the zap is sent publicly and identifies the user who sent it.")
+            return NSLocalizedString("Everyone will see that you zapped", comment: "Description of public zap type where the zap is sent publicly and identifies the user who sent it.")
         case .anon:
-            return NSLocalizedString("No one can see that you zapped", comment: "Description of anonymous zap type where the zap is sent anonymously and does not identify the user who sent it.")
+            return NSLocalizedString("No one will see that you zapped", comment: "Description of anonymous zap type where the zap is sent anonymously and does not identify the user who sent it.")
         case .priv:
             let pk = event.pubkey
             let prof = state.profiles.lookup(id: pk)
             let name = Profile.displayName(profile: prof, pubkey: pk).username
-            return String.localizedStringWithFormat(NSLocalizedString("private_zap_description", value: "Only '%@' can see that you zapped them", comment: "Description of private zap type where the zap is sent privately and does not identify the user to the public."), name)
+            return String.localizedStringWithFormat(NSLocalizedString("private_zap_description", value: "Only '%@' will see that you zapped them", comment: "Description of private zap type where the zap is sent privately and does not identify the user to the public."), name)
         case .non_zap:
-            return NSLocalizedString("No zaps are sent, only a lightning payment.", comment: "Description of non-zap type where sats are sent to the user's wallet as a regular Lightning payment, not as a zap.")
+            return NSLocalizedString("No zaps will be sent, only a lightning payment.", comment: "Description of non-zap type where sats are sent to the user's wallet as a regular Lightning payment, not as a zap.")
         }
     }
     
     var ZapTypePicker: some View {
-        Picker(NSLocalizedString("Zap Type", comment: "Header text to indicate that the picker below it is to choose the type of zap to send."), selection: $zap_type) {
-            Text("Public", comment: "Picker option to indicate that a zap should be sent publicly and identify the user as who sent it.").tag(ZapType.pub)
-            Text("Private", comment: "Picker option to indicate that a zap should be sent privately and not identify the user to the public.").tag(ZapType.priv)
-            Text("Anonymous", comment: "Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.").tag(ZapType.anon)
-            Text(verbatim: NSLocalizedString("none_zap_type", value: "None", comment: "Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.")).tag(ZapType.non_zap)
+        VStack(spacing: 20) {
+            Text("Zap type")
+                .font(.system(size: 18, weight: .heavy))
+            ZapTypeSelection(text: "Public", comment: "Picker option to indicate that a zap should be sent publicly and identify the user as who sent it.", img: "person.2.circle.fill", action: {zap_type = ZapType.pub}, type: ZapType.pub)
+            ZapTypeSelection(text: "Private", comment: "Picker option to indicate that a zap should be sent privately and not identify the user to the public.", img: "lock.circle.fill", action: {zap_type = ZapType.priv}, type: ZapType.priv)
+            ZapTypeSelection(text: "Anonymous", comment: "Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.", img: "person.crop.circle.fill.badge.questionmark", action: {zap_type = ZapType.anon}, type: ZapType.anon)
+            ZapTypeSelection(text: "None", comment: "Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.", img: "bolt.circle.fill", action: {zap_type = ZapType.non_zap}, type: ZapType.non_zap)
         }
-        .pickerStyle(.menu)
+        .padding(.horizontal)
+    }
+    
+    func ZapTypeSelection(text: LocalizedStringKey, comment: StaticString, img: String, action: @escaping () -> (), type: ZapType) -> some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 5) {
+                HStack {
+                    Image(systemName: img)
+                        .foregroundColor(.gray)
+                        .font(.system(size: 24))
+                    Text(text, comment: comment)
+                        .font(.system(size: 20, weight: .semibold))
+                    Spacer()
+                }
+                .padding(.horizontal)
+                Text(zap_type_desc(type: type))
+                    .padding(.horizontal)
+                    .foregroundColor(.gray)
+                    .font(.system(size: 16))
+            }
+        }
+        .frame(minWidth: 400, maxWidth: .infinity, minHeight: 50, maxHeight: 70)
+        .foregroundColor(fontColor())
+        .background(zap_type == type ? fillColor() : DamusColors.adaptableGrey)
+        .cornerRadius(15)
+        .overlay(RoundedRectangle(cornerRadius: 15)
+            .stroke(DamusColors.purple.opacity(zap_type == type ? 1.0 : 0.0), lineWidth: 2))
+    }
+    
+    func ZapTypeButton() -> some View {
+        Button(action: {
+            show_zap_types = true
+        }) {
+            switch zap_type {
+            case .pub:
+                Image(systemName: "person.2")
+                Text("Public")
+            case .anon:
+                Image(systemName: "person.fill.questionmark")
+                Text("Anonymous")
+            case .priv:
+                Image(systemName: "lock")
+                Text("Private")
+            case .non_zap:
+                Image(systemName: "bolt")
+                Text("None")
+            }
+        }
+        .font(.headline)
+        .foregroundColor(fontColor())
+        .padding(.vertical, 5)
+        .padding(.horizontal, 15)
+        .background(DamusColors.adaptableGrey)
+        .cornerRadius(15)
     }
     
     var AmountPicker: some View {
-        Picker(NSLocalizedString("Zap Amount", comment: "Title of picker that allows selection of predefined amounts to zap."), selection: $selected_amount) {
-            ForEach(zap_amounts) { entry in
-                let fmt = format_msats_abbrev(Int64(entry.amount) * 1000)
-                HStack(alignment: .firstTextBaseline) {
-                    Text("\(entry.icon)")
-                        .frame(width: 30)
-                    Text("\(fmt)")
-                        .frame(width: 50)
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(alignment: .center, spacing: 15) {
+                ForEach(zap_amounts) { entry in
+                    ZapAmountButton(zapAmountItem: entry, action: {custom_amount_sats = entry.amount; custom_amount = String(entry.amount)})
                 }
-                .tag(entry)
+            }
+            .padding(10)
+        }
+    }
+    
+    func ZapAmountButton(zapAmountItem: ZapAmountItem, action: @escaping () -> ()) -> some View {
+        Button(action: action) {
+            let fmt = format_msats_abbrev(Int64(zapAmountItem.amount) * 1000)
+            Text("\(zapAmountItem.icon)\n\(fmt)")
+        }
+        .font(.headline)
+        .frame(width: 70, height: 70)
+        .foregroundColor(fontColor())
+        .background(custom_amount_sats == zapAmountItem.amount ? fillColor() : DamusColors.adaptableGrey)
+        .cornerRadius(15)
+        .overlay(RoundedRectangle(cornerRadius: 15)
+            .stroke(DamusColors.purple.opacity(custom_amount_sats == zapAmountItem.amount ? 1.0 : 0.0), lineWidth: 2))
+    }
+    
+    var CustomZapTextField: some View {
+        VStack(alignment: .center, spacing: 0) {
+            TextField("", text: $custom_amount, onEditingChanged: { (editing) in
+                if editing {
+                    custom_amount_sats = 0
+                    custom_amount = ""
+                }
+            })
+            .placeholder(when: custom_amount.isEmpty, alignment: .center) {
+                Text(String("0"))
+            }
+            .accentColor(.clear)
+            .font(.system(size: 72, weight: .heavy))
+            .minimumScaleFactor(0.01)
+            .keyboardType(.numberPad)
+            .multilineTextAlignment(.center)
+            .onReceive(Just(custom_amount)) { newValue in
+                if let parsed = handle_string_amount(new_value: newValue) {
+                    self.custom_amount = String(parsed)
+                    self.custom_amount_sats = parsed
+                }
+            }
+            Text("sats")
+                .font(.system(size: 18, weight: .heavy))
+        }
+    }
+    
+    var ZapReply: some View {
+        HStack {
+            if #available(iOS 16.0, *) {
+                TextField(NSLocalizedString("Send a reply with your zap...", comment: "Placeholder text for a comment to send as part of a zap to the user."), text: $comment, axis: .vertical)
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.never)
+                    .lineLimit(5)
+            } else {
+                TextField(NSLocalizedString("Send a reply with your zap...", comment: "Placeholder text for a comment to send as part of a zap to the user."), text: $comment)
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.never)
             }
         }
-        .pickerStyle(.wheel)
+        .frame(minHeight: 30)
+        .padding(10)
+        .background(.secondary.opacity(0.2))
+        .cornerRadius(10)
+        .padding(.horizontal, 10)
+    }
+    
+    var ZapButton: some View {
+        VStack {
+            if zapping {
+                Text("Zapping...", comment: "Text to indicate that the app is in the process of sending a zap.")
+            } else {
+                Button(NSLocalizedString("Zap ⚡️", comment: "Button to send a zap.")) {
+                    let amount = custom_amount_sats
+                    send_zap(damus_state: state, event: event, lnurl: lnurl, is_custom: true, comment: comment, amount_sats: amount, zap_type: zap_type)
+                    self.zapping = true
+                }
+                .disabled(custom_amount_sats == 0 || custom_amount.isEmpty)
+                .font(.system(size: 28, weight: .bold))
+                .frame(width: 120, height: 50)
+                .foregroundColor(.white)
+                .background(LINEAR_GRADIENT)
+                .opacity(custom_amount_sats == 0 || custom_amount.isEmpty ? 0.5 : 1.0)
+                .clipShape(Capsule())
+            }
+            
+            if let error {
+                Text(error)
+                    .foregroundColor(.red)
+            }
+        }
     }
     
     func receive_zap(notif: Notification) {
@@ -154,8 +299,6 @@ struct CustomizeZapView: View {
                 dismiss()
             }
         }
-        
-    
 }
     
     var body: some View {
@@ -166,72 +309,44 @@ struct CustomizeZapView: View {
             .onReceive(handle_notify(.zapping)) { notif in
                 receive_zap(notif: notif)
             }
-            .ignoresSafeArea()
+            .background(fillColor().edgesIgnoringSafeArea(.all))
     }
-    
-    var TheForm: some View {
-        Form {
-                
-            Group {
-                Section(content: {
-                    AmountPicker
-                        .frame(height: 120)
-                }, header: {
-                    Text("Zap Amount in sats", comment: "Header text to indicate that the picker below it is to choose a pre-defined amount of sats to zap.")
-                })
-                
-                Section(content: {
-                    TextField(String("100000"), text: $custom_amount)
-                        .keyboardType(.numberPad)
-                        .onReceive(Just(custom_amount)) { newValue in
-                            
-                            if let parsed = handle_string_amount(new_value: newValue) {
-                                self.custom_amount = String(parsed)
-                                self.custom_amount_sats = parsed
-                            }
-                        }
-                }, header: {
-                    Text("Custom Zap Amount", comment: "Header text to indicate that the text field below it is to enter a custom zap amount.")
-                })
-                
-                Section(content: {
-                    TextField(NSLocalizedString("Awesome post!", comment: "Placeholder text for a comment to send as part of a zap to the user."), text: $comment)
-                }, header: {
-                    Text("Comment", comment: "Header text to indicate that the text field below it is a comment that will be used to send as part of a zap to the user.")
-                })
-            }
-            .dismissKeyboardOnTap()
-                
-            Section(content: {
-                ZapTypePicker
-            }, header: {
-                Text("Zap Type", comment: "Header text to indicate that the picker below it is to choose the type of zap to send.")
-            }, footer: {
-                Text(zap_type_desc)
-            })
-            
-            
-            if zapping {
-                Text("Zapping...", comment: "Text to indicate that the app is in the process of sending a zap.")
-            } else {
-                Button(NSLocalizedString("Zap", comment: "Button to send a zap.")) {
-                    let amount = custom_amount_sats ?? selected_amount.amount
-                    send_zap(damus_state: state, event: event, lnurl: lnurl, is_custom: true, comment: comment, amount_sats: amount, zap_type: zap_type)
-                    self.zapping = true
-                }
-                .zIndex(16)
-            }
-            
-            if let error {
-                Text(error)
-                    .foregroundColor(.red)
-            }
         
+    var CustomZap: some View {
+        VStack(alignment: .center, spacing: 20) {
+            
+            ZapTypeButton()
+                .padding(.top, 50)
+            
+            Spacer()
+
+            CustomZapTextField
+            
+            AmountPicker
+            
+            ZapReply
+            
+            ZapButton
+            
+            Spacer()
+            
+            Spacer()
+
+        }
+        .dismissKeyboardOnTap()
+        .sheet(isPresented: $show_zap_types) {
+            if #available(iOS 16.0, *) {
+                ZapTypePicker
+                    .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
+            } else {
+                ZapTypePicker
+            }
         }
     }
     
     var MainContent: some View {
-        TheForm
+        CustomZap
     }
 }
 
