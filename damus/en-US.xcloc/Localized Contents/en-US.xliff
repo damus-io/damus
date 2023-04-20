@@ -196,11 +196,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Are you lost?</target>
         <note>Text asking the user if they are lost in the app.</note>
       </trans-unit>
-      <trans-unit id="Are you sure you want to repost this?" xml:space="preserve">
-        <source>Are you sure you want to repost this?</source>
-        <target>Are you sure you want to repost this?</target>
-        <note>Alert message to ask if user wants to repost a post.</note>
-      </trans-unit>
       <trans-unit id="Are you sure you want to upload this image?" xml:space="preserve">
         <source>Are you sure you want to upload this image?</source>
         <target>Are you sure you want to upload this image?</target>
@@ -255,7 +250,6 @@ Sentence composed of 2 variables to describe how many people are following a use
    Button to cancel a repost.
    Button to cancel out of alert that creates a new mutelist.
    Button to cancel out of posting a note.
-   Button to cancel out of reposting a post.
    Button to cancel out of view adding user inputted relay.
    Button to cancel the upload.
    Cancel deleting the user.
@@ -360,6 +354,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Copy Text</source>
         <target>Copy Text</target>
         <note>Context menu option for copying the text from an note.</note>
+      </trans-unit>
+      <trans-unit id="Copy URL" xml:space="preserve">
+        <source>Copy URL</source>
+        <target>Copy URL</target>
+        <note>Label for button in context menu to copy URL of the selected uploaded media asset.</note>
       </trans-unit>
       <trans-unit id="Copy User Pubkey" xml:space="preserve">
         <source>Copy User Pubkey</source>
@@ -942,6 +941,11 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <target>QR Code</target>
         <note>Button to view profile's qr code.</note>
       </trans-unit>
+      <trans-unit id="Quote" xml:space="preserve">
+        <source>Quote</source>
+        <target>Quote</target>
+        <note>Title of alert for confirming to make a quoted post.</note>
+      </trans-unit>
       <trans-unit id="Reactions" xml:space="preserve">
         <source>Reactions</source>
         <target>Reactions</target>
@@ -1030,8 +1034,7 @@ Picker option to indicate that a zap should be sent privately and not identify t
       <trans-unit id="Repost" xml:space="preserve">
         <source>Repost</source>
         <target>Repost</target>
-        <note>Button to confirm reposting a post.
-   Title of alert for confirming to repost a post.</note>
+        <note>Title of alert for confirming to repost a post.</note>
       </trans-unit>
       <trans-unit id="Reposted" xml:space="preserve">
         <source>Reposted</source>
