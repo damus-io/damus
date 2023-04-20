@@ -7,17 +7,18 @@
 
 import SwiftUI
 
-func get_friend_icon(contacts: Contacts, pubkey: String, show_confirmed: Bool) -> String? {
-    if !show_confirmed {
-        return nil
-    }
-    
+enum FriendType {
+    case friend
+    case fof
+}
+
+func get_friend_type(contacts: Contacts, pubkey: String) -> FriendType? {
     if contacts.is_friend_or_self(pubkey) {
-        return "person.fill.checkmark"
+        return .friend
     }
     
     if contacts.is_friend_of_friend(pubkey) {
-        return "person.fill.and.arrow.left.and.arrow.right"
+        return .fof
     }
     
     return nil
@@ -53,8 +54,8 @@ struct ProfileName: View {
         self.show_nip5_domain = show_nip5_domain
     }
     
-    var friend_icon: String? {
-        return get_friend_icon(contacts: damus_state.contacts, pubkey: pubkey, show_confirmed: show_friend_confirmed)
+    var friend_type: FriendType? {
+        return get_friend_type(contacts: damus_state.contacts, pubkey: self.pubkey)
     }
     
     var current_nip05: NIP05? {
@@ -77,9 +78,8 @@ struct ProfileName: View {
             if let nip05 = current_nip05 {
                 NIP05Badge(nip05: nip05, pubkey: pubkey, contacts: damus_state.contacts, show_domain: show_nip5_domain, clickable: true)
             }
-            if let friend = friend_icon, current_nip05 == nil {
-                Image(systemName: friend)
-                    .foregroundColor(.gray)
+            if let friend = friend_type, current_nip05 == nil {
+                FriendIcon(friend: friend)
             }
         }
         .onReceive(handle_notify(.profile_updated)) { notif in
