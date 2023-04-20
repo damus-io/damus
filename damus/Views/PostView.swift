@@ -271,11 +271,14 @@ struct PostView: View {
         }
     }
     
-    var has_artifacts: Bool {
+    var multiply_factor: CGFloat {
         if case .quoting = action {
-            return true
+            return 0.4
+        } else if !uploadedMedias.isEmpty {
+            return 0.2
+        } else {
+            return 1.0
         }
-        return !uploadedMedias.isEmpty
     }
     
     func Editor(deviceSize: GeometryProxy) -> some View {
@@ -285,7 +288,7 @@ struct PostView: View {
                 
                 TextEntry
             }
-            .frame(height: has_artifacts ? deviceSize.size.height*0.4 : deviceSize.size.height)
+            .frame(height: deviceSize.size.height * multiply_factor)
             .id("post")
                 
             PVImageCarouselView(media: $uploadedMedias, deviceWidth: deviceSize.size.width)
