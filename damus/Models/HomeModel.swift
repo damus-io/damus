@@ -202,9 +202,11 @@ class HomeModel: ObservableObject {
         }
         
         notifications.filter { ev in
-            !damus_state.contacts.is_muted(ev.pubkey) &&
-            !damus_state.muted_threads.isMutedThread(ev, privkey: damus_state.keypair.privkey) &&
-            (ev.kind != NostrKind.like.rawValue || !damus_state.settings.hide_reactions)
+            if damus_state.settings.hide_reactions && ev.known_kind == NostrKind.like {
+                return false
+            }
+
+            return !damus_state.contacts.is_muted(ev.pubkey) && !damus_state.muted_threads.isMutedThread(ev, privkey: damus_state.keypair.privkey)
         }
     }
     
