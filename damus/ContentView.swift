@@ -498,8 +498,25 @@ struct ContentView: View {
                 open_event(ev: target)
             }
         }
-        .onReceive(handle_notify(.hide_reactions)) { notif in
+        .onReceive(handle_notify(.onlyzaps_mode)) { notif in
+            let hide = notif.object as! Bool
             home.filter_events()
+            
+            guard let damus_state else {
+                return
+            }
+            
+            guard let profile = damus_state.profiles.lookup(id: damus_state.pubkey) else {
+                return
+            }
+            
+            profile.reactions = !hide
+            
+            guard let profile_ev = make_metadata_event(keypair: damus_state.keypair, metadata: profile) else {
+                return
+            }
+            
+            damus_state.postbox.send(profile_ev)
         }
         .alert(NSLocalizedString("Deleted Account", comment: "Alert message to indicate this is a deleted account"), isPresented: $is_deleted_account) {
             Button(NSLocalizedString("Logout", comment: "Button to close the alert that informs that the current account has been deleted.")) {

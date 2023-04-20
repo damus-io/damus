@@ -202,7 +202,7 @@ class HomeModel: ObservableObject {
         }
         
         notifications.filter { ev in
-            if damus_state.settings.hide_reactions && ev.known_kind == NostrKind.like {
+            if damus_state.settings.onlyzaps_mode && ev.known_kind == NostrKind.like {
                 return false
             }
 
@@ -261,7 +261,7 @@ class HomeModel: ObservableObject {
             return
         }
 
-        if damus_state.settings.hide_reactions {
+        if damus_state.settings.onlyzaps_mode {
             return
         }
 
@@ -389,7 +389,7 @@ class HomeModel: ObservableObject {
             NostrKind.text.rawValue,
             NostrKind.boost.rawValue
         ]
-        if !damus_state.settings.hide_reactions {
+        if !damus_state.settings.onlyzaps_mode {
             home_filter_kinds.append(NostrKind.like.rawValue)
         }
         var home_filter = NostrFilter.filter_kinds(home_filter_kinds)
@@ -402,7 +402,7 @@ class HomeModel: ObservableObject {
             NostrKind.boost.rawValue,
             NostrKind.zap.rawValue,
         ]
-        if !damus_state.settings.hide_reactions {
+        if !damus_state.settings.onlyzaps_mode {
             notifications_filter_kinds.append(NostrKind.like.rawValue)
         }
         var notifications_filter = NostrFilter.filter_kinds(notifications_filter_kinds)

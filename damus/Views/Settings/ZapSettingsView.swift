@@ -24,6 +24,18 @@ struct ZapSettingsView: View {
     
     var body: some View {
         Form {
+            Section(
+                header: Text(NSLocalizedString("OnlyZaps", comment: "Section header for enabling OnlyZaps mode (hide reactions)")),
+                footer: Text(NSLocalizedString("Hide all 🤙's. Others will not be able to send you 🤙's", comment: "Section footer describing onlyzaps mode"))
+                
+            ) {
+                Toggle(NSLocalizedString("Enable OnlyZaps mode", comment: "Setting toggle to hide reactions."), isOn: $settings.onlyzaps_mode)
+                    .toggleStyle(.switch)
+                    .onChange(of: settings.onlyzaps_mode) { newVal in
+                        notify(.onlyzaps_mode, newVal)
+                    }
+            }
+
             Section(NSLocalizedString("Wallet", comment: "Title for section in zap settings that controls the Lightning wallet selection.")) {
                 
                 Toggle(NSLocalizedString("Show wallet selector", comment: "Toggle to show or hide selection of wallet."), isOn: $settings.show_wallet_selector).toggleStyle(.switch)

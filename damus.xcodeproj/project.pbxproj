@@ -143,7 +143,6 @@
 		4C8D00CF29E38B950036AF10 /* nostr_bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00CE29E38B950036AF10 /* nostr_bech32.c */; };
 		4C8D00D429E3C5D40036AF10 /* NIP19Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00D329E3C5D40036AF10 /* NIP19Tests.swift */; };
 		4C8EC52529D1FA6C0085D9A8 /* DamusColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */; };
-		4C90BD162839DB54008EE7EF /* NostrMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD152839DB54008EE7EF /* NostrMetadata.swift */; };
 		4C90BD18283A9EE5008EE7EF /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD17283A9EE5008EE7EF /* LoginView.swift */; };
 		4C90BD1A283AA67F008EE7EF /* Bech32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD19283AA67F008EE7EF /* Bech32.swift */; };
 		4C90BD1C283AC38E008EE7EF /* Bech32Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD1B283AC38E008EE7EF /* Bech32Tests.swift */; };
@@ -550,7 +549,6 @@
 		4C8D00D229E3C19F0036AF10 /* str_block.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = str_block.h; sourceTree = "<group>"; };
 		4C8D00D329E3C5D40036AF10 /* NIP19Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP19Tests.swift; sourceTree = "<group>"; };
 		4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusColors.swift; sourceTree = "<group>"; };
-		4C90BD152839DB54008EE7EF /* NostrMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrMetadata.swift; sourceTree = "<group>"; };
 		4C90BD17283A9EE5008EE7EF /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		4C90BD19283AA67F008EE7EF /* Bech32.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32.swift; sourceTree = "<group>"; };
 		4C90BD1B283AC38E008EE7EF /* Bech32Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32Tests.swift; sourceTree = "<group>"; };
@@ -906,7 +904,6 @@
 				4C64987B286D03E000EAE2B3 /* DirectMessagesView.swift */,
 				4C216F31286E388800040376 /* DMChatView.swift */,
 				4C216F33286F5ACD00040376 /* DMView.swift */,
-				E990020E2955F837003BBC5A /* EditMetadataView.swift */,
 				3169CAE4294E699400EE4006 /* Empty Views */,
 				4C75EFB82804A2740006080F /* EventView.swift */,
 				4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */,
@@ -961,7 +958,6 @@
 				4CACA9DB280C38C000D9BBE8 /* Profiles.swift */,
 				4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */,
 				4C363A8F28247A1D006E126D /* NostrLink.swift */,
-				4C90BD152839DB54008EE7EF /* NostrMetadata.swift */,
 			);
 			path = Nostr;
 			sourceTree = "<group>";
@@ -1051,6 +1047,7 @@
 				4CEE2AF6280B2DEA00AB5EEF /* ProfileName.swift */,
 				4C285C892838B985008A31F1 /* ProfilePictureSelector.swift */,
 				F79C7FAC29D5E9620000F946 /* EditProfilePictureControl.swift */,
+				E990020E2955F837003BBC5A /* EditMetadataView.swift */,
 				4CEE2AF2280B25C500AB5EEF /* ProfilePicView.swift */,
 				4C8682862814DE470026224F /* ProfileView.swift */,
 				4CB9D4A62992D02B00A9A7E4 /* ProfileNameView.swift */,
@@ -1593,7 +1590,6 @@
 				4C1A9A2329DDDB8100516EAC /* IconLabel.swift in Sources */,
 				4C3EA64928FF597700C48A62 /* bech32.c in Sources */,
 				4CE879522996B68900F758CC /* RelayType.swift in Sources */,
-				4C90BD162839DB54008EE7EF /* NostrMetadata.swift in Sources */,
 				4CE8795B2996C47A00F758CC /* ZapsModel.swift in Sources */,
 				4C3A1D3729637E0500558C0F /* PreviewCache.swift in Sources */,
 				4C3EA67528FF7A5A00C48A62 /* take.c in Sources */,

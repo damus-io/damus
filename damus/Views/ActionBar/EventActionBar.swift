@@ -46,6 +46,18 @@ struct EventActionBar: View {
         test_lnurl ?? damus_state.profiles.lookup(id: event.pubkey)?.lnurl
     }
     
+    var show_like: Bool {
+        if settings.onlyzaps_mode {
+            return false
+        }
+        
+        guard let profile = damus_state.profiles.lookup(id: event.pubkey) else {
+            return true
+        }
+        
+        return profile.reactions ?? true
+    }
+    
     var body: some View {
         HStack {
             if damus_state.keypair.privkey != nil {
@@ -75,7 +87,7 @@ struct EventActionBar: View {
                     .foregroundColor(bar.boosted ? Color.green : Color.gray)
             }
 
-            if !settings.hide_reactions {
+            if show_like {
                 Spacer()
 
                 HStack(spacing: 4) {

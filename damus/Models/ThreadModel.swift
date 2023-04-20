@@ -89,7 +89,7 @@ class ThreadModel: ObservableObject {
         meta_events.referenced_ids = [event.id]
 
         var kinds = [NostrKind.zap.rawValue, NostrKind.text.rawValue, NostrKind.boost.rawValue]
-        if !damus_state.settings.hide_reactions {
+        if !damus_state.settings.onlyzaps_mode {
             kinds.append(NostrKind.like.rawValue)
         }
         meta_events.kinds = kinds

@@ -560,7 +560,7 @@ func make_first_contact_event(keypair: Keypair) -> NostrEvent? {
     return ev
 }
 
-func make_metadata_event(keypair: Keypair, metadata: NostrMetadata) -> NostrEvent? {
+func make_metadata_event(keypair: Keypair, metadata: Profile) -> NostrEvent? {
     guard let privkey = keypair.privkey else {
         return nil
     }

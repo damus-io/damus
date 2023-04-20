@@ -113,7 +113,7 @@ extension Notification.Name {
     static var local_notification: Notification.Name {
         return Notification.Name("local_notification")
     }
-    static var hide_reactions: Notification.Name {
+    static var onlyzaps_mode: Notification.Name {
         return Notification.Name("hide_reactions")
     }
 }

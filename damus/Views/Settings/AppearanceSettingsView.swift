@@ -14,14 +14,6 @@ struct AppearanceSettingsView: View {
 
     var body: some View {
         Form {
-            Section(header: Text(NSLocalizedString("Reactions", comment: "Section header for reaction settings"))) {
-                Toggle(NSLocalizedString("Hide Reactions", comment: "Setting to hide reactions."), isOn: $settings.hide_reactions)
-                    .toggleStyle(.switch)
-                    .onChange(of: settings.hide_reactions) { newVal in
-                        notify(.hide_reactions, newVal)
-                    }
-            }
-
             Section(header: Text(NSLocalizedString("Text Truncation", comment: "Section header for damus text truncation user configuration"))) {
                 Toggle(NSLocalizedString("Truncate timeline text", comment: "Setting to truncate text in timeline"), isOn: $settings.truncate_timeline_text)
                     .toggleStyle(.switch)

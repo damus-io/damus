@@ -245,20 +245,33 @@ struct ProfileView: View {
     }
     
     func lnButton(lnurl: String, profile: Profile) -> some View {
-        Button(action: {
+        let button_img = profile.reactions == false ? "bolt.brakesignal" : "bolt.circle"
+        return Button(action: {
             if damus_state.settings.show_wallet_selector  {
                 showing_select_wallet = true
             } else {
                 open_with_wallet(wallet: damus_state.settings.default_wallet.model, invoice: lnurl)
             }
         }) {
-            Image(systemName: "bolt.circle")
+            Image(systemName: button_img)
                 .profile_button_style(scheme: colorScheme)
                 .contextMenu {
-                    Button {
-                        UIPasteboard.general.string = profile.lnurl ?? ""
-                    } label: {
-                        Label(NSLocalizedString("Copy LNURL", comment: "Context menu option for copying a user's Lightning URL."), systemImage: "doc.on.doc")
+                    if profile.reactions == false {
+                        Text("OnlyZaps Enabled")
+                    }
+                    
+                    if let addr = profile.lud16 {
+                        Button {
+                            UIPasteboard.general.string = addr
+                        } label: {
+                            Label(addr, systemImage: "doc.on.doc")
+                        }
+                    } else if let lnurl = profile.lud06 {
+                        Button {
+                            UIPasteboard.general.string = profile.lnurl ?? ""
+                        } label: {
+                            Label(NSLocalizedString("Copy LNURL", comment: "Context menu option for copying a user's Lightning URL."), systemImage: "doc.on.doc")
+                        }
                     }
                 }
             
