@@ -135,7 +135,7 @@ struct CustomizeZapView: View {
                     .font(.system(size: 16))
             }
         }
-        .frame(minWidth: 400, maxWidth: .infinity, minHeight: 50, maxHeight: 70)
+        .frame(maxWidth: .infinity, minHeight: 50, maxHeight: 70)
         .foregroundColor(fontColor())
         .background(zap_type == type ? fillColor() : DamusColors.adaptableGrey)
         .cornerRadius(15)
@@ -332,11 +332,20 @@ struct CustomizeZapView: View {
         }
         .sheet(isPresented: $show_zap_types) {
             if #available(iOS 16.0, *) {
-                ZapTypePicker
-                    .presentationDetents([.medium])
-                    .presentationDragIndicator(.visible)
+                ZStack {
+                    fillColor().edgesIgnoringSafeArea(.all)
+                    ZapTypePicker
+                        .presentationDetents([.medium])
+                        .presentationDragIndicator(.visible)
+ 
+                }
+                .overlay(Rectangle().frame(width: nil, height: 1, alignment: .top).foregroundColor(DamusColors.adaptableGrey), alignment: .top)
             } else {
-                ZapTypePicker
+                ZStack {
+                    fillColor().edgesIgnoringSafeArea(.all)
+                    ZapTypePicker
+                }
+                .overlay(Rectangle().frame(width: nil, height: 1, alignment: .top).foregroundColor(DamusColors.adaptableGrey), alignment: .top)
             }
         }
     }
