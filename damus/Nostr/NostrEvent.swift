@@ -746,6 +746,14 @@ func gather_reply_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
     return ids
 }
 
+func gather_quote_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
+    var ids: [ReferencedId] = []
+    if from.pubkey != our_pubkey {
+        ids.append(ReferencedId(ref_id: from.pubkey, relay_id: nil, key: "p"))
+    }
+    return ids
+}
+
 func event_from_json(dat: String) -> NostrEvent? {
     return try? JSONDecoder().decode(NostrEvent.self, from: Data(dat.utf8))
 }

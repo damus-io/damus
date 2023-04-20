@@ -29,7 +29,6 @@ struct ThreadView: View {
                     ForEach(parent_events, id: \.id) { parent_event in
                         MutedEventView(damus_state: state,
                                        event: parent_event,
-                                       scroller: reader,
                                        selected: false)
                         .padding(.horizontal)
                         .onTapGesture {
@@ -56,7 +55,6 @@ struct ThreadView: View {
                     MutedEventView(
                         damus_state: state,
                         event: self.thread.event,
-                        scroller: reader,
                         selected: true
                     )
                     .id(self.thread.event.id)
@@ -65,7 +63,6 @@ struct ThreadView: View {
                         MutedEventView(
                             damus_state: state,
                             event: child_event,
-                            scroller: nil,
                             selected: false
                         )
                         .padding(.horizontal)

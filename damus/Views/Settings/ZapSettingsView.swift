@@ -14,10 +14,10 @@ struct ZapSettingsView: View {
     
     @State var default_zap_amount: String
     @Environment(\.dismiss) var dismiss
-    
+
     init(pubkey: String, settings: UserSettingsStore) {
         self.pubkey = pubkey
-        let zap_amt = get_default_zap_amount(pubkey: pubkey).map({ "\($0)" }) ?? "1000"
+        let zap_amt = get_default_zap_amount(pubkey: pubkey).formatted()
         _default_zap_amount = State(initialValue: zap_amt)
         self._settings = ObservedObject(initialValue: settings)
     }
@@ -42,12 +42,15 @@ struct ZapSettingsView: View {
             }
             
             Section(NSLocalizedString("Default Zap Amount in sats", comment: "Title for section in zap settings that controls the default zap amount in sats.")) {
-                TextField(String("1000"), text: $default_zap_amount)
+                TextField(fallback_zap_amount.formatted(), text: $default_zap_amount)
                     .keyboardType(.numberPad)
                     .onReceive(Just(default_zap_amount)) { newValue in
                         if let parsed = handle_string_amount(new_value: newValue) {
-                            self.default_zap_amount = String(parsed)
+                            self.default_zap_amount = parsed.formatted()
                             set_default_zap_amount(pubkey: self.pubkey, amount: parsed)
+                        } else {
+                            self.default_zap_amount = ""
+                            set_default_zap_amount(pubkey: self.pubkey, amount: 0)
                         }
                     }
             }

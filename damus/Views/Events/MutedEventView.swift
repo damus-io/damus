@@ -10,15 +10,13 @@ import SwiftUI
 struct MutedEventView: View {
     let damus_state: DamusState
     let event: NostrEvent
-    let scroller: ScrollViewProxy?
     
     let selected: Bool
     @State var shown: Bool
     
-    init(damus_state: DamusState, event: NostrEvent, scroller: ScrollViewProxy?, selected: Bool) {
+    init(damus_state: DamusState, event: NostrEvent, selected: Bool) {
         self.damus_state = damus_state
         self.event = event
-        self.scroller = scroller
         self.selected = selected
         self._shown = State(initialValue: should_show_event(contacts: damus_state.contacts, ev: event))
     }
@@ -89,7 +87,7 @@ struct MutedEventView_Previews: PreviewProvider {
     
     static var previews: some View {
         
-        MutedEventView(damus_state: test_damus_state(), event: test_event, scroller: nil, selected: false)
+        MutedEventView(damus_state: test_damus_state(), event: test_event, selected: false)
             .frame(width: .infinity, height: 50)
     }
 }
