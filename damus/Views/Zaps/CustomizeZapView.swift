@@ -64,6 +64,7 @@ struct CustomizeZapView: View {
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.presentationMode) var presentationMode
     
     func fillColor() -> Color {
         colorScheme == .light ? DamusColors.white : DamusColors.black
@@ -105,16 +106,31 @@ struct CustomizeZapView: View {
         }
     }
     
+    func DismissButton(action: @escaping () -> ()) -> some View {
+        Button(action: {
+            action()
+        }, label: {
+            Image(systemName: "xmark")
+                .frame(width: 25, height: 25)
+                .background(.regularMaterial)
+                .clipShape(Circle())
+        })
+    }
+    
     var ZapTypePicker: some View {
-        VStack(spacing: 20) {
-            Text("Zap type")
-                .font(.system(size: 18, weight: .heavy))
-            ZapTypeSelection(text: "Public", comment: "Picker option to indicate that a zap should be sent publicly and identify the user as who sent it.", img: "person.2.circle.fill", action: {zap_type = ZapType.pub}, type: ZapType.pub)
-            ZapTypeSelection(text: "Private", comment: "Picker option to indicate that a zap should be sent privately and not identify the user to the public.", img: "lock.circle.fill", action: {zap_type = ZapType.priv}, type: ZapType.priv)
-            ZapTypeSelection(text: "Anonymous", comment: "Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.", img: "person.crop.circle.fill.badge.questionmark", action: {zap_type = ZapType.anon}, type: ZapType.anon)
-            ZapTypeSelection(text: "None", comment: "Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.", img: "bolt.circle.fill", action: {zap_type = ZapType.non_zap}, type: ZapType.non_zap)
+        ZStack(alignment: .topLeading) {
+            DismissButton(action: {show_zap_types = false})
+                .padding(.leading)
+            VStack(spacing: 20) {
+                Text("Zap type")
+                    .font(.system(size: 18, weight: .heavy))
+                ZapTypeSelection(text: "Public", comment: "Picker option to indicate that a zap should be sent publicly and identify the user as who sent it.", img: "person.2.circle.fill", action: {zap_type = ZapType.pub}, type: ZapType.pub)
+                ZapTypeSelection(text: "Private", comment: "Picker option to indicate that a zap should be sent privately and not identify the user to the public.", img: "lock.circle.fill", action: {zap_type = ZapType.priv}, type: ZapType.priv)
+                ZapTypeSelection(text: "Anonymous", comment: "Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.", img: "person.crop.circle.fill.badge.questionmark", action: {zap_type = ZapType.anon}, type: ZapType.anon)
+                ZapTypeSelection(text: "None", comment: "Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.", img: "bolt.circle.fill", action: {zap_type = ZapType.non_zap}, type: ZapType.non_zap)
+            }
+            .padding(.horizontal)
         }
-        .padding(.horizontal)
     }
     
     func ZapTypeSelection(text: LocalizedStringKey, comment: StaticString, img: String, action: @escaping () -> (), type: ZapType) -> some View {
@@ -200,7 +216,6 @@ struct CustomizeZapView: View {
             .placeholder(when: custom_amount.isEmpty, alignment: .center) {
                 Text(String("0"))
             }
-            .accentColor(.clear)
             .font(.system(size: 72, weight: .heavy))
             .minimumScaleFactor(0.01)
             .keyboardType(.numberPad)
@@ -313,39 +328,46 @@ struct CustomizeZapView: View {
     }
 
     var CustomZap: some View {
-        VStack(alignment: .center, spacing: 20) {
+        
+        ZStack(alignment: .topLeading) {
             
-            ZapTypeButton()
-                .padding(.top, 50)
+            DismissButton(action: {presentationMode.wrappedValue.dismiss()})
+                .padding(EdgeInsets(top: 50, leading: 20, bottom: 0, trailing: 0))
             
-            Spacer()
-
-            CustomZapTextField
-            
-            AmountPicker
-            
-            ZapReply
-            
-            ZapButton
-            
-            Spacer()
-        }
-        .sheet(isPresented: $show_zap_types) {
-            if #available(iOS 16.0, *) {
-                ZStack {
-                    fillColor().edgesIgnoringSafeArea(.all)
-                    ZapTypePicker
-                        .presentationDetents([.medium])
-                        .presentationDragIndicator(.visible)
- 
+            VStack(alignment: .center, spacing: 20) {
+                
+                ZapTypeButton()
+                    .padding(.top, 50)
+                
+                Spacer()
+                
+                CustomZapTextField
+                
+                AmountPicker
+                
+                ZapReply
+                
+                ZapButton
+                
+                Spacer()
+            }
+            .sheet(isPresented: $show_zap_types) {
+                if #available(iOS 16.0, *) {
+                    ZStack {
+                        fillColor().edgesIgnoringSafeArea(.all)
+                        ZapTypePicker
+                            .presentationDetents([.medium])
+                            .presentationDragIndicator(.visible)
+                        
+                    }
+                    .overlay(Rectangle().frame(width: nil, height: 1, alignment: .top).foregroundColor(DamusColors.adaptableGrey), alignment: .top)
+                } else {
+                    ZStack {
+                        fillColor().edgesIgnoringSafeArea(.all)
+                        ZapTypePicker
+                    }
+                    .overlay(Rectangle().frame(width: nil, height: 1, alignment: .top).foregroundColor(DamusColors.adaptableGrey), alignment: .top)
                 }
-                .overlay(Rectangle().frame(width: nil, height: 1, alignment: .top).foregroundColor(DamusColors.adaptableGrey), alignment: .top)
-            } else {
-                ZStack {
-                    fillColor().edgesIgnoringSafeArea(.all)
-                    ZapTypePicker
-                }
-                .overlay(Rectangle().frame(width: nil, height: 1, alignment: .top).foregroundColor(DamusColors.adaptableGrey), alignment: .top)
             }
         }
     }
