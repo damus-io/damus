@@ -70,6 +70,14 @@ struct ProfileName: View {
         return prefix == "@" ? current_display_name.username : current_display_name.display_name
     }
     
+    var onlyzapper: Bool {
+        guard let profile else {
+            return false
+        }
+        
+        return profile.reactions == false
+    }
+    
     var body: some View {
         HStack(spacing: 2) {
             Text(verbatim: "\(prefix)\(name_choice)")
@@ -80,6 +88,10 @@ struct ProfileName: View {
             }
             if let friend = friend_type, current_nip05 == nil {
                 FriendIcon(friend: friend)
+            }
+            if onlyzapper {
+                Image("zap-hashtag")
+                    .frame(width: 14, height: 14)
             }
         }
         .onReceive(handle_notify(.profile_updated)) { notif in

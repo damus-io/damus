@@ -50,7 +50,15 @@ struct EventProfileName: View {
     var current_display_name: DisplayName {
         return display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)
     }
-   
+    
+    var onlyzapper: Bool {
+        guard let profile else {
+            return false
+        }
+        
+        return profile.reactions == false
+    }
+    
     var body: some View {
         HStack(spacing: 2) {
             switch current_display_name {
@@ -73,6 +81,11 @@ struct EventProfileName: View {
             
             if current_nip05 == nil, let frend = friend_type {
                 FriendIcon(friend: frend)
+            }
+            
+            if onlyzapper {
+                Image("zap-hashtag")
+                    .frame(width: 14, height: 14)
             }
         }
         .onReceive(handle_notify(.profile_updated)) { notif in
