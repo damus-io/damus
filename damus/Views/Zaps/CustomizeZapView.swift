@@ -329,8 +329,6 @@ struct CustomizeZapView: View {
             ZapButton
             
             Spacer()
-            
-            Spacer()
         }
         .sheet(isPresented: $show_zap_types) {
             if #available(iOS 16.0, *) {
