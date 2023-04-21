@@ -61,9 +61,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere*r reagierten auf einen Beitrag in dem Du markiert warst</string>
+			<string>%2$@ und %1$d andere*r reagierten auf einen Beitrag in dem du markiert warst</string>
 			<key>other</key>
-			<string>%2$@ und %1$d andere reagierten auf einen Beitrag in dem Du markiert warst</string>
+			<string>%2$@ und %1$d andere reagierten auf einen Beitrag in dem du markiert warst</string>
 		</dict>
 	</dict>
 	<key>reacted_your_post_3</key>
@@ -157,9 +157,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere*r teilten einen Beitrag in dem Du markiert warst</string>
+			<string>%2$@ und %1$d andere*r teilten einen Beitrag in dem du markiert warst</string>
 			<key>other</key>
-			<string>%2$@ und %1$d andere teilten ein Beitrag in dem Du markiert warst</string>
+			<string>%2$@ und %1$d andere teilten ein Beitrag in dem du markiert warst</string>
 		</dict>
 	</dict>
 	<key>reposted_your_post_3</key>
@@ -269,9 +269,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere:r zappten einen Beitrag in dem Du markiert warst</string>
+			<string>%2$@ und %1$d andere:r zappten einen Beitrag in dem du markiert warst</string>
 			<key>other</key>
-			<string>%2$@ und %1$d andere zappten einen Beitrag in dem Du markiert warst</string>
+			<string>%2$@ und %1$d andere zappten einen Beitrag in dem du markiert warst</string>
 		</dict>
 	</dict>
 	<key>zapped_your_post_3</key>
