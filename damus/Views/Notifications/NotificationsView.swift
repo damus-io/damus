@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum FineNotificationFilter: String {
+enum FriendFilter: String {
     case all
     case friends
     
@@ -23,7 +23,7 @@ enum FineNotificationFilter: String {
 
 class NotificationFilter: ObservableObject, Equatable {
     @Published var state: NotificationFilterState
-    @Published var fine_filter: FineNotificationFilter
+    @Published var fine_filter: FriendFilter
     
     static func == (lhs: NotificationFilter, rhs: NotificationFilter) -> Bool {
         return lhs.state == rhs.state && lhs.fine_filter == rhs.fine_filter
@@ -34,7 +34,7 @@ class NotificationFilter: ObservableObject, Equatable {
         self.fine_filter = .all
     }
     
-    init(state: NotificationFilterState, fine_filter: FineNotificationFilter) {
+    init(state: NotificationFilterState, fine_filter: FriendFilter) {
         self.state = state
         self.fine_filter = fine_filter
     }
@@ -226,7 +226,7 @@ func load_notification_filter_state(pubkey: String) -> NotificationFilter {
     let state = (state_str.flatMap { NotificationFilterState(rawValue: $0) }) ?? .all
     
     let filter_str = UserDefaults.standard.string(forKey: fine_key)
-    let filter = (filter_str.flatMap { FineNotificationFilter(rawValue: $0) } ) ?? .all
+    let filter = (filter_str.flatMap { FriendFilter(rawValue: $0) } ) ?? .all
     
     return NotificationFilter(state: state, fine_filter: filter)
 }
@@ -238,7 +238,7 @@ func save_notification_filter_state(pubkey: String, state: NotificationFilterSta
     UserDefaults.standard.set(state.rawValue, forKey: key)
 }
 
-func save_friend_filter(pubkey: String, filter: FineNotificationFilter) {
+func save_friend_filter(pubkey: String, filter: FriendFilter) {
     let key = friend_filter_key(pubkey: pubkey)
     
     UserDefaults.standard.set(filter.rawValue, forKey: key)
@@ -251,7 +251,7 @@ func would_filter_non_friends_from_notifications(contacts: Contacts, state: Noti
             continue
         }
         
-        if item.would_filter({ ev in FineNotificationFilter.friends.filter(contacts: contacts, pubkey: ev.pubkey) }) {
+        if item.would_filter({ ev in FriendFilter.friends.filter(contacts: contacts, pubkey: ev.pubkey) }) {
             return true
         }
     }
