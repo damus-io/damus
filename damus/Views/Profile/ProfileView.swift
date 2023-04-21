@@ -210,7 +210,7 @@ struct ProfileView: View {
         }) {
             navImage(systemImage: "ellipsis")
         }
-        .confirmationDialog(NSLocalizedString("Actions", comment: "Title for confirmation dialog to either share, report, or block a profile."), isPresented: $action_sheet_presented) {
+        .confirmationDialog(NSLocalizedString("Actions", comment: "Title for confirmation dialog to either share, report, or mute a profile."), isPresented: $action_sheet_presented) {
             Button(NSLocalizedString("Share", comment: "Button to share the link to a profile.")) {
                 show_share_sheet = true
             }
@@ -257,7 +257,7 @@ struct ProfileView: View {
                 .profile_button_style(scheme: colorScheme)
                 .contextMenu {
                     if profile.reactions == false {
-                        Text("OnlyZaps Enabled")
+                        Text("OnlyZaps Enabled", comment: "Non-tappable text in context menu that shows up when the zap button on profile is long pressed to indicate that the user has enabled OnlyZaps, meaning that they would like to be only zapped and not accept reactions to their notes.")
                     }
                     
                     if let addr = profile.lud16 {
