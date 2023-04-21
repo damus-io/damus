@@ -51,11 +51,7 @@ struct EventActionBar: View {
             return false
         }
         
-        guard let profile = damus_state.profiles.lookup(id: event.pubkey) else {
-            return true
-        }
-        
-        return profile.reactions ?? true
+        return true
     }
     
     var body: some View {
