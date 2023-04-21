@@ -130,6 +130,12 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "disable_animation", default_value: UIAccessibility.isReduceMotionEnabled)
     var disable_animation: Bool
+    
+    @StringSetting(key: "friend_filter", default_value: .all)
+    var friend_filter: FriendFilter
+    
+    @StringSetting(key: "notification_state", default_value: .all)
+    var notification_state: NotificationFilterState
 
     @StringSetting(key: "translation_service", default_value: .none)
     var translation_service: TranslationService

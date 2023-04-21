@@ -7,9 +7,21 @@
 
 import SwiftUI
 
-enum FriendFilter: String {
+enum FriendFilter: String, StringCodable {
     case all
     case friends
+    
+    init?(from string: String) {
+        guard let ff = FriendFilter(rawValue: string) else {
+            return nil
+        }
+        
+        self = ff
+    }
+    
+    func to_string() -> String {
+        self.rawValue
+    }
     
     func filter(contacts: Contacts, pubkey: String) -> Bool {
         switch self {
@@ -70,10 +82,22 @@ class NotificationFilter: ObservableObject, Equatable {
     }
 }
 
-enum NotificationFilterState: String {
+enum NotificationFilterState: String, StringCodable {
     case all
     case zaps
     case replies
+    
+    init?(from string: String) {
+        guard let val = NotificationFilterState(rawValue: string) else {
+            return nil
+        }
+        
+        self = val
+    }
+    
+    func to_string() -> String {
+        self.rawValue
+    }
     
     func is_other( item: NotificationItem) -> Bool {
         return item.is_zap == nil && item.is_reply == nil
@@ -143,15 +167,14 @@ struct NotificationsView: View {
             }
         }
         .onChange(of: filter_state.fine_filter) { val in
-            save_friend_filter(pubkey: state.pubkey, filter: val)
+            state.settings.friend_filter = val
         }
         .onChange(of: filter_state.state) { val in
-            save_notification_filter_state(pubkey: state.pubkey, state: val)
+            state.settings.notification_state = val
         }
         .onAppear {
-            let state = load_notification_filter_state(pubkey: state.pubkey)
-            self.filter_state.fine_filter = state.fine_filter
-            self.filter_state.state = state.state
+            self.filter_state.fine_filter = state.settings.friend_filter
+            self.filter_state.state = state.settings.notification_state
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
@@ -208,40 +231,6 @@ struct NotificationsView_Previews: PreviewProvider {
     static var previews: some View {
         NotificationsView(state: test_damus_state(), notifications: NotificationsModel(), filter_state: NotificationFilter())
     }
-}
-
-func notification_filter_state_key(pubkey: String) -> String {
-    return pk_setting_key(pubkey, key: "notification_filter_state")
-}
-
-func friend_filter_key(pubkey: String) -> String {
-    return pk_setting_key(pubkey, key: "friend_filter")
-}
-
-func load_notification_filter_state(pubkey: String) -> NotificationFilter {
-    let key = notification_filter_state_key(pubkey: pubkey)
-    let fine_key = friend_filter_key(pubkey: pubkey)
-    
-    let state_str = UserDefaults.standard.string(forKey: key)
-    let state = (state_str.flatMap { NotificationFilterState(rawValue: $0) }) ?? .all
-    
-    let filter_str = UserDefaults.standard.string(forKey: fine_key)
-    let filter = (filter_str.flatMap { FriendFilter(rawValue: $0) } ) ?? .all
-    
-    return NotificationFilter(state: state, fine_filter: filter)
-}
-
-
-func save_notification_filter_state(pubkey: String, state: NotificationFilterState)  {
-    let key = notification_filter_state_key(pubkey: pubkey)
-    
-    UserDefaults.standard.set(state.rawValue, forKey: key)
-}
-
-func save_friend_filter(pubkey: String, filter: FriendFilter) {
-    let key = friend_filter_key(pubkey: pubkey)
-    
-    UserDefaults.standard.set(filter.rawValue, forKey: key)
 }
 
 func would_filter_non_friends_from_notifications(contacts: Contacts, state: NotificationFilterState, items: [NotificationItem]) -> Bool {
