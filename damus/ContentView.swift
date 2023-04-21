@@ -678,7 +678,12 @@ struct ContentView: View {
         }
         
         pool.register_handler(sub_id: sub_id, handler: home.handle_event)
-
+        
+        // dumb stuff needed for property wrappers
+        UserSettingsStore.pubkey = pubkey
+        let settings = UserSettingsStore()
+        UserSettingsStore.shared = settings
+        
         self.damus_state = DamusState(pool: pool,
                                       keypair: keypair,
                                       likes: EventCounter(our_pubkey: pubkey),
@@ -690,7 +695,7 @@ struct ContentView: View {
                                       previews: PreviewCache(),
                                       zaps: Zaps(our_pubkey: pubkey),
                                       lnurls: LNUrls(),
-                                      settings: UserSettingsStore(),
+                                      settings: settings,
                                       relay_filters: relay_filters,
                                       relay_metadata: metadatas,
                                       drafts: Drafts(),

@@ -155,6 +155,7 @@
 		4C9F18E229AA9B6C008C55EC /* CustomizeZapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */; };
 		4C9F18E429ABDE6D008C55EC /* MaybeAnonPfpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9F18E329ABDE6D008C55EC /* MaybeAnonPfpView.swift */; };
 		4CA2EFA0280E37AC0044ACD8 /* TimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA2EF9F280E37AC0044ACD8 /* TimelineView.swift */; };
+		4CA5588329F33F5B00DC6A45 /* StringCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA5588229F33F5B00DC6A45 /* StringCodable.swift */; };
 		4CAAD8AD298851D000060CEA /* AccountDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CAAD8AC298851D000060CEA /* AccountDeletion.swift */; };
 		4CAAD8B029888AD200060CEA /* RelayConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CAAD8AF29888AD200060CEA /* RelayConfigView.swift */; };
 		4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CACA9D4280C31E100D9BBE8 /* ReplyView.swift */; };
@@ -563,6 +564,7 @@
 		4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomizeZapView.swift; sourceTree = "<group>"; };
 		4C9F18E329ABDE6D008C55EC /* MaybeAnonPfpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaybeAnonPfpView.swift; sourceTree = "<group>"; };
 		4CA2EF9F280E37AC0044ACD8 /* TimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineView.swift; sourceTree = "<group>"; };
+		4CA5588229F33F5B00DC6A45 /* StringCodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringCodable.swift; sourceTree = "<group>"; };
 		4CAAD8AC298851D000060CEA /* AccountDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDeletion.swift; sourceTree = "<group>"; };
 		4CAAD8AF29888AD200060CEA /* RelayConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayConfigView.swift; sourceTree = "<group>"; };
 		4CACA9D4280C31E100D9BBE8 /* ReplyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyView.swift; sourceTree = "<group>"; };
@@ -1008,6 +1010,7 @@
 				4C8D00C729DF791C0036AF10 /* CompatibleAttribute.swift */,
 				4C8D00CB29DF92DF0036AF10 /* Hashtags.swift */,
 				4CDA128B29EB19C40006FA5A /* LocalNotification.swift */,
+				4CA5588229F33F5B00DC6A45 /* StringCodable.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -1524,6 +1527,7 @@
 				4CC6193A29DC777C006A86D1 /* RelayBootstrap.swift in Sources */,
 				4C285C8A2838B985008A31F1 /* ProfilePictureSelector.swift in Sources */,
 				4C9F18E429ABDE6D008C55EC /* MaybeAnonPfpView.swift in Sources */,
+				4CA5588329F33F5B00DC6A45 /* StringCodable.swift in Sources */,
 				4C75EFB92804A2740006080F /* EventView.swift in Sources */,
 				4C8D00C829DF791C0036AF10 /* CompatibleAttribute.swift in Sources */,
 				3AA247FD297E3CFF0090C62D /* RepostsModel.swift in Sources */,

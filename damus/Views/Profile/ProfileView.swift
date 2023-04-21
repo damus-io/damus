@@ -266,9 +266,9 @@ struct ProfileView: View {
                         } label: {
                             Label(addr, systemImage: "doc.on.doc")
                         }
-                    } else if let lnurl = profile.lud06 {
+                    } else if let lnurl = profile.lnurl {
                         Button {
-                            UIPasteboard.general.string = profile.lnurl ?? ""
+                            UIPasteboard.general.string = lnurl
                         } label: {
                             Label(NSLocalizedString("Copy LNURL", comment: "Context menu option for copying a user's Lightning URL."), systemImage: "doc.on.doc")
                         }
