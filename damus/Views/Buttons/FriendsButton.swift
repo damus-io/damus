@@ -8,13 +8,18 @@
 import SwiftUI
 
 struct FriendsButton: View {
-    @Binding var enabled: Bool
+    @Binding var filter: FriendFilter
     
     var body: some View {
         Button(action: {
-            self.enabled.toggle()
+            switch self.filter {
+            case .all:
+                self.filter = .friends
+            case .friends:
+                self.filter = .all
+            }
         }) {
-            if enabled {
+            if filter == .friends {
                 LINEAR_GRADIENT
                     .mask(Image(systemName: "person.2.fill")
                         .resizable()
@@ -31,9 +36,9 @@ struct FriendsButton: View {
 }
 
 struct FriendsButton_Previews: PreviewProvider {
-    @State static var enabled: Bool = false
+    @State static var enabled: FriendFilter = .all
     
     static var previews: some View {
-        FriendsButton(enabled: $enabled)
+        FriendsButton(filter: $enabled)
     }
 }

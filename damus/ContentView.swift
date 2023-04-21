@@ -182,7 +182,7 @@ struct ContentView: View {
                 NotificationsView(state: damus, notifications: home.notifications)
                 
             case .dms:
-                DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms)
+                DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings)
             
             case .none:
                 EmptyView()

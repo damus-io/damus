@@ -60,14 +60,6 @@ class NotificationFilter: ObservableObject, Equatable {
         }
     }
     
-    var fine_filter_binding: Binding<Bool> {
-        Binding(get: {
-            return self.fine_filter == .friends
-        }, set: { v in
-            self.fine_filter = v ? .friends : .all
-        })
-    }
-    
     func filter(contacts: Contacts, items: [NotificationItem]) -> [NotificationItem] {
         
         return items.reduce(into: []) { acc, item in
@@ -162,7 +154,7 @@ struct NotificationsView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if would_filter_non_friends_from_notifications(contacts: state.contacts, state: self.filter_state.state, items: self.notifications.notifications) {
-                    FriendsButton(enabled: self.filter_state.fine_filter_binding)
+                    FriendsButton(filter: $filter_state.fine_filter)
                 }
             }
         }
