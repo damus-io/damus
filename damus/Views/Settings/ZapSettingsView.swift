@@ -26,7 +26,7 @@ struct ZapSettingsView: View {
         Form {
             Section(
                 header: Text(NSLocalizedString("OnlyZaps", comment: "Section header for enabling OnlyZaps mode (hide reactions)")),
-                footer: Text(NSLocalizedString("Hide all 🤙's. Others will not be able to send you 🤙's", comment: "Section footer describing onlyzaps mode"))
+                footer: Text(NSLocalizedString("Hide all 🤙's", comment: "Section footer describing onlyzaps mode"))
                 
             ) {
                 Toggle(NSLocalizedString("Enable OnlyZaps mode", comment: "Setting toggle to hide reactions."), isOn: $settings.onlyzaps_mode)
