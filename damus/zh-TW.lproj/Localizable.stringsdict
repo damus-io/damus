@@ -13,7 +13,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>...還有%d 条便條...</string>
+			<string>...還有%d 条筆記...</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -237,7 +237,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 和 %1$d 個其他用戶電擊了提到你的便條</string>
+			<string>%2$@ 和 %1$d 個其他用戶打閃了提到你的便條</string>
 		</dict>
 	</dict>
 	<key>zapped_your_post_3</key>
@@ -251,7 +251,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 和 %1$d 個其他用戶電擊了你的便條</string>
+			<string>%2$@ 和 %1$d 個其他用戶打閃了你的便條</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -265,7 +265,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 和 %1$d 個其他用戶電擊了你的檔案</string>
+			<string>%2$@ 和 %1$d 個其他用戶打閃了你的檔案</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
@@ -279,7 +279,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>電擊</string>
+			<string>打閃</string>
 		</dict>
 	</dict>
 </dict>
