@@ -7,6 +7,69 @@
 
 import SwiftUI
 
+enum FineNotificationFilter: String {
+    case all
+    case friends
+    
+    func filter(contacts: Contacts, pubkey: String) -> Bool {
+        switch self {
+        case .all:
+            return true
+        case .friends:
+            return contacts.is_in_friendosphere(pubkey)
+        }
+    }
+}
+
+class NotificationFilter: ObservableObject, Equatable {
+    @Published var state: NotificationFilterState
+    @Published var fine_filter: FineNotificationFilter
+    
+    static func == (lhs: NotificationFilter, rhs: NotificationFilter) -> Bool {
+        return lhs.state == rhs.state && lhs.fine_filter == rhs.fine_filter
+    }
+    
+    init() {
+        self.state = .all
+        self.fine_filter = .all
+    }
+    
+    init(state: NotificationFilterState, fine_filter: FineNotificationFilter) {
+        self.state = state
+        self.fine_filter = fine_filter
+    }
+    
+    func toggle_fine_filter() {
+        switch self.fine_filter {
+        case .all:
+            self.fine_filter = .friends
+        case .friends:
+            self.fine_filter = .all
+        }
+    }
+    
+    var fine_filter_binding: Binding<Bool> {
+        Binding(get: {
+            return self.fine_filter == .friends
+        }, set: { v in
+            self.fine_filter = v ? .friends : .all
+        })
+    }
+    
+    func filter(contacts: Contacts, items: [NotificationItem]) -> [NotificationItem] {
+        
+        return items.reduce(into: []) { acc, item in
+            if !self.state.filter(item) {
+                return
+            }
+            
+            if let item = item.filter({ self.fine_filter.filter(contacts: contacts, pubkey: $0.pubkey) }) {
+                acc.append(item)
+            }
+        }
+    }
+}
+
 enum NotificationFilterState: String {
     case all
     case zaps
@@ -31,7 +94,7 @@ enum NotificationFilterState: String {
 struct NotificationsView: View {
     let state: DamusState
     @ObservedObject var notifications: NotificationsModel
-    @State var filter_state: NotificationFilterState = .all
+    @StateObject var filter_state: NotificationFilter = NotificationFilter()
     
     @Environment(\.colorScheme) var colorScheme
     
@@ -44,28 +107,55 @@ struct NotificationsView: View {
     }
     
     var body: some View {
-        TabView(selection: $filter_state) {
+        TabView(selection: $filter_state.state) {
+            // This is needed or else there is a bug when switching from the 3rd or 2nd tab to first. no idea why.
             mystery
             
-            // This is needed or else there is a bug when switching from the 3rd or 2nd tab to first. no idea why.
-            NotificationTab(NotificationFilterState.all)
-                .tag(NotificationFilterState.all)
+            NotificationTab(
+                NotificationFilter(
+                    state: .all,
+                    fine_filter: filter_state.fine_filter
+                )
+            )
+            .tag(NotificationFilterState.all)
             
-            NotificationTab(NotificationFilterState.zaps)
-                .tag(NotificationFilterState.zaps)
+            NotificationTab(
+                NotificationFilter(
+                    state: .zaps,
+                    fine_filter: filter_state.fine_filter
+                )
+            )
+            .tag(NotificationFilterState.zaps)
             
-            NotificationTab(NotificationFilterState.replies)
-                .tag(NotificationFilterState.replies)
+            NotificationTab(
+                NotificationFilter(
+                    state: .replies,
+                    fine_filter: filter_state.fine_filter
+                )
+            )
+            .tag(NotificationFilterState.replies)
         }
-        .onChange(of: filter_state) { val in
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if would_filter_non_friends_from_notifications(contacts: state.contacts, state: self.filter_state.state, items: self.notifications.notifications) {
+                    FriendsButton(enabled: self.filter_state.fine_filter_binding)
+                }
+            }
+        }
+        .onChange(of: filter_state.fine_filter) { val in
+            save_friend_filter(pubkey: state.pubkey, filter: val)
+        }
+        .onChange(of: filter_state.state) { val in
             save_notification_filter_state(pubkey: state.pubkey, state: val)
         }
         .onAppear {
-            self.filter_state = load_notification_filter_state(pubkey: state.pubkey)
+            let state = load_notification_filter_state(pubkey: state.pubkey)
+            self.filter_state.fine_filter = state.fine_filter
+            self.filter_state.state = state.state
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
-                CustomPicker(selection: $filter_state, content: {
+                CustomPicker(selection: $filter_state.state, content: {
                     Text("All", comment: "Label for filter for all notifications.")
                         .tag(NotificationFilterState.all)
                     
@@ -83,14 +173,14 @@ struct NotificationsView: View {
         }
     }
     
-    func NotificationTab(_ filter: NotificationFilterState) -> some View {
+    func NotificationTab(_ filter: NotificationFilter) -> some View {
         ScrollViewReader { scroller in
             ScrollView {
                 LazyVStack(alignment: .leading) {
                     Color.white.opacity(0)
                         .id("startblock")
                         .frame(height: 5)
-                    ForEach(notifications.notifications.filter(filter.filter), id: \.id) { item in
+                    ForEach(filter.filter(contacts: state.contacts, items: notifications.notifications), id: \.id) { item in
                         NotificationItemView(state: state, item: item)
                     }
                 }
@@ -116,7 +206,7 @@ struct NotificationsView: View {
 
 struct NotificationsView_Previews: PreviewProvider {
     static var previews: some View {
-        NotificationsView(state: test_damus_state(), notifications: NotificationsModel(), filter_state: NotificationFilterState.all)
+        NotificationsView(state: test_damus_state(), notifications: NotificationsModel(), filter_state: NotificationFilter())
     }
 }
 
@@ -124,22 +214,48 @@ func notification_filter_state_key(pubkey: String) -> String {
     return pk_setting_key(pubkey, key: "notification_filter_state")
 }
 
-func load_notification_filter_state(pubkey: String) -> NotificationFilterState {
+func friend_filter_key(pubkey: String) -> String {
+    return pk_setting_key(pubkey, key: "friend_filter")
+}
+
+func load_notification_filter_state(pubkey: String) -> NotificationFilter {
     let key = notification_filter_state_key(pubkey: pubkey)
+    let fine_key = friend_filter_key(pubkey: pubkey)
     
-    guard let state_str = UserDefaults.standard.string(forKey: key) else {
-        return .all
-    }
+    let state_str = UserDefaults.standard.string(forKey: key)
+    let state = (state_str.flatMap { NotificationFilterState(rawValue: $0) }) ?? .all
     
-    guard let state = NotificationFilterState(rawValue: state_str) else {
-        return .all
-    }
+    let filter_str = UserDefaults.standard.string(forKey: fine_key)
+    let filter = (filter_str.flatMap { FineNotificationFilter(rawValue: $0) } ) ?? .all
     
-    return state
+    return NotificationFilter(state: state, fine_filter: filter)
 }
 
 
 func save_notification_filter_state(pubkey: String, state: NotificationFilterState)  {
     let key = notification_filter_state_key(pubkey: pubkey)
+    
     UserDefaults.standard.set(state.rawValue, forKey: key)
 }
+
+func save_friend_filter(pubkey: String, filter: FineNotificationFilter) {
+    let key = friend_filter_key(pubkey: pubkey)
+    
+    UserDefaults.standard.set(filter.rawValue, forKey: key)
+}
+
+func would_filter_non_friends_from_notifications(contacts: Contacts, state: NotificationFilterState, items: [NotificationItem]) -> Bool {
+    for item in items {
+        // this is only valid depending on which tab we're looking at
+        if !state.filter(item) {
+            continue
+        }
+        
+        if item.would_filter({ ev in FineNotificationFilter.friends.filter(contacts: contacts, pubkey: ev.pubkey) }) {
+            return true
+        }
+    }
+    
+    return false
+}
+

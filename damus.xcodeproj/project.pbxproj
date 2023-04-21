@@ -143,6 +143,7 @@
 		4C8D00CF29E38B950036AF10 /* nostr_bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00CE29E38B950036AF10 /* nostr_bech32.c */; };
 		4C8D00D429E3C5D40036AF10 /* NIP19Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00D329E3C5D40036AF10 /* NIP19Tests.swift */; };
 		4C8D1A6C29F1DFC200ACDF75 /* FriendIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6B29F1DFC200ACDF75 /* FriendIcon.swift */; };
+		4C8D1A6F29F31E5000ACDF75 /* FriendsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */; };
 		4C8EC52529D1FA6C0085D9A8 /* DamusColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */; };
 		4C90BD18283A9EE5008EE7EF /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD17283A9EE5008EE7EF /* LoginView.swift */; };
 		4C90BD1A283AA67F008EE7EF /* Bech32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD19283AA67F008EE7EF /* Bech32.swift */; };
@@ -550,6 +551,7 @@
 		4C8D00D229E3C19F0036AF10 /* str_block.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = str_block.h; sourceTree = "<group>"; };
 		4C8D00D329E3C5D40036AF10 /* NIP19Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP19Tests.swift; sourceTree = "<group>"; };
 		4C8D1A6B29F1DFC200ACDF75 /* FriendIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendIcon.swift; sourceTree = "<group>"; };
+		4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsButton.swift; sourceTree = "<group>"; };
 		4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusColors.swift; sourceTree = "<group>"; };
 		4C90BD17283A9EE5008EE7EF /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		4C90BD19283AA67F008EE7EF /* Bech32.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32.swift; sourceTree = "<group>"; };
@@ -881,6 +883,7 @@
 		4C75EFA227FA576C0006080F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4C8D1A6D29F31E4100ACDF75 /* Buttons */,
 				4C1A9A1B29DDCF8B00516EAC /* Settings */,
 				4CFF8F6129CC9A80008DB934 /* Images */,
 				4CCEB7AC29B53D180078AA28 /* Search */,
@@ -1007,6 +1010,14 @@
 				4CDA128B29EB19C40006FA5A /* LocalNotification.swift */,
 			);
 			path = Util;
+			sourceTree = "<group>";
+		};
+		4C8D1A6D29F31E4100ACDF75 /* Buttons */ = {
+			isa = PBXGroup;
+			children = (
+				4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */,
+			);
+			path = Buttons;
 			sourceTree = "<group>";
 		};
 		4CAAD8AE29888A9B00060CEA /* Relays */ = {
@@ -1535,6 +1546,7 @@
 				4CF0ABF029857E9200D66079 /* Bech32Object.swift in Sources */,
 				4C3D52B8298DB5C6001C5831 /* TextEvent.swift in Sources */,
 				4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */,
+				4C8D1A6F29F31E5000ACDF75 /* FriendsButton.swift in Sources */,
 				4C216F382871EDE300040376 /* DirectMessageModel.swift in Sources */,
 				4C75EFA627FF87A20006080F /* Nostr.swift in Sources */,
 				4CB883A62975F83C00DC99E7 /* LNUrlPayRequest.swift in Sources */,

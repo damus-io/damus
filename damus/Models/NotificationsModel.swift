@@ -65,6 +65,37 @@ enum NotificationItem {
             return reply.created_at
         }
     }
+    
+    func would_filter(_ isIncluded: (NostrEvent) -> Bool) -> Bool {
+        switch self {
+        case .repost(_, let evgrp):
+            return evgrp.would_filter(isIncluded)
+        case .reaction(_, let evgrp):
+            return evgrp.would_filter(isIncluded)
+        case .profile_zap(let zapgrp):
+            return zapgrp.would_filter(isIncluded)
+        case .event_zap(_, let zapgrp):
+            return zapgrp.would_filter(isIncluded)
+        case .reply(let ev):
+            return !isIncluded(ev)
+        }
+    }
+    
+    func filter(_ isIncluded: (NostrEvent) -> Bool) -> NotificationItem? {
+        switch self {
+        case .repost(let evid, let evgrp):
+            return evgrp.filter(isIncluded).map { .repost(evid, $0) }
+        case .reaction(let evid, let evgrp):
+            return evgrp.filter(isIncluded).map { .reaction(evid, $0) }
+        case .profile_zap(let zapgrp):
+            return zapgrp.filter(isIncluded).map { .profile_zap($0) }
+        case .event_zap(let evid, let zapgrp):
+            return zapgrp.filter(isIncluded).map { .event_zap(evid, $0) }
+        case .reply(let ev):
+            if isIncluded(ev) { return .reply(ev) }
+            return nil
+        }
+    }
 }
 
 class NotificationsModel: ObservableObject, ScrollQueue {
