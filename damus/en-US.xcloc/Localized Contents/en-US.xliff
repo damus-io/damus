@@ -582,7 +582,7 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Hide" xml:space="preserve">
         <source>Hide</source>
         <target>Hide</target>
-        <note>Button to hide a post from a user who has been blocked.</note>
+        <note>Button to hide a post from a user who has been muted.</note>
       </trans-unit>
       <trans-unit id="Hide API Key" xml:space="preserve">
         <source>Hide API Key</source>
@@ -863,10 +863,10 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Post</target>
         <note>Button to post a note.</note>
       </trans-unit>
-      <trans-unit id="Post from a user you've blocked" xml:space="preserve">
-        <source>Post from a user you've blocked</source>
-        <target>Post from a user you've blocked</target>
-        <note>Text to indicate that what is being shown is a post from a user who has been blocked.</note>
+      <trans-unit id="Post from a user you've muted" xml:space="preserve">
+        <source>Post from a user you've muted</source>
+        <target>Post from a user you've muted</target>
+        <note>Text to indicate that what is being shown is a post from a user who has been muted.</note>
       </trans-unit>
       <trans-unit id="Posts" xml:space="preserve">
         <source>Posts</source>
