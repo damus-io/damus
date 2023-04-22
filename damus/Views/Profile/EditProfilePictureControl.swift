@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct EditProfilePictureControl: View {
-    
+    let uploader: MediaUploader
     let pubkey: String
     @Binding var profile_image: URL?
     @ObservedObject var viewModel: ProfileUploadingViewModel
@@ -46,7 +46,7 @@ struct EditProfilePictureControl: View {
         }
         .sheet(isPresented: $show_camera) {
             // The alert may not be required for the profile pic upload case. Not showing the confirm check alert for this scenario
-            ImagePicker(sourceType: .camera, pubkey: pubkey, image_upload_confirm: $image_upload_confirm, imagesOnly: true) { img in
+            ImagePicker(uploader: uploader, sourceType: .camera, pubkey: pubkey, image_upload_confirm: $image_upload_confirm, imagesOnly: true) { img in
                 handle_upload(media: .image(img))
             } onVideoPicked: { url in
                 print("Cannot upload videos as profile image")
@@ -54,7 +54,7 @@ struct EditProfilePictureControl: View {
         }
         .sheet(isPresented: $show_library) {
             // The alert may not be required for the profile pic upload case. Not showing the confirm check alert for this scenario
-            ImagePicker(sourceType: .photoLibrary, pubkey: pubkey, image_upload_confirm: $image_upload_confirm, imagesOnly: true) { img in
+            ImagePicker(uploader: uploader, sourceType: .photoLibrary, pubkey: pubkey, image_upload_confirm: $image_upload_confirm, imagesOnly: true) { img in
                 handle_upload(media: .image(img))
             } onVideoPicked: { url in
                 print("Cannot upload videos as profile image")
@@ -64,7 +64,6 @@ struct EditProfilePictureControl: View {
     
     private func handle_upload(media: MediaUpload) {
         viewModel.isLoading = true
-        let uploader = get_media_uploader(pubkey)
         Task {
             let res = await image_upload.start(media: media, uploader: uploader)
             

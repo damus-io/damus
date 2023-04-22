@@ -246,7 +246,7 @@ struct PostView: View {
     }
     
     func handle_upload(media: MediaUpload) {
-        let uploader = get_media_uploader(damus_state.pubkey)
+        let uploader = damus_state.settings.default_media_uploader
         Task.init {
             let img = getImage(media: media)
             let res = await image_upload.start(media: media, uploader: uploader)
@@ -336,7 +336,7 @@ struct PostView: View {
                 }
             }
             .sheet(isPresented: $attach_media) {
-                ImagePicker(sourceType: .photoLibrary, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
+                ImagePicker(uploader: damus_state.settings.default_media_uploader, sourceType: .photoLibrary, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
                     self.mediaToUpload = .image(img)
                 } onVideoPicked: { url in
                     self.mediaToUpload = .video(url)
@@ -353,7 +353,7 @@ struct PostView: View {
             }
             .sheet(isPresented: $attach_camera) {
                 // image_upload_confirm isn't handled here, I don't know we need to display it here too tbh
-                ImagePicker(sourceType: .camera, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
+                ImagePicker(uploader: damus_state.settings.default_media_uploader, sourceType: .camera, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
                     handle_upload(media: .image(img))
                 } onVideoPicked: { url in
                     handle_upload(media: .video(url))
