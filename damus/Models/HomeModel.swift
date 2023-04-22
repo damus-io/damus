@@ -673,9 +673,7 @@ func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
 
 func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: Profile, ev: NostrEvent) {
     if our_pubkey == ev.pubkey && (profile.deleted ?? false) {
-        DispatchQueue.main.async {
-            notify(.deleted_account, ())
-        }
+        notify(.deleted_account, ())
         return
     }
 
@@ -709,20 +707,15 @@ func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: P
     // load pfps asap
     let picture = tprof.profile.picture ?? robohash(ev.pubkey)
     if URL(string: picture) != nil {
-        DispatchQueue.main.async {
-            notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-        }
+        notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
     }
     
     let banner = tprof.profile.banner ?? ""
     if URL(string: banner) != nil {
-        DispatchQueue.main.async {
-            notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-        }
+        notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
     }
     
     notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-
 }
 
 func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping () -> Void) {
