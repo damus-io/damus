@@ -11,11 +11,12 @@ import Kingfisher
     
 // lots of overlap between this and ImageContainerView
 struct ImageContainerView: View {
-    
     let url: URL?
     
     @State private var image: UIImage?
     @State private var showShareSheet = false
+    
+    let disable_animation: Bool
     
     private struct ImageHandler: ImageModifier {
         @Binding var handler: UIImage?
@@ -29,7 +30,7 @@ struct ImageContainerView: View {
     var body: some View {
         
         KFAnimatedImage(url)
-            .imageContext(.note)
+            .imageContext(.note, disable_animation: disable_animation)
             .configure { view in
                 view.framePreloadCount = 3
             }
@@ -46,6 +47,6 @@ let test_image_url = URL(string: "https://jb55.com/red-me.jpg")!
 
 struct ImageContainerView_Previews: PreviewProvider {
     static var previews: some View {
-        ImageContainerView(url: test_image_url)
+        ImageContainerView(url: test_image_url, disable_animation: false)
     }
 }

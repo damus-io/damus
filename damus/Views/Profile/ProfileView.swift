@@ -165,7 +165,7 @@ struct ProfileView: View {
             return AnyView(
                 VStack(spacing: 0) {
                     ZStack {
-                        BannerImageView(pubkey: profile.pubkey, profiles: damus_state.profiles)
+                        BannerImageView(pubkey: profile.pubkey, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                             .aspectRatio(contentMode: .fill)
                             .frame(width: proxy.size.width, height: minY > 0 ? bannerHeight + minY : bannerHeight)
                             .clipped()
@@ -332,7 +332,7 @@ struct ProfileView: View {
     func nameSection(profile_data: Profile?) -> some View {
         return Group {
             HStack(alignment: .center) {
-                ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles)
+                ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                     .padding(.top, -(pfp_size / 2.0))
                     .offset(y: pfpOffset())
                     .scaleEffect(pfpScale())
@@ -340,7 +340,8 @@ struct ProfileView: View {
                         is_zoomed.toggle()
                     }
                     .fullScreenCover(isPresented: $is_zoomed) {
-                        ProfilePicImageView(pubkey: profile.pubkey, profiles: damus_state.profiles)                        }
+                        ProfilePicImageView(pubkey: profile.pubkey, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                    }
                 
                 Spacer()
                 

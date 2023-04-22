@@ -125,7 +125,7 @@ struct EditMetadataView: View {
     var TopSection: some View {
         ZStack(alignment: .top) {
             GeometryReader { geo in
-                BannerImageView(pubkey: damus_state.pubkey, profiles: damus_state.profiles)
+                BannerImageView(pubkey: damus_state.pubkey, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: BANNER_HEIGHT)
                     .clipped()
