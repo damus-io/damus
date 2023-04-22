@@ -35,10 +35,10 @@ struct NIP05Badge: View {
                     .mask(Image(systemName: "checkmark.seal.fill")
                         .resizable()
                     ).frame(width: 14, height: 14)
-            } else {
+            } else if show_domain {
                 Image(systemName: "checkmark.seal.fill")
                     .font(.footnote)
-                    .foregroundColor(.gray)
+                    .nip05_colorized(gradient: nip05_color)
             }
         }
     }

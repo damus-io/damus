@@ -22,7 +22,7 @@ class ZapsModel: ObservableObject {
     }
     
     func subscribe() {
-        var filter = NostrFilter.filter_kinds([9735])
+        var filter = NostrFilter.filter_kinds([NostrKind.zap.rawValue])
         switch target {
         case .profile(let profile_id):
             filter.pubkeys = [profile_id]

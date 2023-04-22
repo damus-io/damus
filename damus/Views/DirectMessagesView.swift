@@ -17,6 +17,7 @@ struct DirectMessagesView: View {
     
     @State var dm_type: DMType = .friend
     @ObservedObject var model: DirectMessagesModel
+    @ObservedObject var settings: UserSettingsStore
     
     func MainContent(requests: Bool) -> some View {
         ScrollView {
@@ -29,12 +30,9 @@ struct DirectMessagesView: View {
                     EmptyTimelineView()
                 } else {
                     let dms = requests ? model.message_requests : model.friend_dms
-                    ForEach(dms, id: \.pubkey) { tup in
-                        MaybeEvent(tup)
+                    ForEach(dms, id: \.pubkey) { dm in
+                        MaybeEvent(dm)
                             .padding(.top, 10)
-                        
-                        Divider()
-                            .padding([.top], 10)
                     }
                 }
             }
@@ -52,11 +50,15 @@ struct DirectMessagesView: View {
     
     func MaybeEvent(_ model: DirectMessageModel) -> some View {
         Group {
-            if let ev = model.events.last {
+            let ok = damus_state.settings.friend_filter.filter(contacts: damus_state.contacts, pubkey: model.pubkey)
+            if ok, let ev = model.events.last {
                 EventView(damus: damus_state, event: ev, pubkey: model.pubkey, options: options)
                     .onTapGesture {
                         self.model.open_dm_by_model(model)
                     }
+                
+                Divider()
+                    .padding([.top], 10)
             } else {
                 EmptyView()
             }
@@ -84,8 +86,26 @@ struct DirectMessagesView: View {
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if would_filter_non_friends_from_dms(contacts: damus_state.contacts, dms: self.model.dms) {
+                    
+                    FriendsButton(filter: $settings.friend_filter)
+                }
+            }
+        }
         .navigationTitle(NSLocalizedString("DMs", comment: "Navigation title for view of DMs, where DM is an English abbreviation for Direct Message."))
     }
+}
+
+func would_filter_non_friends_from_dms(contacts: Contacts, dms: [DirectMessageModel]) -> Bool {
+    for dm in dms {
+        if !FriendFilter.friends.filter(contacts: contacts, pubkey: dm.pubkey) {
+            return true
+        }
+    }
+    
+    return false
 }
 
 struct DirectMessagesView_Previews: PreviewProvider {
@@ -95,6 +115,6 @@ struct DirectMessagesView_Previews: PreviewProvider {
                                kind: 4,
                                tags: [])
         let ds = test_damus_state()
-        DirectMessagesView(damus_state: ds, model: ds.dms)
+        DirectMessagesView(damus_state: ds, model: ds.dms, settings: ds.settings)
     }
 }

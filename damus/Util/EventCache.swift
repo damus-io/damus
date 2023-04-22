@@ -15,6 +15,7 @@ class EventCache {
     private var cancellable: AnyCancellable?
     private var translations: [String: TranslateStatus] = [:]
     private var artifacts: [String: NoteArtifacts] = [:]
+    var validation: [String: ValidationResult] = [:]
     
     //private var thread_latest: [String: Int64]
     
@@ -24,6 +25,14 @@ class EventCache {
         ).sink { [weak self] _ in
             self?.prune()
         }
+    }
+    
+    func is_event_valid(_ evid: String) -> ValidationResult {
+        guard let result = validation[evid] else {
+            return .unknown
+        }
+        
+        return result
     }
     
     func store_translation_artifacts(evid: String, translated: TranslateStatus) {

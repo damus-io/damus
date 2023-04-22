@@ -39,8 +39,8 @@ struct EventProfileName: View {
         self.size = size
     }
     
-    var friend_icon: String? {
-        return get_friend_icon(contacts: damus_state.contacts, pubkey: pubkey, show_confirmed: show_friend_confirmed)
+    var friend_type: FriendType? {
+        return get_friend_type(contacts: damus_state.contacts, pubkey: self.pubkey)
     }
     
     var current_nip05: NIP05? {
@@ -50,7 +50,15 @@ struct EventProfileName: View {
     var current_display_name: DisplayName {
         return display_name ?? Profile.displayName(profile: profile, pubkey: pubkey)
     }
-   
+    
+    var onlyzapper: Bool {
+        guard let profile else {
+            return false
+        }
+        
+        return profile.reactions == false
+    }
+    
     var body: some View {
         HStack(spacing: 2) {
             switch current_display_name {
@@ -71,10 +79,13 @@ struct EventProfileName: View {
                 NIP05Badge(nip05: nip05, pubkey: pubkey, contacts: damus_state.contacts, show_domain: false, clickable: false)
             }
             
-            if let frend = friend_icon, current_nip05 == nil {
-                Label("", systemImage: frend)
-                    .foregroundColor(.gray)
-                    .font(.footnote)
+            if current_nip05 == nil, let frend = friend_type {
+                FriendIcon(friend: frend)
+            }
+            
+            if onlyzapper {
+                Image("zap-hashtag")
+                    .frame(width: 14, height: 14)
             }
         }
         .onReceive(handle_notify(.profile_updated)) { notif in

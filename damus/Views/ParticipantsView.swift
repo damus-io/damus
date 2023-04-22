@@ -1,5 +1,5 @@
 //
-//  ParicipantsView.swift
+//  ParticipantsView.swift
 //  damus
 //
 //  Created by Joel Klabo on 1/18/23.

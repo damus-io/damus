@@ -66,7 +66,7 @@ struct ImageCarousel: View {
     }
     
     var height: CGFloat {
-        image_fill?.height ?? 0
+        image_fill?.height ?? 100
     }
     
     var body: some View {
@@ -118,10 +118,7 @@ extension KFOptionSetter {
         let modifier = AnyImageModifier { image -> KFCrossPlatformImage in
             let img_size = image.size
             let geo_size = size
-            let fill = ImageFill.calculate_image_fill(geo_size: geo_size,
-                                                      img_size: img_size,
-                                                      maxHeight: max,
-                                                      fillHeight: fill)
+            let fill = ImageFill.calculate_image_fill(geo_size: geo_size, img_size: img_size, maxHeight: max, fillHeight: fill)
             DispatchQueue.main.async { [block, fill] in
                 try? block(fill)
             }

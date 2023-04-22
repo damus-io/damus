@@ -32,7 +32,7 @@ struct EventDetailBar: View {
                 .buttonStyle(PlainButtonStyle())
             }
 
-            if bar.likes > 0 {
+            if bar.likes > 0 && !state.settings.onlyzaps_mode {
                 NavigationLink(destination: ReactionsView(damus_state: state, model: ReactionsModel(state: state, target: target))) {
                     let noun = Text(verbatim: "\(reactionsCountString(bar.likes))").foregroundColor(.gray)
                     Text("\(Text("\(bar.likes)").font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.")
