@@ -119,6 +119,7 @@ struct ProfileView: View {
     @State var showing_select_wallet: Bool = false
     @State var is_zoomed: Bool = false
     @State var show_share_sheet: Bool = false
+    @State var show_qr_code: Bool = false
     @State var action_sheet_presented: Bool = false
     @State var filter_state : FilterState = .posts
     @State var yOffset: CGFloat = 0
@@ -213,6 +214,10 @@ struct ProfileView: View {
             Button(NSLocalizedString("Share", comment: "Button to share the link to a profile.")) {
                 show_share_sheet = true
             }
+            
+            Button(NSLocalizedString("QR Code", comment: "Button to view profile's qr code.")) {
+                show_qr_code = true
+            }
 
             // Only allow reporting if logged in with private key and the currently viewed profile is not the logged in profile.
             if profile.pubkey != damus_state.pubkey && damus_state.is_privkey_user {
@@ -240,20 +245,33 @@ struct ProfileView: View {
     }
     
     func lnButton(lnurl: String, profile: Profile) -> some View {
-        Button(action: {
+        let button_img = profile.reactions == false ? "bolt.brakesignal" : "bolt.circle"
+        return Button(action: {
             if damus_state.settings.show_wallet_selector  {
                 showing_select_wallet = true
             } else {
                 open_with_wallet(wallet: damus_state.settings.default_wallet.model, invoice: lnurl)
             }
         }) {
-            Image(systemName: "bolt.circle")
+            Image(systemName: button_img)
                 .profile_button_style(scheme: colorScheme)
                 .contextMenu {
-                    Button {
-                        UIPasteboard.general.string = profile.lnurl ?? ""
-                    } label: {
-                        Label(NSLocalizedString("Copy LNURL", comment: "Context menu option for copying a user's Lightning URL."), systemImage: "doc.on.doc")
+                    if profile.reactions == false {
+                        Text("OnlyZaps Enabled")
+                    }
+                    
+                    if let addr = profile.lud16 {
+                        Button {
+                            UIPasteboard.general.string = addr
+                        } label: {
+                            Label(addr, systemImage: "doc.on.doc")
+                        }
+                    } else if let lnurl = profile.lud06 {
+                        Button {
+                            UIPasteboard.general.string = profile.lnurl ?? ""
+                        } label: {
+                            Label(NSLocalizedString("Copy LNURL", comment: "Context menu option for copying a user's Lightning URL."), systemImage: "doc.on.doc")
+                        }
                     }
                 }
             
@@ -266,8 +284,7 @@ struct ProfileView: View {
     
     var dmButton: some View {
         let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
-        let dmview = DMChatView(damus_state: damus_state, pubkey: profile.pubkey)
-            .environmentObject(dm_model)
+        let dmview = DMChatView(damus_state: damus_state, dms: dm_model)
         return NavigationLink(destination: dmview) {
             Image(systemName: "bubble.left.circle")
                 .profile_button_style(scheme: colorScheme)
@@ -464,6 +481,9 @@ struct ProfileView: View {
                     ShareSheet(activityItems: [url])
                 }
             }
+        }
+        .fullScreenCover(isPresented: $show_qr_code) {
+            QRCodeView(damus_state: damus_state, pubkey: profile.pubkey)
         }
     }
 }

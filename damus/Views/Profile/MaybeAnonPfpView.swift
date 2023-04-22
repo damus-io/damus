@@ -11,17 +11,20 @@ struct MaybeAnonPfpView: View {
     let state: DamusState
     let is_anon: Bool
     let pubkey: String
+    let size: CGFloat
     
-    init(state: DamusState, event: NostrEvent, pubkey: String) {
+    init(state: DamusState, event: NostrEvent, pubkey: String, size: CGFloat) {
         self.state = state
         self.is_anon = event_is_anonymous(ev: event)
         self.pubkey = pubkey
+        self.size = size
     }
     
-    init(state: DamusState, is_anon: Bool, pubkey: String) {
+    init(state: DamusState, is_anon: Bool, pubkey: String, size: CGFloat) {
         self.state = state
         self.is_anon = is_anon
         self.pubkey = pubkey
+        self.size = size
     }
     
     var body: some View {
@@ -29,10 +32,10 @@ struct MaybeAnonPfpView: View {
             if is_anon {
                 Image(systemName: "person.fill.questionmark")
                     .font(.largeTitle)
-                    .frame(width: PFP_SIZE, height: PFP_SIZE)
+                    .frame(width: size, height: size)
             } else {
                 NavigationLink(destination: ProfileView(damus_state: state, pubkey: pubkey)) {
-                    ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: state.profiles)
+                    ProfilePicView(pubkey: pubkey, size: size, highlight: .none, profiles: state.profiles)
                 }
             }
         }
@@ -41,6 +44,6 @@ struct MaybeAnonPfpView: View {
 
 struct MaybeAnonPfpView_Previews: PreviewProvider {
     static var previews: some View {
-        MaybeAnonPfpView(state: test_damus_state(), is_anon: true, pubkey: "anon")
+        MaybeAnonPfpView(state: test_damus_state(), is_anon: true, pubkey: "anon", size: PFP_SIZE)
     }
 }

@@ -48,10 +48,6 @@ struct BuilderEventView: View {
             return
         }
         
-        guard nostr_event.known_kind == .text else {
-            return
-        }
-        
         if event != nil {
             return
         }
@@ -78,8 +74,8 @@ struct BuilderEventView: View {
                 let thread = ThreadModel(event: ev, damus_state: damus)
                 let dest = ThreadView(state: damus, thread: thread)
                 NavigationLink(destination: dest) {
-                    EmbeddedEventView(damus_state: damus, event: event)
-                        .padding(8)
+                    EventView(damus: damus, event: event, options: .embedded)
+                        .padding([.top, .bottom], 8)
                 }.buttonStyle(.plain)
             } else {
                 ProgressView().padding()

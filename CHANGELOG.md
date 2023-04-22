@@ -1,3 +1,54 @@
+## [1.4.3-2] - 2023-04-17
+
+### Added
+
+- Add deep links for local notifications (Swift)
+- Add thread muting (Terry Yiu)
+- Preview media uploads when posting (Swift)
+- Add QR Code in profiles (ericholguin)
+
+
+### Changed
+
+- Always check signatures of profile events (William Casarin)
+- Ask permission before uploading media (Swift)
+- Show DM message in local notification (William Casarin)
+
+
+### Fixed
+
+- Fixed repost turning green too early and not reposting sometimes (Swift)
+- Fix shuffling when choosing users to reply to (Joshua Jiang)
+- Do not translate own notes if logged in with private key (Terry Yiu)
+- Load missing profiles from boosts on home view (Gísli Kristjánsson)
+- Load missing profiles from boosts on profile view (Gísli Kristjánsson)
+- Fix tap area when mentioning users (OlegAba)
+- Fix invalid DM author notifications (William Casarin)
+- Fix relay signal indicator, properly show how many relays you are connected to (William Casarin)
+
+
+[1.4.3-2]: https://github.com/damus-io/damus/releases/tag/v1.4.3-2
+
+## [1.4.2-2] - 2023-04-12
+
+### Added
+
+- Include #btc in custom #bitcoin hashtag (William Casarin)
+- Make notification dots configurable (William Casarin)
+
+
+### Changed
+
+- Display follows in most recent to oldest (Luis Cabrera)
+
+### Fixed
+
+- Fix hitches caused by syncronous loading of cached images (William Casarin)
+- Fix tabs sometimes not switching (William Casarin)
+
+
+[1.4.2-2]: https://github.com/damus-io/damus/releases/tag/v1.4.2-2
+
 ## [1.4.1-8] - 2023-04-10
 
 ### Added
@@ -987,3 +1038,4 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
+

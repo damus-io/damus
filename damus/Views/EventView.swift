@@ -69,19 +69,6 @@ func should_show_images(settings: UserSettingsStore, contacts: Contacts, ev: Nos
     return false
 }
 
-func event_validity_color(_ validation: ValidationResult) -> some View {
-    Group {
-        switch validation {
-        case .ok:
-            EmptyView()
-        case .bad_id:
-            Color.orange.opacity(0.4)
-        case .bad_sig:
-            Color.red.opacity(0.4)
-        }
-    }
-}
-
 extension View {
     func pubkey_context_menu(bech32_pubkey: String) -> some View {
         return self.contextMenu {
@@ -93,9 +80,9 @@ extension View {
         }
     }
     
-    func event_context_menu(_ event: NostrEvent, keypair: Keypair, target_pubkey: String, bookmarks: BookmarksManager) -> some View {
+    func event_context_menu(_ event: NostrEvent, keypair: Keypair, target_pubkey: String, bookmarks: BookmarksManager, muted_threads: MutedThreadsManager) -> some View {
         return self.contextMenu {
-            EventMenuContext(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks)
+            EventMenuContext(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks, muted_threads: muted_threads)
         }
 
     }

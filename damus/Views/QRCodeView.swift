@@ -10,12 +10,13 @@ import CoreImage.CIFilterBuiltins
 
 struct QRCodeView: View {
     let damus_state: DamusState
+    @State var pubkey: String
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.presentationMode) var presentationMode
 
     var maybe_key: String? {
-        guard let key = bech32_pubkey(damus_state.pubkey) else {
+        guard let key = bech32_pubkey(pubkey) else {
             return nil
         }
 
@@ -39,10 +40,11 @@ struct QRCodeView: View {
             }
         
             VStack(alignment: .center) {
-                let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
                 
-                if (damus_state.profiles.lookup(id: damus_state.pubkey)?.picture) != nil {
-                    ProfilePicView(pubkey: damus_state.pubkey, size: 90.0, highlight: .custom(DamusColors.white, 4.0), profiles: damus_state.profiles)
+                let profile = damus_state.profiles.lookup(id: pubkey)
+                
+                if (damus_state.profiles.lookup(id: pubkey)?.picture) != nil {
+                    ProfilePicView(pubkey: pubkey, size: 90.0, highlight: .custom(DamusColors.white, 4.0), profiles: damus_state.profiles)
                         .padding(.top, 50)
                 } else {
                     Image(systemName: "person.fill")
@@ -119,6 +121,6 @@ struct QRCodeView: View {
 
 struct QRCodeView_Previews: PreviewProvider {
     static var previews: some View {
-        QRCodeView(damus_state: test_damus_state())
+        QRCodeView(damus_state: test_damus_state(), pubkey: test_event.pubkey)
     }
 }

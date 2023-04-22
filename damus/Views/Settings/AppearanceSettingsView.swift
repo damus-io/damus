@@ -50,7 +50,7 @@ struct AppearanceSettingsView: View {
                 
 
         }
-        .navigationTitle("Appearance")
+        .navigationTitle(NSLocalizedString("Appearance", comment: "Navigation title for text and appearance settings."))
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
         }

@@ -40,8 +40,14 @@ struct TranslateView: View {
         } else {
             self.currentLanguage = Locale.current.languageCode ?? "en"
         }
-        
-        if let cached = damus_state.events.lookup_translated_artifacts(evid: event.id) {
+
+        if damus_state.pubkey == event.pubkey && damus_state.is_privkey_user {
+            // Do not translate self-authored notes if logged in with a private key
+            // as we can assume the user can understand their own notes.
+            // The detected language prediction could be incorrect and not in the list of preferred languages.
+            // Offering a translation in this case is definitely incorrect so let's avoid it altogether.
+            self._translated = State(initialValue: .not_needed)
+        } else if let cached = damus_state.events.lookup_translated_artifacts(evid: event.id) {
             self._translated = State(initialValue: cached)
         } else {
             let initval: TranslateStatus = self.damus_state.settings.auto_translate ? .trying : .havent_tried

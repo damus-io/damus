@@ -26,11 +26,13 @@ func set_default_zap_amount(pubkey: String, amount: Int) {
     UserDefaults.standard.setValue(amount, forKey: key)
 }
 
-func get_default_zap_amount(pubkey: String) -> Int? {
+let fallback_zap_amount = 1000
+
+func get_default_zap_amount(pubkey: String) -> Int {
     let key = default_zap_setting_key(pubkey: pubkey)
     let amt = UserDefaults.standard.integer(forKey: key)
     if amt == 0 {
-        return nil
+        return fallback_zap_amount
     }
     return amt
 }
@@ -200,6 +202,12 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
+    @Published var onlyzaps_mode: Bool {
+        didSet {
+            UserDefaults.standard.set(onlyzaps_mode, forKey: "onlyzaps_mode")
+        }
+    }
+
     @Published var translation_service: TranslationService {
         didSet {
             UserDefaults.standard.set(translation_service.rawValue, forKey: "translation_service")
@@ -294,6 +302,7 @@ class UserSettingsStore: ObservableObject {
         disable_animation = should_disable_image_animation()
         auto_translate = UserDefaults.standard.object(forKey: "auto_translate") as? Bool ?? true
         show_only_preferred_languages = UserDefaults.standard.object(forKey: "show_only_preferred_languages") as? Bool ?? false
+        onlyzaps_mode = UserDefaults.standard.object(forKey: "hide_reactions") as? Bool ?? false
 
         // Note from @tyiu:
         // Default translation service is disabled by default for now until we gain some confidence that it is working well in production.
