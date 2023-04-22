@@ -24,13 +24,12 @@ struct ZapAmountItem: Identifiable, Hashable {
     }
 }
 
-func get_default_zap_amount_item(_ pubkey: String) -> ZapAmountItem {
-    let def = get_default_zap_amount(pubkey: pubkey)
+func get_default_zap_amount_item(_ def: Int) -> ZapAmountItem {
     return ZapAmountItem(amount: def, icon: "🤙")
 }
 
-func get_zap_amount_items(pubkey: String) -> [ZapAmountItem] {
-    let def_item = get_default_zap_amount_item(pubkey)
+func get_zap_amount_items(_ default_zap_amt: Int) -> [ZapAmountItem] {
+    let def_item = get_default_zap_amount_item(default_zap_amt)
     var entries = [
         ZapAmountItem(amount: 500, icon: "🙂"),
         ZapAmountItem(amount: 5000, icon: "💜"),
@@ -67,13 +66,13 @@ struct CustomizeZapView: View {
     init(state: DamusState, event: NostrEvent, lnurl: String) {
         self._comment = State(initialValue: "")
         self.event = event
-        self.zap_amounts = get_zap_amount_items(pubkey: state.pubkey)
+        self.zap_amounts = get_zap_amount_items(state.settings.default_zap_amount)
         self._error = State(initialValue: nil)
         self._invoice = State(initialValue: "")
         self._showing_wallet_selector = State(initialValue: false)
         self._custom_amount = State(initialValue: "")
         self._zap_type = State(initialValue: .pub)
-        let selected = get_default_zap_amount_item(state.pubkey)
+        let selected = get_default_zap_amount_item(state.settings.default_zap_amount)
         self._selected_amount = State(initialValue: selected)
         self._custom_amount_sats = State(initialValue: nil)
         self._zapping = State(initialValue: false)
@@ -144,12 +143,13 @@ struct CustomizeZapView: View {
             }
             break
         case .got_zap_invoice(let inv):
-            if should_show_wallet_selector(state.pubkey) {
+            if state.settings.show_wallet_selector {
                 self.invoice = inv
                 self.showing_wallet_selector = true
             } else {
                 end_editing()
-                open_with_wallet(wallet: get_default_wallet(state.pubkey).model, invoice: inv)
+                let wallet = state.settings.default_wallet.model
+                open_with_wallet(wallet: wallet, invoice: inv)
                 self.showing_wallet_selector = false
                 dismiss()
             }
@@ -161,7 +161,7 @@ struct CustomizeZapView: View {
     var body: some View {
         MainContent
             .sheet(isPresented: $showing_wallet_selector) {
-                SelectWalletView(showingSelectWallet: $showing_wallet_selector, our_pubkey: state.pubkey, invoice: invoice)
+                SelectWalletView(default_wallet: state.settings.default_wallet, showingSelectWallet: $showing_wallet_selector, our_pubkey: state.pubkey, invoice: invoice)
             }
             .onReceive(handle_notify(.zapping)) { notif in
                 receive_zap(notif: notif)

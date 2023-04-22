@@ -278,7 +278,7 @@ struct ProfileView: View {
         }
         .cornerRadius(24)
         .sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
-            SelectWalletView(showingSelectWallet: $showing_select_wallet, our_pubkey: damus_state.pubkey, invoice: lnurl)
+            SelectWalletView(default_wallet: damus_state.settings.default_wallet, showingSelectWallet: $showing_select_wallet, our_pubkey: damus_state.pubkey, invoice: lnurl)
         }
     }
     

@@ -72,7 +72,7 @@ struct NoteContentView: View {
     }
     
     var invoicesView: some View {
-        InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: artifacts.invoices)
+        InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: artifacts.invoices, settings: damus_state.settings)
     }
 
     var translateView: some View {
