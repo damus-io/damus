@@ -30,10 +30,26 @@ class ZapGroup {
         }
     }
     
-    init(zaps: [Zap]) {
-        self.zaps = zaps
-        self.msat_total = 0
-        self.zappers = Set()
+    func would_filter(_ isIncluded: (NostrEvent) -> Bool) -> Bool {
+        for zap in zaps {
+            if !isIncluded(zap.request_ev) {
+                return true
+            }
+        }
+        
+        return false
+    }
+    
+    func filter(_ isIncluded: (NostrEvent) -> Bool) -> ZapGroup? {
+        let new_zaps = zaps.filter { isIncluded($0.request_ev) }
+        guard new_zaps.count > 0 else {
+            return nil
+        }
+        let grp = ZapGroup()
+        for zap in new_zaps {
+            grp.insert(zap)
+        }
+        return grp
     }
     
     init() {
@@ -42,6 +58,7 @@ class ZapGroup {
         self.zappers = Set()
     }
     
+    @discardableResult
     func insert(_ zap: Zap) -> Bool {
         if !insert_uniq_sorted_zap_by_created(zaps: &zaps, new_zap: zap) {
             return false

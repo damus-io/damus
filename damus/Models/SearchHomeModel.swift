@@ -24,7 +24,7 @@ class SearchHomeModel: ObservableObject {
     }
     
     func get_base_filter() -> NostrFilter {
-        var filter = NostrFilter.filter_kinds([1, 42])
+        var filter = NostrFilter.filter_kinds([NostrKind.text.rawValue, NostrKind.chat.rawValue])
         filter.limit = self.limit
         filter.until = Int64(Date.now.timeIntervalSince1970)
         return filter
@@ -128,11 +128,14 @@ func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent]
     var pubkeys = Set<String>()
     
     for ev in events {
-        if profiles.lookup(id: ev.pubkey) != nil {
-            continue
+        // lookup profiles from boosted events
+        if ev.known_kind == .boost, let bev = ev.inner_event, profiles.lookup(id: bev.pubkey) == nil {
+            pubkeys.insert(bev.pubkey)
         }
         
-        pubkeys.insert(ev.pubkey)
+        if profiles.lookup(id: ev.pubkey) == nil {
+            pubkeys.insert(ev.pubkey)
+        }
     }
     
     return Array(pubkeys)

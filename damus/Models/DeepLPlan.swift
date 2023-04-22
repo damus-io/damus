@@ -7,7 +7,19 @@
 
 import Foundation
 
-enum DeepLPlan: String, CaseIterable, Identifiable {
+enum DeepLPlan: String, CaseIterable, Identifiable, StringCodable {
+    init?(from string: String) {
+        guard let dl = DeepLPlan(rawValue: string) else {
+            return nil
+        }
+        
+        self = dl
+    }
+    
+    func to_string() -> String {
+        return self.rawValue
+    }
+    
     var id: String { self.rawValue }
 
     struct Model: Identifiable, Hashable {

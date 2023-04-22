@@ -560,7 +560,7 @@ func make_first_contact_event(keypair: Keypair) -> NostrEvent? {
     return ev
 }
 
-func make_metadata_event(keypair: Keypair, metadata: NostrMetadata) -> NostrEvent? {
+func make_metadata_event(keypair: Keypair, metadata: Profile) -> NostrEvent? {
     guard let privkey = keypair.privkey else {
         return nil
     }
@@ -720,11 +720,34 @@ func make_zap_request_event(keypair: FullKeypair, content: String, relays: [Rela
     return ev
 }
 
+func uniq<T: Hashable>(_ xs: [T]) -> [T] {
+    var s = Set<T>()
+    var ys: [T] = []
+    
+    for x in xs {
+        if s.contains(x) {
+            continue
+        }
+        s.insert(x)
+        ys.append(x)
+    }
+    
+    return ys
+}
+
 func gather_reply_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
     var ids = get_referenced_ids(tags: from.tags, key: "e").first.map { [$0] } ?? []
 
     ids.append(ReferencedId(ref_id: from.id, relay_id: nil, key: "e"))
-    ids.append(contentsOf: from.referenced_pubkeys.filter { $0.ref_id != our_pubkey })
+    ids.append(contentsOf: uniq(from.referenced_pubkeys.filter { $0.ref_id != our_pubkey }))
+    if from.pubkey != our_pubkey {
+        ids.append(ReferencedId(ref_id: from.pubkey, relay_id: nil, key: "p"))
+    }
+    return ids
+}
+
+func gather_quote_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
+    var ids: [ReferencedId] = []
     if from.pubkey != our_pubkey {
         ids.append(ReferencedId(ref_id: from.pubkey, relay_id: nil, key: "p"))
     }

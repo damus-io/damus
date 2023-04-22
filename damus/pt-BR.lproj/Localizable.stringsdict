@@ -17,7 +17,7 @@
 			<key>many</key>
 			<string>... %d Outras observações ... </string>
 			<key>other</key>
-			<string>... %d outras observações ... </string>
+			<string>... %d outras notas ... </string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -71,7 +71,7 @@
 			<key>many</key>
 			<string>%2$@ e %1$d muitos outros reagiram a uma publicação na qual você está marcado</string>
 			<key>other</key>
-			<string>%2$@ e %1$d outros reagiram a uma publicação na qual você está marcado</string>
+			<string>%2$@ e %1$d outros reagiram a um post que você está marcado</string>
 		</dict>
 	</dict>
 	<key>reacted_your_post_3</key>
@@ -89,7 +89,7 @@
 			<key>many</key>
 			<string>%2$@ e %1$d muitos outros reagiram à sua publicação</string>
 			<key>other</key>
-			<string>%2$@ e %1$d outros reagiram à sua publicação</string>
+			<string>%2$@ e %1$d outros reagiram ao seu post</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -143,7 +143,7 @@
 			<key>many</key>
 			<string>Transmissões</string>
 			<key>other</key>
-			<string>Transmissões</string>
+			<string>Relays</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
@@ -179,7 +179,7 @@
 			<key>many</key>
 			<string>%2$@ e %1$d muitos outros republicaram uma publicação na qual você está marcado</string>
 			<key>other</key>
-			<string>%2$@ e %1$d outros republicaram uma publicação na qual você está marcado</string>
+			<string>%2$@ e %1$d outros repostaram um post que você está marcado</string>
 		</dict>
 	</dict>
 	<key>reposted_your_post_3</key>
@@ -197,7 +197,7 @@
 			<key>many</key>
 			<string>%2$@ e %1$d muitos outros republicaram seu perfil</string>
 			<key>other</key>
-			<string>%2$@ e %1$d outros republicaram seu perfil</string>
+			<string>%2$@ e %1$d outros repostaram seu perfil</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -215,7 +215,7 @@
 			<key>many</key>
 			<string>%2$@ e %1$d muitos outros republicaram seu perfil</string>
 			<key>other</key>
-			<string>%2$@ e %1$d outros republicaram seu perfil</string>
+			<string>%2$@ e %1$d outros repostaram seu perfil</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -233,7 +233,7 @@
 			<key>many</key>
 			<string>Republicações</string>
 			<key>other</key>
-			<string>Republicações</string>
+			<string>Reposts</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -305,7 +305,7 @@
 			<key>many</key>
 			<string>%2$@ e %1$d muitos outros eletrizaram uma publicação na qual você está marcado</string>
 			<key>other</key>
-			<string>%2$@ e %1$d outros eletrizaram uma publicação na qual você está marcado</string>
+			<string>%2$@ e %1$d outros zapped um post que você está marcado</string>
 		</dict>
 	</dict>
 	<key>zapped_your_post_3</key>
@@ -323,7 +323,7 @@
 			<key>many</key>
 			<string>%2$@ e %1$d muitos outros eletrizaram sua publicação</string>
 			<key>other</key>
-			<string>%2$@ e %1$d outros eletrizaram sua publicação</string>
+			<string>%2$@ e %1$d outros zapped seu post</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -341,7 +341,7 @@
 			<key>many</key>
 			<string>%2$@ e %1$d muitos outros eletrizaram seu perfil</string>
 			<key>other</key>
-			<string>%2$@ e %1$d outros eletrizaram seu perfil</string>
+			<string>%2$@ e %1$d outros zapped seu perfil</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
@@ -359,7 +359,7 @@
 			<key>many</key>
 			<string>Muitos iluminaram</string>
 			<key>other</key>
-			<string>Iluminaram</string>
+			<string>Zaps</string>
 		</dict>
 	</dict>
 </dict>
