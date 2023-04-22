@@ -192,8 +192,8 @@ class NotificationsModel: ObservableObject, ScrollQueue {
     }
     
     
-    private func insert_repost(_ ev: NostrEvent) -> Bool {
-        guard let reposted_ev = ev.inner_event else {
+    private func insert_repost(_ ev: NostrEvent, cache: EventCache) -> Bool {
+        guard let reposted_ev = ev.get_inner_event(cache: cache) else {
             return false
         }
         
@@ -235,9 +235,9 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
     }
     
-    private func insert_event_immediate(_ ev: NostrEvent) -> Bool {
+    private func insert_event_immediate(_ ev: NostrEvent, cache: EventCache) -> Bool {
         if ev.known_kind == .boost {
-            return insert_repost(ev)
+            return insert_repost(ev, cache: cache)
         } else if ev.known_kind == .like {
             return insert_reaction(ev)
         } else if ev.known_kind == .text {
@@ -269,7 +269,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
             return insert_uniq_sorted_event_created(events: &incoming_events, new_ev: ev)
         }
         
-        if insert_event_immediate(ev) {
+        if insert_event_immediate(ev, cache: damus_state.events) {
             self.notifications = build_notifications()
             return true
         }
@@ -339,7 +339,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
         
         for event in incoming_events {
-            inserted = insert_event_immediate(event) || inserted
+            inserted = insert_event_immediate(event, cache: damus_state.events) || inserted
         }
         
         if inserted {
