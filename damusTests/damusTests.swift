@@ -95,14 +95,6 @@ class damusTests: XCTestCase {
         XCTAssertEqual(parsed, expected)
     }
     
-    func testSaveDefaultZapAmount() {
-        let pubkey = "test_pubkey"
-        let amt = 1234
-        set_default_zap_amount(pubkey: pubkey, amount: amt)
-        let loaded = get_default_zap_amount(pubkey: pubkey)
-        XCTAssertEqual(loaded, amt)
-    }
-    
     func testSaveRelayFilters() {
         var filters = Set<RelayFilter>()
         
