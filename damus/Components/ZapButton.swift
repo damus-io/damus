@@ -86,7 +86,7 @@ struct ZapButton: View {
                     return
                 }
                 
-                send_zap(damus_state: damus_state, event: event, lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: ZapType.pub)
+                send_zap(damus_state: damus_state, event: event, lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: damus_state.settings.default_zap_type)
                 self.zapping = true
             })
             .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
@@ -101,7 +101,7 @@ struct ZapButton: View {
             CustomizeZapView(state: damus_state, event: event, lnurl: lnurl)
         }
         .sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
-            SelectWalletView(showingSelectWallet: $showing_select_wallet, our_pubkey: damus_state.pubkey, invoice: invoice)
+            SelectWalletView(default_wallet: damus_state.settings.default_wallet, showingSelectWallet: $showing_select_wallet, our_pubkey: damus_state.pubkey, invoice: invoice)
         }
         .onReceive(handle_notify(.zapping)) { notif in
             let zap_ev = notif.object as! ZappingEvent
@@ -118,11 +118,12 @@ struct ZapButton: View {
             case .failed:
                 break
             case .got_zap_invoice(let inv):
-                if should_show_wallet_selector(damus_state.pubkey) {
+                if damus_state.settings.show_wallet_selector {
                     self.invoice = inv
                     self.showing_select_wallet = true
                 } else {
-                    open_with_wallet(wallet: get_default_wallet(damus_state.pubkey).model, invoice: inv)
+                    let wallet = damus_state.settings.default_wallet.model
+                    open_with_wallet(wallet: wallet, invoice: inv)
                 }
             }
             
@@ -173,7 +174,7 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
             damus_state.lnurls.endpoints[target.pubkey] = payreq
         }
         
-        let zap_amount = amount_sats ?? get_default_zap_amount(pubkey: damus_state.pubkey)
+        let zap_amount = amount_sats ?? damus_state.settings.default_zap_amount
         
         guard let inv = await fetch_zap_invoice(payreq, zapreq: zapreq, sats: zap_amount, zap_type: zap_type, comment: comment) else {
             DispatchQueue.main.async {

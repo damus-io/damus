@@ -20,7 +20,7 @@ struct ProfilePicturesView: View {
         }
         HStack {
             ForEach(events.prefix(8)) { ev in
-                ProfilePicView(pubkey: ev.pubkey, size: 32.0, highlight: .none, profiles: state.profiles)
+                ProfilePicView(pubkey: ev.pubkey, size: 32.0, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation)
                     .onTapGesture {
                         nav_target = ev.pubkey
                         navigating = true

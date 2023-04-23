@@ -9,6 +9,8 @@ import Foundation
 import Vault
 import UIKit
 
+let fallback_zap_amount = 1000
+
 @propertyWrapper struct Setting<T: Equatable> {
     private let key: String
     private var value: T
@@ -92,8 +94,14 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "zap_notification", default_value: true)
     var zap_notification: Bool
     
+    @Setting(key: "default_zap_amount", default_value: fallback_zap_amount)
+    var default_zap_amount: Int
+    
     @Setting(key: "mention_notification", default_value: true)
     var mention_notification: Bool
+    
+    @StringSetting(key: "zap_type", default_value: ZapType.pub)
+    var default_zap_type: ZapType
 
     @Setting(key: "repost_notification", default_value: true)
     var repost_notification: Bool
@@ -157,7 +165,7 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
-    @Setting(key: "libretranslate_server", default_value: .vern)
+    @StringSetting(key: "libretranslate_server", default_value: .terraprint)
     var libretranslate_server: LibreTranslateServer
     
     @Setting(key: "libretranslate_url", default_value: "")
@@ -226,78 +234,7 @@ struct DamusDeepLKeychainConfiguration: KeychainConfiguration {
     var accountName = "deepl_apikey"
 }
 
-func should_show_wallet_selector(_ pubkey: String) -> Bool {
-    return UserDefaults.standard.object(forKey: "show_wallet_selector") as? Bool ?? true
-}
-
 func pk_setting_key(_ pubkey: String, key: String) -> String {
     return "\(pubkey)_\(key)"
 }
 
-func default_zap_setting_key(pubkey: String) -> String {
-    return pk_setting_key(pubkey, key: "default_zap_amount")
-}
-
-func set_default_zap_amount(pubkey: String, amount: Int) {
-    let key = default_zap_setting_key(pubkey: pubkey)
-    UserDefaults.standard.setValue(amount, forKey: key)
-}
-
-let fallback_zap_amount = 1000
-
-func get_default_zap_amount(pubkey: String) -> Int {
-    let key = default_zap_setting_key(pubkey: pubkey)
-    let amt = UserDefaults.standard.integer(forKey: key)
-    if amt == 0 {
-        return fallback_zap_amount
-    }
-    return amt
-}
-
-func should_disable_image_animation() -> Bool {
-    return (UserDefaults.standard.object(forKey: "disable_animation") as? Bool)
-            ?? UIAccessibility.isReduceMotionEnabled
- }
-
-func get_default_wallet(_ pubkey: String) -> Wallet {
-    if let defaultWalletName = UserDefaults.standard.string(forKey: "default_wallet"),
-       let default_wallet = Wallet(rawValue: defaultWalletName)
-    {
-        return default_wallet
-    } else {
-        return .system_default_wallet
-    }
-}
-
-func get_media_uploader(_ pubkey: String) -> MediaUploader {
-    if let defaultMediaUploader = UserDefaults.standard.string(forKey: "default_media_uploader"),
-       let defaultMediaUploader = MediaUploader(rawValue: defaultMediaUploader) {
-        return defaultMediaUploader
-    } else {
-        return .nostrBuild
-    }
-}
-
-private func get_translation_service(_ pubkey: String) -> TranslationService? {
-    guard let translation_service = UserDefaults.standard.string(forKey: "translation_service") else {
-        return nil
-    }
-
-    return TranslationService(rawValue: translation_service)
-}
-
-private func get_libretranslate_url(_ pubkey: String, server: LibreTranslateServer) -> String? {
-    if let url = server.model.url {
-        return url
-    }
-    
-    return UserDefaults.standard.object(forKey: "libretranslate_url") as? String
-}
-
-private func get_libretranslate_server(_ pubkey: String) -> LibreTranslateServer? {
-    guard let server_name = UserDefaults.standard.string(forKey: "libretranslate_server") else {
-        return nil
-    }
-    
-    return LibreTranslateServer(rawValue: server_name)
-}

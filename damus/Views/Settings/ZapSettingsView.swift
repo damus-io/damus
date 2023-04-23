@@ -17,8 +17,7 @@ struct ZapSettingsView: View {
 
     init(pubkey: String, settings: UserSettingsStore) {
         self.pubkey = pubkey
-        let zap_amt = get_default_zap_amount(pubkey: pubkey).formatted()
-        _default_zap_amount = State(initialValue: zap_amt)
+        _default_zap_amount = State(initialValue: settings.default_zap_amount.formatted())
         self._settings = ObservedObject(initialValue: settings)
     }
     
@@ -59,10 +58,10 @@ struct ZapSettingsView: View {
                     .onReceive(Just(default_zap_amount)) { newValue in
                         if let parsed = handle_string_amount(new_value: newValue) {
                             self.default_zap_amount = parsed.formatted()
-                            set_default_zap_amount(pubkey: self.pubkey, amount: parsed)
+                            settings.default_zap_amount = parsed
                         } else {
                             self.default_zap_amount = ""
-                            set_default_zap_amount(pubkey: self.pubkey, amount: 0)
+                            settings.default_zap_amount = 0
                         }
                     }
             }

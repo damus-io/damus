@@ -261,7 +261,7 @@ struct ContentView: View {
                                     Button {
                                         isSideBarOpened.toggle()
                                     } label: {
-                                        ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles)
+                                        ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, disable_animation: damus_state!.settings.disable_animation)
                                             .opacity(isSideBarOpened ? 0 : 1)
                                             .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
                                     }

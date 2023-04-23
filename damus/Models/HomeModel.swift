@@ -229,7 +229,7 @@ class HomeModel: ObservableObject {
     func handle_boost_event(sub_id: String, _ ev: NostrEvent) {
         var boost_ev_id = ev.last_refid()?.ref_id
 
-        if let inner_ev = ev.inner_event {
+        if let inner_ev = ev.get_inner_event(cache: damus_state.events) {
             boost_ev_id = inner_ev.id
             
             guard validate_event(ev: inner_ev) == .ok else {
@@ -488,7 +488,7 @@ class HomeModel: ObservableObject {
         
         damus_state.events.insert(ev)
         
-        if let inner_ev = ev.inner_event {
+        if let inner_ev = ev.get_inner_event(cache: damus_state.events) {
             damus_state.events.insert(inner_ev)
         }
         
@@ -1104,7 +1104,7 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
             let notify = LocalNotification(type: .mention, event: ev, target: ev, content: content)
             create_local_notification(profiles: damus_state.profiles, notify: notify )
         }
-    } else if type == .boost && damus_state.settings.repost_notification, let inner_ev = ev.inner_event {
+    } else if type == .boost && damus_state.settings.repost_notification, let inner_ev = ev.get_inner_event(cache: damus_state.events) {
         let notify = LocalNotification(type: .repost, event: ev, target: inner_ev, content: inner_ev.content)
         create_local_notification(profiles: damus_state.profiles, notify: notify)
     } else if type == .like && damus_state.settings.like_notification,
