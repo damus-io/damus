@@ -58,18 +58,17 @@ struct UserSearch: View {
 
     private func createUserTag(for user: SearchedUser, with pk: String) -> NSMutableAttributedString {
         let name = Profile.displayName(profile: user.profile, pubkey: pk).username
-        let tag = "@\(name)"
+        let filteredName = String(name.map{String($0) == " " ? searchCompatibleSpaceChar : $0 })
+        let tag = "@\(filteredName)"
         if !searchedNames.contains(tag) {
             searchedNames.append(tag)
         }
-        
-        let tagString = "@\(name)\u{200B} "
-
+        let tagString = "\(tag) "
         let tagAttributedString = NSMutableAttributedString(string: tagString,
                                    attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0),
                                                 NSAttributedString.Key.link: "@\(pk)"])
-        tagAttributedString.removeAttribute(.link, range: NSRange(location: tagAttributedString.length - 2, length: 2))
-        tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 2, length: 2))
+        tagAttributedString.removeAttribute(.link, range: NSRange(location: tagAttributedString.length - 1, length: 1))
+        tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 1, length: 1))
         
         return tagAttributedString
     }

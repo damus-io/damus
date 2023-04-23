@@ -15,7 +15,7 @@ enum NostrPostResult {
 
 let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Text box prompt to ask user to type their post.")
 var searchedNames = [String]()
-fileprivate var composing = false
+var searchCompatibleSpaceChar = Character(.init(0x2004)!) /// this character looks identical in the UI to the 'regular' space-bar space
 
 enum PostAction {
     case replying_to(NostrEvent)
@@ -396,8 +396,11 @@ struct PostView: View {
     }
 }
 
-func get_searching_string(_ post: String) -> (String,Int,Int,Int)? { /// could refactor to return a Struct w/ these properties
-    let components = post.components(separatedBy: .whitespacesAndNewlines)
+func get_searching_string(_ post: String) -> (String,Int,Int,Int)? {
+    var characterSet = CharacterSet()
+    characterSet.insert(charactersIn: "\n")
+    characterSet.insert(charactersIn: " ")
+    let components = post.components(separatedBy: characterSet)
     
     var searching = ""
     var tagLength = 0, tagIndex = 0 // index of the start of a tag in a post
@@ -411,7 +414,7 @@ tagLoop:
             tagWordIndex = index
             break tagLoop
         }
-        tagIndex += (word.count == 0) ? (1) : (1 + word.count)
+        tagIndex += 1 + word.count
     }
     
     guard searching.count >= 2 else {
@@ -423,7 +426,7 @@ tagLoop:
         return nil
     }
     
-    searching = String(searching.dropFirst())
+    searching = String(searching.dropFirst().map{$0 == searchCompatibleSpaceChar ? Character(.init(0x0020)!) : $0 }) /// 0x0020 is the 'regular' space-bar whitespace character
     return (searching,tagLength,tagIndex,tagWordIndex)
 }
 
