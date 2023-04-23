@@ -7,7 +7,19 @@
 
 import Foundation
 
-enum TranslationService: String, CaseIterable, Identifiable {
+enum TranslationService: String, CaseIterable, Identifiable, StringCodable {
+    init?(from string: String) {
+        guard let ts = TranslationService(rawValue: string) else {
+            return nil
+        }
+        
+        self = ts
+    }
+    
+    func to_string() -> String {
+        return self.rawValue
+    }
+    
     var id: String { self.rawValue }
 
     struct Model: Identifiable, Hashable {

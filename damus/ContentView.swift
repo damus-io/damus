@@ -182,7 +182,7 @@ struct ContentView: View {
                 NotificationsView(state: damus, notifications: home.notifications)
                 
             case .dms:
-                DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms)
+                DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings)
             
             case .none:
                 EmptyView()
@@ -467,13 +467,13 @@ struct ContentView: View {
             self.damus_state?.pool.connect_to_disconnected()
         }
         .onReceive(handle_notify(.new_mutes)) { notif in
-            home.filter_muted()
+            home.filter_events()
         }
         .onReceive(handle_notify(.mute_thread)) { notif in
-            home.filter_muted()
+            home.filter_events()
         }
         .onReceive(handle_notify(.unmute_thread)) { notif in
-            home.filter_muted()
+            home.filter_events()
         }
         .onReceive(handle_notify(.local_notification)) { notif in
             
@@ -497,6 +497,26 @@ struct ContentView: View {
             case .repost:
                 open_event(ev: target)
             }
+        }
+        .onReceive(handle_notify(.onlyzaps_mode)) { notif in
+            let hide = notif.object as! Bool
+            home.filter_events()
+            
+            guard let damus_state else {
+                return
+            }
+            
+            guard let profile = damus_state.profiles.lookup(id: damus_state.pubkey) else {
+                return
+            }
+            
+            profile.reactions = !hide
+            
+            guard let profile_ev = make_metadata_event(keypair: damus_state.keypair, metadata: profile) else {
+                return
+            }
+            
+            damus_state.postbox.send(profile_ev)
         }
         .alert(NSLocalizedString("Deleted Account", comment: "Alert message to indicate this is a deleted account"), isPresented: $is_deleted_account) {
             Button(NSLocalizedString("Logout", comment: "Button to close the alert that informs that the current account has been deleted.")) {
@@ -658,7 +678,12 @@ struct ContentView: View {
         }
         
         pool.register_handler(sub_id: sub_id, handler: home.handle_event)
-
+        
+        // dumb stuff needed for property wrappers
+        UserSettingsStore.pubkey = pubkey
+        let settings = UserSettingsStore()
+        UserSettingsStore.shared = settings
+        
         self.damus_state = DamusState(pool: pool,
                                       keypair: keypair,
                                       likes: EventCounter(our_pubkey: pubkey),
@@ -670,7 +695,7 @@ struct ContentView: View {
                                       previews: PreviewCache(),
                                       zaps: Zaps(our_pubkey: pubkey),
                                       lnurls: LNUrls(),
-                                      settings: UserSettingsStore(),
+                                      settings: settings,
                                       relay_filters: relay_filters,
                                       relay_metadata: metadatas,
                                       drafts: Drafts(),
@@ -841,7 +866,7 @@ func find_event(state: DamusState, evid: String, search_type: SearchType, find_f
     var filter = search_type == .event ? NostrFilter.filter_ids([ evid ]) : NostrFilter.filter_authors([ evid ])
     
     if search_type == .profile {
-        filter.kinds = [0]
+        filter.kinds = [NostrKind.metadata.rawValue]
     }
     
     filter.limit = 1

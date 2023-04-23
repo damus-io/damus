@@ -30,7 +30,7 @@ final class RequestTests: XCTestCase {
     }
     
     func testMakeSubscriptionRequest() {
-        let filter = NostrFilter(kinds: [3], limit: 1, authors: ["d9fa34214aa9d151c4f4db843e9c2af4f246bab4205137731f91bcfa44d66a62"])
+        let filter = NostrFilter(kinds: [NostrKind.contacts.rawValue], limit: 1, authors: ["d9fa34214aa9d151c4f4db843e9c2af4f246bab4205137731f91bcfa44d66a62"])
         let subscribe = NostrSubscribe(filters: [filter], sub_id: "31C737B7-C8F9-41DD-8707-325974F279A4")
         let result = make_nostr_req(.subscribe(subscribe))
         let expectedResult = "[\"REQ\",\"31C737B7-C8F9-41DD-8707-325974F279A4\",{\"kinds\":[3],\"authors\":[\"d9fa34214aa9d151c4f4db843e9c2af4f246bab4205137731f91bcfa44d66a62\"],\"limit\":1}]"

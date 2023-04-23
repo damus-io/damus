@@ -52,6 +52,10 @@ struct Zap {
     public let is_anon: Bool
     public let private_request: NostrEvent?
     
+    var request_ev: NostrEvent {
+        return private_request ?? self.request.ev
+    }
+    
     public static func from_zap_event(zap_ev: NostrEvent, zapper: String, our_privkey: String?) -> Zap? {
         /// Make sure that we only create a zap event if it is authorized by the profile or event
         guard zapper == zap_ev.pubkey else {

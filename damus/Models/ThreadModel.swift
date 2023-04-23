@@ -77,18 +77,23 @@ class ThreadModel: ObservableObject {
         var meta_events = NostrFilter()
         var event_filter = NostrFilter()
         var ref_events = NostrFilter()
-        //var likes_filter = NostrFilter.filter_kinds(7])
 
         let thread_id = event.thread_id(privkey: nil)
         
         ref_events.referenced_ids = [thread_id, event.id]
-        ref_events.kinds = [1]
+        ref_events.kinds = [NostrKind.text.rawValue]
         ref_events.limit = 1000
         
         event_filter.ids = [thread_id, event.id]
         
         meta_events.referenced_ids = [event.id]
-        meta_events.kinds = [9735, 1, 6, 7]
+
+        var kinds = [NostrKind.zap.rawValue, NostrKind.text.rawValue, NostrKind.boost.rawValue]
+        if !damus_state.settings.onlyzaps_mode {
+            kinds.append(NostrKind.like.rawValue)
+        }
+        meta_events.kinds = kinds
+
         meta_events.limit = 1000
         
         /*

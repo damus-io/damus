@@ -89,10 +89,22 @@ extension NSMutableData {
     }
 }
 
-enum MediaUploader: String, CaseIterable, Identifiable {
+enum MediaUploader: String, CaseIterable, Identifiable, StringCodable {
     var id: String { self.rawValue }
     case nostrBuild
     case nostrImg
+    
+    init?(from string: String) {
+        guard let mu = MediaUploader(rawValue: string) else {
+            return nil
+        }
+        
+        self = mu
+    }
+    
+    func to_string() -> String {
+        return rawValue
+    }
 
     var nameParam: String {
         switch self {

@@ -457,7 +457,7 @@ struct PVImageCarouselView: View {
                                     Button(action: {
                                         UIPasteboard.general.string = uploadedURL.absoluteString
                                     }) {
-                                        Label("Copy URL", systemImage: "doc.on.doc")
+                                        Label(NSLocalizedString("Copy URL", comment: "Label for button in context menu to copy URL of the selected uploaded media asset."), systemImage: "doc.on.doc")
                                     }
                                 }
                             }
