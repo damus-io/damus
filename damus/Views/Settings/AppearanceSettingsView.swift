@@ -27,15 +27,15 @@ struct AppearanceSettingsView: View {
             }
             
             Section(NSLocalizedString("Images", comment: "Section title for images configuration.")) {
-                Toggle(NSLocalizedString("Disable animations", comment: "Button to disable image animation"), isOn: $settings.disable_animation)
+                Toggle(NSLocalizedString("Animations", comment: "Toggle to enable or disable image animation"), isOn: $settings.enable_animation)
                     .toggleStyle(.switch)
-                    .onChange(of: settings.disable_animation) { _ in
+                    .onChange(of: settings.enable_animation) { _ in
                         clear_kingfisher_cache()
                     }
                 Toggle(NSLocalizedString("Always show images", comment: "Setting to always show and never blur images"), isOn: $settings.always_show_images)
                     .toggleStyle(.switch)
                 
-                Picker(NSLocalizedString("Select image uploader", comment: "Prompt selection of user's image uploader"),
+                Picker(NSLocalizedString("Image uploader", comment: "Prompt selection of user's image uploader"),
                        selection: $settings.default_media_uploader) {
                     ForEach(MediaUploader.allCases, id: \.self) { uploader in
                         Text(uploader.model.displayName)
