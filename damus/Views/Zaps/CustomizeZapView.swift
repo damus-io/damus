@@ -31,6 +31,7 @@ func get_default_zap_amount_item(_ def: Int) -> ZapAmountItem {
 func get_zap_amount_items(_ default_zap_amt: Int) -> [ZapAmountItem] {
     let def_item = get_default_zap_amount_item(default_zap_amt)
     var entries = [
+        ZapAmountItem(amount: 69, icon: "😘"),
         ZapAmountItem(amount: 500, icon: "🙂"),
         ZapAmountItem(amount: 5000, icon: "💜"),
         ZapAmountItem(amount: 10_000, icon: "😍"),
@@ -80,9 +81,7 @@ struct CustomizeZapView: View {
         self._invoice = State(initialValue: "")
         self._showing_wallet_selector = State(initialValue: false)
         self._zap_type = State(initialValue: .pub)
-        let default_amount = get_default_zap_amount_item(state.settings.default_zap_amount)
-        self._selected_amount = State(initialValue: selected)
-        self._custom_amount = State(initialValue: String(default_amount))
+        self._custom_amount = State(initialValue: String(state.settings.default_zap_amount))
         self._custom_amount_sats = State(initialValue: nil)
         self._zapping = State(initialValue: false)
         self.lnurl = lnurl
@@ -169,15 +168,34 @@ struct CustomizeZapView: View {
         .cornerRadius(15)
     }
     
-    var AmountPicker: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(alignment: .center, spacing: 15) {
-                ForEach(zap_amounts) { entry in
-                    ZapAmountButton(zapAmountItem: entry, action: {custom_amount_sats = entry.amount; custom_amount = String(entry.amount)})
-                }
-            }
-            .padding(10)
+    func amount_parts(_ n: Int) -> [ZapAmountItem] {
+        var i: Int = -1
+        let start = n * 3
+        let end = start + 3
+        
+        return zap_amounts.filter { _ in
+            i += 1
+            return i >= start && i < end
         }
+    }
+    
+    func AmountsPart(n: Int) -> some View {
+        HStack(alignment: .center, spacing: 15) {
+            ForEach(amount_parts(n)) { entry in
+                ZapAmountButton(zapAmountItem: entry, action: {custom_amount_sats = entry.amount; custom_amount = String(entry.amount)})
+            }
+        }
+    }
+    
+    var AmountPicker: some View {
+        VStack {
+            AmountsPart(n: 0)
+            
+            AmountsPart(n: 1)
+            
+            AmountsPart(n: 2)
+        }
+        .padding(10)
     }
     
     func ZapAmountButton(zapAmountItem: ZapAmountItem, action: @escaping () -> ()) -> some View {
@@ -185,6 +203,7 @@ struct CustomizeZapView: View {
             let fmt = format_msats_abbrev(Int64(zapAmountItem.amount) * 1000)
             Text("\(zapAmountItem.icon)\n\(fmt)")
         }
+        .contentShape(Rectangle())
         .font(.headline)
         .frame(width: 70, height: 70)
         .foregroundColor(fontColor())
@@ -244,14 +263,14 @@ struct CustomizeZapView: View {
             if zapping {
                 Text("Zapping...", comment: "Text to indicate that the app is in the process of sending a zap.")
             } else {
-                Button(NSLocalizedString("Zap ⚡️", comment: "Button to send a zap.")) {
+                Button(NSLocalizedString("Zap", comment: "Button to send a zap.")) {
                     let amount = custom_amount_sats
                     send_zap(damus_state: state, event: event, lnurl: lnurl, is_custom: true, comment: comment, amount_sats: amount, zap_type: zap_type)
                     self.zapping = true
                 }
                 .disabled(custom_amount_sats == 0 || custom_amount.isEmpty)
                 .font(.system(size: 28, weight: .bold))
-                .frame(width: 120, height: 50)
+                .frame(width: 130, height: 50)
                 .foregroundColor(.white)
                 .background(LINEAR_GRADIENT)
                 .opacity(custom_amount_sats == 0 || custom_amount.isEmpty ? 0.5 : 1.0)
