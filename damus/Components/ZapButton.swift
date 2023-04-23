@@ -86,7 +86,7 @@ struct ZapButton: View {
                     return
                 }
                 
-                send_zap(damus_state: damus_state, event: event, lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: ZapType.pub)
+                send_zap(damus_state: damus_state, event: event, lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: damus_state.settings.default_zap_type)
                 self.zapping = true
             })
             .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))

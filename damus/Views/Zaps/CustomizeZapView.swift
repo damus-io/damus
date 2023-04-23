@@ -73,7 +73,7 @@ struct CustomizeZapView: View {
         self._error = State(initialValue: nil)
         self._invoice = State(initialValue: "")
         self._showing_wallet_selector = State(initialValue: false)
-        self._zap_type = State(initialValue: .pub)
+        self._zap_type = State(initialValue: state.settings.default_zap_type)
         self._custom_amount = State(initialValue: String(state.settings.default_zap_amount))
         self._custom_amount_sats = State(initialValue: nil)
         self._zapping = State(initialValue: false)
@@ -294,13 +294,17 @@ struct CustomizeZapView: View {
         }
         .sheet(isPresented: $show_zap_types) {
             if #available(iOS 16.0, *) {
-                ZapTypePicker(zap_type: $zap_type, profiles: state.profiles, pubkey: event.pubkey)
+                ZapPicker
                     .presentationDetents([.medium])
                     .presentationDragIndicator(.visible)
             } else {
-                ZapTypePicker(zap_type: $zap_type, profiles: state.profiles, pubkey: event.pubkey)
+                ZapPicker
             }
         }
+    }
+    
+    var ZapPicker: some View {
+        ZapTypePicker(zap_type: $zap_type, settings: state.settings, profiles: state.profiles, pubkey: event.pubkey)
     }
     
     var MainContent: some View {

@@ -99,6 +99,9 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "mention_notification", default_value: true)
     var mention_notification: Bool
+    
+    @StringSetting(key: "zap_type", default_value: ZapType.pub)
+    var default_zap_type: ZapType
 
     @Setting(key: "repost_notification", default_value: true)
     var repost_notification: Bool
