@@ -32,7 +32,7 @@ func get_zap_amount_items(_ default_zap_amt: Int) -> [ZapAmountItem] {
     let def_item = get_default_zap_amount_item(default_zap_amt)
     var entries = [
         ZapAmountItem(amount: 69, icon: "😘"),
-        ZapAmountItem(amount: 500, icon: "🙂"),
+        ZapAmountItem(amount: 420, icon: "🌿"),
         ZapAmountItem(amount: 5000, icon: "💜"),
         ZapAmountItem(amount: 10_000, icon: "😍"),
         ZapAmountItem(amount: 20_000, icon: "🤩"),
