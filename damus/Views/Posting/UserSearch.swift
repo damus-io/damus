@@ -19,7 +19,7 @@ struct SearchedUser: Identifiable {
 
 struct UserSearch: View {
     let damus_state: DamusState
-    let search: (String,Int,Int,Int)
+    let search: (String,Int)
 
     @Binding var post: NSMutableAttributedString
     
@@ -36,23 +36,16 @@ struct UserSearch: View {
             return
         }
         
-        let components = post.string.components(separatedBy: .whitespacesAndNewlines)
-        let (tagLength,tagIndex,tagWordIndex) = (search.1,search.2,search.3)
-        
         let mutableString = NSMutableAttributedString()
         mutableString.append(post)
         
         // replace tag-search word with the full-length tag selected
+        let tagIndex = search.1
         mutableString.deleteCharacters(in: NSRange(location: tagIndex, length: tagLength))
         let tagAttributedString = createUserTag(for: user, with: pk)
         mutableString.insert(tagAttributedString, at: tagIndex)
         
-        // if no tag at end of post, insert extra space at end
-        if mutableString.string.last != " ", tagWordIndex != components.count - 1 {
-            let endSpace = plainAttributedString(string: " ")
-            mutableString.insert(endSpace, at: mutableString.length)
-        }
-        
+        justInsertedTag = true
         post = mutableString
     }
 
@@ -60,6 +53,7 @@ struct UserSearch: View {
         let name = Profile.displayName(profile: user.profile, pubkey: pk).username
         let filteredName = String(name.map{String($0) == " " ? searchCompatibleSpaceChar : $0 })
         let tag = "@\(filteredName)"
+        lastTagSelected = tag
         if !searchedNames.contains(tag) {
             searchedNames.append(tag)
         }
@@ -104,7 +98,7 @@ struct UserSearch: View {
 }
 
 struct UserSearch_Previews: PreviewProvider {
-    static let search: (String,Int,Int,Int) = ("jb55",0,0,0)
+    static let search: (String,Int) = ("jb55",0)
     @State static var post: NSMutableAttributedString = NSMutableAttributedString(string: "some @jb55")
     
     static var previews: some View {

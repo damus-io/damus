@@ -27,8 +27,26 @@ struct TextViewWrapper: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UITextView, context: Context) {
+        var selectedRange = NSRange()
+        if justLoadedDraft {
+            selectedRange = NSRange(location:
+                                        uiView.selectedRange.location + attributedText.string.count,
+                                    length: uiView.selectedRange.length)
+            justLoadedDraft = false
+        } else {
+            if justInsertedTag {
+                selectedRange = NSRange(location:
+                                            uiView.selectedRange.location + lastTagSelected.count - tagLength + 1,
+                                        length: uiView.selectedRange.length)
+            } else {
+                selectedRange = uiView.selectedRange
+            }
+            justInsertedTag = false
+        }
+        uiView.isScrollEnabled = false
         uiView.attributedText = attributedText
-        TextViewWrapper.setTextProperties(uiView)
+        uiView.selectedRange = selectedRange
+        uiView.isScrollEnabled = true
     }
 
     func makeCoordinator() -> Coordinator {

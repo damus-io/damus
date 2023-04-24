@@ -14,6 +14,9 @@ enum NostrPostResult {
 }
 
 let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Text box prompt to ask user to type their post.")
+var justInsertedTag = false, justLoadedDraft = false
+var lastTagSelected = ""
+var tagLength = 0
 var searchedNames = [String]()
 var searchCompatibleSpaceChar = Character(.init(0x2004)!) /// this character looks identical in the UI to the 'regular' space-bar space
 
@@ -171,6 +174,7 @@ struct PostView: View {
             return
         }
         
+        justLoadedDraft = true
         self.uploadedMedias = draft.media
         self.post = draft.content
     }
@@ -399,22 +403,20 @@ struct PostView: View {
     }
 }
 
-func get_searching_string(_ post: String) -> (String,Int,Int,Int)? {
+func get_searching_string(_ post: String) -> (String,Int)? {
     var characterSet = CharacterSet()
     characterSet.insert(charactersIn: "\n")
     characterSet.insert(charactersIn: " ")
     let components = post.components(separatedBy: characterSet)
     
     var searching = ""
-    var tagLength = 0, tagIndex = 0 // index of the start of a tag in a post
-    var tagWordIndex = 0            // index of the word containing a tag
+    var tagIndex = 0 // index of the start of a tag in a post
     
 tagLoop:
-    for (index,word) in components.enumerated() {
+    for word in components {
         if word.first == "@" && !searchedNames.contains(word) {
             searching = word
             tagLength = word.count
-            tagWordIndex = index
             break tagLoop
         }
         tagIndex += 1 + word.count
@@ -430,7 +432,7 @@ tagLoop:
     }
     
     searching = String(searching.dropFirst().map{$0 == searchCompatibleSpaceChar ? Character(.init(0x0020)!) : $0 }) /// 0x0020 is the 'regular' space-bar whitespace character
-    return (searching,tagLength,tagIndex,tagWordIndex)
+    return (searching,tagIndex)
 }
 
 struct PostView_Previews: PreviewProvider {
