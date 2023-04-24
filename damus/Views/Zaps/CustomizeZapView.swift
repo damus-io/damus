@@ -116,15 +116,15 @@ struct CustomizeZapView: View {
         Button(action: action) {
             let fmt = format_msats_abbrev(Int64(zapAmountItem.amount) * 1000)
             Text("\(zapAmountItem.icon)\n\(fmt)")
+                .contentShape(Rectangle())
+                .font(.headline)
+                .frame(width: 70, height: 70)
+                .foregroundColor(fontColor())
+                .background(custom_amount_sats == zapAmountItem.amount ? fillColor() : DamusColors.adaptableGrey)
+                .cornerRadius(15)
+                .overlay(RoundedRectangle(cornerRadius: 15)
+                    .stroke(DamusColors.purple.opacity(custom_amount_sats == zapAmountItem.amount ? 1.0 : 0.0), lineWidth: 2))
         }
-        .contentShape(Rectangle())
-        .font(.headline)
-        .frame(width: 70, height: 70)
-        .foregroundColor(fontColor())
-        .background(custom_amount_sats == zapAmountItem.amount ? fillColor() : DamusColors.adaptableGrey)
-        .cornerRadius(15)
-        .overlay(RoundedRectangle(cornerRadius: 15)
-            .stroke(DamusColors.purple.opacity(custom_amount_sats == zapAmountItem.amount ? 1.0 : 0.0), lineWidth: 2))
     }
     
     var CustomZapTextField: some View {
