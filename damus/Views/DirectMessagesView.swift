@@ -30,8 +30,8 @@ struct DirectMessagesView: View {
                     EmptyTimelineView()
                 } else {
                     let dms = requests ? model.message_requests : model.friend_dms
-                    ForEach(dms, id: \.pubkey) { tup in
-                        MaybeEvent(tup)
+                    ForEach(dms, id: \.pubkey) { dm in
+                        MaybeEvent(dm)
                             .padding(.top, 10)
                     }
                 }
