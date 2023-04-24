@@ -138,7 +138,7 @@ struct CarouselDotsView: View {
                         }
                 }
             }
-            .padding(.top)
+            .padding(.top, CGFloat(8))
         }
     }
 }
