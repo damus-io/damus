@@ -62,13 +62,8 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
     
     do {
         let (data, _) = try await URLSession.shared.data(for: request, delegate: progress)
-        
-        guard let responseString = String(data: data, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue)) else {
-            print("Upload failed getting response string")
-            return .failed(nil)
-        }
-        
-        guard let url = mediaUploader.getMediaURL(from: responseString, mediaIsImage: mediaToUpload.is_image) else {
+
+        guard let url = mediaUploader.getMediaURL(from: data) else {
             print("Upload failed getting media url")
             return .failed(nil)
         }
@@ -144,28 +139,27 @@ enum MediaUploader: String, CaseIterable, Identifiable, StringCodable {
     var postAPI: String {
         switch self {
         case .nostrBuild:
-            return "https://nostr.build/upload.php"
+            return "https://nostr.build/api/upload/ios.php"
         case .nostrImg:
             return "https://nostrimg.com/api/upload"
         }
     }
 
-    func getMediaURL(from responseString: String, mediaIsImage: Bool) -> String? {
+    func getMediaURL(from data: Data) -> String? {
         switch self {
         case .nostrBuild:
-            guard let startIndex = responseString.range(of: "nostr.build_")?.lowerBound else {
+            do {
+                return try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? String
+            } catch {
+                print("Failed JSONSerialization")
                 return nil
             }
-            
-            let stringContainingName = responseString[startIndex..<responseString.endIndex]
-            guard let endIndex = stringContainingName.range(of: "<")?.lowerBound else {
-                return nil
-            }
-            let nostrBuildImageName = responseString[startIndex..<endIndex]
-            let nostrBuildURL = mediaIsImage ? "https://nostr.build/i/\(nostrBuildImageName)" : "https://nostr.build/av/\(nostrBuildImageName)"
-            return nostrBuildURL
-                
         case .nostrImg:
+            guard let responseString = String(data: data, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue)) else {
+                print("Upload failed getting response string")
+                return nil
+            }
+
             guard let startIndex = responseString.range(of: "https://i.nostrimg.com/")?.lowerBound else {
                     return nil
                 }
