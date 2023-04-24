@@ -14,6 +14,7 @@ struct AppearanceSettingsView: View {
 
     var body: some View {
         Form {
+            // MARK: - Text Truncation
             Section(header: Text(NSLocalizedString("Text Truncation", comment: "Section header for damus text truncation user configuration"))) {
                 Toggle(NSLocalizedString("Truncate timeline text", comment: "Setting to truncate text in timeline"), isOn: $settings.truncate_timeline_text)
                     .toggleStyle(.switch)
@@ -21,11 +22,13 @@ struct AppearanceSettingsView: View {
                     .toggleStyle(.switch)
             }
             
+            // MARK: - Accessibility
             Section(header: Text(NSLocalizedString("Accessibility", comment: "Section header for accessibility settings"))) {
                 Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)
                     .toggleStyle(.switch)
             }
             
+            // MARK: - Images
             Section(NSLocalizedString("Images", comment: "Section title for images configuration.")) {
                 Toggle(NSLocalizedString("Animations", comment: "Toggle to enable or disable image animation"), isOn: $settings.enable_animation)
                     .toggleStyle(.switch)

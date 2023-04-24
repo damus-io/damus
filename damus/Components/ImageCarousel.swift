@@ -52,6 +52,7 @@ enum ImageShape {
     }
 }
 
+// MARK: - Image Carousel
 struct ImageCarousel: View {
     var urls: [URL]
     
@@ -62,9 +63,12 @@ struct ImageCarousel: View {
     @State private var open_sheet: Bool = false
     @State private var current_url: URL? = nil
     @State private var image_fill: ImageFill? = nil
-    
-    let fillHeight: CGFloat = 350
-    let maxHeight: CGFloat = UIScreen.main.bounds.height * 1.2
+
+    @State private var fillHeight: CGFloat = 350
+    @State private var maxHeight: CGFloat = UIScreen.main.bounds.height * 0.85 // 1.2
+    @State private var firstImageHeight: CGFloat = UIScreen.main.bounds.height * 0.85
+    @State private var currentImageHeight: CGFloat?
+    @State private var selectedIndex = 0
     
     init(state: DamusState, evid: String, urls: [URL]) {
         _open_sheet = State(initialValue: false)
@@ -91,7 +95,7 @@ struct ImageCarousel: View {
                     .resizable()
                     .frame(width: geo_size.width * UIScreen.main.scale, height: self.height * UIScreen.main.scale)
             } else {
-                EmptyView()
+                Color.clear
             }
         }
         .onAppear {
@@ -105,9 +109,10 @@ struct ImageCarousel: View {
         }
     }
     
-    var body: some View {
-        TabView {
-            ForEach(urls, id: \.absoluteString) { url in
+    var Images: some View {
+        TabView(selection: $selectedIndex) {
+            ForEach(urls.indices, id: \.self) { index in
+                let url = urls[index]
                 GeometryReader { geo in
                     KFAnimatedImage(url)
                         .callbackQueue(.dispatch(.global(qos:.background)))
@@ -128,26 +133,71 @@ struct ImageCarousel: View {
                                 state.events.lookup_img_metadata(url: url)?.state = .not_needed
                             }
                             image_fill = fill
+                            if index == 0 {
+                                firstImageHeight = fill.height
+                                //maxHeight = firstImageHeight ?? maxHeight
+                            } else {
+                                //maxHeight = firstImageHeight ?? fill.height
+                            }
                         }
                         .background {
                             Placeholder(url: url, geo_size: geo.size)
                         }
                         .aspectRatio(contentMode: filling ? .fill : .fit)
+                        //.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                        .position(x: geo.size.width / 2, y: geo.size.height / 2)
                         .tabItem {
                             Text(url.absoluteString)
                         }
                         .id(url.absoluteString)
+                        .padding(0)
                 }
             }
         }
+        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
         .fullScreenCover(isPresented: $open_sheet) {
             ImageView(urls: urls, disable_animation: state.settings.disable_animation)
         }
-        .frame(height: self.height)
+        .frame(height: firstImageHeight)
         .onTapGesture {
             open_sheet = true
         }
+        .onChange(of: selectedIndex) { value in
+                        selectedIndex = value
+                    }
         .tabViewStyle(PageTabViewStyle())
+    }
+    
+    var body: some View {
+        VStack {
+            Images
+            
+            // This is our custom carousel image indicator
+            CarouselDotsView(urls: urls, selectedIndex: $selectedIndex)
+        }
+    }
+}
+
+// MARK: - Custom Carousel
+struct CarouselDotsView: View {
+    let urls: [URL]
+    @Binding var selectedIndex: Int
+
+    var body: some View {
+        if urls.count > 1 {
+            HStack {
+                ForEach(urls.indices, id: \.self) { index in
+                    Circle()
+                        .fill(index == selectedIndex ? Color("DamusPurple") : Color("DamusLightGrey"))
+                        .frame(width: 10, height: 10)
+                        .onTapGesture {
+                            selectedIndex = index
+                        }
+                }
+            }
+            .padding(.top, CGFloat(8))
+            .id(UUID())
+        }
     }
 }
 
@@ -199,6 +249,7 @@ public struct ImageFill {
     }
 }
 
+// MARK: - Preview Provider
 struct ImageCarousel_Previews: PreviewProvider {
     static var previews: some View {
         ImageCarousel(state: test_damus_state(), evid: "evid", urls: [URL(string: "https://jb55.com/red-me.jpg")!,URL(string: "https://jb55.com/red-me.jpg")!])
