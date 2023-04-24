@@ -120,3 +120,14 @@ First contributors:
 ### git log bot
 
 npub1fjtdwclt9lspjy8huu3qklr7eklp5uq90u6yh8mec290pqxraccqlufnas
+
+### LIFPay
+
+LifPay：Bitcoin Lightning Wallet
+
+Make Lightning Wallet out of the box, send and receive Bitcoin instantly with minimal fees via the Lightning Network.
+
+- **Website**: https://www.lifpay.me
+- **Twitter**: https://twitter.com/LifPay/
+- **Tags**: lightning, bitcoin, wallet
+
