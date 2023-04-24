@@ -935,11 +935,10 @@ func handle_incoming_dms(prev_events: NewEventsBits, dms: DirectMessagesModel, o
             new_events = new
         }
     }
-    
-    if inserted {
-        dms.dms = dms.dms.filter({ $0.events.count > 0 }).sorted { a, b in
-            return a.events.last!.created_at > b.events.last!.created_at
-        }
+
+    // Do this everytime when new message is received or sent (being inserted returning always false except restart)
+    dms.dms = dms.dms.filter({ $0.events.count > 0 }).sorted { a, b in
+        return a.events.last!.created_at > b.events.last!.created_at
     }
     
     return new_events
