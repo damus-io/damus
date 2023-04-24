@@ -31,7 +31,6 @@ struct ShareSheet: UIViewControllerRepresentable {
     }
 }
 
-
 enum ImageShape {
     case square
     case landscape
@@ -39,7 +38,7 @@ enum ImageShape {
     case unknown
 }
 
-
+// MARK: - Image Carousel
 struct ImageCarousel: View {
     var urls: [URL]
     
@@ -53,6 +52,7 @@ struct ImageCarousel: View {
     @State private var image_fill: ImageFill? = nil
     @State private var fillHeight: CGFloat = 350
     @State private var maxHeight: CGFloat = UIScreen.main.bounds.height * 0.85
+    @State private var selectedIndex = 0
     
     init(previews: PreviewCache, evid: String, urls: [URL], disable_animation: Bool) {
         _open_sheet = State(initialValue: false)
@@ -73,41 +73,73 @@ struct ImageCarousel: View {
     }
     
     var body: some View {
-        TabView {
-            ForEach(urls, id: \.absoluteString) { url in
-                Rectangle()
-                    .foregroundColor(Color.clear)
-                    .overlay {
-                        GeometryReader { geo in
-                            KFAnimatedImage(url)
-                                .callbackQueue(.dispatch(.global(qos:.background)))
-                                .backgroundDecode(true)
-                                .imageContext(.note, disable_animation: disable_animation)
-                                .cancelOnDisappear(true)
-                                .configure { view in
-                                    view.framePreloadCount = 3
-                                }
-                                .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
-                                    previews.cache_image_meta(evid: evid, image_fill: fill)
-                                    image_fill = fill
-                                }
-                                .aspectRatio(contentMode: filling ? .fill : .fit)
-                                .tabItem {
-                                    Text(url.absoluteString)
-                                }
-                                .id(url.absoluteString)
+        VStack {
+            TabView(selection: $selectedIndex) {
+                ForEach(urls.indices, id: \.self) { index in
+                    Rectangle()
+                        .foregroundColor(Color.clear)
+                        .overlay {
+                            GeometryReader { geo in
+                                KFAnimatedImage(urls[index])
+                                    .callbackQueue(.dispatch(.global(qos:.background)))
+                                    .backgroundDecode(true)
+                                    .imageContext(.note, disable_animation: disable_animation)
+                                    .cancelOnDisappear(true)
+                                    .configure { view in
+                                        view.framePreloadCount = 3
+                                    }
+                                    .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
+                                        previews.cache_image_meta(evid: evid, image_fill: fill)
+                                        image_fill = fill
+                                    }
+                                    .aspectRatio(contentMode: filling ? .fill : .fit)
+                                    .tabItem {
+                                        Text(urls[index].absoluteString)
+                                    }
+                                    .id(urls[index].absoluteString)
+                            }
                         }
-                    }
+                        .tag(index)
+                }
             }
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+            .fullScreenCover(isPresented: $open_sheet) {
+                ImageView(urls: urls, disable_animation: disable_animation)
+            }
+            .frame(height: height)
+            .onTapGesture {
+                open_sheet = true
+            }
+            .onChange(of: selectedIndex) { value in
+                            selectedIndex = value
+                        }
+            .tabViewStyle(PageTabViewStyle())
+            
+            // This is our custom carousel image indicator
+            CarouselDotsView(urls: urls, selectedIndex: $selectedIndex)
         }
-        .fullScreenCover(isPresented: $open_sheet) {
-            ImageView(urls: urls, disable_animation: disable_animation)
+    }
+}
+
+// MARK: - Custom Carousel
+struct CarouselDotsView: View {
+    let urls: [URL]
+    @Binding var selectedIndex: Int
+
+    var body: some View {
+        if urls.count > 1 {
+            HStack {
+                ForEach(urls.indices, id: \.self) { index in
+                    Circle()
+                        .fill(index == selectedIndex ? Color("DamusPurple") : Color("DamusLightGrey"))
+                        .frame(width: 10, height: 10)
+                        .onTapGesture {
+                            selectedIndex = index
+                        }
+                }
+            }
+            .padding(.top)
         }
-        .frame(height: height)
-        .onTapGesture {
-            open_sheet = true
-        }
-        .tabViewStyle(PageTabViewStyle())
     }
 }
 
