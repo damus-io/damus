@@ -138,6 +138,17 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "disable_animation", default_value: UIAccessibility.isReduceMotionEnabled)
     var disable_animation: Bool
+
+    // Helper for inverse of disable_animation.
+    // disable_animation was introduced as a setting first, but it's more natural for the settings UI to show the inverse.
+    var enable_animation: Bool {
+        get {
+            !disable_animation
+        }
+        set {
+            disable_animation = !newValue
+        }
+    }
     
     @StringSetting(key: "friend_filter", default_value: .all)
     var friend_filter: FriendFilter

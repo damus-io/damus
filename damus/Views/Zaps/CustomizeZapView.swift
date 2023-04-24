@@ -115,7 +115,7 @@ struct CustomizeZapView: View {
     func ZapAmountButton(zapAmountItem: ZapAmountItem, action: @escaping () -> ()) -> some View {
         Button(action: action) {
             let fmt = format_msats_abbrev(Int64(zapAmountItem.amount) * 1000)
-            Text("\(zapAmountItem.icon)\n\(fmt)")
+            Text(verbatim: "\(zapAmountItem.icon)\n\(fmt)")
                 .contentShape(Rectangle())
                 .font(.headline)
                 .frame(width: 70, height: 70)
@@ -147,7 +147,7 @@ struct CustomizeZapView: View {
                    self.custom_amount_sats = nil
                }
             }
-            Text("sats")
+            Text("sats", comment: "Shortened form of satoshi, display unit of measure where 1,000,000,000 satoshis is 1 Bitcoin. Used to indicate how many sats will be zapped to a note, configured through the custom zap view.")
                 .font(.system(size: 18, weight: .heavy))
         }
     }
@@ -253,16 +253,16 @@ struct CustomizeZapView: View {
             switch zap_type {
             case .pub:
                 Image(systemName: "person.2")
-                Text("Public")
+                Text("Public", comment: "Button text to indicate that the zap type is a public zap.")
             case .anon:
                 Image(systemName: "person.fill.questionmark")
-                Text("Anonymous")
+                Text("Anonymous", comment: "Button text to indicate that the zap type is a anonymous zap.")
             case .priv:
                 Image(systemName: "lock")
-                Text("Private")
+                Text("Private", comment: "Button text to indicate that the zap type is a private zap.")
             case .non_zap:
                 Image(systemName: "bolt")
-                Text("None")
+                Text("None", comment: "Button text to indicate that the zap type is a private zap.")
             }
         }
         .font(.headline)
