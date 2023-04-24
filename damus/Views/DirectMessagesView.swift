@@ -18,6 +18,17 @@ struct DirectMessagesView: View {
     @State var dm_type: DMType = .friend
     @ObservedObject var model: DirectMessagesModel
     @ObservedObject var settings: UserSettingsStore
+
+    func getSortedDms(requests: Bool) -> [DirectMessageModel] {
+        let dms = requests ? model.message_requests : model.friend_dms
+        return dms.lazy.sorted { a, b in
+            guard let created_date_last_ev_dm_a = a.events.last?.created_at,
+                  let created_date_last_ev_dm_b = b.events.last?.created_at else {
+                return false
+            }
+            return created_date_last_ev_dm_a > created_date_last_ev_dm_b
+        }
+    }
     
     func MainContent(requests: Bool) -> some View {
         ScrollView {
@@ -30,8 +41,8 @@ struct DirectMessagesView: View {
                     EmptyTimelineView()
                 } else {
                     let dms = requests ? model.message_requests : model.friend_dms
-                    ForEach(dms, id: \.pubkey) { dm in
-                        MaybeEvent(dm)
+                    ForEach(getSortedDms(requests: requests), id: \.pubkey) { tup in
+                        MaybeEvent(tup)
                             .padding(.top, 10)
                     }
                 }
