@@ -141,7 +141,7 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Actions" xml:space="preserve">
         <source>Actions</source>
         <target>Actions</target>
-        <note>Title for confirmation dialog to either share, report, or block a profile.</note>
+        <note>Title for confirmation dialog to either share, report, or mute a profile.</note>
       </trans-unit>
       <trans-unit id="Add" xml:space="preserve">
         <source>Add</source>
@@ -195,11 +195,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Are you lost?</source>
         <target>Are you lost?</target>
         <note>Text asking the user if they are lost in the app.</note>
-      </trans-unit>
-      <trans-unit id="Are you sure you want to repost this?" xml:space="preserve">
-        <source>Are you sure you want to repost this?</source>
-        <target>Are you sure you want to repost this?</target>
-        <note>Alert message to ask if user wants to repost a post.</note>
       </trans-unit>
       <trans-unit id="Are you sure you want to upload this image?" xml:space="preserve">
         <source>Are you sure you want to upload this image?</source>
@@ -255,7 +250,6 @@ Sentence composed of 2 variables to describe how many people are following a use
    Button to cancel a repost.
    Button to cancel out of alert that creates a new mutelist.
    Button to cancel out of posting a note.
-   Button to cancel out of reposting a post.
    Button to cancel out of view adding user inputted relay.
    Button to cancel the upload.
    Cancel deleting the user.
@@ -361,6 +355,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Copy Text</target>
         <note>Context menu option for copying the text from an note.</note>
       </trans-unit>
+      <trans-unit id="Copy URL" xml:space="preserve">
+        <source>Copy URL</source>
+        <target>Copy URL</target>
+        <note>Label for button in context menu to copy URL of the selected uploaded media asset.</note>
+      </trans-unit>
       <trans-unit id="Copy User Pubkey" xml:space="preserve">
         <source>Copy User Pubkey</source>
         <target>Copy User Pubkey</target>
@@ -443,7 +442,7 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Delete</source>
         <target>Delete</target>
         <note>Button for deleting the users account.
-   Button to remove a user from their blocklist.</note>
+   Button to remove a user from their mutelist.</note>
       </trans-unit>
       <trans-unit id="Delete Account" xml:space="preserve">
         <source>Delete Account</source>
@@ -504,6 +503,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Edit</source>
         <target>Edit</target>
         <note>Button to edit user's profile.</note>
+      </trans-unit>
+      <trans-unit id="Enable OnlyZaps mode" xml:space="preserve">
+        <source>Enable OnlyZaps mode</source>
+        <target>Enable OnlyZaps mode</target>
+        <note>Setting toggle to hide reactions.</note>
       </trans-unit>
       <trans-unit id="Encrypted" xml:space="preserve">
         <source>Encrypted</source>
@@ -583,13 +587,18 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Hide" xml:space="preserve">
         <source>Hide</source>
         <target>Hide</target>
-        <note>Button to hide a post from a user who has been blocked.</note>
+        <note>Button to hide a post from a user who has been muted.</note>
       </trans-unit>
       <trans-unit id="Hide API Key" xml:space="preserve">
         <source>Hide API Key</source>
         <target>Hide API Key</target>
         <note>Button to hide the DeepL translation API key.
    Button to hide the LibreTranslate server API key.</note>
+      </trans-unit>
+      <trans-unit id="Hide all 🤙's" xml:space="preserve">
+        <source>Hide all 🤙's</source>
+        <target>Hide all 🤙's</target>
+        <note>Section footer describing onlyzaps mode</note>
       </trans-unit>
       <trans-unit id="Home" xml:space="preserve">
         <source>Home</source>
@@ -828,6 +837,16 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Only you can see this message and who sent it.</target>
         <note>Help text on green lock icon that explains that only the current user can see the message of a zap event and who sent the zap.</note>
       </trans-unit>
+      <trans-unit id="OnlyZaps" xml:space="preserve">
+        <source>OnlyZaps</source>
+        <target>OnlyZaps</target>
+        <note>Section header for enabling OnlyZaps mode (hide reactions)</note>
+      </trans-unit>
+      <trans-unit id="OnlyZaps Enabled" xml:space="preserve">
+        <source>OnlyZaps Enabled</source>
+        <target>OnlyZaps Enabled</target>
+        <note>Non-tappable text in context menu that shows up when the zap button on profile is long pressed to indicate that the user has enabled OnlyZaps, meaning that they would like to be only zapped and not accept reactions to their notes.</note>
+      </trans-unit>
       <trans-unit id="Paid Relay" xml:space="preserve">
         <source>Paid Relay</source>
         <target>Paid Relay</target>
@@ -864,10 +883,10 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Post</target>
         <note>Button to post a note.</note>
       </trans-unit>
-      <trans-unit id="Post from a user you've blocked" xml:space="preserve">
-        <source>Post from a user you've blocked</source>
-        <target>Post from a user you've blocked</target>
-        <note>Text to indicate that what is being shown is a post from a user who has been blocked.</note>
+      <trans-unit id="Post from a user you've muted" xml:space="preserve">
+        <source>Post from a user you've muted</source>
+        <target>Post from a user you've muted</target>
+        <note>Text to indicate that what is being shown is a post from a user who has been muted.</note>
       </trans-unit>
       <trans-unit id="Posts" xml:space="preserve">
         <source>Posts</source>
@@ -941,6 +960,11 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <source>QR Code</source>
         <target>QR Code</target>
         <note>Button to view profile's qr code.</note>
+      </trans-unit>
+      <trans-unit id="Quote" xml:space="preserve">
+        <source>Quote</source>
+        <target>Quote</target>
+        <note>Title of alert for confirming to make a quoted post.</note>
       </trans-unit>
       <trans-unit id="Reactions" xml:space="preserve">
         <source>Reactions</source>
@@ -1030,8 +1054,7 @@ Picker option to indicate that a zap should be sent privately and not identify t
       <trans-unit id="Repost" xml:space="preserve">
         <source>Repost</source>
         <target>Repost</target>
-        <note>Button to confirm reposting a post.
-   Title of alert for confirming to repost a post.</note>
+        <note>Title of alert for confirming to repost a post.</note>
       </trans-unit>
       <trans-unit id="Reposted" xml:space="preserve">
         <source>Reposted</source>
@@ -1150,7 +1173,7 @@ Picker option to indicate that a zap should be sent privately and not identify t
       <trans-unit id="Show" xml:space="preserve">
         <source>Show</source>
         <target>Show</target>
-        <note>Button to show a post from a user who has been blocked.
+        <note>Button to show a post from a user who has been muted.
    Toggle to show or hide user's secret account login key.</note>
       </trans-unit>
       <trans-unit id="Show +" xml:space="preserve">

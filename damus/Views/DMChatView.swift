@@ -43,7 +43,7 @@ struct DMChatView: View {
         let profile_page = ProfileView(damus_state: damus_state, pubkey: pubkey)
         return NavigationLink(destination: profile_page) {
             HStack {
-                ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles)
+                ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
 
                 ProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_friend_confirmed: true)
             }

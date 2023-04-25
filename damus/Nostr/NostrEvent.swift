@@ -111,13 +111,21 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         return parse_mentions(content: content, tags: self.tags)
     }
 
-    lazy var inner_event: NostrEvent? = {
-        // don't try to deserialize an inner event if we know there won't be one
-        if self.known_kind == .boost {
-            return event_from_json(dat: self.content)
-        }
-        return nil
+    private lazy var inner_event: NostrEvent? = {
+        return event_from_json(dat: self.content)
     }()
+    
+    func get_inner_event(cache: EventCache) -> NostrEvent? {
+        guard self.known_kind == .boost else {
+            return nil
+        }
+        
+        if self.content == "", let ref = self.referenced_ids.first {
+            return cache.lookup(ref.ref_id)
+        }
+        
+        return self.inner_event
+    }
     
     private var _event_refs: [EventRef]? = nil
     func event_refs(_ privkey: String?) -> [EventRef] {
@@ -560,7 +568,7 @@ func make_first_contact_event(keypair: Keypair) -> NostrEvent? {
     return ev
 }
 
-func make_metadata_event(keypair: Keypair, metadata: NostrMetadata) -> NostrEvent? {
+func make_metadata_event(keypair: Keypair, metadata: Profile) -> NostrEvent? {
     guard let privkey = keypair.privkey else {
         return nil
     }
@@ -998,8 +1006,8 @@ func last_etag(tags: [[String]]) -> String? {
     return e
 }
 
-func inner_event_or_self(ev: NostrEvent) -> NostrEvent {
-    guard let inner_ev = ev.inner_event else {
+func inner_event_or_self(ev: NostrEvent, cache: EventCache) -> NostrEvent {
+    guard let inner_ev = ev.get_inner_event(cache: cache) else {
         return ev
     }
     

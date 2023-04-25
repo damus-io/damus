@@ -8,11 +8,12 @@ import SwiftUI
 import Kingfisher
 
 struct ProfileImageContainerView: View {
-    
     let url: URL?
     
     @State private var image: UIImage?
     @State private var showShareSheet = false
+    
+    let disable_animation: Bool
     
     private struct ImageHandler: ImageModifier {
         @Binding var handler: UIImage?
@@ -26,7 +27,7 @@ struct ProfileImageContainerView: View {
     var body: some View {
         
         KFAnimatedImage(url)
-            .imageContext(.pfp)
+            .imageContext(.pfp, disable_animation: disable_animation)
             .configure { view in
                 view.framePreloadCount = 3
             }
@@ -61,9 +62,9 @@ struct NavDismissBarView: View {
 }
 
 struct ProfilePicImageView: View {
-    
     let pubkey: String
     let profiles: Profiles
+    let disable_animation: Bool
     
     @Environment(\.presentationMode) var presentationMode
 
@@ -73,7 +74,7 @@ struct ProfilePicImageView: View {
                 .ignoresSafeArea()
             
             ZoomableScrollView {
-                ProfileImageContainerView(url: get_profile_url(picture: nil, pubkey: pubkey, profiles: profiles))
+                ProfileImageContainerView(url: get_profile_url(picture: nil, pubkey: pubkey, profiles: profiles), disable_animation: disable_animation)
                     .aspectRatio(contentMode: .fit)
                     .padding(.top, Theme.safeAreaInsets?.top)
                     .padding(.bottom, Theme.safeAreaInsets?.bottom)
@@ -94,6 +95,8 @@ struct ProfileZoomView_Previews: PreviewProvider {
     static var previews: some View {
         ProfilePicImageView(
             pubkey: pubkey,
-            profiles: make_preview_profiles(pubkey))
+            profiles: make_preview_profiles(pubkey),
+            disable_animation: false
+        )
     }
 }

@@ -63,6 +63,7 @@ struct EditMetadataView: View {
     @State var name: String
     @State var ln: String
     @State var website: String
+    let profile: Profile?
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
@@ -73,6 +74,7 @@ struct EditMetadataView: View {
     init (damus_state: DamusState) {
         self.damus_state = damus_state
         let data = damus_state.profiles.lookup(id: damus_state.pubkey)
+        self.profile = data
         
         _name = State(initialValue: data?.name ?? "")
         _display_name = State(initialValue: data?.display_name ?? "")
@@ -85,27 +87,31 @@ struct EditMetadataView: View {
     }
     
     func imageBorderColor() -> Color {
-            colorScheme == .light ? DamusColors.white : DamusColors.black
-        }
+        colorScheme == .light ? DamusColors.white : DamusColors.black
+    }
+    
+    func to_profile() -> Profile {
+        let profile = self.profile ?? Profile()
+        
+        profile.name = name
+        profile.display_name = display_name
+        profile.about = about
+        profile.website = website
+        profile.nip05 = nip05.isEmpty ? nil : nip05
+        profile.picture = picture.isEmpty ? nil : picture
+        profile.banner = banner.isEmpty ? nil : banner
+        profile.lud06 = ln.contains("@") ? nil : ln
+        profile.lud16 = ln.contains("@") ? ln : nil
+        
+        return profile
+    }
     
     func save() {
-        let metadata = NostrMetadata(
-            display_name: display_name,
-            name: name,
-            about: about,
-            website: website,
-            nip05: nip05.isEmpty ? nil : nip05,
-            picture: picture.isEmpty ? nil : picture,
-            banner: banner.isEmpty ? nil : banner,
-            lud06: ln.contains("@") ? nil : ln,
-            lud16: ln.contains("@") ? ln : nil
-        );
-        
-        let m_metadata_ev = make_metadata_event(keypair: damus_state.keypair, metadata: metadata)
-        
-        if let metadata_ev = m_metadata_ev {
-            damus_state.postbox.send(metadata_ev)
+        let profile = to_profile()
+        guard let metadata_ev = make_metadata_event(keypair: damus_state.keypair, metadata: profile) else {
+            return
         }
+        damus_state.postbox.send(metadata_ev)
     }
 
     func is_ln_valid(ln: String) -> Bool {
@@ -119,7 +125,7 @@ struct EditMetadataView: View {
     var TopSection: some View {
         ZStack(alignment: .top) {
             GeometryReader { geo in
-                BannerImageView(pubkey: damus_state.pubkey, profiles: damus_state.profiles)
+                BannerImageView(pubkey: damus_state.pubkey, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: BANNER_HEIGHT)
                     .clipped()

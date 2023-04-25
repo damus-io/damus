@@ -24,7 +24,7 @@ class SearchHomeModel: ObservableObject {
     }
     
     func get_base_filter() -> NostrFilter {
-        var filter = NostrFilter.filter_kinds([1, 42])
+        var filter = NostrFilter.filter_kinds([NostrKind.text.rawValue, NostrKind.chat.rawValue])
         filter.limit = self.limit
         filter.until = Int64(Date.now.timeIntervalSince1970)
         return filter
@@ -101,10 +101,10 @@ func find_profiles_to_fetch_pk(profiles: Profiles, event_pubkeys: [String]) -> [
     return Array(pubkeys)
 }
 
-func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad) -> [String] {
+func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: EventCache) -> [String] {
     switch load {
     case .from_events(let events):
-        return find_profiles_to_fetch_from_events(profiles: profiles, events: events)
+        return find_profiles_to_fetch_from_events(profiles: profiles, events: events, cache: cache)
     case .from_keys(let pks):
         return find_profiles_to_fetch_from_keys(profiles: profiles, pks: pks)
     }
@@ -124,12 +124,12 @@ func find_profiles_to_fetch_from_keys(profiles: Profiles, pks: [String]) -> [Str
     return Array(pubkeys)
 }
 
-func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent]) -> [String] {
+func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent], cache: EventCache) -> [String] {
     var pubkeys = Set<String>()
     
     for ev in events {
         // lookup profiles from boosted events
-        if ev.known_kind == .boost, let bev = ev.inner_event, profiles.lookup(id: bev.pubkey) == nil {
+        if ev.known_kind == .boost, let bev = ev.get_inner_event(cache: cache), profiles.lookup(id: bev.pubkey) == nil {
             pubkeys.insert(bev.pubkey)
         }
         
@@ -148,7 +148,7 @@ enum PubkeysToLoad {
 
 func load_profiles(profiles_subid: String, relay_id: String, load: PubkeysToLoad, damus_state: DamusState) {
     var filter = NostrFilter.filter_profiles
-    let authors = find_profiles_to_fetch(profiles: damus_state.profiles, load: load)
+    let authors = find_profiles_to_fetch(profiles: damus_state.profiles, load: load, cache: damus_state.events)
     filter.authors = authors
     
     guard !authors.isEmpty else {

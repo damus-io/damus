@@ -30,6 +30,7 @@ struct EventActionBar: View {
     @State var show_share_action: Bool = false
     
     @ObservedObject var bar: ActionBarModel
+    @ObservedObject var settings: UserSettingsStore
     
     @Environment(\.colorScheme) var colorScheme
     
@@ -38,10 +39,19 @@ struct EventActionBar: View {
         self.event = event
         self.test_lnurl = test_lnurl
         _bar = ObservedObject(wrappedValue: bar ?? make_actionbar_model(ev: event.id, damus: damus_state))
+        _settings = ObservedObject(wrappedValue: damus_state.settings)
     }
     
     var lnurl: String? {
         test_lnurl ?? damus_state.profiles.lookup(id: event.pubkey)?.lnurl
+    }
+    
+    var show_like: Bool {
+        if settings.onlyzaps_mode {
+            return false
+        }
+        
+        return true
     }
     
     var body: some View {
@@ -72,22 +82,25 @@ struct EventActionBar: View {
                     .font(.footnote.weight(.medium))
                     .foregroundColor(bar.boosted ? Color.green : Color.gray)
             }
-            Spacer()
-            
-            HStack(spacing: 4) {
-                LikeButton(liked: bar.liked) {
-                    if bar.liked {
-                        notify(.delete, bar.our_like)
-                    } else {
-                        send_like()
+
+            if show_like {
+                Spacer()
+
+                HStack(spacing: 4) {
+                    LikeButton(liked: bar.liked) {
+                        if bar.liked {
+                            notify(.delete, bar.our_like)
+                        } else {
+                            send_like()
+                        }
                     }
+
+                    Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
+                        .font(.footnote.weight(.medium))
+                        .nip05_colorized(gradient: bar.liked)
                 }
-                
-                Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
-                    .font(.footnote.weight(.medium))
-                    .nip05_colorized(gradient: bar.liked)
             }
-            
+
             if let lnurl = self.lnurl {
                 Spacer()
                 ZapButton(damus_state: damus_state, event: event, lnurl: lnurl, bar: bar)

@@ -246,7 +246,7 @@ struct PostView: View {
     }
     
     func handle_upload(media: MediaUpload) {
-        let uploader = get_media_uploader(damus_state.pubkey)
+        let uploader = damus_state.settings.default_media_uploader
         Task.init {
             let img = getImage(media: media)
             let res = await image_upload.start(media: media, uploader: uploader)
@@ -271,21 +271,24 @@ struct PostView: View {
         }
     }
     
-    var has_artifacts: Bool {
+    var multiply_factor: CGFloat {
         if case .quoting = action {
-            return true
+            return 0.4
+        } else if !uploadedMedias.isEmpty {
+            return 0.2
+        } else {
+            return 1.0
         }
-        return !uploadedMedias.isEmpty
     }
     
     func Editor(deviceSize: GeometryProxy) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
-                ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
+                ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                 
                 TextEntry
             }
-            .frame(height: has_artifacts ? deviceSize.size.height*0.4 : deviceSize.size.height)
+            .frame(height: deviceSize.size.height * multiply_factor)
             .id("post")
                 
             PVImageCarouselView(media: $uploadedMedias, deviceWidth: deviceSize.size.width)
@@ -336,7 +339,7 @@ struct PostView: View {
                 }
             }
             .sheet(isPresented: $attach_media) {
-                ImagePicker(sourceType: .photoLibrary, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
+                ImagePicker(uploader: damus_state.settings.default_media_uploader, sourceType: .photoLibrary, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
                     self.mediaToUpload = .image(img)
                 } onVideoPicked: { url in
                     self.mediaToUpload = .video(url)
@@ -353,7 +356,7 @@ struct PostView: View {
             }
             .sheet(isPresented: $attach_camera) {
                 // image_upload_confirm isn't handled here, I don't know we need to display it here too tbh
-                ImagePicker(sourceType: .camera, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
+                ImagePicker(uploader: damus_state.settings.default_media_uploader, sourceType: .camera, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
                     handle_upload(media: .image(img))
                 } onVideoPicked: { url in
                     handle_upload(media: .video(url))
@@ -442,7 +445,7 @@ struct PVImageCarouselView: View {
                                     Button(action: {
                                         UIPasteboard.general.string = uploadedURL.absoluteString
                                     }) {
-                                        Label("Copy URL", systemImage: "doc.on.doc")
+                                        Label(NSLocalizedString("Copy URL", comment: "Label for button in context menu to copy URL of the selected uploaded media asset."), systemImage: "doc.on.doc")
                                     }
                                 }
                             }

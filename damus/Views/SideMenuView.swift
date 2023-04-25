@@ -58,7 +58,7 @@ struct SideMenuView: View {
                         NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
                             
                             HStack {
-                                ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles)
+                                ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                                 
                                 VStack(alignment: .leading) {
                                     if let display_name = profile?.display_name {

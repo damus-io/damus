@@ -45,7 +45,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Ακόλουθος</string>
+			<string>Ακολουθεί</string>
 			<key>other</key>
 			<string>Ακολουθεί</string>
 		</dict>
@@ -141,9 +141,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Απάντηση προς %2$@, %3$@ &amp; %1$d άλλον</string>
+			<string>Απάντηση προς %2$@, %3$@ &amp; %1$d ακόμα</string>
 			<key>other</key>
-			<string>Απάντηση προς %2$@, %3$@ &amp; %1$d άλλους</string>
+			<string>Απάντηση προς %2$@, %3$@ &amp; %1$d ακόμα</string>
 		</dict>
 	</dict>
 	<key>reposted_tagged_in_3</key>

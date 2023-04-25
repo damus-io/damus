@@ -72,7 +72,7 @@ struct NoteContentView: View {
     }
     
     var invoicesView: some View {
-        InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: artifacts.invoices)
+        InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: artifacts.invoices, settings: damus_state.settings)
     }
 
     var translateView: some View {
@@ -123,10 +123,10 @@ struct NoteContentView: View {
             }
 
             if show_images && artifacts.images.count > 0 {
-                ImageCarousel(previews: damus_state.previews, evid: event.id, urls: artifacts.images)
+                ImageCarousel(previews: damus_state.previews, evid: event.id, urls: artifacts.images, disable_animation: damus_state.settings.disable_animation)
             } else if !show_images && artifacts.images.count > 0 {
                 ZStack {
-                    ImageCarousel(previews: damus_state.previews, evid: event.id, urls: artifacts.images)
+                    ImageCarousel(previews: damus_state.previews, evid: event.id, urls: artifacts.images, disable_animation: damus_state.settings.disable_animation)
                     Blur()
                         .disabled(true)
                 }
