@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Starscream
 
 struct TimestampedProfile {
     let profile: Profile
@@ -77,11 +76,9 @@ struct ContentView: View {
     @State var confirm_mute: Bool = false
     @State var user_muted_confirm: Bool = false
     @State var confirm_overwrite_mutelist: Bool = false
-    @State var current_boost: NostrEvent? = nil
     @State var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
-    @State var shouldShowBoostAlert = false
     
     // connect retry timer
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
@@ -349,19 +346,9 @@ struct ContentView: View {
             }
             
         }
-        .onReceive(handle_notify(.boost)) { notif in
-            guard let ev = notif.object as? NostrEvent else {
-                return
-            }
-
-            current_boost = ev
-            shouldShowBoostAlert = true
-        }
-        .onReceive(handle_notify(.reply)) { notif in
-            let ev = notif.object as! NostrEvent
-            self.active_sheet = .post(.replying_to(ev))
-        }
-        .onReceive(handle_notify(.like)) { like in
+        .onReceive(handle_notify(.compose)) { notif in
+            let action = notif.object as! PostAction
+            self.active_sheet = .post(action)
         }
         .onReceive(handle_notify(.deleted_account)) { notif in
             self.is_deleted_account = true
@@ -605,36 +592,6 @@ struct ContentView: View {
                 Text("Could not find user to mute...", comment: "Alert message to indicate that the muted user could not be found.")
             }
         })
-        .confirmationDialog("Repost", isPresented: $shouldShowBoostAlert) {
-            Button(NSLocalizedString("Repost", comment: "Title of alert for confirming to repost a post.")) {
-                guard let current_boost else {
-                    return
-                }
-                            
-                guard let privkey = self.damus_state?.keypair.privkey else {
-                    return
-                }
-                
-                guard let damus_state else {
-                    return
-                }
-                
-                let boost = make_boost_event(pubkey: damus_state.keypair.pubkey, privkey: privkey, boosted: current_boost)
-                damus_state.postbox.send(boost)
-            }
-            
-            Button(NSLocalizedString("Quote", comment: "Title of alert for confirming to make a quoted post.")) {
-                guard let current_boost else {
-                    return
-                }
-                self.active_sheet = .post(.quoting(current_boost))
-            }
-        }
-        .onChange(of: shouldShowBoostAlert) { v in
-            if v == false {
-                self.current_boost = nil
-            }
-        }
     }
     
     func switch_timeline(_ timeline: Timeline) {
@@ -726,31 +683,6 @@ func get_since_time(last_event: NostrEvent?) -> Int64? {
     }
     
     return nil
-}
-
-func ws_nostr_event(relay: String, ev: WebSocketEvent) -> NostrEvent? {
-    switch ev {
-    case .binary(let dat):
-        return NostrEvent(content: "binary data? \(dat.count) bytes", pubkey: relay)
-    case .cancelled:
-        return NostrEvent(content: "cancelled", pubkey: relay)
-    case .connected:
-        return NostrEvent(content: "connected", pubkey: relay)
-    case .disconnected:
-        return NostrEvent(content: "disconnected", pubkey: relay)
-    case .error(let err):
-        return NostrEvent(content: "error \(err.debugDescription)", pubkey: relay)
-    case .text(let txt):
-        return NostrEvent(content: "text \(txt)", pubkey: relay)
-    case .pong:
-        return NostrEvent(content: "pong", pubkey: relay)
-    case .ping:
-        return NostrEvent(content: "ping", pubkey: relay)
-    case .viabilityChanged(let b):
-        return NostrEvent(content: "viabilityChanged \(b)", pubkey: relay)
-    case .reconnectSuggested(let b):
-        return NostrEvent(content: "reconnectSuggested \(b)", pubkey: relay)
-    }
 }
 
 func is_notification(ev: NostrEvent, pubkey: String) -> Bool {

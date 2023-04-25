@@ -127,7 +127,7 @@ struct SaveKeysView: View {
                 
             case .error(let err):
                 self.loading = false
-                self.error = "\(err.debugDescription)"
+                self.error = String(describing: err)
             default:
                 break
             }

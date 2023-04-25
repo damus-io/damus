@@ -23,6 +23,18 @@ class ActionBarModel: ObservableObject {
         return ActionBarModel(likes: 0, boosts: 0, zaps: 0, zap_total: 0, replies: 0, our_like: nil, our_boost: nil, our_zap: nil, our_reply: nil)
     }
     
+    init() {
+        self.our_like = nil
+        self.our_boost = nil
+        self.our_reply = nil
+        self.our_zap = nil
+        self.likes = 0
+        self.boosts = 0
+        self.zaps = 0
+        self.zap_total = 0
+        self.replies = 0
+    }
+    
     init(likes: Int, boosts: Int, zaps: Int, zap_total: Int64, replies: Int, our_like: NostrEvent?, our_boost: NostrEvent?, our_zap: Zap?, our_reply: NostrEvent?) {
         self.likes = likes
         self.boosts = boosts

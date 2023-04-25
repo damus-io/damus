@@ -138,6 +138,17 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "disable_animation", default_value: UIAccessibility.isReduceMotionEnabled)
     var disable_animation: Bool
+
+    // Helper for inverse of disable_animation.
+    // disable_animation was introduced as a setting first, but it's more natural for the settings UI to show the inverse.
+    var enable_animation: Bool {
+        get {
+            !disable_animation
+        }
+        set {
+            disable_animation = !newValue
+        }
+    }
     
     @StringSetting(key: "friend_filter", default_value: .all)
     var friend_filter: FriendFilter
@@ -185,6 +196,20 @@ class UserSettingsStore: ObservableObject {
             }
         }
     }
+    
+    @Published var nokyctranslate_api_key: String {
+        didSet {
+            do {
+                if nokyctranslate_api_key == "" {
+                    try clearNoKYCTranslateApiKey()
+                } else {
+                    try saveNoKYCTranslateApiKey(nokyctranslate_api_key)
+                }
+            } catch {
+                // No-op.
+            }
+        }
+    }
 
     init() {
         do {
@@ -192,6 +217,13 @@ class UserSettingsStore: ObservableObject {
         } catch {
             deepl_api_key = ""
         }
+        
+        do {
+            nokyctranslate_api_key = try Vault.getPrivateKey(keychainConfiguration: DamusNoKYCTranslateKeychainConfiguration())
+        } catch {
+            nokyctranslate_api_key = ""
+        }
+        
     }
 
     private func saveLibreTranslateApiKey(_ apiKey: String) throws {
@@ -202,6 +234,14 @@ class UserSettingsStore: ObservableObject {
         try Vault.deletePrivateKey(keychainConfiguration: DamusLibreTranslateKeychainConfiguration())
     }
 
+    private func saveNoKYCTranslateApiKey(_ apiKey: String) throws {
+        try Vault.savePrivateKey(apiKey, keychainConfiguration: DamusNoKYCTranslateKeychainConfiguration())
+    }
+    
+    private func clearNoKYCTranslateApiKey() throws {
+        try Vault.deletePrivateKey(keychainConfiguration: DamusNoKYCTranslateKeychainConfiguration())
+    }
+    
     private func saveDeepLApiKey(_ apiKey: String) throws {
         try Vault.savePrivateKey(apiKey, keychainConfiguration: DamusDeepLKeychainConfiguration())
     }
@@ -218,6 +258,8 @@ class UserSettingsStore: ObservableObject {
             return URLComponents(string: libretranslate_url) != nil
         case .deepl:
             return deepl_api_key != ""
+        case .nokyctranslate:
+            return nokyctranslate_api_key != ""
         }
     }
 }
@@ -234,7 +276,12 @@ struct DamusDeepLKeychainConfiguration: KeychainConfiguration {
     var accountName = "deepl_apikey"
 }
 
+struct DamusNoKYCTranslateKeychainConfiguration: KeychainConfiguration {
+    var serviceName = "damus"
+    var accessGroup: String? = nil
+    var accountName = "nokyctranslate_apikey"
+}
+
 func pk_setting_key(_ pubkey: String, key: String) -> String {
     return "\(pubkey)_\(key)"
 }
-

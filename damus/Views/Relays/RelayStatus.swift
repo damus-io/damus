@@ -24,7 +24,7 @@ struct RelayStatus: View {
                 if c.isConnected {
                     conn_image = "network"
                     conn_color = .green
-                } else if c.isConnecting || c.isReconnecting {
+                } else if c.isConnecting {
                     connecting = true
                 } else {
                     conn_image = "exclamationmark.circle.fill"
