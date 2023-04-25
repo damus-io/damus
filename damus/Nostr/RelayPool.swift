@@ -106,7 +106,7 @@ class RelayPool {
         }
     }
     
-    func add_relay(_ url: URL, info: RelayInfo) throws {
+    func add_relay(_ url: RelayURL, info: RelayInfo) throws {
         let relay_id = get_relay_id(url)
         if get_relay(relay_id) != nil {
             throw RelayError.RelayAlreadyExists
@@ -127,7 +127,7 @@ class RelayPool {
             let is_connecting = c.isConnecting
             
             if is_connecting && (Date.now.timeIntervalSince1970 - c.last_connection_attempt) > 5 {
-                print("stale connection detected (\(relay.descriptor.url.absoluteString)). retrying...")
+                print("stale connection detected (\(relay.descriptor.url.url.absoluteString)). retrying...")
                 relay.connection.reconnect()
             } else if relay.is_broken || is_connecting || c.isConnected {
                 continue
@@ -271,8 +271,10 @@ class RelayPool {
 }
 
 func add_rw_relay(_ pool: RelayPool, _ url: String) {
-    let url_ = URL(string: url)!
-    try? pool.add_relay(url_, info: RelayInfo.rw)
+    guard let url = RelayURL(url) else {
+        return
+    }
+    try? pool.add_relay(url, info: RelayInfo.rw)
 }
 
 

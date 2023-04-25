@@ -242,7 +242,7 @@ func follow_with_existing_contacts(our_pubkey: String, our_contacts: NostrEvent,
 
 func make_contact_relays(_ relays: [RelayDescriptor]) -> [String: RelayInfo] {
     return relays.reduce(into: [:]) { acc, relay in
-        acc[relay.url.absoluteString] = relay.info
+        acc[relay.url.url.absoluteString] = relay.info
     }
 }
 

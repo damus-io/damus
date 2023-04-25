@@ -13,18 +13,42 @@ enum NostrConnectionEvent {
     case nostr_event(NostrResponse)
 }
 
+public struct RelayURL: Hashable {
+    private(set) var url: URL
+    
+    var id: String {
+        return url.absoluteString
+    }
+    
+    init?(_ str: String) {
+        guard let url = URL(string: str) else {
+            return nil
+        }
+        
+        guard let scheme = url.scheme else {
+            return nil
+        }
+        
+        guard scheme == "ws" || scheme == "wss" else {
+            return nil
+        }
+        
+        self.url = url
+    }
+}
+
 final class RelayConnection {
     private(set) var isConnected = false
     private(set) var isConnecting = false
     
     private(set) var last_connection_attempt: TimeInterval = 0
-    private lazy var socket = WebSocket(url)
+    private lazy var socket = WebSocket(url.url)
     private var subscriptionToken: AnyCancellable?
     
     private var handleEvent: (NostrConnectionEvent) -> ()
-    private let url: URL
+    private let url: RelayURL
 
-    init(url: URL, handleEvent: @escaping (NostrConnectionEvent) -> ()) {
+    init(url: RelayURL, handleEvent: @escaping (NostrConnectionEvent) -> ()) {
         self.url = url
         self.handleEvent = handleEvent
     }

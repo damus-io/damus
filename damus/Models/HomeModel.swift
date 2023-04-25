@@ -809,7 +809,7 @@ func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     for d in diff {
         changed = true
         if new.contains(d) {
-            if let url = URL(string: d) {
+            if let url = RelayURL(d) {
                 add_new_relay(relay_filters: state.relay_filters, metadatas: state.relay_metadata, pool: state.pool, url: url, info: decoded[d] ?? .rw, new_relay_filters: new_relay_filters)
             }
         } else {
@@ -823,10 +823,10 @@ func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     }
 }
 
-func add_new_relay(relay_filters: RelayFilters, metadatas: RelayMetadatas, pool: RelayPool, url: URL, info: RelayInfo, new_relay_filters: Bool) {
+func add_new_relay(relay_filters: RelayFilters, metadatas: RelayMetadatas, pool: RelayPool, url: RelayURL, info: RelayInfo, new_relay_filters: Bool) {
     try? pool.add_relay(url, info: info)
     
-    let relay_id = url.absoluteString
+    let relay_id = url.id
     guard metadatas.lookup(relay_id: relay_id) == nil else {
         return
     }
