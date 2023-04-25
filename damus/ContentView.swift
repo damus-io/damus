@@ -80,6 +80,9 @@ struct ContentView: View {
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
     
+    // connect retry timer
+    let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
+
     let sub_id = UUID().description
     
     @Environment(\.colorScheme) var colorScheme
@@ -446,6 +449,9 @@ struct ContentView: View {
                 active_sheet = nil
                 print("post cancelled")
             }
+        }
+        .onReceive(timer) { n in
+            self.damus_state?.pool.connect_to_disconnected()
         }
         .onReceive(handle_notify(.new_mutes)) { notif in
             home.filter_events()
