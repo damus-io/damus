@@ -18,7 +18,14 @@ struct EventActionBar: View {
     @State var show_share_sheet: Bool = false
     @State var show_share_action: Bool = false
     @State var show_repost_action: Bool = false
-    @State var bar: ActionBarModel = ActionBarModel()
+
+    @ObservedObject var bar: ActionBarModel
+    
+    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil) {
+        self.damus_state = damus_state
+        self.event = event
+        _bar = ObservedObject(wrappedValue: bar ?? make_actionbar_model(ev: event.id, damus: damus_state))
+    }
     
     @Environment(\.colorScheme) var colorScheme
     
