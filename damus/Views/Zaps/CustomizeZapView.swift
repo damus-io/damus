@@ -147,6 +147,9 @@ struct CustomizeZapView: View {
                    self.custom_amount_sats = nil
                }
             }
+            .onChange(of: custom_amount) { newValue in
+                comment = state.settings.default_zap_comment[custom_amount] ?? ""
+            }
             Text("sats", comment: "Shortened form of satoshi, display unit of measure where 1,000,000,000 satoshis is 1 Bitcoin. Used to indicate how many sats will be zapped to a note, configured through the custom zap view.")
                 .font(.system(size: 18, weight: .heavy))
         }
@@ -181,6 +184,7 @@ struct CustomizeZapView: View {
                     let amount = custom_amount_sats
                     send_zap(damus_state: state, event: event, lnurl: lnurl, is_custom: true, comment: comment, amount_sats: amount, zap_type: zap_type)
                     self.zapping = true
+                    state.settings.default_zap_comment[custom_amount] = comment
                 }
                 .disabled(custom_amount_sats == 0 || custom_amount.isEmpty)
                 .font(.system(size: 28, weight: .bold))

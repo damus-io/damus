@@ -96,6 +96,9 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "default_zap_amount", default_value: fallback_zap_amount)
     var default_zap_amount: Int
+
+    @Setting(key: "default_zap_comment", default_value: [:])
+    var default_zap_comment: [String:String]
     
     @Setting(key: "mention_notification", default_value: true)
     var mention_notification: Bool
