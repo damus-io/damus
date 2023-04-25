@@ -1,3 +1,33 @@
+
+## [1.4.3-10] - 2023-04-25
+
+### Added
+
+- Add paste button to login (Suhail Saqan)
+- Add nokyctranslate translation option (symbsrcool)
+- You can now change the default zap type (William Casarin)
+- Add partial support for different repost variants (William Casarin)
+
+
+### Changed
+
+- Change 500 custom zap to 420 (William Casarin)
+- New looks to the custom zaps view (ericholguin)
+- Adjust attachment images placement when posting (Swift)
+- Only show friends, not friend-of-friend in friend filter (William Casarin)
+
+
+### Fixed
+
+- Fix reposts on macos and ipad (William Casarin)
+- Fix slow reconnection issues (Bryan Montz)
+- Fix issue where uploaded images were from someone else (Swift)
+- Fix crash with LibreTranslate server setting selection and remove delisted vern server (Terry Yiu)
+- Fix buggy zap amounts and wallet selector settings (William Casarin)
+
+
+[1.4.3-10]: https://github.com/damus-io/damus/releases/tag/v1.4.3-10
+
 ## [1.4.3-2] - 2023-04-17
 
 ### Added
@@ -1038,4 +1068,3 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
