@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct EventViewOptions: OptionSet {
-    let rawValue: UInt8
+    let rawValue: UInt32
+    
     static let no_action_bar = EventViewOptions(rawValue: 1 << 0)
     static let no_replying_to = EventViewOptions(rawValue: 1 << 1)
     static let no_images = EventViewOptions(rawValue: 1 << 2)
@@ -16,6 +17,10 @@ struct EventViewOptions: OptionSet {
     static let truncate_content = EventViewOptions(rawValue: 1 << 4)
     static let pad_content = EventViewOptions(rawValue: 1 << 5)
     static let no_translate = EventViewOptions(rawValue: 1 << 6)
+    static let small_pfp = EventViewOptions(rawValue: 1 << 7)
+    static let nested = EventViewOptions(rawValue: 1 << 8)
+    
+    static let embedded: EventViewOptions = [.no_action_bar, .small_pfp, .wide, .truncate_content, .nested]
 }
 
 struct TextEvent: View {
@@ -43,7 +48,7 @@ struct TextEvent: View {
     }
     
     func Pfp(is_anon: Bool) -> some View {
-        MaybeAnonPfpView(state: damus, is_anon: is_anon, pubkey: pubkey)
+        MaybeAnonPfpView(state: damus, is_anon: is_anon, pubkey: pubkey, size: options.contains(.small_pfp) ? eventview_pfp_size(.small) : PFP_SIZE )
     }
     
     func TopPart(is_anon: Bool) -> some View {
@@ -82,7 +87,7 @@ struct TextEvent: View {
 
             EvBody(options: self.options.union(.pad_content))
             
-            if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
+            if let mention = get_mention() {
                 Mention(mention)
                     .padding(.horizontal)
             }
@@ -135,6 +140,14 @@ struct TextEvent: View {
         return Rectangle().frame(height: 2).opacity(0)
     }
     
+    func get_mention() -> Mention? {
+        if self.options.contains(.nested) {
+            return nil
+        }
+        
+        return first_eref_mention(ev: event, privkey: damus.keypair.privkey)
+    }
+    
     var ThreadedStyle: some View {
         HStack(alignment: .top) {
         
@@ -151,7 +164,7 @@ struct TextEvent: View {
                 ReplyPart
                 EvBody(options: self.options)
                 
-                if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
+                if let mention = get_mention() {
                     Mention(mention)
                 }
                 

@@ -32,7 +32,7 @@ struct EventView: View {
     var body: some View {
         VStack {
             if event.known_kind == .boost {
-                if let inner_ev = event.inner_event {
+                if let inner_ev = event.get_inner_event(cache: damus.events) {
                     RepostedEvent(damus: damus, event: event, inner_ev: inner_ev, options: options)
                 } else {
                     EmptyView()

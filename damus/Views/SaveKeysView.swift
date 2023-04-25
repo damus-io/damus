@@ -217,3 +217,7 @@ struct SaveKeysView_Previews: PreviewProvider {
         SaveKeysView(account: model)
     }
 }
+
+func create_account_to_metadata(_ model: CreateAccountModel) -> Profile {
+    return Profile(name: model.nick_name, display_name: model.real_name, about: model.about, picture: model.profile_image, banner: nil, website: nil, lud06: nil, lud16: nil, nip05: nil)
+}

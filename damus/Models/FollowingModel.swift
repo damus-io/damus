@@ -22,7 +22,7 @@ class FollowingModel {
     }
     
     func get_filter() -> NostrFilter {
-        var f = NostrFilter.filter_kinds([0])
+        var f = NostrFilter.filter_kinds([NostrKind.metadata.rawValue])
         f.authors = self.contacts.reduce(into: Array<String>()) { acc, pk in
             // don't fetch profiles we already have
             if damus_state.profiles.lookup(id: pk) != nil {

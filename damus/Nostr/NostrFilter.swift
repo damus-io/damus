@@ -41,7 +41,7 @@ struct NostrFilter: Codable, Equatable {
     }
 
     public static var filter_text: NostrFilter {
-        return filter_kinds([1])
+        return filter_kinds([NostrKind.text.rawValue])
     }
     
     public static func filter_ids(_ ids: [String]) -> NostrFilter {
@@ -49,11 +49,11 @@ struct NostrFilter: Codable, Equatable {
     }
     
     public static var filter_profiles: NostrFilter {
-        return filter_kinds([0])
+        return filter_kinds([NostrKind.metadata.rawValue])
     }
 
     public static var filter_contacts: NostrFilter {
-        return filter_kinds([3])
+        return filter_kinds([NostrKind.contacts.rawValue])
     }
     
     public static func filter_authors(_ authors: [String]) -> NostrFilter {

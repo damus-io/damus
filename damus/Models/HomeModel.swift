@@ -52,7 +52,7 @@ class HomeModel: ObservableObject {
 
     init() {
         self.damus_state = DamusState.empty
-        filter_muted()
+        filter_events()
         self.setup_debouncer()
     }
     
@@ -192,7 +192,7 @@ class HomeModel: ObservableObject {
     func handle_channel_meta(_ ev: NostrEvent) {
     }
     
-    func filter_muted() {
+    func filter_events() {
         events.filter { ev in
             !damus_state.contacts.is_muted(ev.pubkey)
         }
@@ -202,8 +202,11 @@ class HomeModel: ObservableObject {
         }
         
         notifications.filter { ev in
-            !damus_state.contacts.is_muted(ev.pubkey) &&
-            !damus_state.muted_threads.isMutedThread(ev, privkey: damus_state.keypair.privkey)
+            if damus_state.settings.onlyzaps_mode && ev.known_kind == NostrKind.like {
+                return false
+            }
+
+            return !damus_state.contacts.is_muted(ev.pubkey) && !damus_state.muted_threads.isMutedThread(ev, privkey: damus_state.keypair.privkey)
         }
     }
     
@@ -226,7 +229,7 @@ class HomeModel: ObservableObject {
     func handle_boost_event(sub_id: String, _ ev: NostrEvent) {
         var boost_ev_id = ev.last_refid()?.ref_id
 
-        if let inner_ev = ev.inner_event {
+        if let inner_ev = ev.get_inner_event(cache: damus_state.events) {
             boost_ev_id = inner_ev.id
             
             guard validate_event(ev: inner_ev) == .ok else {
@@ -255,6 +258,10 @@ class HomeModel: ObservableObject {
     func handle_like_event(_ ev: NostrEvent) {
         guard let e = ev.last_refid() else {
             // no id ref? invalid like event
+            return
+        }
+
+        if damus_state.settings.onlyzaps_mode {
             return
         }
 
@@ -353,13 +360,13 @@ class HomeModel: ObservableObject {
         var friends = damus_state.contacts.get_friend_list()
         friends.append(damus_state.pubkey)
 
-        var contacts_filter = NostrFilter.filter_kinds([0])
+        var contacts_filter = NostrFilter.filter_kinds([NostrKind.metadata.rawValue])
         contacts_filter.authors = friends
         
-        var our_contacts_filter = NostrFilter.filter_kinds([3, 0])
+        var our_contacts_filter = NostrFilter.filter_kinds([NostrKind.contacts.rawValue, NostrKind.metadata.rawValue])
         our_contacts_filter.authors = [damus_state.pubkey]
         
-        var our_blocklist_filter = NostrFilter.filter_kinds([30000])
+        var our_blocklist_filter = NostrFilter.filter_kinds([NostrKind.list.rawValue])
         our_blocklist_filter.parameter = ["mute"]
         our_blocklist_filter.authors = [damus_state.pubkey]
         
@@ -378,21 +385,27 @@ class HomeModel: ObservableObject {
         our_dms_filter.authors = [ damus_state.pubkey ]
 
         // TODO: separate likes?
-        var home_filter = NostrFilter.filter_kinds([
+        var home_filter_kinds = [
             NostrKind.text.rawValue,
-            NostrKind.like.rawValue,
-            NostrKind.boost.rawValue,
-        ])
+            NostrKind.boost.rawValue
+        ]
+        if !damus_state.settings.onlyzaps_mode {
+            home_filter_kinds.append(NostrKind.like.rawValue)
+        }
+        var home_filter = NostrFilter.filter_kinds(home_filter_kinds)
         // include our pubkey as well even if we're not technically a friend
         home_filter.authors = friends
         home_filter.limit = 500
 
-        var notifications_filter = NostrFilter.filter_kinds([
+        var notifications_filter_kinds = [
             NostrKind.text.rawValue,
-            NostrKind.like.rawValue,
             NostrKind.boost.rawValue,
             NostrKind.zap.rawValue,
-        ])
+        ]
+        if !damus_state.settings.onlyzaps_mode {
+            notifications_filter_kinds.append(NostrKind.like.rawValue)
+        }
+        var notifications_filter = NostrFilter.filter_kinds(notifications_filter_kinds)
         notifications_filter.pubkeys = [damus_state.pubkey]
         notifications_filter.limit = 500
 
@@ -475,7 +488,7 @@ class HomeModel: ObservableObject {
         
         damus_state.events.insert(ev)
         
-        if let inner_ev = ev.inner_event {
+        if let inner_ev = ev.get_inner_event(cache: damus_state.events) {
             damus_state.events.insert(inner_ev)
         }
         
@@ -660,9 +673,7 @@ func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
 
 func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: Profile, ev: NostrEvent) {
     if our_pubkey == ev.pubkey && (profile.deleted ?? false) {
-        DispatchQueue.main.async {
-            notify(.deleted_account, ())
-        }
+        notify(.deleted_account, ())
         return
     }
 
@@ -696,20 +707,15 @@ func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: P
     // load pfps asap
     let picture = tprof.profile.picture ?? robohash(ev.pubkey)
     if URL(string: picture) != nil {
-        DispatchQueue.main.async {
-            notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-        }
+        notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
     }
     
     let banner = tprof.profile.banner ?? ""
     if URL(string: banner) != nil {
-        DispatchQueue.main.async {
-            notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-        }
+        notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
     }
     
     notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-
 }
 
 func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping () -> Void) {
@@ -1098,7 +1104,7 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
             let notify = LocalNotification(type: .mention, event: ev, target: ev, content: content)
             create_local_notification(profiles: damus_state.profiles, notify: notify )
         }
-    } else if type == .boost && damus_state.settings.repost_notification, let inner_ev = ev.inner_event {
+    } else if type == .boost && damus_state.settings.repost_notification, let inner_ev = ev.get_inner_event(cache: damus_state.events) {
         let notify = LocalNotification(type: .repost, event: ev, target: inner_ev, content: inner_ev.content)
         create_local_notification(profiles: damus_state.profiles, notify: notify)
     } else if type == .like && damus_state.settings.like_notification,

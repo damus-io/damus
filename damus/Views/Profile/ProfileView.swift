@@ -165,7 +165,7 @@ struct ProfileView: View {
             return AnyView(
                 VStack(spacing: 0) {
                     ZStack {
-                        BannerImageView(pubkey: profile.pubkey, profiles: damus_state.profiles)
+                        BannerImageView(pubkey: profile.pubkey, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                             .aspectRatio(contentMode: .fill)
                             .frame(width: proxy.size.width, height: minY > 0 ? bannerHeight + minY : bannerHeight)
                             .clipped()
@@ -210,7 +210,7 @@ struct ProfileView: View {
         }) {
             navImage(systemImage: "ellipsis")
         }
-        .confirmationDialog(NSLocalizedString("Actions", comment: "Title for confirmation dialog to either share, report, or block a profile."), isPresented: $action_sheet_presented) {
+        .confirmationDialog(NSLocalizedString("Actions", comment: "Title for confirmation dialog to either share, report, or mute a profile."), isPresented: $action_sheet_presented) {
             Button(NSLocalizedString("Share", comment: "Button to share the link to a profile.")) {
                 show_share_sheet = true
             }
@@ -245,27 +245,40 @@ struct ProfileView: View {
     }
     
     func lnButton(lnurl: String, profile: Profile) -> some View {
-        Button(action: {
+        let button_img = profile.reactions == false ? "bolt.brakesignal" : "bolt.circle"
+        return Button(action: {
             if damus_state.settings.show_wallet_selector  {
                 showing_select_wallet = true
             } else {
                 open_with_wallet(wallet: damus_state.settings.default_wallet.model, invoice: lnurl)
             }
         }) {
-            Image(systemName: "bolt.circle")
+            Image(systemName: button_img)
                 .profile_button_style(scheme: colorScheme)
                 .contextMenu {
-                    Button {
-                        UIPasteboard.general.string = profile.lnurl ?? ""
-                    } label: {
-                        Label(NSLocalizedString("Copy LNURL", comment: "Context menu option for copying a user's Lightning URL."), systemImage: "doc.on.doc")
+                    if profile.reactions == false {
+                        Text("OnlyZaps Enabled", comment: "Non-tappable text in context menu that shows up when the zap button on profile is long pressed to indicate that the user has enabled OnlyZaps, meaning that they would like to be only zapped and not accept reactions to their notes.")
+                    }
+                    
+                    if let addr = profile.lud16 {
+                        Button {
+                            UIPasteboard.general.string = addr
+                        } label: {
+                            Label(addr, systemImage: "doc.on.doc")
+                        }
+                    } else if let lnurl = profile.lnurl {
+                        Button {
+                            UIPasteboard.general.string = lnurl
+                        } label: {
+                            Label(NSLocalizedString("Copy LNURL", comment: "Context menu option for copying a user's Lightning URL."), systemImage: "doc.on.doc")
+                        }
                     }
                 }
             
         }
         .cornerRadius(24)
         .sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
-            SelectWalletView(showingSelectWallet: $showing_select_wallet, our_pubkey: damus_state.pubkey, invoice: lnurl)
+            SelectWalletView(default_wallet: damus_state.settings.default_wallet, showingSelectWallet: $showing_select_wallet, our_pubkey: damus_state.pubkey, invoice: lnurl)
         }
     }
     
@@ -319,7 +332,7 @@ struct ProfileView: View {
     func nameSection(profile_data: Profile?) -> some View {
         return Group {
             HStack(alignment: .center) {
-                ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles)
+                ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                     .padding(.top, -(pfp_size / 2.0))
                     .offset(y: pfpOffset())
                     .scaleEffect(pfpScale())
@@ -327,7 +340,8 @@ struct ProfileView: View {
                         is_zoomed.toggle()
                     }
                     .fullScreenCover(isPresented: $is_zoomed) {
-                        ProfilePicImageView(pubkey: profile.pubkey, profiles: damus_state.profiles)                        }
+                        ProfilePicImageView(pubkey: profile.pubkey, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                    }
                 
                 Spacer()
                 

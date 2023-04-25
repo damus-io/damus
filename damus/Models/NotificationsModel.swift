@@ -65,6 +65,37 @@ enum NotificationItem {
             return reply.created_at
         }
     }
+    
+    func would_filter(_ isIncluded: (NostrEvent) -> Bool) -> Bool {
+        switch self {
+        case .repost(_, let evgrp):
+            return evgrp.would_filter(isIncluded)
+        case .reaction(_, let evgrp):
+            return evgrp.would_filter(isIncluded)
+        case .profile_zap(let zapgrp):
+            return zapgrp.would_filter(isIncluded)
+        case .event_zap(_, let zapgrp):
+            return zapgrp.would_filter(isIncluded)
+        case .reply(let ev):
+            return !isIncluded(ev)
+        }
+    }
+    
+    func filter(_ isIncluded: (NostrEvent) -> Bool) -> NotificationItem? {
+        switch self {
+        case .repost(let evid, let evgrp):
+            return evgrp.filter(isIncluded).map { .repost(evid, $0) }
+        case .reaction(let evid, let evgrp):
+            return evgrp.filter(isIncluded).map { .reaction(evid, $0) }
+        case .profile_zap(let zapgrp):
+            return zapgrp.filter(isIncluded).map { .profile_zap($0) }
+        case .event_zap(let evid, let zapgrp):
+            return zapgrp.filter(isIncluded).map { .event_zap(evid, $0) }
+        case .reply(let ev):
+            if isIncluded(ev) { return .reply(ev) }
+            return nil
+        }
+    }
 }
 
 class NotificationsModel: ObservableObject, ScrollQueue {
@@ -161,8 +192,8 @@ class NotificationsModel: ObservableObject, ScrollQueue {
     }
     
     
-    private func insert_repost(_ ev: NostrEvent) -> Bool {
-        guard let reposted_ev = ev.inner_event else {
+    private func insert_repost(_ ev: NostrEvent, cache: EventCache) -> Bool {
+        guard let reposted_ev = ev.get_inner_event(cache: cache) else {
             return false
         }
         
@@ -204,9 +235,9 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
     }
     
-    private func insert_event_immediate(_ ev: NostrEvent) -> Bool {
+    private func insert_event_immediate(_ ev: NostrEvent, cache: EventCache) -> Bool {
         if ev.known_kind == .boost {
-            return insert_repost(ev)
+            return insert_repost(ev, cache: cache)
         } else if ev.known_kind == .like {
             return insert_reaction(ev)
         } else if ev.known_kind == .text {
@@ -238,7 +269,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
             return insert_uniq_sorted_event_created(events: &incoming_events, new_ev: ev)
         }
         
-        if insert_event_immediate(ev) {
+        if insert_event_immediate(ev, cache: damus_state.events) {
             self.notifications = build_notifications()
             return true
         }
@@ -308,7 +339,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
         
         for event in incoming_events {
-            inserted = insert_event_immediate(event) || inserted
+            inserted = insert_event_immediate(event, cache: damus_state.events) || inserted
         }
         
         if inserted {

@@ -46,19 +46,22 @@ struct ImageCarousel: View {
     let evid: String
     let previews: PreviewCache
     
+    let disable_animation: Bool
+    
     @State private var open_sheet: Bool = false
     @State private var current_url: URL? = nil
     @State private var image_fill: ImageFill? = nil
     @State private var fillHeight: CGFloat = 350
     @State private var maxHeight: CGFloat = UIScreen.main.bounds.height * 0.85
     
-    init(previews: PreviewCache, evid: String, urls: [URL]) {
+    init(previews: PreviewCache, evid: String, urls: [URL], disable_animation: Bool) {
         _open_sheet = State(initialValue: false)
         _current_url = State(initialValue: nil)
         _image_fill = State(initialValue: previews.lookup_image_meta(evid))
         self.urls = urls
         self.evid = evid
         self.previews = previews
+        self.disable_animation = disable_animation
     }
     
     var filling: Bool {
@@ -66,7 +69,7 @@ struct ImageCarousel: View {
     }
     
     var height: CGFloat {
-        image_fill?.height ?? 0
+        image_fill?.height ?? 100
     }
     
     var body: some View {
@@ -79,7 +82,7 @@ struct ImageCarousel: View {
                             KFAnimatedImage(url)
                                 .callbackQueue(.dispatch(.global(qos:.background)))
                                 .backgroundDecode(true)
-                                .imageContext(.note)
+                                .imageContext(.note, disable_animation: disable_animation)
                                 .cancelOnDisappear(true)
                                 .configure { view in
                                     view.framePreloadCount = 3
@@ -98,7 +101,7 @@ struct ImageCarousel: View {
             }
         }
         .fullScreenCover(isPresented: $open_sheet) {
-            ImageView(urls: urls)
+            ImageView(urls: urls, disable_animation: disable_animation)
         }
         .frame(height: height)
         .onTapGesture {
@@ -118,10 +121,7 @@ extension KFOptionSetter {
         let modifier = AnyImageModifier { image -> KFCrossPlatformImage in
             let img_size = image.size
             let geo_size = size
-            let fill = ImageFill.calculate_image_fill(geo_size: geo_size,
-                                                      img_size: img_size,
-                                                      maxHeight: max,
-                                                      fillHeight: fill)
+            let fill = ImageFill.calculate_image_fill(geo_size: geo_size, img_size: img_size, maxHeight: max, fillHeight: fill)
             DispatchQueue.main.async { [block, fill] in
                 try? block(fill)
             }
@@ -172,7 +172,7 @@ public struct ImageFill {
 
 struct ImageCarousel_Previews: PreviewProvider {
     static var previews: some View {
-        ImageCarousel(previews: test_damus_state().previews, evid: "evid", urls: [URL(string: "https://jb55.com/red-me.jpg")!,URL(string: "https://jb55.com/red-me.jpg")!])
+        ImageCarousel(previews: test_damus_state().previews, evid: "evid", urls: [URL(string: "https://jb55.com/red-me.jpg")!,URL(string: "https://jb55.com/red-me.jpg")!], disable_animation: false)
     }
 }
 

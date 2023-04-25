@@ -14,6 +14,7 @@ struct InvoiceView: View {
     let invoice: Invoice
     @State var showing_select_wallet: Bool = false
     @State var copied = false
+    let settings: UserSettingsStore
     
     var CopyButton: some View {
         Button {
@@ -36,10 +37,10 @@ struct InvoiceView: View {
     
     var PayButton: some View {
         Button {
-            if should_show_wallet_selector(our_pubkey) {
+            if settings.show_wallet_selector {
                 showing_select_wallet = true
             } else {
-                open_with_wallet(wallet: get_default_wallet(our_pubkey).model, invoice: invoice.string)
+                open_with_wallet(wallet: settings.default_wallet.model, invoice: invoice.string)
             }
         } label: {
             RoundedRectangle(cornerRadius: 20, style: .circular)
@@ -80,7 +81,7 @@ struct InvoiceView: View {
             .padding(30)
         }
         .sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
-            SelectWalletView(showingSelectWallet: $showing_select_wallet, our_pubkey: our_pubkey, invoice: invoice.string)
+            SelectWalletView(default_wallet: settings.default_wallet, showingSelectWallet: $showing_select_wallet, our_pubkey: our_pubkey, invoice: invoice.string)
         }
     }
 }
@@ -111,7 +112,8 @@ let test_invoice = Invoice(description: .description("this is a description"), a
 
 struct InvoiceView_Previews: PreviewProvider {
     static var previews: some View {
-        InvoiceView(our_pubkey: "", invoice: test_invoice)
+        InvoiceView(our_pubkey: "", invoice: test_invoice, settings: test_damus_state().settings)
             .frame(width: 300, height: 200)
     }
 }
+

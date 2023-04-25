@@ -10,7 +10,7 @@ import Kingfisher
 
 extension KFOptionSetter {
     
-    func imageContext(_ imageContext: ImageContext) -> Self {
+    func imageContext(_ imageContext: ImageContext, disable_animation: Bool) -> Self {
         options.callbackQueue = .dispatch(.global(qos: .background))
         options.processingQueue = .dispatch(.global(qos: .background))
         options.downloader = CustomImageDownloader.shared
@@ -26,7 +26,7 @@ extension KFOptionSetter {
         options.backgroundDecode = true
         options.cacheOriginalImage = true
         options.scaleFactor = UIScreen.main.scale
-        options.onlyLoadFirstFrame = should_disable_image_animation()
+        options.onlyLoadFirstFrame = disable_animation
         
         return self
     }

@@ -48,10 +48,6 @@ struct BuilderEventView: View {
             return
         }
         
-        guard nostr_event.known_kind == .text else {
-            return
-        }
-        
         if event != nil {
             return
         }
@@ -74,12 +70,12 @@ struct BuilderEventView: View {
     var body: some View {
         VStack {
             if let event {
-                let ev = event.inner_event ?? event
+                let ev = event.get_inner_event(cache: damus.events) ?? event
                 let thread = ThreadModel(event: ev, damus_state: damus)
                 let dest = ThreadView(state: damus, thread: thread)
                 NavigationLink(destination: dest) {
-                    EmbeddedEventView(damus_state: damus, event: event)
-                        .padding(8)
+                    EventView(damus: damus, event: event, options: .embedded)
+                        .padding([.top, .bottom], 8)
                 }.buttonStyle(.plain)
             } else {
                 ProgressView().padding()

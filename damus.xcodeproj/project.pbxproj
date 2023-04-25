@@ -142,8 +142,9 @@
 		4C8D00CC29DF92DF0036AF10 /* Hashtags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00CB29DF92DF0036AF10 /* Hashtags.swift */; };
 		4C8D00CF29E38B950036AF10 /* nostr_bech32.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00CE29E38B950036AF10 /* nostr_bech32.c */; };
 		4C8D00D429E3C5D40036AF10 /* NIP19Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00D329E3C5D40036AF10 /* NIP19Tests.swift */; };
+		4C8D1A6C29F1DFC200ACDF75 /* FriendIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6B29F1DFC200ACDF75 /* FriendIcon.swift */; };
+		4C8D1A6F29F31E5000ACDF75 /* FriendsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */; };
 		4C8EC52529D1FA6C0085D9A8 /* DamusColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */; };
-		4C90BD162839DB54008EE7EF /* NostrMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD152839DB54008EE7EF /* NostrMetadata.swift */; };
 		4C90BD18283A9EE5008EE7EF /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD17283A9EE5008EE7EF /* LoginView.swift */; };
 		4C90BD1A283AA67F008EE7EF /* Bech32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD19283AA67F008EE7EF /* Bech32.swift */; };
 		4C90BD1C283AC38E008EE7EF /* Bech32Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD1B283AC38E008EE7EF /* Bech32Tests.swift */; };
@@ -154,6 +155,8 @@
 		4C9F18E229AA9B6C008C55EC /* CustomizeZapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */; };
 		4C9F18E429ABDE6D008C55EC /* MaybeAnonPfpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9F18E329ABDE6D008C55EC /* MaybeAnonPfpView.swift */; };
 		4CA2EFA0280E37AC0044ACD8 /* TimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA2EF9F280E37AC0044ACD8 /* TimelineView.swift */; };
+		4CA3FA1029F593D000FDB3C3 /* ZapTypePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA3FA0F29F593D000FDB3C3 /* ZapTypePicker.swift */; };
+		4CA5588329F33F5B00DC6A45 /* StringCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CA5588229F33F5B00DC6A45 /* StringCodable.swift */; };
 		4CAAD8AD298851D000060CEA /* AccountDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CAAD8AC298851D000060CEA /* AccountDeletion.swift */; };
 		4CAAD8B029888AD200060CEA /* RelayConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CAAD8AF29888AD200060CEA /* RelayConfigView.swift */; };
 		4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CACA9D4280C31E100D9BBE8 /* ReplyView.swift */; };
@@ -182,7 +185,6 @@
 		4CC7AAEB297F0AEC00430951 /* BuilderEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAEA297F0AEC00430951 /* BuilderEventView.swift */; };
 		4CC7AAED297F0B9E00430951 /* Highlight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAEC297F0B9E00430951 /* Highlight.swift */; };
 		4CC7AAF0297F11C700430951 /* SelectedEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAEF297F11C700430951 /* SelectedEventView.swift */; };
-		4CC7AAF2297F129C00430951 /* EmbeddedEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAF1297F129C00430951 /* EmbeddedEventView.swift */; };
 		4CC7AAF4297F18B400430951 /* ReplyDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAF3297F18B400430951 /* ReplyDescription.swift */; };
 		4CC7AAF6297F1A6A00430951 /* EventBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAF5297F1A6A00430951 /* EventBody.swift */; };
 		4CC7AAF8297F1CEE00430951 /* EventProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAF7297F1CEE00430951 /* EventProfile.swift */; };
@@ -550,8 +552,9 @@
 		4C8D00D129E397AD0036AF10 /* block.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = block.h; sourceTree = "<group>"; };
 		4C8D00D229E3C19F0036AF10 /* str_block.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = str_block.h; sourceTree = "<group>"; };
 		4C8D00D329E3C5D40036AF10 /* NIP19Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NIP19Tests.swift; sourceTree = "<group>"; };
+		4C8D1A6B29F1DFC200ACDF75 /* FriendIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendIcon.swift; sourceTree = "<group>"; };
+		4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsButton.swift; sourceTree = "<group>"; };
 		4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusColors.swift; sourceTree = "<group>"; };
-		4C90BD152839DB54008EE7EF /* NostrMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrMetadata.swift; sourceTree = "<group>"; };
 		4C90BD17283A9EE5008EE7EF /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		4C90BD19283AA67F008EE7EF /* Bech32.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32.swift; sourceTree = "<group>"; };
 		4C90BD1B283AC38E008EE7EF /* Bech32Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32Tests.swift; sourceTree = "<group>"; };
@@ -562,6 +565,8 @@
 		4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomizeZapView.swift; sourceTree = "<group>"; };
 		4C9F18E329ABDE6D008C55EC /* MaybeAnonPfpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaybeAnonPfpView.swift; sourceTree = "<group>"; };
 		4CA2EF9F280E37AC0044ACD8 /* TimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineView.swift; sourceTree = "<group>"; };
+		4CA3FA0F29F593D000FDB3C3 /* ZapTypePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapTypePicker.swift; sourceTree = "<group>"; };
+		4CA5588229F33F5B00DC6A45 /* StringCodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringCodable.swift; sourceTree = "<group>"; };
 		4CAAD8AC298851D000060CEA /* AccountDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDeletion.swift; sourceTree = "<group>"; };
 		4CAAD8AF29888AD200060CEA /* RelayConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayConfigView.swift; sourceTree = "<group>"; };
 		4CACA9D4280C31E100D9BBE8 /* ReplyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyView.swift; sourceTree = "<group>"; };
@@ -590,7 +595,6 @@
 		4CC7AAEA297F0AEC00430951 /* BuilderEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuilderEventView.swift; sourceTree = "<group>"; };
 		4CC7AAEC297F0B9E00430951 /* Highlight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Highlight.swift; sourceTree = "<group>"; };
 		4CC7AAEF297F11C700430951 /* SelectedEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectedEventView.swift; sourceTree = "<group>"; };
-		4CC7AAF1297F129C00430951 /* EmbeddedEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddedEventView.swift; sourceTree = "<group>"; };
 		4CC7AAF3297F18B400430951 /* ReplyDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyDescription.swift; sourceTree = "<group>"; };
 		4CC7AAF5297F1A6A00430951 /* EventBody.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventBody.swift; sourceTree = "<group>"; };
 		4CC7AAF7297F1CEE00430951 /* EventProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventProfile.swift; sourceTree = "<group>"; };
@@ -883,6 +887,7 @@
 		4C75EFA227FA576C0006080F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4C8D1A6D29F31E4100ACDF75 /* Buttons */,
 				4C1A9A1B29DDCF8B00516EAC /* Settings */,
 				4CFF8F6129CC9A80008DB934 /* Images */,
 				4CCEB7AC29B53D180078AA28 /* Search */,
@@ -908,7 +913,6 @@
 				4C64987B286D03E000EAE2B3 /* DirectMessagesView.swift */,
 				4C216F31286E388800040376 /* DMChatView.swift */,
 				4C216F33286F5ACD00040376 /* DMView.swift */,
-				E990020E2955F837003BBC5A /* EditMetadataView.swift */,
 				3169CAE4294E699400EE4006 /* Empty Views */,
 				4C75EFB82804A2740006080F /* EventView.swift */,
 				4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */,
@@ -963,7 +967,6 @@
 				4CACA9DB280C38C000D9BBE8 /* Profiles.swift */,
 				4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */,
 				4C363A8F28247A1D006E126D /* NostrLink.swift */,
-				4C90BD152839DB54008EE7EF /* NostrMetadata.swift */,
 			);
 			path = Nostr;
 			sourceTree = "<group>";
@@ -1009,8 +1012,17 @@
 				4C8D00C729DF791C0036AF10 /* CompatibleAttribute.swift */,
 				4C8D00CB29DF92DF0036AF10 /* Hashtags.swift */,
 				4CDA128B29EB19C40006FA5A /* LocalNotification.swift */,
+				4CA5588229F33F5B00DC6A45 /* StringCodable.swift */,
 			);
 			path = Util;
+			sourceTree = "<group>";
+		};
+		4C8D1A6D29F31E4100ACDF75 /* Buttons */ = {
+			isa = PBXGroup;
+			children = (
+				4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */,
+			);
+			path = Buttons;
 			sourceTree = "<group>";
 		};
 		4CAAD8AE29888A9B00060CEA /* Relays */ = {
@@ -1053,12 +1065,14 @@
 				4CEE2AF6280B2DEA00AB5EEF /* ProfileName.swift */,
 				4C285C892838B985008A31F1 /* ProfilePictureSelector.swift */,
 				F79C7FAC29D5E9620000F946 /* EditProfilePictureControl.swift */,
+				E990020E2955F837003BBC5A /* EditMetadataView.swift */,
 				4CEE2AF2280B25C500AB5EEF /* ProfilePicView.swift */,
 				4C8682862814DE470026224F /* ProfileView.swift */,
 				4CB9D4A62992D02B00A9A7E4 /* ProfileNameView.swift */,
 				4CB9D4A82992D2F400A9A7E4 /* FollowsYou.swift */,
 				4C9F18E329ABDE6D008C55EC /* MaybeAnonPfpView.swift */,
 				4C9BB83329C12D9900FC4E37 /* EventProfileName.swift */,
+				4C8D1A6B29F1DFC200ACDF75 /* FriendIcon.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -1067,7 +1081,6 @@
 			isa = PBXGroup;
 			children = (
 				4CC7AAEF297F11C700430951 /* SelectedEventView.swift */,
-				4CC7AAF1297F129C00430951 /* EmbeddedEventView.swift */,
 				4CC7AAF3297F18B400430951 /* ReplyDescription.swift */,
 				4CC7AAF5297F1A6A00430951 /* EventBody.swift */,
 				4CC7AAEA297F0AEC00430951 /* BuilderEventView.swift */,
@@ -1242,6 +1255,7 @@
 			children = (
 				4CE879572996C45300F758CC /* ZapsView.swift */,
 				4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */,
+				4CA3FA0F29F593D000FDB3C3 /* ZapTypePicker.swift */,
 			);
 			path = Zaps;
 			sourceTree = "<group>";
@@ -1484,6 +1498,7 @@
 				4C3AC79D2833036D00E1F516 /* FollowingView.swift in Sources */,
 				5CF72FC229B9142F00124A13 /* ShareAction.swift in Sources */,
 				4C363A8A28236B57006E126D /* MentionView.swift in Sources */,
+				4C8D1A6C29F1DFC200ACDF75 /* FriendIcon.swift in Sources */,
 				4CE4F8CD281352B30009DFBB /* Notifications.swift in Sources */,
 				4C30AC7829A577AB00E2BD5A /* EventCache.swift in Sources */,
 				4C285C8428385690008A31F1 /* CreateAccountView.swift in Sources */,
@@ -1515,6 +1530,7 @@
 				4CC6193A29DC777C006A86D1 /* RelayBootstrap.swift in Sources */,
 				4C285C8A2838B985008A31F1 /* ProfilePictureSelector.swift in Sources */,
 				4C9F18E429ABDE6D008C55EC /* MaybeAnonPfpView.swift in Sources */,
+				4CA5588329F33F5B00DC6A45 /* StringCodable.swift in Sources */,
 				4C75EFB92804A2740006080F /* EventView.swift in Sources */,
 				4C8D00C829DF791C0036AF10 /* CompatibleAttribute.swift in Sources */,
 				3AA247FD297E3CFF0090C62D /* RepostsModel.swift in Sources */,
@@ -1537,6 +1553,7 @@
 				4CF0ABF029857E9200D66079 /* Bech32Object.swift in Sources */,
 				4C3D52B8298DB5C6001C5831 /* TextEvent.swift in Sources */,
 				4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */,
+				4C8D1A6F29F31E5000ACDF75 /* FriendsButton.swift in Sources */,
 				4C216F382871EDE300040376 /* DirectMessageModel.swift in Sources */,
 				4C75EFA627FF87A20006080F /* Nostr.swift in Sources */,
 				4CB883A62975F83C00DC99E7 /* LNUrlPayRequest.swift in Sources */,
@@ -1559,6 +1576,7 @@
 				4CFF8F6729CC9E3A008DB934 /* ImageView.swift in Sources */,
 				4C90BD18283A9EE5008EE7EF /* LoginView.swift in Sources */,
 				4CB8838B296F6E1E00DC99E7 /* NIP05Badge.swift in Sources */,
+				4CA3FA1029F593D000FDB3C3 /* ZapTypePicker.swift in Sources */,
 				4C3EA66828FF5F9900C48A62 /* hex.c in Sources */,
 				E9E4ED0B295867B900DD7078 /* ThreadView.swift in Sources */,
 				4CD348EF29C3659D00497EB2 /* ImageUploadModel.swift in Sources */,
@@ -1582,7 +1600,6 @@
 				4CCEB7AE29B53D260078AA28 /* SearchingEventView.swift in Sources */,
 				4CF0ABE929844AF100D66079 /* AnyCodable.swift in Sources */,
 				4C0A3F8F280F640A000448DE /* ThreadModel.swift in Sources */,
-				4CC7AAF2297F129C00430951 /* EmbeddedEventView.swift in Sources */,
 				4C3AC79F2833115300E1F516 /* FollowButtonView.swift in Sources */,
 				4CC7AAE7297EFA7B00430951 /* Zap.swift in Sources */,
 				4C3BEFD22819DB9B00B3DE84 /* ProfileModel.swift in Sources */,
@@ -1597,7 +1614,6 @@
 				4C1A9A2329DDDB8100516EAC /* IconLabel.swift in Sources */,
 				4C3EA64928FF597700C48A62 /* bech32.c in Sources */,
 				4CE879522996B68900F758CC /* RelayType.swift in Sources */,
-				4C90BD162839DB54008EE7EF /* NostrMetadata.swift in Sources */,
 				4CE8795B2996C47A00F758CC /* ZapsModel.swift in Sources */,
 				4C3A1D3729637E0500558C0F /* PreviewCache.swift in Sources */,
 				4C3EA67528FF7A5A00C48A62 /* take.c in Sources */,
@@ -2012,7 +2028,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = damus/damus.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_PREVIEWS = YES;
@@ -2059,7 +2075,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = damus/damus.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_PREVIEWS = YES;

@@ -52,6 +52,11 @@ class Profile: Codable {
         set_val(key, val)
     }
     
+    var reactions: Bool? {
+        get { return get_val("reactions"); }
+        set(s) { set_val("reactions", s) }
+    }
+    
     var deleted: Bool? {
         get { return get_val("deleted"); }
         set(s) { set_val("deleted", s) }

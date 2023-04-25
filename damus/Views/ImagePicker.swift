@@ -13,6 +13,7 @@ struct ImagePicker: UIViewControllerRepresentable {
     @Environment(\.presentationMode)
     private var presentationMode
 
+    let uploader: MediaUploader
     let sourceType: UIImagePickerController.SourceType
     let pubkey: String
     @Binding var image_upload_confirm: Bool
@@ -108,9 +109,8 @@ struct ImagePicker: UIViewControllerRepresentable {
     func makeUIViewController(context: UIViewControllerRepresentableContext<ImagePicker>) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.sourceType = sourceType
-        let mediaUploader = get_media_uploader(pubkey)
         picker.mediaTypes = ["public.image", "com.compuserve.gif"]
-        if mediaUploader.supportsVideo && !imagesOnly {
+        if uploader.supportsVideo && !imagesOnly {
             picker.mediaTypes.append("public.movie")
         }
         picker.delegate = context.coordinator
