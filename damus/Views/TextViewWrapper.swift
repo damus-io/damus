@@ -33,13 +33,13 @@ struct TextViewWrapper: UIViewRepresentable {
                                     length: uiView.selectedRange.length)
             justLoadedDraft = false
         } else {
-            if justInsertedTag {
-                selectedRange = NSRange(location: uiView.selectedRange.location + lastTagSelected.count - tagLength + 1,
+            if justMadeATagSelection {
+                selectedRange = NSRange(location: uiView.selectedRange.location + latestTaggedUsername.count - tagSearchQueryLength + 1,
                                         length: uiView.selectedRange.length)
             } else {
                 selectedRange = uiView.selectedRange
             }
-            justInsertedTag = false
+            justMadeATagSelection = false
         }
         uiView.isScrollEnabled = false
         uiView.attributedText = attributedText

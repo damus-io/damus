@@ -41,21 +41,21 @@ struct UserSearch: View {
         
         // replace tag-search word with the full-length tag selected
         let tagIndex = search.1
-        mutableString.deleteCharacters(in: NSRange(location: tagIndex, length: tagLength))
+        mutableString.deleteCharacters(in: NSRange(location: tagIndex, length: tagSearchQueryLength))
         let tagAttributedString = createUserTag(for: user, with: pk)
         mutableString.insert(tagAttributedString, at: tagIndex)
         
-        justInsertedTag = true
+        justMadeATagSelection = true
         post = mutableString
     }
 
     private func createUserTag(for user: SearchedUser, with pk: String) -> NSMutableAttributedString {
         let name = Profile.displayName(profile: user.profile, pubkey: pk).username
-        let filteredName = String(name.map{String($0) == " " ? searchCompatibleSpaceChar : $0 })
+        let filteredName = String(name.map{String($0) == " " ? search_friendly_space_character : $0 })
         let tag = "@\(filteredName)"
-        lastTagSelected = tag
-        if !searchedNames.contains(tag) {
-            searchedNames.append(tag)
+        latestTaggedUsername = tag
+        if !usernamesTaggedInPost.contains(tag) {
+            usernamesTaggedInPost.append(tag)
         }
         let tagString = "\(tag) "
         let tagAttributedString = NSMutableAttributedString(string: tagString,

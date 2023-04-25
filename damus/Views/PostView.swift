@@ -14,11 +14,11 @@ enum NostrPostResult {
 }
 
 let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Text box prompt to ask user to type their post.")
-var searchCompatibleSpaceChar = Character(.init(0x2004)!) /// this character looks identical in the UI to the 'regular' space-bar space
-var justInsertedTag = false, justLoadedDraft = false
-var lastTagSelected = ""
-var tagLength = 0
-var searchedNames = [String]()
+var search_friendly_space_character = Character(.init(0x2004)!) /// this character looks identical in the UI to the 'regular' space-bar space
+var usernamesTaggedInPost = [String]()
+var justLoadedDraft = false, justMadeATagSelection = false
+var latestTaggedUsername = ""
+var tagSearchQueryLength = 0
 
 enum PostAction {
     case replying_to(NostrEvent)
@@ -99,6 +99,7 @@ struct PostView: View {
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
         
         clear_draft()
+        usernamesTaggedInPost = []
 
         dismiss()
     }
@@ -414,9 +415,9 @@ func get_searching_string(_ post: String) -> (String,Int)? {
     
 tagLoop:
     for word in components {
-        if word.first == "@" && !searchedNames.contains(word) {
+        if word.first == "@" && !(usernamesTaggedInPost.contains(word)) {
             searching = word
-            tagLength = word.count
+            tagSearchQueryLength = word.count
             break tagLoop
         }
         tagIndex += 1 + word.count
@@ -431,7 +432,7 @@ tagLoop:
         return nil
     }
     
-    searching = String(searching.dropFirst().map{$0 == searchCompatibleSpaceChar ? Character(.init(0x0020)!) : $0 }) /// 0x0020 is the 'regular' space-bar whitespace character
+    searching = String(searching.dropFirst().map{$0 == search_friendly_space_character ? Character(.init(0x0020)!) : $0 }) /// 0x0020 is the 'regular' space-bar whitespace character
     return (searching,tagIndex)
 }
 
