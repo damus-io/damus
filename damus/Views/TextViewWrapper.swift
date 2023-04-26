@@ -29,11 +29,11 @@ struct TextViewWrapper: UIViewRepresentable {
 
     func updateUIView(_ uiView: UITextView, context: Context) {
         var selectedRange = NSRange()
-        if postModel.justLoadedDraft {
+        if postModel.willLoadDraft {
             selectedRange = NSRange(location: uiView.selectedRange.location + attributedText.string.count,
                                     length: uiView.selectedRange.length)
             DispatchQueue.main.async {
-                postModel.justLoadedDraft = false
+                postModel.willLoadDraft = false
             }
         }
         else {

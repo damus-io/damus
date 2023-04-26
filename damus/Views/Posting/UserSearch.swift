@@ -56,6 +56,8 @@ struct UserSearch: View {
 
     private func createUserTag(for user: SearchedUser, with pk: String) -> NSMutableAttributedString {
         let name = Profile.displayName(profile: user.profile, pubkey: pk).username
+        
+        //replace (" ") w/ identical-looking Character to avoid unwanted  .components  separation interrupting dynamic search
         let filteredName = String(name.map{String($0) == " " ? search_friendly_space_character : $0 })
         let tag = "@\(filteredName)"
         DispatchQueue.main.async {
@@ -75,10 +77,10 @@ struct UserSearch: View {
     }
     
     private func plainAttributedString(string: String) -> NSMutableAttributedString {
-        let tagAttributedString = NSMutableAttributedString(string: string,
+        let plainAttributedString = NSMutableAttributedString(string: string,
                                                             attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0)])
-        tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 1, length: 1))
-        return tagAttributedString
+        plainAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: plainAttributedString.length - 1, length: 1))
+        return plainAttributedString
     }
     
     var body: some View {

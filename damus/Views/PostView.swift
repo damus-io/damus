@@ -63,7 +63,7 @@ struct PostView: View {
     func cancel() {
         NotificationCenter.default.post(name: .post, object: NostrPostResult.cancel)
         DispatchQueue.main.async {
-            postModel.justLoadedDraft = true
+            postModel.willLoadDraft = true
         }
         dismiss()
     }
