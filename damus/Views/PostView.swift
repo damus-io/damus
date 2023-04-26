@@ -432,7 +432,7 @@ tagLoop:
         return nil
     }
     
-    searching = String(searching.dropFirst().map{$0 == search_friendly_space_character ? Character(.init(0x0020)!) : $0 }) /// 0x0020 is the 'regular' space-bar whitespace character
+    searching = String(searching.dropFirst().map{$0 == search_friendly_space_character ? Character(.init(0x0020)!) : $0 })  // 0x0020 is the 'regular' space-bar whitespace character
     return (searching,tagIndex)
 }
 

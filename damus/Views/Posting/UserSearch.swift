@@ -25,7 +25,8 @@ struct UserSearch: View {
     
     var users: [SearchedUser] {
         guard let contacts = damus_state.contacts.event else {
-            return search_profiles(profiles: damus_state.profiles, search: search.0) /// 0th tuple value is the search string itself
+            return search_profiles(profiles: damus_state.profiles,
+                                   search: search.0) // 0th tuple value is the search string itself
         }
         
         return search_users_for_autocomplete(profiles: damus_state.profiles, tags: contacts.tags, search: search.0)
