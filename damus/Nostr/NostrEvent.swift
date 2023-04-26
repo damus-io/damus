@@ -694,7 +694,7 @@ func generate_private_keypair(our_privkey: String, id: String, created_at: Int64
 func make_zap_request_event(keypair: FullKeypair, content: String, relays: [RelayDescriptor], target: ZapTarget, zap_type: ZapType) -> NostrEvent? {
     var tags = zap_target_to_tags(target)
     var relay_tag = ["relays"]
-    relay_tag.append(contentsOf: relays.map { $0.url.absoluteString })
+    relay_tag.append(contentsOf: relays.map { $0.url.id })
     tags.append(relay_tag)
     
     var kp = keypair

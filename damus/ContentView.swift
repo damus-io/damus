@@ -629,7 +629,7 @@ struct ContentView: View {
         
         let new_relay_filters = load_relay_filters(pubkey) == nil
         for relay in bootstrap_relays {
-            if let url = URL(string: relay) {
+            if let url = RelayURL(relay) {
                 add_new_relay(relay_filters: relay_filters, metadatas: metadatas, pool: pool, url: url, info: .rw, new_relay_filters: new_relay_filters)
             }
         }

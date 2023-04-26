@@ -14,8 +14,8 @@ public struct RelayInfo: Codable {
     static let rw = RelayInfo(read: true, write: true)
 }
 
-public struct RelayDescriptor: Codable {
-    public let url: URL
+public struct RelayDescriptor {
+    public let url: RelayURL
     public let info: RelayInfo
 }
 
@@ -79,6 +79,6 @@ enum RelayError: Error {
     case RelayNotFound
 }
 
-func get_relay_id(_ url: URL) -> String {
-    return url.absoluteString
+func get_relay_id(_ url: RelayURL) -> String {
+    return url.url.absoluteString
 }

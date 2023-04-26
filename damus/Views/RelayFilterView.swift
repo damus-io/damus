@@ -31,8 +31,8 @@ struct RelayFilterView: View {
             .padding(.top, 20)
             .padding(.bottom, 0)
         
-        List(Array(relays), id: \.url) { relay in
-            RelayToggle(state: state, timeline: timeline, relay_id: relay.url.absoluteString)
+        List(Array(relays), id: \.url.id) { relay in
+            RelayToggle(state: state, timeline: timeline, relay_id: relay.url.url.absoluteString)
         }
     }
 }

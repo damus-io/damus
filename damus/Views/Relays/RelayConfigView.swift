@@ -23,7 +23,7 @@ struct RelayConfigView: View {
     var recommended: [RelayDescriptor] {
         let rs: [RelayDescriptor] = []
         return BOOTSTRAP_RELAYS.reduce(into: rs) { xs, x in
-            if state.pool.get_relay(x) == nil, let url = URL(string: x) {
+            if state.pool.get_relay(x) == nil, let url = RelayURL(x) {
                 xs.append(RelayDescriptor(url: url, info: .rw))
             }
         }
@@ -75,7 +75,7 @@ struct RelayConfigView: View {
                                     new_relay.removeLast();
                                 }
                                 
-                                guard let url = URL(string: new_relay) else {
+                                guard let url = RelayURL(new_relay) else {
                                     return
                                 }
                                 
@@ -120,7 +120,7 @@ struct RelayConfigView: View {
             
             Section {
                 List(Array(relays), id: \.url) { relay in
-                    RelayView(state: state, relay: relay.url.absoluteString, showActionButtons: $showActionButtons)
+                    RelayView(state: state, relay: relay.url.id, showActionButtons: $showActionButtons)
                 }
             } header: {
                 HStack {
@@ -133,7 +133,7 @@ struct RelayConfigView: View {
             if recommended.count > 0 {
                 Section {
                     List(recommended, id: \.url) { r in
-                        RecommendedRelayView(damus: state, relay: r.url.absoluteString, showActionButtons: $showActionButtons)
+                        RecommendedRelayView(damus: state, relay: r.url.id, showActionButtons: $showActionButtons)
                     }
                 } header: {
                     Text(NSLocalizedString("Recommended Relays", comment: "Section title for recommend relay servers that could be added as part of configuration"))

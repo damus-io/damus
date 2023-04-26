@@ -121,7 +121,6 @@
 		4C5F9118283D88E40052CD1C /* FollowingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5F9117283D88E40052CD1C /* FollowingModel.swift */; };
 		4C633350283D40E500B1C9C3 /* HomeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C63334F283D40E500B1C9C3 /* HomeModel.swift */; };
 		4C633352283D419F00B1C9C3 /* SignalModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C633351283D419F00B1C9C3 /* SignalModel.swift */; };
-		4C649844285A952100EAE2B3 /* LocalUserConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C649843285A952100EAE2B3 /* LocalUserConfig.swift */; };
 		4C64987C286D03E000EAE2B3 /* DirectMessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C64987B286D03E000EAE2B3 /* DirectMessagesView.swift */; };
 		4C64987E286D082C00EAE2B3 /* DirectMessagesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C64987D286D082C00EAE2B3 /* DirectMessagesModel.swift */; };
 		4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */ = {isa = PBXBuildFile; productRef = 4C649880286E0EE300EAE2B3 /* secp256k1 */; };
@@ -530,7 +529,6 @@
 		4C5F9117283D88E40052CD1C /* FollowingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowingModel.swift; sourceTree = "<group>"; };
 		4C63334F283D40E500B1C9C3 /* HomeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeModel.swift; sourceTree = "<group>"; };
 		4C633351283D419F00B1C9C3 /* SignalModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalModel.swift; sourceTree = "<group>"; };
-		4C649843285A952100EAE2B3 /* LocalUserConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalUserConfig.swift; sourceTree = "<group>"; };
 		4C64987B286D03E000EAE2B3 /* DirectMessagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectMessagesView.swift; sourceTree = "<group>"; };
 		4C64987D286D082C00EAE2B3 /* DirectMessagesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectMessagesModel.swift; sourceTree = "<group>"; };
 		4C75EFA327FA577B0006080F /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
@@ -837,7 +835,6 @@
 				4C5F9117283D88E40052CD1C /* FollowingModel.swift */,
 				4C987B56283FD07F0042CE38 /* FollowersModel.swift */,
 				4C5C7E67284ED36500A22DF5 /* SearchHomeModel.swift */,
-				4C649843285A952100EAE2B3 /* LocalUserConfig.swift */,
 				4C64987D286D082C00EAE2B3 /* DirectMessagesModel.swift */,
 				4C216F372871EDE300040376 /* DirectMessageModel.swift */,
 				4C99737A28C92A9200E53835 /* ChatroomMetadata.swift */,
@@ -1572,7 +1569,6 @@
 				4C8D00CA29DF80350036AF10 /* TruncatedText.swift in Sources */,
 				4C9BB83429C12D9900FC4E37 /* EventProfileName.swift in Sources */,
 				4CB8838F296F781C00DC99E7 /* ReactionsView.swift in Sources */,
-				4C649844285A952100EAE2B3 /* LocalUserConfig.swift in Sources */,
 				4C75EFB328049D640006080F /* NostrEvent.swift in Sources */,
 				4CA2EFA0280E37AC0044ACD8 /* TimelineView.swift in Sources */,
 				4C30AC7629A5770900E2BD5A /* NotificationItemView.swift in Sources */,
@@ -2040,7 +2036,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = damus/damus.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_PREVIEWS = YES;
@@ -2087,7 +2083,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = damus/damus.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_PREVIEWS = YES;
