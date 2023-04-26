@@ -11,6 +11,7 @@ struct BookmarksView: View {
     let state: DamusState
     private let noneFilter: (NostrEvent) -> Bool = { _ in true }
     private let bookmarksTitle = NSLocalizedString("Bookmarks", comment: "Title of bookmarks view")
+    @State private var clearAllAlert: Bool = false
     
     @ObservedObject var manager: BookmarksManager
 
@@ -45,8 +46,15 @@ struct BookmarksView: View {
         .toolbar {
             if !bookmarks.isEmpty {
                 Button(NSLocalizedString("Clear All", comment: "Button for clearing bookmarks data.")) {
-                    manager.clearAll()
+                    clearAllAlert = true
                 }
+            }
+        }
+        .alert(NSLocalizedString("Are you sure you want to delete all of your bookmarks?", comment: "Alert for deleting all of the bookmarks."), isPresented: $clearAllAlert) {
+            Button(NSLocalizedString("Cancel", comment: "Cancel deleting bookmarks."), role: .cancel) {
+            }
+            Button(NSLocalizedString("Continue", comment: "Continue with bookmarks.")) {
+                manager.clearAll()
             }
         }
     }
