@@ -682,7 +682,7 @@ func make_post_tags(post_blocks: [PostBlock], tags: [[String]], silent_mentions:
 }
 
 func post_to_event(post: NostrPost, privkey: String, pubkey: String) -> NostrEvent {
-    let tags = post.references.map(refid_to_tag)
+    let tags = post.references.map(refid_to_tag) + post.tags
     let post_blocks = parse_post_blocks(content: post.content)
     let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags, silent_mentions: false)
     let content = render_blocks(blocks: post_tags.blocks)
