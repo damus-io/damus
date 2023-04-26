@@ -14,11 +14,7 @@ enum NostrPostResult {
 }
 
 let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Text box prompt to ask user to type their post.")
-var search_friendly_space_character = Character(.init(0x2004)!) /// this character looks identical in the UI to the 'regular' space-bar space
-var usernamesTaggedInPost = [String]()
-var justLoadedDraft = false, justMadeATagSelection = false
-var latestTaggedUsername = ""
-var tagSearchQueryLength = 0
+var search_friendly_space_character = Character(.init(0x2004)!) // this character looks identical in the UI to the 'regular' space-bar space
 
 enum PostAction {
     case replying_to(NostrEvent)
@@ -55,6 +51,8 @@ struct PostView: View {
 
     let action: PostAction
     let damus_state: DamusState
+    
+    @EnvironmentObject var postModel: PostModel
 
     @Environment(\.presentationMode) var presentationMode
 
@@ -64,6 +62,9 @@ struct PostView: View {
 
     func cancel() {
         NotificationCenter.default.post(name: .post, object: NostrPostResult.cancel)
+        DispatchQueue.main.async {
+            postModel.justLoadedDraft = true
+        }
         dismiss()
     }
 
@@ -99,7 +100,10 @@ struct PostView: View {
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
         
         clear_draft()
-        usernamesTaggedInPost = []
+        
+        DispatchQueue.main.async {
+            postModel.usernamesTaggedInPost = []
+        }
 
         dismiss()
     }
@@ -174,8 +178,6 @@ struct PostView: View {
             self.uploadedMedias = []
             return
         }
-        
-        justLoadedDraft = true
         self.uploadedMedias = draft.media
         self.post = draft.content
     }
@@ -402,38 +404,40 @@ struct PostView: View {
             })
         }
     }
-}
-
-func get_searching_string(_ post: String) -> (String,Int)? {
-    var characterSet = CharacterSet()
-    characterSet.insert(charactersIn: "\n")
-    characterSet.insert(charactersIn: " ")
-    let components = post.components(separatedBy: characterSet)
     
-    var searching = ""
-    var tagIndex = 0 // index of the start of a tag in a post
-    
-tagLoop:
-    for word in components {
-        if word.first == "@" && !(usernamesTaggedInPost.contains(word)) {
-            searching = word
-            tagSearchQueryLength = word.count
-            break tagLoop
+    func get_searching_string(_ post: String) -> (String,Int)? {
+        var characterSet = CharacterSet()
+        characterSet.insert(charactersIn: "\n")
+        characterSet.insert(charactersIn: " ")
+        let components = post.components(separatedBy: characterSet)
+        
+        var searching = ""
+        var tagIndex = 0 // index of the start of a tag in a post
+        
+    tagLoop:
+        for word in components {
+            if word.first == "@" && !(postModel.usernamesTaggedInPost.contains(word)) {
+                searching = word
+                DispatchQueue.main.async {
+                    postModel.tagSearchQueryLength = word.count
+                }
+                break tagLoop
+            }
+            tagIndex += 1 + word.count
         }
-        tagIndex += 1 + word.count
+        
+        guard searching.count >= 2 else {
+            return nil
+        }
+        
+        // don't include @npub... strings
+        guard searching.count != 64 else {
+            return nil
+        }
+        
+        searching = String(searching.dropFirst().map{$0 == search_friendly_space_character ? Character(.init(0x0020)!) : $0 }) // 0x0020 is the 'regular' space-bar whitespace character
+        return (searching,tagIndex)
     }
-    
-    guard searching.count >= 2 else {
-        return nil
-    }
-    
-    // don't include @npub... strings
-    guard searching.count != 64 else {
-        return nil
-    }
-    
-    searching = String(searching.dropFirst().map{$0 == search_friendly_space_character ? Character(.init(0x0020)!) : $0 })  // 0x0020 is the 'regular' space-bar whitespace character
-    return (searching,tagIndex)
 }
 
 struct PostView_Previews: PreviewProvider {
