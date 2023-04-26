@@ -9,12 +9,39 @@ import Combine
 import Foundation
 import UIKit
 
+class ImageMetadataState {
+    var state: ImageMetaProcessState
+    var meta: ImageMetadata
+    
+    init(state: ImageMetaProcessState, meta: ImageMetadata) {
+        self.state = state
+        self.meta = meta
+    }
+}
+
+enum ImageMetaProcessState {
+    case processing
+    case failed
+    case processed(UIImage)
+    
+    var img: UIImage? {
+        switch self {
+        case .processed(let img):
+            return img
+        default:
+            return nil
+        }
+    }
+}
+
 class EventCache {
     private var events: [String: NostrEvent] = [:]
     private var replies = ReplyMap()
     private var cancellable: AnyCancellable?
     private var translations: [String: TranslateStatus] = [:]
     private var artifacts: [String: NoteArtifacts] = [:]
+    // url to meta
+    private var image_metadata: [String: ImageMetadataState] = [:]
     var validation: [String: ValidationResult] = [:]
     
     //private var thread_latest: [String: Int64]
@@ -43,8 +70,16 @@ class EventCache {
         self.artifacts[evid] = artifacts
     }
     
+    func store_img_metadata(url: URL, meta: ImageMetadataState) {
+        self.image_metadata[url.absoluteString.lowercased()] = meta
+    }
+    
     func lookup_artifacts(evid: String) -> NoteArtifacts? {
         return self.artifacts[evid]
+    }
+    
+    func lookup_img_metadata(url: URL) -> ImageMetadataState? {
+        return image_metadata[url.absoluteString.lowercased()]
     }
     
     func lookup_translated_artifacts(evid: String) -> TranslateStatus? {

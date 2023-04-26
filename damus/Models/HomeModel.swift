@@ -519,6 +519,8 @@ class HomeModel: ObservableObject {
             return
         }
         
+        // TODO: will we need to process this in other places like zap request contents, etc?
+        process_image_metadata(cache: damus_state.events, ev: ev)
         damus_state.replies.count_replies(ev)
         damus_state.events.insert(ev)
 

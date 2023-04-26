@@ -25,18 +25,25 @@ struct ImageMetaDim: Equatable, StringCodable {
         "\(width)x\(height)"
     }
     
+    var size: CGSize {
+        return CGSize(width: CGFloat(self.width), height: CGFloat(self.height))
+    }
+    
     let width: Int
     let height: Int
-    
-    
+}
+
+struct ProcessedImageMetadata {
+    let blurhash: UIImage?
+    let dim: ImageMetaDim?
 }
 
 struct ImageMetadata: Equatable {
     let url: URL
-    let blurhash: String
-    let dim: ImageMetaDim
+    let blurhash: String?
+    let dim: ImageMetaDim?
     
-    init(url: URL, blurhash: String, dim: ImageMetaDim) {
+    init(url: URL, blurhash: String? = nil, dim: ImageMetaDim? = nil) {
         self.url = url
         self.blurhash = blurhash
         self.dim = dim
@@ -55,8 +62,30 @@ struct ImageMetadata: Equatable {
     }
 }
 
+func process_blurhash(blurhash: String, size: CGSize?) async -> UIImage? {
+    let res = Task.init {
+        let size = get_blurhash_size(img_size: size ?? CGSize(width: 100.0, height: 100.0))
+        guard let img = UIImage.init(blurHash: blurhash, size: size) else {
+            let noimg: UIImage? = nil
+            return noimg
+        }
+        
+        return img
+    }
+    
+    
+    return await res.value
+}
+
 func image_metadata_to_tag(_ meta: ImageMetadata) -> [String] {
-    return ["imeta", "url \(meta.url.absoluteString)", "blurhash \(meta.blurhash)", "dim \(meta.dim.to_string())"]
+    var tags = ["imeta", "url \(meta.url.absoluteString)"]
+    if let blurhash = meta.blurhash {
+        tags.append("blurhash \(blurhash)")
+    }
+    if let dim = meta.dim {
+        tags.append("dim \(dim.to_string())")
+    }
+    return tags
 }
 
 func decode_image_metadata(_ parts: [String]) -> ImageMetadata? {
@@ -65,7 +94,12 @@ func decode_image_metadata(_ parts: [String]) -> ImageMetadata? {
     var dim: ImageMetaDim? = nil
     
     for part in parts {
+        if part == "imeta" {
+            continue
+        }
+        
         let ps = part.split(separator: " ")
+        
         guard ps.count == 2 else {
             return nil
         }
@@ -81,7 +115,7 @@ func decode_image_metadata(_ parts: [String]) -> ImageMetadata? {
         }
     }
     
-    guard let blurhash, let dim, let url else {
+    guard let url else {
         return nil
     }
 
@@ -107,16 +141,18 @@ extension UIImage {
     }
 }
 
+func get_blurhash_size(img_size: CGSize) -> CGSize {
+    return CGSize(width: 100.0, height: (100.0/img_size.width) * img_size.height)
+}
+
 func calculate_blurhash(img: UIImage) async -> String? {
     guard img.size.height > 0 else {
         return nil
     }
     
     let res = Task.init {
-        let sw: Double = 100
-        let sh: Double = (100.0/img.size.width) * img.size.height
-        
-        let smaller = img.resized(to: CGSize(width: sw, height: sh))
+        let bhs = get_blurhash_size(img_size: img.size)
+        let smaller = img.resized(to: bhs)
         
         guard let blurhash = smaller.blurHash(numberOfComponents: (5,5)) else {
             let meta: String? = nil
@@ -130,9 +166,43 @@ func calculate_blurhash(img: UIImage) async -> String? {
 }
 
 func calculate_image_metadata(url: URL, img: UIImage, blurhash: String) -> ImageMetadata {
-    let width = Int(round(img.size.width * img.scale))
-    let height = Int(round(img.size.height * img.scale))
+    let width = Int(img.size.width)
+    let height = Int(img.size.height)
     let dim = ImageMetaDim(width: width, height: height)
     
     return ImageMetadata(url: url, blurhash: blurhash, dim: dim)
+}
+
+
+func process_image_metadata(cache: EventCache, ev: NostrEvent) {
+    for tag in ev.tags {
+        guard tag.count >= 2 && tag[0] == "imeta" else {
+            continue
+        }
+        
+        guard let meta = ImageMetadata(tag: tag) else {
+            continue
+        }
+        
+        guard cache.lookup_img_metadata(url: meta.url) == nil else {
+            continue
+        }
+        
+        let state = ImageMetadataState(state: .processing, meta: meta)
+        cache.store_img_metadata(url: meta.url, meta: state)
+        
+        if let blurhash = meta.blurhash {
+            Task.init {
+                let img = await process_blurhash(blurhash: blurhash, size: meta.dim?.size)
+                
+                DispatchQueue.main.async {
+                    if let img {
+                        state.state = .processed(img)
+                    } else {
+                        state.state = .failed
+                    }
+                }
+            }
+        }
+    }
 }
