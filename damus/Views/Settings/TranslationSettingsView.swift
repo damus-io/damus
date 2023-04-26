@@ -66,7 +66,7 @@ struct TranslationSettingsView: View {
                 }
 
                 if settings.translation_service == .nokyctranslate {
-                    SecureField(NSLocalizedString("API Key (required)", comment: "Prompt for optional entry of API Key to use translation server."), text: $settings.nokyctranslate_api_key)
+                    SecureField(NSLocalizedString("API Key (required)", comment: "Prompt for required entry of API Key to use translation server."), text: $settings.nokyctranslate_api_key)
                         .disableAutocorrection(true)
                         .disabled(settings.translation_service != .nokyctranslate)
                         .autocapitalization(UITextAutocapitalizationType.none)
