@@ -9,7 +9,6 @@ import SwiftUI
 
 struct TextViewWrapper: UIViewRepresentable {
     @Binding var attributedText: NSMutableAttributedString
-    @EnvironmentObject var postModel: PostModel
     
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
@@ -29,22 +28,18 @@ struct TextViewWrapper: UIViewRepresentable {
 
     func updateUIView(_ uiView: UITextView, context: Context) {
         var selectedRange = NSRange()
-        if postModel.justLoadedDraft {
+        if justLoadedDraft {
             selectedRange = NSRange(location: uiView.selectedRange.location + attributedText.string.count,
                                     length: uiView.selectedRange.length)
-            DispatchQueue.main.async {
-                postModel.justLoadedDraft = false
-            }
+            justLoadedDraft = false
         } else {
-            if postModel.justMadeATagSelection {
-                selectedRange = NSRange(location: uiView.selectedRange.location + postModel.latestTaggedUsername.count - postModel.tagSearchQueryLength + 1,
+            if justMadeATagSelection {
+                selectedRange = NSRange(location: uiView.selectedRange.location + latestTaggedUsername.count - tagSearchQueryLength + 1,
                                         length: uiView.selectedRange.length)
             } else {
                 selectedRange = uiView.selectedRange
             }
-            DispatchQueue.main.async {
-                postModel.justMadeATagSelection = false
-            }
+            justMadeATagSelection = false
         }
         uiView.isScrollEnabled = false
         uiView.attributedText = attributedText
@@ -64,9 +59,7 @@ struct TextViewWrapper: UIViewRepresentable {
         }
 
         func textViewDidChange(_ textView: UITextView) {
-            DispatchQueue.main.async { [weak self] in
-                self?.attributedText = NSMutableAttributedString(attributedString: textView.attributedText)
-            }
+            attributedText = NSMutableAttributedString(attributedString: textView.attributedText)
         }
     }
 }

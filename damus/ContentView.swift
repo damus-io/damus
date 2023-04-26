@@ -48,14 +48,6 @@ enum FilterState : Int {
     }
 }
 
-class PostModel: ObservableObject {
-    @Published var usernamesTaggedInPost = [String]()
-    @Published var justLoadedDraft = false
-    @Published var justMadeATagSelection = false
-    @Published var latestTaggedUsername = ""
-    @Published var tagSearchQueryLength = 0
-}
-
 struct ContentView: View {
     let keypair: Keypair
     
@@ -87,7 +79,6 @@ struct ContentView: View {
     @State var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
-    @StateObject var postModel: PostModel = PostModel()
     
     // connect retry timer
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
@@ -317,7 +308,6 @@ struct ContentView: View {
                 MaybeReportView(target: target)
             case .post(let action):
                 PostView(action: action, damus_state: damus_state!)
-                    .environmentObject(postModel)
             case .event:
                 EventDetailView()
             case .filter:
