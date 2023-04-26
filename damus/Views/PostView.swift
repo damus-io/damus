@@ -88,6 +88,8 @@ struct PostView: View {
         var content = self.post.string.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 
         let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
+        
+        let img_meta_tags = uploadedMedias.compactMap { $0.metadata?.to_tag() }
 
         content.append(" " + imagesString + " ")
 
@@ -95,7 +97,7 @@ struct PostView: View {
             content.append(" nostr:" + id)
         }
         
-        let new_post = NostrPost(content: content, references: references, kind: kind)
+        let new_post = NostrPost(content: content, references: references, kind: kind, tags: img_meta_tags)
 
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
         
@@ -258,6 +260,8 @@ struct PostView: View {
         let uploader = damus_state.settings.default_media_uploader
         Task.init {
             let img = getImage(media: media)
+            print("img size w:\(img.size.width) h:\(img.size.height)")
+            async let blurhash = calculate_blurhash(img: img)
             let res = await image_upload.start(media: media, uploader: uploader)
             
             switch res {
@@ -266,7 +270,9 @@ struct PostView: View {
                     self.error = "Error uploading image :("
                     return
                 }
-                let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, representingImage: img)
+                let blurhash = await blurhash
+                let meta = blurhash.map { bh in calculate_image_metadata(url: url, img: img, blurhash: bh) }
+                let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, representingImage: img, metadata: meta)
                 uploadedMedias.append(uploadedMedia)
                 
             case .failed(let error):
@@ -526,6 +532,7 @@ struct UploadedMedia: Equatable {
     let localURL: URL
     let uploadedURL: URL
     let representingImage: UIImage
+    let metadata: ImageMetadata?
 }
 
 
