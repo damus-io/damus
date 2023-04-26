@@ -22,6 +22,7 @@ struct UserSearch: View {
     let search: (String,Int)
 
     @Binding var post: NSMutableAttributedString
+    @EnvironmentObject var postModel: PostModel
     
     var users: [SearchedUser] {
         guard let contacts = damus_state.contacts.event else {
@@ -41,21 +42,26 @@ struct UserSearch: View {
         
         // replace tag-search word with the full-length tag selected
         let tagIndex = search.1
-        mutableString.deleteCharacters(in: NSRange(location: tagIndex, length: tagSearchQueryLength))
+        mutableString.deleteCharacters(in: NSRange(location: tagIndex,
+                                                   length: postModel.tagSearchQueryLength))
         let tagAttributedString = createUserTag(for: user, with: pk)
         mutableString.insert(tagAttributedString, at: tagIndex)
         
-        justMadeATagSelection = true
-        post = mutableString
+        DispatchQueue.main.async {
+            postModel.justMadeATagSelection = true
+            post = mutableString
+        }
     }
 
     private func createUserTag(for user: SearchedUser, with pk: String) -> NSMutableAttributedString {
         let name = Profile.displayName(profile: user.profile, pubkey: pk).username
         let filteredName = String(name.map{String($0) == " " ? search_friendly_space_character : $0 })
         let tag = "@\(filteredName)"
-        latestTaggedUsername = tag
-        if !usernamesTaggedInPost.contains(tag) {
-            usernamesTaggedInPost.append(tag)
+        DispatchQueue.main.async {
+            postModel.latestTaggedUsername = tag
+            if !postModel.usernamesTaggedInPost.contains(tag) {
+                postModel.usernamesTaggedInPost.append(tag)
+            }
         }
         let tagString = "\(tag) "
         let tagAttributedString = NSMutableAttributedString(string: tagString,
