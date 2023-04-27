@@ -100,6 +100,7 @@ struct ImageCarousel: View {
                case .processed(let blurhash) = meta.state {
                 Image(uiImage: blurhash)
                     .resizable()
+                    .opacity(0.8)
                     .frame(width: geo_size.width * UIScreen.main.scale, height: self.height * UIScreen.main.scale)
             } else {
                 EmptyView()
@@ -127,7 +128,7 @@ struct ImageCarousel: View {
                                 .callbackQueue(.dispatch(.global(qos:.background)))
                                 .backgroundDecode(true)
                                 .imageContext(.note, disable_animation: state.settings.disable_animation)
-                                .image_fade(duration: 1.0)
+                                .image_fade(duration: 0.25)
                                 .cancelOnDisappear(true)
                                 .configure { view in
                                     view.framePreloadCount = 3
