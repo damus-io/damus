@@ -100,7 +100,6 @@ struct ImageCarousel: View {
                case .processed(let blurhash) = meta.state {
                 Image(uiImage: blurhash)
                     .resizable()
-                    .opacity(0.8)
                     .frame(width: geo_size.width * UIScreen.main.scale, height: self.height * UIScreen.main.scale)
             } else {
                 EmptyView()
