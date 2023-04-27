@@ -50,8 +50,8 @@ enum FilterState : Int {
 
 class PostModel: ObservableObject {
     var usernamesTaggedInPost = [String]()
-    var tagSearchQueryLength = 0
     var latestTaggedUsername = ""
+    var tagCharIndex = 0, tagSearchQueryLength = 0
     var justMadeATagSelection = false, willLoadDraft = false
 }
 

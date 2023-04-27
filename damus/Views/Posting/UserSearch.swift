@@ -19,18 +19,17 @@ struct SearchedUser: Identifiable {
 
 struct UserSearch: View {
     let damus_state: DamusState
-    let search: (String,Int)
+    let search: String
 
     @Binding var post: NSMutableAttributedString
     @EnvironmentObject var postModel: PostModel
     
     var users: [SearchedUser] {
         guard let contacts = damus_state.contacts.event else {
-            return search_profiles(profiles: damus_state.profiles,
-                                   search: search.0) // 0th tuple value is the search string itself
+            return search_profiles(profiles: damus_state.profiles, search: search)
         }
         
-        return search_users_for_autocomplete(profiles: damus_state.profiles, tags: contacts.tags, search: search.0)
+        return search_users_for_autocomplete(profiles: damus_state.profiles, tags: contacts.tags, search: search)
     }
     
     func on_user_tapped(user: SearchedUser) {
@@ -42,10 +41,9 @@ struct UserSearch: View {
         mutableString.append(post)
         
         // replace tag-search word with the full-length tag selected
-        let tagIndex = search.1
-        mutableString.deleteCharacters(in: NSRange(location: tagIndex, length: postModel.tagSearchQueryLength))
+        mutableString.deleteCharacters(in: NSRange(location: postModel.tagCharIndex, length: postModel.tagSearchQueryLength))
         let tagAttributedString = createUserTag(for: user, with: pk)
-        mutableString.insert(tagAttributedString, at: tagIndex)
+        mutableString.insert(tagAttributedString, at: postModel.tagCharIndex)
         
         postModel.justMadeATagSelection = true
         post = mutableString
@@ -96,7 +94,7 @@ struct UserSearch: View {
 }
 
 struct UserSearch_Previews: PreviewProvider {
-    static let search: (String,Int) = ("jb55",0)
+    static let search: String = "jb55"
     @State static var post: NSMutableAttributedString = NSMutableAttributedString(string: "some @jb55")
     
     static var previews: some View {

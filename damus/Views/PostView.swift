@@ -406,23 +406,24 @@ struct PostView: View {
         }
     }
     
-    func get_searching_string(_ post: String) -> (String,Int)? {
-        var characterSet = CharacterSet()
-        characterSet.insert(charactersIn: "\n")
-        characterSet.insert(charactersIn: " ")
-        let components = post.components(separatedBy: characterSet)
-        
-        var searching = ""
-        var tagIndex = 0 // index of the start of a tag in a post
-        
-    tagLoop:
+    func get_searching_string(_ post: String) -> String? {
+            var characterSet = CharacterSet()
+            characterSet.insert(charactersIn: "\n")
+            characterSet.insert(charactersIn: " ")
+            let components = post.components(separatedBy: characterSet)
+            
+            var searching = ""
+            postModel.tagCharIndex = 0 // index of the start of a tag in a post
+            
+        tagLoop:
+
         for word in components {
             if word.first == "@" && !(postModel.usernamesTaggedInPost.contains(word)) {
                 searching = word
                 postModel.tagSearchQueryLength = word.count
                 break tagLoop
             }
-            tagIndex += 1 + word.count
+            postModel.tagCharIndex += 1 + word.count
         }
         
         guard searching.count >= 2 else {
@@ -435,7 +436,7 @@ struct PostView: View {
         }
         
         searching = String(searching.dropFirst().map{$0 == search_friendly_space_character ? Character(.init(0x0020)!) : $0 }) // 0x0020 is the 'regular' space-bar whitespace character
-        return (searching,tagIndex)
+        return searching
     }
 }
 
