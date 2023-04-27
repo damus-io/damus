@@ -41,17 +41,17 @@ enum ImageShape {
 // MARK: - Image Carousel
 struct ImageCarousel: View {
     var urls: [URL]
-    
     let evid: String
     let previews: PreviewCache
-    
     let disable_animation: Bool
-    
+
     @State private var open_sheet: Bool = false
     @State private var current_url: URL? = nil
     @State private var image_fill: ImageFill? = nil
     @State private var fillHeight: CGFloat = 350
     @State private var maxHeight: CGFloat = UIScreen.main.bounds.height * 0.85
+    @State private var firstImageHeight: CGFloat = UIScreen.main.bounds.height * 0.85
+    @State private var currentImageHeight: CGFloat?
     @State private var selectedIndex = 0
     
     init(previews: PreviewCache, evid: String, urls: [URL], disable_animation: Bool) {
@@ -71,48 +71,58 @@ struct ImageCarousel: View {
     var height: CGFloat {
         image_fill?.height ?? 100
     }
-    
+
     var body: some View {
         VStack {
             TabView(selection: $selectedIndex) {
                 ForEach(urls.indices, id: \.self) { index in
-                    Rectangle()
-                        .foregroundColor(Color.clear)
-                        .overlay {
-                            GeometryReader { geo in
-                                KFAnimatedImage(urls[index])
-                                    .callbackQueue(.dispatch(.global(qos:.background)))
-                                    .backgroundDecode(true)
-                                    .imageContext(.note, disable_animation: disable_animation)
-                                    .cancelOnDisappear(true)
-                                    .configure { view in
-                                        view.framePreloadCount = 3
-                                    }
-                                    .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
-                                        previews.cache_image_meta(evid: evid, image_fill: fill)
-                                        image_fill = fill
-                                    }
-                                    .aspectRatio(contentMode: filling ? .fill : .fit)
-                                    .tabItem {
-                                        Text(urls[index].absoluteString)
-                                    }
-                                    .id(urls[index].absoluteString)
+                    ZStack {
+                        Rectangle()
+                            .foregroundColor(Color.clear)
+                            .overlay {
+                                GeometryReader { geo in
+                                    KFAnimatedImage(urls[index])
+                                        .callbackQueue(.dispatch(.global(qos:.background)))
+                                        .backgroundDecode(true)
+                                        .imageContext(.note, disable_animation: disable_animation)
+                                        .cancelOnDisappear(true)
+                                        .configure { view in
+                                            view.framePreloadCount = 3
+                                        }
+                                        .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
+                                            previews.cache_image_meta(evid: evid, image_fill: fill)
+                                            image_fill = fill
+                                            if index == 0 {
+                                                firstImageHeight = fill.height
+                                                //maxHeight = firstImageHeight ?? maxHeight
+                                            } else {
+                                                //maxHeight = firstImageHeight ?? fill.height
+                                            }
+                                        }
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                                        .tabItem {
+                                            Text(urls[index].absoluteString)
+                                        }
+                                        .id(urls[index].absoluteString)
+                                        .padding(0)
+                                }
                             }
-                        }
-                        .tag(index)
+                            .tag(index)
+                            .background(Color("DamusDarkGrey"))
+                        
+                        CarouselImageCounter(urls: urls, selectedIndex: $selectedIndex)
+                    }
                 }
             }
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             .fullScreenCover(isPresented: $open_sheet) {
                 ImageView(urls: urls, disable_animation: disable_animation)
             }
-            .frame(height: height)
+            .frame(height: firstImageHeight)
             .onTapGesture {
                 open_sheet = true
             }
-            .onChange(of: selectedIndex) { value in
-                            selectedIndex = value
-                        }
             .tabViewStyle(PageTabViewStyle())
             
             // This is our custom carousel image indicator
@@ -139,6 +149,34 @@ struct CarouselDotsView: View {
                 }
             }
             .padding(.top, CGFloat(8))
+            .id(UUID())
+        }
+    }
+}
+
+// MARK: - Carousel Image Counter
+struct CarouselImageCounter: View {
+    let urls: [URL]
+    @Binding var selectedIndex: Int
+    
+    var body: some View {
+        if urls.count > 1 {
+            VStack {
+                HStack {
+                    Text("\(selectedIndex + 1)/\(urls.count)")
+                        .foregroundColor(.white)
+                        .padding(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+                        .background(
+                            RoundedRectangle(cornerRadius: 40)
+                                .foregroundColor(Color("DamusDarkGrey"))
+                                .opacity(0.40)
+                        )
+                        .padding(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12))
+                    
+                    Spacer()
+                }
+                Spacer()
+            }
         }
     }
 }
@@ -164,12 +202,10 @@ extension KFOptionSetter {
     }
 }
 
-
 public struct ImageFill {
     let filling: Bool?
     let height: CGFloat
         
-    
     static func determine_image_shape(_ size: CGSize) -> ImageShape {
         guard size.height > 0 else {
             return .unknown
@@ -202,6 +238,7 @@ public struct ImageFill {
     }
 }
 
+// MARK: - Preview Provider
 struct ImageCarousel_Previews: PreviewProvider {
     static var previews: some View {
         ImageCarousel(previews: test_damus_state().previews, evid: "evid", urls: [URL(string: "https://jb55.com/red-me.jpg")!,URL(string: "https://jb55.com/red-me.jpg")!], disable_animation: false)
