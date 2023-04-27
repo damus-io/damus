@@ -62,9 +62,7 @@ struct PostView: View {
 
     func cancel() {
         NotificationCenter.default.post(name: .post, object: NostrPostResult.cancel)
-        DispatchQueue.main.async {
-            postModel.willLoadDraft = true
-        }
+        postModel.willLoadDraft = true
         dismiss()
     }
 
@@ -102,10 +100,7 @@ struct PostView: View {
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
         
         clear_draft()
-        
-        DispatchQueue.main.async {
-            postModel.usernamesTaggedInPost = []
-        }
+        postModel.usernamesTaggedInPost = []
 
         dismiss()
     }
@@ -424,9 +419,7 @@ struct PostView: View {
         for word in components {
             if word.first == "@" && !(postModel.usernamesTaggedInPost.contains(word)) {
                 searching = word
-                DispatchQueue.main.async {
-                    postModel.tagSearchQueryLength = word.count
-                }
+                postModel.tagSearchQueryLength = word.count
                 break tagLoop
             }
             tagIndex += 1 + word.count

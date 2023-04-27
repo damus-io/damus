@@ -48,10 +48,8 @@ struct UserSearch: View {
         let tagAttributedString = createUserTag(for: user, with: pk)
         mutableString.insert(tagAttributedString, at: tagIndex)
         
-        DispatchQueue.main.async {
-            postModel.justMadeATagSelection = true
-            post = mutableString
-        }
+        postModel.justMadeATagSelection = true
+        post = mutableString
     }
 
     private func createUserTag(for user: SearchedUser, with pk: String) -> NSMutableAttributedString {
@@ -59,12 +57,11 @@ struct UserSearch: View {
         
         //replace (" ") w/ identical-looking Character to avoid unwanted .components separation that would interrupt dynamic search
         let filteredName = String(name.map{String($0) == " " ? search_friendly_space_character : $0 })
+        
         let tag = "@\(filteredName)"
-        DispatchQueue.main.async {
-            postModel.latestTaggedUsername = tag
-            if !postModel.usernamesTaggedInPost.contains(tag) {
-                postModel.usernamesTaggedInPost.append(tag)
-            }
+        postModel.latestTaggedUsername = tag
+        if !postModel.usernamesTaggedInPost.contains(tag) {
+            postModel.usernamesTaggedInPost.append(tag)
         }
         let tagString = "\(tag) "
         let tagAttributedString = NSMutableAttributedString(string: tagString,

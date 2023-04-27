@@ -43,9 +43,7 @@ struct TextViewWrapper: UIViewRepresentable {
             } else {
                 selectedRange = uiView.selectedRange
             }
-            DispatchQueue.main.async {
-                postModel.justMadeATagSelection = false
-            }
+            postModel.justMadeATagSelection = false
         }
         uiView.isScrollEnabled = false
         uiView.attributedText = attributedText
@@ -65,9 +63,7 @@ struct TextViewWrapper: UIViewRepresentable {
         }
 
         func textViewDidChange(_ textView: UITextView) {
-            DispatchQueue.main.async { [weak self] in
-                self?.attributedText = NSMutableAttributedString(attributedString: textView.attributedText)
-            }
+            attributedText = NSMutableAttributedString(attributedString: textView.attributedText)
         }
     }
 }
