@@ -43,8 +43,7 @@ struct UserSearch: View {
         
         // replace tag-search word with the full-length tag selected
         let tagIndex = search.1
-        mutableString.deleteCharacters(in: NSRange(location: tagIndex,
-                                                   length: postModel.tagSearchQueryLength))
+        mutableString.deleteCharacters(in: NSRange(location: tagIndex, length: postModel.tagSearchQueryLength))
         let tagAttributedString = createUserTag(for: user, with: pk)
         mutableString.insert(tagAttributedString, at: tagIndex)
         
@@ -71,13 +70,6 @@ struct UserSearch: View {
         tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 1, length: 1))
         
         return tagAttributedString
-    }
-    
-    private func plainAttributedString(string: String) -> NSMutableAttributedString {
-        let plainAttributedString = NSMutableAttributedString(string: string,
-                                                            attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0)])
-        plainAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: plainAttributedString.length - 1, length: 1))
-        return plainAttributedString
     }
     
     var body: some View {

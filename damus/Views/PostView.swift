@@ -14,7 +14,7 @@ enum NostrPostResult {
 }
 
 let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Text box prompt to ask user to type their post.")
-var search_friendly_space_character = Character(.init(0x2004)!) // this character looks identical in the UI to the 'regular' space-bar space
+let search_friendly_space_character = Character(.init(0x2004)!) // this character looks identical in the UI to the 'regular' space-bar space
 
 enum PostAction {
     case replying_to(NostrEvent)
