@@ -57,7 +57,7 @@ func hashtag_str(_ htag: String) -> CompatibleText {
         displayText = htag
         displayColor = DamusColors.purple
         imageOffset = nil
-        imageName = lowertag
+        imageName = nil
     }
     
     var attributedString = AttributedString(stringLiteral: "#\(displayText)")
@@ -66,12 +66,12 @@ func hashtag_str(_ htag: String) -> CompatibleText {
        
     var text = Text(attributedString)
     
-    if let name = imageName, let img = UIImage(named: "\(name)-hashtag") {
+    if let imageName = imageName, let img = UIImage(named: "\(imageName)-hashtag") {
         attributedString = attributedString + " "
         attributed_string_attach_icon(&attributedString, img: img)
         
         text = Text(attributedString)
-        let img = Image("\(name)-hashtag")
+        let img = Image("\(imageName)-hashtag")
         text = text + Text("\(img)").baselineOffset(imageOffset ?? 0.0)
     }
     
