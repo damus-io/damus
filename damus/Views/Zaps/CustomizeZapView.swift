@@ -147,7 +147,7 @@ struct CustomizeZapView: View {
                    self.custom_amount_sats = nil
                }
             }
-            Text("sats", comment: "Shortened form of satoshi, display unit of measure where 1,000,000,000 satoshis is 1 Bitcoin. Used to indicate how many sats will be zapped to a note, configured through the custom zap view.")
+            Text(custom_amount_sats == 1 ? "sat" : "sats", comment: "Shortened form of satoshi, display unit of measure where 1,000,000,000 satoshis is 1 Bitcoin. Used to indicate how many sats will be zapped to a note, configured through the custom zap view.")
                 .font(.system(size: 18, weight: .heavy))
         }
     }
