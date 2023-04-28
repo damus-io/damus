@@ -12,6 +12,8 @@ struct SideMenuView: View {
     @Binding var isSidebarVisible: Bool
     @State var confirm_logout: Bool = false
     
+    private let nfcWriter = NFCWriter()
+    
     @State private var showQRCode = false
     
     @Environment(\.colorScheme) var colorScheme
@@ -82,6 +84,7 @@ struct SideMenuView: View {
                         
                         ScrollView {
                             VStack(spacing: verticalSpacing) {
+                                // MARK: Profile
                                 NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
                                     navLabel(title: NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), systemImage: "person")
                                 }
@@ -91,22 +94,27 @@ struct SideMenuView: View {
                                     navLabel(title: NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), systemImage: "bolt")
                                 }
                                 */
-                                 
+                                
+                                // MARK: Muted
                                 NavigationLink(destination: MutelistView(damus_state: damus_state, users: get_mutelist_users(damus_state.contacts.mutelist) )) {
                                     navLabel(title: NSLocalizedString("Muted", comment: "Sidebar menu label for muted users view."), systemImage: "exclamationmark.octagon")
                                 }
                                 
+                                // MARK: Relays
                                 NavigationLink(destination: RelayConfigView(state: damus_state)) {
                                     navLabel(title: NSLocalizedString("Relays", comment: "Sidebar menu label for Relays view."), systemImage: "network")
                                 }
                                 
+                                // MARK: Bookmarks
                                 NavigationLink(destination: BookmarksView(state: damus_state)) {
                                     navLabel(title: NSLocalizedString("Bookmarks", comment: "Sidebar menu label for Bookmarks view."), systemImage: "bookmark")
                                 }
                                 
+                                // MARK: Settings
                                 NavigationLink(destination: ConfigView(state: damus_state)) {
                                     navLabel(title: NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), systemImage: "gear")
                                 }
+                                
                             }
                             .labelStyle(SideMenuLabelStyle())
                             .padding([.top, .bottom], verticalSpacing)
@@ -119,6 +127,7 @@ struct SideMenuView: View {
                     Divider()
                     
                     HStack() {
+                        // MARK: Sign-out
                         Button(action: {
                             //ConfigView(state: damus_state)
                             if damus_state.keypair.privkey == nil {
@@ -135,6 +144,19 @@ struct SideMenuView: View {
                         
                         Spacer()
                         
+                        // MARK: NFC Tool
+                        Button(action: {
+                            if let urlComponent = URLComponents(string: "nostr:" + (bech32_pubkey(damus_state.pubkey) ?? damus_state.pubkey).lowercased()) {
+                                nfcWriter.writeNDEFMessage(payload: urlComponent)
+                                nfcWriter.beginSession()
+                            }
+                        }, label: {
+                            Label("", systemImage: "sensor.tag.radiowaves.forward")
+                                .font(.title)
+                                .foregroundColor(textColor())
+                        })
+                        
+                        // MARK: QR Code
                         Button(action: {
                             showQRCode.toggle()
                         }, label: {
@@ -189,6 +211,7 @@ struct SideMenuView: View {
     }
 }
 
+// MARK: - Preview Provider
 struct Previews_SideMenuView_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state()

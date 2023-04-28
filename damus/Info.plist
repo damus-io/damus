@@ -41,6 +41,8 @@
 		<string>walletofsatoshi</string>
 		<string>blixtwallet</string>
 	</array>
+	<key>NFCReaderUsageDescription</key>
+	<string>The NFC functionality is used to write your nPub to an NFC chip for in-person zapping.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
