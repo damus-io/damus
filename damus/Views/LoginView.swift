@@ -36,6 +36,7 @@ struct LoginView: View {
     @State var key: String = ""
     @State var is_pubkey: Bool = false
     @State var error: String? = nil
+    @State private var credential_handler = CredentialHandler()
 
     func get_error(parsed_key: ParsedKey?) -> String? {
         if self.error != nil {
@@ -43,85 +44,12 @@ struct LoginView: View {
         }
 
         if !key.isEmpty && parsed_key == nil {
-            return "Invalid key"
+            return LoginError.invalid_key.errorDescription
         }
 
         return nil
     }
-
-    func process_login(_ key: ParsedKey, is_pubkey: Bool) -> Bool {
-        switch key {
-        case .priv(let priv):
-            do {
-                try save_privkey(privkey: priv)
-            } catch {
-                return false
-            }
-            
-            guard let pk = privkey_to_pubkey(privkey: priv) else {
-                return false
-            }
-            save_pubkey(pubkey: pk)
-
-        case .pub(let pub):
-            do {
-                try clear_saved_privkey()
-            } catch {
-                return false
-            }
-            
-            save_pubkey(pubkey: pub)
-
-        case .nip05(let id):
-            Task.init {
-                guard let nip05 = await get_nip05_pubkey(id: id) else {
-                    self.error = "Could not fetch pubkey"
-                    return
-                }
-
-                // this is a weird way to login anyways
-                /*
-                var bootstrap_relays = load_bootstrap_relays(pubkey: nip05.pubkey)
-                for relay in nip05.relays {
-                    if !(bootstrap_relays.contains { $0 == relay }) {
-                        bootstrap_relays.append(relay)
-                    }
-                }
-                 */
-                save_pubkey(pubkey: nip05.pubkey)
-
-                notify(.login, ())
-            }
-
-
-        case .hex(let hexstr):
-            if is_pubkey {
-                do {
-                    try clear_saved_privkey()
-                } catch {
-                    return false
-                }
-                
-                save_pubkey(pubkey: hexstr)
-            } else {
-                do {
-                    try save_privkey(privkey: hexstr)
-                } catch {
-                    return false
-                }
-                
-                guard let pk = privkey_to_pubkey(privkey: hexstr) else {
-                    return false
-                }
-                save_pubkey(pubkey: pk)
-            }
-        }
-
-    notify(.login, ())
-    return true
-}
-
-
+    
     var body: some View {
         ZStack(alignment: .top) {
             DamusGradient()
@@ -163,13 +91,20 @@ struct LoginView: View {
 
                 if let p = parsed {
                     DamusWhiteButton(NSLocalizedString("Login", comment: "Button to log into account.")) {
-                        if !process_login(p, is_pubkey: self.is_pubkey) {
-                            self.error = NSLocalizedString("Invalid key", comment: "Error message indicating that an invalid account key was entered for login.")
+                        Task {
+                            do {
+                                try await process_login(p, is_pubkey: is_pubkey)
+                            } catch {
+                                self.error = error.localizedDescription
+                            }
                         }
                     }
                 }
             }
             .padding()
+        }
+        .onAppear {
+            credential_handler.check_credentials()
         }
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackNav())
@@ -212,6 +147,71 @@ func parse_key(_ thekey: String) -> ParsedKey? {
     }
 
     return nil
+}
+
+enum LoginError: LocalizedError {
+    case invalid_key
+    case nip05_failed
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalid_key:
+            return NSLocalizedString("Invalid key", comment: "Error message indicating that an invalid account key was entered for login.")
+        case .nip05_failed:
+            return "Could not fetch pubkey"
+        }
+    }
+}
+
+func process_login(_ key: ParsedKey, is_pubkey: Bool) async throws {
+    switch key {
+    case .priv(let priv):
+        try handle_privkey(priv)
+    case .pub(let pub):
+        try clear_saved_privkey()
+        save_pubkey(pubkey: pub)
+
+    case .nip05(let id):
+        guard let nip05 = await get_nip05_pubkey(id: id) else {
+            throw LoginError.nip05_failed
+        }
+        
+        // this is a weird way to login anyways
+        /*
+         var bootstrap_relays = load_bootstrap_relays(pubkey: nip05.pubkey)
+         for relay in nip05.relays {
+         if !(bootstrap_relays.contains { $0 == relay }) {
+         bootstrap_relays.append(relay)
+         }
+         }
+         */
+        save_pubkey(pubkey: nip05.pubkey)
+
+    case .hex(let hexstr):
+        if is_pubkey {
+            try clear_saved_privkey()
+            save_pubkey(pubkey: hexstr)
+        } else {
+            try handle_privkey(hexstr)
+        }
+    }
+    
+    func handle_privkey(_ privkey: String) throws {
+        try save_privkey(privkey: privkey)
+        
+        guard let pk = privkey_to_pubkey(privkey: privkey) else {
+            throw LoginError.invalid_key
+        }
+        
+        if let pub = bech32_pubkey(pk), let priv = bech32_privkey(privkey) {
+            CredentialHandler().save_credential(pubkey: pub, privkey: priv)
+        }
+        save_pubkey(pubkey: pk)
+    }
+    
+    await MainActor.run {
+        notify(.login, ())
+    }
 }
 
 struct NIP05Result: Decodable {

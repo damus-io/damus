@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Security
 
 struct SaveKeysView: View {
     let account: CreateAccountModel
@@ -15,6 +16,8 @@ struct SaveKeysView: View {
     @State var priv_copied: Bool = false
     @State var loading: Bool = false
     @State var error: String? = nil
+    
+    @State private var credential_handler = CredentialHandler()
 
     @FocusState var pubkey_focused: Bool
     @FocusState var privkey_focused: Bool
@@ -96,6 +99,8 @@ struct SaveKeysView: View {
         }
 
         self.pool.register_handler(sub_id: "signup", handler: handle_event)
+        
+        credential_handler.save_credential(pubkey: account.pubkey_bech32, privkey: account.privkey_bech32)
         
         self.loading = true
         
