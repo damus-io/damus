@@ -10,59 +10,69 @@ import SwiftUI
 
 struct CustomHashtag {
     let name: String
+    let display: String
     let offset: CGFloat?
     let color: Color?
     
-    init(name: String, color: Color? = nil, offset: CGFloat? = nil) {
+    init(name: String, display: String, color: Color? = nil, offset: CGFloat? = nil) {
         self.name = name
+        self.display = display
         self.color = color
         self.offset = offset
     }
-    
-    static let coffee = CustomHashtag(name: "coffee", color: DamusColors.brown, offset: -1.0)
-    static let bitcoin = CustomHashtag(name: "bitcoin", color: Color.orange, offset: -3.0)
-    static let nostr = CustomHashtag(name: "nostr", color: DamusColors.purple, offset: -2.0)
-    static let plebchain = CustomHashtag(name: "plebchain", color: DamusColors.deepPurple, offset: -3.0)
-    static let zap = CustomHashtag(name: "zap", color: DamusColors.yellow, offset: -4.0)
 }
 
-
 let custom_hashtags: [String: CustomHashtag] = [
-    "bitcoin": CustomHashtag.bitcoin,
-    "btc": CustomHashtag.bitcoin,
-    "nostr": CustomHashtag.nostr,
-    "coffee": CustomHashtag.coffee,
-    "coffeechain": CustomHashtag.coffee,
-    "plebchain": CustomHashtag.plebchain,
-    "zap": CustomHashtag.zap,
-    "zaps": CustomHashtag.zap,
-    "zapathon": CustomHashtag.zap,
-    "onlyzaps": CustomHashtag.zap,
+    "bitcoin": CustomHashtag(name: "bitcoin", display: "Bitcoin", color: Color.orange, offset: -3.0),
+    "bitcoinwallet": CustomHashtag(name: "bitcoin", display: "Bitcoin", color: Color.orange, offset: -3.0),
+    "bitcoinadoption": CustomHashtag(name: "bitcoin", display: "BitcoinAdoption", color: Color.orange, offset: -3.0),
+    "bitcoinjungle": CustomHashtag(name: "bitcoin", display: "BitcoinJungle", color: Color.orange, offset: -3.0),
+    "btc": CustomHashtag(name: "bitcoin", display: "BTC", color: Color.orange, offset: -3.0),
+    "coffee": CustomHashtag(name: "coffee", display: "Coffee", color: DamusColors.brown, offset: -1.0),
+    "coffeechain": CustomHashtag(name: "coffee", display: "CoffeeChain", color: DamusColors.brown, offset: -1.0),
+    "nostr": CustomHashtag(name: "nostr", display: "Nostr", color: DamusColors.purple, offset: -2.0),
+    "nostrica": CustomHashtag(name: "nostrica", display: "Nostrica", color: DamusColors.purple, offset: -2.0),
+    "onlyzap": CustomHashtag(name: "onlyzap", display: "OnlyZap", color: DamusColors.yellow, offset: -4.0),
+    "onlyzaps": CustomHashtag(name: "onlyzaps", display: "OnlyZaps", color: DamusColors.yellow, offset: -4.0),
+    "plebchain": CustomHashtag(name: "plebchain", display: "PlebChain", color: DamusColors.deepPurple, offset: -3.0),
+    "zap": CustomHashtag(name: "zap", display: "Zap", color: DamusColors.yellow, offset: -4.0),
+    "zaps": CustomHashtag(name: "zaps", display: "Zaps", color: DamusColors.yellow, offset: -4.0),
+    "zapathon": CustomHashtag(name: "zapathon", display: "Zapathon", color: DamusColors.yellow, offset: -4.0),
 ]
 
 func hashtag_str(_ htag: String) -> CompatibleText {
-    var attributedString = AttributedString(stringLiteral: "#\(htag)")
-    attributedString.link = URL(string: "damus:t:\(htag)")
-    
     let lowertag = htag.lowercased()
     
-    var text = Text(attributedString)
+    let displayText: String
+    var displayColor: Color?
+    var imageOffset: CGFloat?
+    var tagName: String?
+    
     if let custom_hashtag = custom_hashtags[lowertag] {
-        if let col = custom_hashtag.color {
-            attributedString.foregroundColor = col
-        }
+        displayText = custom_hashtag.display
+        displayColor = custom_hashtag.color
+        imageOffset = custom_hashtag.offset
+        tagName = custom_hashtag.name.lowercased()
+    } else {
+        displayText = htag
+        displayColor = DamusColors.purple
+        imageOffset = nil
+        tagName = lowertag
+    }
+    
+    var attributedString = AttributedString(stringLiteral: "#\(displayText)")
+    attributedString.link = URL(string: "damus:t:\(displayText)")
+    attributedString.foregroundColor = displayColor
+       
+    var text = Text(attributedString)
+    
+    if let name = tagName, let img = UIImage(named: "\(name)-hashtag") {
+        attributedString = attributedString + " "
+        attributed_string_attach_icon(&attributedString, img: img)
         
-        let name = custom_hashtag.name
-        
-        if let img = UIImage(named: "\(name)-hashtag") {
-            attributedString = attributedString + " "
-            attributed_string_attach_icon(&attributedString, img: img)
-        }
         text = Text(attributedString)
         let img = Image("\(name)-hashtag")
-        text = text + Text("\(img)").baselineOffset(custom_hashtag.offset ?? 0.0)
-    } else {
-        attributedString.foregroundColor = DamusColors.purple
+        text = text + Text("\(img)").baselineOffset(imageOffset ?? 0.0)
     }
     
     return CompatibleText(text: text, attributed: attributedString)
