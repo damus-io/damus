@@ -564,6 +564,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Get API Key</target>
         <note>Button to navigate to DeepL website to get a translation API key.</note>
       </trans-unit>
+      <trans-unit id="Get API Key with BTC/Lightning" xml:space="preserve">
+        <source>Get API Key with BTC/Lightning</source>
+        <target>Get API Key with BTC/Lightning</target>
+        <note>Button to navigate to nokyctranslate website to get a translation API key.</note>
+      </trans-unit>
       <trans-unit id="Hide" xml:space="preserve">
         <source>Hide</source>
         <target>Hide</target>
@@ -786,6 +791,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>No zaps will be sent, only a lightning payment.</target>
         <note>Description of non-zap type where sats are sent to the user's wallet as a regular Lightning payment, not as a zap.</note>
       </trans-unit>
+      <trans-unit id="NoKYCTranslate.com (Prepay with BTC)" xml:space="preserve">
+        <source>NoKYCTranslate.com (Prepay with BTC)</source>
+        <target>NoKYCTranslate.com (Prepay with BTC)</target>
+        <note>Dropdown option for selecting NoKYCTranslate.com as the translation service.</note>
+      </trans-unit>
       <trans-unit id="None" xml:space="preserve">
         <source>None</source>
         <target>None</target>
@@ -964,7 +974,7 @@ Button text to indicate that the zap type is a private zap.</note>
       <trans-unit id="Quote" xml:space="preserve">
         <source>Quote</source>
         <target>Quote</target>
-        <note>Title of alert for confirming to make a quoted post.</note>
+        <note>Button to compose a quoted note</note>
       </trans-unit>
       <trans-unit id="Reactions" xml:space="preserve">
         <source>Reactions</source>
@@ -1054,7 +1064,12 @@ Button text to indicate that the zap type is a private zap.</note>
       <trans-unit id="Repost" xml:space="preserve">
         <source>Repost</source>
         <target>Repost</target>
-        <note>Title of alert for confirming to repost a post.</note>
+        <note>Button to repost a note</note>
+      </trans-unit>
+      <trans-unit id="Repost Note" xml:space="preserve">
+        <source>Repost Note</source>
+        <target>Repost Note</target>
+        <note>Title text to indicate that the buttons below are meant to be used to repost a note to others.</note>
       </trans-unit>
       <trans-unit id="Reposted" xml:space="preserve">
         <source>Reposted</source>
