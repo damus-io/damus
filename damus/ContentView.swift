@@ -97,6 +97,7 @@ struct ContentView: View {
     @SceneStorage("ContentView.filter_state") var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     var home: HomeModel = HomeModel()
+    @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
 
     let sub_id = UUID().description
     
@@ -287,7 +288,7 @@ struct ContentView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
-                NavigationView {
+                NavigationStack(path: $navigationCoordinator.path) {
                     TabView { // Prevents navbar appearance change on scroll
                         MainContent(damus: damus)
                             .toolbar() {
@@ -327,6 +328,12 @@ struct ContentView: View {
                     .overlay(
                         SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened.animation())
                     )
+                    .navigationDestination(for: Route.self) { route in
+                        route.view(navigationCordinator: navigationCoordinator)
+                    }
+                    .onReceive(handle_notify(.switched_timeline)) { _ in
+                        navigationCoordinator.popToRoot()
+                    }
                 }
                 .navigationViewStyle(.stack)
             
