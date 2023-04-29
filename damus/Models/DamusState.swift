@@ -31,6 +31,14 @@ struct DamusState {
     let replies: ReplyCounter
     let muted_threads: MutedThreadsManager
     
+    @discardableResult
+    func add_zap(zap: Zap) -> Bool {
+        // store generic zap mapping
+        self.zaps.add_zap(zap: zap)
+        // associate with events as well
+        return self.events.store_zap(zap: zap)
+    }
+    
     var pubkey: String {
         return keypair.pubkey
     }

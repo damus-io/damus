@@ -128,7 +128,7 @@ class HomeModel: ObservableObject {
             return
         }
         
-        damus_state.zaps.add_zap(zap: zap)
+        damus_state.add_zap(zap: zap)
         
         guard zap.target.pubkey == our_keypair.pubkey else {
             return
@@ -726,7 +726,7 @@ func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping (
             let result = validate_event(ev: ev)
             
             DispatchQueue.main.async {
-                events.validation[ev.id] = result
+                events.store_event_validation(evid: ev.id, validated: result)
                 guard result == .ok else {
                     return
                 }

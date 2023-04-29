@@ -34,15 +34,26 @@ enum ImageMetaProcessState {
     }
 }
 
+class EventData: ObservableObject {
+    @Published var translations: TranslateStatus?
+    @Published var artifacts: NoteArtifacts?
+    @Published var zaps: [Zap]
+    var validated: ValidationResult
+    
+    init(zaps: [Zap] = []) {
+        self.translations = nil
+        self.artifacts = nil
+        self.zaps = zaps
+        self.validated = .unknown
+    }
+}
+
 class EventCache {
     private var events: [String: NostrEvent] = [:]
     private var replies = ReplyMap()
     private var cancellable: AnyCancellable?
-    private var translations: [String: TranslateStatus] = [:]
-    private var artifacts: [String: NoteArtifacts] = [:]
-    // url to meta
     private var image_metadata: [String: ImageMetadataState] = [:]
-    var validation: [String: ValidationResult] = [:]
+    private var event_data: [String: EventData] = [:]
     
     //private var thread_latest: [String: Int64]
     
@@ -54,20 +65,40 @@ class EventCache {
         }
     }
     
-    func is_event_valid(_ evid: String) -> ValidationResult {
-        guard let result = validation[evid] else {
-            return .unknown
+    private func get_cache_data(_ evid: String) -> EventData {
+        guard let data = event_data[evid] else {
+            let data = EventData()
+            event_data[evid] = data
+            return data
         }
         
-        return result
+        return data
+    }
+    
+    func is_event_valid(_ evid: String) -> ValidationResult {
+        return get_cache_data(evid).validated
+    }
+    
+    func store_event_validation(evid: String, validated: ValidationResult) {
+        get_cache_data(evid).validated = validated
     }
     
     func store_translation_artifacts(evid: String, translated: TranslateStatus) {
-        self.translations[evid] = translated
+        get_cache_data(evid).translations = translated
     }
     
     func store_artifacts(evid: String, artifacts: NoteArtifacts) {
-        self.artifacts[evid] = artifacts
+        get_cache_data(evid).artifacts = artifacts
+    }
+    
+    @discardableResult
+    func store_zap(zap: Zap) -> Bool {
+        var data = get_cache_data(zap.target.id)
+        return insert_uniq_sorted_zap_by_amount(zaps: &data.zaps, new_zap: zap)
+    }
+    
+    func lookup_zaps(target: ZapTarget) -> [Zap] {
+        return get_cache_data(target.id).zaps
     }
     
     func store_img_metadata(url: URL, meta: ImageMetadataState) {
@@ -75,7 +106,7 @@ class EventCache {
     }
     
     func lookup_artifacts(evid: String) -> NoteArtifacts? {
-        return self.artifacts[evid]
+        return get_cache_data(evid).artifacts
     }
     
     func lookup_img_metadata(url: URL) -> ImageMetadataState? {
@@ -83,7 +114,7 @@ class EventCache {
     }
     
     func lookup_translated_artifacts(evid: String) -> TranslateStatus? {
-        return self.translations[evid]
+        return get_cache_data(evid).translations
     }
     
     func parent_events(event: NostrEvent) -> [NostrEvent] {
@@ -149,8 +180,7 @@ class EventCache {
     
     private func prune() {
         events = [:]
-        translations = [:]
-        artifacts = [:]
+        event_data = [:]
         replies.replies = [:]
     }
 }
