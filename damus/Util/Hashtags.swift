@@ -66,7 +66,7 @@ func hashtag_str(_ htag: String) -> CompatibleText {
        
     var text = Text(attributedString)
     
-    if let imageName = imageName, let img = UIImage(named: "\(imageName)-hashtag") {
+    if let imageName, let img = UIImage(named: "\(imageName)-hashtag") {
         attributedString = attributedString + " "
         attributed_string_attach_icon(&attributedString, img: img)
         
