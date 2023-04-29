@@ -1,3 +1,27 @@
+## [1.4.3-15] - 2023-04-29
+
+### Added
+
+- Add q tag to quoted renotes (William Casarin)
+- Add confirmation alert when clearing all bookmarks (Swift)
+- Show blurhash placeholders from image metadata (William Casarin)
+- Add image metadata to image uploads (William Casarin)
+
+
+### Changed
+
+- Load zaps instantly on events (William Casarin)
+
+
+### Fixed
+
+- Fix thread incompatibility for clients that add more than one reply tag (amethyst, plebstr)
+- Preserve order of bookmarks when saving (William Casarin)
+- Fix crash when you have invalid relays in your relay list (William Casarin)
+
+
+
+[1.4.3-14]: https://github.com/damus-io/damus/releases/tag/v1.4.3-14
 
 ## [1.4.3-10] - 2023-04-25
 
