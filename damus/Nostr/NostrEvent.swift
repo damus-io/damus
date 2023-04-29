@@ -42,6 +42,18 @@ struct ReferencedId: Identifiable, Hashable, Equatable {
     var id: String {
         return ref_id
     }
+    
+    static func q(_ id: String, relay_id: String? = nil) -> ReferencedId {
+        return ReferencedId(ref_id: id, relay_id: relay_id, key: "q")
+    }
+    
+    static func e(_ id: String, relay_id: String? = nil) -> ReferencedId {
+        return ReferencedId(ref_id: id, relay_id: relay_id, key: "e")
+    }
+    
+    static func p(_ id: String, relay_id: String? = nil) -> ReferencedId {
+        return ReferencedId(ref_id: id, relay_id: relay_id, key: "p")
+    }
 }
 
 struct EventId: Identifiable, CustomStringConvertible {
@@ -746,7 +758,7 @@ func uniq<T: Hashable>(_ xs: [T]) -> [T] {
 func gather_reply_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
     var ids = get_referenced_ids(tags: from.tags, key: "e").first.map { [$0] } ?? []
 
-    ids.append(ReferencedId(ref_id: from.id, relay_id: nil, key: "e"))
+    ids.append(.e(from.id))
     ids.append(contentsOf: uniq(from.referenced_pubkeys.filter { $0.ref_id != our_pubkey }))
     if from.pubkey != our_pubkey {
         ids.append(ReferencedId(ref_id: from.pubkey, relay_id: nil, key: "p"))
