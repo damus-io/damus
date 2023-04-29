@@ -4,8 +4,6 @@ import Foundation
 final class FailedImageURLsCache {
     static let notification = Notification.Name("FailedImageURLsDidChange")
     
-    static let shared = FailedImageURLsCache()
-    
     private(set) var urls = Set<URL>()
     
     func add(_ url: URL) {

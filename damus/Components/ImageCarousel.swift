@@ -119,7 +119,7 @@ struct ImageCarousel: View {
     var body: some View {
         TabView {
             ForEach(urls, id: \.absoluteString) { url in
-                if FailedImageURLsCache.shared.urls.contains(url) {
+                if state.failed_image_urls_cache.urls.contains(url) {
                     EmptyView()
                 } else {
                     Rectangle()
@@ -137,7 +137,7 @@ struct ImageCarousel: View {
                                     }
                                     .onFailure { error in
                                         if case .processorError(_) = error {
-                                            FailedImageURLsCache.shared.add(url)
+                                            state.failed_image_urls_cache.add(url)
                                         }
                                     }
                                     .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in

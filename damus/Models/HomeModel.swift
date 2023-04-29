@@ -1098,7 +1098,7 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
     if type == .text && damus_state.settings.mention_notification {
         let blocks = ev.blocks(damus_state.keypair.privkey)
         for case .mention(let mention) in blocks where mention.ref.ref_id == damus_state.keypair.pubkey {
-            let content = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content.attributed).string
+            let content = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, failed_image_urls: damus_state.failed_image_urls_cache.urls, privkey: damus_state.keypair.privkey).content.attributed).string
             
             let notify = LocalNotification(type: .mention, event: ev, target: ev, content: content)
             create_local_notification(profiles: damus_state.profiles, notify: notify )

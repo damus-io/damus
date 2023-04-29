@@ -127,7 +127,7 @@ struct TranslateView: View {
 
         // Render translated note
         let translated_blocks = event.get_blocks(content: translated_note)
-        let artifacts = render_blocks(blocks: translated_blocks, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+        let artifacts = render_blocks(blocks: translated_blocks, profiles: damus_state.profiles, failed_image_urls: damus_state.failed_image_urls_cache.urls, privkey: damus_state.keypair.privkey)
         
         // and cache it
         DispatchQueue.main.async {

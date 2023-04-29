@@ -51,7 +51,7 @@ struct NoteContentView: View {
         if let cache = damus_state.events.lookup_artifacts(evid: event.id) {
             self._artifacts = State(initialValue: cache)
         } else {
-            let artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+            let artifacts = render_note_content(ev: event, profiles: damus_state.profiles, failed_image_urls: damus_state.failed_image_urls_cache.urls, privkey: damus_state.keypair.privkey)
             damus_state.events.store_artifacts(evid: event.id, artifacts: artifacts)
             self._artifacts = State(initialValue: artifacts)
         }
@@ -177,7 +177,7 @@ struct NoteContentView: View {
                 }
             }
             .onReceive(handle_notify(FailedImageURLsCache.notification)) { _ in
-                if (Set(artifacts.images) as NSSet).intersects(FailedImageURLsCache.shared.urls) {
+                if (Set(artifacts.images) as NSSet).intersects(damus_state.failed_image_urls_cache.urls) {
                     refreshArtifacts()
                 }
             }
@@ -188,7 +188,7 @@ struct NoteContentView: View {
     }
     
     private func refreshArtifacts() {
-        artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+        artifacts = render_note_content(ev: event, profiles: damus_state.profiles, failed_image_urls: damus_state.failed_image_urls_cache.urls, privkey: damus_state.keypair.privkey)
     }
     
     private func refreshPreview() async {
@@ -291,13 +291,13 @@ struct NoteArtifacts: Equatable {
     }
 }
 
-func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -> NoteArtifacts {
+func render_note_content(ev: NostrEvent, profiles: Profiles, failed_image_urls: Set<URL>, privkey: String?) -> NoteArtifacts {
     let blocks = ev.blocks(privkey)
     
-    return render_blocks(blocks: blocks, profiles: profiles, privkey: privkey)
+    return render_blocks(blocks: blocks, profiles: profiles, failed_image_urls: failed_image_urls, privkey: privkey)
 }
 
-func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> NoteArtifacts {
+func render_blocks(blocks: [Block], profiles: Profiles, failed_image_urls: Set<URL>, privkey: String?) -> NoteArtifacts {
     var invoices: [Invoice] = []
     var img_urls: [URL] = []
     var link_urls: [URL] = []
@@ -341,7 +341,7 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
             return str
         case .url(let url):
             // Handle Image URLs
-            if is_image_url(url) && !FailedImageURLsCache.shared.urls.contains(url) {
+            if is_image_url(url) && !failed_image_urls.contains(url) {
                 // Append Image
                 img_urls.append(url)
                 return str
