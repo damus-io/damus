@@ -20,9 +20,6 @@ extension Notification.Name {
     static var select_quote: Notification.Name {
         return Notification.Name("select quote")
     }
-    static var reply: Notification.Name {
-        return Notification.Name("reply")
-    }
     static var profile_updated: Notification.Name {
         return Notification.Name("profile_updated")
     }
@@ -56,6 +53,9 @@ extension Notification.Name {
     static var post: Notification.Name {
         return Notification.Name("send post")
     }
+    static var compose: Notification.Name {
+        return Notification.Name("compose")
+    }
     static var boost: Notification.Name {
         return Notification.Name("boost")
     }
@@ -86,8 +86,8 @@ extension Notification.Name {
     static var report: Notification.Name {
         return Notification.Name("report")
     }
-    static var block: Notification.Name {
-        return Notification.Name("block")
+    static var mute: Notification.Name {
+        return Notification.Name("mute")
     }
     static var new_mutes: Notification.Name {
         return Notification.Name("new_mutes")
@@ -103,6 +103,18 @@ extension Notification.Name {
     }
     static var zapping: Notification.Name {
         return Notification.Name("zapping")
+    }
+    static var mute_thread: Notification.Name {
+        return Notification.Name("mute_thread")
+    }
+    static var unmute_thread: Notification.Name {
+        return Notification.Name("unmute_thread")
+    }
+    static var local_notification: Notification.Name {
+        return Notification.Name("local_notification")
+    }
+    static var onlyzaps_mode: Notification.Name {
+        return Notification.Name("hide_reactions")
     }
 }
 

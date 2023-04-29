@@ -11,17 +11,17 @@ struct NostrPost {
     let kind: NostrKind
     let content: String
     let references: [ReferencedId]
+    let tags: [[String]]
     
-    init (content: String, references: [ReferencedId]) {
-        self.content = content
-        self.references = references
-        self.kind = .text
-    }
-    
-    init (content: String, references: [ReferencedId], kind: NostrKind) {
+    init (content: String, references: [ReferencedId], kind: NostrKind = .text, tags: [[String]] = []) {
         self.content = content
         self.references = references
         self.kind = kind
+        self.tags = tags
+    }
+    
+    func to_event(keypair: FullKeypair) -> NostrEvent {
+        return post_to_event(post: self, privkey: keypair.privkey, pubkey: keypair.pubkey)
     }
 }
 

@@ -50,6 +50,10 @@ struct SearchHomeView: View {
             damus: damus_state,
             show_friend_icon: true,
             filter: {
+                if damus_state.muted_threads.isMutedThread($0, privkey: self.damus_state.keypair.privkey) {
+                    return false
+                }
+
                 if damus_state.settings.show_only_preferred_languages == false {
                     return true
                 }

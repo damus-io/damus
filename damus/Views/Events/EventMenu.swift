@@ -12,6 +12,7 @@ struct EventMenuContext: View {
     let keypair: Keypair
     let target_pubkey: String
     let bookmarks: BookmarksManager
+    let muted_threads: MutedThreadsManager
     
     @Environment(\.colorScheme) var colorScheme
     
@@ -19,7 +20,7 @@ struct EventMenuContext: View {
         HStack {
             Menu {
 
-                MenuItems(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks)
+                MenuItems(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks, muted_threads: muted_threads)
                 
             } label: {
                 Label("", systemImage: "ellipsis")
@@ -36,14 +37,20 @@ struct MenuItems: View {
     let keypair: Keypair
     let target_pubkey: String
     let bookmarks: BookmarksManager
+    let muted_threads: MutedThreadsManager
     
     @State private var isBookmarked: Bool = false
+    @State private var isMutedThread: Bool = false
     
-    init(event: NostrEvent, keypair: Keypair, target_pubkey: String, bookmarks: BookmarksManager) {
+    init(event: NostrEvent, keypair: Keypair, target_pubkey: String, bookmarks: BookmarksManager, muted_threads: MutedThreadsManager) {
         let bookmarked = bookmarks.isBookmarked(event)
         self._isBookmarked = State(initialValue: bookmarked)
+
+        let muted_thread = muted_threads.isMutedThread(event, privkey: keypair.privkey)
+        self._isMutedThread = State(initialValue: muted_thread)
         
         self.bookmarks = bookmarks
+        self.muted_threads = muted_threads
         self.event = event
         self.keypair = keypair
         self.target_pubkey = target_pubkey
@@ -86,6 +93,19 @@ struct MenuItems: View {
                 Label(isBookmarked ? removeBookmarkString : addBookmarkString, systemImage: imageName)
             }
 
+            if event.known_kind != .dm {
+                Button {
+                    self.muted_threads.updateMutedThread(event)
+                    let muted = self.muted_threads.isMutedThread(event, privkey: self.keypair.privkey)
+                    isMutedThread = muted
+                } label: {
+                    let imageName = isMutedThread ? "speaker" : "speaker.slash"
+                    let unmuteThreadString = NSLocalizedString("Unmute conversation", comment: "Context menu option for unmuting a conversation.")
+                    let muteThreadString = NSLocalizedString("Mute conversation", comment: "Context menu option for muting a conversation.")
+                    Label(isMutedThread ? unmuteThreadString : muteThreadString, systemImage: imageName)
+                }
+            }
+
             Button {
                 NotificationCenter.default.post(name: .broadcast_event, object: event)
             } label: {
@@ -102,9 +122,9 @@ struct MenuItems: View {
                 }
                 
                 Button(role: .destructive) {
-                    notify(.block, target_pubkey)
+                    notify(.mute, target_pubkey)
                 } label: {
-                    Label(NSLocalizedString("Block", comment: "Context menu option for blocking users."), systemImage: "exclamationmark.octagon")
+                    Label(NSLocalizedString("Mute User", comment: "Context menu option for muting users."), systemImage: "exclamationmark.octagon")
                 }
             }
         }

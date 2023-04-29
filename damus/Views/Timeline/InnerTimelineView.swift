@@ -25,6 +25,14 @@ struct InnerTimelineView: View {
         self._nav_target = State(initialValue: test_event)
     }
     
+    var event_options: EventViewOptions {
+        if self.damus.settings.truncate_timeline_text {
+            return [.wide, .truncate_content]
+        }
+        
+        return [.wide]
+    }
+    
     var body: some View {
         let thread = ThreadModel(event: nav_target, damus_state: damus)
         let dest = ThreadView(state: damus, thread: thread)
@@ -37,14 +45,14 @@ struct InnerTimelineView: View {
                 EmptyTimelineView()
             } else {
                 ForEach(events.filter(filter), id: \.id) { (ev: NostrEvent) in
-                    EventView(damus: damus, event: ev, options: [.wide])
+                    EventView(damus: damus, event: ev, options: event_options)
                         .onTapGesture {
-                            nav_target = ev.inner_event ?? ev
+                            nav_target = ev.get_inner_event(cache: self.damus.events) ?? ev
                             navigating = true
                         }
                         .padding(.top, 7)
                     
-                    Divider()
+                    ThiccDivider()
                         .padding([.top], 7)
                 }
             }

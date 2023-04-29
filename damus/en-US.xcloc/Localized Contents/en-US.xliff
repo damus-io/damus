@@ -45,7 +45,7 @@
       <trans-unit id="%@" xml:space="preserve">
         <source>%@</source>
         <target>%@</target>
-        <note>No comment provided by engineer.</note>
+        <note>DM by heading in local notification</note>
       </trans-unit>
       <trans-unit id="%@ %@" xml:space="preserve">
         <source>%@ %@</source>
@@ -53,10 +53,10 @@
         <note>Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
 Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.</note>
       </trans-unit>
-      <trans-unit id="%@ has been blocked" xml:space="preserve">
-        <source>%@ has been blocked</source>
-        <target>%@ has been blocked</target>
-        <note>Alert message that informs a user was blocked.</note>
+      <trans-unit id="%@ has been muted" xml:space="preserve">
+        <source>%@ has been muted</source>
+        <target>%@ has been muted</target>
+        <note>Alert message that informs a user was muted.</note>
       </trans-unit>
       <trans-unit id="%@ not found" xml:space="preserve">
         <source>%@ not found</source>
@@ -128,6 +128,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Accept</target>
         <note>Button to accept the end user license agreement before being allowed into the app.</note>
       </trans-unit>
+      <trans-unit id="Accessibility" xml:space="preserve">
+        <source>Accessibility</source>
+        <target>Accessibility</target>
+        <note>Section header for accessibility settings</note>
+      </trans-unit>
       <trans-unit id="Account ID" xml:space="preserve">
         <source>Account ID</source>
         <target>Account ID</target>
@@ -136,7 +141,7 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Actions" xml:space="preserve">
         <source>Actions</source>
         <target>Actions</target>
-        <note>Title for confirmation dialog to either share, report, or block a profile.</note>
+        <note>Title for confirmation dialog to either share, report, or mute a profile.</note>
       </trans-unit>
       <trans-unit id="Add" xml:space="preserve">
         <source>Add</source>
@@ -169,6 +174,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Always show images</target>
         <note>Setting to always show and never blur images</note>
       </trans-unit>
+      <trans-unit id="Animations" xml:space="preserve">
+        <source>Animations</source>
+        <target>Animations</target>
+        <note>Toggle to enable or disable image animation</note>
+      </trans-unit>
       <trans-unit id="Anonymous" xml:space="preserve">
         <source>Anonymous</source>
         <target>Anonymous</target>
@@ -180,20 +190,26 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Any</target>
         <note>Any amount of sats</note>
       </trans-unit>
-      <trans-unit id="Are you sure you want to repost this?" xml:space="preserve">
-        <source>Are you sure you want to repost this?</source>
-        <target>Are you sure you want to repost this?</target>
-        <note>Alert message to ask if user wants to repost a post.</note>
+      <trans-unit id="Appearance" xml:space="preserve">
+        <source>Appearance</source>
+        <target>Appearance</target>
+        <note>Navigation title for text and appearance settings.
+   Section header for text and appearance settings</note>
+      </trans-unit>
+      <trans-unit id="Are you lost?" xml:space="preserve">
+        <source>Are you lost?</source>
+        <target>Are you lost?</target>
+        <note>Text asking the user if they are lost in the app.</note>
+      </trans-unit>
+      <trans-unit id="Are you sure you want to upload this image?" xml:space="preserve">
+        <source>Are you sure you want to upload this image?</source>
+        <target>Are you sure you want to upload this image?</target>
+        <note>Alert message asking if the user wants to upload an image.</note>
       </trans-unit>
       <trans-unit id="Automatically translate notes" xml:space="preserve">
         <source>Automatically translate notes</source>
         <target>Automatically translate notes</target>
         <note>Toggle to automatically translate notes.</note>
-      </trans-unit>
-      <trans-unit id="Awesome post!" xml:space="preserve">
-        <source>Awesome post!</source>
-        <target>Awesome post!</target>
-        <note>Placeholder text for a comment to send as part of a zap to the user.</note>
       </trans-unit>
       <trans-unit id="Banner Image" xml:space="preserve">
         <source>Banner Image</source>
@@ -205,52 +221,10 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus.</target>
         <note>Reminder to user that they should save their account information.</note>
       </trans-unit>
-      <trans-unit id="Bitcoin Beach" xml:space="preserve">
-        <source>Bitcoin Beach</source>
-        <target>Bitcoin Beach</target>
-        <note>Dropdown option label for Lightning wallet, Bitcoin Beach.</note>
-      </trans-unit>
       <trans-unit id="Bitcoin Lightning Tips" xml:space="preserve">
         <source>Bitcoin Lightning Tips</source>
         <target>Bitcoin Lightning Tips</target>
         <note>Label for Bitcoin Lightning Tips section of user profile form.</note>
-      </trans-unit>
-      <trans-unit id="Blixt Wallet" xml:space="preserve">
-        <source>Blixt Wallet</source>
-        <target>Blixt Wallet</target>
-        <note>Dropdown option label for Lightning wallet, Blixt Wallet</note>
-      </trans-unit>
-      <trans-unit id="Block" xml:space="preserve">
-        <source>Block</source>
-        <target>Block</target>
-        <note>Alert button to block a user.
-   Button to block a profile.
-   Context menu option for blocking users.</note>
-      </trans-unit>
-      <trans-unit id="Block %@?" xml:space="preserve">
-        <source>Block %@?</source>
-        <target>Block %@?</target>
-        <note>Alert message prompt to ask if a user should be blocked.</note>
-      </trans-unit>
-      <trans-unit id="Block User" xml:space="preserve">
-        <source>Block User</source>
-        <target>Block User</target>
-        <note>Title of alert for blocking a user.</note>
-      </trans-unit>
-      <trans-unit id="Blocked" xml:space="preserve">
-        <source>Blocked</source>
-        <target>Blocked</target>
-        <note>Sidebar menu label for Profile view.</note>
-      </trans-unit>
-      <trans-unit id="Blocked Users" xml:space="preserve">
-        <source>Blocked Users</source>
-        <target>Blocked Users</target>
-        <note>Navigation title of view to see list of blocked users.</note>
-      </trans-unit>
-      <trans-unit id="Blue Wallet" xml:space="preserve">
-        <source>Blue Wallet</source>
-        <target>Blue Wallet</target>
-        <note>Dropdown option label for Lightning wallet, Blue Wallet.</note>
       </trans-unit>
       <trans-unit id="Bookmarks" xml:space="preserve">
         <source>Bookmarks</source>
@@ -263,11 +237,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Boosts</target>
         <note>Accessibility label for boosts button</note>
       </trans-unit>
-      <trans-unit id="Breez" xml:space="preserve">
-        <source>Breez</source>
-        <target>Breez</target>
-        <note>Dropdown option label for Lightning wallet, Breez.</note>
-      </trans-unit>
       <trans-unit id="Broadcast" xml:space="preserve">
         <source>Broadcast</source>
         <target>Broadcast</target>
@@ -277,19 +246,19 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Cancel" xml:space="preserve">
         <source>Cancel</source>
         <target>Cancel</target>
-        <note>Alert button to cancel out of alert for blocking a user.
+        <note>Alert button to cancel out of alert for muting a user.
    Button to cancel a repost.
    Button to cancel out of alert that creates a new mutelist.
    Button to cancel out of posting a note.
-   Button to cancel out of reposting a post.
    Button to cancel out of view adding user inputted relay.
+   Button to cancel the upload.
    Cancel deleting the user.
    Cancel out of logging out the user.</note>
       </trans-unit>
-      <trans-unit id="Cash App" xml:space="preserve">
-        <source>Cash App</source>
-        <target>Cash App</target>
-        <note>Dropdown option label for Lightning wallet, Cash App.</note>
+      <trans-unit id="Choose from Library" xml:space="preserve">
+        <source>Choose from Library</source>
+        <target>Choose from Library</target>
+        <note>Option to select photo from library</note>
       </trans-unit>
       <trans-unit id="Clear All" xml:space="preserve">
         <source>Clear All</source>
@@ -300,11 +269,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Clear Cache</source>
         <target>Clear Cache</target>
         <note>Button to clear image cache.</note>
-      </trans-unit>
-      <trans-unit id="Comment" xml:space="preserve">
-        <source>Comment</source>
-        <target>Comment</target>
-        <note>Header text to indicate that the text field below it is a comment that will be used to send as part of a zap to the user.</note>
       </trans-unit>
       <trans-unit id="Connect" xml:space="preserve">
         <source>Connect</source>
@@ -349,8 +313,7 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Copy Image" xml:space="preserve">
         <source>Copy Image</source>
         <target>Copy Image</target>
-        <note>Context menu option to copy an image into clipboard.
-   Context menu option to copy an image to clipboard.</note>
+        <note>Context menu option to copy an image into clipboard.</note>
       </trans-unit>
       <trans-unit id="Copy Image URL" xml:space="preserve">
         <source>Copy Image URL</source>
@@ -387,6 +350,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Copy Text</target>
         <note>Context menu option for copying the text from an note.</note>
       </trans-unit>
+      <trans-unit id="Copy URL" xml:space="preserve">
+        <source>Copy URL</source>
+        <target>Copy URL</target>
+        <note>Label for button in context menu to copy URL of the selected uploaded media asset.</note>
+      </trans-unit>
       <trans-unit id="Copy User Pubkey" xml:space="preserve">
         <source>Copy User Pubkey</source>
         <target>Copy User Pubkey</target>
@@ -397,10 +365,15 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Copy invoice</target>
         <note>Title of section for copying a Lightning invoice identifier.</note>
       </trans-unit>
-      <trans-unit id="Could not find user to block..." xml:space="preserve">
-        <source>Could not find user to block...</source>
-        <target>Could not find user to block...</target>
-        <note>Alert message to indicate that the blocked user could not be found.</note>
+      <trans-unit id="Could not find the user you're looking for" xml:space="preserve">
+        <source>Could not find the user you're looking for</source>
+        <target>Could not find the user you're looking for</target>
+        <note>Indicates that there are no users found.</note>
+      </trans-unit>
+      <trans-unit id="Could not find user to mute..." xml:space="preserve">
+        <source>Could not find user to mute...</source>
+        <target>Could not find user to mute...</target>
+        <note>Alert message to indicate that the muted user could not be found.</note>
       </trans-unit>
       <trans-unit id="Create" xml:space="preserve">
         <source>Create</source>
@@ -427,16 +400,12 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Custom</target>
         <note>Dropdown option for selecting a custom translation server.</note>
       </trans-unit>
-      <trans-unit id="Custom Zap Amount" xml:space="preserve">
-        <source>Custom Zap Amount</source>
-        <target>Custom Zap Amount</target>
-        <note>Header text to indicate that the text field below it is to enter a custom zap amount.</note>
-      </trans-unit>
       <trans-unit id="DMs" xml:space="preserve">
         <source>DMs</source>
         <target>DMs</target>
         <note>Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
    Navigation title for view of DMs, where DM is an English abbreviation for Direct Message.
+   Setting to enable DM Local Notification
    Toolbar label for DMs view, where DM is the English abbreviation for Direct Message.</note>
       </trans-unit>
       <trans-unit id="Damus" xml:space="preserve">
@@ -457,13 +426,13 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Default Zap Amount in sats" xml:space="preserve">
         <source>Default Zap Amount in sats</source>
         <target>Default Zap Amount in sats</target>
-        <note>Section title for zap configuration</note>
+        <note>Title for section in zap settings that controls the default zap amount in sats.</note>
       </trans-unit>
       <trans-unit id="Delete" xml:space="preserve">
         <source>Delete</source>
         <target>Delete</target>
         <note>Button for deleting the users account.
-   Button to remove a user from their blocklist.</note>
+   Button to remove a user from their mutelist.</note>
       </trans-unit>
       <trans-unit id="Delete Account" xml:space="preserve">
         <source>Delete Account</source>
@@ -479,11 +448,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Description</source>
         <target>Description</target>
         <note>Label to display relay description.</note>
-      </trans-unit>
-      <trans-unit id="Disable animations" xml:space="preserve">
-        <source>Disable animations</source>
-        <target>Disable animations</target>
-        <note>Button to disable image animation</note>
       </trans-unit>
       <trans-unit id="Disconnect" xml:space="preserve">
         <source>Disconnect</source>
@@ -525,11 +489,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Edit</target>
         <note>Button to edit user's profile.</note>
       </trans-unit>
-      <trans-unit id="Edit participants" xml:space="preserve">
-        <source>Edit participants</source>
-        <target>Edit participants</target>
-        <note>Text indicating that the view is used for editing which participants are replied to in a note.</note>
-      </trans-unit>
       <trans-unit id="Encrypted" xml:space="preserve">
         <source>Encrypted</source>
         <target>Encrypted</target>
@@ -550,9 +509,9 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Error: %@</target>
         <note>Error message indicating why saving keys failed.</note>
       </trans-unit>
-      <trans-unit id="Everyone on can see that you zapped" xml:space="preserve">
-        <source>Everyone on can see that you zapped</source>
-        <target>Everyone on can see that you zapped</target>
+      <trans-unit id="Everyone will see that you zapped" xml:space="preserve">
+        <source>Everyone will see that you zapped</source>
+        <target>Everyone will see that you zapped</target>
         <note>Description of public zap type where the zap is sent publicly and identifies the user who sent it.</note>
       </trans-unit>
       <trans-unit id="Filter" xml:space="preserve">
@@ -608,13 +567,18 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Hide" xml:space="preserve">
         <source>Hide</source>
         <target>Hide</target>
-        <note>Button to hide a post from a user who has been blocked.</note>
+        <note>Button to hide a post from a user who has been muted.</note>
       </trans-unit>
       <trans-unit id="Hide API Key" xml:space="preserve">
         <source>Hide API Key</source>
         <target>Hide API Key</target>
         <note>Button to hide the DeepL translation API key.
    Button to hide the LibreTranslate server API key.</note>
+      </trans-unit>
+      <trans-unit id="Hide all 🤙's" xml:space="preserve">
+        <source>Hide all 🤙's</source>
+        <target>Hide all 🤙's</target>
+        <note>Section footer describing OnlyZaps mode</note>
       </trans-unit>
       <trans-unit id="Home" xml:space="preserve">
         <source>Home</source>
@@ -625,6 +589,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Illegal content</source>
         <target>Illegal content</target>
         <note>Button for user to report that the account or content has illegal content.</note>
+      </trans-unit>
+      <trans-unit id="Image uploader" xml:space="preserve">
+        <source>Image uploader</source>
+        <target>Image uploader</target>
+        <note>Prompt selection of user's image uploader</note>
       </trans-unit>
       <trans-unit id="Images" xml:space="preserve">
         <source>Images</source>
@@ -651,10 +620,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>It's spam</target>
         <note>Button for user to report that the account or content has spam.</note>
       </trans-unit>
-      <trans-unit id="LNLink" xml:space="preserve">
-        <source>LNLink</source>
-        <target>LNLink</target>
-        <note>Dropdown option label for Lightning wallet, LNLink.</note>
+      <trans-unit id="Keys" xml:space="preserve">
+        <source>Keys</source>
+        <target>Keys</target>
+        <note>Navigation title for managing keys.
+   Settings section for managing keys</note>
       </trans-unit>
       <trans-unit id="Left Handed" xml:space="preserve">
         <source>Left Handed</source>
@@ -686,10 +656,25 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Like</target>
         <note>Accessibility Label for Like button</note>
       </trans-unit>
+      <trans-unit id="Liked by %@" xml:space="preserve">
+        <source>Liked by %@</source>
+        <target>Liked by %@</target>
+        <note>Liked by heading in local notification</note>
+      </trans-unit>
+      <trans-unit id="Likes" xml:space="preserve">
+        <source>Likes</source>
+        <target>Likes</target>
+        <note>Setting to enable Like Local Notification</note>
+      </trans-unit>
       <trans-unit id="Load %lld more" xml:space="preserve">
         <source>Load %lld more</source>
         <target>Load %lld more</target>
         <note>Button text for loading more events, where the variable is the number of events.</note>
+      </trans-unit>
+      <trans-unit id="Local Notifications" xml:space="preserve">
+        <source>Local Notifications</source>
+        <target>Local Notifications</target>
+        <note>Section header for damus local notifications user configuration</note>
       </trans-unit>
       <trans-unit id="Local authentication to access private key" xml:space="preserve">
         <source>Local authentication to access private key</source>
@@ -719,60 +704,92 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Looking for %@...</target>
         <note>Label that appears when searching for note or profile</note>
       </trans-unit>
+      <trans-unit id="Make Default" xml:space="preserve">
+        <source>Make Default</source>
+        <target>Make Default</target>
+        <note>Button label to indicate that tapping it will make the selected zap type be the default for future zaps.</note>
+      </trans-unit>
       <trans-unit id="Make sure your nsec account key is saved before you logout or you will lose access to this account" xml:space="preserve">
         <source>Make sure your nsec account key is saved before you logout or you will lose access to this account</source>
         <target>Make sure your nsec account key is saved before you logout or you will lose access to this account</target>
         <note>Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.</note>
       </trans-unit>
+      <trans-unit id="Mentioned by %@" xml:space="preserve">
+        <source>Mentioned by %@</source>
+        <target>Mentioned by %@</target>
+        <note>Mentioned by heading in local notification</note>
+      </trans-unit>
       <trans-unit id="Mentions" xml:space="preserve">
         <source>Mentions</source>
         <target>Mentions</target>
-        <note>Label for filter for seeing mention notifications (replies, etc).</note>
+        <note>Setting to enable Mention Local Notification</note>
       </trans-unit>
-      <trans-unit id="Miscellaneous" xml:space="preserve">
-        <source>Miscellaneous</source>
-        <target>Miscellaneous</target>
-        <note>Section header for miscellaneous user configuration</note>
+      <trans-unit id="Mute" xml:space="preserve">
+        <source>Mute</source>
+        <target>Mute</target>
+        <note>Alert button to mute a user.
+   Button to mute a profile.</note>
       </trans-unit>
-      <trans-unit id="Muun" xml:space="preserve">
-        <source>Muun</source>
-        <target>Muun</target>
-        <note>Dropdown option label for Lightning wallet, Muun.</note>
+      <trans-unit id="Mute %@?" xml:space="preserve">
+        <source>Mute %@?</source>
+        <target>Mute %@?</target>
+        <note>Alert message prompt to ask if a user should be muted.</note>
+      </trans-unit>
+      <trans-unit id="Mute User" xml:space="preserve">
+        <source>Mute User</source>
+        <target>Mute User</target>
+        <note>Context menu option for muting users.
+   Title of alert for muting a user.</note>
+      </trans-unit>
+      <trans-unit id="Mute conversation" xml:space="preserve">
+        <source>Mute conversation</source>
+        <target>Mute conversation</target>
+        <note>Context menu option for muting a conversation.</note>
+      </trans-unit>
+      <trans-unit id="Muted" xml:space="preserve">
+        <source>Muted</source>
+        <target>Muted</target>
+        <note>Sidebar menu label for muted users view.</note>
+      </trans-unit>
+      <trans-unit id="Muted Users" xml:space="preserve">
+        <source>Muted Users</source>
+        <target>Muted Users</target>
+        <note>Navigation title of view to see list of muted users.</note>
       </trans-unit>
       <trans-unit id="NIP-05 Verification" xml:space="preserve">
         <source>NIP-05 Verification</source>
         <target>NIP-05 Verification</target>
         <note>Label for NIP-05 Verification section of user profile form.</note>
       </trans-unit>
+      <trans-unit id="New encrypted direct message" xml:space="preserve">
+        <source>New encrypted direct message</source>
+        <target>New encrypted direct message</target>
+        <note>Notification that the user has received a new direct message</note>
+      </trans-unit>
       <trans-unit id="No" xml:space="preserve">
         <source>No</source>
         <target>No</target>
         <note>Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key.</note>
       </trans-unit>
-      <trans-unit id="No block list found, create a new one? This will overwrite any previous block lists." xml:space="preserve">
-        <source>No block list found, create a new one? This will overwrite any previous block lists.</source>
-        <target>No block list found, create a new one? This will overwrite any previous block lists.</target>
-        <note>Alert message prompt that asks if the user wants to create a new block list, overwriting previous block lists.</note>
+      <trans-unit id="No mute list found, create a new one? This will overwrite any previous mute lists." xml:space="preserve">
+        <source>No mute list found, create a new one? This will overwrite any previous mute lists.</source>
+        <target>No mute list found, create a new one? This will overwrite any previous mute lists.</target>
+        <note>Alert message prompt that asks if the user wants to create a new mute list, overwriting previous mute lists.</note>
       </trans-unit>
-      <trans-unit id="No one can see that you zapped" xml:space="preserve">
-        <source>No one can see that you zapped</source>
-        <target>No one can see that you zapped</target>
+      <trans-unit id="No one will see that you zapped" xml:space="preserve">
+        <source>No one will see that you zapped</source>
+        <target>No one will see that you zapped</target>
         <note>Description of anonymous zap type where the zap is sent anonymously and does not identify the user who sent it.</note>
       </trans-unit>
-      <trans-unit id="No zaps are sent, only a lightning payment." xml:space="preserve">
-        <source>No zaps are sent, only a lightning payment.</source>
-        <target>No zaps are sent, only a lightning payment.</target>
+      <trans-unit id="No zaps will be sent, only a lightning payment." xml:space="preserve">
+        <source>No zaps will be sent, only a lightning payment.</source>
+        <target>No zaps will be sent, only a lightning payment.</target>
         <note>Description of non-zap type where sats are sent to the user's wallet as a regular Lightning payment, not as a zap.</note>
       </trans-unit>
-      <trans-unit id="NostrBuild" xml:space="preserve">
-        <source>NostrBuild</source>
-        <target>NostrBuild</target>
-        <note>Dropdown option label for system default for NostrBuild image uploader.</note>
-      </trans-unit>
-      <trans-unit id="NostrImg" xml:space="preserve">
-        <source>NostrImg</source>
-        <target>NostrImg</target>
-        <note>Dropdown option label for system default for NostrImg image uploader.</note>
+      <trans-unit id="None" xml:space="preserve">
+        <source>None</source>
+        <target>None</target>
+        <note>Button text to indicate that the zap type is a private zap.</note>
       </trans-unit>
       <trans-unit id="Note contains &quot;nsec1&quot; private key. Are you sure?" xml:space="preserve">
         <source>Note contains "nsec1" private key. Are you sure?</source>
@@ -784,10 +801,21 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Nothing to see here. Check back later!</target>
         <note>Indicates that there are no notes in the timeline to view.</note>
       </trans-unit>
+      <trans-unit id="Notification Dots" xml:space="preserve">
+        <source>Notification Dots</source>
+        <target>Notification Dots</target>
+        <note>Section header for notification indicator dot settings</note>
+      </trans-unit>
+      <trans-unit id="Notification Preference" xml:space="preserve">
+        <source>Notification Preference</source>
+        <target>Notification Preference</target>
+        <note>Section header for Notification Preferences</note>
+      </trans-unit>
       <trans-unit id="Notifications" xml:space="preserve">
         <source>Notifications</source>
         <target>Notifications</target>
-        <note>Toolbar label for Notifications view.</note>
+        <note>Section header for Damus notifications
+   Toolbar label for Notifications view.</note>
       </trans-unit>
       <trans-unit id="Nudity or explicit content" xml:space="preserve">
         <source>Nudity or explicit content</source>
@@ -803,6 +831,21 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Only you can see this message and who sent it.</source>
         <target>Only you can see this message and who sent it.</target>
         <note>Help text on green lock icon that explains that only the current user can see the message of a zap event and who sent the zap.</note>
+      </trans-unit>
+      <trans-unit id="OnlyZaps" xml:space="preserve">
+        <source>OnlyZaps</source>
+        <target>OnlyZaps</target>
+        <note>Section header for enabling OnlyZaps mode (hide reactions)</note>
+      </trans-unit>
+      <trans-unit id="OnlyZaps Enabled" xml:space="preserve">
+        <source>OnlyZaps Enabled</source>
+        <target>OnlyZaps Enabled</target>
+        <note>Non-tappable text in context menu that shows up when the zap button on profile is long pressed to indicate that the user has enabled OnlyZaps, meaning that they would like to be only zapped and not accept reactions to their notes.</note>
+      </trans-unit>
+      <trans-unit id="OnlyZaps mode" xml:space="preserve">
+        <source>OnlyZaps mode</source>
+        <target>OnlyZaps mode</target>
+        <note>Setting toggle to hide reactions.</note>
       </trans-unit>
       <trans-unit id="Paid Relay" xml:space="preserve">
         <source>Paid Relay</source>
@@ -825,11 +868,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <note>Alert for deleting the users account.
    Section title for deleting the user</note>
       </trans-unit>
-      <trans-unit id="Phoenix" xml:space="preserve">
-        <source>Phoenix</source>
-        <target>Phoenix</target>
-        <note>Dropdown option label for Lightning wallet, Phoenix.</note>
-      </trans-unit>
       <trans-unit id="Plan" xml:space="preserve">
         <source>Plan</source>
         <target>Plan</target>
@@ -845,10 +883,10 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Post</target>
         <note>Button to post a note.</note>
       </trans-unit>
-      <trans-unit id="Post from a user you've blocked" xml:space="preserve">
-        <source>Post from a user you've blocked</source>
-        <target>Post from a user you've blocked</target>
-        <note>Text to indicate that what is being shown is a post from a user who has been blocked.</note>
+      <trans-unit id="Post from a user you've muted" xml:space="preserve">
+        <source>Post from a user you've muted</source>
+        <target>Post from a user you've muted</target>
+        <note>Text to indicate that what is being shown is a post from a user who has been muted.</note>
       </trans-unit>
       <trans-unit id="Posts" xml:space="preserve">
         <source>Posts</source>
@@ -866,7 +904,7 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <source>Private</source>
         <target>Private</target>
         <note>Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading.
-Picker option to indicate that a zap should be sent privately and not identify the user to the public.</note>
+Button text to indicate that the zap type is a private zap.</note>
       </trans-unit>
       <trans-unit id="Private Key" xml:space="preserve">
         <source>Private Key</source>
@@ -896,7 +934,7 @@ Picker option to indicate that a zap should be sent privately and not identify t
       <trans-unit id="Public" xml:space="preserve">
         <source>Public</source>
         <target>Public</target>
-        <note>Picker option to indicate that a zap should be sent publicly and identify the user as who sent it.</note>
+        <note>Button text to indicate that the zap type is a public zap.</note>
       </trans-unit>
       <trans-unit id="Public Account ID" xml:space="preserve">
         <source>Public Account ID</source>
@@ -917,6 +955,16 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <source>Public key</source>
         <target>Public key</target>
         <note>Label indicating that the text is a user's public account key.</note>
+      </trans-unit>
+      <trans-unit id="QR Code" xml:space="preserve">
+        <source>QR Code</source>
+        <target>QR Code</target>
+        <note>Button to view profile's qr code.</note>
+      </trans-unit>
+      <trans-unit id="Quote" xml:space="preserve">
+        <source>Quote</source>
+        <target>Quote</target>
+        <note>Title of alert for confirming to make a quoted post.</note>
       </trans-unit>
       <trans-unit id="Reactions" xml:space="preserve">
         <source>Reactions</source>
@@ -967,6 +1015,11 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <target>Reply</target>
         <note>Accessibility label for reply button</note>
       </trans-unit>
+      <trans-unit id="Replying to" xml:space="preserve">
+        <source>Replying to</source>
+        <target>Replying to</target>
+        <note>Text indicating that the view is used for editing which participants are replied to in a note.</note>
+      </trans-unit>
       <trans-unit id="Replying to %@" xml:space="preserve">
         <source>Replying to %@</source>
         <target>Replying to %@</target>
@@ -981,11 +1034,6 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <source>Replying to self</source>
         <target>Replying to self</target>
         <note>Label to indicate that the user is replying to themself.</note>
-      </trans-unit>
-      <trans-unit id="Replying to:" xml:space="preserve">
-        <source>Replying to:</source>
-        <target>Replying to:</target>
-        <note>Indicating that the user is replying to the following listed people.</note>
       </trans-unit>
       <trans-unit id="Report" xml:space="preserve">
         <source>Report</source>
@@ -1006,18 +1054,23 @@ Picker option to indicate that a zap should be sent privately and not identify t
       <trans-unit id="Repost" xml:space="preserve">
         <source>Repost</source>
         <target>Repost</target>
-        <note>Button to confirm reposting a post.
-   Title of alert for confirming to repost a post.</note>
+        <note>Title of alert for confirming to repost a post.</note>
       </trans-unit>
       <trans-unit id="Reposted" xml:space="preserve">
         <source>Reposted</source>
         <target>Reposted</target>
         <note>Text indicating that the post was reposted (i.e. re-shared).</note>
       </trans-unit>
+      <trans-unit id="Reposted by %@" xml:space="preserve">
+        <source>Reposted by %@</source>
+        <target>Reposted by %@</target>
+        <note>Reposted by heading in local notification</note>
+      </trans-unit>
       <trans-unit id="Reposts" xml:space="preserve">
         <source>Reposts</source>
         <target>Reposts</target>
-        <note>Navigation bar title for Reposts view.</note>
+        <note>Navigation bar title for Reposts view.
+   Setting to enable Repost Local Notification</note>
       </trans-unit>
       <trans-unit id="Requests" xml:space="preserve">
         <source>Requests</source>
@@ -1028,11 +1081,6 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <source>Retry</source>
         <target>Retry</target>
         <note>Button to retry completing account creation after an error occurred.</note>
-      </trans-unit>
-      <trans-unit id="River" xml:space="preserve">
-        <source>River</source>
-        <target>River</target>
-        <note>Dropdown option label for Lightning wallet, River</note>
       </trans-unit>
       <trans-unit id="Satoshi Nakamoto" xml:space="preserve">
         <source>Satoshi Nakamoto</source>
@@ -1079,15 +1127,15 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <target>Select default wallet</target>
         <note>Prompt selection of user's default wallet</note>
       </trans-unit>
-      <trans-unit id="Select image uploader" xml:space="preserve">
-        <source>Select image uploader</source>
-        <target>Select image uploader</target>
-        <note>Prompt selection of user's image uploader</note>
-      </trans-unit>
       <trans-unit id="Send a message to start the conversation..." xml:space="preserve">
         <source>Send a message to start the conversation...</source>
         <target>Send a message to start the conversation...</target>
         <note>Text prompt for user to send a message to the other user.</note>
+      </trans-unit>
+      <trans-unit id="Send a reply with your zap..." xml:space="preserve">
+        <source>Send a reply with your zap...</source>
+        <target>Send a reply with your zap...</target>
+        <note>Placeholder text for a comment to send as part of a zap to the user.</note>
       </trans-unit>
       <trans-unit id="Server" xml:space="preserve">
         <source>Server</source>
@@ -1125,7 +1173,7 @@ Picker option to indicate that a zap should be sent privately and not identify t
       <trans-unit id="Show" xml:space="preserve">
         <source>Show</source>
         <target>Show</target>
-        <note>Button to show a post from a user who has been blocked.
+        <note>Button to show a post from a user who has been muted.
    Toggle to show or hide user's secret account login key.</note>
       </trans-unit>
       <trans-unit id="Show +" xml:space="preserve">
@@ -1143,6 +1191,11 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <source>Show more</source>
         <target>Show more</target>
         <note>Button to show entire note.</note>
+      </trans-unit>
+      <trans-unit id="Show only from users you follow" xml:space="preserve">
+        <source>Show only from users you follow</source>
+        <target>Show only from users you follow</target>
+        <note>Setting to Show notifications only associated to users your follow</note>
       </trans-unit>
       <trans-unit id="Show only preferred languages on Universe feed" xml:space="preserve">
         <source>Show only preferred languages on Universe feed</source>
@@ -1169,20 +1222,25 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <target>Software</target>
         <note>Label to display relay software.</note>
       </trans-unit>
-      <trans-unit id="Strike" xml:space="preserve">
-        <source>Strike</source>
-        <target>Strike</target>
-        <note>Dropdown option label for Lightning wallet, Strike.</note>
-      </trans-unit>
       <trans-unit id="Supported NIPs" xml:space="preserve">
         <source>Supported NIPs</source>
         <target>Supported NIPs</target>
         <note>Label to display relay's supported NIPs.</note>
       </trans-unit>
+      <trans-unit id="Take Photo" xml:space="preserve">
+        <source>Take Photo</source>
+        <target>Take Photo</target>
+        <note>Option to take a photo with the camera</note>
+      </trans-unit>
+      <trans-unit id="Text Truncation" xml:space="preserve">
+        <source>Text Truncation</source>
+        <target>Text Truncation</target>
+        <note>Section header for damus text truncation user configuration</note>
+      </trans-unit>
       <trans-unit id="Thanks!" xml:space="preserve">
         <source>Thanks!</source>
         <target>Thanks!</target>
-        <note>Button to close out of alert that informs that the action to block a user was successful.</note>
+        <note>Button to close out of alert that informs that the action to muted a user was successful.</note>
       </trans-unit>
       <trans-unit id="The address should either begin with LNURL or should look like an email address." xml:space="preserve">
         <source>The address should either begin with LNURL or should look like an email address.</source>
@@ -1224,6 +1282,11 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <target>Thread</target>
         <note>Navigation bar title for note thread.</note>
       </trans-unit>
+      <trans-unit id="Translate DMs" xml:space="preserve">
+        <source>Translate DMs</source>
+        <target>Translate DMs</target>
+        <note>Toggle to translate direct messages.</note>
+      </trans-unit>
       <trans-unit id="Translate Note" xml:space="preserve">
         <source>Translate Note</source>
         <target>Translate Note</target>
@@ -1234,15 +1297,31 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <target>Translated from %@</target>
         <note>Button to indicate that the note has been translated from a different language.</note>
       </trans-unit>
-      <trans-unit id="Translating from %@..." xml:space="preserve">
-        <source>Translating from %@...</source>
-        <target>Translating from %@...</target>
-        <note>Button to indicate that the note is in the process of being translated from a different language.</note>
+      <trans-unit id="Translating..." xml:space="preserve">
+        <source>Translating...</source>
+        <target>Translating...</target>
+        <note>Text to display when waiting for the translation of a note to finish processing before showing it.</note>
+      </trans-unit>
+      <trans-unit id="Translation" xml:space="preserve">
+        <source>Translation</source>
+        <target>Translation</target>
+        <note>Navigation title for translation settings.
+   Section header for text and appearance settings</note>
       </trans-unit>
       <trans-unit id="Translations" xml:space="preserve">
         <source>Translations</source>
         <target>Translations</target>
         <note>Section title for selecting the translation service.</note>
+      </trans-unit>
+      <trans-unit id="Truncate notification mention text" xml:space="preserve">
+        <source>Truncate notification mention text</source>
+        <target>Truncate notification mention text</target>
+        <note>Setting to truncate text in mention notifications</note>
+      </trans-unit>
+      <trans-unit id="Truncate timeline text" xml:space="preserve">
+        <source>Truncate timeline text</source>
+        <target>Truncate timeline text</target>
+        <note>Setting to truncate text in timeline</note>
       </trans-unit>
       <trans-unit id="Type %@ to delete" xml:space="preserve">
         <source>Type %@ to delete</source>
@@ -1274,15 +1353,25 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <target>Universe 🛸</target>
         <note>Toolbar label for the universal view where posts from all connected relay servers appear.</note>
       </trans-unit>
-      <trans-unit id="User blocked" xml:space="preserve">
-        <source>User blocked</source>
-        <target>User blocked</target>
-        <note>Alert message to indicate the user has been blocked</note>
+      <trans-unit id="Unmute conversation" xml:space="preserve">
+        <source>Unmute conversation</source>
+        <target>Unmute conversation</target>
+        <note>Context menu option for unmuting a conversation.</note>
       </trans-unit>
-      <trans-unit id="User has been blocked" xml:space="preserve">
-        <source>User has been blocked</source>
-        <target>User has been blocked</target>
-        <note>Alert message that informs a user was blocked.</note>
+      <trans-unit id="Upload" xml:space="preserve">
+        <source>Upload</source>
+        <target>Upload</target>
+        <note>Button to proceed with uploading.</note>
+      </trans-unit>
+      <trans-unit id="User has been muted" xml:space="preserve">
+        <source>User has been muted</source>
+        <target>User has been muted</target>
+        <note>Alert message that informs a user was d.</note>
+      </trans-unit>
+      <trans-unit id="User muted" xml:space="preserve">
+        <source>User muted</source>
+        <target>User muted</target>
+        <note>Alert message to indicate the user has been muted</note>
       </trans-unit>
       <trans-unit id="Username" xml:space="preserve">
         <source>Username</source>
@@ -1313,20 +1402,16 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
  ARE YOU SURE YOU WANT TO CONTINUE?</target>
         <note>Alert for deleting the users account.</note>
       </trans-unit>
+      <trans-unit id="Wake up, %@" xml:space="preserve">
+        <source>Wake up, %@</source>
+        <target>Wake up, %@</target>
+        <note>Text telling the user to wake up, where the argument is their display name.</note>
+      </trans-unit>
       <trans-unit id="Wallet" xml:space="preserve">
         <source>Wallet</source>
         <target>Wallet</target>
-        <note>Sidebar menu label for Wallet view.</note>
-      </trans-unit>
-      <trans-unit id="Wallet Selector" xml:space="preserve">
-        <source>Wallet Selector</source>
-        <target>Wallet Selector</target>
-        <note>Section title for selection of wallet.</note>
-      </trans-unit>
-      <trans-unit id="Wallet of Satoshi" xml:space="preserve">
-        <source>Wallet of Satoshi</source>
-        <target>Wallet of Satoshi</target>
-        <note>Dropdown option label for Lightning wallet, Wallet of Satoshi.</note>
+        <note>Sidebar menu label for Wallet view.
+   Title for section in zap settings that controls the Lightning wallet selection.</note>
       </trans-unit>
       <trans-unit id="Website" xml:space="preserve">
         <source>Website</source>
@@ -1358,6 +1443,11 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <target>Yes, Post with Private Key</target>
         <note>Button to proceed with posting a note even though it looks like they might be posting a private key.</note>
       </trans-unit>
+      <trans-unit id="You are dreaming..." xml:space="preserve">
+        <source>You are dreaming...</source>
+        <target>You are dreaming...</target>
+        <note>Text telling the user that they are dreaming.</note>
+      </trans-unit>
       <trans-unit id="You have no bookmarks yet, add them in the context menu" xml:space="preserve">
         <source>You have no bookmarks yet, add them in the context menu</source>
         <target>You have no bookmarks yet, add them in the context menu</target>
@@ -1380,25 +1470,15 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
    Button to send a zap.
    Title of notification when a non-private zap is received.</note>
       </trans-unit>
-      <trans-unit id="Zap Amount" xml:space="preserve">
-        <source>Zap Amount</source>
-        <target>Zap Amount</target>
-        <note>Title of picker that allows selection of predefined amounts to zap.</note>
-      </trans-unit>
-      <trans-unit id="Zap Amount in sats" xml:space="preserve">
-        <source>Zap Amount in sats</source>
-        <target>Zap Amount in sats</target>
-        <note>Header text to indicate that the picker below it is to choose a pre-defined amount of sats to zap.</note>
-      </trans-unit>
-      <trans-unit id="Zap Type" xml:space="preserve">
-        <source>Zap Type</source>
-        <target>Zap Type</target>
-        <note>Header text to indicate that the picker below it is to choose the type of zap to send.</note>
-      </trans-unit>
       <trans-unit id="Zap Vibration" xml:space="preserve">
         <source>Zap Vibration</source>
         <target>Zap Vibration</target>
         <note>Setting to enable vibration on zap</note>
+      </trans-unit>
+      <trans-unit id="Zap type" xml:space="preserve">
+        <source>Zap type</source>
+        <target>Zap type</target>
+        <note>Text to indicate that the buttons below it is for choosing the type of zap to send.</note>
       </trans-unit>
       <trans-unit id="Zapping..." xml:space="preserve">
         <source>Zapping...</source>
@@ -1408,17 +1488,11 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
       <trans-unit id="Zaps" xml:space="preserve">
         <source>Zaps</source>
         <target>Zaps</target>
-        <note>Navigation bar title for the Zaps view.</note>
-      </trans-unit>
-      <trans-unit id="Zebedee" xml:space="preserve">
-        <source>Zebedee</source>
-        <target>Zebedee</target>
-        <note>Dropdown option label for Lightning wallet, Zebedee.</note>
-      </trans-unit>
-      <trans-unit id="Zeus LN" xml:space="preserve">
-        <source>Zeus LN</source>
-        <target>Zeus LN</target>
-        <note>Dropdown option label for Lightning wallet, Zeus LN.</note>
+        <note>Navigation bar title for the Zaps view.
+   Navigation title for zap settings.
+   Section header for zap settings
+   Setting to enable Zap Local Notification
+   Title for section in zap settings that controls general zap preferences.</note>
       </trans-unit>
       <trans-unit id="https://example.com/pic.jpg" xml:space="preserve">
         <source>https://example.com/pic.jpg</source>
@@ -1445,11 +1519,6 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <target>None</target>
         <note>Dropdown option for selecting no translation service.</note>
       </trans-unit>
-      <trans-unit id="none_zap_type" xml:space="preserve">
-        <source>None</source>
-        <target>None</target>
-        <note>Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.</note>
-      </trans-unit>
       <trans-unit id="now" xml:space="preserve">
         <source>now</source>
         <target>now</target>
@@ -1466,8 +1535,8 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <note>Label indicating that a form input is optional.</note>
       </trans-unit>
       <trans-unit id="private_zap_description" xml:space="preserve">
-        <source>Only '%@' can see that you zapped them</source>
-        <target>Only '%@' can see that you zapped them</target>
+        <source>Only '%@' will see that you zapped them</source>
+        <target>Only '%@' will see that you zapped them</target>
         <note>Description of private zap type where the zap is sent privately and does not identify the user to the public.</note>
       </trans-unit>
       <trans-unit id="reacted_tagged_in_1" xml:space="preserve">
@@ -1534,6 +1603,16 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <source>satoshi</source>
         <target>satoshi</target>
         <note>Example username of Bitcoin creator(s), Satoshi Nakamoto.</note>
+      </trans-unit>
+      <trans-unit id="sats" xml:space="preserve">
+        <source>sats</source>
+        <target>sats</target>
+        <note>Shortened form of satoshi, display unit of measure where 1,000,000,000 satoshis is 1 Bitcoin. Used to indicate how many sats will be zapped to a note, configured through the custom zap view.</note>
+      </trans-unit>
+      <trans-unit id="self" xml:space="preserve">
+        <source>self</source>
+        <target>self</target>
+        <note>Part of a larger sentence 'Replying to self' in US English. 'self' indicates that the user is replying to themself and no one else.</note>
       </trans-unit>
       <trans-unit id="wss://some.relay.com" xml:space="preserve">
         <source>wss://some.relay.com</source>

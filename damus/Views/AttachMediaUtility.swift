@@ -40,9 +40,9 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
     request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
     
     switch mediaToUpload {
-    case .image(let img):
+    case .image(let url):
         do {
-            mediaData = try Data(contentsOf: img)
+            mediaData = try Data(contentsOf: url)
         } catch {
             return .failed(error)
         }
@@ -62,13 +62,8 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
     
     do {
         let (data, _) = try await URLSession.shared.data(for: request, delegate: progress)
-        
-        guard let responseString = String(data: data, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue)) else {
-            print("Upload failed getting response string")
-            return .failed(nil)
-        }
-        
-        guard let url = mediaUploader.getMediaURL(from: responseString, mediaIsImage: mediaToUpload.is_image) else {
+
+        guard let url = mediaUploader.getMediaURL(from: data) else {
             print("Upload failed getting media url")
             return .failed(nil)
         }
@@ -77,81 +72,6 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
         
     } catch {
         return .failed(error)
-    }
-}
-
-extension PostView {
-    struct ImagePicker: UIViewControllerRepresentable {
-
-        @Environment(\.presentationMode)
-        private var presentationMode
-
-        let sourceType: UIImagePickerController.SourceType
-        let damusState: DamusState
-        let onImagePicked: (URL) -> Void
-        let onVideoPicked: (URL) -> Void
-
-        final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
-            @Binding private var presentationMode: PresentationMode
-            private let sourceType: UIImagePickerController.SourceType
-            private let onImagePicked: (URL) -> Void
-            private let onVideoPicked: (URL) -> Void
-
-            init(presentationMode: Binding<PresentationMode>,
-                 sourceType: UIImagePickerController.SourceType,
-                 onImagePicked: @escaping (URL) -> Void,
-                 onVideoPicked: @escaping (URL) -> Void) {
-                _presentationMode = presentationMode
-                self.sourceType = sourceType
-                self.onImagePicked = onImagePicked
-                self.onVideoPicked = onVideoPicked
-            }
-
-            func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-                if let videoURL = info[UIImagePickerController.InfoKey.mediaURL] as? URL {
-                    // Handle the selected video
-                    onVideoPicked(videoURL)
-                } else if let imageURL = info[UIImagePickerController.InfoKey.imageURL] as? URL {
-                    // Handle the selected image
-                    self.onImagePicked(imageURL)
-                }
-                presentationMode.dismiss()
-            }
-
-            func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-                presentationMode.dismiss()
-            }
-        }
-
-        func makeCoordinator() -> Coordinator {
-            return Coordinator(presentationMode: presentationMode,
-                               sourceType: sourceType,
-                               onImagePicked: { url in
-                // Handle the selected image URL
-                onImagePicked(url)
-            },
-                               onVideoPicked: { videoURL in
-                // Handle the selected video URL
-                onVideoPicked(videoURL)
-            })
-        }
-
-        func makeUIViewController(context: UIViewControllerRepresentableContext<ImagePicker>) -> UIImagePickerController {
-            let picker = UIImagePickerController()
-            picker.sourceType = sourceType
-            let mediaUploader = get_media_uploader(damusState.keypair.pubkey)
-            picker.mediaTypes = ["public.image", "com.compuserve.gif"]
-            if mediaUploader.supportsVideo {
-                picker.mediaTypes.append("public.movie")
-            }
-            picker.delegate = context.coordinator
-            return picker
-        }
-
-        func updateUIViewController(_ uiViewController: UIImagePickerController,
-                                    context: UIViewControllerRepresentableContext<ImagePicker>) {
-
-        }
     }
 }
 
@@ -164,10 +84,22 @@ extension NSMutableData {
     }
 }
 
-enum MediaUploader: String, CaseIterable, Identifiable {
+enum MediaUploader: String, CaseIterable, Identifiable, StringCodable {
     var id: String { self.rawValue }
     case nostrBuild
     case nostrImg
+    
+    init?(from string: String) {
+        guard let mu = MediaUploader(rawValue: string) else {
+            return nil
+        }
+        
+        self = mu
+    }
+    
+    func to_string() -> String {
+        return rawValue
+    }
 
     var nameParam: String {
         switch self {
@@ -197,9 +129,9 @@ enum MediaUploader: String, CaseIterable, Identifiable {
     var model: Model {
         switch self {
         case .nostrBuild:
-            return .init(index: -1, tag: "nostrBuild", displayName: NSLocalizedString("NostrBuild", comment: "Dropdown option label for system default for NostrBuild image uploader."))
+            return .init(index: -1, tag: "nostrBuild", displayName: "nostr.build")
         case .nostrImg:
-            return .init(index: 0, tag: "nostrImg", displayName: NSLocalizedString("NostrImg", comment: "Dropdown option label for system default for NostrImg image uploader."))
+            return .init(index: 0, tag: "nostrImg", displayName: "nostrimg.com")
         }
     }
 
@@ -207,28 +139,27 @@ enum MediaUploader: String, CaseIterable, Identifiable {
     var postAPI: String {
         switch self {
         case .nostrBuild:
-            return "https://nostr.build/upload.php"
+            return "https://nostr.build/api/upload/ios.php"
         case .nostrImg:
             return "https://nostrimg.com/api/upload"
         }
     }
 
-    func getMediaURL(from responseString: String, mediaIsImage: Bool) -> String? {
+    func getMediaURL(from data: Data) -> String? {
         switch self {
         case .nostrBuild:
-            guard let startIndex = responseString.range(of: "nostr.build_")?.lowerBound else {
+            do {
+                return try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? String
+            } catch {
+                print("Failed JSONSerialization")
                 return nil
             }
-            
-            let stringContainingName = responseString[startIndex..<responseString.endIndex]
-            guard let endIndex = stringContainingName.range(of: "<")?.lowerBound else {
-                return nil
-            }
-            let nostrBuildImageName = responseString[startIndex..<endIndex]
-            let nostrBuildURL = mediaIsImage ? "https://nostr.build/i/\(nostrBuildImageName)" : "https://nostr.build/av/\(nostrBuildImageName)"
-            return nostrBuildURL
-                
         case .nostrImg:
+            guard let responseString = String(data: data, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue)) else {
+                print("Upload failed getting response string")
+                return nil
+            }
+
             guard let startIndex = responseString.range(of: "https://i.nostrimg.com/")?.lowerBound else {
                     return nil
                 }

@@ -72,14 +72,23 @@ struct UserSearch: View {
     }
     
     var body: some View {
-        ScrollView {
-            LazyVStack {
-                ForEach(users) { user in
-                    UserView(damus_state: damus_state, pubkey: user.pubkey)
-                        .onTapGesture {
-                            on_user_tapped(user: user)
+        VStack(spacing: 0) {
+            Divider()
+            ScrollView {
+                LazyVStack {
+                    if users.count == 0 {
+                        EmptyUserSearchView()
+                    } else {
+                        ForEach(users) { user in
+                            UserView(damus_state: damus_state, pubkey: user.pubkey)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    on_user_tapped(user: user)
+                                }
                         }
+                    }
                 }
+                .padding()
             }
         }
     }

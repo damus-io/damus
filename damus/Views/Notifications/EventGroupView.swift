@@ -204,7 +204,7 @@ struct EventGroupView: View {
                 .frame(width: PFP_SIZE + 10)
             
             VStack(alignment: .leading) {
-                ProfilePicturesView(state: state, events: group.events)
+                ProfilePicturesView(state: state, pubkeys: group.events.map { $0.pubkey })
                 
                 if let event {
                     let thread = ThreadModel(event: event, damus_state: state)
@@ -212,8 +212,9 @@ struct EventGroupView: View {
                     NavigationLink(destination: dest) {
                         VStack(alignment: .leading) {
                             GroupDescription
-                            EventBody(damus_state: state, event: event, size: .normal, options: [])
+                            EventBody(damus_state: state, event: event, size: .normal, options: [.truncate_content])
                                 .padding([.top], 1)
+                                .padding([.trailing])
                                 .foregroundColor(.gray)
                         }
                     }

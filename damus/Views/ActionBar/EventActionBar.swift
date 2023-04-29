@@ -8,49 +8,51 @@
 import SwiftUI
 import UIKit
 
-enum ActionBarSheet: Identifiable {
-    case reply
-
-    var id: String {
-        switch self {
-        case .reply: return "reply"
-        }
-    }
-}
 
 struct EventActionBar: View {
     let damus_state: DamusState
     let event: NostrEvent
-    let test_lnurl: String?
     let generator = UIImpactFeedbackGenerator(style: .medium)
     
     // just used for previews
-    @State var sheet: ActionBarSheet? = nil
     @State var show_share_sheet: Bool = false
     @State var show_share_action: Bool = false
-    
+    @State var show_repost_action: Bool = false
+
     @ObservedObject var bar: ActionBarModel
     
-    @Environment(\.colorScheme) var colorScheme
-    
-    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil, test_lnurl: String? = nil) {
+    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil) {
         self.damus_state = damus_state
         self.event = event
-        self.test_lnurl = test_lnurl
         _bar = ObservedObject(wrappedValue: bar ?? make_actionbar_model(ev: event.id, damus: damus_state))
     }
     
+    @Environment(\.colorScheme) var colorScheme
+    
     var lnurl: String? {
-        test_lnurl ?? damus_state.profiles.lookup(id: event.pubkey)?.lnurl
+        damus_state.profiles.lookup(id: event.pubkey)?.lnurl
+    }
+    
+    var show_like: Bool {
+        if damus_state.settings.onlyzaps_mode {
+            return false
+        }
+        
+        return true
     }
     
     var body: some View {
         HStack {
             if damus_state.keypair.privkey != nil {
-                EventActionButton(img: "bubble.left", col: nil) {
-                    notify(.reply, event)
+                HStack(spacing: 4) {
+                    EventActionButton(img: "bubble.left", col: bar.replied ? DamusColors.purple : Color.gray) {
+                        notify(.compose, PostAction.replying_to(event))
+                    }
+                    .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
+                    Text(verbatim: "\(bar.replies > 0 ? "\(bar.replies)" : "")")
+                        .font(.footnote.weight(.medium))
+                        .foregroundColor(bar.replied ? DamusColors.purple : Color.gray)
                 }
-                .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
             }
             Spacer()
             HStack(spacing: 4) {
@@ -59,7 +61,7 @@ struct EventActionBar: View {
                     if bar.boosted {
                         notify(.delete, bar.our_boost)
                     } else {
-                        send_boost()
+                        self.show_repost_action = true
                     }
                 }
                 .accessibilityLabel(NSLocalizedString("Boosts", comment: "Accessibility label for boosts button"))
@@ -67,22 +69,25 @@ struct EventActionBar: View {
                     .font(.footnote.weight(.medium))
                     .foregroundColor(bar.boosted ? Color.green : Color.gray)
             }
-            Spacer()
-            
-            HStack(spacing: 4) {
-                LikeButton(liked: bar.liked) {
-                    if bar.liked {
-                        notify(.delete, bar.our_like)
-                    } else {
-                        send_like()
+
+            if show_like {
+                Spacer()
+
+                HStack(spacing: 4) {
+                    LikeButton(liked: bar.liked) {
+                        if bar.liked {
+                            notify(.delete, bar.our_like)
+                        } else {
+                            send_like()
+                        }
                     }
+
+                    Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
+                        .font(.footnote.weight(.medium))
+                        .nip05_colorized(gradient: bar.liked)
                 }
-                
-                Text(verbatim: "\(bar.likes > 0 ? "\(bar.likes)" : "")")
-                    .font(.footnote.weight(.medium))
-                    .nip05_colorized(gradient: bar.liked)
             }
-            
+
             if let lnurl = self.lnurl {
                 Spacer()
                 ZapButton(damus_state: damus_state, event: event, lnurl: lnurl, bar: bar)
@@ -94,24 +99,33 @@ struct EventActionBar: View {
             }
             .accessibilityLabel(NSLocalizedString("Share", comment: "Button to share a post"))
         }
-        .sheet(isPresented: $show_share_action) {
+        .onAppear {
+            self.bar.update(damus: damus_state, evid: self.event.id)
+        }
+        .sheet(isPresented: $show_share_action, onDismiss: { self.show_share_action = false }) {
             if #available(iOS 16.0, *) {
-                ShareAction(event: event, bookmarks: damus_state.bookmarks, show_share_sheet: $show_share_sheet, show_share_action: $show_share_action)
+                ShareAction(event: event, bookmarks: damus_state.bookmarks, show_share: $show_share_sheet)
                     .presentationDetents([.height(300)])
                     .presentationDragIndicator(.visible)
             } else {
-                if let note_id = bech32_note_id(event.id) {
-                    if let url = URL(string: "https://damus.io/" + note_id) {
-                        ShareSheet(activityItems: [url])
-                    }
-                }
+                ShareAction(event: event, bookmarks: damus_state.bookmarks, show_share: $show_share_sheet)
             }
         }
-        .sheet(isPresented: $show_share_sheet) {
+        .sheet(isPresented: $show_share_sheet, onDismiss: { self.show_share_sheet = false }) {
             if let note_id = bech32_note_id(event.id) {
                 if let url = URL(string: "https://damus.io/" + note_id) {
                     ShareSheet(activityItems: [url])
                 }
+            }
+        }
+        .sheet(isPresented: $show_repost_action, onDismiss: { self.show_repost_action = false }) {
+        
+            if #available(iOS 16.0, *) {
+                RepostAction(damus_state: self.damus_state, event: event)
+                    .presentationDetents([.height(300)])
+                    .presentationDragIndicator(.visible)
+            } else {
+                RepostAction(damus_state: self.damus_state, event: event)
             }
         }
         .onReceive(handle_notify(.update_stats)) { n in
@@ -129,18 +143,6 @@ struct EventActionBar: View {
                 self.bar.our_like = liked.event
             }
         }
-    }
-    
-    func send_boost() {
-        guard let privkey = self.damus_state.keypair.privkey else {
-            return
-        }
-
-        let boost = make_boost_event(pubkey: damus_state.keypair.pubkey, privkey: privkey, boosted: self.event)
-        
-        self.bar.our_boost = boost
-        
-        notify(.boost, boost)
     }
     
     func send_like() {
@@ -225,12 +227,12 @@ struct EventActionBar_Previews: PreviewProvider {
         let ev = NostrEvent(content: "hi", pubkey: pk)
         
         let bar = ActionBarModel.empty()
-        let likedbar = ActionBarModel(likes: 10, boosts: 0, zaps: 0, zap_total: 0, our_like: nil, our_boost: nil, our_zap: nil)
-        let likedbar_ours = ActionBarModel(likes: 10, boosts: 0, zaps: 0, zap_total: 0, our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: nil, our_zap: nil)
-        let maxed_bar = ActionBarModel(likes: 999, boosts: 999, zaps: 999, zap_total: 99999999,  our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: NostrEvent(id: "", content: "", pubkey: ""), our_zap: nil)
-        let extra_max_bar = ActionBarModel(likes: 9999, boosts: 9999, zaps: 9999, zap_total: 99999999,  our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: NostrEvent(id: "", content: "", pubkey: ""), our_zap: nil)
-        let mega_max_bar = ActionBarModel(likes: 9999999, boosts: 99999, zaps: 9999, zap_total: 99999999,  our_like: NostrEvent(id: "", content: "", pubkey: ""), our_boost: NostrEvent(id: "", content: "", pubkey: ""), our_zap: nil)
-        let zapbar = ActionBarModel(likes: 0, boosts: 0, zaps: 5, zap_total: 10000000, our_like: nil, our_boost: nil, our_zap: nil)
+        let likedbar = ActionBarModel(likes: 10, boosts: 0, zaps: 0, zap_total: 0, replies: 0, our_like: nil, our_boost: nil, our_zap: nil, our_reply: nil)
+        let likedbar_ours = ActionBarModel(likes: 10, boosts: 0, zaps: 0, zap_total: 0, replies: 0, our_like: test_event, our_boost: nil, our_zap: nil, our_reply: nil)
+        let maxed_bar = ActionBarModel(likes: 999, boosts: 999, zaps: 999, zap_total: 99999999, replies: 999, our_like: test_event, our_boost: test_event, our_zap: nil, our_reply: nil)
+        let extra_max_bar = ActionBarModel(likes: 9999, boosts: 9999, zaps: 9999, zap_total: 99999999, replies: 9999, our_like: test_event, our_boost: test_event, our_zap: nil, our_reply: test_event)
+        let mega_max_bar = ActionBarModel(likes: 9999999, boosts: 99999, zaps: 9999, zap_total: 99999999, replies: 9999999,  our_like: test_event, our_boost: test_event, our_zap: test_zap, our_reply: test_event)
+        let zapbar = ActionBarModel(likes: 0, boosts: 0, zaps: 5, zap_total: 10000000, replies: 0, our_like: nil, our_boost: nil, our_zap: nil, our_reply: nil)
         
         VStack(spacing: 50) {
             EventActionBar(damus_state: ds, event: ev, bar: bar)
@@ -244,8 +246,6 @@ struct EventActionBar_Previews: PreviewProvider {
             EventActionBar(damus_state: ds, event: ev, bar: extra_max_bar)
 
             EventActionBar(damus_state: ds, event: ev, bar: mega_max_bar)
-            
-            EventActionBar(damus_state: ds, event: ev, bar: zapbar, test_lnurl: "lnurl")
         }
         .padding(20)
     }

@@ -48,7 +48,13 @@ struct NoteContentView: View {
         self._artifacts = State(initialValue: artifacts)
         self.preview_height = lookup_cached_preview_size(previews: damus_state.previews, evid: event.id)
         self._preview = State(initialValue: load_cached_preview(previews: damus_state.previews, evid: event.id))
-        self._artifacts = State(initialValue: render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey))
+        if let cache = damus_state.events.lookup_artifacts(evid: event.id) {
+            self._artifacts = State(initialValue: cache)
+        } else {
+            let artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+            damus_state.events.store_artifacts(evid: event.id, artifacts: artifacts)
+            self._artifacts = State(initialValue: artifacts)
+        }
     }
     
     var truncate: Bool {
@@ -60,12 +66,19 @@ struct NoteContentView: View {
     }
     
     var truncatedText: some View {
-        TruncatedText(text: artifacts.content, maxChars: (truncate ? 280 : nil))
-            .font(eventviewsize_to_font(size))
+        Group {
+            if truncate {
+                TruncatedText(text: artifacts.content)
+                    .font(eventviewsize_to_font(size))
+            } else {
+                artifacts.content.text
+                    .font(eventviewsize_to_font(size))
+            }
+        }
     }
     
     var invoicesView: some View {
-        InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: artifacts.invoices)
+        InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: artifacts.invoices, settings: damus_state.settings)
     }
 
     var translateView: some View {
@@ -91,7 +104,12 @@ struct NoteContentView: View {
     var MainContent: some View {
         VStack(alignment: .leading) {
             if size == .selected {
-                SelectableText(attributedString: artifacts.content, size: self.size)
+                if with_padding {
+                    SelectableText(attributedString: artifacts.content.attributed, size: self.size)
+                        .padding(.horizontal)
+                } else {
+                    SelectableText(attributedString: artifacts.content.attributed, size: self.size)
+                }
             } else {
                 if with_padding {
                     truncatedText
@@ -101,7 +119,7 @@ struct NoteContentView: View {
                 }
             }
 
-            if size == .selected || damus_state.settings.auto_translate {
+            if !options.contains(.no_translate) && (size == .selected || damus_state.settings.auto_translate) {
                 if with_padding {
                     translateView
                         .padding(.horizontal)
@@ -111,10 +129,10 @@ struct NoteContentView: View {
             }
 
             if show_images && artifacts.images.count > 0 {
-                ImageCarousel(urls: artifacts.images)
+                ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.images)
             } else if !show_images && artifacts.images.count > 0 {
                 ZStack {
-                    ImageCarousel(urls: artifacts.images)
+                    ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.images)
                     Blur()
                         .disabled(true)
                 }
@@ -150,6 +168,7 @@ struct NoteContentView: View {
                         if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
                             self.refreshArtifacts()
                         }
+                    case .relay: return
                     case .text: return
                     case .hashtag: return
                     case .url: return
@@ -204,21 +223,28 @@ struct NoteContentView: View {
     }
 }
 
-func hashtag_str(_ htag: String) -> AttributedString {
-     var attributedString = AttributedString(stringLiteral: "#\(htag)")
-     attributedString.link = URL(string: "damus:t:\(htag)")
-     attributedString.foregroundColor = DamusColors.purple
-     return attributedString
- }
+enum ImageName {
+    case systemImage(String)
+    case image(String)
+}
 
-func url_str(_ url: URL) -> AttributedString {
+func attributed_string_attach_icon(_ astr: inout AttributedString, img: UIImage) {
+    let attachment = NSTextAttachment()
+    attachment.image = img
+    let attachmentString = NSAttributedString(attachment: attachment)
+    let wrapped = AttributedString(attachmentString)
+    astr.append(wrapped)
+}
+
+func url_str(_ url: URL) -> CompatibleText {
     var attributedString = AttributedString(stringLiteral: url.absoluteString)
     attributedString.link = url
     attributedString.foregroundColor = DamusColors.purple
-    return attributedString
+    
+    return CompatibleText(attributed: attributedString)
  }
 
-func mention_str(_ m: Mention, profiles: Profiles) -> AttributedString {
+func mention_str(_ m: Mention, profiles: Profiles) -> CompatibleText {
     switch m.type {
     case .pubkey:
         let pk = m.ref.ref_id
@@ -227,13 +253,15 @@ func mention_str(_ m: Mention, profiles: Profiles) -> AttributedString {
         var attributedString = AttributedString(stringLiteral: "@\(disp)")
         attributedString.link = URL(string: "damus:\(encode_pubkey_uri(m.ref))")
         attributedString.foregroundColor = DamusColors.purple
-        return attributedString
+        
+        return CompatibleText(attributed: attributedString)
     case .event:
         let bevid = bech32_note_id(m.ref.ref_id) ?? m.ref.ref_id
         var attributedString = AttributedString(stringLiteral: "@\(abbrev_pubkey(bevid))")
         attributedString.link = URL(string: "damus:\(encode_event_id_uri(m.ref))")
         attributedString.foregroundColor = DamusColors.purple
-        return attributedString
+
+        return CompatibleText(attributed: attributedString)
     }
 }
 
@@ -241,19 +269,25 @@ struct NoteContentView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
         let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
-        let artifacts = NoteArtifacts(content: AttributedString(stringLiteral: content), images: [], invoices: [], links: [])
+        let txt = CompatibleText(attributed: AttributedString(stringLiteral: content))
+        let artifacts = NoteArtifacts(content: txt, images: [], invoices: [], links: [])
         NoteContentView(damus_state: state, event: NostrEvent(content: content, pubkey: "pk"), show_images: true, size: .normal, artifacts: artifacts, options: [])
     }
 }
 
-struct NoteArtifacts {
-    let content: AttributedString
+struct NoteArtifacts: Equatable {
+    static func == (lhs: NoteArtifacts, rhs: NoteArtifacts) -> Bool {
+        return lhs.content == rhs.content
+    }
+    
+    let content: CompatibleText
     let images: [URL]
     let invoices: [Invoice]
     let links: [URL]
     
     static func just_content(_ content: String) -> NoteArtifacts {
-        NoteArtifacts(content: AttributedString(stringLiteral: content), images: [], invoices: [], links: [])
+        let txt = CompatibleText(attributed: AttributedString(stringLiteral: content))
+        return NoteArtifacts(content: txt, images: [], invoices: [], links: [])
     }
 }
 
@@ -272,7 +306,10 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
         .filter({ $0.is_note_mention })
         .count == 1
     
-    let txt: AttributedString = blocks.reduce("") { str, block in
+    var ind: Int = -1
+    let txt: CompatibleText = blocks.reduce(CompatibleText()) { str, block in
+        ind = ind + 1
+        
         switch block {
         case .mention(let m):
             if m.type == .event && one_note_ref {
@@ -280,7 +317,23 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
             }
             return str + mention_str(m, profiles: profiles)
         case .text(let txt):
-            return str + AttributedString(stringLiteral: txt)
+            var trimmed = txt
+            if let prev = blocks[safe: ind-1], case .url(let u) = prev, is_image_url(u) {
+                trimmed = " " + trim_prefix(trimmed)
+            }
+            
+            if let next = blocks[safe: ind+1] {
+                if case .url(let u) = next, is_image_url(u) {
+                    trimmed = trim_suffix(trimmed)
+                } else if case .mention(let m) = next, m.type == .event, one_note_ref {
+                    trimmed = trim_suffix(trimmed)
+                }
+            }
+            
+            return str + CompatibleText(stringLiteral: trimmed)
+        case .relay(let relay):
+            return str + CompatibleText(stringLiteral: relay)
+            
         case .hashtag(let htag):
             return str + hashtag_str(htag)
         case .invoice(let invoice):
@@ -327,32 +380,13 @@ func load_cached_preview(previews: PreviewCache, evid: String) -> LinkViewRepres
     return LinkViewRepresentable(meta: .linkmeta(meta))
 }
 
-struct TruncatedText: View {
-    
-    let text: AttributedString
-    let maxChars: Int?
-    
-    var body: some View {
-        let truncatedAttributedString: AttributedString? = getTruncatedString()
-        
-        Text(truncatedAttributedString ?? text)
-            .fixedSize(horizontal: false, vertical: true)
-        
-        if truncatedAttributedString != nil {
-            Spacer()
-            Button(NSLocalizedString("Show more", comment: "Button to show entire note.")) { }
-                .allowsHitTesting(false)
-        }
-    }
-    
-    func getTruncatedString() -> AttributedString? {
-        guard let maxChars = maxChars else { return nil }
-        let nsAttributedString = NSAttributedString(text)
-        if nsAttributedString.length < maxChars { return nil }
-        
-        let range = NSRange(location: 0, length: maxChars)
-        let truncatedAttributedString = nsAttributedString.attributedSubstring(from: range)
-        
-        return AttributedString(truncatedAttributedString) + "..."
-    }
+
+// trim suffix whitespace and newlines
+func trim_suffix(_ str: String) -> String {
+    return str.replacingOccurrences(of: "\\s+$", with: "", options: .regularExpression)
+}
+
+// trim prefix whitespace and newlines
+func trim_prefix(_ str: String) -> String {
+    return str.replacingOccurrences(of: "^\\s+", with: "", options: .regularExpression)
 }

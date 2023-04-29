@@ -10,6 +10,7 @@ import SwiftUI
 struct InvoicesView: View {
     let our_pubkey: String
     var invoices: [Invoice]
+    let settings: UserSettingsStore
     
     @State var open_sheet: Bool = false
     @State var current_invoice: Invoice? = nil
@@ -17,7 +18,7 @@ struct InvoicesView: View {
     var body: some View {
         TabView {
             ForEach(invoices, id: \.string) { invoice in
-                InvoiceView(our_pubkey: our_pubkey, invoice: invoice)
+                InvoiceView(our_pubkey: our_pubkey, invoice: invoice, settings: settings)
                 .tabItem {
                     Text(invoice.string)
                 }
@@ -31,7 +32,7 @@ struct InvoicesView: View {
 
 struct InvoicesView_Previews: PreviewProvider {
     static var previews: some View {
-        InvoicesView(our_pubkey: "", invoices: [Invoice.init(description: .description("description"), amount: .specific(10000), string: "invstr", expiry: 100000, payment_hash: Data(), created_at: 1000000)])
+        InvoicesView(our_pubkey: "", invoices: [Invoice.init(description: .description("description"), amount: .specific(10000), string: "invstr", expiry: 100000, payment_hash: Data(), created_at: 1000000)], settings: test_damus_state().settings)
             .frame(width: 300)
     }
 }

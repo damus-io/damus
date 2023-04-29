@@ -118,6 +118,14 @@ bech32_encoding bech32_decode(
     size_t max_input_len
 );
 
+bech32_encoding bech32_decode_len(
+    char *hrp,
+    uint8_t *data,
+    size_t *data_len,
+    const char *input,
+    size_t input_len
+);
+
 /* Helper from bech32: translates inbits-bit bytes to outbits-bit bytes.
  * @outlen is incremented as bytes are added.
  * @pad is true if we're to pad, otherwise truncate last byte if necessary

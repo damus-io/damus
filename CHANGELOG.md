@@ -1,3 +1,228 @@
+
+## [1.4.3-10] - 2023-04-25
+
+### Added
+
+- Add paste button to login (Suhail Saqan)
+- Add nokyctranslate translation option (symbsrcool)
+- You can now change the default zap type (William Casarin)
+- Add partial support for different repost variants (William Casarin)
+
+
+### Changed
+
+- Change 500 custom zap to 420 (William Casarin)
+- New looks to the custom zaps view (ericholguin)
+- Adjust attachment images placement when posting (Swift)
+- Only show friends, not friend-of-friend in friend filter (William Casarin)
+
+
+### Fixed
+
+- Fix reposts on macos and ipad (William Casarin)
+- Fix slow reconnection issues (Bryan Montz)
+- Fix issue where uploaded images were from someone else (Swift)
+- Fix crash with LibreTranslate server setting selection and remove delisted vern server (Terry Yiu)
+- Fix buggy zap amounts and wallet selector settings (William Casarin)
+
+
+[1.4.3-10]: https://github.com/damus-io/damus/releases/tag/v1.4.3-10
+
+## [1.4.3-2] - 2023-04-17
+
+### Added
+
+- Add deep links for local notifications (Swift)
+- Add thread muting (Terry Yiu)
+- Preview media uploads when posting (Swift)
+- Add QR Code in profiles (ericholguin)
+
+
+### Changed
+
+- Always check signatures of profile events (William Casarin)
+- Ask permission before uploading media (Swift)
+- Show DM message in local notification (William Casarin)
+
+
+### Fixed
+
+- Fixed repost turning green too early and not reposting sometimes (Swift)
+- Fix shuffling when choosing users to reply to (Joshua Jiang)
+- Do not translate own notes if logged in with private key (Terry Yiu)
+- Load missing profiles from boosts on home view (Gísli Kristjánsson)
+- Load missing profiles from boosts on profile view (Gísli Kristjánsson)
+- Fix tap area when mentioning users (OlegAba)
+- Fix invalid DM author notifications (William Casarin)
+- Fix relay signal indicator, properly show how many relays you are connected to (William Casarin)
+
+
+[1.4.3-2]: https://github.com/damus-io/damus/releases/tag/v1.4.3-2
+
+## [1.4.2-2] - 2023-04-12
+
+### Added
+
+- Include #btc in custom #bitcoin hashtag (William Casarin)
+- Make notification dots configurable (William Casarin)
+
+
+### Changed
+
+- Display follows in most recent to oldest (Luis Cabrera)
+
+### Fixed
+
+- Fix hitches caused by syncronous loading of cached images (William Casarin)
+- Fix tabs sometimes not switching (William Casarin)
+
+
+[1.4.2-2]: https://github.com/damus-io/damus/releases/tag/v1.4.2-2
+
+## [1.4.1-8] - 2023-04-10
+
+### Added
+
+- Add support for nostr: bech32 urls in posts and DMs (NIP19) (Bartholomew Joyce)
+
+### Fixed
+
+- Don't leak mentions in DMs (William Casarin)
+- Fix tap area when mentioning users (OlegAba)
+
+[1.4.1-8]: https://github.com/damus-io/damus/releases/tag/v1.4.1-8
+## [1.4.1-7] - 2023-04-07
+
+### Added
+
+- Add #zap and #zapathon custom hashtags (William Casarin)
+- Add custom #plebchain icon (William Casarin)
+
+
+### Changed
+
+- Add validation to prevent whitespaces be inputted on NIP-05 input field (Terry Yiu)
+- Change reply color from blue to purple. Blue is banned from Damus. (William Casarin)
+
+
+### Fixed
+
+- Fix padding in post view (OlegAba)
+- Show most recently bookmarked notes at the top (Bryan Montz)
+
+
+[1.4.1-7]: https://github.com/damus-io/damus/releases/tag/v1.4.1-7
+
+## [1.4.1-6] - 2023-04-06
+
+### Added
+
+- Custom hashtags for #bitcoin, #nostr and #coffeechain (William Casarin)
+
+### Changed
+
+- Disable translations in DMs by default (William Casarin)
+
+### Fixed
+
+- Don't show Translating... if we're not actually translating (William Casarin)
+
+
+[1.4.1-6]: https://github.com/damus-io/damus/releases/tag/v1.4.1-6
+
+## [1.4.1-4] - 2023-04-06
+
+### Added
+
+- Cache translations (William Casarin)
+
+### Fixed
+
+- Fix translation text popping (William Casarin)
+- Fix broken auto-translations (William Casarin)
+- Fix extraneous padding on some image posts (William Casarin)
+- Fix crash in relay list view (William Casarin)
+
+[1.4.1-4]: https://github.com/damus-io/damus/releases/tag/v1.4.1-4
+
+## [1.4.1-3] - 2023-04-05
+
+### Added
+
+- Added text truncation settings (William Casarin)
+
+### Changed
+
+- Rename block to mute (William Casarin)
+
+### Fixed
+
+- Reduce chopping of images (mainvolume)
+- Fix some notification settings not saving (William Casarin)
+- Fix broken camera uploads (again) (Joel Klabo)
+
+
+[1.4.1-3]: https://github.com/damus-io/damus/releases/tag/v1.4.1-3
+
+## [1.4.1-2] - 2023-04-04
+
+### Added
+
+- Reply counts (William Casarin)
+- Add option to only show notification from people you follow (Swift)
+- Added local notifications for other events (Swift)
+- Show a custom view when tagged user isn't found (ericholguin)
+- Show referenced notes in DMs (William Casarin)
+
+
+### Changed
+
+- Show full bleed images on selected events in threads (William Casarin)
+- Improvement to square image displaying (mainvolume)
+
+
+### Fixed
+
+- Fix broken website links that have missing https:// prefixes (William Casarin)
+- Get around CCP bootstrap relay banning by caching user's relays as their bootstrap relays (William Casarin)
+
+
+[1.4.1-2]: https://github.com/damus-io/damus/releases/tag/v1.4.1-2
+
+## [1.4.1] - 2023-04-03
+
+### Added
+
+- Profile Picture Upload (Joel Klabo)
+- Enable offline posting (William Casarin)
+- Add auto-translation caching to ruduce api usage (Terry Yiu)
+- Added support for gif uploads (Swift)
+- Add a Divider in the Follows List for Large Screens (Joel Klabo)
+- Upload Photos and Videos from Camera (Joel Klabo)
+- Added ability to lookup users by nip05 identifiers (William Casarin)
+
+### Changed
+
+- Only truncate timeline text if enabled in settings (William Casarin)
+- Make mentions wide in notifications like in timeline (William Casarin)
+- Broadcast events you are replying to (William Casarin)
+- Broadcast now also broadcasts event user's profile (William Casarin)
+- Improved look of reply view (ericholguin)
+- Remove gradient in some places for visibility (ericholguin)
+
+
+### Fixed
+
+- Fix cropped images (mainvolume)
+- Truncate long text in notification items (William Casarin)
+- Restore missing reply description on selected events (William Casarin)
+- Show sent DMs immediately (William Casarin)
+- Fixed size of translated text (William Casarin)
+- Fix crash when reposting (William Casarin)
+- Fix unclickable image dismiss button (OlegAba)
+
+
+[1.4.1]: https://github.com/damus-io/damus/releases/tag/v1.4.1
 ## [1.4.0] - 2023-03-27
 
 ### Added
@@ -843,5 +1068,3 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
-

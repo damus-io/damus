@@ -58,7 +58,7 @@ struct SideMenuView: View {
                         NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
                             
                             HStack {
-                                ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles)
+                                ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                                 
                                 VStack(alignment: .leading) {
                                     if let display_name = profile?.display_name {
@@ -93,7 +93,7 @@ struct SideMenuView: View {
                                 */
                                  
                                 NavigationLink(destination: MutelistView(damus_state: damus_state, users: get_mutelist_users(damus_state.contacts.mutelist) )) {
-                                    navLabel(title: NSLocalizedString("Blocked", comment: "Sidebar menu label for Profile view."), systemImage: "exclamationmark.octagon")
+                                    navLabel(title: NSLocalizedString("Muted", comment: "Sidebar menu label for muted users view."), systemImage: "exclamationmark.octagon")
                                 }
                                 
                                 NavigationLink(destination: RelayConfigView(state: damus_state)) {
@@ -142,7 +142,7 @@ struct SideMenuView: View {
                                 .font(.title)
                                 .foregroundColor(textColor())
                         }).fullScreenCover(isPresented: $showQRCode) {
-                            QRCodeView(damus_state: damus_state)
+                            QRCodeView(damus_state: damus_state, pubkey: damus_state.pubkey)
                         }
                     }
                     .padding(.top, verticalSpacing)
