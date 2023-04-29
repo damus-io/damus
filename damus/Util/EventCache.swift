@@ -123,7 +123,7 @@ class EventCache {
         var ev = event
         
         while true {
-            guard let direct_reply = ev.direct_replies(nil).first else {
+            guard let direct_reply = ev.direct_replies(nil).last else {
                 break
             }
             
