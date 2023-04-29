@@ -45,7 +45,7 @@ struct NoteContentView: View {
         if let cache = damus_state.events.lookup_artifacts(evid: event.id) {
             self._artifacts = State(initialValue: cache)
         } else {
-            let artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+            let artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey, camel_case_hashtags: damus_state.settings.capitalize_hashtags)
             damus_state.events.store_artifacts(evid: event.id, artifacts: artifacts)
             self._artifacts = State(initialValue: artifacts)
         }
@@ -160,7 +160,7 @@ struct NoteContentView: View {
                     switch block {
                     case .mention(let m):
                         if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
-                            self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+                            self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey, camel_case_hashtags: damus_state.settings.capitalize_hashtags)
                         }
                     case .relay: return
                     case .text: return
@@ -274,13 +274,13 @@ struct NoteArtifacts: Equatable {
     }
 }
 
-func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -> NoteArtifacts {
+func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?, camel_case_hashtags: Bool) -> NoteArtifacts {
     let blocks = ev.blocks(privkey)
     
-    return render_blocks(blocks: blocks, profiles: profiles, privkey: privkey)
+    return render_blocks(blocks: blocks, profiles: profiles, privkey: privkey, camel_case_hashtags: camel_case_hashtags)
 }
 
-func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> NoteArtifacts {
+func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?, camel_case_hashtags: Bool) -> NoteArtifacts {
     var invoices: [Invoice] = []
     var img_urls: [URL] = []
     var link_urls: [URL] = []
@@ -318,7 +318,7 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
             return str + CompatibleText(stringLiteral: relay)
             
         case .hashtag(let htag):
-            return str + hashtag_str(htag)
+            return str + hashtag_str(htag: htag, camel_case: camel_case_hashtags)
         case .invoice(let invoice):
             invoices.append(invoice)
             return str

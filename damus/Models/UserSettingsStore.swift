@@ -85,6 +85,9 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "left_handed", default_value: false)
     var left_handed: Bool
     
+    @Setting(key: "capitalize_hashtags", default_value: true)
+    var capitalize_hashtags: Bool
+    
     @Setting(key: "always_show_images", default_value: false)
     var always_show_images: Bool
 
