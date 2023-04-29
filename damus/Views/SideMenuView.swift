@@ -45,7 +45,7 @@ struct SideMenuView: View {
     
     func SidemenuItems(profile_model: ProfileModel, followers: FollowersModel) -> some View {
         return VStack(spacing: verticalSpacing) {
-            NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
+            NavigationLink(value: Route.Profile(damusSate: damus_state, profile: profile_model, followers: followers)) {
                 navLabel(title: NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), img: "user")
             }
             
@@ -64,19 +64,19 @@ struct SideMenuView: View {
                 }*/
             }
              
-            NavigationLink(destination: MutelistView(damus_state: damus_state, users: get_mutelist_users(damus_state.contacts.mutelist) )) {
+            NavigationLink(value: Route.MuteList(damusState: damus_state, users: get_mutelist_users(damus_state.contacts.mutelist))) {
                 navLabel(title: NSLocalizedString("Muted", comment: "Sidebar menu label for muted users view."), img: "mute")
             }
             
-            NavigationLink(destination: RelayConfigView(state: damus_state)) {
+            NavigationLink(value: Route.RelayConfig(damusState: damus_state)) {
                 navLabel(title: NSLocalizedString("Relays", comment: "Sidebar menu label for Relays view."), img: "world-relays")
             }
             
-            NavigationLink(destination: BookmarksView(state: damus_state)) {
+            NavigationLink(value: Route.Bookmarks(damusState: damus_state)) {
                 navLabel(title: NSLocalizedString("Bookmarks", comment: "Sidebar menu label for Bookmarks view."), img: "bookmark")
             }
             
-            NavigationLink(destination: ConfigView(state: damus_state)) {
+            NavigationLink(value: Route.Config(damusState: damus_state)) {
                 navLabel(title: NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), img: "settings")
             }
         }
@@ -126,15 +126,15 @@ struct SideMenuView: View {
             ZStack(alignment: .top) {
                 fillColor()
                     .ignoresSafeArea()
-                
+
                 VStack(alignment: .leading, spacing: 0) {
                     MainSidemenu
                     .simultaneousGesture(TapGesture().onEnded {
                         isSidebarVisible = false
                     })
-                    
+
                     Divider()
-                    
+
                     HStack() {
                         Button(action: {
                             //ConfigView(state: damus_state)
@@ -150,9 +150,9 @@ struct SideMenuView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .dynamicTypeSize(.xSmall)
                         })
-                        
+
                         Spacer()
-                        
+
                         Button(action: {
                             showQRCode.toggle()
                         }, label: {

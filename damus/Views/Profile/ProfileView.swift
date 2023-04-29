@@ -77,7 +77,7 @@ struct EditButton: View {
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
+        NavigationLink(value: Route.EditMetadata(damusState: damus_state)) {
             Text("Edit", comment: "Button to edit user's profile.")
                 .frame(height: 30)
                 .padding(.horizontal,25)
@@ -300,8 +300,7 @@ struct ProfileView: View {
     
     var dmButton: some View {
         let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
-        let dmview = DMChatView(damus_state: damus_state, dms: dm_model)
-        return NavigationLink(destination: dmview) {
+        return NavigationLink(value: Route.DMChat(damusState: damus_state, dms: dm_model)) {
             Image("messages")
                 .profile_button_style(scheme: colorScheme)
         }
@@ -325,7 +324,7 @@ struct ProfileView: View {
                     follow_state: damus_state.contacts.follow_state(profile.pubkey)
                 )
             } else if damus_state.keypair.privkey != nil {
-                NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
+                NavigationLink(value: Route.EditMetadata(damusState: damus_state)) {
                     EditButton(damus_state: damus_state)
                 }
             }
@@ -404,7 +403,7 @@ struct ProfileView: View {
                 if let contact = profile.contacts {
                     let contacts = contact.referenced_pubkeys.map { $0.ref_id }
                     let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
-                    NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model)) {
+                    NavigationLink(value: Route.Following(damusState: damus_state, following: following_model)) {
                         HStack {
                             let noun_text = Text(verbatim: "\(followingCountString(profile.following))").font(.subheadline).foregroundColor(.gray)
                             Text("\(Text(verbatim: profile.following.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
@@ -412,10 +411,9 @@ struct ProfileView: View {
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
-                let fview = FollowersView(damus_state: damus_state)
-                    .environmentObject(followers)
+
                 if followers.contacts != nil {
-                    NavigationLink(destination: fview) {
+                    NavigationLink(value: Route.Followers(damusState: damus_state, environmentObject: followers)) {
                         followersCount
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -433,12 +431,12 @@ struct ProfileView: View {
                     let noun_text = Text(verbatim: relaysCountString(relays.keys.count)).font(.subheadline).foregroundColor(.gray)
                     let relay_text = Text("\(Text(verbatim: relays.keys.count.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
                     if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
-                        NavigationLink(destination: RelayConfigView(state: damus_state)) {
+                        NavigationLink(value: Route.RelayConfig(damusState: damus_state)) {
                             relay_text
                         }
                         .buttonStyle(PlainButtonStyle())
                     } else {
-                        NavigationLink(destination: UserRelaysView(state: damus_state, relays: Array(relays.keys).sorted())) {
+                        NavigationLink(value: Route.UserRelays(damusState: damus_state, relays: Array(relays.keys).sorted())) {
                             relay_text
                         }
                         .buttonStyle(PlainButtonStyle())
