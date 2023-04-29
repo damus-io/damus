@@ -210,6 +210,22 @@
 			<string>Reposts</string>
 		</dict>
 	</dict>
+	<key>sats</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@SATS@</string>
+		<key>SATS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>sat</string>
+			<key>other</key>
+			<string>sats</string>
+		</dict>
+	</dict>
 	<key>sats_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -253,9 +269,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>You received %2$@ sat from %3$@: "%4$@"</string>
+			<string>You received %2$@ sat from %3$@: &quot;%4$@&quot;</string>
 			<key>other</key>
-			<string>You received %2$@ sats from %3$@: "%4$@"</string>
+			<string>You received %2$@ sats from %3$@: &quot;%4$@&quot;</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>

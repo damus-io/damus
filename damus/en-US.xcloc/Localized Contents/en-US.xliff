@@ -201,6 +201,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Are you lost?</target>
         <note>Text asking the user if they are lost in the app.</note>
       </trans-unit>
+      <trans-unit id="Are you sure you want to delete all of your bookmarks?" xml:space="preserve">
+        <source>Are you sure you want to delete all of your bookmarks?</source>
+        <target>Are you sure you want to delete all of your bookmarks?</target>
+        <note>Alert for deleting all of the bookmarks.</note>
+      </trans-unit>
       <trans-unit id="Are you sure you want to upload this image?" xml:space="preserve">
         <source>Are you sure you want to upload this image?</source>
         <target>Are you sure you want to upload this image?</target>
@@ -252,6 +257,7 @@ Sentence composed of 2 variables to describe how many people are following a use
    Button to cancel out of posting a note.
    Button to cancel out of view adding user inputted relay.
    Button to cancel the upload.
+   Cancel deleting bookmarks.
    Cancel deleting the user.
    Cancel out of logging out the user.</note>
       </trans-unit>
@@ -293,7 +299,8 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Continue" xml:space="preserve">
         <source>Continue</source>
         <target>Continue</target>
-        <note>Continue with deleting the user.</note>
+        <note>Continue with bookmarks.
+   Continue with deleting the user.</note>
       </trans-unit>
       <trans-unit id="Copied" xml:space="preserve">
         <source>Copied</source>
@@ -661,11 +668,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Like</target>
         <note>Accessibility Label for Like button</note>
       </trans-unit>
-      <trans-unit id="Liked by %@" xml:space="preserve">
-        <source>Liked by %@</source>
-        <target>Liked by %@</target>
-        <note>Liked by heading in local notification</note>
-      </trans-unit>
       <trans-unit id="Likes" xml:space="preserve">
         <source>Likes</source>
         <target>Likes</target>
@@ -975,6 +977,11 @@ Button text to indicate that the zap type is a private zap.</note>
         <source>Quote</source>
         <target>Quote</target>
         <note>Button to compose a quoted note</note>
+      </trans-unit>
+      <trans-unit id="Reacted by %@" xml:space="preserve">
+        <source>Reacted by %@</source>
+        <target>Reacted by %@</target>
+        <note>Reacted by heading in local notification</note>
       </trans-unit>
       <trans-unit id="Reactions" xml:space="preserve">
         <source>Reactions</source>
@@ -1619,11 +1626,6 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <target>satoshi</target>
         <note>Example username of Bitcoin creator(s), Satoshi Nakamoto.</note>
       </trans-unit>
-      <trans-unit id="sats" xml:space="preserve">
-        <source>sats</source>
-        <target>sats</target>
-        <note>Shortened form of satoshi, display unit of measure where 1,000,000,000 satoshis is 1 Bitcoin. Used to indicate how many sats will be zapped to a note, configured through the custom zap view.</note>
-      </trans-unit>
       <trans-unit id="self" xml:space="preserve">
         <source>self</source>
         <target>self</target>
@@ -1874,6 +1876,21 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
       <trans-unit id="/reposts_count:dict/REPOSTS:dict/other:dict/:string" xml:space="preserve">
         <source>Reposts</source>
         <target>Reposts</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/sats:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@SATS@</source>
+        <target>%#@SATS@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/sats:dict/SATS:dict/one:dict/:string" xml:space="preserve">
+        <source>sat</source>
+        <target>sat</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/sats:dict/SATS:dict/other:dict/:string" xml:space="preserve">
+        <source>sats</source>
+        <target>sats</target>
         <note/>
       </trans-unit>
       <trans-unit id="/sats_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
