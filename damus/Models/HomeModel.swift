@@ -1126,7 +1126,7 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
         let notify = LocalNotification(type: .repost, event: ev, target: inner_ev, content: inner_ev.content)
         create_local_notification(profiles: damus_state.profiles, notify: notify)
     } else if type == .like && damus_state.settings.like_notification,
-              let evid = ev.referenced_ids.first?.ref_id,
+              let evid = ev.referenced_ids.last?.ref_id,
               let liked_event = damus_state.events.lookup(evid)
     {
         let notify = LocalNotification(type: .like, event: ev, target: liked_event, content: liked_event.content)
