@@ -269,9 +269,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>You received %2$@ sat from %3$@: &quot;%4$@&quot;</string>
+			<string>You received %2$@ sat from %3$@: "%4$@"</string>
 			<key>other</key>
-			<string>You received %2$@ sats from %3$@: &quot;%4$@&quot;</string>
+			<string>You received %2$@ sats from %3$@: "%4$@"</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
