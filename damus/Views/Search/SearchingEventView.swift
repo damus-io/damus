@@ -93,11 +93,13 @@ struct SearchingEventView: View {
             }
         case .profile:
             find_event(state: state, evid: evid, search_type: search_type, find_from: nil) { _ in
-                if state.profiles.lookup(id: evid) != nil {
-                    self.search_state = .found_profile(evid)
-                    return
-                } else {
-                    self.search_state = .not_found
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1 ) {
+                    if state.profiles.lookup(id: evid) != nil {
+                        self.search_state = .found_profile(evid)
+                        return
+                    } else {
+                        self.search_state = .not_found
+                    }
                 }
             }
         }
