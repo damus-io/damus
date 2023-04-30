@@ -44,6 +44,9 @@ struct MutelistView: View {
                 }
         }
         .navigationTitle(NSLocalizedString("Muted Users", comment: "Navigation title of view to see list of muted users."))
+        .onAppear {
+            users = get_mutelist_users(damus_state.contacts.mutelist) 
+        }
     }
 }
 
