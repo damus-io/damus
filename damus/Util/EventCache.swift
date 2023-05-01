@@ -37,10 +37,12 @@ enum ImageMetaProcessState {
 }
 
 class TranslationModel: ObservableObject {
+    var note_language: String?
     @Published var state: TranslateStatus
     
     init(state: TranslateStatus) {
         self.state = state
+        self.note_language = nil
     }
 }
 
@@ -92,7 +94,6 @@ class EventData {
     var preview_model: PreviewModel
     var zaps_model : ZapsDataModel
     var relative_time: RelativeTimeModel
-    
     var validated: ValidationResult
     
     var translations: TranslateStatus {
@@ -258,7 +259,7 @@ class EventCache {
     }
 }
 
-func should_translate(event: NostrEvent, our_keypair: Keypair, settings: UserSettingsStore) -> Bool {
+func should_translate(event: NostrEvent, our_keypair: Keypair, settings: UserSettingsStore, note_lang: String?) -> Bool {
     guard settings.can_translate else {
         return false
     }
@@ -271,15 +272,25 @@ func should_translate(event: NostrEvent, our_keypair: Keypair, settings: UserSet
         return false
     }
     
+    if let note_lang {
+        let preferredLanguages = Set(Locale.preferredLanguages.map { localeToLanguage($0) })
+        
+        // Don't translate if its in our preferred languages
+        guard !preferredLanguages.contains(note_lang) else {
+            // if its the same, give up and don't retry
+            return false
+        }
+    }
+    
     // we should start translating if we have auto_translate on
     return settings.auto_translate
 }
 
-func should_preload_translation(event: NostrEvent, our_keypair: Keypair, current_status: TranslateStatus, settings: UserSettingsStore) -> Bool {
+func should_preload_translation(event: NostrEvent, our_keypair: Keypair, current_status: TranslateStatus, settings: UserSettingsStore, note_lang: String?) -> Bool {
     
     switch current_status {
     case .havent_tried:
-        return should_translate(event: event, our_keypair: our_keypair, settings: settings)
+        return should_translate(event: event, our_keypair: our_keypair, settings: settings, note_lang: note_lang)
     case .translating: return false
     case .translated: return false
     case .not_needed: return false
@@ -294,6 +305,7 @@ struct PreloadResult {
     let translations: TranslateStatus?
     let preview: Preview?
     let timeago: String
+    let note_language: String
 }
 
 
@@ -319,7 +331,7 @@ func get_preload_plan(cache: EventData, ev: NostrEvent, our_keypair: Keypair, se
         cache.artifacts_model.state = .loading
     }
     
-    let load_translations = should_preload_translation(event: ev, our_keypair: our_keypair, current_status: cache.translations, settings: settings)
+    let load_translations = should_preload_translation(event: ev, our_keypair: our_keypair, current_status: cache.translations, settings: settings, note_lang: cache.translations_model.note_language)
     if load_translations {
         cache.translations_model.state = .translating
     }
@@ -363,11 +375,13 @@ func preload_event(plan: PreloadPlan, profiles: Profiles, our_keypair: Keypair, 
         }
     }
     
+    let note_language = plan.event.note_language(our_keypair.privkey) ?? current_language()
+    
     if plan.load_translations {
-        translations = await translate_note(profiles: profiles, privkey: our_keypair.privkey, event: plan.event, settings: settings)
+        translations = await translate_note(profiles: profiles, privkey: our_keypair.privkey, event: plan.event, settings: settings, note_lang: note_language)
     }
     
-    return PreloadResult(event: plan.event, artifacts: artifacts, translations: translations, preview: preview, timeago: format_relative_time(plan.event.created_at))
+    return PreloadResult(event: plan.event, artifacts: artifacts, translations: translations, preview: preview, timeago: format_relative_time(plan.event.created_at), note_language: note_language)
 }
 
 func set_preload_results(plan: PreloadPlan, res: PreloadResult, privkey: String?) {
@@ -396,6 +410,7 @@ func set_preload_results(plan: PreloadPlan, res: PreloadResult, privkey: String?
         }
     }
     
+    plan.data.translations_model.note_language = res.note_language
     plan.data.relative_time.value = res.timeago
 }
 

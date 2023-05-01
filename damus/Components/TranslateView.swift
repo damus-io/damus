@@ -60,7 +60,7 @@ struct TranslateView: View {
     
     func translate() {
         Task {
-            let res = await translate_note(profiles: damus_state.profiles, privkey: damus_state.keypair.privkey, event: event, settings: damus_state.settings)
+            let res = await translate_note(profiles: damus_state.profiles, privkey: damus_state.keypair.privkey, event: event, settings: damus_state.settings, note_lang: translations_model.note_language)
             DispatchQueue.main.async {
                 self.translations_model.state = res
             }
@@ -68,7 +68,7 @@ struct TranslateView: View {
     }
     
     func attempt_translation() {
-        guard should_translate(event: event, our_keypair: damus_state.keypair, settings: damus_state.settings) else {
+        guard should_translate(event: event, our_keypair: damus_state.keypair, settings: damus_state.settings, note_lang: self.translations_model.note_language) else {
             return
         }
         
@@ -81,7 +81,7 @@ struct TranslateView: View {
             case .havent_tried:
                 if damus_state.settings.auto_translate {
                     Text("")
-                } else {
+                } else if should_translate(event: event, our_keypair: damus_state.keypair, settings: damus_state.settings, note_lang: translations_model.note_language ?? current_language()) {
                     TranslateButton
                 }
             case .translating:
@@ -118,16 +118,9 @@ struct TranslateView_Previews: PreviewProvider {
     }
 }
 
-func translate_note(profiles: Profiles, privkey: String?, event: NostrEvent, settings: UserSettingsStore) async -> TranslateStatus {
-    let note_lang = await event.note_language(privkey) ?? current_language()
+func translate_note(profiles: Profiles, privkey: String?, event: NostrEvent, settings: UserSettingsStore, note_lang: String?) async -> TranslateStatus {
     
-    let preferredLanguages = Set(Locale.preferredLanguages.map { localeToLanguage($0) })
-    
-    // Don't translate if its in our preferred languages
-    guard !preferredLanguages.contains(note_lang) else {
-        // if its the same, give up and don't retry
-        return .not_needed
-    }
+    let note_lang = note_lang ?? current_language()
     
     // If the note language is different from our preferred languages, send a translation request.
     let translator = Translator(settings)
