@@ -127,18 +127,11 @@ final class RelayConnection {
     private func receive(message: URLSessionWebSocketTask.Message) {
         switch message {
         case .string(let messageString):
-            if messageString.utf8.count > 2000 {
-                DispatchQueue.global(qos: .default).async {
-                    if let ev = decode_nostr_event(txt: messageString) {
-                        DispatchQueue.main.async {
-                            self.handleEvent(.nostr_event(ev))
-                        }
-                        return
-                    }
-                }
-            } else {
+            DispatchQueue.global(qos: .default).async {
                 if let ev = decode_nostr_event(txt: messageString) {
-                    handleEvent(.nostr_event(ev))
+                    DispatchQueue.main.async {
+                        self.handleEvent(.nostr_event(ev))
+                    }
                     return
                 }
             }

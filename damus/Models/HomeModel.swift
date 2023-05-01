@@ -232,13 +232,19 @@ class HomeModel: ObservableObject {
         if let inner_ev = ev.get_inner_event(cache: damus_state.events) {
             boost_ev_id = inner_ev.id
             
-            guard validate_event(ev: inner_ev) == .ok else {
-                return
+            
+            Task.init {
+                guard validate_event(ev: inner_ev) == .ok else {
+                    return
+                }
+                
+                if inner_ev.is_textlike {
+                    DispatchQueue.main.async {
+                        self.handle_text_event(sub_id: sub_id, ev)
+                    }
+                }
             }
            
-            if inner_ev.is_textlike {
-                handle_text_event(sub_id: sub_id, ev)
-            }
         }
 
         guard let e = boost_ev_id else {
@@ -271,8 +277,8 @@ class HomeModel: ObservableObject {
         case .success(let n):
             handle_notification(ev: ev)
             let liked = Counted(event: ev, id: e.ref_id, total: n)
-            notify(.liked, liked)
-            notify(.update_stats, e.ref_id)
+            //notify(.liked, liked)
+            //notify(.update_stats, e.ref_id)
         }
     }
 
@@ -689,6 +695,7 @@ func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: P
     profiles.add(id: ev.pubkey, profile: tprof)
     
     if let nip05 = profile.nip05, old_nip05 != profile.nip05 {
+        
         Task.detached(priority: .background) {
             let validated = await validate_nip05(pubkey: ev.pubkey, nip05_str: nip05)
             if validated != nil {
@@ -704,17 +711,22 @@ func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: P
     }
     
     // load pfps asap
+    
+    var changed = false
+    
     let picture = tprof.profile.picture ?? robohash(ev.pubkey)
     if URL(string: picture) != nil {
-        notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+        changed = true
     }
     
     let banner = tprof.profile.banner ?? ""
     if URL(string: banner) != nil {
-        notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+        changed = true
     }
     
-    notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+    if changed {
+        notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+    }
 }
 
 func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping () -> Void) {
@@ -749,6 +761,8 @@ func process_metadata_event(events: EventCache, our_pubkey: String, profiles: Pr
             guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
                 return
             }
+            
+            profile.cache_lnurl()
             
             DispatchQueue.main.async {
                 process_metadata_profile(our_pubkey: our_pubkey, profiles: profiles, profile: profile, ev: ev)
@@ -936,8 +950,13 @@ func handle_incoming_dms(prev_events: NewEventsBits, dms: DirectMessagesModel, o
     }
     
     if inserted {
-        dms.dms = dms.dms.filter({ $0.events.count > 0 }).sorted { a, b in
-            return a.events.last!.created_at > b.events.last!.created_at
+        Task.init {
+            let new_dms = dms.dms.filter({ $0.events.count > 0 }).sorted { a, b in
+                return a.events.last!.created_at > b.events.last!.created_at
+            }
+            DispatchQueue.main.async {
+                dms.dms = new_dms
+            }
         }
     }
     

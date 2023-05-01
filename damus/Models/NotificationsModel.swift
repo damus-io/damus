@@ -110,6 +110,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
     var reposts: [String: EventGroup]
     var replies: [NostrEvent]
     var has_reply: Set<String>
+    var has_ev: Set<String>
     
     @Published var notifications: [NotificationItem]
     
@@ -124,6 +125,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         self.incoming_events = []
         self.profile_zaps = ZapGroup()
         self.notifications = []
+        self.has_ev = Set()
     }
     
     func set_should_queue(_ val: Bool) {
@@ -265,8 +267,14 @@ class NotificationsModel: ObservableObject, ScrollQueue {
     }
     
     func insert_event(_ ev: NostrEvent, damus_state: DamusState) -> Bool {
+        if has_ev.contains(ev.id) {
+            return false
+        }
+        
         if should_queue {
-            return insert_uniq_sorted_event_created(events: &incoming_events, new_ev: ev)
+            incoming_events.append(ev)
+            has_ev.insert(ev.id)
+            return true
         }
         
         if insert_event_immediate(ev, cache: damus_state.events) {

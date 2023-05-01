@@ -115,6 +115,18 @@ class Profile: Codable {
         }
     }
     
+    func cache_lnurl() {
+        guard self._lnurl == nil else {
+            return
+        }
+        
+        guard let addr = lud16 ?? lud06 else {
+            return
+        }
+        
+        self._lnurl = lnaddress_to_lnurl(addr)
+    }
+    
     private var _lnurl: String? = nil
     var lnurl: String? {
         if let _lnurl {

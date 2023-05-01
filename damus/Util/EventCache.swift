@@ -8,6 +8,8 @@
 import Combine
 import Foundation
 import UIKit
+import LinkPresentation
+import Kingfisher
 
 class ImageMetadataState {
     var state: ImageMetaProcessState
@@ -34,17 +36,88 @@ enum ImageMetaProcessState {
     }
 }
 
-class EventData: ObservableObject {
-    @Published var translations: TranslateStatus?
-    @Published var artifacts: NoteArtifacts?
+class TranslationModel: ObservableObject {
+    @Published var state: TranslateStatus
+    
+    init(state: TranslateStatus) {
+        self.state = state
+    }
+}
+
+class NoteArtifactsModel: ObservableObject {
+    @Published var state: NoteArtifactState
+    
+    init(state: NoteArtifactState) {
+        self.state = state
+    }
+}
+
+class PreviewModel: ObservableObject {
+    @Published var state: PreviewState
+    
+    func store(preview: LPLinkMetadata?)  {
+        state = .loaded(Preview(meta: preview))
+    }
+    
+    init(state: PreviewState) {
+        self.state = state
+    }
+}
+
+class ZapsDataModel: ObservableObject {
     @Published var zaps: [Zap]
+    
+    init(_ zaps: [Zap]) {
+        self.zaps = zaps
+    }
+}
+
+class RelativeTimeModel: ObservableObject {
+    private(set) var last_update: Int64
+    @Published var value: String {
+        didSet {
+            self.last_update = Int64(Date().timeIntervalSince1970)
+        }
+    }
+    
+    init(value: String) {
+        self.last_update = 0
+        self.value = ""
+    }
+}
+
+class EventData {
+    var translations_model: TranslationModel
+    var artifacts_model: NoteArtifactsModel
+    var preview_model: PreviewModel
+    var zaps_model : ZapsDataModel
+    var relative_time: RelativeTimeModel
+    
     var validated: ValidationResult
     
+    var translations: TranslateStatus {
+        return translations_model.state
+    }
+    
+    var artifacts: NoteArtifactState {
+        return artifacts_model.state
+    }
+    
+    var preview: PreviewState {
+        return preview_model.state
+    }
+    
+    var zaps: [Zap] {
+        return zaps_model.zaps
+    }
+    
     init(zaps: [Zap] = []) {
-        self.translations = nil
-        self.artifacts = nil
-        self.zaps = zaps
+        self.translations_model = .init(state: .havent_tried)
+        self.artifacts_model = .init(state: .not_loaded)
+        self.zaps_model = .init(zaps)
         self.validated = .unknown
+        self.preview_model = .init(state: .not_loaded)
+        self.relative_time = .init(value: "")
     }
 }
 
@@ -65,7 +138,7 @@ class EventCache {
         }
     }
     
-    private func get_cache_data(_ evid: String) -> EventData {
+    func get_cache_data(_ evid: String) -> EventData {
         guard let data = event_data[evid] else {
             let data = EventData()
             event_data[evid] = data
@@ -84,29 +157,29 @@ class EventCache {
     }
     
     func store_translation_artifacts(evid: String, translated: TranslateStatus) {
-        get_cache_data(evid).translations = translated
+        get_cache_data(evid).translations_model.state = translated
     }
     
     func store_artifacts(evid: String, artifacts: NoteArtifacts) {
-        get_cache_data(evid).artifacts = artifacts
+        get_cache_data(evid).artifacts_model.state = .loaded(artifacts)
     }
     
     @discardableResult
     func store_zap(zap: Zap) -> Bool {
-        var data = get_cache_data(zap.target.id)
+        let data = get_cache_data(zap.target.id).zaps_model
         return insert_uniq_sorted_zap_by_amount(zaps: &data.zaps, new_zap: zap)
     }
     
     func lookup_zaps(target: ZapTarget) -> [Zap] {
-        return get_cache_data(target.id).zaps
+        return get_cache_data(target.id).zaps_model.zaps
     }
     
     func store_img_metadata(url: URL, meta: ImageMetadataState) {
         self.image_metadata[url.absoluteString.lowercased()] = meta
     }
     
-    func lookup_artifacts(evid: String) -> NoteArtifacts? {
-        return get_cache_data(evid).artifacts
+    func lookup_artifacts(evid: String) -> NoteArtifactState {
+        return get_cache_data(evid).artifacts_model.state
     }
     
     func lookup_img_metadata(url: URL) -> ImageMetadataState? {
@@ -114,7 +187,7 @@ class EventCache {
     }
     
     func lookup_translated_artifacts(evid: String) -> TranslateStatus? {
-        return get_cache_data(evid).translations
+        return get_cache_data(evid).translations_model.state
     }
     
     func parent_events(event: NostrEvent) -> [NostrEvent] {
@@ -184,3 +257,163 @@ class EventCache {
         replies.replies = [:]
     }
 }
+
+func should_translate(event: NostrEvent, our_keypair: Keypair, settings: UserSettingsStore) -> Bool {
+    guard settings.can_translate else {
+        return false
+    }
+    
+    // Do not translate self-authored notes if logged in with a private key
+    // as we can assume the user can understand their own notes.
+    // The detected language prediction could be incorrect and not in the list of preferred languages.
+    // Offering a translation in this case is definitely incorrect so let's avoid it altogether.
+    if our_keypair.privkey != nil && our_keypair.pubkey == event.pubkey {
+        return false
+    }
+    
+    // we should start translating if we have auto_translate on
+    return settings.auto_translate
+}
+
+func should_preload_translation(event: NostrEvent, our_keypair: Keypair, current_status: TranslateStatus, settings: UserSettingsStore) -> Bool {
+    
+    switch current_status {
+    case .havent_tried:
+        return should_translate(event: event, our_keypair: our_keypair, settings: settings)
+    case .translating: return false
+    case .translated: return false
+    case .not_needed: return false
+    }
+}
+
+
+
+struct PreloadResult {
+    let event: NostrEvent
+    let artifacts: NoteArtifacts?
+    let translations: TranslateStatus?
+    let preview: Preview?
+    let timeago: String
+}
+
+
+struct PreloadPlan {
+    let data: EventData
+    let event: NostrEvent
+    let load_artifacts: Bool
+    let load_translations: Bool
+    let load_preview: Bool
+}
+
+func load_preview(artifacts: NoteArtifacts) async -> Preview? {
+    guard let link = artifacts.links.first else {
+        return nil
+    }
+    let meta = await Preview.fetch_metadata(for: link)
+    return Preview(meta: meta)
+}
+
+func get_preload_plan(cache: EventData, ev: NostrEvent, our_keypair: Keypair, settings: UserSettingsStore) -> PreloadPlan? {
+    let load_artifacts = cache.artifacts.should_preload
+    if load_artifacts {
+        cache.artifacts_model.state = .loading
+    }
+    
+    let load_translations = should_preload_translation(event: ev, our_keypair: our_keypair, current_status: cache.translations, settings: settings)
+    if load_translations {
+        cache.translations_model.state = .translating
+    }
+    
+    let load_preview = cache.preview.should_preload
+    if load_preview {
+        cache.preview_model.state = .loading
+    }
+    
+    if !load_artifacts && !load_translations && !load_preview {
+        return nil
+    }
+    
+    return PreloadPlan(data: cache, event: ev, load_artifacts: load_artifacts, load_translations: load_translations, load_preview: load_preview)
+}
+
+func preload_event(plan: PreloadPlan, profiles: Profiles, our_keypair: Keypair, settings: UserSettingsStore) async -> PreloadResult {
+    var artifacts: NoteArtifacts? = nil
+    var translations: TranslateStatus? = nil
+    var preview: Preview? = nil
+    
+    print("Preloading event \(plan.event.content)")
+    
+    if plan.load_artifacts {
+        artifacts = render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)
+        let arts = artifacts!
+        
+        for url in arts.images {
+            print("Preloading image \(url.absoluteString)")
+            KingfisherManager.shared.retrieveImage(with: ImageResource(downloadURL: url)) { val in
+                print("Finished preloading image \(url.absoluteString)")
+            }
+        }
+    }
+    
+    if plan.load_preview {
+        if let arts = artifacts ?? plan.data.artifacts.artifacts {
+            preview = await load_preview(artifacts: arts)
+        } else {
+            print("couldnt preload preview")
+        }
+    }
+    
+    if plan.load_translations {
+        translations = await translate_note(profiles: profiles, privkey: our_keypair.privkey, event: plan.event, settings: settings)
+    }
+    
+    return PreloadResult(event: plan.event, artifacts: artifacts, translations: translations, preview: preview, timeago: format_relative_time(plan.event.created_at))
+}
+
+func set_preload_results(plan: PreloadPlan, res: PreloadResult, privkey: String?) {
+    if plan.load_translations {
+        if let translations = res.translations {
+            plan.data.translations_model.state = translations
+        } else {
+            // failed
+            plan.data.translations_model.state = .not_needed
+        }
+    }
+    
+    if plan.load_artifacts, case .loading = plan.data.artifacts {
+        if let artifacts = res.artifacts {
+            plan.data.artifacts_model.state = .loaded(artifacts)
+        } else {
+            plan.data.artifacts_model.state = .loaded(.just_content(plan.event.get_content(privkey)))
+        }
+    }
+    
+    if plan.load_preview, case .loading = plan.data.preview {
+        if let preview = res.preview {
+            plan.data.preview_model.state = .loaded(preview)
+        } else {
+            plan.data.preview_model.state = .loaded(.failed)
+        }
+    }
+    
+    plan.data.relative_time.value = res.timeago
+}
+
+func preload_events(event_cache: EventCache, events: [NostrEvent], profiles: Profiles, our_keypair: Keypair, settings: UserSettingsStore) {
+    
+    let plans = events.compactMap { ev in
+        get_preload_plan(cache: event_cache.get_cache_data(ev.id), ev: ev, our_keypair: our_keypair, settings: settings)
+    }
+    
+    Task.init {
+        for plan in plans {
+            let res = await preload_event(plan: plan, profiles: profiles, our_keypair: our_keypair, settings: settings)
+            // dispatch results right away
+            DispatchQueue.main.async { [plan] in
+                set_preload_results(plan: plan, res: res, privkey: our_keypair.privkey)
+            }
+        }
+    }
+    
+}
+

@@ -250,7 +250,7 @@ class UserSettingsStore: ObservableObject {
         try Vault.deletePrivateKey(keychainConfiguration: DamusDeepLKeychainConfiguration())
     }
 
-    func can_translate(_ pubkey: String) -> Bool {
+    var can_translate: Bool {
         switch translation_service {
         case .none:
             return false
