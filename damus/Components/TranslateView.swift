@@ -60,7 +60,10 @@ struct TranslateView: View {
     
     func translate() {
         Task {
-            let res = await translate_note(profiles: damus_state.profiles, privkey: damus_state.keypair.privkey, event: event, settings: damus_state.settings, note_lang: translations_model.note_language)
+            guard let note_language = translations_model.note_language else {
+                return
+            }
+            let res = await translate_note(profiles: damus_state.profiles, privkey: damus_state.keypair.privkey, event: event, settings: damus_state.settings, note_lang: note_language)
             DispatchQueue.main.async {
                 self.translations_model.state = res
             }
@@ -68,11 +71,15 @@ struct TranslateView: View {
     }
     
     func attempt_translation() {
-        guard should_translate(event: event, our_keypair: damus_state.keypair, settings: damus_state.settings, note_lang: self.translations_model.note_language) else {
+        guard should_translate(event: event, our_keypair: damus_state.keypair, settings: damus_state.settings, note_lang: self.translations_model.note_language), damus_state.settings.auto_translate else {
             return
         }
         
         translate()
+    }
+    
+    func should_transl(_ note_lang: String) -> Bool {
+        should_translate(event: event, our_keypair: damus_state.keypair, settings: damus_state.settings, note_lang: note_lang)
     }
     
     var body: some View {
@@ -81,14 +88,13 @@ struct TranslateView: View {
             case .havent_tried:
                 if damus_state.settings.auto_translate {
                     Text("")
-                } else if should_translate(event: event, our_keypair: damus_state.keypair, settings: damus_state.settings, note_lang: translations_model.note_language ?? current_language()) {
-                    TranslateButton
+                } else if let note_lang = translations_model.note_language, should_transl(note_lang)  {
+                        TranslateButton
+                } else {
+                    Text("")
                 }
             case .translating:
-                Text("Translating...", comment: "Text to display when waiting for the translation of a note to finish processing before showing it.")
-                    .foregroundColor(.gray)
-                    .font(.footnote)
-                    .padding([.top, .bottom], 10)
+                Text("")
             case .translated(let translated):
                 let languageName = Locale.current.localizedString(forLanguageCode: translated.language)
                 TranslatedView(lang: languageName, artifacts: translated.artifacts)
@@ -118,9 +124,7 @@ struct TranslateView_Previews: PreviewProvider {
     }
 }
 
-func translate_note(profiles: Profiles, privkey: String?, event: NostrEvent, settings: UserSettingsStore, note_lang: String?) async -> TranslateStatus {
-    
-    let note_lang = note_lang ?? current_language()
+func translate_note(profiles: Profiles, privkey: String?, event: NostrEvent, settings: UserSettingsStore, note_lang: String) async -> TranslateStatus {
     
     // If the note language is different from our preferred languages, send a translation request.
     let translator = Translator(settings)

@@ -37,7 +37,7 @@ enum ImageMetaProcessState {
 }
 
 class TranslationModel: ObservableObject {
-    var note_language: String?
+    @Published var note_language: String?
     @Published var state: TranslateStatus
     
     init(state: TranslateStatus) {
@@ -283,14 +283,14 @@ func should_translate(event: NostrEvent, our_keypair: Keypair, settings: UserSet
     }
     
     // we should start translating if we have auto_translate on
-    return settings.auto_translate
+    return true
 }
 
 func should_preload_translation(event: NostrEvent, our_keypair: Keypair, current_status: TranslateStatus, settings: UserSettingsStore, note_lang: String?) -> Bool {
     
     switch current_status {
     case .havent_tried:
-        return should_translate(event: event, our_keypair: our_keypair, settings: settings, note_lang: note_lang)
+        return should_translate(event: event, our_keypair: our_keypair, settings: settings, note_lang: note_lang) && settings.auto_translate
     case .translating: return false
     case .translated: return false
     case .not_needed: return false
@@ -377,7 +377,7 @@ func preload_event(plan: PreloadPlan, profiles: Profiles, our_keypair: Keypair, 
     
     let note_language = plan.event.note_language(our_keypair.privkey) ?? current_language()
     
-    if plan.load_translations {
+    if plan.load_translations, should_translate(event: plan.event, our_keypair: our_keypair, settings: settings, note_lang: note_language) {
         translations = await translate_note(profiles: profiles, privkey: our_keypair.privkey, event: plan.event, settings: settings, note_lang: note_language)
     }
     
