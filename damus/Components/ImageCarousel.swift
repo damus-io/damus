@@ -131,6 +131,10 @@ struct ImageCarousel: View {
                         }
                         .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
                             state.previews.cache_image_meta(evid: evid, image_fill: fill)
+                            // blur hash can be discarded when we have the url
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                state.events.lookup_img_metadata(url: url)?.state = .not_needed
+                            }
                             image_fill = fill
                         }
                         .background {

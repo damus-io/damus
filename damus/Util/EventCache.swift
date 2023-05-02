@@ -25,6 +25,7 @@ enum ImageMetaProcessState {
     case processing
     case failed
     case processed(UIImage)
+    case not_needed
     
     var img: UIImage? {
         switch self {
