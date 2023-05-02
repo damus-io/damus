@@ -211,6 +211,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Are you sure you want to upload this image?</target>
         <note>Alert message asking if the user wants to upload an image.</note>
       </trans-unit>
+      <trans-unit id="Are you sure you want to upload this media?" xml:space="preserve">
+        <source>Are you sure you want to upload this media?</source>
+        <target>Are you sure you want to upload this media?</target>
+        <note>Alert message asking if the user wants to upload media.</note>
+      </trans-unit>
       <trans-unit id="Automatically translate notes" xml:space="preserve">
         <source>Automatically translate notes</source>
         <target>Automatically translate notes</target>
@@ -1318,11 +1323,6 @@ Button text to indicate that the zap type is a private zap.</note>
         <source>Translated from %@</source>
         <target>Translated from %@</target>
         <note>Button to indicate that the note has been translated from a different language.</note>
-      </trans-unit>
-      <trans-unit id="Translating..." xml:space="preserve">
-        <source>Translating...</source>
-        <target>Translating...</target>
-        <note>Text to display when waiting for the translation of a note to finish processing before showing it.</note>
       </trans-unit>
       <trans-unit id="Translation" xml:space="preserve">
         <source>Translation</source>
