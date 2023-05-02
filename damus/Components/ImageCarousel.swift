@@ -119,33 +119,29 @@ struct ImageCarousel: View {
     var body: some View {
         TabView {
             ForEach(urls, id: \.absoluteString) { url in
-                Rectangle()
-                    .foregroundColor(Color.clear)
-                    .overlay {
-                        GeometryReader { geo in
-                            KFAnimatedImage(url)
-                                .callbackQueue(.dispatch(.global(qos:.background)))
-                                .backgroundDecode(true)
-                                .imageContext(.note, disable_animation: state.settings.disable_animation)
-                                .image_fade(duration: 0.25)
-                                .cancelOnDisappear(true)
-                                .configure { view in
-                                    view.framePreloadCount = 3
-                                }
-                                .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
-                                    state.previews.cache_image_meta(evid: evid, image_fill: fill)
-                                    image_fill = fill
-                                }
-                                .background {
-                                    Placeholder(url: url, geo_size: geo.size)
-                                }
-                                .aspectRatio(contentMode: filling ? .fill : .fit)
-                                .tabItem {
-                                    Text(url.absoluteString)
-                                }
-                                .id(url.absoluteString)
+                GeometryReader { geo in
+                    KFAnimatedImage(url)
+                        .callbackQueue(.dispatch(.global(qos:.background)))
+                        .backgroundDecode(true)
+                        .imageContext(.note, disable_animation: state.settings.disable_animation)
+                        .image_fade(duration: 0.25)
+                        .cancelOnDisappear(true)
+                        .configure { view in
+                            view.framePreloadCount = 3
                         }
-                    }
+                        .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
+                            state.previews.cache_image_meta(evid: evid, image_fill: fill)
+                            image_fill = fill
+                        }
+                        .background {
+                            Placeholder(url: url, geo_size: geo.size)
+                        }
+                        .aspectRatio(contentMode: filling ? .fill : .fit)
+                        .tabItem {
+                            Text(url.absoluteString)
+                        }
+                        .id(url.absoluteString)
+                }
             }
         }
         .fullScreenCover(isPresented: $open_sheet) {
