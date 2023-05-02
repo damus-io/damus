@@ -321,8 +321,11 @@ func get_preload_plan(evcache: EventCache, ev: NostrEvent, our_keypair: Keypair,
     if load_artifacts {
         cache.artifacts_model.state = .loading
     }
-    
-    let load_translations = should_preload_translation(event: ev, our_keypair: our_keypair, current_status: cache.translations, settings: settings, note_lang: cache.translations_model.note_language)
+
+    // Cached event might not have the note language determined yet, so determine the language here before figuring out if translations should be preloaded.
+    let note_lang = cache.translations_model.note_language ?? ev.note_language(our_keypair.privkey) ?? current_language()
+
+    let load_translations = should_preload_translation(event: ev, our_keypair: our_keypair, current_status: cache.translations, settings: settings, note_lang: note_lang)
     if load_translations {
         cache.translations_model.state = .translating
     }
