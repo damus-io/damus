@@ -298,18 +298,6 @@ func should_preload_translation(event: NostrEvent, our_keypair: Keypair, current
     }
 }
 
-
-
-struct PreloadResult {
-    let event: NostrEvent
-    let artifacts: NoteArtifacts?
-    let translations: TranslateStatus?
-    let preview: Preview?
-    let timeago: String
-    let note_language: String
-}
-
-
 struct PreloadPlan {
     let data: EventData
     let event: NostrEvent
@@ -349,16 +337,19 @@ func get_preload_plan(cache: EventData, ev: NostrEvent, our_keypair: Keypair, se
     return PreloadPlan(data: cache, event: ev, load_artifacts: load_artifacts, load_translations: load_translations, load_preview: load_preview)
 }
 
-func preload_event(plan: PreloadPlan, profiles: Profiles, our_keypair: Keypair, settings: UserSettingsStore) async -> PreloadResult {
-    var artifacts: NoteArtifacts? = nil
-    var translations: TranslateStatus? = nil
-    var preview: Preview? = nil
+func preload_event(plan: PreloadPlan, profiles: Profiles, our_keypair: Keypair, settings: UserSettingsStore) async {
+    var artifacts: NoteArtifacts? = plan.data.artifacts.artifacts
     
     print("Preloading event \(plan.event.content)")
     
-    if plan.load_artifacts {
-        artifacts = render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)
-        let arts = artifacts!
+    if artifacts == nil && plan.load_artifacts {
+        let arts = render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)
+        artifacts = arts
+        
+        // we need these asap
+        DispatchQueue.main.async {
+            plan.data.artifacts_model.state = .loaded(arts)
+        }
         
         for url in arts.images {
             print("Preloading image \(url.absoluteString)")
@@ -369,50 +360,35 @@ func preload_event(plan: PreloadPlan, profiles: Profiles, our_keypair: Keypair, 
     }
     
     if plan.load_preview {
-        if let arts = artifacts ?? plan.data.artifacts.artifacts {
-            preview = await load_preview(artifacts: arts)
-        } else {
-            print("couldnt preload preview")
+        let arts = artifacts ?? render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)
+        let preview = await load_preview(artifacts: arts)
+        DispatchQueue.main.async {
+            if let preview {
+                plan.data.preview_model.state = .loaded(preview)
+            } else {
+                plan.data.preview_model.state = .loaded(.failed)
+            }
         }
     }
     
-    let note_language = plan.event.note_language(our_keypair.privkey) ?? current_language()
+    let note_language = plan.data.translations_model.note_language ?? plan.event.note_language(our_keypair.privkey) ?? current_language()
     
-    if plan.load_translations, should_translate(event: plan.event, our_keypair: our_keypair, settings: settings, note_lang: note_language) {
+    var translations: TranslateStatus? = nil
+    // We have to recheck should_translate here now that we have note_language
+    if plan.load_translations && should_translate(event: plan.event, our_keypair: our_keypair, settings: settings, note_lang: note_language) && settings.auto_translate
+    {
         translations = await translate_note(profiles: profiles, privkey: our_keypair.privkey, event: plan.event, settings: settings, note_lang: note_language)
     }
     
-    return PreloadResult(event: plan.event, artifacts: artifacts, translations: translations, preview: preview, timeago: format_relative_time(plan.event.created_at), note_language: note_language)
-}
-
-func set_preload_results(plan: PreloadPlan, res: PreloadResult, privkey: String?) {
-    if plan.load_translations {
-        if let translations = res.translations {
-            plan.data.translations_model.state = translations
-        } else {
-            // failed
-            plan.data.translations_model.state = .not_needed
+    let timeago = format_relative_time(plan.event.created_at)
+    let ts = translations
+    DispatchQueue.main.async {
+        if let ts {
+            plan.data.translations_model.state = ts
         }
+        plan.data.relative_time.value = timeago
+        plan.data.translations_model.note_language = note_language
     }
-    
-    if plan.load_artifacts, case .loading = plan.data.artifacts {
-        if let artifacts = res.artifacts {
-            plan.data.artifacts_model.state = .loaded(artifacts)
-        } else {
-            plan.data.artifacts_model.state = .loaded(.just_content(plan.event.get_content(privkey)))
-        }
-    }
-    
-    if plan.load_preview, case .loading = plan.data.preview {
-        if let preview = res.preview {
-            plan.data.preview_model.state = .loaded(preview)
-        } else {
-            plan.data.preview_model.state = .loaded(.failed)
-        }
-    }
-    
-    plan.data.translations_model.note_language = res.note_language
-    plan.data.relative_time.value = res.timeago
 }
 
 func preload_events(event_cache: EventCache, events: [NostrEvent], profiles: Profiles, our_keypair: Keypair, settings: UserSettingsStore) {
@@ -423,11 +399,7 @@ func preload_events(event_cache: EventCache, events: [NostrEvent], profiles: Pro
     
     Task.init {
         for plan in plans {
-            let res = await preload_event(plan: plan, profiles: profiles, our_keypair: our_keypair, settings: settings)
-            // dispatch results right away
-            DispatchQueue.main.async { [plan] in
-                set_preload_results(plan: plan, res: res, privkey: our_keypair.privkey)
-            }
+            await preload_event(plan: plan, profiles: profiles, our_keypair: our_keypair, settings: settings)
         }
     }
     

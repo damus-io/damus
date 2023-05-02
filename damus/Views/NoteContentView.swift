@@ -164,11 +164,7 @@ struct NoteContentView: View {
             return
         }
             
-        let result = await preload_event(plan: plan, profiles: damus_state.profiles, our_keypair: damus_state.keypair, settings: damus_state.settings)
-        
-        DispatchQueue.main.async {
-            set_preload_results(plan: plan, res: result, privkey: damus_state.keypair.privkey)
-        }
+        await preload_event(plan: plan, profiles: damus_state.profiles, our_keypair: damus_state.keypair, settings: damus_state.settings)
     }
     
     var body: some View {
