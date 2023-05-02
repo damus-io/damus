@@ -87,6 +87,8 @@ class SearchModel: ObservableObject {
             return
         }
         
+        self.loading = false
+        
         if sub_id == self.sub_id {
             load_profiles(profiles_subid: self.profiles_subid, relay_id: relay_id, load: .from_events(self.events.all_events), damus_state: state)
         }
