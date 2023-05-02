@@ -951,7 +951,7 @@ func handle_incoming_dms(prev_events: NewEventsBits, dms: DirectMessagesModel, o
     
     if inserted {
         Task.init {
-            let new_dms = dms.dms.filter({ $0.events.count > 0 }).sorted { a, b in
+            let new_dms = Array(dms.dms.filter({ $0.events.count > 0 })).sorted { a, b in
                 return a.events.last!.created_at > b.events.last!.created_at
             }
             DispatchQueue.main.async {
