@@ -308,7 +308,7 @@ struct ContentView: View {
             case .event:
                 EventDetailView()
             case .filter:
-                let timeline = selected_timeline ?? .home
+                let timeline = selected_timeline
                 if #available(iOS 16.0, *) {
                     RelayFilterView(state: damus_state!, timeline: timeline)
                         .presentationDetents([.height(550)])
