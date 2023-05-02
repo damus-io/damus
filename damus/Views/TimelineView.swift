@@ -17,6 +17,7 @@ struct TimelineView: View {
     @Binding var loading: Bool
     @State var offset = CGFloat.zero
     
+    @Environment(\.scenePhase) var scenePhase
     @Environment(\.colorScheme) var colorScheme
 
     let damus: DamusState
@@ -59,6 +60,16 @@ struct TimelineView: View {
         }
         .onAppear {
             events.flush()
+        }
+        .onChange(of: scenePhase) { phase in
+            switch phase {
+            case .active:
+                events.flush()
+            case .background, .inactive:
+                break
+            @unknown default:
+                break
+            }
         }
     }
 }
