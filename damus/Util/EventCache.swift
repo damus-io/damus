@@ -337,10 +337,31 @@ func get_preload_plan(cache: EventData, ev: NostrEvent, our_keypair: Keypair, se
     return PreloadPlan(data: cache, event: ev, load_artifacts: load_artifacts, load_translations: load_translations, load_preview: load_preview)
 }
 
+func preload_image(url: URL) {
+    if ImageCache.default.isCached(forKey: url.absoluteString) {
+        print("Preloaded image \(url.absoluteString) found in cache")
+        // looks like we already have it cached. no download needed
+        return
+    }
+    
+    print("Preloading image \(url.absoluteString)")
+    
+    KingfisherManager.shared.retrieveImage(with: ImageResource(downloadURL: url)) { val in
+        print("Preloaded image \(url.absoluteString)")
+    }
+}
+
 func preload_event(plan: PreloadPlan, profiles: Profiles, our_keypair: Keypair, settings: UserSettingsStore) async {
     var artifacts: NoteArtifacts? = plan.data.artifacts.artifacts
     
     print("Preloading event \(plan.event.content)")
+    
+    // preload pfp
+    if let profile = profiles.lookup(id: plan.event.pubkey),
+       let picture = profile.picture,
+       let url = URL(string: picture) {
+        preload_image(url: url)
+    }
     
     if artifacts == nil && plan.load_artifacts {
         let arts = render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)
@@ -352,10 +373,7 @@ func preload_event(plan: PreloadPlan, profiles: Profiles, our_keypair: Keypair, 
         }
         
         for url in arts.images {
-            print("Preloading image \(url.absoluteString)")
-            KingfisherManager.shared.retrieveImage(with: ImageResource(downloadURL: url)) { val in
-                print("Finished preloading image \(url.absoluteString)")
-            }
+            preload_image(url: url)
         }
     }
     
