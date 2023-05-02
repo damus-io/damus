@@ -28,7 +28,7 @@ static inline int is_boundary(char c) {
 }
 
 static inline int is_invalid_url_ending(char c) {
-    return c == '!' || c == '?' || c == ')' || c == '.' || c == ',' || c == ';';
+    return c == '!' || c == '?' || c == '.' || c == ',' || c == ';';
 }
 
 static inline int is_alphanumeric(char c) {
@@ -124,7 +124,6 @@ static int parse_digit(struct cursor *cur, int *digit) {
     }
     return 0;
 }
-
 
 static inline int pull_byte(struct cursor *cur, u8 *byte) {
     if (cur->p >= cur->end)

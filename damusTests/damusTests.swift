@@ -155,6 +155,22 @@ class damusTests: XCTestCase {
         XCTAssertEqual(parsed[0].is_url?.absoluteString, "https://foo.bar")
     }
     
+    func testParseUrlTrailingParenthesis() {
+        let testString = "https://en.m.wikipedia.org/wiki/Delicious_(website)"
+        let parsed = parse_mentions(content: testString, tags: [])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed[0].is_url?.absoluteString, testString)
+    }
+    
+    func testParseUrlTrailingParenthesisAndInitialParenthesis() {
+        let testString = "( https://en.m.wikipedia.org/wiki/Delicious_(website)"
+        let parsed = parse_mentions(content: testString, tags: [])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed[1].is_url?.absoluteString, "https://en.m.wikipedia.org/wiki/Delicious_(website)")
+    }
+    
     func testParseMentionBlank() {
         let parsed = parse_mentions(content: "", tags: [["e", "event_id"]])
         
