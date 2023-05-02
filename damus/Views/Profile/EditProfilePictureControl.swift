@@ -53,7 +53,7 @@ struct EditProfilePictureControl: View {
             } onVideoPicked: { url in
                 print("Cannot upload videos as profile image")
             }
-            .alert("Are you sure you want to upload this image?", isPresented: $image_upload_confirm) {
+            .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
                 Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
                     if let mediaToUpload {
                         self.handle_upload(media: mediaToUpload)
@@ -70,7 +70,7 @@ struct EditProfilePictureControl: View {
             } onVideoPicked: { url in
                 print("Cannot upload videos as profile image")
             }
-            .alert("Are you sure you want to upload this image?", isPresented: $image_upload_confirm) {
+            .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
                 Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
                     if let mediaToUpload {
                         self.handle_upload(media: mediaToUpload)
