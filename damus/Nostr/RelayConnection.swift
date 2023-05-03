@@ -63,7 +63,7 @@ final class RelayConnection {
         last_connection_attempt = Date().timeIntervalSince1970
         
         subscriptionToken = socket.subject
-            .receive(on: DispatchQueue.main)
+            .receive(on: DispatchQueue.global(qos: .default))
             .sink { [weak self] completion in
                 switch completion {
                 case .failure(let error):
@@ -97,26 +97,34 @@ final class RelayConnection {
     private func receive(event: WebSocketEvent) {
         switch event {
         case .connected:
-            backoff = 1.0
-            self.isConnected = true
-            self.isConnecting = false
+            DispatchQueue.main.async {
+                self.backoff = 1.0
+                self.isConnected = true
+                self.isConnecting = false
+            }
         case .message(let message):
             self.receive(message: message)
         case .disconnected(let closeCode, let reason):
             if closeCode != .normalClosure {
                 print("⚠️ Warning: RelayConnection (\(self.url)) closed with code \(closeCode), reason: \(String(describing: reason))")
             }
-            isConnected = false
-            isConnecting = false
-            reconnect()
+            DispatchQueue.main.async {
+                self.isConnected = false
+                self.isConnecting = false
+                self.reconnect()
+            }
         case .error(let error):
             print("⚠️ Warning: RelayConnection (\(self.url)) error: \(error)")
-            isConnected = false
-            isConnecting = false
-            backoff *= 1.5
-            reconnect_in(after: backoff)
+            DispatchQueue.main.async {
+                self.isConnected = false
+                self.isConnecting = false
+                self.backoff *= 1.5
+                self.reconnect_in(after: self.backoff)
+            }
         }
-        self.handleEvent(.ws_event(event))
+        DispatchQueue.main.async {
+            self.handleEvent(.ws_event(event))
+        }
     }
     
     func reconnect() {
@@ -136,13 +144,11 @@ final class RelayConnection {
     private func receive(message: URLSessionWebSocketTask.Message) {
         switch message {
         case .string(let messageString):
-            DispatchQueue.global(qos: .default).async {
-                if let ev = decode_nostr_event(txt: messageString) {
-                    DispatchQueue.main.async {
-                        self.handleEvent(.nostr_event(ev))
-                    }
-                    return
+            if let ev = decode_nostr_event(txt: messageString) {
+                DispatchQueue.main.async {
+                    self.handleEvent(.nostr_event(ev))
                 }
+                return
             }
         case .data(let messageData):
             if let messageString = String(data: messageData, encoding: .utf8) {

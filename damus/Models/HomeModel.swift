@@ -48,12 +48,18 @@ class HomeModel: ObservableObject {
     
     @Published var new_events: NewEventsBits = NewEventsBits()
     @Published var notifications = NotificationsModel()
-    @Published var events = EventHolder()
-
+    @Published var events: EventHolder = EventHolder()
+    
     init() {
         self.damus_state = DamusState.empty
-        filter_events()
         self.setup_debouncer()
+        filter_events()
+        events.on_queue = preloader
+        //self.events = EventHolder(on_queue: preloader)
+    }
+    
+    func preloader(ev: NostrEvent) {
+        preload_events(state: self.damus_state, events: [ev])
     }
     
     var pool: RelayPool {
@@ -528,7 +534,7 @@ class HomeModel: ObservableObject {
         }
         
         // TODO: will we need to process this in other places like zap request contents, etc?
-        process_image_metadata(cache: damus_state.events, ev: ev)
+        process_image_metadatas(cache: damus_state.events, ev: ev)
         damus_state.replies.count_replies(ev)
         damus_state.events.insert(ev)
 
@@ -950,14 +956,11 @@ func handle_incoming_dms(prev_events: NewEventsBits, dms: DirectMessagesModel, o
     }
     
     if inserted {
-        Task.init {
-            let new_dms = Array(dms.dms.filter({ $0.events.count > 0 })).sorted { a, b in
-                return a.events.last!.created_at > b.events.last!.created_at
-            }
-            DispatchQueue.main.async {
-                dms.dms = new_dms
-            }
+        let new_dms = Array(dms.dms.filter({ $0.events.count > 0 })).sorted { a, b in
+            return a.events.last!.created_at > b.events.last!.created_at
         }
+        
+        dms.dms = new_dms
     }
     
     return new_events

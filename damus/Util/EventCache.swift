@@ -300,8 +300,9 @@ func should_preload_translation(event: NostrEvent, our_keypair: Keypair, current
 
 struct PreloadPlan {
     let data: EventData
+    let img_metadata: [ImageMetadata]
     let event: NostrEvent
-    let load_artifacts: Bool
+    var load_artifacts: Bool
     let load_translations: Bool
     let load_preview: Bool
 }
@@ -314,7 +315,8 @@ func load_preview(artifacts: NoteArtifacts) async -> Preview? {
     return Preview(meta: meta)
 }
 
-func get_preload_plan(cache: EventData, ev: NostrEvent, our_keypair: Keypair, settings: UserSettingsStore) -> PreloadPlan? {
+func get_preload_plan(evcache: EventCache, ev: NostrEvent, our_keypair: Keypair, settings: UserSettingsStore) -> PreloadPlan? {
+    let cache = evcache.get_cache_data(ev.id)
     let load_artifacts = cache.artifacts.should_preload
     if load_artifacts {
         cache.artifacts_model.state = .loading
@@ -325,16 +327,28 @@ func get_preload_plan(cache: EventData, ev: NostrEvent, our_keypair: Keypair, se
         cache.translations_model.state = .translating
     }
     
+    let load_urls = event_image_metadata(ev: ev)
+        .reduce(into: [ImageMetadata]()) { to_load, meta in
+            let cached = evcache.lookup_img_metadata(url: meta.url)
+            guard cached == nil else {
+                return
+            }
+            
+            let m = ImageMetadataState(state: .processing, meta: meta)
+            evcache.store_img_metadata(url: meta.url, meta: m)
+            to_load.append(meta)
+    }
+    
     let load_preview = cache.preview.should_preload
     if load_preview {
         cache.preview_model.state = .loading
     }
     
-    if !load_artifacts && !load_translations && !load_preview {
+    if !load_artifacts && !load_translations && !load_preview && load_urls.count == 0 {
         return nil
     }
     
-    return PreloadPlan(data: cache, event: ev, load_artifacts: load_artifacts, load_translations: load_translations, load_preview: load_preview)
+    return PreloadPlan(data: cache, img_metadata: load_urls, event: ev, load_artifacts: load_artifacts, load_translations: load_translations, load_preview: load_preview)
 }
 
 func preload_image(url: URL) {
@@ -351,16 +365,30 @@ func preload_image(url: URL) {
     }
 }
 
-func preload_event(plan: PreloadPlan, profiles: Profiles, our_keypair: Keypair, settings: UserSettingsStore) async {
-    var artifacts: NoteArtifacts? = plan.data.artifacts.artifacts
-    
-    print("Preloading event \(plan.event.content)")
-    
+func preload_pfp(profiles: Profiles, pubkey: String) {
     // preload pfp
-    if let profile = profiles.lookup(id: plan.event.pubkey),
+    if let profile = profiles.lookup(id: pubkey),
        let picture = profile.picture,
        let url = URL(string: picture) {
         preload_image(url: url)
+    }
+}
+
+func preload_event(plan: PreloadPlan, state: DamusState) async {
+    var artifacts: NoteArtifacts? = plan.data.artifacts.artifacts
+    let settings = state.settings
+    let profiles = state.profiles
+    let our_keypair = state.keypair
+    
+    print("Preloading event \(plan.event.content)")
+    
+    for meta in plan.img_metadata {
+        process_image_metadata(cache: state.events, meta: meta, ev: plan.event)
+    }
+    
+    preload_pfp(profiles: profiles, pubkey: plan.event.pubkey)
+    if let inner_ev = plan.event.get_inner_event(cache: state.events), inner_ev.pubkey != plan.event.pubkey {
+        preload_pfp(profiles: profiles, pubkey: inner_ev.pubkey)
     }
     
     if artifacts == nil && plan.load_artifacts {
@@ -398,28 +426,37 @@ func preload_event(plan: PreloadPlan, profiles: Profiles, our_keypair: Keypair, 
         translations = await translate_note(profiles: profiles, privkey: our_keypair.privkey, event: plan.event, settings: settings, note_lang: note_language)
     }
     
-    let timeago = format_relative_time(plan.event.created_at)
     let ts = translations
-    DispatchQueue.main.async {
-        if let ts {
-            plan.data.translations_model.state = ts
+    if plan.data.translations_model.note_language == nil || ts != nil {
+        DispatchQueue.main.async {
+            if let ts {
+                plan.data.translations_model.state = ts
+            }
+            if plan.data.translations_model.note_language != note_language {
+                plan.data.translations_model.note_language = note_language
+            }
         }
-        plan.data.relative_time.value = timeago
-        plan.data.translations_model.note_language = note_language
     }
+    
 }
 
-func preload_events(event_cache: EventCache, events: [NostrEvent], profiles: Profiles, our_keypair: Keypair, settings: UserSettingsStore) {
+func preload_events(state: DamusState, events: [NostrEvent]) {
+    let event_cache = state.events
+    let our_keypair = state.keypair
+    let settings = state.settings
     
     let plans = events.compactMap { ev in
-        get_preload_plan(cache: event_cache.get_cache_data(ev.id), ev: ev, our_keypair: our_keypair, settings: settings)
+        get_preload_plan(evcache: event_cache, ev: ev, our_keypair: our_keypair, settings: settings)
+    }
+    
+    if plans.count == 0 {
+        return
     }
     
     Task.init {
         for plan in plans {
-            await preload_event(plan: plan, profiles: profiles, our_keypair: our_keypair, settings: settings)
+            await preload_event(plan: plan, state: state)
         }
     }
-    
 }
 

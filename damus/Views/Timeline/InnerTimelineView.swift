@@ -64,7 +64,7 @@ struct InnerTimelineView: View {
                                    indexed[safe: ind+5]?.0
                                   ].compactMap({ $0 }))
                             
-                            preload_events(event_cache: state.events, events: to_preload, profiles: state.profiles, our_keypair: state.keypair, settings: state.settings)
+                            preload_events(state: state, events: to_preload)
                         }
                     
                     ThiccDivider()

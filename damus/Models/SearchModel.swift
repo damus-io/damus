@@ -10,7 +10,7 @@ import Foundation
 
 class SearchModel: ObservableObject {
     let state: DamusState
-    var events: EventHolder = EventHolder()
+    var events: EventHolder
     @Published var loading: Bool = false
     @Published var channel_name: String? = nil
     
@@ -22,6 +22,9 @@ class SearchModel: ObservableObject {
     init(state: DamusState, search: NostrFilter) {
         self.state = state
         self.search = search
+        self.events = EventHolder(on_queue: { ev in
+            preload_events(state: state, events: [ev])
+        })
     }
     
     func filter_muted()  {

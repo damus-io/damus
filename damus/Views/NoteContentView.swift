@@ -159,12 +159,28 @@ struct NoteContentView: View {
         }
     }
     
-    func load() async {
-        guard let plan = get_preload_plan(cache: damus_state.events.get_cache_data(event.id), ev: event, our_keypair: damus_state.keypair, settings: damus_state.settings) else {
-            return
-        }
+    func load(force_artifacts: Bool = false) {
+        // always reload artifacts on load
+        let plan = get_preload_plan(evcache: damus_state.events, ev: event, our_keypair: damus_state.keypair, settings: damus_state.settings)
+        
+        // TODO: make this cleaner
+        Task {
+            // this is surprisingly slow
+            let rel = format_relative_time(event.created_at)
+            Task { @MainActor in
+                self.damus_state.events.get_cache_data(event.id).relative_time.value = rel
+            }
             
-        await preload_event(plan: plan, profiles: damus_state.profiles, our_keypair: damus_state.keypair, settings: damus_state.settings)
+            if var plan {
+                if force_artifacts {
+                    plan.load_artifacts = true
+                }
+                await preload_event(plan: plan, state: damus_state)
+            } else if force_artifacts {
+                let arts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+                self.artifacts_model.state = .loaded(arts)
+            }
+        }
     }
     
     var body: some View {
@@ -176,10 +192,7 @@ struct NoteContentView: View {
                     switch block {
                     case .mention(let m):
                         if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
-                            self.artifacts_model.state = .loading
-                            Task.init {
-                                await load()
-                            }
+                            load(force_artifacts: true)
                             return
                         }
                     case .relay: return
@@ -190,8 +203,8 @@ struct NoteContentView: View {
                     }
                 }
             }
-            .task {
-                await load()
+            .onAppear {
+                load()
             }
     }
     
