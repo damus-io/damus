@@ -11,6 +11,8 @@ struct ReactionsView: View {
     let damus_state: DamusState
     @StateObject var model: ReactionsModel
     
+    @Environment(\.dismiss) var dismiss
+    
     var body: some View {
         ScrollView {
             LazyVStack {
@@ -26,6 +28,9 @@ struct ReactionsView: View {
         }
         .onDisappear {
             model.unsubscribe()
+        }
+        .onReceive(handle_notify(.switched_timeline)) { _ in
+            dismiss()
         }
     }
 }
