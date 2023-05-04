@@ -258,6 +258,8 @@
 		4CFF8F6D29CD022E008DB934 /* WideEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8F6C29CD022E008DB934 /* WideEventView.swift */; };
 		4FE60CDD295E1C5E00105A1F /* Wallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE60CDC295E1C5E00105A1F /* Wallet.swift */; };
 		50088DA129E8271A008A1FDF /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50088DA029E8271A008A1FDF /* WebSocket.swift */; };
+		501F8C802A0220E1001AFC1D /* KeychainStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */; };
+		501F8C822A0224EB001AFC1D /* KeychainStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */; };
 		50A50A8D29A09E1C00C01BE7 /* RequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */; };
 		50B5685329F97CB400A23243 /* CredentialHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B5685229F97CB400A23243 /* CredentialHandler.swift */; };
 		5C42E78C29DB76D90086AAC1 /* EmptyUserSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */; };
@@ -268,7 +270,6 @@
 		643EA5C8296B764E005081BB /* RelayFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 643EA5C7296B764E005081BB /* RelayFilterView.swift */; };
 		647D9A8D2968520300A295DE /* SideMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 647D9A8C2968520300A295DE /* SideMenuView.swift */; };
 		64FBD06F296255C400D9D3B2 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64FBD06E296255C400D9D3B2 /* Theme.swift */; };
-		6C7DE41F2955169800E66263 /* Vault in Frameworks */ = {isa = PBXBuildFile; productRef = 6C7DE41E2955169800E66263 /* Vault */; };
 		7C0F392F29B57CAF0039859C /* Binding+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C0F392E29B57CAF0039859C /* Binding+.swift */; };
 		7C60CAEF298471A1009C80D6 /* CoreSVG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C60CAEE298471A1009C80D6 /* CoreSVG.swift */; };
 		7C902AE32981D55B002AB16E /* ZoomableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C902AE22981D55B002AB16E /* ZoomableScrollView.swift */; };
@@ -681,6 +682,8 @@
 		4CFF8F6C29CD022E008DB934 /* WideEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WideEventView.swift; sourceTree = "<group>"; };
 		4FE60CDC295E1C5E00105A1F /* Wallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wallet.swift; sourceTree = "<group>"; };
 		50088DA029E8271A008A1FDF /* WebSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocket.swift; sourceTree = "<group>"; };
+		501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorage.swift; sourceTree = "<group>"; };
+		501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorageTests.swift; sourceTree = "<group>"; };
 		50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestTests.swift; sourceTree = "<group>"; };
 		50B5685229F97CB400A23243 /* CredentialHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialHandler.swift; sourceTree = "<group>"; };
 		5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyUserSearchView.swift; sourceTree = "<group>"; };
@@ -720,7 +723,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */,
-				6C7DE41F2955169800E66263 /* Vault in Frameworks */,
 				4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1035,6 +1037,7 @@
 				4C363AA728297703006E126D /* InsertSort.swift */,
 				4C477C9D282C3A4800033AA3 /* TipCounter.swift */,
 				4C285C8B28398BC6008A31F1 /* Keys.swift */,
+				501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */,
 				4C90BD19283AA67F008EE7EF /* Bech32.swift */,
 				4C216F352870A9A700040376 /* InputDismissKeyboard.swift */,
 				3169CAEC294FCCFC00EE4006 /* Constants.swift */,
@@ -1271,6 +1274,7 @@
 				3A3040F229A91366008A0F29 /* ProfileViewTests.swift */,
 				3A30410029AB12AA008A0F29 /* EventGroupViewTests.swift */,
 				4C8D00D329E3C5D40036AF10 /* NIP19Tests.swift */,
+				501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */,
 			);
 			path = damusTests;
 			sourceTree = "<group>";
@@ -1393,7 +1397,6 @@
 			packageProductDependencies = (
 				4C649880286E0EE300EAE2B3 /* secp256k1 */,
 				4C06670328FC7EC500038D2A /* Kingfisher */,
-				6C7DE41E2955169800E66263 /* Vault */,
 			);
 			productName = damus;
 			productReference = 4CE6DEE327F7A08100C66700 /* damus.app */;
@@ -1498,7 +1501,6 @@
 			packageReferences = (
 				4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */,
 				4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */,
-				6C7DE41D2955169800E66263 /* XCRemoteSwiftPackageReference "Vault" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -1789,6 +1791,7 @@
 				4C75EFA427FA577B0006080F /* PostView.swift in Sources */,
 				4C30AC7229A5677A00E2BD5A /* NotificationsView.swift in Sources */,
 				4C1A9A2129DDD3E100516EAC /* KeySettingsView.swift in Sources */,
+				501F8C802A0220E1001AFC1D /* KeychainStorage.swift in Sources */,
 				4C1A9A1D29DDCF9B00516EAC /* NotificationSettingsView.swift in Sources */,
 				4C75EFB528049D790006080F /* Relay.swift in Sources */,
 				4CEE2AF1280B216B00AB5EEF /* EventDetailView.swift in Sources */,
@@ -1811,6 +1814,7 @@
 				3A3040ED29A5CB86008A0F29 /* ReplyDescriptionTests.swift in Sources */,
 				4C8D00D429E3C5D40036AF10 /* NIP19Tests.swift in Sources */,
 				3A30410129AB12AA008A0F29 /* EventGroupViewTests.swift in Sources */,
+				501F8C822A0224EB001AFC1D /* KeychainStorageTests.swift in Sources */,
 				3ACBCB78295FE5C70037388A /* TimeAgoTests.swift in Sources */,
 				DD597CBD2963D85A00C64D32 /* MarkdownTests.swift in Sources */,
 				3A3040EF29A8FEE9008A0F29 /* EventDetailBarTests.swift in Sources */,
@@ -2307,14 +2311,6 @@
 				revision = 40b4b38b3b1c83f7088c76189a742870e0ca06a9;
 			};
 		};
-		6C7DE41D2955169800E66263 /* XCRemoteSwiftPackageReference "Vault" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SparrowTek/Vault";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -2327,11 +2323,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
 			productName = secp256k1;
-		};
-		6C7DE41E2955169800E66263 /* Vault */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 6C7DE41D2955169800E66263 /* XCRemoteSwiftPackageReference "Vault" */;
-			productName = Vault;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
