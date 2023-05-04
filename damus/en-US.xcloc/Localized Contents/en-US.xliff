@@ -141,7 +141,7 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Actions" xml:space="preserve">
         <source>Actions</source>
         <target>Actions</target>
-        <note>Title for confirmation dialog to either share, report, or block a profile.</note>
+        <note>Title for confirmation dialog to either share, report, or mute a profile.</note>
       </trans-unit>
       <trans-unit id="Add" xml:space="preserve">
         <source>Add</source>
@@ -174,6 +174,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Always show images</target>
         <note>Setting to always show and never blur images</note>
       </trans-unit>
+      <trans-unit id="Animations" xml:space="preserve">
+        <source>Animations</source>
+        <target>Animations</target>
+        <note>Toggle to enable or disable image animation</note>
+      </trans-unit>
       <trans-unit id="Anonymous" xml:space="preserve">
         <source>Anonymous</source>
         <target>Anonymous</target>
@@ -205,11 +210,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Automatically translate notes</source>
         <target>Automatically translate notes</target>
         <note>Toggle to automatically translate notes.</note>
-      </trans-unit>
-      <trans-unit id="Awesome post!" xml:space="preserve">
-        <source>Awesome post!</source>
-        <target>Awesome post!</target>
-        <note>Placeholder text for a comment to send as part of a zap to the user.</note>
       </trans-unit>
       <trans-unit id="Banner Image" xml:space="preserve">
         <source>Banner Image</source>
@@ -269,11 +269,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Clear Cache</source>
         <target>Clear Cache</target>
         <note>Button to clear image cache.</note>
-      </trans-unit>
-      <trans-unit id="Comment" xml:space="preserve">
-        <source>Comment</source>
-        <target>Comment</target>
-        <note>Header text to indicate that the text field below it is a comment that will be used to send as part of a zap to the user.</note>
       </trans-unit>
       <trans-unit id="Connect" xml:space="preserve">
         <source>Connect</source>
@@ -405,11 +400,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Custom</target>
         <note>Dropdown option for selecting a custom translation server.</note>
       </trans-unit>
-      <trans-unit id="Custom Zap Amount" xml:space="preserve">
-        <source>Custom Zap Amount</source>
-        <target>Custom Zap Amount</target>
-        <note>Header text to indicate that the text field below it is to enter a custom zap amount.</note>
-      </trans-unit>
       <trans-unit id="DMs" xml:space="preserve">
         <source>DMs</source>
         <target>DMs</target>
@@ -442,7 +432,7 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Delete</source>
         <target>Delete</target>
         <note>Button for deleting the users account.
-   Button to remove a user from their blocklist.</note>
+   Button to remove a user from their mutelist.</note>
       </trans-unit>
       <trans-unit id="Delete Account" xml:space="preserve">
         <source>Delete Account</source>
@@ -458,11 +448,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Description</source>
         <target>Description</target>
         <note>Label to display relay description.</note>
-      </trans-unit>
-      <trans-unit id="Disable animations" xml:space="preserve">
-        <source>Disable animations</source>
-        <target>Disable animations</target>
-        <note>Button to disable image animation</note>
       </trans-unit>
       <trans-unit id="Disconnect" xml:space="preserve">
         <source>Disconnect</source>
@@ -524,9 +509,9 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Error: %@</target>
         <note>Error message indicating why saving keys failed.</note>
       </trans-unit>
-      <trans-unit id="Everyone on can see that you zapped" xml:space="preserve">
-        <source>Everyone on can see that you zapped</source>
-        <target>Everyone on can see that you zapped</target>
+      <trans-unit id="Everyone will see that you zapped" xml:space="preserve">
+        <source>Everyone will see that you zapped</source>
+        <target>Everyone will see that you zapped</target>
         <note>Description of public zap type where the zap is sent publicly and identifies the user who sent it.</note>
       </trans-unit>
       <trans-unit id="Filter" xml:space="preserve">
@@ -579,16 +564,26 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Get API Key</target>
         <note>Button to navigate to DeepL website to get a translation API key.</note>
       </trans-unit>
+      <trans-unit id="Get API Key with BTC/Lightning" xml:space="preserve">
+        <source>Get API Key with BTC/Lightning</source>
+        <target>Get API Key with BTC/Lightning</target>
+        <note>Button to navigate to nokyctranslate website to get a translation API key.</note>
+      </trans-unit>
       <trans-unit id="Hide" xml:space="preserve">
         <source>Hide</source>
         <target>Hide</target>
-        <note>Button to hide a post from a user who has been blocked.</note>
+        <note>Button to hide a post from a user who has been muted.</note>
       </trans-unit>
       <trans-unit id="Hide API Key" xml:space="preserve">
         <source>Hide API Key</source>
         <target>Hide API Key</target>
         <note>Button to hide the DeepL translation API key.
    Button to hide the LibreTranslate server API key.</note>
+      </trans-unit>
+      <trans-unit id="Hide all 🤙's" xml:space="preserve">
+        <source>Hide all 🤙's</source>
+        <target>Hide all 🤙's</target>
+        <note>Section footer describing OnlyZaps mode</note>
       </trans-unit>
       <trans-unit id="Home" xml:space="preserve">
         <source>Home</source>
@@ -599,6 +594,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Illegal content</source>
         <target>Illegal content</target>
         <note>Button for user to report that the account or content has illegal content.</note>
+      </trans-unit>
+      <trans-unit id="Image uploader" xml:space="preserve">
+        <source>Image uploader</source>
+        <target>Image uploader</target>
+        <note>Prompt selection of user's image uploader</note>
       </trans-unit>
       <trans-unit id="Images" xml:space="preserve">
         <source>Images</source>
@@ -709,6 +709,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Looking for %@...</target>
         <note>Label that appears when searching for note or profile</note>
       </trans-unit>
+      <trans-unit id="Make Default" xml:space="preserve">
+        <source>Make Default</source>
+        <target>Make Default</target>
+        <note>Button label to indicate that tapping it will make the selected zap type be the default for future zaps.</note>
+      </trans-unit>
       <trans-unit id="Make sure your nsec account key is saved before you logout or you will lose access to this account" xml:space="preserve">
         <source>Make sure your nsec account key is saved before you logout or you will lose access to this account</source>
         <target>Make sure your nsec account key is saved before you logout or you will lose access to this account</target>
@@ -776,15 +781,25 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>No mute list found, create a new one? This will overwrite any previous mute lists.</target>
         <note>Alert message prompt that asks if the user wants to create a new mute list, overwriting previous mute lists.</note>
       </trans-unit>
-      <trans-unit id="No one can see that you zapped" xml:space="preserve">
-        <source>No one can see that you zapped</source>
-        <target>No one can see that you zapped</target>
+      <trans-unit id="No one will see that you zapped" xml:space="preserve">
+        <source>No one will see that you zapped</source>
+        <target>No one will see that you zapped</target>
         <note>Description of anonymous zap type where the zap is sent anonymously and does not identify the user who sent it.</note>
       </trans-unit>
-      <trans-unit id="No zaps are sent, only a lightning payment." xml:space="preserve">
-        <source>No zaps are sent, only a lightning payment.</source>
-        <target>No zaps are sent, only a lightning payment.</target>
+      <trans-unit id="No zaps will be sent, only a lightning payment." xml:space="preserve">
+        <source>No zaps will be sent, only a lightning payment.</source>
+        <target>No zaps will be sent, only a lightning payment.</target>
         <note>Description of non-zap type where sats are sent to the user's wallet as a regular Lightning payment, not as a zap.</note>
+      </trans-unit>
+      <trans-unit id="NoKYCTranslate.com (Prepay with BTC)" xml:space="preserve">
+        <source>NoKYCTranslate.com (Prepay with BTC)</source>
+        <target>NoKYCTranslate.com (Prepay with BTC)</target>
+        <note>Dropdown option for selecting NoKYCTranslate.com as the translation service.</note>
+      </trans-unit>
+      <trans-unit id="None" xml:space="preserve">
+        <source>None</source>
+        <target>None</target>
+        <note>Button text to indicate that the zap type is a private zap.</note>
       </trans-unit>
       <trans-unit id="Note contains &quot;nsec1&quot; private key. Are you sure?" xml:space="preserve">
         <source>Note contains "nsec1" private key. Are you sure?</source>
@@ -827,6 +842,21 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Only you can see this message and who sent it.</target>
         <note>Help text on green lock icon that explains that only the current user can see the message of a zap event and who sent the zap.</note>
       </trans-unit>
+      <trans-unit id="OnlyZaps" xml:space="preserve">
+        <source>OnlyZaps</source>
+        <target>OnlyZaps</target>
+        <note>Section header for enabling OnlyZaps mode (hide reactions)</note>
+      </trans-unit>
+      <trans-unit id="OnlyZaps Enabled" xml:space="preserve">
+        <source>OnlyZaps Enabled</source>
+        <target>OnlyZaps Enabled</target>
+        <note>Non-tappable text in context menu that shows up when the zap button on profile is long pressed to indicate that the user has enabled OnlyZaps, meaning that they would like to be only zapped and not accept reactions to their notes.</note>
+      </trans-unit>
+      <trans-unit id="OnlyZaps mode" xml:space="preserve">
+        <source>OnlyZaps mode</source>
+        <target>OnlyZaps mode</target>
+        <note>Setting toggle to hide reactions.</note>
+      </trans-unit>
       <trans-unit id="Paid Relay" xml:space="preserve">
         <source>Paid Relay</source>
         <target>Paid Relay</target>
@@ -863,10 +893,10 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Post</target>
         <note>Button to post a note.</note>
       </trans-unit>
-      <trans-unit id="Post from a user you've blocked" xml:space="preserve">
-        <source>Post from a user you've blocked</source>
-        <target>Post from a user you've blocked</target>
-        <note>Text to indicate that what is being shown is a post from a user who has been blocked.</note>
+      <trans-unit id="Post from a user you've muted" xml:space="preserve">
+        <source>Post from a user you've muted</source>
+        <target>Post from a user you've muted</target>
+        <note>Text to indicate that what is being shown is a post from a user who has been muted.</note>
       </trans-unit>
       <trans-unit id="Posts" xml:space="preserve">
         <source>Posts</source>
@@ -884,7 +914,7 @@ Label for filter for seeing your posts and replies (instead of only your posts).
         <source>Private</source>
         <target>Private</target>
         <note>Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading.
-Picker option to indicate that a zap should be sent privately and not identify the user to the public.</note>
+Button text to indicate that the zap type is a private zap.</note>
       </trans-unit>
       <trans-unit id="Private Key" xml:space="preserve">
         <source>Private Key</source>
@@ -914,7 +944,7 @@ Picker option to indicate that a zap should be sent privately and not identify t
       <trans-unit id="Public" xml:space="preserve">
         <source>Public</source>
         <target>Public</target>
-        <note>Picker option to indicate that a zap should be sent publicly and identify the user as who sent it.</note>
+        <note>Button text to indicate that the zap type is a public zap.</note>
       </trans-unit>
       <trans-unit id="Public Account ID" xml:space="preserve">
         <source>Public Account ID</source>
@@ -944,7 +974,7 @@ Picker option to indicate that a zap should be sent privately and not identify t
       <trans-unit id="Quote" xml:space="preserve">
         <source>Quote</source>
         <target>Quote</target>
-        <note>Title of alert for confirming to make a quoted post.</note>
+        <note>Button to compose a quoted note</note>
       </trans-unit>
       <trans-unit id="Reactions" xml:space="preserve">
         <source>Reactions</source>
@@ -1034,7 +1064,12 @@ Picker option to indicate that a zap should be sent privately and not identify t
       <trans-unit id="Repost" xml:space="preserve">
         <source>Repost</source>
         <target>Repost</target>
-        <note>Title of alert for confirming to repost a post.</note>
+        <note>Button to repost a note</note>
+      </trans-unit>
+      <trans-unit id="Repost Note" xml:space="preserve">
+        <source>Repost Note</source>
+        <target>Repost Note</target>
+        <note>Title text to indicate that the buttons below are meant to be used to repost a note to others.</note>
       </trans-unit>
       <trans-unit id="Reposted" xml:space="preserve">
         <source>Reposted</source>
@@ -1107,15 +1142,15 @@ Picker option to indicate that a zap should be sent privately and not identify t
         <target>Select default wallet</target>
         <note>Prompt selection of user's default wallet</note>
       </trans-unit>
-      <trans-unit id="Select image uploader" xml:space="preserve">
-        <source>Select image uploader</source>
-        <target>Select image uploader</target>
-        <note>Prompt selection of user's image uploader</note>
-      </trans-unit>
       <trans-unit id="Send a message to start the conversation..." xml:space="preserve">
         <source>Send a message to start the conversation...</source>
         <target>Send a message to start the conversation...</target>
         <note>Text prompt for user to send a message to the other user.</note>
+      </trans-unit>
+      <trans-unit id="Send a reply with your zap..." xml:space="preserve">
+        <source>Send a reply with your zap...</source>
+        <target>Send a reply with your zap...</target>
+        <note>Placeholder text for a comment to send as part of a zap to the user.</note>
       </trans-unit>
       <trans-unit id="Server" xml:space="preserve">
         <source>Server</source>
@@ -1153,7 +1188,7 @@ Picker option to indicate that a zap should be sent privately and not identify t
       <trans-unit id="Show" xml:space="preserve">
         <source>Show</source>
         <target>Show</target>
-        <note>Button to show a post from a user who has been blocked.
+        <note>Button to show a post from a user who has been muted.
    Toggle to show or hide user's secret account login key.</note>
       </trans-unit>
       <trans-unit id="Show +" xml:space="preserve">
@@ -1450,25 +1485,15 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
    Button to send a zap.
    Title of notification when a non-private zap is received.</note>
       </trans-unit>
-      <trans-unit id="Zap Amount" xml:space="preserve">
-        <source>Zap Amount</source>
-        <target>Zap Amount</target>
-        <note>Title of picker that allows selection of predefined amounts to zap.</note>
-      </trans-unit>
-      <trans-unit id="Zap Amount in sats" xml:space="preserve">
-        <source>Zap Amount in sats</source>
-        <target>Zap Amount in sats</target>
-        <note>Header text to indicate that the picker below it is to choose a pre-defined amount of sats to zap.</note>
-      </trans-unit>
-      <trans-unit id="Zap Type" xml:space="preserve">
-        <source>Zap Type</source>
-        <target>Zap Type</target>
-        <note>Header text to indicate that the picker below it is to choose the type of zap to send.</note>
-      </trans-unit>
       <trans-unit id="Zap Vibration" xml:space="preserve">
         <source>Zap Vibration</source>
         <target>Zap Vibration</target>
         <note>Setting to enable vibration on zap</note>
+      </trans-unit>
+      <trans-unit id="Zap type" xml:space="preserve">
+        <source>Zap type</source>
+        <target>Zap type</target>
+        <note>Text to indicate that the buttons below it is for choosing the type of zap to send.</note>
       </trans-unit>
       <trans-unit id="Zapping..." xml:space="preserve">
         <source>Zapping...</source>
@@ -1509,11 +1534,6 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <target>None</target>
         <note>Dropdown option for selecting no translation service.</note>
       </trans-unit>
-      <trans-unit id="none_zap_type" xml:space="preserve">
-        <source>None</source>
-        <target>None</target>
-        <note>Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.</note>
-      </trans-unit>
       <trans-unit id="now" xml:space="preserve">
         <source>now</source>
         <target>now</target>
@@ -1530,8 +1550,8 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <note>Label indicating that a form input is optional.</note>
       </trans-unit>
       <trans-unit id="private_zap_description" xml:space="preserve">
-        <source>Only '%@' can see that you zapped them</source>
-        <target>Only '%@' can see that you zapped them</target>
+        <source>Only '%@' will see that you zapped them</source>
+        <target>Only '%@' will see that you zapped them</target>
         <note>Description of private zap type where the zap is sent privately and does not identify the user to the public.</note>
       </trans-unit>
       <trans-unit id="reacted_tagged_in_1" xml:space="preserve">
@@ -1598,6 +1618,11 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <source>satoshi</source>
         <target>satoshi</target>
         <note>Example username of Bitcoin creator(s), Satoshi Nakamoto.</note>
+      </trans-unit>
+      <trans-unit id="sats" xml:space="preserve">
+        <source>sats</source>
+        <target>sats</target>
+        <note>Shortened form of satoshi, display unit of measure where 1,000,000,000 satoshis is 1 Bitcoin. Used to indicate how many sats will be zapped to a note, configured through the custom zap view.</note>
       </trans-unit>
       <trans-unit id="self" xml:space="preserve">
         <source>self</source>

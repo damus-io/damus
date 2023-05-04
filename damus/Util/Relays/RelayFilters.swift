@@ -89,6 +89,6 @@ func load_relay_filters(_ pubkey: String) -> Set<RelayFilter>? {
 
 func determine_to_relays(pool: RelayPool, filters: RelayFilters) -> [String] {
     return pool.descriptors
-        .map { $0.url.absoluteString }
+        .map { $0.url.url.absoluteString }
         .filter { !filters.is_filtered(timeline: .search, relay_id: $0) }
 }

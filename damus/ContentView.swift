@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Starscream
 
 struct TimestampedProfile {
     let profile: Profile
@@ -63,7 +62,7 @@ struct ContentView: View {
     @State var status: String = "Not connected"
     @State var active_sheet: Sheets? = nil
     @State var damus_state: DamusState? = nil
-    @State var selected_timeline: Timeline? = .home
+    @SceneStorage("ContentView.selected_timeline") var selected_timeline: Timeline = .home
     @State var is_deleted_account: Bool = false
     @State var is_profile_open: Bool = false
     @State var event: NostrEvent? = nil
@@ -77,11 +76,9 @@ struct ContentView: View {
     @State var confirm_mute: Bool = false
     @State var user_muted_confirm: Bool = false
     @State var confirm_overwrite_mutelist: Bool = false
-    @State var current_boost: NostrEvent? = nil
-    @State var filter_state : FilterState = .posts_and_replies
+    @SceneStorage("ContentView.filter_state") var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
-    @State var shouldShowBoostAlert = false
     
     // connect retry timer
     let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
@@ -182,10 +179,7 @@ struct ContentView: View {
                 NotificationsView(state: damus, notifications: home.notifications)
                 
             case .dms:
-                DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms)
-            
-            case .none:
-                EmptyView()
+                DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings)
             }
         }
         .navigationBarTitle(timeline_name(selected_timeline), displayMode: .inline)
@@ -212,7 +206,7 @@ struct ContentView: View {
     var MaybeSearchView: some View {
         Group {
             if let search = self.active_search {
-                SearchView(appstate: damus_state!, search: SearchModel(contacts: damus_state!.contacts, pool: damus_state!.pool, search: search))
+                SearchView(appstate: damus_state!, search: SearchModel(state: damus_state!, search: search))
             } else {
                 EmptyView()
             }
@@ -261,7 +255,7 @@ struct ContentView: View {
                                     Button {
                                         isSideBarOpened.toggle()
                                     } label: {
-                                        ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles)
+                                        ProfilePicView(pubkey: damus_state!.pubkey, size: 32, highlight: .none, profiles: damus_state!.profiles, disable_animation: damus_state!.settings.disable_animation)
                                             .opacity(isSideBarOpened ? 0 : 1)
                                             .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
                                     }
@@ -314,7 +308,7 @@ struct ContentView: View {
             case .event:
                 EventDetailView()
             case .filter:
-                let timeline = selected_timeline ?? .home
+                let timeline = selected_timeline
                 if #available(iOS 16.0, *) {
                     RelayFilterView(state: damus_state!, timeline: timeline)
                         .presentationDetents([.height(550)])
@@ -349,19 +343,9 @@ struct ContentView: View {
             }
             
         }
-        .onReceive(handle_notify(.boost)) { notif in
-            guard let ev = notif.object as? NostrEvent else {
-                return
-            }
-
-            current_boost = ev
-            shouldShowBoostAlert = true
-        }
-        .onReceive(handle_notify(.reply)) { notif in
-            let ev = notif.object as! NostrEvent
-            self.active_sheet = .post(.replying_to(ev))
-        }
-        .onReceive(handle_notify(.like)) { like in
+        .onReceive(handle_notify(.compose)) { notif in
+            let action = notif.object as! PostAction
+            self.active_sheet = .post(action)
         }
         .onReceive(handle_notify(.deleted_account)) { notif in
             self.is_deleted_account = true
@@ -605,36 +589,6 @@ struct ContentView: View {
                 Text("Could not find user to mute...", comment: "Alert message to indicate that the muted user could not be found.")
             }
         })
-        .confirmationDialog("Repost", isPresented: $shouldShowBoostAlert) {
-            Button(NSLocalizedString("Repost", comment: "Title of alert for confirming to repost a post.")) {
-                guard let current_boost else {
-                    return
-                }
-                            
-                guard let privkey = self.damus_state?.keypair.privkey else {
-                    return
-                }
-                
-                guard let damus_state else {
-                    return
-                }
-                
-                let boost = make_boost_event(pubkey: damus_state.keypair.pubkey, privkey: privkey, boosted: current_boost)
-                damus_state.postbox.send(boost)
-            }
-            
-            Button(NSLocalizedString("Quote", comment: "Title of alert for confirming to make a quoted post.")) {
-                guard let current_boost else {
-                    return
-                }
-                self.active_sheet = .post(.quoting(current_boost))
-            }
-        }
-        .onChange(of: shouldShowBoostAlert) { v in
-            if v == false {
-                self.current_boost = nil
-            }
-        }
     }
     
     func switch_timeline(_ timeline: Timeline) {
@@ -672,13 +626,18 @@ struct ContentView: View {
         
         let new_relay_filters = load_relay_filters(pubkey) == nil
         for relay in bootstrap_relays {
-            if let url = URL(string: relay) {
+            if let url = RelayURL(relay) {
                 add_new_relay(relay_filters: relay_filters, metadatas: metadatas, pool: pool, url: url, info: .rw, new_relay_filters: new_relay_filters)
             }
         }
         
         pool.register_handler(sub_id: sub_id, handler: home.handle_event)
-
+        
+        // dumb stuff needed for property wrappers
+        UserSettingsStore.pubkey = pubkey
+        let settings = UserSettingsStore()
+        UserSettingsStore.shared = settings
+        
         self.damus_state = DamusState(pool: pool,
                                       keypair: keypair,
                                       likes: EventCounter(our_pubkey: pubkey),
@@ -690,7 +649,7 @@ struct ContentView: View {
                                       previews: PreviewCache(),
                                       zaps: Zaps(our_pubkey: pubkey),
                                       lnurls: LNUrls(),
-                                      settings: UserSettingsStore(),
+                                      settings: settings,
                                       relay_filters: relay_filters,
                                       relay_metadata: metadatas,
                                       drafts: Drafts(),
@@ -721,31 +680,6 @@ func get_since_time(last_event: NostrEvent?) -> Int64? {
     }
     
     return nil
-}
-
-func ws_nostr_event(relay: String, ev: WebSocketEvent) -> NostrEvent? {
-    switch ev {
-    case .binary(let dat):
-        return NostrEvent(content: "binary data? \(dat.count) bytes", pubkey: relay)
-    case .cancelled:
-        return NostrEvent(content: "cancelled", pubkey: relay)
-    case .connected:
-        return NostrEvent(content: "connected", pubkey: relay)
-    case .disconnected:
-        return NostrEvent(content: "disconnected", pubkey: relay)
-    case .error(let err):
-        return NostrEvent(content: "error \(err.debugDescription)", pubkey: relay)
-    case .text(let txt):
-        return NostrEvent(content: "text \(txt)", pubkey: relay)
-    case .pong:
-        return NostrEvent(content: "pong", pubkey: relay)
-    case .ping:
-        return NostrEvent(content: "ping", pubkey: relay)
-    case .viabilityChanged(let b):
-        return NostrEvent(content: "viabilityChanged \(b)", pubkey: relay)
-    case .reconnectSuggested(let b):
-        return NostrEvent(content: "reconnectSuggested \(b)", pubkey: relay)
-    }
 }
 
 func is_notification(ev: NostrEvent, pubkey: String) -> Bool {

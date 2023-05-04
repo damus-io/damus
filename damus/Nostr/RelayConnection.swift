@@ -5,42 +5,53 @@
 //  Created by William Casarin on 2022-04-02.
 //
 
+import Combine
 import Foundation
-import Starscream
 
 enum NostrConnectionEvent {
     case ws_event(WebSocketEvent)
     case nostr_event(NostrResponse)
 }
 
-final class RelayConnection: WebSocketDelegate {
-    private(set) var isConnected = false
-    private(set) var isConnecting = false
-    private(set) var isReconnecting = false
+public struct RelayURL: Hashable {
+    private(set) var url: URL
     
-    private(set) var last_connection_attempt: TimeInterval = 0
-    private lazy var socket = {
-        let req = URLRequest(url: url)
-        let socket = WebSocket(request: req, compressionHandler: .none)
-        socket.delegate = self
-        return socket
-    }()
-    private var handleEvent: (NostrConnectionEvent) -> ()
-    private let url: URL
-
-    init(url: URL, handleEvent: @escaping (NostrConnectionEvent) -> ()) {
-        self.url = url
-        self.handleEvent = handleEvent
+    var id: String {
+        return url.absoluteString
     }
     
-    func reconnect() {
-        if isConnected {
-            isReconnecting = true
-            disconnect()
-        } else {
-            // we're already disconnected, so just connect
-            connect(force: true)
+    init?(_ str: String) {
+        guard let url = URL(string: str) else {
+            return nil
         }
+        
+        guard let scheme = url.scheme else {
+            return nil
+        }
+        
+        guard scheme == "ws" || scheme == "wss" else {
+            return nil
+        }
+        
+        self.url = url
+    }
+}
+
+final class RelayConnection {
+    private(set) var isConnected = false
+    private(set) var isConnecting = false
+    
+    private(set) var last_connection_attempt: TimeInterval = 0
+    private(set) var backoff: TimeInterval = 1.0
+    private lazy var socket = WebSocket(url.url)
+    private var subscriptionToken: AnyCancellable?
+    
+    private var handleEvent: (NostrConnectionEvent) -> ()
+    private let url: RelayURL
+
+    init(url: RelayURL, handleEvent: @escaping (NostrConnectionEvent) -> ()) {
+        self.url = url
+        self.handleEvent = handleEvent
     }
     
     func connect(force: Bool = false) {
@@ -50,11 +61,27 @@ final class RelayConnection: WebSocketDelegate {
         
         isConnecting = true
         last_connection_attempt = Date().timeIntervalSince1970
+        
+        subscriptionToken = socket.subject
+            .receive(on: DispatchQueue.global(qos: .default))
+            .sink { [weak self] completion in
+                switch completion {
+                case .failure(let error):
+                    self?.receive(event: .error(error))
+                case .finished:
+                    self?.receive(event: .disconnected(.normalClosure, nil))
+                }
+            } receiveValue: { [weak self] event in
+                self?.receive(event: event)
+            }
+            
         socket.connect()
     }
 
     func disconnect() {
         socket.disconnect()
+        subscriptionToken = nil
+        
         isConnected = false
         isConnecting = false
     }
@@ -64,53 +91,72 @@ final class RelayConnection: WebSocketDelegate {
             print("failed to encode nostr req: \(req)")
             return
         }
-
-        socket.write(string: req)
+        socket.send(.string(req))
     }
     
-    // MARK: - WebSocketDelegate
-    
-    func didReceive(event: WebSocketEvent, client: WebSocket) {
+    private func receive(event: WebSocketEvent) {
         switch event {
         case .connected:
-            self.isConnected = true
-            self.isConnecting = false
-
-        case .disconnected:
-            self.isConnecting = false
-            self.isConnected = false
-            if self.isReconnecting {
-                self.isReconnecting = false
-                self.connect()
+            DispatchQueue.main.async {
+                self.backoff = 1.0
+                self.isConnected = true
+                self.isConnecting = false
             }
-
-        case .cancelled, .error:
-            self.isConnecting = false
-            self.isConnected = false
-
-        case .text(let txt):
-            if txt.utf8.count > 2000 {
-                DispatchQueue.global(qos: .default).async {
-                    if let ev = decode_nostr_event(txt: txt) {
-                        DispatchQueue.main.async {
-                            self.handleEvent(.nostr_event(ev))
-                        }
-                        return
-                    }
-                }
-            } else {
-                if let ev = decode_nostr_event(txt: txt) {
-                    handleEvent(.nostr_event(ev))
-                    return
-                }
+        case .message(let message):
+            self.receive(message: message)
+        case .disconnected(let closeCode, let reason):
+            if closeCode != .normalClosure {
+                print("⚠️ Warning: RelayConnection (\(self.url)) closed with code \(closeCode), reason: \(String(describing: reason))")
             }
-
-
-        default:
-            break
+            DispatchQueue.main.async {
+                self.isConnected = false
+                self.isConnecting = false
+                self.reconnect()
+            }
+        case .error(let error):
+            print("⚠️ Warning: RelayConnection (\(self.url)) error: \(error)")
+            DispatchQueue.main.async {
+                self.isConnected = false
+                self.isConnecting = false
+                self.backoff *= 1.5
+                self.reconnect_in(after: self.backoff)
+            }
         }
-
-        handleEvent(.ws_event(event))
+        DispatchQueue.main.async {
+            self.handleEvent(.ws_event(event))
+        }
+    }
+    
+    func reconnect() {
+        guard !isConnecting else {
+            return  // we're already trying to connect
+        }
+        disconnect()
+        connect()
+    }
+    
+    func reconnect_in(after: TimeInterval) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + after) {
+            self.reconnect()
+        }
+    }
+    
+    private func receive(message: URLSessionWebSocketTask.Message) {
+        switch message {
+        case .string(let messageString):
+            if let ev = decode_nostr_event(txt: messageString) {
+                DispatchQueue.main.async {
+                    self.handleEvent(.nostr_event(ev))
+                }
+                return
+            }
+        case .data(let messageData):
+            if let messageString = String(data: messageData, encoding: .utf8) {
+                receive(message: .string(messageString))
+            }
+        @unknown default:
+            print("An unexpected URLSessionWebSocketTask.Message was received.")
+        }
     }
 }
 

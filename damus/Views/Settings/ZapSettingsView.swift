@@ -17,8 +17,7 @@ struct ZapSettingsView: View {
 
     init(pubkey: String, settings: UserSettingsStore) {
         self.pubkey = pubkey
-        let zap_amt = get_default_zap_amount(pubkey: pubkey).formatted()
-        _default_zap_amount = State(initialValue: zap_amt)
+        _default_zap_amount = State(initialValue: settings.default_zap_amount.formatted())
         self._settings = ObservedObject(initialValue: settings)
     }
     
@@ -26,10 +25,10 @@ struct ZapSettingsView: View {
         Form {
             Section(
                 header: Text(NSLocalizedString("OnlyZaps", comment: "Section header for enabling OnlyZaps mode (hide reactions)")),
-                footer: Text(NSLocalizedString("Hide all 🤙's. Others will not be able to send you 🤙's", comment: "Section footer describing onlyzaps mode"))
+                footer: Text(NSLocalizedString("Hide all 🤙's", comment: "Section footer describing OnlyZaps mode"))
                 
             ) {
-                Toggle(NSLocalizedString("Enable OnlyZaps mode", comment: "Setting toggle to hide reactions."), isOn: $settings.onlyzaps_mode)
+                Toggle(NSLocalizedString("OnlyZaps mode", comment: "Setting toggle to hide reactions."), isOn: $settings.onlyzaps_mode)
                     .toggleStyle(.switch)
                     .onChange(of: settings.onlyzaps_mode) { newVal in
                         notify(.onlyzaps_mode, newVal)
@@ -59,10 +58,10 @@ struct ZapSettingsView: View {
                     .onReceive(Just(default_zap_amount)) { newValue in
                         if let parsed = handle_string_amount(new_value: newValue) {
                             self.default_zap_amount = parsed.formatted()
-                            set_default_zap_amount(pubkey: self.pubkey, amount: parsed)
+                            settings.default_zap_amount = parsed
                         } else {
                             self.default_zap_amount = ""
-                            set_default_zap_amount(pubkey: self.pubkey, amount: 0)
+                            settings.default_zap_amount = 0
                         }
                     }
             }

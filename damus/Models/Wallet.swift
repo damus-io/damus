@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Wallet: String, CaseIterable, Identifiable {
+enum Wallet: String, CaseIterable, Identifiable, StringCodable {
     var id: String { self.rawValue }
     
     struct Model: Identifiable, Hashable {
@@ -18,6 +18,17 @@ enum Wallet: String, CaseIterable, Identifiable {
         var link : String
         var appStoreLink : String?
         var image: String
+    }
+    
+    func to_string() -> String {
+        return rawValue
+    }
+    
+    init?(from string: String) {
+        guard let w = Wallet(rawValue: string) else {
+            return nil
+        }
+        self = w
     }
     
     // New url prefixes needed to be added to LSApplicationQueriesSchemes

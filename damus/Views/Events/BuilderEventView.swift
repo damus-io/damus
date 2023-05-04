@@ -70,7 +70,7 @@ struct BuilderEventView: View {
     var body: some View {
         VStack {
             if let event {
-                let ev = event.inner_event ?? event
+                let ev = event.get_inner_event(cache: damus.events) ?? event
                 let thread = ThreadModel(event: ev, damus_state: damus)
                 let dest = ThreadView(state: damus, thread: thread)
                 NavigationLink(destination: dest) {

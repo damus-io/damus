@@ -48,12 +48,18 @@ class HomeModel: ObservableObject {
     
     @Published var new_events: NewEventsBits = NewEventsBits()
     @Published var notifications = NotificationsModel()
-    @Published var events = EventHolder()
-
+    @Published var events: EventHolder = EventHolder()
+    
     init() {
         self.damus_state = DamusState.empty
-        filter_events()
         self.setup_debouncer()
+        filter_events()
+        events.on_queue = preloader
+        //self.events = EventHolder(on_queue: preloader)
+    }
+    
+    func preloader(ev: NostrEvent) {
+        preload_events(state: self.damus_state, events: [ev])
     }
     
     var pool: RelayPool {
@@ -128,7 +134,7 @@ class HomeModel: ObservableObject {
             return
         }
         
-        damus_state.zaps.add_zap(zap: zap)
+        damus_state.add_zap(zap: zap)
         
         guard zap.target.pubkey == our_keypair.pubkey else {
             return
@@ -229,16 +235,22 @@ class HomeModel: ObservableObject {
     func handle_boost_event(sub_id: String, _ ev: NostrEvent) {
         var boost_ev_id = ev.last_refid()?.ref_id
 
-        if let inner_ev = ev.inner_event {
+        if let inner_ev = ev.get_inner_event(cache: damus_state.events) {
             boost_ev_id = inner_ev.id
             
-            guard validate_event(ev: inner_ev) == .ok else {
-                return
+            
+            Task.init {
+                guard validate_event(ev: inner_ev) == .ok else {
+                    return
+                }
+                
+                if inner_ev.is_textlike {
+                    DispatchQueue.main.async {
+                        self.handle_text_event(sub_id: sub_id, ev)
+                    }
+                }
             }
            
-            if inner_ev.is_textlike {
-                handle_text_event(sub_id: sub_id, ev)
-            }
         }
 
         guard let e = boost_ev_id else {
@@ -290,17 +302,12 @@ class HomeModel: ObservableObject {
                     send_home_filters(relay_id: relay_id)
                 }
             case .error(let merr):
-                let desc = merr.debugDescription
+                let desc = String(describing: merr)
                 if desc.contains("Software caused connection abort") {
                     pool.reconnect(to: [relay_id])
                 }
-            case .disconnected: fallthrough
-            case .cancelled:
+            case .disconnected:
                 pool.reconnect(to: [relay_id])
-            case .reconnectSuggested(let t):
-                if t {
-                    pool.reconnect(to: [relay_id])
-                }
             default:
                 break
             }
@@ -310,11 +317,13 @@ class HomeModel: ObservableObject {
             switch ev {
             case .event(let sub_id, let ev):
                 // globally handle likes
+                /*
                 let always_process = sub_id == notifications_subid || sub_id == contacts_subid || sub_id == home_subid || sub_id == dms_subid || sub_id == init_subid || ev.known_kind == .like || ev.known_kind == .boost || ev.known_kind == .zap || ev.known_kind == .contacts || ev.known_kind == .metadata
                 if !always_process {
                     // TODO: other views like threads might have their own sub ids, so ignore those events... or should we?
                     return
                 }
+                */
 
                 self.process_event(sub_id: sub_id, relay_id: relay_id, ev: ev)
             case .notice(let msg):
@@ -488,7 +497,7 @@ class HomeModel: ObservableObject {
         
         damus_state.events.insert(ev)
         
-        if let inner_ev = ev.inner_event {
+        if let inner_ev = ev.get_inner_event(cache: damus_state.events) {
             damus_state.events.insert(inner_ev)
         }
         
@@ -524,6 +533,8 @@ class HomeModel: ObservableObject {
             return
         }
         
+        // TODO: will we need to process this in other places like zap request contents, etc?
+        process_image_metadatas(cache: damus_state.events, ev: ev)
         damus_state.replies.count_replies(ev)
         damus_state.events.insert(ev)
 
@@ -673,9 +684,7 @@ func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
 
 func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: Profile, ev: NostrEvent) {
     if our_pubkey == ev.pubkey && (profile.deleted ?? false) {
-        DispatchQueue.main.async {
-            notify(.deleted_account, ())
-        }
+        notify(.deleted_account, ())
         return
     }
 
@@ -692,6 +701,7 @@ func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: P
     profiles.add(id: ev.pubkey, profile: tprof)
     
     if let nip05 = profile.nip05, old_nip05 != profile.nip05 {
+        
         Task.detached(priority: .background) {
             let validated = await validate_nip05(pubkey: ev.pubkey, nip05_str: nip05)
             if validated != nil {
@@ -707,22 +717,22 @@ func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: P
     }
     
     // load pfps asap
+    
+    var changed = false
+    
     let picture = tprof.profile.picture ?? robohash(ev.pubkey)
     if URL(string: picture) != nil {
-        DispatchQueue.main.async {
-            notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-        }
+        changed = true
     }
     
     let banner = tprof.profile.banner ?? ""
     if URL(string: banner) != nil {
-        DispatchQueue.main.async {
-            notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-        }
+        changed = true
     }
     
-    notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-
+    if changed {
+        notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+    }
 }
 
 func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping () -> Void) {
@@ -734,7 +744,7 @@ func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping (
             let result = validate_event(ev: ev)
             
             DispatchQueue.main.async {
-                events.validation[ev.id] = result
+                events.store_event_validation(evid: ev.id, validated: result)
                 guard result == .ok else {
                     return
                 }
@@ -757,6 +767,8 @@ func process_metadata_event(events: EventCache, our_pubkey: String, profiles: Pr
             guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
                 return
             }
+            
+            profile.cache_lnurl()
             
             DispatchQueue.main.async {
                 process_metadata_profile(our_pubkey: our_pubkey, profiles: profiles, profile: profile, ev: ev)
@@ -821,7 +833,7 @@ func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     for d in diff {
         changed = true
         if new.contains(d) {
-            if let url = URL(string: d) {
+            if let url = RelayURL(d) {
                 add_new_relay(relay_filters: state.relay_filters, metadatas: state.relay_metadata, pool: state.pool, url: url, info: decoded[d] ?? .rw, new_relay_filters: new_relay_filters)
             }
         } else {
@@ -835,10 +847,10 @@ func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     }
 }
 
-func add_new_relay(relay_filters: RelayFilters, metadatas: RelayMetadatas, pool: RelayPool, url: URL, info: RelayInfo, new_relay_filters: Bool) {
+func add_new_relay(relay_filters: RelayFilters, metadatas: RelayMetadatas, pool: RelayPool, url: RelayURL, info: RelayInfo, new_relay_filters: Bool) {
     try? pool.add_relay(url, info: info)
     
-    let relay_id = url.absoluteString
+    let relay_id = url.id
     guard metadatas.lookup(relay_id: relay_id) == nil else {
         return
     }
@@ -944,9 +956,11 @@ func handle_incoming_dms(prev_events: NewEventsBits, dms: DirectMessagesModel, o
     }
     
     if inserted {
-        dms.dms = dms.dms.filter({ $0.events.count > 0 }).sorted { a, b in
+        let new_dms = Array(dms.dms.filter({ $0.events.count > 0 })).sorted { a, b in
             return a.events.last!.created_at > b.events.last!.created_at
         }
+        
+        dms.dms = new_dms
     }
     
     return new_events
@@ -1111,11 +1125,11 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
             let notify = LocalNotification(type: .mention, event: ev, target: ev, content: content)
             create_local_notification(profiles: damus_state.profiles, notify: notify )
         }
-    } else if type == .boost && damus_state.settings.repost_notification, let inner_ev = ev.inner_event {
+    } else if type == .boost && damus_state.settings.repost_notification, let inner_ev = ev.get_inner_event(cache: damus_state.events) {
         let notify = LocalNotification(type: .repost, event: ev, target: inner_ev, content: inner_ev.content)
         create_local_notification(profiles: damus_state.profiles, notify: notify)
     } else if type == .like && damus_state.settings.like_notification,
-              let evid = ev.referenced_ids.first?.ref_id,
+              let evid = ev.referenced_ids.last?.ref_id,
               let liked_event = damus_state.events.lookup(evid)
     {
         let notify = LocalNotification(type: .like, event: ev, target: liked_event, content: liked_event.content)

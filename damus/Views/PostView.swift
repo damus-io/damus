@@ -85,6 +85,8 @@ struct PostView: View {
         var content = self.post.string.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 
         let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
+        
+        let img_meta_tags = uploadedMedias.compactMap { $0.metadata?.to_tag() }
 
         content.append(" " + imagesString + " ")
 
@@ -92,7 +94,7 @@ struct PostView: View {
             content.append(" nostr:" + id)
         }
         
-        let new_post = NostrPost(content: content, references: references, kind: kind)
+        let new_post = NostrPost(content: content, references: references, kind: kind, tags: img_meta_tags)
 
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
         
@@ -258,9 +260,11 @@ struct PostView: View {
     }
     
     func handle_upload(media: MediaUpload) {
-        let uploader = get_media_uploader(damus_state.pubkey)
+        let uploader = damus_state.settings.default_media_uploader
         Task.init {
             let img = getImage(media: media)
+            print("img size w:\(img.size.width) h:\(img.size.height)")
+            async let blurhash = calculate_blurhash(img: img)
             let res = await image_upload.start(media: media, uploader: uploader)
             
             switch res {
@@ -269,7 +273,9 @@ struct PostView: View {
                     self.error = "Error uploading image :("
                     return
                 }
-                let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, representingImage: img)
+                let blurhash = await blurhash
+                let meta = blurhash.map { bh in calculate_image_metadata(url: url, img: img, blurhash: bh) }
+                let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, representingImage: img, metadata: meta)
                 uploadedMedias.append(uploadedMedia)
                 
             case .failed(let error):
@@ -283,21 +289,24 @@ struct PostView: View {
         }
     }
     
-    var has_artifacts: Bool {
+    var multiply_factor: CGFloat {
         if case .quoting = action {
-            return true
+            return 0.4
+        } else if !uploadedMedias.isEmpty {
+            return 0.2
+        } else {
+            return 1.0
         }
-        return !uploadedMedias.isEmpty
     }
     
     func Editor(deviceSize: GeometryProxy) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
-                ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
+                ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                 
                 TextEntry
             }
-            .frame(height: has_artifacts ? deviceSize.size.height*0.4 : deviceSize.size.height)
+            .frame(height: deviceSize.size.height * multiply_factor)
             .id("post")
                 
             PVImageCarouselView(media: $uploadedMedias, deviceWidth: deviceSize.size.width)
@@ -364,12 +373,12 @@ struct PostView: View {
                 }
             }
             .sheet(isPresented: $attach_media) {
-                ImagePicker(sourceType: .photoLibrary, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
+                ImagePicker(uploader: damus_state.settings.default_media_uploader, sourceType: .photoLibrary, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
                     self.mediaToUpload = .image(img)
                 } onVideoPicked: { url in
                     self.mediaToUpload = .video(url)
                 }
-                .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
+                .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
                     Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
                         if let mediaToUpload {
                             self.handle_upload(media: mediaToUpload)
@@ -380,11 +389,20 @@ struct PostView: View {
                 }
             }
             .sheet(isPresented: $attach_camera) {
-                // image_upload_confirm isn't handled here, I don't know we need to display it here too tbh
-                ImagePicker(sourceType: .camera, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
-                    handle_upload(media: .image(img))
+                
+                ImagePicker(uploader: damus_state.settings.default_media_uploader, sourceType: .camera, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
+                    self.mediaToUpload = .image(img)
                 } onVideoPicked: { url in
-                    handle_upload(media: .video(url))
+                    self.mediaToUpload = .video(url)
+                }
+                .alert("Are you sure you want to upload this media?", isPresented: $image_upload_confirm) {
+                    Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
+                        if let mediaToUpload {
+                            self.handle_upload(media: mediaToUpload)
+                            self.attach_camera = false
+                        }
+                    }
+                    Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
                 }
             }
             .sheet(isPresented: $add_zap_target) {
@@ -532,6 +550,7 @@ struct UploadedMedia: Equatable {
     let localURL: URL
     let uploadedURL: URL
     let representingImage: UIImage
+    let metadata: ImageMetadata?
 }
 
 

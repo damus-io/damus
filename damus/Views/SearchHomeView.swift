@@ -49,8 +49,8 @@ struct SearchHomeView: View {
             loading: $model.loading,
             damus: damus_state,
             show_friend_icon: true,
-            filter: {
-                if damus_state.muted_threads.isMutedThread($0, privkey: self.damus_state.keypair.privkey) {
+            filter: { ev in
+                if damus_state.muted_threads.isMutedThread(ev, privkey: self.damus_state.keypair.privkey) {
                     return false
                 }
 
@@ -59,11 +59,12 @@ struct SearchHomeView: View {
                 }
 
                 // If we can't determine the note's language with 50%+ confidence, lean on the side of caution and show it anyway.
-                guard let noteLanguage = $0.note_language(damus_state.keypair.privkey) else {
+                let note_lang = damus_state.events.get_cache_data(ev.id).translations_model.note_language
+                guard let note_lang else {
                     return true
                 }
 
-                return preferredLanguages.contains(noteLanguage)
+                return preferredLanguages.contains(note_lang)
             }
         )
         .refreshable {

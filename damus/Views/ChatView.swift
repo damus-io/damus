@@ -71,11 +71,15 @@ struct ChatView: View {
     
     @Environment(\.colorScheme) var colorScheme
     
+    var disable_animation: Bool {
+        self.damus_state.settings.disable_animation
+    }
+    
     var body: some View {
         HStack {
             VStack {
                 if is_active || just_started {
-                    ProfilePicView(pubkey: event.pubkey, size: 32, highlight: is_active ? .main : .none, profiles: damus_state.profiles)
+                    ProfilePicView(pubkey: event.pubkey, size: 32, highlight: is_active ? .main : .none, profiles: damus_state.profiles, disable_animation: disable_animation)
                 }
 
                 Spacer()

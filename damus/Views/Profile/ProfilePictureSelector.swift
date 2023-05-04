@@ -23,11 +23,15 @@ struct ProfilePictureSelector: View {
     
     @State var profile_image: URL? = nil
     
+    var uploader: MediaUploader {
+        damus_state?.settings.default_media_uploader ?? .nostrBuild
+    }
+    
     var body: some View {
         let highlight: Highlight = .custom(Color.white, 2.0)
         ZStack {
             EditProfilePictureView(url: $profile_image, pubkey: pubkey, size: size, highlight: highlight, damus_state: damus_state)
-            EditProfilePictureControl(pubkey: pubkey, profile_image: $profile_image, viewModel: viewModel, callback: callback)
+            EditProfilePictureControl(uploader: uploader, pubkey: pubkey, profile_image: $profile_image, viewModel: viewModel, callback: callback)
         }
     }
 }

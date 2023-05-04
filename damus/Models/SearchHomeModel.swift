@@ -10,7 +10,7 @@ import Foundation
 
 /// The data model for the SearchHome view, typically something global-like
 class SearchHomeModel: ObservableObject {
-    var events: EventHolder = EventHolder()
+    var events: EventHolder
     @Published var loading: Bool = false
 
     var seen_pubkey: Set<String> = Set()
@@ -21,6 +21,9 @@ class SearchHomeModel: ObservableObject {
     
     init(damus_state: DamusState) {
         self.damus_state = damus_state
+        self.events = EventHolder(on_queue: { ev in
+            preload_events(state: damus_state, events: [ev])
+        })
     }
     
     func get_base_filter() -> NostrFilter {
@@ -101,10 +104,10 @@ func find_profiles_to_fetch_pk(profiles: Profiles, event_pubkeys: [String]) -> [
     return Array(pubkeys)
 }
 
-func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad) -> [String] {
+func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: EventCache) -> [String] {
     switch load {
     case .from_events(let events):
-        return find_profiles_to_fetch_from_events(profiles: profiles, events: events)
+        return find_profiles_to_fetch_from_events(profiles: profiles, events: events, cache: cache)
     case .from_keys(let pks):
         return find_profiles_to_fetch_from_keys(profiles: profiles, pks: pks)
     }
@@ -124,12 +127,12 @@ func find_profiles_to_fetch_from_keys(profiles: Profiles, pks: [String]) -> [Str
     return Array(pubkeys)
 }
 
-func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent]) -> [String] {
+func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent], cache: EventCache) -> [String] {
     var pubkeys = Set<String>()
     
     for ev in events {
         // lookup profiles from boosted events
-        if ev.known_kind == .boost, let bev = ev.inner_event, profiles.lookup(id: bev.pubkey) == nil {
+        if ev.known_kind == .boost, let bev = ev.get_inner_event(cache: cache), profiles.lookup(id: bev.pubkey) == nil {
             pubkeys.insert(bev.pubkey)
         }
         
@@ -148,7 +151,7 @@ enum PubkeysToLoad {
 
 func load_profiles(profiles_subid: String, relay_id: String, load: PubkeysToLoad, damus_state: DamusState) {
     var filter = NostrFilter.filter_profiles
-    let authors = find_profiles_to_fetch(profiles: damus_state.profiles, load: load)
+    let authors = find_profiles_to_fetch(profiles: damus_state.profiles, load: load, cache: damus_state.events)
     filter.authors = authors
     
     guard !authors.isEmpty else {

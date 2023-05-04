@@ -37,7 +37,7 @@ struct UserView: View {
         
         VStack {
             HStack {
-                ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles)
+                ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
             
                 VStack(alignment: .leading) {
                     let profile = damus_state.profiles.lookup(id: pubkey)
