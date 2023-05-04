@@ -38,6 +38,24 @@
 			<string>Sekotāji</string>
 		</dict>
 	</dict>
+	<key>following_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWING@</string>
+		<key>FOLLOWING</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>Sekojat</string>
+			<key>one</key>
+			<string>Sekojat</string>
+			<key>other</key>
+			<string>Sekojat</string>
+		</dict>
+	</dict>
 	<key>reacted_tagged_in_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -218,6 +236,24 @@
 			<string>Pārpublicējumi</string>
 		</dict>
 	</dict>
+	<key>sats</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@SATS@</string>
+		<key>SATS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>sati</string>
+			<key>one</key>
+			<string>sats</string>
+			<key>other</key>
+			<string>sati</string>
+		</dict>
+	</dict>
 	<key>sats_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -234,6 +270,42 @@
 			<string>%2$@ sati</string>
 			<key>other</key>
 			<string>%2$@ sati</string>
+		</dict>
+	</dict>
+	<key>zap_notification_no_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>zero</key>
+			<string>Jūs saņēmāt %2$@ satus no %3$@</string>
+			<key>one</key>
+			<string>Jūs saņēmāt %2$@ satu no %3$@</string>
+			<key>other</key>
+			<string>Jūs saņēmāt %2$@ satus no %3$@</string>
+		</dict>
+	</dict>
+	<key>zap_notification_with_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>zero</key>
+			<string>Jūs saņēmāt %2$@ satus no %3$@: "%4$@"</string>
+			<key>one</key>
+			<string>Jūs saņēmāt %2$@ satu no %3$@: "%4$@"</string>
+			<key>other</key>
+			<string>Jūs saņēmāt %2$@ satus no %3$@: "%4$@"</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
