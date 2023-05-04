@@ -385,10 +385,6 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     
     print("Preloading event \(plan.event.content)")
     
-    for meta in plan.img_metadata {
-        process_image_metadata(cache: state.events, meta: meta, ev: plan.event)
-    }
-    
     preload_pfp(profiles: profiles, pubkey: plan.event.pubkey)
     if let inner_ev = plan.event.get_inner_event(cache: state.events), inner_ev.pubkey != plan.event.pubkey {
         preload_pfp(profiles: profiles, pubkey: inner_ev.pubkey)

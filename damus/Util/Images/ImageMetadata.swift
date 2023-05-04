@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import Kingfisher
 
 struct ImageMetaDim: Equatable, StringCodable {
     init(width: Int, height: Int) {
@@ -191,39 +192,29 @@ func process_image_metadatas(cache: EventCache, ev: NostrEvent) {
             continue
         }
         
+        // We don't need blurhash if we already have the source image cached
+        if ImageCache.default.isCached(forKey: meta.url.absoluteString) {
+            continue
+        }
+        
         let state = ImageMetadataState(state: meta.blurhash == nil ? .not_needed : .processing, meta: meta)
         cache.store_img_metadata(url: meta.url, meta: state)
         
-        guard let blurhash = meta.blurhash else {
+        guard let blurhash = state.meta.blurhash else {
             return
         }
         
         Task {
-            guard let img = await process_blurhash(blurhash: blurhash, size: meta.dim?.size) else {
-                return
-            }
+            let img = await process_blurhash(blurhash: blurhash, size: state.meta.dim?.size)
+            
             Task { @MainActor in
-                state.state = .processed(img)
+                if let img {
+                    state.state = .processed(img)
+                } else {
+                    state.state = .failed
+                }
             }
         }
     }
 }
 
-func process_image_metadata(cache: EventCache, meta: ImageMetadata, ev: NostrEvent) {
-    guard let blurhash = meta.blurhash else {
-        return
-    }
-    Task {
-        let img = await process_blurhash(blurhash: blurhash, size: meta.dim?.size)
-        
-        DispatchQueue.main.async {
-            if let img {
-                let state = ImageMetadataState(state: .processed(img), meta: meta)
-                cache.store_img_metadata(url: meta.url, meta: state)
-            } else {
-                let state = ImageMetadataState(state: .failed, meta: meta)
-                cache.store_img_metadata(url: meta.url, meta: state)
-            }
-        }
-    }
-}
