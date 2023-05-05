@@ -36,6 +36,14 @@ struct DMChatView: View {
                 }
             }
         }
+        .onOpenURL { url in
+            let s = url.absoluteString
+            let cmd = s.replacingOccurrences(of: "damus:", with: "")
+            if cmd.starts(with: "/") {
+              dms.draft = cmd
+              send_message()
+            }
+        }
     }
 
     var Header: some View {

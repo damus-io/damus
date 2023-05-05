@@ -200,6 +200,7 @@ struct NoteContentView: View {
                     case .hashtag: return
                     case .url: return
                     case .invoice: return
+                    case .command: return
                     }
                 }
             }
@@ -230,6 +231,15 @@ func url_str(_ url: URL) -> CompatibleText {
     
     return CompatibleText(attributed: attributedString)
  }
+
+func command_str(_ cmd: String) -> CompatibleText {
+  var attributedString = AttributedString(stringLiteral: cmd)
+  attributedString.foregroundColor = DamusColors.purple
+  attributedString.link = URL(string: "damus:" + cmd)
+  attributedString.font = UIFont.boldSystemFont(ofSize: UIFont.labelFontSize)
+  
+  return CompatibleText(attributed: attributedString)
+}
 
 func mention_str(_ m: Mention, profiles: Profiles) -> CompatibleText {
     switch m.type {
@@ -372,6 +382,8 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
                 link_urls.append(url)
                 return str + url_str(url)
             }
+          case .command(let cmd):
+            return str + command_str(cmd)
         }
     }
 

@@ -71,6 +71,8 @@ enum Block: Equatable {
             return a == b
         case (.invoice(let a), .invoice(let b)):
             return a.string == b.string
+        case (.command(let a), .command(let b)):
+          return a == b
         case (_, _):
             return false
         }
@@ -82,6 +84,7 @@ enum Block: Equatable {
     case url(URL)
     case invoice(Invoice)
     case relay(String)
+    case command(String)
     
     var is_invoice: Invoice? {
         if case .invoice(let invoice) = self {
@@ -126,6 +129,13 @@ enum Block: Equatable {
         }
         return false
     }
+  
+    var is_command: Bool {
+      if case .command = self {
+        return true
+      }
+      return false
+    }
 }
 
 func render_blocks(blocks: [Block]) -> String {
@@ -151,6 +161,8 @@ func render_blocks(blocks: [Block]) -> String {
             return str + url.absoluteString
         case .invoice(let inv):
             return str + inv.string
+        case .command(let cmd):
+            return str + cmd
         }
     }
 }
@@ -213,6 +225,8 @@ func convert_block(_ b: block_t, tags: [[String]]) -> Block? {
         return convert_invoice_block(b.block.invoice)
     } else if b.type == BLOCK_MENTION_BECH32 {
         return convert_mention_bech32_block(b.block.mention_bech32)
+    } else if b.type == BLOCK_COMMAND {
+        return convert_command_block(b.block.str)
     }
 
     return nil
@@ -226,6 +240,13 @@ func convert_url_block(_ b: str_block) -> Block? {
         return .text(str)
     }
     return .url(url)
+}
+
+func convert_command_block(_ b: str_block) -> Block? {
+  guard let str = strblock_to_string(b) else {
+      return nil
+  }
+  return .command(str)
 }
 
 func maybe_pointee<T>(_ p: UnsafeMutablePointer<T>!) -> T? {

@@ -20,6 +20,7 @@ enum block_type {
     BLOCK_MENTION_BECH32 = 4,
     BLOCK_URL = 5,
     BLOCK_INVOICE = 6,
+    BLOCK_COMMAND = 7,
 };
 
 

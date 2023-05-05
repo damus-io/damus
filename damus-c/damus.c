@@ -11,6 +11,7 @@
 #include "bech32.h"
 #include <stdlib.h>
 #include <string.h>
+#include "regex.h"
 
 static int parse_mention_index(struct cursor *cur, struct block *block) {
     int d1, d2, d3, ind;
@@ -121,6 +122,45 @@ static int parse_url(struct cursor *cur, struct block *block) {
     return 1;
 }
 
+static int parse_command(struct cursor *cur, struct block *block) {
+  const u8 *start = cur->p;
+  
+  if (!parse_str(cur, "/"))
+      return 0;
+  
+  const char *pattern = "(^|\\s|\\n\\n)(\\/[a-z]{3,})";
+  regex_t regex;
+  regmatch_t matches[3];
+  int regex_flags = REG_EXTENDED;
+  
+  if (regcomp(&regex, pattern, regex_flags) != 0) {
+    printf("Error compiling regex.\n");
+    return 0;
+  }
+  
+  if (regexec(&regex, (const char *)start, 3, matches, 0) == 0) {
+    
+    if (!consume_until_whitespace(cur, 1)) {
+        cur->p = start;
+        return 0;
+    }
+
+    block->type = BLOCK_COMMAND;
+    block->block.str.start = (const char *)start;
+    block->block.str.end = (const char *)cur->p;
+    
+    // Free the resources
+    regfree(&regex);
+    return 1;
+  } else {
+    printf("No command was matched.\n");
+    regfree(&regex);
+    return 0;
+  }
+  
+  return 1;
+}
+
 static int parse_invoice(struct cursor *cur, struct block *block) {
     const u8 *start, *end;
     char *fail;
@@ -226,7 +266,11 @@ int damus_parse_content(struct blocks *blocks, const char *content) {
                 if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;
                 continue;
-            }
+            } else if ((c == '/') && parse_command(&cur, &block)) {
+              if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
+                  return 0;
+              continue;
+          }
         }
         
         cur.p++;

@@ -88,6 +88,8 @@ func build_mention_indices(_ blocks: [Block], type: MentionType) -> Set<Int> {
             return
         case .invoice:
             return
+        case .command:
+          return
         }
     }
 }
