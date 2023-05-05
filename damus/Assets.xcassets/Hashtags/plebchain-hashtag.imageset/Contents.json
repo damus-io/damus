@@ -1,15 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "plebchain-hashtag.svg",
+      "filename" : "plebchain.svg",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "plebchain.svg",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "plebchain.svg",
       "idiom" : "universal",
       "scale" : "3x"
     }
