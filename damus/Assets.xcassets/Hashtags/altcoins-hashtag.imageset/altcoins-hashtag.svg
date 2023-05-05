@@ -1,0 +1,32 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M7.9625 2.15757C8.04453 2.05679 8.17344 2.00522 8.30234 2.02397C9.40156 2.17163 10.25 3.11382 10.25 4.25288C10.25 4.51538 10.2055 4.7685 10.1211 5.00288H10.25C11.0773 5.00288 11.75 5.67554 11.75 6.50288C11.75 6.95054 11.5531 7.35366 11.2414 7.62788H11.5625C12.4953 7.62788 13.25 8.38257 13.25 9.31538C13.25 9.85913 12.9922 10.3419 12.5938 10.6513C13.393 10.7849 14 11.4787 14 12.3154C14 13.2482 13.2453 14.0029 12.3125 14.0029H3.6875C2.75469 14.0029 2 13.2482 2 12.3154C2 11.4787 2.60703 10.7849 3.40625 10.6513C3.00781 10.3419 2.75 9.85913 2.75 9.31538C2.75 8.38257 3.50469 7.62788 4.4375 7.62788H4.75859C4.44687 7.35366 4.25 6.95054 4.25 6.50288C4.25 5.67554 4.92266 5.00288 5.75 5.00288H6.12969C7.16328 5.00054 8 4.16147 8 3.12788C8 2.91225 7.96484 2.70835 7.89922 2.51616C7.85703 2.39429 7.88047 2.256 7.96484 2.15522L7.9625 2.15757Z" fill="#804E2C"/>
+<rect x="5.5" y="8" width="1.5" height="2" rx="0.75" fill="#D9D9D9"/>
+<mask id="mask0_1550_39095" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="5" y="8" width="2" height="2">
+<rect x="5.5" y="8" width="1.5" height="2" rx="0.75" fill="#D9D9D9"/>
+</mask>
+<g mask="url(#mask0_1550_39095)">
+<rect width="0.8" height="1.2" rx="0.4" transform="matrix(1 0 0 -1 5.8501 9.57999)" fill="#130F0F"/>
+</g>
+<rect x="8.5" y="8" width="1.5" height="2" rx="0.75" fill="#D9D9D9"/>
+<mask id="mask1_1550_39095" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="8" y="8" width="2" height="2">
+<rect x="8.5" y="8" width="1.5" height="2" rx="0.75" fill="#D9D9D9"/>
+</mask>
+<g mask="url(#mask1_1550_39095)">
+<rect width="0.8" height="1.2" rx="0.4" transform="matrix(1 0 0 -1 8.8501 9.57999)" fill="#130F0F"/>
+</g>
+<g filter="url(#filter0_i_1550_39095)">
+<path d="M5 11.3639C5 11.1629 5.1629 11 5.36385 11H10.6361C10.8371 11 11 11.1629 11 11.3639C11 11.5393 10.8748 11.6895 10.7018 11.7183C10.1392 11.8119 8.8974 12 8 12C7.1026 12 5.86081 11.8119 5.29825 11.7183C5.12516 11.6895 5 11.5393 5 11.3639Z" fill="#D9D9D9"/>
+</g>
+<defs>
+<filter id="filter0_i_1550_39095" x="5" y="11" width="6" height="1.2" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="0.2"/>
+<feGaussianBlur stdDeviation="0.25"/>
+<feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+<feBlend mode="normal" in2="shape" result="effect1_innerShadow_1550_39095"/>
+</filter>
+</defs>
+</svg>
