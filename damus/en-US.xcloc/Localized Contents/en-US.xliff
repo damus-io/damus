@@ -45,7 +45,7 @@
       <trans-unit id="%@" xml:space="preserve">
         <source>%@</source>
         <target>%@</target>
-        <note>DM by heading in local notification</note>
+        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="%@ %@" xml:space="preserve">
         <source>%@ %@</source>
@@ -63,6 +63,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>%@ not found</target>
         <note>When a note or profile is not found when searching for it via its note id</note>
       </trans-unit>
+      <trans-unit id="%@ reacted with %@" xml:space="preserve">
+        <source>%1$@ reacted with %2$@</source>
+        <target>%1$@ reacted with %2$@</target>
+        <note>Reacted by heading in local notification</note>
+      </trans-unit>
       <trans-unit id="%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." xml:space="preserve">
         <source>%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction.</source>
         <target>%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction.</target>
@@ -77,11 +82,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet.</source>
         <target>%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet.</target>
         <note>Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string.</note>
-      </trans-unit>
-      <trans-unit id="%lld" xml:space="preserve">
-        <source>%lld</source>
-        <target>%lld</target>
-        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="%lld/%lld" xml:space="preserve">
         <source>%lld/%lld</source>
@@ -982,11 +982,6 @@ Button text to indicate that the zap type is a private zap.</note>
         <source>Quote</source>
         <target>Quote</target>
         <note>Button to compose a quoted note</note>
-      </trans-unit>
-      <trans-unit id="Reacted by %@" xml:space="preserve">
-        <source>Reacted by %@</source>
-        <target>Reacted by %@</target>
-        <note>Reacted by heading in local notification</note>
       </trans-unit>
       <trans-unit id="Reactions" xml:space="preserve">
         <source>Reactions</source>

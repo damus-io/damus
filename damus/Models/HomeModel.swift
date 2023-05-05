@@ -1153,10 +1153,10 @@ func create_local_notification(profiles: Profiles, notify: LocalNotification) {
         title = String(format: NSLocalizedString("Reposted by %@", comment: "Reposted by heading in local notification"), displayName)
         identifier = "myBoostNotification"
     case .like:
-        title = String(format: NSLocalizedString("Reacted by %@", comment: "Reacted by heading in local notification"), displayName)
+        title = String(format: NSLocalizedString("%@ reacted with %@", comment: "Reacted by heading in local notification"), displayName, notify.event.content)
         identifier = "myLikeNotification"
     case .dm:
-        title = String(format: NSLocalizedString("%@", comment: "DM by heading in local notification"), displayName)
+        title = displayName
         identifier = "myDMNotification"
     case .zap:
         // not handled here

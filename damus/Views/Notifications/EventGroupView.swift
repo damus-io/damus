@@ -174,7 +174,7 @@ struct EventGroupView: View {
         return VStack(alignment: .center) {
             Image(systemName: "bolt.fill")
                 .foregroundColor(.orange)
-            Text("\(fmt)")
+            Text(verbatim: fmt)
                 .foregroundColor(Color.orange)
         }
     }
