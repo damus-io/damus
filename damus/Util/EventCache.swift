@@ -357,14 +357,15 @@ func preload_event(plan: PreloadPlan, profiles: Profiles, our_keypair: Keypair, 
     
     if plan.load_artifacts {
         artifacts = render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)
-        let arts = artifacts!
-        
-        for url in arts.images {
-            print("Preloading image \(url.absoluteString)")
-            KingfisherManager.shared.retrieveImage(with: ImageResource(downloadURL: url)) { val in
-                print("Finished preloading image \(url.absoluteString)")
+        if let artifacts {
+            for url in artifacts.images {
+                print("Preloading image \(url.absoluteString)")
+                KingfisherManager.shared.retrieveImage(with: ImageResource(downloadURL: url)) { val in
+                    print("Finished preloading image \(url.absoluteString)")
+                }
             }
         }
+        
     }
     
     if plan.load_preview {
