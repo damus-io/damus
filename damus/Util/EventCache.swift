@@ -385,10 +385,12 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     
     print("Preloading event \(plan.event.content)")
     
+    /*
     preload_pfp(profiles: profiles, pubkey: plan.event.pubkey)
     if let inner_ev = plan.event.get_inner_event(cache: state.events), inner_ev.pubkey != plan.event.pubkey {
         preload_pfp(profiles: profiles, pubkey: inner_ev.pubkey)
     }
+     */
     
     if artifacts == nil && plan.load_artifacts {
         let arts = render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)
