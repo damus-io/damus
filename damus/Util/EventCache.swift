@@ -393,7 +393,7 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
      */
     
     if artifacts == nil && plan.load_artifacts {
-        let arts = render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)
+        let arts = render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey, camel_case_hashtags: state.settings.capitalize_hashtags)
         artifacts = arts
         
         // we need these asap
@@ -407,7 +407,7 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     }
     
     if plan.load_preview {
-        let arts = artifacts ?? render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)
+        let arts = artifacts ?? render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey, camel_case_hashtags: state.settings.capitalize_hashtags)
         let preview = await load_preview(artifacts: arts)
         DispatchQueue.main.async {
             if let preview {

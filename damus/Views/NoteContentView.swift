@@ -177,7 +177,7 @@ struct NoteContentView: View {
                 }
                 await preload_event(plan: plan, state: damus_state)
             } else if force_artifacts {
-                let arts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+                let arts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey, camel_case_hashtags: damus_state.settings.capitalize_hashtags)
                 self.artifacts_model.state = .loaded(arts)
             }
         }
