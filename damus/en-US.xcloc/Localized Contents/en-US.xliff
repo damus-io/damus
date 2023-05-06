@@ -586,12 +586,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Hide</target>
         <note>Button to hide a post from a user who has been muted.</note>
       </trans-unit>
-      <trans-unit id="Hide API Key" xml:space="preserve">
-        <source>Hide API Key</source>
-        <target>Hide API Key</target>
-        <note>Button to hide the DeepL translation API key.
-   Button to hide the LibreTranslate server API key.</note>
-      </trans-unit>
       <trans-unit id="Hide all 🤙's" xml:space="preserve">
         <source>Hide all 🤙's</source>
         <target>Hide all 🤙's</target>
@@ -1202,12 +1196,6 @@ Button text to indicate that the zap type is a private zap.</note>
         <source>Show +</source>
         <target>Show +</target>
         <note>Button that, when tapped, will show + buttons next to a user's relays.</note>
-      </trans-unit>
-      <trans-unit id="Show API Key" xml:space="preserve">
-        <source>Show API Key</source>
-        <target>Show API Key</target>
-        <note>Button to show the DeepL translation API key.
-   Button to show the LibreTranslate server API key.</note>
       </trans-unit>
       <trans-unit id="Show more" xml:space="preserve">
         <source>Show more</source>
