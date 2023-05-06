@@ -45,7 +45,6 @@ struct PostView: View {
     @State var originalReferences: [ReferencedId] = []
     @State var references: [ReferencedId] = []
     @State var zap_pubkey: String = ""
-    @State var zap_display_name: String = ""
 
     @State var mediaToUpload: MediaUpload? = nil
     
@@ -86,15 +85,20 @@ struct PostView: View {
 
         let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
         
-        let img_meta_tags = uploadedMedias.compactMap { $0.metadata?.to_tag() }
-
+        var tags = uploadedMedias.compactMap { $0.metadata?.to_tag() }
+        
+        if !zap_pubkey.isEmpty {
+            let zap_target_tag = ["zap", zap_pubkey, "pubkey"]
+            tags.append(zap_target_tag)
+        }
+        
         content.append(" " + imagesString + " ")
 
         if case .quoting(let ev) = action, let id = bech32_note_id(ev.id) {
             content.append(" nostr:" + id)
         }
         
-        let new_post = NostrPost(content: content, references: references, kind: kind, tags: img_meta_tags)
+        let new_post = NostrPost(content: content, references: references, kind: kind, tags: tags)
 
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
         
@@ -348,17 +352,20 @@ struct PostView: View {
                     UserSearch(damus_state: damus_state, search: searching, post: $post)
                         .frame(maxHeight: .infinity)
                 } else {
-                    if !zap_pubkey.isEmpty && !zap_display_name.isEmpty {
+                    if !zap_pubkey.isEmpty {
                         HStack(spacing: 0) {
                             Text(Image(systemName: "bolt"))
                                 .foregroundColor(DamusColors.yellow)
                             Text("Zaps going to ")
-                            ProfilePicView(pubkey: zap_pubkey, size: 25.0, highlight: .none, profiles: damus_state.profiles)
-                            Text(" \(zap_display_name)")
+                            ProfilePicView(pubkey: zap_pubkey, size: 25.0, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                            let profile = damus_state.profiles.lookup(id: zap_pubkey)
+                            let display_name = Profile.displayName(profile: profile, pubkey: zap_pubkey).display_name
+                            Text(" \(display_name)")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.5)
                             Spacer()
                             Button(NSLocalizedString("Remove", comment: "Button to remove zap target")) {
                                 zap_pubkey = ""
-                                zap_display_name = ""
                             }
                             .foregroundColor(.accentColor)
                         }
@@ -406,7 +413,7 @@ struct PostView: View {
                 }
             }
             .sheet(isPresented: $add_zap_target) {
-                ZapTargetView(damus_state: damus_state, zap_pubkey: $zap_pubkey, display_name: $zap_display_name)
+                ZapTargetView(damus_state: damus_state, zap_pubkey: $zap_pubkey)
             }
             .onAppear() {
                 load_draft()

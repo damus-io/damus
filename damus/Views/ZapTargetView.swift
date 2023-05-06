@@ -15,8 +15,6 @@ struct ZapTargetView: View {
     @State private var alertMessage: String = ""
     @State var searching: Bool = false
     @Binding var zap_pubkey: String
-    @Binding var display_name: String
-    @FocusState private var isFocused: Bool
     
     @Environment(\.presentationMode) var presentationMode
     
@@ -48,7 +46,6 @@ struct ZapTargetView: View {
         }
         
         input = user.pubkey
-        display_name = Profile.displayName(profile: user.profile, pubkey: user.pubkey).display_name
     }
     
     var SelectUsersPubkey: some View {
@@ -67,9 +64,20 @@ struct ZapTargetView: View {
                 }
             }
         }
-        .onAppear() {
-            isFocused = false
+    }
+    
+    func handleInput() -> Bool {
+        let parsed = parse_key(input)
+        if parsed?.is_pub ?? false {
+            let decoded = try? bech32_decode(input)
+            input = hex_encode(decoded!.data)
         }
+        if input == damus_state.pubkey {
+            showAlert = true
+            alertMessage = "Cannot add yourself as a zap target"
+            return false
+        }
+        return true
     }
     
     var ZapTargetInput: some View {
@@ -85,7 +93,6 @@ struct ZapTargetView: View {
                 .padding(5)
                 .autocorrectionDisabled(true)
                 .textInputAutocapitalization(.never)
-                .focused($isFocused)
                 .disabled(!zap_pubkey.isEmpty)
             
             Label("", systemImage: "xmark.circle.fill")
@@ -103,9 +110,10 @@ struct ZapTargetView: View {
     
     var ZapTargetProfile: some View {
         VStack {
-            ProfilePicView(pubkey: zap_pubkey, size: 90.0, highlight: .none, profiles: damus_state.profiles)
-            Text(display_name)
-                .font(.headline)
+            ProfilePicView(pubkey: zap_pubkey, size: 90.0, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+            let profile = damus_state.profiles.lookup(id: zap_pubkey)
+            let display_name = Profile.displayName(profile: profile, pubkey: zap_pubkey).display_name
+            Text(" \(display_name)")
         }
     }
     
@@ -136,19 +144,20 @@ struct ZapTargetView: View {
             } else {
                 ZapTargetInput
             }
+            
+            let parsed = parse_key(input)
 
             if(!zap_pubkey.isEmpty) {
                 ZapTargetAction(text: "Remove", comment: "Button to remove zap target", action: {
                     input = ""
-                    display_name = ""
                     zap_pubkey = ""
-                    isFocused = false
                 })
-            } else if (!input.isEmpty) {
+            } else if (!input.isEmpty && parsed != nil) {
                 ZapTargetAction(text: "Confirm", comment: "Button to confirm zap target", action: {
-                    zap_pubkey = input
-                    presentationMode.wrappedValue.dismiss()
-                    isFocused = false
+                    if handleInput() {
+                        zap_pubkey = input
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 })
             }
 
@@ -157,11 +166,6 @@ struct ZapTargetView: View {
             }
         }
         .padding()
-        .onAppear() {
-            if !zap_pubkey.isEmpty {
-                input = display_name
-            }
-        }
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Sorry"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
         }
@@ -170,7 +174,7 @@ struct ZapTargetView: View {
 
 struct ZapTargetView_Previews: PreviewProvider {
     static var previews: some View {
-        ZapTargetView(damus_state: test_damus_state(), zap_pubkey: .constant(""), display_name: .constant(""))
+        ZapTargetView(damus_state: test_damus_state(), zap_pubkey: .constant(""))
     }
 }
 
