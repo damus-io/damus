@@ -156,6 +156,9 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
     
     Task {
         var mpayreq = damus_state.lnurls.lookup(target.pubkey)
+        if let zap_target_pubkey = event_tag(event, name: "zap") {
+            mpayreq = damus_state.lnurls.lookup(zap_target_pubkey)
+        }
         if mpayreq == nil {
             mpayreq = await fetch_static_payreq(lnurl)
         }
