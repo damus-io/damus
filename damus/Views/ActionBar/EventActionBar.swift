@@ -87,8 +87,15 @@ struct EventActionBar: View {
                         .nip05_colorized(gradient: bar.liked)
                 }
             }
-
-            if let lnurl = self.lnurl {
+            
+            if let pk = event_tag(event, name: "zap") {
+                if let prof = damus_state.profiles.lookup(id: pk) {
+                    if let lnurl = prof.lnurl {
+                        Spacer()
+                        ZapButton(damus_state: damus_state, event: event, lnurl: lnurl, bar: bar)
+                    }
+                }
+            } else if let lnurl = self.lnurl {
                 Spacer()
                 ZapButton(damus_state: damus_state, event: event, lnurl: lnurl, bar: bar)
             }
