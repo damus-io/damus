@@ -84,8 +84,10 @@ struct PostView: View {
         let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
         
         let img_meta_tags = uploadedMedias.compactMap { $0.metadata?.to_tag() }
-
-        content.append(" " + imagesString + " ")
+        
+        if !imagesString.isEmpty {
+            content.append(" " + imagesString + " ")
+        }
 
         if case .quoting(let ev) = action, let id = bech32_note_id(ev.id) {
             content.append(" nostr:" + id)
