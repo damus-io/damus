@@ -350,7 +350,7 @@ struct PostView: View {
                 } onVideoPicked: { url in
                     self.mediaToUpload = .video(url)
                 }
-                .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
+                .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
                     Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
                         if let mediaToUpload {
                             self.handle_upload(media: mediaToUpload)
@@ -361,11 +361,20 @@ struct PostView: View {
                 }
             }
             .sheet(isPresented: $attach_camera) {
-                // image_upload_confirm isn't handled here, I don't know we need to display it here too tbh
+                
                 ImagePicker(uploader: damus_state.settings.default_media_uploader, sourceType: .camera, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
-                    handle_upload(media: .image(img))
+                    self.mediaToUpload = .image(img)
                 } onVideoPicked: { url in
-                    handle_upload(media: .video(url))
+                    self.mediaToUpload = .video(url)
+                }
+                .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
+                    Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
+                        if let mediaToUpload {
+                            self.handle_upload(media: mediaToUpload)
+                            self.attach_camera = false
+                        }
+                    }
+                    Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
                 }
             }
             .onAppear() {

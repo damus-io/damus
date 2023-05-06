@@ -174,7 +174,7 @@ struct EventGroupView: View {
         return VStack(alignment: .center) {
             Image(systemName: "bolt.fill")
                 .foregroundColor(.orange)
-            Text("\(fmt)")
+            Text(verbatim: fmt)
                 .foregroundColor(Color.orange)
         }
     }
@@ -204,7 +204,7 @@ struct EventGroupView: View {
                 .frame(width: PFP_SIZE + 10)
             
             VStack(alignment: .leading) {
-                ProfilePicturesView(state: state, events: group.events)
+                ProfilePicturesView(state: state, pubkeys: group.events.map { $0.pubkey })
                 
                 if let event {
                     let thread = ThreadModel(event: event, damus_state: state)

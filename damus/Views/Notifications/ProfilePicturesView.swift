@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ProfilePicturesView: View {
     let state: DamusState
-    let events: [NostrEvent]
+    let pubkeys: [String]
 
     @State var nav_target: String? = nil
     @State var navigating: Bool = false
@@ -19,10 +19,10 @@ struct ProfilePicturesView: View {
             EmptyView()
         }
         HStack {
-            ForEach(events.prefix(8)) { ev in
-                ProfilePicView(pubkey: ev.pubkey, size: 32.0, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation)
+            ForEach(pubkeys.prefix(8), id: \.self) { pubkey in
+                ProfilePicView(pubkey: pubkey, size: 32.0, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation)
                     .onTapGesture {
-                        nav_target = ev.pubkey
+                        nav_target = pubkey
                         navigating = true
                     }
             }
@@ -32,6 +32,6 @@ struct ProfilePicturesView: View {
 
 struct ProfilePicturesView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfilePicturesView(state: test_damus_state(), events: [test_event, test_event])
+        ProfilePicturesView(state: test_damus_state(), pubkeys: ["a", "b"])
     }
 }

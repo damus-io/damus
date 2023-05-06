@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "filename": "earth.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "earth.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "earth.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

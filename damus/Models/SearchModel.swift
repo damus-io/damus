@@ -9,24 +9,26 @@ import Foundation
 
 
 class SearchModel: ObservableObject {
-    var events: EventHolder = EventHolder()
+    let state: DamusState
+    var events: EventHolder
     @Published var loading: Bool = false
     @Published var channel_name: String? = nil
     
-    let pool: RelayPool
     var search: NostrFilter
-    let contacts: Contacts
     let sub_id = UUID().description
+    let profiles_subid = UUID().description
     let limit: UInt32 = 500
     
-    init(contacts: Contacts, pool: RelayPool, search: NostrFilter) {
-        self.contacts = contacts
-        self.pool = pool
+    init(state: DamusState, search: NostrFilter) {
+        self.state = state
         self.search = search
+        self.events = EventHolder(on_queue: { ev in
+            preload_events(state: state, events: [ev])
+        })
     }
     
     func filter_muted()  {
-        self.events.filter { should_show_event(contacts: contacts, ev: $0) }
+        self.events.filter { should_show_event(contacts: state.contacts, ev: $0) }
         self.objectWillChange.send()
     }
     
@@ -38,13 +40,13 @@ class SearchModel: ObservableObject {
         //likes_filter.ids = ref_events.referenced_ids!
 
         print("subscribing to search '\(search)' with sub_id \(sub_id)")
-        pool.register_handler(sub_id: sub_id, handler: handle_event)
+        state.pool.register_handler(sub_id: sub_id, handler: handle_event)
         loading = true
-        pool.send(.subscribe(.init(filters: [search], sub_id: sub_id)))
+        state.pool.send(.subscribe(.init(filters: [search], sub_id: sub_id)))
     }
     
     func unsubscribe() {
-        self.pool.unsubscribe(sub_id: sub_id)
+        state.pool.unsubscribe(sub_id: sub_id)
         loading = false
         print("unsubscribing from search '\(search)' with sub_id \(sub_id)")
     }
@@ -54,7 +56,7 @@ class SearchModel: ObservableObject {
             return
         }
         
-        guard should_show_event(contacts: contacts, ev: ev) else {
+        guard should_show_event(contacts: state.contacts, ev: ev) else {
             return
         }
         
@@ -74,7 +76,7 @@ class SearchModel: ObservableObject {
     }
     
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
-        let (_, done) = handle_subid_event(pool: pool, relay_id: relay_id, ev: ev) { sub_id, ev in
+        let (sub_id, done) = handle_subid_event(pool: state.pool, relay_id: relay_id, ev: ev) { sub_id, ev in
             if ev.is_textlike && ev.should_show_event {
                 self.add_event(ev)
             } else if ev.known_kind == .channel_create {
@@ -84,8 +86,14 @@ class SearchModel: ObservableObject {
             }
         }
         
-        if done {
-            loading = false
+        guard done else {
+            return
+        }
+        
+        self.loading = false
+        
+        if sub_id == self.sub_id {
+            load_profiles(profiles_subid: self.profiles_subid, relay_id: relay_id, load: .from_events(self.events.all_events), damus_state: state)
         }
     }
 }

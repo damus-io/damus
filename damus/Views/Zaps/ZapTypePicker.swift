@@ -87,7 +87,7 @@ struct ZapTypePicker: View {
                     .font(.system(size: 16))
             }
         }
-        .frame(minWidth: 400, maxWidth: .infinity, minHeight: 50, maxHeight: 70)
+        .frame(maxWidth: .infinity, minHeight: 50, maxHeight: 70)
         .foregroundColor(fontColor())
         .background(zap_type == type ? fillColor() : DamusColors.adaptableGrey)
         .cornerRadius(15)

@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Vault
 import UIKit
 
 let fallback_zap_amount = 1000
@@ -155,9 +154,6 @@ class UserSettingsStore: ObservableObject {
     
     @StringSetting(key: "friend_filter", default_value: .all)
     var friend_filter: FriendFilter
-    
-    @StringSetting(key: "notification_state", default_value: .all)
-    var notification_state: NotificationFilterState
 
     @StringSetting(key: "translation_service", default_value: .none)
     var translation_service: TranslationService
@@ -166,16 +162,11 @@ class UserSettingsStore: ObservableObject {
     var deepl_plan: DeepLPlan
     
     var deepl_api_key: String {
-        didSet {
-            do {
-                if deepl_api_key == "" {
-                    try clearDeepLApiKey()
-                } else {
-                    try saveDeepLApiKey(deepl_api_key)
-                }
-            } catch {
-                // No-op.
-            }
+        get {
+            return internal_deepl_api_key ?? ""
+        }
+        set {
+            internal_deepl_api_key = newValue == "" ? nil : newValue
         }
     }
 
@@ -185,104 +176,47 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "libretranslate_url", default_value: "")
     var libretranslate_url: String
 
-    @Setting(key: "libretranslate_api_key", default_value: "")
     var libretranslate_api_key: String {
-        didSet {
-            do {
-                if libretranslate_api_key == "" {
-                    try clearLibreTranslateApiKey()
-                } else {
-                    try saveLibreTranslateApiKey(libretranslate_api_key)
-                }
-            } catch {
-                // No-op.
-            }
+        get {
+            return internal_libretranslate_api_key ?? ""
+        }
+        set {
+            internal_libretranslate_api_key = newValue == "" ? nil : newValue
         }
     }
     
-    @Published var nokyctranslate_api_key: String {
-        didSet {
-            do {
-                if nokyctranslate_api_key == "" {
-                    try clearNoKYCTranslateApiKey()
-                } else {
-                    try saveNoKYCTranslateApiKey(nokyctranslate_api_key)
-                }
-            } catch {
-                // No-op.
-            }
+    var nokyctranslate_api_key: String {
+        get {
+            return internal_nokyctranslate_api_key ?? ""
         }
-    }
-
-    init() {
-        do {
-            deepl_api_key = try Vault.getPrivateKey(keychainConfiguration: DamusDeepLKeychainConfiguration())
-        } catch {
-            deepl_api_key = ""
+        set {
+            internal_nokyctranslate_api_key = newValue == "" ? nil : newValue
         }
-        
-        do {
-            nokyctranslate_api_key = try Vault.getPrivateKey(keychainConfiguration: DamusNoKYCTranslateKeychainConfiguration())
-        } catch {
-            nokyctranslate_api_key = ""
-        }
-        
-    }
-
-    private func saveLibreTranslateApiKey(_ apiKey: String) throws {
-        try Vault.savePrivateKey(apiKey, keychainConfiguration: DamusLibreTranslateKeychainConfiguration())
-    }
-
-    private func clearLibreTranslateApiKey() throws {
-        try Vault.deletePrivateKey(keychainConfiguration: DamusLibreTranslateKeychainConfiguration())
-    }
-
-    private func saveNoKYCTranslateApiKey(_ apiKey: String) throws {
-        try Vault.savePrivateKey(apiKey, keychainConfiguration: DamusNoKYCTranslateKeychainConfiguration())
     }
     
-    private func clearNoKYCTranslateApiKey() throws {
-        try Vault.deletePrivateKey(keychainConfiguration: DamusNoKYCTranslateKeychainConfiguration())
-    }
+    // These internal keys are necessary because entries in the keychain need to be Optional,
+    // but the translation view needs non-Optional String in order to use them as Bindings.
+    @KeychainStorage(account: "deepl_apikey")
+    var internal_deepl_api_key: String?
     
-    private func saveDeepLApiKey(_ apiKey: String) throws {
-        try Vault.savePrivateKey(apiKey, keychainConfiguration: DamusDeepLKeychainConfiguration())
-    }
+    @KeychainStorage(account: "nokyctranslate_apikey")
+    var internal_nokyctranslate_api_key: String?
+    
+    @KeychainStorage(account: "libretranslate_apikey")
+    var internal_libretranslate_api_key: String?
 
-    private func clearDeepLApiKey() throws {
-        try Vault.deletePrivateKey(keychainConfiguration: DamusDeepLKeychainConfiguration())
-    }
-
-    func can_translate(_ pubkey: String) -> Bool {
+    var can_translate: Bool {
         switch translation_service {
         case .none:
             return false
         case .libretranslate:
             return URLComponents(string: libretranslate_url) != nil
         case .deepl:
-            return deepl_api_key != ""
+            return internal_deepl_api_key != nil
         case .nokyctranslate:
-            return nokyctranslate_api_key != ""
+            return internal_nokyctranslate_api_key != nil
         }
     }
-}
-
-struct DamusLibreTranslateKeychainConfiguration: KeychainConfiguration {
-    var serviceName = "damus"
-    var accessGroup: String? = nil
-    var accountName = "libretranslate_apikey"
-}
-
-struct DamusDeepLKeychainConfiguration: KeychainConfiguration {
-    var serviceName = "damus"
-    var accessGroup: String? = nil
-    var accountName = "deepl_apikey"
-}
-
-struct DamusNoKYCTranslateKeychainConfiguration: KeychainConfiguration {
-    var serviceName = "damus"
-    var accessGroup: String? = nil
-    var accountName = "nokyctranslate_apikey"
 }
 
 func pk_setting_key(_ pubkey: String, key: String) -> String {

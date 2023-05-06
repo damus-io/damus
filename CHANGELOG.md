@@ -1,3 +1,67 @@
+## [1.4.3-20] - 2023-05-04
+
+### Added
+
+- Add webp image support (William Casarin)
+- Preload profile pictures while scrolling (William Casarin)
+- Save keys when logging in and when creating new keypair (Bryan Montz)
+- Top-level tab state restoration (Bryan Montz)
+- Added event preloading when scrolling (William Casarin)
+- Preload images so they don't pop in (William Casarin)
+
+
+### Changed
+
+- Preload events when they are queued (William Casarin)
+- Search hashtags automatically (William Casarin)
+- Cached various UI elements so its not as laggy (William Casarin)
+
+
+### Fixed
+
+- Don't process blurhash if we already have image cached (William Casarin)
+- Home now dismisses reactions view (William Casarin)
+- Fix auto-translations bug where languages in preferred language still gets translated (Terry Yiu)
+- Fix wrong relative times on events (William Casarin)
+- Load profiles in hashtag searched (William Casarin)
+- Fix weird #\[0] artifacts appearing in posts (William Casarin)
+- Fix "translated from english" bugs (Terry)
+- Fix crash when loading DMs in the background (William Casarin)
+- Fixed blurhash appearing behind loaded images when swiping on carousel (William Casarin)
+- Fix camera not dismissing (Swift)
+- Fix bug with reaction notifications referencing the wrong event (Terry Yiu)
+- Fix Copy Link action does not dismiss ShareAction view (Bryan Montz)
+- Saved Jack's soul. (Ben Weeks)
+- Fixed preview elements popping in (William Casarin)
+- Fixed glitchy preview (William Casarin)
+
+
+
+[1.4.3-20]: https://github.com/damus-io/damus/releases/tag/v1.4.3-20
+## [1.4.3-15] - 2023-04-29
+
+### Added
+
+- Add q tag to quoted renotes (William Casarin)
+- Add confirmation alert when clearing all bookmarks (Swift)
+- Show blurhash placeholders from image metadata (William Casarin)
+- Add image metadata to image uploads (William Casarin)
+
+
+### Changed
+
+- Load zaps instantly on events (William Casarin)
+
+
+### Fixed
+
+- Fix thread incompatibility for clients that add more than one reply tag (amethyst, plebstr)
+- Preserve order of bookmarks when saving (William Casarin)
+- Fix crash when you have invalid relays in your relay list (William Casarin)
+
+
+
+[1.4.3-14]: https://github.com/damus-io/damus/releases/tag/v1.4.3-14
 
 ## [1.4.3-10] - 2023-04-25
 
@@ -1068,3 +1132,4 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
+

@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "filename": "title-case.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "title-case.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "title-case.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

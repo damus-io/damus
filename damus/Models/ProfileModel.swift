@@ -8,19 +8,26 @@
 import Foundation
 
 class ProfileModel: ObservableObject, Equatable {
-    var events: EventHolder = EventHolder()
     @Published var contacts: NostrEvent? = nil
     @Published var following: Int = 0
     @Published var relays: [String: RelayInfo]? = nil
     @Published var progress: Int = 0
     
+    var events: EventHolder
     let pubkey: String
     let damus: DamusState
-    
     
     var seen_event: Set<String> = Set()
     var sub_id = UUID().description
     var prof_subid = UUID().description
+    
+    init(pubkey: String, damus: DamusState) {
+        self.pubkey = pubkey
+        self.damus = damus
+        self.events = EventHolder(on_queue: { ev in
+            preload_events(state: damus, events: [ev])
+        })
+    }
     
     func follows(pubkey: String) -> Bool {
         guard let contacts = self.contacts else {
@@ -45,11 +52,6 @@ class ProfileModel: ObservableObject, Equatable {
             return .contact(contacts)
         }
         return .pubkey(pubkey)
-    }
-    
-    init(pubkey: String, damus: DamusState) {
-        self.pubkey = pubkey
-        self.damus = damus
     }
     
     static func == (lhs: ProfileModel, rhs: ProfileModel) -> Bool {

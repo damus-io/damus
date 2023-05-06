@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "filename": "logout.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "logout.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "logout.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

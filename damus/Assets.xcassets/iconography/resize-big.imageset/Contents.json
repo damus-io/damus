@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "filename": "resize-big.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "resize-big.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "resize-big.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

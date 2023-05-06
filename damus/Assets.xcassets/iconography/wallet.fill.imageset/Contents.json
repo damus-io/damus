@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "filename": "wallet.fill.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "wallet.fill.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "wallet.fill.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

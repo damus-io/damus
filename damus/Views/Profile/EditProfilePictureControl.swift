@@ -20,6 +20,8 @@ struct EditProfilePictureControl: View {
     @State private var show_library = false
     @State var image_upload_confirm: Bool = false
 
+    @State var mediaToUpload: MediaUpload? = nil
+
     var body: some View {
         Menu {
             Button(action: {
@@ -45,19 +47,37 @@ struct EditProfilePictureControl: View {
             }
         }
         .sheet(isPresented: $show_camera) {
-            // The alert may not be required for the profile pic upload case. Not showing the confirm check alert for this scenario
+            
             ImagePicker(uploader: uploader, sourceType: .camera, pubkey: pubkey, image_upload_confirm: $image_upload_confirm, imagesOnly: true) { img in
-                handle_upload(media: .image(img))
+                self.mediaToUpload = .image(img)
             } onVideoPicked: { url in
                 print("Cannot upload videos as profile image")
             }
+            .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
+                Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
+                    if let mediaToUpload {
+                        self.handle_upload(media: mediaToUpload)
+                        self.show_camera = false
+                    }
+                }
+                Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
+            }
         }
         .sheet(isPresented: $show_library) {
-            // The alert may not be required for the profile pic upload case. Not showing the confirm check alert for this scenario
             ImagePicker(uploader: uploader, sourceType: .photoLibrary, pubkey: pubkey, image_upload_confirm: $image_upload_confirm, imagesOnly: true) { img in
-                handle_upload(media: .image(img))
+                self.mediaToUpload = .image(img)
+
             } onVideoPicked: { url in
                 print("Cannot upload videos as profile image")
+            }
+            .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
+                Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
+                    if let mediaToUpload {
+                        self.handle_upload(media: mediaToUpload)
+                        self.show_library = false
+                    }
+                }
+                Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
             }
         }
     }

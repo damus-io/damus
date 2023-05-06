@@ -39,6 +39,11 @@ func get_zap_amount_items(_ default_zap_amt: Int) -> [ZapAmountItem] {
     return entries
 }
 
+func satsString(_ count: Int, locale: Locale = Locale.current) -> String {
+    let format = localizedStringFormat(key: "sats", locale: locale)
+    return String(format: format, locale: locale, count)
+}
+
 struct CustomizeZapView: View {
     let state: DamusState
     let event: NostrEvent
@@ -147,7 +152,7 @@ struct CustomizeZapView: View {
                    self.custom_amount_sats = nil
                }
             }
-            Text("sats", comment: "Shortened form of satoshi, display unit of measure where 1,000,000,000 satoshis is 1 Bitcoin. Used to indicate how many sats will be zapped to a note, configured through the custom zap view.")
+            Text(verbatim: satsString(custom_amount_sats ?? 0))
                 .font(.system(size: 18, weight: .heavy))
         }
     }

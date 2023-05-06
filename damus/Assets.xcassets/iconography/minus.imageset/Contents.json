@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "filename": "minus.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "minus.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "minus.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

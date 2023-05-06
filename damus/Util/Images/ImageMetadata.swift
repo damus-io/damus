@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import Kingfisher
 
 struct ImageMetaDim: Equatable, StringCodable {
     init(width: Int, height: Int) {
@@ -174,35 +175,46 @@ func calculate_image_metadata(url: URL, img: UIImage, blurhash: String) -> Image
 }
 
 
-func process_image_metadata(cache: EventCache, ev: NostrEvent) {
-    for tag in ev.tags {
-        guard tag.count >= 2 && tag[0] == "imeta" else {
-            continue
+func event_image_metadata(ev: NostrEvent) -> [ImageMetadata] {
+    return ev.tags.reduce(into: [ImageMetadata]()) { meta, tag in
+        guard tag.count >= 2 && tag[0] == "imeta",
+              let data = ImageMetadata(tag: tag) else {
+            return
         }
         
-        guard let meta = ImageMetadata(tag: tag) else {
-            continue
-        }
-        
+        meta.append(data)
+    }
+}
+
+func process_image_metadatas(cache: EventCache, ev: NostrEvent) {
+    for meta in event_image_metadata(ev: ev) {
         guard cache.lookup_img_metadata(url: meta.url) == nil else {
             continue
         }
         
-        let state = ImageMetadataState(state: .processing, meta: meta)
+        // We don't need blurhash if we already have the source image cached
+        if ImageCache.default.isCached(forKey: meta.url.absoluteString) {
+            continue
+        }
+        
+        let state = ImageMetadataState(state: meta.blurhash == nil ? .not_needed : .processing, meta: meta)
         cache.store_img_metadata(url: meta.url, meta: state)
         
-        if let blurhash = meta.blurhash {
-            Task.init {
-                let img = await process_blurhash(blurhash: blurhash, size: meta.dim?.size)
-                
-                DispatchQueue.main.async {
-                    if let img {
-                        state.state = .processed(img)
-                    } else {
-                        state.state = .failed
-                    }
+        guard let blurhash = state.meta.blurhash else {
+            return
+        }
+        
+        Task {
+            let img = await process_blurhash(blurhash: blurhash, size: state.meta.dim?.size)
+            
+            Task { @MainActor in
+                if let img {
+                    state.state = .processed(img)
+                } else {
+                    state.state = .failed
                 }
             }
         }
     }
 }
+

@@ -119,33 +119,36 @@ struct ImageCarousel: View {
     var body: some View {
         TabView {
             ForEach(urls, id: \.absoluteString) { url in
-                Rectangle()
-                    .foregroundColor(Color.clear)
-                    .overlay {
-                        GeometryReader { geo in
-                            KFAnimatedImage(url)
-                                .callbackQueue(.dispatch(.global(qos:.background)))
-                                .backgroundDecode(true)
-                                .imageContext(.note, disable_animation: state.settings.disable_animation)
-                                .image_fade(duration: 0.25)
-                                .cancelOnDisappear(true)
-                                .configure { view in
-                                    view.framePreloadCount = 3
-                                }
-                                .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
-                                    state.previews.cache_image_meta(evid: evid, image_fill: fill)
-                                    image_fill = fill
-                                }
-                                .background {
-                                    Placeholder(url: url, geo_size: geo.size)
-                                }
-                                .aspectRatio(contentMode: filling ? .fill : .fit)
-                                .tabItem {
-                                    Text(url.absoluteString)
-                                }
-                                .id(url.absoluteString)
+                GeometryReader { geo in
+                    KFAnimatedImage(url)
+                        .callbackQueue(.dispatch(.global(qos:.background)))
+                        .backgroundDecode(true)
+                        .imageContext(.note, disable_animation: state.settings.disable_animation)
+                        .image_fade(duration: 0.25)
+                        .cancelOnDisappear(true)
+                        .configure { view in
+                            view.framePreloadCount = 3
                         }
-                    }
+                        .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
+                            state.previews.cache_image_meta(evid: evid, image_fill: fill)
+                            // blur hash can be discarded when we have the url
+                            // NOTE: this is the wrong place for this... we need to remove
+                            //       it when the image is loaded in memory. This may happen
+                            //       earlier than this (by the preloader, etc)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                state.events.lookup_img_metadata(url: url)?.state = .not_needed
+                            }
+                            image_fill = fill
+                        }
+                        .background {
+                            Placeholder(url: url, geo_size: geo.size)
+                        }
+                        .aspectRatio(contentMode: filling ? .fill : .fit)
+                        .tabItem {
+                            Text(url.absoluteString)
+                        }
+                        .id(url.absoluteString)
+                }
             }
         }
         .fullScreenCover(isPresented: $open_sheet) {

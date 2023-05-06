@@ -42,6 +42,75 @@ struct SideMenuView: View {
         }
     }
     
+    func SidemenuItems(profile_model: ProfileModel, followers: FollowersModel) -> some View {
+        return VStack(spacing: verticalSpacing) {
+            NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
+                navLabel(title: NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), systemImage: "person")
+            }
+            
+            /*
+            NavigationLink(destination: EmptyView()) {
+                navLabel(title: NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), systemImage: "bolt")
+            }
+            */
+             
+            NavigationLink(destination: MutelistView(damus_state: damus_state, users: get_mutelist_users(damus_state.contacts.mutelist) )) {
+                navLabel(title: NSLocalizedString("Muted", comment: "Sidebar menu label for muted users view."), systemImage: "exclamationmark.octagon")
+            }
+            
+            NavigationLink(destination: RelayConfigView(state: damus_state)) {
+                navLabel(title: NSLocalizedString("Relays", comment: "Sidebar menu label for Relays view."), systemImage: "network")
+            }
+            
+            NavigationLink(destination: BookmarksView(state: damus_state)) {
+                navLabel(title: NSLocalizedString("Bookmarks", comment: "Sidebar menu label for Bookmarks view."), systemImage: "bookmark")
+            }
+            
+            NavigationLink(destination: ConfigView(state: damus_state)) {
+                navLabel(title: NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), systemImage: "gear")
+            }
+        }
+    }
+    
+    var MainSidemenu: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
+            let followers = FollowersModel(damus_state: damus_state, target: damus_state.pubkey)
+            let profile_model = ProfileModel(pubkey: damus_state.pubkey, damus: damus_state)
+            
+            NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
+                
+                HStack {
+                    ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                    
+                    VStack(alignment: .leading) {
+                        if let display_name = profile?.display_name {
+                            Text(display_name)
+                                .foregroundColor(textColor())
+                                .font(.title)
+                                .lineLimit(1)
+                        }
+                        if let name = profile?.name {
+                            Text("@" + name)
+                                .foregroundColor(DamusColors.mediumGrey)
+                                .font(.body)
+                                .lineLimit(1)
+                        }
+                    }
+                }
+                .padding(.bottom, verticalSpacing)
+            }
+            
+            Divider()
+            
+            ScrollView {
+                SidemenuItems(profile_model: profile_model, followers: followers)
+                    .labelStyle(SideMenuLabelStyle())
+                    .padding([.top, .bottom], verticalSpacing)
+            }
+        }
+    }
+    
     var content: some View {
         HStack(alignment: .top) {
             ZStack(alignment: .top) {
@@ -49,69 +118,7 @@ struct SideMenuView: View {
                     .ignoresSafeArea()
                 
                 VStack(alignment: .leading, spacing: 0) {
-                    
-                    VStack(alignment: .leading, spacing: 0) {
-                        let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
-                        let followers = FollowersModel(damus_state: damus_state, target: damus_state.pubkey)
-                        let profile_model = ProfileModel(pubkey: damus_state.pubkey, damus: damus_state)
-                        
-                        NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
-                            
-                            HStack {
-                                ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
-                                
-                                VStack(alignment: .leading) {
-                                    if let display_name = profile?.display_name {
-                                        Text(display_name)
-                                            .foregroundColor(textColor())
-                                            .font(.title)
-                                            .lineLimit(1)
-                                    }
-                                    if let name = profile?.name {
-                                        Text("@" + name)
-                                            .foregroundColor(DamusColors.mediumGrey)
-                                            .font(.body)
-                                            .lineLimit(1)
-                                    }
-                                }
-                            }
-                            .padding(.bottom, verticalSpacing)
-                        }
-                        
-                        Divider()
-                        
-                        ScrollView {
-                            VStack(spacing: verticalSpacing) {
-                                NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
-                                    navLabel(title: NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), systemImage: "person")
-                                }
-                                
-                                /*
-                                NavigationLink(destination: EmptyView()) {
-                                    navLabel(title: NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), systemImage: "bolt")
-                                }
-                                */
-                                 
-                                NavigationLink(destination: MutelistView(damus_state: damus_state, users: get_mutelist_users(damus_state.contacts.mutelist) )) {
-                                    navLabel(title: NSLocalizedString("Muted", comment: "Sidebar menu label for muted users view."), systemImage: "exclamationmark.octagon")
-                                }
-                                
-                                NavigationLink(destination: RelayConfigView(state: damus_state)) {
-                                    navLabel(title: NSLocalizedString("Relays", comment: "Sidebar menu label for Relays view."), systemImage: "network")
-                                }
-                                
-                                NavigationLink(destination: BookmarksView(state: damus_state)) {
-                                    navLabel(title: NSLocalizedString("Bookmarks", comment: "Sidebar menu label for Bookmarks view."), systemImage: "bookmark")
-                                }
-                                
-                                NavigationLink(destination: ConfigView(state: damus_state)) {
-                                    navLabel(title: NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), systemImage: "gear")
-                                }
-                            }
-                            .labelStyle(SideMenuLabelStyle())
-                            .padding([.top, .bottom], verticalSpacing)
-                        }
-                    }
+                    MainSidemenu
                     .simultaneousGesture(TapGesture().onEnded {
                         isSidebarVisible = false
                     })
