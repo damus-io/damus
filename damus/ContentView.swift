@@ -751,8 +751,16 @@ func find_event(state: DamusState, evid: String, search_type: SearchType, find_f
             break
         case .event(_, let ev):
             has_event = true
-            callback(ev)
+            
             state.pool.unsubscribe(sub_id: subid)
+            
+            if search_type == .profile && ev.known_kind == .metadata {
+                process_metadata_event(events: state.events, our_pubkey: state.pubkey, profiles: state.profiles, ev: ev) {
+                    callback(ev)
+                }
+            } else {
+                callback(ev)
+            }
         case .eose:
             if !has_event {
                 attempts += 1
