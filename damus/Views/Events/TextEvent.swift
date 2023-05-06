@@ -94,7 +94,7 @@ struct TextEvent: View {
     var ZapTargetPart: some View {
         Group {
             if event_has_tag(ev: event, tag: "zap") {
-                ZapDescription(event: event)
+                ZapDescription(event: event, profiles: damus.profiles)
             } else {
                 EmptyView()
             }

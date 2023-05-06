@@ -49,7 +49,8 @@ struct SelectedEventView: View {
                 }
                 
                 if event_has_tag(ev: event, tag: "zap") {
-                    ZapDescription(event: event)
+                    ZapDescription(event: event, profiles: damus.profiles)
+                        .padding(.horizontal)
                 }
                 
                 EventBody(damus_state: damus, event: event, size: size, options: [.pad_content])
