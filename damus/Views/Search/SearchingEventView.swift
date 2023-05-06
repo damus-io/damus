@@ -92,10 +92,15 @@ struct SearchingEventView: View {
                 }
             }
         case .profile:
-            find_event(state: state, evid: evid, search_type: search_type, find_from: nil) { _ in
-                if state.profiles.lookup(id: evid) != nil {
-                    self.search_state = .found_profile(evid)
-                    return
+            find_event(state: state, evid: evid, search_type: search_type, find_from: nil) { ev in
+                if let ev {
+                    process_metadata_event(events: state.events, our_pubkey: state.pubkey, profiles: state.profiles, ev: ev) {
+                        if state.profiles.lookup(id: evid) != nil {
+                            self.search_state = .found_profile(evid)
+                        } else {
+                            self.search_state = .not_found
+                        }
+                    }
                 } else {
                     self.search_state = .not_found
                 }
