@@ -43,9 +43,8 @@ struct SearchView_Previews: PreviewProvider {
     static var previews: some View {
         let test_state = test_damus_state()
         let filter = NostrFilter.filter_hashtag(["bitcoin"])
-        let pool = test_state.pool
         
-        let model = SearchModel(contacts: test_state.contacts, pool: pool, search: filter)
+        let model = SearchModel(state: test_state, search: filter)
         
         SearchView(appstate: test_state, search: model)
     }

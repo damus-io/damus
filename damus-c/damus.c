@@ -209,7 +209,7 @@ int damus_parse_content(struct blocks *blocks, const char *content) {
         c  = peek_char(&cur, 0);
         
         pre_mention = cur.p;
-        if (cp == -1 || is_whitespace(cp)) {
+        if (cp == -1 || is_whitespace(cp) || c == '#') {
             if (c == '#' && (parse_mention_index(&cur, &block) || parse_hashtag(&cur, &block))) {
                 if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;

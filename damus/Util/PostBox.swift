@@ -109,9 +109,7 @@ class PostBox {
             return
         }
         
-        let remaining = pool.descriptors.map {
-            $0.url.absoluteString
-        }
+        let remaining = pool.descriptors.map { $0.url.id }
         
         let posted_ev = PostedEvent(event: event, remaining: remaining)
         events[event.id] = posted_ev

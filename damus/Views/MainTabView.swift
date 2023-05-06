@@ -37,7 +37,7 @@ func show_indicator(timeline: Timeline, current: NewEventsBits, indicator_settin
 struct TabButton: View {
     let timeline: Timeline
     let img: String
-    @Binding var selected: Timeline?
+    @Binding var selected: Timeline
     @Binding var new_events: NewEventsBits
     
     let settings: UserSettingsStore
@@ -75,7 +75,7 @@ struct TabButton: View {
 
 struct TabBar: View {
     @Binding var new_events: NewEventsBits
-    @Binding var selected: Timeline?
+    @Binding var selected: Timeline
     
     let settings: UserSettingsStore
     let action: (Timeline) -> ()

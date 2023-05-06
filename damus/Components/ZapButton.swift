@@ -47,7 +47,7 @@ struct ZapButton: View {
             return "bolt"
         }
         
-        return "bolt.horizontal.fill"
+        return "bolt.fill"
     }
     
     var zap_color: Color? {

@@ -23,11 +23,30 @@ struct EventViewOptions: OptionSet {
     static let embedded: EventViewOptions = [.no_action_bar, .small_pfp, .wide, .truncate_content, .nested]
 }
 
+struct RelativeTime: View {
+    @ObservedObject var time: RelativeTimeModel
+    
+    var body: some View {
+        Text(verbatim: "\(time.value)")
+            .font(.system(size: 16))
+            .foregroundColor(.gray)
+    }
+}
+
 struct TextEvent: View {
     let damus: DamusState
     let event: NostrEvent
     let pubkey: String
     let options: EventViewOptions
+    let evdata: EventData
+    
+    init(damus: DamusState, event: NostrEvent, pubkey: String, options: EventViewOptions) {
+        self.damus = damus
+        self.event = event
+        self.pubkey = pubkey
+        self.options = options
+        self.evdata = damus.events.get_cache_data(event.id)
+    }
     
     var has_action_bar: Bool {
         !options.contains(.no_action_bar)
@@ -55,7 +74,7 @@ struct TextEvent: View {
         HStack(alignment: .center, spacing: 0) {
             ProfileName(is_anon: is_anon)
             TimeDot
-            Time
+            RelativeTime(time: self.evdata.relative_time)
             Spacer()
             ContextButton
         }
@@ -106,12 +125,6 @@ struct TextEvent: View {
             .foregroundColor(.gray)
     }
     
-    var Time: some View {
-        Text(verbatim: "\(format_relative_time(event.created_at))")
-            .font(.system(size: 16))
-            .foregroundColor(.gray)
-    }
-    
     var ContextButton: some View {
         EventMenuContext(event: event, keypair: damus.keypair, target_pubkey: event.pubkey, bookmarks: damus.bookmarks, muted_threads: damus.muted_threads)
             .padding([.bottom], 4)
@@ -124,7 +137,17 @@ struct TextEvent: View {
     }
     
     func EvBody(options: EventViewOptions) -> some View {
-        return EventBody(damus_state: damus, event: event, size: .normal, options: options)
+        let show_imgs = should_show_images(settings: damus.settings, contacts: damus.contacts, ev: event, our_pubkey: damus.pubkey)
+        let artifacts = damus.events.get_cache_data(event.id).artifacts.artifacts ?? .just_content(event.get_content(damus.keypair.privkey))
+        return NoteContentView(
+            damus_state: damus,
+            event: event,
+            show_images: show_imgs,
+            size: .normal,
+            artifacts: artifacts,
+            options: options
+        )
+        .fixedSize(horizontal: false, vertical: true)
     }
     
     func Mention(_ mention: Mention) -> some View {
@@ -162,6 +185,7 @@ struct TextEvent: View {
                 TopPart(is_anon: is_anon)
                 
                 ReplyPart
+                
                 EvBody(options: self.options)
                 
                 if let mention = get_mention() {

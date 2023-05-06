@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "filename": "help2.fill.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "help2.fill.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "help2.fill.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

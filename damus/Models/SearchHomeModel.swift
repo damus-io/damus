@@ -10,7 +10,7 @@ import Foundation
 
 /// The data model for the SearchHome view, typically something global-like
 class SearchHomeModel: ObservableObject {
-    var events: EventHolder = EventHolder()
+    var events: EventHolder
     @Published var loading: Bool = false
 
     var seen_pubkey: Set<String> = Set()
@@ -21,6 +21,9 @@ class SearchHomeModel: ObservableObject {
     
     init(damus_state: DamusState) {
         self.damus_state = damus_state
+        self.events = EventHolder(on_queue: { ev in
+            preload_events(state: damus_state, events: [ev])
+        })
     }
     
     func get_base_filter() -> NostrFilter {

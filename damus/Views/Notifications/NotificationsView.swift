@@ -74,25 +74,13 @@ class NotificationFilter: ObservableObject, Equatable {
     }
 }
 
-enum NotificationFilterState: String, StringCodable {
+enum NotificationFilterState: String {
     case all
     case zaps
     case replies
     
-    init?(from string: String) {
-        guard let val = NotificationFilterState(rawValue: string) else {
-            return nil
-        }
-        
-        self = val
-    }
-    
-    func to_string() -> String {
-        self.rawValue
-    }
-    
     func is_other( item: NotificationItem) -> Bool {
-        return item.is_zap == nil && item.is_reply == nil
+        item.is_zap == nil && item.is_reply == nil
     }
     
     func filter(_ item: NotificationItem) -> Bool {
@@ -110,7 +98,8 @@ enum NotificationFilterState: String, StringCodable {
 struct NotificationsView: View {
     let state: DamusState
     @ObservedObject var notifications: NotificationsModel
-    @StateObject var filter_state: NotificationFilter = NotificationFilter()
+    @StateObject var filter = NotificationFilter()
+    @SceneStorage("NotificationsView.filter_state") var filter_state: NotificationFilterState = .all
     
     @Environment(\.colorScheme) var colorScheme
     
@@ -123,14 +112,14 @@ struct NotificationsView: View {
     }
     
     var body: some View {
-        TabView(selection: $filter_state.state) {
+        TabView(selection: $filter_state) {
             // This is needed or else there is a bug when switching from the 3rd or 2nd tab to first. no idea why.
             mystery
             
             NotificationTab(
                 NotificationFilter(
                     state: .all,
-                    fine_filter: filter_state.fine_filter
+                    fine_filter: filter.fine_filter
                 )
             )
             .tag(NotificationFilterState.all)
@@ -138,7 +127,7 @@ struct NotificationsView: View {
             NotificationTab(
                 NotificationFilter(
                     state: .zaps,
-                    fine_filter: filter_state.fine_filter
+                    fine_filter: filter.fine_filter
                 )
             )
             .tag(NotificationFilterState.zaps)
@@ -146,31 +135,31 @@ struct NotificationsView: View {
             NotificationTab(
                 NotificationFilter(
                     state: .replies,
-                    fine_filter: filter_state.fine_filter
+                    fine_filter: filter.fine_filter
                 )
             )
             .tag(NotificationFilterState.replies)
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                if would_filter_non_friends_from_notifications(contacts: state.contacts, state: self.filter_state.state, items: self.notifications.notifications) {
-                    FriendsButton(filter: $filter_state.fine_filter)
+                if would_filter_non_friends_from_notifications(contacts: state.contacts, state: filter_state, items: self.notifications.notifications) {
+                    FriendsButton(filter: $filter.fine_filter)
                 }
             }
         }
-        .onChange(of: filter_state.fine_filter) { val in
+        .onChange(of: filter.fine_filter) { val in
             state.settings.friend_filter = val
         }
-        .onChange(of: filter_state.state) { val in
-            state.settings.notification_state = val
+        .onChange(of: filter_state) { val in
+            filter.state = val
         }
         .onAppear {
-            self.filter_state.fine_filter = state.settings.friend_filter
-            self.filter_state.state = state.settings.notification_state
+            self.filter.fine_filter = state.settings.friend_filter
+            filter.state = filter_state
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
-                CustomPicker(selection: $filter_state.state, content: {
+                CustomPicker(selection: $filter_state, content: {
                     Text("All", comment: "Label for filter for all notifications.")
                         .tag(NotificationFilterState.all)
                     
@@ -221,7 +210,7 @@ struct NotificationsView: View {
 
 struct NotificationsView_Previews: PreviewProvider {
     static var previews: some View {
-        NotificationsView(state: test_damus_state(), notifications: NotificationsModel(), filter_state: NotificationFilter())
+        NotificationsView(state: test_damus_state(), notifications: NotificationsModel(), filter: NotificationFilter())
     }
 }
 

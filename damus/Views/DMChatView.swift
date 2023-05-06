@@ -6,8 +6,9 @@
 //
 
 import SwiftUI
+import Combine
 
-struct DMChatView: View {
+struct DMChatView: View, KeyboardReadable {
     let damus_state: DamusState
     @ObservedObject var dms: DirectMessageModel
     @State var showPrivateKeyWarning: Bool = false
@@ -19,22 +20,42 @@ struct DMChatView: View {
     var Messages: some View {
         ScrollViewReader { scroller in
             ScrollView {
-                VStack(alignment: .leading) {
+                LazyVStack(alignment: .leading) {
                     ForEach(Array(zip(dms.events, dms.events.indices)), id: \.0.id) { (ev, ind) in
                         DMView(event: dms.events[ind], damus_state: damus_state)
                             .contextMenu{MenuItems(event: ev, keypair: damus_state.keypair, target_pubkey: ev.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads)}
                     }
-                    EndBlock(height: 80)
+                    EndBlock(height: 1)
                 }
                 .padding(.horizontal)
+
             }
+            .dismissKeyboardOnTap()
             .onAppear {
-                scroller.scrollTo("endblock")
+                scroll_to_end(scroller)
             }.onChange(of: dms.events.count) { _ in
-                withAnimation {
-                    scroller.scrollTo("endblock")
-                }
+                scroll_to_end(scroller, animated: true)
             }
+            
+            Footer
+                .onReceive(keyboardPublisher) { visible in
+                    guard visible else {
+                        return
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        scroll_to_end(scroller, animated: true)
+                    }
+                }
+        }
+    }
+    
+    func scroll_to_end(_ scroller: ScrollViewProxy, animated: Bool = false) {
+        if animated {
+            withAnimation {
+                scroller.scrollTo("endblock")
+            }
+        } else {
+            scroller.scrollTo("endblock")
         }
     }
 
@@ -87,37 +108,32 @@ struct DMChatView: View {
     }
 
     var Footer: some View {
-        ZStack {
-            BackgroundColor()
-            
-            HStack(spacing: 0) {
-                InputField
+    
+        HStack(spacing: 0) {
+            InputField
 
-                if !dms.draft.isEmpty {
-                    Button(
-                        role: .none,
-                        action: {
-                            showPrivateKeyWarning = contentContainsPrivateKey(dms.draft)
+            if !dms.draft.isEmpty {
+                Button(
+                    role: .none,
+                    action: {
+                        showPrivateKeyWarning = contentContainsPrivateKey(dms.draft)
 
-                            if !showPrivateKeyWarning {
-                                send_message()
-                            }
+                        if !showPrivateKeyWarning {
+                            send_message()
                         }
-                    ) {
-                        Label("", systemImage: "arrow.right.circle")
-                            .font(.title)
                     }
+                ) {
+                    Label("", systemImage: "arrow.right.circle")
+                        .font(.title)
                 }
             }
+        }
+
+        /*
+        Text(dms.draft).opacity(0).padding(.all, 8)
             .fixedSize(horizontal: false, vertical: true)
             .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
-
-            Text(dms.draft).opacity(0).padding(.all, 8)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
-        }
-        .fixedSize(horizontal: false, vertical: true)
-        .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
+         */
     }
 
     func send_message() {
@@ -143,13 +159,6 @@ struct DMChatView: View {
     var body: some View {
         ZStack {
             Messages
-                .dismissKeyboardOnTap()
-
-            VStack {
-                Spacer()
-
-                Footer
-            }
 
             Text("Send a message to start the conversation...", comment: "Text prompt for user to send a message to the other user.")
                 .lineLimit(nil)
@@ -238,3 +247,4 @@ extension View {
             .background(content())
     }
 }
+

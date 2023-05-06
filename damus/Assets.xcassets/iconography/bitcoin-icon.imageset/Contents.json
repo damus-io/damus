@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "filename": "bitcoin-icon.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "bitcoin-icon.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "bitcoin-icon.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

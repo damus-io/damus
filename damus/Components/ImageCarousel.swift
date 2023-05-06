@@ -37,31 +37,53 @@ enum ImageShape {
     case landscape
     case portrait
     case unknown
+    
+    static func determine_image_shape(_ size: CGSize) -> ImageShape {
+        guard size.height > 0 else {
+            return .unknown
+        }
+        let imageRatio = size.width / size.height
+        switch imageRatio {
+            case 1.0: return .square
+            case ..<1.0: return .portrait
+            case 1.0...: return .landscape
+            default: return .unknown
+        }
+    }
 }
 
+// Try either calculated imagefill from the real image or from metadata hints in tags
+func lookup_imgmeta_size_hint(events: EventCache, url: URL?) -> CGSize? {
+    guard let url,
+          let meta = events.lookup_img_metadata(url: url),
+          let img_size = meta.meta.dim?.size else {
+        return nil
+    }
+    
+    return img_size
+}
 
 struct ImageCarousel: View {
     var urls: [URL]
     
     let evid: String
-    let previews: PreviewCache
     
-    let disable_animation: Bool
+    let state: DamusState
     
     @State private var open_sheet: Bool = false
     @State private var current_url: URL? = nil
     @State private var image_fill: ImageFill? = nil
-    @State private var fillHeight: CGFloat = 350
-    @State private var maxHeight: CGFloat = UIScreen.main.bounds.height * 0.85
     
-    init(previews: PreviewCache, evid: String, urls: [URL], disable_animation: Bool) {
+    let fillHeight: CGFloat = 350
+    let maxHeight: CGFloat = UIScreen.main.bounds.height * 1.2
+    
+    init(state: DamusState, evid: String, urls: [URL]) {
         _open_sheet = State(initialValue: false)
         _current_url = State(initialValue: nil)
-        _image_fill = State(initialValue: previews.lookup_image_meta(evid))
+        _image_fill = State(initialValue: state.previews.lookup_image_meta(evid))
         self.urls = urls
         self.evid = evid
-        self.previews = previews
-        self.disable_animation = disable_animation
+        self.state = state
     }
     
     var filling: Bool {
@@ -69,41 +91,70 @@ struct ImageCarousel: View {
     }
     
     var height: CGFloat {
-        image_fill?.height ?? 100
+        image_fill?.height ?? fillHeight
+    }
+    
+    func Placeholder(url: URL, geo_size: CGSize) -> some View {
+        Group {
+            if let meta = state.events.lookup_img_metadata(url: url),
+               case .processed(let blurhash) = meta.state {
+                Image(uiImage: blurhash)
+                    .resizable()
+                    .frame(width: geo_size.width * UIScreen.main.scale, height: self.height * UIScreen.main.scale)
+            } else {
+                EmptyView()
+            }
+        }
+        .onAppear {
+            if self.image_fill == nil,
+               let meta = state.events.lookup_img_metadata(url: url),
+               let size = meta.meta.dim?.size
+            {
+                let fill = ImageFill.calculate_image_fill(geo_size: geo_size, img_size: size, maxHeight: maxHeight, fillHeight: fillHeight)
+                self.image_fill = fill
+            }
+        }
     }
     
     var body: some View {
         TabView {
             ForEach(urls, id: \.absoluteString) { url in
-                Rectangle()
-                    .foregroundColor(Color.clear)
-                    .overlay {
-                        GeometryReader { geo in
-                            KFAnimatedImage(url)
-                                .callbackQueue(.dispatch(.global(qos:.background)))
-                                .backgroundDecode(true)
-                                .imageContext(.note, disable_animation: disable_animation)
-                                .cancelOnDisappear(true)
-                                .configure { view in
-                                    view.framePreloadCount = 3
-                                }
-                                .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
-                                    previews.cache_image_meta(evid: evid, image_fill: fill)
-                                    image_fill = fill
-                                }
-                                .aspectRatio(contentMode: filling ? .fill : .fit)
-                                .tabItem {
-                                    Text(url.absoluteString)
-                                }
-                                .id(url.absoluteString)
+                GeometryReader { geo in
+                    KFAnimatedImage(url)
+                        .callbackQueue(.dispatch(.global(qos:.background)))
+                        .backgroundDecode(true)
+                        .imageContext(.note, disable_animation: state.settings.disable_animation)
+                        .image_fade(duration: 0.25)
+                        .cancelOnDisappear(true)
+                        .configure { view in
+                            view.framePreloadCount = 3
                         }
-                    }
+                        .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
+                            state.previews.cache_image_meta(evid: evid, image_fill: fill)
+                            // blur hash can be discarded when we have the url
+                            // NOTE: this is the wrong place for this... we need to remove
+                            //       it when the image is loaded in memory. This may happen
+                            //       earlier than this (by the preloader, etc)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                state.events.lookup_img_metadata(url: url)?.state = .not_needed
+                            }
+                            image_fill = fill
+                        }
+                        .background {
+                            Placeholder(url: url, geo_size: geo.size)
+                        }
+                        .aspectRatio(contentMode: filling ? .fill : .fit)
+                        .tabItem {
+                            Text(url.absoluteString)
+                        }
+                        .id(url.absoluteString)
+                }
             }
         }
         .fullScreenCover(isPresented: $open_sheet) {
-            ImageView(urls: urls, disable_animation: disable_animation)
+            ImageView(urls: urls, disable_animation: state.settings.disable_animation)
         }
-        .frame(height: height)
+        .frame(height: self.height)
         .onTapGesture {
             open_sheet = true
         }
@@ -137,25 +188,14 @@ public struct ImageFill {
     let filling: Bool?
     let height: CGFloat
         
-    
-    static func determine_image_shape(_ size: CGSize) -> ImageShape {
-        guard size.height > 0 else {
-            return .unknown
-        }
-        let imageRatio = size.width / size.height
-        switch imageRatio {
-            case 1.0: return .square
-            case ..<1.0: return .portrait
-            case 1.0...: return .landscape
-            default: return .unknown
-        }
-    }
-    
     static func calculate_image_fill(geo_size: CGSize, img_size: CGSize, maxHeight: CGFloat, fillHeight: CGFloat) -> ImageFill {
-        let shape = determine_image_shape(img_size)
+        let shape = ImageShape.determine_image_shape(img_size)
 
         let xfactor = geo_size.width / img_size.width
         let scaled = img_size.height * xfactor
+        
+        //print("calc_img_fill \(img_size.width)x\(img_size.height) xfactor:\(xfactor) scaled:\(scaled)")
+        
         // calculate scaled image height
         // set scale factor and constrain images to minimum 150
         // and animations to scaled factor for dynamic size adjustment
@@ -172,7 +212,7 @@ public struct ImageFill {
 
 struct ImageCarousel_Previews: PreviewProvider {
     static var previews: some View {
-        ImageCarousel(previews: test_damus_state().previews, evid: "evid", urls: [URL(string: "https://jb55.com/red-me.jpg")!,URL(string: "https://jb55.com/red-me.jpg")!], disable_animation: false)
+        ImageCarousel(state: test_damus_state(), evid: "evid", urls: [URL(string: "https://jb55.com/red-me.jpg")!,URL(string: "https://jb55.com/red-me.jpg")!])
     }
 }
 

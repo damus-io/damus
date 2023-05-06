@@ -19,7 +19,7 @@ func load_bookmarks(pubkey: String) -> [NostrEvent] {
 }
 
 func save_bookmarks(pubkey: String, current_value: [NostrEvent], value: [NostrEvent]) -> Bool {
-    let uniq_bookmarks = Array(Set(value))
+    let uniq_bookmarks = uniq(value)
     
     if uniq_bookmarks != current_value {
         let encoded = uniq_bookmarks.map(event_to_json)

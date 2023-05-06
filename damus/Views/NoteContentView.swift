@@ -30,8 +30,12 @@ struct NoteContentView: View {
     let preview_height: CGFloat?
     let options: EventViewOptions
 
-    @State var artifacts: NoteArtifacts
-    @State var preview: LinkViewRepresentable?
+    @ObservedObject var artifacts_model: NoteArtifactsModel
+    @ObservedObject var preview_model: PreviewModel
+    
+    var artifacts: NoteArtifacts {
+        return self.artifacts_model.state.artifacts ?? .just_content(event.get_content(damus_state.keypair.privkey))
+    }
     
     init(damus_state: DamusState, event: NostrEvent, show_images: Bool, size: EventViewKind, artifacts: NoteArtifacts, options: EventViewOptions) {
         self.damus_state = damus_state
@@ -39,16 +43,10 @@ struct NoteContentView: View {
         self.show_images = show_images
         self.size = size
         self.options = options
-        self._artifacts = State(initialValue: artifacts)
         self.preview_height = lookup_cached_preview_size(previews: damus_state.previews, evid: event.id)
-        self._preview = State(initialValue: load_cached_preview(previews: damus_state.previews, evid: event.id))
-        if let cache = damus_state.events.lookup_artifacts(evid: event.id) {
-            self._artifacts = State(initialValue: cache)
-        } else {
-            let artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
-            damus_state.events.store_artifacts(evid: event.id, artifacts: artifacts)
-            self._artifacts = State(initialValue: artifacts)
-        }
+        let cached = damus_state.events.get_cache_data(event.id)
+        self._preview_model = ObservedObject(wrappedValue: cached.preview_model)
+        self._artifacts_model = ObservedObject(wrappedValue: cached.artifacts_model)
     }
     
     var truncate: Bool {
@@ -57,6 +55,16 @@ struct NoteContentView: View {
     
     var with_padding: Bool {
         return options.contains(.pad_content)
+    }
+    
+    var preview: LinkViewRepresentable? {
+        guard show_images,
+              case .loaded(let preview) = preview_model.state,
+              case .value(let cached) = preview else {
+            return nil
+        }
+        
+        return LinkViewRepresentable(meta: .linkmeta(cached))
     }
     
     var truncatedText: some View {
@@ -123,10 +131,10 @@ struct NoteContentView: View {
             }
 
             if show_images && artifacts.images.count > 0 {
-                ImageCarousel(previews: damus_state.previews, evid: event.id, urls: artifacts.images, disable_animation: damus_state.settings.disable_animation)
+                ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.images)
             } else if !show_images && artifacts.images.count > 0 {
                 ZStack {
-                    ImageCarousel(previews: damus_state.previews, evid: event.id, urls: artifacts.images, disable_animation: damus_state.settings.disable_animation)
+                    ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.images)
                     Blur()
                         .disabled(true)
                 }
@@ -151,6 +159,30 @@ struct NoteContentView: View {
         }
     }
     
+    func load(force_artifacts: Bool = false) {
+        // always reload artifacts on load
+        let plan = get_preload_plan(evcache: damus_state.events, ev: event, our_keypair: damus_state.keypair, settings: damus_state.settings)
+        
+        // TODO: make this cleaner
+        Task {
+            // this is surprisingly slow
+            let rel = format_relative_time(event.created_at)
+            Task { @MainActor in
+                self.damus_state.events.get_cache_data(event.id).relative_time.value = rel
+            }
+            
+            if var plan {
+                if force_artifacts {
+                    plan.load_artifacts = true
+                }
+                await preload_event(plan: plan, state: damus_state)
+            } else if force_artifacts {
+                let arts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+                self.artifacts_model.state = .loaded(arts)
+            }
+        }
+    }
+    
     var body: some View {
         MainContent
             .onReceive(handle_notify(.profile_updated)) { notif in
@@ -160,7 +192,8 @@ struct NoteContentView: View {
                     switch block {
                     case .mention(let m):
                         if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
-                            self.artifacts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+                            load(force_artifacts: true)
+                            return
                         }
                     case .relay: return
                     case .text: return
@@ -170,40 +203,11 @@ struct NoteContentView: View {
                     }
                 }
             }
-            .task {
-                guard self.preview == nil else {
-                    return
-                }
-                
-                if show_images, artifacts.links.count == 1 {
-                    let meta = await getMetaData(for: artifacts.links.first!)
-                    
-                    damus_state.previews.store(evid: self.event.id, preview: meta)
-                    guard case .value(let cached) = damus_state.previews.lookup(self.event.id) else {
-                        return
-                    }
-                    let view = LinkViewRepresentable(meta: .linkmeta(cached))
-                    
-                    self.preview = view
-                }
-
+            .onAppear {
+                load()
             }
     }
     
-    func getMetaData(for url: URL) async -> LPLinkMetadata? {
-        // iOS 15 is crashing for some reason
-        guard #available(iOS 16, *) else {
-            return nil
-        }
-        
-        let provider = LPMetadataProvider()
-        
-        do {
-            return try await provider.startFetchingMetadata(for: url)
-        } catch {
-            return nil
-        }
-    }
 }
 
 enum ImageName {
@@ -274,6 +278,42 @@ struct NoteArtifacts: Equatable {
     }
 }
 
+enum NoteArtifactState {
+    case not_loaded
+    case loading
+    case loaded(NoteArtifacts)
+    
+    var artifacts: NoteArtifacts? {
+        if case .loaded(let artifacts) = self {
+            return artifacts
+        }
+        
+        return nil
+    }
+    
+    var is_loaded: Bool {
+        switch self {
+        case .not_loaded:
+            return false
+        case .loading:
+            return false
+        case .loaded:
+            return true
+        }
+    }
+    
+    var should_preload: Bool {
+        switch self {
+        case .loaded:
+            return false
+        case .loading:
+            return false
+        case .not_loaded:
+            return true
+        }
+    }
+}
+
 func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -> NoteArtifacts {
     let blocks = ev.blocks(privkey)
     
@@ -340,7 +380,7 @@ func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> Not
 
 func is_image_url(_ url: URL) -> Bool {
     let str = url.lastPathComponent.lowercased()
-    let isUrl = str.hasSuffix(".png") || str.hasSuffix(".jpg") || str.hasSuffix(".jpeg") || str.hasSuffix(".gif")
+    let isUrl = str.hasSuffix(".png") || str.hasSuffix(".jpg") || str.hasSuffix(".jpeg") || str.hasSuffix(".gif") || str.hasSuffix(".webp")
     return isUrl
 }
 

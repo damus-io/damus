@@ -31,6 +31,13 @@ extension KFOptionSetter {
         return self
     }
     
+    func image_fade(duration: TimeInterval) -> Self {
+        options.transition = ImageTransition.fade(duration)
+        options.keepCurrentImageWhileLoading = false
+        
+        return self
+    }
+    
     func onFailure(fallbackUrl: URL?, cacheKey: String?) -> Self {
         guard let url = fallbackUrl, let key = cacheKey else { return self }
         let imageResource = ImageResource(downloadURL: url, cacheKey: key)

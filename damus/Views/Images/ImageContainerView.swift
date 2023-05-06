@@ -9,7 +9,6 @@ import SwiftUI
 import Kingfisher
 
     
-// lots of overlap between this and ImageContainerView
 struct ImageContainerView: View {
     let url: URL?
     

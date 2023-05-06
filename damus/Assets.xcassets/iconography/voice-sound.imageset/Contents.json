@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "filename": "voice-sound.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "voice-sound.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "voice-sound.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

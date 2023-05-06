@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "filename": "arrow-expand-vertical.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "arrow-expand-vertical.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "arrow-expand-vertical.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

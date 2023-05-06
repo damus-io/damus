@@ -50,14 +50,14 @@ struct ZapTypePicker: View {
     var body: some View {
         VStack(spacing: 20) {
             HStack {
-                Text("Zap type")
+                Text("Zap type", comment: "Text to indicate that the buttons below it is for choosing the type of zap to send.")
                     .font(.system(size: 25, weight: .heavy))
                 Spacer()
                 if !is_default {
                     Button(action: {
                         settings.default_zap_type = zap_type
                     }) {
-                        Label("Make Default", image: "checkmark.circle.fill")
+                        Label(NSLocalizedString("Make Default", comment: "Button label to indicate that tapping it will make the selected zap type be the default for future zaps."), image: "checkmark.circle.fill")
                     }
                 }
             }
@@ -87,7 +87,7 @@ struct ZapTypePicker: View {
                     .font(.system(size: 16))
             }
         }
-        .frame(minWidth: 400, maxWidth: .infinity, minHeight: 50, maxHeight: 70)
+        .frame(maxWidth: .infinity, minHeight: 50, maxHeight: 70)
         .foregroundColor(fontColor())
         .background(zap_type == type ? fillColor() : DamusColors.adaptableGrey)
         .cornerRadius(15)

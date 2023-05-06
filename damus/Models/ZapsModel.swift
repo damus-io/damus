@@ -10,7 +10,6 @@ import Foundation
 class ZapsModel: ObservableObject {
     let state: DamusState
     let target: ZapTarget
-    var zaps: [Zap]
     
     let zaps_subid = UUID().description
     let profiles_subid = UUID().description
@@ -18,7 +17,10 @@ class ZapsModel: ObservableObject {
     init(state: DamusState, target: ZapTarget) {
         self.state = state
         self.target = target
-        self.zaps = []
+    }
+    
+    var zaps: [Zap] {
+        return state.events.lookup_zaps(target: target)
     }
     
     func subscribe() {
@@ -51,7 +53,7 @@ class ZapsModel: ObservableObject {
         case .notice:
             break
         case .eose:
-            let events = self.zaps.map { $0.request.ev }
+            let events = state.events.lookup_zaps(target: target).map { $0.request_ev }
             load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(events), damus_state: state)
         case .event(_, let ev):
             guard ev.kind == 9735 else {
@@ -59,7 +61,7 @@ class ZapsModel: ObservableObject {
             }
             
             if let zap = state.zaps.zaps[ev.id] {
-                if insert_uniq_sorted_zap_by_amount(zaps: &zaps, new_zap: zap) {
+                if state.events.store_zap(zap: zap) {
                     objectWillChange.send()
                 }
             } else {
@@ -71,9 +73,7 @@ class ZapsModel: ObservableObject {
                     return
                 }
                 
-                state.zaps.add_zap(zap: zap)
-                
-                if insert_uniq_sorted_zap_by_amount(zaps: &zaps, new_zap: zap) {
+                if self.state.add_zap(zap: zap) {
                     objectWillChange.send()
                 }
             }

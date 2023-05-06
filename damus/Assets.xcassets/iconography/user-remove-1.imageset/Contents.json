@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "filename": "user-remove-1.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "user-remove-1.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "user-remove-1.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}
