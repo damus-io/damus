@@ -11,7 +11,6 @@ import Security
 struct SaveKeysView: View {
     let account: CreateAccountModel
     let pool: RelayPool = RelayPool()
-    @State var is_done: Bool = false
     @State var pub_copied: Bool = false
     @State var priv_copied: Bool = false
     @State var loading: Bool = false

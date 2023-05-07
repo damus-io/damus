@@ -12,14 +12,6 @@ class SignalModel: ObservableObject {
     @Published var signal: Int
     @Published var max_signal: Int
     
-    var percentage: Double {
-        if max_signal == 0 {
-            return 0
-        }
-        
-        return Double(signal) / Double(max_signal)
-    }
-    
     init() {
         self.signal = 0
         self.max_signal = 0

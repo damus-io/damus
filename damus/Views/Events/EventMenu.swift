@@ -14,8 +14,6 @@ struct EventMenuContext: View {
     let bookmarks: BookmarksManager
     let muted_threads: MutedThreadsManager
     
-    @Environment(\.colorScheme) var colorScheme
-    
     var body: some View {
         HStack {
             Menu {

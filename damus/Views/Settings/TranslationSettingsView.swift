@@ -10,8 +10,6 @@ import SwiftUI
 struct TranslationSettingsView: View {
     @ObservedObject var settings: UserSettingsStore
     
-    @State var show_api_key: Bool = false
-    
     @Environment(\.dismiss) var dismiss
     
     var body: some View {

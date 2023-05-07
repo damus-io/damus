@@ -134,16 +134,6 @@ func invoice_to_zap_invoice(_ invoice: Invoice) -> ZapInvoice? {
     return ZapInvoice(description: invoice.description, amount: amt, string: invoice.string, expiry: invoice.expiry, payment_hash: invoice.payment_hash, created_at: invoice.created_at)
 }
 
-func preimage_matches_invoice<T>(_ preimage: String, inv: LightningInvoice<T>) -> Bool {
-    guard let raw_preimage = hex_decode(preimage) else {
-        return false
-    }
-    
-    let hashed = sha256(Data(raw_preimage))
-    
-    return inv.payment_hash == hashed
-}
-
 func determine_zap_target(_ ev: NostrEvent) -> ZapTarget? {
     guard let ptag = event_tag(ev, name: "p") else {
         return nil
@@ -208,47 +198,6 @@ func decode_nostr_event_json(_ desc: String) -> NostrEvent? {
     
     return ev
 }
-
-func decode_zap_request(_ desc: String) -> ZapRequest? {
-    let decoder = JSONDecoder()
-    guard let jsonData = desc.data(using: .utf8) else {
-        return nil
-    }
-    guard let jsonArray = try? JSONSerialization.jsonObject(with: jsonData) as? [[Any]] else {
-        return nil
-    }
-    
-    for array in jsonArray {
-        guard array.count == 2 else {
-            continue
-        }
-        let mkey = array.first.flatMap { $0 as? String }
-        if let key = mkey, key == "application/nostr" {
-            guard let dat = try? JSONSerialization.data(withJSONObject: array[1], options: []) else {
-                return nil
-            }
-            
-            guard let zap_req = try? decoder.decode(NostrEvent.self, from: dat) else {
-                return nil
-            }
-            
-            guard zap_req.kind == 9734 else {
-                return nil
-            }
-            
-            /// Ensure the signature on the zap request is correct
-            guard case .ok = validate_event(ev: zap_req) else {
-                return nil
-            }
-            
-            return ZapRequest(ev: zap_req)
-        }
-    }
-    
-    return nil
-}
-
-
 
 func fetch_zapper_from_lnurl(_ lnurl: String) async -> String? {
     guard let endpoint = await fetch_static_payreq(lnurl) else {

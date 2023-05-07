@@ -27,8 +27,6 @@ struct EventActionBar: View {
         _bar = ObservedObject(wrappedValue: bar ?? make_actionbar_model(ev: event.id, damus: damus_state))
     }
     
-    @Environment(\.colorScheme) var colorScheme
-    
     var lnurl: String? {
         damus_state.profiles.lookup(id: event.pubkey)?.lnurl
     }
@@ -172,8 +170,6 @@ func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> 
 struct LikeButton: View {
     let liked: Bool
     let action: () -> ()
-    
-    @Environment(\.colorScheme) var colorScheme
 
     // Following four are Shaka animation properties
     let timer = Timer.publish(every: 0.10, on: .main, in: .common).autoconnect()
@@ -232,7 +228,6 @@ struct EventActionBar_Previews: PreviewProvider {
         let maxed_bar = ActionBarModel(likes: 999, boosts: 999, zaps: 999, zap_total: 99999999, replies: 999, our_like: test_event, our_boost: test_event, our_zap: nil, our_reply: nil)
         let extra_max_bar = ActionBarModel(likes: 9999, boosts: 9999, zaps: 9999, zap_total: 99999999, replies: 9999, our_like: test_event, our_boost: test_event, our_zap: nil, our_reply: test_event)
         let mega_max_bar = ActionBarModel(likes: 9999999, boosts: 99999, zaps: 9999, zap_total: 99999999, replies: 9999999,  our_like: test_event, our_boost: test_event, our_zap: test_zap, our_reply: test_event)
-        let zapbar = ActionBarModel(likes: 0, boosts: 0, zaps: 5, zap_total: 10000000, replies: 0, our_like: nil, our_boost: nil, our_zap: nil, our_reply: nil)
         
         VStack(spacing: 50) {
             EventActionBar(damus_state: ds, event: ev, bar: bar)

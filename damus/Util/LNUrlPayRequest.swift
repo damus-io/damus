@@ -12,10 +12,6 @@ struct LNUrlPayRequest: Decodable {
     let commentAllowed: Int?
     let nostrPubkey: String?
     
-    let metadata: String?
-    let minSendable: Int64?
-    let maxSendable: Int64?
-    let status: String?
     let callback: String?
 }
 

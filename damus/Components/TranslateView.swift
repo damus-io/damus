@@ -143,7 +143,7 @@ func translate_note(profiles: Profiles, privkey: String?, event: NostrEvent, set
 
     // Render translated note
     let translated_blocks = event.get_blocks(content: translated_note)
-    let artifacts = render_blocks(blocks: translated_blocks, profiles: profiles, privkey: privkey)
+    let artifacts = render_blocks(blocks: translated_blocks, profiles: profiles)
     
     // and cache it
     return .translated(Translated(artifacts: artifacts, language: note_lang))

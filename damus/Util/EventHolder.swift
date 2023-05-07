@@ -23,10 +23,6 @@ class EventHolder: ObservableObject, ScrollQueue {
         return incoming.count
     }
     
-    var has_incoming: Bool {
-        return queued > 0
-    }
-    
     var all_events: [NostrEvent] {
         events + incoming
     }

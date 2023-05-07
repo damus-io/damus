@@ -55,10 +55,6 @@ struct PostView: View {
 
     @Environment(\.presentationMode) var presentationMode
 
-    enum FocusField: Hashable {
-      case post
-    }
-
     func cancel() {
         NotificationCenter.default.post(name: .post, object: NostrPostResult.cancel)
         dismiss()

@@ -7,11 +7,6 @@
 
 import SwiftUI
 
-enum ProfileTab: Hashable {
-    case posts
-    case following
-}
-
 enum FollowState {
     case follows
     case following
@@ -33,19 +28,6 @@ func follow_btn_txt(_ fs: FollowState, follows_you: Bool) -> String {
         } else {
             return NSLocalizedString("Follow", comment: "Button to follow a user.")
         }
-    }
-}
-
-func follow_btn_enabled_state(_ fs: FollowState) -> Bool {
-    switch fs {
-    case .follows:
-        return true
-    case .following:
-        return false
-    case .unfollowing:
-        return false
-    case .unfollows:
-       return true
     }
 }
 
@@ -114,8 +96,6 @@ struct ProfileView: View {
     
     static let markdown = Markdown()
     
-    @State private var selected_tab: ProfileTab = .posts
-    @State private var showingEditProfile = false
     @State var showing_select_wallet: Bool = false
     @State var is_zoomed: Bool = false
     @State var show_share_sheet: Bool = false
@@ -141,7 +121,6 @@ struct ProfileView: View {
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.openURL) var openURL
     @Environment(\.presentationMode) var presentationMode
     
     func imageBorderColor() -> Color {
@@ -419,7 +398,7 @@ struct ProfileView: View {
                         }
                         .buttonStyle(PlainButtonStyle())
                     } else {
-                        NavigationLink(destination: UserRelaysView(state: damus_state, pubkey: profile.pubkey, relays: Array(relays.keys).sorted())) {
+                        NavigationLink(destination: UserRelaysView(state: damus_state, relays: Array(relays.keys).sorted())) {
                             relay_text
                         }
                         .buttonStyle(PlainButtonStyle())
@@ -450,10 +429,10 @@ struct ProfileView: View {
                     .background(colorScheme == .dark ? Color.black : Color.white)
                     
                     if filter_state == FilterState.posts {
-                        InnerTimelineView(events: profile.events, damus: damus_state, show_friend_icon: false, filter: FilterState.posts.filter)
+                        InnerTimelineView(events: profile.events, damus: damus_state, filter: FilterState.posts.filter)
                     }
                     if filter_state == FilterState.posts_and_replies {
-                        InnerTimelineView(events: profile.events, damus: damus_state, show_friend_icon: false, filter: FilterState.posts_and_replies.filter)
+                        InnerTimelineView(events: profile.events, damus: damus_state, filter: FilterState.posts_and_replies.filter)
                     }
                 }
                 .padding(.horizontal, Theme.safeAreaInsets?.left)

@@ -22,12 +22,8 @@ struct EventBody: View {
         self.should_show_img = should_show_img ?? should_show_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
     }
     
-    var content: String {
-        event.get_content(damus_state.keypair.privkey)
-    }
-    
     var body: some View {
-        NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, size: size, artifacts: .just_content(content), options: options)
+        NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, size: size, options: options)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

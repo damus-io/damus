@@ -9,7 +9,6 @@ import SwiftUI
 
 struct InvoiceView: View {
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.openURL) private var openURL
     let our_pubkey: String
     let invoice: Invoice
     @State var showing_select_wallet: Bool = false

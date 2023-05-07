@@ -14,7 +14,6 @@ struct ShareAction: View {
 
     @Binding var show_share: Bool
     
-    @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismiss
     
     init(event: NostrEvent, bookmarks: BookmarksManager, show_share: Binding<Bool>) {
@@ -44,8 +43,7 @@ struct ShareAction: View {
                 
                 let bookmarkImg = isBookmarked ? "bookmark.slash" : "bookmark"
                 let bookmarkTxt = isBookmarked ? NSLocalizedString("Remove Bookmark", comment: "Button text to remove bookmark from a note.") : NSLocalizedString("Add Bookmark", comment: "Button text to add bookmark to a note.")
-                let boomarkCol = isBookmarked ? Color(.red) : nil
-                ShareActionButton(img: bookmarkImg, text: bookmarkTxt, col: boomarkCol) {
+                ShareActionButton(img: bookmarkImg, text: bookmarkTxt) {
                     dismiss()
                     self.bookmarks.updateBookmark(event)
                     isBookmarked = self.bookmarks.isBookmarked(event)

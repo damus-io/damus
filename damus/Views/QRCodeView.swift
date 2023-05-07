@@ -12,7 +12,6 @@ struct QRCodeView: View {
     let damus_state: DamusState
     @State var pubkey: String
     
-    @Environment(\.dismiss) var dismiss
     @Environment(\.presentationMode) var presentationMode
 
     var maybe_key: String? {

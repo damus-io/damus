@@ -7,27 +7,6 @@
 
 import SwiftUI
 
-struct PubkeyView: View {
-    let pubkey: String
-    let relay: String?
-    
-    var body: some View {
-        let color: Color = id_to_color(pubkey)
-        ZStack {
-            Text(verbatim: abbrev_pubkey(pubkey))
-                .foregroundColor(color)
-        }
-    }
-}
-
 func abbrev_pubkey(_ pubkey: String, amount: Int = 8) -> String {
     return pubkey.prefix(amount) + ":" + pubkey.suffix(amount)
 }
-
-/*
-struct PubkeyView_Previews: PreviewProvider {
-    static var previews: some View {
-        PubkeyView()
-    }
-}
- */

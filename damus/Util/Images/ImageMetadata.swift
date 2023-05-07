@@ -34,11 +34,6 @@ struct ImageMetaDim: Equatable, StringCodable {
     let height: Int
 }
 
-struct ProcessedImageMetadata {
-    let blurhash: UIImage?
-    let dim: ImageMetaDim?
-}
-
 struct ImageMetadata: Equatable {
     let url: URL
     let blurhash: String?

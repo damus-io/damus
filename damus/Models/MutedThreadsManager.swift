@@ -29,7 +29,6 @@ func saveMutedThreads(pubkey: String, currentValue: [String], value: [String]) -
 
 class MutedThreadsManager: ObservableObject {
 
-    private let userDefaults = UserDefaults.standard
     private let keypair: Keypair
 
     private var _mutedThreadsSet: Set<String>
@@ -67,10 +66,5 @@ class MutedThreadsManager: ObservableObject {
             _mutedThreadsSet.insert(threadId)
             notify(.mute_thread, ev)
         }
-    }
-
-    func clearAll() {
-        mutedThreads = []
-        _mutedThreadsSet.removeAll()
     }
 }

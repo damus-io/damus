@@ -12,9 +12,6 @@ struct InvoicesView: View {
     var invoices: [Invoice]
     let settings: UserSettingsStore
     
-    @State var open_sheet: Bool = false
-    @State var current_invoice: Invoice? = nil
-    
     var body: some View {
         TabView {
             ForEach(invoices, id: \.string) { invoice in

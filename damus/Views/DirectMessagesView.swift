@@ -110,10 +110,6 @@ func would_filter_non_friends_from_dms(contacts: Contacts, dms: [DirectMessageMo
 
 struct DirectMessagesView_Previews: PreviewProvider {
     static var previews: some View {
-        let ev = NostrEvent(content: "encrypted stuff",
-                               pubkey: "pubkey",
-                               kind: 4,
-                               tags: [])
         let ds = test_damus_state()
         DirectMessagesView(damus_state: ds, model: ds.dms, settings: ds.settings)
     }

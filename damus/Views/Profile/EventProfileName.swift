@@ -12,30 +12,16 @@ struct EventProfileName: View {
     let damus_state: DamusState
     let pubkey: String
     let profile: Profile?
-    let prefix: String
-    
-    let show_friend_confirmed: Bool
     
     @State var display_name: DisplayName?
     @State var nip05: NIP05?
     
     let size: EventViewKind
     
-    init(pubkey: String, profile: Profile?, damus: DamusState, show_friend_confirmed: Bool, size: EventViewKind = .normal) {
+    init(pubkey: String, profile: Profile?, damus: DamusState, size: EventViewKind = .normal) {
         self.damus_state = damus
         self.pubkey = pubkey
         self.profile = profile
-        self.prefix = ""
-        self.show_friend_confirmed = show_friend_confirmed
-        self.size = size
-    }
-    
-    init(pubkey: String, profile: Profile?, prefix: String, damus: DamusState, show_friend_confirmed: Bool, size: EventViewKind = .normal) {
-        self.damus_state = damus
-        self.pubkey = pubkey
-        self.profile = profile
-        self.prefix = prefix
-        self.show_friend_confirmed = show_friend_confirmed
         self.size = size
     }
     
@@ -102,6 +88,6 @@ struct EventProfileName: View {
 
 struct EventProfileName_Previews: PreviewProvider {
     static var previews: some View {
-        EventProfileName(pubkey: "pk", profile: nil, damus: test_damus_state(), show_friend_confirmed: true)
+        EventProfileName(pubkey: "pk", profile: nil, damus: test_damus_state())
     }
 }

@@ -12,7 +12,6 @@ class SearchModel: ObservableObject {
     let state: DamusState
     var events: EventHolder
     @Published var loading: Bool = false
-    @Published var channel_name: String? = nil
     
     var search: NostrFilter
     let sub_id = UUID().description
@@ -65,24 +64,14 @@ class SearchModel: ObservableObject {
         }
     }
     
-    func handle_channel_create(_ ev: NostrEvent) {
-        self.channel_name = ev.content
-        return
-    }
-    
-    func handle_channel_meta(_ ev: NostrEvent) {
-        self.channel_name = ev.content
-        return
-    }
-    
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
         let (sub_id, done) = handle_subid_event(pool: state.pool, relay_id: relay_id, ev: ev) { sub_id, ev in
             if ev.is_textlike && ev.should_show_event {
                 self.add_event(ev)
             } else if ev.known_kind == .channel_create {
-                handle_channel_create(ev)
+                // unimplemented
             } else if ev.known_kind == .channel_meta {
-                handle_channel_meta(ev)
+                // unimplemented
             }
         }
         
@@ -110,16 +99,6 @@ func event_matches_hashtag(_ ev: NostrEvent, hashtags: [String]) -> Bool {
 func tag_is_hashtag(_ tag: [String]) -> Bool {
     // "hashtag" is deprecated, will remove in the future
     return tag.count >= 2 && (tag[0] == "hashtag" || tag[0] == "t")
-}
-
-func has_hashtag(_ tags: [[String]], hashtag: String) -> Bool {
-    for tag in tags {
-        if tag_is_hashtag(tag) && tag[1] == hashtag {
-            return true
-        }
-    }
-    
-    return false
 }
 
 func event_matches_filter(_ ev: NostrEvent, filter: NostrFilter) -> Bool {

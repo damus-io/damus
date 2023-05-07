@@ -121,7 +121,7 @@ class HomeModel: ObservableObject {
         case .channel_create:
             handle_channel_create(ev)
         case .channel_meta:
-            handle_channel_meta(ev)
+            break
         case .zap:
             handle_zap_event(ev)
         case .zap_request:
@@ -140,7 +140,7 @@ class HomeModel: ObservableObject {
             return
         }
         
-        if !notifications.insert_zap(zap, damus_state: damus_state) {
+        if !notifications.insert_zap(zap) {
             return
         }
 
@@ -193,9 +193,6 @@ class HomeModel: ObservableObject {
     
     func handle_channel_create(_ ev: NostrEvent) {
         self.channels[ev.id] = ev
-    }
-    
-    func handle_channel_meta(_ ev: NostrEvent) {
     }
     
     func filter_events() {
@@ -327,7 +324,6 @@ class HomeModel: ObservableObject {
 
                 self.process_event(sub_id: sub_id, relay_id: relay_id, ev: ev)
             case .notice(let msg):
-                //self.events.insert(NostrEvent(content: "NOTICE from \(relay_id): \(msg)", pubkey: "system"), at: 0)
                 print(msg)
 
             case .eose(let sub_id):
@@ -600,7 +596,7 @@ func add_contact_if_friend(contacts: Contacts, ev: NostrEvent) {
     contacts.add_friend_contact(ev)
 }
 
-func load_our_contacts(contacts: Contacts, our_pubkey: String, m_old_ev: NostrEvent?, ev: NostrEvent) {
+func load_our_contacts(contacts: Contacts, m_old_ev: NostrEvent?, ev: NostrEvent) {
     var new_pks = Set<String>()
     // our contacts
     for tag in ev.tags {
@@ -798,7 +794,7 @@ func load_our_stuff(state: DamusState, ev: NostrEvent) {
     let m_old_ev = state.contacts.event
     state.contacts.event = ev
 
-    load_our_contacts(contacts: state.contacts, our_pubkey: state.pubkey, m_old_ev: m_old_ev, ev: ev)
+    load_our_contacts(contacts: state.contacts, m_old_ev: m_old_ev, ev: ev)
     load_our_relays(state: state, m_old_ev: m_old_ev, ev: ev)
 }
 
@@ -894,9 +890,6 @@ func fetch_relay_metadata(relay_id: String) async throws -> RelayMetadata? {
     
     let nip11 = try JSONDecoder().decode(RelayMetadata.self, from: data)
     return nip11
-}
-
-func process_relay_metadata() {
 }
 
 @discardableResult

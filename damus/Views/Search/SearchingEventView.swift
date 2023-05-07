@@ -27,14 +27,6 @@ struct SearchingEventView: View {
     
     @State var search_state: SearchState = .searching
     
-    var bech32_evid: String {
-        guard let bytes = hex_decode(evid) else {
-            return evid
-        }
-        let noteid = bech32_encode(hrp: "note", bytes)
-        return abbrev_pubkey(noteid)
-    }
-    
     var search_name: String {
         switch search_type {
         case .nip05:
@@ -142,12 +134,3 @@ struct SearchingEventView_Previews: PreviewProvider {
         SearchingEventView(state: state, evid: test_event.id, search_type: .event)
     }
 }
-
-
-enum EventSearchState {
-    case searching
-    case not_found
-    case found(NostrEvent)
-    case found_profile(String)
-}
-

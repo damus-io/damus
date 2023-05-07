@@ -19,10 +19,6 @@ struct NostrPost {
         self.kind = kind
         self.tags = tags
     }
-    
-    func to_event(keypair: FullKeypair) -> NostrEvent {
-        return post_to_event(post: self, privkey: keypair.privkey, pubkey: keypair.pubkey)
-    }
 }
 
 // TODO: parse nostr:{e,p}:pubkey uris as well

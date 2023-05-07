@@ -8,22 +8,6 @@
 import Foundation
 import Network
 
-struct SubscriptionId: Identifiable, CustomStringConvertible {
-    let id: String
-
-    var description: String {
-        id
-    }
-}
-
-struct RelayId: Identifiable, CustomStringConvertible {
-    let id: String
-
-    var description: String {
-        id
-    }
-}
-
 struct RelayHandler {
     let sub_id: String
     let callback: (String, NostrConnectionEvent) -> ()
@@ -32,11 +16,6 @@ struct RelayHandler {
 struct QueuedRequest {
     let req: NostrRequest
     let relay: String
-}
-
-struct NostrRequestId: Equatable, Hashable {
-    let relay: String?
-    let sub_id: String
 }
 
 class RelayPool {
@@ -65,10 +44,6 @@ class RelayPool {
     
     var descriptors: [RelayDescriptor] {
         relays.map { $0.descriptor }
-    }
-    
-    var num_connecting: Int {
-        return relays.reduce(0) { n, r in n + (r.connection.isConnecting ? 1 : 0) }
     }
     
     var num_connected: Int {
@@ -149,12 +124,6 @@ class RelayPool {
         for relay in relays {
             // don't try to reconnect to broken relays
             relay.connection.reconnect()
-        }
-    }
-    
-    func mark_broken(_ relay_id: String) {
-        for relay in relays {
-            relay.mark_broken()
         }
     }
 
