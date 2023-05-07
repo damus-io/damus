@@ -425,8 +425,8 @@ func get_searching_string(_ word: String?) -> String? {
         return nil
     }
     
-    guard let firstWord = word.first,
-          firstWord == "@" else {
+    guard let firstCharacter = word.first,
+          firstCharacter == "@" else {
         return nil
     }
     
