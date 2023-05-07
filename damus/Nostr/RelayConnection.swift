@@ -57,11 +57,7 @@ final class RelayConnection {
     
     func ping() {
         socket.ping { err in
-            if let err {
-                self.isConnecting = false
-                self.isConnected = false
-                self.reconnect_with_backoff()
-            } else {
+            if err != nil {
                 self.last_pong = .now
             }
         }
@@ -124,7 +120,7 @@ final class RelayConnection {
             DispatchQueue.main.async {
                 self.isConnected = false
                 self.isConnecting = false
-                self.reconnect_with_backoff()
+                self.reconnect()
             }
         case .error(let error):
             print("⚠️ Warning: RelayConnection (\(self.url)) error: \(error)")
