@@ -9,7 +9,6 @@ import Foundation
 import secp256k1
 
 let PUBKEY_HRP = "npub"
-let PRIVKEY_HRP = "nsec"
 
 struct FullKeypair {
     let pubkey: String

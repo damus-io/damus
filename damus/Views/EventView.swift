@@ -20,8 +20,6 @@ struct EventView: View {
     let damus: DamusState
     let pubkey: String
 
-    @EnvironmentObject var action_bar: ActionBarModel
-
     init(damus: DamusState, event: NostrEvent, pubkey: String? = nil, options: EventViewOptions = []) {
         self.event = event
         self.options = options
@@ -78,13 +76,6 @@ extension View {
                 Label(NSLocalizedString("Copy Account ID", comment: "Context menu option for copying the ID of the account that created the note."), systemImage: "doc.on.doc")
             }
         }
-    }
-    
-    func event_context_menu(_ event: NostrEvent, keypair: Keypair, target_pubkey: String, bookmarks: BookmarksManager, muted_threads: MutedThreadsManager) -> some View {
-        return self.contextMenu {
-            EventMenuContext(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks, muted_threads: muted_threads)
-        }
-
     }
 }
 

@@ -12,8 +12,6 @@ struct RelayDetailView: View {
     let relay: String
     let nip11: RelayMetadata
     
-    @State private var errorString: String?
-    
     @Environment(\.dismiss) var dismiss
     
     func check_connection() -> Bool {

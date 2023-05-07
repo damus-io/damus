@@ -48,12 +48,6 @@ public class SVG {
         CGSVGDocumentGetCanvasSize(document)
     }
     
-    public func image() -> UIImage? {
-        let ImageWithCGSVGDocument = unsafeBitCast(UIImage.self.method(for: ImageWithCGSVGDocumentSEL), to: ImageWithCGSVGDocument.self)
-        let image = ImageWithCGSVGDocument(UIImage.self, ImageWithCGSVGDocumentSEL, document)
-        return image
-    }
-    
     public func draw(in context: CGContext) {
         draw(in: context, size: size)
     }

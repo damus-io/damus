@@ -12,7 +12,6 @@ struct EventViewOptions: OptionSet {
     
     static let no_action_bar = EventViewOptions(rawValue: 1 << 0)
     static let no_replying_to = EventViewOptions(rawValue: 1 << 1)
-    static let no_images = EventViewOptions(rawValue: 1 << 2)
     static let wide = EventViewOptions(rawValue: 1 << 3)
     static let truncate_content = EventViewOptions(rawValue: 1 << 4)
     static let pad_content = EventViewOptions(rawValue: 1 << 5)
@@ -133,18 +132,16 @@ struct TextEvent: View {
     func ProfileName(is_anon: Bool) -> some View {
         let profile = damus.profiles.lookup(id: pubkey)
         let pk = is_anon ? "anon" : pubkey
-        return EventProfileName(pubkey: pk, profile: profile, damus: damus, show_friend_confirmed: true, size: .normal)
+        return EventProfileName(pubkey: pk, profile: profile, damus: damus, size: .normal)
     }
     
     func EvBody(options: EventViewOptions) -> some View {
         let show_imgs = should_show_images(settings: damus.settings, contacts: damus.contacts, ev: event, our_pubkey: damus.pubkey)
-        let artifacts = damus.events.get_cache_data(event.id).artifacts.artifacts ?? .just_content(event.get_content(damus.keypair.privkey))
         return NoteContentView(
             damus_state: damus,
             event: event,
             show_images: show_imgs,
             size: .normal,
-            artifacts: artifacts,
             options: options
         )
         .fixedSize(horizontal: false, vertical: true)

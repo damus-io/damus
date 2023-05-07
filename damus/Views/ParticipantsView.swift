@@ -55,7 +55,7 @@ struct ParticipantsView: View {
                             
                             VStack(alignment: .leading) {
                                 let profile = damus_state.profiles.lookup(id: pubkey)
-                                ProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_friend_confirmed: false, show_nip5_domain: false)
+                                ProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_nip5_domain: false)
                                 if let about = profile?.about {
                                     Text(FollowUserView.markdown.process(about))
                                         .lineLimit(3)

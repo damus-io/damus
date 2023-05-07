@@ -39,10 +39,6 @@ struct NostrFilter: Codable, Equatable {
     public static func filter_hashtag(_ htags: [String]) -> NostrFilter {
         return NostrFilter(ids: nil, kinds: nil, referenced_ids: nil, pubkeys: nil, since: nil, until: nil, authors: nil, hashtag: htags.map { $0.lowercased() })
     }
-
-    public static var filter_text: NostrFilter {
-        return filter_kinds([NostrKind.text.rawValue])
-    }
     
     public static func filter_ids(_ ids: [String]) -> NostrFilter {
         return NostrFilter(ids: ids, kinds: nil, referenced_ids: nil, pubkeys: nil, since: nil, until: nil, authors: nil, hashtag: nil)
@@ -62,9 +58,5 @@ struct NostrFilter: Codable, Equatable {
 
     public static func filter_kinds(_ kinds: [Int]) -> NostrFilter {
         return NostrFilter(ids: nil, kinds: kinds, referenced_ids: nil, pubkeys: nil, since: nil, until: nil, authors: nil)
-    }
-
-    public static func filter_since(_ val: Int64) -> NostrFilter {
-        return NostrFilter(ids: nil, kinds: nil, referenced_ids: nil, pubkeys: nil, since: val, until: nil, authors: nil)
     }
 }

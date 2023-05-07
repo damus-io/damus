@@ -97,12 +97,6 @@ class PostBox {
         }
     }
     
-    func flush() {
-        for event in events {
-            flush_event(event.value)
-        }
-    }
-    
     func send(_ event: NostrEvent) {
         // Don't add event if we already have it
         if events[event.id] != nil {

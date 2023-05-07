@@ -10,7 +10,6 @@ import Foundation
 class FollowersModel: ObservableObject {
     let damus_state: DamusState
     let target: String
-    var needs_sub: Bool = true
     
     @Published var contacts: [String]? = nil
     var has_contact: Set<String> = Set()

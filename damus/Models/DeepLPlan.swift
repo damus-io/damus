@@ -40,8 +40,4 @@ enum DeepLPlan: String, CaseIterable, Identifiable, StringCodable {
             return .init(tag: self.rawValue, displayName: NSLocalizedString("Pro", comment: "Dropdown option for selecting Pro plan for DeepL translation service."), url: "https://api.deepl.com")
         }
     }
-
-    static var allModels: [Model] {
-        return Self.allCases.map { $0.model }
-    }
 }

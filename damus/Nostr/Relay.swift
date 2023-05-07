@@ -60,10 +60,6 @@ class Relay: Identifiable {
         self.connection = connection
     }
     
-    func mark_broken() {
-        flags |= RelayFlags.broken.rawValue
-    }
-    
     var is_broken: Bool {
         return (flags & RelayFlags.broken.rawValue) == RelayFlags.broken.rawValue
     }
@@ -76,7 +72,6 @@ class Relay: Identifiable {
 
 enum RelayError: Error {
     case RelayAlreadyExists
-    case RelayNotFound
 }
 
 func get_relay_id(_ url: RelayURL) -> String {

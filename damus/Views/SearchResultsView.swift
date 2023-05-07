@@ -34,19 +34,6 @@ enum Search: Identifiable {
     }
 }
 
-struct AnySearchResultsView: View {
-    let damus_state: DamusState
-    let searches: [Search]
-    
-    var body: some View {
-        VStack {
-            ForEach(searches) { r in
-                InnerSearchResults(damus_state: damus_state, search: r)
-            }
-        }
-    }
-}
-
 struct InnerSearchResults: View {
     let damus_state: DamusState
     let search: Search?

@@ -66,7 +66,7 @@ struct DMChatView: View, KeyboardReadable {
             HStack {
                 ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
 
-                ProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_friend_confirmed: true)
+                ProfileName(pubkey: pubkey, profile: profile, damus: damus_state)
             }
         }
         .buttonStyle(PlainButtonStyle())
@@ -96,14 +96,6 @@ struct DMChatView: View, KeyboardReadable {
             return Color.init(.sRGB, red: 0.9, green: 0.9, blue: 0.9, opacity: 1.0)
         } else {
             return Color.init(.sRGB, red: 0.1, green: 0.1, blue: 0.1, opacity: 1.0)
-        }
-    }
-
-    func BackgroundColor() -> some View {
-        if colorScheme == .dark {
-            return Color.black.opacity(0.9)
-        } else {
-            return Color.white.opacity(0.9)
         }
     }
 

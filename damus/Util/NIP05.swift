@@ -31,25 +31,6 @@ struct NIP05 {
 
 struct NIP05Response: Decodable {
     let names: [String: String]
-    let relays: [String: [String]]?
-}
-
-enum NIP05Validation {
-    case invalid
-    case valid
-}
-
-struct FetchedNIP05 {
-    let response: NIP05Response
-    let nip05: NIP05Response
-}
-
-func fetch_nip05_str(nip05_str: String) async -> NIP05Response? {
-    guard let nip05 = NIP05.parse(nip05_str) else {
-        return nil
-    }
-    
-    return await fetch_nip05(nip05: nip05)
 }
 
 func fetch_nip05(nip05: NIP05) async -> NIP05Response? {

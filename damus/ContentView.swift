@@ -29,11 +29,6 @@ enum Sheets: Identifiable {
     }
 }
 
-enum ThreadState {
-    case event_details
-    case chatroom
-}
-
 enum FilterState : Int {
     case posts_and_replies = 1
     case posts = 0
@@ -59,13 +54,10 @@ struct ContentView: View {
         return keypair.privkey
     }
     
-    @State var status: String = "Not connected"
     @State var active_sheet: Sheets? = nil
     @State var damus_state: DamusState? = nil
     @SceneStorage("ContentView.selected_timeline") var selected_timeline: Timeline = .home
     @State var is_deleted_account: Bool = false
-    @State var is_profile_open: Bool = false
-    @State var event: NostrEvent? = nil
     @State var active_profile: String? = nil
     @State var active_search: NostrFilter? = nil
     @State var active_event: NostrEvent? = nil
@@ -539,19 +531,6 @@ struct ContentView: View {
         }
         
         self.selected_timeline = timeline
-        //NotificationCenter.default.post(name: .switched_timeline, object: timeline)
-        //self.selected_timeline = timeline
-    }
-    
-    func add_relay(_ pool: RelayPool, _ relay: String) {
-        //add_rw_relay(pool, "wss://nostr-pub.wellorder.net")
-        add_rw_relay(pool, relay)
-        /*
-        let profile = Profile(name: relay, about: nil, picture: nil)
-        let ts = Int64(Date().timeIntervalSince1970)
-        let tsprofile = TimestampedProfile(profile: profile, timestamp: ts)
-        damus!.profiles.add(id: relay, profile: tsprofile)
-         */
     }
 
     func connect() {
@@ -579,7 +558,6 @@ struct ContentView: View {
                                       likes: EventCounter(our_pubkey: pubkey),
                                       boosts: EventCounter(our_pubkey: pubkey),
                                       contacts: Contacts(our_pubkey: pubkey),
-                                      tips: TipCounter(our_pubkey: pubkey),
                                       profiles: Profiles(),
                                       dms: home.dms,
                                       previews: PreviewCache(),
@@ -618,14 +596,6 @@ func get_since_time(last_event: NostrEvent?) -> Int64? {
     return nil
 }
 
-func is_notification(ev: NostrEvent, pubkey: String) -> Bool {
-    if ev.pubkey == pubkey {
-        return false
-    }
-    return ev.references(id: pubkey, key: "p")
-}
-
-
 extension UINavigationController: UIGestureRecognizerDelegate {
     override open func viewDidLoad() {
         super.viewDidLoad()
@@ -661,12 +631,6 @@ func save_last_event(_ ev: NostrEvent, timeline: Timeline) {
     UserDefaults.standard.set(String(ev.created_at), forKey: "last_\(str)_time")
 }
 
-
-func get_like_pow() -> [String] {
-    return ["00000"] // 20 bits
-}
-
-
 func update_filters_with_since(last_of_kind: [Int: NostrEvent], filters: [NostrFilter]) -> [NostrFilter] {
     
     return filters.map { filter in
@@ -699,7 +663,6 @@ func update_filters_with_since(last_of_kind: [Int: NostrEvent], filters: [NostrF
         return filter
     }
 }
-
 
 
 func setup_notifications() {
@@ -767,7 +730,6 @@ func find_event(state: DamusState, evid: String, search_type: SearchType, find_f
 
     }
 }
-
 
 func timeline_name(_ timeline: Timeline?) -> String {
     guard let timeline else {
@@ -852,5 +814,3 @@ func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: Ev
         return false
     }
 }
-    
-

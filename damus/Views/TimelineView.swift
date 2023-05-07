@@ -7,17 +7,9 @@
 
 import SwiftUI
 
-enum TimelineAction {
-    case chillin
-    case navigating
-}
-
 struct TimelineView: View {
     @ObservedObject var events: EventHolder
     @Binding var loading: Bool
-    @State var offset = CGFloat.zero
-    
-    @Environment(\.colorScheme) var colorScheme
 
     let damus: DamusState
     let show_friend_icon: Bool
@@ -27,10 +19,6 @@ struct TimelineView: View {
         MainContent
     }
     
-    var realtime_bar_opacity: Double {
-        colorScheme == .dark ? 0.2 : 0.1
-    }
-    
     var MainContent: some View {
         ScrollViewReader { scroller in
             ScrollView {
@@ -38,7 +26,7 @@ struct TimelineView: View {
                     .id("startblock")
                     .frame(height: 1)
                 
-                InnerTimelineView(events: events, damus: damus, show_friend_icon: show_friend_icon, filter: loading ? { _ in true } : filter)
+                InnerTimelineView(events: events, damus: damus, filter: loading ? { _ in true } : filter)
                     .redacted(reason: loading ? .placeholder : [])
                     .shimmer(loading)
                     .disabled(loading)

@@ -32,8 +32,6 @@ struct ZapButton: View {
     
     @State var zapping: Bool = false
     @State var invoice: String = ""
-    @State var slider_value: Double = 0.0
-    @State var slider_visible: Bool = false
     @State var showing_select_wallet: Bool = false
     @State var showing_zap_customizer: Bool = false
     @State var is_charging: Bool = false

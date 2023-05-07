@@ -7,37 +7,6 @@
 
 import Foundation
 
-func insert_uniq<T: Equatable>(xs: inout [T], new_x: T) -> Bool {
-    for x in xs {
-        if x == new_x {
-            return false
-        }
-    }
-    
-    xs.append(new_x)
-    return true
-}
-
-func insert_uniq_by_pubkey(events: inout [NostrEvent], new_ev: NostrEvent, cmp: (NostrEvent, NostrEvent) -> Bool) -> Bool {
-    var i: Int = 0
-    
-    for event in events {
-        // don't insert duplicate events
-        if new_ev.pubkey == event.pubkey {
-            return false
-        }
-        
-        if cmp(new_ev, event) {
-            events.insert(new_ev, at: i)
-            return true
-        }
-        i += 1
-    }
-    
-    events.append(new_ev)
-    return true
-}
-
 func insert_uniq_sorted_zap(zaps: inout [Zap], new_zap: Zap, cmp: (Zap, Zap) -> Bool) -> Bool {
     var i: Int = 0
     

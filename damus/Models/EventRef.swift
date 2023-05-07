@@ -13,13 +13,6 @@ enum EventRef {
     case reply(ReferencedId)
     case reply_to_root(ReferencedId)
     
-    var is_mention: Mention? {
-        if case .mention(let m) = self {
-            return m
-        }
-        return nil
-    }
-    
     var is_direct_reply: ReferencedId? {
         switch self {
         case .mention:
@@ -58,15 +51,6 @@ enum EventRef {
             return refid
         }
     }
-}
-
-func has_any_e_refs(_ tags: [[String]]) -> Bool {
-    for tag in tags {
-        if tag.count >= 2 && tag[0] == "e" {
-            return true
-        }
-    }
-    return false
 }
 
 func build_mention_indices(_ blocks: [Block], type: MentionType) -> Set<Int> {

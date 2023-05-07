@@ -285,7 +285,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         return false
     }
     
-    func insert_zap(_ zap: Zap, damus_state: DamusState) -> Bool {
+    func insert_zap(_ zap: Zap) -> Bool {
         if should_queue {
             return insert_uniq_sorted_zap_by_created(zaps: &incoming_zaps, new_zap: zap)
         }

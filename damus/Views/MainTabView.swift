@@ -18,15 +18,6 @@ enum Timeline: String, CustomStringConvertible, Hashable {
     }
 }
 
-func timeline_bit(_ timeline: Timeline) -> Int {
-    switch timeline {
-    case .home: return 1 << 0
-    case .notifications: return 1 << 1
-    case .search: return 1 << 2
-    case .dms: return 1 << 3
-    }
-}
-
 func show_indicator(timeline: Timeline, current: NewEventsBits, indicator_setting: Int) -> Bool {
     if timeline == .notifications {
         return (current.rawValue & indicator_setting & NewEventsBits.notifications.rawValue) > 0

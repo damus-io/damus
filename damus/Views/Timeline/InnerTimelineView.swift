@@ -11,15 +11,13 @@ import SwiftUI
 struct InnerTimelineView: View {
     @ObservedObject var events: EventHolder
     let state: DamusState
-    let show_friend_icon: Bool
     let filter: (NostrEvent) -> Bool
     @State var nav_target: NostrEvent
     @State var navigating: Bool = false
     
-    init(events: EventHolder, damus: DamusState, show_friend_icon: Bool, filter: @escaping (NostrEvent) -> Bool) {
+    init(events: EventHolder, damus: DamusState, filter: @escaping (NostrEvent) -> Bool) {
         self.events = events
         self.state = damus
-        self.show_friend_icon = show_friend_icon
         self.filter = filter
         // dummy event to avoid MaybeThreadView
         self._nav_target = State(initialValue: test_event)
@@ -80,7 +78,7 @@ struct InnerTimelineView: View {
 
 struct InnerTimelineView_Previews: PreviewProvider {
     static var previews: some View {
-        InnerTimelineView(events: test_event_holder, damus: test_damus_state(), show_friend_icon: true, filter: { _ in true })
+        InnerTimelineView(events: test_event_holder, damus: test_damus_state(), filter: { _ in true })
             .frame(width: 300, height: 500)
             .border(Color.red)
     }
