@@ -12,39 +12,44 @@ struct RepostAction: View {
     let event: NostrEvent
     
     @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        VStack {
-            Text("Repost Note", comment: "Title text to indicate that the buttons below are meant to be used to repost a note to others.")
-                .padding()
-                .font(.system(size: 17, weight: .bold))
+        VStack(alignment: .leading) {
             
-            Spacer()
+            Button {
+                dismiss()
+                            
+                guard let privkey = self.damus_state.keypair.privkey else {
+                    return
+                }
+                
+                let boost = make_boost_event(pubkey: damus_state.keypair.pubkey, privkey: privkey, boosted: self.event)
+                
+                damus_state.postbox.send(boost)
+            } label: {
+                Label(NSLocalizedString("Repost", comment: "Button to repost a note"), systemImage: "arrow.2.squarepath")
+                    .frame(maxWidth: .infinity, minHeight: 50, maxHeight: 50, alignment: .leading)
 
-            HStack(alignment: .top, spacing: 100) {
-                
-                ShareActionButton(img: "arrow.2.squarepath", text: NSLocalizedString("Repost", comment: "Button to repost a note")) {
-                    dismiss()
-                                
-                    guard let privkey = self.damus_state.keypair.privkey else {
-                        return
-                    }
-                    
-                    let boost = make_boost_event(pubkey: damus_state.keypair.pubkey, privkey: privkey, boosted: self.event)
-                    
-                    damus_state.postbox.send(boost)
-                }
-                
-                ShareActionButton(img: "quote.opening", text: NSLocalizedString("Quote", comment: "Button to compose a quoted note")) {
-                    dismiss()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        notify(.compose, PostAction.quoting(self.event))
-                    }
-                }
-                
             }
+            .font(.system(size: 20, weight: .regular))
+            .foregroundColor(colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite"))
+            .padding(EdgeInsets(top: 25, leading: 50, bottom: 0, trailing: 50))
             
-            Spacer()
+            Button {
+                dismiss()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    notify(.compose, PostAction.quoting(self.event))
+                }
+                
+            } label: {
+                Label(NSLocalizedString("Quote", comment: "Button to compose a quoted note"), systemImage: "quote.opening")
+                    .frame(maxWidth: .infinity, minHeight: 50, maxHeight: 50, alignment: .leading)
+
+            }
+            .font(.system(size: 20, weight: .regular))
+            .foregroundColor(colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite"))
+            .padding(EdgeInsets(top: 0, leading: 50, bottom: 0, trailing: 50))
             
             HStack {
                 BigButton(NSLocalizedString("Cancel", comment: "Button to cancel a repost.")) {

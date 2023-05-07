@@ -122,7 +122,7 @@ struct EventActionBar: View {
         
             if #available(iOS 16.0, *) {
                 RepostAction(damus_state: self.damus_state, event: event)
-                    .presentationDetents([.height(300)])
+                    .presentationDetents([.height(220)])
                     .presentationDragIndicator(.visible)
             } else {
                 RepostAction(damus_state: self.damus_state, event: event)
