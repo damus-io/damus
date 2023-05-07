@@ -32,6 +32,10 @@ final class WebSocket: NSObject, URLSessionWebSocketDelegate {
         self.session = session
     }
     
+    func ping(receiveHandler: @escaping (Error?) -> Void) {
+        self.webSocketTask.sendPing(pongReceiveHandler: receiveHandler)
+    }
+    
     func connect() {
         resume()
     }

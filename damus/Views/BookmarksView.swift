@@ -13,6 +13,7 @@ struct BookmarksView: View {
     private let bookmarksTitle = NSLocalizedString("Bookmarks", comment: "Title of bookmarks view")
     @State private var clearAllAlert: Bool = false
     
+    @Environment(\.dismiss) var dismiss
     @ObservedObject var manager: BookmarksManager
 
     init(state: DamusState) {
@@ -40,6 +41,9 @@ struct BookmarksView: View {
 
                 }
             }
+        }
+        .onReceive(handle_notify(.switched_timeline)) { _ in
+            dismiss()
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(bookmarksTitle)

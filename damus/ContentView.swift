@@ -54,6 +54,8 @@ struct ContentView: View {
         return keypair.privkey
     }
     
+    @Environment(\.scenePhase) var scenePhase
+    
     @State var active_sheet: Sheets? = nil
     @State var damus_state: DamusState? = nil
     @SceneStorage("ContentView.selected_timeline") var selected_timeline: Timeline = .home
@@ -71,9 +73,6 @@ struct ContentView: View {
     @SceneStorage("ContentView.filter_state") var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
-    
-    // connect retry timer
-    let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
 
     let sub_id = UUID().description
     
@@ -383,9 +382,6 @@ struct ContentView: View {
                 self.active_sheet = nil
             }
         }
-        .onReceive(timer) { n in
-            self.damus_state?.pool.connect_to_disconnected()
-        }
         .onReceive(handle_notify(.new_mutes)) { notif in
             home.filter_events()
         }
@@ -394,6 +390,22 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.unmute_thread)) { notif in
             home.filter_events()
+        }
+        .onChange(of: scenePhase) { (phase: ScenePhase) in
+            switch phase {
+            case .background:
+                print("📙 DAMUS BACKGROUNDED")
+                break
+            case .inactive:
+                print("📙 DAMUS INACTIVE")
+                break
+            case .active:
+                print("📙 DAMUS ACTIVE")
+                guard let ds = damus_state else { return }
+                ds.pool.ping()
+            @unknown default:
+                break
+            }
         }
         .onReceive(handle_notify(.local_notification)) { notif in
             
@@ -714,8 +726,16 @@ func find_event(state: DamusState, evid: String, search_type: SearchType, find_f
             break
         case .event(_, let ev):
             has_event = true
-            callback(ev)
+            
             state.pool.unsubscribe(sub_id: subid)
+            
+            if search_type == .profile && ev.known_kind == .metadata {
+                process_metadata_event(events: state.events, our_pubkey: state.pubkey, profiles: state.profiles, ev: ev) {
+                    callback(ev)
+                }
+            } else {
+                callback(ev)
+            }
         case .eose:
             if !has_event {
                 attempts += 1
