@@ -42,6 +42,7 @@ final class RelayConnection {
     private(set) var isConnecting = false
     
     private(set) var last_connection_attempt: TimeInterval = 0
+    private(set) var last_pong: Date? = nil
     private(set) var backoff: TimeInterval = 1.0
     private lazy var socket = WebSocket(url.url)
     private var subscriptionToken: AnyCancellable?
@@ -52,6 +53,18 @@ final class RelayConnection {
     init(url: RelayURL, handleEvent: @escaping (NostrConnectionEvent) -> ()) {
         self.url = url
         self.handleEvent = handleEvent
+    }
+    
+    func ping() {
+        socket.ping { err in
+            if let err {
+                self.isConnecting = false
+                self.isConnected = false
+                self.reconnect_with_backoff()
+            } else {
+                self.last_pong = .now
+            }
+        }
     }
     
     func connect(force: Bool = false) {
@@ -111,20 +124,24 @@ final class RelayConnection {
             DispatchQueue.main.async {
                 self.isConnected = false
                 self.isConnecting = false
-                self.reconnect()
+                self.reconnect_with_backoff()
             }
         case .error(let error):
             print("⚠️ Warning: RelayConnection (\(self.url)) error: \(error)")
             DispatchQueue.main.async {
                 self.isConnected = false
                 self.isConnecting = false
-                self.backoff *= 1.5
-                self.reconnect_in(after: self.backoff)
+                self.reconnect_with_backoff()
             }
         }
         DispatchQueue.main.async {
             self.handleEvent(.ws_event(event))
         }
+    }
+    
+    func reconnect_with_backoff() {
+        self.backoff *= 1.5
+        self.reconnect_in(after: self.backoff)
     }
     
     func reconnect() {

@@ -59,6 +59,8 @@ struct ContentView: View {
         return keypair.privkey
     }
     
+    @Environment(\.scenePhase) var scenePhase
+    
     @State var status: String = "Not connected"
     @State var active_sheet: Sheets? = nil
     @State var damus_state: DamusState? = nil
@@ -402,6 +404,22 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.unmute_thread)) { notif in
             home.filter_events()
+        }
+        .onChange(of: scenePhase) { (phase: ScenePhase) in
+            switch phase {
+            case .background:
+                print("📙 DAMUS BACKGROUNDED")
+                break
+            case .inactive:
+                print("📙 DAMUS INACTIVE")
+                break
+            case .active:
+                print("📙 DAMUS ACTIVE")
+                guard let ds = damus_state else { return }
+                ds.pool.ping()
+            @unknown default:
+                break
+            }
         }
         .onReceive(handle_notify(.local_notification)) { notif in
             
