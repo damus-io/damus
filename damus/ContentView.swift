@@ -81,9 +81,6 @@ struct ContentView: View {
     @SceneStorage("ContentView.filter_state") var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
-    
-    // connect retry timer
-    let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
 
     let sub_id = UUID().description
     
@@ -392,9 +389,6 @@ struct ContentView: View {
             if !handle_post_notification(keypair: keypair, postbox: state.postbox, events: state.events, notif: notif) {
                 self.active_sheet = nil
             }
-        }
-        .onReceive(timer) { n in
-            self.damus_state?.pool.connect_to_disconnected()
         }
         .onReceive(handle_notify(.new_mutes)) { notif in
             home.filter_events()

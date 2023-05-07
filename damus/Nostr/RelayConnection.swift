@@ -57,8 +57,13 @@ final class RelayConnection {
     
     func ping() {
         socket.ping { err in
-            if err != nil {
+            if err == nil {
                 self.last_pong = .now
+            } else {
+                print("pong failed, reconnecting \(self.url.id)")
+                self.isConnected = false
+                self.isConnecting = false
+                self.reconnect_with_backoff()
             }
         }
     }
