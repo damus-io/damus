@@ -1,3 +1,20 @@
+## [1.4.3-21] - 2023-05-07
+
+### Fixed
+
+- Potentially fix disconnection issues, please test (William Casarin)
+- Fix npub search fails on the first try (Bryan Montz)
+- Dismiss bookmarks view when switching tabs (William Casarin)
+- Fix posts with no uploadedURLs always get two blank spaces at the end (Bryan Montz)
+- Fix bug where you could only mention users at the end of a post (Swift)
+- Properly scroll DM view when keyboard is open (William Casarin)
+- Made DMs less poppy (William Casarin)
+- Zap type selection on smaller phones (ericholguin)
+- Fix parse mention without space in content (Joshua Jiang)
+
+
+[1.4.3-21]: https://github.com/damus-io/damus/releases/tag/v1.4.3-21
+
 ## [1.4.3-20] - 2023-05-04
 
 ### Added
