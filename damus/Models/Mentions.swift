@@ -78,6 +78,28 @@ enum Block: Equatable {
     case invoice(Invoice)
     case relay(String)
     
+    var is_invoice: Invoice? {
+        if case .invoice(let invoice) = self {
+            return invoice
+        }
+        return nil
+    }
+    
+    var is_hashtag: String? {
+        if case .hashtag(let htag) = self {
+            return htag
+        }
+        return nil
+    }
+    
+    var is_url: URL? {
+        if case .url(let url) = self {
+            return url
+        }
+        
+        return nil
+    }
+    
     var is_text: String? {
         if case .text(let txt) = self {
             return txt
@@ -91,6 +113,13 @@ enum Block: Equatable {
         }
         
         return mention.type == .event
+    }
+    
+    var is_mention: Bool {
+        if case .mention = self {
+            return true
+        }
+        return false
     }
 }
 

@@ -13,6 +13,13 @@ enum EventRef {
     case reply(ReferencedId)
     case reply_to_root(ReferencedId)
     
+    var is_mention: Mention? {
+        if case .mention(let m) = self {
+            return m
+        }
+        return nil
+    }
+    
     var is_direct_reply: ReferencedId? {
         switch self {
         case .mention:
