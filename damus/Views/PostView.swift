@@ -43,6 +43,8 @@ struct PostView: View {
     @State var image_upload_confirm: Bool = false
     @State var originalReferences: [ReferencedId] = []
     @State var references: [ReferencedId] = []
+    @State var focusWordAttributes: (String?, NSRange?) = (nil, nil)
+    @State var newCursorIndex: Int?
 
     @State var mediaToUpload: MediaUpload? = nil
     
@@ -203,7 +205,10 @@ struct PostView: View {
     
     var TextEntry: some View {
         ZStack(alignment: .topLeading) {
-            TextViewWrapper(attributedText: $post)
+            TextViewWrapper(attributedText: $post, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
+                focusWordAttributes = (word, range)
+                self.newCursorIndex = nil
+            })
                 .focused($focus)
                 .textInputAutocapitalization(.sentences)
                 .onChange(of: post) { p in
@@ -312,8 +317,7 @@ struct PostView: View {
     var body: some View {
         GeometryReader { (deviceSize: GeometryProxy) in
             VStack(alignment: .leading, spacing: 0) {
-
-                let searching = get_searching_string(post.string)
+                let searching = get_searching_string(focusWordAttributes.0)
                 
                 TopBar
                 
@@ -333,7 +337,7 @@ struct PostView: View {
                 
                 // This if-block observes @ for tagging
                 if let searching {
-                    UserSearch(damus_state: damus_state, search: searching, post: $post)
+                    UserSearch(damus_state: damus_state, search: searching, focusWordAttributes: $focusWordAttributes, newCursorIndex: $newCursorIndex, post: $post)
                         .frame(maxHeight: .infinity)
                 } else {
                     Divider()
@@ -412,25 +416,26 @@ struct PostView: View {
     }
 }
 
-func get_searching_string(_ post: String) -> String? {
-    guard let last_word = post.components(separatedBy: .whitespacesAndNewlines).last else {
+func get_searching_string(_ word: String?) -> String? {
+    guard let word = word else {
+        return nil
+    }
+
+    guard word.count >= 2 else {
         return nil
     }
     
-    guard last_word.count >= 2 else {
-        return nil
-    }
-    
-    guard last_word.first! == "@" else {
+    guard let firstCharacter = word.first,
+          firstCharacter == "@" else {
         return nil
     }
     
     // don't include @npub... strings
-    guard last_word.count != 64 else {
+    guard word.count != 64 else {
         return nil
     }
     
-    return String(last_word.dropFirst())
+    return String(word.dropFirst())
 }
 
 struct PostView_Previews: PreviewProvider {
