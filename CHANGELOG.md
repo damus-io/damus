@@ -18,7 +18,6 @@
 - Add unmute option in profile view (Joshua Jiang)
 - Add webp image support (William Casarin)
 - Added event preloading when scrolling (William Casarin)
-- Banner Image Upload (Joel Klabo)
 - Colorize friend icons (William Casarin)
 - Friends filter for notifications (William Casarin)
 - Preload images so they don't pop in (William Casarin)
