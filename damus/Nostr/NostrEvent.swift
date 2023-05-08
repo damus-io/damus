@@ -383,6 +383,11 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     func sign(privkey: String) {
         self.sig = sign_event(privkey: privkey, ev: self)
     }
+    
+    var age: TimeInterval {
+        let event_date = Date(timeIntervalSince1970: TimeInterval(created_at))
+        return Date.now.timeIntervalSince(event_date)
+    }
 }
 
 func sign_event(privkey: String, ev: NostrEvent) -> String {
