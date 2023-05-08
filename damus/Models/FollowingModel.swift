@@ -22,7 +22,7 @@ class FollowingModel {
     }
     
     func get_filter() -> NostrFilter {
-        var f = NostrFilter.filter_kinds([0])
+        var f = NostrFilter.filter_kinds([NostrKind.metadata.rawValue])
         f.authors = self.contacts.reduce(into: Array<String>()) { acc, pk in
             // don't fetch profiles we already have
             if damus_state.profiles.lookup(id: pk) != nil {
@@ -58,9 +58,11 @@ class FollowingModel {
             break
         case .nostr_event(let nev):
             switch nev {
+            case .ok:
+                break
             case .event(_, let ev):
                 if ev.kind == 0 {
-                    process_metadata_event(our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
+                    process_metadata_event(events: damus_state.events, our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
                 }
             case .notice(let msg):
                 print("followingmodel notice: \(msg)")

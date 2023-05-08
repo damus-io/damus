@@ -10,16 +10,13 @@ import SwiftUI
 struct MutedEventView: View {
     let damus_state: DamusState
     let event: NostrEvent
-    let scroller: ScrollViewProxy?
     
     let selected: Bool
     @State var shown: Bool
-    @Environment(\.colorScheme) var colorScheme
     
-    init(damus_state: DamusState, event: NostrEvent, scroller: ScrollViewProxy?, selected: Bool) {
+    init(damus_state: DamusState, event: NostrEvent, selected: Bool) {
         self.damus_state = damus_state
         self.event = event
-        self.scroller = scroller
         self.selected = selected
         self._shown = State(initialValue: should_show_event(contacts: damus_state.contacts, ev: event))
     }
@@ -28,19 +25,15 @@ struct MutedEventView: View {
         return !should_show_event(contacts: damus_state.contacts, ev: event)
     }
     
-    var FillColor: Color {
-        colorScheme == .light ? Color("DamusLightGrey") : Color("DamusDarkGrey")
-    }
-    
     var MutedBox: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 20)
-                .foregroundColor(FillColor)
+                .foregroundColor(DamusColors.adaptableGrey)
             
             HStack {
-                Text("Post from a user you've blocked", comment: "Text to indicate that what is being shown is a post from a user who has been blocked.")
+                Text("Post from a user you've muted", comment: "Text to indicate that what is being shown is a post from a user who has been muted.")
                 Spacer()
-                Button(shown ? NSLocalizedString("Hide", comment: "Button to hide a post from a user who has been blocked.") : NSLocalizedString("Show", comment: "Button to show a post from a user who has been blocked.")) {
+                Button(shown ? NSLocalizedString("Hide", comment: "Button to hide a post from a user who has been muted.") : NSLocalizedString("Show", comment: "Button to show a post from a user who has been muted.")) {
                     shown.toggle()
                 }
             }
@@ -51,7 +44,7 @@ struct MutedEventView: View {
     var Event: some View {
         Group {
             if selected {
-                SelectedEventView(damus: damus_state, event: event)
+                SelectedEventView(damus: damus_state, event: event, size: .selected)
             } else {
                 EventView(damus: damus_state, event: event)
             }
@@ -94,7 +87,7 @@ struct MutedEventView_Previews: PreviewProvider {
     
     static var previews: some View {
         
-        MutedEventView(damus_state: test_damus_state(), event: test_event, scroller: nil, selected: false)
+        MutedEventView(damus_state: test_damus_state(), event: test_event, selected: false)
             .frame(width: .infinity, height: 50)
     }
 }

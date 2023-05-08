@@ -71,11 +71,15 @@ struct ChatView: View {
     
     @Environment(\.colorScheme) var colorScheme
     
+    var disable_animation: Bool {
+        self.damus_state.settings.disable_animation
+    }
+    
     var body: some View {
         HStack {
             VStack {
                 if is_active || just_started {
-                    ProfilePicView(pubkey: event.pubkey, size: 32, highlight: is_active ? .main : .none, profiles: damus_state.profiles)
+                    ProfilePicView(pubkey: event.pubkey, size: 32, highlight: is_active ? .main : .none, profiles: damus_state.profiles, disable_animation: disable_animation)
                 }
 
                 Spacer()
@@ -108,13 +112,13 @@ struct ChatView: View {
                         }
                     }
                     
-                    let show_images = should_show_images(contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
+                    let show_images = should_show_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
                     NoteContentView(damus_state: damus_state,
                                     event: event,
                                     show_images: show_images,
                                     size: .normal,
                                     artifacts: .just_content(event.content),
-                                    truncate: false)
+                                    options: [])
 
                     if is_active || next_ev == nil || next_ev!.pubkey != event.pubkey {
                         let bar = make_actionbar_model(ev: event.id, damus: damus_state)

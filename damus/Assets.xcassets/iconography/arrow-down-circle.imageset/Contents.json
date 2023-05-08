@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "filename": "arrow-down-circle.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "arrow-down-circle.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "arrow-down-circle.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

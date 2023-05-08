@@ -10,6 +10,7 @@ import SwiftUI
 struct SelectedEventView: View {
     let damus: DamusState
     let event: NostrEvent
+    let size: EventViewKind
     
     var pubkey: String {
         event.pubkey
@@ -17,9 +18,10 @@ struct SelectedEventView: View {
     
     @StateObject var bar: ActionBarModel
     
-    init(damus: DamusState, event: NostrEvent) {
+    init(damus: DamusState, event: NostrEvent, size: EventViewKind) {
         self.damus = damus
         self.event = event
+        self.size = size
         self._bar = StateObject(wrappedValue: make_actionbar_model(ev: event.id, damus: damus))
     }
     
@@ -33,21 +35,28 @@ struct SelectedEventView: View {
                     
                     Spacer()
                     
-                    EventMenuContext(event: event, keypair: damus.keypair, target_pubkey: event.pubkey, bookmarks: damus.bookmarks)
+                    EventMenuContext(event: event, keypair: damus.keypair, target_pubkey: event.pubkey, bookmarks: damus.bookmarks, muted_threads: damus.muted_threads)
                         .padding([.bottom], 4)
 
                 }
+                .padding(.horizontal)
                 .minimumScaleFactor(0.75)
                 .lineLimit(1)
                 
-                EventBody(damus_state: damus, event: event, size: .selected)
+                if event_is_reply(event, privkey: damus.keypair.privkey) {
+                    ReplyDescription(event: event, profiles: damus.profiles)
+                        .padding(.horizontal)
+                }
+                
+                EventBody(damus_state: damus, event: event, size: size, options: [.pad_content])
                 
                 if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
                     BuilderEventView(damus: damus, event_id: mention.ref.id)
+                        .padding(.horizontal)
                 }
                 
                 Text(verbatim: "\(format_date(event.created_at))")
-                    .padding(.top, 10)
+                    .padding([.top, .leading, .trailing])
                     .font(.footnote)
                     .foregroundColor(.gray)
                 
@@ -56,11 +65,13 @@ struct SelectedEventView: View {
                 
                 if !bar.is_empty {
                     EventDetailBar(state: damus, target: event.id, target_pk: event.pubkey)
+                        .padding(.horizontal)
                     Divider()
                 }
                 
                 EventActionBar(damus_state: damus, event: event)
                     .padding([.top], 4)
+                    .padding(.horizontal)
 
                 Divider()
                     .padding([.top], 4)
@@ -70,7 +81,6 @@ struct SelectedEventView: View {
                 guard target == self.event.id else { return }
                 self.bar.update(damus: self.damus, evid: target)
             }
-            .padding([.leading], 2)
             .compositingGroup()
         }
     }
@@ -78,7 +88,7 @@ struct SelectedEventView: View {
 
 struct SelectedEventView_Previews: PreviewProvider {
     static var previews: some View {
-        SelectedEventView(damus: test_damus_state(), event: test_event)
+        SelectedEventView(damus: test_damus_state(), event: test_event, size: .selected)
             .padding()
     }
 }

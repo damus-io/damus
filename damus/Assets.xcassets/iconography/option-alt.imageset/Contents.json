@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "filename": "option-alt.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "option-alt.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "option-alt.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

@@ -82,7 +82,7 @@ class FollowersModel: ObservableObject {
             if ev.known_kind == .contacts {
                 handle_contact_event(ev)
             } else if ev.known_kind == .metadata {
-                process_metadata_event(our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
+                process_metadata_event(events: damus_state.events, our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
             }
             
         case .notice(let msg):
@@ -94,6 +94,9 @@ class FollowersModel: ObservableObject {
             } else if sub_id == self.profiles_id {
                 damus_state.pool.unsubscribe(sub_id: profiles_id, to: [relay_id])
             }
+            
+        case .ok:
+            break
         }
     }
 }

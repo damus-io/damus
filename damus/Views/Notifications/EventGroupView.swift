@@ -61,7 +61,7 @@ func determine_reacting_to(our_pubkey: String, ev: NostrEvent?) -> ReactingTo {
 
 func event_author_name(profiles: Profiles, pubkey: String) -> String {
     let alice_prof = profiles.lookup(id: pubkey)
-    return Profile.displayName(profile: alice_prof, pubkey: pubkey)
+    return Profile.displayName(profile: alice_prof, pubkey: pubkey).username
 }
 
 func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType) -> String {
@@ -73,7 +73,7 @@ func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType
         }
         
         if zap.is_anon {
-            return "Anonymous"
+            return NSLocalizedString("Anonymous", comment: "Placeholder author name of the anonymous person who zapped an event.")
         }
         
         return event_author_name(profiles: profiles, pubkey: zap.request.ev.pubkey)
@@ -121,28 +121,30 @@ func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType
  "zapped_your_profile_3" - returned when 3 or more zaps occurred to the current user's profile
  */
 func reacting_to_text(profiles: Profiles, our_pubkey: String, group: EventGroupType, ev: NostrEvent?, locale: Locale? = nil) -> String {
+    if group.events.count == 0 {
+        return "??"
+    }
+
     let verb = reacting_to_verb(group: group)
     let reacting_to = determine_reacting_to(our_pubkey: our_pubkey, ev: ev)
     let localization_key = "\(verb)_\(reacting_to)_\(min(group.events.count, 3))"
-    let bundle = bundleForLocale(locale: locale)
+    let format = localizedStringFormat(key: localization_key, locale: locale)
 
     switch group.events.count {
-    case 0:
-        return "??"
     case 1:
         let display_name = event_group_author_name(profiles: profiles, ind: 0, group: group)
 
-        return String(format: bundle.localizedString(forKey: localization_key, value: bundleForLocale(locale: Locale(identifier: "en-US")).localizedString(forKey: localization_key, value: nil, table: nil), table: nil), locale: locale, display_name)
+        return String(format: format, locale: locale, display_name)
     case 2:
         let alice_name = event_group_author_name(profiles: profiles, ind: 0, group: group)
         let bob_name = event_group_author_name(profiles: profiles, ind: 1, group: group)
 
-        return String(format: bundle.localizedString(forKey: localization_key, value: bundleForLocale(locale: Locale(identifier: "en-US")).localizedString(forKey: localization_key, value: nil, table: nil), table: nil), locale: locale, alice_name, bob_name)
+        return String(format: format, locale: locale, alice_name, bob_name)
     default:
         let alice_name = event_group_author_name(profiles: profiles, ind: 0, group: group)
         let count = group.events.count - 1
 
-        return String(format: bundle.localizedString(forKey: localization_key, value: bundleForLocale(locale: Locale(identifier: "en-US")).localizedString(forKey: localization_key, value: nil, table: nil), table: nil), locale: locale, count, alice_name)
+        return String(format: format, locale: locale, count, alice_name)
     }
 }
 
@@ -172,7 +174,7 @@ struct EventGroupView: View {
         return VStack(alignment: .center) {
             Image(systemName: "bolt.fill")
                 .foregroundColor(.orange)
-            Text("\(fmt)")
+            Text(verbatim: fmt)
                 .foregroundColor(Color.orange)
         }
     }
@@ -182,12 +184,12 @@ struct EventGroupView: View {
             switch group {
             case .repost:
                 Image(systemName: "arrow.2.squarepath")
-                    .foregroundColor(Color("DamusGreen"))
+                    .foregroundColor(DamusColors.green)
             case .reaction:
-                Image("shaka-full")
-                    .resizable()
-                    .frame(width: 24, height: 24)
-                    .foregroundColor(.accentColor)
+                LINEAR_GRADIENT
+                    .mask(Image("shaka-full")
+                        .resizable()
+                    ).frame(width: 24, height: 24)
             case .profile_zap(let zapgrp):
                 ZapIcon(zapgrp)
             case .zap(let zapgrp):
@@ -202,19 +204,23 @@ struct EventGroupView: View {
                 .frame(width: PFP_SIZE + 10)
             
             VStack(alignment: .leading) {
-                ProfilePicturesView(state: state, events: group.events)
-                
-                GroupDescription
+                ProfilePicturesView(state: state, pubkeys: group.events.map { $0.pubkey })
                 
                 if let event {
                     let thread = ThreadModel(event: event, damus_state: state)
                     let dest = ThreadView(state: state, thread: thread)
                     NavigationLink(destination: dest) {
-                        Text(render_note_content(ev: event, profiles: state.profiles, privkey: state.keypair.privkey).content)
-                            .padding([.top], 1)
-                            .foregroundColor(.gray)
+                        VStack(alignment: .leading) {
+                            GroupDescription
+                            EventBody(damus_state: state, event: event, size: .normal, options: [.truncate_content])
+                                .padding([.top], 1)
+                                .padding([.trailing])
+                                .foregroundColor(.gray)
+                        }
                     }
                     .buttonStyle(.plain)
+                } else {
+                    GroupDescription
                 }
             }
         }

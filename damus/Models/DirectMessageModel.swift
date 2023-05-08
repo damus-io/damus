@@ -16,6 +16,8 @@ class DirectMessageModel: ObservableObject {
 
     @Published var draft: String
     
+    let pubkey: String
+    
     var is_request: Bool
     var our_pubkey: String
     
@@ -29,17 +31,19 @@ class DirectMessageModel: ObservableObject {
         return true
     }
     
-    init(events: [NostrEvent], our_pubkey: String) {
+    init(events: [NostrEvent], our_pubkey: String, pubkey: String) {
         self.events = events
         self.is_request = false
         self.our_pubkey = our_pubkey
         self.draft = ""
+        self.pubkey = pubkey
     }
     
-    init(our_pubkey: String) {
+    init(our_pubkey: String, pubkey: String) {
         self.events = []
         self.is_request = false
         self.our_pubkey = our_pubkey
         self.draft = ""
+        self.pubkey = pubkey
     }
 }

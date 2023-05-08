@@ -24,19 +24,33 @@ struct NIP05Badge: View {
         self.clickable = clickable
     }
     
-    var nip05_color: Color {
-       return get_nip05_color(pubkey: pubkey, contacts: contacts)
+    var nip05_color: Bool {
+       return use_nip05_color(pubkey: pubkey, contacts: contacts)
+    }
+    
+    var Seal: some View {
+        Group {
+            if nip05_color {
+                LINEAR_GRADIENT
+                    .mask(Image(systemName: "checkmark.seal.fill")
+                        .resizable()
+                    ).frame(width: 14, height: 14)
+            } else if show_domain {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.footnote)
+                    .nip05_colorized(gradient: nip05_color)
+            }
+        }
     }
     
     var body: some View {
         HStack(spacing: 2) {
-            Image(systemName: "checkmark.seal.fill")
-                .font(.footnote)
-                .foregroundColor(nip05_color)
+            Seal
+            
             if show_domain {
                 if clickable {
                     Text(nip05.host)
-                        .foregroundColor(nip05_color)
+                        .nip05_colorized(gradient: nip05_color)
                         .onTapGesture {
                             if let nip5url = nip05.siteUrl {
                                 openURL(nip5url)
@@ -44,7 +58,7 @@ struct NIP05Badge: View {
                         }
                 } else {
                     Text(nip05.host)
-                        .foregroundColor(nip05_color)
+                        .foregroundColor(.gray)
                 }
             }
         }
@@ -52,8 +66,19 @@ struct NIP05Badge: View {
     }
 }
 
-func get_nip05_color(pubkey: String, contacts: Contacts) -> Color {
-    return contacts.is_friend_or_self(pubkey) ? .accentColor : .gray
+extension View {
+    func nip05_colorized(gradient: Bool) -> some View {
+        if gradient {
+            return AnyView(self.foregroundStyle(LINEAR_GRADIENT))
+        } else {
+            return AnyView(self.foregroundColor(.gray))
+        }
+        
+    }
+}
+
+func use_nip05_color(pubkey: String, contacts: Contacts) -> Bool {
+    return contacts.is_friend_or_self(pubkey) ? true : false
 }
 
 struct NIP05Badge_Previews: PreviewProvider {

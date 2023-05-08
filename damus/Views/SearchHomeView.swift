@@ -7,45 +7,71 @@
 
 import SwiftUI
 import CryptoKit
+import NaturalLanguage
 
 struct SearchHomeView: View {
     let damus_state: DamusState
     @StateObject var model: SearchHomeModel
     @State var search: String = ""
+    @FocusState private var isFocused: Bool
+
+    let preferredLanguages = Set(Locale.preferredLanguages.map { localeToLanguage($0) })
     
     var SearchInput: some View {
-        ZStack(alignment: .leading) {
+        HStack {
             HStack{
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.gray)
                 TextField(NSLocalizedString("Search...", comment: "Placeholder text to prompt entry of search query."), text: $search)
-                    .padding(8)
-                    .padding(.leading, 35)
                     .autocorrectionDisabled(true)
                     .textInputAutocapitalization(.never)
+                    .focused($isFocused)
+            }
+            .padding(10)
+            .background(.secondary.opacity(0.2))
+            .cornerRadius(20)
+            
+            if(!search.isEmpty) {
                 Text("Cancel", comment: "Cancel out of search view.")
-                    .foregroundColor(.blue)
+                    .foregroundColor(.accentColor)
                     .padding(EdgeInsets(top: 0.0, leading: 0.0, bottom: 0.0, trailing: 10.0))
-                    .opacity((search == "") ? 0.0 : 1.0)
                     .onTapGesture {
                         self.search = ""
+                        isFocused = false
                     }
             }
-                
-            Label("", systemImage: "magnifyingglass")
-                .padding(.leading, 10)
-        }
-        .background {
-            RoundedRectangle(cornerRadius: 8)
-                .foregroundColor(.secondary.opacity(0.2))
         }
     }
     
     var GlobalContent: some View {
-        return TimelineView(events: model.events, loading: $model.loading, damus: damus_state, show_friend_icon: true, filter: { _ in true })
-            .refreshable {
-                // Fetch new information by unsubscribing and resubscribing to the relay
-                model.unsubscribe()
-                model.subscribe()
+        return TimelineView(
+            events: model.events,
+            loading: $model.loading,
+            damus: damus_state,
+            show_friend_icon: true,
+            filter: { ev in
+                if damus_state.muted_threads.isMutedThread(ev, privkey: self.damus_state.keypair.privkey) {
+                    return false
+                }
+
+                if damus_state.settings.show_only_preferred_languages == false {
+                    return true
+                }
+
+                // If we can't determine the note's language with 50%+ confidence, lean on the side of caution and show it anyway.
+                let note_lang = damus_state.events.get_cache_data(ev.id).translations_model.note_language
+                guard let note_lang else {
+                    return true
+                }
+
+                return preferredLanguages.contains(note_lang)
             }
+        )
+        .refreshable {
+            // Fetch new information by unsubscribing and resubscribing to the relay
+            model.unsubscribe()
+            model.subscribe()
+        }
     }
     
     var SearchContent: some View {

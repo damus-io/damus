@@ -10,13 +10,18 @@ import CommonCrypto
 import secp256k1
 import secp256k1_implementation
 import CryptoKit
-
+import NaturalLanguage
 
 
 enum ValidationResult: Decodable {
+    case unknown
     case ok
     case bad_id
     case bad_sig
+    
+    var is_bad: Bool {
+        return self == .bad_id || self == .bad_sig
+    }
 }
 
 struct OtherEvent {
@@ -36,6 +41,18 @@ struct ReferencedId: Identifiable, Hashable, Equatable {
 
     var id: String {
         return ref_id
+    }
+    
+    static func q(_ id: String, relay_id: String? = nil) -> ReferencedId {
+        return ReferencedId(ref_id: id, relay_id: relay_id, key: "q")
+    }
+    
+    static func e(_ id: String, relay_id: String? = nil) -> ReferencedId {
+        return ReferencedId(ref_id: id, relay_id: relay_id, key: "e")
+    }
+    
+    static func p(_ id: String, relay_id: String? = nil) -> ReferencedId {
+        return ReferencedId(ref_id: id, relay_id: relay_id, key: "p")
     }
 }
 
@@ -81,7 +98,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     }
     
     var too_big: Bool {
-        return self.content.count > 16000
+        return self.content.utf8.count > 16000
     }
     
     var should_show_event: Bool {
@@ -91,14 +108,6 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     var is_valid_id: Bool {
         return calculate_event_id(ev: self) == self.id
     }
-    
-    var is_valid: Bool {
-        return validity == .ok
-    }
-    
-    lazy var validity: ValidationResult = {
-        return .ok //validate_event(ev: self)
-    }()
     
     private var _blocks: [Block]? = nil
     func blocks(_ privkey: String?) -> [Block] {
@@ -114,13 +123,21 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         return parse_mentions(content: content, tags: self.tags)
     }
 
-    lazy var inner_event: NostrEvent? = {
-        // don't try to deserialize an inner event if we know there won't be one
-        if self.known_kind == .boost {
-            return event_from_json(dat: self.content)
-        }
-        return nil
+    private lazy var inner_event: NostrEvent? = {
+        return event_from_json(dat: self.content)
     }()
+    
+    func get_inner_event(cache: EventCache) -> NostrEvent? {
+        guard self.known_kind == .boost else {
+            return nil
+        }
+        
+        if self.content == "", let ref = self.referenced_ids.first {
+            return cache.lookup(ref.ref_id)
+        }
+        
+        return self.inner_event
+    }
     
     private var _event_refs: [EventRef]? = nil
     func event_refs(_ privkey: String?) -> [EventRef] {
@@ -257,6 +274,25 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
 
     func is_reply(_ privkey: String?) -> Bool {
         return event_is_reply(self, privkey: privkey)
+    }
+
+    func note_language(_ privkey: String?) -> String? {
+        // Rely on Apple's NLLanguageRecognizer to tell us which language it thinks the note is in
+        // and filter on only the text portions of the content as URLs and hashtags confuse the language recognizer.
+        let originalBlocks = blocks(privkey)
+        let originalOnlyText = originalBlocks.compactMap { $0.is_text }.joined(separator: " ")
+
+        // Only accept language recognition hypothesis if there's at least a 50% probability that it's accurate.
+        let languageRecognizer = NLLanguageRecognizer()
+        languageRecognizer.processString(originalOnlyText)
+
+        guard let locale = languageRecognizer.languageHypotheses(withMaximum: 1).first(where: { $0.value >= 0.5 })?.key.rawValue else {
+            return nil
+        }
+
+        // Remove the variant component and just take the language part as translation services typically only supports the variant-less language.
+        // Moreover, speakers of one variant can generally understand other variants.
+        return localeToLanguage(locale)
     }
 
     public var referenced_ids: [ReferencedId] {
@@ -518,16 +554,21 @@ func make_first_contact_event(keypair: Keypair) -> NostrEvent? {
     guard let privkey = keypair.privkey else {
         return nil
     }
-
+    
+    let bootstrap_relays = load_bootstrap_relays(pubkey: keypair.pubkey)
     let rw_relay_info = RelayInfo(read: true, write: true)
     var relays: [String: RelayInfo] = [:]
-    for relay in BOOTSTRAP_RELAYS {
+    
+    for relay in bootstrap_relays {
         relays[relay] = rw_relay_info
     }
+    
     let relay_json = encode_json(relays)!
     let damus_pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
+    let jb55_pubkey = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245" // lol
     let tags = [
         ["p", damus_pubkey],
+        ["p", jb55_pubkey],
         ["p", keypair.pubkey] // you're a friend of yourself!
     ]
     let ev = NostrEvent(content: relay_json,
@@ -539,7 +580,7 @@ func make_first_contact_event(keypair: Keypair) -> NostrEvent? {
     return ev
 }
 
-func make_metadata_event(keypair: Keypair, metadata: NostrMetadata) -> NostrEvent? {
+func make_metadata_event(keypair: Keypair, metadata: Profile) -> NostrEvent? {
     guard let privkey = keypair.privkey else {
         return nil
     }
@@ -665,7 +706,7 @@ func generate_private_keypair(our_privkey: String, id: String, created_at: Int64
 func make_zap_request_event(keypair: FullKeypair, content: String, relays: [RelayDescriptor], target: ZapTarget, zap_type: ZapType) -> NostrEvent? {
     var tags = zap_target_to_tags(target)
     var relay_tag = ["relays"]
-    relay_tag.append(contentsOf: relays.map { $0.url.absoluteString })
+    relay_tag.append(contentsOf: relays.map { $0.url.id })
     tags.append(relay_tag)
     
     var kp = keypair
@@ -699,11 +740,34 @@ func make_zap_request_event(keypair: FullKeypair, content: String, relays: [Rela
     return ev
 }
 
+func uniq<T: Hashable>(_ xs: [T]) -> [T] {
+    var s = Set<T>()
+    var ys: [T] = []
+    
+    for x in xs {
+        if s.contains(x) {
+            continue
+        }
+        s.insert(x)
+        ys.append(x)
+    }
+    
+    return ys
+}
+
 func gather_reply_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
     var ids = get_referenced_ids(tags: from.tags, key: "e").first.map { [$0] } ?? []
 
-    ids.append(ReferencedId(ref_id: from.id, relay_id: nil, key: "e"))
-    ids.append(contentsOf: from.referenced_pubkeys.filter { $0.ref_id != our_pubkey })
+    ids.append(.e(from.id))
+    ids.append(contentsOf: uniq(from.referenced_pubkeys.filter { $0.ref_id != our_pubkey }))
+    if from.pubkey != our_pubkey {
+        ids.append(ReferencedId(ref_id: from.pubkey, relay_id: nil, key: "p"))
+    }
+    return ids
+}
+
+func gather_quote_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
+    var ids: [ReferencedId] = [.q(from.id)]
     if from.pubkey != our_pubkey {
         ids.append(ReferencedId(ref_id: from.pubkey, relay_id: nil, key: "p"))
     }
@@ -954,8 +1018,8 @@ func last_etag(tags: [[String]]) -> String? {
     return e
 }
 
-func inner_event_or_self(ev: NostrEvent) -> NostrEvent {
-    guard let inner_ev = ev.inner_event else {
+func inner_event_or_self(ev: NostrEvent, cache: EventCache) -> NostrEvent {
+    guard let inner_ev = ev.get_inner_event(cache: cache) else {
         return ev
     }
     

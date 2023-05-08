@@ -6,32 +6,56 @@
 //
 
 import SwiftUI
+import Combine
 
-struct DMChatView: View {
+struct DMChatView: View, KeyboardReadable {
     let damus_state: DamusState
-    let pubkey: String
-    @EnvironmentObject var dms: DirectMessageModel
+    @ObservedObject var dms: DirectMessageModel
     @State var showPrivateKeyWarning: Bool = false
-
+    
+    var pubkey: String {
+        dms.pubkey
+    }
+    
     var Messages: some View {
         ScrollViewReader { scroller in
             ScrollView {
-                VStack(alignment: .leading) {
+                LazyVStack(alignment: .leading) {
                     ForEach(Array(zip(dms.events, dms.events.indices)), id: \.0.id) { (ev, ind) in
                         DMView(event: dms.events[ind], damus_state: damus_state)
-                            .contextMenu{MenuItems(event: ev, keypair: damus_state.keypair, target_pubkey: ev.pubkey, bookmarks: damus_state.bookmarks)}
+                            .contextMenu{MenuItems(event: ev, keypair: damus_state.keypair, target_pubkey: ev.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads)}
                     }
-                    EndBlock(height: 80)
+                    EndBlock(height: 1)
                 }
                 .padding(.horizontal)
+
             }
+            .dismissKeyboardOnTap()
             .onAppear {
-                scroller.scrollTo("endblock")
+                scroll_to_end(scroller)
             }.onChange(of: dms.events.count) { _ in
-                withAnimation {
-                    scroller.scrollTo("endblock")
-                }
+                scroll_to_end(scroller, animated: true)
             }
+            
+            Footer
+                .onReceive(keyboardPublisher) { visible in
+                    guard visible else {
+                        return
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        scroll_to_end(scroller, animated: true)
+                    }
+                }
+        }
+    }
+    
+    func scroll_to_end(_ scroller: ScrollViewProxy, animated: Bool = false) {
+        if animated {
+            withAnimation {
+                scroller.scrollTo("endblock")
+            }
+        } else {
+            scroller.scrollTo("endblock")
         }
     }
 
@@ -40,7 +64,7 @@ struct DMChatView: View {
         let profile_page = ProfileView(damus_state: damus_state, pubkey: pubkey)
         return NavigationLink(destination: profile_page) {
             HStack {
-                ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles)
+                ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
 
                 ProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_friend_confirmed: true)
             }
@@ -84,43 +108,38 @@ struct DMChatView: View {
     }
 
     var Footer: some View {
-        ZStack {
-            BackgroundColor()
-            
-            HStack(spacing: 0) {
-                InputField
+    
+        HStack(spacing: 0) {
+            InputField
 
-                if !dms.draft.isEmpty {
-                    Button(
-                        role: .none,
-                        action: {
-                            showPrivateKeyWarning = contentContainsPrivateKey(dms.draft)
+            if !dms.draft.isEmpty {
+                Button(
+                    role: .none,
+                    action: {
+                        showPrivateKeyWarning = contentContainsPrivateKey(dms.draft)
 
-                            if !showPrivateKeyWarning {
-                                send_message()
-                            }
+                        if !showPrivateKeyWarning {
+                            send_message()
                         }
-                    ) {
-                        Label("", systemImage: "arrow.right.circle")
-                            .font(.title)
                     }
+                ) {
+                    Label("", systemImage: "arrow.right.circle")
+                        .font(.title)
                 }
             }
+        }
+
+        /*
+        Text(dms.draft).opacity(0).padding(.all, 8)
             .fixedSize(horizontal: false, vertical: true)
             .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
-
-            Text(dms.draft).opacity(0).padding(.all, 8)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
-        }
-        .fixedSize(horizontal: false, vertical: true)
-        .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
+         */
     }
 
     func send_message() {
         let tags = [["p", pubkey]]
         let post_blocks = parse_post_blocks(content: dms.draft)
-        let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
+        let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags, silent_mentions: true)
         let content = render_blocks(blocks: post_tags.blocks)
         
         guard let dm = create_dm(content, to_pk: pubkey, tags: post_tags.tags, keypair: damus_state.keypair) else {
@@ -130,20 +149,16 @@ struct DMChatView: View {
 
         dms.draft = ""
 
-        damus_state.pool.send(.event(dm))
+        damus_state.postbox.send(dm)
+        
+        handle_incoming_dm(ev: dm, our_pubkey: damus_state.pubkey, dms: damus_state.dms, prev_events: NewEventsBits())
+
         end_editing()
     }
 
     var body: some View {
         ZStack {
             Messages
-                .dismissKeyboardOnTap()
-
-            VStack {
-                Spacer()
-
-                Footer
-            }
 
             Text("Send a message to start the conversation...", comment: "Text prompt for user to send a message to the other user.")
                 .lineLimit(nil)
@@ -174,10 +189,9 @@ struct DMChatView_Previews: PreviewProvider {
     static var previews: some View {
         let ev = NostrEvent(content: "hi", pubkey: "pubkey", kind: 1, tags: [])
 
-        let model = DirectMessageModel(events: [ev], our_pubkey: "pubkey")
+        let model = DirectMessageModel(events: [ev], our_pubkey: "pubkey", pubkey: "the_pk")
 
-        DMChatView(damus_state: test_damus_state(), pubkey: "pubkey")
-            .environmentObject(model)
+        DMChatView(damus_state: test_damus_state(), dms: model)
     }
 }
 
@@ -233,3 +247,4 @@ extension View {
             .background(content())
     }
 }
+

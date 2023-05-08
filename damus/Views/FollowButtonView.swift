@@ -50,11 +50,11 @@ struct FollowButtonView: View {
     }
     
     func filledTextColor() -> Color {
-        colorScheme == .light ? Color("DamusWhite") : Color("DamusBlack")
+        colorScheme == .light ? DamusColors.white : DamusColors.black
     }
     
     func fillColor() -> Color {
-        colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite")
+        colorScheme == .light ? DamusColors.black : DamusColors.white
     }
     
     func emptyColor() -> Color {
@@ -62,7 +62,7 @@ struct FollowButtonView: View {
     }
     
     func borderColor() -> Color {
-        colorScheme == .light ? Color("DamusDarkGrey") : Color("DamusLightGrey")
+        colorScheme == .light ? DamusColors.darkGrey : DamusColors.lightGrey
     }
 }
 

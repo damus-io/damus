@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Security
 
 struct SaveKeysView: View {
     let account: CreateAccountModel
@@ -15,6 +16,8 @@ struct SaveKeysView: View {
     @State var priv_copied: Bool = false
     @State var loading: Bool = false
     @State var error: String? = nil
+    
+    @State private var credential_handler = CredentialHandler()
 
     @FocusState var pubkey_focused: Bool
     @FocusState var privkey_focused: Bool
@@ -90,11 +93,14 @@ struct SaveKeysView: View {
     }
     
     func complete_account_creation(_ account: CreateAccountModel) {
-        for relay in BOOTSTRAP_RELAYS {
+        let bootstrap_relays = load_bootstrap_relays(pubkey: account.pubkey)
+        for relay in bootstrap_relays {
             add_rw_relay(self.pool, relay)
         }
 
         self.pool.register_handler(sub_id: "signup", handler: handle_event)
+        
+        credential_handler.save_credential(pubkey: account.pubkey_bech32, privkey: account.privkey_bech32)
         
         self.loading = true
         
@@ -107,13 +113,13 @@ struct SaveKeysView: View {
             switch wsev {
             case .connected:
                 let metadata = create_account_to_metadata(account)
-                let m_metadata_ev = make_metadata_event(keypair: account.keypair, metadata: metadata)
-                let m_contacts_ev = make_first_contact_event(keypair: account.keypair)
+                let metadata_ev = make_metadata_event(keypair: account.keypair, metadata: metadata)
+                let contacts_ev = make_first_contact_event(keypair: account.keypair)
                 
-                if let metadata_ev = m_metadata_ev {
+                if let metadata_ev {
                     self.pool.send(.event(metadata_ev))
                 }
-                if let contacts_ev = m_contacts_ev {
+                if let contacts_ev {
                     self.pool.send(.event(contacts_ev))
                 }
                 
@@ -126,7 +132,7 @@ struct SaveKeysView: View {
                 
             case .error(let err):
                 self.loading = false
-                self.error = "\(err.debugDescription)"
+                self.error = String(describing: err)
             default:
                 break
             }
@@ -140,6 +146,8 @@ struct SaveKeysView: View {
             case .event:
                 print("event in signup?")
             case .eose:
+                break
+            case .ok:
                 break
             }
         }
@@ -213,4 +221,8 @@ struct SaveKeysView_Previews: PreviewProvider {
         let model = CreateAccountModel(real: "William", nick: "jb55", about: "I'm me")
         SaveKeysView(account: model)
     }
+}
+
+func create_account_to_metadata(_ model: CreateAccountModel) -> Profile {
+    return Profile(name: model.nick_name, display_name: model.real_name, about: model.about, picture: model.profile_image, banner: nil, website: nil, lud06: nil, lud16: nil, nip05: nil)
 }

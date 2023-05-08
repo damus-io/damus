@@ -39,7 +39,27 @@
 			<key>many</key>
 			<string>Followers</string>
 			<key>other</key>
-			<string>Sledují</string>
+			<string>Sledující</string>
+		</dict>
+	</dict>
+	<key>following_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWING@</string>
+		<key>FOLLOWING</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Sleduje</string>
+			<key>few</key>
+			<string>Sleduje</string>
+			<key>many</key>
+			<string>Sleduje</string>
+			<key>other</key>
+			<string>Sleduje</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -260,6 +280,46 @@
 			<string>%2$@ sats</string>
 			<key>other</key>
 			<string>%2$@ satů</string>
+		</dict>
+	</dict>
+	<key>zap_notification_no_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>Dostal jsi %2$@ sat od %3$@</string>
+			<key>few</key>
+			<string>Dostal jsi %2$@ satů od %3$@</string>
+			<key>many</key>
+			<string>Dostal jsi %2$@ satů od %3$@</string>
+			<key>other</key>
+			<string>Dostal jsi %2$@ satů od %3$@</string>
+		</dict>
+	</dict>
+	<key>zap_notification_with_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>Dostal jsi %2$@ sat od %3$@: "%4$@"</string>
+			<key>few</key>
+			<string>Dostal jsi %2$@ satů od %3$@: "%4$@"</string>
+			<key>many</key>
+			<string>Dostal jsi %2$@ satů od %3$@: "%4$@"</string>
+			<key>other</key>
+			<string>Dostal jsi %2$@ satů od %3$@: "%4$@"</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>

@@ -74,8 +74,12 @@ func build_mention_indices(_ blocks: [Block], type: MentionType) -> Set<Int> {
         switch block {
         case .mention(let m):
             if m.type == type {
-                acc.insert(m.index)
+                if let idx = m.index {
+                    acc.insert(idx)
+                }
             }
+        case .relay:
+            return
         case .text:
             return
         case .hashtag:

@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "filename": "shopping-cart.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "shopping-cart.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "shopping-cart.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

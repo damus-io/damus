@@ -16,6 +16,15 @@ struct RelayDetailView: View {
     
     @Environment(\.dismiss) var dismiss
     
+    func check_connection() -> Bool {
+        for relay in state.pool.relays {
+            if relay.id == self.relay {
+                return true
+            }
+        }
+        return false
+    }
+    
     func FieldText(_ str: String?) -> some View {
         Text(str ?? "No data available")
     }
@@ -23,9 +32,45 @@ struct RelayDetailView: View {
     var body: some View {
         Group {
             Form {
+                
+                if let privkey = state.keypair.privkey {
+                    if check_connection() {
+                        Button(action: {
+                            guard let ev = state.contacts.event else {
+                                return
+                            }
+
+                            let descriptors = state.pool.descriptors
+                            guard let new_ev = remove_relay( ev: ev, current_relays: descriptors, privkey: privkey, relay: relay) else {
+                                return
+                            }
+
+                            process_contact_event(state: state, ev: new_ev)
+                            state.postbox.send(new_ev)
+                            dismiss()
+                        }) {
+                            Text("Disconnect From Relay", comment: "Button to disconnect from the relay.")
+                        }
+                    } else {
+                        Button(action: {
+                            guard let ev_before_add = state.contacts.event else {
+                                return
+                            }
+                            guard let ev_after_add = add_relay(ev: ev_before_add, privkey: privkey, current_relays: state.pool.descriptors, relay: relay, info: .rw) else {
+                                return
+                            }
+                            process_contact_event(state: state, ev: ev_after_add)
+                            state.postbox.send(ev_after_add)
+                            dismiss()
+                        }) {
+                            Text("Connect To Relay", comment: "Button to connect to the relay.")
+                        }
+                    }
+                }
+                
                 if let pubkey = nip11.pubkey {
                     Section(NSLocalizedString("Admin", comment: "Label to display relay contact user.")) {
-                        UserView(damus_state: state, pubkey: pubkey)
+                        UserViewRow(damus_state: state, pubkey: pubkey)
                     }
                 }
                 Section(NSLocalizedString("Relay", comment: "Label to display relay address.")) {
@@ -68,6 +113,7 @@ struct RelayDetailView: View {
             dismiss()
         }
         .navigationTitle(nip11.name ?? "")
+        .navigationBarTitleDisplayMode(.inline)
     }
     
     private func nipsList(nips: [Int]) -> AttributedString {

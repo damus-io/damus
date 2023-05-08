@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "filename": "magic-box.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "magic-box.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "magic-box.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

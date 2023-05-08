@@ -15,15 +15,18 @@ struct SelectableText: View {
     @State private var selectedTextHeight: CGFloat = .zero
     @State private var selectedTextWidth: CGFloat = .zero
     
+    let size: EventViewKind
+    
     var body: some View {
         GeometryReader { geo in
             TextViewRepresentable(
                 attributedString: attributedString,
                 textColor: UIColor.label,
-                font: UIFont.preferredFont(forTextStyle: .title2),
+                font: eventviewsize_to_uifont(size),
                 fixedWidth: selectedTextWidth,
                 height: $selectedTextHeight
             )
+            .padding([.leading, .trailing], -1.0)
             .onAppear {
                 self.selectedTextWidth = geo.size.width
             }
@@ -52,6 +55,8 @@ struct SelectableText: View {
         view.backgroundColor = .clear
         view.textContainer.lineFragmentPadding = 0
         view.textContainerInset = .zero
+        view.textContainerInset.left = 1.0
+        view.textContainerInset.right = 1.0
         return view
     }
 
