@@ -15,6 +15,10 @@ enum NostrPostResult {
 
 let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Text box prompt to ask user to type their post.")
 
+class TagModel: ObservableObject {
+    var diff = 0
+}
+
 enum PostAction {
     case replying_to(NostrEvent)
     case quoting(NostrEvent)
@@ -49,6 +53,7 @@ struct PostView: View {
     @State var mediaToUpload: MediaUpload? = nil
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
+    @StateObject var tagModel: TagModel = TagModel()
 
     let action: PostAction
     let damus_state: DamusState
@@ -211,6 +216,7 @@ struct PostView: View {
                 focusWordAttributes = (word, range)
                 self.newCursorIndex = nil
             })
+                .environmentObject(tagModel)
                 .focused($focus)
                 .textInputAutocapitalization(.sentences)
                 .onChange(of: post) { p in
@@ -341,6 +347,7 @@ struct PostView: View {
                 if let searching {
                     UserSearch(damus_state: damus_state, search: searching, focusWordAttributes: $focusWordAttributes, newCursorIndex: $newCursorIndex, post: $post)
                         .frame(maxHeight: .infinity)
+                        .environmentObject(tagModel)
                 } else {
                     Divider()
                     VStack(alignment: .leading) {

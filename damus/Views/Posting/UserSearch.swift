@@ -24,6 +24,7 @@ struct UserSearch: View {
     @Binding var newCursorIndex: Int?
 
     @Binding var post: NSMutableAttributedString
+    @EnvironmentObject var tagModel: TagModel
     
     var users: [SearchedUser] {
         guard let contacts = damus_state.contacts.event else {
@@ -47,6 +48,9 @@ struct UserSearch: View {
         }
         let mutableString = NSMutableAttributedString(attributedString: post)
         mutableString.replaceCharacters(in: wordRange, with: tagAttributedString)
+        ///adjust cursor position appropriately: ('diff' used in TextViewWrapper / updateUIView after below update of 'post')
+        tagModel.diff = tagAttributedString.length - wordRange.length
+        
         post = mutableString
         focusWordAttributes = (nil, nil)
         newCursorIndex = wordRange.location + tagAttributedString.string.count
