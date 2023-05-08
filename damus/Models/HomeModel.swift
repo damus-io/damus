@@ -24,6 +24,9 @@ struct NewEventsBits: OptionSet {
 }
 
 class HomeModel: ObservableObject {
+    // Don't trigger a user notification for events older than a certain age
+    static let event_max_age_for_notification: TimeInterval = 12 * 60 * 60
+    
     var damus_state: DamusState
 
     var has_event: [String: Set<String>] = [:]
@@ -543,7 +546,8 @@ class HomeModel: ObservableObject {
     
     func got_new_dm(notifs: NewEventsBits, ev: NostrEvent) {
         self.new_events = notifs
-        if damus_state.settings.dm_notification {
+        
+        if damus_state.settings.dm_notification && ev.age < HomeModel.event_max_age_for_notification {
             let convo = ev.decrypted(privkey: self.damus_state.keypair.privkey) ?? NSLocalizedString("New encrypted direct message", comment: "Notification that the user has received a new direct message")
             let notify = LocalNotification(type: .dm, event: ev, target: ev, content: convo)
             create_local_notification(profiles: damus_state.profiles, notify: notify)
@@ -1109,6 +1113,11 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
 
     // Don't show notifications from muted threads.
     if damus_state.muted_threads.isMutedThread(ev, privkey: damus_state.keypair.privkey) {
+        return
+    }
+    
+    // Don't show notifications for old events
+    guard ev.age < HomeModel.event_max_age_for_notification else {
         return
     }
 
