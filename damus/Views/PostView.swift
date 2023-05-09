@@ -45,6 +45,7 @@ struct PostView: View {
     @State var references: [ReferencedId] = []
     @State var focusWordAttributes: (String?, NSRange?) = (nil, nil)
     @State var newCursorIndex: Int?
+    @State var postTextViewCanScroll: Bool = true
 
     @State var mediaToUpload: MediaUpload? = nil
     
@@ -203,7 +204,7 @@ struct PostView: View {
     
     var TextEntry: some View {
         ZStack(alignment: .topLeading) {
-            TextViewWrapper(attributedText: $post, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
+            TextViewWrapper(attributedText: $post, postTextViewCanScroll: $postTextViewCanScroll, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
                 focusWordAttributes = (word, range)
                 self.newCursorIndex = nil
             })
@@ -335,7 +336,7 @@ struct PostView: View {
                 
                 // This if-block observes @ for tagging
                 if let searching {
-                    UserSearch(damus_state: damus_state, search: searching, focusWordAttributes: $focusWordAttributes, newCursorIndex: $newCursorIndex, post: $post)
+                    UserSearch(damus_state: damus_state, search: searching, focusWordAttributes: $focusWordAttributes, newCursorIndex: $newCursorIndex, postTextViewCanScroll: $postTextViewCanScroll, post: $post)
                         .frame(maxHeight: .infinity)
                 } else {
                     Divider()
