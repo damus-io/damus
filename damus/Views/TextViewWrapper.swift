@@ -32,14 +32,12 @@ struct TextViewWrapper: UIViewRepresentable {
 
     func updateUIView(_ uiView: UITextView, context: Context) {
         let range = uiView.selectedRange
-        uiView.isScrollEnabled = false
         uiView.attributedText = attributedText
 
         TextViewWrapper.setTextProperties(uiView)
         setCursorPosition(textView: uiView)
 
         uiView.selectedRange = NSRange(location: range.location + tagModel.diff, length: range.length)
-        uiView.isScrollEnabled = true
         tagModel.diff = 0
     }
 
