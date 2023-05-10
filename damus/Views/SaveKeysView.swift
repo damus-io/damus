@@ -112,12 +112,13 @@ struct SaveKeysView: View {
             switch wsev {
             case .connected:
                 let metadata = create_account_to_metadata(account)
-                let metadata_ev = make_metadata_event(keypair: account.keypair, metadata: metadata)
                 let contacts_ev = make_first_contact_event(keypair: account.keypair)
                 
-                if let metadata_ev {
+                if let keypair = account.keypair.to_full() {
+                    let metadata_ev = make_metadata_event(keypair: keypair, metadata: metadata)
                     self.pool.send(.event(metadata_ev))
                 }
+                
                 if let contacts_ev {
                     self.pool.send(.event(contacts_ev))
                 }

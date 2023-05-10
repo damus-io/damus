@@ -468,11 +468,7 @@ func make_first_contact_event(keypair: Keypair) -> NostrEvent? {
     return ev
 }
 
-func make_metadata_event(keypair: Keypair, metadata: Profile) -> NostrEvent? {
-    guard let privkey = keypair.privkey else {
-        return nil
-    }
-
+func make_metadata_event(keypair: FullKeypair, metadata: Profile) -> NostrEvent {
     let metadata_json = encode_json(metadata)!
     let ev = NostrEvent(content: metadata_json,
                         pubkey: keypair.pubkey,
@@ -480,7 +476,7 @@ func make_metadata_event(keypair: Keypair, metadata: Profile) -> NostrEvent? {
                         tags: [])
 
     ev.calculate_id()
-    ev.sign(privkey: privkey)
+    ev.sign(privkey: keypair.privkey)
     return ev
 }
 
