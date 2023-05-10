@@ -739,7 +739,7 @@ func find_event(state: DamusState, evid: String, search_type: SearchType, find_f
         case .eose:
             if !has_event {
                 attempts += 1
-                if attempts == state.pool.descriptors.count / 2 {
+                if attempts == state.pool.our_descriptors.count / 2 {
                     callback(nil)
                 }
                 state.pool.unsubscribe(sub_id: subid, to: [relay_id])

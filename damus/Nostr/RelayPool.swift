@@ -42,7 +42,11 @@ class RelayPool {
         network_monitor.start(queue: network_monitor_queue)
     }
     
-    var descriptors: [RelayDescriptor] {
+    var our_descriptors: [RelayDescriptor] {
+        return all_descriptors.filter { d in !d.info.ephemeral }
+    }
+    
+    var all_descriptors: [RelayDescriptor] {
         relays.map { r in r.descriptor }
     }
     

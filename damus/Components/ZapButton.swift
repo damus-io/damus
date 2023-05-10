@@ -146,7 +146,7 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
     }
     
     // Only take the first 10 because reasons
-    let relays = Array(damus_state.pool.descriptors.prefix(10))
+    let relays = Array(damus_state.pool.our_descriptors.prefix(10))
     let target = ZapTarget.note(id: event.id, author: event.pubkey)
     let content = comment ?? ""
     
