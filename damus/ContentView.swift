@@ -359,6 +359,23 @@ struct ContentView: View {
             self.muting = pubkey
             self.confirm_mute = true
         }
+        .onReceive(handle_notify(.attached_wallet)) { notif in
+            // update the lightning address on our profile when we attach a
+            // wallet with an associated
+            let nwc = notif.object as! WalletConnectURL
+            guard let ds = self.damus_state,
+                  let lud16 = nwc.lud16,
+                  let keypair = ds.keypair.to_full(),
+                  let profile = ds.profiles.lookup(id: ds.pubkey),
+                  lud16 != profile.lud16
+            else {
+                return
+            }
+            
+            profile.lud16 = lud16
+            let ev = make_metadata_event(keypair: keypair, metadata: profile)
+            ds.postbox.send(ev)
+        }
         .onReceive(handle_notify(.broadcast_event)) { obj in
             let ev = obj.object as! NostrEvent
             guard let ds = self.damus_state else {
