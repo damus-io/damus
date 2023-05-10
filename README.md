@@ -13,15 +13,19 @@ A twitter-like [nostr][nostr] client for iPhone, iPad and MacOS.
 damus implements the following [Nostr Implementation Possibilities][nips]
 
 - [NIP-01: Basic protocol flow][nip01]
+- [NIP-04: Encrypted Direct Message][nip04]
 - [NIP-08: Mentions][nip08]
 - [NIP-10: Reply conventions][nip10]
 - [NIP-12: Generic tag queries (hashtags)][nip12]
+- [NIP-57: Lightning Zaps][nip57]
 
 [nips]: https://github.com/nostr-protocol/nips
 [nip01]: https://github.com/nostr-protocol/nips/blob/master/01.md
+[nip04]: https://github.com/nostr-protocol/nips/blob/master/04.md
 [nip08]: https://github.com/nostr-protocol/nips/blob/master/08.md
 [nip10]: https://github.com/nostr-protocol/nips/blob/master/10.md
 [nip12]: https://github.com/nostr-protocol/nips/blob/master/12.md
+[nip57]: https://github.com/nostr-protocol/nips/blob/master/57.md
 
 ## Getting Started on Damus 
 
@@ -100,6 +104,26 @@ Contributors welcome! Start by examining known issues: https://github.com/damus-
 
 [git-send-email]: http://git-send-email.io
 
+### PR Sanitation and Best Practices
+Damus aspires to mimic Linux best PR practices that have scaled Linux to tens of thousands of contributors. All the commits are small, logically distinct, and easy to review. When they are small and logically distinct, it becomes much easier to pull changes incrementally. This allows you to build larger features that become easier to review over time as "prep" commits are cherry picked first, vs having it all in one large change that has many conflicts.
+
+Here is an example PR of how I would like to see commits structured if you are looking to have your code integrated into damus:
+
+https://github.com/damus-io/damus/pull/1112
+
+This is super important if you are looking to get large code changes merged.
+
+The way I do this is to collect all my changes into a large commit that I continually update with git add -u && git commit --amend
+
+Once I'm done I'll split open the commit (git reset --soft HEAD^ && git reset .) and then I'll start selectively building individual, logically distinct, standalone commits with git add -p && git commit. Many times you don't need to do the splitting thing, you can git add -p and craft commits as you go along, using git add -p && git commit --amend to incrementally add logically grouped things to the same commit.
+
+Also git rebase -i to reorder, fixup, squash, and reword commits. If you forgot to add something to a commit, you can do git add -p and git commit --fixup=<commit-to-add-fix-to> to have this change automatically integrated into that commit on the next (interactive) rebase.
+
+If you use these techniques to craft awesome git commits, the chances of me merging your code will be *much* higher. It's also a lot of fun and you will become much more effective at git and contributing to open source in general.
+
+Once ya'll are experts at this code review and merging will be much easier for me! Not to mention merge conflicts will be much less likely. 
+
+
 ### Privacy
 Your internet protocol (IP) address is exposed to the relays you connect to, and third party media hosters (e.g. nostr.build, imgur.com, giphy.com, youtube.com etc.) that render on Damus. If you want to improve your privacy, consider utilizing a service that masks your IP address (e.g. a VPN) from trackers online.
 
@@ -112,6 +136,8 @@ Translators welcome! Join the [Transifex][transifex] project.
 All user-facing strings must have a comment in order to provide context to translators. If a SwiftUI component has a `comment` parameter, use that. Otherwise, wrap your string with `NSLocalizedString` with the `comment` field populated.
 
 [transifex]: https://explore.transifex.com/damus/damus-ios/
+	
+Contact TYiu regarding translations: npub1yaul8k059377u9lsu67de7y637w4jtgeuwcmh5n7788l6xnlnrgs3tvjmf
 
 ### Awards
 
@@ -125,3 +151,8 @@ First contributors:
 ### git log bot
 
 npub1fjtdwclt9lspjy8huu3qklr7eklp5uq90u6yh8mec290pqxraccqlufnas
+
+### git PR bot
+
+npub1ahckk8wkr64n2w5r4arsesf42upfhlmgy76vhxmlex7mvv4zhrnqry7v97
+
