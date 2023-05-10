@@ -52,3 +52,9 @@ class Profiles {
         }
     }
 }
+
+
+func invalidate_zapper_cache(pubkey: String, profiles: Profiles, lnurl: LNUrls) {
+    profiles.zappers.removeValue(forKey: pubkey)
+    lnurl.endpoints.removeValue(forKey: pubkey)
+}

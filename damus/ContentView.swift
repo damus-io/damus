@@ -372,6 +372,12 @@ struct ContentView: View {
                 return
             }
             
+            // clear zapper cache for old lud16
+            if profile.lud16 != nil {
+                // TODO: should this be somewhere else, where we process profile events!?
+                invalidate_zapper_cache(pubkey: keypair.pubkey, profiles: ds.profiles, lnurl: ds.lnurls)
+            }
+            
             profile.lud16 = lud16
             let ev = make_metadata_event(keypair: keypair, metadata: profile)
             ds.postbox.send(ev)
