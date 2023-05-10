@@ -77,3 +77,13 @@ func make_wallet_connect_request<T>(req: WalletRequest<T>, to_pk: String, keypai
     }
     return create_encrypted_event(content, to_pk: to_pk, tags: tags, keypair: keypair, created_at: created_at, kind: 23194)
 }
+
+func nwc_pay(url: WalletConnectURL, pool: RelayPool, post: PostBox, invoice: String) {
+    let req = make_wallet_pay_invoice_request(invoice: invoice)
+    guard let ev = make_wallet_connect_request(req: req, to_pk: url.pubkey, keypair: url.keypair) else {
+        return
+    }
+    
+    try? pool.add_relay(url.relay, info: .ephemeral)
+    post.send(ev, to: [url.relay.id], skip_ephemeral: false)
+}

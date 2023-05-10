@@ -184,8 +184,13 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
         }
         
         DispatchQueue.main.async {
-            let ev = ZappingEvent(is_custom: is_custom, type: .got_zap_invoice(inv), event: event)
-            notify(.zapping, ev)
+            if let url = damus_state.settings.nostr_wallet_connect,
+               let nwc = WalletConnectURL(str: url) {
+                nwc_pay(url: nwc,  pool: damus_state.pool, post: damus_state.postbox, invoice: inv)
+            } else {
+                let ev = ZappingEvent(is_custom: is_custom, type: .got_zap_invoice(inv), event: event)
+                notify(.zapping, ev)
+            }
         }
     }
     
