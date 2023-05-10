@@ -10,8 +10,16 @@ import Foundation
 public struct RelayInfo: Codable {
     let read: Bool
     let write: Bool
+    let ephemeral: Bool
+    
+    init(read: Bool, write: Bool, ephemeral: Bool = false) {
+        self.read = read
+        self.write = write
+        self.ephemeral = ephemeral
+    }
 
-    static let rw = RelayInfo(read: true, write: true)
+    static let rw = RelayInfo(read: true, write: true, ephemeral: false)
+    static let ephemeral = RelayInfo(read: true, write: true, ephemeral: true)
 }
 
 public struct RelayDescriptor {
