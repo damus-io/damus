@@ -235,6 +235,16 @@ struct ContentView: View {
         self.thread_open = true
     }
     
+    func open_profile(id: String) {
+        self.active_profile = id
+        self.profile_open = true
+    }
+    
+    func open_search(filt: NostrFilter) {
+        self.active_search = filt
+        self.search_open = true
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
