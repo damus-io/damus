@@ -122,7 +122,8 @@ Also git rebase -i to reorder, fixup, squash, and reword commits. If you forgot 
 If you use these techniques to craft awesome git commits, the chances of me merging your code will be *much* higher. It's also a lot of fun and you will become much more effective at git and contributing to open source in general.
 
 Once ya'll are experts at this code review and merging will be much easier for me! Not to mention merge conflicts will be much less likely. 
-
+	
+Please add Changelog-{Added,Fixed,Changed}: ...  to the commit body. This is how entries show up in the changelog.
 
 ### Privacy
 Your internet protocol (IP) address is exposed to the relays you connect to, and third party media hosters (e.g. nostr.build, imgur.com, giphy.com, youtube.com etc.) that render on Damus. If you want to improve your privacy, consider utilizing a service that masks your IP address (e.g. a VPN) from trackers online.
