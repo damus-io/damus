@@ -8,9 +8,9 @@
 import Foundation
 
 public struct RelayInfo: Codable {
-    let read: Bool
-    let write: Bool
-    let ephemeral: Bool
+    let read: Bool?
+    let write: Bool?
+    let ephemeral: Bool?
     
     init(read: Bool, write: Bool, ephemeral: Bool = false) {
         self.read = read

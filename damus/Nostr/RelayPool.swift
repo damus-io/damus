@@ -43,7 +43,7 @@ class RelayPool {
     }
     
     var our_descriptors: [RelayDescriptor] {
-        return all_descriptors.filter { d in !d.info.ephemeral }
+        return all_descriptors.filter { d in !(d.info.ephemeral ?? false) }
     }
     
     var all_descriptors: [RelayDescriptor] {
@@ -188,15 +188,15 @@ class RelayPool {
         let relays = to.map{ get_relays($0) } ?? self.relays
 
         for relay in relays {
-            if req.is_read && !relay.descriptor.info.read {
+            if req.is_read && !(relay.descriptor.info.read ?? true) {
                 continue
             }
             
-            if req.is_write && !relay.descriptor.info.write {
+            if req.is_write && !(relay.descriptor.info.write ?? true) {
                 continue
             }
             
-            if relay.descriptor.info.ephemeral && skip_ephemeral {
+            if (relay.descriptor.info.ephemeral ?? false) && skip_ephemeral {
                 continue
             }
             
