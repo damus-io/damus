@@ -26,6 +26,8 @@ public struct Translator {
             return try await translateWithLibreTranslate(text, from: sourceLanguage, to: targetLanguage)
         case .nokyctranslate:
             return try await translateWithNoKYCTranslate(text, from: sourceLanguage, to: targetLanguage)
+        case .winetranslate:
+            return try await translateWithWineTranslate(text, from: sourceLanguage, to: targetLanguage)
         case .deepl:
             return try await translateWithDeepL(text, from: sourceLanguage, to: targetLanguage)
         case .none:
@@ -102,6 +104,29 @@ public struct Translator {
             let api_key: String?
         }
         let body = RequestBody(q: text, source: sourceLanguage, target: targetLanguage, api_key: userSettingsStore.nokyctranslate_api_key)
+        request.httpBody = try encoder.encode(body)
+
+        struct Response: Decodable {
+            let translatedText: String
+        }
+        let response: Response = try await decodedData(for: request)
+        return response.translatedText
+    }
+
+    private func translateWithWineTranslate(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> String? {
+        let url = try makeURL("https://translate.nostr.wine", path: "/translate")
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        struct RequestBody: Encodable {
+            let q: String
+            let source: String
+            let target: String
+            let api_key: String?
+        }
+        let body = RequestBody(q: text, source: sourceLanguage, target: targetLanguage, api_key: userSettingsStore.winetranslate_api_key)
         request.httpBody = try encoder.encode(body)
 
         struct Response: Decodable {

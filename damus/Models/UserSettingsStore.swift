@@ -244,6 +244,15 @@ class UserSettingsStore: ObservableObject {
             internal_nokyctranslate_api_key = newValue == "" ? nil : newValue
         }
     }
+
+    var winetranslate_api_key: String {
+        get {
+            return internal_winetranslate_api_key ?? ""
+        }
+        set {
+            internal_winetranslate_api_key = newValue == "" ? nil : newValue
+        }
+    }
     
     // These internal keys are necessary because entries in the keychain need to be Optional,
     // but the translation view needs non-Optional String in order to use them as Bindings.
@@ -252,6 +261,9 @@ class UserSettingsStore: ObservableObject {
     
     @KeychainStorage(account: "nokyctranslate_apikey")
     var internal_nokyctranslate_api_key: String?
+
+    @KeychainStorage(account: "winetranslate_apikey")
+    var internal_winetranslate_api_key: String?
     
     @KeychainStorage(account: "libretranslate_apikey")
     var internal_libretranslate_api_key: String?
@@ -269,6 +281,8 @@ class UserSettingsStore: ObservableObject {
             return internal_deepl_api_key != nil
         case .nokyctranslate:
             return internal_nokyctranslate_api_key != nil
+        case .winetranslate:
+            return internal_winetranslate_api_key != nil
         }
     }
 }

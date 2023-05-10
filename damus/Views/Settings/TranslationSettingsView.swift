@@ -73,6 +73,17 @@ struct TranslationSettingsView: View {
                         Link(NSLocalizedString("Get API Key with BTC/Lightning", comment: "Button to navigate to nokyctranslate website to get a translation API key."), destination: URL(string: "https://nokyctranslate.com")!)
                     }
                 }
+
+                if settings.translation_service == .winetranslate {
+                    SecureField(NSLocalizedString("API Key (required)", comment: "Prompt for required entry of API Key to use translation server."), text: $settings.winetranslate_api_key)
+                        .disableAutocorrection(true)
+                        .disabled(settings.translation_service != .winetranslate)
+                        .autocapitalization(UITextAutocapitalizationType.none)
+
+                    if settings.winetranslate_api_key == "" {
+                        Link(NSLocalizedString("Get API Key with BTC/Lightning", comment: "Button to navigate to translate.nostr.wine to get a translation API key."), destination: URL(string: "https://translate.nostr.wine")!)
+                    }
+                }
                 
                 if settings.translation_service != .none {
                     Toggle(NSLocalizedString("Automatically translate notes", comment: "Toggle to automatically translate notes."), isOn: $settings.auto_translate)
