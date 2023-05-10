@@ -137,6 +137,13 @@
 		4C75EFB92804A2740006080F /* EventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFB82804A2740006080F /* EventView.swift */; };
 		4C75EFBB2804A34C0006080F /* ProofOfWork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFBA2804A34C0006080F /* ProofOfWork.swift */; };
 		4C7D09592A05BEAD00943473 /* KeyboardVisible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09582A05BEAD00943473 /* KeyboardVisible.swift */; };
+		4C7D09662A0AE62100943473 /* AlbyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09652A0AE62100943473 /* AlbyButton.swift */; };
+		4C7D096D2A0AEA0400943473 /* CodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D096A2A0AEA0400943473 /* CodeScanner.swift */; };
+		4C7D096E2A0AEA0400943473 /* ScannerCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D096B2A0AEA0400943473 /* ScannerCoordinator.swift */; };
+		4C7D096F2A0AEA0400943473 /* ScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D096C2A0AEA0400943473 /* ScannerViewController.swift */; };
+		4C7D09722A0AEF5E00943473 /* DamusGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09712A0AEF5E00943473 /* DamusGradient.swift */; };
+		4C7D09742A0AEF9000943473 /* AlbyGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09732A0AEF9000943473 /* AlbyGradient.swift */; };
+		4C7D09762A0AF19E00943473 /* FillAndStroke.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7D09752A0AF19E00943473 /* FillAndStroke.swift */; };
 		4C7FF7D52823313F009601DB /* Mentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7FF7D42823313F009601DB /* Mentions.swift */; };
 		4C8682872814DE470026224F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8682862814DE470026224F /* ProfileView.swift */; };
 		4C8D00C829DF791C0036AF10 /* CompatibleAttribute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D00C729DF791C0036AF10 /* CompatibleAttribute.swift */; };
@@ -545,6 +552,13 @@
 		4C75EFB82804A2740006080F /* EventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventView.swift; sourceTree = "<group>"; };
 		4C75EFBA2804A34C0006080F /* ProofOfWork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProofOfWork.swift; sourceTree = "<group>"; };
 		4C7D09582A05BEAD00943473 /* KeyboardVisible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardVisible.swift; sourceTree = "<group>"; };
+		4C7D09652A0AE62100943473 /* AlbyButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbyButton.swift; sourceTree = "<group>"; };
+		4C7D096A2A0AEA0400943473 /* CodeScanner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodeScanner.swift; sourceTree = "<group>"; };
+		4C7D096B2A0AEA0400943473 /* ScannerCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScannerCoordinator.swift; sourceTree = "<group>"; };
+		4C7D096C2A0AEA0400943473 /* ScannerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScannerViewController.swift; sourceTree = "<group>"; };
+		4C7D09712A0AEF5E00943473 /* DamusGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusGradient.swift; sourceTree = "<group>"; };
+		4C7D09732A0AEF9000943473 /* AlbyGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbyGradient.swift; sourceTree = "<group>"; };
+		4C7D09752A0AF19E00943473 /* FillAndStroke.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FillAndStroke.swift; sourceTree = "<group>"; };
 		4C7FF7D42823313F009601DB /* Mentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mentions.swift; sourceTree = "<group>"; };
 		4C8682862814DE470026224F /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		4C8D00C729DF791C0036AF10 /* CompatibleAttribute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibleAttribute.swift; sourceTree = "<group>"; };
@@ -906,6 +920,7 @@
 		4C75EFA227FA576C0006080F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4C7D09692A0AEA0400943473 /* CodeScanner */,
 				4C8D1A6D29F31E4100ACDF75 /* Buttons */,
 				4C1A9A1B29DDCF8B00516EAC /* Settings */,
 				4CFF8F6129CC9A80008DB934 /* Images */,
@@ -987,6 +1002,25 @@
 			path = Nostr;
 			sourceTree = "<group>";
 		};
+		4C7D09692A0AEA0400943473 /* CodeScanner */ = {
+			isa = PBXGroup;
+			children = (
+				4C7D096A2A0AEA0400943473 /* CodeScanner.swift */,
+				4C7D096B2A0AEA0400943473 /* ScannerCoordinator.swift */,
+				4C7D096C2A0AEA0400943473 /* ScannerViewController.swift */,
+			);
+			path = CodeScanner;
+			sourceTree = "<group>";
+		};
+		4C7D09702A0AEF4C00943473 /* Gradients */ = {
+			isa = PBXGroup;
+			children = (
+				4C7D09712A0AEF5E00943473 /* DamusGradient.swift */,
+				4C7D09732A0AEF9000943473 /* AlbyGradient.swift */,
+			);
+			path = Gradients;
+			sourceTree = "<group>";
+		};
 		4C7FF7D628233637009601DB /* Util */ = {
 			isa = PBXGroup;
 			children = (
@@ -1041,6 +1075,7 @@
 			isa = PBXGroup;
 			children = (
 				4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */,
+				4C7D09652A0AE62100943473 /* AlbyButton.swift */,
 			);
 			path = Buttons;
 			sourceTree = "<group>";
@@ -1138,6 +1173,7 @@
 		4CE4F9DF285287A000C00DD9 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				4C7D09702A0AEF4C00943473 /* Gradients */,
 				31D2E846295218AF006D67F8 /* Shimmer.swift */,
 				4CD7641A28A1641400B6928F /* EndBlock.swift */,
 				4C06670528FCB08600038D2A /* ImageCarousel.swift */,
@@ -1326,6 +1362,7 @@
 			isa = PBXGroup;
 			children = (
 				7C95CAED299DCEF1009DCB67 /* KFOptionSetter+.swift */,
+				4C7D09752A0AF19E00943473 /* FillAndStroke.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -1552,6 +1589,7 @@
 				4CA5588329F33F5B00DC6A45 /* StringCodable.swift in Sources */,
 				4C75EFB92804A2740006080F /* EventView.swift in Sources */,
 				4C8D00C829DF791C0036AF10 /* CompatibleAttribute.swift in Sources */,
+				4C7D09742A0AEF9000943473 /* AlbyGradient.swift in Sources */,
 				3AA247FD297E3CFF0090C62D /* RepostsModel.swift in Sources */,
 				4C198DF229F88C6B004C165C /* BlurHashDecode.swift in Sources */,
 				F75BA12F29A18EF500E10810 /* BookmarksView.swift in Sources */,
@@ -1574,6 +1612,7 @@
 				4C216F382871EDE300040376 /* DirectMessageModel.swift in Sources */,
 				4C75EFA627FF87A20006080F /* Nostr.swift in Sources */,
 				4CB883A62975F83C00DC99E7 /* LNUrlPayRequest.swift in Sources */,
+				4C7D096D2A0AEA0400943473 /* CodeScanner.swift in Sources */,
 				4CE4F9DE2852768D00C00DD9 /* ConfigView.swift in Sources */,
 				3A48E7B029DFBE9D006E787E /* MutedThreadsManager.swift in Sources */,
 				4C285C8E28399BFE008A31F1 /* SaveKeysView.swift in Sources */,
@@ -1596,6 +1635,7 @@
 				4C3EA66828FF5F9900C48A62 /* hex.c in Sources */,
 				E9E4ED0B295867B900DD7078 /* ThreadView.swift in Sources */,
 				4CD348EF29C3659D00497EB2 /* ImageUploadModel.swift in Sources */,
+				4C7D096E2A0AEA0400943473 /* ScannerCoordinator.swift in Sources */,
 				4C3BEFDC281DCE6100B3DE84 /* Liked.swift in Sources */,
 				4CF0ABE7298444FD00D66079 /* MutedEventView.swift in Sources */,
 				9C83F89329A937B900136C08 /* TextViewWrapper.swift in Sources */,
@@ -1623,6 +1663,7 @@
 				4C3BEFD22819DB9B00B3DE84 /* ProfileModel.swift in Sources */,
 				4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */,
 				7C95CAEE299DCEF1009DCB67 /* KFOptionSetter+.swift in Sources */,
+				4C7D09722A0AEF5E00943473 /* DamusGradient.swift in Sources */,
 				4CCEB7B029B5415A0078AA28 /* SearchingProfileView.swift in Sources */,
 				BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */,
 				3169CAE6294E69C000EE4006 /* EmptyTimelineView.swift in Sources */,
@@ -1646,6 +1687,7 @@
 				9609F058296E220800069BF3 /* BannerImageView.swift in Sources */,
 				4C363A94282704FA006E126D /* Post.swift in Sources */,
 				4C216F32286E388800040376 /* DMChatView.swift in Sources */,
+				4C7D09662A0AE62100943473 /* AlbyButton.swift in Sources */,
 				4CAAD8AD298851D000060CEA /* AccountDeletion.swift in Sources */,
 				4CFF8F6329CC9AD7008DB934 /* ImageContextMenuModifier.swift in Sources */,
 				4C54AA0A29A55429003E4487 /* EventGroup.swift in Sources */,
@@ -1694,8 +1736,10 @@
 				4CE6DF1627F8DEBF00C66700 /* RelayConnection.swift in Sources */,
 				4CDA128C29EB19C40006FA5A /* LocalNotification.swift in Sources */,
 				4C3BEFD6281D995700B3DE84 /* ActionBarModel.swift in Sources */,
+				4C7D09762A0AF19E00943473 /* FillAndStroke.swift in Sources */,
 				4C363AA428296DEE006E126D /* SearchModel.swift in Sources */,
 				4C8D00CC29DF92DF0036AF10 /* Hashtags.swift in Sources */,
+				4C7D096F2A0AEA0400943473 /* ScannerViewController.swift in Sources */,
 				4CEE2AF3280B25C500AB5EEF /* ProfilePicView.swift in Sources */,
 				4CC7AAF6297F1A6A00430951 /* EventBody.swift in Sources */,
 				3165648B295B70D500C64604 /* LinkView.swift in Sources */,
@@ -2077,7 +2121,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				MARKETING_VERSION = 1.4.3;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -2124,7 +2168,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				MARKETING_VERSION = 1.4.3;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

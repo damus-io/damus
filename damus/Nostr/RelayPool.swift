@@ -43,7 +43,7 @@ class RelayPool {
     }
     
     var descriptors: [RelayDescriptor] {
-        relays.map { $0.descriptor }
+        relays.map { r in r.descriptor }
     }
     
     var num_connected: Int {

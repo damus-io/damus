@@ -10,6 +10,13 @@ import UIKit
 
 
 class Profiles {
+    
+    /// This queue is used to synchronize access to the profiles dictionary, which
+    /// prevents data races from crashing the app.
+    private var queue = DispatchQueue(label: "io.damus.profiles",
+                                      qos: .userInteractive,
+                                      attributes: .concurrent)
+    
     var profiles: [String: TimestampedProfile] = [:]
     var validated: [String: NIP05] = [:]
     var nip05_pubkey: [String: String] = [:]
@@ -28,14 +35,20 @@ class Profiles {
     }
     
     func add(id: String, profile: TimestampedProfile) {
-        profiles[id] = profile
+        queue.async(flags: .barrier) {
+            self.profiles[id] = profile
+        }
     }
     
     func lookup(id: String) -> Profile? {
-        return profiles[id]?.profile
+        queue.sync {
+            return profiles[id]?.profile
+        }
     }
     
     func lookup_with_timestamp(id: String) -> TimestampedProfile? {
-        return profiles[id]
+        queue.sync {
+            return profiles[id]
+        }
     }
 }

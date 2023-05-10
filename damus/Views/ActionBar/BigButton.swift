@@ -27,7 +27,7 @@ struct BigButton: View {
                 .foregroundColor(colorScheme == .light ? DamusColors.black : DamusColors.white)
                 .overlay {
                     RoundedRectangle(cornerRadius: 24)
-                        .stroke(colorScheme == .light ? DamusColors.mediumGrey : DamusColors.white, lineWidth: 1)
+                        .stroke(colorScheme == .light ? DamusColors.black : DamusColors.white, lineWidth: 2)
                 }
                 .padding(EdgeInsets(top: 10, leading: 50, bottom: 25, trailing: 50))
         }
