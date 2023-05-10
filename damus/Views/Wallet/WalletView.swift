@@ -14,6 +14,10 @@ struct WalletView: View {
         VStack {
             Text("\(nwc.relay.id)")
             
+            if let lud16 = nwc.lud16 {
+                Text("\(lud16)")
+            }
+            
             BigButton("Disconnect Wallet") {
                 self.model.disconnect()
             }

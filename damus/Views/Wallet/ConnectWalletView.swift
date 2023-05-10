@@ -46,6 +46,12 @@ struct ConnectWalletView: View {
                 .font(.body)
                 .foregroundColor(.gray)
             
+            if let lud16 = nwc.lud16 {
+                Text(lud16)
+                    .font(.body)
+                    .foregroundColor(.gray)
+            }
+            
             BigButton("Attach") {
                 model.connect(nwc)
             }
