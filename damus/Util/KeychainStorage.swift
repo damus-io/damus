@@ -64,8 +64,6 @@ import Security
                 
                 _ = SecItemDelete(query)
             }
-                
-            UserSettingsStore.shared!.objectWillChange.send()
         }
     }
     
