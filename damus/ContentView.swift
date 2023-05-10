@@ -66,6 +66,8 @@ struct ContentView: View {
     @State var profile_open: Bool = false
     @State var thread_open: Bool = false
     @State var search_open: Bool = false
+    @State var wallet_open: Bool = false
+    @State var active_nwc: WalletConnectURL? = nil
     @State var muting: String? = nil
     @State var confirm_mute: Bool = false
     @State var user_muted_confirm: Bool = false
@@ -131,6 +133,7 @@ struct ContentView: View {
         profile_open = false
         thread_open = false
         search_open = false
+        wallet_open = false
         isSideBarOpened = false
     }
     
@@ -141,6 +144,9 @@ struct ContentView: View {
     
     func MainContent(damus: DamusState) -> some View {
         VStack {
+            NavigationLink(destination: WalletView(model: damus_state!.wallet), isActive: $wallet_open) {
+                EmptyView()
+            }
             NavigationLink(destination: MaybeProfileView, isActive: $profile_open) {
                 EmptyView()
             }
@@ -235,6 +241,11 @@ struct ContentView: View {
         self.thread_open = true
     }
     
+    func open_wallet(nwc: WalletConnectURL) {
+        self.damus_state!.wallet.new(nwc)
+        self.wallet_open = true
+    }
+    
     func open_profile(id: String) {
         self.active_profile = id
         self.profile_open = true
@@ -320,29 +331,17 @@ struct ContentView: View {
             }
         }
         .onOpenURL { url in
-            guard let link = decode_nostr_uri(url.absoluteString) else {
-                return
-            }
-            
-            switch link {
-            case .ref(let ref):
-                if ref.key == "p" {
-                    active_profile = ref.ref_id
-                    profile_open = true
-                } else if ref.key == "e" {
-                    find_event(state: damus_state!, evid: ref.ref_id, search_type: .event, find_from: nil) { ev in
-                        if let ev {
-                            open_event(ev: ev)
-                        }
-                    }
+            on_open_url(state: damus_state!, url: url) { res in
+                guard let res else {
+                    return
                 }
-            case .filter(let filt):
-                active_search = filt
-                search_open = true
-                break
-                // TODO: handle filter searches?
+                
+                switch res {
+                case .filter(let filt): self.open_search(filt: filt)
+                case .profile(let id):  self.open_profile(id: id)
+                case .event(let ev):    self.open_event(ev: ev)
+                case .wallet_connect(let nwc): self.open_wallet(nwc: nwc)}
             }
-            
         }
         .onReceive(handle_notify(.compose)) { notif in
             let action = notif.object as! PostAction
@@ -589,7 +588,8 @@ struct ContentView: View {
                                       postbox: PostBox(pool: pool),
                                       bootstrap_relays: bootstrap_relays,
                                       replies: ReplyCounter(our_pubkey: pubkey),
-                                      muted_threads: MutedThreadsManager(keypair: keypair)
+                                      muted_threads: MutedThreadsManager(keypair: keypair),
+                                      wallet: WalletModel(settings: settings)
         )
         home.damus_state = self.damus_state!
         
@@ -837,5 +837,42 @@ func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: Ev
     case .cancel:
         print("post cancelled")
         return false
+    }
+}
+
+
+enum OpenResult {
+    case profile(String)
+    case filter(NostrFilter)
+    case event(NostrEvent)
+    case wallet_connect(WalletConnectURL)
+}
+
+func on_open_url(state: DamusState, url: URL, result: @escaping (OpenResult?) -> Void) {
+    if let nwc = WalletConnectURL(str: url.absoluteString) {
+        result(.wallet_connect(nwc))
+        return
+    }
+    
+    guard let link = decode_nostr_uri(url.absoluteString) else {
+        result(nil)
+        return
+    }
+    
+    switch link {
+    case .ref(let ref):
+        if ref.key == "p" {
+            result(.profile(ref.ref_id))
+        } else if ref.key == "e" {
+            find_event(state: state, evid: ref.ref_id, search_type: .event, find_from: nil) { ev in
+                if let ev {
+                    result(.event(ev))
+                }
+            }
+        }
+    case .filter(let filt):
+        result(.filter(filt))
+        break
+        // TODO: handle filter searches?
     }
 }
