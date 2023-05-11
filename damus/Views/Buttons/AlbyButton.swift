@@ -23,7 +23,7 @@ struct AlbyButton: View {
             HStack {
                 Image("alby")
                 
-                Text("Attach Alby Wallet")
+                Text("Attach Alby Wallet", comment:  "Button to attach an Alby Wallet, a service that provides a Lightning wallet for zapping sats. Alby is the name of the service and should not be translated.")
             }
             .offset(x: -25)
             .frame(minWidth: 300, maxWidth: .infinity, minHeight: 50, maxHeight: 50, alignment: .center)

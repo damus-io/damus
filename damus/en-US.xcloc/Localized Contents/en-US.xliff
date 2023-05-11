@@ -291,6 +291,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Connect To Relay</target>
         <note>Label for section for adding a relay server.</note>
       </trans-unit>
+      <trans-unit id="Connect to Alby" xml:space="preserve">
+        <source>Connect to Alby</source>
+        <target>Connect to Alby</target>
+        <note>Button to connect to Alby, a service that provides a Lightning wallet for zapping sats. Alby is the name of the service and should not be translated.</note>
+      </trans-unit>
       <trans-unit id="Connected Relays" xml:space="preserve">
         <source>Connected Relays</source>
         <target>Connected Relays</target>
@@ -470,11 +475,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Disconnect From Relay</source>
         <target>Disconnect From Relay</target>
         <note>Button to disconnect from the relay.</note>
-      </trans-unit>
-      <trans-unit id="Dismiss" xml:space="preserve">
-        <source>Dismiss</source>
-        <target>Dismiss</target>
-        <note>Button to dismiss a text field alert.</note>
       </trans-unit>
       <trans-unit id="Display Name" xml:space="preserve">
         <source>Display Name</source>
@@ -995,8 +995,7 @@ Button text to indicate that the zap type is a private zap.</note>
       <trans-unit id="Relay" xml:space="preserve">
         <source>Relay</source>
         <target>Relay</target>
-        <note>Label to display relay address.
-   Text field for relay server. Used for testing purposes.</note>
+        <note>Label to display relay address.</note>
       </trans-unit>
       <trans-unit id="Relays" xml:space="preserve">
         <source>Relays</source>
@@ -1066,11 +1065,6 @@ Button text to indicate that the zap type is a private zap.</note>
         <source>Repost</source>
         <target>Repost</target>
         <note>Button to repost a note</note>
-      </trans-unit>
-      <trans-unit id="Repost Note" xml:space="preserve">
-        <source>Repost Note</source>
-        <target>Repost Note</target>
-        <note>Title text to indicate that the buttons below are meant to be used to repost a note to others.</note>
       </trans-unit>
       <trans-unit id="Reposted" xml:space="preserve">
         <source>Reposted</source>
@@ -1357,6 +1351,11 @@ Button text to indicate that the zap type is a private zap.</note>
         <source>Universe 🛸</source>
         <target>Universe 🛸</target>
         <note>Toolbar label for the universal view where posts from all connected relay servers appear.</note>
+      </trans-unit>
+      <trans-unit id="Unmute" xml:space="preserve">
+        <source>Unmute</source>
+        <target>Unmute</target>
+        <note>Button to unmute a profile.</note>
       </trans-unit>
       <trans-unit id="Unmute conversation" xml:space="preserve">
         <source>Unmute conversation</source>
