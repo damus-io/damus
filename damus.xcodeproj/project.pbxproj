@@ -259,6 +259,7 @@
 		50088DA129E8271A008A1FDF /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50088DA029E8271A008A1FDF /* WebSocket.swift */; };
 		501F8C802A0220E1001AFC1D /* KeychainStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */; };
 		501F8C822A0224EB001AFC1D /* KeychainStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */; };
+		501F8C5829FF5FC5001AFC1D /* Damus.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C5629FF5FC5001AFC1D /* Damus.xcdatamodeld */; };
 		50A50A8D29A09E1C00C01BE7 /* RequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */; };
 		50B5685329F97CB400A23243 /* CredentialHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B5685229F97CB400A23243 /* CredentialHandler.swift */; };
 		5C42E78C29DB76D90086AAC1 /* EmptyUserSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */; };
@@ -682,6 +683,7 @@
 		50088DA029E8271A008A1FDF /* WebSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocket.swift; sourceTree = "<group>"; };
 		501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorage.swift; sourceTree = "<group>"; };
 		501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorageTests.swift; sourceTree = "<group>"; };
+		501F8C5729FF5FC5001AFC1D /* Damus.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Damus.xcdatamodel; sourceTree = "<group>"; };
 		50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestTests.swift; sourceTree = "<group>"; };
 		50B5685229F97CB400A23243 /* CredentialHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialHandler.swift; sourceTree = "<group>"; };
 		5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyUserSearchView.swift; sourceTree = "<group>"; };
@@ -985,6 +987,7 @@
 		4C75EFAB28049CC80006080F /* Nostr */ = {
 			isa = PBXGroup;
 			children = (
+				501F8C5329FF5EE2001AFC1D /* CoreData */,
 				4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */,
 				4C75EFA527FF87A20006080F /* Nostr.swift */,
 				4C75EFAE28049D340006080F /* NostrFilter.swift */,
@@ -1358,6 +1361,14 @@
 			path = Images;
 			sourceTree = "<group>";
 		};
+		501F8C5329FF5EE2001AFC1D /* CoreData */ = {
+			isa = PBXGroup;
+			children = (
+				501F8C5629FF5FC5001AFC1D /* Damus.xcdatamodeld */,
+			);
+			path = CoreData;
+			sourceTree = "<group>";
+		};
 		7C0F392D29B57C8F0039859C /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
@@ -1727,6 +1738,7 @@
 				4C1A9A2729DDE31900516EAC /* TranslationSettingsView.swift in Sources */,
 				4CB8838629656C8B00DC99E7 /* NIP05.swift in Sources */,
 				4CF0ABD82981980C00D66079 /* Lists.swift in Sources */,
+				501F8C5829FF5FC5001AFC1D /* Damus.xcdatamodeld in Sources */,
 				4C30AC8029A6A53F00E2BD5A /* ProfilePicturesView.swift in Sources */,
 				4C8EC52529D1FA6C0085D9A8 /* DamusColors.swift in Sources */,
 				4C5C7E6A284EDE2E00A22DF5 /* SearchResultsView.swift in Sources */,
@@ -2329,6 +2341,19 @@
 			productName = secp256k1;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		501F8C5629FF5FC5001AFC1D /* Damus.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				501F8C5729FF5FC5001AFC1D /* Damus.xcdatamodel */,
+			);
+			currentVersion = 501F8C5729FF5FC5001AFC1D /* Damus.xcdatamodel */;
+			path = Damus.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 4CE6DEDB27F7A08100C66700 /* Project object */;
 }
