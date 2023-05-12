@@ -19,8 +19,11 @@ let fallback_zap_amount = 1000
         if let loaded = UserDefaults.standard.object(forKey: self.key) as? T {
             self.value = loaded
         } else if let loaded = UserDefaults.standard.object(forKey: key) as? T {
-            // try to load from deprecated non-pubkey-keyed setting
+            // If pubkey-scoped setting does not exist but the deprecated non-pubkey-scoped setting does,
+            // migrate the deprecated setting into the pubkey-scoped one and delete the deprecated one.
             self.value = loaded
+            UserDefaults.standard.set(loaded, forKey: self.key)
+            UserDefaults.standard.removeObject(forKey: key)
         } else {
             self.value = default_value
         }
@@ -48,8 +51,11 @@ let fallback_zap_amount = 1000
         if let loaded = UserDefaults.standard.string(forKey: self.key), let val = T.init(from: loaded) {
             self.value = val
         } else if let loaded = UserDefaults.standard.string(forKey: key), let val = T.init(from: loaded) {
-            // try to load from deprecated non-pubkey-keyed setting
+            // If pubkey-scoped setting does not exist but the deprecated non-pubkey-scoped setting does,
+            // migrate the deprecated setting into the pubkey-scoped one and delete the deprecated one.
             self.value = val
+            UserDefaults.standard.set(val.to_string(), forKey: self.key)
+            UserDefaults.standard.removeObject(forKey: key)
         } else {
             self.value = default_value
         }
