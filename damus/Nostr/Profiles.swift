@@ -6,8 +6,6 @@
 //
 
 import Foundation
-import UIKit
-
 
 class Profiles {
     
@@ -22,28 +20,34 @@ class Profiles {
     var nip05_pubkey: [String: String] = [:]
     var zappers: [String: String] = [:]
     
+    private let database = ProfileDatabase()
+    
     func is_validated(_ pk: String) -> NIP05? {
-        return validated[pk]
+        validated[pk]
     }
     
     func lookup_zapper(pubkey: String) -> String? {
-        if let zapper = zappers[pubkey] {
-            return zapper
-        }
-        
-        return nil
+        zappers[pubkey]
     }
     
     func add(id: String, profile: TimestampedProfile) {
         queue.async(flags: .barrier) {
             self.profiles[id] = profile
         }
+        
+        do {
+            try database.upsert(id: id, profile: profile.profile, last_update: Date(timeIntervalSince1970: TimeInterval(profile.timestamp)))
+        } catch {
+            print("⚠️ Warning: Profiles failed to save a profile: \(error)")
+        }
     }
     
     func lookup(id: String) -> Profile? {
+        var profile: Profile?
         queue.sync {
-            return profiles[id]?.profile
+            profile = profiles[id]?.profile
         }
+        return profile ?? database.get(id: id)
     }
     
     func lookup_with_timestamp(id: String) -> TimestampedProfile? {
