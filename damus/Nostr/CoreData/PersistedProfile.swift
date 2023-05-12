@@ -21,4 +21,16 @@ final class PersistedProfile: NSManagedObject {
     @NSManaged var lud16: String?
     @NSManaged var nip05: String?
     @NSManaged var last_update: Date?
+    
+    func copyValues(from profile: Profile) {
+        name = profile.name
+        display_name = profile.display_name
+        about = profile.about
+        picture = profile.picture
+        banner = profile.banner
+        website = profile.website
+        lud06 = profile.lud06
+        lud16 = profile.lud16
+        nip05 = profile.nip05
+    }
 }
