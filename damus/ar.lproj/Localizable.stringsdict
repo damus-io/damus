@@ -314,6 +314,30 @@
 			<string>اعادة نشر</string>
 		</dict>
 	</dict>
+	<key>sats</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@SATS@</string>
+		<key>SATS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>ساتوشي</string>
+			<key>one</key>
+			<string>ساتوشي</string>
+			<key>two</key>
+			<string>ساتوشي</string>
+			<key>few</key>
+			<string>ساتوشي</string>
+			<key>many</key>
+			<string>ساتوشي</string>
+			<key>other</key>
+			<string>ساتوشي</string>
+		</dict>
+	</dict>
 	<key>sats_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

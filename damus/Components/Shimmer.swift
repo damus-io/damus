@@ -9,8 +9,6 @@ import SwiftUI
 
 public struct ShimmerConfiguration {
     
-    @Environment(\.colorScheme) var colorScheme
-    
     public let gradient: Gradient
     public let initialLocation: (start: UnitPoint, end: UnitPoint)
     public let finalLocation: (start: UnitPoint, end: UnitPoint)

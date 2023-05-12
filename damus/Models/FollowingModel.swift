@@ -11,7 +11,6 @@ class FollowingModel {
     let damus_state: DamusState
     var needs_sub: Bool = true
     
-    var has_contact: Set<String> = Set()
     let contacts: [String]
     
     let sub_id: String = UUID().description

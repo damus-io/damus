@@ -55,15 +55,6 @@ func parse_str(_ p: Parser, _ s: String) -> Bool {
     return false
 }
 
-func peek_char(_ p: Parser, _ i: Int) -> Character? {
-    let offset = p.pos + i
-    if offset < 0 || offset > p.str.count {
-        return nil
-    }
-    let ind = p.str.index(p.str.startIndex, offsetBy: offset)
-    return p.str[ind]
-}
-
 func parse_char(_ p: Parser, _ c: Character) -> Bool {
     if p.pos >= p.str.count {
         return false
@@ -78,21 +69,6 @@ func parse_char(_ p: Parser, _ c: Character) -> Bool {
     
     return false
 }
-
-func parse_digit(_ p: Parser) -> Int? {
-    let ind = p.str.index(p.str.startIndex, offsetBy: p.pos)
-    
-    if let c = p.str[ind].unicodeScalars.first {
-        let d = Int(c.value) - 48
-        if d >= 0 && d < 10 {
-            p.pos += 1
-            return Int(d)
-        }
-    }
-    
-    return nil
-}
-
 
 func parse_hex_char(_ p: Parser) -> Character? {
     let ind = p.str.index(p.str.startIndex, offsetBy: p.pos)

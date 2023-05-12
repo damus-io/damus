@@ -11,7 +11,7 @@ struct RelayFilter: Hashable {
     let timeline: Timeline
     let relay_id: String
     
-    init(timeline: Timeline, relay_id: String, on: Bool = false) {
+    init(timeline: Timeline, relay_id: String) {
         self.timeline = timeline
         self.relay_id = relay_id
     }
@@ -63,11 +63,6 @@ func relay_filter_setting_key(_ pubkey: String) -> String {
     return pk_setting_key(pubkey, key: "relay_filters")
 }
 
-func clear_relay_filters(_ pubkey: String) {
-    let key = relay_filter_setting_key(pubkey)
-    UserDefaults.standard.removeObject(forKey: key)
-}
-
 func load_relay_filters(_ pubkey: String) -> Set<RelayFilter>? {
     let key = relay_filter_setting_key(pubkey)
     guard let filters = UserDefaults.standard.stringArray(forKey: key) else {
@@ -88,7 +83,7 @@ func load_relay_filters(_ pubkey: String) -> Set<RelayFilter>? {
 }
 
 func determine_to_relays(pool: RelayPool, filters: RelayFilters) -> [String] {
-    return pool.descriptors
+    return pool.our_descriptors
         .map { $0.url.url.absoluteString }
         .filter { !filters.is_filtered(timeline: .search, relay_id: $0) }
 }

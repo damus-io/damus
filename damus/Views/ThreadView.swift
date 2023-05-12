@@ -32,7 +32,7 @@ struct ThreadView: View {
                                        selected: false)
                         .padding(.horizontal)
                         .onTapGesture {
-                            thread.set_active_event(parent_event, privkey: state.keypair.privkey)
+                            thread.set_active_event(parent_event)
                             scroll_to_event(scroller: reader, id: parent_event.id, delay: 0.1, animate: false)
                         }
                         
@@ -67,7 +67,7 @@ struct ThreadView: View {
                         )
                         .padding(.horizontal)
                         .onTapGesture {
-                            thread.set_active_event(child_event, privkey: state.keypair.privkey)
+                            thread.set_active_event(child_event)
                             scroll_to_event(scroller: reader, id: child_event.id, delay: 0.1, animate: false)
                         }
 

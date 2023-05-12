@@ -32,8 +32,6 @@ struct ZapButton: View {
     
     @State var zapping: Bool = false
     @State var invoice: String = ""
-    @State var slider_value: Double = 0.0
-    @State var slider_visible: Bool = false
     @State var showing_select_wallet: Bool = false
     @State var showing_zap_customizer: Bool = false
     @State var is_charging: Bool = false
@@ -148,7 +146,7 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
     }
     
     // Only take the first 10 because reasons
-    let relays = Array(damus_state.pool.descriptors.prefix(10))
+    let relays = Array(damus_state.pool.our_descriptors.prefix(10))
     let target = ZapTarget.note(id: event.id, author: event.pubkey)
     let content = comment ?? ""
     

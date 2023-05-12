@@ -52,17 +52,6 @@ enum ImageShape {
     }
 }
 
-// Try either calculated imagefill from the real image or from metadata hints in tags
-func lookup_imgmeta_size_hint(events: EventCache, url: URL?) -> CGSize? {
-    guard let url,
-          let meta = events.lookup_img_metadata(url: url),
-          let img_size = meta.meta.dim?.size else {
-        return nil
-    }
-    
-    return img_size
-}
-
 struct ImageCarousel: View {
     var urls: [URL]
     

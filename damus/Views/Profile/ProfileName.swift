@@ -30,27 +30,24 @@ struct ProfileName: View {
     let profile: Profile?
     let prefix: String
     
-    let show_friend_confirmed: Bool
     let show_nip5_domain: Bool
     
     @State var display_name: DisplayName?
     @State var nip05: NIP05?
 
-    init(pubkey: String, profile: Profile?, damus: DamusState, show_friend_confirmed: Bool, show_nip5_domain: Bool = true) {
+    init(pubkey: String, profile: Profile?, damus: DamusState, show_nip5_domain: Bool = true) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = ""
-        self.show_friend_confirmed = show_friend_confirmed
         self.show_nip5_domain = show_nip5_domain
         self.damus_state = damus
     }
     
-    init(pubkey: String, profile: Profile?, prefix: String, damus: DamusState, show_friend_confirmed: Bool, show_nip5_domain: Bool = true) {
+    init(pubkey: String, profile: Profile?, prefix: String, damus: DamusState, show_nip5_domain: Bool = true) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = prefix
         self.damus_state = damus
-        self.show_friend_confirmed = show_friend_confirmed
         self.show_nip5_domain = show_nip5_domain
     }
     
@@ -108,6 +105,6 @@ struct ProfileName: View {
 struct ProfileName_Previews: PreviewProvider {
     static var previews: some View {
         ProfileName(pubkey:
-                        test_damus_state().pubkey, profile: make_test_profile(), damus: test_damus_state(), show_friend_confirmed: true)
+                        test_damus_state().pubkey, profile: make_test_profile(), damus: test_damus_state())
     }
 }

@@ -1,0 +1,26 @@
+{
+  "images": [
+    {
+      "filename": "search-page-find.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "search-page-find.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "search-page-find.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  },
+  "properties": {
+    "template-rendering-intent": "template"
+  }
+}

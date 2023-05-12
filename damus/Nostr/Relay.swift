@@ -8,10 +8,18 @@
 import Foundation
 
 public struct RelayInfo: Codable {
-    let read: Bool
-    let write: Bool
+    let read: Bool?
+    let write: Bool?
+    let ephemeral: Bool?
+    
+    init(read: Bool, write: Bool, ephemeral: Bool = false) {
+        self.read = read
+        self.write = write
+        self.ephemeral = ephemeral
+    }
 
-    static let rw = RelayInfo(read: true, write: true)
+    static let rw = RelayInfo(read: true, write: true, ephemeral: false)
+    static let ephemeral = RelayInfo(read: true, write: true, ephemeral: true)
 }
 
 public struct RelayDescriptor {
@@ -60,10 +68,6 @@ class Relay: Identifiable {
         self.connection = connection
     }
     
-    func mark_broken() {
-        flags |= RelayFlags.broken.rawValue
-    }
-    
     var is_broken: Bool {
         return (flags & RelayFlags.broken.rawValue) == RelayFlags.broken.rawValue
     }
@@ -76,7 +80,6 @@ class Relay: Identifiable {
 
 enum RelayError: Error {
     case RelayAlreadyExists
-    case RelayNotFound
 }
 
 func get_relay_id(_ url: RelayURL) -> String {

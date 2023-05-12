@@ -27,11 +27,6 @@ struct Mention: Equatable {
     let ref: ReferencedId
 }
 
-struct IdBlock: Identifiable {
-    let id: String = UUID().description
-    let block: Block
-}
-
 typealias Invoice = LightningInvoice<Amount>
 typealias ZapInvoice = LightningInvoice<Int64>
 
@@ -155,10 +150,6 @@ func render_blocks(blocks: [Block]) -> String {
     }
 }
 
-func parse_textblock(str: String, from: Int, to: Int) -> Block {
-    return .text(String(substring(str, start: from, end: to)))
-}
-
 func parse_mentions(content: String, tags: [[String]]) -> [Block] {
     var out: [Block] = []
     
@@ -247,32 +238,6 @@ enum Amount: Equatable {
             return format_msats(amt)
         }
     }
-}
-
-func format_actions_abbrev(_ actions: Int) -> String {
-    let formatter = NumberFormatter()
-    formatter.numberStyle = .decimal
-    formatter.positiveSuffix = "m"
-    formatter.positivePrefix = ""
-    formatter.minimumFractionDigits = 0
-    formatter.maximumFractionDigits = 3
-    formatter.roundingMode = .down
-    formatter.roundingIncrement = 0.1
-    formatter.multiplier = 1
-        
-    if actions >= 1_000_000 {
-        formatter.positiveSuffix = "m"
-        formatter.multiplier = 0.000001
-    } else if actions >= 1000 {
-        formatter.positiveSuffix = "k"
-        formatter.multiplier = 0.001
-    } else {
-        return "\(actions)"
-    }
-    
-    let actions = NSNumber(value: actions)
-    
-    return formatter.string(from: actions) ?? "\(actions)"
 }
 
 func format_msats_abbrev(_ msats: Int64) -> String {
@@ -423,59 +388,6 @@ func convert_mention_index_block(ind: Int32, tags: [[String]]) -> Block?
     return .mention(Mention(index: ind, type: mention_type, ref: ref))
 }
 
-func parse_mentions_old(content: String, tags: [[String]]) -> [Block] {
-    let p = Parser(pos: 0, str: content)
-    var blocks: [Block] = []
-    var starting_from: Int = 0
-    
-    while p.pos < content.count {
-        if !consume_until(p, match: { !$0.isWhitespace}) {
-            break
-        }
-        
-        let pre_mention = p.pos
-        
-        let c = peek_char(p, 0)
-        let pr = peek_char(p, -1)
-        
-        if c == "#" {
-            if let mention = parse_mention(p, tags: tags) {
-                blocks.append(parse_textblock(str: p.str, from: starting_from, to: pre_mention))
-                blocks.append(.mention(mention))
-                starting_from = p.pos
-            } else if let hashtag = parse_hashtag(p) {
-                blocks.append(parse_textblock(str: p.str, from: starting_from, to: pre_mention))
-                blocks.append(.hashtag(hashtag))
-                starting_from = p.pos
-            } else {
-                if !consume_until(p, match: { $0.isWhitespace }) {
-                    break
-                }
-            }
-        } else if c == "h" && (pr == nil || pr!.isWhitespace) {
-            if let url = parse_url(p) {
-                blocks.append(parse_textblock(str: p.str, from: starting_from, to: pre_mention))
-                blocks.append(.url(url))
-                starting_from = p.pos
-            } else {
-                if !consume_until(p, match: { $0.isWhitespace }) {
-                    break
-                }
-            }
-        } else {
-            if !consume_until(p, match: { $0.isWhitespace }) {
-                break
-            }
-        }
-    }
-    
-    if p.str.count - starting_from > 0 {
-        blocks.append(parse_textblock(str: p.str, from: starting_from, to: p.str.count))
-    }
-    
-    return blocks
-}
-
 func parse_while(_ p: Parser, match: (Character) -> Bool) -> String? {
     var i: Int = 0
     let sub = substring(p.str, start: p.pos, end: p.str.count)
@@ -513,37 +425,6 @@ func is_punctuation(_ c: Character) -> Bool {
     return c.isWhitespace || c.isPunctuation
 }
 
-func parse_url(_ p: Parser) -> URL? {
-    let start = p.pos
-    
-    if !parse_str(p, "http") {
-        return nil
-    }
-    
-    if parse_char(p, "s") {
-        if !parse_str(p, "://") {
-            return nil
-        }
-    } else {
-        if !parse_str(p, "://") {
-            return nil
-        }
-    }
-    
-    if !consume_until(p, match: { c in c.isWhitespace }, end_ok: true) {
-        p.pos = start
-        return nil
-    }
-    
-    let url_str = String(substring(p.str, start: start, end: p.pos))
-    guard let url = URL(string: url_str) else {
-        p.pos = start
-        return nil
-    }
-    
-    return url
-}
-
 func parse_hashtag(_ p: Parser) -> String? {
     let start = p.pos
     
@@ -564,51 +445,6 @@ func parse_hashtag(_ p: Parser) -> String? {
     }
     
     return str
-}
-
-func parse_mention(_ p: Parser, tags: [[String]]) -> Mention? {
-    let start = p.pos
-    
-    if !parse_str(p, "#[") {
-        return nil
-    }
-    
-    guard let digit = parse_digit(p) else {
-        p.pos = start
-        return nil
-    }
-    
-    var ind = digit
-    
-    if let d2 = parse_digit(p) {
-        ind = digit * 10
-        ind += d2
-    }
-    
-    if !parse_char(p, "]") {
-        return nil
-    }
-    
-    var kind: MentionType = .pubkey
-    if ind > tags.count - 1 {
-        return nil
-    }
-    
-    if tags[ind].count == 0 {
-        return nil
-    }
-    
-    switch tags[ind][0] {
-    case "e": kind = .event
-    case "p": kind = .pubkey
-    default: return nil
-    }
-    
-    guard let ref = tag_to_refid(tags[ind]) else {
-        return nil
-    }
-    
-    return Mention(index: ind, type: kind, ref: ref)
 }
 
 func find_tag_ref(type: String, id: String, tags: [[String]]) -> Int? {

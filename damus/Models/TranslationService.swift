@@ -45,8 +45,4 @@ enum TranslationService: String, CaseIterable, Identifiable, StringCodable {
             return .init(tag: self.rawValue, displayName: NSLocalizedString("NoKYCTranslate.com (Prepay with BTC)", comment: "Dropdown option for selecting NoKYCTranslate.com as the translation service."))
         }
     }
-
-    static var allModels: [Model] {
-        return Self.allCases.map { $0.model }
-    }
 }

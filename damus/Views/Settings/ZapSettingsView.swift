@@ -9,14 +9,12 @@ import SwiftUI
 import Combine
 
 struct ZapSettingsView: View {
-    let pubkey: String
     @ObservedObject var settings: UserSettingsStore
     
     @State var default_zap_amount: String
     @Environment(\.dismiss) var dismiss
 
-    init(pubkey: String, settings: UserSettingsStore) {
-        self.pubkey = pubkey
+    init(settings: UserSettingsStore) {
         _default_zap_amount = State(initialValue: settings.default_zap_amount.formatted())
         self._settings = ObservedObject(initialValue: settings)
     }
@@ -75,6 +73,6 @@ struct ZapSettingsView: View {
 
 struct WalletSettingsView_Previews: PreviewProvider {
     static var previews: some View {
-        ZapSettingsView(pubkey: "pubkey", settings: UserSettingsStore())
+        ZapSettingsView(settings: UserSettingsStore())
     }
 }

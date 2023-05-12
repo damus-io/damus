@@ -45,7 +45,7 @@
       <trans-unit id="%@" xml:space="preserve">
         <source>%@</source>
         <target>%@</target>
-        <note>DM by heading in local notification</note>
+        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="%@ %@" xml:space="preserve">
         <source>%@ %@</source>
@@ -63,6 +63,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>%@ not found</target>
         <note>When a note or profile is not found when searching for it via its note id</note>
       </trans-unit>
+      <trans-unit id="%@ reacted with %@" xml:space="preserve">
+        <source>%1$@ reacted with %2$@</source>
+        <target>%1$@ reacted with %2$@</target>
+        <note>Reacted by heading in local notification</note>
+      </trans-unit>
       <trans-unit id="%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." xml:space="preserve">
         <source>%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction.</source>
         <target>%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction.</target>
@@ -77,11 +82,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet.</source>
         <target>%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet.</target>
         <note>Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string.</note>
-      </trans-unit>
-      <trans-unit id="%lld" xml:space="preserve">
-        <source>%lld</source>
-        <target>%lld</target>
-        <note>No comment provided by engineer.</note>
       </trans-unit>
       <trans-unit id="%lld/%lld" xml:space="preserve">
         <source>%lld/%lld</source>
@@ -201,10 +201,20 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Are you lost?</target>
         <note>Text asking the user if they are lost in the app.</note>
       </trans-unit>
+      <trans-unit id="Are you sure you want to delete all of your bookmarks?" xml:space="preserve">
+        <source>Are you sure you want to delete all of your bookmarks?</source>
+        <target>Are you sure you want to delete all of your bookmarks?</target>
+        <note>Alert for deleting all of the bookmarks.</note>
+      </trans-unit>
       <trans-unit id="Are you sure you want to upload this image?" xml:space="preserve">
         <source>Are you sure you want to upload this image?</source>
         <target>Are you sure you want to upload this image?</target>
         <note>Alert message asking if the user wants to upload an image.</note>
+      </trans-unit>
+      <trans-unit id="Are you sure you want to upload this media?" xml:space="preserve">
+        <source>Are you sure you want to upload this media?</source>
+        <target>Are you sure you want to upload this media?</target>
+        <note>Alert message asking if the user wants to upload media.</note>
       </trans-unit>
       <trans-unit id="Automatically translate notes" xml:space="preserve">
         <source>Automatically translate notes</source>
@@ -252,6 +262,7 @@ Sentence composed of 2 variables to describe how many people are following a use
    Button to cancel out of posting a note.
    Button to cancel out of view adding user inputted relay.
    Button to cancel the upload.
+   Cancel deleting bookmarks.
    Cancel deleting the user.
    Cancel out of logging out the user.</note>
       </trans-unit>
@@ -293,7 +304,8 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Continue" xml:space="preserve">
         <source>Continue</source>
         <target>Continue</target>
-        <note>Continue with deleting the user.</note>
+        <note>Continue with bookmarks.
+   Continue with deleting the user.</note>
       </trans-unit>
       <trans-unit id="Copied" xml:space="preserve">
         <source>Copied</source>
@@ -574,12 +586,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Hide</target>
         <note>Button to hide a post from a user who has been muted.</note>
       </trans-unit>
-      <trans-unit id="Hide API Key" xml:space="preserve">
-        <source>Hide API Key</source>
-        <target>Hide API Key</target>
-        <note>Button to hide the DeepL translation API key.
-   Button to hide the LibreTranslate server API key.</note>
-      </trans-unit>
       <trans-unit id="Hide all 🤙's" xml:space="preserve">
         <source>Hide all 🤙's</source>
         <target>Hide all 🤙's</target>
@@ -660,11 +666,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Like</source>
         <target>Like</target>
         <note>Accessibility Label for Like button</note>
-      </trans-unit>
-      <trans-unit id="Liked by %@" xml:space="preserve">
-        <source>Liked by %@</source>
-        <target>Liked by %@</target>
-        <note>Liked by heading in local notification</note>
       </trans-unit>
       <trans-unit id="Likes" xml:space="preserve">
         <source>Likes</source>
@@ -1196,12 +1197,6 @@ Button text to indicate that the zap type is a private zap.</note>
         <target>Show +</target>
         <note>Button that, when tapped, will show + buttons next to a user's relays.</note>
       </trans-unit>
-      <trans-unit id="Show API Key" xml:space="preserve">
-        <source>Show API Key</source>
-        <target>Show API Key</target>
-        <note>Button to show the DeepL translation API key.
-   Button to show the LibreTranslate server API key.</note>
-      </trans-unit>
       <trans-unit id="Show more" xml:space="preserve">
         <source>Show more</source>
         <target>Show more</target>
@@ -1311,11 +1306,6 @@ Button text to indicate that the zap type is a private zap.</note>
         <source>Translated from %@</source>
         <target>Translated from %@</target>
         <note>Button to indicate that the note has been translated from a different language.</note>
-      </trans-unit>
-      <trans-unit id="Translating..." xml:space="preserve">
-        <source>Translating...</source>
-        <target>Translating...</target>
-        <note>Text to display when waiting for the translation of a note to finish processing before showing it.</note>
       </trans-unit>
       <trans-unit id="Translation" xml:space="preserve">
         <source>Translation</source>
@@ -1619,11 +1609,6 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <target>satoshi</target>
         <note>Example username of Bitcoin creator(s), Satoshi Nakamoto.</note>
       </trans-unit>
-      <trans-unit id="sats" xml:space="preserve">
-        <source>sats</source>
-        <target>sats</target>
-        <note>Shortened form of satoshi, display unit of measure where 1,000,000,000 satoshis is 1 Bitcoin. Used to indicate how many sats will be zapped to a note, configured through the custom zap view.</note>
-      </trans-unit>
       <trans-unit id="self" xml:space="preserve">
         <source>self</source>
         <target>self</target>
@@ -1874,6 +1859,21 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
       <trans-unit id="/reposts_count:dict/REPOSTS:dict/other:dict/:string" xml:space="preserve">
         <source>Reposts</source>
         <target>Reposts</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/sats:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@SATS@</source>
+        <target>%#@SATS@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/sats:dict/SATS:dict/one:dict/:string" xml:space="preserve">
+        <source>sat</source>
+        <target>sat</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/sats:dict/SATS:dict/other:dict/:string" xml:space="preserve">
+        <source>sats</source>
+        <target>sats</target>
         <note/>
       </trans-unit>
       <trans-unit id="/sats_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">

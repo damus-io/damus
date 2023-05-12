@@ -45,6 +45,8 @@ struct PostView: View {
     @State var originalReferences: [ReferencedId] = []
     @State var references: [ReferencedId] = []
     @State var zap_pubkey: String = ""
+    @State var focusWordAttributes: (String?, NSRange?) = (nil, nil)
+    @State var newCursorIndex: Int?
 
     @State var mediaToUpload: MediaUpload? = nil
     
@@ -54,10 +56,6 @@ struct PostView: View {
     let damus_state: DamusState
 
     @Environment(\.presentationMode) var presentationMode
-
-    enum FocusField: Hashable {
-      case post
-    }
 
     func cancel() {
         NotificationCenter.default.post(name: .post, object: NostrPostResult.cancel)
@@ -86,13 +84,15 @@ struct PostView: View {
         let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
         
         var tags = uploadedMedias.compactMap { $0.metadata?.to_tag() }
-        
+      
         if !zap_pubkey.isEmpty {
             let zap_target_tag = ["zap", zap_pubkey, "pubkey"]
             tags.append(zap_target_tag)
         }
         
-        content.append(" " + imagesString + " ")
+        if !imagesString.isEmpty {
+            content.append(" " + imagesString + " ")
+        }
 
         if case .quoting(let ev) = action, let id = bech32_note_id(ev.id) {
             content.append(" nostr:" + id)
@@ -219,7 +219,10 @@ struct PostView: View {
     
     var TextEntry: some View {
         ZStack(alignment: .topLeading) {
-            TextViewWrapper(attributedText: $post)
+            TextViewWrapper(attributedText: $post, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
+                focusWordAttributes = (word, range)
+                self.newCursorIndex = nil
+            })
                 .focused($focus)
                 .textInputAutocapitalization(.sentences)
                 .onChange(of: post) { p in
@@ -328,8 +331,7 @@ struct PostView: View {
     var body: some View {
         GeometryReader { (deviceSize: GeometryProxy) in
             VStack(alignment: .leading, spacing: 0) {
-
-                let searching = get_searching_string(post.string)
+                let searching = get_searching_string(focusWordAttributes.0)
                 
                 TopBar
                 
@@ -349,7 +351,7 @@ struct PostView: View {
                 
                 // This if-block observes @ for tagging
                 if let searching {
-                    UserSearch(damus_state: damus_state, search: searching, post: $post)
+                    UserSearch(damus_state: damus_state, search: searching, focusWordAttributes: $focusWordAttributes, newCursorIndex: $newCursorIndex, post: $post)
                         .frame(maxHeight: .infinity)
                 } else {
                     if !zap_pubkey.isEmpty {
@@ -385,7 +387,7 @@ struct PostView: View {
                 } onVideoPicked: { url in
                     self.mediaToUpload = .video(url)
                 }
-                .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
+                .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
                     Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
                         if let mediaToUpload {
                             self.handle_upload(media: mediaToUpload)
@@ -402,7 +404,7 @@ struct PostView: View {
                 } onVideoPicked: { url in
                     self.mediaToUpload = .video(url)
                 }
-                .alert("Are you sure you want to upload this media?", isPresented: $image_upload_confirm) {
+                .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
                     Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
                         if let mediaToUpload {
                             self.handle_upload(media: mediaToUpload)
@@ -450,25 +452,26 @@ struct PostView: View {
     }
 }
 
-func get_searching_string(_ post: String) -> String? {
-    guard let last_word = post.components(separatedBy: .whitespacesAndNewlines).last else {
+func get_searching_string(_ word: String?) -> String? {
+    guard let word = word else {
+        return nil
+    }
+
+    guard word.count >= 2 else {
         return nil
     }
     
-    guard last_word.count >= 2 else {
-        return nil
-    }
-    
-    guard last_word.first! == "@" else {
+    guard let firstCharacter = word.first,
+          firstCharacter == "@" else {
         return nil
     }
     
     // don't include @npub... strings
-    guard last_word.count != 64 else {
+    guard word.count != 64 else {
         return nil
     }
     
-    return String(last_word.dropFirst())
+    return String(word.dropFirst())
 }
 
 struct PostView_Previews: PreviewProvider {

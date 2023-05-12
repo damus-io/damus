@@ -60,15 +60,6 @@ enum EventRef {
     }
 }
 
-func has_any_e_refs(_ tags: [[String]]) -> Bool {
-    for tag in tags {
-        if tag.count >= 2 && tag[0] == "e" {
-            return true
-        }
-    }
-    return false
-}
-
 func build_mention_indices(_ blocks: [Block], type: MentionType) -> Set<Int> {
     return blocks.reduce(into: []) { acc, block in
         switch block {

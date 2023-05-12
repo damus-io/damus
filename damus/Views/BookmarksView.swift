@@ -13,6 +13,7 @@ struct BookmarksView: View {
     private let bookmarksTitle = NSLocalizedString("Bookmarks", comment: "Title of bookmarks view")
     @State private var clearAllAlert: Bool = false
     
+    @Environment(\.dismiss) var dismiss
     @ObservedObject var manager: BookmarksManager
 
     init(state: DamusState) {
@@ -36,10 +37,13 @@ struct BookmarksView: View {
                 }
             } else {
                 ScrollView {
-                    InnerTimelineView(events: EventHolder(events: bookmarks, incoming: []), damus: state, show_friend_icon: true, filter: noneFilter)
+                    InnerTimelineView(events: EventHolder(events: bookmarks, incoming: []), damus: state, filter: noneFilter)
 
                 }
             }
+        }
+        .onReceive(handle_notify(.switched_timeline)) { _ in
+            dismiss()
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(bookmarksTitle)

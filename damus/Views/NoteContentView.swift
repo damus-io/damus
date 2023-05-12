@@ -37,7 +37,7 @@ struct NoteContentView: View {
         return self.artifacts_model.state.artifacts ?? .just_content(event.get_content(damus_state.keypair.privkey))
     }
     
-    init(damus_state: DamusState, event: NostrEvent, show_images: Bool, size: EventViewKind, artifacts: NoteArtifacts, options: EventViewOptions) {
+    init(damus_state: DamusState, event: NostrEvent, show_images: Bool, size: EventViewKind, options: EventViewOptions) {
         self.damus_state = damus_state
         self.event = event
         self.show_images = show_images
@@ -210,11 +210,6 @@ struct NoteContentView: View {
     
 }
 
-enum ImageName {
-    case systemImage(String)
-    case image(String)
-}
-
 func attributed_string_attach_icon(_ astr: inout AttributedString, img: UIImage) {
     let attachment = NSTextAttachment()
     attachment.image = img
@@ -256,9 +251,7 @@ struct NoteContentView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
         let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
-        let txt = CompatibleText(attributed: AttributedString(stringLiteral: content))
-        let artifacts = NoteArtifacts(content: txt, images: [], invoices: [], links: [])
-        NoteContentView(damus_state: state, event: NostrEvent(content: content, pubkey: "pk"), show_images: true, size: .normal, artifacts: artifacts, options: [])
+        NoteContentView(damus_state: state, event: NostrEvent(content: content, pubkey: "pk"), show_images: true, size: .normal, options: [])
     }
 }
 
@@ -291,17 +284,6 @@ enum NoteArtifactState {
         return nil
     }
     
-    var is_loaded: Bool {
-        switch self {
-        case .not_loaded:
-            return false
-        case .loading:
-            return false
-        case .loaded:
-            return true
-        }
-    }
-    
     var should_preload: Bool {
         switch self {
         case .loaded:
@@ -317,10 +299,10 @@ enum NoteArtifactState {
 func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -> NoteArtifacts {
     let blocks = ev.blocks(privkey)
     
-    return render_blocks(blocks: blocks, profiles: profiles, privkey: privkey)
+    return render_blocks(blocks: blocks, profiles: profiles)
 }
 
-func render_blocks(blocks: [Block], profiles: Profiles, privkey: String?) -> NoteArtifacts {
+func render_blocks(blocks: [Block], profiles: Profiles) -> NoteArtifacts {
     var invoices: [Invoice] = []
     var img_urls: [URL] = []
     var link_urls: [URL] = []
@@ -395,16 +377,6 @@ func lookup_cached_preview_size(previews: PreviewCache, evid: String) -> CGFloat
     
     return height
 }
-    
-
-func load_cached_preview(previews: PreviewCache, evid: String) -> LinkViewRepresentable? {
-    guard case .value(let meta) = previews.lookup(evid) else {
-        return nil
-    }
-    
-    return LinkViewRepresentable(meta: .linkmeta(meta))
-}
-
 
 // trim suffix whitespace and newlines
 func trim_suffix(_ str: String) -> String {

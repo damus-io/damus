@@ -23,18 +23,15 @@ struct ImagePicker: UIViewControllerRepresentable {
 
     final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
         @Binding private var presentationMode: PresentationMode
-        private let sourceType: UIImagePickerController.SourceType
         private let onImagePicked: (URL) -> Void
         private let onVideoPicked: (URL) -> Void
         @Binding var image_upload_confirm: Bool
 
         init(presentationMode: Binding<PresentationMode>,
-             sourceType: UIImagePickerController.SourceType,
              onImagePicked: @escaping (URL) -> Void,
              onVideoPicked: @escaping (URL) -> Void,
              image_upload_confirm: Binding<Bool>) {
             _presentationMode = presentationMode
-            self.sourceType = sourceType
             self.onImagePicked = onImagePicked
             self.onVideoPicked = onVideoPicked
             self._image_upload_confirm = image_upload_confirm
@@ -95,7 +92,6 @@ struct ImagePicker: UIViewControllerRepresentable {
     
     func makeCoordinator() -> Coordinator {
         return Coordinator(presentationMode: presentationMode,
-                           sourceType: sourceType,
                            onImagePicked: { url in
             // Handle the selected image URL
             onImagePicked(url)

@@ -187,11 +187,6 @@ func make_ln_url(_ str: String?) -> URL? {
     return str.flatMap { URL(string: "lightning:" + $0) }
 }
 
-struct NostrSubscription {
-    let sub_id: String
-    let filter: NostrFilter
-}
-
 func lnaddress_to_lnurl(_ lnaddr: String) -> String? {
     let parts = lnaddr.split(separator: "@")
     guard parts.count == 2 else {

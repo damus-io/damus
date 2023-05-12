@@ -13,13 +13,6 @@ struct MaybeAnonPfpView: View {
     let pubkey: String
     let size: CGFloat
     
-    init(state: DamusState, event: NostrEvent, pubkey: String, size: CGFloat) {
-        self.state = state
-        self.is_anon = event_is_anonymous(ev: event)
-        self.pubkey = pubkey
-        self.size = size
-    }
-    
     init(state: DamusState, is_anon: Bool, pubkey: String, size: CGFloat) {
         self.state = state
         self.is_anon = is_anon

@@ -24,10 +24,12 @@ class Relayer {
 
 class PostedEvent {
     let event: NostrEvent
+    let skip_ephemeral: Bool
     var remaining: [Relayer]
     
-    init(event: NostrEvent, remaining: [String]) {
+    init(event: NostrEvent, remaining: [String], skip_ephemeral: Bool) {
         self.event = event
+        self.skip_ephemeral = skip_ephemeral
         self.remaining = remaining.map {
             Relayer(relay: $0, attempts: 0, retry_after: 2.0)
         }
@@ -93,25 +95,18 @@ class PostBox {
             relayer.attempts += 1
             relayer.last_attempt = Int64(Date().timeIntervalSince1970)
             relayer.retry_after *= 1.5
-            pool.send(.event(event.event), to: [relayer.relay])
+            pool.send(.event(event.event), to: [relayer.relay], skip_ephemeral: event.skip_ephemeral)
         }
     }
     
-    func flush() {
-        for event in events {
-            flush_event(event.value)
-        }
-    }
-    
-    func send(_ event: NostrEvent) {
+    func send(_ event: NostrEvent, to: [String]? = nil, skip_ephemeral: Bool = true) {
         // Don't add event if we already have it
         if events[event.id] != nil {
             return
         }
         
-        let remaining = pool.descriptors.map { $0.url.id }
-        
-        let posted_ev = PostedEvent(event: event, remaining: remaining)
+        let remaining = to ?? pool.our_descriptors.map { $0.url.id }
+        let posted_ev = PostedEvent(event: event, remaining: remaining, skip_ephemeral: skip_ephemeral)
         events[event.id] = posted_ev
         
         flush_event(posted_ev)

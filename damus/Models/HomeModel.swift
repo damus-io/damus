@@ -24,6 +24,9 @@ struct NewEventsBits: OptionSet {
 }
 
 class HomeModel: ObservableObject {
+    // Don't trigger a user notification for events older than a certain age
+    static let event_max_age_for_notification: TimeInterval = 12 * 60 * 60
+    
     var damus_state: DamusState
 
     var has_event: [String: Set<String>] = [:]
@@ -121,7 +124,7 @@ class HomeModel: ObservableObject {
         case .channel_create:
             handle_channel_create(ev)
         case .channel_meta:
-            handle_channel_meta(ev)
+            break
         case .zap:
             handle_zap_event(ev)
         case .zap_request:
@@ -140,7 +143,7 @@ class HomeModel: ObservableObject {
             return
         }
         
-        if !notifications.insert_zap(zap, damus_state: damus_state) {
+        if !notifications.insert_zap(zap) {
             return
         }
 
@@ -193,9 +196,6 @@ class HomeModel: ObservableObject {
     
     func handle_channel_create(_ ev: NostrEvent) {
         self.channels[ev.id] = ev
-    }
-    
-    func handle_channel_meta(_ ev: NostrEvent) {
     }
     
     func filter_events() {
@@ -327,7 +327,6 @@ class HomeModel: ObservableObject {
 
                 self.process_event(sub_id: sub_id, relay_id: relay_id, ev: ev)
             case .notice(let msg):
-                //self.events.insert(NostrEvent(content: "NOTICE from \(relay_id): \(msg)", pubkey: "system"), at: 0)
                 print(msg)
 
             case .eose(let sub_id):
@@ -547,7 +546,8 @@ class HomeModel: ObservableObject {
     
     func got_new_dm(notifs: NewEventsBits, ev: NostrEvent) {
         self.new_events = notifs
-        if damus_state.settings.dm_notification {
+        
+        if damus_state.settings.dm_notification && ev.age < HomeModel.event_max_age_for_notification {
             let convo = ev.decrypted(privkey: self.damus_state.keypair.privkey) ?? NSLocalizedString("New encrypted direct message", comment: "Notification that the user has received a new direct message")
             let notify = LocalNotification(type: .dm, event: ev, target: ev, content: convo)
             create_local_notification(profiles: damus_state.profiles, notify: notify)
@@ -600,7 +600,7 @@ func add_contact_if_friend(contacts: Contacts, ev: NostrEvent) {
     contacts.add_friend_contact(ev)
 }
 
-func load_our_contacts(contacts: Contacts, our_pubkey: String, m_old_ev: NostrEvent?, ev: NostrEvent) {
+func load_our_contacts(contacts: Contacts, m_old_ev: NostrEvent?, ev: NostrEvent) {
     var new_pks = Set<String>()
     // our contacts
     for tag in ev.tags {
@@ -761,10 +761,11 @@ func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping (
     }
 }
 
-func process_metadata_event(events: EventCache, our_pubkey: String, profiles: Profiles, ev: NostrEvent) {
+func process_metadata_event(events: EventCache, our_pubkey: String, profiles: Profiles, ev: NostrEvent, completion: (() -> Void)? = nil) {
     guard_valid_event(events: events, ev: ev) {
         DispatchQueue.global(qos: .background).async {
             guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
+                completion?()
                 return
             }
             
@@ -772,6 +773,7 @@ func process_metadata_event(events: EventCache, our_pubkey: String, profiles: Pr
             
             DispatchQueue.main.async {
                 process_metadata_profile(our_pubkey: our_pubkey, profiles: profiles, profile: profile, ev: ev)
+                completion?()
             }
         }
     }
@@ -796,7 +798,7 @@ func load_our_stuff(state: DamusState, ev: NostrEvent) {
     let m_old_ev = state.contacts.event
     state.contacts.event = ev
 
-    load_our_contacts(contacts: state.contacts, our_pubkey: state.pubkey, m_old_ev: m_old_ev, ev: ev)
+    load_our_contacts(contacts: state.contacts, m_old_ev: m_old_ev, ev: ev)
     load_our_relays(state: state, m_old_ev: m_old_ev, ev: ev)
 }
 
@@ -892,9 +894,6 @@ func fetch_relay_metadata(relay_id: String) async throws -> RelayMetadata? {
     
     let nip11 = try JSONDecoder().decode(RelayMetadata.self, from: data)
     return nip11
-}
-
-func process_relay_metadata() {
 }
 
 @discardableResult
@@ -1116,6 +1115,11 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
     if damus_state.muted_threads.isMutedThread(ev, privkey: damus_state.keypair.privkey) {
         return
     }
+    
+    // Don't show notifications for old events
+    guard ev.age < HomeModel.event_max_age_for_notification else {
+        return
+    }
 
     if type == .text && damus_state.settings.mention_notification {
         let blocks = ev.blocks(damus_state.keypair.privkey)
@@ -1153,10 +1157,10 @@ func create_local_notification(profiles: Profiles, notify: LocalNotification) {
         title = String(format: NSLocalizedString("Reposted by %@", comment: "Reposted by heading in local notification"), displayName)
         identifier = "myBoostNotification"
     case .like:
-        title = String(format: NSLocalizedString("Liked by %@", comment: "Liked by heading in local notification"), displayName)
+        title = String(format: NSLocalizedString("%@ reacted with %@", comment: "Reacted by heading in local notification"), displayName, notify.event.content)
         identifier = "myLikeNotification"
     case .dm:
-        title = String(format: NSLocalizedString("%@", comment: "DM by heading in local notification"), displayName)
+        title = displayName
         identifier = "myDMNotification"
     case .zap:
         // not handled here

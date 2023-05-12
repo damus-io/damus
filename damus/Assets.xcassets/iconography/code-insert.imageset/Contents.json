@@ -1,0 +1,26 @@
+{
+  "images": [
+    {
+      "filename": "code-insert.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "code-insert.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "code-insert.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  },
+  "properties": {
+    "template-rendering-intent": "template"
+  }
+}

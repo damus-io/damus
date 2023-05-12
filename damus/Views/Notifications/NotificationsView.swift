@@ -51,15 +51,6 @@ class NotificationFilter: ObservableObject, Equatable {
         self.fine_filter = fine_filter
     }
     
-    func toggle_fine_filter() {
-        switch self.fine_filter {
-        case .all:
-            self.fine_filter = .friends
-        case .friends:
-            self.fine_filter = .all
-        }
-    }
-    
     func filter(contacts: Contacts, items: [NotificationItem]) -> [NotificationItem] {
         
         return items.reduce(into: []) { acc, item in
@@ -78,10 +69,6 @@ enum NotificationFilterState: String {
     case all
     case zaps
     case replies
-    
-    func is_other( item: NotificationItem) -> Bool {
-        item.is_zap == nil && item.is_reply == nil
-    }
     
     func filter(_ item: NotificationItem) -> Bool {
         switch self {

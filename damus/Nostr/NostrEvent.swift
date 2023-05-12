@@ -18,20 +18,6 @@ enum ValidationResult: Decodable {
     case ok
     case bad_id
     case bad_sig
-    
-    var is_bad: Bool {
-        return self == .bad_id || self == .bad_sig
-    }
-}
-
-struct OtherEvent {
-    let event_id: String
-    let relay_url: String
-}
-
-struct KeyEvent {
-    let key: String
-    let relay_url: String
 }
 
 struct ReferencedId: Identifiable, Hashable, Equatable {
@@ -49,18 +35,6 @@ struct ReferencedId: Identifiable, Hashable, Equatable {
     
     static func e(_ id: String, relay_id: String? = nil) -> ReferencedId {
         return ReferencedId(ref_id: id, relay_id: relay_id, key: "e")
-    }
-    
-    static func p(_ id: String, relay_id: String? = nil) -> ReferencedId {
-        return ReferencedId(ref_id: id, relay_id: relay_id, key: "p")
-    }
-}
-
-struct EventId: Identifiable, CustomStringConvertible {
-    let id: String
-
-    var description: String {
-        id
     }
 }
 
@@ -186,21 +160,9 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         }
         
         return content
-        
-        /*
-        switch validity {
-        case .ok:
-            return content
-        case .bad_id:
-            return content + "\n\n*WARNING: invalid note id, could be forged!*"
-        case .bad_sig:
-            return content + "\n\n*WARNING: invalid signature, could be forged!*"
-        }
-         */
     }
 
     var description: String {
-        //let p = pow.map { String($0) } ?? "?"
         return "NostrEvent { id: \(id) pubkey \(pubkey) kind \(kind) tags \(tags) content '\(content)' }"
     }
 
@@ -214,15 +176,6 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
 
     private func get_referenced_ids(key: String) -> [ReferencedId] {
         return damus.get_referenced_ids(tags: self.tags, key: key)
-    }
-
-    public func is_root_event() -> Bool {
-        for tag in tags {
-            if tag.count >= 1 && tag[0] == "e" {
-                return false
-            }
-        }
-        return true
     }
 
     public func direct_replies(_ privkey: String?) -> [ReferencedId] {
@@ -299,29 +252,8 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         return get_referenced_ids(key: "e")
     }
 
-    public func count_ids() -> Int {
-        return count_refs("e")
-    }
-
-    public func count_refs(_ type: String) -> Int {
-        var count: Int = 0
-        for tag in tags {
-            if tag.count >= 2 && tag[0] == "e" {
-                count += 1
-            }
-        }
-        return count
-    }
-
     public var referenced_pubkeys: [ReferencedId] {
         return get_referenced_ids(key: "p")
-    }
-
-    /// Make a local event
-    public static func local(content: String, pubkey: String) -> NostrEvent {
-        let ev = NostrEvent(content: content, pubkey: pubkey)
-        ev.flags |= 1
-        return ev
     }
 
     public var is_local: Bool {
@@ -339,49 +271,17 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         self.created_at = createdAt
     }
 
-    init(from: NostrEvent, content: String? = nil) {
-        self.id = from.id
-        self.sig = from.sig
-
-        self.content = content ?? from.content
-        self.pubkey = from.pubkey
-        self.kind = from.kind
-        self.tags = from.tags
-        self.created_at = from.created_at
-    }
-
     func calculate_id() {
         self.id = calculate_event_id(ev: self)
-        //self.pow = count_hash_leading_zero_bits(self.id)
-    }
-
-    // TODO: timeout
-    /*
-    func mine_id(pow: Int, done: @escaping (String) -> ()) {
-        let nonce_ind = self.ensure_nonce_tag()
-        let nonce: Int64 = 0
-
-        DispatchQueue.global(qos: .background).async {
-            while
-        }
-    }
-     */
-
-    private func ensure_nonce_tag() -> Int {
-        for (i, tags) in self.tags.enumerated() {
-            for tag in tags {
-                if tags.count == 2 && tag == "nonce" {
-                    return i
-                }
-            }
-        }
-
-        self.tags.append(["nonce", "0"])
-        return self.tags.count - 1
     }
 
     func sign(privkey: String) {
         self.sig = sign_event(privkey: privkey, ev: self)
+    }
+    
+    var age: TimeInterval {
+        let event_date = Date(timeIntervalSince1970: TimeInterval(created_at))
+        return Date.now.timeIntervalSince(event_date)
     }
 }
 
@@ -538,18 +438,6 @@ func get_referenced_ids(tags: [[String]], key: String) -> [ReferencedId] {
     }
 }
 
-func get_referenced_id_set(tags: [[String]], key: String) -> Set<ReferencedId> {
-    return tags.reduce(into: Set()) { (acc, tag) in
-        if tag.count >= 2 && tag[0] == key {
-            var relay_id: String? = nil
-            if tag.count >= 3 {
-                relay_id = tag[2]
-            }
-            acc.insert(ReferencedId(ref_id: tag[1], relay_id: relay_id, key: key))
-        }
-    }
-}
-
 func make_first_contact_event(keypair: Keypair) -> NostrEvent? {
     guard let privkey = keypair.privkey else {
         return nil
@@ -580,11 +468,7 @@ func make_first_contact_event(keypair: Keypair) -> NostrEvent? {
     return ev
 }
 
-func make_metadata_event(keypair: Keypair, metadata: Profile) -> NostrEvent? {
-    guard let privkey = keypair.privkey else {
-        return nil
-    }
-
+func make_metadata_event(keypair: FullKeypair, metadata: Profile) -> NostrEvent {
     let metadata_json = encode_json(metadata)!
     let ev = NostrEvent(content: metadata_json,
                         pubkey: keypair.pubkey,
@@ -592,7 +476,7 @@ func make_metadata_event(keypair: Keypair, metadata: Profile) -> NostrEvent? {
                         tags: [])
 
     ev.calculate_id()
-    ev.sign(privkey: privkey)
+    ev.sign(privkey: keypair.privkey)
     return ev
 }
 
@@ -1016,14 +900,6 @@ func last_etag(tags: [[String]]) -> String? {
         }
     }
     return e
-}
-
-func inner_event_or_self(ev: NostrEvent, cache: EventCache) -> NostrEvent {
-    guard let inner_ev = ev.get_inner_event(cache: cache) else {
-        return ev
-    }
-    
-    return inner_ev
 }
 
 func first_eref_mention(ev: NostrEvent, privkey: String?) -> Mention? {

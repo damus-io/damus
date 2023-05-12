@@ -1,0 +1,26 @@
+{
+  "images": [
+    {
+      "filename": "light-bulb.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "light-bulb.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "light-bulb.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  },
+  "properties": {
+    "template-rendering-intent": "template"
+  }
+}

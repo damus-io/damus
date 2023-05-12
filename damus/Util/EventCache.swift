@@ -26,15 +26,6 @@ enum ImageMetaProcessState {
     case failed
     case processed(UIImage)
     case not_needed
-    
-    var img: UIImage? {
-        switch self {
-        case .processed(let img):
-            return img
-        default:
-            return nil
-        }
-    }
 }
 
 class TranslationModel: ObservableObject {
@@ -58,10 +49,6 @@ class NoteArtifactsModel: ObservableObject {
 class PreviewModel: ObservableObject {
     @Published var state: PreviewState
     
-    func store(preview: LPLinkMetadata?)  {
-        state = .loaded(Preview(meta: preview))
-    }
-    
     init(state: PreviewState) {
         self.state = state
     }
@@ -76,17 +63,7 @@ class ZapsDataModel: ObservableObject {
 }
 
 class RelativeTimeModel: ObservableObject {
-    private(set) var last_update: Int64
-    @Published var value: String {
-        didSet {
-            self.last_update = Int64(Date().timeIntervalSince1970)
-        }
-    }
-    
-    init(value: String) {
-        self.last_update = 0
-        self.value = ""
-    }
+    @Published var value: String = ""
 }
 
 class EventData {
@@ -94,7 +71,7 @@ class EventData {
     var artifacts_model: NoteArtifactsModel
     var preview_model: PreviewModel
     var zaps_model : ZapsDataModel
-    var relative_time: RelativeTimeModel
+    var relative_time: RelativeTimeModel = RelativeTimeModel()
     var validated: ValidationResult
     
     var translations: TranslateStatus {
@@ -109,17 +86,12 @@ class EventData {
         return preview_model.state
     }
     
-    var zaps: [Zap] {
-        return zaps_model.zaps
-    }
-    
     init(zaps: [Zap] = []) {
         self.translations_model = .init(state: .havent_tried)
         self.artifacts_model = .init(state: .not_loaded)
         self.zaps_model = .init(zaps)
         self.validated = .unknown
         self.preview_model = .init(state: .not_loaded)
-        self.relative_time = .init(value: "")
     }
 }
 
@@ -158,14 +130,6 @@ class EventCache {
         get_cache_data(evid).validated = validated
     }
     
-    func store_translation_artifacts(evid: String, translated: TranslateStatus) {
-        get_cache_data(evid).translations_model.state = translated
-    }
-    
-    func store_artifacts(evid: String, artifacts: NoteArtifacts) {
-        get_cache_data(evid).artifacts_model.state = .loaded(artifacts)
-    }
-    
     @discardableResult
     func store_zap(zap: Zap) -> Bool {
         let data = get_cache_data(zap.target.id).zaps_model
@@ -180,16 +144,8 @@ class EventCache {
         self.image_metadata[url.absoluteString.lowercased()] = meta
     }
     
-    func lookup_artifacts(evid: String) -> NoteArtifactState {
-        return get_cache_data(evid).artifacts_model.state
-    }
-    
     func lookup_img_metadata(url: URL) -> ImageMetadataState? {
         return image_metadata[url.absoluteString.lowercased()]
-    }
-    
-    func lookup_translated_artifacts(evid: String) -> TranslateStatus? {
-        return get_cache_data(evid).translations_model.state
     }
     
     func parent_events(event: NostrEvent) -> [NostrEvent] {
@@ -368,15 +324,6 @@ func preload_image(url: URL) {
     }
 }
 
-func preload_pfp(profiles: Profiles, pubkey: String) {
-    // preload pfp
-    if let profile = profiles.lookup(id: pubkey),
-       let picture = profile.picture,
-       let url = URL(string: picture) {
-        preload_image(url: url)
-    }
-}
-
 func preload_event(plan: PreloadPlan, state: DamusState) async {
     var artifacts: NoteArtifacts? = plan.data.artifacts.artifacts
     let settings = state.settings
@@ -384,11 +331,6 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     let our_keypair = state.keypair
     
     print("Preloading event \(plan.event.content)")
-    
-    preload_pfp(profiles: profiles, pubkey: plan.event.pubkey)
-    if let inner_ev = plan.event.get_inner_event(cache: state.events), inner_ev.pubkey != plan.event.pubkey {
-        preload_pfp(profiles: profiles, pubkey: inner_ev.pubkey)
-    }
     
     if artifacts == nil && plan.load_artifacts {
         let arts = render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)

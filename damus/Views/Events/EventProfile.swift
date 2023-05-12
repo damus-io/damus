@@ -40,7 +40,7 @@ struct EventProfile: View {
                 }
             }
             
-            EventProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_friend_confirmed: true, size: size)
+            EventProfileName(pubkey: pubkey, profile: profile, damus: damus_state, size: size)
         }
     }
 }
