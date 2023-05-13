@@ -109,4 +109,10 @@ final class ProfileDatabase {
         }
         return Profile(persisted_profile: profile)
     }
+    
+    var count: Int {
+        let request = NSFetchRequest<PersistedProfile>(entityName: entity_name)
+        let count = try? persistent_container?.viewContext.count(for: request)
+        return count ?? 0
+    }
 }
