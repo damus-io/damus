@@ -259,6 +259,7 @@
 		50088DA129E8271A008A1FDF /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50088DA029E8271A008A1FDF /* WebSocket.swift */; };
 		501F8C802A0220E1001AFC1D /* KeychainStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */; };
 		501F8C822A0224EB001AFC1D /* KeychainStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */; };
+		5019CADD2A0FB0A9000069E1 /* ProfileDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5019CADC2A0FB0A9000069E1 /* ProfileDatabaseTests.swift */; };
 		501F8C5529FF5EF6001AFC1D /* PersistedProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C5429FF5EF6001AFC1D /* PersistedProfile.swift */; };
 		501F8C5829FF5FC5001AFC1D /* Damus.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C5629FF5FC5001AFC1D /* Damus.xcdatamodeld */; };
 		501F8C5A29FF70F5001AFC1D /* ProfileDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C5929FF70F5001AFC1D /* ProfileDatabase.swift */; };
@@ -685,6 +686,7 @@
 		50088DA029E8271A008A1FDF /* WebSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocket.swift; sourceTree = "<group>"; };
 		501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorage.swift; sourceTree = "<group>"; };
 		501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorageTests.swift; sourceTree = "<group>"; };
+		5019CADC2A0FB0A9000069E1 /* ProfileDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileDatabaseTests.swift; sourceTree = "<group>"; };
 		501F8C5429FF5EF6001AFC1D /* PersistedProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedProfile.swift; sourceTree = "<group>"; };
 		501F8C5729FF5FC5001AFC1D /* Damus.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Damus.xcdatamodel; sourceTree = "<group>"; };
 		501F8C5929FF70F5001AFC1D /* ProfileDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileDatabase.swift; sourceTree = "<group>"; };
@@ -1275,6 +1277,7 @@
 				4CB883AD2976FA9300DC99E7 /* FormatTests.swift */,
 				3A3040EC29A5CB86008A0F29 /* ReplyDescriptionTests.swift */,
 				3A3040EE29A8FEE9008A0F29 /* EventDetailBarTests.swift */,
+				5019CADC2A0FB0A9000069E1 /* ProfileDatabaseTests.swift */,
 				3A3040F229A91366008A0F29 /* ProfileViewTests.swift */,
 				3A30410029AB12AA008A0F29 /* EventGroupViewTests.swift */,
 				4C8D00D329E3C5D40036AF10 /* NIP19Tests.swift */,
@@ -1833,6 +1836,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5019CADD2A0FB0A9000069E1 /* ProfileDatabaseTests.swift in Sources */,
 				3A3040ED29A5CB86008A0F29 /* ReplyDescriptionTests.swift in Sources */,
 				4C8D00D429E3C5D40036AF10 /* NIP19Tests.swift in Sources */,
 				3A30410129AB12AA008A0F29 /* EventGroupViewTests.swift in Sources */,
