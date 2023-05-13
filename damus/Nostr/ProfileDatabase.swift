@@ -18,17 +18,19 @@ final class ProfileDatabase {
     private let entity_name = "PersistedProfile"
     private var persistent_container: NSPersistentContainer?
     private var background_context: NSManagedObjectContext?
+    private let cache_url: URL
     
-    init() {
+    init(cache_url: URL = ProfileDatabase.profile_cache_url) {
+        self.cache_url = cache_url
         set_up()
     }
     
-    private var profile_cache_url: URL {
+    private static var profile_cache_url: URL {
         (FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent("profiles"))!
     }
     
     private var persistent_store_description: NSPersistentStoreDescription {
-        let description = NSPersistentStoreDescription(url: profile_cache_url)
+        let description = NSPersistentStoreDescription(url: cache_url)
         description.type = NSSQLiteStoreType
         description.setOption(true as NSNumber, forKey: NSMigratePersistentStoresAutomaticallyOption)
         description.setOption(true as NSNumber, forKey: NSInferMappingModelAutomaticallyOption)
