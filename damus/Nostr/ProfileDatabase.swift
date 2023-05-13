@@ -115,4 +115,24 @@ final class ProfileDatabase {
         let count = try? persistent_container?.viewContext.count(for: request)
         return count ?? 0
     }
+    
+    func remove_all_profiles() throws {
+        guard let context = background_context, let container = persistent_container else {
+            throw ProfileDatabaseError.missing_context
+        }
+        
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: entity_name)
+        let batch_delete_request = NSBatchDeleteRequest(fetchRequest: request)
+        batch_delete_request.resultType = .resultTypeObjectIDs
+        
+        let result = try container.persistentStoreCoordinator.execute(batch_delete_request, with: context) as! NSBatchDeleteResult
+        
+        // NSBatchDeleteRequest is an NSPersistentStoreRequest, which operates on disk. So now we'll manually update our in-memory context.
+        if let object_ids = result.result as? [NSManagedObjectID] {
+            let changes: [AnyHashable: Any] = [
+                NSDeletedObjectsKey: object_ids
+            ]
+            NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [context])
+        }
+    }
 }
