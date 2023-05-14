@@ -54,15 +54,19 @@ struct ZapButton: View {
     }
     
     var zap_color: Color {
-        guard let our_zap else {
+        if our_zap == nil {
             return Color.gray
         }
         
+        // always orange !
+        return Color.orange
+            /*
         if our_zap.is_paid {
             return Color.orange
         } else {
             return Color.yellow
         }
+             */
     }
     
     func tap() {
