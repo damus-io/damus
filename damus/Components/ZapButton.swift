@@ -85,6 +85,8 @@ struct ZapButton: View {
                 return
             }
             
+            UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+            
             switch res {
             case .send_err(let cancel_err):
                 switch cancel_err {
