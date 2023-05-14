@@ -93,8 +93,6 @@ class PostBox {
     }
     
     func handle_event(relay_id: String, _ ev: NostrConnectionEvent) {
-        try_flushing_events()
-        
         guard case .nostr_event(let resp) = ev else {
             return
         }

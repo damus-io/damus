@@ -80,6 +80,9 @@ struct ContentView: View {
     
     @Environment(\.colorScheme) var colorScheme
     
+    // connect retry timer
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    
     var mystery: some View {
         Text("Are you lost?", comment: "Text asking the user if they are lost in the app.")
         .id("what")
@@ -346,6 +349,9 @@ struct ContentView: View {
         .onReceive(handle_notify(.compose)) { notif in
             let action = notif.object as! PostAction
             self.active_sheet = .post(action)
+        }
+        .onReceive(timer) { n in
+            self.damus_state?.postbox.try_flushing_events()
         }
         .onReceive(handle_notify(.deleted_account)) { notif in
             self.is_deleted_account = true
