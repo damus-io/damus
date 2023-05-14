@@ -119,10 +119,6 @@ struct ZapButton: View {
                     .font(.footnote.weight(.medium))
             })
             .simultaneousGesture(LongPressGesture().onEnded {_  in
-                guard our_zap == nil else {
-                    return
-                }
-                
                 button.showing_zap_customizer = true
             })
             .highPriorityGesture(TapGesture().onEnded {
