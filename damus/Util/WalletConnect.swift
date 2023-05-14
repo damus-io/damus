@@ -88,7 +88,7 @@ struct FullWalletResponse {
     let req_id: String
     let response: WalletResponse
     
-    init?(from: NostrEvent) async {
+    init?(from: NostrEvent, nwc: WalletConnectURL) async {
         guard let req_id = from.referenced_ids.first else {
             return nil
         }
@@ -96,7 +96,9 @@ struct FullWalletResponse {
         self.req_id = req_id.ref_id
         
         let ares = Task {
-            guard let resp: WalletResponse = decode_json(from.content) else {
+            guard let json = decrypt_dm(nwc.keypair.privkey, pubkey: nwc.pubkey, content: from.content, encoding: .base64),
+                  let resp: WalletResponse = decode_json(json)
+            else {
                 let resp: WalletResponse? = nil
                 return resp
             }
@@ -116,7 +118,7 @@ struct FullWalletResponse {
 struct WalletResponse: Decodable {
     let result_type: WalletResponseResultType
     let error: WalletResponseErr?
-    let result: WalletResponseResult
+    let result: WalletResponseResult?
     
     private enum CodingKeys: CodingKey {
         case result_type, error, result
@@ -132,6 +134,11 @@ struct WalletResponse: Decodable {
         
         self.result_type = result_type
         self.error = try container.decodeIfPresent(WalletResponseErr.self, forKey: .error)
+        
+        guard self.error == nil else {
+            self.result = nil
+            return
+        }
         
         switch result_type {
         case .pay_invoice:

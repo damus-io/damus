@@ -138,7 +138,10 @@ class HomeModel: ObservableObject {
     
     func handle_nwc_response(_ ev: NostrEvent) {
         Task { @MainActor in
-            guard let resp = await FullWalletResponse(from: ev) else {
+            // TODO: Adapt KeychainStorage to StringCodable and instead of parsing to WalletConnectURL every time
+            guard let nwc_str = damus_state.settings.nostr_wallet_connect,
+                  let nwc = WalletConnectURL(str: nwc_str),
+                  let resp = await FullWalletResponse(from: ev, nwc: nwc) else {
                 return
             }
             
