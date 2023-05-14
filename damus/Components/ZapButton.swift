@@ -124,13 +124,6 @@ struct ZapButton: View {
                     .foregroundColor(zap_color)
                     .font(.footnote.weight(.medium))
             })
-            .simultaneousGesture(LongPressGesture().onEnded {_  in
-                button.showing_zap_customizer = true
-            })
-            .highPriorityGesture(TapGesture().onEnded {
-                tap()
-            })
-            .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
 
             if zaps.zap_total > 0 {
                 Text(verbatim: format_msats_abbrev(zaps.zap_total))
@@ -138,6 +131,13 @@ struct ZapButton: View {
                     .foregroundColor(zap_color)
             }
         }
+        .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
+        .simultaneousGesture(LongPressGesture().onEnded {_  in
+            button.showing_zap_customizer = true
+        })
+        .highPriorityGesture(TapGesture().onEnded {
+            tap()
+        })
         .sheet(isPresented: $button.showing_zap_customizer) {
             CustomizeZapView(state: damus_state, event: event, lnurl: lnurl)
         }
