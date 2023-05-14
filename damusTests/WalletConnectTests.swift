@@ -65,7 +65,7 @@ final class WalletConnectTests: XCTestCase {
         
         XCTAssertEqual(pool.our_descriptors.count, 0)
         XCTAssertEqual(pool.all_descriptors.count, 1)
-        XCTAssertEqual(pool.all_descriptors[0].info.ephemeral, true)
+        XCTAssertEqual(pool.all_descriptors[0].variant, .nwc)
         XCTAssertEqual(pool.all_descriptors[0].url.id, "ws://127.0.0.1")
         XCTAssertEqual(box.events.count, 1)
         let ev = box.events.first!.value
