@@ -234,7 +234,8 @@ func nwc_error(zapcache: Zaps, evcache: EventCache, resp: FullWalletResponse) {
             }
             
             // remove the pending zap if there was an error
-            remove_zap(reqid: pzap.request.ev.id, zapcache: zapcache, evcache: evcache)
+            let reqid = ZapRequestId(from_pending: pzap)
+            remove_zap(reqid: reqid, zapcache: zapcache, evcache: evcache)
             return
         }
     }

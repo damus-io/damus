@@ -45,7 +45,7 @@ let test_zap = Zap(event: test_event, invoice: test_zap_invoice, zapper: "zapper
 
 let test_private_zap = Zap(event: test_event, invoice: test_zap_invoice, zapper: "zapper", target: .profile("pk"), request: test_zap_request, is_anon: false, private_request: test_event)
 
-let test_pending_zap = PendingZap(amount_msat: 10000, target: .note(id: "id", author: "pk"), request: test_zap_request, type: .pub, state: .external(.init(state: .fetching_invoice)))
+let test_pending_zap = PendingZap(amount_msat: 10000, target: .note(id: "id", author: "pk"), request: .normal(test_zap_request), type: .pub, state: .external(.init(state: .fetching_invoice)))
 
 struct ZapEvent_Previews: PreviewProvider {
     static var previews: some View {

@@ -105,10 +105,10 @@ class PendingZap {
     let type: ZapType
     private(set) var state: PendingZapState
     
-    init(amount_msat: Int64, target: ZapTarget, request: ZapRequest, type: ZapType, state: PendingZapState) {
+    init(amount_msat: Int64, target: ZapTarget, request: MakeZapRequest, type: ZapType, state: PendingZapState) {
         self.amount_msat = amount_msat
         self.target = target
-        self.request = request
+        self.request = request.private_inner_request
         self.type = type
         self.state = state
     }
@@ -125,6 +125,21 @@ class PendingZap {
     }
 }
 
+struct ZapRequestId: Equatable {
+    let reqid: String
+    
+    init(from_zap: Zapping) {
+        self.reqid = from_zap.request.id
+    }
+    
+    init(from_makezap: MakeZapRequest) {
+        self.reqid = from_makezap.private_inner_request.ev.id
+    }
+    
+    init(from_pending: PendingZap) {
+        self.reqid = from_pending.request.ev.id
+    }
+}
 
 enum Zapping {
     case zap(Zap)

@@ -174,7 +174,7 @@ struct ZapButton: View {
 
 struct ZapButton_Previews: PreviewProvider {
     static var previews: some View {
-        let pending_zap = PendingZap(amount_msat: 1000, target: ZapTarget.note(id: "noteid", author: "author"), request: test_zap_request, type: .pub, state: .external(.init(state: .fetching_invoice)))
+        let pending_zap = PendingZap(amount_msat: 1000, target: ZapTarget.note(id: "noteid", author: "author"), request: .normal(test_zap_request), type: .pub, state: .external(.init(state: .fetching_invoice)))
         let zaps = ZapsDataModel([.pending(pending_zap)])
         
         ZapButton(damus_state: test_damus_state(), event: test_event, lnurl: "lnurl", zaps: zaps)
@@ -203,7 +203,7 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
     let target = ZapTarget.note(id: event.id, author: event.pubkey)
     let content = comment ?? ""
     
-    guard let zapreq = make_zap_request_event(keypair: keypair, content: content, relays: relays, target: target, zap_type: zap_type) else {
+    guard let mzapreq = make_zap_request_event(keypair: keypair, content: content, relays: relays, target: target, zap_type: zap_type) else {
         // this should never happen
         return
     }
@@ -211,7 +211,9 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
     let zap_amount = amount_sats ?? damus_state.settings.default_zap_amount
     let amount_msat = Int64(zap_amount) * 1000
     let pending_zap_state = initial_pending_zap_state(settings: damus_state.settings)
-    let pending_zap = PendingZap(amount_msat: amount_msat, target: target, request: ZapRequest(ev: zapreq), type: zap_type, state: pending_zap_state)
+    let pending_zap = PendingZap(amount_msat: amount_msat, target: target, request: mzapreq, type: zap_type, state: pending_zap_state)
+    let zapreq = mzapreq.potentially_anon_outer_request.ev
+    let reqid = ZapRequestId(from_makezap: mzapreq)
     
     UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
     damus_state.add_zap(zap: .pending(pending_zap))
@@ -225,7 +227,7 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
         guard let payreq = mpayreq else {
             // TODO: show error
             DispatchQueue.main.async {
-                remove_zap(reqid: zapreq.id, zapcache: damus_state.zaps, evcache: damus_state.events)
+                remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
                 let typ = ZappingEventType.failed(.bad_lnurl)
                 let ev = ZappingEvent(is_custom: is_custom, type: typ, event: event)
                 notify(.zapping, ev)
@@ -239,7 +241,7 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
         
         guard let inv = await fetch_zap_invoice(payreq, zapreq: zapreq, sats: zap_amount, zap_type: zap_type, comment: comment) else {
             DispatchQueue.main.async {
-                remove_zap(reqid: zapreq.id, zapcache: damus_state.zaps, evcache: damus_state.events)
+                remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
                 let typ = ZappingEventType.failed(.fetching_invoice)
                 let ev = ZappingEvent(is_custom: is_custom, type: typ, event: event)
                 notify(.zapping, ev)
@@ -253,7 +255,7 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
             case .nwc(let nwc_state):
                 // don't both continuing, user has canceled
                 if case .cancel_fetching_invoice = nwc_state.state {
-                    remove_zap(reqid: zapreq.id, zapcache: damus_state.zaps, evcache: damus_state.events)
+                    remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
                     return
                 }
                 
@@ -308,10 +310,12 @@ func cancel_zap(zap: PendingZap, box: PostBox, zapcache: Zaps, evcache: EventCac
         if let err = box.cancel_send(evid: nwc_req.id) {
             return .send_err(err)
         }
-        remove_zap(reqid: zap.request.ev.id, zapcache: zapcache, evcache: evcache)
+        let reqid = ZapRequestId(from_pending: zap)
+        remove_zap(reqid: reqid, zapcache: zapcache, evcache: evcache)
         
     case .failed:
-        remove_zap(reqid: zap.request.ev.id, zapcache: zapcache, evcache: evcache)
+        let reqid = ZapRequestId(from_pending: zap)
+        remove_zap(reqid: reqid, zapcache: zapcache, evcache: evcache)
     }
     
     return nil
