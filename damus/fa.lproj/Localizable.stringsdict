@@ -63,7 +63,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d نفر دیگر به یک مطلب که شما در آن تگ شده‌اید بازخورد داده‌اند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر به یک مطلب که شما در آن تگ شده‌اید بازخورد داده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر به یک نوت که شما در آن تگ شده‌اید بازخورد داده‌اند</string>
 		</dict>
 	</dict>
 	<key>reacted_your_post_3</key>
@@ -79,7 +79,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d نفر دیگر به مطلب شما بازخورد داده‌اند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر به مطلب شما بازخورد داده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر به نوت شما بازخورد داده‌اند</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -95,7 +95,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d نفر دیگر به نمایه‌ی شما بازخورد داده‌اند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر به نمایه‌ی شما بازخورد داده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر به پروفایل شما بازخورد داده‌اند</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
