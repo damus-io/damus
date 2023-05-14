@@ -46,7 +46,7 @@ struct SupporterBadge_Previews: PreviewProvider {
         HStack(alignment: .center) {
             SupporterBadge(percent: p)
                 .frame(width: 50)
-            Text("\(p)")
+            Text(verbatim: p.formatted())
                 .frame(width: 50)
         }
     }

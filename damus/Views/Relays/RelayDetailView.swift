@@ -24,7 +24,11 @@ struct RelayDetailView: View {
     }
     
     func FieldText(_ str: String?) -> some View {
-        Text(str ?? "No data available")
+        if let s = str {
+            return Text(verbatim: s)
+        } else {
+            return Text("No data available", comment: "Text indicating that there is no data available to show for specific metadata about a relay server.")
+        }
     }
     
     var body: some View {

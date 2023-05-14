@@ -17,7 +17,7 @@ struct ConnectWalletView: View {
     
     var body: some View {
         MainContent
-            .navigationTitle("Attach a Wallet")
+            .navigationTitle(NSLocalizedString("Attach a Wallet", comment: "Navigation title for attaching Nostr Wallet Connect lightning wallet."))
             .navigationBarTitleDisplayMode(.large)
             .padding()
             .onChange(of: wallet_scan_result) { res in
@@ -39,7 +39,7 @@ struct ConnectWalletView: View {
     
     func AreYouSure(nwc: WalletConnectURL) -> some View {
         VStack {
-            Text("Are you sure you want to attach this wallet?")
+            Text("Are you sure you want to attach this wallet?", comment: "Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet.")
                 .font(.title)
             
             Text(nwc.relay.id)
@@ -52,11 +52,11 @@ struct ConnectWalletView: View {
                     .foregroundColor(.gray)
             }
             
-            BigButton("Attach") {
+            BigButton(NSLocalizedString("Attach", comment: "Text for button to attach Nostr Wallet Connect lightning wallet.")) {
                 model.connect(nwc)
             }
             
-            BigButton("Cancel") {
+            BigButton(NSLocalizedString("Cancel", comment: "Text for button to cancel out of connecting Nostr Wallet Connect lightning ewallet.")) {
                 model.cancel()
             }
         }
@@ -72,7 +72,7 @@ struct ConnectWalletView: View {
                 openURL(URL(string:"https://nwc.getalby.com/apps/new?c=Damus")!)
             }
             
-            BigButton("Attach Wallet") {
+            BigButton(NSLocalizedString("Attach Wallet", comment: "Text for button to attach Nostr Wallet Connect lightning wallet.")) {
                 scanning = true
             }
             
@@ -89,7 +89,7 @@ struct ConnectWalletView: View {
             case .new(let nwc):
                 AreYouSure(nwc: nwc)
             case .existing:
-                Text("Shouldn't happen")
+                Text(verbatim: "Shouldn't happen")
             case .none:
                 ConnectWallet
             }
