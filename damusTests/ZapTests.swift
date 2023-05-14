@@ -24,13 +24,14 @@ final class ZapTests: XCTestCase {
         let target = ZapTarget.profile(bob.pubkey)
         
         let message = "hey bob!"
-        let zapreq = make_zap_request_event(keypair: alice, content: message, relays: [], target: target, zap_type: .priv)
+        let mzapreq = make_zap_request_event(keypair: alice, content: message, relays: [], target: target, zap_type: .priv)
         
-        XCTAssertNotNil(zapreq)
-        guard let zapreq else {
+        XCTAssertNotNil(mzapreq)
+        guard let mzapreq else {
             return
         }
         
+        let zapreq = mzapreq.potentially_anon_outer_request.ev
         let decrypted = decrypt_private_zap(our_privkey: bob.privkey, zapreq: zapreq, target: target)
         
         XCTAssertNotNil(decrypted)
