@@ -203,7 +203,7 @@ class UserSettingsStore: ObservableObject {
     var internal_libretranslate_api_key: String?
     
     @KeychainStorage(account: "nostr_wallet_connect")
-    var nostr_wallet_connect: String?
+    var nostr_wallet_connect: String? // TODO: strongly type this to WalletConnectURL
 
     var can_translate: Bool {
         switch translation_service {

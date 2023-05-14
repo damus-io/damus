@@ -212,6 +212,7 @@ func nwc_success(zapcache: Zaps, evcache: EventCache, resp: FullWalletResponse) 
             if nwc_state.update_state(state: .confirmed) {
                 // notify the zaps model of an update so it can mark them as paid
                 evcache.get_cache_data(pzap.target.id).zaps_model.objectWillChange.send()
+                print("NWC success confirmed")
             }
             return
         }
