@@ -240,6 +240,7 @@ struct ContentView: View {
     }
     
     func open_event(ev: NostrEvent) {
+        popToRoot()
         self.active_event = ev
         self.thread_open = true
     }
@@ -250,11 +251,13 @@ struct ContentView: View {
     }
     
     func open_profile(id: String) {
+        popToRoot()
         self.active_profile = id
         self.profile_open = true
     }
     
     func open_search(filt: NostrFilter) {
+        popToRoot()
         self.active_search = filt
         self.search_open = true
     }
