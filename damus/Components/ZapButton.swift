@@ -54,13 +54,14 @@ struct ZapButton: View {
     }
     
     var zap_color: Color {
-        switch our_zap {
-        case .none:
+        guard let our_zap else {
             return Color.gray
-        case .pending:
-            return Color.yellow
-        case .zap:
+        }
+        
+        if our_zap.is_paid {
             return Color.orange
+        } else {
+            return Color.yellow
         }
     }
     
@@ -260,7 +261,9 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
                     return
                 }
                 
-                pzap_state.state = .postbox_pending(nwc_req)
+                if pzap_state.update_state(state: .postbox_pending(nwc_req)) {
+                    // we don't need to trigger a ZapsDataModel update here
+                }
             case .external(let pending_ext):
                 pending_ext.state = .done
                 let ev = ZappingEvent(is_custom: is_custom, type: .got_zap_invoice(inv), event: event)
@@ -285,7 +288,9 @@ func cancel_zap(zap: PendingZap, box: PostBox, zapcache: Zaps, evcache: EventCac
     
     switch nwc_state.state {
     case .fetching_invoice:
-        nwc_state.state = .cancel_fetching_invoice
+        if nwc_state.update_state(state: .cancel_fetching_invoice) {
+            // we don't need to update the ZapsDataModel here
+        }
         // let the code that retrieves the invoice remove the zap, because
         // it still needs access to this pending zap to know to cancel
         

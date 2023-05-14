@@ -61,17 +61,21 @@ class ZapsDataModel: ObservableObject {
         self.zaps = zaps
     }
     
-    func update_state(reqid: String, state: PendingZapState) {
+    func confirm_nwc(reqid: String) {
         guard let zap = zaps.first(where: { z in z.request.id == reqid }),
-              case .pending(let pzap) = zap,
-              pzap.state != state
+              case .pending(let pzap) = zap
         else {
             return
         }
         
-        pzap.state = state
-        
-        self.objectWillChange.send()
+        switch pzap.state {
+        case .external:
+            break
+        case .nwc(let nwc_state):
+            if nwc_state.update_state(state: .confirmed) {
+                self.objectWillChange.send()
+            }
+        }
     }
     
     var zap_total: Int64 {

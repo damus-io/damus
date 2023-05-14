@@ -76,12 +76,21 @@ enum NWCStateType: Equatable {
 }
 
 class NWCPendingZapState: Equatable {
-    var state: NWCStateType
+    private(set) var state: NWCStateType
     let url: WalletConnectURL
     
     init(state: NWCStateType, url: WalletConnectURL) {
         self.state = state
         self.url = url
+    }
+    
+    //@discardableResult  -- not discardable, the ZapsDataModel may need to send objectWillChange but we don't force it
+    func update_state(state: NWCStateType) -> Bool {
+        guard state != self.state else {
+            return false
+        }
+        self.state = state
+        return true
     }
     
     static func == (lhs: NWCPendingZapState, rhs: NWCPendingZapState) -> Bool {
@@ -94,7 +103,7 @@ class PendingZap {
     let target: ZapTarget
     let request: ZapRequest
     let type: ZapType
-    var state: PendingZapState
+    private(set) var state: PendingZapState
     
     init(amount_msat: Int64, target: ZapTarget, request: ZapRequest, type: ZapType, state: PendingZapState) {
         self.amount_msat = amount_msat
@@ -102,6 +111,17 @@ class PendingZap {
         self.request = request
         self.type = type
         self.state = state
+    }
+    
+    @discardableResult
+    func update_state(model: ZapsDataModel, state: PendingZapState) -> Bool {
+        guard self.state != state else {
+            return false
+        }
+        
+        self.state = state
+        model.objectWillChange.send()
+        return true
     }
 }
 
@@ -116,6 +136,23 @@ enum Zapping {
             return false
         case .pending:
             return true
+        }
+    }
+    
+    var is_paid: Bool {
+        switch self {
+        case .zap:
+            // we have a zap so this is proof of payment
+            return true
+        case .pending(let pzap):
+            switch pzap.state {
+            case .external:
+                // It could be but we don't know. We have to wait for a zap to know.
+                return false
+            case .nwc(let nwc_state):
+                // nwc confirmed that we have a payment, but we might not have zap yet
+                return nwc_state.state == .confirmed
+            }
         }
     }
     

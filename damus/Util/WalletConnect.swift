@@ -188,7 +188,7 @@ func nwc_pay(url: WalletConnectURL, pool: RelayPool, post: PostBox, invoice: Str
 }
 
 
-func nwc_success(zapcache: Zaps, resp: FullWalletResponse) {
+func nwc_success(zapcache: Zaps, evcache: EventCache, resp: FullWalletResponse) {
     // find the pending zap and mark it as pending-confirmed
     for kv in zapcache.our_zaps {
         let zaps = kv.value
@@ -202,7 +202,10 @@ func nwc_success(zapcache: Zaps, resp: FullWalletResponse) {
                 continue
             }
             
-            nwc_state.state = .confirmed
+            if nwc_state.update_state(state: .confirmed) {
+                // notify the zaps model of an update so it can mark them as paid
+                evcache.get_cache_data(pzap.target.id).zaps_model.objectWillChange.send()
+            }
             return
         }
     }

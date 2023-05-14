@@ -143,7 +143,7 @@ class HomeModel: ObservableObject {
             }
             
             if resp.response.error == nil {
-                nwc_success(zapcache: self.damus_state.zaps, resp: resp)
+                nwc_success(zapcache: self.damus_state.zaps, evcache: self.damus_state.events, resp: resp)
                 return
             }
             

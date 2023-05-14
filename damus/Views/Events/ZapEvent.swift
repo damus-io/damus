@@ -26,7 +26,7 @@ struct ZapEvent: View {
                 
                 if zap.is_pending {
                     Image(systemName: "clock.arrow.circlepath")
-                        .foregroundColor(DamusColors.yellow)
+                        .foregroundColor(zap.is_paid ? Color.orange : DamusColors.yellow)
                         .help(NSLocalizedString("Only you can see this message and who sent it.", comment: "Help text on green lock icon that explains that only the current user can see the message of a zap event and who sent the zap."))
                 }
             }
