@@ -210,6 +210,22 @@
 			<string>بازنشرها</string>
 		</dict>
 	</dict>
+	<key>sats</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@SATS@</string>
+		<key>SATS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>ساتوشی</string>
+			<key>other</key>
+			<string>ساتوشی</string>
+		</dict>
+	</dict>
 	<key>sats_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -224,6 +240,38 @@
 			<string>%2$@ ساتوشی</string>
 			<key>other</key>
 			<string>%2$@ ساتوشی</string>
+		</dict>
+	</dict>
+	<key>zap_notification_no_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>%2$@ ساتوشی از %3$@ دریافت کردید</string>
+			<key>other</key>
+			<string>%2$@ ساتوشی از %3$@ دریافت کردید</string>
+		</dict>
+	</dict>
+	<key>zap_notification_with_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>%2$@ ساتوشی از %3$@ دریافت کردید: "%4$@"</string>
+			<key>other</key>
+			<string>%2$@ ساتوشی از %3$@ دریافت کردید: "%4$@"</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
