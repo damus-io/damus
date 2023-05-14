@@ -7,12 +7,17 @@
 
 import Foundation
 
-func insert_uniq_sorted_zap(zaps: inout [Zap], new_zap: Zap, cmp: (Zap, Zap) -> Bool) -> Bool {
+func insert_uniq_sorted_zap(zaps: inout [Zapping], new_zap: Zapping, cmp: (Zapping, Zapping) -> Bool) -> Bool {
     var i: Int = 0
     
     for zap in zaps {
-        // don't insert duplicate events
-        if new_zap.event.id == zap.event.id {
+        if new_zap.request.id == zap.request.id {
+            // replace pending
+            if !new_zap.is_pending && zap.is_pending {
+                zaps[i] = new_zap
+                return true
+            }
+            // don't insert duplicate events
             return false
         }
         
@@ -28,16 +33,16 @@ func insert_uniq_sorted_zap(zaps: inout [Zap], new_zap: Zap, cmp: (Zap, Zap) -> 
 }
 
 @discardableResult
-func insert_uniq_sorted_zap_by_created(zaps: inout [Zap], new_zap: Zap) -> Bool {
+func insert_uniq_sorted_zap_by_created(zaps: inout [Zapping], new_zap: Zapping) -> Bool {
     return insert_uniq_sorted_zap(zaps: &zaps, new_zap: new_zap) { (a, b) in
-        a.event.created_at > b.event.created_at
+        a.created_at > b.created_at
     }
 }
 
 @discardableResult
-func insert_uniq_sorted_zap_by_amount(zaps: inout [Zap], new_zap: Zap) -> Bool {
+func insert_uniq_sorted_zap_by_amount(zaps: inout [Zapping], new_zap: Zapping) -> Bool {
     return insert_uniq_sorted_zap(zaps: &zaps, new_zap: new_zap) { (a, b) in
-        a.invoice.amount > b.invoice.amount
+        a.amount > b.amount
     }
 }
 

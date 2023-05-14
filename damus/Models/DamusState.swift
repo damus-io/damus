@@ -32,7 +32,7 @@ struct DamusState {
     let wallet: WalletModel
     
     @discardableResult
-    func add_zap(zap: Zap) -> Bool {
+    func add_zap(zap: Zapping) -> Bool {
         // store generic zap mapping
         self.zaps.add_zap(zap: zap)
         // associate with events as well

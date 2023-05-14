@@ -8,9 +8,9 @@
 import Foundation
 
 class Zaps {
-    var zaps: [String: Zap]
+    var zaps: [String: Zapping]
     let our_pubkey: String
-    var our_zaps: [String: [Zap]]
+    var our_zaps: [String: [Zapping]]
     
     var event_counts: [String: Int]
     var event_totals: [String: Int64]
@@ -22,15 +22,42 @@ class Zaps {
         self.event_counts = [:]
         self.event_totals = [:]
     }
+
+    func remove_zap(reqid: String) -> Zapping? {
+        var res: Zapping? = nil
+        for kv in our_zaps {
+            let ours = kv.value
+            guard let zap = ours.first(where: { z in z.request.id == reqid }) else {
+                continue
+            }
+            
+            res = zap
+            
+            our_zaps[kv.key] = ours.filter { z in z.request.id != reqid }
+            
+            if let count = event_counts[zap.target.id] {
+                event_counts[zap.target.id] = count - 1
+            }
+            if let total = event_totals[zap.target.id] {
+                event_totals[zap.target.id] = total - zap.amount
+            }
+            
+            // we found the request id, we can stop looking
+            break
+        }
+        
+        self.zaps.removeValue(forKey: reqid)
+        return res
+    }
     
-    func add_zap(zap: Zap) {
-        if zaps[zap.event.id] != nil {
+    func add_zap(zap: Zapping) {
+        if zaps[zap.request.id] != nil {
             return
         }
-        self.zaps[zap.event.id] = zap
+        self.zaps[zap.request.id] = zap
         
         // record our zaps for an event
-        if zap.request.ev.pubkey == our_pubkey {
+        if zap.request.pubkey == our_pubkey {
             switch zap.target {
             case .note(let note_target):
                 if our_zaps[note_target.note_id] == nil {
@@ -44,7 +71,7 @@ class Zaps {
         }
         
         // don't count tips to self. lame.
-        guard zap.request.ev.pubkey != zap.target.pubkey else {
+        guard zap.request.pubkey != zap.target.pubkey else {
             return
         }
         
@@ -58,8 +85,15 @@ class Zaps {
         }
         
         event_counts[id] = event_counts[id]! + 1
-        event_totals[id] = event_totals[id]! + zap.invoice.amount
+        event_totals[id] = event_totals[id]! + zap.amount
         
         notify(.update_stats, zap.target.id)
     }
+}
+
+func remove_zap(reqid: String, zapcache: Zaps, evcache: EventCache) {
+    guard let zap = zapcache.remove_zap(reqid: reqid) else {
+        return
+    }
+    evcache.get_cache_data(zap.target.id).zaps_model.remove(reqid: reqid)
 }

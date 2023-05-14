@@ -129,6 +129,25 @@ class HomeModel: ObservableObject {
             handle_zap_event(ev)
         case .zap_request:
             break
+        case .nwc_request:
+            break
+        case .nwc_response:
+            handle_nwc_response(ev)
+        }
+    }
+    
+    func handle_nwc_response(_ ev: NostrEvent) {
+        Task { @MainActor in
+            guard let resp = await FullWalletResponse(from: ev) else {
+                return
+            }
+            
+            if resp.response.error == nil {
+                nwc_success(zapcache: self.damus_state.zaps, resp: resp)
+                return
+            }
+            
+            nwc_error(zapcache: self.damus_state.zaps, evcache: self.damus_state.events, resp: resp)
         }
     }
     
@@ -137,13 +156,13 @@ class HomeModel: ObservableObject {
             return
         }
         
-        damus_state.add_zap(zap: zap)
+        damus_state.add_zap(zap: .zap(zap))
         
         guard zap.target.pubkey == our_keypair.pubkey else {
             return
         }
         
-        if !notifications.insert_zap(zap) {
+        if !notifications.insert_zap(.zap(zap)) {
             return
         }
 
@@ -301,6 +320,16 @@ class HomeModel: ObservableObject {
                     //remove_bootstrap_nodes(damus_state)
                     send_home_filters(relay_id: relay_id)
                 }
+                
+                // connect to nwc relays when connected
+                if let nwc_str = damus_state.settings.nostr_wallet_connect,
+                   let r = pool.get_relay(relay_id),
+                   r.descriptor.variant == .nwc,
+                   let nwc = WalletConnectURL(str: nwc_str),
+                   nwc.relay.id == relay_id
+                {
+                    subscribe_to_nwc(url: nwc, pool: pool)
+                }
             case .error(let merr):
                 let desc = String(describing: merr)
                 if desc.contains("Software caused connection abort") {
@@ -431,7 +460,7 @@ class HomeModel: ObservableObject {
 
         print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters, notifications_filters, dms_filters])
 
-        if let relay_id = relay_id {
+        if let relay_id {
             pool.send(.subscribe(.init(filters: home_filters, sub_id: home_subid)), to: [relay_id])
             pool.send(.subscribe(.init(filters: contacts_filters, sub_id: contacts_subid)), to: [relay_id])
             pool.send(.subscribe(.init(filters: notifications_filters, sub_id: notifications_subid)), to: [relay_id])
@@ -836,7 +865,8 @@ func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
         changed = true
         if new.contains(d) {
             if let url = RelayURL(d) {
-                add_new_relay(relay_filters: state.relay_filters, metadatas: state.relay_metadata, pool: state.pool, url: url, info: decoded[d] ?? .rw, new_relay_filters: new_relay_filters)
+                let descriptor = RelayDescriptor(url: url, info: decoded[d] ?? .rw)
+                add_new_relay(relay_filters: state.relay_filters, metadatas: state.relay_metadata, pool: state.pool, descriptor: descriptor, new_relay_filters: new_relay_filters)
             }
         } else {
             state.pool.remove_relay(d)
@@ -849,8 +879,9 @@ func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     }
 }
 
-func add_new_relay(relay_filters: RelayFilters, metadatas: RelayMetadatas, pool: RelayPool, url: RelayURL, info: RelayInfo, new_relay_filters: Bool) {
-    try? pool.add_relay(url, info: info)
+func add_new_relay(relay_filters: RelayFilters, metadatas: RelayMetadatas, pool: RelayPool, descriptor: RelayDescriptor, new_relay_filters: Bool) {
+    try? pool.add_relay(descriptor)
+    let url = descriptor.url
     
     let relay_id = url.id
     guard metadatas.lookup(relay_id: relay_id) == nil else {

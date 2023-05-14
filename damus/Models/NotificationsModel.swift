@@ -99,7 +99,7 @@ enum NotificationItem {
 }
 
 class NotificationsModel: ObservableObject, ScrollQueue {
-    var incoming_zaps: [Zap]
+    var incoming_zaps: [Zapping]
     var incoming_events: [NostrEvent]
     var should_queue: Bool
     
@@ -150,7 +150,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
         
         for zap in incoming_zaps {
-            pks.insert(zap.request.ev.pubkey)
+            pks.insert(zap.request.pubkey)
         }
         
         return Array(pks)
@@ -249,7 +249,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         return false
     }
     
-    private func insert_zap_immediate(_ zap: Zap) -> Bool {
+    private func insert_zap_immediate(_ zap: Zapping) -> Bool {
         switch zap.target {
         case .note(let notezt):
             let id = notezt.note_id
@@ -285,7 +285,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         return false
     }
     
-    func insert_zap(_ zap: Zap) -> Bool {
+    func insert_zap(_ zap: Zapping) -> Bool {
         if should_queue {
             return insert_uniq_sorted_zap_by_created(zaps: &incoming_zaps, new_zap: zap)
         }
@@ -307,7 +307,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         changed = changed || incoming_events.count != count
         
         count = profile_zaps.zaps.count
-        profile_zaps.zaps = profile_zaps.zaps.filter { zap in isIncluded(zap.request.ev) }
+        profile_zaps.zaps = profile_zaps.zaps.filter { zap in isIncluded(zap.request) }
         changed = changed || profile_zaps.zaps.count != count
         
         for el in reactions {
@@ -325,7 +325,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         for el in zaps {
             count = el.value.zaps.count
             el.value.zaps = el.value.zaps.filter {
-                isIncluded($0.request.ev)
+                isIncluded($0.request)
             }
             changed = changed || el.value.zaps.count != count
         }

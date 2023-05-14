@@ -55,10 +55,41 @@ class PreviewModel: ObservableObject {
 }
 
 class ZapsDataModel: ObservableObject {
-    @Published var zaps: [Zap]
+    @Published var zaps: [Zapping]
     
-    init(_ zaps: [Zap]) {
+    init(_ zaps: [Zapping]) {
         self.zaps = zaps
+    }
+    
+    func update_state(reqid: String, state: PendingZapState) {
+        guard let zap = zaps.first(where: { z in z.request.id == reqid }),
+              case .pending(let pzap) = zap,
+              pzap.state != state
+        else {
+            return
+        }
+        
+        pzap.state = state
+        
+        self.objectWillChange.send()
+    }
+    
+    var zap_total: Int64 {
+        zaps.reduce(0) { total, zap in total + zap.amount }
+    }
+   
+    func from(_ pubkey: String) -> [Zapping] {
+        return self.zaps.filter { z in z.request.pubkey == pubkey }
+    }
+    
+    @discardableResult
+    func remove(reqid: String) -> Bool {
+        guard zaps.first(where: { z in z.request.id == reqid }) != nil else {
+            return false
+        }
+        
+        self.zaps = zaps.filter { z in z.request.id != reqid }
+        return true
     }
 }
 
@@ -86,7 +117,7 @@ class EventData {
         return preview_model.state
     }
     
-    init(zaps: [Zap] = []) {
+    init(zaps: [Zapping] = []) {
         self.translations_model = .init(state: .havent_tried)
         self.artifacts_model = .init(state: .not_loaded)
         self.zaps_model = .init(zaps)
@@ -131,12 +162,23 @@ class EventCache {
     }
     
     @discardableResult
-    func store_zap(zap: Zap) -> Bool {
+    func store_zap(zap: Zapping) -> Bool {
         let data = get_cache_data(zap.target.id).zaps_model
         return insert_uniq_sorted_zap_by_amount(zaps: &data.zaps, new_zap: zap)
     }
     
-    func lookup_zaps(target: ZapTarget) -> [Zap] {
+    func remove_zap(zap: Zapping) {
+        switch zap.target {
+        case .note(let note_target):
+            let zaps = get_cache_data(note_target.note_id).zaps_model
+            zaps.remove(reqid: zap.request.id)
+        case .profile:
+            // these aren't stored anywhere yet
+            break
+        }
+    }
+    
+    func lookup_zaps(target: ZapTarget) -> [Zapping] {
         return get_cache_data(target.id).zaps_model.zaps
     }
     

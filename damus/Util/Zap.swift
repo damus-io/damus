@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct NoteZapTarget: Equatable {
+public struct NoteZapTarget: Equatable, Hashable {
     public let note_id: String
     public let author: String
 }
@@ -41,6 +41,148 @@ public enum ZapTarget: Equatable {
 
 struct ZapRequest {
     let ev: NostrEvent
+    
+}
+
+enum ExtPendingZapStateType {
+    case fetching_invoice
+    case done
+}
+
+class ExtPendingZapState: Equatable {
+    static func == (lhs: ExtPendingZapState, rhs: ExtPendingZapState) -> Bool {
+        return lhs.state == rhs.state
+    }
+    
+    var state: ExtPendingZapStateType
+    
+    init(state: ExtPendingZapStateType) {
+        self.state = state
+    }
+}
+
+enum PendingZapState: Equatable {
+    case nwc(NWCPendingZapState)
+    case external(ExtPendingZapState)
+}
+
+
+enum NWCStateType: Equatable {
+    case fetching_invoice
+    case cancel_fetching_invoice
+    case postbox_pending(NostrEvent)
+    case confirmed
+    case failed
+}
+
+class NWCPendingZapState: Equatable {
+    var state: NWCStateType
+    let url: WalletConnectURL
+    
+    init(state: NWCStateType, url: WalletConnectURL) {
+        self.state = state
+        self.url = url
+    }
+    
+    static func == (lhs: NWCPendingZapState, rhs: NWCPendingZapState) -> Bool {
+        return lhs.state == rhs.state && lhs.url == rhs.url
+    }
+}
+
+class PendingZap {
+    let amount_msat: Int64
+    let target: ZapTarget
+    let request: ZapRequest
+    let type: ZapType
+    var state: PendingZapState
+    
+    init(amount_msat: Int64, target: ZapTarget, request: ZapRequest, type: ZapType, state: PendingZapState) {
+        self.amount_msat = amount_msat
+        self.target = target
+        self.request = request
+        self.type = type
+        self.state = state
+    }
+}
+
+
+enum Zapping {
+    case zap(Zap)
+    case pending(PendingZap)
+    
+    var is_pending: Bool {
+        switch self {
+        case .zap:
+            return false
+        case .pending:
+            return true
+        }
+    }
+    
+    var is_private: Bool {
+        switch self {
+        case .zap(let zap):
+            return zap.private_request != nil
+        case .pending(let pzap):
+            return pzap.type == .priv
+        }
+    }
+    
+    var amount: Int64 {
+        switch self {
+        case .zap(let zap):
+            return zap.invoice.amount
+        case .pending(let pzap):
+            return pzap.amount_msat
+        }
+    }
+    
+    var target: ZapTarget {
+        switch self {
+        case .zap(let zap):
+            return zap.target
+        case .pending(let pzap):
+            return pzap.target
+        }
+    }
+    
+    var request: NostrEvent {
+        switch self {
+        case .zap(let zap):
+            return zap.request_ev
+        case .pending(let pzap):
+            return pzap.request.ev
+        }
+    }
+    
+    var created_at: Int64 {
+        switch self {
+        case .zap(let zap):
+            return zap.event.created_at
+        case .pending(let pzap):
+            // pending zaps are created right away
+            return pzap.request.ev.created_at
+        }
+    }
+    
+    var event: NostrEvent? {
+        switch self {
+        case .zap(let zap):
+            return zap.event
+        case .pending:
+            // pending zaps don't have a zap event
+            return nil
+        }
+    }
+    
+    var is_anon: Bool {
+        switch self {
+        case .zap(let zap):
+            return zap.is_anon
+        case .pending(let pzap):
+            return pzap.type == .anon
+        }
+    }
 }
 
 struct Zap {
@@ -246,7 +388,7 @@ func fetch_static_payreq(_ lnurl: String) async -> LNUrlPayRequest? {
     return endpoint
 }
 
-func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, sats: Int, zap_type: ZapType, comment: String?) async -> String? {
+func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent, sats: Int, zap_type: ZapType, comment: String?) async -> String? {
     guard var base_url = payreq.callback.flatMap({ URLComponents(string: $0) }) else {
         return nil
     }
@@ -256,7 +398,7 @@ func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, sats: Int
     
     var query = [URLQueryItem(name: "amount", value: "\(amount)")]
     
-    if let zapreq, zappable && zap_type != .non_zap, let json = encode_json(zapreq) {
+    if zappable && zap_type != .non_zap, let json = encode_json(zapreq) {
         print("zapreq json: \(json)")
         query.append(URLQueryItem(name: "nostr", value: json))
     }

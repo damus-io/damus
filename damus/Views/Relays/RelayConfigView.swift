@@ -88,8 +88,8 @@ struct RelayConfigView: View {
                                 }
                                 
                                 let info = RelayInfo.rw
-                                
-                                guard (try? state.pool.add_relay(url, info: info)) != nil else {
+                                let descriptor = RelayDescriptor(url: url, info: info)
+                                guard (try? state.pool.add_relay(descriptor)) != nil else {
                                     return
                                 }
                                 

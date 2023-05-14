@@ -581,7 +581,8 @@ struct ContentView: View {
         let new_relay_filters = load_relay_filters(pubkey) == nil
         for relay in bootstrap_relays {
             if let url = RelayURL(relay) {
-                add_new_relay(relay_filters: relay_filters, metadatas: metadatas, pool: pool, url: url, info: .rw, new_relay_filters: new_relay_filters)
+                let descriptor = RelayDescriptor(url: url, info: .rw)
+                add_new_relay(relay_filters: relay_filters, metadatas: metadatas, pool: pool, descriptor: descriptor, new_relay_filters: new_relay_filters)
             }
         }
         
@@ -591,6 +592,11 @@ struct ContentView: View {
         UserSettingsStore.pubkey = pubkey
         let settings = UserSettingsStore()
         UserSettingsStore.shared = settings
+        
+        if let nwc_str = settings.nostr_wallet_connect,
+           let nwc = WalletConnectURL(str: nwc_str) {
+            try? pool.add_relay(.nwc(url: nwc.relay))
+        }
         
         self.damus_state = DamusState(pool: pool,
                                       keypair: keypair,
