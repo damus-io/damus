@@ -104,16 +104,18 @@ class PostBox {
         remove_relayer(relay_id: relay_id, event_id: cr.event_id)
     }
     
-    func remove_relayer(relay_id: String, event_id: String) {
+    @discardableResult
+    func remove_relayer(relay_id: String, event_id: String) -> Bool {
         guard let ev = self.events[event_id] else {
-            return
+            return false
         }
-        ev.remaining = ev.remaining.filter {
-            $0.relay != relay_id
-        }
+        let prev_count = ev.remaining.count
+        ev.remaining = ev.remaining.filter { $0.relay != relay_id }
+        let after_count = ev.remaining.count
         if ev.remaining.count == 0 {
             self.events.removeValue(forKey: event_id)
         }
+        return prev_count != after_count
     }
     
     private func flush_event(_ event: PostedEvent, to_relay: Relayer? = nil) {
@@ -147,3 +149,5 @@ class PostBox {
         }
     }
 }
+
+

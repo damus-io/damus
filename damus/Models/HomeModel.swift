@@ -145,6 +145,14 @@ class HomeModel: ObservableObject {
                 return
             }
             
+            // since command results are not returned for ephemeral events,
+            // remove the request from the postbox which is likely failing over and over
+            if damus_state.postbox.remove_relayer(relay_id: nwc.relay.id, event_id: resp.req_id) {
+                print("nwc: got response, removed \(resp.req_id) from the postbox")
+            } else {
+                print("nwc: \(resp.req_id) not found in the postbox, nothing to remove")
+            }
+            
             if resp.response.error == nil {
                 nwc_success(zapcache: self.damus_state.zaps, evcache: self.damus_state.events, resp: resp)
                 return
