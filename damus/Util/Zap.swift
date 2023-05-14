@@ -293,5 +293,12 @@ func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, sats: Int
         return nil
     }
     
+    // make sure it's the correct amount
+    guard let bolt11 = decode_bolt11(result.pr),
+          .specific(amount) == bolt11.amount
+    else {
+        return nil
+    }
+    
     return result.pr
 }
