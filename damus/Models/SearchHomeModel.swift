@@ -90,20 +90,6 @@ class SearchHomeModel: ObservableObject {
     }
 }
 
-func find_profiles_to_fetch_pk(profiles: Profiles, event_pubkeys: [String]) -> [String] {
-    var pubkeys = Set<String>()
-    
-    for pk in event_pubkeys {
-        if profiles.lookup(id: pk) != nil {
-            continue
-        }
-        
-        pubkeys.insert(pk)
-    }
-    
-    return Array(pubkeys)
-}
-
 func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: EventCache) -> [String] {
     switch load {
     case .from_events(let events):
