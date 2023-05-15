@@ -34,6 +34,7 @@ struct ProfileName: View {
     
     @State var display_name: DisplayName?
     @State var nip05: NIP05?
+    @State var donation: Int?
 
     init(pubkey: String, profile: Profile?, damus: DamusState, show_nip5_domain: Bool = true) {
         self.pubkey = pubkey
@@ -75,6 +76,17 @@ struct ProfileName: View {
         return profile.reactions == false
     }
     
+    var supporter: Int? {
+        guard let profile,
+              let donation = profile.damus_donation,
+              donation > 0
+        else {
+            return nil
+        }
+        
+        return donation
+    }
+    
     var body: some View {
         HStack(spacing: 2) {
             Text(verbatim: "\(prefix)\(name_choice)")
@@ -90,6 +102,9 @@ struct ProfileName: View {
                 Image("zap-hashtag")
                     .frame(width: 14, height: 14)
             }
+            if let supporter {
+                SupporterBadge(percent: supporter)
+            }
         }
         .onReceive(handle_notify(.profile_updated)) { notif in
             let update = notif.object as! ProfileUpdate
@@ -98,6 +113,7 @@ struct ProfileName: View {
             }
             display_name = Profile.displayName(profile: update.profile, pubkey: pubkey)
             nip05 = damus_state.profiles.is_validated(pubkey)
+            donation = profile?.damus_donation
         }
     }
 }

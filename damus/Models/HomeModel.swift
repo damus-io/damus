@@ -735,7 +735,7 @@ func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: P
     var old_nip05: String? = nil
     if let mprof = profiles.lookup_with_timestamp(id: ev.pubkey) {
         old_nip05 = mprof.profile.nip05
-        if mprof.timestamp > ev.created_at {
+        if mprof.event.created_at > ev.created_at {
             // skip if we already have an newer profile
             return
         }
@@ -752,7 +752,7 @@ func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: P
                 print("validated nip05 for '\(nip05)'")
             }
             
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 profiles.validated[ev.pubkey] = validated
                 profiles.nip05_pubkey[nip05] = ev.pubkey
                 notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))

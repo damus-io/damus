@@ -397,7 +397,7 @@ struct ContentView: View {
                 return
             }
             ds.postbox.send(ev)
-            if let profile = ds.profiles.profiles[ev.pubkey] {
+            if let profile = ds.profiles.lookup_with_timestamp(id: ev.pubkey) {
                 ds.postbox.send(profile.event)
             }
         }

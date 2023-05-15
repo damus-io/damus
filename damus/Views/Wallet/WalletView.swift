@@ -58,7 +58,19 @@ struct WalletView: View {
     var tip_msats: String {
         let msats = Int64(percent * Double(model.settings.default_zap_amount * 1000))
         let s = format_msats_abbrev(msats)
-        return s.split(separator: ".").first.map({ x in String(x) }) ?? s
+        // TODO: fix formatting and remove this hack
+        let parts = s.split(separator: ".")
+        if parts.count == 1 {
+            return s
+        }
+        if let end = parts[safe: 1] {
+            if end.allSatisfy({ c in c.isNumber }) {
+                return String(parts[0])
+            } else {
+                return s
+            }
+        }
+        return s
     }
     
     var SupportDamus: some View {
@@ -93,6 +105,7 @@ struct WalletView: View {
                     Text("\(Int(binding.wrappedValue))%")
                         .font(.title.bold())
                         .foregroundColor(.white)
+                        .frame(width: 80)
                 }
                 
                 HStack{
@@ -103,7 +116,7 @@ struct WalletView: View {
                             Text("\(Image("zap.fill")) \(format_msats_abbrev(Int64(model.settings.default_zap_amount) * 1000))")
                                 .font(.title)
                                 .foregroundColor(percent == 0 ? .gray : .yellow)
-                                .frame(width: 100)
+                                .frame(width: 120)
                         }
                         
                         Text("Zap")
@@ -121,9 +134,10 @@ struct WalletView: View {
                             Text("\(Image("zap.fill")) \(tip_msats)")
                                 .font(.title)
                                 .foregroundColor(percent == 0 ? .gray : Color.yellow)
-                                .frame(width: 100)
+                                .frame(width: 120)
                         }
-                        Text("💜")
+                        
+                        Text(percent == 0 ? "🩶" : "💜")
                             .foregroundColor(.white)
                     }
                     Spacer()
@@ -154,16 +168,30 @@ struct WalletView: View {
             ConnectWalletView(model: model)
         case .existing(let nwc):
             MainWalletView(nwc: nwc)
+                .onAppear() {
+                    model.inital_percent = settings.donation_percent
+                }
+                .onChange(of: settings.donation_percent) { p in
+                    guard let profile = damus_state.profiles.lookup(id: damus_state.pubkey) else {
+                        return
+                    }
+                    
+                    profile.damus_donation = p
+                    
+                    notify(.profile_updated, ProfileUpdate(pubkey: damus_state.pubkey, profile: profile))
+                }
                 .onDisappear {
                     guard let keypair = damus_state.keypair.to_full(),
                           let profile = damus_state.profiles.lookup(id: damus_state.pubkey),
-                          profile.damus_donation != settings.donation_percent
+                          model.inital_percent != profile.damus_donation
                     else {
                         return
                     }
                     
                     profile.damus_donation = settings.donation_percent
                     let meta = make_metadata_event(keypair: keypair, metadata: profile)
+                    let tsprofile = TimestampedProfile(profile: profile, timestamp: meta.created_at, event: meta)
+                    damus_state.profiles.add(id: damus_state.pubkey, profile: tsprofile)
                     damus_state.postbox.send(meta)
                 }
         }

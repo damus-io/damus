@@ -15,6 +15,7 @@ struct EventProfileName: View {
     
     @State var display_name: DisplayName?
     @State var nip05: NIP05?
+    @State var donation: Int?
     
     let size: EventViewKind
     
@@ -23,6 +24,7 @@ struct EventProfileName: View {
         self.pubkey = pubkey
         self.profile = profile
         self.size = size
+        self._donation = State(wrappedValue: profile?.damus_donation)
     }
     
     var friend_type: FriendType? {
@@ -43,6 +45,15 @@ struct EventProfileName: View {
         }
         
         return profile.reactions == false
+    }
+    
+    var supporter: Int? {
+        guard let donation, donation > 0
+        else {
+            return nil
+        }
+        
+        return donation
     }
     
     var body: some View {
@@ -73,6 +84,10 @@ struct EventProfileName: View {
                 Image("zap-hashtag")
                     .frame(width: 14, height: 14)
             }
+            
+            if let supporter {
+                SupporterBadge(percent: supporter)
+            }
         }
         .onReceive(handle_notify(.profile_updated)) { notif in
             let update = notif.object as! ProfileUpdate
@@ -81,6 +96,7 @@ struct EventProfileName: View {
             }
             display_name = Profile.displayName(profile: update.profile, pubkey: pubkey)
             nip05 = damus_state.profiles.is_validated(pubkey)
+            donation = update.profile.damus_donation
         }
     }
 }

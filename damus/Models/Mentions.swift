@@ -246,7 +246,7 @@ func format_msats_abbrev(_ msats: Int64) -> String {
     formatter.positiveSuffix = "m"
     formatter.positivePrefix = ""
     formatter.minimumFractionDigits = 0
-    formatter.maximumFractionDigits = 2
+    formatter.maximumFractionDigits = 3
     formatter.roundingMode = .down
     formatter.roundingIncrement = 0.1
     formatter.multiplier = 1

@@ -140,7 +140,7 @@ func search_users_for_autocomplete(profiles: Profiles, tags: [[String]], search 
     }
     
     // search profile cache as well
-    for tup in profiles.profiles.enumerated() {
+    for tup in profiles.enumerated() {
         let pk = tup.element.key
         let prof = tup.element.value.profile
         

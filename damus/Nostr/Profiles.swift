@@ -17,13 +17,19 @@ class Profiles {
                                       qos: .userInteractive,
                                       attributes: .concurrent)
     
-    var profiles: [String: TimestampedProfile] = [:]
+    private var profiles: [String: TimestampedProfile] = [:]
     var validated: [String: NIP05] = [:]
     var nip05_pubkey: [String: String] = [:]
     var zappers: [String: String] = [:]
     
     func is_validated(_ pk: String) -> NIP05? {
         return validated[pk]
+    }
+    
+    func enumerated() -> EnumeratedSequence<[String: TimestampedProfile]> {
+        return queue.sync {
+            return profiles.enumerated()
+        }
     }
     
     func lookup_zapper(pubkey: String) -> String? {
