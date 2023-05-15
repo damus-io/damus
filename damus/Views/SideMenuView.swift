@@ -48,7 +48,7 @@ struct SideMenuView: View {
                 navLabel(title: NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), systemImage: "person")
             }
             
-            NavigationLink(destination: WalletView(model: damus_state.wallet)) {
+            NavigationLink(destination: WalletView(damus_state: damus_state, model: damus_state.wallet)) {
                 HStack {
                     Image("wallet")
                         .tint(DamusColors.adaptableBlack)

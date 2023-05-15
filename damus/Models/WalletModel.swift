@@ -14,14 +14,15 @@ enum WalletConnectState {
 }
 
 class WalletModel: ObservableObject {
-    let settings: UserSettingsStore?
+    var settings: UserSettingsStore
     private(set) var previous_state: WalletConnectState
+    
     @Published private(set) var connect_state: WalletConnectState
     
-    init() {
-        self.connect_state = .none
+    init(state: WalletConnectState, settings: UserSettingsStore) {
+        self.connect_state = state
         self.previous_state = .none
-        self.settings = nil
+        self.settings = settings
     }
     
     init(settings: UserSettingsStore) {
@@ -42,7 +43,7 @@ class WalletModel: ObservableObject {
     }
     
     func disconnect() {
-        self.settings?.nostr_wallet_connect = nil
+        self.settings.nostr_wallet_connect = nil
         self.connect_state = .none
         self.previous_state = .none
     }
@@ -52,7 +53,7 @@ class WalletModel: ObservableObject {
     }
     
     func connect(_ nwc: WalletConnectURL) {
-        self.settings?.nostr_wallet_connect = nwc.to_url().absoluteString
+        self.settings.nostr_wallet_connect = nwc.to_url().absoluteString
         notify(.attached_wallet, nwc)
         self.connect_state = .existing(nwc)
         self.previous_state = .existing(nwc)

@@ -99,6 +99,6 @@ struct ConnectWalletView: View {
 
 struct ConnectWalletView_Previews: PreviewProvider {
     static var previews: some View {
-        ConnectWalletView(model: WalletModel())
+        ConnectWalletView(model: WalletModel(settings: UserSettingsStore()))
     }
 }

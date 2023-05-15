@@ -147,7 +147,7 @@ struct ContentView: View {
     
     func MainContent(damus: DamusState) -> some View {
         VStack {
-            NavigationLink(destination: WalletView(model: damus_state!.wallet), isActive: $wallet_open) {
+            NavigationLink(destination: WalletView(damus_state: damus, model: damus_state!.wallet), isActive: $wallet_open) {
                 EmptyView()
             }
             NavigationLink(destination: MaybeProfileView, isActive: $profile_open) {
