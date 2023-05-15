@@ -258,14 +258,18 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
                     return
                 }
                 
-                let nwc_req = nwc_pay(url: nwc_state.url,  pool: damus_state.pool, post: damus_state.postbox, invoice: inv, on_flush: .once({ pe in
-                    
-                    // send donation zap when the pending zap is flushed, this allows user to cancel and not send a donation
-                    Task.init { @MainActor in
-                        await send_donation_zap(pool: damus_state.pool, postbox: damus_state.postbox, nwc: nwc_state.url, percent: damus_state.settings.donation_percent, base_msats: amount_msat)
-                    }
-                    
-                }))
+                var flusher: OnFlush? = nil
+                // Don't donate on custom zaps
+                if !is_custom && damus_state.settings.donation_percent > 0 {
+                    flusher = .once({ pe in
+                        // send donation zap when the pending zap is flushed, this allows user to cancel and not send a donation
+                        Task.init { @MainActor in
+                            await send_donation_zap(pool: damus_state.pool, postbox: damus_state.postbox, nwc: nwc_state.url, percent: damus_state.settings.donation_percent, base_msats: amount_msat)
+                        }
+                    })
+                }
+                
+                let nwc_req = nwc_pay(url: nwc_state.url,  pool: damus_state.pool, post: damus_state.postbox, invoice: inv, on_flush: flusher)
                 
                 guard let nwc_req, case .nwc(let pzap_state) = pending_zap_state else {
                     return
