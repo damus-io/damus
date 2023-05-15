@@ -42,7 +42,7 @@ class PostedEvent {
         self.on_flush = on_flush
         self.flushed_once = false
         self.remaining = remaining.map {
-            Relayer(relay: $0, attempts: 0, retry_after: 2.0)
+            Relayer(relay: $0, attempts: 0, retry_after: 10.0)
         }
     }
 }
