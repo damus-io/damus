@@ -24,7 +24,7 @@ class FollowingModel {
         var f = NostrFilter.filter_kinds([NostrKind.metadata.rawValue])
         f.authors = self.contacts.reduce(into: Array<String>()) { acc, pk in
             // don't fetch profiles we already have
-            if damus_state.profiles.lookup(id: pk) != nil {
+            if damus_state.profiles.has_fresh_profile(id: pk) {
                 return
             }
             acc.append(pk)
