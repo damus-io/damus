@@ -66,7 +66,7 @@ final class ProfileDatabase {
         background_context?.mergePolicy = NSMergePolicy(merge: .mergeByPropertyObjectTrumpMergePolicyType)
     }
     
-    private func get_persisted(id: String) -> PersistedProfile? {
+    func get_persisted(id: String) -> PersistedProfile? {
         let request = NSFetchRequest<PersistedProfile>(entityName: entity_name)
         request.predicate = NSPredicate(format: "id == %@", id)
         request.fetchLimit = 1
