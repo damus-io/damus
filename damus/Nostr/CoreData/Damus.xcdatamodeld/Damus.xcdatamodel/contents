@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21513" systemVersion="21G72" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21513" systemVersion="22E261" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="PersistedProfile" representedClassName="PersistedProfile" syncable="YES">
         <attribute name="about" optional="YES" attributeType="String"/>
         <attribute name="banner" optional="YES" attributeType="String"/>
@@ -9,6 +9,7 @@
         <attribute name="lud06" optional="YES" attributeType="String"/>
         <attribute name="lud16" optional="YES" attributeType="String"/>
         <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="network_pull_date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="nip05" optional="YES" attributeType="String"/>
         <attribute name="picture" optional="YES" attributeType="String"/>
         <attribute name="website" optional="YES" attributeType="String"/>

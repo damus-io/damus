@@ -99,6 +99,7 @@ final class ProfileDatabase {
         }
         persisted_profile?.copyValues(from: profile)
         persisted_profile?.last_update = last_update
+        persisted_profile?.network_pull_date = Date.now
         
         try context.save()
     }
