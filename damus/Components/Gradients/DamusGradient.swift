@@ -14,8 +14,12 @@ fileprivate let damus_grad = [damus_grad_c1, damus_grad_c2, damus_grad_c3]
 
 struct DamusGradient: View {
     var body: some View {
-        LinearGradient(colors: damus_grad, startPoint: .bottomLeading, endPoint: .topTrailing)
+        DamusGradient.gradient
             .edgesIgnoringSafeArea([.top,.bottom])
+    }
+    
+    static var gradient: LinearGradient {
+         LinearGradient(colors: damus_grad, startPoint: .bottomLeading, endPoint: .topTrailing)
     }
 }
 
