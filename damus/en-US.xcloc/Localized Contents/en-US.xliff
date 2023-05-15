@@ -201,6 +201,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Are you lost?</target>
         <note>Text asking the user if they are lost in the app.</note>
       </trans-unit>
+      <trans-unit id="Are you sure you want to attach this wallet?" xml:space="preserve">
+        <source>Are you sure you want to attach this wallet?</source>
+        <target>Are you sure you want to attach this wallet?</target>
+        <note>Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet.</note>
+      </trans-unit>
       <trans-unit id="Are you sure you want to delete all of your bookmarks?" xml:space="preserve">
         <source>Are you sure you want to delete all of your bookmarks?</source>
         <target>Are you sure you want to delete all of your bookmarks?</target>
@@ -215,6 +220,21 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Are you sure you want to upload this media?</source>
         <target>Are you sure you want to upload this media?</target>
         <note>Alert message asking if the user wants to upload media.</note>
+      </trans-unit>
+      <trans-unit id="Attach" xml:space="preserve">
+        <source>Attach</source>
+        <target>Attach</target>
+        <note>Text for button to attach Nostr Wallet Connect lightning wallet.</note>
+      </trans-unit>
+      <trans-unit id="Attach Wallet" xml:space="preserve">
+        <source>Attach Wallet</source>
+        <target>Attach Wallet</target>
+        <note>Text for button to attach Nostr Wallet Connect lightning wallet.</note>
+      </trans-unit>
+      <trans-unit id="Attach a Wallet" xml:space="preserve">
+        <source>Attach a Wallet</source>
+        <target>Attach a Wallet</target>
+        <note>Navigation title for attaching Nostr Wallet Connect lightning wallet.</note>
       </trans-unit>
       <trans-unit id="Automatically translate notes" xml:space="preserve">
         <source>Automatically translate notes</source>
@@ -264,7 +284,8 @@ Sentence composed of 2 variables to describe how many people are following a use
    Button to cancel the upload.
    Cancel deleting bookmarks.
    Cancel deleting the user.
-   Cancel out of logging out the user.</note>
+   Cancel out of logging out the user.
+   Text for button to cancel out of connecting Nostr Wallet Connect lightning ewallet.</note>
       </trans-unit>
       <trans-unit id="Choose from Library" xml:space="preserve">
         <source>Choose from Library</source>
