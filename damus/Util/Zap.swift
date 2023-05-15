@@ -440,15 +440,14 @@ func fetch_static_payreq(_ lnurl: String) async -> LNUrlPayRequest? {
     return endpoint
 }
 
-func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent, sats: Int, zap_type: ZapType, comment: String?) async -> String? {
+func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, msats: Int64, zap_type: ZapType, comment: String?) async -> String? {
     guard var base_url = payreq.callback.flatMap({ URLComponents(string: $0) }) else {
         return nil
     }
     
     let zappable = payreq.allowsNostr ?? false
-    let amount: Int64 = Int64(sats) * 1000
     
-    var query = [URLQueryItem(name: "amount", value: "\(amount)")]
+    var query = [URLQueryItem(name: "amount", value: "\(msats)")]
     
     if zappable && zap_type != .non_zap, let json = encode_json(zapreq) {
         print("zapreq json: \(json)")
@@ -489,7 +488,7 @@ func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent, sats: Int,
     
     // make sure it's the correct amount
     guard let bolt11 = decode_bolt11(result.pr),
-          .specific(amount) == bolt11.amount
+          .specific(msats) == bolt11.amount
     else {
         return nil
     }

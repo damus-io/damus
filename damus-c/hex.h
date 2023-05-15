@@ -26,7 +26,7 @@ bool hex_decode(const char *str, size_t slen, void *buf, size_t bufsize);
 /**
  * hex_encode - Create a nul-terminated hex string
  * @buf: the buffer to read the data from
- * @bufsize: the length of @buf
+ * @bufsize: the length of buf
  * @dest: the string to fill
  * @destsize: the max size of the string
  *

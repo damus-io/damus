@@ -601,7 +601,7 @@ enum MakeZapRequest {
     
     var private_inner_request: ZapRequest {
         switch self {
-        case .priv(let _, let pzr):
+        case .priv(_, let pzr):
             return pzr.req
         case .normal(let zr):
             return zr

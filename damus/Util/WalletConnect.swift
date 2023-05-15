@@ -182,7 +182,8 @@ func subscribe_to_nwc(url: WalletConnectURL, pool: RelayPool) {
     pool.send(.subscribe(sub), to: [url.relay.id])
 }
 
-func nwc_pay(url: WalletConnectURL, pool: RelayPool, post: PostBox, invoice: String) -> NostrEvent? {
+@discardableResult
+func nwc_pay(url: WalletConnectURL, pool: RelayPool, post: PostBox, invoice: String, delay: TimeInterval? = 5.0, on_flush: OnFlush? = nil) -> NostrEvent? {
     let req = make_wallet_pay_invoice_request(invoice: invoice)
     guard let ev = make_wallet_connect_request(req: req, to_pk: url.pubkey, keypair: url.keypair) else {
         return nil
@@ -190,14 +191,14 @@ func nwc_pay(url: WalletConnectURL, pool: RelayPool, post: PostBox, invoice: Str
     
     try? pool.add_relay(.nwc(url: url.relay))
     subscribe_to_nwc(url: url, pool: pool)
-    post.send(ev, to: [url.relay.id], skip_ephemeral: false, delay: 5.0)
+    post.send(ev, to: [url.relay.id], skip_ephemeral: false, delay: delay, on_flush: on_flush)
     return ev
 }
 
 
-func nwc_success(zapcache: Zaps, evcache: EventCache, resp: FullWalletResponse) {
+func nwc_success(state: DamusState, resp: FullWalletResponse) {
     // find the pending zap and mark it as pending-confirmed
-    for kv in zapcache.our_zaps {
+    for kv in state.zaps.our_zaps {
         let zaps = kv.value
         
         for zap in zaps {
@@ -211,12 +212,27 @@ func nwc_success(zapcache: Zaps, evcache: EventCache, resp: FullWalletResponse) 
             
             if nwc_state.update_state(state: .confirmed) {
                 // notify the zaps model of an update so it can mark them as paid
-                evcache.get_cache_data(pzap.target.id).zaps_model.objectWillChange.send()
+                state.events.get_cache_data(pzap.target.id).zaps_model.objectWillChange.send()
                 print("NWC success confirmed")
             }
+            
             return
         }
     }
+}
+
+func send_donation_zap(pool: RelayPool, postbox: PostBox, nwc: WalletConnectURL, percent: Int, base_msats: Int64) async {
+    let percent_f = Double(percent) / 100.0
+    let donations_msats = Int64(percent_f * Double(base_msats))
+    
+    let payreq = LNUrlPayRequest(allowsNostr: true, commentAllowed: nil, nostrPubkey: "", callback: "https://sendsats.lol/@damus")
+    guard let invoice = await fetch_zap_invoice(payreq, zapreq: nil, msats: donations_msats, zap_type: .non_zap, comment: nil) else {
+        // we failed... oh well. no donation for us.
+        print("damus-donation failed to fetch invoice")
+        return
+    }
+    
+    nwc_pay(url: nwc, pool: pool, post: postbox, invoice: invoice, delay: nil)
 }
 
 func nwc_error(zapcache: Zaps, evcache: EventCache, resp: FullWalletResponse) {

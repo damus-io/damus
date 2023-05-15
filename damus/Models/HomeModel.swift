@@ -154,10 +154,14 @@ class HomeModel: ObservableObject {
             }
             
             if resp.response.error == nil {
-                nwc_success(zapcache: self.damus_state.zaps, evcache: self.damus_state.events, resp: resp)
+            }
+            
+            guard let err = resp.response.error else {
+                nwc_success(state: self.damus_state, resp: resp)
                 return
             }
             
+            print("nwc error: \(err)")
             nwc_error(zapcache: self.damus_state.zaps, evcache: self.damus_state.events, resp: resp)
         }
     }

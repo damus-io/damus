@@ -22,7 +22,7 @@ class Zaps {
         self.event_counts = [:]
         self.event_totals = [:]
     }
-
+    
     func remove_zap(reqid: String) -> Zapping? {
         var res: Zapping? = nil
         for kv in our_zaps {

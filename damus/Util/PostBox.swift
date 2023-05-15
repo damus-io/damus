@@ -22,16 +22,25 @@ class Relayer {
     }
 }
 
+enum OnFlush {
+    case once((PostedEvent) -> Void)
+    case all((PostedEvent) -> Void)
+}
+
 class PostedEvent {
     let event: NostrEvent
     let skip_ephemeral: Bool
     var remaining: [Relayer]
     let flush_after: Date?
+    var flushed_once: Bool
+    let on_flush: OnFlush?
     
-    init(event: NostrEvent, remaining: [String], skip_ephemeral: Bool, flush_after: Date? = nil) {
+    init(event: NostrEvent, remaining: [String], skip_ephemeral: Bool, flush_after: Date?, on_flush: OnFlush?) {
         self.event = event
         self.skip_ephemeral = skip_ephemeral
         self.flush_after = flush_after
+        self.on_flush = on_flush
+        self.flushed_once = false
         self.remaining = remaining.map {
             Relayer(relay: $0, attempts: 0, retry_after: 2.0)
         }
@@ -109,6 +118,19 @@ class PostBox {
         guard let ev = self.events[event_id] else {
             return false
         }
+        
+        if let on_flush = ev.on_flush {
+            switch on_flush {
+            case .once(let cb):
+                if !ev.flushed_once {
+                    ev.flushed_once = true
+                    cb(ev)
+                }
+            case .all(let cb):
+                cb(ev)
+            }
+        }
+        
         let prev_count = ev.remaining.count
         ev.remaining = ev.remaining.filter { $0.relay != relay_id }
         let after_count = ev.remaining.count
@@ -132,7 +154,7 @@ class PostBox {
         }
     }
     
-    func send(_ event: NostrEvent, to: [String]? = nil, skip_ephemeral: Bool = true, delay: TimeInterval? = nil) {
+    func send(_ event: NostrEvent, to: [String]? = nil, skip_ephemeral: Bool = true, delay: TimeInterval? = nil, on_flush: OnFlush? = nil) {
         // Don't add event if we already have it
         if events[event.id] != nil {
             return
@@ -140,7 +162,7 @@ class PostBox {
         
         let remaining = to ?? pool.our_descriptors.map { $0.url.id }
         let after = delay.map { d in Date.now.addingTimeInterval(d) }
-        let posted_ev = PostedEvent(event: event, remaining: remaining, skip_ephemeral: skip_ephemeral, flush_after: after)
+        let posted_ev = PostedEvent(event: event, remaining: remaining, skip_ephemeral: skip_ephemeral, flush_after: after, on_flush: on_flush)
         
         events[event.id] = posted_ev
         

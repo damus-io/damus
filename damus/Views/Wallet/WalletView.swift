@@ -123,7 +123,7 @@ struct WalletView: View {
                                 .foregroundColor(percent == 0 ? .gray : Color.yellow)
                                 .frame(width: 100)
                         }
-                        Text("Donation")
+                        Text("💜")
                             .foregroundColor(.white)
                     }
                     Spacer()

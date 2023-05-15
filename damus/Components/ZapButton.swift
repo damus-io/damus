@@ -208,8 +208,7 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
         return
     }
     
-    let zap_amount = amount_sats ?? damus_state.settings.default_zap_amount
-    let amount_msat = Int64(zap_amount) * 1000
+    let amount_msat = Int64(amount_sats ?? damus_state.settings.default_zap_amount) * 1000
     let pending_zap_state = initial_pending_zap_state(settings: damus_state.settings)
     let pending_zap = PendingZap(amount_msat: amount_msat, target: target, request: mzapreq, type: zap_type, state: pending_zap_state)
     let zapreq = mzapreq.potentially_anon_outer_request.ev
@@ -239,7 +238,7 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
             damus_state.lnurls.endpoints[target.pubkey] = payreq
         }
         
-        guard let inv = await fetch_zap_invoice(payreq, zapreq: zapreq, sats: zap_amount, zap_type: zap_type, comment: comment) else {
+        guard let inv = await fetch_zap_invoice(payreq, zapreq: zapreq, msats: amount_msat, zap_type: zap_type, comment: comment) else {
             DispatchQueue.main.async {
                 remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
                 let typ = ZappingEventType.failed(.fetching_invoice)
@@ -259,9 +258,16 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
                     return
                 }
                 
-                guard let nwc_req = nwc_pay(url: nwc_state.url,  pool: damus_state.pool, post: damus_state.postbox, invoice: inv),
-                      case .nwc(let pzap_state) = pending_zap_state
-                else {
+                let nwc_req = nwc_pay(url: nwc_state.url,  pool: damus_state.pool, post: damus_state.postbox, invoice: inv, on_flush: .once({ pe in
+                    
+                    // send donation zap when the pending zap is flushed, this allows user to cancel and not send a donation
+                    Task.init { @MainActor in
+                        await send_donation_zap(pool: damus_state.pool, postbox: damus_state.postbox, nwc: nwc_state.url, percent: damus_state.settings.donation_percent, base_msats: amount_msat)
+                    }
+                    
+                }))
+                
+                guard let nwc_req, case .nwc(let pzap_state) = pending_zap_state else {
                     return
                 }
                 
