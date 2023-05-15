@@ -154,6 +154,18 @@ struct WalletView: View {
             ConnectWalletView(model: model)
         case .existing(let nwc):
             MainWalletView(nwc: nwc)
+                .onDisappear {
+                    guard let keypair = damus_state.keypair.to_full(),
+                          let profile = damus_state.profiles.lookup(id: damus_state.pubkey),
+                          profile.damus_donation != settings.donation_percent
+                    else {
+                        return
+                    }
+                    
+                    profile.damus_donation = settings.donation_percent
+                    let meta = make_metadata_event(keypair: keypair, metadata: profile)
+                    damus_state.postbox.send(meta)
+                }
         }
     }
 }
