@@ -36,7 +36,8 @@ struct WalletConnectURL: Equatable {
     }
     
     init?(str: String) {
-        guard let url = URL(string: str), url.scheme == "nostrwalletconnect",
+        guard let url = URL(string: str),
+              url.scheme == "nostrwalletconnect" || url.scheme == "nostr+walletconnect",
               let pk = url.host, pk.utf8.count == 64,
               let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
               let items = components.queryItems,
