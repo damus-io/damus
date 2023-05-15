@@ -143,6 +143,9 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "disable_animation", default_value: UIAccessibility.isReduceMotionEnabled)
     var disable_animation: Bool
+    
+    @Setting(key: "donation_percent", default_value: 0)
+    var donation_percent: Int
 
     // Helper for inverse of disable_animation.
     // disable_animation was introduced as a setting first, but it's more natural for the settings UI to show the inverse.
