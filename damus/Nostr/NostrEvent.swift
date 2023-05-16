@@ -492,11 +492,11 @@ func make_boost_event(pubkey: String, privkey: String, boosted: NostrEvent) -> N
     return ev
 }
 
-func make_like_event(pubkey: String, privkey: String, liked: NostrEvent) -> NostrEvent {
+func make_like_event(pubkey: String, privkey: String, liked: NostrEvent, content: String = "🤙") -> NostrEvent {
     var tags: [[String]] = liked.tags.filter { tag in tag.count >= 2 && (tag[0] == "e" || tag[0] == "p") }
     tags.append(["e", liked.id])
     tags.append(["p", liked.pubkey])
-    let ev = NostrEvent(content: "🤙", pubkey: pubkey, kind: 7, tags: tags)
+    let ev = NostrEvent(content: content, pubkey: pubkey, kind: 7, tags: tags)
     ev.calculate_id()
     ev.sign(privkey: privkey)
 
@@ -964,6 +964,28 @@ func first_eref_mention(ev: NostrEvent, privkey: String?) -> Mention? {
     }
     
     return nil
+}
+
+/**
+ Transforms a `NostrEvent` of known kind `NostrKind.like`to a human-readable emoji.
+ If the known kind is not a `NostrKind.like`, it will return `nil`.
+ If the event content is an empty string or `+`, it will map that to a heart ❤️ emoji.
+ If the event content is a "-", it will map that to a dislike 👎 emoji.
+ Otherwise, it will return the event content at face value without transforming it.
+ */
+func to_reaction_emoji(ev: NostrEvent) -> String? {
+    guard ev.known_kind == NostrKind.like else {
+        return nil
+    }
+
+    switch ev.content {
+    case "", "+":
+        return "❤️"
+    case "-":
+        return "👎"
+    default:
+        return ev.content
+    }
 }
 
 extension [ReferencedId] {
