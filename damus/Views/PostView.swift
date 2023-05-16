@@ -38,6 +38,8 @@ struct PostView: View {
     @State var showPrivateKeyWarning: Bool = false
     @State var attach_media: Bool = false
     @State var attach_camera: Bool = false
+    @State private var attach_gif: Bool = false
+    @State private var selected_gif_url: String?
     @State var error: String? = nil
     @State var uploadedMedias: [UploadedMedia] = []
     @State var image_upload_confirm: Bool = false
@@ -122,10 +124,26 @@ struct PostView: View {
         })
     }
     
+    var GIFButton: some View {
+        Button(action: {
+            attach_gif = true
+        }, label: {
+            Image("gif-icon", bundle: nil)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 25, height: 35)
+                .padding(EdgeInsets(top: 3, leading: 3, bottom: 0, trailing: 6))
+                .foregroundColor(DamusColors.purple)
+        })
+        .disabled(UserSettingsStore.shared?.gif_source == GIFSource.none)
+        .opacity(UserSettingsStore.shared?.gif_source == GIFSource.none ? 0.5 : 1)
+    }
+    
     var AttachmentBar: some View {
         HStack(alignment: .center) {
             ImageButton
             CameraButton
+            GIFButton
         }
         .disabled(image_upload.progress != nil)
     }
@@ -379,6 +397,18 @@ struct PostView: View {
                     Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
                 }
             }
+            .sheet(isPresented: $attach_gif, onDismiss: {
+                guard let gifURL = URL(string: selected_gif_url ?? "") else {
+                    return
+                }
+                let media = MediaUpload.image(gifURL)
+                let img = getImage(media: media)
+                let uploadedMedia = UploadedMedia(localURL: gifURL, uploadedURL: gifURL, representingImage: img, metadata: nil)
+                uploadedMedias.append(uploadedMedia)
+            }, content: {
+                GiphyPicker(isPresented: $attach_gif, selectedURL: $selected_gif_url)
+            })
+
             .onAppear() {
                 load_draft()
                 

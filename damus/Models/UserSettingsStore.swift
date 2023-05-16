@@ -164,6 +164,9 @@ class UserSettingsStore: ObservableObject {
     @StringSetting(key: "translation_service", default_value: .none)
     var translation_service: TranslationService
 
+    @StringSetting(key: "gif_source", default_value: .none)
+    var gif_source: GIFSource
+
     @StringSetting(key: "deepl_plan", default_value: .free)
     var deepl_plan: DeepLPlan
     
@@ -173,6 +176,15 @@ class UserSettingsStore: ObservableObject {
         }
         set {
             internal_deepl_api_key = newValue == "" ? nil : newValue
+        }
+    }
+
+    var giphy_api_key: String {
+        get {
+            return internal_giphy_api_key ?? ""
+        }
+        set {
+            internal_giphy_api_key = newValue == "" ? nil : newValue
         }
     }
 
@@ -213,6 +225,9 @@ class UserSettingsStore: ObservableObject {
     
     @KeychainStorage(account: "nostr_wallet_connect")
     var nostr_wallet_connect: String? // TODO: strongly type this to WalletConnectURL
+
+    @KeychainStorage(account: "giphy_apikey")
+    var internal_giphy_api_key: String?
 
     var can_translate: Bool {
         switch translation_service {

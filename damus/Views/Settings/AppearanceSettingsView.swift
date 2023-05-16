@@ -25,7 +25,28 @@ struct AppearanceSettingsView: View {
                 Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)
                     .toggleStyle(.switch)
             }
-            
+
+            Section(NSLocalizedString("GIF Attachment", comment: "Section for GIF Attachment configuration.")) {
+                Picker(NSLocalizedString("GIF source", comment: "Prompt selection of GIF Source."), selection: $settings.gif_source) {
+                    ForEach(GIFSource.allCases, id: \.self) { source in
+                        Text(source.model.displayName)
+                            .tag(source.model.tag)
+                    }
+                }
+                
+                if settings.gif_source == .giphy {
+                    SecureField(NSLocalizedString("API Key (required)", comment: "Prompt selection of GIF Source API."), text: $settings.giphy_api_key)
+                        .disableAutocorrection(true)
+                        .disabled(settings.gif_source != .giphy)
+                        .autocapitalization(UITextAutocapitalizationType.none)
+                    
+                }
+
+                if settings.giphy_api_key == "" && settings.gif_source == .giphy {
+                    Link(NSLocalizedString("Get API Key", comment: "Button to navigate to Giphy website to get an API key."), destination: URL(string: "https://developers.giphy.com/docs/api")!)
+                }
+            }
+
             Section(NSLocalizedString("Images", comment: "Section title for images configuration.")) {
                 Toggle(NSLocalizedString("Animations", comment: "Toggle to enable or disable image animation"), isOn: $settings.enable_animation)
                     .toggleStyle(.switch)
