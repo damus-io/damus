@@ -18,6 +18,7 @@ enum Sheets: Identifiable {
     case report(ReportTarget)
     case event(NostrEvent)
     case filter
+    case twitterFollow
 
     var id: String {
         switch self {
@@ -25,6 +26,7 @@ enum Sheets: Identifiable {
         case .post(let action): return "post-" + (action.ev?.id ?? "")
         case .event(let ev): return "event-" + ev.id
         case .filter: return "filter"
+        case .twitterFollow: return "twitter"
         }
     }
 }
@@ -75,6 +77,7 @@ struct ContentView: View {
     @SceneStorage("ContentView.filter_state") var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     @StateObject var home: HomeModel = HomeModel()
+    @AppStorage("has_seen_twitter_search") private var hasShownTwitterView = false
 
     let sub_id = UUID().description
     
@@ -316,6 +319,10 @@ struct ContentView: View {
         .onAppear() {
             self.connect()
             setup_notifications()
+            if !hasShownTwitterView {
+                active_sheet = .twitterFollow
+                hasShownTwitterView = true
+            }
         }
         .sheet(item: $active_sheet) { item in
             switch item {
@@ -333,6 +340,10 @@ struct ContentView: View {
                         .presentationDragIndicator(.visible)
                 } else {
                     RelayFilterView(state: damus_state!, timeline: timeline)
+                }
+            case .twitterFollow:
+                NavigationView {
+                    TwitterUserSearchView(state: damus_state!)
                 }
             }
         }
