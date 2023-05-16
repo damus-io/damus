@@ -136,7 +136,7 @@ struct CustomizeZapView: View {
         VStack(alignment: .center, spacing: 0) {
             TextField("", text: $custom_amount)
             .placeholder(when: custom_amount.isEmpty, alignment: .center) {
-                Text(String("0"))
+                Text(verbatim: 0.formatted())
             }
             .accentColor(.clear)
             .font(.system(size: 72, weight: .heavy))

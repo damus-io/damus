@@ -24,18 +24,18 @@ struct WalletView: View {
             
             Spacer()
             
-            Text("\(nwc.relay.id)")
+            Text(verbatim: nwc.relay.id)
             
             if let lud16 = nwc.lud16 {
-                Text("\(lud16)")
+                Text(verbatim: lud16)
             }
             
-            BigButton("Disconnect Wallet") {
+            BigButton(NSLocalizedString("Disconnect Wallet", comment: "Text for button to disconnect from Nostr Wallet Connect lightning wallet.")) {
                 self.model.disconnect()
             }
             
         }
-        .navigationTitle("Wallet")
+        .navigationTitle(NSLocalizedString("Wallet", comment: "Navigation title for Wallet view"))
         .navigationBarTitleDisplayMode(.large)
         .padding()
     }
@@ -83,16 +83,16 @@ struct WalletView: View {
                     Image("logo-nobg")
                         .resizable()
                         .frame(width: 50, height: 50)
-                    Text("Support Damus")
+                    Text("Support Damus", comment: "Text calling for the user to support Damus through zaps")
                         .font(.title.bold())
                         .foregroundColor(.white)
                 }
                 
-                Text("Help build the future of decentralized communication on the web.")
+                Text("Help build the future of decentralized communication on the web.", comment: "Text indicating the goal of developing Damus which the user can help with.")
                     .fixedSize(horizontal: false, vertical: true)
                     .foregroundColor(.white)
                 
-                Text("An additional percentage of each zap will be sent to support Damus development ")
+                Text("An additional percentage of each zap will be sent to support Damus development", comment: "Text indicating that they can contribute zaps to support Damus development.")
                     .fixedSize(horizontal: false, vertical: true)
                     .foregroundColor(.white)
                 
@@ -102,7 +102,7 @@ struct WalletView: View {
                     Slider(value: binding,
                            in: WalletView.min_donation...WalletView.max_donation,
                            label: {  })
-                    Text("\(Int(binding.wrappedValue))%")
+                    Text("\(Int(binding.wrappedValue))%", comment: "Percentage of additional zap that should be sent to support Damus development.")
                         .font(.title.bold())
                         .foregroundColor(.white)
                         .frame(width: 80)
@@ -119,12 +119,12 @@ struct WalletView: View {
                                 .frame(width: 120)
                         }
                         
-                        Text("Zap")
+                        Text("Zap", comment: "Text underneath the number of sats indicating that it's the amount used for zaps.")
                             .foregroundColor(.white)
                     }
                     Spacer()
                     
-                    Text("+")
+                    Text(verbatim: "+")
                         .font(.title)
                         .foregroundColor(.white)
                     Spacer()
@@ -137,23 +137,13 @@ struct WalletView: View {
                                 .frame(width: 120)
                         }
                         
-                        Text(percent == 0 ? "🩶" : "💜")
+                        Text(verbatim: percent == 0 ? "🩶" : "💜")
                             .foregroundColor(.white)
                     }
                     Spacer()
                 }
                 
                 EventProfile(damus_state: damus_state, pubkey: damus_state.pubkey, profile: damus_state.profiles.lookup(id: damus_state.pubkey), size: .small)
-                
-                /*
-                Slider(value: donation_binding(),
-                       in: WalletView.min...WalletView.max,
-                       step: 1,
-                       minimumValueLabel: { Text("\(WalletView.min)") },
-                       maximumValueLabel: { Text("\(WalletView.max)") },
-                       label: { Text("label") }
-                )
-                 */
             }
             .padding(25)
         }
