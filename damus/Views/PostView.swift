@@ -405,6 +405,7 @@ struct PostView: View {
                 let img = getImage(media: media)
                 let uploadedMedia = UploadedMedia(localURL: gifURL, uploadedURL: gifURL, representingImage: img, metadata: nil)
                 uploadedMedias.append(uploadedMedia)
+                selected_gif_url = nil
             }, content: {
                 GiphyPicker(isPresented: $attach_gif, selectedURL: $selected_gif_url)
             })
