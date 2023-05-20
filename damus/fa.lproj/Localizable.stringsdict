@@ -303,7 +303,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d نفر دیگر مطلب شما را زپ کرده‌اند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر مطلب شما را زپ کرده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر یادداشت شما را زپ کرده‌اند</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
