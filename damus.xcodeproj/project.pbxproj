@@ -269,6 +269,7 @@
 		501F8C822A0224EB001AFC1D /* KeychainStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */; };
 		50A50A8D29A09E1C00C01BE7 /* RequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */; };
 		50B5685329F97CB400A23243 /* CredentialHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B5685229F97CB400A23243 /* CredentialHandler.swift */; };
+		50DA11262A16A23F00236234 /* Launch.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 50DA11252A16A23F00236234 /* Launch.storyboard */; };
 		5C42E78C29DB76D90086AAC1 /* EmptyUserSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */; };
 		5C513FBA297F72980072348F /* CustomPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FB9297F72980072348F /* CustomPicker.swift */; };
 		5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FCB2984ACA60072348F /* QRCodeView.swift */; };
@@ -700,6 +701,7 @@
 		501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorageTests.swift; sourceTree = "<group>"; };
 		50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestTests.swift; sourceTree = "<group>"; };
 		50B5685229F97CB400A23243 /* CredentialHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialHandler.swift; sourceTree = "<group>"; };
+		50DA11252A16A23F00236234 /* Launch.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Launch.storyboard; sourceTree = "<group>"; };
 		5C42E78B29DB76D90086AAC1 /* EmptyUserSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyUserSearchView.swift; sourceTree = "<group>"; };
 		5C513FB9297F72980072348F /* CustomPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomPicker.swift; sourceTree = "<group>"; };
 		5C513FCB2984ACA60072348F /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
@@ -994,6 +996,7 @@
 				4CF0ABD529817F5B00D66079 /* ReportView.swift */,
 				4CF0ABE42981EE0C00D66079 /* EULAView.swift */,
 				3AA247FE297E3D900090C62D /* RepostsView.swift */,
+				50DA11252A16A23F00236234 /* Launch.storyboard */,
 				5C513FCB2984ACA60072348F /* QRCodeView.swift */,
 				643EA5C7296B764E005081BB /* RelayFilterView.swift */,
 			);
@@ -1558,6 +1561,7 @@
 				3ACB685F297633BC00C46468 /* Localizable.strings in Resources */,
 				4CE6DEEE27F7A08200C66700 /* Preview Assets.xcassets in Resources */,
 				3ACB685C297633BC00C46468 /* InfoPlist.strings in Resources */,
+				50DA11262A16A23F00236234 /* Launch.storyboard in Resources */,
 				4CE6DEEB27F7A08200C66700 /* Assets.xcassets in Resources */,
 				4C198DF129F88C6B004C165C /* License.txt in Resources */,
 				4C198DF029F88C6B004C165C /* Readme.md in Resources */,
@@ -2151,6 +2155,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = Launch.storyboard;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2198,6 +2203,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = Launch.storyboard;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
