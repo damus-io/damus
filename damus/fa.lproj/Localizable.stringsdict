@@ -95,7 +95,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d نفر دیگر به نمایه‌ی شما بازخورد داده‌اند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر به پروفایل شما بازخورد داده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر به نمایه شما واکنش داده‌اند</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
