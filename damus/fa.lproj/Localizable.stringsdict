@@ -175,7 +175,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d نفر دیگر مطلب شما را بازنشر کرده‌اند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر مطلب شما را بازنشر کرده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر یادداشت شما را بازنشر کرده‌اند</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
