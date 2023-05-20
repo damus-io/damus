@@ -111,7 +111,7 @@
 			<key>one</key>
 			<string>بازخورد</string>
 			<key>other</key>
-			<string>بازخوردها</string>
+			<string>واکنش ها</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
