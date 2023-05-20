@@ -79,7 +79,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d نفر دیگر به مطلب شما بازخورد داده‌اند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر به یاداشت شما واکنش داده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر به یادداشت شما واکنش داده‌اند</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
