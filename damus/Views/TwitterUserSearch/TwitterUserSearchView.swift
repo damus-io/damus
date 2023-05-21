@@ -37,7 +37,7 @@ struct TwitterUserSearchView: View {
                 case .empty:
                     Group {
                         Spacer()
-                        Text("No results")
+                        Text(NSLocalizedString("No results", comment: "Label telling user there are no results for search"))
                     }
                 case .loading:
                     Group {

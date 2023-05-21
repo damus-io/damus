@@ -14,7 +14,7 @@ struct TwitterSearchBar: View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.gray)
-            TextField("Find users to follow from Twitter", text: $searchText)
+            TextField(NSLocalizedString("Find a Twitter handle's followers on Nostr", comment: "Placeholder for Twitter search bar"), text: $searchText)
                 .autocorrectionDisabled()
                 .autocapitalization(.none)
                 .foregroundColor(.black)
