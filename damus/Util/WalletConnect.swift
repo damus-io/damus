@@ -180,7 +180,7 @@ func subscribe_to_nwc(url: WalletConnectURL, pool: RelayPool) {
     filter.limit = 0
     let sub = NostrSubscribe(filters: [filter], sub_id: "nwc")
     
-    pool.send(.subscribe(sub), to: [url.relay.id])
+    pool.send(.subscribe(sub), to: [url.relay.id], skip_ephemeral: false)
 }
 
 @discardableResult
@@ -233,6 +233,7 @@ func send_donation_zap(pool: RelayPool, postbox: PostBox, nwc: WalletConnectURL,
         return
     }
     
+    print("damus-donation donating...")
     nwc_pay(url: nwc, pool: pool, post: postbox, invoice: invoice, delay: nil)
 }
 
