@@ -69,8 +69,7 @@ class Profiles {
         }
         
         // then disk
-        guard let persisted_profile = database.get_persisted(id: id),
-              let pull_date = persisted_profile.network_pull_date else {
+        guard let pull_date = database.get_network_pull_date(id: id) else {
             return false
         }
         return Date.now.timeIntervalSince(pull_date) < Profiles.db_freshness_threshold

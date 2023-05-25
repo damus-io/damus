@@ -19,6 +19,7 @@ final class ProfileDatabase {
     private var persistent_container: NSPersistentContainer?
     private var background_context: NSManagedObjectContext?
     private let cache_url: URL
+    private var network_pull_date_cache = [String: Date]()
     
     init(cache_url: URL = ProfileDatabase.profile_cache_url) {
         self.cache_url = cache_url
@@ -66,11 +67,28 @@ final class ProfileDatabase {
         background_context?.mergePolicy = NSMergePolicy(merge: .mergeByPropertyObjectTrumpMergePolicyType)
     }
     
-    func get_persisted(id: String) -> PersistedProfile? {
+    private func get_persisted(id: String, context: NSManagedObjectContext) -> PersistedProfile? {
         let request = NSFetchRequest<PersistedProfile>(entityName: entity_name)
         request.predicate = NSPredicate(format: "id == %@", id)
         request.fetchLimit = 1
-        return try? persistent_container?.viewContext.fetch(request).first
+        return try? context.fetch(request).first
+    }
+    
+    func get_network_pull_date(id: String) -> Date? {
+        if let pull_date = network_pull_date_cache[id] {
+            return pull_date
+        }
+        
+        let request = NSFetchRequest<PersistedProfile>(entityName: entity_name)
+        request.predicate = NSPredicate(format: "id == %@", id)
+        request.fetchLimit = 1
+        request.propertiesToFetch = ["network_pull_date"]
+        guard let profile = try? persistent_container?.viewContext.fetch(request).first else {
+            return nil
+        }
+        
+        network_pull_date_cache[id] = profile.network_pull_date
+        return profile.network_pull_date
     }
     
     // MARK: - Public
@@ -86,26 +104,34 @@ final class ProfileDatabase {
             throw ProfileDatabaseError.missing_context
         }
         
-        var persisted_profile: PersistedProfile?
-        if let profile = get_persisted(id: id) {
-            if let existing_last_update = profile.last_update, last_update < existing_last_update {
-                throw ProfileDatabaseError.outdated_input
-            } else {
-                persisted_profile = profile
+        Task {
+            try await context.perform {
+                var persisted_profile: PersistedProfile?
+                if let profile = self.get_persisted(id: id, context: context) {
+                    if let existing_last_update = profile.last_update, last_update < existing_last_update {
+                        throw ProfileDatabaseError.outdated_input
+                    } else {
+                        persisted_profile = profile
+                    }
+                } else {
+                    persisted_profile = NSEntityDescription.insertNewObject(forEntityName: self.entity_name, into: context) as? PersistedProfile
+                    persisted_profile?.id = id
+                }
+                persisted_profile?.copyValues(from: profile)
+                persisted_profile?.last_update = last_update
+                
+                let pull_date = Date.now
+                persisted_profile?.network_pull_date = pull_date
+                self.network_pull_date_cache[id] = pull_date
+                
+                try context.save()
             }
-        } else {
-            persisted_profile = NSEntityDescription.insertNewObject(forEntityName: entity_name, into: context) as? PersistedProfile
-            persisted_profile?.id = id
         }
-        persisted_profile?.copyValues(from: profile)
-        persisted_profile?.last_update = last_update
-        persisted_profile?.network_pull_date = Date.now
-        
-        try context.save()
     }
     
     func get(id: String) -> Profile? {
-        guard let profile = get_persisted(id: id) else {
+        guard let container = persistent_container,
+              let profile = get_persisted(id: id, context: container.viewContext) else {
             return nil
         }
         return Profile(persisted_profile: profile)
@@ -121,6 +147,8 @@ final class ProfileDatabase {
         guard let context = background_context, let container = persistent_container else {
             throw ProfileDatabaseError.missing_context
         }
+        
+        network_pull_date_cache.removeAll()
         
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: entity_name)
         let batch_delete_request = NSBatchDeleteRequest(fetchRequest: request)
