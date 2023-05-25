@@ -30,7 +30,7 @@ class ProfileDatabaseTests: XCTestCase {
                 nip05: "test-nip05")
     }
 
-    func testStoreAndRetrieveProfile() throws {
+    func testStoreAndRetrieveProfile() async throws {
         let id = "test-id"
         
         let profile = test_profile
@@ -39,7 +39,7 @@ class ProfileDatabaseTests: XCTestCase {
         XCTAssertNil(database.get(id: id))
         
         // store the profile
-        try database.upsert(id: id, profile: profile, last_update: .now)
+        try await database.upsert(id: id, profile: profile, last_update: .now)
         
         // read the profile out of the database
         let retrievedProfile = try XCTUnwrap(database.get(id: id))
@@ -55,50 +55,55 @@ class ProfileDatabaseTests: XCTestCase {
         XCTAssertEqual(profile.nip05, retrievedProfile.nip05)
     }
     
-    func testRejectOutdatedProfile() throws {
+    func testRejectOutdatedProfile() async throws {
         let id = "test-id"
         
         // store a profile
         let profile = test_profile
         let profile_last_updated = Date.now
-        try database.upsert(id: id, profile: profile, last_update: profile_last_updated)
+        try await database.upsert(id: id, profile: profile, last_update: profile_last_updated)
         
         // try to store a profile with the same id but the last_update date is older than the previously stored profile
         let outdatedProfile = test_profile
         let outdated_last_updated = profile_last_updated.addingTimeInterval(-60)
         
-        XCTAssertThrowsError(try database.upsert(id: id, profile: outdatedProfile, last_update: outdated_last_updated)) { error in
-            XCTAssertEqual(error as? ProfileDatabaseError, ProfileDatabaseError.outdated_input)
+        do {
+            try await database.upsert(id: id, profile: outdatedProfile, last_update: outdated_last_updated)
+            XCTFail("expected to throw error")
+        } catch let error as ProfileDatabaseError {
+            XCTAssertEqual(error, ProfileDatabaseError.outdated_input)
+        } catch {
+            XCTFail("not the expected error")
         }
     }
     
-    func testUpdateExistingProfile() throws {
+    func testUpdateExistingProfile() async throws {
         let id = "test-id"
         
         // store a profile
         let profile = test_profile
         let profile_last_update = Date.now
-        try database.upsert(id: id, profile: profile, last_update: profile_last_update)
+        try await database.upsert(id: id, profile: profile, last_update: profile_last_update)
         
         // update the same profile
         let updated_profile = test_profile
         updated_profile.nip05 = "updated-nip05"
         let updated_profile_last_update = profile_last_update.addingTimeInterval(60)
-        try database.upsert(id: id, profile: updated_profile, last_update: updated_profile_last_update)
+        try await database.upsert(id: id, profile: updated_profile, last_update: updated_profile_last_update)
         
         // retrieve the profile and make sure it was updated
         let retrieved_profile = database.get(id: id)
         XCTAssertEqual(retrieved_profile?.nip05, "updated-nip05")
     }
     
-    func testStoreMultipleAndRemoveAllProfiles() throws {
+    func testStoreMultipleAndRemoveAllProfiles() async throws {
         XCTAssertEqual(database.count, 0)
         
         // store a profile
         let id = "test-id"
         let profile = test_profile
         let profile_last_update = Date.now
-        try database.upsert(id: id, profile: profile, last_update: profile_last_update)
+        try await database.upsert(id: id, profile: profile, last_update: profile_last_update)
         
         XCTAssertEqual(database.count, 1)
         
@@ -106,7 +111,7 @@ class ProfileDatabaseTests: XCTestCase {
         let id2 = "test-id-2"
         let profile2 = test_profile
         let profile_last_update2 = Date.now
-        try database.upsert(id: id2, profile: profile2, last_update: profile_last_update2)
+        try await database.upsert(id: id2, profile: profile2, last_update: profile_last_update2)
         
         XCTAssertEqual(database.count, 2)
         

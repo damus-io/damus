@@ -99,33 +99,31 @@ final class ProfileDatabase {
     ///   - id: Profile id (pubkey)
     ///   - profile: Profile object to be stored
     ///   - last_update: Date that the Profile was updated
-    func upsert(id: String, profile: Profile, last_update: Date) throws {
+    func upsert(id: String, profile: Profile, last_update: Date) async throws {
         guard let context = background_context else {
             throw ProfileDatabaseError.missing_context
         }
         
-        Task {
-            try await context.perform {
-                var persisted_profile: PersistedProfile?
-                if let profile = self.get_persisted(id: id, context: context) {
-                    if let existing_last_update = profile.last_update, last_update < existing_last_update {
-                        throw ProfileDatabaseError.outdated_input
-                    } else {
-                        persisted_profile = profile
-                    }
+        try await context.perform {
+            var persisted_profile: PersistedProfile?
+            if let profile = self.get_persisted(id: id, context: context) {
+                if let existing_last_update = profile.last_update, last_update < existing_last_update {
+                    throw ProfileDatabaseError.outdated_input
                 } else {
-                    persisted_profile = NSEntityDescription.insertNewObject(forEntityName: self.entity_name, into: context) as? PersistedProfile
-                    persisted_profile?.id = id
+                    persisted_profile = profile
                 }
-                persisted_profile?.copyValues(from: profile)
-                persisted_profile?.last_update = last_update
-                
-                let pull_date = Date.now
-                persisted_profile?.network_pull_date = pull_date
-                self.network_pull_date_cache[id] = pull_date
-                
-                try context.save()
+            } else {
+                persisted_profile = NSEntityDescription.insertNewObject(forEntityName: self.entity_name, into: context) as? PersistedProfile
+                persisted_profile?.id = id
             }
+            persisted_profile?.copyValues(from: profile)
+            persisted_profile?.last_update = last_update
+            
+            let pull_date = Date.now
+            persisted_profile?.network_pull_date = pull_date
+            self.network_pull_date_cache[id] = pull_date
+            
+            try context.save()
         }
     }
     

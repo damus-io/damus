@@ -37,10 +37,12 @@ class Profiles {
             self.profiles[id] = profile
         }
         
-        do {
-            try database.upsert(id: id, profile: profile.profile, last_update: Date(timeIntervalSince1970: TimeInterval(profile.timestamp)))
-        } catch {
-            print("⚠️ Warning: Profiles failed to save a profile: \(error)")
+        Task {
+            do {
+                try await database.upsert(id: id, profile: profile.profile, last_update: Date(timeIntervalSince1970: TimeInterval(profile.timestamp)))
+            } catch {
+                print("⚠️ Warning: Profiles failed to save a profile: \(error)")
+            }
         }
     }
     
