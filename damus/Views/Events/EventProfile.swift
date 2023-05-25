@@ -15,6 +15,8 @@ func eventview_pfp_size(_ size: EventViewKind) -> CGFloat {
         return PFP_SIZE
     case .selected:
         return PFP_SIZE
+    case .subheadline:
+        return PFP_SIZE * 0.5
     }
 }
 
