@@ -57,7 +57,9 @@ struct ParticipantsView: View {
                                 let profile = damus_state.profiles.lookup(id: pubkey)
                                 ProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_nip5_domain: false)
                                 if let about = profile?.about {
-                                    Text(FollowUserView.markdown.process(about))
+                                    let blocks = parse_mentions(content: about, tags: [])
+                                    let about_string = render_blocks(blocks: blocks, profiles: damus_state.profiles).content.attributed
+                                    Text(about_string)
                                         .lineLimit(3)
                                         .font(.footnote)
                                 }
