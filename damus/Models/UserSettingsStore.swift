@@ -92,6 +92,9 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "always_show_images", default_value: false)
     var always_show_images: Bool
+    
+    @Setting(key: "always_show_images", default_value: false)
+    var show_carousel_counter: Bool
 
     @Setting(key: "zap_vibration", default_value: true)
     var zap_vibration: Bool

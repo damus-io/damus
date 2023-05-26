@@ -154,7 +154,9 @@ struct ImageCarousel: View {
                             .tag(index)
                             .background(Color("DamusDarkGrey"))
                         
-                        CarouselImageCounter(urls: urls, selectedIndex: $selectedIndex)
+                        if (state.settings.show_carousel_counter) {
+                            CarouselImageCounter(urls: urls, selectedIndex: $selectedIndex)
+                        }
                     }
                 }
             }
