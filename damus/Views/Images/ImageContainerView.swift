@@ -10,10 +10,11 @@ import Kingfisher
 
     
 struct ImageContainerView: View {
-    let url: URL?
+    let url: MediaUrl
     
     @State private var image: UIImage?
     @State private var showShareSheet = false
+    @State private var video_size: CGSize? = nil
     
     let disable_animation: Bool
     
@@ -26,8 +27,7 @@ struct ImageContainerView: View {
         }
     }
     
-    var body: some View {
-        
+    func Img(url: URL) -> some View {
         KFAnimatedImage(url)
             .imageContext(.note, disable_animation: disable_animation)
             .configure { view in
@@ -40,12 +40,23 @@ struct ImageContainerView: View {
                 ShareSheet(activityItems: [url])
             }
     }
+    
+    var body: some View {
+        Group {
+            switch url {
+            case .image(let url):
+                Img(url: url)
+            case .video(let url):
+                DamusVideoPlayer(url: url, video_size: $video_size)
+            }
+        }
+    }
 }
 
 let test_image_url = URL(string: "https://jb55.com/red-me.jpg")!
 
 struct ImageContainerView_Previews: PreviewProvider {
     static var previews: some View {
-        ImageContainerView(url: test_image_url, disable_animation: false)
+        ImageContainerView(url: .image(test_image_url), disable_animation: false)
     }
 }

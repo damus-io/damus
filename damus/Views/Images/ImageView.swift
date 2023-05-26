@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct ImageView: View {
-    
-    let urls: [URL?]
+    let urls: [MediaUrl]
     
     @Environment(\.presentationMode) var presentationMode
     
@@ -79,6 +78,7 @@ struct ImageView: View {
 
 struct ImageView_Previews: PreviewProvider {
     static var previews: some View {
-        ImageView(urls: [URL(string: "https://jb55.com/red-me.jpg")], disable_animation: false)
+        let url: MediaUrl = .image(URL(string: "https://jb55.com/red-me.jpg")!)
+        ImageView(urls: [url], disable_animation: false)
     }
 }
