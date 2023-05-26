@@ -45,36 +45,38 @@ struct SideMenuView: View {
     func SidemenuItems(profile_model: ProfileModel, followers: FollowersModel) -> some View {
         return VStack(spacing: verticalSpacing) {
             NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
-                navLabel(title: NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), systemImage: "person")
+                navLabel(title: NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), img: "user")
             }
             
             NavigationLink(destination: WalletView(damus_state: damus_state, model: damus_state.wallet)) {
+                navLabel(title: NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), img: "wallet")
+                /*
                 HStack {
                     Image("wallet")
                         .tint(DamusColors.adaptableBlack)
                     
-                    Text(NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."))
+                    Text(NSLocalizedString("wallet", comment: "Sidebar menu label for Wallet view."))
                         .font(.title2)
                         .foregroundColor(textColor())
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .dynamicTypeSize(.xSmall)
-                }
+                }*/
             }
              
             NavigationLink(destination: MutelistView(damus_state: damus_state, users: get_mutelist_users(damus_state.contacts.mutelist) )) {
-                navLabel(title: NSLocalizedString("Muted", comment: "Sidebar menu label for muted users view."), systemImage: "exclamationmark.octagon")
+                navLabel(title: NSLocalizedString("Muted", comment: "Sidebar menu label for muted users view."), img: "mute")
             }
             
             NavigationLink(destination: RelayConfigView(state: damus_state)) {
-                navLabel(title: NSLocalizedString("Relays", comment: "Sidebar menu label for Relays view."), systemImage: "network")
+                navLabel(title: NSLocalizedString("Relays", comment: "Sidebar menu label for Relays view."), img: "world-relays")
             }
             
             NavigationLink(destination: BookmarksView(state: damus_state)) {
-                navLabel(title: NSLocalizedString("Bookmarks", comment: "Sidebar menu label for Bookmarks view."), systemImage: "bookmark")
+                navLabel(title: NSLocalizedString("Bookmarks", comment: "Sidebar menu label for Bookmarks view."), img: "bookmark")
             }
             
             NavigationLink(destination: ConfigView(state: damus_state)) {
-                navLabel(title: NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), systemImage: "gear")
+                navLabel(title: NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), img: "settings")
             }
         }
     }
@@ -141,7 +143,7 @@ struct SideMenuView: View {
                                 confirm_logout = true
                             }
                         }, label: {
-                            Label(NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account."), systemImage: "pip.exit")
+                            Label(NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account."), image: "logout")
                                 .font(.title3)
                                 .foregroundColor(textColor())
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -153,7 +155,7 @@ struct SideMenuView: View {
                         Button(action: {
                             showQRCode.toggle()
                         }, label: {
-                            Label("", systemImage: "qrcode")
+                            Image("qr-code")
                                 .font(.title)
                                 .foregroundColor(textColor())
                                 .dynamicTypeSize(.xSmall)
@@ -186,8 +188,11 @@ struct SideMenuView: View {
     
     
     @ViewBuilder
-    func navLabel(title: String, systemImage: String) -> some View {
-        Label(title, systemImage: systemImage)
+    func navLabel(title: String, img: String) -> some View {
+        Image(img)
+            .tint(DamusColors.adaptableBlack)
+        
+        Text(title)
             .font(.title2)
             .foregroundColor(textColor())
             .frame(maxWidth: .infinity, alignment: .leading)
