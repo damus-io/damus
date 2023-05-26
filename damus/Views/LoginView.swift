@@ -285,27 +285,33 @@ struct KeyInput: View {
     }
 
     var body: some View {
-        ZStack(alignment: .leading) {
+        HStack {
+            Image(systemName: "doc.on.clipboard")
+                .foregroundColor(.gray)
+                .onTapGesture {
+                    if let pastedkey = UIPasteboard.general.string {
+                        self.key.wrappedValue = pastedkey
+                    }
+                }
             TextField("", text: key)
                 .placeholder(when: key.wrappedValue.isEmpty) {
                     Text(title).foregroundColor(.white.opacity(0.6))
                 }
-                .padding()
-                .padding(.leading, 20)
-                .background {
-                    RoundedRectangle(cornerRadius: 4.0).opacity(0.2)
-                }
+                .padding(10)
                 .autocapitalization(.none)
-                .foregroundColor(.white)
+                .autocorrectionDisabled(true)
+                .textInputAutocapitalization(.never)
                 .font(.body.monospaced())
                 .textContentType(.password)
+        }
+        .padding(.horizontal, 10)
+        .overlay {
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(.gray, lineWidth: 1)
+        }
+    }
+}
 
-            Label("", systemImage: "doc.on.clipboard")
-                .padding(.leading, 10)
-                .onTapGesture {
-                if let pastedkey = UIPasteboard.general.string {
-                    self.key.wrappedValue = pastedkey
-                }
             }
         }
     }
