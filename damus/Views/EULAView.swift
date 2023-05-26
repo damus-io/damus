@@ -72,18 +72,43 @@ struct EULAView: View {
                     .padding()
             }
             .padding(EdgeInsets(top: 20, leading: 10, bottom: 50, trailing: 10))
+            
+            VStack {
+                Spacer()
+                
+                HStack {
+                    Spacer()
+                    
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        HStack {
+                            Text("Reject", comment:  "Button to reject the end user license agreement, which disallows the user from being let into the app.")
+                                .fontWeight(.semibold)
+                        }
+                        .frame(minWidth: 75, maxHeight: 12, alignment: .center)
+                        .padding()
+                        .foregroundColor(Color.white)
+                        .background {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(DamusColors.darkGrey, strokeBorder: DamusColors.mediumGrey, lineWidth: 1)
+                        }
                     }
+                    
+                    Button(action: {
+                        accepted = true
+                        login.toggle()
+                    }) {
+                        HStack {
+                            Text("Accept", comment:  "Button to accept the end user license agreement before being allowed into the app.")
+                                .fontWeight(.semibold)
+                        }
+                        .frame(minWidth: 75, maxHeight: 12, alignment: .center)
                     }
+                    .buttonStyle(GradientButtonStyle())
                 }
-                DamusWhiteButton(NSLocalizedString("Accept", comment: "Button to accept the end user license agreement before being allowed into the app.")) {
-                    accepted = true
-                }
-
-                DamusWhiteButton(NSLocalizedString("Reject", comment: "Button to reject the end user license agreement, which disallows the user from being let into the app.")) {
-                    dismiss()
-                }
+                .padding(.trailing, 30)
             }
-            .padding()
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
