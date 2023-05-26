@@ -27,7 +27,8 @@ class ProfileDatabaseTests: XCTestCase {
                 website: "test-website",
                 lud06: "test-lud06",
                 lud16: "test-lud16",
-                nip05: "test-nip05")
+                nip05: "test-nip05",
+                damus_donation: 100)
     }
 
     func testStoreAndRetrieveProfile() async throws {
@@ -53,6 +54,7 @@ class ProfileDatabaseTests: XCTestCase {
         XCTAssertEqual(profile.lud06, retrievedProfile.lud06)
         XCTAssertEqual(profile.lud16, retrievedProfile.lud16)
         XCTAssertEqual(profile.nip05, retrievedProfile.nip05)
+        XCTAssertEqual(profile.damus_donation, retrievedProfile.damus_donation)
     }
     
     func testRejectOutdatedProfile() async throws {

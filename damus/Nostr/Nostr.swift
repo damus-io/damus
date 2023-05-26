@@ -33,7 +33,8 @@ class Profile: Codable {
                   website: persisted_profile.website,
                   lud06: persisted_profile.lud06,
                   lud16: persisted_profile.lud16,
-                  nip05: persisted_profile.nip05)
+                  nip05: persisted_profile.nip05,
+                  damus_donation: Int(persisted_profile.damus_donation))
     }
     
     private func str(_ str: String) -> String? {

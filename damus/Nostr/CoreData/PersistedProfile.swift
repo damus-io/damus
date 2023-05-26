@@ -20,6 +20,7 @@ final class PersistedProfile: NSManagedObject {
     @NSManaged var lud06: String?
     @NSManaged var lud16: String?
     @NSManaged var nip05: String?
+    @NSManaged var damus_donation: Int16
     @NSManaged var last_update: Date?       // The date that the profile was last updated by the user
     @NSManaged var network_pull_date: Date? // The date we got this profile from a relay (for staleness checking)
     
@@ -33,5 +34,6 @@ final class PersistedProfile: NSManagedObject {
         lud06 = profile.lud06
         lud16 = profile.lud16
         nip05 = profile.nip05
+        damus_donation = profile.damus_donation != nil ? Int16(profile.damus_donation!) : 0
     }
 }
