@@ -11,23 +11,23 @@ struct SideMenuView: View {
     let damus_state: DamusState
     @Binding var isSidebarVisible: Bool
     @State var confirm_logout: Bool = false
-    
+
     @State private var showQRCode = false
-    
+
     @Environment(\.colorScheme) var colorScheme
-    
+
     var sideBarWidth = min(UIScreen.main.bounds.size.width * 0.65, 400.0)
     let verticalSpacing: CGFloat = 20
     let padding: CGFloat = 30
-    
+
     func fillColor() -> Color {
         colorScheme == .light ? DamusColors.white : DamusColors.black
     }
-    
+
     func textColor() -> Color {
         colorScheme == .light ? DamusColors.black : DamusColors.white
     }
-    
+
     var body: some View {
         ZStack {
             GeometryReader { _ in
@@ -42,20 +42,20 @@ struct SideMenuView: View {
             content
         }
     }
-    
+
     func SidemenuItems(profile_model: ProfileModel, followers: FollowersModel) -> some View {
         return VStack(spacing: verticalSpacing) {
-            NavigationLink(value: Route.Profile(damusSate: damus_state, profile: profile_model, followers: followers)) {
+            NavigationLink(value: Route.Profile(profile: profile_model, followers: followers)) {
                 navLabel(title: NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), img: "user")
             }
-            
+
             NavigationLink(destination: WalletView(damus_state: damus_state, model: damus_state.wallet)) {
                 navLabel(title: NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), img: "wallet")
                 /*
                 HStack {
                     Image("wallet")
                         .tint(DamusColors.adaptableBlack)
-                    
+
                     Text(NSLocalizedString("wallet", comment: "Sidebar menu label for Wallet view."))
                         .font(.title2)
                         .foregroundColor(textColor())
@@ -63,36 +63,35 @@ struct SideMenuView: View {
                         .dynamicTypeSize(.xSmall)
                 }*/
             }
-             
-            NavigationLink(value: Route.MuteList(damusState: damus_state, users: get_mutelist_users(damus_state.contacts.mutelist))) {
+
+            NavigationLink(value: Route.MuteList(users: get_mutelist_users(damus_state.contacts.mutelist))) {
                 navLabel(title: NSLocalizedString("Muted", comment: "Sidebar menu label for muted users view."), img: "mute")
             }
-            
-            NavigationLink(value: Route.RelayConfig(damusState: damus_state)) {
+
+            NavigationLink(value: Route.RelayConfig) {
                 navLabel(title: NSLocalizedString("Relays", comment: "Sidebar menu label for Relays view."), img: "world-relays")
             }
-            
-            NavigationLink(value: Route.Bookmarks(damusState: damus_state)) {
+
+            NavigationLink(value: Route.Bookmarks) {
                 navLabel(title: NSLocalizedString("Bookmarks", comment: "Sidebar menu label for Bookmarks view."), img: "bookmark")
             }
-            
-            NavigationLink(value: Route.Config(damusState: damus_state)) {
+
+            NavigationLink(value: Route.Config) {
                 navLabel(title: NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), img: "settings")
             }
         }
     }
-    
+
     var MainSidemenu: some View {
         VStack(alignment: .leading, spacing: 0) {
             let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
             let followers = FollowersModel(damus_state: damus_state, target: damus_state.pubkey)
             let profile_model = ProfileModel(pubkey: damus_state.pubkey, damus: damus_state)
-            
-            NavigationLink(destination: ProfileView(damus_state: damus_state, profile: profile_model, followers: followers)) {
-                
+
+            NavigationLink(value: Route.Profile(profile: profile_model, followers: followers), label: {
                 HStack {
                     ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
-                    
+
                     VStack(alignment: .leading) {
                         if let display_name = profile?.display_name {
                             Text(display_name)
@@ -109,10 +108,10 @@ struct SideMenuView: View {
                     }
                 }
                 .padding(.bottom, verticalSpacing)
-            }
-            
+            })
+
             Divider()
-            
+
             ScrollView {
                 SidemenuItems(profile_model: profile_model, followers: followers)
                     .labelStyle(SideMenuLabelStyle())
@@ -120,7 +119,7 @@ struct SideMenuView: View {
             }
         }
     }
-    
+
     var content: some View {
         HStack(alignment: .top) {
             ZStack(alignment: .top) {
@@ -186,20 +185,20 @@ struct SideMenuView: View {
             Spacer()
         }
     }
-    
-    
+
+
     @ViewBuilder
     func navLabel(title: String, img: String) -> some View {
         Image(img)
             .tint(DamusColors.adaptableBlack)
-        
+
         Text(title)
             .font(.title2)
             .foregroundColor(textColor())
             .frame(maxWidth: .infinity, alignment: .leading)
             .dynamicTypeSize(.xSmall)
     }
-    
+
     struct SideMenuLabelStyle: LabelStyle {
         func makeBody(configuration: Configuration) -> some View {
             HStack(alignment: .center, spacing: 8) {

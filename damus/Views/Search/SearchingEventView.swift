@@ -100,14 +100,12 @@ struct SearchingEventView: View {
                         .progressViewStyle(.circular)
                 }
             case .found(let ev):
-                NavigationLink(destination: ThreadView(state: state, thread: ThreadModel(event: ev, damus_state: state))) {
-                    
+                NavigationLink(value: Route.Thread(thread: ThreadModel(event: ev, damus_state: state))) {
                     EventView(damus: state, event: ev)
                 }
                 .buttonStyle(PlainButtonStyle())
             case .found_profile(let pk):
-                NavigationLink(destination: ProfileView(damus_state: state, pubkey: pk)) {
-                    
+                NavigationLink(value: Route.ProfileByKey(pubkey: pk)) {
                     FollowUserView(target: .pubkey(pk), damus_state: state)
                 }
                 .buttonStyle(PlainButtonStyle())

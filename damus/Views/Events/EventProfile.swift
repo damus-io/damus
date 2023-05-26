@@ -37,7 +37,7 @@ struct EventProfile: View {
     var body: some View {
         HStack(alignment: .center) {
             VStack {
-                NavigationLink(destination: ProfileView(damus_state: damus_state, pubkey: pubkey)) {
+                NavigationLink(value: Route.ProfileByKey(pubkey: pubkey)) {
                     ProfilePicView(pubkey: pubkey, size: pfp_size, highlight: .none, profiles: damus_state.profiles, disable_animation: disable_animation)
                 }
             }
