@@ -312,6 +312,25 @@ struct KeyInput: View {
     }
 }
 
+struct SignInHeader: View {
+    var body: some View {
+        VStack {
+            Image("logo-nobg")
+                .resizable()
+                .frame(width: 56, height: 56, alignment: .center)
+                .shadow(color: DamusColors.purple, radius: 2)
+                .padding(.bottom)
+            
+            Text("Sign in", comment: "Title of view to log into an account.")
+                .font(.system(size: 32, weight: .bold))
+                .padding(.bottom, 5)
+            
+            Text("Welcome to the social network you control", comment: "Welcome text")
+                .foregroundColor(Color("DamusMediumGrey"))
+        }
+    }
+}
+
             }
         }
     }
