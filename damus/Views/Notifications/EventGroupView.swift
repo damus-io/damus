@@ -240,8 +240,7 @@ struct EventGroupView: View {
                 
                 if let event {
                     let thread = ThreadModel(event: event, damus_state: state)
-                    let dest = ThreadView(state: state, thread: thread)
-                    NavigationLink(destination: dest) {
+                    NavigationLink(value: Route.Thread(thread: thread)) {
                         VStack(alignment: .leading) {
                             GroupDescription(unique_pubkeys)
                             EventBody(damus_state: state, event: event, size: .normal, options: [.truncate_content])

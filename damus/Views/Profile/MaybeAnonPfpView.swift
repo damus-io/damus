@@ -28,7 +28,7 @@ struct MaybeAnonPfpView: View {
                     .font(.largeTitle)
                     .frame(width: size, height: size)
             } else {
-                NavigationLink(destination: ProfileView(damus_state: state, pubkey: pubkey)) {
+                NavigationLink(value: Route.ProfileByKey(pubkey: pubkey)) {
                     ProfilePicView(pubkey: pubkey, size: size, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation)
                 }
             }

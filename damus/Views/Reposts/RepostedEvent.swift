@@ -16,9 +16,8 @@ struct RepostedEvent: View {
     var body: some View {
         VStack(alignment: .leading) {
             let prof = damus.profiles.lookup(id: event.pubkey)
-            let booster_profile = ProfileView(damus_state: damus, pubkey: event.pubkey)
             
-            NavigationLink(destination: booster_profile) {
+            NavigationLink(value: Route.ProfileByKey(pubkey: event.pubkey)) {
                 Reposted(damus: damus, pubkey: event.pubkey, profile: prof)
                     .padding(.horizontal)
             }

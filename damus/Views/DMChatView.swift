@@ -61,8 +61,7 @@ struct DMChatView: View, KeyboardReadable {
 
     var Header: some View {
         let profile = damus_state.profiles.lookup(id: pubkey)
-        let profile_page = ProfileView(damus_state: damus_state, pubkey: pubkey)
-        return NavigationLink(destination: profile_page) {
+        return NavigationLink(value: Route.ProfileByKey(pubkey: pubkey)) {
             HStack {
                 ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
 

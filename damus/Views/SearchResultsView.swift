@@ -44,8 +44,7 @@ struct InnerSearchResults: View {
     
     func HashtagSearch(_ ht: String) -> some View {
         let search_model = SearchModel(state: damus_state, search: .filter_hashtag([ht]))
-        let dst = SearchView(appstate: damus_state, search: search_model)
-        return NavigationLink(destination: dst) {
+        return NavigationLink(value: Route.Search(search: search_model)) {
             Text("Search hashtag: #\(ht)", comment: "Navigation link to search hashtag.")
         }
     }
