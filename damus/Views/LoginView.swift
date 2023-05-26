@@ -345,7 +345,18 @@ struct SignInEntry: View {
     }
 }
 
+struct CreateAccountPrompt: View {
+    @Binding var create_account: Bool
+    var body: some View {
+        HStack {
+            Text("New to nostr?", comment: "Ask the user if they are new to nostr")
+                .foregroundColor(Color("DamusMediumGrey"))
+            
+            Button(NSLocalizedString("Create account", comment: "Button to navigate to create account view.")) {
+                create_account.toggle()
             }
+            
+            Spacer()
         }
     }
 }
