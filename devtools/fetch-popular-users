@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+curl $(curl -s 'https://storage.googleapis.com/storage/v1/b/nostrdb-backups/o?prefix=ndjson' | jq -r '.items | last | .mediaLink') > nostr-directory.json
+
+jq -rc '.data | {url: .profileImageUrl, pk: .hexPubKey, userName: .userName, twitterFollowers: .user.followers_count, nostrFollowers: .nFollowerCount}' nostr-directory.json | jq -cs 'sort_by(.twitterFollowers + .nostrFollowers) | .[]' | tail -n1000 | tac > popular_users.json
+
+printf "saved popular_users.json\n" >&2

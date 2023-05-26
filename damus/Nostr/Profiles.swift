@@ -17,7 +17,7 @@ class Profiles {
                                       qos: .userInteractive,
                                       attributes: .concurrent)
     
-    var profiles: [String: TimestampedProfile] = [:]
+    private var profiles: [String: TimestampedProfile] = [:]
     var validated: [String: NIP05] = [:]
     var nip05_pubkey: [String: String] = [:]
     var zappers: [String: String] = [:]
@@ -26,6 +26,12 @@ class Profiles {
     
     func is_validated(_ pk: String) -> NIP05? {
         validated[pk]
+    }
+    
+    func enumerated() -> EnumeratedSequence<[String: TimestampedProfile]> {
+        return queue.sync {
+            return profiles.enumerated()
+        }
     }
     
     func lookup_zapper(pubkey: String) -> String? {
@@ -76,4 +82,10 @@ class Profiles {
         }
         return Date.now.timeIntervalSince(pull_date) < Profiles.db_freshness_threshold
     }
+}
+
+
+func invalidate_zapper_cache(pubkey: String, profiles: Profiles, lnurl: LNUrls) {
+    profiles.zappers.removeValue(forKey: pubkey)
+    lnurl.endpoints.removeValue(forKey: pubkey)
 }

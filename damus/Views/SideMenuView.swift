@@ -48,11 +48,17 @@ struct SideMenuView: View {
                 navLabel(title: NSLocalizedString("Profile", comment: "Sidebar menu label for Profile view."), systemImage: "person")
             }
             
-            /*
-            NavigationLink(destination: EmptyView()) {
-                navLabel(title: NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."), systemImage: "bolt")
+            NavigationLink(destination: WalletView(damus_state: damus_state, model: damus_state.wallet)) {
+                HStack {
+                    Image("wallet")
+                        .tint(DamusColors.adaptableBlack)
+                    
+                    Text(NSLocalizedString("Wallet", comment: "Sidebar menu label for Wallet view."))
+                        .font(.title2)
+                        .foregroundColor(textColor())
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
-            */
              
             NavigationLink(destination: MutelistView(damus_state: damus_state, users: get_mutelist_users(damus_state.contacts.mutelist) )) {
                 navLabel(title: NSLocalizedString("Muted", comment: "Sidebar menu label for muted users view."), systemImage: "exclamationmark.octagon")

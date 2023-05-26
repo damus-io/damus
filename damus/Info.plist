@@ -24,6 +24,26 @@
 				<string>damus</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>io.damus.nwc</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>nostrwalletconnect</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>io.damus.nwcp</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>nostr+walletconnect</string>
+			</array>
+		</dict>
 	</array>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>

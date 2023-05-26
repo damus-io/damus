@@ -492,11 +492,11 @@ func make_boost_event(pubkey: String, privkey: String, boosted: NostrEvent) -> N
     return ev
 }
 
-func make_like_event(pubkey: String, privkey: String, liked: NostrEvent) -> NostrEvent {
+func make_like_event(pubkey: String, privkey: String, liked: NostrEvent, content: String = "🤙") -> NostrEvent {
     var tags: [[String]] = liked.tags.filter { tag in tag.count >= 2 && (tag[0] == "e" || tag[0] == "p") }
     tags.append(["e", liked.id])
     tags.append(["p", liked.pubkey])
-    let ev = NostrEvent(content: "🤙", pubkey: pubkey, kind: 7, tags: tags)
+    let ev = NostrEvent(content: content, pubkey: pubkey, kind: 7, tags: tags)
     ev.calculate_id()
     ev.sign(privkey: privkey)
 
@@ -512,7 +512,12 @@ func zap_target_to_tags(_ target: ZapTarget) -> [[String]] {
     }
 }
 
-func make_private_zap_request_event(identity: FullKeypair, enc_key: FullKeypair, target: ZapTarget, message: String) -> String? {
+struct PrivateZapRequest {
+    let req: ZapRequest
+    let enc: String
+}
+
+func make_private_zap_request_event(identity: FullKeypair, enc_key: FullKeypair, target: ZapTarget, message: String) -> PrivateZapRequest? {
     // target tags must be the same as zap request target tags
     let tags = zap_target_to_tags(target)
     
@@ -520,10 +525,13 @@ func make_private_zap_request_event(identity: FullKeypair, enc_key: FullKeypair,
     note.id = calculate_event_id(ev: note)
     note.sig = sign_event(privkey: identity.privkey, ev: note)
     
-    guard let note_json = encode_json(note) else {
+    guard let note_json = encode_json(note),
+          let enc = encrypt_message(message: note_json, privkey: enc_key.privkey, to_pk: target.pubkey, encoding: .bech32)
+    else {
         return nil
     }
-    return encrypt_message(message: note_json, privkey: enc_key.privkey, to_pk: target.pubkey, encoding: .bech32)
+    
+    return PrivateZapRequest(req: ZapRequest(ev: note), enc: enc)
 }
 
 func decrypt_private_zap(our_privkey: String, zapreq: NostrEvent, target: ZapTarget) -> NostrEvent? {
@@ -587,7 +595,30 @@ func generate_private_keypair(our_privkey: String, id: String, created_at: Int64
     return FullKeypair(pubkey: pubkey, privkey: privkey)
 }
 
-func make_zap_request_event(keypair: FullKeypair, content: String, relays: [RelayDescriptor], target: ZapTarget, zap_type: ZapType) -> NostrEvent? {
+enum MakeZapRequest {
+    case priv(ZapRequest, PrivateZapRequest)
+    case normal(ZapRequest)
+    
+    var private_inner_request: ZapRequest {
+        switch self {
+        case .priv(_, let pzr):
+            return pzr.req
+        case .normal(let zr):
+            return zr
+        }
+    }
+    
+    var potentially_anon_outer_request: ZapRequest {
+        switch self {
+        case .priv(let zr, _):
+            return zr
+        case .normal(let zr):
+            return zr
+        }
+    }
+}
+
+func make_zap_request_event(keypair: FullKeypair, content: String, relays: [RelayDescriptor], target: ZapTarget, zap_type: ZapType) -> MakeZapRequest? {
     var tags = zap_target_to_tags(target)
     var relay_tag = ["relays"]
     relay_tag.append(contentsOf: relays.map { $0.url.id })
@@ -596,6 +627,8 @@ func make_zap_request_event(keypair: FullKeypair, content: String, relays: [Rela
     var kp = keypair
     
     let now = Int64(Date().timeIntervalSince1970)
+    
+    var privzap_req: PrivateZapRequest?
     
     var message = content
     switch zap_type {
@@ -614,14 +647,20 @@ func make_zap_request_event(keypair: FullKeypair, content: String, relays: [Rela
         guard let privreq = make_private_zap_request_event(identity: keypair, enc_key: kp, target: target, message: message) else {
             return nil
         }
-        tags.append(["anon", privreq])
+        tags.append(["anon", privreq.enc])
         message = ""
+        privzap_req = privreq
     }
     
     let ev = NostrEvent(content: message, pubkey: kp.pubkey, kind: 9734, tags: tags, createdAt: now)
     ev.id = calculate_event_id(ev: ev)
     ev.sig = sign_event(privkey: kp.privkey, ev: ev)
-    return ev
+    let zapreq = ZapRequest(ev: ev)
+    if let privzap_req {
+        return .priv(zapreq, privzap_req)
+    } else {
+        return .normal(zapreq)
+    }
 }
 
 func uniq<T: Hashable>(_ xs: [T]) -> [T] {
@@ -925,6 +964,28 @@ func first_eref_mention(ev: NostrEvent, privkey: String?) -> Mention? {
     }
     
     return nil
+}
+
+/**
+ Transforms a `NostrEvent` of known kind `NostrKind.like`to a human-readable emoji.
+ If the known kind is not a `NostrKind.like`, it will return `nil`.
+ If the event content is an empty string or `+`, it will map that to a heart ❤️ emoji.
+ If the event content is a "-", it will map that to a dislike 👎 emoji.
+ Otherwise, it will return the event content at face value without transforming it.
+ */
+func to_reaction_emoji(ev: NostrEvent) -> String? {
+    guard ev.known_kind == NostrKind.like else {
+        return nil
+    }
+
+    switch ev.content {
+    case "", "+":
+        return "❤️"
+    case "-":
+        return "👎"
+    default:
+        return ev.content
+    }
 }
 
 extension [ReferencedId] {

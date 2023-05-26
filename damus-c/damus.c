@@ -12,6 +12,22 @@
 #include <stdlib.h>
 #include <string.h>
 
+static int parse_digit(struct cursor *cur, int *digit) {
+    int c;
+    if ((c = peek_char(cur, 0)) == -1)
+        return 0;
+    
+    c -= '0';
+    
+    if (c >= 0 && c <= 9) {
+        *digit = c;
+        cur->p++;
+        return 1;
+    }
+    return 0;
+}
+
+
 static int parse_mention_index(struct cursor *cur, struct block *block) {
     int d1, d2, d3, ind;
     const u8 *start = cur->p;

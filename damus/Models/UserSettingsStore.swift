@@ -19,8 +19,11 @@ let fallback_zap_amount = 1000
         if let loaded = UserDefaults.standard.object(forKey: self.key) as? T {
             self.value = loaded
         } else if let loaded = UserDefaults.standard.object(forKey: key) as? T {
-            // try to load from deprecated non-pubkey-keyed setting
+            // If pubkey-scoped setting does not exist but the deprecated non-pubkey-scoped setting does,
+            // migrate the deprecated setting into the pubkey-scoped one and delete the deprecated one.
             self.value = loaded
+            UserDefaults.standard.set(loaded, forKey: self.key)
+            UserDefaults.standard.removeObject(forKey: key)
         } else {
             self.value = default_value
         }
@@ -48,8 +51,11 @@ let fallback_zap_amount = 1000
         if let loaded = UserDefaults.standard.string(forKey: self.key), let val = T.init(from: loaded) {
             self.value = val
         } else if let loaded = UserDefaults.standard.string(forKey: key), let val = T.init(from: loaded) {
-            // try to load from deprecated non-pubkey-keyed setting
+            // If pubkey-scoped setting does not exist but the deprecated non-pubkey-scoped setting does,
+            // migrate the deprecated setting into the pubkey-scoped one and delete the deprecated one.
             self.value = val
+            UserDefaults.standard.set(val.to_string(), forKey: self.key)
+            UserDefaults.standard.removeObject(forKey: key)
         } else {
             self.value = default_value
         }
@@ -137,6 +143,9 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "disable_animation", default_value: UIAccessibility.isReduceMotionEnabled)
     var disable_animation: Bool
+    
+    @Setting(key: "donation_percent", default_value: 0)
+    var donation_percent: Int
 
     // Helper for inverse of disable_animation.
     // disable_animation was introduced as a setting first, but it's more natural for the settings UI to show the inverse.
@@ -201,6 +210,9 @@ class UserSettingsStore: ObservableObject {
     
     @KeychainStorage(account: "libretranslate_apikey")
     var internal_libretranslate_api_key: String?
+    
+    @KeychainStorage(account: "nostr_wallet_connect")
+    var nostr_wallet_connect: String? // TODO: strongly type this to WalletConnectURL
 
     var can_translate: Bool {
         switch translation_service {

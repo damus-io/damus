@@ -182,7 +182,7 @@ func make_hashtagable(_ str: String) -> String {
 
 func search_profiles(profiles: Profiles, search: String) -> [SearchedUser] {
     let new = search.lowercased()
-    return profiles.profiles.enumerated().reduce(into: []) { acc, els in
+    return profiles.enumerated().reduce(into: []) { acc, els in
         let pk = els.element.key
         let prof = els.element.value.profile
         

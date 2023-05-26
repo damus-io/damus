@@ -181,7 +181,9 @@ struct TextEvent: View {
             VStack(alignment: .leading) {
                 TopPart(is_anon: is_anon)
                 
-                ReplyPart
+                if !options.contains(.no_replying_to) {
+                    ReplyPart
+                }
                 
                 EvBody(options: self.options)
                 

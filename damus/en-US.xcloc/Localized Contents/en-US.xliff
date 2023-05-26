@@ -42,11 +42,6 @@
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.3" build-num="14E222b"/>
     </header>
     <body>
-      <trans-unit id="%@" xml:space="preserve">
-        <source>%@</source>
-        <target>%@</target>
-        <note>No comment provided by engineer.</note>
-      </trans-unit>
       <trans-unit id="%@ %@" xml:space="preserve">
         <source>%@ %@</source>
         <target>%@ %@</target>
@@ -82,6 +77,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet.</source>
         <target>%@. Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet.</target>
         <note>Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string.</note>
+      </trans-unit>
+      <trans-unit id="%lld%%" xml:space="preserve">
+        <source>%lld%%</source>
+        <target>%lld%%</target>
+        <note>Percentage of additional zap that should be sent to support Damus development.</note>
       </trans-unit>
       <trans-unit id="%lld/%lld" xml:space="preserve">
         <source>%lld/%lld</source>
@@ -174,6 +174,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Always show images</target>
         <note>Setting to always show and never blur images</note>
       </trans-unit>
+      <trans-unit id="An additional percentage of each zap will be sent to support Damus development" xml:space="preserve">
+        <source>An additional percentage of each zap will be sent to support Damus development</source>
+        <target>An additional percentage of each zap will be sent to support Damus development</target>
+        <note>Text indicating that they can contribute zaps to support Damus development.</note>
+      </trans-unit>
       <trans-unit id="Animations" xml:space="preserve">
         <source>Animations</source>
         <target>Animations</target>
@@ -201,6 +206,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Are you lost?</target>
         <note>Text asking the user if they are lost in the app.</note>
       </trans-unit>
+      <trans-unit id="Are you sure you want to attach this wallet?" xml:space="preserve">
+        <source>Are you sure you want to attach this wallet?</source>
+        <target>Are you sure you want to attach this wallet?</target>
+        <note>Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet.</note>
+      </trans-unit>
       <trans-unit id="Are you sure you want to delete all of your bookmarks?" xml:space="preserve">
         <source>Are you sure you want to delete all of your bookmarks?</source>
         <target>Are you sure you want to delete all of your bookmarks?</target>
@@ -215,6 +225,26 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Are you sure you want to upload this media?</source>
         <target>Are you sure you want to upload this media?</target>
         <note>Alert message asking if the user wants to upload media.</note>
+      </trans-unit>
+      <trans-unit id="Attach" xml:space="preserve">
+        <source>Attach</source>
+        <target>Attach</target>
+        <note>Text for button to attach Nostr Wallet Connect lightning wallet.</note>
+      </trans-unit>
+      <trans-unit id="Attach Alby Wallet" xml:space="preserve">
+        <source>Attach Alby Wallet</source>
+        <target>Attach Alby Wallet</target>
+        <note>Button to attach an Alby Wallet, a service that provides a Lightning wallet for zapping sats. Alby is the name of the service and should not be translated.</note>
+      </trans-unit>
+      <trans-unit id="Attach Wallet" xml:space="preserve">
+        <source>Attach Wallet</source>
+        <target>Attach Wallet</target>
+        <note>Text for button to attach Nostr Wallet Connect lightning wallet.</note>
+      </trans-unit>
+      <trans-unit id="Attach a Wallet" xml:space="preserve">
+        <source>Attach a Wallet</source>
+        <target>Attach a Wallet</target>
+        <note>Navigation title for attaching Nostr Wallet Connect lightning wallet.</note>
       </trans-unit>
       <trans-unit id="Automatically translate notes" xml:space="preserve">
         <source>Automatically translate notes</source>
@@ -264,7 +294,8 @@ Sentence composed of 2 variables to describe how many people are following a use
    Button to cancel the upload.
    Cancel deleting bookmarks.
    Cancel deleting the user.
-   Cancel out of logging out the user.</note>
+   Cancel out of logging out the user.
+   Text for button to cancel out of connecting Nostr Wallet Connect lightning ewallet.</note>
       </trans-unit>
       <trans-unit id="Choose from Library" xml:space="preserve">
         <source>Choose from Library</source>
@@ -471,10 +502,10 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Disconnect From Relay</target>
         <note>Button to disconnect from the relay.</note>
       </trans-unit>
-      <trans-unit id="Dismiss" xml:space="preserve">
-        <source>Dismiss</source>
-        <target>Dismiss</target>
-        <note>Button to dismiss a text field alert.</note>
+      <trans-unit id="Disconnect Wallet" xml:space="preserve">
+        <source>Disconnect Wallet</source>
+        <target>Disconnect Wallet</target>
+        <note>Text for button to disconnect from Nostr Wallet Connect lightning wallet.</note>
       </trans-unit>
       <trans-unit id="Display Name" xml:space="preserve">
         <source>Display Name</source>
@@ -580,6 +611,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Get API Key with BTC/Lightning</source>
         <target>Get API Key with BTC/Lightning</target>
         <note>Button to navigate to nokyctranslate website to get a translation API key.</note>
+      </trans-unit>
+      <trans-unit id="Help build the future of decentralized communication on the web." xml:space="preserve">
+        <source>Help build the future of decentralized communication on the web.</source>
+        <target>Help build the future of decentralized communication on the web.</target>
+        <note>Text indicating the goal of developing Damus which the user can help with.</note>
       </trans-unit>
       <trans-unit id="Hide" xml:space="preserve">
         <source>Hide</source>
@@ -776,6 +812,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>No</source>
         <target>No</target>
         <note>Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key.</note>
+      </trans-unit>
+      <trans-unit id="No data available" xml:space="preserve">
+        <source>No data available</source>
+        <target>No data available</target>
+        <note>Text indicating that there is no data available to show for specific metadata about a relay server.</note>
       </trans-unit>
       <trans-unit id="No mute list found, create a new one? This will overwrite any previous mute lists." xml:space="preserve">
         <source>No mute list found, create a new one? This will overwrite any previous mute lists.</source>
@@ -995,8 +1036,7 @@ Button text to indicate that the zap type is a private zap.</note>
       <trans-unit id="Relay" xml:space="preserve">
         <source>Relay</source>
         <target>Relay</target>
-        <note>Label to display relay address.
-   Text field for relay server. Used for testing purposes.</note>
+        <note>Label to display relay address.</note>
       </trans-unit>
       <trans-unit id="Relays" xml:space="preserve">
         <source>Relays</source>
@@ -1066,11 +1106,6 @@ Button text to indicate that the zap type is a private zap.</note>
         <source>Repost</source>
         <target>Repost</target>
         <note>Button to repost a note</note>
-      </trans-unit>
-      <trans-unit id="Repost Note" xml:space="preserve">
-        <source>Repost Note</source>
-        <target>Repost Note</target>
-        <note>Title text to indicate that the buttons below are meant to be used to repost a note to others.</note>
       </trans-unit>
       <trans-unit id="Reposted" xml:space="preserve">
         <source>Reposted</source>
@@ -1232,6 +1267,11 @@ Button text to indicate that the zap type is a private zap.</note>
         <target>Software</target>
         <note>Label to display relay software.</note>
       </trans-unit>
+      <trans-unit id="Support Damus" xml:space="preserve">
+        <source>Support Damus</source>
+        <target>Support Damus</target>
+        <note>Text calling for the user to support Damus through zaps</note>
+      </trans-unit>
       <trans-unit id="Supported NIPs" xml:space="preserve">
         <source>Supported NIPs</source>
         <target>Supported NIPs</target>
@@ -1358,6 +1398,11 @@ Button text to indicate that the zap type is a private zap.</note>
         <target>Universe 🛸</target>
         <note>Toolbar label for the universal view where posts from all connected relay servers appear.</note>
       </trans-unit>
+      <trans-unit id="Unmute" xml:space="preserve">
+        <source>Unmute</source>
+        <target>Unmute</target>
+        <note>Button to unmute a profile.</note>
+      </trans-unit>
       <trans-unit id="Unmute conversation" xml:space="preserve">
         <source>Unmute conversation</source>
         <target>Unmute conversation</target>
@@ -1415,7 +1460,8 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
       <trans-unit id="Wallet" xml:space="preserve">
         <source>Wallet</source>
         <target>Wallet</target>
-        <note>Sidebar menu label for Wallet view.
+        <note>Navigation title for Wallet view
+   Sidebar menu label for Wallet view.
    Title for section in zap settings that controls the Lightning wallet selection.</note>
       </trans-unit>
       <trans-unit id="Website" xml:space="preserve">

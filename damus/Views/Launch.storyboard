@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Y6W-OH-hqX">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="s0d-6b-0kx">
+            <objects>
+                <viewController id="Y6W-OH-hqX" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="5EZ-qb-Rvc">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="gradient" translatesAutoresizingMaskIntoConstraints="NO" id="zoF-av-bOb">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="damus-home" translatesAutoresizingMaskIntoConstraints="NO" id="LOu-EK-R9r">
+                                <rect key="frame" x="153.66666666666666" y="383" width="86" height="86"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="86" id="KmA-28-Ngq"/>
+                                    <constraint firstAttribute="width" constant="86" id="ShD-nJ-gt9"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
+                        <color key="backgroundColor" systemColor="systemPurpleColor"/>
+                        <constraints>
+                            <constraint firstItem="LOu-EK-R9r" firstAttribute="centerY" secondItem="5EZ-qb-Rvc" secondAttribute="centerY" id="Y10-Wq-VOp"/>
+                            <constraint firstItem="zoF-av-bOb" firstAttribute="top" secondItem="5EZ-qb-Rvc" secondAttribute="top" id="Y5l-Ax-ViU"/>
+                            <constraint firstItem="zoF-av-bOb" firstAttribute="leading" secondItem="5EZ-qb-Rvc" secondAttribute="leading" id="bvq-6J-kYc"/>
+                            <constraint firstAttribute="bottom" secondItem="zoF-av-bOb" secondAttribute="bottom" id="dfj-BJ-nxB"/>
+                            <constraint firstItem="LOu-EK-R9r" firstAttribute="centerX" secondItem="5EZ-qb-Rvc" secondAttribute="centerX" id="mtD-6Q-d3P"/>
+                            <constraint firstAttribute="right" secondItem="zoF-av-bOb" secondAttribute="right" id="xQW-SS-8nb"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Ief-a0-LHa" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-106.10687022900763" y="-29.577464788732396"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="damus-home" width="43.333332061767578" height="43.333332061767578"/>
+        <image name="gradient" width="1125" height="2400"/>
+        <systemColor name="systemPurpleColor">
+            <color red="0.68627450980392157" green="0.32156862745098042" blue="0.87058823529411766" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>

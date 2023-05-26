@@ -43,7 +43,7 @@ class RelayPool {
     }
     
     var our_descriptors: [RelayDescriptor] {
-        return all_descriptors.filter { d in !(d.info.ephemeral ?? false) }
+        return all_descriptors.filter { d in !d.ephemeral }
     }
     
     var all_descriptors: [RelayDescriptor] {
@@ -91,7 +91,8 @@ class RelayPool {
         }
     }
     
-    func add_relay(_ url: RelayURL, info: RelayInfo) throws {
+    func add_relay(_ desc: RelayDescriptor) throws {
+        let url = desc.url
         let relay_id = get_relay_id(url)
         if get_relay(relay_id) != nil {
             throw RelayError.RelayAlreadyExists
@@ -99,8 +100,7 @@ class RelayPool {
         let conn = RelayConnection(url: url) { event in
             self.handle_event(relay_id: relay_id, event: event)
         }
-        let descriptor = RelayDescriptor(url: url, info: info)
-        let relay = Relay(descriptor: descriptor, connection: conn)
+        let relay = Relay(descriptor: desc, connection: conn)
         self.relays.append(relay)
     }
     
@@ -196,7 +196,7 @@ class RelayPool {
                 continue
             }
             
-            if (relay.descriptor.info.ephemeral ?? false) && skip_ephemeral {
+            if relay.descriptor.ephemeral && skip_ephemeral {
                 continue
             }
             
@@ -266,7 +266,7 @@ func add_rw_relay(_ pool: RelayPool, _ url: String) {
     guard let url = RelayURL(url) else {
         return
     }
-    try? pool.add_relay(url, info: RelayInfo.rw)
+    try? pool.add_relay(RelayDescriptor(url: url, info: .rw))
 }
 
 

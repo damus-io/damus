@@ -92,6 +92,9 @@ extension Notification.Name {
     static var onlyzaps_mode: Notification.Name {
         return Notification.Name("hide_reactions")
     }
+    static var attached_wallet: Notification.Name {
+        return Notification.Name("attached_wallet")
+    }
 }
 
 func handle_notify(_ name: Notification.Name) -> NotificationCenter.Publisher {

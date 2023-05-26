@@ -7,12 +7,17 @@
 
 import Foundation
 
+enum Zapped {
+    case not_zapped
+    case pending
+    case zapped
+}
 
 class ActionBarModel: ObservableObject {
     @Published var our_like: NostrEvent?
     @Published var our_boost: NostrEvent?
     @Published var our_reply: NostrEvent?
-    @Published var our_zap: Zap?
+    @Published var our_zap: Zapping?
     @Published var likes: Int
     @Published var boosts: Int
     @Published var zaps: Int
@@ -35,7 +40,7 @@ class ActionBarModel: ObservableObject {
         self.replies = 0
     }
     
-    init(likes: Int, boosts: Int, zaps: Int, zap_total: Int64, replies: Int, our_like: NostrEvent?, our_boost: NostrEvent?, our_zap: Zap?, our_reply: NostrEvent?) {
+    init(likes: Int, boosts: Int, zaps: Int, zap_total: Int64, replies: Int, our_like: NostrEvent?, our_boost: NostrEvent?, our_zap: Zapping?, our_reply: NostrEvent?) {
         self.likes = likes
         self.boosts = boosts
         self.zaps = zaps
@@ -62,10 +67,6 @@ class ActionBarModel: ObservableObject {
     
     var is_empty: Bool {
         return likes == 0 && boosts == 0 && zaps == 0
-    }
-    
-    var zapped: Bool {
-        return our_zap != nil
     }
     
     var liked: Bool {
