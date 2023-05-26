@@ -69,6 +69,23 @@ func DamusWhiteButton(_ title: String, action: @escaping () -> ()) -> some View 
                     .stroke(Color.white, lineWidth: 2.0)
                     .background(Color.white.opacity(0.15))
             )
+struct LearnAboutNostrLink: View {
+    @Environment(\.openURL) var openURL
+    var body: some View {
+        HStack {
+            Button(action: {
+                openURL(URL(string: "https://nostr.com")!)
+            }, label: {
+                Text("Learn more about nostr")
+                    .foregroundColor(.accentColor)
+            })
+            
+            Image(systemName: "arrow.up.right")
+                .font(.footnote)
+                .foregroundColor(.accentColor)
+        }
+    }
+}
     }
 }
 
