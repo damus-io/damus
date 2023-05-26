@@ -19,6 +19,12 @@ final class ProfileDatabase {
     private var persistent_container: NSPersistentContainer?
     private var background_context: NSManagedObjectContext?
     private let cache_url: URL
+    
+    /// This queue is used to synchronize access to the network_pull_date_cache dictionary, which
+    /// prevents data races from crashing the app.
+    private var queue = DispatchQueue(label: "io.damus.profile_db",
+                                      qos: .userInteractive,
+                                      attributes: .concurrent)
     private var network_pull_date_cache = [String: Date]()
     
     init(cache_url: URL = ProfileDatabase.profile_cache_url) {
@@ -75,7 +81,11 @@ final class ProfileDatabase {
     }
     
     func get_network_pull_date(id: String) -> Date? {
-        if let pull_date = network_pull_date_cache[id] {
+        var pull_date: Date?
+        queue.sync {
+            pull_date = network_pull_date_cache[id]
+        }
+        if let pull_date {
             return pull_date
         }
         
@@ -87,7 +97,9 @@ final class ProfileDatabase {
             return nil
         }
         
-        network_pull_date_cache[id] = profile.network_pull_date
+        queue.async(flags: .barrier) {
+            self.network_pull_date_cache[id] = profile.network_pull_date
+        }
         return profile.network_pull_date
     }
     
@@ -121,7 +133,9 @@ final class ProfileDatabase {
             
             let pull_date = Date.now
             persisted_profile?.network_pull_date = pull_date
-            self.network_pull_date_cache[id] = pull_date
+            self.queue.async(flags: .barrier) {
+                self.network_pull_date_cache[id] = pull_date
+            }
             
             try context.save()
         }
@@ -146,7 +160,9 @@ final class ProfileDatabase {
             throw ProfileDatabaseError.missing_context
         }
         
-        network_pull_date_cache.removeAll()
+        queue.async(flags: .barrier) {
+            self.network_pull_date_cache.removeAll()
+        }
         
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: entity_name)
         let batch_delete_request = NSBatchDeleteRequest(fetchRequest: request)
