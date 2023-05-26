@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21754" systemVersion="22E261" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="PersistedProfile" representedClassName="PersistedProfile" syncable="YES">
+        <attribute name="about" optional="YES" attributeType="String"/>
+        <attribute name="banner" optional="YES" attributeType="String"/>
+        <attribute name="damus_donation" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="display_name" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="YES" attributeType="String"/>
+        <attribute name="last_update" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="lud06" optional="YES" attributeType="String"/>
+        <attribute name="lud16" optional="YES" attributeType="String"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="network_pull_date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="nip05" optional="YES" attributeType="String"/>
+        <attribute name="picture" optional="YES" attributeType="String"/>
+        <attribute name="website" optional="YES" attributeType="String"/>
+    </entity>
+</model>

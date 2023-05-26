@@ -57,7 +57,7 @@ class FollowersModel: ObservableObject {
     
     func load_profiles(relay_id: String) {
         var filter = NostrFilter.filter_profiles
-        let authors = find_profiles_to_fetch_pk(profiles: damus_state.profiles, event_pubkeys: contacts ?? [])
+        let authors = find_profiles_to_fetch_from_keys(profiles: damus_state.profiles, pks: contacts ?? [])
         if authors.isEmpty {
             return
         }
