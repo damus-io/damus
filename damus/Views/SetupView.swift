@@ -86,6 +86,25 @@ struct LearnAboutNostrLink: View {
         }
     }
 }
+
+struct WhatIsNostr: View {
+    var body: some View {
+        HStack(alignment: .top) {
+            Image("nostr-logo")
+            VStack(alignment: .leading) {
+                Text("What is nostr?")
+                    .fontWeight(.bold)
+                    .padding(.vertical, 10)
+                
+                Text("Nostr is a protocol, designed for simplicity, that aims to create a censorship-resistant global social network")
+                    .foregroundColor(DamusColors.mediumGrey)
+                
+                LearnAboutNostrLink()
+                    .padding(.top, 10)
+            }
+        }
+    }
+}
     }
 }
 
