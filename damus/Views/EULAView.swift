@@ -110,10 +110,17 @@ struct EULAView: View {
                 .padding(.trailing, 30)
             }
         }
+        .background(
+            Image("eula-bg")
+                .resizable()
+                .blur(radius: 70)
+                .ignoresSafeArea(),
+            alignment: .top
+        )
+        .navigationTitle("EULA")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackNav())
-        .foregroundColor(.white)
     }
 }
 
