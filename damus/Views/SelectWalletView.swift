@@ -12,7 +12,6 @@ struct SelectWalletView: View {
     @Binding var showingSelectWallet: Bool
     let our_pubkey: String
     let invoice: String
-    @Environment(\.openURL) private var openURL
     @State var invoice_copied: Bool = false
     
     @State var allWalletModels: [Wallet.Model] = Wallet.allModels
@@ -70,7 +69,6 @@ struct SelectWalletView: View {
 
 struct SelectWalletView_Previews: PreviewProvider {
     @State static var show: Bool = true
-    @State static var invoice: String = ""
     
     static var previews: some View {
         SelectWalletView(default_wallet: .lnlink, showingSelectWallet: $show, our_pubkey: "", invoice: "")

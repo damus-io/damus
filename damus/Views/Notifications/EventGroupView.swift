@@ -68,15 +68,11 @@ func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType
     if let zapgrp = group.zap_group {
         let zap = zapgrp.zaps[ind]
         
-        if let privzap = zap.private_request {
-            return event_author_name(profiles: profiles, pubkey: privzap.pubkey)
-        }
-        
         if zap.is_anon {
             return NSLocalizedString("Anonymous", comment: "Placeholder author name of the anonymous person who zapped an event.")
         }
         
-        return event_author_name(profiles: profiles, pubkey: zap.request.ev.pubkey)
+        return event_author_name(profiles: profiles, pubkey: zap.request.pubkey)
     } else {
         let ev = group.events[ind]
         return event_author_name(profiles: profiles, pubkey: ev.pubkey)
@@ -174,7 +170,7 @@ struct EventGroupView: View {
         return VStack(alignment: .center) {
             Image(systemName: "bolt.fill")
                 .foregroundColor(.orange)
-            Text("\(fmt)")
+            Text(verbatim: fmt)
                 .foregroundColor(Color.orange)
         }
     }
@@ -204,7 +200,7 @@ struct EventGroupView: View {
                 .frame(width: PFP_SIZE + 10)
             
             VStack(alignment: .leading) {
-                ProfilePicturesView(state: state, events: group.events)
+                ProfilePicturesView(state: state, pubkeys: group.events.map { $0.pubkey })
                 
                 if let event {
                     let thread = ThreadModel(event: event, damus_state: state)

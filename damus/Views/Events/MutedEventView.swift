@@ -82,8 +82,6 @@ struct MutedEventView: View {
 }
 
 struct MutedEventView_Previews: PreviewProvider {
-    @State static var nav_target: NostrEvent = test_event
-    @State static var navigating: Bool = false
     
     static var previews: some View {
         

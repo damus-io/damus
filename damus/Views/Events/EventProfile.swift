@@ -15,6 +15,8 @@ func eventview_pfp_size(_ size: EventViewKind) -> CGFloat {
         return PFP_SIZE
     case .selected:
         return PFP_SIZE
+    case .subheadline:
+        return PFP_SIZE * 0.5
     }
 }
 
@@ -40,7 +42,7 @@ struct EventProfile: View {
                 }
             }
             
-            EventProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_friend_confirmed: true, size: size)
+            EventProfileName(pubkey: pubkey, profile: profile, damus: damus_state, size: size)
         }
     }
 }

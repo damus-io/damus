@@ -15,7 +15,7 @@
 			<key>one</key>
 			<string>... %d یادداشت دیگر ...</string>
 			<key>other</key>
-			<string>... %d یادداشت‌های دیگر ...</string>
+			<string>... %d یادداشت های دیگر ...</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -63,7 +63,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d نفر دیگر به یک مطلب که شما در آن تگ شده‌اید بازخورد داده‌اند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر به یک مطلب که شما در آن تگ شده‌اید بازخورد داده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر به یک یادداشت که شما در آن تگ شده‌اید واکنش داده‌اند</string>
 		</dict>
 	</dict>
 	<key>reacted_your_post_3</key>
@@ -79,7 +79,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d نفر دیگر به مطلب شما بازخورد داده‌اند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر به مطلب شما بازخورد داده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر به یادداشت شما واکنش داده‌اند</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -95,7 +95,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d نفر دیگر به نمایه‌ی شما بازخورد داده‌اند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر به نمایه‌ی شما بازخورد داده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر به نمایه شما واکنش داده‌اند</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
@@ -111,7 +111,7 @@
 			<key>one</key>
 			<string>بازخورد</string>
 			<key>other</key>
-			<string>بازخوردها</string>
+			<string>واکنش ها</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -159,7 +159,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d نفر دیگر یک مطلب که شما در آن تگ شده‌اید را بازنشر کرده‌اند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر یک مطلب که شما در آن تگ شده‌اید را بازنشر کرده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر یک یادداشت که شما در آن تگ شده‌اید را بازنشر کرده‌اند</string>
 		</dict>
 	</dict>
 	<key>reposted_your_post_3</key>
@@ -175,7 +175,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d نفر دیگر مطلب شما را بازنشر کرده‌اند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر مطلب شما را بازنشر کرده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر یادداشت شما را بازنشر کرده‌اند</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -210,6 +210,22 @@
 			<string>بازنشرها</string>
 		</dict>
 	</dict>
+	<key>sats</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@SATS@</string>
+		<key>SATS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>ساتوشی</string>
+			<key>other</key>
+			<string>ساتوشی</string>
+		</dict>
+	</dict>
 	<key>sats_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -226,6 +242,38 @@
 			<string>%2$@ ساتوشی</string>
 		</dict>
 	</dict>
+	<key>zap_notification_no_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>%2$@ ساتوشی از %3$@ دریافت کردید</string>
+			<key>other</key>
+			<string>%2$@ ساتوشی از %3$@ دریافت کردید</string>
+		</dict>
+	</dict>
+	<key>zap_notification_with_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>%2$@ ساتوشی از %3$@ دریافت کردید: "%4$@"</string>
+			<key>other</key>
+			<string>%2$@ ساتوشی از %3$@ دریافت کردید: "%4$@"</string>
+		</dict>
+	</dict>
 	<key>zapped_tagged_in_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -239,7 +287,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d نفر دیگر یک مطلب که شما در آن تگ شده‌اید را زپ کرده‌اند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر یک مطلب که شما در آن تگ شده‌اید را زپ کرده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر یک یادداشت که شما در آن تگ شده‌اید را زپ کرده‌اند</string>
 		</dict>
 	</dict>
 	<key>zapped_your_post_3</key>
@@ -255,7 +303,7 @@
 			<key>one</key>
 			<string>%2$@ و %1$d نفر دیگر مطلب شما را زپ کرده‌اند</string>
 			<key>other</key>
-			<string>%2$@ و %1$d نفر دیگر مطلب شما را زپ کرده‌اند</string>
+			<string>%2$@ و %1$d نفر دیگر یادداشت شما را زپ کرده‌اند</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -287,7 +335,7 @@
 			<key>one</key>
 			<string>Zap</string>
 			<key>other</key>
-			<string>Zaps</string>
+			<string>زپ</string>
 		</dict>
 	</dict>
 </dict>

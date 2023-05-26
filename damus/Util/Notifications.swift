@@ -8,20 +8,8 @@
 import Foundation
 
 extension Notification.Name {
-    static var thread_focus: Notification.Name {
-        return Notification.Name("thread focus")
-    }
     static var relays_changed: Notification.Name {
         return Notification.Name("relays_changed")
-    }
-    static var select_event: Notification.Name {
-        return Notification.Name("select_event")
-    }
-    static var select_quote: Notification.Name {
-        return Notification.Name("select quote")
-    }
-    static var reply: Notification.Name {
-        return Notification.Name("reply")
     }
     static var profile_updated: Notification.Name {
         return Notification.Name("profile_updated")
@@ -32,23 +20,14 @@ extension Notification.Name {
     static var liked: Notification.Name {
         return Notification.Name("liked")
     }
-    static var open_profile: Notification.Name {
-        return Notification.Name("open_profile")
-    }
     static var scroll_to_top: Notification.Name {
         return Notification.Name("scroll_to_to")
     }
     static var broadcast_event: Notification.Name {
         return Notification.Name("broadcast event")
     }
-    static var open_thread: Notification.Name {
-        return Notification.Name("open thread")
-    }
     static var notice: Notification.Name {
         return Notification.Name("notice")
-    }
-    static var like: Notification.Name {
-        return Notification.Name("like note")
     }
     static var delete: Notification.Name {
         return Notification.Name("delete note")
@@ -56,8 +35,8 @@ extension Notification.Name {
     static var post: Notification.Name {
         return Notification.Name("send post")
     }
-    static var boost: Notification.Name {
-        return Notification.Name("boost")
+    static var compose: Notification.Name {
+        return Notification.Name("compose")
     }
     static var boosted: Notification.Name {
         return Notification.Name("boosted")
@@ -76,9 +55,6 @@ extension Notification.Name {
     }
     static var followed: Notification.Name {
         return Notification.Name("followed")
-    }
-    static var chatroom_meta: Notification.Name {
-        return Notification.Name("chatroom_meta")
     }
     static var unfollowed: Notification.Name {
         return Notification.Name("unfollowed")
@@ -115,6 +91,9 @@ extension Notification.Name {
     }
     static var onlyzaps_mode: Notification.Name {
         return Notification.Name("hide_reactions")
+    }
+    static var attached_wallet: Notification.Name {
+        return Notification.Name("attached_wallet")
     }
 }
 

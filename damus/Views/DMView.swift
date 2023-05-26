@@ -41,7 +41,8 @@ struct DMView: View {
 
             let should_show_img = should_show_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
 
-            NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, size: .normal, artifacts: .just_content(event.get_content(damus_state.keypair.privkey)), options: dm_options)
+            NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, size: .normal, options: dm_options)
+                .fixedSize(horizontal: false, vertical: true)
                 .padding([.top, .leading, .trailing], 10)
                 .padding([.bottom], 25)
                 .background(VisualEffectView(effect: UIBlurEffect(style: .prominent))

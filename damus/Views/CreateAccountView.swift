@@ -11,10 +11,7 @@ struct CreateAccountView: View {
     @StateObject var account: CreateAccountModel = CreateAccountModel()
     @StateObject var profileUploadViewModel = ProfileUploadingViewModel()
     
-    @State var is_light: Bool = false
     @State var is_done: Bool = false
-    @State var reading_eula: Bool = false
-    @State var profile_image: URL? = nil
     
     func SignupForm<FormContent: View>(@ViewBuilder content: () -> FormContent) -> some View {
         return VStack(alignment: .leading, spacing: 10.0, content: content)

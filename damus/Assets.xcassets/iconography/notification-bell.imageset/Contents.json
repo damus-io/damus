@@ -1,0 +1,26 @@
+{
+  "images": [
+    {
+      "filename": "notification-bell.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "notification-bell.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "notification-bell.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  },
+  "properties": {
+    "template-rendering-intent": "template"
+  }
+}

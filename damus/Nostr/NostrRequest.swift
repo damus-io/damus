@@ -16,4 +16,19 @@ enum NostrRequest {
     case subscribe(NostrSubscribe)
     case unsubscribe(String)
     case event(NostrEvent)
+    
+    var is_write: Bool {
+        switch self {
+        case .subscribe:
+            return false
+        case .unsubscribe:
+            return false
+        case .event:
+            return true
+        }
+    }
+    
+    var is_read: Bool {
+        return !is_write
+    }
 }

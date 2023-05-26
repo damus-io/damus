@@ -12,31 +12,19 @@ struct EventProfileName: View {
     let damus_state: DamusState
     let pubkey: String
     let profile: Profile?
-    let prefix: String
-    
-    let show_friend_confirmed: Bool
     
     @State var display_name: DisplayName?
     @State var nip05: NIP05?
+    @State var donation: Int?
     
     let size: EventViewKind
     
-    init(pubkey: String, profile: Profile?, damus: DamusState, show_friend_confirmed: Bool, size: EventViewKind = .normal) {
+    init(pubkey: String, profile: Profile?, damus: DamusState, size: EventViewKind = .normal) {
         self.damus_state = damus
         self.pubkey = pubkey
         self.profile = profile
-        self.prefix = ""
-        self.show_friend_confirmed = show_friend_confirmed
         self.size = size
-    }
-    
-    init(pubkey: String, profile: Profile?, prefix: String, damus: DamusState, show_friend_confirmed: Bool, size: EventViewKind = .normal) {
-        self.damus_state = damus
-        self.pubkey = pubkey
-        self.profile = profile
-        self.prefix = prefix
-        self.show_friend_confirmed = show_friend_confirmed
-        self.size = size
+        self._donation = State(wrappedValue: profile?.damus_donation)
     }
     
     var friend_type: FriendType? {
@@ -57,6 +45,15 @@ struct EventProfileName: View {
         }
         
         return profile.reactions == false
+    }
+    
+    var supporter: Int? {
+        guard let donation, donation > 0
+        else {
+            return nil
+        }
+        
+        return donation
     }
     
     var body: some View {
@@ -87,6 +84,10 @@ struct EventProfileName: View {
                 Image("zap-hashtag")
                     .frame(width: 14, height: 14)
             }
+            
+            if let supporter {
+                SupporterBadge(percent: supporter)
+            }
         }
         .onReceive(handle_notify(.profile_updated)) { notif in
             let update = notif.object as! ProfileUpdate
@@ -95,6 +96,7 @@ struct EventProfileName: View {
             }
             display_name = Profile.displayName(profile: update.profile, pubkey: pubkey)
             nip05 = damus_state.profiles.is_validated(pubkey)
+            donation = update.profile.damus_donation
         }
     }
 }
@@ -102,6 +104,6 @@ struct EventProfileName: View {
 
 struct EventProfileName_Previews: PreviewProvider {
     static var previews: some View {
-        EventProfileName(pubkey: "pk", profile: nil, damus: test_damus_state(), show_friend_confirmed: true)
+        EventProfileName(pubkey: "pk", profile: nil, damus: test_damus_state())
     }
 }

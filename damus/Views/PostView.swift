@@ -15,6 +15,10 @@ enum NostrPostResult {
 
 let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Text box prompt to ask user to type their post.")
 
+class TagModel: ObservableObject {
+    var diff = 0
+}
+
 enum PostAction {
     case replying_to(NostrEvent)
     case quoting(NostrEvent)
@@ -43,19 +47,19 @@ struct PostView: View {
     @State var image_upload_confirm: Bool = false
     @State var originalReferences: [ReferencedId] = []
     @State var references: [ReferencedId] = []
+    @State var focusWordAttributes: (String?, NSRange?) = (nil, nil)
+    @State var newCursorIndex: Int?
+    @State var postTextViewCanScroll: Bool = true
 
     @State var mediaToUpload: MediaUpload? = nil
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
+    @StateObject var tagModel: TagModel = TagModel()
 
     let action: PostAction
     let damus_state: DamusState
 
     @Environment(\.presentationMode) var presentationMode
-
-    enum FocusField: Hashable {
-      case post
-    }
 
     func cancel() {
         NotificationCenter.default.post(name: .post, object: NostrPostResult.cancel)
@@ -82,14 +86,18 @@ struct PostView: View {
         var content = self.post.string.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 
         let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
-
-        content.append(" " + imagesString + " ")
+        
+        let img_meta_tags = uploadedMedias.compactMap { $0.metadata?.to_tag() }
+        
+        if !imagesString.isEmpty {
+            content.append(" " + imagesString + " ")
+        }
 
         if case .quoting(let ev) = action, let id = bech32_note_id(ev.id) {
             content.append(" nostr:" + id)
         }
         
-        let new_post = NostrPost(content: content, references: references, kind: kind)
+        let new_post = NostrPost(content: content, references: references, kind: kind, tags: img_meta_tags)
 
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
         
@@ -201,7 +209,11 @@ struct PostView: View {
     
     var TextEntry: some View {
         ZStack(alignment: .topLeading) {
-            TextViewWrapper(attributedText: $post)
+            TextViewWrapper(attributedText: $post, postTextViewCanScroll: $postTextViewCanScroll, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
+                focusWordAttributes = (word, range)
+                self.newCursorIndex = nil
+            })
+                .environmentObject(tagModel)
                 .focused($focus)
                 .textInputAutocapitalization(.sentences)
                 .onChange(of: post) { p in
@@ -249,6 +261,8 @@ struct PostView: View {
         let uploader = damus_state.settings.default_media_uploader
         Task.init {
             let img = getImage(media: media)
+            print("img size w:\(img.size.width) h:\(img.size.height)")
+            async let blurhash = calculate_blurhash(img: img)
             let res = await image_upload.start(media: media, uploader: uploader)
             
             switch res {
@@ -257,7 +271,9 @@ struct PostView: View {
                     self.error = "Error uploading image :("
                     return
                 }
-                let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, representingImage: img)
+                let blurhash = await blurhash
+                let meta = blurhash.map { bh in calculate_image_metadata(url: url, img: img, blurhash: bh) }
+                let uploadedMedia = UploadedMedia(localURL: media.localURL, uploadedURL: url, representingImage: img, metadata: meta)
                 uploadedMedias.append(uploadedMedia)
                 
             case .failed(let error):
@@ -306,8 +322,7 @@ struct PostView: View {
     var body: some View {
         GeometryReader { (deviceSize: GeometryProxy) in
             VStack(alignment: .leading, spacing: 0) {
-
-                let searching = get_searching_string(post.string)
+                let searching = get_searching_string(focusWordAttributes.0)
                 
                 TopBar
                 
@@ -327,8 +342,9 @@ struct PostView: View {
                 
                 // This if-block observes @ for tagging
                 if let searching {
-                    UserSearch(damus_state: damus_state, search: searching, post: $post)
+                    UserSearch(damus_state: damus_state, search: searching, focusWordAttributes: $focusWordAttributes, newCursorIndex: $newCursorIndex, postTextViewCanScroll: $postTextViewCanScroll, post: $post)
                         .frame(maxHeight: .infinity)
+                        .environmentObject(tagModel)
                 } else {
                     Divider()
                     VStack(alignment: .leading) {
@@ -344,7 +360,7 @@ struct PostView: View {
                 } onVideoPicked: { url in
                     self.mediaToUpload = .video(url)
                 }
-                .alert(NSLocalizedString("Are you sure you want to upload this image?", comment: "Alert message asking if the user wants to upload an image."), isPresented: $image_upload_confirm) {
+                .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
                     Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
                         if let mediaToUpload {
                             self.handle_upload(media: mediaToUpload)
@@ -355,11 +371,20 @@ struct PostView: View {
                 }
             }
             .sheet(isPresented: $attach_camera) {
-                // image_upload_confirm isn't handled here, I don't know we need to display it here too tbh
+                
                 ImagePicker(uploader: damus_state.settings.default_media_uploader, sourceType: .camera, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
-                    handle_upload(media: .image(img))
+                    self.mediaToUpload = .image(img)
                 } onVideoPicked: { url in
-                    handle_upload(media: .video(url))
+                    self.mediaToUpload = .video(url)
+                }
+                .alert(NSLocalizedString("Are you sure you want to upload this media?", comment: "Alert message asking if the user wants to upload media."), isPresented: $image_upload_confirm) {
+                    Button(NSLocalizedString("Upload", comment: "Button to proceed with uploading."), role: .none) {
+                        if let mediaToUpload {
+                            self.handle_upload(media: mediaToUpload)
+                            self.attach_camera = false
+                        }
+                    }
+                    Button(NSLocalizedString("Cancel", comment: "Button to cancel the upload."), role: .cancel) {}
                 }
             }
             .onAppear() {
@@ -397,25 +422,26 @@ struct PostView: View {
     }
 }
 
-func get_searching_string(_ post: String) -> String? {
-    guard let last_word = post.components(separatedBy: .whitespacesAndNewlines).last else {
+func get_searching_string(_ word: String?) -> String? {
+    guard let word = word else {
+        return nil
+    }
+
+    guard word.count >= 2 else {
         return nil
     }
     
-    guard last_word.count >= 2 else {
-        return nil
-    }
-    
-    guard last_word.first! == "@" else {
+    guard let firstCharacter = word.first,
+          firstCharacter == "@" else {
         return nil
     }
     
     // don't include @npub... strings
-    guard last_word.count != 64 else {
+    guard word.count != 64 else {
         return nil
     }
     
-    return String(last_word.dropFirst())
+    return String(word.dropFirst())
 }
 
 struct PostView_Previews: PreviewProvider {
@@ -504,6 +530,7 @@ struct UploadedMedia: Equatable {
     let localURL: URL
     let uploadedURL: URL
     let representingImage: UIImage
+    let metadata: ImageMetadata?
 }
 
 

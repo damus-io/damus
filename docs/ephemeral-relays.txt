@@ -1,0 +1,9 @@
+Ephemeral Relays
+================
+
+Ephemeral relays are relays that exist in your relay pool but not on your
+published relays on your profile. These are used for various purposes,
+such as communicating with NWC relays and following note relay hints.
+
+Ephemeral relays are marked with the ephemeral tag on RelayInfo in the relay
+descriptor.

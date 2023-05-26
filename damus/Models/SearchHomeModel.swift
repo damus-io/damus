@@ -10,7 +10,7 @@ import Foundation
 
 /// The data model for the SearchHome view, typically something global-like
 class SearchHomeModel: ObservableObject {
-    var events: EventHolder = EventHolder()
+    var events: EventHolder
     @Published var loading: Bool = false
 
     var seen_pubkey: Set<String> = Set()
@@ -21,6 +21,9 @@ class SearchHomeModel: ObservableObject {
     
     init(damus_state: DamusState) {
         self.damus_state = damus_state
+        self.events = EventHolder(on_queue: { ev in
+            preload_events(state: damus_state, events: [ev])
+        })
     }
     
     func get_base_filter() -> NostrFilter {
@@ -87,20 +90,6 @@ class SearchHomeModel: ObservableObject {
     }
 }
 
-func find_profiles_to_fetch_pk(profiles: Profiles, event_pubkeys: [String]) -> [String] {
-    var pubkeys = Set<String>()
-    
-    for pk in event_pubkeys {
-        if profiles.lookup(id: pk) != nil {
-            continue
-        }
-        
-        pubkeys.insert(pk)
-    }
-    
-    return Array(pubkeys)
-}
-
 func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: EventCache) -> [String] {
     switch load {
     case .from_events(let events):
@@ -111,17 +100,7 @@ func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: Even
 }
 
 func find_profiles_to_fetch_from_keys(profiles: Profiles, pks: [String]) -> [String] {
-    var pubkeys = Set<String>()
-    
-    for pk in pks {
-        if profiles.lookup(id: pk) != nil {
-            continue
-        }
-        
-        pubkeys.insert(pk)
-    }
-    
-    return Array(pubkeys)
+    Array(Set(pks.filter { pk in !profiles.has_fresh_profile(id: pk) }))
 }
 
 func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent], cache: EventCache) -> [String] {
@@ -129,11 +108,11 @@ func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent]
     
     for ev in events {
         // lookup profiles from boosted events
-        if ev.known_kind == .boost, let bev = ev.get_inner_event(cache: cache), profiles.lookup(id: bev.pubkey) == nil {
+        if ev.known_kind == .boost, let bev = ev.get_inner_event(cache: cache), !profiles.has_fresh_profile(id: bev.pubkey) {
             pubkeys.insert(bev.pubkey)
         }
         
-        if profiles.lookup(id: ev.pubkey) == nil {
+        if !profiles.has_fresh_profile(id: ev.pubkey) {
             pubkeys.insert(ev.pubkey)
         }
     }

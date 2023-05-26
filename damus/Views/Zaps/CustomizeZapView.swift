@@ -39,6 +39,11 @@ func get_zap_amount_items(_ default_zap_amt: Int) -> [ZapAmountItem] {
     return entries
 }
 
+func satsString(_ count: Int, locale: Locale = Locale.current) -> String {
+    let format = localizedStringFormat(key: "sats", locale: locale)
+    return String(format: format, locale: locale, count)
+}
+
 struct CustomizeZapView: View {
     let state: DamusState
     let event: NostrEvent
@@ -115,23 +120,23 @@ struct CustomizeZapView: View {
     func ZapAmountButton(zapAmountItem: ZapAmountItem, action: @escaping () -> ()) -> some View {
         Button(action: action) {
             let fmt = format_msats_abbrev(Int64(zapAmountItem.amount) * 1000)
-            Text("\(zapAmountItem.icon)\n\(fmt)")
+            Text(verbatim: "\(zapAmountItem.icon)\n\(fmt)")
+                .contentShape(Rectangle())
+                .font(.headline)
+                .frame(width: 70, height: 70)
+                .foregroundColor(fontColor())
+                .background(custom_amount_sats == zapAmountItem.amount ? fillColor() : DamusColors.adaptableGrey)
+                .cornerRadius(15)
+                .overlay(RoundedRectangle(cornerRadius: 15)
+                    .stroke(DamusColors.purple.opacity(custom_amount_sats == zapAmountItem.amount ? 1.0 : 0.0), lineWidth: 2))
         }
-        .contentShape(Rectangle())
-        .font(.headline)
-        .frame(width: 70, height: 70)
-        .foregroundColor(fontColor())
-        .background(custom_amount_sats == zapAmountItem.amount ? fillColor() : DamusColors.adaptableGrey)
-        .cornerRadius(15)
-        .overlay(RoundedRectangle(cornerRadius: 15)
-            .stroke(DamusColors.purple.opacity(custom_amount_sats == zapAmountItem.amount ? 1.0 : 0.0), lineWidth: 2))
     }
     
     var CustomZapTextField: some View {
         VStack(alignment: .center, spacing: 0) {
             TextField("", text: $custom_amount)
             .placeholder(when: custom_amount.isEmpty, alignment: .center) {
-                Text(String("0"))
+                Text(verbatim: 0.formatted())
             }
             .accentColor(.clear)
             .font(.system(size: 72, weight: .heavy))
@@ -147,7 +152,7 @@ struct CustomizeZapView: View {
                    self.custom_amount_sats = nil
                }
             }
-            Text("sats")
+            Text(verbatim: satsString(custom_amount_sats ?? 0))
                 .font(.system(size: 18, weight: .heavy))
         }
     }
@@ -253,16 +258,16 @@ struct CustomizeZapView: View {
             switch zap_type {
             case .pub:
                 Image(systemName: "person.2")
-                Text("Public")
+                Text("Public", comment: "Button text to indicate that the zap type is a public zap.")
             case .anon:
                 Image(systemName: "person.fill.questionmark")
-                Text("Anonymous")
+                Text("Anonymous", comment: "Button text to indicate that the zap type is a anonymous zap.")
             case .priv:
                 Image(systemName: "lock")
-                Text("Private")
+                Text("Private", comment: "Button text to indicate that the zap type is a private zap.")
             case .non_zap:
                 Image(systemName: "bolt")
-                Text("None")
+                Text("None", comment: "Button text to indicate that the zap type is a private zap.")
             }
         }
         .font(.headline)

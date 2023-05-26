@@ -6,22 +6,7 @@
 //
 
 import Foundation
-
-struct SubscriptionId: Identifiable, CustomStringConvertible {
-    let id: String
-
-    var description: String {
-        id
-    }
-}
-
-struct RelayId: Identifiable, CustomStringConvertible {
-    let id: String
-
-    var description: String {
-        id
-    }
-}
+import Network
 
 struct RelayHandler {
     let sub_id: String
@@ -33,24 +18,36 @@ struct QueuedRequest {
     let relay: String
 }
 
-struct NostrRequestId: Equatable, Hashable {
-    let relay: String?
-    let sub_id: String
-}
-
 class RelayPool {
     var relays: [Relay] = []
     var handlers: [RelayHandler] = []
     var request_queue: [QueuedRequest] = []
     var seen: Set<String> = Set()
     var counts: [String: UInt64] = [:]
+    
+    private let network_monitor = NWPathMonitor()
+    private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
+    private var last_network_status: NWPath.Status = .unsatisfied
 
-    var descriptors: [RelayDescriptor] {
-        relays.map { $0.descriptor }
+    init() {
+        network_monitor.pathUpdateHandler = { [weak self] path in
+            if (path.status == .satisfied || path.status == .requiresConnection) && self?.last_network_status != path.status {
+                DispatchQueue.main.async {
+                    self?.connect_to_disconnected()
+                }
+            }
+            
+            self?.last_network_status = path.status
+        }
+        network_monitor.start(queue: network_monitor_queue)
     }
     
-    var num_connecting: Int {
-        return relays.reduce(0) { n, r in n + (r.connection.isConnecting ? 1 : 0) }
+    var our_descriptors: [RelayDescriptor] {
+        return all_descriptors.filter { d in !d.ephemeral }
+    }
+    
+    var all_descriptors: [RelayDescriptor] {
+        relays.map { r in r.descriptor }
     }
     
     var num_connected: Int {
@@ -61,7 +58,13 @@ class RelayPool {
         self.handlers = handlers.filter { $0.sub_id != sub_id }
         print("removing \(sub_id) handler, current: \(handlers.count)")
     }
-
+    
+    func ping() {
+        for relay in relays {
+            relay.connection.ping()
+        }
+    }
+    
     func register_handler(sub_id: String, handler: @escaping (String, NostrConnectionEvent) -> ()) {
         for handler in handlers {
             // don't add duplicate handlers
@@ -88,7 +91,8 @@ class RelayPool {
         }
     }
     
-    func add_relay(_ url: URL, info: RelayInfo) throws {
+    func add_relay(_ desc: RelayDescriptor) throws {
+        let url = desc.url
         let relay_id = get_relay_id(url)
         if get_relay(relay_id) != nil {
             throw RelayError.RelayAlreadyExists
@@ -96,8 +100,7 @@ class RelayPool {
         let conn = RelayConnection(url: url) { event in
             self.handle_event(relay_id: relay_id, event: event)
         }
-        let descriptor = RelayDescriptor(url: url, info: info)
-        let relay = Relay(descriptor: descriptor, connection: conn)
+        let relay = Relay(descriptor: desc, connection: conn)
         self.relays.append(relay)
     }
     
@@ -106,11 +109,11 @@ class RelayPool {
         for relay in relays {
             let c = relay.connection
             
-            let is_connecting = c.isReconnecting || c.isConnecting
+            let is_connecting = c.isConnecting
             
             if is_connecting && (Date.now.timeIntervalSince1970 - c.last_connection_attempt) > 5 {
-                print("stale connection detected (\(relay.descriptor.url.absoluteString)). retrying...")
-                relay.connection.connect(force: true)
+                print("stale connection detected (\(relay.descriptor.url.url.absoluteString)). retrying...")
+                relay.connection.reconnect()
             } else if relay.is_broken || is_connecting || c.isConnected {
                 continue
             } else {
@@ -125,12 +128,6 @@ class RelayPool {
         for relay in relays {
             // don't try to reconnect to broken relays
             relay.connection.reconnect()
-        }
-    }
-    
-    func mark_broken(_ relay_id: String) {
-        for relay in relays {
-            relay.mark_broken()
         }
     }
 
@@ -187,10 +184,22 @@ class RelayPool {
         request_queue.append(QueuedRequest(req: r, relay: relay))
     }
     
-    func send(_ req: NostrRequest, to: [String]? = nil) {
+    func send(_ req: NostrRequest, to: [String]? = nil, skip_ephemeral: Bool = true) {
         let relays = to.map{ get_relays($0) } ?? self.relays
 
         for relay in relays {
+            if req.is_read && !(relay.descriptor.info.read ?? true) {
+                continue
+            }
+            
+            if req.is_write && !(relay.descriptor.info.write ?? true) {
+                continue
+            }
+            
+            if relay.descriptor.ephemeral && skip_ephemeral {
+                continue
+            }
+            
             guard relay.connection.isConnected else {
                 queue_req(r: req, relay: relay.id)
                 continue
@@ -201,24 +210,12 @@ class RelayPool {
     }
     
     func get_relays(_ ids: [String]) -> [Relay] {
+        // don't include ephemeral relays in the default list to query
         relays.filter { ids.contains($0.id) }
     }
     
     func get_relay(_ id: String) -> Relay? {
         relays.first(where: { $0.id == id })
-    }
-    
-    func record_last_pong(relay_id: String, event: NostrConnectionEvent) {
-        if case .ws_event(let ws_event) = event {
-            if case .pong = ws_event {
-                for relay in relays {
-                    if relay.id == relay_id {
-                        relay.last_pong = UInt32(Date.now.timeIntervalSince1970)
-                        return
-                    }
-                }
-            }
-        }
     }
     
     func run_queue(_ relay_id: String) {
@@ -250,7 +247,6 @@ class RelayPool {
     }
     
     func handle_event(relay_id: String, event: NostrConnectionEvent) {
-        record_last_pong(relay_id: relay_id, event: event)
         record_seen(relay_id: relay_id, event: event)
         
         // run req queue when we reconnect
@@ -267,8 +263,10 @@ class RelayPool {
 }
 
 func add_rw_relay(_ pool: RelayPool, _ url: String) {
-    let url_ = URL(string: url)!
-    try? pool.add_relay(url_, info: RelayInfo.rw)
+    guard let url = RelayURL(url) else {
+        return
+    }
+    try? pool.add_relay(RelayDescriptor(url: url, info: .rw))
 }
 
 

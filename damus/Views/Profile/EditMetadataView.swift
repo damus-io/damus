@@ -8,50 +8,7 @@
 import SwiftUI
 import Combine
 
-let PPM_SIZE: CGFloat = 80.0
 let BANNER_HEIGHT: CGFloat = 150.0;
-
-func isHttpsUrl(_ string: String) -> Bool {
-    let urlRegEx = "^https://.*$"
-    let urlTest = NSPredicate(format:"SELF MATCHES %@", urlRegEx)
-    return urlTest.evaluate(with: string)
-}
-
-func isImage(_ urlString: String) -> Bool {
-    let imageTypes = ["image/jpg", "image/jpeg", "image/png", "image/gif", "image/tiff", "image/bmp", "image/webp"]
-
-    guard let url = URL(string: urlString) else {
-        return false
-    }
-
-    var result = false
-    let semaphore = DispatchSemaphore(value: 0)
-
-    let task = URLSession.shared.dataTask(with: url) { data, response, error in
-        if let error = error {
-            print(error)
-            semaphore.signal()
-            return
-        }
-
-        guard let httpResponse = response as? HTTPURLResponse,
-              let contentType = httpResponse.allHeaderFields["Content-Type"] as? String else {
-            semaphore.signal()
-            return
-        }
-
-        if imageTypes.contains(contentType.lowercased()) {
-            result = true
-        }
-
-        semaphore.signal()
-    }
-
-    task.resume()
-    semaphore.wait()
-
-    return result
-}
 
 struct EditMetadataView: View {
     let damus_state: DamusState
@@ -66,7 +23,6 @@ struct EditMetadataView: View {
     let profile: Profile?
     
     @Environment(\.dismiss) var dismiss
-    @Environment(\.colorScheme) var colorScheme
 
     @State var confirm_ln_address: Bool = false
     @StateObject var profileUploadViewModel = ProfileUploadingViewModel()
@@ -84,10 +40,6 @@ struct EditMetadataView: View {
         _banner = State(initialValue: data?.banner ?? "")
         _nip05 = State(initialValue: data?.nip05 ?? "")
         _ln = State(initialValue: data?.lud16 ?? data?.lud06 ?? "")
-    }
-    
-    func imageBorderColor() -> Color {
-        colorScheme == .light ? DamusColors.white : DamusColors.black
     }
     
     func to_profile() -> Profile {
@@ -108,9 +60,10 @@ struct EditMetadataView: View {
     
     func save() {
         let profile = to_profile()
-        guard let metadata_ev = make_metadata_event(keypair: damus_state.keypair, metadata: profile) else {
+        guard let keypair = damus_state.keypair.to_full() else {
             return
         }
+        let metadata_ev = make_metadata_event(keypair: keypair, metadata: profile)
         damus_state.postbox.send(metadata_ev)
     }
 

@@ -20,8 +20,12 @@ struct SearchedUser: Identifiable {
 struct UserSearch: View {
     let damus_state: DamusState
     let search: String
+    @Binding var focusWordAttributes: (String?, NSRange?)
+    @Binding var newCursorIndex: Int?
+    @Binding var postTextViewCanScroll: Bool
 
     @Binding var post: NSMutableAttributedString
+    @EnvironmentObject var tagModel: TagModel
     
     var users: [SearchedUser] {
         guard let contacts = damus_state.contacts.event else {
@@ -35,20 +39,22 @@ struct UserSearch: View {
         guard let pk = bech32_pubkey(user.pubkey) else {
             return
         }
-
-        // Remove all characters after the last '@'
-        removeCharactersAfterLastAtSymbol()
-
-        // Create and append the user tag
         let tagAttributedString = createUserTag(for: user, with: pk)
-        appendUserTag(tagAttributedString)
+        appendUserTag(withTag: tagAttributedString)
     }
-    
-    private func removeCharactersAfterLastAtSymbol() {
-        while post.string.last != "@" {
-            post.deleteCharacters(in: NSRange(location: post.length - 1, length: 1))
+
+    private func appendUserTag(withTag tagAttributedString: NSMutableAttributedString) {
+        guard let wordRange = focusWordAttributes.1 else {
+            return
         }
-        post.deleteCharacters(in: NSRange(location: post.length - 1, length: 1))
+        let mutableString = NSMutableAttributedString(attributedString: post)
+        mutableString.replaceCharacters(in: wordRange, with: tagAttributedString)
+        ///adjust cursor position appropriately: ('diff' used in TextViewWrapper / updateUIView after below update of 'post')
+        tagModel.diff = tagAttributedString.length - wordRange.length
+        
+        post = mutableString
+        focusWordAttributes = (nil, nil)
+        newCursorIndex = wordRange.location + tagAttributedString.string.count
     }
 
     private func createUserTag(for user: SearchedUser, with pk: String) -> NSMutableAttributedString {
@@ -91,15 +97,25 @@ struct UserSearch: View {
                 .padding()
             }
         }
+        .onAppear() {
+            postTextViewCanScroll = false
+        }
+        .onDisappear() {
+            postTextViewCanScroll = true
+        }
     }
+        
 }
 
 struct UserSearch_Previews: PreviewProvider {
     static let search: String = "jb55"
     @State static var post: NSMutableAttributedString = NSMutableAttributedString(string: "some @jb55")
+    @State static var word: (String?, NSRange?) = (nil, nil)
+    @State static var newCursorIndex: Int?
+    @State static var postTextViewCanScroll: Bool = false
     
     static var previews: some View {
-        UserSearch(damus_state: test_damus_state(), search: search, post: $post)
+        UserSearch(damus_state: test_damus_state(), search: search, focusWordAttributes: $word, newCursorIndex: $newCursorIndex, postTextViewCanScroll: $postTextViewCanScroll, post: $post)
     }
 }
 
@@ -137,7 +153,7 @@ func search_users_for_autocomplete(profiles: Profiles, tags: [[String]], search 
     }
     
     // search profile cache as well
-    for tup in profiles.profiles.enumerated() {
+    for tup in profiles.enumerated() {
         let pk = tup.element.key
         let prof = tup.element.value.profile
         

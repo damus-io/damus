@@ -110,21 +110,6 @@ static inline int peek_char(struct cursor *cur, int ind) {
     return *(cur->p + ind);
 }
 
-static int parse_digit(struct cursor *cur, int *digit) {
-    int c;
-    if ((c = peek_char(cur, 0)) == -1)
-        return 0;
-    
-    c -= '0';
-    
-    if (c >= 0 && c <= 9) {
-        *digit = c;
-        cur->p++;
-        return 1;
-    }
-    return 0;
-}
-
 
 static inline int pull_byte(struct cursor *cur, u8 *byte) {
     if (cur->p >= cur->end)

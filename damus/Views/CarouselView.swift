@@ -38,10 +38,6 @@ struct CarouselView: View {
     }
 }
 
-func CarouselText(_ txt: String) -> some View {
-    return Text(txt)
-}
-
 struct CarouselItemView: View {
     let item: CarouselItem
     

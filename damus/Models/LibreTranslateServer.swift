@@ -42,8 +42,4 @@ enum LibreTranslateServer: String, CaseIterable, Identifiable, StringCodable {
             return .init(tag: self.rawValue, displayName: NSLocalizedString("Custom", comment: "Dropdown option for selecting a custom translation server."), url: nil)
         }
     }
-
-    static var allModels: [Model] {
-        return Self.allCases.map { $0.model }
-    }
 }

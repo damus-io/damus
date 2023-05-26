@@ -17,13 +17,13 @@ struct RelayConfigView: View {
     
     init(state: DamusState) {
         self.state = state
-        _relays = State(initialValue: state.pool.descriptors)
+        _relays = State(initialValue: state.pool.our_descriptors)
     }
     
     var recommended: [RelayDescriptor] {
         let rs: [RelayDescriptor] = []
         return BOOTSTRAP_RELAYS.reduce(into: rs) { xs, x in
-            if state.pool.get_relay(x) == nil, let url = URL(string: x) {
+            if state.pool.get_relay(x) == nil, let url = RelayURL(x) {
                 xs.append(RelayDescriptor(url: url, info: .rw))
             }
         }
@@ -32,7 +32,7 @@ struct RelayConfigView: View {
     var body: some View {
         MainContent
         .onReceive(handle_notify(.relays_changed)) { _ in
-            self.relays = state.pool.descriptors
+            self.relays = state.pool.our_descriptors
         }
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
@@ -75,7 +75,7 @@ struct RelayConfigView: View {
                                     new_relay.removeLast();
                                 }
                                 
-                                guard let url = URL(string: new_relay) else {
+                                guard let url = RelayURL(new_relay) else {
                                     return
                                 }
                                 
@@ -88,14 +88,14 @@ struct RelayConfigView: View {
                                 }
                                 
                                 let info = RelayInfo.rw
-                                
-                                guard (try? state.pool.add_relay(url, info: info)) != nil else {
+                                let descriptor = RelayDescriptor(url: url, info: info)
+                                guard (try? state.pool.add_relay(descriptor)) != nil else {
                                     return
                                 }
                                 
                                 state.pool.connect(to: [new_relay])
                                 
-                                guard let new_ev = add_relay(ev: ev, privkey: privkey, current_relays: state.pool.descriptors, relay: new_relay, info: info) else {
+                                guard let new_ev = add_relay(ev: ev, privkey: privkey, current_relays: state.pool.our_descriptors, relay: new_relay, info: info) else {
                                     return
                                 }
                                 
@@ -120,7 +120,7 @@ struct RelayConfigView: View {
             
             Section {
                 List(Array(relays), id: \.url) { relay in
-                    RelayView(state: state, relay: relay.url.absoluteString, showActionButtons: $showActionButtons)
+                    RelayView(state: state, relay: relay.url.id, showActionButtons: $showActionButtons)
                 }
             } header: {
                 HStack {
@@ -133,7 +133,7 @@ struct RelayConfigView: View {
             if recommended.count > 0 {
                 Section {
                     List(recommended, id: \.url) { r in
-                        RecommendedRelayView(damus: state, relay: r.url.absoluteString, showActionButtons: $showActionButtons)
+                        RecommendedRelayView(damus: state, relay: r.url.id, showActionButtons: $showActionButtons)
                     }
                 } header: {
                     Text(NSLocalizedString("Recommended Relays", comment: "Section title for recommend relay servers that could be added as part of configuration"))

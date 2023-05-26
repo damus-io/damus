@@ -1,0 +1,26 @@
+{
+  "images": [
+    {
+      "filename": "basket.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "basket.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "basket.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  },
+  "properties": {
+    "template-rendering-intent": "template"
+  }
+}

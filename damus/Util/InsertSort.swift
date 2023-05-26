@@ -7,43 +7,18 @@
 
 import Foundation
 
-func insert_uniq<T: Equatable>(xs: inout [T], new_x: T) -> Bool {
-    for x in xs {
-        if x == new_x {
-            return false
-        }
-    }
-    
-    xs.append(new_x)
-    return true
-}
-
-func insert_uniq_by_pubkey(events: inout [NostrEvent], new_ev: NostrEvent, cmp: (NostrEvent, NostrEvent) -> Bool) -> Bool {
-    var i: Int = 0
-    
-    for event in events {
-        // don't insert duplicate events
-        if new_ev.pubkey == event.pubkey {
-            return false
-        }
-        
-        if cmp(new_ev, event) {
-            events.insert(new_ev, at: i)
-            return true
-        }
-        i += 1
-    }
-    
-    events.append(new_ev)
-    return true
-}
-
-func insert_uniq_sorted_zap(zaps: inout [Zap], new_zap: Zap, cmp: (Zap, Zap) -> Bool) -> Bool {
+func insert_uniq_sorted_zap(zaps: inout [Zapping], new_zap: Zapping, cmp: (Zapping, Zapping) -> Bool) -> Bool {
     var i: Int = 0
     
     for zap in zaps {
-        // don't insert duplicate events
-        if new_zap.event.id == zap.event.id {
+        if new_zap.request.id == zap.request.id {
+            // replace pending
+            if !new_zap.is_pending && zap.is_pending {
+                print("nwc: replacing pending with real zap \(new_zap.request.id)")
+                zaps[i] = new_zap
+                return true
+            }
+            // don't insert duplicate events
             return false
         }
         
@@ -59,16 +34,16 @@ func insert_uniq_sorted_zap(zaps: inout [Zap], new_zap: Zap, cmp: (Zap, Zap) -> 
 }
 
 @discardableResult
-func insert_uniq_sorted_zap_by_created(zaps: inout [Zap], new_zap: Zap) -> Bool {
+func insert_uniq_sorted_zap_by_created(zaps: inout [Zapping], new_zap: Zapping) -> Bool {
     return insert_uniq_sorted_zap(zaps: &zaps, new_zap: new_zap) { (a, b) in
-        a.event.created_at > b.event.created_at
+        a.created_at > b.created_at
     }
 }
 
 @discardableResult
-func insert_uniq_sorted_zap_by_amount(zaps: inout [Zap], new_zap: Zap) -> Bool {
+func insert_uniq_sorted_zap_by_amount(zaps: inout [Zapping], new_zap: Zapping) -> Bool {
     return insert_uniq_sorted_zap(zaps: &zaps, new_zap: new_zap) { (a, b) in
-        a.invoice.amount > b.invoice.amount
+        a.amount > b.amount
     }
 }
 

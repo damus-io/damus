@@ -63,8 +63,3 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         completionHandler()
     }
 }
-
-func needs_setup() -> Keypair? {
-    return get_saved_keypair()
-}
-    

@@ -12,6 +12,22 @@
 #include <stdlib.h>
 #include <string.h>
 
+static int parse_digit(struct cursor *cur, int *digit) {
+    int c;
+    if ((c = peek_char(cur, 0)) == -1)
+        return 0;
+    
+    c -= '0';
+    
+    if (c >= 0 && c <= 9) {
+        *digit = c;
+        cur->p++;
+        return 1;
+    }
+    return 0;
+}
+
+
 static int parse_mention_index(struct cursor *cur, struct block *block) {
     int d1, d2, d3, ind;
     const u8 *start = cur->p;
@@ -209,7 +225,7 @@ int damus_parse_content(struct blocks *blocks, const char *content) {
         c  = peek_char(&cur, 0);
         
         pre_mention = cur.p;
-        if (cp == -1 || is_whitespace(cp)) {
+        if (cp == -1 || is_whitespace(cp) || c == '#') {
             if (c == '#' && (parse_mention_index(&cur, &block) || parse_hashtag(&cur, &block))) {
                 if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;

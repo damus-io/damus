@@ -76,7 +76,7 @@ struct RelayView: View {
                 return
             }
             
-            let descriptors = state.pool.descriptors
+            let descriptors = state.pool.our_descriptors
             guard let new_ev = remove_relay( ev: ev, current_relays: descriptors, privkey: privkey, relay: relay) else {
                 return
             }

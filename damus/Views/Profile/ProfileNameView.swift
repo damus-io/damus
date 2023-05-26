@@ -21,7 +21,7 @@ struct ProfileNameView: View {
                 switch Profile.displayName(profile: profile, pubkey: pubkey) {
                 case .one:
                     HStack(alignment: .center, spacing: spacing) {
-                        ProfileName(pubkey: pubkey, profile: profile, damus: damus, show_friend_confirmed: true)
+                        ProfileName(pubkey: pubkey, profile: profile, damus: damus)
                             .font(.title3.weight(.bold))
                         if follows_you {
                             FollowsYou()
@@ -32,7 +32,7 @@ struct ProfileNameView: View {
                         .font(.title3.weight(.bold))
                     
                     HStack(alignment: .center, spacing: spacing) {
-                        ProfileName(pubkey: pubkey, profile: profile, prefix: "@", damus: damus, show_friend_confirmed: true)
+                        ProfileName(pubkey: pubkey, profile: profile, prefix: "@", damus: damus)
                             .font(.callout)
                             .foregroundColor(.gray)
                         

@@ -12,8 +12,6 @@ struct RelayDetailView: View {
     let relay: String
     let nip11: RelayMetadata
     
-    @State private var errorString: String?
-    
     @Environment(\.dismiss) var dismiss
     
     func check_connection() -> Bool {
@@ -26,7 +24,11 @@ struct RelayDetailView: View {
     }
     
     func FieldText(_ str: String?) -> some View {
-        Text(str ?? "No data available")
+        if let s = str {
+            return Text(verbatim: s)
+        } else {
+            return Text("No data available", comment: "Text indicating that there is no data available to show for specific metadata about a relay server.")
+        }
     }
     
     var body: some View {
@@ -40,7 +42,7 @@ struct RelayDetailView: View {
                                 return
                             }
 
-                            let descriptors = state.pool.descriptors
+                            let descriptors = state.pool.our_descriptors
                             guard let new_ev = remove_relay( ev: ev, current_relays: descriptors, privkey: privkey, relay: relay) else {
                                 return
                             }
@@ -56,7 +58,7 @@ struct RelayDetailView: View {
                             guard let ev_before_add = state.contacts.event else {
                                 return
                             }
-                            guard let ev_after_add = add_relay(ev: ev_before_add, privkey: privkey, current_relays: state.pool.descriptors, relay: relay, info: .rw) else {
+                            guard let ev_after_add = add_relay(ev: ev_before_add, privkey: privkey, current_relays: state.pool.our_descriptors, relay: relay, info: .rw) else {
                                 return
                             }
                             process_contact_event(state: state, ev: ev_after_add)

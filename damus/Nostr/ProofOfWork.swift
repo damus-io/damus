@@ -7,54 +7,6 @@
 
 import Foundation
 
-
-func zero_bits(_ argb: UInt8) -> Int
-{
-    var b = argb
-    var n: Int = 0;
-
-    if b == 0 {
-        return 8;
-    }
-
-    while true {
-        b >>= 1;
-        if b != 0 {
-            n += 1;
-        } else {
-            break
-        }
-    }
-
-    return 7-n;
-}
-
-func count_hash_leading_zero_bits(_ hash: String) -> Int?
-{
-    guard let decoded = hex_decode(hash) else {
-        return nil
-    }
-    return count_leading_zero_bits(decoded)
-}
-
-/* find the number of leading zero bits in a hash */
-func count_leading_zero_bits(_ hash: [UInt8]) -> Int
-{
-    var bits: Int = 0
-    var total: Int = 0
-
-    for c in hash {
-        bits = zero_bits(c)
-        total += bits
-        if (bits != 8) {
-            break
-        }
-    }
-
-    return total
-}
-
-
 func char_to_hex(_ c: UInt8) -> UInt8?
 {
     // 0 && 9

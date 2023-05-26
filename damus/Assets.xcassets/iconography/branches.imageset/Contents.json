@@ -1,0 +1,26 @@
+{
+  "images": [
+    {
+      "filename": "branches.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "branches.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "branches.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  },
+  "properties": {
+    "template-rendering-intent": "template"
+  }
+}

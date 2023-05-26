@@ -6,8 +6,9 @@
 //
 
 import SwiftUI
+import Combine
 
-struct DMChatView: View {
+struct DMChatView: View, KeyboardReadable {
     let damus_state: DamusState
     @ObservedObject var dms: DirectMessageModel
     @State var showPrivateKeyWarning: Bool = false
@@ -19,22 +20,42 @@ struct DMChatView: View {
     var Messages: some View {
         ScrollViewReader { scroller in
             ScrollView {
-                VStack(alignment: .leading) {
+                LazyVStack(alignment: .leading) {
                     ForEach(Array(zip(dms.events, dms.events.indices)), id: \.0.id) { (ev, ind) in
                         DMView(event: dms.events[ind], damus_state: damus_state)
                             .contextMenu{MenuItems(event: ev, keypair: damus_state.keypair, target_pubkey: ev.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads)}
                     }
-                    EndBlock(height: 80)
+                    EndBlock(height: 1)
                 }
                 .padding(.horizontal)
+
             }
+            .dismissKeyboardOnTap()
             .onAppear {
-                scroller.scrollTo("endblock")
+                scroll_to_end(scroller)
             }.onChange(of: dms.events.count) { _ in
-                withAnimation {
-                    scroller.scrollTo("endblock")
-                }
+                scroll_to_end(scroller, animated: true)
             }
+            
+            Footer
+                .onReceive(keyboardPublisher) { visible in
+                    guard visible else {
+                        return
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        scroll_to_end(scroller, animated: true)
+                    }
+                }
+        }
+    }
+    
+    func scroll_to_end(_ scroller: ScrollViewProxy, animated: Bool = false) {
+        if animated {
+            withAnimation {
+                scroller.scrollTo("endblock")
+            }
+        } else {
+            scroller.scrollTo("endblock")
         }
     }
 
@@ -45,7 +66,7 @@ struct DMChatView: View {
             HStack {
                 ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
 
-                ProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_friend_confirmed: true)
+                ProfileName(pubkey: pubkey, profile: profile, damus: damus_state)
             }
         }
         .buttonStyle(PlainButtonStyle())
@@ -78,46 +99,33 @@ struct DMChatView: View {
         }
     }
 
-    func BackgroundColor() -> some View {
-        if colorScheme == .dark {
-            return Color.black.opacity(0.9)
-        } else {
-            return Color.white.opacity(0.9)
-        }
-    }
-
     var Footer: some View {
-        ZStack {
-            BackgroundColor()
-            
-            HStack(spacing: 0) {
-                InputField
+    
+        HStack(spacing: 0) {
+            InputField
 
-                if !dms.draft.isEmpty {
-                    Button(
-                        role: .none,
-                        action: {
-                            showPrivateKeyWarning = contentContainsPrivateKey(dms.draft)
+            if !dms.draft.isEmpty {
+                Button(
+                    role: .none,
+                    action: {
+                        showPrivateKeyWarning = contentContainsPrivateKey(dms.draft)
 
-                            if !showPrivateKeyWarning {
-                                send_message()
-                            }
+                        if !showPrivateKeyWarning {
+                            send_message()
                         }
-                    ) {
-                        Label("", systemImage: "arrow.right.circle")
-                            .font(.title)
                     }
+                ) {
+                    Label("", systemImage: "arrow.right.circle")
+                        .font(.title)
                 }
             }
+        }
+
+        /*
+        Text(dms.draft).opacity(0).padding(.all, 8)
             .fixedSize(horizontal: false, vertical: true)
             .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
-
-            Text(dms.draft).opacity(0).padding(.all, 8)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
-        }
-        .fixedSize(horizontal: false, vertical: true)
-        .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
+         */
     }
 
     func send_message() {
@@ -143,13 +151,6 @@ struct DMChatView: View {
     var body: some View {
         ZStack {
             Messages
-                .dismissKeyboardOnTap()
-
-            VStack {
-                Spacer()
-
-                Footer
-            }
 
             Text("Send a message to start the conversation...", comment: "Text prompt for user to send a message to the other user.")
                 .lineLimit(nil)
@@ -210,22 +211,30 @@ func encrypt_message(message: String, privkey: String, to_pk: String, encoding: 
     
 }
 
-func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair, created_at: Int64? = nil) -> NostrEvent?
-{
-    guard let privkey = keypair.privkey else {
-        return nil
-    }
-
+func create_encrypted_event(_ message: String, to_pk: String, tags: [[String]], keypair: FullKeypair, created_at: Int64, kind: Int) -> NostrEvent? {
+    
+    let privkey = keypair.privkey
+    
     guard let enc_content = encrypt_message(message: message, privkey: privkey, to_pk: to_pk) else {
         return nil
     }
     
-    let created = created_at ?? Int64(Date().timeIntervalSince1970)
-    let ev = NostrEvent(content: enc_content, pubkey: keypair.pubkey, kind: 4, tags: tags, createdAt: created)
+    let ev = NostrEvent(content: enc_content, pubkey: keypair.pubkey, kind: kind, tags: tags, createdAt: created_at)
     
     ev.calculate_id()
     ev.sign(privkey: privkey)
     return ev
+}
+
+func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair, created_at: Int64? = nil) -> NostrEvent?
+{
+    let created = created_at ?? Int64(Date().timeIntervalSince1970)
+    
+    guard let keypair = keypair.to_full() else {
+        return nil
+    }
+    
+    return create_encrypted_event(message, to_pk: to_pk, tags: tags, keypair: keypair, created_at: created, kind: 4)
 }
 
 extension View {
@@ -238,3 +247,4 @@ extension View {
             .background(content())
     }
 }
+

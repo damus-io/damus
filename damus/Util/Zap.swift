@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct NoteZapTarget: Equatable {
+public struct NoteZapTarget: Equatable, Hashable {
     public let note_id: String
     public let author: String
 }
@@ -41,6 +41,200 @@ public enum ZapTarget: Equatable {
 
 struct ZapRequest {
     let ev: NostrEvent
+    
+}
+
+enum ExtPendingZapStateType {
+    case fetching_invoice
+    case done
+}
+
+class ExtPendingZapState: Equatable {
+    static func == (lhs: ExtPendingZapState, rhs: ExtPendingZapState) -> Bool {
+        return lhs.state == rhs.state
+    }
+    
+    var state: ExtPendingZapStateType
+    
+    init(state: ExtPendingZapStateType) {
+        self.state = state
+    }
+}
+
+enum PendingZapState: Equatable {
+    case nwc(NWCPendingZapState)
+    case external(ExtPendingZapState)
+}
+
+
+enum NWCStateType: Equatable {
+    case fetching_invoice
+    case cancel_fetching_invoice
+    case postbox_pending(NostrEvent)
+    case confirmed
+    case failed
+}
+
+class NWCPendingZapState: Equatable {
+    private(set) var state: NWCStateType
+    let url: WalletConnectURL
+    
+    init(state: NWCStateType, url: WalletConnectURL) {
+        self.state = state
+        self.url = url
+    }
+    
+    //@discardableResult  -- not discardable, the ZapsDataModel may need to send objectWillChange but we don't force it
+    func update_state(state: NWCStateType) -> Bool {
+        guard state != self.state else {
+            return false
+        }
+        self.state = state
+        return true
+    }
+    
+    static func == (lhs: NWCPendingZapState, rhs: NWCPendingZapState) -> Bool {
+        return lhs.state == rhs.state && lhs.url == rhs.url
+    }
+}
+
+class PendingZap {
+    let amount_msat: Int64
+    let target: ZapTarget
+    let request: ZapRequest
+    let type: ZapType
+    private(set) var state: PendingZapState
+    
+    init(amount_msat: Int64, target: ZapTarget, request: MakeZapRequest, type: ZapType, state: PendingZapState) {
+        self.amount_msat = amount_msat
+        self.target = target
+        self.request = request.private_inner_request
+        self.type = type
+        self.state = state
+    }
+    
+    @discardableResult
+    func update_state(model: ZapsDataModel, state: PendingZapState) -> Bool {
+        guard self.state != state else {
+            return false
+        }
+        
+        self.state = state
+        model.objectWillChange.send()
+        return true
+    }
+}
+
+struct ZapRequestId: Equatable {
+    let reqid: String
+    
+    init(from_zap: Zapping) {
+        self.reqid = from_zap.request.id
+    }
+    
+    init(from_makezap: MakeZapRequest) {
+        self.reqid = from_makezap.private_inner_request.ev.id
+    }
+    
+    init(from_pending: PendingZap) {
+        self.reqid = from_pending.request.ev.id
+    }
+}
+
+enum Zapping {
+    case zap(Zap)
+    case pending(PendingZap)
+    
+    var is_pending: Bool {
+        switch self {
+        case .zap:
+            return false
+        case .pending:
+            return true
+        }
+    }
+    
+    var is_paid: Bool {
+        switch self {
+        case .zap:
+            // we have a zap so this is proof of payment
+            return true
+        case .pending(let pzap):
+            switch pzap.state {
+            case .external:
+                // It could be but we don't know. We have to wait for a zap to know.
+                return false
+            case .nwc(let nwc_state):
+                // nwc confirmed that we have a payment, but we might not have zap yet
+                return nwc_state.state == .confirmed
+            }
+        }
+    }
+    
+    var is_private: Bool {
+        switch self {
+        case .zap(let zap):
+            return zap.private_request != nil
+        case .pending(let pzap):
+            return pzap.type == .priv
+        }
+    }
+    
+    var amount: Int64 {
+        switch self {
+        case .zap(let zap):
+            return zap.invoice.amount
+        case .pending(let pzap):
+            return pzap.amount_msat
+        }
+    }
+    
+    var target: ZapTarget {
+        switch self {
+        case .zap(let zap):
+            return zap.target
+        case .pending(let pzap):
+            return pzap.target
+        }
+    }
+    
+    var request: NostrEvent {
+        switch self {
+        case .zap(let zap):
+            return zap.request_ev
+        case .pending(let pzap):
+            return pzap.request.ev
+        }
+    }
+    
+    var created_at: Int64 {
+        switch self {
+        case .zap(let zap):
+            return zap.event.created_at
+        case .pending(let pzap):
+            // pending zaps are created right away
+            return pzap.request.ev.created_at
+        }
+    }
+    
+    var event: NostrEvent? {
+        switch self {
+        case .zap(let zap):
+            return zap.event
+        case .pending:
+            // pending zaps don't have a zap event
+            return nil
+        }
+    }
+    
+    var is_anon: Bool {
+        switch self {
+        case .zap(let zap):
+            return zap.is_anon
+        case .pending(let pzap):
+            return pzap.type == .anon
+        }
+    }
 }
 
 struct Zap {
@@ -134,16 +328,6 @@ func invoice_to_zap_invoice(_ invoice: Invoice) -> ZapInvoice? {
     return ZapInvoice(description: invoice.description, amount: amt, string: invoice.string, expiry: invoice.expiry, payment_hash: invoice.payment_hash, created_at: invoice.created_at)
 }
 
-func preimage_matches_invoice<T>(_ preimage: String, inv: LightningInvoice<T>) -> Bool {
-    guard let raw_preimage = hex_decode(preimage) else {
-        return false
-    }
-    
-    let hashed = sha256(Data(raw_preimage))
-    
-    return inv.payment_hash == hashed
-}
-
 func determine_zap_target(_ ev: NostrEvent) -> ZapTarget? {
     guard let ptag = event_tag(ev, name: "p") else {
         return nil
@@ -209,47 +393,6 @@ func decode_nostr_event_json(_ desc: String) -> NostrEvent? {
     return ev
 }
 
-func decode_zap_request(_ desc: String) -> ZapRequest? {
-    let decoder = JSONDecoder()
-    guard let jsonData = desc.data(using: .utf8) else {
-        return nil
-    }
-    guard let jsonArray = try? JSONSerialization.jsonObject(with: jsonData) as? [[Any]] else {
-        return nil
-    }
-    
-    for array in jsonArray {
-        guard array.count == 2 else {
-            continue
-        }
-        let mkey = array.first.flatMap { $0 as? String }
-        if let key = mkey, key == "application/nostr" {
-            guard let dat = try? JSONSerialization.data(withJSONObject: array[1], options: []) else {
-                return nil
-            }
-            
-            guard let zap_req = try? decoder.decode(NostrEvent.self, from: dat) else {
-                return nil
-            }
-            
-            guard zap_req.kind == 9734 else {
-                return nil
-            }
-            
-            /// Ensure the signature on the zap request is correct
-            guard case .ok = validate_event(ev: zap_req) else {
-                return nil
-            }
-            
-            return ZapRequest(ev: zap_req)
-        }
-    }
-    
-    return nil
-}
-
-
-
 func fetch_zapper_from_lnurl(_ lnurl: String) async -> String? {
     guard let endpoint = await fetch_static_payreq(lnurl) else {
         return nil
@@ -297,17 +440,16 @@ func fetch_static_payreq(_ lnurl: String) async -> LNUrlPayRequest? {
     return endpoint
 }
 
-func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, sats: Int, zap_type: ZapType, comment: String?) async -> String? {
+func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, msats: Int64, zap_type: ZapType, comment: String?) async -> String? {
     guard var base_url = payreq.callback.flatMap({ URLComponents(string: $0) }) else {
         return nil
     }
     
     let zappable = payreq.allowsNostr ?? false
-    let amount: Int64 = Int64(sats) * 1000
     
-    var query = [URLQueryItem(name: "amount", value: "\(amount)")]
+    var query = [URLQueryItem(name: "amount", value: "\(msats)")]
     
-    if let zapreq, zappable && zap_type != .non_zap, let json = encode_json(zapreq) {
+    if zappable && zap_type != .non_zap, let json = encode_json(zapreq) {
         print("zapreq json: \(json)")
         query.append(URLQueryItem(name: "nostr", value: json))
     }
@@ -341,6 +483,13 @@ func fetch_zap_invoice(_ payreq: LNUrlPayRequest, zapreq: NostrEvent?, sats: Int
     let json_str = String(decoding: ret.0, as: UTF8.self)
     guard let result: LNUrlPayResponse = decode_json(json_str) else {
         print("fetch_zap_invoice error: \(json_str)")
+        return nil
+    }
+    
+    // make sure it's the correct amount
+    guard let bolt11 = decode_bolt11(result.pr),
+          .specific(msats) == bolt11.amount
+    else {
         return nil
     }
     
