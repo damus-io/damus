@@ -41,35 +41,35 @@ You agree not to use our application to create, upload, post, send, or store any
 * Is intended to harass or bully others
 * Is intended to impersonate others
 
-## You also agree not to engage in any conduct that:
+**You also agree not to engage in any conduct that:**
 
 * Harasses or bullies others
 * Impersonates others
 * Is intended to intimidate or threaten others
 * Is intended to promote or incite violence
 
-## Consequences of Violation
+**Consequences of Violation**
 
 Any violation of this EULA, including the prohibited content and conduct outlined above, may result in the termination of your access to our application.
 
-## Disclaimer of Warranties and Limitation of Liability
+**Disclaimer of Warranties and Limitation of Liability**
 
 Our application is provided "as is" and "as available" without warranty of any kind, either express or implied, including but not limited to the implied warranties of merchantability and fitness for a particular purpose. We do not guarantee that our application will be uninterrupted or error-free. In no event shall Damus Nostr Inc. be liable for any damages whatsoever, including but not limited to direct, indirect, special, incidental, or consequential damages, arising out of or in connection with the use or inability to use our application.
 
-## Changes to EULA
+**Changes to EULA**
 
 We reserve the right to update or modify this EULA at any time and without prior notice. Your continued use of our application following any changes to this EULA will be deemed to be your acceptance of such changes.
 
-## Contact Information
+**Contact Information**
 
 If you have any questions about this EULA, please contact us at damus@jb55.com
 
-## Acceptance of Terms
+**Acceptance of Terms**
 
 By using our Application, you signify your acceptance of this EULA. If you do not agree to this EULA, you may not use our Application.
 
-"""))
-                .padding()
+"""
+
     @State private var login = false
                 NavigationLink(destination: LoginView(accepted: $accepted), isActive: $login) {
                     EmptyView()
