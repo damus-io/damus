@@ -27,26 +27,47 @@ struct SetupView: View {
                         EmptyView()
                     }
                     
+                    Spacer()
+                    
                     Image("logo-nobg")
                         .resizable()
-                        .frame(width: 128.0, height: 128.0, alignment: .center)
-                        .padding([.top], 20.0)
-                    Text("Damus", comment: "Name of the app, shown on the first screen when user is not logged in.")
-                        .font(Font.custom("Nunito", size: 50.0))
-                        .kerning(-2)
-                        .foregroundColor(.white)
+                        .shadow(color: DamusColors.purple, radius: 2)
+                        .frame(width: 56, height: 56, alignment: .center)
+                        .padding(.top, 20.0)
                     
-                    CarouselView()
-                    
-                    DamusWhiteButton(NSLocalizedString("Create Account", comment: "Button to create an account.")) {
-                        self.state = .create_account
+                    HStack {
+                        Text("Welcome to", comment: "Welcome text shown on the first screen when user is not logged in.")
+                            .font(.title)
+                            .fontWeight(.heavy)
+                        Text("Damus")
+                            .font(.title)
+                            .fontWeight(.heavy)
+                            .foregroundStyle(DamusLogoGradient.gradient)
                     }
                     
-                    Button(NSLocalizedString("Login", comment: "Button to log into an account.")) {
-                        self.state = .login
+                    Text("The go-to iOS nostr client", comment: "Quick description of what Damus is")
+                        .foregroundColor(DamusColors.mediumGrey)
+                        .padding(.top, 10)
+                    
+                    WhatIsNostr()
+                        .padding()
+                    
+                    WhyWeNeedNostr()
+                        .padding()
+                    
+                    Spacer()
+                    
+                    Button(action: {
+                        eula.toggle()
+                    }) {
+                        HStack {
+                            Text("Let's get started!", comment:  "Button to continue to login page.")
+                                .fontWeight(.semibold)
+                        }
+                        .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
                     }
-                    .padding([.top, .bottom], 20)
-                    .foregroundColor(.white)
+                    .buttonStyle(GradientButtonStyle())
+                    .padding()
                 }
             }
             .background(
