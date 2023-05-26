@@ -15,15 +15,9 @@ func hex_col(r: UInt8, g: UInt8, b: UInt8) -> Color {
                  opacity: 1.0)
 }
 
-enum SetupState {
-    case home
-    case create_account
-    case login
-}
-
 
 struct SetupView: View {
-    @State var state: SetupState? = .home
+    @State private var eula = false
     
     var body: some View {
         NavigationView {
@@ -31,10 +25,7 @@ struct SetupView: View {
                 DamusGradient()
                 
                 VStack(alignment: .center) {
-                    NavigationLink(destination: EULAView(state: state), tag: .create_account, selection: $state ) {
-                        EmptyView()
-                    }
-                    NavigationLink(destination: EULAView(state: state), tag: .login, selection: $state ) {
+                    NavigationLink(destination: EULAView(), isActive: $eula) {
                         EmptyView()
                     }
                     
@@ -79,7 +70,6 @@ func DamusWhiteButton(_ title: String, action: @escaping () -> ()) -> some View 
                     .background(Color.white.opacity(0.15))
             )
     }
-                    
 }
 
 struct SetupView_Previews: PreviewProvider {
