@@ -207,6 +207,8 @@
 		4CC7AAFA297F64AC00430951 /* EventMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAF9297F64AC00430951 /* EventMenu.swift */; };
 		4CCEB7AE29B53D260078AA28 /* SearchingEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CCEB7AD29B53D260078AA28 /* SearchingEventView.swift */; };
 		4CCEB7B029B5415A0078AA28 /* SearchingProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CCEB7AF29B5415A0078AA28 /* SearchingProfileView.swift */; };
+		4CCF9AAF2A1FDBDB00E03CFB /* VideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CCF9AAE2A1FDBDB00E03CFB /* VideoPlayer.swift */; };
+		4CCF9AB22A1FE80C00E03CFB /* GSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 4CCF9AB12A1FE80C00E03CFB /* GSPlayer */; };
 		4CD348EF29C3659D00497EB2 /* ImageUploadModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD348EE29C3659D00497EB2 /* ImageUploadModel.swift */; };
 		4CD7641B28A1641400B6928F /* EndBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD7641A28A1641400B6928F /* EndBlock.swift */; };
 		4CDA128A29E9D10C0006FA5A /* SignalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDA128929E9D10C0006FA5A /* SignalView.swift */; };
@@ -651,6 +653,7 @@
 		4CC7AAF9297F64AC00430951 /* EventMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventMenu.swift; sourceTree = "<group>"; };
 		4CCEB7AD29B53D260078AA28 /* SearchingEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchingEventView.swift; sourceTree = "<group>"; };
 		4CCEB7AF29B5415A0078AA28 /* SearchingProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchingProfileView.swift; sourceTree = "<group>"; };
+		4CCF9AAE2A1FDBDB00E03CFB /* VideoPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayer.swift; sourceTree = "<group>"; };
 		4CD348EE29C3659D00497EB2 /* ImageUploadModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageUploadModel.swift; sourceTree = "<group>"; };
 		4CD7641A28A1641400B6928F /* EndBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndBlock.swift; sourceTree = "<group>"; };
 		4CDA128929E9D10C0006FA5A /* SignalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalView.swift; sourceTree = "<group>"; };
@@ -771,6 +774,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */,
+				4CCF9AB22A1FE80C00E03CFB /* GSPlayer in Frameworks */,
 				4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -949,6 +953,14 @@
 			path = Settings;
 			sourceTree = "<group>";
 		};
+		4C1A9A2829DDF53B00516EAC /* Video */ = {
+			isa = PBXGroup;
+			children = (
+				4CCF9AAE2A1FDBDB00E03CFB /* VideoPlayer.swift */,
+			);
+			path = Video;
+			sourceTree = "<group>";
+		};
 		4C30AC7029A5676F00E2BD5A /* Notifications */ = {
 			isa = PBXGroup;
 			children = (
@@ -975,6 +987,7 @@
 				4C7D09692A0AEA0400943473 /* CodeScanner */,
 				4C7D095A2A098C5C00943473 /* Wallet */,
 				4C8D1A6D29F31E4100ACDF75 /* Buttons */,
+				4C1A9A2829DDF53B00516EAC /* Video */,
 				4C1A9A1B29DDCF8B00516EAC /* Settings */,
 				4CFF8F6129CC9A80008DB934 /* Images */,
 				4CCEB7AC29B53D180078AA28 /* Search */,
@@ -1501,6 +1514,7 @@
 			packageProductDependencies = (
 				4C649880286E0EE300EAE2B3 /* secp256k1 */,
 				4C06670328FC7EC500038D2A /* Kingfisher */,
+				4CCF9AB12A1FE80C00E03CFB /* GSPlayer */,
 			);
 			productName = damus;
 			productReference = 4CE6DEE327F7A08100C66700 /* damus.app */;
@@ -1605,6 +1619,7 @@
 			packageReferences = (
 				4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */,
 				4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				4CCF9AB02A1FE80B00E03CFB /* XCRemoteSwiftPackageReference "GSPlayer" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -1669,6 +1684,7 @@
 				4C285C8428385690008A31F1 /* CreateAccountView.swift in Sources */,
 				4C216F34286F5ACD00040376 /* DMView.swift in Sources */,
 				4C3EA64428FF558100C48A62 /* sha256.c in Sources */,
+				4CCF9AAF2A1FDBDB00E03CFB /* VideoPlayer.swift in Sources */,
 				4CF0ABF62985CD5500D66079 /* UserSearch.swift in Sources */,
 				4C363AA828297703006E126D /* InsertSort.swift in Sources */,
 				4C285C86283892E7008A31F1 /* CreateAccountModel.swift in Sources */,
@@ -2441,6 +2457,14 @@
 				revision = 40b4b38b3b1c83f7088c76189a742870e0ca06a9;
 			};
 		};
+		4CCF9AB02A1FE80B00E03CFB /* XCRemoteSwiftPackageReference "GSPlayer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/wxxsw/GSPlayer";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.2.26;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -2453,6 +2477,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
 			productName = secp256k1;
+		};
+		4CCF9AB12A1FE80C00E03CFB /* GSPlayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4CCF9AB02A1FE80B00E03CFB /* XCRemoteSwiftPackageReference "GSPlayer" */;
+			productName = GSPlayer;
 		};
 /* End XCSwiftPackageProductDependency section */
 
