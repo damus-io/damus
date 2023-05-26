@@ -331,6 +331,20 @@ struct SignInHeader: View {
     }
 }
 
+struct SignInEntry: View {
+    let key: Binding<String>
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("Enter your account key", comment: "Prompt for user to enter an account key to login.")
+                .fontWeight(.medium)
+                .padding(.top, 30)
+            
+            KeyInput(NSLocalizedString("nsec1...", comment: "Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key."), key: key)
+        }
+    }
+}
+
             }
         }
     }
