@@ -49,6 +49,7 @@
 		4C1A9A2329DDDB8100516EAC /* IconLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2229DDDB8100516EAC /* IconLabel.swift */; };
 		4C1A9A2529DDDF2600516EAC /* ZapSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2429DDDF2600516EAC /* ZapSettingsView.swift */; };
 		4C1A9A2729DDE31900516EAC /* TranslationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2629DDE31900516EAC /* TranslationSettingsView.swift */; };
+		4C1A9A2A29DDF54400516EAC /* DamusVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2929DDF54400516EAC /* DamusVideoPlayer.swift */; };
 		4C216F32286E388800040376 /* DMChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F31286E388800040376 /* DMChatView.swift */; };
 		4C216F34286F5ACD00040376 /* DMView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F33286F5ACD00040376 /* DMView.swift */; };
 		4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F352870A9A700040376 /* InputDismissKeyboard.swift */; };
@@ -461,6 +462,7 @@
 		4C1A9A2229DDDB8100516EAC /* IconLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconLabel.swift; sourceTree = "<group>"; };
 		4C1A9A2429DDDF2600516EAC /* ZapSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapSettingsView.swift; sourceTree = "<group>"; };
 		4C1A9A2629DDE31900516EAC /* TranslationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationSettingsView.swift; sourceTree = "<group>"; };
+		4C1A9A2929DDF54400516EAC /* DamusVideoPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusVideoPlayer.swift; sourceTree = "<group>"; };
 		4C216F31286E388800040376 /* DMChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMChatView.swift; sourceTree = "<group>"; };
 		4C216F33286F5ACD00040376 /* DMView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMView.swift; sourceTree = "<group>"; };
 		4C216F352870A9A700040376 /* InputDismissKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputDismissKeyboard.swift; sourceTree = "<group>"; };
@@ -956,6 +958,7 @@
 		4C1A9A2829DDF53B00516EAC /* Video */ = {
 			isa = PBXGroup;
 			children = (
+				4C1A9A2929DDF54400516EAC /* DamusVideoPlayer.swift */,
 				4CCF9AAE2A1FDBDB00E03CFB /* VideoPlayer.swift */,
 			);
 			path = Video;
@@ -1830,6 +1833,7 @@
 				F79C7FAD29D5E9620000F946 /* EditProfilePictureControl.swift in Sources */,
 				4C9F18E229AA9B6C008C55EC /* CustomizeZapView.swift in Sources */,
 				4C2859602A12A2BE004746F7 /* SupporterBadge.swift in Sources */,
+				4C1A9A2A29DDF54400516EAC /* DamusVideoPlayer.swift in Sources */,
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
 				4C3EA64C28FF59AC00C48A62 /* bech32_util.c in Sources */,
 				4CE1399029F0661A00AC6A0B /* RepostAction.swift in Sources */,
