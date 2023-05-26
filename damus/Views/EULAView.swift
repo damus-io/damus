@@ -22,12 +22,14 @@ struct EULAView: View {
                 
                 Text(Markdown.parse(content: """
 End User License Agreement
+let eula = """
+**End User License Agreement**
 
-## Introduction
+**Introduction**
 
 This End User License Agreement ("EULA") is a legal agreement between you and Damus Nostr Inc. for the use of our mobile application Damus. By installing, accessing, or using our application, you agree to be bound by the terms and conditions of this EULA.
 
-## Prohibited Content and Conduct
+**Prohibited Content and Conduct**
 
 You agree not to use our application to create, upload, post, send, or store any content that:
 
