@@ -7,21 +7,6 @@
 
 import SwiftUI
 
-struct EULAView: View {
-    @Environment(\.dismiss) var dismiss
-    @State var accepted = false
-
-    var body: some View {
-        ZStack {
-            DamusGradient()
-            
-            ScrollView {
-                Text("EULA", comment: "Label indicating that the below text is the EULA, an acronym for End User License Agreement.")
-                    .font(.title.bold())
-                    .foregroundColor(.white)
-                
-                Text(Markdown.parse(content: """
-End User License Agreement
 let eula = """
 **End User License Agreement**
 
@@ -70,11 +55,23 @@ By using our Application, you signify your acceptance of this EULA. If you do no
 
 """
 
+struct EULAView: View {
     @State private var login = false
+    @State var accepted = false
+    @Environment(\.colorScheme) var colorScheme
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        ZStack {
+            ScrollView {
                 NavigationLink(destination: LoginView(accepted: $accepted), isActive: $login) {
                     EmptyView()
                 }
                 
+                Text(Markdown.parse(content: eula))
+                    .padding()
+            }
+            .padding(EdgeInsets(top: 20, leading: 10, bottom: 50, trailing: 10))
                     }
                     }
                 }
