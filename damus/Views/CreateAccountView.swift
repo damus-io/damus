@@ -26,6 +26,9 @@ struct CreateAccountView: View {
     var body: some View {
         ZStack(alignment: .top) {
             DamusGradient()
+            NavigationLink(destination: SaveKeysView(account: account), isActive: $is_done) {
+                EmptyView()
+            }
             
             VStack {
                 Text("Create Account")
@@ -73,8 +76,6 @@ struct CreateAccountView: View {
                     }
                 }
                 
-                NavigationLink(destination: SaveKeysView(account: account), isActive: $is_done) {
-                    EmptyView()
                 }
                 
                 DamusWhiteButton(NSLocalizedString("Create", comment: "Button to create account.")) {
