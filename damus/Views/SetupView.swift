@@ -105,6 +105,20 @@ struct WhatIsNostr: View {
         }
     }
 }
+
+struct WhyWeNeedNostr: View {
+    var body: some View {
+        HStack(alignment: .top) {
+            Image("lightbulb")
+            VStack(alignment: .leading) {
+                Text("Why we need nostr?")
+                    .fontWeight(.bold)
+                    .padding(.vertical, 10)
+                
+                Text("Social media has developed into a key way information flows around the world. Unfortunately, our current social media systems are broken")
+                    .foregroundColor(DamusColors.mediumGrey)
+            }
+        }
     }
 }
 
