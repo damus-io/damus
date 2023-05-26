@@ -62,19 +62,13 @@ struct LoginView: View {
             }
             
             VStack {
-                Text("Login", comment: "Title of view to log into an account.")
-                    .foregroundColor(.white)
-                    .font(.title)
-                    .padding()
-
-                Text("Enter your account key to login:", comment: "Prompt for user to enter an account key to login.")
-                    .foregroundColor(.white)
-                    .padding()
-
-                KeyInput(NSLocalizedString("nsec1...", comment: "Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key."), key: $key)
-
+                SignInHeader()
+                    .padding(.top, 100)
+                
+                SignInEntry(key: $key)
+                
                 let parsed = parse_key(key)
-
+                
                 if parsed?.is_hex ?? false {
                     Text("This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key.", comment: "Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key.")
                         .font(.subheadline.bold())
