@@ -33,10 +33,13 @@ enum ParsedKey {
 }
 
 struct LoginView: View {
+    @State private var create_account = false
     @State var key: String = ""
     @State var is_pubkey: Bool = false
     @State var error: String? = nil
     @State private var credential_handler = CredentialHandler()
+    
+    @Binding var accepted: Bool
 
     func get_error(parsed_key: ParsedKey?) -> String? {
         if self.error != nil {
@@ -53,6 +56,12 @@ struct LoginView: View {
     var body: some View {
         ZStack(alignment: .top) {
             DamusGradient()
+            if accepted {
+                NavigationLink(destination: CreateAccountView(), isActive: $create_account) {
+                    EmptyView()
+                }
+            }
+            
             VStack {
                 Text("Login", comment: "Title of view to log into an account.")
                     .foregroundColor(.white)

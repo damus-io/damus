@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct EULAView: View {
-    var state: SetupState?
     @Environment(\.dismiss) var dismiss
     @State var accepted = false
 
@@ -69,14 +68,12 @@ By using our Application, you signify your acceptance of this EULA. If you do no
 
 """))
                 .padding()
+    @State private var login = false
+                NavigationLink(destination: LoginView(accepted: $accepted), isActive: $login) {
+                    EmptyView()
+                }
                 
-                if state == .create_account {
-                    NavigationLink(destination: CreateAccountView(), isActive: $accepted) {
-                        EmptyView()
                     }
-                } else {
-                    NavigationLink(destination: LoginView(), isActive: $accepted) {
-                        EmptyView()
                     }
                 }
                 DamusWhiteButton(NSLocalizedString("Accept", comment: "Button to accept the end user license agreement before being allowed into the app.")) {
