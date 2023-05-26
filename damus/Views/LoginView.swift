@@ -70,11 +70,7 @@ struct LoginView: View {
                 let parsed = parse_key(key)
                 
                 if parsed?.is_hex ?? false {
-                    Text("This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key.", comment: "Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key.")
-                        .font(.subheadline.bold())
-                        .foregroundColor(.white)
-                    PubkeySwitch(isOn: $is_pubkey)
-                        .padding()
+                    // convert to bech32 here
                 }
 
                 if let error = get_error(parsed_key: parsed) {
@@ -117,18 +113,6 @@ struct LoginView: View {
         }
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackNav())
-    }
-}
-
-struct PubkeySwitch: View {
-    @Binding var isOn: Bool
-    var body: some View {
-        HStack {
-            Toggle(isOn: $isOn) {
-                Text("Public Key?", comment: "Prompt to ask user if the key they entered is a public key.")
-                    .foregroundColor(.white)
-            }
-        }
     }
 }
 
