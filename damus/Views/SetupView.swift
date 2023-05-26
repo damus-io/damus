@@ -22,8 +22,6 @@ struct SetupView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                DamusGradient()
-                
                 VStack(alignment: .center) {
                     NavigationLink(destination: EULAView(), isActive: $eula) {
                         EmptyView()
@@ -51,6 +49,13 @@ struct SetupView: View {
                     .foregroundColor(.white)
                 }
             }
+            .background(
+                Image("login-header")
+                    .resizable()
+                    .frame(maxWidth: .infinity, maxHeight: 300, alignment: .center)
+                    .ignoresSafeArea(),
+                alignment: .top
+            )
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationViewStyle(StackNavigationViewStyle())
