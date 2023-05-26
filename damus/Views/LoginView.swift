@@ -55,7 +55,6 @@ struct LoginView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            DamusGradient()
             if accepted {
                 NavigationLink(destination: CreateAccountView(), isActive: $create_account) {
                     EmptyView()
@@ -112,6 +111,13 @@ struct LoginView: View {
             }
             .padding()
         }
+        .background(
+            Image("login-header")
+                .resizable()
+                .frame(maxWidth: .infinity, maxHeight: 350, alignment: .center)
+                .ignoresSafeArea(),
+            alignment: .top
+        )
         .onAppear {
             credential_handler.check_credentials()
         }
