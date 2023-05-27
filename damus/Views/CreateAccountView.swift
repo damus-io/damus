@@ -158,8 +158,9 @@ func KeyText(_ text: Binding<String>) -> some View {
     let bechkey = bech32_encode(hrp: PUBKEY_HRP, decoded)
     return Text(bechkey)
         .textSelection(.enabled)
+        .multilineTextAlignment(.center)
         .font(.callout.monospaced())
-        .foregroundColor(.white)
+        .foregroundStyle(DamusLogoGradient.gradient)
 }
 
 func FormTextInput(_ title: String, text: Binding<String>) -> some View {
