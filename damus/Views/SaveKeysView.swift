@@ -187,7 +187,7 @@ struct SaveKeyView: View {
             VStack {
                 spacerBlock(width: 0, height: 0)
                 Button(action: copy_text) {
-                    Label("", systemImage: is_copied ? "checkmark.circle.fill" : "doc.on.doc")
+                    Label("", image: is_copied ? "check-circle.fill" : "copy2")
                         .foregroundColor(is_copied ? .green : .gray)
                         .background {
                             if is_copied {

@@ -111,7 +111,8 @@ struct LoginPrompt: View {
 struct BackNav: View {
     @Environment(\.dismiss) var dismiss
     var body: some View {
-        Image(systemName: "chevron.backward")
+        Image("chevron-left")
+            .foregroundColor(.white)
         .onTapGesture {
             self.dismiss()
         }

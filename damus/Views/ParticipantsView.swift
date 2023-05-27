@@ -67,7 +67,7 @@ struct ParticipantsView: View {
                             
                             Spacer()
                             
-                            Image(systemName: "checkmark.circle.fill")
+                            Image("check-circle.fill")
                                 .font(.system(size: 30))
                                 .foregroundColor(references.contains(participant) ? DamusColors.purple : .gray)
                         }

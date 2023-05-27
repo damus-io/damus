@@ -28,7 +28,7 @@ struct SelectWalletView: View {
                         
                         Spacer()
                         
-                        Image(systemName: self.invoice_copied ? "checkmark.circle" : "doc.on.doc").foregroundColor(.blue)
+                        Image(self.invoice_copied ? "check-circle" : "copy2").foregroundColor(.blue)
                     }.clipShape(RoundedRectangle(cornerRadius: 5)).onTapGesture {
                         UIPasteboard.general.string = invoice
                         self.invoice_copied = true

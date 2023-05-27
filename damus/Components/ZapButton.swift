@@ -45,11 +45,11 @@ struct ZapButton: View {
     var zap_img: String {
         switch our_zap {
         case .none:
-            return "bolt"
+            return "zap"
         case .zap:
-            return "bolt.fill"
+            return "zap.fill"
         case .pending:
-            return "bolt.fill"
+            return "zap.fill"
         }
     }
     
@@ -120,9 +120,12 @@ struct ZapButton: View {
         HStack(spacing: 4) {
             Button(action: {
             }, label: {
-                Image(systemName: zap_img)
+                Image(zap_img)
+                    .resizable()
                     .foregroundColor(zap_color)
                     .font(.footnote.weight(.medium))
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width:15, height: 15)
             })
 
             if zaps.zap_total > 0 {

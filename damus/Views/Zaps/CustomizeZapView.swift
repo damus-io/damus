@@ -257,16 +257,16 @@ struct CustomizeZapView: View {
         }) {
             switch zap_type {
             case .pub:
-                Image(systemName: "person.2")
+                Image("globe")
                 Text("Public", comment: "Button text to indicate that the zap type is a public zap.")
             case .anon:
-                Image(systemName: "person.fill.questionmark")
+                Image("question")
                 Text("Anonymous", comment: "Button text to indicate that the zap type is a anonymous zap.")
             case .priv:
-                Image(systemName: "lock")
+                Image("lock")
                 Text("Private", comment: "Button text to indicate that the zap type is a private zap.")
             case .non_zap:
-                Image(systemName: "bolt")
+                Image("zap")
                 Text("None", comment: "Button text to indicate that the zap type is a private zap.")
             }
         }
