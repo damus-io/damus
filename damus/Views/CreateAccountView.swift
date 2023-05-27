@@ -177,11 +177,10 @@ func FormLabel(_ title: String, optional: Bool = false) -> some View {
     return HStack {
         Text(title)
                 .bold()
-                .foregroundColor(.white)
         if optional {
-            Text("optional", comment: "Label indicating that a form input is optional.")
+            Text("- optional", comment: "Label indicating that a form input is optional.")
                 .font(.callout)
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(DamusColors.mediumGrey)
         }
     }
 }
