@@ -30,31 +30,6 @@ struct CreateAccountView: View {
             }
             
             VStack {
-                
-                HStack(alignment: .top) {
-                    VStack {
-                        Text(verbatim: "   ")
-                            .foregroundColor(.white)
-                    }
-                    VStack {
-                        SignupForm {
-                            
-                            FormLabel(NSLocalizedString("Display Name", comment: "Label to prompt display name entry."), optional: true)
-                            FormTextInput(NSLocalizedString("Satoshi Nakamoto", comment: "Name of Bitcoin creator(s)."), text: $account.real_name)
-                                .textInputAutocapitalization(.words)
-                            
-                            FormLabel(NSLocalizedString("About", comment: "Label to prompt for about text entry for user to describe about themself."), optional: true)
-                            FormTextInput(NSLocalizedString("Creator(s) of Bitcoin. Absolute legend.", comment: "Example description about Bitcoin creator(s), Satoshi Nakamoto."), text: $account.about)
-                            
-                            FormLabel(NSLocalizedString("Account ID", comment: "Label to indicate the public ID of the account."))
-                                .onTapGesture {
-                                    regen_key()
-                                }
-                            
-                            KeyText($account.pubkey)
-                                .onTapGesture {
-                                    regen_key()
-                                }
                 VStack(alignment: .center) {
                     ProfilePictureSelector(pubkey: account.pubkey, viewModel: profileUploadViewModel, callback: uploadedProfilePicture(image_url:))
 
@@ -70,7 +45,6 @@ struct CreateAccountView: View {
                         .onTapGesture {
                             regen_key()
                         }
-                    }
                 }
                 .frame(minWidth: 300, maxWidth: .infinity, minHeight: 300, alignment: .center)
                 .background {
@@ -78,6 +52,16 @@ struct CreateAccountView: View {
                         .fill(DamusColors.adaptableGrey, strokeBorder: .gray.opacity(0.5), lineWidth: 1)
                 }
                 
+                SignupForm {
+                    FormLabel(NSLocalizedString("Display name", comment: "Label to prompt display name entry."), optional: true)
+                    FormTextInput(NSLocalizedString("Satoshi Nakamoto", comment: "Name of Bitcoin creator(s)."), text: $account.real_name)
+                        .textInputAutocapitalization(.words)
+
+                    FormLabel(NSLocalizedString("About", comment: "Label to prompt for about text entry for user to describe about themself."), optional: true)
+                    FormTextInput(NSLocalizedString("Creator(s) of Bitcoin. Absolute legend.", comment: "Example description about Bitcoin creator(s), Satoshi Nakamoto."), text: $account.about)
+                }
+                .padding(.top, 10)
+
                 Button(action: {
                     self.is_done = true
                 }) {
