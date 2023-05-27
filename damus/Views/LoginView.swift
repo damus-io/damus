@@ -84,11 +84,10 @@ struct LoginView: View {
                         .foregroundColor(.white)
                         .padding()
                 }
-                
-                Spacer()
 
                 if let p = parsed {
-                    DamusWhiteButton(NSLocalizedString("Login", comment: "Button to log into account.")) {
+                    
+                    Button(action: {
                         Task {
                             do {
                                 try await process_login(p, is_pubkey: is_pubkey)
@@ -96,7 +95,15 @@ struct LoginView: View {
                                 self.error = error.localizedDescription
                             }
                         }
+                    }) {
+                        HStack {
+                            Text("Login", comment:  "Button to log into account.")
+                                .fontWeight(.semibold)
+                        }
+                        .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
                     }
+                    .buttonStyle(GradientButtonStyle())
+                    .padding(.top, 10)
                 }
             }
             .padding()
