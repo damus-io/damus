@@ -25,7 +25,6 @@ struct CreateAccountView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            DamusGradient()
             NavigationLink(destination: SaveKeysView(account: account), isActive: $is_done) {
                 EmptyView()
             }
