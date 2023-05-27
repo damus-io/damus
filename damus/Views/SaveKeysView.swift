@@ -206,11 +206,10 @@ struct SaveKeyView: View {
             TextField("", text: .constant(text))
                 .padding(5)
                 .background {
-                    RoundedRectangle(cornerRadius: 4.0).opacity(0.2)
+                    RoundedRectangle(cornerRadius: 4.0).opacity(0.1)
                 }
                 .textSelection(.enabled)
                 .font(.callout.monospaced())
-                .foregroundColor(.white)
                 .onTapGesture {
                     copy_text()
                     // Hack to force keyboard to hide. Showing keyboard on text field is necessary to register password autofill flow but the text itself should not be modified.
