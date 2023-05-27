@@ -60,25 +60,25 @@ struct MenuItems: View {
             Button {
                 UIPasteboard.general.string = event.get_content(keypair.privkey)
             } label: {
-                Label(NSLocalizedString("Copy Text", comment: "Context menu option for copying the text from an note."), systemImage: "doc.on.doc")
+                Label(NSLocalizedString("Copy text", comment: "Context menu option for copying the text from an note."), systemImage: "doc.on.doc")
             }
 
             Button {
                 UIPasteboard.general.string = bech32_pubkey(target_pubkey)
             } label: {
-                Label(NSLocalizedString("Copy User Pubkey", comment: "Context menu option for copying the ID of the user who created the note."), systemImage: "person")
+                Label(NSLocalizedString("Copy user public key", comment: "Context menu option for copying the ID of the user who created the note."), systemImage: "person")
             }
 
             Button {
                 UIPasteboard.general.string = bech32_note_id(event.id) ?? event.id
             } label: {
-                Label(NSLocalizedString("Copy Note ID", comment: "Context menu option for copying the ID of the note."), systemImage: "note.text")
+                Label(NSLocalizedString("Copy note ID", comment: "Context menu option for copying the ID of the note."), systemImage: "note.text")
             }
 
             Button {
                 UIPasteboard.general.string = event_to_json(ev: event)
             } label: {
-                Label(NSLocalizedString("Copy Note JSON", comment: "Context menu option for copying the JSON text from the note."), systemImage: "square.on.square")
+                Label(NSLocalizedString("Copy note JSON", comment: "Context menu option for copying the JSON text from the note."), systemImage: "square.on.square")
             }
             
             Button {
@@ -86,8 +86,8 @@ struct MenuItems: View {
                 isBookmarked = self.bookmarks.isBookmarked(event)
             } label: {
                 let imageName = isBookmarked ? "bookmark.fill" : "bookmark"
-                let removeBookmarkString = NSLocalizedString("Remove Bookmark", comment: "Context menu option for removing a note bookmark.")
-                let addBookmarkString = NSLocalizedString("Add Bookmark", comment: "Context menu option for adding a note bookmark.")
+                let removeBookmarkString = NSLocalizedString("Remove bookmark", comment: "Context menu option for removing a note bookmark.")
+                let addBookmarkString = NSLocalizedString("Add bookmark", comment: "Context menu option for adding a note bookmark.")
                 Label(isBookmarked ? removeBookmarkString : addBookmarkString, systemImage: imageName)
             }
 
@@ -122,7 +122,7 @@ struct MenuItems: View {
                 Button(role: .destructive) {
                     notify(.mute, target_pubkey)
                 } label: {
-                    Label(NSLocalizedString("Mute User", comment: "Context menu option for muting users."), systemImage: "exclamationmark.octagon")
+                    Label(NSLocalizedString("Mute user", comment: "Context menu option for muting users."), systemImage: "exclamationmark.octagon")
                 }
             }
         }
