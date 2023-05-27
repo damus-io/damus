@@ -77,10 +77,16 @@ struct CreateAccountView: View {
                 
                 }
                 
-                DamusWhiteButton(NSLocalizedString("Create", comment: "Button to create account.")) {
+                Button(action: {
                     self.is_done = true
+                }) {
+                    HStack {
+                        Text("Create account now", comment:  "Button to create account.")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
                 }
-                .padding()
+                .buttonStyle(GradientButtonStyle())
                 .disabled(profileUploadViewModel.isLoading)
                 .opacity(profileUploadViewModel.isLoading ? 0.5 : 1)
             }
