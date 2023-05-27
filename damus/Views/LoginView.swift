@@ -105,6 +105,11 @@ struct LoginView: View {
                     .buttonStyle(GradientButtonStyle())
                     .padding(.top, 10)
                 }
+
+                CreateAccountPrompt(create_account: $create_account)
+                    .padding(.top, 10)
+
+                Spacer()
             }
             .padding()
         }
