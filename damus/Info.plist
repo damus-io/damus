@@ -70,5 +70,16 @@
 	<string>Damus needs access to your camera if you want to upload photos from it</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Damus needs access to your microphone if you want to upload recorded videos from it</string>
+	<key>CFBundleIdentifier</key>
+	<string></string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Inter-Regular.otf</string>
+		<string>Inter-Bold.otf</string>
+		<string>Inter-Light.otf</string>
+		<string>Inter-SemiBold.otf</string>
+		<string>Inter-Medium.otf</string>
+		<string>Inter-Italic.otf</string>
+	</array>
 </dict>
 </plist>
