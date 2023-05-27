@@ -353,11 +353,12 @@ struct CreateAccountPrompt: View {
 
 struct LoginView_Previews: PreviewProvider {
     static var previews: some View {
-        let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
+//        let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
+        let pubkey = "npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955"
         let bech32_pubkey = "KeyInput"
         Group {
-            LoginView(key: pubkey)
-            LoginView(key: bech32_pubkey)
+            LoginView(key: pubkey, accepted: .constant(true))
+            LoginView(key: bech32_pubkey, accepted: .constant(true))
         }
     }
 }
