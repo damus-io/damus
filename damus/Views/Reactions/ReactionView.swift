@@ -12,10 +12,7 @@ struct ReactionView: View {
     let reaction: NostrEvent
     
     var content: String {
-        if reaction.content == "" || reaction.content == "+" {
-            return "❤️"
-        }
-        return reaction.content
+        return to_reaction_emoji(ev: reaction) ?? ""
     }
     
     var body: some View {

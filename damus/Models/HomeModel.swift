@@ -132,11 +132,11 @@ class HomeModel: ObservableObject {
         case .nwc_request:
             break
         case .nwc_response:
-            handle_nwc_response(ev)
+            handle_nwc_response(ev, relay: relay_id)
         }
     }
     
-    func handle_nwc_response(_ ev: NostrEvent) {
+    func handle_nwc_response(_ ev: NostrEvent, relay: String) {
         Task { @MainActor in
             // TODO: Adapt KeychainStorage to StringCodable and instead of parsing to WalletConnectURL every time
             guard let nwc_str = damus_state.settings.nostr_wallet_connect,
@@ -148,25 +148,24 @@ class HomeModel: ObservableObject {
             // since command results are not returned for ephemeral events,
             // remove the request from the postbox which is likely failing over and over
             if damus_state.postbox.remove_relayer(relay_id: nwc.relay.id, event_id: resp.req_id) {
-                print("nwc: got response, removed \(resp.req_id) from the postbox")
+                print("nwc: got response, removed \(resp.req_id) from the postbox [\(relay)]")
             } else {
-                print("nwc: \(resp.req_id) not found in the postbox, nothing to remove")
-            }
-            
-            if resp.response.error == nil {
+                print("nwc: \(resp.req_id) not found in the postbox, nothing to remove [\(relay)]")
             }
             
             guard let err = resp.response.error else {
+                print("nwc success: \(resp.response.result.debugDescription) [\(relay)]")
                 nwc_success(state: self.damus_state, resp: resp)
                 return
             }
             
-            print("nwc error: \(err)")
+            print("nwc error: \(resp.response)")
             nwc_error(zapcache: self.damus_state.zaps, evcache: self.damus_state.events, resp: resp)
         }
     }
     
     func handle_zap_event_with_zapper(profiles: Profiles, ev: NostrEvent, our_keypair: Keypair, zapper: String) {
+        
         guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: our_keypair.privkey) else {
             return
         }
@@ -1203,7 +1202,7 @@ func create_local_notification(profiles: Profiles, notify: LocalNotification) {
         title = String(format: NSLocalizedString("Reposted by %@", comment: "Reposted by heading in local notification"), displayName)
         identifier = "myBoostNotification"
     case .like:
-        title = String(format: NSLocalizedString("%@ reacted with %@", comment: "Reacted by heading in local notification"), displayName, notify.event.content)
+        title = String(format: NSLocalizedString("%@ reacted with %@", comment: "Reacted by heading in local notification"), displayName, to_reaction_emoji(ev: notify.event) ?? "")
         identifier = "myLikeNotification"
     case .dm:
         title = displayName

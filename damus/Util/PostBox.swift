@@ -150,6 +150,11 @@ class PostBox {
             relayer.attempts += 1
             relayer.last_attempt = Int64(Date().timeIntervalSince1970)
             relayer.retry_after *= 1.5
+            if let relay = pool.get_relay(relayer.relay) {
+                print("flushing event \(event.event.id) to \(relayer.relay)")
+            } else {
+                print("could not find relay when flushing: \(relayer.relay)")
+            }
             pool.send(.event(event.event), to: [relayer.relay], skip_ephemeral: event.skip_ephemeral)
         }
     }

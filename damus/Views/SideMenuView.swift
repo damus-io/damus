@@ -57,6 +57,7 @@ struct SideMenuView: View {
                         .font(.title2)
                         .foregroundColor(textColor())
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .dynamicTypeSize(.xSmall)
                 }
             }
              
@@ -144,6 +145,7 @@ struct SideMenuView: View {
                                 .font(.title3)
                                 .foregroundColor(textColor())
                                 .frame(maxWidth: .infinity, alignment: .leading)
+                                .dynamicTypeSize(.xSmall)
                         })
                         
                         Spacer()
@@ -154,6 +156,7 @@ struct SideMenuView: View {
                             Label("", systemImage: "qrcode")
                                 .font(.title)
                                 .foregroundColor(textColor())
+                                .dynamicTypeSize(.xSmall)
                         }).fullScreenCover(isPresented: $showQRCode) {
                             QRCodeView(damus_state: damus_state, pubkey: damus_state.pubkey)
                         }
@@ -188,6 +191,7 @@ struct SideMenuView: View {
             .font(.title2)
             .foregroundColor(textColor())
             .frame(maxWidth: .infinity, alignment: .leading)
+            .dynamicTypeSize(.xSmall)
     }
     
     struct SideMenuLabelStyle: LabelStyle {

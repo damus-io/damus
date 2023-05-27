@@ -24,6 +24,19 @@ class Profile: Codable {
         self.damus_donation = damus_donation
     }
     
+    convenience init(persisted_profile: PersistedProfile) {
+        self.init(name: persisted_profile.name,
+                  display_name: persisted_profile.display_name,
+                  about: persisted_profile.about,
+                  picture: persisted_profile.picture,
+                  banner: persisted_profile.banner,
+                  website: persisted_profile.website,
+                  lud06: persisted_profile.lud06,
+                  lud16: persisted_profile.lud16,
+                  nip05: persisted_profile.nip05,
+                  damus_donation: Int(persisted_profile.damus_donation))
+    }
+    
     private func str(_ str: String) -> String? {
         return get_val(str)
     }

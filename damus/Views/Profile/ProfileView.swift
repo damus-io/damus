@@ -370,9 +370,15 @@ struct ProfileView: View {
             let profile_data = damus_state.profiles.lookup(id: profile.pubkey)
             
             nameSection(profile_data: profile_data)
-            
-            Text(ProfileView.markdown.process(profile_data?.about ?? ""))
-                .font(.subheadline).textSelection(.enabled)
+
+            if let about = profile_data?.about {
+                let blocks = parse_mentions(content: about, tags: [])
+                let about_string = render_blocks(blocks: blocks, profiles: damus_state.profiles).content.attributed
+                SelectableText(attributedString: about_string, size: .subheadline)
+            } else {
+                Text(verbatim: "")
+                    .font(.subheadline)
+            }
             
             if let url = profile_data?.website_url {
                 WebsiteLink(url: url)
