@@ -166,7 +166,7 @@ func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> 
             .foregroundColor(col == nil ? Color.gray : col!)
             .font(.footnote.weight(.medium))
             .aspectRatio(contentMode: .fit)
-            .frame(width: 15, height: 15)
+            .frame(width: 20, height: 20)
     }
 }
 
@@ -195,12 +195,12 @@ struct LikeButton: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                     )
-                    .frame(width: 15, height: 15)
+                    .frame(width: 20, height: 20)
             } else {
                 Image("shaka")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 15, height: 15)
+                    .frame(width: 20, height: 20)
                     .foregroundColor(.gray)
             }
         }
