@@ -163,13 +163,13 @@ func KeyText(_ text: Binding<String>) -> some View {
 func FormTextInput(_ title: String, text: Binding<String>) -> some View {
     return TextField("", text: text)
         .placeholder(when: text.wrappedValue.isEmpty) {
-            Text(title).foregroundColor(.white.opacity(0.4))
+            Text(title).foregroundColor(.gray.opacity(0.5))
         }
-        .padding()
+        .padding(15)
         .background {
-            RoundedRectangle(cornerRadius: 4.0).opacity(0.2)
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(.gray.opacity(0.5), lineWidth: 1)
         }
-        .foregroundColor(.white)
         .font(.body.bold())
 }
 
