@@ -30,7 +30,6 @@ struct CreateAccountView: View {
             }
             
             VStack {
-                ProfilePictureSelector(pubkey: account.pubkey, viewModel: profileUploadViewModel, callback: uploadedProfilePicture(image_url:))
                 
                 HStack(alignment: .top) {
                     VStack {
@@ -67,10 +66,27 @@ struct CreateAccountView: View {
                                 .onTapGesture {
                                     regen_key()
                                 }
+                VStack(alignment: .center) {
+                    ProfilePictureSelector(pubkey: account.pubkey, viewModel: profileUploadViewModel, callback: uploadedProfilePicture(image_url:))
+
+                    Text(NSLocalizedString("Public Key", comment: "Label to indicate the public key of the account."))
+                        .bold()
+                        .padding()
+                        .onTapGesture {
+                            regen_key()
+                        }
+
+                    KeyText($account.pubkey)
+                        .padding(.horizontal, 20)
+                        .onTapGesture {
+                            regen_key()
                         }
                     }
                 }
-                
+                .frame(minWidth: 300, maxWidth: .infinity, minHeight: 300, alignment: .center)
+                .background {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(DamusColors.adaptableGrey, strokeBorder: .gray.opacity(0.5), lineWidth: 1)
                 }
                 
                 Button(action: {
