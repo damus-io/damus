@@ -83,18 +83,6 @@ struct SetupView: View {
     }
 }
 
-func DamusWhiteButton(_ title: String, action: @escaping () -> ()) -> some View {
-    return Button(action: action) {
-        Text(title)
-            .frame(width: 300, height: 50)
-            .font(.body.bold())
-            .contentShape(Rectangle())
-            .foregroundColor(.white)
-            .background(
-                RoundedRectangle(cornerRadius: 4.0)
-                    .stroke(Color.white, lineWidth: 2.0)
-                    .background(Color.white.opacity(0.15))
-            )
 struct LearnAboutNostrLink: View {
     @Environment(\.openURL) var openURL
     var body: some View {
