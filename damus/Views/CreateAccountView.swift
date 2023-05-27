@@ -93,11 +93,10 @@ struct CreateAccountView: View {
 
                 LoginPrompt()
             }
-            .padding(.leading, 14.0)
-            .padding(.trailing, 20.0)
-            
+            .padding()
         }
         .dismissKeyboardOnTap()
+        .navigationTitle("Create account")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackNav())
