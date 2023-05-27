@@ -125,7 +125,7 @@ struct ZapButton: View {
                     .foregroundColor(zap_color)
                     .font(.footnote.weight(.medium))
                     .aspectRatio(contentMode: .fit)
-                    .frame(width:15, height: 15)
+                    .frame(width:20, height: 20)
             })
 
             if zaps.zap_total > 0 {
