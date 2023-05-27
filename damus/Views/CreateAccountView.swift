@@ -30,10 +30,6 @@ struct CreateAccountView: View {
             }
             
             VStack {
-                Text("Create Account")
-                    .font(.title.bold())
-                    .foregroundColor(.white)
-                
                 ProfilePictureSelector(pubkey: account.pubkey, viewModel: profileUploadViewModel, callback: uploadedProfilePicture(image_url:))
                 
                 HStack(alignment: .top) {
