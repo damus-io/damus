@@ -60,13 +60,30 @@ struct SaveKeysView: View {
                     } else if let err = error {
                         Text("Error: \(err)", comment: "Error message indicating why saving keys failed.")
                             .foregroundColor(.red)
-                        DamusWhiteButton(NSLocalizedString("Retry", comment: "Button to retry completing account creation after an error occurred.")) {
+
+                        Button(action: {
                             complete_account_creation(account)
+                        }) {
+                            HStack {
+                                Text("Retry", comment:  "Button to retry completing account creation after an error occurred.")
+                                    .fontWeight(.semibold)
+                            }
+                            .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
                         }
+                        .buttonStyle(GradientButtonStyle())
+                        .padding(.top, 20)
                     } else {
-                        DamusWhiteButton(NSLocalizedString("Let's go!", comment: "Button to complete account creation and start using the app.")) {
+                        Button(action: {
                             complete_account_creation(account)
+                        }) {
+                            HStack {
+                                Text("Let's go!", comment:  "Button to complete account creation and start using the app.")
+                                    .fontWeight(.semibold)
+                            }
+                            .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
                         }
+                        .buttonStyle(GradientButtonStyle())
+                        .padding(.top, 20)
                     }
                 }
             }
