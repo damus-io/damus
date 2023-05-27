@@ -39,7 +39,7 @@ struct EditProfilePictureControl: View {
             if viewModel.isLoading {
                 ProgressView()
             } else {
-                Image(systemName: "camera")
+                Image("camera")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 25, height: 25)

@@ -13,7 +13,7 @@ struct WebsiteLink: View {
 
     var body: some View {
         HStack {
-            Image(systemName: "link")
+            Image("link")
                 .foregroundColor(.gray)
                 .font(.footnote)
             

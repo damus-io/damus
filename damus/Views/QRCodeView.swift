@@ -30,7 +30,7 @@ struct QRCodeView: View {
                 Button {
                     presentationMode.wrappedValue.dismiss()
                 } label: {
-                    Image(systemName: "xmark")
+                    Image("close")
                         .foregroundColor(.white)
                         .font(.subheadline)
                         .padding(.leading, 20)

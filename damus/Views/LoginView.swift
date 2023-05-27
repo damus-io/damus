@@ -285,7 +285,7 @@ struct KeyInput: View {
                 .font(.body.monospaced())
                 .textContentType(.password)
 
-            Label("", systemImage: "doc.on.clipboard")
+            Label("", image: "copy2")
                 .padding(.leading, 10)
                 .onTapGesture {
                 if let pastedkey = UIPasteboard.general.string {

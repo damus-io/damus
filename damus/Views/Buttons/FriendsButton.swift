@@ -21,13 +21,13 @@ struct FriendsButton: View {
         }) {
             if filter == .friends {
                 LINEAR_GRADIENT
-                    .mask(Image(systemName: "person.2.fill")
+                    .mask(Image("user-added")
                         .resizable()
-                    ).frame(width: 30, height: 20)
+                    ).frame(width: 28, height: 28)
             } else {
-                Image(systemName: "person.2.fill")
+                Image("user-added")
                     .resizable()
-                    .frame(width: 30, height: 20)
+                    .frame(width: 28, height: 28)
                     .foregroundColor(DamusColors.adaptableGrey)
             }
         }

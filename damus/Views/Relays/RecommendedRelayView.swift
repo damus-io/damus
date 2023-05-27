@@ -52,14 +52,16 @@ struct RecommendedRelayView: View {
                     
                     Spacer()
                     
-                    Image(systemName: "info.circle")
-                        .font(.system(size: 20, weight: .regular))
+                    Image("info")
+                        .resizable()
+                        .frame(width: 20, height: 20)
                         .foregroundColor(Color.accentColor)
                 } else {
                     Spacer()
 
-                    Image(systemName: "questionmark.circle")
-                        .font(.system(size: 20, weight: .regular))
+                    Image("question")
+                        .resizable()
+                        .frame(width: 20, height: 20)
                         .foregroundColor(.gray)
                 }
             }
@@ -85,7 +87,7 @@ struct RecommendedRelayView: View {
         Button {
             UIPasteboard.general.setValue(relay, forPasteboardType: "public.plain-text")
         } label: {
-            Label(NSLocalizedString("Copy", comment: "Button to copy a relay server address."), systemImage: "doc.on.doc")
+            Label(NSLocalizedString("Copy", comment: "Button to copy a relay server address."), image: "copy")
         }
     }
     
@@ -96,8 +98,9 @@ struct RecommendedRelayView: View {
             if showText {
                 Text(NSLocalizedString("Connect", comment: "Button to connect to recommended relay server."))
             }
-            Image(systemName: "plus.circle.fill")
-                .font(.system(size: 20, weight: .medium))
+            Image("plus-circle")
+                .resizable()
+                .frame(width: 20, height: 20)
                 .foregroundColor(.accentColor)
                 .padding(.leading, 5)
         }

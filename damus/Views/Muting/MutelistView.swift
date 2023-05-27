@@ -29,7 +29,7 @@ struct MutelistView: View {
             damus_state.postbox.send(new_ev)
             users = get_mutelist_users(new_ev)
         } label: {
-            Label(NSLocalizedString("Delete", comment: "Button to remove a user from their mutelist."), systemImage: "trash")
+            Label(NSLocalizedString("Delete", comment: "Button to remove a user from their mutelist."), image: "delete")
         }
         .tint(.red)
     }

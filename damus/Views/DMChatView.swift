@@ -115,7 +115,7 @@ struct DMChatView: View, KeyboardReadable {
                         }
                     }
                 ) {
-                    Label("", systemImage: "arrow.right.circle")
+                    Label("", image: "send")
                         .font(.title)
                 }
             }

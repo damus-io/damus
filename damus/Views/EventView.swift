@@ -74,7 +74,7 @@ extension View {
             Button {
                     UIPasteboard.general.string = bech32_pubkey
             } label: {
-                Label(NSLocalizedString("Copy Account ID", comment: "Context menu option for copying the ID of the account that created the note."), systemImage: "doc.on.doc")
+                Label(NSLocalizedString("Copy Account ID", comment: "Context menu option for copying the ID of the account that created the note."), image: "copy2")
             }
         }
     }

@@ -66,7 +66,7 @@ struct KeySettingsView: View {
             }
         }) {
             let copied = is_pk ? self.pubkey_copied : self.privkey_copied
-            Image(systemName: copied ? "checkmark.circle" : "doc.on.doc")
+            Image(copied ? "check-circle" : "copy2")
         }
     }
     

@@ -29,7 +29,7 @@ struct BookmarksView: View {
         Group {
             if bookmarks.isEmpty {
                 VStack {
-                    Image(systemName: "bookmark")
+                    Image("bookmark")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 32.0, height: 32.0)
