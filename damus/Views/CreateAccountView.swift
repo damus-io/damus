@@ -89,6 +89,9 @@ struct CreateAccountView: View {
                 .buttonStyle(GradientButtonStyle())
                 .disabled(profileUploadViewModel.isLoading)
                 .opacity(profileUploadViewModel.isLoading ? 0.5 : 1)
+                .padding(.top, 20)
+
+                LoginPrompt()
             }
             .padding(.leading, 14.0)
             .padding(.trailing, 20.0)
