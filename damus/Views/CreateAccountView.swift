@@ -105,6 +105,22 @@ struct CreateAccountView: View {
     }
 }
 
+struct LoginPrompt: View {
+    @Environment(\.dismiss) var dismiss
+    var body: some View {
+        HStack {
+            Text("Already on nostr?", comment: "Ask the user if they already have an account on nostr")
+                .foregroundColor(Color("DamusMediumGrey"))
+
+            Button(NSLocalizedString("Login", comment: "Button to navigate to login view.")) {
+                self.dismiss()
+            }
+
+            Spacer()
+        }
+    }
+}
+
 struct BackNav: View {
     @Environment(\.dismiss) var dismiss
     
