@@ -188,7 +188,7 @@ struct SaveKeyView: View {
                 spacerBlock(width: 0, height: 0)
                 Button(action: copy_text) {
                     Label("", systemImage: is_copied ? "checkmark.circle.fill" : "doc.on.doc")
-                        .foregroundColor(is_copied ? .green : .white)
+                        .foregroundColor(is_copied ? .green : .gray)
                         .background {
                             if is_copied {
                                 Circle()
