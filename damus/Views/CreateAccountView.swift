@@ -38,17 +38,6 @@ struct CreateAccountView: View {
                     }
                     VStack {
                         SignupForm {
-                            FormLabel(NSLocalizedString("Username", comment: "Label to prompt username entry."))
-                            HStack(spacing: 0.0) {
-                                Text(verbatim: "@")
-                                    .foregroundColor(.white)
-                                    .padding(.leading, -25.0)
-                                
-                                FormTextInput(NSLocalizedString("satoshi", comment: "Example username of Bitcoin creator(s), Satoshi Nakamoto."), text: $account.nick_name)
-                                    .autocorrectionDisabled(true)
-                                    .textInputAutocapitalization(.never)
-                                
-                            }
                             
                             FormLabel(NSLocalizedString("Display Name", comment: "Label to prompt display name entry."), optional: true)
                             FormTextInput(NSLocalizedString("Satoshi Nakamoto", comment: "Name of Bitcoin creator(s)."), text: $account.real_name)
