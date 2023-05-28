@@ -76,10 +76,6 @@ struct EventProfileName: View {
                 NIP05Badge(nip05: nip05, pubkey: pubkey, contacts: damus_state.contacts, show_domain: false, clickable: false)
             }
             
-            if current_nip05 == nil, let frend = friend_type {
-                FriendIcon(friend: frend)
-            }
-            
             if onlyzapper {
                 Image("zap-hashtag")
                     .frame(width: 14, height: 14)
