@@ -10,10 +10,6 @@ import Kingfisher
 
 let PFP_SIZE: CGFloat = 52.0
 
-func id_to_color(_ id: String) -> Color {
-    return hex_to_rgb(id)
-}
-
 func highlight_color(_ h: Highlight) -> Color {
     switch h {
     case .main: return Color.red
@@ -42,14 +38,9 @@ struct EditProfilePictureView: View {
     
     var damus_state: DamusState?
 
-    var PlaceholderColor: Color {
-        return id_to_color(pubkey)
-    }
-
     var Placeholder: some View {
-        PlaceholderColor
+        Circle()
             .frame(width: size, height: size)
-            .clipShape(Circle())
             .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
             .padding(2)
     }
@@ -98,14 +89,9 @@ struct InnerProfilePicView: View {
     let highlight: Highlight
     let disable_animation: Bool
 
-    var PlaceholderColor: Color {
-        return id_to_color(pubkey)
-    }
-
     var Placeholder: some View {
-        PlaceholderColor
+        Circle()
             .frame(width: size, height: size)
-            .clipShape(Circle())
             .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
             .padding(2)
     }
@@ -195,38 +181,4 @@ struct ProfilePicView_Previews: PreviewProvider {
             disable_animation: false
         )
     }
-}
-
-func hex_to_rgb(_ hex: String) -> Color {
-    guard hex.count >= 6 else {
-        return Color.white
-    }
-    
-    let arr = Array(hex.utf8)
-    var rgb: [UInt8] = []
-    var i: Int = arr.count - 12
-    
-    while i < arr.count {
-        let cs1 = arr[i]
-        let cs2 = arr[i+1]
-        
-        guard let c1 = char_to_hex(cs1) else {
-            return Color.black
-        }
-
-        guard let c2 = char_to_hex(cs2) else {
-            return Color.black
-        }
-        
-        rgb.append((c1 << 4) | c2)
-        i += 2
-    }
-
-    return Color.init(
-        .sRGB,
-        red: Double(rgb[0]) / 255,
-        green: Double(rgb[1]) / 255,
-        blue:  Double(rgb[2]) / 255,
-        opacity: 1
-    )
 }
