@@ -370,6 +370,14 @@ func preload_image(url: URL) {
     }
 }
 
+func is_animated_image(url: URL) -> Bool {
+    guard let ext = url.pathComponents.last?.split(separator: ".").last?.lowercased() else {
+        return false
+    }
+    
+    return ext == "gif"
+}
+
 func preload_event(plan: PreloadPlan, state: DamusState) async {
     var artifacts: NoteArtifacts? = plan.data.artifacts.artifacts
     let settings = state.settings
@@ -387,12 +395,16 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
             plan.data.artifacts_model.state = .loaded(arts)
         }
         
-        // jb55: image preloading might be breaking gifs? some kind of disk race condition perhaps?
-        /*
         for url in arts.images {
+            guard !is_animated_image(url: url) else {
+                // jb55: I have a theory that animated images are not working with the preloader due
+                // to some disk-cache write race condition. normal images need not apply
+                
+                continue
+            }
+            
             preload_image(url: url)
         }
-         */
     }
     
     if plan.load_preview {
