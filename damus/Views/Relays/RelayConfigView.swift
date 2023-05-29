@@ -9,24 +9,20 @@ import SwiftUI
 
 struct RelayConfigView: View {
     let state: DamusState
+    
     @State var new_relay: String = ""
     @State var relays: [RelayDescriptor]
     @State private var showActionButtons = false
     
+    @StateObject var profile: ProfileModel
+    
     @Environment(\.dismiss) var dismiss
     
-    init(state: DamusState) {
+    init(state: DamusState, profile: ProfileModel) {
         self.state = state
+        self._profile = StateObject(wrappedValue: profile)
+        
         _relays = State(initialValue: state.pool.our_descriptors)
-    }
-    
-    var recommended: [RelayDescriptor] {
-        let rs: [RelayDescriptor] = []
-        return BOOTSTRAP_RELAYS.reduce(into: rs) { xs, x in
-            if state.pool.get_relay(x) == nil, let url = RelayURL(x) {
-                xs.append(RelayDescriptor(url: url, info: .rw))
-            }
-        }
     }
     
     var body: some View {
@@ -130,16 +126,19 @@ struct RelayConfigView: View {
                 }
             }
             
-            if recommended.count > 0 {
-                Section {
-                    List(recommended, id: \.url) { r in
-                        RecommendedRelayView(damus: state, relay: r.url.id, showActionButtons: $showActionButtons)
+            Section {
+                Text(NSLocalizedString("Recommended relays are determined by the relays the people you follow are also using. This helps you discover other relays that you might also want to use as well.", comment: "Section explanation for recommended relays."))
+                if !profile.get_recommended_relays().isEmpty {
+                    List(profile.get_recommended_relays(), id: \.0.url) { (relayDescriptor, count) in
+                        RecommendedRelayView(damus: state, relay: "\(relayDescriptor.url.id) (\(count))", showActionButtons: $showActionButtons)
                     }
-                } header: {
-                    Text(NSLocalizedString("Recommended Relays", comment: "Section title for recommend relay servers that could be added as part of configuration"))
-                        .font(.system(size: 18, weight: .heavy))
-                        .padding(.bottom, 5)
+                } else {
+                    Text(NSLocalizedString("No recommended relays found", comment: "Explains that no recommended relays were found"))
                 }
+            } header: {
+                Text(NSLocalizedString("Recommended Relays", comment: "Section title for recommend relay servers that could be added as part of configuration"))
+                    .font(.system(size: 18, weight: .heavy))
+                    .padding(.bottom, 5)
             }
         }
         .navigationTitle(NSLocalizedString("Relays", comment: "Title of relays view"))
@@ -162,6 +161,9 @@ struct RelayConfigView: View {
 
 struct RelayConfigView_Previews: PreviewProvider {
     static var previews: some View {
-        RelayConfigView(state: test_damus_state())
+        let test_state = test_damus_state()
+        let profile = ProfileModel(pubkey: test_state.pubkey, damus: test_state)
+
+        RelayConfigView(state: test_state, profile: profile)
     }
 }

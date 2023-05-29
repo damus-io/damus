@@ -29,6 +29,34 @@ class ProfileModel: ObservableObject, Equatable {
         })
     }
     
+    func get_recommended_relays() -> [(RelayDescriptor, Int)] {
+        var recommended_relays: [(RelayDescriptor, Int)] = []
+        
+        if let contact = self.contacts {
+            let contacts_pubkeys = contact.referenced_pubkeys.map { $0.ref_id }
+            //let following = FollowingModel(damus_state: damus, contacts: contacts)
+            
+            for pubkey in contacts_pubkeys.reversed() {
+                let contact = ProfileModel(pubkey: pubkey, damus: damus)
+                if let relays = contact.relays {
+                    for (urlString, relayInfo) in relays {
+                        if let relayURL = RelayURL(urlString) {
+                            let newRelay = RelayDescriptor(url: relayURL, info: relayInfo)
+                            
+                            if let index = recommended_relays.firstIndex(where: { $0.0.url == newRelay.url }) {
+                                recommended_relays[index].1 += 1
+                            } else {
+                                recommended_relays.append((newRelay, 1))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return recommended_relays
+    }
+    
     func follows(pubkey: String) -> Bool {
         guard let contacts = self.contacts else {
             return false
@@ -151,7 +179,6 @@ class ProfileModel: ObservableObject, Equatable {
         }
     }
 }
-
 
 func count_pubkeys(_ tags: [[String]]) -> Int {
     var c: Int = 0

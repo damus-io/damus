@@ -417,7 +417,7 @@ struct ProfileView: View {
                     let noun_text = Text(verbatim: relaysCountString(relays.keys.count)).font(.subheadline).foregroundColor(.gray)
                     let relay_text = Text("\(Text(verbatim: relays.keys.count.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
                     if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
-                        NavigationLink(destination: RelayConfigView(state: damus_state)) {
+                        NavigationLink(destination: RelayConfigView(state: damus_state, profile: profile)) {
                             relay_text
                         }
                         .buttonStyle(PlainButtonStyle())

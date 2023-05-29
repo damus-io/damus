@@ -65,7 +65,7 @@ struct SideMenuView: View {
                 navLabel(title: NSLocalizedString("Muted", comment: "Sidebar menu label for muted users view."), systemImage: "exclamationmark.octagon")
             }
             
-            NavigationLink(destination: RelayConfigView(state: damus_state)) {
+            NavigationLink(destination: RelayConfigView(state: damus_state, profile: profile_model)) {
                 navLabel(title: NSLocalizedString("Relays", comment: "Sidebar menu label for Relays view."), systemImage: "network")
             }
             
@@ -208,7 +208,9 @@ struct SideMenuView: View {
 
 struct Previews_SideMenuView_Previews: PreviewProvider {
     static var previews: some View {
-        let ds = test_damus_state()
-        SideMenuView(damus_state: ds, isSidebarVisible: .constant(true))
+        let test_state = test_damus_state()
+        //let profile = ProfileModel(pubkey: test_state.pubkey, damus: test_state)
+        
+        SideMenuView(damus_state: test_state, isSidebarVisible: .constant(true))
     }
 }

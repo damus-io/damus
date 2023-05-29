@@ -282,8 +282,10 @@ struct ContentView: View {
                                 
                                 ToolbarItem(placement: .navigationBarTrailing) {
                                     HStack(alignment: .center) {
-                                        SignalView(state: damus_state!, signal: home.signal)
-                                        
+                                        if let pk = self.active_profile {
+                                            let profile_model = ProfileModel(pubkey: pk, damus: damus_state!)
+                                            SignalView(state: damus_state!, signal: home.signal, profile: profile_model)
+                                        }
                                         // maybe expand this to other timelines in the future
                                         if selected_timeline == .search {
                                             Button(action: {
