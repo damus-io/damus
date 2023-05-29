@@ -87,9 +87,12 @@ struct ImageCarousel: View {
         image_fill?.height ?? fillHeight
     }
     
-    func Placeholder(url: URL, geo_size: CGSize) -> some View {
+    func Placeholder(url: URL, geo_size: CGSize, num_urls: Int) -> some View {
         Group {
-            if let meta = state.events.lookup_img_metadata(url: url),
+            if num_urls > 1 {
+                // jb55: quick hack since carousel with multiple images looks horrible with blurhash background
+                Color.clear
+            } else if let meta = state.events.lookup_img_metadata(url: url),
                case .processed(let blurhash) = meta.state {
                 Image(uiImage: blurhash)
                     .resizable()
@@ -141,7 +144,7 @@ struct ImageCarousel: View {
                             }
                         }
                         .background {
-                            Placeholder(url: url, geo_size: geo.size)
+                            Placeholder(url: url, geo_size: geo.size, num_urls: urls.count)
                         }
                         .aspectRatio(contentMode: filling ? .fill : .fit)
                         //.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
