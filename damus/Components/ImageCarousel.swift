@@ -66,7 +66,7 @@ struct ImageCarousel: View {
 
     @State private var fillHeight: CGFloat = 350
     @State private var maxHeight: CGFloat = UIScreen.main.bounds.height * 1.2 // 1.2
-    @State private var firstImageHeight: CGFloat = UIScreen.main.bounds.height * 1.2
+    @State private var firstImageHeight: CGFloat? = nil
     @State private var currentImageHeight: CGFloat?
     @State private var selectedIndex = 0
     
@@ -84,7 +84,7 @@ struct ImageCarousel: View {
     }
     
     var height: CGFloat {
-        image_fill?.height ?? fillHeight
+        firstImageHeight ?? image_fill?.height ?? fillHeight
     }
     
     func Placeholder(url: URL, geo_size: CGSize, num_urls: Int) -> some View {
@@ -147,8 +147,7 @@ struct ImageCarousel: View {
                             Placeholder(url: url, geo_size: geo.size, num_urls: urls.count)
                         }
                         .aspectRatio(contentMode: filling ? .fill : .fit)
-                        //.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                        .position(x: geo.size.width / 2, y: geo.size.height / 2)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                         .tabItem {
                             Text(url.absoluteString)
                         }
@@ -161,7 +160,7 @@ struct ImageCarousel: View {
         .fullScreenCover(isPresented: $open_sheet) {
             ImageView(urls: urls, disable_animation: state.settings.disable_animation)
         }
-        .frame(height: firstImageHeight)
+        .frame(height: height)
         .onTapGesture {
             open_sheet = true
         }
