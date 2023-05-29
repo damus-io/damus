@@ -387,9 +387,12 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
             plan.data.artifacts_model.state = .loaded(arts)
         }
         
+        // jb55: image preloading might be breaking gifs? some kind of disk race condition perhaps?
+        /*
         for url in arts.images {
             preload_image(url: url)
         }
+         */
     }
     
     if plan.load_preview {
