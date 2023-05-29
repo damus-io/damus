@@ -137,6 +137,9 @@ class UserSettingsStore: ObservableObject {
 
     @Setting(key: "show_only_preferred_languages", default_value: false)
     var show_only_preferred_languages: Bool
+    
+    @Setting(key: "multiple_events_per_pubkey", default_value: false)
+    var multiple_events_per_pubkey: Bool
 
     @Setting(key: "onlyzaps_mode", default_value: false)
     var onlyzaps_mode: Bool

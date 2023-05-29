@@ -303,6 +303,7 @@
 		E4AE2AD32A228CB400680283 /* Inter-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = E4AE2AD12A228CA000680283 /* Inter-SemiBold.otf */; };
 		E4AE2AD42A228CB900680283 /* Inter-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = E4AE2AD22A228CA700680283 /* Inter-Medium.otf */; };
 		E4AE2AD52A228CC000680283 /* Inter-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = E4AE2ACF2A228C7500680283 /* Inter-Italic.otf */; };
+		E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */; };
 		E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E990020E2955F837003BBC5A /* EditMetadataView.swift */; };
 		E9E4ED0B295867B900DD7078 /* ThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E4ED0A295867B900DD7078 /* ThreadView.swift */; };
 		F757933A29D7AECD007DEAC1 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F757933929D7AECD007DEAC1 /* ImagePicker.swift */; };
@@ -750,6 +751,7 @@
 		E4AE2ACF2A228C7500680283 /* Inter-Italic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Italic.otf"; sourceTree = "<group>"; };
 		E4AE2AD12A228CA000680283 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-SemiBold.otf"; sourceTree = "<group>"; };
 		E4AE2AD22A228CA700680283 /* Inter-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Medium.otf"; sourceTree = "<group>"; };
+		E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSettingsView.swift; sourceTree = "<group>"; };
 		E990020E2955F837003BBC5A /* EditMetadataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMetadataView.swift; sourceTree = "<group>"; };
 		E9E4ED0A295867B900DD7078 /* ThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadView.swift; sourceTree = "<group>"; };
 		F757933929D7AECD007DEAC1 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
@@ -942,6 +944,7 @@
 				4C1A9A2029DDD3E100516EAC /* KeySettingsView.swift */,
 				4C1A9A2429DDDF2600516EAC /* ZapSettingsView.swift */,
 				4C1A9A2629DDE31900516EAC /* TranslationSettingsView.swift */,
+				E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -1916,6 +1919,7 @@
 				4C75EFB528049D790006080F /* Relay.swift in Sources */,
 				4CEE2AF1280B216B00AB5EEF /* EventDetailView.swift in Sources */,
 				4CC7AAFA297F64AC00430951 /* EventMenu.swift in Sources */,
+				E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */,
 				4C75EFBB2804A34C0006080F /* ProofOfWork.swift in Sources */,
 				4C3AC7A52836987600E1F516 /* MainTabView.swift in Sources */,
 				4C1A9A1F29DDD24B00516EAC /* AppearanceSettingsView.swift in Sources */,
