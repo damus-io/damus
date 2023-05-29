@@ -48,11 +48,7 @@ struct NostrFilter: Codable, Equatable {
         NostrFilter(ids: from.ids, kinds: from.kinds, referenced_ids: from.referenced_ids, pubkeys: from.pubkeys, since: from.since, until: from.until, authors: from.authors, hashtag: from.hashtag)
     }
     
-    public static var filter_profiles: NostrFilter {
-        NostrFilter(kinds: [.metadata])
-    }
-
-    public static var filter_contacts: NostrFilter {
-        NostrFilter(kinds: [.contacts])
+    public static func filter_hashtag(_ htags: [String]) -> NostrFilter {
+        NostrFilter(hashtag: htags.map { $0.lowercased() })
     }
 }

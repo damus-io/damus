@@ -24,6 +24,8 @@ public struct Translator {
         switch userSettingsStore.translation_service {
         case .libretranslate:
             return try await translateWithLibreTranslate(text, from: sourceLanguage, to: targetLanguage)
+        case .nokyctranslate:
+            return try await translateWithNoKYCTranslate(text, from: sourceLanguage, to: targetLanguage)
         case .deepl:
             return try await translateWithDeepL(text, from: sourceLanguage, to: targetLanguage)
         case .none:
@@ -84,6 +86,29 @@ public struct Translator {
 
         let response: Response = try await decodedData(for: request)
         return response.translations.map { $0.text }.joined(separator: " ")
+    }
+    
+    private func translateWithNoKYCTranslate(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> String? {
+        let url = try makeURL("https://translate.nokyctranslate.com", path: "/translate")
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        struct RequestBody: Encodable {
+            let q: String
+            let source: String
+            let target: String
+            let api_key: String?
+        }
+        let body = RequestBody(q: text, source: sourceLanguage, target: targetLanguage, api_key: userSettingsStore.nokyctranslate_api_key)
+        request.httpBody = try encoder.encode(body)
+
+        struct Response: Decodable {
+            let translatedText: String
+        }
+        let response: Response = try await decodedData(for: request)
+        return response.translatedText
     }
 
     private func makeURL(_ baseUrl: String, path: String) throws -> URL {

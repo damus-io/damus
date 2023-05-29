@@ -7,10 +7,10 @@
 
 import Foundation
 
-struct Profile: Codable {
+class Profile: Codable {
     var value: [String: AnyCodable]
     
-    init (name: String?, display_name: String?, about: String?, picture: String?, banner: String?, website: String?, lud06: String?, lud16: String?, nip05: String?) {
+    init (name: String?, display_name: String?, about: String?, picture: String?, banner: String?, website: String?, lud06: String?, lud16: String?, nip05: String?, damus_donation: Int?) {
         self.value = [:]
         self.name = name
         self.display_name = display_name
@@ -21,10 +21,28 @@ struct Profile: Codable {
         self.lud06 = lud06
         self.lud16 = lud16
         self.nip05 = nip05
+        self.damus_donation = damus_donation
+    }
+    
+    convenience init(persisted_profile: PersistedProfile) {
+        self.init(name: persisted_profile.name,
+                  display_name: persisted_profile.display_name,
+                  about: persisted_profile.about,
+                  picture: persisted_profile.picture,
+                  banner: persisted_profile.banner,
+                  website: persisted_profile.website,
+                  lud06: persisted_profile.lud06,
+                  lud16: persisted_profile.lud16,
+                  nip05: persisted_profile.nip05,
+                  damus_donation: Int(persisted_profile.damus_donation))
     }
     
     private func str(_ str: String) -> String? {
         return get_val(str)
+    }
+    
+    private func int(_ key: String) -> Int? {
+        return get_val(key)
     }
     
     private func get_val<T>(_ v: String) -> T? {
@@ -39,7 +57,7 @@ struct Profile: Codable {
         return s
     }
     
-    private mutating func set_val<T>(_ key: String, _ val: T?) {
+    private func set_val<T>(_ key: String, _ val: T?) {
         if val == nil {
             self.value.removeValue(forKey: key)
             return
@@ -48,8 +66,17 @@ struct Profile: Codable {
         self.value[key] = AnyCodable.init(val)
     }
     
-    private mutating func set_str(_ key: String, _ val: String?) {
+    private func set_str(_ key: String, _ val: String?) {
         set_val(key, val)
+    }
+    
+    private func set_int(_ key: String, _ val: Int?) {
+        set_val(key, val)
+    }
+    
+    var reactions: Bool? {
+        get { return get_val("reactions"); }
+        set(s) { set_val("reactions", s) }
     }
     
     var deleted: Bool? {
@@ -70,6 +97,11 @@ struct Profile: Codable {
     var about: String? {
         get { return str("about"); }
         set(s) { set_str("about", s) }
+    }
+    
+    var damus_donation: Int? {
+        get { return int("damus_donation"); }
+        set(s) { set_int("damus_donation", s) }
     }
     
     var picture: String? {
@@ -98,16 +130,45 @@ struct Profile: Codable {
     }
     
     var website_url: URL? {
-        return self.website.flatMap { URL(string: $0) }
+        if self.website?.trimmingCharacters(in: .whitespacesAndNewlines) == "" {
+            return nil
+        }
+        return self.website.flatMap { url in
+            let trim = url.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !(trim.hasPrefix("http://") || trim.hasPrefix("https://")) {
+                return URL(string: "https://" + trim)
+            }
+            return URL(string: trim)
+        }
     }
     
+    func cache_lnurl() {
+        guard self._lnurl == nil else {
+            return
+        }
+        
+        guard let addr = lud16 ?? lud06 else {
+            return
+        }
+        
+        self._lnurl = lnaddress_to_lnurl(addr)
+    }
+    
+    private var _lnurl: String? = nil
     var lnurl: String? {
+        if let _lnurl {
+            return _lnurl
+        }
+        
         guard let addr = lud16 ?? lud06 else {
             return nil;
         }
         
         if addr.contains("@") {
-            return lnaddress_to_lnurl(addr);
+            // this is a heavy op and is used a lot in views, cache it!
+            let addr = lnaddress_to_lnurl(addr);
+            self._lnurl = addr
+            return addr
         }
         
         if !addr.lowercased().hasPrefix("lnurl") {
@@ -130,7 +191,7 @@ struct Profile: Codable {
         self.value = [:]
     }
     
-    init(from decoder: Decoder) throws {
+    required init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         self.value = try container.decode([String: AnyCodable].self)
     }
@@ -140,26 +201,17 @@ struct Profile: Codable {
         try container.encode(value)
     }
     
-    static func displayName(profile: Profile?, pubkey: String) -> String {
-        if pubkey == "anon" {
-            return "Anonymous"
-        }
-        let pk = bech32_nopre_pubkey(pubkey) ?? pubkey
-        return profile?.name ?? abbrev_pubkey(pk)
+    static func displayName(profile: Profile?, pubkey: String) -> DisplayName {
+        return parse_display_name(profile: profile, pubkey: pubkey)
     }
 }
 
 func make_test_profile() -> Profile {
-    return Profile(name: "jb55", display_name: "Will", about: "Its a me", picture: "https://cdn.jb55.com/img/red-me.jpg", banner: "https://pbs.twimg.com/profile_banners/9918032/1531711830/600x200",  website: "jb55.com", lud06: "jb55@jb55.com", lud16: nil, nip05: "jb55@jb55.com")
+    return Profile(name: "jb55", display_name: "Will", about: "Its a me", picture: "https://cdn.jb55.com/img/red-me.jpg", banner: "https://pbs.twimg.com/profile_banners/9918032/1531711830/600x200",  website: "jb55.com", lud06: "jb55@jb55.com", lud16: nil, nip05: "jb55@jb55.com", damus_donation: 1)
 }
 
 func make_ln_url(_ str: String?) -> URL? {
     return str.flatMap { URL(string: "lightning:" + $0) }
-}
-
-struct NostrSubscription {
-    let sub_id: String
-    let filter: NostrFilter
 }
 
 func lnaddress_to_lnurl(_ lnaddr: String) -> String? {

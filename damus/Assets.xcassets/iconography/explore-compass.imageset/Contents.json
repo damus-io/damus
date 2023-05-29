@@ -1,0 +1,26 @@
+{
+  "images": [
+    {
+      "filename": "explore-compass.svg",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "explore-compass.svg"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "explore-compass.svg"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  },
+  "properties": {
+    "template-rendering-intent": "template"
+  }
+}

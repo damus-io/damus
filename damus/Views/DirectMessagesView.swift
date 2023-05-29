@@ -16,21 +16,13 @@ struct DirectMessagesView: View {
     let damus_state: DamusState
     
     @State var dm_type: DMType = .friend
-    @State var open_dm: Bool = false
-    @State var pubkey: String = ""
-    @EnvironmentObject var model: DirectMessagesModel
-    @State var active_model: DirectMessageModel
-    
-    init(damus_state: DamusState) {
-        self.damus_state = damus_state
-        self._active_model = State(initialValue: DirectMessageModel(our_pubkey: damus_state.pubkey))
-    }
+    @ObservedObject var model: DirectMessagesModel
+    @ObservedObject var settings: UserSettingsStore
     
     func MainContent(requests: Bool) -> some View {
         ScrollView {
-            let chat = DMChatView(damus_state: damus_state, pubkey: pubkey)
-                .environmentObject(active_model)
-            NavigationLink(destination: chat, isActive: $open_dm) {
+            let chat = DMChatView(damus_state: damus_state, dms: model.active_model)
+            NavigationLink(destination: chat, isActive: $model.open_dm) {
                 EmptyView()
             }
             LazyVStack(spacing: 0) {
@@ -38,12 +30,9 @@ struct DirectMessagesView: View {
                     EmptyTimelineView()
                 } else {
                     let dms = requests ? model.message_requests : model.friend_dms
-                    ForEach(dms, id: \.0) { tup in
-                        MaybeEvent(tup)
+                    ForEach(dms, id: \.pubkey) { dm in
+                        MaybeEvent(dm)
                             .padding(.top, 10)
-                        
-                        Divider()
-                            .padding([.top], 10)
                     }
                 }
             }
@@ -51,15 +40,25 @@ struct DirectMessagesView: View {
         }
     }
     
-    func MaybeEvent(_ tup: (String, DirectMessageModel)) -> some View {
+    var options: EventViewOptions {
+        if self.damus_state.settings.translate_dms {
+            return [.truncate_content, .no_action_bar]
+        }
+        
+        return [.truncate_content, .no_action_bar, .no_translate]
+    }
+    
+    func MaybeEvent(_ model: DirectMessageModel) -> some View {
         Group {
-            if let ev = tup.1.events.last {
-                EventView(damus: damus_state, event: ev, pubkey: tup.0)
+            let ok = damus_state.settings.friend_filter.filter(contacts: damus_state.contacts, pubkey: model.pubkey)
+            if ok, let ev = model.events.last {
+                EventView(damus: damus_state, event: ev, pubkey: model.pubkey, options: options)
                     .onTapGesture {
-                        pubkey = tup.0
-                        active_model = tup.1
-                        open_dm = true
+                        self.model.open_dm_by_model(model)
                     }
+                
+                Divider()
+                    .padding([.top], 10)
             } else {
                 EmptyView()
             }
@@ -87,19 +86,31 @@ struct DirectMessagesView: View {
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if would_filter_non_friends_from_dms(contacts: damus_state.contacts, dms: self.model.dms) {
+                    
+                    FriendsButton(filter: $settings.friend_filter)
+                }
+            }
+        }
         .navigationTitle(NSLocalizedString("DMs", comment: "Navigation title for view of DMs, where DM is an English abbreviation for Direct Message."))
     }
 }
 
+func would_filter_non_friends_from_dms(contacts: Contacts, dms: [DirectMessageModel]) -> Bool {
+    for dm in dms {
+        if !FriendFilter.friends.filter(contacts: contacts, pubkey: dm.pubkey) {
+            return true
+        }
+    }
+    
+    return false
+}
+
 struct DirectMessagesView_Previews: PreviewProvider {
     static var previews: some View {
-        let ev = NostrEvent(content: "encrypted stuff",
-                               pubkey: "pubkey",
-                               kind: 4,
-                               tags: [])
         let ds = test_damus_state()
-        let model = DirectMessageModel(events: [ev], our_pubkey: ds.pubkey)
-        DirectMessagesView(damus_state: ds)
-            .environmentObject(model)
+        DirectMessagesView(damus_state: ds, model: ds.dms, settings: ds.settings)
     }
 }

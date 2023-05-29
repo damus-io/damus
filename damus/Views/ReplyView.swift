@@ -7,60 +7,74 @@
 
 import SwiftUI
 
-func all_referenced_pubkeys(_ ev: NostrEvent) -> [ReferencedId] {
-    var keys = ev.referenced_pubkeys
-    let ref = ReferencedId(ref_id: ev.pubkey, relay_id: nil, key: "p")
-    keys.insert(ref, at: 0)
-    return keys
-}
-
 struct ReplyView: View {
     let replying_to: NostrEvent
     let damus: DamusState
     
-    @State var originalReferences: [ReferencedId] = []
-    @State var references: [ReferencedId] = []
-    
+    @Binding var originalReferences: [ReferencedId]
+    @Binding var references: [ReferencedId]
     @State var participantsShown: Bool = false
-        
-    var body: some View {
-        VStack {
-            Text("Replying to:", comment: "Indicating that the user is replying to the following listed people.")
-            HStack(alignment: .top) {
+    
+    var ReplyingToSection: some View {
+        HStack {
+            Group {
                 let names = references.pRefs
                     .map { pubkey in
                         let pk = pubkey.ref_id
                         let prof = damus.profiles.lookup(id: pk)
-                        return Profile.displayName(profile: prof, pubkey: pk)
+                        return "@" + Profile.displayName(profile: prof, pubkey: pk).username
                     }
-                    .joined(separator: ", ")
-                Text(names)
-                    .foregroundColor(.gray)
-                    .font(.footnote)
+                    .joined(separator: " ")
+                if names.isEmpty {
+                    Text("Replying to \(Text("self", comment: "Part of a larger sentence 'Replying to self' in US English. 'self' indicates that the user is replying to themself and no one else.").foregroundColor(.accentColor).font(.footnote))", comment: "Indicating that the user is replying to the themself and no one else, where the parameter is 'self' in US English.")
+                        .foregroundColor(.gray)
+                        .font(.footnote)
+                } else {
+                    Text("Replying to \(Text(verbatim: names).foregroundColor(.accentColor).font(.footnote))", comment: "Indicating that the user is replying to the following listed people.")
+                        .foregroundColor(.gray)
+                        .font(.footnote)
+                }
             }
             .onTapGesture {
                 participantsShown.toggle()
             }
             .sheet(isPresented: $participantsShown) {
-                ParticipantsView(damus_state: damus, references: $references, originalReferences: $originalReferences)
+                if #available(iOS 16.0, *) {
+                    ParticipantsView(damus_state: damus, references: $references, originalReferences: $originalReferences)
+                        .presentationDetents([.medium, .large])
+                        .presentationDragIndicator(.visible)
+                } else {
+                    ParticipantsView(damus_state: damus, references: $references, originalReferences: $originalReferences)
+                }
             }
-            ScrollView {
-                EventView(damus: damus, event: replying_to, options: [.no_action_bar])
-            }
-            PostView(replying_to: replying_to, references: references, damus_state: damus)
+            .padding(.leading, 75)
+            Spacer()
         }
-        .onAppear {
-            references =  gather_reply_ids(our_pubkey: damus.pubkey, from: replying_to)
-            originalReferences = references
-        }
-        .padding()
     }
-    
-    
-}
+        
+    var body: some View {
+        VStack(alignment: .leading) {
 
-struct ReplyView_Previews: PreviewProvider {
-    static var previews: some View {
-        ReplyView(replying_to: NostrEvent(content: "hi", pubkey: "pubkey"), damus: test_damus_state(), references: [])
+            EventView(damus: damus, event: replying_to, options: [.no_action_bar])
+                .padding()
+                .background(GeometryReader { geometry in
+                    let eventHeight = geometry.frame(in: .global).height
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.25))
+                        .frame(width: 2, height: eventHeight + 7)
+                        .offset(x: 25, y: 40)
+                        .padding(.leading)
+                })
+            
+            ReplyingToSection
+                .background(GeometryReader { geometry in
+                    let replyingToHeight = geometry.frame(in: .global).height
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.25))
+                        .frame(width: 2, height: replyingToHeight)
+                        .offset(x: 25, y: 40)
+                        .padding(.leading)
+                })
+        }
     }
 }

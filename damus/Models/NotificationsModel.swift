@@ -14,6 +14,28 @@ enum NotificationItem {
     case event_zap(String, ZapGroup)
     case reply(NostrEvent)
     
+    var is_reply: NostrEvent? {
+        if case .reply(let ev) = self {
+            return ev
+        }
+        return nil
+    }
+    
+    var is_zap: ZapGroup? {
+        switch self {
+        case .profile_zap(let zapgrp):
+            return zapgrp
+        case .event_zap(_, let zapgrp):
+            return zapgrp
+        case .reaction:
+            return nil
+        case .reply:
+            return nil
+        case .repost:
+            return nil
+        }
+    }
+    
     var id: String {
         switch self {
         case .repost(let evid, _):
@@ -43,10 +65,41 @@ enum NotificationItem {
             return reply.created_at
         }
     }
+    
+    func would_filter(_ isIncluded: (NostrEvent) -> Bool) -> Bool {
+        switch self {
+        case .repost(_, let evgrp):
+            return evgrp.would_filter(isIncluded)
+        case .reaction(_, let evgrp):
+            return evgrp.would_filter(isIncluded)
+        case .profile_zap(let zapgrp):
+            return zapgrp.would_filter(isIncluded)
+        case .event_zap(_, let zapgrp):
+            return zapgrp.would_filter(isIncluded)
+        case .reply(let ev):
+            return !isIncluded(ev)
+        }
+    }
+    
+    func filter(_ isIncluded: (NostrEvent) -> Bool) -> NotificationItem? {
+        switch self {
+        case .repost(let evid, let evgrp):
+            return evgrp.filter(isIncluded).map { .repost(evid, $0) }
+        case .reaction(let evid, let evgrp):
+            return evgrp.filter(isIncluded).map { .reaction(evid, $0) }
+        case .profile_zap(let zapgrp):
+            return zapgrp.filter(isIncluded).map { .profile_zap($0) }
+        case .event_zap(let evid, let zapgrp):
+            return zapgrp.filter(isIncluded).map { .event_zap(evid, $0) }
+        case .reply(let ev):
+            if isIncluded(ev) { return .reply(ev) }
+            return nil
+        }
+    }
 }
 
 class NotificationsModel: ObservableObject, ScrollQueue {
-    var incoming_zaps: [Zap]
+    var incoming_zaps: [Zapping]
     var incoming_events: [NostrEvent]
     var should_queue: Bool
     
@@ -57,6 +110,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
     var reposts: [String: EventGroup]
     var replies: [NostrEvent]
     var has_reply: Set<String>
+    var has_ev: Set<String>
     
     @Published var notifications: [NotificationItem]
     
@@ -71,6 +125,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         self.incoming_events = []
         self.profile_zaps = ZapGroup()
         self.notifications = []
+        self.has_ev = Set()
     }
     
     func set_should_queue(_ val: Bool) {
@@ -95,7 +150,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
         
         for zap in incoming_zaps {
-            pks.insert(zap.request.ev.pubkey)
+            pks.insert(zap.request.pubkey)
         }
         
         return Array(pks)
@@ -107,7 +162,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         for el in zaps {
             let evid = el.key
             let zapgrp = el.value
-            
+
             let notif: NotificationItem = .event_zap(evid, zapgrp)
             notifs.append(notif)
         }
@@ -139,8 +194,8 @@ class NotificationsModel: ObservableObject, ScrollQueue {
     }
     
     
-    private func insert_repost(_ ev: NostrEvent) -> Bool {
-        guard let reposted_ev = ev.inner_event else {
+    private func insert_repost(_ ev: NostrEvent, cache: EventCache) -> Bool {
+        guard let reposted_ev = ev.get_inner_event(cache: cache) else {
             return false
         }
         
@@ -182,9 +237,9 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
     }
     
-    private func insert_event_immediate(_ ev: NostrEvent) -> Bool {
+    private func insert_event_immediate(_ ev: NostrEvent, cache: EventCache) -> Bool {
         if ev.known_kind == .boost {
-            return insert_repost(ev)
+            return insert_repost(ev, cache: cache)
         } else if ev.known_kind == .like {
             return insert_reaction(ev)
         } else if ev.known_kind == .text {
@@ -194,7 +249,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         return false
     }
     
-    private func insert_zap_immediate(_ zap: Zap) -> Bool {
+    private func insert_zap_immediate(_ zap: Zapping) -> Bool {
         switch zap.target {
         case .note(let notezt):
             let id = notezt.note_id
@@ -211,12 +266,18 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
     }
     
-    func insert_event(_ ev: NostrEvent) -> Bool {
-        if should_queue {
-            return insert_uniq_sorted_event_created(events: &incoming_events, new_ev: ev)
+    func insert_event(_ ev: NostrEvent, damus_state: DamusState) -> Bool {
+        if has_ev.contains(ev.id) {
+            return false
         }
         
-        if insert_event_immediate(ev) {
+        if should_queue {
+            incoming_events.append(ev)
+            has_ev.insert(ev.id)
+            return true
+        }
+        
+        if insert_event_immediate(ev, cache: damus_state.events) {
             self.notifications = build_notifications()
             return true
         }
@@ -224,7 +285,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         return false
     }
     
-    func insert_zap(_ zap: Zap) -> Bool {
+    func insert_zap(_ zap: Zapping) -> Bool {
         if should_queue {
             return insert_uniq_sorted_zap_by_created(zaps: &incoming_zaps, new_zap: zap)
         }
@@ -246,7 +307,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         changed = changed || incoming_events.count != count
         
         count = profile_zaps.zaps.count
-        profile_zaps.zaps = profile_zaps.zaps.filter { zap in isIncluded(zap.request.ev) }
+        profile_zaps.zaps = profile_zaps.zaps.filter { zap in isIncluded(zap.request) }
         changed = changed || profile_zaps.zaps.count != count
         
         for el in reactions {
@@ -264,7 +325,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         for el in zaps {
             count = el.value.zaps.count
             el.value.zaps = el.value.zaps.filter {
-                isIncluded($0.request.ev)
+                isIncluded($0.request)
             }
             changed = changed || el.value.zaps.count != count
         }
@@ -278,7 +339,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
     }
     
-    func flush() -> Bool {
+    func flush(_ damus_state: DamusState) -> Bool {
         var inserted = false
         
         for zap in incoming_zaps {
@@ -286,7 +347,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
         
         for event in incoming_events {
-            inserted = insert_event_immediate(event) || inserted
+            inserted = insert_event_immediate(event, cache: damus_state.events) || inserted
         }
         
         if inserted {

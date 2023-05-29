@@ -8,8 +8,8 @@
 import SwiftUI
 
 let RECTANGLE_GRADIENT = LinearGradient(gradient: Gradient(colors: [
-    Color("DamusPurple"),
-    Color("DamusBlue")
+    DamusColors.purple,
+    DamusColors.blue
 ]), startPoint: .leading, endPoint: .trailing)
 
 struct CustomPicker<SelectionValue: Hashable, Content: View>: View {
@@ -52,9 +52,10 @@ struct CustomPicker<SelectionValue: Hashable, Content: View>: View {
                 .accentColor(tag == selection ? textColor() : .gray)
             }
         }
+        .background(Color(UIColor.systemBackground))
     }
     
     func textColor() -> Color {
-        colorScheme == .light ? Color("DamusBlack") : Color("DamusWhite")
+        colorScheme == .light ? DamusColors.black : DamusColors.white
     }
 }

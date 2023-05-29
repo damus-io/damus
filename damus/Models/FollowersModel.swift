@@ -10,7 +10,6 @@ import Foundation
 class FollowersModel: ObservableObject {
     let damus_state: DamusState
     let target: String
-    var needs_sub: Bool = true
     
     @Published var contacts: [String]? = nil
     var has_contact: Set<String> = Set()
@@ -31,9 +30,8 @@ class FollowersModel: ObservableObject {
     }
     
     func get_filter() -> NostrFilter {
-        var filter = NostrFilter.filter_contacts
-        filter.pubkeys = [target]
-        return filter
+        NostrFilter(kinds: [.contacts],
+                    pubkeys: [target])
     }
     
     func subscribe() {
@@ -57,14 +55,13 @@ class FollowersModel: ObservableObject {
     }
     
     func load_profiles(relay_id: String) {
-        var filter = NostrFilter.filter_profiles
-        let authors = find_profiles_to_fetch_pk(profiles: damus_state.profiles, event_pubkeys: contacts ?? [])
+        let authors = find_profiles_to_fetch_from_keys(profiles: damus_state.profiles, pks: contacts ?? [])
         if authors.isEmpty {
             return
         }
         
-        filter.authors = authors
-        
+        let filter = NostrFilter(kinds: [.metadata],
+                                 authors: authors)
         damus_state.pool.subscribe_to(sub_id: profiles_id, filters: [filter], to: [relay_id], handler: handle_event)
     }
     
@@ -82,7 +79,7 @@ class FollowersModel: ObservableObject {
             if ev.known_kind == .contacts {
                 handle_contact_event(ev)
             } else if ev.known_kind == .metadata {
-                process_metadata_event(our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
+                process_metadata_event(events: damus_state.events, our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
             }
             
         case .notice(let msg):
@@ -94,6 +91,9 @@ class FollowersModel: ObservableObject {
             } else if sub_id == self.profiles_id {
                 damus_state.pool.unsubscribe(sub_id: profiles_id, to: [relay_id])
             }
+            
+        case .ok:
+            break
         }
     }
 }

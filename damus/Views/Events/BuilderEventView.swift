@@ -13,6 +13,19 @@ struct BuilderEventView: View {
     @State var event: NostrEvent?
     @State var subscription_uuid: String = UUID().description
     
+    init(damus: DamusState, event: NostrEvent) {
+        _event = State(initialValue: event)
+        self.damus = damus
+        self.event_id = event.id
+    }
+    
+    init(damus: DamusState, event_id: String) {
+        let event = damus.events.lookup(event_id)
+        self.event_id = event_id
+        self.damus = damus
+        _event = State(initialValue: event)
+    }
+    
     func unsubscribe() {
         damus.pool.unsubscribe(sub_id: subscription_uuid)
     }
@@ -32,10 +45,6 @@ struct BuilderEventView: View {
         }
         
         guard id == subscription_uuid else {
-            return
-        }
-        
-        guard nostr_event.known_kind == .text else {
             return
         }
         
@@ -60,13 +69,13 @@ struct BuilderEventView: View {
     
     var body: some View {
         VStack {
-            if let event = event {
-                let ev = event.inner_event ?? event
+            if let event {
+                let ev = event.get_inner_event(cache: damus.events) ?? event
                 let thread = ThreadModel(event: ev, damus_state: damus)
                 let dest = ThreadView(state: damus, thread: thread)
                 NavigationLink(destination: dest) {
-                    EmbeddedEventView(damus_state: damus, event: event)
-                        .padding(8)
+                    EventView(damus: damus, event: event, options: .embedded)
+                        .padding([.top, .bottom], 8)
                 }.buttonStyle(.plain)
             } else {
                 ProgressView().padding()
@@ -78,6 +87,9 @@ struct BuilderEventView: View {
                 .stroke(Color.gray.opacity(0.2), lineWidth: 1.0)
         )
         .onAppear {
+            guard event == nil else {
+                return
+            }
             self.load()
         }
     }

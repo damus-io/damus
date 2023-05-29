@@ -11,7 +11,8 @@ import XCTest
 final class ZapTests: XCTestCase {
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        let db = ProfileDatabase()
+        try db.remove_all_profiles()
     }
 
     override func tearDownWithError() throws {
@@ -24,13 +25,14 @@ final class ZapTests: XCTestCase {
         let target = ZapTarget.profile(bob.pubkey)
         
         let message = "hey bob!"
-        let zapreq = make_zap_request_event(keypair: alice, content: message, relays: [], target: target, zap_type: .priv)
+        let mzapreq = make_zap_request_event(keypair: alice, content: message, relays: [], target: target, zap_type: .priv)
         
-        XCTAssertNotNil(zapreq)
-        guard let zapreq else {
+        XCTAssertNotNil(mzapreq)
+        guard let mzapreq else {
             return
         }
         
+        let zapreq = mzapreq.potentially_anon_outer_request.ev
         let decrypted = decrypt_private_zap(our_privkey: bob.privkey, zapreq: zapreq, target: target)
         
         XCTAssertNotNil(decrypted)
@@ -65,6 +67,9 @@ final class ZapTests: XCTestCase {
         
         XCTAssertEqual(zap.zapper, "9630f464cca6a5147aa8a35f0bcdd3ce485324e732fd39e09233b1d848238f31")
         XCTAssertEqual(zap.target, ZapTarget.profile("32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"))
+
+        XCTAssertEqual(zap_notification_title(zap), "Zap")
+        XCTAssertEqual(zap_notification_body(profiles: Profiles(), zap: zap), "You received 1k sats from 107jk7ht:2qlu3nfm")
     }
 
 }

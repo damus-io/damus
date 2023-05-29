@@ -21,15 +21,10 @@ enum MentionType {
     }
 }
 
-struct Mention {
-    let index: Int
+struct Mention: Equatable {
+    let index: Int?
     let type: MentionType
     let ref: ReferencedId
-}
-
-struct IdBlock: Identifiable {
-    let id: String = UUID().description
-    let block: Block
 }
 
 typealias Invoice = LightningInvoice<Amount>
@@ -58,12 +53,30 @@ struct LightningInvoice<T> {
     }
 }
 
-enum Block {
+enum Block: Equatable {
+    static func == (lhs: Block, rhs: Block) -> Bool {
+        switch (lhs, rhs) {
+        case (.text(let a), .text(let b)):
+            return a == b
+        case (.mention(let a), .mention(let b)):
+            return a == b
+        case (.hashtag(let a), .hashtag(let b)):
+            return a == b
+        case (.url(let a), .url(let b)):
+            return a == b
+        case (.invoice(let a), .invoice(let b)):
+            return a.string == b.string
+        case (_, _):
+            return false
+        }
+    }
+    
     case text(String)
     case mention(Mention)
     case hashtag(String)
     case url(URL)
     case invoice(Invoice)
+    case relay(String)
     
     var is_invoice: Invoice? {
         if case .invoice(let invoice) = self {
@@ -94,6 +107,14 @@ enum Block {
         return nil
     }
     
+    var is_note_mention: Bool {
+        guard case .mention(let mention) = self else {
+            return false
+        }
+        
+        return mention.type == .event
+    }
+    
     var is_mention: Bool {
         if case .mention = self {
             return true
@@ -106,7 +127,17 @@ func render_blocks(blocks: [Block]) -> String {
     return blocks.reduce("") { str, block in
         switch block {
         case .mention(let m):
-            return str + "#[\(m.index)]"
+            if let idx = m.index {
+                return str + "#[\(idx)]"
+            } else if m.type == .pubkey, let pk = bech32_pubkey(m.ref.ref_id) {
+                return str + "nostr:\(pk)"
+            } else if let note_id = bech32_note_id(m.ref.ref_id) {
+                return str + "nostr:\(note_id)"
+            } else {
+                return str + m.ref.ref_id
+            }
+        case .relay(let relay):
+            return str + relay
         case .text(let txt):
             return str + txt
         case .hashtag(let htag):
@@ -117,10 +148,6 @@ func render_blocks(blocks: [Block]) -> String {
             return str + inv.string
         }
     }
-}
-
-func parse_textblock(str: String, from: Int, to: Int) -> Block {
-    return .text(String(substring(str, start: from, end: to)))
 }
 
 func parse_mentions(content: String, tags: [[String]]) -> [Block] {
@@ -169,14 +196,16 @@ func convert_block(_ b: block_t, tags: [[String]]) -> Block? {
             return nil
         }
         return .text(str)
-    } else if b.type == BLOCK_MENTION {
-        return convert_mention_block(ind: b.block.mention, tags: tags)
+    } else if b.type == BLOCK_MENTION_INDEX {
+        return convert_mention_index_block(ind: b.block.mention_index, tags: tags)
     } else if b.type == BLOCK_URL {
         return convert_url_block(b.block.str)
     } else if b.type == BLOCK_INVOICE {
         return convert_invoice_block(b.block.invoice)
+    } else if b.type == BLOCK_MENTION_BECH32 {
+        return convert_mention_bech32_block(b.block.mention_bech32)
     }
-    
+
     return nil
 }
 
@@ -209,32 +238,6 @@ enum Amount: Equatable {
             return format_msats(amt)
         }
     }
-}
-
-func format_actions_abbrev(_ actions: Int) -> String {
-    let formatter = NumberFormatter()
-    formatter.numberStyle = .decimal
-    formatter.positiveSuffix = "m"
-    formatter.positivePrefix = ""
-    formatter.minimumFractionDigits = 0
-    formatter.maximumFractionDigits = 3
-    formatter.roundingMode = .down
-    formatter.roundingIncrement = 0.1
-    formatter.multiplier = 1
-        
-    if actions >= 1_000_000 {
-        formatter.positiveSuffix = "m"
-        formatter.multiplier = 0.000001
-    } else if actions >= 1000 {
-        formatter.positiveSuffix = "k"
-        formatter.multiplier = 0.001
-    } else {
-        return "\(actions)"
-    }
-    
-    let actions = NSNumber(value: actions)
-    
-    return formatter.string(from: actions) ?? "\(actions)"
 }
 
 func format_msats_abbrev(_ msats: Int64) -> String {
@@ -274,8 +277,8 @@ func format_msats(_ msat: Int64, locale: Locale = Locale.current) -> String {
     let sats = NSNumber(value: (Double(msat) / 1000.0))
     let formattedSats = numberFormatter.string(from: sats) ?? sats.stringValue
 
-    let bundle = bundleForLocale(locale: locale)
-    return String(format: bundle.localizedString(forKey: "sats_count", value: nil, table: nil), locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats)
+    let format = localizedStringFormat(key: "sats_count", locale: locale)
+    return String(format: format, locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats)
 }
 
 func convert_invoice_block(_ b: invoice_block) -> Block? {
@@ -299,6 +302,60 @@ func convert_invoice_block(_ b: invoice_block) -> Block? {
     return .invoice(Invoice(description: description, amount: amount, string: invstr, expiry: b11.expiry, payment_hash: payment_hash, created_at: created_at))
 }
 
+func convert_mention_bech32_block(_ b: mention_bech32_block) -> Block?
+{
+    switch b.bech32.type {
+    case NOSTR_BECH32_NOTE:
+        let note = b.bech32.data.note;
+        let event_id = hex_encode(Data(bytes: note.event_id, count: 32))
+        let event_id_ref = ReferencedId(ref_id: event_id, relay_id: nil, key: "e")
+        return .mention(Mention(index: nil, type: .event, ref: event_id_ref))
+        
+    case NOSTR_BECH32_NEVENT:
+        let nevent = b.bech32.data.nevent;
+        let event_id = hex_encode(Data(bytes: nevent.event_id, count: 32))
+        var relay_id: String? = nil
+        if nevent.relays.num_relays > 0 {
+            relay_id = strblock_to_string(nevent.relays.relays.0)
+        }
+        let event_id_ref = ReferencedId(ref_id: event_id, relay_id: relay_id, key: "e")
+        return .mention(Mention(index: nil, type: .event, ref: event_id_ref))
+
+    case NOSTR_BECH32_NPUB:
+        let npub = b.bech32.data.npub
+        let pubkey = hex_encode(Data(bytes: npub.pubkey, count: 32))
+        let pubkey_ref = ReferencedId(ref_id: pubkey, relay_id: nil, key: "p")
+        return .mention(Mention(index: nil, type: .pubkey, ref: pubkey_ref))
+        
+    case NOSTR_BECH32_NPROFILE:
+        let nprofile = b.bech32.data.nprofile
+        let pubkey = hex_encode(Data(bytes: nprofile.pubkey, count: 32))
+        var relay_id: String? = nil
+        if nprofile.relays.num_relays > 0 {
+            relay_id = strblock_to_string(nprofile.relays.relays.0)
+        }
+        let pubkey_ref = ReferencedId(ref_id: pubkey, relay_id: relay_id, key: "p")
+        return .mention(Mention(index: nil, type: .pubkey, ref: pubkey_ref))
+
+    case NOSTR_BECH32_NRELAY:
+        let nrelay = b.bech32.data.nrelay
+        guard let relay_str = strblock_to_string(nrelay.relay) else {
+            return nil
+        }
+        return .relay(relay_str)
+        
+    case NOSTR_BECH32_NADDR:
+        // TODO: wtf do I do with this
+        guard let naddr = strblock_to_string(b.str) else {
+            return nil
+        }
+        return .text("nostr:" + naddr)
+
+    default:
+        return nil
+    }
+}
+
 func convert_invoice_description(b11: bolt11) -> InvoiceDescription? {
     if let desc = b11.description {
         return .description(String(cString: desc))
@@ -311,7 +368,7 @@ func convert_invoice_description(b11: bolt11) -> InvoiceDescription? {
     return nil
 }
 
-func convert_mention_block(ind: Int32, tags: [[String]]) -> Block?
+func convert_mention_index_block(ind: Int32, tags: [[String]]) -> Block?
 {
     let ind = Int(ind)
     
@@ -329,59 +386,6 @@ func convert_mention_block(ind: Int32, tags: [[String]]) -> Block?
     }
     
     return .mention(Mention(index: ind, type: mention_type, ref: ref))
-}
-
-func parse_mentions_old(content: String, tags: [[String]]) -> [Block] {
-    let p = Parser(pos: 0, str: content)
-    var blocks: [Block] = []
-    var starting_from: Int = 0
-    
-    while p.pos < content.count {
-        if !consume_until(p, match: { !$0.isWhitespace}) {
-            break
-        }
-        
-        let pre_mention = p.pos
-        
-        let c = peek_char(p, 0)
-        let pr = peek_char(p, -1)
-        
-        if c == "#" {
-            if let mention = parse_mention(p, tags: tags) {
-                blocks.append(parse_textblock(str: p.str, from: starting_from, to: pre_mention))
-                blocks.append(.mention(mention))
-                starting_from = p.pos
-            } else if let hashtag = parse_hashtag(p) {
-                blocks.append(parse_textblock(str: p.str, from: starting_from, to: pre_mention))
-                blocks.append(.hashtag(hashtag))
-                starting_from = p.pos
-            } else {
-                if !consume_until(p, match: { $0.isWhitespace }) {
-                    break
-                }
-            }
-        } else if c == "h" && (pr == nil || pr!.isWhitespace) {
-            if let url = parse_url(p) {
-                blocks.append(parse_textblock(str: p.str, from: starting_from, to: pre_mention))
-                blocks.append(.url(url))
-                starting_from = p.pos
-            } else {
-                if !consume_until(p, match: { $0.isWhitespace }) {
-                    break
-                }
-            }
-        } else {
-            if !consume_until(p, match: { $0.isWhitespace }) {
-                break
-            }
-        }
-    }
-    
-    if p.str.count - starting_from > 0 {
-        blocks.append(parse_textblock(str: p.str, from: starting_from, to: p.str.count))
-    }
-    
-    return blocks
 }
 
 func parse_while(_ p: Parser, match: (Character) -> Bool) -> String? {
@@ -421,37 +425,6 @@ func is_punctuation(_ c: Character) -> Bool {
     return c.isWhitespace || c.isPunctuation
 }
 
-func parse_url(_ p: Parser) -> URL? {
-    let start = p.pos
-    
-    if !parse_str(p, "http") {
-        return nil
-    }
-    
-    if parse_char(p, "s") {
-        if !parse_str(p, "://") {
-            return nil
-        }
-    } else {
-        if !parse_str(p, "://") {
-            return nil
-        }
-    }
-    
-    if !consume_until(p, match: { c in c.isWhitespace }, end_ok: true) {
-        p.pos = start
-        return nil
-    }
-    
-    let url_str = String(substring(p.str, start: start, end: p.pos))
-    guard let url = URL(string: url_str) else {
-        p.pos = start
-        return nil
-    }
-    
-    return url
-}
-
 func parse_hashtag(_ p: Parser) -> String? {
     let start = p.pos
     
@@ -472,51 +445,6 @@ func parse_hashtag(_ p: Parser) -> String? {
     }
     
     return str
-}
-
-func parse_mention(_ p: Parser, tags: [[String]]) -> Mention? {
-    let start = p.pos
-    
-    if !parse_str(p, "#[") {
-        return nil
-    }
-    
-    guard let digit = parse_digit(p) else {
-        p.pos = start
-        return nil
-    }
-    
-    var ind = digit
-    
-    if let d2 = parse_digit(p) {
-        ind = digit * 10
-        ind += d2
-    }
-    
-    if !parse_char(p, "]") {
-        return nil
-    }
-    
-    var kind: MentionType = .pubkey
-    if ind > tags.count - 1 {
-        return nil
-    }
-    
-    if tags[ind].count == 0 {
-        return nil
-    }
-    
-    switch tags[ind][0] {
-    case "e": kind = .event
-    case "p": kind = .pubkey
-    default: return nil
-    }
-    
-    guard let ref = tag_to_refid(tags[ind]) else {
-        return nil
-    }
-    
-    return Mention(index: ind, type: kind, ref: ref)
 }
 
 func find_tag_ref(type: String, id: String, tags: [[String]]) -> Int? {
@@ -549,7 +477,7 @@ func parse_mention_type(_ c: String) -> MentionType? {
 }
 
 /// Convert
-func make_post_tags(post_blocks: [PostBlock], tags: [[String]]) -> PostTags {
+func make_post_tags(post_blocks: [PostBlock], tags: [[String]], silent_mentions: Bool) -> PostTags {
     var new_tags = tags
     var blocks: [Block] = []
     
@@ -559,6 +487,14 @@ func make_post_tags(post_blocks: [PostBlock], tags: [[String]]) -> PostTags {
             guard let mention_type = parse_mention_type(ref.key) else {
                 continue
             }
+            
+            if silent_mentions || mention_type == .event {
+                let mention = Mention(index: nil, type: mention_type, ref: ref)
+                let block = Block.mention(mention)
+                blocks.append(block)
+                continue
+            }
+            
             if let ind = find_tag_ref(type: ref.key, id: ref.ref_id, tags: tags) {
                 let mention = Mention(index: ind, type: mention_type, ref: ref)
                 let block = Block.mention(mention)
@@ -582,9 +518,9 @@ func make_post_tags(post_blocks: [PostBlock], tags: [[String]]) -> PostTags {
 }
 
 func post_to_event(post: NostrPost, privkey: String, pubkey: String) -> NostrEvent {
-    let tags = post.references.map(refid_to_tag)
+    let tags = post.references.map(refid_to_tag) + post.tags
     let post_blocks = parse_post_blocks(content: post.content)
-    let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
+    let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags, silent_mentions: false)
     let content = render_blocks(blocks: post_tags.blocks)
     let new_ev = NostrEvent(content: content, pubkey: pubkey, kind: post.kind.rawValue, tags: post_tags.tags)
     new_ev.calculate_id()

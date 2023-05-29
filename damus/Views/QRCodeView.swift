@@ -10,12 +10,12 @@ import CoreImage.CIFilterBuiltins
 
 struct QRCodeView: View {
     let damus_state: DamusState
+    @State var pubkey: String
     
-    @Environment(\.dismiss) var dismiss
     @Environment(\.presentationMode) var presentationMode
 
     var maybe_key: String? {
-        guard let key = bech32_pubkey(damus_state.pubkey) else {
+        guard let key = bech32_pubkey(pubkey) else {
             return nil
         }
 
@@ -39,26 +39,27 @@ struct QRCodeView: View {
             }
         
             VStack(alignment: .center) {
-                let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
                 
-                if (damus_state.profiles.lookup(id: damus_state.pubkey)?.picture) != nil {
-                    ProfilePicView(pubkey: damus_state.pubkey, size: 90.0, highlight: .custom(Color("DamusWhite"), 4.0), profiles: damus_state.profiles)
+                let profile = damus_state.profiles.lookup(id: pubkey)
+                
+                if (damus_state.profiles.lookup(id: pubkey)?.picture) != nil {
+                    ProfilePicView(pubkey: pubkey, size: 90.0, highlight: .custom(DamusColors.white, 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                         .padding(.top, 50)
                 } else {
                     Image(systemName: "person.fill")
                         .font(.system(size: 60))
-                        .foregroundColor(Color("DamusWhite"))
+                        .foregroundColor(DamusColors.white)
                         .padding(.top, 50)
                 }
                 
                 if let display_name = profile?.display_name {
                     Text(display_name)
-                        .foregroundColor(Color("DamusWhite"))
+                        .foregroundColor(DamusColors.white)
                         .font(.system(size: 24, weight: .heavy))
                 }
                 if let name = profile?.name {
                     Text("@" + name)
-                        .foregroundColor(Color("DamusWhite"))
+                        .foregroundColor(DamusColors.white)
                         .font(.body)
                 }
                 
@@ -73,19 +74,19 @@ struct QRCodeView: View {
                         .padding()
                         .cornerRadius(10)
                         .overlay(RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color("DamusWhite"), lineWidth: 1))
+                            .stroke(DamusColors.white, lineWidth: 1))
                         .shadow(radius: 10)
                 }
                 
                 Spacer()
                 
                 Text("Follow me on nostr", comment: "Text on QR code view to prompt viewer looking at screen to follow the user.")
-                    .foregroundColor(Color("DamusWhite"))
+                    .foregroundColor(DamusColors.white)
                     .font(.system(size: 24, weight: .heavy))
                     .padding(.top)
                 
                 Text("Scan the code", comment: "Text on QR code view to prompt viewer to scan the QR code on screen with their device camera.")
-                    .foregroundColor(Color("DamusWhite"))
+                    .foregroundColor(DamusColors.white)
                     .font(.system(size: 18, weight: .ultraLight))
                 
                 Spacer()
@@ -119,6 +120,6 @@ struct QRCodeView: View {
 
 struct QRCodeView_Previews: PreviewProvider {
     static var previews: some View {
-        QRCodeView(damus_state: test_damus_state())
+        QRCodeView(damus_state: test_damus_state(), pubkey: test_event.pubkey)
     }
 }

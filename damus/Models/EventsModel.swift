@@ -64,6 +64,8 @@ class EventsModel: ObservableObject {
             handle_event(relay_id: relay_id, ev: ev)
         case .notice(_):
             break
+        case .ok:
+            break
         case .eose(_):
             load_profiles(profiles_subid: profiles_id, relay_id: relay_id, load: .from_events(events), damus_state: state)
         }

@@ -19,7 +19,7 @@ func load_bookmarks(pubkey: String) -> [NostrEvent] {
 }
 
 func save_bookmarks(pubkey: String, current_value: [NostrEvent], value: [NostrEvent]) -> Bool {
-    let uniq_bookmarks = Array(Set(value))
+    let uniq_bookmarks = uniq(value)
     
     if uniq_bookmarks != current_value {
         let encoded = uniq_bookmarks.map(event_to_json)
@@ -32,7 +32,6 @@ func save_bookmarks(pubkey: String, current_value: [NostrEvent], value: [NostrEv
 
 class BookmarksManager: ObservableObject {
     
-    private let userDefaults = UserDefaults.standard
     private let pubkey: String
     
     private var _bookmarks: [NostrEvent]
@@ -61,7 +60,7 @@ class BookmarksManager: ObservableObject {
         if isBookmarked(ev) {
             bookmarks = bookmarks.filter { $0 != ev }
         } else {
-            bookmarks.append(ev)
+            bookmarks.insert(ev, at: 0)
         }
     }
     

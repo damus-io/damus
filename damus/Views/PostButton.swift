@@ -10,8 +10,8 @@ import SwiftUI
 
 let BUTTON_SIZE = 57.0
 let LINEAR_GRADIENT = LinearGradient(gradient: Gradient(colors: [
-    Color("DamusPurple"),
-    Color("DamusBlue")
+    DamusColors.purple,
+    DamusColors.blue
 ]), startPoint: .topTrailing, endPoint: .bottomTrailing)
 
 func PostButton(action: @escaping () -> ()) -> some View {

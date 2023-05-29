@@ -12,13 +12,20 @@ struct FollowUserView: View {
     let damus_state: DamusState
 
     static let markdown = Markdown()
+    @State var navigating: Bool = false
 
     var body: some View {
+        let dest = ProfileView(damus_state: damus_state, pubkey: target.pubkey)
+        NavigationLink(destination: dest, isActive: $navigating) {
+            EmptyView()
+        }
+        
         HStack {
-            UserView(damus_state: damus_state, pubkey: target.pubkey)
+            UserViewRow(damus_state: damus_state, pubkey: target.pubkey)
             
             FollowButtonView(target: target, follows_you: false, follow_state: damus_state.contacts.follow_state(target.pubkey))
         }
+        Spacer()
     }
 }
 
@@ -35,7 +42,7 @@ struct FollowersView: View {
                     FollowUserView(target: .pubkey(pk), damus_state: damus_state)
                 }
             }
-            .padding()
+            .padding(.horizontal)
         }
         .navigationBarTitle(NSLocalizedString("Followers", comment: "Navigation bar title for view that shows who is following a user."))
         .onAppear {
@@ -45,7 +52,6 @@ struct FollowersView: View {
             followers.unsubscribe()
         }
     }
-    
 }
 
 struct FollowingView: View {
@@ -57,7 +63,7 @@ struct FollowingView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading) {
-                ForEach(following.contacts, id: \.self) { pk in
+                ForEach(following.contacts.reversed(), id: \.self) { pk in
                     FollowUserView(target: .pubkey(pk), damus_state: damus_state)
                 }
             }

@@ -91,13 +91,12 @@ int bech32_encode(char *output, const char *hrp, const uint8_t *data, size_t dat
     return 1;
 }
 
-bech32_encoding bech32_decode(char* hrp, uint8_t *data, size_t *data_len, const char *input, size_t max_input_len) {
+bech32_encoding bech32_decode_len(char* hrp, uint8_t *data, size_t *data_len, const char *input, size_t input_len) {
     uint32_t chk = 1;
     size_t i;
-    size_t input_len = strlen(input);
     size_t hrp_len;
     int have_lower = 0, have_upper = 0;
-    if (input_len < 8 || input_len > max_input_len) {
+    if (input_len < 8) {
         return BECH32_ENCODING_NONE;
     }
     *data_len = 0;
@@ -152,6 +151,14 @@ bech32_encoding bech32_decode(char* hrp, uint8_t *data, size_t *data_len, const 
     } else {
         return BECH32_ENCODING_NONE;
     }
+}
+
+bech32_encoding bech32_decode(char* hrp, uint8_t *data, size_t *data_len, const char *input, size_t max_input_len) {
+    size_t len = strlen(input);
+    if (len > max_input_len) {
+        return BECH32_ENCODING_NONE;
+    }
+    return bech32_decode_len(hrp, data, data_len, input, len);
 }
 
 int bech32_convert_bits(uint8_t* out, size_t* outlen, int outbits, const uint8_t* in, size_t inlen, int inbits, int pad) {

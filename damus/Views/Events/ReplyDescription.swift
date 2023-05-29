@@ -39,19 +39,21 @@ func reply_desc(profiles: Profiles, event: NostrEvent, locale: Locale = Locale.c
 
     let names: [String] = pubkeys.map {
         let prof = profiles.lookup(id: $0)
-        return Profile.displayName(profile: prof, pubkey: $0)
+        return Profile.displayName(profile: prof, pubkey: $0).username
     }
+    
+    let uniqueNames = NSOrderedSet(array: names).array as! [String]
 
-    if names.count > 1 {
+    if uniqueNames.count > 1 {
         let othersCount = n - pubkeys.count
         if othersCount == 0 {
-            return String(format: NSLocalizedString("Replying to %@ & %@", bundle: bundle, comment: "Label to indicate that the user is replying to 2 users."), locale: locale, names[0], names[1])
+            return String(format: NSLocalizedString("Replying to %@ & %@", bundle: bundle, comment: "Label to indicate that the user is replying to 2 users."), locale: locale, uniqueNames[0], uniqueNames[1])
         } else {
-            return String(format: bundle.localizedString(forKey: "replying_to_two_and_others", value: nil, table: nil), locale: locale, othersCount, names[0], names[1])
+            return String(format: localizedStringFormat(key: "replying_to_two_and_others", locale: locale), locale: locale, othersCount, uniqueNames[0], uniqueNames[1])
         }
     }
 
-    return String(format: NSLocalizedString("Replying to %@", bundle: bundle, comment: "Label to indicate that the user is replying to 1 user."), locale: locale, names[0])
+    return String(format: NSLocalizedString("Replying to %@", bundle: bundle, comment: "Label to indicate that the user is replying to 1 user."), locale: locale, uniqueNames[0])
 }
 
 

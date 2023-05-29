@@ -32,4 +32,26 @@ class LikeTests: XCTestCase {
         XCTAssertEqual(like_ev.last_refid()!.ref_id, id)
     }
 
+    func testToReactionEmoji() {
+        let privkey = "0fc2092231f958f8d57d66f5e238bb45b6a2571f44c0ce024bbc6f3a9c8a15fe"
+        let pubkey  = "30c6d1dc7f7c156794fa15055e651b758a61b99f50fcf759de59386050bf6ae2"
+        let liked = NostrEvent(content: "awesome #[0] post", pubkey: "orig_pk", tags: [["p", "cindy"], ["e", "bob"]])
+        liked.calculate_id()
+        let id = liked.id
+
+        let emptyReaction = make_like_event(pubkey: pubkey, privkey: privkey, liked: liked, content: "")
+        let plusReaction = make_like_event(pubkey: pubkey, privkey: privkey, liked: liked, content: "+")
+        let minusReaction = make_like_event(pubkey: pubkey, privkey: privkey, liked: liked, content: "-")
+        let heartReaction = make_like_event(pubkey: pubkey, privkey: privkey, liked: liked, content: "❤️")
+        let thumbsUpReaction = make_like_event(pubkey: pubkey, privkey: privkey, liked: liked, content: "👍")
+        let shakaReaction = make_like_event(pubkey: pubkey, privkey: privkey, liked: liked, content: "🤙")
+
+        XCTAssertEqual(to_reaction_emoji(ev: emptyReaction), "❤️")
+        XCTAssertEqual(to_reaction_emoji(ev: plusReaction), "❤️")
+        XCTAssertEqual(to_reaction_emoji(ev: minusReaction), "👎")
+        XCTAssertEqual(to_reaction_emoji(ev: heartReaction), "❤️")
+        XCTAssertEqual(to_reaction_emoji(ev: thumbsUpReaction), "👍")
+        XCTAssertEqual(to_reaction_emoji(ev: shakaReaction), "🤙")
+    }
+
 }

@@ -34,6 +34,22 @@
 			<string>Ακόλουθοι</string>
 		</dict>
 	</dict>
+	<key>following_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWING@</string>
+		<key>FOLLOWING</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Ακολουθεί</string>
+			<key>other</key>
+			<string>Ακολουθεί</string>
+		</dict>
+	</dict>
 	<key>reacted_tagged_in_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -111,7 +127,7 @@
 			<key>one</key>
 			<string>Διακομιστής Relay</string>
 			<key>other</key>
-			<string>Διακομιστές Relays</string>
+			<string>Relays</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
@@ -125,9 +141,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Απάντηση προς %2$@, %3$@ &amp; %1$d άλλον</string>
+			<string>Απάντηση προς %2$@, %3$@ &amp; %1$d ακόμα</string>
 			<key>other</key>
-			<string>Απάντηση προς %2$@, %3$@ &amp; %1$d άλλους</string>
+			<string>Απάντηση προς %2$@, %3$@ &amp; %1$d ακόμα</string>
 		</dict>
 	</dict>
 	<key>reposted_tagged_in_3</key>
@@ -194,6 +210,22 @@
 			<string>Αναδημοσιεύσεις</string>
 		</dict>
 	</dict>
+	<key>sats</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@SATS@</string>
+		<key>SATS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>sat</string>
+			<key>other</key>
+			<string>sats</string>
+		</dict>
+	</dict>
 	<key>sats_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -208,6 +240,38 @@
 			<string>%2$@ sat</string>
 			<key>other</key>
 			<string>%2$@ sats</string>
+		</dict>
+	</dict>
+	<key>zap_notification_no_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>Λάβατε %2$@ sat από %3$@</string>
+			<key>other</key>
+			<string>Λάβατε %2$@ sats από %3$@</string>
+		</dict>
+	</dict>
+	<key>zap_notification_with_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>Λάβατε %2$@ sat από %3$@: "%4$@"</string>
+			<key>other</key>
+			<string>Λάβατε %2$@ sats από %3$@: "%4$@"</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>

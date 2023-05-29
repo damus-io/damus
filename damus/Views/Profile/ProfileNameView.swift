@@ -17,12 +17,22 @@ struct ProfileNameView: View {
     
     var body: some View {
         Group {
-            if let real_name = profile?.display_name {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(real_name)
-                        .font(.title3.weight(.bold))
+            VStack(alignment: .leading) {
+                switch Profile.displayName(profile: profile, pubkey: pubkey) {
+                case .one:
                     HStack(alignment: .center, spacing: spacing) {
-                        ProfileName(pubkey: pubkey, profile: profile, prefix: "@", damus: damus, show_friend_confirmed: true)
+                        ProfileName(pubkey: pubkey, profile: profile, damus: damus)
+                            .font(.title3.weight(.bold))
+                        if follows_you {
+                            FollowsYou()
+                        }
+                    }
+                case .both(let both):
+                    Text(both.display_name)
+                        .font(.title3.weight(.bold))
+                    
+                    HStack(alignment: .center, spacing: spacing) {
+                        ProfileName(pubkey: pubkey, profile: profile, prefix: "@", damus: damus)
                             .font(.callout)
                             .foregroundColor(.gray)
                         
@@ -30,22 +40,12 @@ struct ProfileNameView: View {
                             FollowsYou()
                         }
                     }
-                    Spacer()
-                    KeyView(pubkey: pubkey)
-                        .pubkey_context_menu(bech32_pubkey: pubkey)
                 }
-            } else {
-                VStack(alignment: .leading) {
-                    HStack(alignment: .center, spacing: spacing) {
-                        ProfileName(pubkey: pubkey, profile: profile, damus: damus, show_friend_confirmed: true)
-                            .font(.title3.weight(.bold))
-                        if follows_you {
-                            FollowsYou()
-                        }
-                    }
-                    KeyView(pubkey: pubkey)
-                        .pubkey_context_menu(bech32_pubkey: pubkey)
-                }
+                
+                Spacer()
+                
+                KeyView(pubkey: pubkey)
+                    .pubkey_context_menu(bech32_pubkey: pubkey)
             }
         }
     }

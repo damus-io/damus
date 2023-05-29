@@ -7,7 +7,19 @@
 
 import Foundation
 
-enum DeepLPlan: String, CaseIterable, Identifiable {
+enum DeepLPlan: String, CaseIterable, Identifiable, StringCodable {
+    init?(from string: String) {
+        guard let dl = DeepLPlan(rawValue: string) else {
+            return nil
+        }
+        
+        self = dl
+    }
+    
+    func to_string() -> String {
+        return self.rawValue
+    }
+    
     var id: String { self.rawValue }
 
     struct Model: Identifiable, Hashable {
@@ -27,9 +39,5 @@ enum DeepLPlan: String, CaseIterable, Identifiable {
         case .pro:
             return .init(tag: self.rawValue, displayName: NSLocalizedString("Pro", comment: "Dropdown option for selecting Pro plan for DeepL translation service."), url: "https://api.deepl.com")
         }
-    }
-
-    static var allModels: [Model] {
-        return Self.allCases.map { $0.model }
     }
 }

@@ -15,23 +15,12 @@ func hex_col(r: UInt8, g: UInt8, b: UInt8) -> Color {
                  opacity: 1.0)
 }
 
-let damus_grad_c1 = hex_col(r: 0x1c, g: 0x55, b: 0xff)
-let damus_grad_c2 = hex_col(r: 0x7f, g: 0x35, b: 0xab)
-let damus_grad_c3 = hex_col(r: 0xff, g: 0x0b, b: 0xd6)
-let damus_grad = [damus_grad_c1, damus_grad_c2, damus_grad_c3]
-
 enum SetupState {
     case home
     case create_account
     case login
 }
 
-struct DamusGradient: View {
-    var body: some View {
-        LinearGradient(colors: damus_grad, startPoint: .bottomLeading, endPoint: .topTrailing)
-            .edgesIgnoringSafeArea([.top,.bottom])
-    }
-}
 
 struct SetupView: View {
     @State var state: SetupState? = .home

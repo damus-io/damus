@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct SelectWalletView: View {
+    let default_wallet: Wallet
     @Binding var showingSelectWallet: Bool
     let our_pubkey: String
     let invoice: String
-    @Environment(\.openURL) private var openURL
     @State var invoice_copied: Bool = false
     
     @State var allWalletModels: [Wallet.Model] = Wallet.allModels
@@ -38,8 +38,7 @@ struct SelectWalletView: View {
                 Section(NSLocalizedString("Select a Lightning wallet", comment: "Title of section for selecting a Lightning wallet to pay a Lightning invoice.")) {
                     List{
                         Button() {
-                            let wallet_model = get_default_wallet(our_pubkey).model
-                            open_with_wallet(wallet: wallet_model, invoice: invoice)
+                            open_with_wallet(wallet: default_wallet.model, invoice: invoice)
                         } label: {
                             HStack {
                                 Text("Default Wallet", comment: "Button to pay a Lightning invoice with the user's default Lightning wallet.").font(.body).foregroundColor(.blue)
@@ -70,9 +69,8 @@ struct SelectWalletView: View {
 
 struct SelectWalletView_Previews: PreviewProvider {
     @State static var show: Bool = true
-    @State static var invoice: String = ""
     
     static var previews: some View {
-        SelectWalletView(showingSelectWallet: $show, our_pubkey: "", invoice: "")
+        SelectWalletView(default_wallet: .lnlink, showingSelectWallet: $show, our_pubkey: "", invoice: "")
     }
 }

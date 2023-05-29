@@ -7,12 +7,10 @@
 
 import Foundation
 import secp256k1
-import Vault
 
 let PUBKEY_HRP = "npub"
-let PRIVKEY_HRP = "nsec"
 
-struct FullKeypair {
+struct FullKeypair: Equatable {
     let pubkey: String
     let privkey: String
 }
@@ -42,12 +40,6 @@ struct Keypair {
 enum Bech32Key {
     case pub(String)
     case sec(String)
-}
-
-struct DamusKeychainConfiguration: KeychainConfiguration {
-    var serviceName = "damus"
-    var accessGroup: String? = nil
-    var accountName = "privkey"
 }
 
 func decode_bech32_key(_ key: String) -> Bech32Key? {
@@ -114,12 +106,17 @@ func save_pubkey(pubkey: String) {
     UserDefaults.standard.set(pubkey, forKey: "pubkey")
 }
 
+enum Keys {
+    @KeychainStorage(account: "privkey")
+    static var privkey: String?
+}
+
 func save_privkey(privkey: String) throws {
-    try Vault.savePrivateKey(privkey, keychainConfiguration: DamusKeychainConfiguration())
+    Keys.privkey = privkey
 }
 
 func clear_saved_privkey() throws {
-    try Vault.deletePrivateKey(keychainConfiguration: DamusKeychainConfiguration())
+    Keys.privkey = nil
 }
 
 func clear_saved_pubkey() {
@@ -154,7 +151,7 @@ func get_saved_pubkey() -> String? {
 }
 
 func get_saved_privkey() -> String? {
-    let mkey = try? Vault.getPrivateKey(keychainConfiguration: DamusKeychainConfiguration());
+    let mkey = Keys.privkey
     return mkey.map { $0.trimmingCharacters(in: .whitespaces) }
 }
 

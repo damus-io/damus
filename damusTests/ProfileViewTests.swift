@@ -31,6 +31,17 @@ final class ProfileViewTests: XCTestCase {
         }
     }
 
+    func testFollowingCountString() throws {
+        XCTAssertEqual(followingCountString(0, locale: enUsLocale), "Following")
+        XCTAssertEqual(followingCountString(1, locale: enUsLocale), "Following")
+        XCTAssertEqual(followingCountString(2, locale: enUsLocale), "Following")
+        Bundle.main.localizations.map { Locale(identifier: $0) }.forEach {
+            for count in 1...10 {
+                XCTAssertNoThrow(followingCountString(count, locale: $0))
+            }
+        }
+    }
+
     func testRelaysCountString() throws {
         XCTAssertEqual(relaysCountString(0, locale: enUsLocale), "Relays")
         XCTAssertEqual(relaysCountString(1, locale: enUsLocale), "Relay")

@@ -10,7 +10,7 @@ import Foundation
 
 /// The data model for the SearchHome view, typically something global-like
 class SearchHomeModel: ObservableObject {
-    var events: EventHolder = EventHolder()
+    var events: EventHolder
     @Published var loading: Bool = false
 
     var seen_pubkey: Set<String> = Set()
@@ -21,6 +21,9 @@ class SearchHomeModel: ObservableObject {
     
     init(damus_state: DamusState) {
         self.damus_state = damus_state
+        self.events = EventHolder(on_queue: { ev in
+            preload_events(state: damus_state, events: [ev])
+        })
     }
     
     func get_base_filter() -> NostrFilter {
@@ -68,6 +71,8 @@ class SearchHomeModel: ObservableObject {
             }
         case .notice(let msg):
             print("search home notice: \(msg)")
+        case .ok:
+            break
         case .eose(let sub_id):
             loading = false
             
@@ -85,52 +90,31 @@ class SearchHomeModel: ObservableObject {
     }
 }
 
-func find_profiles_to_fetch_pk(profiles: Profiles, event_pubkeys: [String]) -> [String] {
-    var pubkeys = Set<String>()
-    
-    for pk in event_pubkeys {
-        if profiles.lookup(id: pk) != nil {
-            continue
-        }
-        
-        pubkeys.insert(pk)
-    }
-    
-    return Array(pubkeys)
-}
-
-func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad) -> [String] {
+func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: EventCache) -> [String] {
     switch load {
     case .from_events(let events):
-        return find_profiles_to_fetch_from_events(profiles: profiles, events: events)
+        return find_profiles_to_fetch_from_events(profiles: profiles, events: events, cache: cache)
     case .from_keys(let pks):
         return find_profiles_to_fetch_from_keys(profiles: profiles, pks: pks)
     }
 }
 
 func find_profiles_to_fetch_from_keys(profiles: Profiles, pks: [String]) -> [String] {
-    var pubkeys = Set<String>()
-    
-    for pk in pks {
-        if profiles.lookup(id: pk) != nil {
-            continue
-        }
-        
-        pubkeys.insert(pk)
-    }
-    
-    return Array(pubkeys)
+    Array(Set(pks.filter { pk in !profiles.has_fresh_profile(id: pk) }))
 }
 
-func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent]) -> [String] {
+func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent], cache: EventCache) -> [String] {
     var pubkeys = Set<String>()
     
     for ev in events {
-        if profiles.lookup(id: ev.pubkey) != nil {
-            continue
+        // lookup profiles from boosted events
+        if ev.known_kind == .boost, let bev = ev.get_inner_event(cache: cache), !profiles.has_fresh_profile(id: bev.pubkey) {
+            pubkeys.insert(bev.pubkey)
         }
         
-        pubkeys.insert(ev.pubkey)
+        if !profiles.has_fresh_profile(id: ev.pubkey) {
+            pubkeys.insert(ev.pubkey)
+        }
     }
     
     return Array(pubkeys)
@@ -142,15 +126,15 @@ enum PubkeysToLoad {
 }
 
 func load_profiles(profiles_subid: String, relay_id: String, load: PubkeysToLoad, damus_state: DamusState) {
-    var filter = NostrFilter.filter_profiles
-    let authors = find_profiles_to_fetch(profiles: damus_state.profiles, load: load)
-    filter.authors = authors
-    
+    let authors = find_profiles_to_fetch(profiles: damus_state.profiles, load: load, cache: damus_state.events)
     guard !authors.isEmpty else {
         return
     }
     
     print("loading \(authors.count) profiles from \(relay_id)")
+    
+    let filter = NostrFilter(kinds: [.metadata],
+                             authors: authors)
     
     damus_state.pool.subscribe_to(sub_id: profiles_subid, filters: [filter], to: [relay_id]) { sub_id, conn_ev in
         let (sid, done) = handle_subid_event(pool: damus_state.pool, relay_id: relay_id, ev: conn_ev) { sub_id, ev in
@@ -159,7 +143,7 @@ func load_profiles(profiles_subid: String, relay_id: String, load: PubkeysToLoad
             }
             
             if ev.known_kind == .metadata {
-                process_metadata_event(our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
+                process_metadata_event(events: damus_state.events, our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
             }
             
         }

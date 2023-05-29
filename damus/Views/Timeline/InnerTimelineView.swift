@@ -10,24 +10,30 @@ import SwiftUI
 
 struct InnerTimelineView: View {
     @ObservedObject var events: EventHolder
-    let damus: DamusState
-    let show_friend_icon: Bool
+    let state: DamusState
     let filter: (NostrEvent) -> Bool
     @State var nav_target: NostrEvent
     @State var navigating: Bool = false
     
-    init(events: EventHolder, damus: DamusState, show_friend_icon: Bool, filter: @escaping (NostrEvent) -> Bool) {
+    init(events: EventHolder, damus: DamusState, filter: @escaping (NostrEvent) -> Bool) {
         self.events = events
-        self.damus = damus
-        self.show_friend_icon = show_friend_icon
+        self.state = damus
         self.filter = filter
         // dummy event to avoid MaybeThreadView
         self._nav_target = State(initialValue: test_event)
     }
     
+    var event_options: EventViewOptions {
+        if self.state.settings.truncate_timeline_text {
+            return [.wide, .truncate_content]
+        }
+        
+        return [.wide]
+    }
+    
     var body: some View {
-        let thread = ThreadModel(event: nav_target, damus_state: damus)
-        let dest = ThreadView(state: damus, thread: thread)
+        let thread = ThreadModel(event: nav_target, damus_state: state)
+        let dest = ThreadView(state: state, thread: thread)
         NavigationLink(destination: dest, isActive: $navigating) {
             EmptyView()
         }
@@ -36,28 +42,45 @@ struct InnerTimelineView: View {
             if events.isEmpty {
                 EmptyTimelineView()
             } else {
-                ForEach(events.filter(filter), id: \.id) { (ev: NostrEvent) in
-                    EventView(damus: damus, event: ev)
+                let evs = events.filter(filter)
+                let indexed = Array(zip(evs, 0...))
+                ForEach(indexed, id: \.0.id) { tup in
+                    let ev = tup.0
+                    let ind = tup.1
+                    EventView(damus: state, event: ev, options: event_options)
                         .onTapGesture {
-                            nav_target = ev
+                            nav_target = ev.get_inner_event(cache: state.events) ?? ev
                             navigating = true
                         }
-                        .padding(.top, 10)
+                        .padding(.top, 7)
+                        .onAppear {
+                            let to_preload =
+                            Array([indexed[safe: ind+1]?.0,
+                                   indexed[safe: ind+2]?.0,
+                                   indexed[safe: ind+3]?.0,
+                                   indexed[safe: ind+4]?.0,
+                                   indexed[safe: ind+5]?.0
+                                  ].compactMap({ $0 }))
+                            
+                            preload_events(state: state, events: to_preload)
+                        }
                     
-                    Divider()
-                        .padding([.top], 10)
+                    ThiccDivider()
+                        .padding([.top], 7)
                 }
             }
         }
-        .padding(.horizontal)
+        //.padding(.horizontal)
+        
     }
 }
 
 
 struct InnerTimelineView_Previews: PreviewProvider {
     static var previews: some View {
-        InnerTimelineView(events: test_event_holder, damus: test_damus_state(), show_friend_icon: true, filter: { _ in true })
+        InnerTimelineView(events: test_event_holder, damus: test_damus_state(), filter: { _ in true })
             .frame(width: 300, height: 500)
             .border(Color.red)
     }
 }
+

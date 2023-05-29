@@ -26,10 +26,10 @@ struct MutelistView: View {
             }
             
             damus_state.contacts.set_mutelist(new_ev)
-            damus_state.pool.send(.event(new_ev))
+            damus_state.postbox.send(new_ev)
             users = get_mutelist_users(new_ev)
         } label: {
-            Label(NSLocalizedString("Delete", comment: "Button to remove a user from their blocklist."), systemImage: "trash")
+            Label(NSLocalizedString("Delete", comment: "Button to remove a user from their mutelist."), systemImage: "trash")
         }
         .tint(.red)
     }
@@ -37,13 +37,16 @@ struct MutelistView: View {
     
     var body: some View {
         List(users, id: \.self) { pubkey in
-            UserView(damus_state: damus_state, pubkey: pubkey)
+            UserViewRow(damus_state: damus_state, pubkey: pubkey)
                 .id(pubkey)
                 .swipeActions {
                     RemoveAction(pubkey: pubkey)
                 }
         }
-        .navigationTitle(NSLocalizedString("Blocked Users", comment: "Navigation title of view to see list of blocked users."))
+        .navigationTitle(NSLocalizedString("Muted Users", comment: "Navigation title of view to see list of muted users."))
+        .onAppear {
+            users = get_mutelist_users(damus_state.contacts.mutelist) 
+        }
     }
 }
 

@@ -31,19 +31,9 @@ struct NIP05 {
 
 struct NIP05Response: Decodable {
     let names: [String: String]
-    let relays: [String: [String]]?
 }
 
-enum NIP05Validation {
-    case invalid
-    case valid
-}
-
-func validate_nip05(pubkey: String, nip05_str: String) async -> NIP05? {
-    guard let nip05 = NIP05.parse(nip05_str) else {
-        return nil
-    }
-    
+func fetch_nip05(nip05: NIP05) async -> NIP05Response? {
     guard let url = nip05.url else {
         return nil
     }
@@ -54,6 +44,18 @@ func validate_nip05(pubkey: String, nip05_str: String) async -> NIP05? {
     let dat = ret.0
     
     guard let decoded = try? JSONDecoder().decode(NIP05Response.self, from: dat) else {
+        return nil
+    }
+    
+    return decoded
+}
+
+func validate_nip05(pubkey: String, nip05_str: String) async -> NIP05? {
+    guard let nip05 = NIP05.parse(nip05_str) else {
+        return nil
+    }
+    
+    guard let decoded = await fetch_nip05(nip05: nip05) else {
         return nil
     }
     
