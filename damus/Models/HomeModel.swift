@@ -256,6 +256,8 @@ class HomeModel: ObservableObject {
     func handle_contact_event(sub_id: String, relay_id: String, ev: NostrEvent) {
         process_contact_event(state: self.damus_state, ev: ev)
 
+        damus_state.events.insert(ev)
+        
         if sub_id == init_subid {
             pool.send(.unsubscribe(init_subid), to: [relay_id])
             if !done_init {
@@ -621,6 +623,14 @@ class HomeModel: ObservableObject {
             }
             self.incoming_dms = []
         }
+    }
+    
+    func handle_followed(_ ev: NostrEvent) {
+        guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
+            return
+        }
+        
+        damus_state.events.insert(ev)
     }
 }
 

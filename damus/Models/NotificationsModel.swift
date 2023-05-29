@@ -13,6 +13,7 @@ enum NotificationItem {
     case profile_zap(ZapGroup)
     case event_zap(String, ZapGroup)
     case reply(NostrEvent)
+    case contacts(NostrEvent)
     
     var is_reply: NostrEvent? {
         if case .reply(let ev) = self {
@@ -33,6 +34,8 @@ enum NotificationItem {
             return nil
         case .repost:
             return nil
+        case .contacts:
+            return nil
         }
     }
     
@@ -48,6 +51,8 @@ enum NotificationItem {
             return "event_zap_" + evid
         case .reply(let ev):
             return "reply_" + ev.id
+        case .contacts(let ev):
+            return "contacts_" + ev.id
         }
     }
     
@@ -63,6 +68,8 @@ enum NotificationItem {
             return zapgrp.last_event_at
         case .reply(let reply):
             return reply.created_at
+        case .contacts(let event):
+            return event.created_at
         }
     }
     
@@ -77,6 +84,8 @@ enum NotificationItem {
         case .event_zap(_, let zapgrp):
             return zapgrp.would_filter(isIncluded)
         case .reply(let ev):
+            return !isIncluded(ev)
+        case .contacts(let ev):
             return !isIncluded(ev)
         }
     }
@@ -93,6 +102,9 @@ enum NotificationItem {
             return zapgrp.filter(isIncluded).map { .event_zap(evid, $0) }
         case .reply(let ev):
             if isIncluded(ev) { return .reply(ev) }
+            return nil
+        case .contacts(let ev):
+            if isIncluded(ev) { return .contacts(ev) }
             return nil
         }
     }
@@ -111,6 +123,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
     var replies: [NostrEvent]
     var has_reply: Set<String>
     var has_ev: Set<String>
+    var contacts: [NostrEvent]
     
     @Published var notifications: [NotificationItem]
     
@@ -126,6 +139,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         self.profile_zaps = ZapGroup()
         self.notifications = []
         self.has_ev = Set()
+        self.contacts = []
     }
     
     func set_should_queue(_ val: Bool) {
@@ -315,6 +329,12 @@ class NotificationsModel: ObservableObject, ScrollQueue {
             el.value.events = el.value.events.filter(isIncluded)
             changed = changed || el.value.events.count != count
         }
+        
+        /*for el in contacts {
+            count = el.value.events.count
+            el.value.events = el.value.events.filter(isIncluded)
+            changed = changed || el.value.events.count != count
+        }*/
         
         for el in reposts {
             count = el.value.events.count

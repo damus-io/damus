@@ -37,6 +37,8 @@ struct NotificationSettingsView: View {
                     .toggleStyle(.switch)
                 Toggle(NSLocalizedString("DMs", comment: "Setting to enable DM Local Notification"), isOn: $settings.dm_notification)
                     .toggleStyle(.switch)
+                Toggle(NSLocalizedString("Follows", comment: "Setting to enable follow Notification"), isOn: $settings.contacts_notification)
+                    .toggleStyle(.switch)
             }
 
             Section(header: Text(NSLocalizedString("Notification Preference", comment: "Section header for Notification Preferences"))) {

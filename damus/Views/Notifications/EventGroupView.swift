@@ -13,6 +13,7 @@ enum EventGroupType {
     case reaction(EventGroup)
     case zap(ZapGroup)
     case profile_zap(ZapGroup)
+    case contacts(EventGroup)
     
     var zap_group: ZapGroup? {
         switch self {
@@ -23,6 +24,8 @@ enum EventGroupType {
         case .reaction:
             return nil
         case .repost:
+            return nil
+        case .contacts:
             return nil
         }
     }
@@ -37,6 +40,8 @@ enum EventGroupType {
             return zapgrp.zap_requests()
         case .profile_zap(let zapgrp):
             return zapgrp.zap_requests()
+        case .contacts(let grp):
+            return grp.events
         }
     }
 }
@@ -153,6 +158,8 @@ func reacting_to_verb(group: EventGroupType) -> String {
     case .zap: fallthrough
     case .profile_zap:
         return "zapped"
+    case .contacts:
+        return "followed"
     }
 }
 
@@ -186,6 +193,9 @@ struct EventGroupView: View {
                     .mask(Image("shaka-full")
                         .resizable()
                     ).frame(width: 24, height: 24)
+            case .contacts:
+                Image(systemName: "person.fill.badge.plus")
+                    .foregroundColor(DamusColors.green)
             case .profile_zap(let zapgrp):
                 ZapIcon(zapgrp)
             case .zap(let zapgrp):

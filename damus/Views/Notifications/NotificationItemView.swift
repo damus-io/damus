@@ -24,6 +24,8 @@ func notification_item_event(events: EventCache, notif: NotificationItem) -> Sho
         return .dontshow(events.lookup(evid))
     case .profile_zap:
         return .show(nil)
+    case .contacts(let ev):
+        return .show(ev)
     }
 }
 
@@ -57,6 +59,9 @@ struct NotificationItemView: View {
             
             case .reaction(_, let evgrp):
                 EventGroupView(state: state, event: ev, group: .reaction(evgrp))
+                
+            case .contacts(let ev):
+                Text("Followed")
             
             case .reply(let ev):
                 NavigationLink(destination: ThreadView(state: state, thread: ThreadModel(event: ev, damus_state: state))) {

@@ -114,6 +114,9 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "dm_notification", default_value: true)
     var dm_notification: Bool
     
+    @Setting(key: "contacts_notification", default_value: true)
+    var contacts_notification: Bool
+    
     @Setting(key: "like_notification", default_value: true)
     var like_notification: Bool
     
