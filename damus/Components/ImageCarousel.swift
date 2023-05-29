@@ -65,8 +65,8 @@ struct ImageCarousel: View {
     @State private var image_fill: ImageFill? = nil
 
     @State private var fillHeight: CGFloat = 350
-    @State private var maxHeight: CGFloat = UIScreen.main.bounds.height * 0.85 // 1.2
-    @State private var firstImageHeight: CGFloat = UIScreen.main.bounds.height * 0.85
+    @State private var maxHeight: CGFloat = UIScreen.main.bounds.height * 1.2 // 1.2
+    @State private var firstImageHeight: CGFloat = UIScreen.main.bounds.height * 1.2
     @State private var currentImageHeight: CGFloat?
     @State private var selectedIndex = 0
     
