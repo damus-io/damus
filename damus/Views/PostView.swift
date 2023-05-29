@@ -209,11 +209,11 @@ struct PostView: View {
     
     func TextEntry(scrollViewGeometry: GeometryProxy) -> some View {
         GeometryReader { (geometry: GeometryProxy) in
-        ZStack(alignment: .topLeading) {
-            TextViewWrapper(attributedText: $post, postTextViewCanScroll: $postTextViewCanScroll, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
-                focusWordAttributes = (word, range)
-                self.newCursorIndex = nil
-            })
+            ZStack(alignment: .topLeading) {
+                TextViewWrapper(attributedText: $post, postTextViewCanScroll: $postTextViewCanScroll, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
+                    focusWordAttributes = (word, range)
+                    self.newCursorIndex = nil
+                })
                 .environmentObject(tagModel)
                 .frame(maxHeight: scrollViewGeometry.size.height)
                 .position(x: geometry.frame(in: .local).midX, y: scrollViewGeometry.frame(in: .local).midY)
@@ -222,15 +222,15 @@ struct PostView: View {
                 .onChange(of: post) { p in
                     post_changed(post: p, media: uploadedMedias)
                 }
-            
-            if post.string.isEmpty {
-                Text(POST_PLACEHOLDER)
-                    .padding(.top, 8)
-                    .padding(.leading, 4)
-                    .foregroundColor(Color(uiColor: .placeholderText))
-                    .allowsHitTesting(false)
+                
+                if post.string.isEmpty {
+                    Text(POST_PLACEHOLDER)
+                        .padding(.top, 8)
+                        .padding(.leading, 4)
+                        .foregroundColor(Color(uiColor: .placeholderText))
+                        .allowsHitTesting(false)
+                }
             }
-        }
         }
     }
     
@@ -332,18 +332,17 @@ struct PostView: View {
                 
                 ScrollViewReader { scroller in
                     GeometryReader { (geometry: GeometryProxy) in
-                    ScrollView {
-                        if case .replying_to(let replying_to) = self.action {
-                            ReplyView(replying_to: replying_to, damus: damus_state, originalReferences: $originalReferences, references: $references)
+                        ScrollView {
+                            if case .replying_to(let replying_to) = self.action {
+                                ReplyView(replying_to: replying_to, damus: damus_state, originalReferences: $originalReferences, references: $references)
+                            }
+                            
+                            Editor(deviceSize: deviceSize, scrollViewGeometry: geometry)
                         }
-                        
-                        /// `scrollViewGeometry` is passed to TextEntry's .frame & .position modifiers
-                        Editor(deviceSize: deviceSize, scrollViewGeometry: geometry)
-                    }
-                    .frame(maxHeight: searching == nil ? .infinity : 70)
-                    .onAppear {
-                        scroll_to_event(scroller: scroller, id: "post", delay: 1.0, animate: true, anchor: .top)
-                    }
+                        .frame(maxHeight: searching == nil ? .infinity : 70)
+                        .onAppear {
+                            scroll_to_event(scroller: scroller, id: "post", delay: 1.0, animate: true, anchor: .top)
+                        }
                     }
                 }
                 
