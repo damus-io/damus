@@ -18,6 +18,7 @@ class SearchHomeModel: ObservableObject {
     let base_subid = UUID().description
     let profiles_subid = UUID().description
     let limit: UInt32 = 250
+    let multiple_events_per_pubkey: Bool = false
     
     init(damus_state: DamusState) {
         self.damus_state = damus_state
@@ -60,7 +61,7 @@ class SearchHomeModel: ObservableObject {
                 return
             }
             if ev.is_textlike && should_show_event(contacts: damus_state.contacts, ev: ev) && !ev.is_reply(nil) {
-                if seen_pubkey.contains(ev.pubkey) {
+                if !multiple_events_per_pubkey && seen_pubkey.contains(ev.pubkey) {
                     return
                 }
                 seen_pubkey.insert(ev.pubkey)
