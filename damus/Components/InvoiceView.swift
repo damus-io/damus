@@ -25,10 +25,10 @@ struct InvoiceView: View {
             UIPasteboard.general.string = invoice.string
         } label: {
             if !copied {
-                Image(systemName: "doc.on.clipboard")
+                Image("copy2")
                     .foregroundColor(.gray)
             } else {
-                Image(systemName: "checkmark.circle")
+                Image("check-circle")
                     .foregroundColor(DamusColors.green)
             }
         }
@@ -63,7 +63,7 @@ struct InvoiceView: View {
             
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Label("", systemImage: "bolt.fill")
+                    Label("", image: "zap.fill")
                         .foregroundColor(.orange)
                     Text("Lightning Invoice", comment: "Indicates that the view is for paying a Lightning invoice.")
                     Spacer()

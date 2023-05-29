@@ -43,7 +43,7 @@ struct EventActionBar: View {
         HStack {
             if damus_state.keypair.privkey != nil {
                 HStack(spacing: 4) {
-                    EventActionButton(img: "bubble.left", col: bar.replied ? DamusColors.purple : Color.gray) {
+                    EventActionButton(img: "bubble2", col: bar.replied ? DamusColors.purple : Color.gray) {
                         notify(.compose, PostAction.replying_to(event))
                     }
                     .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
@@ -55,7 +55,7 @@ struct EventActionBar: View {
             Spacer()
             HStack(spacing: 4) {
                 
-                EventActionButton(img: "arrow.2.squarepath", col: bar.boosted ? Color.green : nil) {
+                EventActionButton(img: "repost", col: bar.boosted ? Color.green : nil) {
                     if bar.boosted {
                         notify(.delete, bar.our_boost)
                     } else {
@@ -92,7 +92,7 @@ struct EventActionBar: View {
             }
 
             Spacer()
-            EventActionButton(img: "square.and.arrow.up", col: Color.gray) {
+            EventActionButton(img: "upload", col: Color.gray) {
                 show_share_action = true
             }
             .accessibilityLabel(NSLocalizedString("Share", comment: "Button to share a post"))
@@ -161,9 +161,12 @@ struct EventActionBar: View {
 
 func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> some View {
     Button(action: action) {
-        Image(systemName: img)
+        Image(img)
+            .resizable()
             .foregroundColor(col == nil ? Color.gray : col!)
             .font(.footnote.weight(.medium))
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 20, height: 20)
     }
 }
 
@@ -188,11 +191,16 @@ struct LikeButton: View {
         }) {
             if liked {
                 LINEAR_GRADIENT
-                    .mask(Image("shaka-full")
+                    .mask(Image("shaka.fill")
                         .resizable()
-                    ).frame(width: 14, height: 14)
+                        .aspectRatio(contentMode: .fit)
+                    )
+                    .frame(width: 20, height: 20)
             } else {
-                Image("shaka-line")
+                Image("shaka")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 20, height: 20)
                     .foregroundColor(.gray)
             }
         }

@@ -114,7 +114,7 @@ struct PostView: View {
         Button(action: {
             attach_media = true
         }, label: {
-            Image(systemName: "photo")
+            Image("images")
                 .padding(6)
         })
     }
@@ -123,7 +123,7 @@ struct PostView: View {
         Button(action: {
             attach_camera = true
         }, label: {
-            Image(systemName: "camera")
+            Image("camera")
                 .padding(6)
         })
     }
@@ -477,11 +477,11 @@ struct PVImageCarouselView: View {
                                     Button(action: {
                                         UIPasteboard.general.string = uploadedURL.absoluteString
                                     }) {
-                                        Label(NSLocalizedString("Copy URL", comment: "Label for button in context menu to copy URL of the selected uploaded media asset."), systemImage: "doc.on.doc")
+                                        Label(NSLocalizedString("Copy URL", comment: "Label for button in context menu to copy URL of the selected uploaded media asset."), image: "copy")
                                     }
                                 }
                             }
-                        Image(systemName: "xmark.circle.fill")
+                        Image("close-circle")
                             .foregroundColor(.white)
                             .padding(20)
                             .shadow(radius: 5)

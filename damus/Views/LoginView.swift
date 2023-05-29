@@ -33,10 +33,13 @@ enum ParsedKey {
 }
 
 struct LoginView: View {
+    @State private var create_account = false
     @State var key: String = ""
     @State var is_pubkey: Bool = false
     @State var error: String? = nil
     @State private var credential_handler = CredentialHandler()
+    
+    @Binding var accepted: Bool
 
     func get_error(parsed_key: ParsedKey?) -> String? {
         if self.error != nil {
@@ -52,27 +55,22 @@ struct LoginView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            DamusGradient()
+            if accepted {
+                NavigationLink(destination: CreateAccountView(), isActive: $create_account) {
+                    EmptyView()
+                }
+            }
+            
             VStack {
-                Text("Login", comment: "Title of view to log into an account.")
-                    .foregroundColor(.white)
-                    .font(.title)
-                    .padding()
-
-                Text("Enter your account key to login:", comment: "Prompt for user to enter an account key to login.")
-                    .foregroundColor(.white)
-                    .padding()
-
-                KeyInput(NSLocalizedString("nsec1...", comment: "Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key."), key: $key)
-
+                SignInHeader()
+                    .padding(.top, 100)
+                
+                SignInEntry(key: $key)
+                
                 let parsed = parse_key(key)
-
+                
                 if parsed?.is_hex ?? false {
-                    Text("This is an old-style nostr key. We're not sure if it's a pubkey or private key. Please toggle the button below if this a public key.", comment: "Warning that the inputted account key for login is an old-style and asking user to verify if it is a public key.")
-                        .font(.subheadline.bold())
-                        .foregroundColor(.white)
-                    PubkeySwitch(isOn: $is_pubkey)
-                        .padding()
+                    // convert to bech32 here
                 }
 
                 if let error = get_error(parsed_key: parsed) {
@@ -83,14 +81,13 @@ struct LoginView: View {
 
                 if parsed?.is_pub ?? false {
                     Text("This is a public key, you will not be able to make posts or interact in any way. This is used for viewing accounts from their perspective.", comment: "Warning that the inputted account key is a public key and the result of what happens because of it.")
-                        .foregroundColor(.white)
-                        .padding()
+                        .foregroundColor(Color.orange)
+                        .bold()
                 }
-                
-                Spacer()
 
                 if let p = parsed {
-                    DamusWhiteButton(NSLocalizedString("Login", comment: "Button to log into account.")) {
+                    
+                    Button(action: {
                         Task {
                             do {
                                 try await process_login(p, is_pubkey: is_pubkey)
@@ -98,28 +95,36 @@ struct LoginView: View {
                                 self.error = error.localizedDescription
                             }
                         }
+                    }) {
+                        HStack {
+                            Text("Login", comment:  "Button to log into account.")
+                                .fontWeight(.semibold)
+                        }
+                        .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
                     }
+                    .buttonStyle(GradientButtonStyle())
+                    .padding(.top, 10)
                 }
+
+                CreateAccountPrompt(create_account: $create_account)
+                    .padding(.top, 10)
+
+                Spacer()
             }
             .padding()
         }
+        .background(
+            Image("login-header")
+                .resizable()
+                .frame(maxWidth: .infinity, maxHeight: 350, alignment: .center)
+                .ignoresSafeArea(),
+            alignment: .top
+        )
         .onAppear {
             credential_handler.check_credentials()
         }
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackNav())
-    }
-}
-
-struct PubkeySwitch: View {
-    @Binding var isOn: Bool
-    var body: some View {
-        HStack {
-            Toggle(isOn: $isOn) {
-                Text("Public Key?", comment: "Prompt to ask user if the key they entered is a public key.")
-                    .foregroundColor(.white)
-            }
-        }
     }
 }
 
@@ -270,39 +275,90 @@ struct KeyInput: View {
     }
 
     var body: some View {
-        ZStack(alignment: .leading) {
+        HStack {
+            Image(systemName: "doc.on.clipboard")
+                .foregroundColor(.gray)
+                .onTapGesture {
+                    if let pastedkey = UIPasteboard.general.string {
+                        self.key.wrappedValue = pastedkey
+                    }
+                }
             TextField("", text: key)
                 .placeholder(when: key.wrappedValue.isEmpty) {
                     Text(title).foregroundColor(.white.opacity(0.6))
                 }
-                .padding()
-                .padding(.leading, 20)
-                .background {
-                    RoundedRectangle(cornerRadius: 4.0).opacity(0.2)
-                }
+                .padding(10)
                 .autocapitalization(.none)
-                .foregroundColor(.white)
+                .autocorrectionDisabled(true)
+                .textInputAutocapitalization(.never)
                 .font(.body.monospaced())
                 .textContentType(.password)
+        }
+        .padding(.horizontal, 10)
+        .overlay {
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(.gray, lineWidth: 1)
+        }
+    }
+}
 
-            Label("", systemImage: "doc.on.clipboard")
-                .padding(.leading, 10)
-                .onTapGesture {
-                if let pastedkey = UIPasteboard.general.string {
-                    self.key.wrappedValue = pastedkey
-                }
+struct SignInHeader: View {
+    var body: some View {
+        VStack {
+            Image("logo-nobg")
+                .resizable()
+                .frame(width: 56, height: 56, alignment: .center)
+                .shadow(color: DamusColors.purple, radius: 2)
+                .padding(.bottom)
+            
+            Text("Sign in", comment: "Title of view to log into an account.")
+                .font(.system(size: 32, weight: .bold))
+                .padding(.bottom, 5)
+            
+            Text("Welcome to the social network you control", comment: "Welcome text")
+                .foregroundColor(Color("DamusMediumGrey"))
+        }
+    }
+}
+
+struct SignInEntry: View {
+    let key: Binding<String>
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("Enter your account key", comment: "Prompt for user to enter an account key to login.")
+                .fontWeight(.medium)
+                .padding(.top, 30)
+            
+            KeyInput(NSLocalizedString("nsec1...", comment: "Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key."), key: key)
+        }
+    }
+}
+
+struct CreateAccountPrompt: View {
+    @Binding var create_account: Bool
+    var body: some View {
+        HStack {
+            Text("New to nostr?", comment: "Ask the user if they are new to nostr")
+                .foregroundColor(Color("DamusMediumGrey"))
+            
+            Button(NSLocalizedString("Create account", comment: "Button to navigate to create account view.")) {
+                create_account.toggle()
             }
+            
+            Spacer()
         }
     }
 }
 
 struct LoginView_Previews: PreviewProvider {
     static var previews: some View {
-        let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
+//        let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
+        let pubkey = "npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955"
         let bech32_pubkey = "KeyInput"
         Group {
-            LoginView(key: pubkey)
-            LoginView(key: bech32_pubkey)
+            LoginView(key: pubkey, accepted: .constant(true))
+            LoginView(key: bech32_pubkey, accepted: .constant(true))
         }
     }
 }

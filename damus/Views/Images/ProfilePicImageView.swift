@@ -49,7 +49,7 @@ struct NavDismissBarView: View {
             Button(action: {
                 presentationMode.wrappedValue.dismiss()
             }, label: {
-                Image(systemName: "xmark")
+                Image("close")
                     .frame(width: 33, height: 33)
                     .background(.regularMaterial)
                     .clipShape(Circle())

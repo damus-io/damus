@@ -33,16 +33,21 @@ struct RelayView: View {
                             NavigationLink("", destination: RelayDetailView(state: state, relay: relay, nip11: meta)).opacity(0.0)
                                 .disabled(showActionButtons)
                         )
+                    
                     Spacer()
 
-                    Image(systemName: "info.circle")
-                        .font(.system(size: 20, weight: .regular))
+                    Image("info")
+                        .resizable()
+                        .frame(width: 20, height: 20)
                         .foregroundColor(Color.accentColor)
                 } else {
                     Text(relay)
+                    
                     Spacer()
-                    Image(systemName: "questionmark.circle")
-                        .font(.system(size: 20, weight: .regular))
+                    
+                    Image("question")
+                        .resizable()
+                        .frame(width: 20, height: 20)
                         .foregroundColor(.gray)
                 }
             }
@@ -66,7 +71,7 @@ struct RelayView: View {
         Button {
             UIPasteboard.general.setValue(relay, forPasteboardType: "public.plain-text")
         } label: {
-            Label(NSLocalizedString("Copy", comment: "Button to copy a relay server address."), systemImage: "doc.on.doc")
+            Label(NSLocalizedString("Copy", comment: "Button to copy a relay server address."), image: "copy2")
         }
     }
         
@@ -87,8 +92,10 @@ struct RelayView: View {
             if showText {
                 Text(NSLocalizedString("Disconnect", comment: "Button to disconnect from a relay server."))
             }
-            Image(systemName: "minus.circle.fill")
-                .font(.system(size: 20, weight: .medium))
+            
+            Image("minus-circle")
+                .resizable()
+                .frame(width: 20, height: 20)
                 .foregroundColor(.red)
                 .padding(.leading, 5)
         }

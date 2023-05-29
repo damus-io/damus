@@ -22,12 +22,12 @@ struct RelayStatus: View {
             if relay.id == self.relay {
                 let c = relay.connection
                 if c.isConnected {
-                    conn_image = "network"
+                    conn_image = "globe"
                     conn_color = .green
                 } else if c.isConnecting {
                     connecting = true
                 } else {
-                    conn_image = "exclamationmark.circle.fill"
+                    conn_image = "warning.fill"
                     conn_color = .red
                 }
             }
@@ -38,13 +38,14 @@ struct RelayStatus: View {
         HStack {
             if connecting {
                 ProgressView()
-                    .padding(.trailing, 4)
+                    .frame(width: 20, height: 20)
+                    .padding(.trailing, 5)
             } else {
-                Image(systemName: conn_image)
-                    .frame(width: 8.0, height: 8.0)
+                Image(conn_image)
+                    .resizable()
+                    .frame(width: 20, height: 20)
                     .foregroundColor(conn_color)
-                    .padding(.leading, 5)
-                    .padding(.trailing, 10)
+                    .padding(.trailing, 5)
             }
         }
         .onReceive(timer) { _ in

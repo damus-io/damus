@@ -23,7 +23,8 @@ struct MaybeAnonPfpView: View {
     var body: some View {
         Group {
             if is_anon {
-                Image(systemName: "person.fill.questionmark")
+                Image("question")
+                    .resizable()
                     .font(.largeTitle)
                     .frame(width: size, height: size)
             } else {

@@ -23,25 +23,19 @@ struct SaveKeysView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            DamusGradient()
-            
             VStack(alignment: .center) {
                 Text("Welcome, \(account.rendered_name)!", comment: "Text to welcome user.")
                     .font(.title.bold())
-                    .foregroundColor(.white)
                     .padding(.bottom, 10)
                 
                 Text("Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus.", comment: "Reminder to user that they should save their account information.")
-                    .foregroundColor(.white)
                     .padding(.bottom, 10)
                 
                 Text("Public Key", comment: "Label to indicate that text below is the user's public key used by others to uniquely refer to the user.")
                     .font(.title2.bold())
-                    .foregroundColor(.white)
                     .padding(.bottom, 10)
                 
                 Text("This is your account ID, you can give this to your friends so that they can follow you. Tap to copy.", comment: "Label to describe that a public key is the user's account ID and what they can do with it.")
-                    .foregroundColor(.white)
                     .padding(.bottom, 10)
                 
                 SaveKeyView(text: account.pubkey_bech32, textContentType: .username, is_copied: $pub_copied, focus: $pubkey_focused)
@@ -50,11 +44,9 @@ struct SaveKeysView: View {
                 if pub_copied {
                     Text("Private Key", comment: "Label to indicate that the text below is the user's private key used by only the user themself as a secret to login to access their account.")
                         .font(.title2.bold())
-                        .foregroundColor(.white)
                         .padding(.bottom, 10)
                     
                     Text("This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!", comment: "Label to describe that a private key is the user's secret account key and what they should do with it.")
-                        .foregroundColor(.white)
                         .padding(.bottom, 10)
                     
                     SaveKeyView(text: account.privkey_bech32, textContentType: .newPassword, is_copied: $priv_copied, focus: $privkey_focused)
@@ -68,18 +60,42 @@ struct SaveKeysView: View {
                     } else if let err = error {
                         Text("Error: \(err)", comment: "Error message indicating why saving keys failed.")
                             .foregroundColor(.red)
-                        DamusWhiteButton(NSLocalizedString("Retry", comment: "Button to retry completing account creation after an error occurred.")) {
+
+                        Button(action: {
                             complete_account_creation(account)
+                        }) {
+                            HStack {
+                                Text("Retry", comment:  "Button to retry completing account creation after an error occurred.")
+                                    .fontWeight(.semibold)
+                            }
+                            .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
                         }
+                        .buttonStyle(GradientButtonStyle())
+                        .padding(.top, 20)
                     } else {
-                        DamusWhiteButton(NSLocalizedString("Let's go!", comment: "Button to complete account creation and start using the app.")) {
+                        Button(action: {
                             complete_account_creation(account)
+                        }) {
+                            HStack {
+                                Text("Let's go!", comment:  "Button to complete account creation and start using the app.")
+                                    .fontWeight(.semibold)
+                            }
+                            .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
                         }
+                        .buttonStyle(GradientButtonStyle())
+                        .padding(.top, 20)
                     }
                 }
             }
             .padding(20)
         }
+        .background(
+            Image("eula-bg")
+                .resizable()
+                .blur(radius: 70)
+                .ignoresSafeArea(),
+            alignment: .top
+        )
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackNav())
         .onAppear {
@@ -171,8 +187,8 @@ struct SaveKeyView: View {
             VStack {
                 spacerBlock(width: 0, height: 0)
                 Button(action: copy_text) {
-                    Label("", systemImage: is_copied ? "checkmark.circle.fill" : "doc.on.doc")
-                        .foregroundColor(is_copied ? .green : .white)
+                    Label("", image: is_copied ? "check-circle.fill" : "copy2")
+                        .foregroundColor(is_copied ? .green : .gray)
                         .background {
                             if is_copied {
                                 Circle()
@@ -190,11 +206,10 @@ struct SaveKeyView: View {
             TextField("", text: .constant(text))
                 .padding(5)
                 .background {
-                    RoundedRectangle(cornerRadius: 4.0).opacity(0.2)
+                    RoundedRectangle(cornerRadius: 4.0).opacity(0.1)
                 }
                 .textSelection(.enabled)
                 .font(.callout.monospaced())
-                .foregroundColor(.white)
                 .onTapGesture {
                     copy_text()
                     // Hack to force keyboard to hide. Showing keyboard on text field is necessary to register password autofill flow but the text itself should not be modified.

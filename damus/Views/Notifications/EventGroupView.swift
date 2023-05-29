@@ -168,7 +168,7 @@ struct EventGroupView: View {
     func ZapIcon(_ zapgrp: ZapGroup) -> some View {
         let fmt = format_msats_abbrev(zapgrp.msat_total)
         return VStack(alignment: .center) {
-            Image(systemName: "bolt.fill")
+            Image("zap.fill")
                 .foregroundColor(.orange)
             Text(verbatim: fmt)
                 .foregroundColor(Color.orange)
@@ -179,13 +179,15 @@ struct EventGroupView: View {
         Group {
             switch group {
             case .repost:
-                Image(systemName: "arrow.2.squarepath")
+                Image("repost")
                     .foregroundColor(DamusColors.green)
             case .reaction:
                 LINEAR_GRADIENT
-                    .mask(Image("shaka-full")
+                    .mask(Image("shaka.fill")
                         .resizable()
-                    ).frame(width: 24, height: 24)
+                        .aspectRatio(contentMode: .fit)
+                    )
+                    .frame(width: 20, height: 20)
             case .profile_zap(let zapgrp):
                 ZapIcon(zapgrp)
             case .zap(let zapgrp):
