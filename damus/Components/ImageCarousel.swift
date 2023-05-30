@@ -123,9 +123,6 @@ struct ImageCarousel: View {
                     }
             case .video(let url):
                 DamusVideoPlayer(url: url, video_size: $video_size)
-                    .onTapGesture {
-                        print("video tap")
-                    }
                     .onChange(of: video_size) { size in
                         guard image_fill == nil, let size else {
                             return
@@ -182,7 +179,7 @@ struct ImageCarousel: View {
     }
     
     var Medias: some View {
-        TabView {
+        TabView(selection: $selectedIndex) {
             ForEach(urls.indices, id: \.self) { index in
                 GeometryReader { geo in
                     Media(geo: geo, url: urls[index], index: index)
@@ -194,9 +191,6 @@ struct ImageCarousel: View {
             ImageView(urls: urls, disable_animation: state.settings.disable_animation)
         }
         .frame(height: height)
-        .onTapGesture {
-            open_sheet = true
-        }
         .onChange(of: selectedIndex) { value in
             selectedIndex = value
         }
@@ -206,6 +200,7 @@ struct ImageCarousel: View {
     var body: some View {
         VStack {
             Medias
+                .onTapGesture { }
             
             // This is our custom carousel image indicator
             CarouselDotsView(urls: urls, selectedIndex: $selectedIndex)

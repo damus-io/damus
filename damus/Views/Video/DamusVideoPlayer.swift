@@ -28,9 +28,6 @@ struct DamusVideoPlayer: View {
                 .foregroundColor(.black)
             
             Image(systemName: mute_icon)
-                .onTapGesture {
-                    model.muted = !model.muted
-                }
                 .padding()
                 .foregroundColor(.white)
         }
