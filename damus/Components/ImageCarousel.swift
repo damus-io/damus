@@ -174,6 +174,7 @@ struct ImageCarousel: View {
                 Placeholder(url: url, geo_size: geo.size, num_urls: urls.count)
             }
             .aspectRatio(contentMode: filling ? .fill : .fit)
+            .position(x: geo.size.width / 2, y: geo.size.height / 2)
             .tabItem {
                 Text(url.absoluteString)
             }
