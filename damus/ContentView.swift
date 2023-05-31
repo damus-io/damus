@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVKit
 
 struct TimestampedProfile {
     let profile: Profile
@@ -315,6 +316,7 @@ struct ContentView: View {
         .ignoresSafeArea(.keyboard)
         .onAppear() {
             self.connect()
+            try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default, options: .mixWithOthers)
             setup_notifications()
         }
         .sheet(item: $active_sheet) { item in
