@@ -130,11 +130,11 @@ struct NoteContentView: View {
                 }
             }
 
-            if show_images && artifacts.images.count > 0 {
-                ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.images)
-            } else if !show_images && artifacts.images.count > 0 {
+            if show_images && artifacts.media.count > 0 {
+                ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media)
+            } else if !show_images && artifacts.media.count > 0 {
                 ZStack {
-                    ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.images)
+                    ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media)
                     Blur()
                         .disabled(true)
                 }
@@ -261,13 +261,24 @@ struct NoteArtifacts: Equatable {
     }
     
     let content: CompatibleText
-    let images: [URL]
+    let urls: [UrlType]
     let invoices: [Invoice]
-    let links: [URL]
+    
+    var media: [MediaUrl] {
+        return urls.compactMap { url in url.is_media }
+    }
+    
+    var images: [URL] {
+        return urls.compactMap { url in url.is_img }
+    }
+    
+    var links: [URL] {
+        return urls.compactMap { url in url.is_link }
+    }
     
     static func just_content(_ content: String) -> NoteArtifacts {
         let txt = CompatibleText(attributed: AttributedString(stringLiteral: content))
-        return NoteArtifacts(content: txt, images: [], invoices: [], links: [])
+        return NoteArtifacts(content: txt, urls: [], invoices: [])
     }
 }
 
@@ -304,8 +315,7 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
 
 func render_blocks(blocks: [Block], profiles: Profiles) -> NoteArtifacts {
     var invoices: [Invoice] = []
-    var img_urls: [URL] = []
-    var link_urls: [URL] = []
+    var urls: [UrlType] = []
     
     let one_note_ref = blocks
         .filter({ $0.is_note_mention })
@@ -323,12 +333,14 @@ func render_blocks(blocks: [Block], profiles: Profiles) -> NoteArtifacts {
             return str + mention_str(m, profiles: profiles)
         case .text(let txt):
             var trimmed = txt
-            if let prev = blocks[safe: ind-1], case .url(let u) = prev, is_image_url(u) {
+            if let prev = blocks[safe: ind-1],
+               case .url(let u) = prev,
+               classify_url(u).is_media != nil {
                 trimmed = " " + trim_prefix(trimmed)
             }
             
             if let next = blocks[safe: ind+1] {
-                if case .url(let u) = next, is_image_url(u) {
+                if case .url(let u) = next, classify_url(u).is_media != nil {
                     trimmed = trim_suffix(trimmed)
                 } else if case .mention(let m) = next, m.type == .event, one_note_ref {
                     trimmed = trim_suffix(trimmed)
@@ -345,25 +357,112 @@ func render_blocks(blocks: [Block], profiles: Profiles) -> NoteArtifacts {
             invoices.append(invoice)
             return str
         case .url(let url):
-            // Handle Image URLs
-            if is_image_url(url) {
-                // Append Image
-                img_urls.append(url)
+            let url_type = classify_url(url)
+            switch url_type {
+            case .media:
+                urls.append(url_type)
                 return str
-            } else {
-                link_urls.append(url)
+            case .link(let url):
+                urls.append(url_type)
                 return str + url_str(url)
             }
         }
     }
 
-    return NoteArtifacts(content: txt, images: img_urls, invoices: invoices, links: link_urls)
+    return NoteArtifacts(content: txt, urls: urls, invoices: invoices)
 }
 
-func is_image_url(_ url: URL) -> Bool {
+enum MediaUrl {
+    case image(URL)
+    case video(URL)
+    
+    var url: URL {
+        switch self {
+        case .image(let url):
+            return url
+        case .video(let url):
+            return url
+        }
+    }
+}
+
+enum UrlType {
+    case media(MediaUrl)
+    case link(URL)
+    
+    var url: URL {
+        switch self {
+        case .media(let media_url):
+            switch media_url {
+            case .image(let url):
+                return url
+            case .video(let url):
+                return url
+            }
+        case .link(let url):
+            return url
+        }
+    }
+    
+    var is_video: URL? {
+        switch self {
+        case .media(let media_url):
+            switch media_url {
+            case .image:
+                return nil
+            case .video(let url):
+                return url
+            }
+        case .link:
+            return nil
+        }
+    }
+    
+    var is_img: URL? {
+        switch self {
+        case .media(let media_url):
+            switch media_url {
+            case .image(let url):
+                return url
+            case .video:
+                return url
+            }
+        case .link:
+            return nil
+        }
+    }
+    
+    var is_link: URL? {
+        switch self {
+        case .media:
+            return nil
+        case .link(let url):
+            return url
+        }
+    }
+    
+    var is_media: MediaUrl? {
+        switch self {
+        case .media(let murl):
+            return murl
+        case .link:
+            return nil
+        }
+    }
+}
+
+func classify_url(_ url: URL) -> UrlType {
     let str = url.lastPathComponent.lowercased()
-    let isUrl = str.hasSuffix(".png") || str.hasSuffix(".jpg") || str.hasSuffix(".jpeg") || str.hasSuffix(".gif") || str.hasSuffix(".webp")
-    return isUrl
+    
+    if str.hasSuffix(".png") || str.hasSuffix(".jpg") || str.hasSuffix(".jpeg") || str.hasSuffix(".gif") || str.hasSuffix(".webp") {
+        return .media(.image(url))
+    }
+    
+    if str.hasSuffix(".mp4") || str.hasSuffix(".mov") {
+        return .media(.video(url))
+    }
+    
+    return .link(url)
 }
 
 func lookup_cached_preview_size(previews: PreviewCache, evid: String) -> CGFloat? {

@@ -101,6 +101,10 @@ class RelativeTimeModel: ObservableObject {
     @Published var value: String = ""
 }
 
+class MediaMetaModel: ObservableObject {
+    @Published var fill: ImageFill? = nil
+}
+
 class EventData {
     var translations_model: TranslationModel
     var artifacts_model: NoteArtifactsModel
@@ -108,6 +112,7 @@ class EventData {
     var zaps_model : ZapsDataModel
     var relative_time: RelativeTimeModel = RelativeTimeModel()
     var validated: ValidationResult
+    var media_metadata_model: MediaMetaModel
     
     var translations: TranslateStatus {
         return translations_model.state
@@ -126,6 +131,7 @@ class EventData {
         self.artifacts_model = .init(state: .not_loaded)
         self.zaps_model = .init(zaps)
         self.validated = .unknown
+        self.media_metadata_model = MediaMetaModel()
         self.preview_model = .init(state: .not_loaded)
     }
 }
@@ -135,6 +141,7 @@ class EventCache {
     private var replies = ReplyMap()
     private var cancellable: AnyCancellable?
     private var image_metadata: [String: ImageMetadataState] = [:]
+    private var video_meta: [String: VideoPlayerModel] = [:]
     private var event_data: [String: EventData] = [:]
     
     //private var thread_latest: [String: Int64]
@@ -192,6 +199,28 @@ class EventCache {
     
     func lookup_img_metadata(url: URL) -> ImageMetadataState? {
         return image_metadata[url.absoluteString.lowercased()]
+    }
+    
+    func lookup_media_size(url: URL) -> CGSize? {
+        if let img_meta = lookup_img_metadata(url: url) {
+            return img_meta.meta.dim?.size
+        }
+        
+        return get_video_player_model(url: url).size
+    }
+    
+    func store_video_player_model(url: URL, meta: VideoPlayerModel) {
+        video_meta[url.absoluteString] = meta
+    }
+    
+    func get_video_player_model(url: URL) -> VideoPlayerModel {
+        if let model = video_meta[url.absoluteString] {
+            return model
+        }
+        
+        let model = VideoPlayerModel()
+        video_meta[url.absoluteString] = model
+        return model
     }
     
     func parent_events(event: NostrEvent) -> [NostrEvent] {
@@ -257,6 +286,7 @@ class EventCache {
     
     private func prune() {
         events = [:]
+        video_meta = [:]
         event_data = [:]
         replies.replies = [:]
     }
