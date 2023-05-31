@@ -207,29 +207,25 @@ struct PostView: View {
         }
     }
     
-    func TextEntry(scrollViewGeometry: GeometryProxy) -> some View {
-        GeometryReader { (geometry: GeometryProxy) in
-            ZStack(alignment: .topLeading) {
-                TextViewWrapper(attributedText: $post, postTextViewCanScroll: $postTextViewCanScroll, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
-                    focusWordAttributes = (word, range)
-                    self.newCursorIndex = nil
-                })
+    var TextEntry: some View {
+        ZStack(alignment: .topLeading) {
+            TextViewWrapper(attributedText: $post, postTextViewCanScroll: $postTextViewCanScroll, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
+                focusWordAttributes = (word, range)
+                self.newCursorIndex = nil
+            })
                 .environmentObject(tagModel)
-                .frame(maxHeight: scrollViewGeometry.size.height)
-                .position(x: geometry.frame(in: .local).midX, y: scrollViewGeometry.frame(in: .local).midY)
                 .focused($focus)
                 .textInputAutocapitalization(.sentences)
                 .onChange(of: post) { p in
                     post_changed(post: p, media: uploadedMedias)
                 }
-                
-                if post.string.isEmpty {
-                    Text(POST_PLACEHOLDER)
-                        .padding(.top, 8)
-                        .padding(.leading, 4)
-                        .foregroundColor(Color(uiColor: .placeholderText))
-                        .allowsHitTesting(false)
-                }
+            
+            if post.string.isEmpty {
+                Text(POST_PLACEHOLDER)
+                    .padding(.top, 8)
+                    .padding(.leading, 4)
+                    .foregroundColor(Color(uiColor: .placeholderText))
+                    .allowsHitTesting(false)
             }
         }
     }
@@ -301,12 +297,12 @@ struct PostView: View {
         }
     }
     
-    func Editor(deviceSize: GeometryProxy, scrollViewGeometry: GeometryProxy) -> some View {
+    func Editor(deviceSize: GeometryProxy) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
                 ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                 
-                TextEntry(scrollViewGeometry: scrollViewGeometry)
+                TextEntry
             }
             .frame(height: deviceSize.size.height * multiply_factor)
             .id("post")
@@ -331,18 +327,16 @@ struct PostView: View {
                 TopBar
                 
                 ScrollViewReader { scroller in
-                    GeometryReader { (geometry: GeometryProxy) in
-                        ScrollView {
-                            if case .replying_to(let replying_to) = self.action {
-                                ReplyView(replying_to: replying_to, damus: damus_state, originalReferences: $originalReferences, references: $references)
-                            }
-                            
-                            Editor(deviceSize: deviceSize, scrollViewGeometry: geometry)
+                    ScrollView {
+                        if case .replying_to(let replying_to) = self.action {
+                            ReplyView(replying_to: replying_to, damus: damus_state, originalReferences: $originalReferences, references: $references)
                         }
-                        .frame(maxHeight: searching == nil ? .infinity : 70)
-                        .onAppear {
-                            scroll_to_event(scroller: scroller, id: "post", delay: 1.0, animate: true, anchor: .top)
-                        }
+                        
+                        Editor(deviceSize: deviceSize)
+                    }
+                    .frame(maxHeight: searching == nil ? .infinity : 70)
+                    .onAppear {
+                        scroll_to_event(scroller: scroller, id: "post", delay: 1.0, animate: true, anchor: .top)
                     }
                 }
                 
