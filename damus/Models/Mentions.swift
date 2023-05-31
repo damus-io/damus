@@ -10,7 +10,7 @@ import Foundation
 enum MentionType {
     case pubkey
     case event
-    
+
     var ref: String {
         switch self {
         case .pubkey:
@@ -495,14 +495,17 @@ func make_post_tags(post_blocks: [PostBlock], tags: [[String]], silent_mentions:
                 continue
             }
             
-            if let ind = find_tag_ref(type: ref.key, id: ref.ref_id, tags: tags) {
-                let mention = Mention(index: ind, type: mention_type, ref: ref)
+            if find_tag_ref(type: ref.key, id: ref.ref_id, tags: tags) != nil {
+                // Mention index is nil because indexed mentions from NIP-08 is deprecated.
+                // It has been replaced with NIP-27 text note references with nostr: prefixed URIs.
+                let mention = Mention(index: nil, type: mention_type, ref: ref)
                 let block = Block.mention(mention)
                 blocks.append(block)
             } else {
-                let ind = new_tags.count
                 new_tags.append(refid_to_tag(ref))
-                let mention = Mention(index: ind, type: mention_type, ref: ref)
+                // Mention index is nil because indexed mentions from NIP-08 is deprecated.
+                // It has been replaced with NIP-27 text note references with nostr: prefixed URIs.
+                let mention = Mention(index: nil, type: mention_type, ref: ref)
                 let block = Block.mention(mention)
                 blocks.append(block)
             }

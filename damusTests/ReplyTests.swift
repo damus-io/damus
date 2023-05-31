@@ -246,7 +246,7 @@ class ReplyTests: XCTestCase {
         XCTAssertEqual(ev.tags.count, 2)
         XCTAssertEqual(blocks.count, 3)
         XCTAssertEqual(blocks[1].is_ref, ReferencedId(ref_id: hex_pk, relay_id: nil, key: "p"))
-        XCTAssertEqual(ev.content, "this is a #[1] mention")
+        XCTAssertEqual(ev.content, "this is a nostr:npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s mention")
     }
     
     func testNoteMention() throws {
@@ -279,7 +279,7 @@ class ReplyTests: XCTestCase {
         XCTAssertEqual(ev.tags.count, 2)
         XCTAssertEqual(blocks.count, 3)
         XCTAssertEqual(blocks[1].is_ref, ReferencedId(ref_id: hex_pk, relay_id: nil, key: "p"))
-        XCTAssertEqual(ev.content, "this is a #[1] mention")
+        XCTAssertEqual(ev.content, "this is a nostr:npub1enu46e5x2qtcmm72ttzsx6fmve5wkauftassz78l3mvluh8efqhqejf3v4 mention")
     }
     
     func testPostWithMentions() throws {
@@ -291,7 +291,7 @@ class ReplyTests: XCTestCase {
         let ev = post_to_event(post: post, privkey: evid, pubkey: pk)
         
         XCTAssertEqual(ev.tags.count, 2)
-        XCTAssertEqual(ev.content, "this is a #[1] mention")
+        XCTAssertEqual(ev.content, "this is a nostr:npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s mention")
     }
     
     func testPostTags() throws {
@@ -320,7 +320,7 @@ class ReplyTests: XCTestCase {
         let post = NostrPost(content: "this is a (@\(pubkey)) mention", references: refs)
         let ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
         
-        XCTAssertEqual(ev.content, "this is a (#[2]) mention")
+        XCTAssertEqual(ev.content, "this is a (nostr:npub1xrrdrhrl0s2k0986z5z4uegmwk9xrwvl2r70wkw7tyuxq59ldt3qh09eay) mention")
         XCTAssertEqual(ev.tags[2][1], pubkey)
     }
     
@@ -397,7 +397,8 @@ class ReplyTests: XCTestCase {
     
     func testParsePostUriPubkeyReference() throws {
         let id = "6fec2ee6cfff779fe8560976b3d9df782b74577f0caefa7a77c0ed4c3749b5de"
-        let parsed = parse_post_blocks(content: "this is a nostr:p:\(id) event mention")
+        let npub = try XCTUnwrap(bech32_pubkey(id))
+        let parsed = parse_post_blocks(content: "this is a nostr:\(npub) event mention")
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -428,7 +429,8 @@ class ReplyTests: XCTestCase {
     
     func testParsePostUriReference() throws {
         let id = "6fec2ee6cfff779fe8560976b3d9df782b74577f0caefa7a77c0ed4c3749b5de"
-        let parsed = parse_post_blocks(content: "this is a nostr:e:\(id) event mention")
+        let note_id = try XCTUnwrap(bech32_note_id(id))
+        let parsed = parse_post_blocks(content: "this is a nostr:\(note_id) event mention")
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)

@@ -22,18 +22,6 @@ func encode_event_id_uri(_ ref: ReferencedId) -> String {
     return "e:" + ref.ref_id
 }
 
-func parse_nostr_ref_uri_type(_ p: Parser) -> String? {
-    if parse_char(p, "p") {
-        return "p"
-    }
-    
-    if parse_char(p, "e") {
-        return "e"
-    }
-    
-    return nil
-}
-
 func parse_hexstr(_ p: Parser, len: Int) -> String? {
     var i: Int = 0
     
@@ -60,24 +48,13 @@ func parse_nostr_ref_uri(_ p: Parser) -> ReferencedId? {
     if !parse_str(p, "nostr:") {
         return nil
     }
-    
-    guard let typ = parse_nostr_ref_uri_type(p) else {
+
+    guard let ref = parse_post_bech32_mention(p) else {
         p.pos = start
         return nil
     }
-    
-    if !parse_char(p, ":") {
-        p.pos = start
-        return nil
-    }
-    
-    guard let pk = parse_hexstr(p, len: 64) else {
-        p.pos = start
-        return nil
-    }
-    
-    // TODO: parse relays from nostr uris
-    return ReferencedId(ref_id: pk, relay_id: nil, key: typ)
+
+    return ref
 }
 
 func decode_universal_link(_ s: String) -> NostrLink? {

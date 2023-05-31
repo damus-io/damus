@@ -83,7 +83,9 @@ struct PostView: View {
             }
         }
 
-        var content = self.post.string.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        var content = self.post.string
+            .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            .replacingOccurrences(of: "\u{200B}", with: "") // these characters are added when adding mentions.
 
         let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
         
