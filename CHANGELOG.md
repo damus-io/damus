@@ -1,3 +1,35 @@
+## [1.5-2] - 2023-05-30
+
+### Added
+
+- Add new full-bleed video player (William Casarin)
+- Add ability to show multiple posts per user in Universe (Ben Weeks)
+- Custom iconography added for other areas of the app. (Ben Weeks)
+- Custom iconography for the left navigation. (Ben Weeks)
+- Custom iconography for the tab buttons. (Ben Weeks)
+- Added dots under image carousel (Ben Weeks)
+- Add profile caching (Bryan Montz)
+- Add mention parsing and fine-grained text selection on description in ProfileView (Terry Yiu)
+
+
+### Changed
+
+- Redesign phase 1 (text, icons)
+- Updated UI to use custom font (Ben Weeks)
+
+### Fixed
+
+- Fix side menu bug in landscape (OlegAba)
+- Use "Follow me on nostr" text when looking at someone else's QR code (Ben Weeks)
+- Fix issue where cursor dissapears when typing long message (gladiusKatana)
+- Attempt fix for randomly broken animated gifs (William Casarin)
+- Fix cursor jumping when pressing return (gladius)
+- Fix side menu label size so that translations in longer languages fit without wrapping (Terry Yiu)
+- Fix reaction notification title to be consistent with ReactionView (Terry Yiu)
+- Fix nostr URL scheme to open properly even if there's already a different view open (Terry Yiu)
+- Fix crash related to preloading events (Bryan Montz)
+
+
 ## v1.4.3 - 2023-05-08
 
 ### Added
