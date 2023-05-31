@@ -45,11 +45,8 @@ struct DamusVideoPlayer: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VideoPlayer(url: url, model: model)
-                .onAppear{
+                .onAppear {
                     model.start()
-                }
-                .onDisappear {
-                    model.stop()
                 }
             
             if model.has_audio == true {
