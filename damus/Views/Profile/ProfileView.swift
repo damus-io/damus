@@ -505,9 +505,6 @@ struct ProfileView_Previews: PreviewProvider {
 func test_damus_state() -> DamusState {
     let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
     let damus = DamusState.empty
-    let settings = UserSettingsStore()
-    settings.donation_percent = 100
-    settings.default_zap_amount = 1971
     
     let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", banner: "", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io", damus_donation: nil)
     let tsprof = TimestampedProfile(profile: prof, timestamp: 0, event: test_event)
