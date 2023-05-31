@@ -44,7 +44,9 @@ public class VideoPlayerModel: ObservableObject {
     @Published var muted: Bool = true
     @Published var play: Bool = true
     @Published var size: CGSize? = nil
+    @Published var has_audio: Bool? = nil
     @Published var contentMode: UIView.ContentMode = .scaleAspectFill
+    
     var time: CMTime = CMTime()
     var handlers: [VideoHandler] = []
     
@@ -168,6 +170,16 @@ public extension VideoPlayer {
     
 }
 
+func get_video_size(player: AVPlayer) -> CGSize? {
+    // TODO: make this async?
+    return player.currentImage?.size
+}
+
+func video_has_audio(player: AVPlayer) async -> Bool {
+    let tracks = try? await player.currentItem?.asset.load(.tracks)
+    return tracks?.filter({ t in t.mediaType == .audio }).first != nil
+}
+
 @available(iOS 13, *)
 extension VideoPlayer: UIViewRepresentable {
     
@@ -204,12 +216,22 @@ extension VideoPlayer: UIViewRepresentable {
             
             if case .playing = state {
                 context.coordinator.startObserver(uiView: uiView)
+                
+                if let player = uiView.player {
+                    Task {
+                        let has_audio = await video_has_audio(player: player)
+                        let size = get_video_size(player: player)
+                        Task { @MainActor in
+                            if let size {
+                                self.model.size = size
+                            }
+                            self.model.has_audio = has_audio
+                        }
+                    }
+                }
+                
             } else {
                 context.coordinator.stopObserver(uiView: uiView)
-            }
-            
-            if model.size == nil, let size = uiView.player?.currentImage?.size {
-                model.size = size
             }
             
             DispatchQueue.main.async {
@@ -240,7 +262,6 @@ extension VideoPlayer: UIViewRepresentable {
             uiView.pause(reason: .userInteraction)
         }
         
-        print("intrinsic video size \(uiView.intrinsicContentSize)")
         uiView.isMuted = model.muted
         uiView.isAutoReplay = model.autoReplay
         

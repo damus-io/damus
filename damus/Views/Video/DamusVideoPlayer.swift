@@ -13,10 +13,19 @@ struct DamusVideoPlayer: View {
     @Binding var video_size: CGSize?
     
     var mute_icon: String {
-        if model.muted {
+        if model.has_audio == false || model.muted {
             return "speaker.slash"
         } else {
             return "speaker"
+        }
+    }
+    
+    var mute_icon_color: Color {
+        switch self.model.has_audio {
+        case .none:
+            return .white
+        case .some(let has_audio):
+            return has_audio ? .white : .red
         }
     }
     
@@ -29,7 +38,7 @@ struct DamusVideoPlayer: View {
             
             Image(systemName: mute_icon)
                 .padding()
-                .foregroundColor(.white)
+                .foregroundColor(mute_icon_color)
         }
     }
     
@@ -43,10 +52,13 @@ struct DamusVideoPlayer: View {
                     model.stop()
                 }
             
-            MuteIcon
-        }
-        .onTapGesture {
-            self.model.muted = !self.model.muted
+            if model.has_audio == true {
+                MuteIcon
+                    .zIndex(11.0)
+                    .onTapGesture {
+                        self.model.muted = !self.model.muted
+                    }
+            }
         }
         .onChange(of: model.size) { size in
             guard let size else {
