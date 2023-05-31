@@ -10,11 +10,11 @@ import Kingfisher
 
     
 struct ImageContainerView: View {
+    let cache: EventCache
     let url: MediaUrl
     
     @State private var image: UIImage?
     @State private var showShareSheet = false
-    @State private var video_size: CGSize? = nil
     
     let disable_animation: Bool
     
@@ -47,7 +47,7 @@ struct ImageContainerView: View {
             case .image(let url):
                 Img(url: url)
             case .video(let url):
-                DamusVideoPlayer(url: url, video_size: $video_size)
+                DamusVideoPlayer(url: url, model: cache.get_video_player_model(url: url), video_size: .constant(nil))
             }
         }
     }
@@ -57,6 +57,6 @@ let test_image_url = URL(string: "https://jb55.com/red-me.jpg")!
 
 struct ImageContainerView_Previews: PreviewProvider {
     static var previews: some View {
-        ImageContainerView(url: .image(test_image_url), disable_animation: false)
+        ImageContainerView(cache: test_damus_state().events, url: .image(test_image_url), disable_animation: false)
     }
 }

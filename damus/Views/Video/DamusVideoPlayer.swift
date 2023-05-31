@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DamusVideoPlayer: View {
     var url: URL
-    @StateObject var model: VideoPlayerModel = VideoPlayerModel()
+    @ObservedObject var model: VideoPlayerModel
     @Binding var video_size: CGSize?
     
     var mute_icon: String {
@@ -58,9 +58,8 @@ struct DamusVideoPlayer: View {
 }
 struct DamusVideoPlayer_Previews: PreviewProvider {
     @StateObject static var model: VideoPlayerModel = VideoPlayerModel()
-    @State static var video_size: CGSize? = nil
     
     static var previews: some View {
-        DamusVideoPlayer(url: URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!, model: model, video_size: $video_size)
+        DamusVideoPlayer(url: URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!, model: model, video_size: .constant(nil))
     }
 }

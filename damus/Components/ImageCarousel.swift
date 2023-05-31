@@ -74,7 +74,8 @@ struct ImageCarousel: View {
     init(state: DamusState, evid: String, urls: [MediaUrl]) {
         _open_sheet = State(initialValue: false)
         _current_url = State(initialValue: nil)
-        _image_fill = State(initialValue: state.previews.lookup_image_meta(evid))
+        let media_model = state.events.get_cache_data(evid).media_metadata_model
+        _image_fill = State(initialValue: media_model.fill)
         self.urls = urls
         self.evid = evid
         self.state = state
@@ -103,14 +104,15 @@ struct ImageCarousel: View {
             }
         }
         .onAppear {
-            if self.image_fill == nil,
-               let meta = state.events.lookup_img_metadata(url: url),
-               let size = meta.meta.dim?.size
-            {
+            if self.image_fill == nil, let size = state.events.lookup_media_size(url: url) {
                 let fill = ImageFill.calculate_image_fill(geo_size: geo_size, img_size: size, maxHeight: maxHeight, fillHeight: fillHeight)
                 self.image_fill = fill
             }
         }
+    }
+    
+    func video_model(_ url: URL) -> VideoPlayerModel {
+        return state.events.get_video_player_model(url: url)
     }
     
     func Media(geo: GeometryProxy, url: MediaUrl, index: Int) -> some View {
@@ -122,18 +124,20 @@ struct ImageCarousel: View {
                         open_sheet = true
                     }
             case .video(let url):
-                DamusVideoPlayer(url: url, video_size: $video_size)
+                DamusVideoPlayer(url: url, model: video_model(url), video_size: $video_size)
                     .onChange(of: video_size) { size in
-                        guard image_fill == nil, let size else {
-                            return
-                        }
-                        let fill = ImageFill.calculate_image_fill(geo_size: geo.size, img_size: size, maxHeight: maxHeight, fillHeight: fillHeight)
-                        image_fill = fill
-                        state.previews.cache_image_meta(evid: evid, image_fill: fill)
+                        guard let size else { return }
                         
-                        if index == 0 {
+                        let fill = ImageFill.calculate_image_fill(geo_size: geo.size, img_size: size, maxHeight: maxHeight, fillHeight: fillHeight)
+                        
+                        print("video_size changed \(size)")
+                        if self.image_fill == nil {
+                            print("video_size firstImageHeight \(fill.height)")
                             firstImageHeight = fill.height
+                            state.events.get_cache_data(evid).media_metadata_model.fill = fill
                         }
+                        
+                        self.image_fill = fill
                     }
             }
         }
@@ -150,7 +154,7 @@ struct ImageCarousel: View {
                 view.framePreloadCount = 3
             }
             .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
-                state.previews.cache_image_meta(evid: evid, image_fill: fill)
+                state.events.get_cache_data(evid).media_metadata_model.fill = fill
                 // blur hash can be discarded when we have the url
                 // NOTE: this is the wrong place for this... we need to remove
                 //       it when the image is loaded in memory. This may happen
@@ -188,7 +192,7 @@ struct ImageCarousel: View {
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
         .fullScreenCover(isPresented: $open_sheet) {
-            ImageView(urls: urls, disable_animation: state.settings.disable_animation)
+            ImageView(cache: state.events, urls: urls, disable_animation: state.settings.disable_animation)
         }
         .frame(height: height)
         .onChange(of: selectedIndex) { value in
