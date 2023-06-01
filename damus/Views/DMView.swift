@@ -73,6 +73,24 @@ struct DMView: View {
         }
     }
 
+    func Invoice(invoices: [Invoice]) -> some View {
+        return Group {
+            HStack {
+                if is_ours {
+                    Spacer(minLength: UIScreen.main.bounds.width * 0.1)
+                }
+
+                InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: invoices, settings: damus_state.settings)
+                    .clipShape(ChatBubbleShape(direction: isLastInGroup ? (is_ours ? ChatBubbleShape.Direction.right: ChatBubbleShape.Direction.left): ChatBubbleShape.Direction.none))
+                    .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads)}
+                
+                if !is_ours {
+                    Spacer(minLength: UIScreen.main.bounds.width * 0.1)
+                }
+            }
+        }
+    }
+
     func TimeStamp() -> some View {
         return Group {
             HStack {
