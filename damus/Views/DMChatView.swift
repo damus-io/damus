@@ -149,19 +149,6 @@ struct DMChatView: View, KeyboardReadable {
             HStack {
                 ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
 
-                ProfileName(pubkey: pubkey, profile: profile, damus: damus_state)
-            }
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-
-    var Header: some View {
-        let profile = damus_state.profiles.lookup(id: pubkey)
-        let profile_page = ProfileView(damus_state: damus_state, pubkey: pubkey)
-        return NavigationLink(destination: profile_page) {
-            HStack {
-                ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
-
                 ProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_nip5_domain: false)
             }
         }
