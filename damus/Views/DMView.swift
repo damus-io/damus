@@ -89,7 +89,55 @@ struct DMView: View {
             }
         }
     }
-    
+
+    func filter_content(blocks bs: Blocks, profiles: Profiles, privkey: Privkey?) -> (Bool, CompatibleText?) {
+        let blocks = bs.blocks
+        
+        let one_note_ref = blocks
+            .filter({ $0.is_note_mention })
+            .count == 1
+        
+        var ind: Int = -1
+        var show_text: Bool = false
+        let txt: CompatibleText = blocks.reduce(CompatibleText()) { str, block in
+            ind = ind + 1
+            
+            switch block {
+            case .mention(let m):
+                if case .note = m.ref, one_note_ref {
+                    return str
+                }
+                if case .pubkey(_) = m.ref {
+                    show_text = true
+                }
+                return str + mention_str(m, profiles: profiles)
+            case .text(let txt):
+                let trimmed = reduce_text_block(blocks: blocks, ind: ind, txt: txt, one_note_ref: one_note_ref)
+                if !trimmed.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    show_text = true
+                }
+                return str + CompatibleText(stringLiteral: trimmed)
+            case .relay(let relay):
+                show_text = true
+                return str + CompatibleText(stringLiteral: relay)
+            case .hashtag(let htag):
+                show_text = true
+                return str + hashtag_str(htag)
+            case .invoice:
+                return str
+            case .url(let url):
+                if classify_url(url).is_media == nil {
+                    show_text = true
+                    return str + url_str(url)
+                } else {
+                    return str
+                }
+            }
+        }
+
+        return (show_text, txt)
+    }
+
     var body: some View {
         VStack {
             Mention
