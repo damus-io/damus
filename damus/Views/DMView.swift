@@ -26,11 +26,13 @@ struct DMView: View {
     }
     
     var dm_options: EventViewOptions {
-        if self.damus_state.settings.translate_dms {
-            return []
+        var options: EventViewOptions = [.only_text]
+        
+        if !self.damus_state.settings.translate_dms {
+            options.insert(.no_translate)
         }
         
-        return [.no_translate]
+        return options
     }
     
     var DM: some View {
