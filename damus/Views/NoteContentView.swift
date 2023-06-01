@@ -60,6 +60,10 @@ struct NoteContentView: View {
         return options.contains(.wide)
     }
     
+    var only_text: Bool {
+        return options.contains(.only_text)
+    }
+    
     var preview: LinkViewRepresentable? {
         guard show_images,
               case .loaded(let preview) = preview_model.state,
@@ -107,7 +111,11 @@ struct NoteContentView: View {
     }
     
     func MainContent(artifacts: NoteArtifactsSeparated) -> some View {
-        VStack(alignment: .leading) {
+        let invoices = only_text ? [] : artifacts.invoices
+        let links = only_text ? [] : artifacts.links
+        let media = only_text ? [] : artifacts.media
+
+        return VStack(alignment: .leading) {
             if size == .selected {
                 if with_padding {
                     SelectableText(attributedString: artifacts.content.attributed, size: self.size)
@@ -133,11 +141,11 @@ struct NoteContentView: View {
                 }
             }
 
-            if show_images && artifacts.media.count > 0 {
-                ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media)
-            } else if !show_images && artifacts.media.count > 0 {
+            if show_images && media.count > 0 {
+                ImageCarousel(state: damus_state, evid: event.id, urls: media)
+            } else if !show_images && media.count > 0 {
                 ZStack {
-                    ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media)
+                    ImageCarousel(state: damus_state, evid: event.id, urls: media)
                     Blur()
                         .disabled(true)
                 }
@@ -146,22 +154,22 @@ struct NoteContentView: View {
             
             if artifacts.invoices.count > 0 {
                 if with_padding {
-                    invoicesView(invoices: artifacts.invoices)
+                    invoicesView(invoices: invoices)
                         .padding(.horizontal)
                 } else {
-                    invoicesView(invoices: artifacts.invoices)
+                    invoicesView(invoices: invoices)
                 }
             }
             
             if with_padding {
-                previewView(links: artifacts.links).padding(.horizontal)
+                previewView(links: links).padding(.horizontal)
             } else {
-                previewView(links: artifacts.links)
+                previewView(links: links)
             }
             
         }
     }
-    
+
     func load(force_artifacts: Bool = false) {
         // always reload artifacts on load
         let plan = get_preload_plan(evcache: damus_state.events, ev: event, our_keypair: damus_state.keypair, settings: damus_state.settings)
