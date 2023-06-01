@@ -46,6 +46,7 @@ typedef struct note_block {
 } block_t;
 
 typedef struct note_blocks {
+    int words;
     int num_blocks;
     struct note_block *blocks;
 } blocks_t;
