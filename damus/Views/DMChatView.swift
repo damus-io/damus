@@ -13,6 +13,13 @@ struct DMChatView: View, KeyboardReadable {
     @ObservedObject var dms: DirectMessageModel
     @State var showPrivateKeyWarning: Bool = false
     @State private var textHeight: CGFloat = 0
+
+    enum FocusedField {
+        case message
+    }
+    @FocusState private var focusedField: FocusedField?
+
+    let placeholder = "Send a message"
     
     var pubkey: Pubkey {
         dms.pubkey
@@ -53,32 +60,45 @@ struct DMChatView: View, KeyboardReadable {
     var Messages: some View {
         ScrollViewReader { scroller in
             ScrollView {
-                LazyVStack(alignment: .leading) {
-                    ForEach(Array(zip(dms.events, dms.events.indices)), id: \.0.id) { (ev, ind) in
-                        DMView(event: dms.events[ind], damus_state: damus_state)
-                            .contextMenu{MenuItems(event: ev, keypair: damus_state.keypair, target_pubkey: ev.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads, settings: damus_state.settings)}
-                    }
-                    EndBlock(height: 1)
-                }
-                .padding(.horizontal)
+                if (dms.events.isEmpty) {
+                    Text("Send a message to start the conversation...", comment: "Text prompt for user to send a message to the other user.")
+                        .lineLimit(nil)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                        .padding(.vertical)
+                        .foregroundColor(.gray)
+                } else {
+                    VStack(alignment: .leading) {
+                        let groups = groupEventsByDateAndPubkey(events: dms.events)
 
+                        ForEach(Array(groups.keys).sorted(), id: \.self) { date in
+                            VStack(alignment: .leading) {
+                                Text(date, style: .date)
+                                    .font(.footnote)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.gray)
+                                    .padding(.horizontal)
+                                    .frame(maxWidth: .infinity)
+
+                                ForEach(Array(groups[date]!.keys).sorted(), id: \.self) { key in
+                                    let events = groups[date]![key]!
+                                    ForEach(events) { event in
+                                        DMView(event: event, damus_state: damus_state, isLastInGroup: event == events.last)
+                                    }
+                                }
+                            }
+                        }
+                        EndBlock(height: 5)
+                    }.padding(.horizontal)
+                }
             }
-            .dismissKeyboardOnTap()
             .onAppear {
                 scroll_to_end(scroller)
             }.onChange(of: dms.events.count) { _ in
                 scroll_to_end(scroller, animated: true)
+            }.onChange(of: textHeight) { _ in
+                scroll_to_end(scroller, animated: true)
             }
-            
-            Footer
-                .onReceive(keyboardPublisher) { visible in
-                    guard visible else {
-                        return
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        scroll_to_end(scroller, animated: true)
-                    }
-                }
         }
     }
     

@@ -74,7 +74,7 @@ struct DMView: View {
                     )
                     .background(VisualEffectView(effect: UIBlurEffect(style: .prominent)))
                     .clipShape(ChatBubbleShape(direction: (isLastInGroup && isLastInDM) ? (is_ours ? ChatBubbleShape.Direction.right: ChatBubbleShape.Direction.left): ChatBubbleShape.Direction.none))
-                    .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads)}
+                    .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads, settings: damus_state.settings)}
 
                 if !is_ours {
                     Spacer(minLength: UIScreen.main.bounds.width * 0.1)
@@ -91,7 +91,7 @@ struct DMView: View {
                 }
 
                 BuilderEventView(damus: damus_state, event_id: mention.ref)
-                    .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads)}
+                    .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads, settings: damus_state.settings)}
 
                 if !is_ours {
                     Spacer(minLength: UIScreen.main.bounds.width * 0.1)
@@ -111,7 +111,7 @@ struct DMView: View {
                 if should_show_img {
                     ImageCarousel(state: damus_state, evid: event.id, urls: urls)
                         .clipShape(ChatBubbleShape(direction: isLastInGroup ? (is_ours ? ChatBubbleShape.Direction.right: ChatBubbleShape.Direction.left): ChatBubbleShape.Direction.none))
-                        .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads)}
+                        .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads, settings: damus_state.settings)}
                 } else if !should_show_img {
                     ZStack {
                         ImageCarousel(state: damus_state, evid: event.id, urls: urls)
@@ -119,7 +119,7 @@ struct DMView: View {
                             .disabled(true)
                     }
                     .clipShape(ChatBubbleShape(direction: isLastInGroup ? (is_ours ? ChatBubbleShape.Direction.right: ChatBubbleShape.Direction.left): ChatBubbleShape.Direction.none))
-                    .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads)}
+                    .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads, settings: damus_state.settings)}
                 }
                 
                 if !is_ours {
@@ -138,7 +138,7 @@ struct DMView: View {
 
                 InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: invoices, settings: damus_state.settings)
                     .clipShape(ChatBubbleShape(direction: isLastInGroup ? (is_ours ? ChatBubbleShape.Direction.right: ChatBubbleShape.Direction.left): ChatBubbleShape.Direction.none))
-                    .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads)}
+                    .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads, settings: damus_state.settings)}
                 
                 if !is_ours {
                     Spacer(minLength: UIScreen.main.bounds.width * 0.1)
