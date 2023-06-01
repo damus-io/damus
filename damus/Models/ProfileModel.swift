@@ -69,8 +69,7 @@ class ProfileModel: ObservableObject, Equatable {
     }
     
     func subscribe() {
-        var text_filter = NostrFilter(kinds: [.text, .chat])
-        
+        var text_filter = NostrFilter(kinds: [.text, .longform])
         var profile_filter = NostrFilter(kinds: [.contacts, .metadata, .boost])
         
         profile_filter.authors = [pubkey]
