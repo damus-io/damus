@@ -35,9 +35,8 @@ struct SelectedEventView: View {
                     
                     Spacer()
                     
-                    EventMenuContext(event: event, keypair: damus.keypair, target_pubkey: event.pubkey, bookmarks: damus.bookmarks, muted_threads: damus.muted_threads, settings: damus.settings)
+                    EventMenuContext(damus: damus, event: event)
                         .padding([.bottom], 4)
-
                 }
                 .padding(.horizontal)
                 .minimumScaleFactor(0.75)
