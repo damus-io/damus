@@ -33,6 +33,13 @@ struct DMView: View {
         return [.no_translate]
     }
     
+    func format_timestamp(timestamp: UInt32) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "h:mm a"
+        let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
+        return dateFormatter.string(from: date)
+    }
+
     var DM: some View {
         HStack {
             if is_ours {
@@ -60,6 +67,25 @@ struct DMView: View {
 
             if !is_ours {
                 Spacer(minLength: UIScreen.main.bounds.width * 0.2)
+            }
+        }
+    }
+
+    var TimeStamp: some View {
+        Group {
+            HStack {
+                if is_ours {
+                    Spacer(minLength: UIScreen.main.bounds.width * 0.1)
+                }
+
+                Text(format_timestamp(timestamp: event.created_at))
+                    .font(.system(size: 11))
+                    .font(.footnote)
+                    .foregroundColor(.gray)
+                
+                if !is_ours {
+                    Spacer(minLength: UIScreen.main.bounds.width * 0.1)
+                }
             }
         }
     }
