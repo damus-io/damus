@@ -17,6 +17,38 @@ struct DMChatView: View, KeyboardReadable {
         dms.pubkey
     }
     
+    // Group events by date and then by pubkey and sort them by creation time
+    func groupEventsByDateAndPubkey(events: [NostrEvent]) -> [Date: [String: [NostrEvent]]] {
+        let groups = Dictionary(grouping: events) { event in
+            Calendar.current.startOfDay(for: Date(timeIntervalSince1970: TimeInterval(event.created_at)))
+        }.mapValues { events in
+            var lastEventDate: Date?
+            var groupCounter = 0
+
+            var eventGroups = [String: [NostrEvent]]()
+
+            for event in events {
+                let currentEventDate = Date(timeIntervalSince1970: TimeInterval(event.created_at))
+                defer { lastEventDate = currentEventDate }
+
+                let pubkey = event.pubkey
+                if let lastDate = lastEventDate,
+                   currentEventDate.timeIntervalSince(lastDate) <= 120,
+                   let lastEvent = eventGroups["\(groupCounter)-\(pubkey)"]?.last,
+                   lastEvent.pubkey == pubkey {
+                    eventGroups["\(groupCounter)-\(pubkey)"]?.append(event)
+                } else {
+                    groupCounter += 1
+                    eventGroups["\(groupCounter)-\(pubkey)"] = [event]
+                }
+            }
+
+            return eventGroups.mapValues { $0.sorted(by: { $0.created_at < $1.created_at }) }
+        } as [Date: [String: [NostrEvent]]]
+
+        return groups
+    }
+
     var Messages: some View {
         ScrollViewReader { scroller in
             ScrollView {
