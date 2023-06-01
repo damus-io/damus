@@ -68,7 +68,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     let content: String
     
     var is_textlike: Bool {
-        return kind == 1 || kind == 42
+        return kind == 1 || kind == 42 || kind == 30023
     }
     
     var too_big: Bool {
