@@ -183,45 +183,6 @@ struct DMChatView: View, KeyboardReadable {
       }
     }
 
-    @Environment(\.colorScheme) var colorScheme
-
-    func InputBackground() -> Color {
-        if colorScheme == .light {
-            return Color.init(.sRGB, red: 0.9, green: 0.9, blue: 0.9, opacity: 1.0)
-        } else {
-            return Color.init(.sRGB, red: 0.1, green: 0.1, blue: 0.1, opacity: 1.0)
-        }
-    }
-
-    var Footer: some View {
-    
-        HStack(spacing: 0) {
-            InputField
-
-            if !dms.draft.isEmpty {
-                Button(
-                    role: .none,
-                    action: {
-                        showPrivateKeyWarning = contentContainsPrivateKey(dms.draft)
-
-                        if !showPrivateKeyWarning {
-                            send_message()
-                        }
-                    }
-                ) {
-                    Label("", image: "send")
-                        .font(.title)
-                }
-            }
-        }
-
-        /*
-        Text(dms.draft).opacity(0).padding(.all, 8)
-            .fixedSize(horizontal: false, vertical: true)
-            .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
-         */
-    }
-
     func send_message() {
         let tags = [["p", pubkey.hex()]]
         let post_blocks = parse_post_blocks(content: dms.draft)
