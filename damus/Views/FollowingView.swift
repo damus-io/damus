@@ -93,7 +93,7 @@ struct FollowingView: View {
 /*
 struct FollowingView_Previews: PreviewProvider {
     static var previews: some View {
-        FollowingView(contact: <#NostrEvent#>, damus_state: <#DamusState#>)
+        FollowingView(damus_state: test_damus_state, following: test_following_model)
     }
 }
  */
