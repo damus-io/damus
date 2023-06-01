@@ -12,11 +12,12 @@ struct DMChatView: View, KeyboardReadable {
     let damus_state: DamusState
     @ObservedObject var dms: DirectMessageModel
     @State var showPrivateKeyWarning: Bool = false
+    @State private var textHeight: CGFloat = 0
     
     var pubkey: Pubkey {
         dms.pubkey
     }
-    
+
     // Group events by date and then by pubkey and sort them by creation time
     func groupEventsByDateAndPubkey(events: [NostrEvent]) -> [Date: [String: [NostrEvent]]] {
         let groups = Dictionary(grouping: events) { event in
@@ -104,20 +105,82 @@ struct DMChatView: View, KeyboardReadable {
     }
 
     var InputField: some View {
-        TextEditor(text: $dms.draft)
-            .textEditorBackground {
-                InputBackground()
+        ZStack(alignment: .bottomTrailing) {
+            VStack(alignment: .leading) {
+                ZStack(alignment: .topLeading) {
+                    HStack {
+                         TextEditor(text: $dms.draft)
+                             .font(.body)
+                             .frame(minHeight: 15, maxHeight: 150)
+                             .foregroundColor(Color.primary)
+                             .padding(.horizontal, 10)
+                             .fixedSize(horizontal: false, vertical: true)
+                             .focused($focusedField, equals: .message)
+                             .overlay(
+                                 GeometryReader { geo in
+                                     Color.clear
+                                         .preference(key: ViewHeightKey.self, value: geo.size.height)
+                                 }
+                             )
+                             .onPreferenceChange(ViewHeightKey.self) {
+                                 textHeight = $0
+                             }
+                             .onChange(of: dms.draft) { _ in
+                                 DispatchQueue.main.async {
+                                     textHeight = getTextHeight()
+                                 }
+                             }
+                         
+                         if !dms.draft.isEmpty {
+                             Button(
+                                 role: .none,
+                                 action: {
+                                     showPrivateKeyWarning = contentContainsPrivateKey(dms.draft)
+                                     
+                                     if !showPrivateKeyWarning {
+                                         send_message()
+                                     }
+                                 }
+                             ) {
+                                 Label("", image: "send")
+                                     .font(.title)
+                                     .foregroundStyle(LINEAR_GRADIENT)
+                             }
+                         }
+                     }
+                    
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(style: .init(lineWidth: 0.75))
+                        .foregroundColor(.secondary.opacity(0.35))
+                    
+                    Text(dms.draft == "" ? placeholder : "")
+                        .font(.body)
+                        .padding(.leading, 15)
+                        .foregroundColor(.gray)
+                        .opacity(dms.draft == "" ? 0.35 : 0)
+                        .frame(minHeight: 15, maxHeight: 150, alignment: .center)
+                        .onTapGesture(perform: {
+                            focusedField = .message
+                        })
+                }
             }
-            .cornerRadius(8)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(style: .init(lineWidth: 2))
-                    .foregroundColor(.secondary.opacity(0.2))
-            )
-            .padding(16)
-            .foregroundColor(Color.primary)
-            .frame(minHeight: 70, maxHeight: 150, alignment: .bottom)
-            .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(height: textHeight)
+    }
+
+    private func getTextHeight() -> CGFloat {
+        let textHeight = dms.draft.isEmpty ? 15 : dms.draft.getHeight(width: UIScreen.main.bounds.width - 32, font: .systemFont(ofSize: 16))
+        let height = textHeight < 150 ? textHeight : 150
+        return height + 16
+    }
+
+    var Footer: some View {
+      VStack {
+          Divider()
+          InputField
+              .padding(10)
+              .padding(.top, -5)
+      }
     }
 
     @Environment(\.colorScheme) var colorScheme
