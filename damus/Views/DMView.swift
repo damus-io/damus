@@ -71,6 +71,35 @@ struct DMView: View {
         }
     }
 
+    func Image(urls: [MediaUrl]) -> some View {
+        return Group {
+            HStack {
+                if is_ours {
+                    Spacer(minLength: UIScreen.main.bounds.width * 0.1)
+                }
+                
+                let should_show_img = should_show_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
+                if should_show_img {
+                    ImageCarousel(state: damus_state, evid: event.id, urls: urls)
+                        .clipShape(ChatBubbleShape(direction: isLastInGroup ? (is_ours ? ChatBubbleShape.Direction.right: ChatBubbleShape.Direction.left): ChatBubbleShape.Direction.none))
+                        .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads)}
+                } else if !should_show_img {
+                    ZStack {
+                        ImageCarousel(state: damus_state, evid: event.id, urls: urls)
+                        Blur()
+                            .disabled(true)
+                    }
+                    .clipShape(ChatBubbleShape(direction: isLastInGroup ? (is_ours ? ChatBubbleShape.Direction.right: ChatBubbleShape.Direction.left): ChatBubbleShape.Direction.none))
+                    .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads)}
+                }
+                
+                if !is_ours {
+                    Spacer(minLength: UIScreen.main.bounds.width * 0.1)
+                }
+            }
+        }
+    }
+
     func Invoice(invoices: [Invoice]) -> some View {
         return Group {
             HStack {
