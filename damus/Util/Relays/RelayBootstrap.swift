@@ -12,6 +12,7 @@ let BOOTSTRAP_RELAYS = [
     "wss://eden.nostr.land",
     "wss://nostr.wine",
     "wss://nos.lol",
+    "wss://purplepag.es"
 ]
 
 func bootstrap_relays_setting_key(pubkey: String) -> String {
