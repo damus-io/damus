@@ -314,6 +314,65 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
     return render_blocks(blocks: blocks, profiles: profiles)
 }
 
+func render_blocks_longform(blocks bs: Blocks) -> NoteArtifacts {
+    var invoices: [Invoice] = []
+    var urls: [UrlType] = []
+    let blocks = bs.blocks
+    
+    var ind: Int = -1
+    let txt: CompatibleText = blocks.reduce(CompatibleText()) { str, block in
+        ind = ind + 1
+        
+        switch block {
+        case .mention(let m):
+            return str + mention_str(m, profiles: profiles)
+        case .text(let txt):
+            return str + reduce_text_block(blocks: blocks, ind: ind, txt: txt, one_note_ref: false)
+            
+        case .relay(let relay):
+            return str + CompatibleText(stringLiteral: relay)
+            
+        case .hashtag(let htag):
+            return str + hashtag_str(htag)
+        case .invoice(let invoice):
+            invoices.append(invoice)
+            return str
+        case .url(let url):
+            let url_type = classify_url(url)
+            switch url_type {
+            case .media:
+                urls.append(url_type)
+                return str
+            case .link(let url):
+                urls.append(url_type)
+                return str + url_str(url)
+            }
+        }
+    }
+
+    return NoteArtifacts(content: txt, words: bs.words, urls: urls, invoices: invoices)
+}
+
+func reduce_text_block(blocks: [Block], ind: Int, txt: String, one_note_ref: Bool) -> CompatibleText {
+    var trimmed = txt
+    
+    if let prev = blocks[safe: ind-1],
+       case .url(let u) = prev,
+       classify_url(u).is_media != nil {
+        trimmed = " " + trim_prefix(trimmed)
+    }
+    
+    if let next = blocks[safe: ind+1] {
+        if case .url(let u) = next, classify_url(u).is_media != nil {
+            trimmed = trim_suffix(trimmed)
+        } else if case .mention(let m) = next, m.type == .event, one_note_ref {
+            trimmed = trim_suffix(trimmed)
+        }
+    }
+    
+    return CompatibleText(stringLiteral: trimmed)
+}
+
 func render_blocks(blocks bs: Blocks, profiles: Profiles) -> NoteArtifacts {
     var invoices: [Invoice] = []
     var urls: [UrlType] = []
@@ -334,22 +393,8 @@ func render_blocks(blocks bs: Blocks, profiles: Profiles) -> NoteArtifacts {
             }
             return str + mention_str(m, profiles: profiles)
         case .text(let txt):
-            var trimmed = txt
-            if let prev = blocks[safe: ind-1],
-               case .url(let u) = prev,
-               classify_url(u).is_media != nil {
-                trimmed = " " + trim_prefix(trimmed)
-            }
+            return str + reduce_text_block(blocks: blocks, ind: ind, txt: txt, one_note_ref: one_note_ref)
             
-            if let next = blocks[safe: ind+1] {
-                if case .url(let u) = next, classify_url(u).is_media != nil {
-                    trimmed = trim_suffix(trimmed)
-                } else if case .mention(let m) = next, m.type == .event, one_note_ref {
-                    trimmed = trim_suffix(trimmed)
-                }
-            }
-            
-            return str + CompatibleText(stringLiteral: trimmed)
         case .relay(let relay):
             return str + CompatibleText(stringLiteral: relay)
             
