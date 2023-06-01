@@ -60,6 +60,10 @@ struct NoteContentView: View {
         return options.contains(.wide)
     }
     
+    var only_txt: Bool {
+        return options.contains(.only_text)
+    }
+    
     var preview: LinkViewRepresentable? {
         guard show_images,
               case .loaded(let preview) = preview_model.state,
@@ -178,9 +182,9 @@ struct NoteContentView: View {
                 if force_artifacts {
                     plan.load_artifacts = true
                 }
-                await preload_event(plan: plan, state: damus_state)
+                await preload_event(plan: plan, state: damus_state, only_text: only_txt)
             } else if force_artifacts {
-                let arts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+                let arts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey, only_text: only_txt)
                 self.artifacts_model.state = .loaded(arts)
             }
         }
@@ -394,7 +398,7 @@ func note_artifact_is_separated(kind: NostrKind?) -> Bool {
     return kind != .longform
 }
 
-func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: Privkey?) -> NoteArtifacts {
+func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: Privkey?, only_text: Bool = false) -> NoteArtifacts {
     let blocks = ev.blocks(privkey)
 
     if ev.known_kind == .longform {
@@ -439,7 +443,7 @@ func reduce_text_block(blocks: [Block], ind: Int, txt: String, one_note_ref: Boo
     return CompatibleText(stringLiteral: trimmed)
 }
 
-func render_blocks(blocks bs: Blocks, profiles: Profiles) -> NoteArtifactsSeparated {
+func render_blocks(blocks bs: Blocks, profiles: Profiles, only_text: Bool = false) -> NoteArtifactsSeparated {
     var invoices: [Invoice] = []
     var urls: [UrlType] = []
     let blocks = bs.blocks
@@ -480,6 +484,10 @@ func render_blocks(blocks bs: Blocks, profiles: Profiles) -> NoteArtifactsSepara
                 return str + url_str(url)
             }
         }
+    }
+
+    if (only_text) {
+        return NoteArtifactsSeparated(content: txt, words: bs.words, urls: [], invoices: [])
     }
 
     return NoteArtifactsSeparated(content: txt, words: bs.words, urls: urls, invoices: invoices)

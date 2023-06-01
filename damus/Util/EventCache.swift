@@ -411,7 +411,7 @@ func is_animated_image(url: URL) -> Bool {
     return ext == "gif"
 }
 
-func preload_event(plan: PreloadPlan, state: DamusState) async {
+func preload_event(plan: PreloadPlan, state: DamusState, only_text: Bool = false) async {
     var artifacts: NoteArtifacts? = plan.data.artifacts.artifacts
     let settings = state.settings
     let profiles = state.profiles
@@ -420,7 +420,7 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     print("Preloading event \(plan.event.content)")
     
     if artifacts == nil && plan.load_artifacts {
-        let arts = render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)
+        let arts = render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey, only_text: only_text)
         artifacts = arts
         
         // we need these asap
@@ -441,7 +441,7 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     }
     
     if plan.load_preview, note_artifact_is_separated(kind: plan.event.known_kind) {
-        let arts = artifacts ?? render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)
+        let arts = artifacts ?? render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey, only_text: only_text)
         
         // only separated artifacts have previews
         if case .separated(let sep) = arts {
@@ -479,7 +479,7 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     
 }
 
-func preload_events(state: DamusState, events: [NostrEvent]) {
+func preload_events(state: DamusState, events: [NostrEvent], only_text: Bool = false) {
     let event_cache = state.events
     let our_keypair = state.keypair
     let settings = state.settings
@@ -494,7 +494,7 @@ func preload_events(state: DamusState, events: [NostrEvent]) {
     
     Task {
         for plan in plans {
-            await preload_event(plan: plan, state: state)
+            await preload_event(plan: plan, state: state, only_text: only_text)
         }
     }
 }
