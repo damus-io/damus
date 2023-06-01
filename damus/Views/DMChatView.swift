@@ -104,6 +104,19 @@ struct DMChatView: View, KeyboardReadable {
         .buttonStyle(PlainButtonStyle())
     }
 
+    var Header: some View {
+        let profile = damus_state.profiles.lookup(id: pubkey)
+        let profile_page = ProfileView(damus_state: damus_state, pubkey: pubkey)
+        return NavigationLink(destination: profile_page) {
+            HStack {
+                ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+
+                ProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_nip5_domain: false)
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+
     var InputField: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack(alignment: .leading) {
@@ -203,18 +216,19 @@ struct DMChatView: View, KeyboardReadable {
     }
 
     var body: some View {
-        ZStack {
-            Messages
-
-            Text("Send a message to start the conversation...", comment: "Text prompt for user to send a message to the other user.")
-                .lineLimit(nil)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-                .opacity(((dms.events.count == 0) ? 1.0 : 0.0))
-                .foregroundColor(.gray)
+        VStack(spacing: 0) {
+            VStack(spacing: 0){
+                Messages
+                    .dismissKeyboardOnTap()
+            }
+            Footer
         }
         .navigationTitle(NSLocalizedString("DMs", comment: "Navigation title for DMs view, where DM is the English abbreviation for Direct Message."))
-        .toolbar { Header }
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Header
+            }
+        }
         .onDisappear {
             if dms.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 dms.draft = ""
