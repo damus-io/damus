@@ -13,6 +13,13 @@ struct DMChatView: View, KeyboardReadable {
     @ObservedObject var dms: DirectMessageModel
     @State var showPrivateKeyWarning: Bool = false
     @State private var textHeight: CGFloat = 0
+
+    enum FocusedField {
+        case message
+    }
+    @FocusState private var focusedField: FocusedField?
+
+    let placeholder = "Send a message"
     
     var pubkey: Pubkey {
         dms.pubkey
@@ -53,32 +60,76 @@ struct DMChatView: View, KeyboardReadable {
     var Messages: some View {
         ScrollViewReader { scroller in
             ScrollView {
-                LazyVStack(alignment: .leading) {
-                    ForEach(Array(zip(dms.events, dms.events.indices)), id: \.0.id) { (ev, ind) in
-                        DMView(event: dms.events[ind], damus_state: damus_state)
-                            .contextMenu{MenuItems(event: ev, keypair: damus_state.keypair, target_pubkey: ev.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads, settings: damus_state.settings)}
-                    }
-                    EndBlock(height: 1)
+                if dms.events.isEmpty {
+                    EmptyMessageView()
+                } else {
+                    GroupedEventsView(groups: groupEventsByDateAndPubkey(events: dms.events), damus_state: damus_state)
                 }
-                .padding(.horizontal)
-
             }
-            .dismissKeyboardOnTap()
             .onAppear {
                 scroll_to_end(scroller)
             }.onChange(of: dms.events.count) { _ in
                 scroll_to_end(scroller, animated: true)
+            }.onChange(of: textHeight) { _ in
+                scroll_to_end(scroller, animated: true)
             }
-            
-            Footer
-                .onReceive(keyboardPublisher) { visible in
-                    guard visible else {
-                        return
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        scroll_to_end(scroller, animated: true)
-                    }
+        }
+    }
+    
+    struct EmptyMessageView: View {
+        var body: some View {
+            Text("Send a message to start the conversation...", comment: "Text prompt for user to send a message to the other user.")
+                .lineLimit(nil)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+                .padding(.vertical)
+                .foregroundColor(.gray)
+        }
+    }
+
+    struct GroupedEventsView: View {
+        var groups: [Date: [String: [NostrEvent]]]
+        var damus_state: DamusState
+        
+        var body: some View {
+            VStack(alignment: .leading) {
+                ForEach(Array(groups.keys).sorted(), id: \.self) { date in
+                    GroupedDateView(date: date, events: groups[date]!, damus_state: damus_state)
                 }
+                EndBlock(height: 5)
+            }.padding(.horizontal)
+        }
+    }
+
+    struct GroupedDateView: View {
+        var date: Date
+        var events: [String: [NostrEvent]]
+        var damus_state: DamusState
+        
+        var body: some View {
+            VStack(alignment: .leading) {
+                Text(date, style: .date)
+                    .font(.footnote)
+                    .fontWeight(.bold)
+                    .foregroundColor(.gray)
+                    .padding(.horizontal)
+                    .frame(maxWidth: .infinity)
+                
+                ForEach(Array(events.keys).sorted(), id: \.self) { key in
+                    GroupedEventView(events: events[key]!, damus_state: damus_state)
+                }
+            }
+        }
+    }
+    
+    struct GroupedEventView: View {
+        var events: [NostrEvent]
+        var damus_state: DamusState
+        
+        var body: some View {
+            ForEach(events, id: \.self) { event in
+                DMView(event: event, damus_state: damus_state, isLastInGroup: event == events.last)
+            }
         }
     }
     
