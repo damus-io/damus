@@ -10,6 +10,7 @@ import SwiftUI
 struct DMView: View {
     let event: NostrEvent
     let damus_state: DamusState
+    let isLastInGroup: Bool
 
     var is_ours: Bool {
         event.pubkey == damus_state.pubkey
@@ -41,34 +42,60 @@ struct DMView: View {
         let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
         return dateFormatter.string(from: date)
     }
+    
+    let LINEAR_GRADIENT_DM = LinearGradient(gradient: Gradient(colors: [
+        DamusColors.purple,
+        .pink
+    ]), startPoint: .topTrailing, endPoint: .bottomTrailing)
+    
+    func DM(content: CompatibleText, isLastInDM: Bool) -> some View {
+        return Group {
+            HStack {
+                if is_ours {
+                    Spacer(minLength: UIScreen.main.bounds.width * 0.1)
+                }
 
-    var DM: some View {
-        HStack {
-            if is_ours {
-                Spacer(minLength: UIScreen.main.bounds.width * 0.2)
-            }
+                let should_show_img = should_show_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
 
-            let should_show_img = should_show_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
-
-            VStack(alignment: .trailing) {
                 NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, size: .normal, options: dm_options)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding([.top, .leading, .trailing], 10)
-                    .padding([.bottom], 25)
-                    .background(VisualEffectView(effect: UIBlurEffect(style: .prominent))
-                        .background(is_ours ? Color.accentColor.opacity(0.9) : Color.secondary.opacity(0.15))
+                    .frame(minWidth: 30)
+                    .contentShape(Rectangle())
+                    .padding(.horizontal, 12.5)
+                    .padding(.vertical, 9)
+                    .foregroundColor(.primary)
+                    .background(
+                        Group {
+                            if is_ours {
+                                LINEAR_GRADIENT_DM.opacity(0.75)
+                            } else {
+                                Color.secondary.opacity(0.15)
+                            }
+                        }
                     )
-                    .cornerRadius(8.0)
-                    .tint(is_ours ? Color.white : Color.accentColor)
+                    .background(VisualEffectView(effect: UIBlurEffect(style: .prominent)))
+                    .clipShape(ChatBubbleShape(direction: (isLastInGroup && isLastInDM) ? (is_ours ? ChatBubbleShape.Direction.right: ChatBubbleShape.Direction.left): ChatBubbleShape.Direction.none))
+                    .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads)}
 
-                Text(format_relative_time(event.created_at))
-                   .font(.footnote)
-                   .foregroundColor(.gray)
-                   .opacity(0.8)
+                if !is_ours {
+                    Spacer(minLength: UIScreen.main.bounds.width * 0.1)
+                }
             }
+        }
+    }
 
-            if !is_ours {
-                Spacer(minLength: UIScreen.main.bounds.width * 0.2)
+    func Mention(mention: Mention) -> some View {
+        Group {
+            HStack {
+                if is_ours {
+                    Spacer(minLength: UIScreen.main.bounds.width * 0.1)
+                }
+
+                BuilderEventView(damus: damus_state, event_id: mention.ref)
+                    .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads)}
+
+                if !is_ours {
+                    Spacer(minLength: UIScreen.main.bounds.width * 0.1)
+                }
             }
         }
     }
@@ -198,10 +225,23 @@ struct DMView: View {
 
     var body: some View {
         VStack {
-            Mention
-            DM
+            let (show_text, filtered_content): (Bool, CompatibleText?) = filter_content(blocks: event.blocks(damus_state.keypair.privkey), profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+            if show_text, let filtered_content = filtered_content {
+                DM(content: filtered_content).padding(.bottom, isLastInGroup ? 0 : -6)
+            }
+            if let mention = first_eref_mention(ev: event, privkey: damus_state.keypair.privkey) {
+                Mention(mention: mention).padding(.bottom, isLastInGroup ? 0 : -6)
+            }
+            if let url = separate_images(ev: event, privkey: damus_state.keypair.privkey) {
+                Image(urls: url).padding(.bottom, isLastInGroup ? 0 : -6)
+            }
+            if let invoices = separate_invoices(ev: event, privkey: damus_state.keypair.privkey) {
+                Invoice(invoices: invoices).padding(.bottom, isLastInGroup ? 0 : -6)
+            }
+            if (isLastInGroup) {
+                TimeStamp().padding(.top, -5)
+            }
         }
-        
     }
 }
 
@@ -313,6 +353,6 @@ struct ChatBubbleShape: Shape {
 struct DMView_Previews: PreviewProvider {
     static var previews: some View {
         let ev = NostrEvent(content: "Hey there *buddy*, want to grab some drinks later? 🍻", keypair: test_keypair, kind: 1, tags: [])!
-        DMView(event: ev, damus_state: test_damus_state())
+        DMView(event: ev, damus_state: test_damus_state(), isLastInGroup: false)
     }
 }
