@@ -188,7 +188,7 @@ struct NoteContentView: View {
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let profile = notif.object as! ProfileUpdate
                 let blocks = event.blocks(damus_state.keypair.privkey)
-                for block in blocks {
+                for block in blocks.blocks {
                     switch block {
                     case .mention(let m):
                         if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
@@ -261,6 +261,7 @@ struct NoteArtifacts: Equatable {
     }
     
     let content: CompatibleText
+    let words: Int
     let urls: [UrlType]
     let invoices: [Invoice]
     
@@ -278,7 +279,7 @@ struct NoteArtifacts: Equatable {
     
     static func just_content(_ content: String) -> NoteArtifacts {
         let txt = CompatibleText(attributed: AttributedString(stringLiteral: content))
-        return NoteArtifacts(content: txt, urls: [], invoices: [])
+        return NoteArtifacts(content: txt, words: 0, urls: [], invoices: [])
     }
 }
 
@@ -313,9 +314,10 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
     return render_blocks(blocks: blocks, profiles: profiles)
 }
 
-func render_blocks(blocks: [Block], profiles: Profiles) -> NoteArtifacts {
+func render_blocks(blocks bs: Blocks, profiles: Profiles) -> NoteArtifacts {
     var invoices: [Invoice] = []
     var urls: [UrlType] = []
+    let blocks = bs.blocks
     
     let one_note_ref = blocks
         .filter({ $0.is_note_mention })
@@ -369,7 +371,7 @@ func render_blocks(blocks: [Block], profiles: Profiles) -> NoteArtifacts {
         }
     }
 
-    return NoteArtifacts(content: txt, urls: urls, invoices: invoices)
+    return NoteArtifacts(content: txt, words: bs.words, urls: urls, invoices: invoices)
 }
 
 enum MediaUrl {

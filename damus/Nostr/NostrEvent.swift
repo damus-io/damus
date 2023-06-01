@@ -83,8 +83,8 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         return calculate_event_id(ev: self) == self.id
     }
     
-    private var _blocks: [Block]? = nil
-    func blocks(_ privkey: String?) -> [Block] {
+    private var _blocks: Blocks? = nil
+    func blocks(_ privkey: String?) -> Blocks {
         if let bs = _blocks {
             return bs
         }
@@ -93,7 +93,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         return blocks
     }
 
-    func get_blocks(content: String) -> [Block] {
+    func get_blocks(content: String) -> Blocks {
         return parse_mentions(content: content, tags: self.tags)
     }
 
@@ -118,7 +118,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         if let rs = _event_refs {
             return rs
         }
-        let refs = interpret_event_refs(blocks: self.blocks(privkey), tags: self.tags)
+        let refs = interpret_event_refs(blocks: self.blocks(privkey).blocks, tags: self.tags)
         self._event_refs = refs
         return refs
     }
@@ -232,7 +232,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     func note_language(_ privkey: String?) -> String? {
         // Rely on Apple's NLLanguageRecognizer to tell us which language it thinks the note is in
         // and filter on only the text portions of the content as URLs and hashtags confuse the language recognizer.
-        let originalBlocks = blocks(privkey)
+        let originalBlocks = blocks(privkey).blocks
         let originalOnlyText = originalBlocks.compactMap { $0.is_text }.joined(separator: " ")
 
         // Only accept language recognition hypothesis if there's at least a 50% probability that it's accurate.
@@ -942,7 +942,7 @@ func last_etag(tags: [[String]]) -> String? {
 }
 
 func first_eref_mention(ev: NostrEvent, privkey: String?) -> Mention? {
-    let blocks = ev.blocks(privkey).filter { block in
+    let blocks = ev.blocks(privkey).blocks.filter { block in
         guard case .mention(let mention) = block else {
             return false
         }
