@@ -309,7 +309,22 @@ func create_encrypted_event(_ message: String, to_pk: Pubkey, tags: [[String]], 
     return NostrEvent(content: enc_content, keypair: keypair.to_keypair(), kind: kind, tags: tags, createdAt: created_at)
 }
 
-func create_dm(_ message: String, to_pk: Pubkey, tags: [[String]], keypair: Keypair, created_at: UInt32? = nil) -> NostrEvent?
+struct ViewHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
+extension String {
+    func getHeight(width: CGFloat, font: UIFont) -> CGFloat {
+        let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
+        let boundingBox = self.boundingRect(with: constraintRect, options: [.usesLineFragmentOrigin, .usesFontLeading], attributes: [.font: font], context: nil)
+        return ceil(boundingBox.height)
+    }
+}
+
+func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair, created_at: UInt32? = nil) -> NostrEvent?
 {
     let created = created_at ?? UInt32(Date().timeIntervalSince1970)
 
