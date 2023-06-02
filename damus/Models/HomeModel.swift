@@ -187,7 +187,12 @@ class HomeModel: ObservableObject {
             }
             if damus_state.settings.zap_notification {
                 // Create in-app local notification for zap received.
-                create_in_app_zap_notification(profiles: profiles, zap: zap, evId: ev.referenced_ids.first?.id ?? "")
+                switch zap.target {
+                case .profile(let profile_id):
+                    create_in_app_profile_zap_notification(profiles: profiles, zap: zap, profile_id: profile_id)
+                case .note(let note_target):
+                    create_in_app_event_zap_notification(profiles: profiles, zap: zap, evId: note_target.note_id)
+                }
             }
         }
 
@@ -1118,7 +1123,28 @@ func zap_notification_body(profiles: Profiles, zap: Zap, locale: Locale = Locale
     }
 }
 
-func create_in_app_zap_notification(profiles: Profiles, zap: Zap, locale: Locale = Locale.current, evId: String) {
+func create_in_app_profile_zap_notification(profiles: Profiles, zap: Zap, locale: Locale = Locale.current, profile_id: String) {
+    let content = UNMutableNotificationContent()
+
+    content.title = zap_notification_title(zap)
+    content.body = zap_notification_body(profiles: profiles, zap: zap, locale: locale)
+    content.sound = UNNotificationSound.default
+    content.userInfo = LossyLocalNotification(type: .profile_zap, event_id: profile_id).to_user_info()
+
+    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+
+    let request = UNNotificationRequest(identifier: "myZapNotification", content: content, trigger: trigger)
+
+    UNUserNotificationCenter.current().add(request) { error in
+        if let error = error {
+            print("Error: \(error)")
+        } else {
+            print("Local notification scheduled")
+        }
+    }
+}
+
+func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: Locale = Locale.current, evId: String) {
     let content = UNMutableNotificationContent()
 
     content.title = zap_notification_title(zap)
@@ -1202,7 +1228,7 @@ func create_local_notification(profiles: Profiles, notify: LocalNotification) {
     case .dm:
         title = displayName
         identifier = "myDMNotification"
-    case .zap:
+    case .zap, .profile_zap:
         // not handled here
         break
     }

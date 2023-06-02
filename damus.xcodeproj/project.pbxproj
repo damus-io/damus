@@ -11,6 +11,7 @@
 		3169CAE6294E69C000EE4006 /* EmptyTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAE5294E69C000EE4006 /* EmptyTimelineView.swift */; };
 		3169CAED294FCCFC00EE4006 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CAEC294FCCFC00EE4006 /* Constants.swift */; };
 		31D2E847295218AF006D67F8 /* Shimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D2E846295218AF006D67F8 /* Shimmer.swift */; };
+		3A23838E2A297DD200E5AA2E /* ZapButtonModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A23838D2A297DD200E5AA2E /* ZapButtonModel.swift */; };
 		3A3040ED29A5CB86008A0F29 /* ReplyDescriptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3040EC29A5CB86008A0F29 /* ReplyDescriptionTests.swift */; };
 		3A3040EF29A8FEE9008A0F29 /* EventDetailBarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3040EE29A8FEE9008A0F29 /* EventDetailBarTests.swift */; };
 		3A3040F129A8FF97008A0F29 /* LocalizationUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A3040F029A8FF97008A0F29 /* LocalizationUtil.swift */; };
@@ -337,6 +338,7 @@
 		3A185A04297F2C3800F4BDC0 /* lv-LV */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "lv-LV"; path = "lv-LV.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		3A185A05297F2C3800F4BDC0 /* lv-LV */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "lv-LV"; path = "lv-LV.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		3A185A06297F2C3800F4BDC0 /* lv-LV */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = "lv-LV"; path = "lv-LV.lproj/Localizable.stringsdict"; sourceTree = "<group>"; };
+		3A23838D2A297DD200E5AA2E /* ZapButtonModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapButtonModel.swift; sourceTree = "<group>"; };
 		3A25EF132992DA5D008ABE69 /* el-GR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "el-GR"; path = "el-GR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		3A25EF142992DA5D008ABE69 /* el-GR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "el-GR"; path = "el-GR.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		3A25EF152992DA5D008ABE69 /* el-GR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = "el-GR"; path = "el-GR.lproj/Localizable.stringsdict"; sourceTree = "<group>"; };
@@ -903,6 +905,7 @@
 				4CD348EE29C3659D00497EB2 /* ImageUploadModel.swift */,
 				3A48E7AF29DFBE9D006E787E /* MutedThreadsManager.swift */,
 				4C7D09772A0B0CC900943473 /* WalletModel.swift */,
+				3A23838D2A297DD200E5AA2E /* ZapButtonModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1790,6 +1793,7 @@
 				4CE0E2B629A3ED5500DB4CA2 /* InnerTimelineView.swift in Sources */,
 				4C363A8828236948006E126D /* BlocksView.swift in Sources */,
 				4C06670628FCB08600038D2A /* ImageCarousel.swift in Sources */,
+				3A23838E2A297DD200E5AA2E /* ZapButtonModel.swift in Sources */,
 				F79C7FAD29D5E9620000F946 /* EditProfilePictureControl.swift in Sources */,
 				4C9F18E229AA9B6C008C55EC /* CustomizeZapView.swift in Sources */,
 				4C2859602A12A2BE004746F7 /* SupporterBadge.swift in Sources */,

@@ -44,4 +44,5 @@ enum LocalNotificationType: String {
     case mention
     case repost
     case zap
+    case profile_zap
 }

@@ -88,7 +88,7 @@ struct EventActionBar: View {
 
             if let lnurl = self.lnurl {
                 Spacer()
-                ZapButton(damus_state: damus_state, event: event, lnurl: lnurl, zaps: self.damus_state.events.get_cache_data(self.event.id).zaps_model)
+                ZapButton(damus_state: damus_state, target: ZapTarget.note(id: event.id, author: event.pubkey), lnurl: lnurl, zaps: self.damus_state.events.get_cache_data(self.event.id).zaps_model)
             }
 
             Spacer()

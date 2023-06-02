@@ -10,29 +10,25 @@ import SwiftUI
 enum ZappingEventType {
     case failed(ZappingError)
     case got_zap_invoice(String)
+    case sent_from_nwc
 }
 
 enum ZappingError {
     case fetching_invoice
     case bad_lnurl
+    case canceled
+    case send_failed
 }
 
 struct ZappingEvent {
     let is_custom: Bool
     let type: ZappingEventType
-    let event: NostrEvent
-}
-
-class ZapButtonModel: ObservableObject {
-    var invoice: String? = nil
-    @Published var zapping: String = ""
-    @Published var showing_select_wallet: Bool = false
-    @Published var showing_zap_customizer: Bool = false
+    let target: ZapTarget
 }
 
 struct ZapButton: View {
     let damus_state: DamusState
-    let event: NostrEvent
+    let target: ZapTarget
     let lnurl: String
     
     @ObservedObject var zaps: ZapsDataModel
@@ -71,7 +67,7 @@ struct ZapButton: View {
     
     func tap() {
         guard let our_zap else {
-            send_zap(damus_state: damus_state, event: event, lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: damus_state.settings.default_zap_type)
+            send_zap(damus_state: damus_state, target: target, lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: damus_state.settings.default_zap_type)
             return
         }
         
@@ -142,7 +138,7 @@ struct ZapButton: View {
             tap()
         })
         .sheet(isPresented: $button.showing_zap_customizer) {
-            CustomizeZapView(state: damus_state, event: event, lnurl: lnurl)
+            CustomizeZapView(state: damus_state, target: target, lnurl: lnurl)
         }
         .sheet(isPresented: $button.showing_select_wallet, onDismiss: {button.showing_select_wallet = false}) {
             SelectWalletView(default_wallet: damus_state.settings.default_wallet, showingSelectWallet: $button.showing_select_wallet, our_pubkey: damus_state.pubkey, invoice: button.invoice ?? "")
@@ -150,7 +146,7 @@ struct ZapButton: View {
         .onReceive(handle_notify(.zapping)) { notif in
             let zap_ev = notif.object as! ZappingEvent
             
-            guard zap_ev.event.id == self.event.id else {
+            guard zap_ev.target.id == self.target.id else {
                 return
             }
             
@@ -169,6 +165,8 @@ struct ZapButton: View {
                     let wallet = damus_state.settings.default_wallet.model
                     open_with_wallet(wallet: wallet, invoice: inv)
                 }
+            case .sent_from_nwc:
+                break
             }
         }
     }
@@ -180,7 +178,7 @@ struct ZapButton_Previews: PreviewProvider {
         let pending_zap = PendingZap(amount_msat: 1000, target: ZapTarget.note(id: "noteid", author: "author"), request: .normal(test_zap_request), type: .pub, state: .external(.init(state: .fetching_invoice)))
         let zaps = ZapsDataModel([.pending(pending_zap)])
         
-        ZapButton(damus_state: test_damus_state(), event: test_event, lnurl: "lnurl", zaps: zaps)
+        ZapButton(damus_state: test_damus_state(), target: ZapTarget.note(id: test_event.id, author: test_event.pubkey), lnurl: "lnurl", zaps: zaps)
     }
 }
 
@@ -196,14 +194,13 @@ func initial_pending_zap_state(settings: UserSettingsStore) -> PendingZapState {
     return .external(ExtPendingZapState(state: .fetching_invoice))
 }
 
-func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_custom: Bool, comment: String?, amount_sats: Int?, zap_type: ZapType) {
+func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_custom: Bool, comment: String?, amount_sats: Int?, zap_type: ZapType) {
     guard let keypair = damus_state.keypair.to_full() else {
         return
     }
     
     // Only take the first 10 because reasons
     let relays = Array(damus_state.pool.our_descriptors.prefix(10))
-    let target = ZapTarget.note(id: event.id, author: event.pubkey)
     let content = comment ?? ""
     
     guard let mzapreq = make_zap_request_event(keypair: keypair, content: content, relays: relays, target: target, zap_type: zap_type) else {
@@ -231,7 +228,7 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
             DispatchQueue.main.async {
                 remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
                 let typ = ZappingEventType.failed(.bad_lnurl)
-                let ev = ZappingEvent(is_custom: is_custom, type: typ, event: event)
+                let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
                 notify(.zapping, ev)
             }
             return
@@ -245,7 +242,7 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
             DispatchQueue.main.async {
                 remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
                 let typ = ZappingEventType.failed(.fetching_invoice)
-                let ev = ZappingEvent(is_custom: is_custom, type: typ, event: event)
+                let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
                 notify(.zapping, ev)
             }
             return
@@ -258,6 +255,9 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
                 // don't both continuing, user has canceled
                 if case .cancel_fetching_invoice = nwc_state.state {
                     remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
+                    let typ = ZappingEventType.failed(.canceled)
+                    let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
+                    notify(.zapping, ev)
                     return
                 }
                 
@@ -276,6 +276,10 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
                 
                 guard let nwc_req, case .nwc(let pzap_state) = pending_zap_state else {
                     print("nwc: failed to send nwc request for zapreq \(reqid.reqid)")
+
+                    let typ = ZappingEventType.failed(.send_failed)
+                    let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
+                    notify(.zapping, ev)
                     return
                 }
                 
@@ -284,9 +288,13 @@ func send_zap(damus_state: DamusState, event: NostrEvent, lnurl: String, is_cust
                 if pzap_state.update_state(state: .postbox_pending(nwc_req)) {
                     // we don't need to trigger a ZapsDataModel update here
                 }
+
+                let ev = ZappingEvent(is_custom: is_custom, type: .sent_from_nwc, target: target)
+                notify(.zapping, ev)
+
             case .external(let pending_ext):
                 pending_ext.state = .done
-                let ev = ZappingEvent(is_custom: is_custom, type: .got_zap_invoice(inv), event: event)
+                let ev = ZappingEvent(is_custom: is_custom, type: .got_zap_invoice(inv), target: target)
                 notify(.zapping, ev)
             }
         }
