@@ -456,6 +456,11 @@ struct ContentView: View {
                 let damus_state else {
                 return
             }
+
+            if local.type == .profile_zap {
+                open_profile(id: local.event_id)
+                return
+            }
             
             guard let target = damus_state.events.lookup(local.event_id) else {
                 return
@@ -471,6 +476,9 @@ struct ContentView: View {
             case .mention: fallthrough
             case .repost:
                 open_event(ev: target)
+            case .profile_zap:
+                // Handled separately above.
+                break
             }
         }
         .onReceive(handle_notify(.onlyzaps_mode)) { notif in

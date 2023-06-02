@@ -46,7 +46,7 @@ func satsString(_ count: Int, locale: Locale = Locale.current) -> String {
 
 struct CustomizeZapView: View {
     let state: DamusState
-    let event: NostrEvent
+    let target: ZapTarget
     let lnurl: String
     @State var comment: String
     @State var custom_amount: String
@@ -71,9 +71,9 @@ struct CustomizeZapView: View {
         colorScheme == .light ? DamusColors.black : DamusColors.white
     }
     
-    init(state: DamusState, event: NostrEvent, lnurl: String) {
+    init(state: DamusState, target: ZapTarget, lnurl: String) {
         self._comment = State(initialValue: "")
-        self.event = event
+        self.target = target
         self.zap_amounts = get_zap_amount_items(state.settings.default_zap_amount)
         self._error = State(initialValue: nil)
         self._invoice = State(initialValue: "")
@@ -184,7 +184,7 @@ struct CustomizeZapView: View {
             } else {
                 Button(NSLocalizedString("Zap", comment: "Button to send a zap.")) {
                     let amount = custom_amount_sats
-                    send_zap(damus_state: state, event: event, lnurl: lnurl, is_custom: true, comment: comment, amount_sats: amount, zap_type: zap_type)
+                    send_zap(damus_state: state, target: target, lnurl: lnurl, is_custom: true, comment: comment, amount_sats: amount, zap_type: zap_type)
                     self.zapping = true
                 }
                 .disabled(custom_amount_sats == 0 || custom_amount.isEmpty)
@@ -208,7 +208,7 @@ struct CustomizeZapView: View {
         guard zap_ev.is_custom else {
             return
         }
-        guard zap_ev.event.id == event.id else {
+        guard zap_ev.target.id == target.id else {
             return
         }
         
@@ -221,6 +221,10 @@ struct CustomizeZapView: View {
                 self.error = NSLocalizedString("Error fetching lightning invoice", comment: "Message to display when there was an error fetching a lightning invoice while attempting to zap.")
             case .bad_lnurl:
                 self.error = NSLocalizedString("Invalid lightning address", comment: "Message to display when there was an error attempting to zap due to an invalid lightning address.")
+            case .canceled:
+                self.error = NSLocalizedString("Zap attempt from connected wallet was canceled.", comment: "Message to display when a zap from the user's connected wallet was canceled.")
+            case .send_failed:
+                self.error = NSLocalizedString("Zap attempt from connected wallet failed.", comment: "Message to display when sending a zap from the user's connected wallet failed.")
             }
             break
         case .got_zap_invoice(let inv):
@@ -234,6 +238,8 @@ struct CustomizeZapView: View {
                 self.showing_wallet_selector = false
                 dismiss()
             }
+        case .sent_from_nwc:
+            dismiss()
         }
 }
     
@@ -309,7 +315,7 @@ struct CustomizeZapView: View {
     }
     
     var ZapPicker: some View {
-        ZapTypePicker(zap_type: $zap_type, settings: state.settings, profiles: state.profiles, pubkey: event.pubkey)
+        ZapTypePicker(zap_type: $zap_type, settings: state.settings, profiles: state.profiles, pubkey: target.pubkey)
     }
     
     var MainContent: some View {
@@ -326,7 +332,7 @@ extension View {
 
 struct CustomizeZapView_Previews: PreviewProvider {
     static var previews: some View {
-        CustomizeZapView(state: test_damus_state(), event: test_event, lnurl: "")
+        CustomizeZapView(state: test_damus_state(), target: ZapTarget.note(id: test_event.id, author: test_event.pubkey), lnurl: "")
             .frame(width: 400, height: 600)
     }
 }

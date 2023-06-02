@@ -106,6 +106,7 @@ struct ProfileView: View {
     
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
+    @StateObject var zap_button_model: ZapButtonModel = ZapButtonModel()
     
     init(damus_state: DamusState, profile: ProfileModel, followers: FollowersModel) {
         self.damus_state = damus_state
@@ -244,11 +245,7 @@ struct ProfileView: View {
     func lnButton(lnurl: String, profile: Profile) -> some View {
         let button_img = profile.reactions == false ? "zap.fill" : "zap"
         return Button(action: {
-            if damus_state.settings.show_wallet_selector  {
-                showing_select_wallet = true
-            } else {
-                open_with_wallet(wallet: damus_state.settings.default_wallet.model, invoice: lnurl)
-            }
+            zap_button_model.showing_zap_customizer = true
         }) {
             Image(button_img)
                 .foregroundColor(button_img == "zap.fill" ? .orange : Color.primary)
@@ -275,8 +272,37 @@ struct ProfileView: View {
             
         }
         .cornerRadius(24)
-        .sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
-            SelectWalletView(default_wallet: damus_state.settings.default_wallet, showingSelectWallet: $showing_select_wallet, our_pubkey: damus_state.pubkey, invoice: lnurl)
+        .sheet(isPresented: $zap_button_model.showing_zap_customizer) {
+            CustomizeZapView(state: damus_state, target: ZapTarget.profile(self.profile.pubkey), lnurl: lnurl)
+        }
+        .sheet(isPresented: $zap_button_model.showing_select_wallet, onDismiss: {zap_button_model.showing_select_wallet = false}) {
+            SelectWalletView(default_wallet: damus_state.settings.default_wallet, showingSelectWallet: $zap_button_model.showing_select_wallet, our_pubkey: damus_state.pubkey, invoice: zap_button_model.invoice ?? "")
+        }
+        .onReceive(handle_notify(.zapping)) { notif in
+            let zap_ev = notif.object as! ZappingEvent
+
+            guard zap_ev.target.id == self.profile.pubkey else {
+                return
+            }
+
+            guard !zap_ev.is_custom else {
+                return
+            }
+
+            switch zap_ev.type {
+            case .failed:
+                break
+            case .got_zap_invoice(let inv):
+                if damus_state.settings.show_wallet_selector {
+                    zap_button_model.invoice = inv
+                    zap_button_model.showing_select_wallet = true
+                } else {
+                    let wallet = damus_state.settings.default_wallet.model
+                    open_with_wallet(wallet: wallet, invoice: inv)
+                }
+            case .sent_from_nwc:
+                break
+            }
         }
     }
     
