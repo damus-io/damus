@@ -153,7 +153,7 @@ func render_blocks(blocks: [Block]) -> String {
 func parse_mentions(content: String, tags: [[String]]) -> [Block] {
     var out: [Block] = []
     
-    var bs = blocks()
+    var bs = note_blocks()
     bs.num_blocks = 0;
     
     blocks_init(&bs)

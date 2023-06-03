@@ -218,7 +218,7 @@ static int parse_nostr_bech32_nrelay(struct cursor *cur, struct bech32_nrelay *n
 }
 
 int parse_nostr_bech32(struct cursor *cur, struct nostr_bech32 *obj) {
-    const u8 *start, *end;
+    u8 *start, *end;
     
     start = cur->p;
     
@@ -257,7 +257,7 @@ int parse_nostr_bech32(struct cursor *cur, struct nostr_bech32 *obj) {
     }
     
     struct cursor bcur;
-    make_cursor(&bcur, obj->buffer, obj->buflen);
+    make_cursor(obj->buffer, obj->buffer + obj->buflen, &bcur);
     
     switch (obj->type) {
         case NOSTR_BECH32_NOTE:

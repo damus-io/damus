@@ -12,6 +12,28 @@ struct NostrSubscribe {
     let sub_id: String
 }
 
+
+enum NostrRequestType {
+    case typical(NostrRequest)
+    case custom(String)
+    
+    var is_write: Bool {
+        guard case .typical(let req) = self else {
+            return true
+        }
+        
+        return req.is_write
+    }
+    
+    var is_read: Bool {
+        guard case .typical(let req) = self else {
+            return true
+        }
+        
+        return req.is_read
+    }
+}
+
 enum NostrRequest {
     case subscribe(NostrSubscribe)
     case unsubscribe(String)
@@ -31,4 +53,5 @@ enum NostrRequest {
     var is_read: Bool {
         return !is_write
     }
+    
 }

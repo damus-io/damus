@@ -44,6 +44,7 @@
 		4C06670E28FDEAA000038D2A /* utf8.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670D28FDEAA000038D2A /* utf8.c */; };
 		4C0A3F8F280F640A000448DE /* ThreadModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F8E280F640A000448DE /* ThreadModel.swift */; };
 		4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F92280F66F5000448DE /* ReplyMap.swift */; };
+		4C190F202A535FC200027FD5 /* CustomizeZapModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C190F1F2A535FC200027FD5 /* CustomizeZapModel.swift */; };
 		4C198DEF29F88C6B004C165C /* BlurHashEncode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C198DEB29F88C6B004C165C /* BlurHashEncode.swift */; };
 		4C198DF029F88C6B004C165C /* Readme.md in Resources */ = {isa = PBXBuildFile; fileRef = 4C198DEC29F88C6B004C165C /* Readme.md */; };
 		4C198DF129F88C6B004C165C /* License.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4C198DED29F88C6B004C165C /* License.txt */; };
@@ -123,6 +124,8 @@
 		4C3EA67D28FFBBA300C48A62 /* InvoicesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67C28FFBBA200C48A62 /* InvoicesView.swift */; };
 		4C3EA67F28FFC01D00C48A62 /* InvoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67E28FFC01D00C48A62 /* InvoiceView.swift */; };
 		4C42812C298C848200DBF26F /* TranslateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C42812B298C848200DBF26F /* TranslateView.swift */; };
+		4C4F14A72A2A61A30045A0B9 /* NostrScriptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C4F14A62A2A61A30045A0B9 /* NostrScriptTests.swift */; };
+		4C4F14AC2A2A763B0045A0B9 /* primal.wasm in Resources */ = {isa = PBXBuildFile; fileRef = 4C4F14AB2A2A763B0045A0B9 /* primal.wasm */; };
 		4C54AA0729A540BA003E4487 /* NotificationsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C54AA0629A540BA003E4487 /* NotificationsModel.swift */; };
 		4C54AA0A29A55429003E4487 /* EventGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C54AA0929A55429003E4487 /* EventGroup.swift */; };
 		4C54AA0C29A5543C003E4487 /* ZapGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C54AA0B29A5543C003E4487 /* ZapGroup.swift */; };
@@ -174,8 +177,11 @@
 		4C90BD18283A9EE5008EE7EF /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD17283A9EE5008EE7EF /* LoginView.swift */; };
 		4C90BD1A283AA67F008EE7EF /* Bech32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD19283AA67F008EE7EF /* Bech32.swift */; };
 		4C90BD1C283AC38E008EE7EF /* Bech32Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD1B283AC38E008EE7EF /* Bech32Tests.swift */; };
+		4C9146FC2A2A77B300DDEA40 /* NostrScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9146FB2A2A77B300DDEA40 /* NostrScript.swift */; };
+		4C9146FD2A2A87C200DDEA40 /* wasm.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9276E2A2A5D110098A105 /* wasm.c */; };
+		4C9146FE2A2A87C200DDEA40 /* nostrscript.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4F14A92A2A71AB0045A0B9 /* nostrscript.c */; };
+		4C9147002A2A891E00DDEA40 /* error.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C9146FF2A2A891E00DDEA40 /* error.c */; };
 		4C987B57283FD07F0042CE38 /* FollowersModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C987B56283FD07F0042CE38 /* FollowersModel.swift */; };
-		4C9AA1482A44442E003F49FD /* CustomizeZapModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9AA1472A44442E003F49FD /* CustomizeZapModel.swift */; };
 		4C9AA14A2A4587A6003F49FD /* NotificationStatusModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9AA1492A4587A6003F49FD /* NotificationStatusModel.swift */; };
 		4C9BB83129C0ED4F00FC4E37 /* DisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9BB83029C0ED4F00FC4E37 /* DisplayName.swift */; };
 		4C9BB83429C12D9900FC4E37 /* EventProfileName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9BB83329C12D9900FC4E37 /* EventProfileName.swift */; };
@@ -461,6 +467,7 @@
 		4C06670D28FDEAA000038D2A /* utf8.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = utf8.c; sourceTree = "<group>"; };
 		4C0A3F8E280F640A000448DE /* ThreadModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadModel.swift; sourceTree = "<group>"; };
 		4C0A3F92280F66F5000448DE /* ReplyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyMap.swift; sourceTree = "<group>"; };
+		4C190F1F2A535FC200027FD5 /* CustomizeZapModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomizeZapModel.swift; sourceTree = "<group>"; };
 		4C198DEB29F88C6B004C165C /* BlurHashEncode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlurHashEncode.swift; sourceTree = "<group>"; };
 		4C198DEC29F88C6B004C165C /* Readme.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Readme.md; sourceTree = "<group>"; };
 		4C198DED29F88C6B004C165C /* License.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = License.txt; sourceTree = "<group>"; };
@@ -570,6 +577,10 @@
 		4C3EA67E28FFC01D00C48A62 /* InvoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvoiceView.swift; sourceTree = "<group>"; };
 		4C42812B298C848200DBF26F /* TranslateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslateView.swift; sourceTree = "<group>"; };
 		4C4A3A5A288A1B2200453788 /* damus.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = damus.entitlements; sourceTree = "<group>"; };
+		4C4F14A62A2A61A30045A0B9 /* NostrScriptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrScriptTests.swift; sourceTree = "<group>"; };
+		4C4F14A82A2A71AB0045A0B9 /* nostrscript.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrscript.h; sourceTree = "<group>"; };
+		4C4F14A92A2A71AB0045A0B9 /* nostrscript.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nostrscript.c; sourceTree = "<group>"; };
+		4C4F14AB2A2A763B0045A0B9 /* primal.wasm */ = {isa = PBXFileReference; lastKnownFileType = file; name = primal.wasm; path = nostrscript/primal.wasm; sourceTree = SOURCE_ROOT; };
 		4C54AA0629A540BA003E4487 /* NotificationsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsModel.swift; sourceTree = "<group>"; };
 		4C54AA0929A55429003E4487 /* EventGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventGroup.swift; sourceTree = "<group>"; };
 		4C54AA0B29A5543C003E4487 /* ZapGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapGroup.swift; sourceTree = "<group>"; };
@@ -625,8 +636,9 @@
 		4C90BD17283A9EE5008EE7EF /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		4C90BD19283AA67F008EE7EF /* Bech32.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32.swift; sourceTree = "<group>"; };
 		4C90BD1B283AC38E008EE7EF /* Bech32Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32Tests.swift; sourceTree = "<group>"; };
+		4C9146FB2A2A77B300DDEA40 /* NostrScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrScript.swift; sourceTree = "<group>"; };
+		4C9146FF2A2A891E00DDEA40 /* error.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = error.c; sourceTree = "<group>"; };
 		4C987B56283FD07F0042CE38 /* FollowersModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowersModel.swift; sourceTree = "<group>"; };
-		4C9AA1472A44442E003F49FD /* CustomizeZapModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomizeZapModel.swift; sourceTree = "<group>"; };
 		4C9AA1492A4587A6003F49FD /* NotificationStatusModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationStatusModel.swift; sourceTree = "<group>"; };
 		4C9BB83029C0ED4F00FC4E37 /* DisplayName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayName.swift; sourceTree = "<group>"; };
 		4C9BB83329C12D9900FC4E37 /* EventProfileName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventProfileName.swift; sourceTree = "<group>"; };
@@ -635,6 +647,13 @@
 		4CA2EF9F280E37AC0044ACD8 /* TimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineView.swift; sourceTree = "<group>"; };
 		4CA3FA0F29F593D000FDB3C3 /* ZapTypePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapTypePicker.swift; sourceTree = "<group>"; };
 		4CA5588229F33F5B00DC6A45 /* StringCodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringCodable.swift; sourceTree = "<group>"; };
+		4CA9276D2A2A5D110098A105 /* wasm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wasm.h; sourceTree = "<group>"; };
+		4CA9276E2A2A5D110098A105 /* wasm.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wasm.c; sourceTree = "<group>"; };
+		4CA9276F2A2A5D470098A105 /* parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
+		4CA927702A2A5D470098A105 /* debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
+		4CA927712A2A5D480098A105 /* error.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = error.h; sourceTree = "<group>"; };
+		4CA927742A2A5E2F0098A105 /* varint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = varint.h; sourceTree = "<group>"; };
+		4CA927752A2A5E2F0098A105 /* typedefs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = typedefs.h; sourceTree = "<group>"; };
 		4CAAD8AC298851D000060CEA /* AccountDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDeletion.swift; sourceTree = "<group>"; };
 		4CAAD8AF29888AD200060CEA /* RelayConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayConfigView.swift; sourceTree = "<group>"; };
 		4CACA9D4280C31E100D9BBE8 /* ReplyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyView.swift; sourceTree = "<group>"; };
@@ -827,6 +846,16 @@
 		4C06670728FDE62900038D2A /* damus-c */ = {
 			isa = PBXGroup;
 			children = (
+				4C9146FF2A2A891E00DDEA40 /* error.c */,
+				4CA927752A2A5E2F0098A105 /* typedefs.h */,
+				4CA927742A2A5E2F0098A105 /* varint.h */,
+				4CA927702A2A5D470098A105 /* debug.h */,
+				4CA927712A2A5D480098A105 /* error.h */,
+				4CA9276F2A2A5D470098A105 /* parser.h */,
+				4CA9276E2A2A5D110098A105 /* wasm.c */,
+				4CA9276D2A2A5D110098A105 /* wasm.h */,
+				4C4F14A82A2A71AB0045A0B9 /* nostrscript.h */,
+				4C4F14A92A2A71AB0045A0B9 /* nostrscript.c */,
 				4C06670928FDE64700038D2A /* damus.h */,
 				4C06670A28FDE64700038D2A /* damus.c */,
 				4C06670828FDE64700038D2A /* damus-Bridging-Header.h */,
@@ -886,7 +915,7 @@
 		4C0A3F8D280F63FF000448DE /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				4C9AA1462A444422003F49FD /* Zaps */,
+				4C190F1E2A535FC200027FD5 /* Zaps */,
 				4C54AA0829A55416003E4487 /* Notifications */,
 				3AA247FC297E3CFF0090C62D /* RepostsModel.swift */,
 				4C0A3F8E280F640A000448DE /* ThreadModel.swift */,
@@ -933,6 +962,14 @@
 				3A90B1802A4EA3AF00000D94 /* UserSearchCache.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		4C190F1E2A535FC200027FD5 /* Zaps */ = {
+			isa = PBXGroup;
+			children = (
+				4C190F1F2A535FC200027FD5 /* CustomizeZapModel.swift */,
+			);
+			path = Zaps;
 			sourceTree = "<group>";
 		};
 		4C198DEA29F88C6B004C165C /* BlurHash */ = {
@@ -985,6 +1022,14 @@
 				4C30AC7F29A6A53F00E2BD5A /* ProfilePicturesView.swift */,
 			);
 			path = Notifications;
+			sourceTree = "<group>";
+		};
+		4C4F14AA2A2A76270045A0B9 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				4C4F14AB2A2A763B0045A0B9 /* primal.wasm */,
+			);
+			path = Fixtures;
 			sourceTree = "<group>";
 		};
 		4C54AA0829A55416003E4487 /* Notifications */ = {
@@ -1181,12 +1226,12 @@
 			path = Buttons;
 			sourceTree = "<group>";
 		};
-		4C9AA1462A444422003F49FD /* Zaps */ = {
+		4CA927732A2A5DCC0098A105 /* nostrscript */ = {
 			isa = PBXGroup;
 			children = (
-				4C9AA1472A44442E003F49FD /* CustomizeZapModel.swift */,
+				4C9146FB2A2A77B300DDEA40 /* NostrScript.swift */,
 			);
-			path = Zaps;
+			path = nostrscript;
 			sourceTree = "<group>";
 		};
 		4CAAD8AE29888A9B00060CEA /* Relays */ = {
@@ -1313,6 +1358,7 @@
 		4CE6DEDA27F7A08100C66700 = {
 			isa = PBXGroup;
 			children = (
+				4CA927732A2A5DCC0098A105 /* nostrscript */,
 				4C06670728FDE62900038D2A /* damus-c */,
 				4CE6DEE527F7A08100C66700 /* damus */,
 				4CE6DEF627F7A08200C66700 /* damusTests */,
@@ -1367,6 +1413,7 @@
 		4CE6DEF627F7A08200C66700 /* damusTests */ = {
 			isa = PBXGroup;
 			children = (
+				4C4F14AA2A2A76270045A0B9 /* Fixtures */,
 				4C7D097D2A0C58B900943473 /* WalletConnectTests.swift */,
 				F944F56C29EA9CB20067B3BF /* Models */,
 				50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */,
@@ -1391,6 +1438,7 @@
 				3AFBF3FC29FDA7CC00E79C7C /* CustomZapViewTests.swift */,
 				3A5E47C62A4A76C800C0D090 /* TrieTests.swift */,
 				3A90B1822A4EA3C600000D94 /* UserSearchCacheTests.swift */,
+				4C4F14A62A2A61A30045A0B9 /* NostrScriptTests.swift */,
 			);
 			path = damusTests;
 			sourceTree = "<group>";
@@ -1669,6 +1717,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C4F14AC2A2A763B0045A0B9 /* primal.wasm in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1705,6 +1754,7 @@
 				4CDA128A29E9D10C0006FA5A /* SignalView.swift in Sources */,
 				4C5C7E68284ED36500A22DF5 /* SearchHomeModel.swift in Sources */,
 				4C54AA0C29A5543C003E4487 /* ZapGroup.swift in Sources */,
+				4C190F202A535FC200027FD5 /* CustomizeZapModel.swift in Sources */,
 				4C75EFB728049D990006080F /* RelayPool.swift in Sources */,
 				F757933A29D7AECD007DEAC1 /* ImagePicker.swift in Sources */,
 				4CF0ABEE29844B5500D66079 /* AnyEncodable.swift in Sources */,
@@ -1799,7 +1849,6 @@
 				4CC7AAE7297EFA7B00430951 /* Zap.swift in Sources */,
 				4C3BEFD22819DB9B00B3DE84 /* ProfileModel.swift in Sources */,
 				4C7D09682A0AE9B200943473 /* NWCScannerView.swift in Sources */,
-				4C9AA1482A44442E003F49FD /* CustomizeZapModel.swift in Sources */,
 				4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */,
 				7C95CAEE299DCEF1009DCB67 /* KFOptionSetter+.swift in Sources */,
 				4C7D09722A0AEF5E00943473 /* DamusGradient.swift in Sources */,
@@ -1809,6 +1858,7 @@
 				4CC7AAF0297F11C700430951 /* SelectedEventView.swift in Sources */,
 				4CC7AAF8297F1CEE00430951 /* EventProfile.swift in Sources */,
 				64FBD06F296255C400D9D3B2 /* Theme.swift in Sources */,
+				4C9146FC2A2A77B300DDEA40 /* NostrScript.swift in Sources */,
 				4C1A9A2329DDDB8100516EAC /* IconLabel.swift in Sources */,
 				4C3EA64928FF597700C48A62 /* bech32.c in Sources */,
 				4CE879522996B68900F758CC /* RelayType.swift in Sources */,
@@ -1844,6 +1894,7 @@
 				4C9F18E229AA9B6C008C55EC /* CustomizeZapView.swift in Sources */,
 				4C2859602A12A2BE004746F7 /* SupporterBadge.swift in Sources */,
 				4C1A9A2A29DDF54400516EAC /* DamusVideoPlayer.swift in Sources */,
+				4C9146FD2A2A87C200DDEA40 /* wasm.c in Sources */,
 				4C75EFAF28049D350006080F /* NostrFilter.swift in Sources */,
 				4C3EA64C28FF59AC00C48A62 /* bech32_util.c in Sources */,
 				4CE1399029F0661A00AC6A0B /* RepostAction.swift in Sources */,
@@ -1920,6 +1971,7 @@
 				4CB55EF3295E5D59007FD187 /* RecommendedRelayView.swift in Sources */,
 				4CE4F0F229D4FCFA005914DB /* DebouncedOnChange.swift in Sources */,
 				4CF0ABEC29844B4700D66079 /* AnyDecodable.swift in Sources */,
+				4C9146FE2A2A87C200DDEA40 /* nostrscript.c in Sources */,
 				4C5F9118283D88E40052CD1C /* FollowingModel.swift in Sources */,
 				4C1A9A1A29DCA17E00516EAC /* ReplyCounter.swift in Sources */,
 				50B5685329F97CB400A23243 /* CredentialHandler.swift in Sources */,
@@ -1933,6 +1985,7 @@
 				4CACA9D5280C31E100D9BBE8 /* ReplyView.swift in Sources */,
 				F7908E92298B0F0700AB113A /* RelayDetailView.swift in Sources */,
 				4C3A1D332960DB0500558C0F /* Markdown.swift in Sources */,
+				4C9147002A2A891E00DDEA40 /* error.c in Sources */,
 				4CE879552996BAB900F758CC /* RelayPaidDetail.swift in Sources */,
 				501F8C5529FF5EF6001AFC1D /* PersistedProfile.swift in Sources */,
 				4CF0ABD42980996B00D66079 /* Report.swift in Sources */,
@@ -1980,6 +2033,7 @@
 				3AFBF3FD29FDA7CC00E79C7C /* CustomZapViewTests.swift in Sources */,
 				3ACBCB78295FE5C70037388A /* TimeAgoTests.swift in Sources */,
 				DD597CBD2963D85A00C64D32 /* MarkdownTests.swift in Sources */,
+				4C4F14A72A2A61A30045A0B9 /* NostrScriptTests.swift in Sources */,
 				3A3040EF29A8FEE9008A0F29 /* EventDetailBarTests.swift in Sources */,
 				4C3EA67B28FF7B3900C48A62 /* InvoiceTests.swift in Sources */,
 				4C363A9E2828A822006E126D /* ReplyTests.swift in Sources */,

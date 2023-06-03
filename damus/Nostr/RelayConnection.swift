@@ -99,13 +99,23 @@ final class RelayConnection: ObservableObject {
         isConnected = false
         isConnecting = false
     }
-
-    func send(_ req: NostrRequest) {
-        guard let req = make_nostr_req(req) else {
-            print("failed to encode nostr req: \(req)")
-            return
-        }
+    
+    func send_raw(_ req: String) {
         socket.send(.string(req))
+    }
+    
+    func send(_ req: NostrRequestType) {
+        switch req {
+        case .typical(let req):
+            guard let req = make_nostr_req(req) else {
+                print("failed to encode nostr req: \(req)")
+                return
+            }
+            send_raw(req)
+            
+        case .custom(let req):
+            send_raw(req)
+        }
     }
     
     private func receive(event: WebSocketEvent) {

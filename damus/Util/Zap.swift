@@ -360,7 +360,7 @@ func determine_zap_target(_ ev: NostrEvent) -> ZapTarget? {
 }
                    
 func decode_bolt11(_ s: String) -> Invoice? {
-    var bs = blocks()
+    var bs = note_blocks()
     bs.num_blocks = 0
     blocks_init(&bs)
     

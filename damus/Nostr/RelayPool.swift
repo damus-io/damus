@@ -14,8 +14,9 @@ struct RelayHandler {
 }
 
 struct QueuedRequest {
-    let req: NostrRequest
+    let req: NostrRequestType
     let relay: String
+    let skip_ephemeral: Bool
 }
 
 struct SeenEvent: Hashable {
@@ -178,18 +179,18 @@ class RelayPool {
         return c
     }
     
-    func queue_req(r: NostrRequest, relay: String) {
+    func queue_req(r: NostrRequestType, relay: String, skip_ephemeral: Bool) {
         let count = count_queued(relay: relay)
         guard count <= 10 else {
             print("can't queue, too many queued events for \(relay)")
             return
         }
         
-        print("queueing request: \(r) for \(relay)")
-        request_queue.append(QueuedRequest(req: r, relay: relay))
+        print("queueing request for \(relay)")
+        request_queue.append(QueuedRequest(req: r, relay: relay, skip_ephemeral: skip_ephemeral))
     }
     
-    func send(_ req: NostrRequest, to: [String]? = nil, skip_ephemeral: Bool = true) {
+    func send_raw(_ req: NostrRequestType, to: [String]? = nil, skip_ephemeral: Bool = true) {
         let relays = to.map{ get_relays($0) } ?? self.relays
 
         for relay in relays {
@@ -206,12 +207,16 @@ class RelayPool {
             }
             
             guard relay.connection.isConnected else {
-                queue_req(r: req, relay: relay.id)
+                queue_req(r: req, relay: relay.id, skip_ephemeral: skip_ephemeral)
                 continue
             }
             
             relay.connection.send(req)
         }
+    }
+    
+    func send(_ req: NostrRequest, to: [String]? = nil, skip_ephemeral: Bool = true) {
+        send_raw(.typical(req), to: to, skip_ephemeral: skip_ephemeral)
     }
     
     func get_relays(_ ids: [String]) -> [Relay] {
@@ -231,7 +236,7 @@ class RelayPool {
             }
             
             print("running queueing request: \(req.req) for \(relay_id)")
-            self.send(req.req, to: [relay_id])
+            self.send_raw(req.req, to: [relay_id], skip_ephemeral: false)
         }
     }
     

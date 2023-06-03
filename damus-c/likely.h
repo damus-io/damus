@@ -52,8 +52,12 @@
  */
 #define unlikely(cond) __builtin_expect(!!(cond), 0)
 #else
+#ifndef likely
 #define likely(cond) (!!(cond))
+#endif
+#ifndef unlikely
 #define unlikely(cond) (!!(cond))
+#endif
 #endif
 #else /* CCAN_LIKELY_DEBUG versions */
 #include <ccan/str/str.h>

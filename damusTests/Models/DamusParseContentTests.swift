@@ -21,7 +21,7 @@ class DamusParseContentTests: XCTestCase {
     }
     
     func test_damus_parse_content_can_parse_mention_without_white_space_at_front() throws {
-        var bs = blocks()
+        var bs = note_blocks()
         bs.num_blocks = 0;
         
         blocks_init(&bs)
