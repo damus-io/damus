@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ConnectWalletView: View {
     @Environment(\.openURL) private var openURL
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     @ObservedObject var model: WalletModel
     
     @State var scanning: Bool = false
@@ -63,17 +64,13 @@ struct ConnectWalletView: View {
     }
     
     var ConnectWallet: some View {
-        VStack {
-            NavigationLink(destination: WalletScannerView(result: $wallet_scan_result), isActive: $scanning) {
-                EmptyView()
-            }
-            
+        VStack {            
             AlbyButton() {
                 openURL(URL(string:"https://nwc.getalby.com/apps/new?c=Damus")!)
             }
             
             BigButton(NSLocalizedString("Attach Wallet", comment: "Text for button to attach Nostr Wallet Connect lightning wallet.")) {
-                scanning = true
+                navigationCoordinator.push(route: Route.WalletScanner(result: $wallet_scan_result))
             }
             
             if let err = self.error {
