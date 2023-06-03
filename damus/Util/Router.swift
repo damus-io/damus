@@ -31,6 +31,10 @@ enum Route: Hashable {
     case Reactions(reactions: ReactionsModel)
     case Zaps(target: ZapTarget)
     case Search(search: SearchModel)
+    case EULA
+    case Login
+    case CreateAccount
+    case SaveKeys(account: CreateAccountModel)
 
     @ViewBuilder
     func view(navigationCordinator: NavigationCoordinator, damusState: DamusState) -> some View {
@@ -82,6 +86,18 @@ enum Route: Hashable {
             ZapsView(state: damusState, target: target)
         case .Search(let search):
             SearchView(appstate: damusState, search: search)
+        case .EULA:
+            EULAView()
+                .environmentObject(navigationCordinator)
+        case .Login:
+            LoginView()
+                .environmentObject(navigationCordinator)
+        case .CreateAccount:
+            CreateAccountView()
+                .environmentObject(navigationCordinator)
+        case .SaveKeys(let account):
+            SaveKeysView(account: account)
+                .environmentObject(navigationCordinator)
         }
     }
 
@@ -133,6 +149,14 @@ enum Route: Hashable {
             return lhs_target == rhs_target
         case (.Search(let lhs_search), .Search(let rhs_search)):
             return lhs_search.sub_id == rhs_search.sub_id && lhs_search.profiles_subid == rhs_search.profiles_subid
+        case (.EULA, .EULA):
+            return true
+        case (.Login, .Login):
+            return true
+        case (.CreateAccount, .CreateAccount):
+            return true
+        case (.SaveKeys(let lhs_account), .SaveKeys(let rhs_account)):
+            return lhs_account.pubkey == rhs_account.pubkey
         default:
             return false
         }
@@ -201,12 +225,25 @@ enum Route: Hashable {
             hasher.combine("search")
             hasher.combine(search.sub_id)
             hasher.combine(search.profiles_subid)
+        case .EULA:
+            hasher.combine("eula")
+        case .Login:
+            hasher.combine("login")
+        case .CreateAccount:
+            hasher.combine("createAccount")
+        case .SaveKeys(let account):
+            hasher.combine("saveKeys")
+            hasher.combine(account.pubkey)
         }
     }
 }
 
 class NavigationCoordinator: ObservableObject {
     @Published var path = [Route]()
+
+    func push(route: Route) {
+        path.append(route)
+    }
 
     func popToRoot() {
         path = []

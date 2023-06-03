@@ -10,8 +10,7 @@ import SwiftUI
 struct CreateAccountView: View {
     @StateObject var account: CreateAccountModel = CreateAccountModel()
     @StateObject var profileUploadViewModel = ProfileUploadingViewModel()
-    
-    @State var is_done: Bool = false
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     
     func SignupForm<FormContent: View>(@ViewBuilder content: () -> FormContent) -> some View {
         return VStack(alignment: .leading, spacing: 10.0, content: content)
@@ -25,10 +24,6 @@ struct CreateAccountView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            NavigationLink(destination: SaveKeysView(account: account), isActive: $is_done) {
-                EmptyView()
-            }
-            
             VStack {
                 VStack(alignment: .center) {
                     ProfilePictureSelector(pubkey: account.pubkey, viewModel: profileUploadViewModel, callback: uploadedProfilePicture(image_url:))
@@ -63,7 +58,7 @@ struct CreateAccountView: View {
                 .padding(.top, 10)
 
                 Button(action: {
-                    self.is_done = true
+                    navigationCoordinator.push(route: Route.SaveKeys(account: account))
                 }) {
                     HStack {
                         Text("Create account now", comment: "Button to create account.")
