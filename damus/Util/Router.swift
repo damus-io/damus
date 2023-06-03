@@ -35,6 +35,8 @@ enum Route: Hashable {
     case Login
     case CreateAccount
     case SaveKeys(account: CreateAccountModel)
+    case Wallet(wallet: WalletModel)
+    case WalletScanner(result: Binding<WalletScanResult>)
 
     @ViewBuilder
     func view(navigationCordinator: NavigationCoordinator, damusState: DamusState) -> some View {
@@ -98,6 +100,11 @@ enum Route: Hashable {
         case .SaveKeys(let account):
             SaveKeysView(account: account)
                 .environmentObject(navigationCordinator)
+        case .Wallet(let walletModel):
+            WalletView(damus_state: damusState, model: walletModel)
+                .environmentObject(navigationCordinator)
+        case .WalletScanner(let walletScanResult):
+            WalletScannerView(result: walletScanResult)
         }
     }
 
@@ -157,6 +164,10 @@ enum Route: Hashable {
             return true
         case (.SaveKeys(let lhs_account), .SaveKeys(let rhs_account)):
             return lhs_account.pubkey == rhs_account.pubkey
+        case (.Wallet(_), .Wallet(_)):
+            return true
+        case (.WalletScanner(_), .WalletScanner(_)):
+            return true
         default:
             return false
         }
@@ -234,6 +245,10 @@ enum Route: Hashable {
         case .SaveKeys(let account):
             hasher.combine("saveKeys")
             hasher.combine(account.pubkey)
+        case .Wallet(_):
+            hasher.combine("wallet")
+        case .WalletScanner(_):
+            hasher.combine("walletScanner")
         }
     }
 }
