@@ -33,13 +33,11 @@ enum ParsedKey {
 }
 
 struct LoginView: View {
-    @State private var create_account = false
     @State var key: String = ""
     @State var is_pubkey: Bool = false
     @State var error: String? = nil
     @State private var credential_handler = CredentialHandler()
-    
-    @Binding var accepted: Bool
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
 
     func get_error(parsed_key: ParsedKey?) -> String? {
         if self.error != nil {
@@ -55,12 +53,6 @@ struct LoginView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            if accepted {
-                NavigationLink(destination: CreateAccountView(), isActive: $create_account) {
-                    EmptyView()
-                }
-            }
-            
             VStack {
                 SignInHeader()
                     .padding(.top, 100)
@@ -107,7 +99,8 @@ struct LoginView: View {
                     .padding(.top, 10)
                 }
 
-                CreateAccountPrompt(create_account: $create_account)
+                CreateAccountPrompt()
+                    .environmentObject(navigationCoordinator)
                     .padding(.top, 10)
 
                 Spacer()
@@ -337,14 +330,14 @@ struct SignInEntry: View {
 }
 
 struct CreateAccountPrompt: View {
-    @Binding var create_account: Bool
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     var body: some View {
         HStack {
             Text("New to Nostr?", comment: "Ask the user if they are new to Nostr")
                 .foregroundColor(Color("DamusMediumGrey"))
             
             Button(NSLocalizedString("Create account", comment: "Button to navigate to create account view.")) {
-                create_account.toggle()
+                navigationCoordinator.push(route: Route.CreateAccount)
             }
             
             Spacer()
@@ -358,8 +351,8 @@ struct LoginView_Previews: PreviewProvider {
         let pubkey = "npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955"
         let bech32_pubkey = "KeyInput"
         Group {
-            LoginView(key: pubkey, accepted: .constant(true))
-            LoginView(key: bech32_pubkey, accepted: .constant(true))
+            LoginView(key: pubkey)
+            LoginView(key: bech32_pubkey)
         }
     }
 }

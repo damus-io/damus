@@ -56,18 +56,13 @@ By using our Application, you signify your acceptance of this EULA. If you do no
 """
 
 struct EULAView: View {
-    @State private var login = false
-    @State var accepted = false
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
 
     var body: some View {
         ZStack {
             ScrollView {
-                NavigationLink(destination: LoginView(accepted: $accepted), isActive: $login) {
-                    EmptyView()
-                }
-                
                 Text(Markdown.parse(content: eula))
                     .padding()
             }
@@ -96,8 +91,7 @@ struct EULAView: View {
                     }
                     
                     Button(action: {
-                        accepted = true
-                        login.toggle()
+                        navigationCoordinator.push(route: Route.Login)
                     }) {
                         HStack {
                             Text("Accept", comment:  "Button to accept the end user license agreement before being allowed into the app.")
