@@ -22,10 +22,11 @@ enum Route: Hashable {
     case DMChat(dms: DirectMessageModel)
     case UserRelays(relays: [String])
     case KeySettings(keypair: Keypair)
-    case AppearanceSettings(settings: UserSettingsStore) // Observed object.. is this an issue?
-    case NotificationSettings(settings: UserSettingsStore) // Observed object.. is this an issue?
-    case ZapSettings(settings: UserSettingsStore) // Observed object.. is this an issue?
-    case TranslationSettings(settings: UserSettingsStore) // Observed object.. is this an issue?
+    case AppearanceSettings(settings: UserSettingsStore)
+    case NotificationSettings(settings: UserSettingsStore)
+    case ZapSettings(settings: UserSettingsStore)
+    case TranslationSettings(settings: UserSettingsStore)
+    case SearchSettings(settings: UserSettingsStore)
     case Thread(thread: ThreadModel)
     case Reposts(reposts: RepostsModel)
     case Reactions(reactions: ReactionsModel)
@@ -43,8 +44,10 @@ enum Route: Hashable {
         switch self {
         case .ProfileByKey(let pubkey):
             ProfileView(damus_state: damusState, pubkey: pubkey)
+                .environmentObject(navigationCordinator)
         case .Profile(let profile, let followers):
             ProfileView(damus_state: damusState, profile: profile, followers: followers)
+                .environmentObject(navigationCordinator)
         case .Followers(let environmentObject):
             FollowersView(damus_state: damusState)
                 .environmentObject(environmentObject)
@@ -60,6 +63,7 @@ enum Route: Hashable {
             RelayConfigView(state: damusState)
         case .Bookmarks:
             BookmarksView(state: damusState)
+                .environmentObject(navigationCordinator)
         case .Config:
             ConfigView(state: damusState)
         case .EditMetadata:
@@ -78,6 +82,8 @@ enum Route: Hashable {
             ZapSettingsView(settings: settings)
         case .TranslationSettings(let settings):
             NotificationSettingsView(settings: settings)
+        case .SearchSettings(let settings):
+            SearchSettingsView(settings: settings)
         case .Thread(let thread):
             ThreadView(state: damusState, thread: thread)
         case .Reposts(let reposts):
@@ -88,6 +94,7 @@ enum Route: Hashable {
             ZapsView(state: damusState, target: target)
         case .Search(let search):
             SearchView(appstate: damusState, search: search)
+                .environmentObject(navigationCordinator)
         case .EULA:
             EULAView()
                 .environmentObject(navigationCordinator)
@@ -145,6 +152,8 @@ enum Route: Hashable {
         case (.ZapSettings(_), .ZapSettings(_)):
             return true
         case (.TranslationSettings(_), .TranslationSettings(_)):
+            return true
+        case (.SearchSettings(_), .SearchSettings(_)):
             return true
         case (.Thread(let lhs_threadModel), .Thread(thread: let rhs_threadModel)):
             return lhs_threadModel.event.id == rhs_threadModel.event.id
@@ -219,6 +228,8 @@ enum Route: Hashable {
             hasher.combine("zapSettings")
         case .TranslationSettings(_):
             hasher.combine("translationSettings")
+        case .SearchSettings(_):
+            hasher.combine("searchSettings")
         case .Thread(let threadModel):
             hasher.combine("thread")
             hasher.combine(threadModel.event.id)

@@ -11,9 +11,11 @@ struct SearchView: View {
     let appstate: DamusState
     @StateObject var search: SearchModel
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     
     var body: some View {
         TimelineView(events: search.events, loading: $search.loading, damus: appstate, show_friend_icon: true, filter: { _ in true })
+            .environmentObject(navigationCoordinator)
             .navigationBarTitle(describe_search(search.search))
             .onReceive(handle_notify(.switched_timeline)) { obj in
                 dismiss()

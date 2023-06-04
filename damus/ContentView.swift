@@ -143,6 +143,7 @@ struct ContentView: View {
         ZStack {
             if let damus = self.damus_state {
                 TimelineView(events: home.events, loading: .constant(false), damus: damus, show_friend_icon: false, filter: filter)
+                    .environmentObject(navigationCoordinator)
             }
         }
     }
@@ -163,10 +164,12 @@ struct ContentView: View {
             case .search:
                 if #available(iOS 16.0, *) {
                     SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
+                        .environmentObject(navigationCoordinator)
                         .scrollDismissesKeyboard(.immediately)
                 } else {
                     // Fallback on earlier versions
                     SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
+                        .environmentObject(navigationCoordinator)
                 }
                 
             case .home:
@@ -174,9 +177,11 @@ struct ContentView: View {
                 
             case .notifications:
                 NotificationsView(state: damus, notifications: home.notifications)
+                    .environmentObject(navigationCoordinator)
                 
             case .dms:
                 DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings)
+                    .environmentObject(navigationCoordinator)
             }
         }
         .navigationBarTitle(timeline_name(selected_timeline), displayMode: .inline)
@@ -483,8 +488,8 @@ struct ContentView: View {
             switch local.type {
             case .dm:
                 selected_timeline = .dms
-                damus_state.dms.open_dm_by_pk(target.pubkey)
-                
+                damus_state.dms.set_active_dm(target.pubkey)
+                navigationCoordinator.push(route: Route.DMChat(dms: damus_state.dms.active_model))
             case .like: fallthrough
             case .zap: fallthrough
             case .mention: fallthrough
