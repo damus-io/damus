@@ -1147,6 +1147,27 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
     }
 }
 
+func render_notification_content_preview(cache: EventCache, ev: NostrEvent, profiles: Profiles, privkey: String?) -> String {
+    
+    let prefix_len = 50
+    let artifacts = cache.get_cache_data(ev.id).artifacts.artifacts ?? render_note_content(ev: ev, profiles: profiles, privkey: privkey)
+    
+    // special case for longform events
+    if ev.known_kind == .longform {
+        let longform = LongformEvent(event: ev)
+        return longform.title ?? longform.summary ?? "Longform Event"
+    }
+    
+    switch artifacts {
+    case .parts:
+        // we should never hit this until we have more note types built out of parts
+        // since we handle this case above in known_kind == .longform
+        return String(ev.content.prefix(prefix_len))
+        
+    case .separated(let artifacts):
+        return String(NSAttributedString(artifacts.content.attributed).string.prefix(prefix_len))
+    }
+}
     
 func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
     guard let type = ev.known_kind else {
@@ -1172,21 +1193,20 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
     if type == .text && damus_state.settings.mention_notification {
         let blocks = ev.blocks(damus_state.keypair.privkey).blocks
         for case .mention(let mention) in blocks where mention.ref.ref_id == damus_state.keypair.pubkey {
-            let content = NSAttributedString(render_note_content(ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content.attributed).string
-            
-            let notify = LocalNotification(type: .mention, event: ev, target: ev, content: content)
+            let content_preview = render_notification_content_preview(cache: damus_state.events, ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+            let notify = LocalNotification(type: .mention, event: ev, target: ev, content: content_preview)
             create_local_notification(profiles: damus_state.profiles, notify: notify )
         }
     } else if type == .boost && damus_state.settings.repost_notification, let inner_ev = ev.get_inner_event(cache: damus_state.events) {
-        let content = NSAttributedString(render_note_content(ev: inner_ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content.attributed).string
-        let notify = LocalNotification(type: .repost, event: ev, target: inner_ev, content: content)
+        let content_preview = render_notification_content_preview(cache: damus_state.events, ev: inner_ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+        let notify = LocalNotification(type: .repost, event: ev, target: inner_ev, content: content_preview)
         create_local_notification(profiles: damus_state.profiles, notify: notify)
     } else if type == .like && damus_state.settings.like_notification,
               let evid = ev.referenced_ids.last?.ref_id,
               let liked_event = damus_state.events.lookup(evid)
     {
-        let content = NSAttributedString(render_note_content(ev: liked_event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content.attributed).string
-        let notify = LocalNotification(type: .like, event: ev, target: liked_event, content: content)
+        let content_preview = render_notification_content_preview(cache: damus_state.events, ev: liked_event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+        let notify = LocalNotification(type: .like, event: ev, target: liked_event, content: content_preview)
         create_local_notification(profiles: damus_state.profiles, notify: notify)
     }
 

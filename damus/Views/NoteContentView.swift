@@ -33,8 +33,8 @@ struct NoteContentView: View {
     @ObservedObject var artifacts_model: NoteArtifactsModel
     @ObservedObject var preview_model: PreviewModel
     
-    var artifacts: NoteArtifacts {
-        return self.artifacts_model.state.artifacts ?? .just_content(event.get_content(damus_state.keypair.privkey))
+    var note_artifacts: NoteArtifacts {
+        return self.artifacts_model.state.artifacts ?? .separated(.just_content(event.get_content(damus_state.keypair.privkey)))
     }
     
     init(damus_state: DamusState, event: NostrEvent, show_images: Bool, size: EventViewKind, options: EventViewOptions) {
@@ -67,27 +67,27 @@ struct NoteContentView: View {
         return LinkViewRepresentable(meta: .linkmeta(cached))
     }
     
-    var truncatedText: some View {
+    func truncatedText(content: CompatibleText) -> some View {
         Group {
             if truncate {
-                TruncatedText(text: artifacts.content)
+                TruncatedText(text: content)
                     .font(eventviewsize_to_font(size))
             } else {
-                artifacts.content.text
+                content.text
                     .font(eventviewsize_to_font(size))
             }
         }
     }
     
-    var invoicesView: some View {
-        InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: artifacts.invoices, settings: damus_state.settings)
+    func invoicesView(invoices: [Invoice]) -> some View {
+        InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: invoices, settings: damus_state.settings)
     }
 
     var translateView: some View {
         TranslateView(damus_state: damus_state, event: event, size: self.size)
     }
     
-    var previewView: some View {
+    func previewView(links: [URL]) -> some View {
         Group {
             if let preview = self.preview, show_images {
                 if let preview_height {
@@ -96,14 +96,14 @@ struct NoteContentView: View {
                 } else {
                     preview
                 }
-            } else if let link = artifacts.links.first {
+            } else if let link = links.first {
                 LinkViewRepresentable(meta: .url(link))
                     .frame(height: 50)
             }
         }
     }
     
-    var MainContent: some View {
+    func MainContent(artifacts: NoteArtifactsSeparated) -> some View {
         VStack(alignment: .leading) {
             if size == .selected {
                 if with_padding {
@@ -114,10 +114,10 @@ struct NoteContentView: View {
                 }
             } else {
                 if with_padding {
-                    truncatedText
+                    truncatedText(content: artifacts.content)
                         .padding(.horizontal)
                 } else {
-                    truncatedText
+                    truncatedText(content: artifacts.content)
                 }
             }
 
@@ -143,17 +143,17 @@ struct NoteContentView: View {
             
             if artifacts.invoices.count > 0 {
                 if with_padding {
-                    invoicesView
+                    invoicesView(invoices: artifacts.invoices)
                         .padding(.horizontal)
                 } else {
-                    invoicesView
+                    invoicesView(invoices: artifacts.invoices)
                 }
             }
             
             if with_padding {
-                previewView.padding(.horizontal)
+                previewView(links: artifacts.links).padding(.horizontal)
             } else {
-                previewView
+                previewView(links: artifacts.links)
             }
             
         }
@@ -183,8 +183,38 @@ struct NoteContentView: View {
         }
     }
     
+    func artifactPartsView(_ parts: [ArtifactPart]) -> some View {
+        
+        LazyVStack {
+            ForEach(parts.indices, id: \.self) { ind in
+                let part = parts[ind]
+                switch part {
+                case .text(let txt):
+                    txt
+                        .padding(.horizontal)
+                case .invoice(let inv):
+                    InvoiceView(our_pubkey: damus_state.pubkey, invoice: inv, settings: damus_state.settings)
+                        .padding(.horizontal)
+                case .media(let media):
+                    Text("media \(media.url.absoluteString)")
+                }
+            }
+        }
+    }
+    
+    var ArtifactContent: some View {
+        Group {
+            switch self.note_artifacts {
+            case .parts(let parts):
+                artifactPartsView(parts.parts)
+            case .separated(let separated):
+                MainContent(artifacts: separated)
+            }
+        }
+    }
+    
     var body: some View {
-        MainContent
+        ArtifactContent
             .onReceive(handle_notify(.profile_updated)) { notif in
                 let profile = notif.object as! ProfileUpdate
                 let blocks = event.blocks(damus_state.keypair.privkey)
@@ -255,8 +285,53 @@ struct NoteContentView_Previews: PreviewProvider {
     }
 }
 
-struct NoteArtifacts: Equatable {
-    static func == (lhs: NoteArtifacts, rhs: NoteArtifacts) -> Bool {
+
+enum NoteArtifacts {
+    case separated(NoteArtifactsSeparated)
+    case parts(NoteArtifactsParts)
+    
+    var images: [URL] {
+        switch self {
+        case .separated(let arts):
+            return arts.images
+        case .parts(let parts):
+            return parts.parts.reduce(into: [URL]()) { acc, part in
+                guard case .media(let m) = part,
+                      case .image(let url) = m
+                else { return }
+                
+                acc.append(url)
+            }
+        }
+    }
+}
+
+enum ArtifactPart {
+    case text(Text)
+    case media(MediaUrl)
+    case invoice(Invoice)
+    
+    var is_text: Bool {
+        switch self {
+        case .text:    return true
+        case .media:   return false
+        case .invoice: return false
+        }
+    }
+}
+
+class NoteArtifactsParts {
+    var parts: [ArtifactPart]
+    var words: Int
+    
+    init(parts: [ArtifactPart], words: Int) {
+        self.parts = parts
+        self.words = words
+    }
+}
+
+struct NoteArtifactsSeparated: Equatable {
+    static func == (lhs: NoteArtifactsSeparated, rhs: NoteArtifactsSeparated) -> Bool {
         return lhs.content == rhs.content
     }
     
@@ -277,9 +352,9 @@ struct NoteArtifacts: Equatable {
         return urls.compactMap { url in url.is_link }
     }
     
-    static func just_content(_ content: String) -> NoteArtifacts {
+    static func just_content(_ content: String) -> NoteArtifactsSeparated {
         let txt = CompatibleText(attributed: AttributedString(stringLiteral: content))
-        return NoteArtifacts(content: txt, words: 0, urls: [], invoices: [])
+        return NoteArtifactsSeparated(content: txt, words: 0, urls: [], invoices: [])
     }
 }
 
@@ -308,49 +383,93 @@ enum NoteArtifactState {
     }
 }
 
+func note_artifact_is_separated(kind: NostrKind?) -> Bool {
+    return kind != .longform
+}
+
 func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -> NoteArtifacts {
     let blocks = ev.blocks(privkey)
     
-    return render_blocks(blocks: blocks, profiles: profiles)
+    if ev.known_kind == .longform {
+        return .parts(render_blocks_parted(blocks: blocks, profiles: profiles))
+    }
+    
+    return .separated(render_blocks(blocks: blocks, profiles: profiles))
 }
 
-func render_blocks_longform(blocks bs: Blocks) -> NoteArtifacts {
-    var invoices: [Invoice] = []
-    var urls: [UrlType] = []
+fileprivate func artifact_part_last_text_ind(parts: [ArtifactPart]) -> (Int, Text)? {
+    let ind = parts.count - 1
+    if ind < 0 {
+        return nil
+    }
+    
+    guard case .text(let txt) = parts[safe: ind] else {
+        return nil
+    }
+    
+    return (ind, txt)
+}
+
+func render_blocks_parted(blocks bs: Blocks, profiles: Profiles) -> NoteArtifactsParts {
     let blocks = bs.blocks
     
-    var ind: Int = -1
-    let txt: CompatibleText = blocks.reduce(CompatibleText()) { str, block in
-        ind = ind + 1
+    let new_parts = NoteArtifactsParts(parts: [], words: bs.words)
+    
+    return blocks.reduce(into: new_parts) { parts, block in
         
         switch block {
         case .mention(let m):
-            return str + mention_str(m, profiles: profiles)
-        case .text(let txt):
-            return str + reduce_text_block(blocks: blocks, ind: ind, txt: txt, one_note_ref: false)
+            guard let (last_ind, txt) = artifact_part_last_text_ind(parts: parts.parts) else {
+                parts.parts.append(.text(mention_str(m, profiles: profiles).text))
+                return
+            }
+            parts.parts[last_ind] = .text(txt + mention_str(m, profiles: profiles).text)
+            
+        case .text(let str):
+            guard let (last_ind, txt) = artifact_part_last_text_ind(parts: parts.parts) else {
+                // TODO: (jb55) md is longform specific
+                let md = Markdown.parse(content: str)
+                parts.parts.append(.text(Text(md)))
+                return
+            }
+            
+            parts.parts[last_ind] = .text(txt + Text(str))
             
         case .relay(let relay):
-            return str + CompatibleText(stringLiteral: relay)
+            guard let (last_ind, txt) = artifact_part_last_text_ind(parts: parts.parts) else {
+                parts.parts.append(.text(Text(relay)))
+                return
+            }
+            
+            parts.parts[last_ind] = .text(txt + Text(relay))
             
         case .hashtag(let htag):
-            return str + hashtag_str(htag)
+            guard let (last_ind, txt) = artifact_part_last_text_ind(parts: parts.parts) else {
+                parts.parts.append(.text(hashtag_str(htag).text))
+                return
+            }
+            
+            parts.parts[last_ind] = .text(txt + hashtag_str(htag).text)
+            
         case .invoice(let invoice):
-            invoices.append(invoice)
-            return str
+            parts.parts.append(.invoice(invoice))
+            return
+            
         case .url(let url):
             let url_type = classify_url(url)
             switch url_type {
-            case .media:
-                urls.append(url_type)
-                return str
+            case .media(let media_url):
+                parts.parts.append(.media(media_url))
             case .link(let url):
-                urls.append(url_type)
-                return str + url_str(url)
+                guard let (last_ind, txt) = artifact_part_last_text_ind(parts: parts.parts) else {
+                    parts.parts.append(.text(url_str(url).text))
+                    return
+                }
+                
+                parts.parts[last_ind] = .text(txt + url_str(url).text)
             }
         }
     }
-
-    return NoteArtifacts(content: txt, words: bs.words, urls: urls, invoices: invoices)
 }
 
 func reduce_text_block(blocks: [Block], ind: Int, txt: String, one_note_ref: Bool) -> CompatibleText {
@@ -373,7 +492,7 @@ func reduce_text_block(blocks: [Block], ind: Int, txt: String, one_note_ref: Boo
     return CompatibleText(stringLiteral: trimmed)
 }
 
-func render_blocks(blocks bs: Blocks, profiles: Profiles) -> NoteArtifacts {
+func render_blocks(blocks bs: Blocks, profiles: Profiles) -> NoteArtifactsSeparated {
     var invoices: [Invoice] = []
     var urls: [UrlType] = []
     let blocks = bs.blocks
@@ -416,7 +535,7 @@ func render_blocks(blocks bs: Blocks, profiles: Profiles) -> NoteArtifacts {
         }
     }
 
-    return NoteArtifacts(content: txt, words: bs.words, urls: urls, invoices: invoices)
+    return NoteArtifactsSeparated(content: txt, words: bs.words, urls: urls, invoices: invoices)
 }
 
 enum MediaUrl {
