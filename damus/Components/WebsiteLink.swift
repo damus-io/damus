@@ -23,6 +23,8 @@ struct WebsiteLink: View {
                 Text(link_text)
                     .font(.footnote)
                     .foregroundColor(.accentColor)
+                    .truncationMode(.tail)
+                    .lineLimit(1)
             })
         }
     }

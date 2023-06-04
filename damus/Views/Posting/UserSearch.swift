@@ -58,7 +58,7 @@ struct UserSearch: View {
     }
 
     private func createUserTag(for user: SearchedUser, with pk: String) -> NSMutableAttributedString {
-        let name = Profile.displayName(profile: user.profile, pubkey: pk).username
+        let name = Profile.displayName(profile: user.profile, pubkey: pk).username.truncate(maxLength: 50)
         let tagString = "@\(name)\u{200B} "
 
         let tagAttributedString = NSMutableAttributedString(string: tagString,

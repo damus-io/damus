@@ -509,7 +509,7 @@ struct ContentView: View {
         }, message: {
             if let pubkey = self.muting {
                 let profile = damus_state!.profiles.lookup(id: pubkey)
-                let name = Profile.displayName(profile: profile, pubkey: pubkey).username
+                let name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
                 Text("\(name) has been muted", comment: "Alert message that informs a user was muted.")
             } else {
                 Text("User has been muted", comment: "Alert message that informs a user was d.")
@@ -569,7 +569,7 @@ struct ContentView: View {
         }, message: {
             if let pubkey = muting {
                 let profile = damus_state?.profiles.lookup(id: pubkey)
-                let name = Profile.displayName(profile: profile, pubkey: pubkey).username
+                let name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
                 Text("Mute \(name)?", comment: "Alert message prompt to ask if a user should be muted.")
             } else {
                 Text("Could not find user to mute...", comment: "Alert message to indicate that the muted user could not be found.")

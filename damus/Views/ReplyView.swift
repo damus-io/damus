@@ -22,7 +22,7 @@ struct ReplyView: View {
                     .map { pubkey in
                         let pk = pubkey.ref_id
                         let prof = damus.profiles.lookup(id: pk)
-                        return "@" + Profile.displayName(profile: prof, pubkey: pk).username
+                        return "@" + Profile.displayName(profile: prof, pubkey: pk).username.truncate(maxLength: 50)
                     }
                     .joined(separator: " ")
                 if names.isEmpty {

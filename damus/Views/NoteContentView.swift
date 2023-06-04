@@ -231,7 +231,7 @@ func mention_str(_ m: Mention, profiles: Profiles) -> CompatibleText {
     case .pubkey:
         let pk = m.ref.ref_id
         let profile = profiles.lookup(id: pk)
-        let disp = Profile.displayName(profile: profile, pubkey: pk).username
+        let disp = Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 50)
         var attributedString = AttributedString(stringLiteral: "@\(disp)")
         attributedString.link = URL(string: "damus:\(encode_pubkey_uri(m.ref))")
         attributedString.foregroundColor = DamusColors.purple

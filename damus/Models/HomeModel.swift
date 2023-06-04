@@ -1112,7 +1112,7 @@ func zap_notification_body(profiles: Profiles, zap: Zap, locale: Locale = Locale
     let profile = profiles.lookup(id: pk)
     let sats = NSNumber(value: (Double(zap.invoice.amount) / 1000.0))
     let formattedSats = format_msats_abbrev(zap.invoice.amount)
-    let name = Profile.displayName(profile: profile, pubkey: pk).display_name
+    let name = Profile.displayName(profile: profile, pubkey: pk).display_name.truncate(maxLength: 50)
 
     if src.content.isEmpty {
         let format = localizedStringFormat(key: "zap_notification_no_message", locale: locale)
