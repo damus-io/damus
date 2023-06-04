@@ -71,7 +71,7 @@ class damusTests: XCTestCase {
         [my website](https://jb55.com)
         """
         
-        let parsed = parse_mentions(content: md, tags: [])
+        let parsed = parse_mentions(content: md, tags: []).blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 1)
@@ -79,7 +79,7 @@ class damusTests: XCTestCase {
     }
     
     func testParseUrlUpper() {
-        let parsed = parse_mentions(content: "a HTTPS://jb55.COM b", tags: [])
+        let parsed = parse_mentions(content: "a HTTPS://jb55.COM b", tags: []).blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -114,7 +114,7 @@ class damusTests: XCTestCase {
     }
     
     func testParseUrl() {
-        let parsed = parse_mentions(content: "a https://jb55.com b", tags: [])
+        let parsed = parse_mentions(content: "a https://jb55.com b", tags: []).blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -122,7 +122,7 @@ class damusTests: XCTestCase {
     }
     
     func testParseUrlEnd() {
-        let parsed = parse_mentions(content: "a https://jb55.com", tags: [])
+        let parsed = parse_mentions(content: "a https://jb55.com", tags: []).blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 2)
@@ -131,7 +131,7 @@ class damusTests: XCTestCase {
     }
     
     func testParseUrlStart() {
-        let parsed = parse_mentions(content: "https://jb55.com br", tags: [])
+        let parsed = parse_mentions(content: "https://jb55.com br", tags: []).blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 2)
@@ -141,7 +141,7 @@ class damusTests: XCTestCase {
     
     func testNoParseUrlWithOnlyWhitespace() {
         let testString = "https://  "
-        let parsed = parse_mentions(content: testString, tags: [])
+        let parsed = parse_mentions(content: testString, tags: []).blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed[0].is_text, testString)
@@ -149,14 +149,14 @@ class damusTests: XCTestCase {
     
     func testNoParseUrlTrailingCharacters() {
         let testString = "https://foo.bar, "
-        let parsed = parse_mentions(content: testString, tags: [])
+        let parsed = parse_mentions(content: testString, tags: []).blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed[0].is_url?.absoluteString, "https://foo.bar")
     }
     
     func testParseMentionBlank() {
-        let parsed = parse_mentions(content: "", tags: [["e", "event_id"]])
+        let parsed = parse_mentions(content: "", tags: [["e", "event_id"]]).blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 0)
@@ -178,7 +178,7 @@ class damusTests: XCTestCase {
     }
     
     func testParseHashtag() {
-        let parsed = parse_mentions(content: "some hashtag #bitcoin derp", tags: [])
+        let parsed = parse_mentions(content: "some hashtag #bitcoin derp", tags: []).blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -188,7 +188,7 @@ class damusTests: XCTestCase {
     }
     
     func testHashtagWithComma() {
-        let parsed = parse_mentions(content: "some hashtag #bitcoin, cool", tags: [])
+        let parsed = parse_mentions(content: "some hashtag #bitcoin, cool", tags: []).blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -198,7 +198,7 @@ class damusTests: XCTestCase {
     }
     
     func testHashtagWithEmoji() {
-        let parsed = parse_mentions(content: "some hashtag #bitcoin☕️ cool", tags: [])
+        let parsed = parse_mentions(content: "some hashtag #bitcoin☕️ cool", tags: []).blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -208,7 +208,7 @@ class damusTests: XCTestCase {
     }
     
     func testParseHashtagEnd() {
-        let parsed = parse_mentions(content: "some hashtag #bitcoin", tags: [])
+        let parsed = parse_mentions(content: "some hashtag #bitcoin", tags: []).blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 2)
@@ -217,7 +217,7 @@ class damusTests: XCTestCase {
     }
     
     func testParseMentionOnlyText() {
-        let parsed = parse_mentions(content: "there is no mention here", tags: [["e", "event_id"]])
+        let parsed = parse_mentions(content: "there is no mention here", tags: [["e", "event_id"]]).blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 1)

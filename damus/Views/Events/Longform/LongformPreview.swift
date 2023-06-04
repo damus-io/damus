@@ -24,22 +24,20 @@ struct LongformPreview: View {
     
     var body: some View {
         EventShell(state: state, event: event.event, options: [.no_mentions]) {
-            NavigationLink(destination: LongformView(event: event)) {
-                VStack(alignment: .leading, spacing: 10) {
-                    Text(event.title ?? "Untitled")
-                        .font(.title)
-                    
-                    Text(event.summary ?? "")
-                        .foregroundColor(.gray)
-                    
-                    if case .loaded(let arts) = artifacts.state {
-                        Words(arts.words)
-                            .font(.footnote)
-                    }
+            VStack(alignment: .leading, spacing: 10) {
+                Text(event.title ?? "Untitled")
+                    .font(.title)
+                
+                Text(event.summary ?? "")
+                    .foregroundColor(.gray)
+                
+                if case .loaded(let arts) = artifacts.state,
+                   case .parts(let parts) = arts
+                {
+                    Words(parts.words).font(.footnote)
                 }
-                .padding()
             }
-            .buttonStyle(.plain)
+            .padding()
         }
     }
 }

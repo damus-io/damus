@@ -12,6 +12,7 @@ enum EventViewKind {
     case small
     case normal
     case selected
+    case title
     case subheadline
 }
 
@@ -109,6 +110,8 @@ func eventviewsize_to_font(_ size: EventViewKind) -> Font {
         return .body
     case .selected:
         return .custom("selected", size: 21.0)
+    case .title:
+        return .title
     case .subheadline:
         return .subheadline
     }
@@ -124,6 +127,8 @@ func eventviewsize_to_uifont(_ size: EventViewKind) -> UIFont {
         return .preferredFont(forTextStyle: .title2)
     case .subheadline:
         return .preferredFont(forTextStyle: .subheadline)
+    case .title:
+        return .preferredFont(forTextStyle: .title1)
     }
 }
 

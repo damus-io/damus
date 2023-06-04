@@ -40,10 +40,10 @@ struct LongformView: View {
     let event: LongformEvent
     @ObservedObject var artifacts: NoteArtifactsModel
     
-    init(state: DamusState, event: LongformEvent) {
+    init(state: DamusState, event: LongformEvent, artifacts: NoteArtifactsModel? = nil) {
         self.state = state
         self.event = event
-        self._artifacts = ObservedObject(wrappedValue: state.events.get_cache_data(event.event.id).artifacts_model)
+        self._artifacts = ObservedObject(wrappedValue: artifacts ?? state.events.get_cache_data(event.event.id).artifacts_model)
     }
     
     var options: EventViewOptions {
@@ -53,17 +53,10 @@ struct LongformView: View {
     var body: some View {
         EventShell(state: state, event: event.event, options: options) {
             
-            Content
-        }
-    }
-    
-    var Content: some View {
-        Group {
-            if case .loaded(let artifacts) = artifacts.state {
-                SelectableText(attributedString: artifacts.content.attributed, size: .selected)
-                    .padding(.horizontal)
-            } else {
-                Text("")
+            VStack {
+                SelectableText(attributedString: AttributedString(stringLiteral: event.title ?? "Untitled"), size: .title)
+            
+                NoteContentView(damus_state: state, event: event.event, show_images: true, size: .selected, options: options)
             }
         }
     }
@@ -85,6 +78,10 @@ let test_longform_event = LongformEvent.parse(from:
 
 struct LongformView_Previews: PreviewProvider {
     static var previews: some View {
-        LongformView(state: test_damus_state(), event: test_longform_event)
+        let st = test_damus_state()
+        let artifacts = render_note_content(ev: test_longform_event.event, profiles: st.profiles, privkey: nil)
+        
+        let model = NoteArtifactsModel(state: .loaded(artifacts))
+        LongformView(state: st, event: test_longform_event, artifacts: model)
     }
 }
