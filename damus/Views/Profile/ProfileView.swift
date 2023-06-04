@@ -132,6 +132,8 @@ struct ProfileView: View {
     @StateObject var followers: FollowersModel
     @StateObject var zap_button_model: ZapButtonModel = ZapButtonModel()
 
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
+
     init(damus_state: DamusState, profile: ProfileModel, followers: FollowersModel) {
         self.damus_state = damus_state
         self._profile = StateObject(wrappedValue: profile)

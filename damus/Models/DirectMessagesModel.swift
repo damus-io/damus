@@ -30,16 +30,6 @@ class DirectMessagesModel: ObservableObject {
         self.active_model = model
     }
     
-    func open_dm_by_pk(_ pubkey: String) {
-        self.set_active_dm(pubkey)
-        self.open_dm = true
-    }
-    
-    func open_dm_by_model(_ model: DirectMessageModel) {
-        self.set_active_dm_model(model)
-        self.open_dm = true
-    }
-    
     func set_active_dm(_ pubkey: String) {
         for model in self.dms where model.pubkey == pubkey {
             self.set_active_dm_model(model)

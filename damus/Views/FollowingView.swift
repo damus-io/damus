@@ -12,14 +12,8 @@ struct FollowUserView: View {
     let damus_state: DamusState
 
     static let markdown = Markdown()
-    @State var navigating: Bool = false
 
     var body: some View {
-        let dest = ProfileView(damus_state: damus_state, pubkey: target.pubkey)
-        NavigationLink(destination: dest, isActive: $navigating) {
-            EmptyView()
-        }
-        
         HStack {
             UserViewRow(damus_state: damus_state, pubkey: target.pubkey)
             

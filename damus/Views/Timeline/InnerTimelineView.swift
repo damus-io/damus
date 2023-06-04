@@ -12,8 +12,8 @@ struct InnerTimelineView: View {
     @ObservedObject var events: EventHolder
     let state: DamusState
     let filter: (NostrEvent) -> Bool
-    @State var nav_target: NostrEvent
-    @State var navigating: Bool = false
+
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     
     static var count: Int = 0
     
@@ -23,8 +23,6 @@ struct InnerTimelineView: View {
         self.filter = filter
         print("rendering InnerTimelineView \(InnerTimelineView.count)")
         InnerTimelineView.count += 1
-        // dummy event to avoid MaybeThreadView
-        self._nav_target = State(initialValue: test_event)
     }
     
     var event_options: EventViewOptions {
@@ -36,11 +34,6 @@ struct InnerTimelineView: View {
     }
     
     var body: some View {
-        let thread = ThreadModel(event: nav_target, damus_state: state)
-        let dest = ThreadView(state: state, thread: thread)
-        NavigationLink(destination: dest, isActive: $navigating) {
-            EmptyView()
-        }
         LazyVStack(spacing: 0) {
             let events = self.events.events
             if events.isEmpty {
@@ -53,8 +46,9 @@ struct InnerTimelineView: View {
                     let ind = tup.1
                     EventView(damus: state, event: ev, options: event_options)
                         .onTapGesture {
-                            nav_target = ev.get_inner_event(cache: state.events) ?? ev
-                            navigating = true
+                            let event = ev.get_inner_event(cache: state.events) ?? ev
+                            let thread = ThreadModel(event: event, damus_state: state)
+                            navigationCoordinator.push(route: Route.Thread(thread: thread))
                         }
                         .padding(.top, 7)
                         .onAppear {

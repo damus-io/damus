@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct TimelineView: View {
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     @ObservedObject var events: EventHolder
     @Binding var loading: Bool
 
@@ -27,6 +28,7 @@ struct TimelineView: View {
                     .frame(height: 1)
                 
                 InnerTimelineView(events: events, damus: damus, filter: loading ? { _ in true } : filter)
+                    .environmentObject(navigationCoordinator)
                     .redacted(reason: loading ? .placeholder : [])
                     .shimmer(loading)
                     .disabled(loading)
