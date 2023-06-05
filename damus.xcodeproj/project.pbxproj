@@ -301,6 +301,14 @@
 		BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
 		DD597CBD2963D85A00C64D32 /* MarkdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD597CBC2963D85A00C64D32 /* MarkdownTests.swift */; };
 		E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */; };
+		E4FA1C052A2E9EA300482697 /* FontManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FA1C042A2E9EA300482697 /* FontManager.swift */; };
+		E4FA1C092A2E9EF900482697 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = E4FA1C082A2E9EF900482697 /* LICENSE.txt */; };
+		E4FA1C0F2A2EA03600482697 /* Inter-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = E4FA1C0D2A2E9F1D00482697 /* Inter-Light.otf */; };
+		E4FA1C102A2EA03600482697 /* Inter-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = E4FA1C0C2A2E9F1300482697 /* Inter-SemiBold.otf */; };
+		E4FA1C112A2EA03600482697 /* Inter-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = E4FA1C0B2A2E9F0C00482697 /* Inter-Medium.otf */; };
+		E4FA1C122A2EA03600482697 /* Inter-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = E4FA1C0A2A2E9F0300482697 /* Inter-Italic.otf */; };
+		E4FA1C132A2EA03600482697 /* Inter-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = E4FA1C0E2A2E9F3000482697 /* Inter-Regular.otf */; };
+		E4FA1C142A2EA03600482697 /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = E4FA1C072A2E9EEB00482697 /* Inter-Bold.otf */; };
 		E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E990020E2955F837003BBC5A /* EditMetadataView.swift */; };
 		E9E4ED0B295867B900DD7078 /* ThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E4ED0A295867B900DD7078 /* ThreadView.swift */; };
 		F757933A29D7AECD007DEAC1 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F757933929D7AECD007DEAC1 /* ImagePicker.swift */; };
@@ -745,6 +753,14 @@
 		BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectWalletView.swift; sourceTree = "<group>"; };
 		DD597CBC2963D85A00C64D32 /* MarkdownTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkdownTests.swift; sourceTree = "<group>"; };
 		E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSettingsView.swift; sourceTree = "<group>"; };
+		E4FA1C042A2E9EA300482697 /* FontManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontManager.swift; sourceTree = "<group>"; };
+		E4FA1C072A2E9EEB00482697 /* Inter-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Bold.otf"; sourceTree = "<group>"; };
+		E4FA1C082A2E9EF900482697 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		E4FA1C0A2A2E9F0300482697 /* Inter-Italic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Italic.otf"; sourceTree = "<group>"; };
+		E4FA1C0B2A2E9F0C00482697 /* Inter-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Medium.otf"; sourceTree = "<group>"; };
+		E4FA1C0C2A2E9F1300482697 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-SemiBold.otf"; sourceTree = "<group>"; };
+		E4FA1C0D2A2E9F1D00482697 /* Inter-Light.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Light.otf"; sourceTree = "<group>"; };
+		E4FA1C0E2A2E9F3000482697 /* Inter-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Regular.otf"; sourceTree = "<group>"; };
 		E990020E2955F837003BBC5A /* EditMetadataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMetadataView.swift; sourceTree = "<group>"; };
 		E9E4ED0A295867B900DD7078 /* ThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadView.swift; sourceTree = "<group>"; };
 		F757933929D7AECD007DEAC1 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
@@ -1143,6 +1159,7 @@
 				50B5685229F97CB400A23243 /* CredentialHandler.swift */,
 				4C7D09582A05BEAD00943473 /* KeyboardVisible.swift */,
 				3A8CC6CB2A2CFEF900940F5F /* StringUtil.swift */,
+				E4FA1C042A2E9EA300482697 /* FontManager.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -1300,6 +1317,7 @@
 		4CE6DEE527F7A08100C66700 /* damus */ = {
 			isa = PBXGroup;
 			children = (
+				E4FA1C062A2E9EB300482697 /* Font */,
 				F7F0BA23297892AE009531F3 /* Modifiers */,
 				4C4A3A5A288A1B2200453788 /* damus.entitlements */,
 				4CE4F9DF285287A000C00DD9 /* Components */,
@@ -1454,6 +1472,20 @@
 				4C7D09752A0AF19E00943473 /* FillAndStroke.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		E4FA1C062A2E9EB300482697 /* Font */ = {
+			isa = PBXGroup;
+			children = (
+				E4FA1C0D2A2E9F1D00482697 /* Inter-Light.otf */,
+				E4FA1C0C2A2E9F1300482697 /* Inter-SemiBold.otf */,
+				E4FA1C0B2A2E9F0C00482697 /* Inter-Medium.otf */,
+				E4FA1C0A2A2E9F0300482697 /* Inter-Italic.otf */,
+				E4FA1C0E2A2E9F3000482697 /* Inter-Regular.otf */,
+				E4FA1C072A2E9EEB00482697 /* Inter-Bold.otf */,
+				E4FA1C082A2E9EF900482697 /* LICENSE.txt */,
+			);
+			path = Font;
 			sourceTree = "<group>";
 		};
 		F7F0BA23297892AE009531F3 /* Modifiers */ = {
@@ -1614,9 +1646,16 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E4FA1C0F2A2EA03600482697 /* Inter-Light.otf in Resources */,
+				E4FA1C102A2EA03600482697 /* Inter-SemiBold.otf in Resources */,
+				E4FA1C112A2EA03600482697 /* Inter-Medium.otf in Resources */,
+				E4FA1C122A2EA03600482697 /* Inter-Italic.otf in Resources */,
+				E4FA1C132A2EA03600482697 /* Inter-Regular.otf in Resources */,
+				E4FA1C142A2EA03600482697 /* Inter-Bold.otf in Resources */,
 				3ACB685F297633BC00C46468 /* Localizable.strings in Resources */,
 				4CE6DEEE27F7A08200C66700 /* Preview Assets.xcassets in Resources */,
 				3ACB685C297633BC00C46468 /* InfoPlist.strings in Resources */,
+				E4FA1C092A2E9EF900482697 /* LICENSE.txt in Resources */,
 				50DA11262A16A23F00236234 /* Launch.storyboard in Resources */,
 				4CE6DEEB27F7A08200C66700 /* Assets.xcassets in Resources */,
 				4C198DF129F88C6B004C165C /* License.txt in Resources */,
@@ -1777,6 +1816,7 @@
 				4C06670128FC7C5900038D2A /* RelayView.swift in Sources */,
 				4C285C8C28398BC7008A31F1 /* Keys.swift in Sources */,
 				4CACA9DC280C38C000D9BBE8 /* Profiles.swift in Sources */,
+				E4FA1C052A2E9EA300482697 /* FontManager.swift in Sources */,
 				4CE879582996C45300F758CC /* ZapsView.swift in Sources */,
 				4C30AC7429A5680900E2BD5A /* EventGroupView.swift in Sources */,
 				4C633352283D419F00B1C9C3 /* SignalModel.swift in Sources */,
