@@ -24,9 +24,11 @@ struct GradientButtonStyle: ButtonStyle {
 struct GradientButtonStyle_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
-            Button("Dynamic Size", action: {
+            Button(action: {
                 print("dynamic size")
-            })
+            }) {
+                Text(verbatim: "Dynamic Size")
+            }
             .buttonStyle(GradientButtonStyle())
             
             
@@ -34,7 +36,7 @@ struct GradientButtonStyle_Previews: PreviewProvider {
                 print("infinite width")
             }) {
                 HStack {
-                    Text("Infinite Width")
+                    Text(verbatim: "Infinite Width")
                 }
                 .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
             }

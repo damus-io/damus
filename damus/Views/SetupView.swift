@@ -34,17 +34,12 @@ struct SetupView: View {
                         .shadow(color: DamusColors.purple, radius: 2)
                         .frame(width: 56, height: 56, alignment: .center)
                         .padding(.top, 20.0)
-                    
-                    HStack {
-                        Text("Welcome to", comment: "Welcome text shown on the first screen when user is not logged in.")
-                            .font(.title)
-                            .fontWeight(.heavy)
-                        Text("Damus")
-                            .font(.title)
-                            .fontWeight(.heavy)
-                            .foregroundStyle(DamusLogoGradient.gradient)
-                    }
-                    
+
+                    Text("Welcome to Damus", comment: "Welcome text shown on the first screen when user is not logged in.")
+                        .font(.title)
+                        .fontWeight(.heavy)
+                        .foregroundStyle(DamusLogoGradient.gradient)
+
                     Text("The go-to iOS nostr client", comment: "Quick description of what Damus is")
                         .foregroundColor(DamusColors.mediumGrey)
                         .padding(.top, 10)
@@ -61,7 +56,7 @@ struct SetupView: View {
                         eula.toggle()
                     }) {
                         HStack {
-                            Text("Let's get started!", comment:  "Button to continue to login page.")
+                            Text("Let's get started!", comment: "Button to continue to login page.")
                                 .fontWeight(.semibold)
                         }
                         .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
@@ -90,7 +85,7 @@ struct LearnAboutNostrLink: View {
             Button(action: {
                 openURL(URL(string: "https://nostr.com")!)
             }, label: {
-                Text("Learn more about nostr")
+                Text("Learn more about nostr", comment: "Button that opens up a webpage where the user can learn more about nostr.")
                     .foregroundColor(.accentColor)
             })
             
@@ -106,11 +101,11 @@ struct WhatIsNostr: View {
         HStack(alignment: .top) {
             Image("nostr-logo")
             VStack(alignment: .leading) {
-                Text("What is nostr?")
+                Text("What is nostr?", comment: "Heading text for section describing what is nostr.")
                     .fontWeight(.bold)
                     .padding(.vertical, 10)
                 
-                Text("Nostr is a protocol, designed for simplicity, that aims to create a censorship-resistant global social network")
+                Text("Nostr is a protocol, designed for simplicity, that aims to create a censorship-resistant global social network", comment: "Description about what is Nostr.")
                     .foregroundColor(DamusColors.mediumGrey)
                 
                 LearnAboutNostrLink()
@@ -125,11 +120,11 @@ struct WhyWeNeedNostr: View {
         HStack(alignment: .top) {
             Image("lightbulb")
             VStack(alignment: .leading) {
-                Text("Why we need nostr?")
+                Text("Why we need nostr?", comment: "Heading text for section describing why nostr is needed.")
                     .fontWeight(.bold)
                     .padding(.vertical, 10)
                 
-                Text("Social media has developed into a key way information flows around the world. Unfortunately, our current social media systems are broken")
+                Text("Social media has developed into a key way information flows around the world. Unfortunately, our current social media systems are broken", comment: "Description about why nostr is needed.")
                     .foregroundColor(DamusColors.mediumGrey)
             }
         }
