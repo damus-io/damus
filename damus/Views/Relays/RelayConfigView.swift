@@ -141,6 +141,13 @@ struct RelayConfigView: View {
                     .padding(.bottom, 5)
             }
         }
+        .onAppear() {
+            profile.subscribe()
+            profile.fetch_relays_for_contacts()
+        }
+        .onDisappear {
+            profile.unsubscribe()
+        }
         .navigationTitle(NSLocalizedString("Relays", comment: "Title of relays view"))
         .navigationBarTitleDisplayMode(.large)
         .toolbar {

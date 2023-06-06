@@ -32,8 +32,8 @@ class ProfileModel: ObservableObject, Equatable {
     func get_recommended_relays() -> [(RelayDescriptor, Int)] {
         var recommended_relays: [(RelayDescriptor, Int)] = []
         
-        if let contact = self.contacts {
-            let contacts_pubkeys = contact.referenced_pubkeys.map { $0.ref_id }
+        if let contacts {
+            let contacts_pubkeys = contacts.referenced_pubkeys.map { $0.ref_id }
             //let following = FollowingModel(damus_state: damus, contacts: contacts)
             
             for pubkey in contacts_pubkeys.reversed() {
@@ -55,6 +55,22 @@ class ProfileModel: ObservableObject, Equatable {
         }
         
         return recommended_relays
+    }
+    
+    func fetch_relays_for_contacts() {
+        guard let contacts = self.contacts else {
+            return
+        }
+        
+        let relays_subid = UUID().uuidString
+
+        let contactsPubkeys = contacts.referenced_pubkeys.map { $0.ref_id }
+        
+        // Create a filter for relay profiles (kind 3) of all your follows
+        let filter = NostrFilter(kinds: [3], authors: contactsPubkeys)
+        
+        // Subscribe to the relays with the filter and handle the received events
+        damus.pool.subscribe(sub_id: relays_subid, filters: [filter], handler: handle_event)
     }
     
     func follows(pubkey: String) -> Bool {
