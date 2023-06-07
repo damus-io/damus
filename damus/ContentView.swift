@@ -746,24 +746,58 @@ func setup_notifications() {
     }
 }
 
-func find_event(state: DamusState, evid: String, search_type: SearchType, find_from: [String]?, callback: @escaping (NostrEvent?) -> ()) {
-    if let ev = state.events.lookup(evid) {
-        callback(ev)
-        return
+struct FindEvent {
+    let type: FindEventType
+    let find_from: [String]?
+    
+    static func profile(pubkey: String, find_from: [String]? = nil) -> FindEvent {
+        return FindEvent(type: .profile(pubkey), find_from: find_from)
+    }
+    
+    static func event(evid: String, find_from: [String]? = nil) -> FindEvent {
+        return FindEvent(type: .event(evid), find_from: find_from)
+    }
+}
+
+enum FindEventType {
+    case profile(String)
+    case event(String)
+}
+
+enum FoundEvent {
+    case profile(Profile, NostrEvent)
+    case invalid_profile(NostrEvent)
+    case event(NostrEvent)
+}
+
+func find_event(state: DamusState, query query_: FindEvent, callback: @escaping (FoundEvent?) -> ()) {
+    
+    var filter: NostrFilter? = nil
+    let find_from = query_.find_from
+    let query = query_.type
+    
+    switch query {
+    case .profile(let pubkey):
+        if let profile = state.profiles.lookup_with_timestamp(id: pubkey) {
+            callback(.profile(profile.profile, profile.event))
+            return
+        }
+        filter = NostrFilter(kinds: [.metadata], limit: 1, authors: [pubkey])
+        
+    case .event(let evid):
+        if let ev = state.events.lookup(evid) {
+            callback(.event(ev))
+            return
+        }
+    
+        var attempts = 0
+        filter = NostrFilter(ids: [evid], limit: 1)
     }
     
     let subid = UUID().description
-    
+    var attempts: Int = 0
     var has_event = false
-    
-    var filter = search_type == .event ? NostrFilter(ids: [evid]) : NostrFilter(authors: [evid])
-    
-    if search_type == .profile {
-        filter.kinds = [.metadata]
-    }
-    
-    filter.limit = 1
-    var attempts = 0
+    guard let filter else { return }
     
     state.pool.subscribe_to(sub_id: subid, filters: [filter], to: find_from) { relay_id, res  in
         guard case .nostr_event(let ev) = res else {
@@ -779,15 +813,22 @@ func find_event(state: DamusState, evid: String, search_type: SearchType, find_f
             break
         case .event(_, let ev):
             has_event = true
-            
             state.pool.unsubscribe(sub_id: subid)
             
-            if search_type == .profile && ev.known_kind == .metadata {
-                process_metadata_event(events: state.events, our_pubkey: state.pubkey, profiles: state.profiles, ev: ev) {
-                    callback(ev)
+            switch query {
+            case .profile:
+                if ev.known_kind == .metadata {
+                    process_metadata_event(events: state.events, our_pubkey: state.pubkey, profiles: state.profiles, ev: ev) { profile in
+                        guard let profile else {
+                            callback(.invalid_profile(ev))
+                            return
+                        }
+                        callback(.profile(profile, ev))
+                        return
+                    }
                 }
-            } else {
-                callback(ev)
+            case .event:
+                callback(.event(ev))
             }
         case .eose:
             if !has_event {
@@ -912,10 +953,9 @@ func on_open_url(state: DamusState, url: URL, result: @escaping (OpenResult?) ->
         if ref.key == "p" {
             result(.profile(ref.ref_id))
         } else if ref.key == "e" {
-            find_event(state: state, evid: ref.ref_id, search_type: .event, find_from: nil) { ev in
-                if let ev {
-                    result(.event(ev))
-                }
+            find_event(state: state, query: .event(evid: ref.ref_id)) { res in
+                guard let res, case .event(let ev) = res else { return }
+                result(.event(ev))
             }
         }
     case .filter(let filt):

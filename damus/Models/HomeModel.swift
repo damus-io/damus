@@ -804,11 +804,11 @@ func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping (
     }
 }
 
-func process_metadata_event(events: EventCache, our_pubkey: String, profiles: Profiles, ev: NostrEvent, completion: (() -> Void)? = nil) {
+func process_metadata_event(events: EventCache, our_pubkey: String, profiles: Profiles, ev: NostrEvent, completion: ((Profile?) -> Void)? = nil) {
     guard_valid_event(events: events, ev: ev) {
         DispatchQueue.global(qos: .background).async {
             guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
-                completion?()
+                completion?(nil)
                 return
             }
             
@@ -816,7 +816,7 @@ func process_metadata_event(events: EventCache, our_pubkey: String, profiles: Pr
             
             DispatchQueue.main.async {
                 process_metadata_profile(our_pubkey: our_pubkey, profiles: profiles, profile: profile, ev: ev)
-                completion?()
+                completion?(profile)
             }
         }
     }
