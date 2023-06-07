@@ -185,7 +185,7 @@ struct QRCodeView: View {
     
     func QRCameraView() -> some View {
         return VStack(alignment: .center) {
-            Text("Scan a user's pubkey")
+            Text("Scan a user's pubkey", comment: "Text to prompt scanning a QR code of a user's pubkey to open their profile.")
                 .padding(.top, 50)
                 .font(.system(size: 24, weight: .heavy))
             
