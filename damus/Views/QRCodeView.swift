@@ -243,18 +243,20 @@ struct QRCodeView: View {
     }
     
     func handleProfileScan(_ prof: String) {
-        if scannedCode != prof {
-            generator.impactOccurred()
-            cameraAnimate {
-                scannedCode = prof
-                
-                if profile(for: scannedCode) != nil {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
-                        showProfileView = true
-                    }
-                } else {
-                    print("Profile not found")
+        guard scannedCode != prof else {
+            return
+        }
+        
+        generator.impactOccurred()
+        cameraAnimate {
+            scannedCode = prof
+            
+            if profile(for: scannedCode) != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
+                    showProfileView = true
                 }
+            } else {
+                print("Profile not found")
             }
         }
     }
