@@ -1182,7 +1182,7 @@ Button text to indicate that the zap type is a private zap.</note>
       <trans-unit id="Scan a user's pubkey" xml:space="preserve">
         <source>Scan a user's pubkey</source>
         <target>Scan a user's pubkey</target>
-        <note>No comment provided by engineer.</note>
+        <note>Text to prompt scanning a QR code of a user's pubkey to open their profile.</note>
       </trans-unit>
       <trans-unit id="Scan the code" xml:space="preserve">
         <source>Scan the code</source>
