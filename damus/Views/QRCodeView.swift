@@ -237,8 +237,10 @@ struct QRCodeView: View {
     }
 
     func profile(for code: String) -> Profile? {
-        let decoded = try? bech32_decode(code)
-        let hex = hex_encode(decoded!.data)
+        guard let decoded = try? bech32_decode(code) else {
+            return nil
+        }
+        let hex = hex_encode(decoded.data)
         return damus_state.profiles.lookup(id: hex)
     }
     
