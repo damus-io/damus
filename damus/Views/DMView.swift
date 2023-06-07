@@ -98,7 +98,8 @@ struct DMView: View {
         }
     }
 
-    func Image(urls: [MediaUrl]) -> some View {
+    @MainActor
+    func Image(urls: [MediaUrl], isLastInDM: Bool) -> some View {
         return Group {
             HStack {
                 if is_ours {
@@ -108,7 +109,7 @@ struct DMView: View {
                 let should_show_img = should_show_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
                 if should_show_img {
                     ImageCarousel(state: damus_state, evid: event.id, urls: urls)
-                        .clipShape(ChatBubbleShape(direction: isLastInGroup ? (is_ours ? ChatBubbleShape.Direction.right: ChatBubbleShape.Direction.left): ChatBubbleShape.Direction.none))
+                        .clipShape(ChatBubbleShape(direction: (isLastInGroup && isLastInDM) ? (is_ours ? ChatBubbleShape.Direction.right: ChatBubbleShape.Direction.left): ChatBubbleShape.Direction.none))
                         .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads, settings: damus_state.settings)}
                 } else if !should_show_img {
                     ZStack {
@@ -116,7 +117,7 @@ struct DMView: View {
                         Blur()
                             .disabled(true)
                     }
-                    .clipShape(ChatBubbleShape(direction: isLastInGroup ? (is_ours ? ChatBubbleShape.Direction.right: ChatBubbleShape.Direction.left): ChatBubbleShape.Direction.none))
+                    .clipShape(ChatBubbleShape(direction: (isLastInGroup && isLastInDM) ? (is_ours ? ChatBubbleShape.Direction.right: ChatBubbleShape.Direction.left): ChatBubbleShape.Direction.none))
                     .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads, settings: damus_state.settings)}
                 }
                 
@@ -127,7 +128,7 @@ struct DMView: View {
         }
     }
 
-    func Invoice(invoices: [Invoice]) -> some View {
+    func Invoice(invoices: [Invoice], isLastInDM: Bool) -> some View {
         return Group {
             HStack {
                 if is_ours {
@@ -135,7 +136,7 @@ struct DMView: View {
                 }
 
                 InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: invoices, settings: damus_state.settings)
-                    .clipShape(ChatBubbleShape(direction: isLastInGroup ? (is_ours ? ChatBubbleShape.Direction.right: ChatBubbleShape.Direction.left): ChatBubbleShape.Direction.none))
+                    .clipShape(ChatBubbleShape(direction: (isLastInGroup && isLastInDM) ? (is_ours ? ChatBubbleShape.Direction.right: ChatBubbleShape.Direction.left): ChatBubbleShape.Direction.none))
                     .contextMenu{MenuItems(event: event, keypair: damus_state.keypair, target_pubkey: event.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads, settings: damus_state.settings)}
                 
                 if !is_ours {
@@ -208,30 +209,59 @@ struct DMView: View {
                 }
             }
         }
-
+        
         return (show_text, txt)
+    }
+    
+    func getLastInDM(text: CompatibleText?, mention: Mention<NoteId>?, url: [MediaUrl]?, invoices: [Invoice]?) -> DMContentType? {
+        var last: DMContentType?
+        if text != nil {
+            last = .text
+        }
+        if mention != nil {
+            last = .mention
+        }
+        if url != nil {
+            last = .url
+        }
+        if invoices != nil {
+            last = .invoice
+        }
+        return last
     }
 
     var body: some View {
         VStack {
             let (show_text, filtered_content): (Bool, CompatibleText?) = filter_content(blocks: event.blocks(damus_state.keypair.privkey), profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+            let mention = first_eref_mention(ev: event, privkey: damus_state.keypair.privkey)
+            let url = separate_images(ev: event, privkey: damus_state.keypair.privkey)
+            let invoices = separate_invoices(ev: event, privkey: damus_state.keypair.privkey)
+            let lastInDM = getLastInDM(text: filtered_content, mention: mention, url: url, invoices: invoices)
+            
             if show_text, let filtered_content = filtered_content {
-                DM(content: filtered_content).padding(.bottom, isLastInGroup ? 0 : -6)
+                DM(content: filtered_content, isLastInDM: lastInDM == .text).padding(.bottom, (isLastInGroup && lastInDM == .text)  ? 0 : -6)
             }
-            if let mention = first_eref_mention(ev: event, privkey: damus_state.keypair.privkey) {
-                Mention(mention: mention).padding(.bottom, isLastInGroup ? 0 : -6)
+            if let mention {
+                Mention(mention: mention).padding(.bottom, (isLastInGroup && lastInDM == .mention) ? 0 : -6)
             }
-            if let url = separate_images(ev: event, privkey: damus_state.keypair.privkey) {
-                Image(urls: url).padding(.bottom, isLastInGroup ? 0 : -6)
+            if let url {
+                Image(urls: url, isLastInDM: lastInDM == .url).padding(.bottom, (isLastInGroup && lastInDM == .url) ? 0 : -6)
             }
-            if let invoices = separate_invoices(ev: event, privkey: damus_state.keypair.privkey) {
-                Invoice(invoices: invoices).padding(.bottom, isLastInGroup ? 0 : -6)
+            if let invoices {
+                Invoice(invoices: invoices, isLastInDM: lastInDM == .invoice).padding(.bottom, (isLastInGroup && lastInDM == .invoice) ? 0 : -6)
             }
             if (isLastInGroup) {
                 TimeStamp().padding(.top, -5)
             }
         }
     }
+}
+
+enum DMContentType {
+    case text
+    case mention
+    case url
+    case invoice
 }
 
 struct ChatBubbleShape: Shape {
