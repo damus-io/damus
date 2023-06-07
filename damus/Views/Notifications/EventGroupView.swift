@@ -42,7 +42,7 @@ enum EventGroupType {
 }
 
 enum ReactingTo {
-    case your_post
+    case your_note
     case tagged_in
     case your_profile
 }
@@ -53,7 +53,7 @@ func determine_reacting_to(our_pubkey: String, ev: NostrEvent?) -> ReactingTo {
     }
     
     if ev.pubkey == our_pubkey {
-        return .your_post
+        return .your_note
     }
     
     return .tagged_in
@@ -89,9 +89,9 @@ func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType
  "reacted_tagged_in_1" - returned when 1 reaction occurred to a post that the current user was tagged in
  "reacted_tagged_in_2" - returned when 2 reactions occurred to a post that the current user was tagged in
  "reacted_tagged_in_3" - returned when 3 or more reactions occurred to a post that the current user was tagged in
- "reacted_your_post_1" - returned when 1 reaction occurred to the current user's post
- "reacted_your_post_2" - returned when 2 reactions occurred to the current user's post
- "reacted_your_post_3" - returned when 3 or more reactions occurred to the current user's post
+ "reacted_your_note_1" - returned when 1 reaction occurred to the current user's post
+ "reacted_your_note_2" - returned when 2 reactions occurred to the current user's post
+ "reacted_your_note_3" - returned when 3 or more reactions occurred to the current user's post
  "reacted_your_profile_1" - returned when 1 reaction occurred to the current user's profile
  "reacted_your_profile_2" - returned when 2 reactions occurred to the current user's profile
  "reacted_your_profile_3" - returned when 3 or more reactions occurred to the current user's profile
@@ -99,9 +99,9 @@ func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType
  "reposted_tagged_in_1" - returned when 1 repost occurred to a post that the current user was tagged in
  "reposted_tagged_in_2" - returned when 2 reposts occurred to a post that the current user was tagged in
  "reposted_tagged_in_3" - returned when 3 or more reposts occurred to a post that the current user was tagged in
- "reposted_your_post_1" - returned when 1 repost occurred to the current user's post
- "reposted_your_post_2" - returned when 2 reposts occurred to the current user's post
- "reposted_your_post_3" - returned when 3 or more reposts occurred to the current user's post
+ "reposted_your_note_1" - returned when 1 repost occurred to the current user's post
+ "reposted_your_note_2" - returned when 2 reposts occurred to the current user's post
+ "reposted_your_note_3" - returned when 3 or more reposts occurred to the current user's post
  "reposted_your_profile_1" - returned when 1 repost occurred to the current user's profile
  "reposted_your_profile_2" - returned when 2 reposts occurred to the current user's profile
  "reposted_your_profile_3" - returned when 3 or more reposts occurred to the current user's profile
@@ -109,9 +109,9 @@ func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType
  "zapped_tagged_in_1" - returned when 1 zap occurred to a post that the current user was tagged in
  "zapped_tagged_in_2" - returned when 2 zaps occurred to a post that the current user was tagged in
  "zapped_tagged_in_3" - returned when 3 or more zaps occurred to a post that the current user was tagged in
- "zapped_your_post_1" - returned when 1 zap occurred to the current user's post
- "zapped_your_post_2" - returned when 2 zaps occurred to the current user's post
- "zapped_your_post_3" - returned when 3 or more zaps occurred to the current user's post
+ "zapped_your_note_1" - returned when 1 zap occurred to the current user's post
+ "zapped_your_note_2" - returned when 2 zaps occurred to the current user's post
+ "zapped_your_note_3" - returned when 3 or more zaps occurred to the current user's post
  "zapped_your_profile_1" - returned when 1 zap occurred to the current user's profile
  "zapped_your_profile_2" - returned when 2 zaps occurred to the current user's profile
  "zapped_your_profile_3" - returned when 3 or more zaps occurred to the current user's profile

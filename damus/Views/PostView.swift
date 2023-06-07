@@ -13,7 +13,7 @@ enum NostrPostResult {
     case cancel
 }
 
-let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Text box prompt to ask user to type their post.")
+let POST_PLACEHOLDER = NSLocalizedString("Type your note here...", comment: "Text box prompt to ask user to type their note.")
 
 class TagModel: ObservableObject {
     var diff = 0

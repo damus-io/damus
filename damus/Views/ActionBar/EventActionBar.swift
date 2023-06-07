@@ -95,7 +95,7 @@ struct EventActionBar: View {
             EventActionButton(img: "upload", col: Color.gray) {
                 show_share_action = true
             }
-            .accessibilityLabel(NSLocalizedString("Share", comment: "Button to share a post"))
+            .accessibilityLabel(NSLocalizedString("Share", comment: "Button to share a note"))
         }
         .onAppear {
             self.bar.update(damus: damus_state, evid: self.event.id)
