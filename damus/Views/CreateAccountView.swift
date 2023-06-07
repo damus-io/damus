@@ -66,7 +66,7 @@ struct CreateAccountView: View {
                     self.is_done = true
                 }) {
                     HStack {
-                        Text("Create account now", comment:  "Button to create account.")
+                        Text("Create account now", comment: "Button to create account.")
                             .fontWeight(.semibold)
                     }
                     .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
@@ -167,7 +167,7 @@ func FormLabel(_ title: String, optional: Bool = false) -> some View {
         Text(title)
                 .bold()
         if optional {
-            Text("- optional", comment: "Label indicating that a form input is optional.")
+            Text("optional", comment: "Label indicating that a form input is optional.")
                 .font(.callout)
                 .foregroundColor(DamusColors.mediumGrey)
         }

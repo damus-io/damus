@@ -67,7 +67,7 @@ struct NWCPaste: View {
         }) {
             HStack {
                 Image(systemName: "doc.on.clipboard")
-                Text("Paste")
+                Text("Paste", comment: "Button to paste a Nostr Wallet Connect string to connect the wallet for use in Damus for zaps.")
             }
             .frame(minWidth: 300, maxWidth: .infinity, minHeight: 50, maxHeight: 50, alignment: .center)
             .foregroundColor(colorScheme == .light ? DamusColors.black : DamusColors.white)

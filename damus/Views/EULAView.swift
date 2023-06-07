@@ -117,7 +117,7 @@ struct EULAView: View {
                 .ignoresSafeArea(),
             alignment: .top
         )
-        .navigationTitle("EULA")
+        .navigationTitle(NSLocalizedString("EULA", comment: "Navigation title of view that shows the EULA, an acronym for End User License Agreement."))
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackNav())
