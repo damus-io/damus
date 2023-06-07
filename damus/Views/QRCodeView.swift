@@ -8,6 +8,38 @@
 import SwiftUI
 import CoreImage.CIFilterBuiltins
 
+struct ProfileScanResult: Equatable {
+    let pubkey: String
+    
+    init(hex: String) {
+        self.pubkey = hex
+    }
+    
+    init?(string: String) {
+        var str = string
+        guard str.count != 0 else {
+            return nil
+        }
+        
+        if str.hasPrefix("nostr:") {
+            str.removeFirst("nostr:".count)
+        }
+        
+        if let _ = hex_decode(str), str.count == 64 {
+            self = .init(hex: str)
+            return
+        }
+        
+        if str.starts(with: "npub"), let b32 = try? bech32_decode(str) {
+            let hex = hex_encode(b32.data)
+            self = .init(hex: hex)
+            return
+        }
+        
+        return nil
+    }
+}
+
 struct QRCodeView: View {
     let damus_state: DamusState
     @State var pubkey: String
@@ -16,12 +48,11 @@ struct QRCodeView: View {
     
     @State private var selectedTab = 0
     
-    @State var scanResult: Search? = nil
+    @State var scanResult: ProfileScanResult? = nil
     
     @State var showProfileView: Bool = false
     @State var profile: Profile? = nil
-    
-    @State private var scannedCode = ""
+    @State var error: String? = nil
     
     @State private var outerTrimEnd: CGFloat = 0
     var animationDuration: Double = 0.5
@@ -152,29 +183,6 @@ struct QRCodeView: View {
         }
     }
     
-    func search_changed(_ new: String) {
-        var str = new
-        guard str.count != 0 else {
-            return
-        }
-        
-        if str.hasPrefix("nostr:") {
-            str.removeFirst("nostr:".count)
-        }
-        
-        if let _ = hex_decode(str), str.count == 64 {
-            self.scanResult = .hex(str)
-            return
-        }
-        
-        if str.starts(with: "npub") {
-            if let _ = try? bech32_decode(str) {
-                self.scanResult = .profile(str)
-                return
-            }
-        }
-    }
-    
     func QRCameraView() -> some View {
         return VStack(alignment: .center) {
             Text("Scan a user's pubkey")
@@ -185,16 +193,10 @@ struct QRCodeView: View {
 
             CodeScannerView(codeTypes: [.qr], scanMode: .continuous, simulatedData: "npub1k92qsr95jcumkpu6dffurkvwwycwa2euvx4fthv78ru7gqqz0nrs2ngfwd", shouldVibrateOnSuccess: false) { result in
                 switch result {
-                case .success(let result):
-                    search_changed(result.string)
-                    switch scanResult {
-                    case .profile(let prof):
-                        handleProfileScan(prof)
-                    default:
-                        print("Not a profile")
-                    }
-                case .failure(let error):
-                    print(error.localizedDescription)
+                case .success(let success):
+                    handleProfileScan(success.string)
+                case .failure(let failure):
+                    self.error = failure.localizedDescription
                 }
             }
             .scaledToFit()
@@ -207,17 +209,11 @@ struct QRCodeView: View {
             
             Spacer()
             
-            if showProfileView {
-                let decoded = try? bech32_decode(scannedCode)
-                let hex = hex_encode(decoded!.data)
-                
-                NavigationLink(
-                    destination: ProfileView(damus_state: damus_state, pubkey: hex),
-                    isActive: $showProfileView,
-                    label: {
-                        EmptyView()
-                    }
-                )
+            if let scanResult {
+                let dst = ProfileView(damus_state: damus_state, pubkey: scanResult.pubkey)
+                NavigationLink(destination: dst, isActive: $showProfileView) {
+                    EmptyView()
+                }
             }
             
             Spacer()
@@ -235,32 +231,49 @@ struct QRCodeView: View {
             .padding(50)
         }
     }
-
-    func profile(for code: String) -> Profile? {
-        guard let decoded = try? bech32_decode(code) else {
-            return nil
-        }
-        let hex = hex_encode(decoded.data)
-        return damus_state.profiles.lookup(id: hex)
-    }
     
-    func handleProfileScan(_ prof: String) {
-        guard scannedCode != prof else {
+    func handleProfileScan(_ scanned_str: String) {
+        guard let result = ProfileScanResult(string: scanned_str) else {
+            self.error = "Invalid profile QR"
+            return
+        }
+        
+        self.error = nil
+
+        guard result != self.scanResult else {
             return
         }
         
         generator.impactOccurred()
         cameraAnimate {
-            scannedCode = prof
+            scanResult = result
             
-            if profile(for: scannedCode) != nil {
-                DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
-                    showProfileView = true
+            find_event(state: damus_state, query: .profile(pubkey: result.pubkey)) { res in
+                guard let res else {
+                    error = "Profile not found"
+                    return
                 }
-            } else {
-                print("Profile not found")
+                
+                switch res {
+                case .invalid_profile:
+                    error = "Profile was found but was corrupt."
+                    
+                case .profile:
+                    show_profile_after_delay()
+                    
+                case .event:
+                    print("invalid search result")
+                }
+                
             }
         }
+    }
+    
+    func show_profile_after_delay() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
+            showProfileView = true
+        }
+        
     }
 
     func cameraAnimate(completion: @escaping () -> Void) {
@@ -296,3 +309,4 @@ struct QRCodeView_Previews: PreviewProvider {
         QRCodeView(damus_state: test_damus_state(), pubkey: test_event.pubkey)
     }
 }
+
