@@ -61,12 +61,12 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ och %1$d till reagerade på ett inlägg som du var taggad i</string>
+			<string>%2$@ och %1$d andra reagerade på en anteckning som du har taggats i</string>
 			<key>other</key>
-			<string>%2$@ och %1$d andra reagerade på ett inlägg som du var taggad i</string>
+			<string>%2$@ och %1$d andra reagerade på en anteckning som du har taggats i</string>
 		</dict>
 	</dict>
-	<key>reacted_your_post_3</key>
+	<key>reacted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REACTED@</string>
@@ -77,9 +77,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ och %1$d till reagerade på ditt inlägg</string>
+			<string>%2$@ och %1$d andra reagerade på din anteckning</string>
 			<key>other</key>
-			<string>%2$@ och %1$d andra reagerade på ditt inlägg</string>
+			<string>%2$@ och %1$d andra reagerade på din anteckning</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -157,12 +157,12 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ och %1$d annan delade ett inlägg som du var taggad i</string>
+			<string>%2$@ och %1$d andra lade om en anteckning som du har taggats i</string>
 			<key>other</key>
-			<string>%2$@ och %1$d andra delade ett inlägg som du var taggad i</string>
+			<string>%2$@ och %1$d andra lade om en anteckning som du har taggats i</string>
 		</dict>
 	</dict>
-	<key>reposted_your_post_3</key>
+	<key>reposted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REPOSTED@</string>
@@ -173,9 +173,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ och %1$d annan delade ditt inlägg</string>
+			<string>%2$@ och %1$d andra lade om din anteckning</string>
 			<key>other</key>
-			<string>%2$@ och %1$d andra delade ditt inlägg</string>
+			<string>%2$@ och %1$d andra lade om din anteckning</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -269,9 +269,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>Du fick %2$@ sat från %3$@: "%4$@"</string>
+			<string>Du fick %2$@ sat från %3$@: &quot;%4$@&quot;</string>
 			<key>other</key>
-			<string>Du fick %2$@ sats från %3$@: "%4$@"</string>
+			<string>Du fick %2$@ sats från %3$@: &quot;%4$@&quot;</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -285,12 +285,12 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ och %1$d annan zappade ett inlägg du som var taggad i</string>
+			<string>%2$@ och %1$d andra zappade en anteckning som du har taggats i</string>
 			<key>other</key>
-			<string>%2$@ och %1$d andra zappade ett inlägg som du var taggad i</string>
+			<string>%2$@ och %1$d andra zappade en anteckning som du har taggats i</string>
 		</dict>
 	</dict>
-	<key>zapped_your_post_3</key>
+	<key>zapped_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@ZAPPED@</string>
@@ -301,9 +301,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ och %1$d annan zappade ditt inlägg</string>
+			<string>%2$@ och %1$d andra zappade din anteckning</string>
 			<key>other</key>
-			<string>%2$@ och %1$d andra zappade ditt inlägg</string>
+			<string>%2$@ och %1$d andra zappade din anteckning</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
