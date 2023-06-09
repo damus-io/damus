@@ -339,7 +339,7 @@ struct CreateAccountPrompt: View {
     @Binding var create_account: Bool
     var body: some View {
         HStack {
-            Text("New to nostr?", comment: "Ask the user if they are new to nostr")
+            Text("New to Nostr?", comment: "Ask the user if they are new to Nostr")
                 .foregroundColor(Color("DamusMediumGrey"))
             
             Button(NSLocalizedString("Create account", comment: "Button to navigate to create account view.")) {

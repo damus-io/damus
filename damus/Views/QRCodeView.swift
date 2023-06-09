@@ -160,7 +160,7 @@ struct QRCodeView: View {
             
             Spacer()
             
-            Text("Follow me on nostr", comment: "Text on QR code view to prompt viewer looking at screen to follow the user.")
+            Text("Follow me on Nostr", comment: "Text on QR code view to prompt viewer looking at screen to follow the user.")
                 .font(.system(size: 24, weight: .heavy))
                 .padding(.top)
             
