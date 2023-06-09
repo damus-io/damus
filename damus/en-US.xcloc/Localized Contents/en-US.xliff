@@ -168,10 +168,10 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>All</target>
         <note>Label for filter for all notifications.</note>
       </trans-unit>
-      <trans-unit id="Already on nostr?" xml:space="preserve">
-        <source>Already on nostr?</source>
-        <target>Already on nostr?</target>
-        <note>Ask the user if they already have an account on nostr</note>
+      <trans-unit id="Already on Nostr?" xml:space="preserve">
+        <source>Already on Nostr?</source>
+        <target>Already on Nostr?</target>
+        <note>Ask the user if they already have an account on Nostr</note>
       </trans-unit>
       <trans-unit id="Always show images" xml:space="preserve">
         <source>Always show images</source>
@@ -571,9 +571,9 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Follow Back</target>
         <note>Button to follow a user back.</note>
       </trans-unit>
-      <trans-unit id="Follow me on nostr" xml:space="preserve">
-        <source>Follow me on nostr</source>
-        <target>Follow me on nostr</target>
+      <trans-unit id="Follow me on Nostr" xml:space="preserve">
+        <source>Follow me on Nostr</source>
+        <target>Follow me on Nostr</target>
         <note>Text on QR code view to prompt viewer looking at screen to follow the user.</note>
       </trans-unit>
       <trans-unit id="Followers" xml:space="preserve">
@@ -672,10 +672,10 @@ Sentence composed of 2 variables to describe how many people are following a use
         <note>Navigation title for managing keys.
    Settings section for managing keys</note>
       </trans-unit>
-      <trans-unit id="Learn more about nostr" xml:space="preserve">
-        <source>Learn more about nostr</source>
-        <target>Learn more about nostr</target>
-        <note>Button that opens up a webpage where the user can learn more about nostr.</note>
+      <trans-unit id="Learn more about Nostr" xml:space="preserve">
+        <source>Learn more about Nostr</source>
+        <target>Learn more about Nostr</target>
+        <note>Button that opens up a webpage where the user can learn more about Nostr.</note>
       </trans-unit>
       <trans-unit id="Left Handed" xml:space="preserve">
         <source>Left Handed</source>
@@ -820,10 +820,10 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>New encrypted direct message</target>
         <note>Notification that the user has received a new direct message</note>
       </trans-unit>
-      <trans-unit id="New to nostr?" xml:space="preserve">
-        <source>New to nostr?</source>
-        <target>New to nostr?</target>
-        <note>Ask the user if they are new to nostr</note>
+      <trans-unit id="New to Nostr?" xml:space="preserve">
+        <source>New to Nostr?</source>
+        <target>New to Nostr?</target>
+        <note>Ask the user if they are new to Nostr</note>
       </trans-unit>
       <trans-unit id="No" xml:space="preserve">
         <source>No</source>
@@ -1318,7 +1318,7 @@ Button text to indicate that the zap type is a private zap.</note>
       <trans-unit id="Social media has developed into a key way information flows around the world. Unfortunately, our current social media systems are broken" xml:space="preserve">
         <source>Social media has developed into a key way information flows around the world. Unfortunately, our current social media systems are broken</source>
         <target>Social media has developed into a key way information flows around the world. Unfortunately, our current social media systems are broken</target>
-        <note>Description about why nostr is needed.</note>
+        <note>Description about why Nostr is needed.</note>
       </trans-unit>
       <trans-unit id="Software" xml:space="preserve">
         <source>Software</source>
@@ -1360,9 +1360,9 @@ Button text to indicate that the zap type is a private zap.</note>
         <target>The address should either begin with LNURL or should look like an email address.</target>
         <note>Giving the description of the alert message.</note>
       </trans-unit>
-      <trans-unit id="The go-to iOS nostr client" xml:space="preserve">
-        <source>The go-to iOS nostr client</source>
-        <target>The go-to iOS nostr client</target>
+      <trans-unit id="The go-to iOS Nostr client" xml:space="preserve">
+        <source>The go-to iOS Nostr client</source>
+        <target>The go-to iOS Nostr client</target>
         <note>Quick description of what Damus is</note>
       </trans-unit>
       <trans-unit id="They are impersonating someone" xml:space="preserve">
@@ -1566,15 +1566,15 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <target>What do you want to report?</target>
         <note>Header text to prompt user what issue they want to report.</note>
       </trans-unit>
-      <trans-unit id="What is nostr?" xml:space="preserve">
-        <source>What is nostr?</source>
-        <target>What is nostr?</target>
-        <note>Heading text for section describing what is nostr.</note>
+      <trans-unit id="What is Nostr?" xml:space="preserve">
+        <source>What is Nostr?</source>
+        <target>What is Nostr?</target>
+        <note>Heading text for section describing what is Nostr.</note>
       </trans-unit>
-      <trans-unit id="Why we need nostr?" xml:space="preserve">
-        <source>Why we need nostr?</source>
-        <target>Why we need nostr?</target>
-        <note>Heading text for section describing why nostr is needed.</note>
+      <trans-unit id="Why we need Nostr?" xml:space="preserve">
+        <source>Why we need Nostr?</source>
+        <target>Why we need Nostr?</target>
+        <note>Heading text for section describing why Nostr is needed.</note>
       </trans-unit>
       <trans-unit id="Yes, Overwrite" xml:space="preserve">
         <source>Yes, Overwrite</source>

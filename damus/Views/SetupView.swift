@@ -40,7 +40,7 @@ struct SetupView: View {
                         .fontWeight(.heavy)
                         .foregroundStyle(DamusLogoGradient.gradient)
 
-                    Text("The go-to iOS nostr client", comment: "Quick description of what Damus is")
+                    Text("The go-to iOS Nostr client", comment: "Quick description of what Damus is")
                         .foregroundColor(DamusColors.mediumGrey)
                         .padding(.top, 10)
                     
@@ -85,7 +85,7 @@ struct LearnAboutNostrLink: View {
             Button(action: {
                 openURL(URL(string: "https://nostr.com")!)
             }, label: {
-                Text("Learn more about nostr", comment: "Button that opens up a webpage where the user can learn more about nostr.")
+                Text("Learn more about Nostr", comment: "Button that opens up a webpage where the user can learn more about Nostr.")
                     .foregroundColor(.accentColor)
             })
             
@@ -101,7 +101,7 @@ struct WhatIsNostr: View {
         HStack(alignment: .top) {
             Image("nostr-logo")
             VStack(alignment: .leading) {
-                Text("What is nostr?", comment: "Heading text for section describing what is nostr.")
+                Text("What is Nostr?", comment: "Heading text for section describing what is Nostr.")
                     .fontWeight(.bold)
                     .padding(.vertical, 10)
                 
@@ -120,11 +120,11 @@ struct WhyWeNeedNostr: View {
         HStack(alignment: .top) {
             Image("lightbulb")
             VStack(alignment: .leading) {
-                Text("Why we need nostr?", comment: "Heading text for section describing why nostr is needed.")
+                Text("Why we need Nostr?", comment: "Heading text for section describing why Nostr is needed.")
                     .fontWeight(.bold)
                     .padding(.vertical, 10)
                 
-                Text("Social media has developed into a key way information flows around the world. Unfortunately, our current social media systems are broken", comment: "Description about why nostr is needed.")
+                Text("Social media has developed into a key way information flows around the world. Unfortunately, our current social media systems are broken", comment: "Description about why Nostr is needed.")
                     .foregroundColor(DamusColors.mediumGrey)
             }
         }
