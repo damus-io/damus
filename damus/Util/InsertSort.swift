@@ -11,10 +11,10 @@ func insert_uniq_sorted_zap(zaps: inout [Zapping], new_zap: Zapping, cmp: (Zappi
     var i: Int = 0
     
     for zap in zaps {
-        if new_zap.request.id == zap.request.id {
+        if new_zap.request.ev.id == zap.request.ev.id {
             // replace pending
             if !new_zap.is_pending && zap.is_pending {
-                print("nwc: replacing pending with real zap \(new_zap.request.id)")
+                print("nwc: replacing pending with real zap \(new_zap.request.ev.id)")
                 zaps[i] = new_zap
                 return true
             }

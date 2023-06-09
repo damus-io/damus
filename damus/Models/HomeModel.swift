@@ -164,70 +164,38 @@ class HomeModel: ObservableObject {
         }
     }
     
-    func handle_zap_event_with_zapper(profiles: Profiles, ev: NostrEvent, our_keypair: Keypair, zapper: String) {
-        
-        guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: our_keypair.privkey) else {
-            return
-        }
-        
-        damus_state.add_zap(zap: .zap(zap))
-        
-        guard zap.target.pubkey == our_keypair.pubkey else {
-            return
-        }
-        
-        if !notifications.insert_zap(.zap(zap)) {
-            return
-        }
-
-        if handle_last_event(ev: ev, timeline: .notifications) {
-            if damus_state.settings.zap_vibration {
-                // Generate zap vibration
-                zap_vibrate(zap_amount: zap.invoice.amount)
-            }
-            if damus_state.settings.zap_notification {
-                // Create in-app local notification for zap received.
-                switch zap.target {
-                case .profile(let profile_id):
-                    create_in_app_profile_zap_notification(profiles: profiles, zap: zap, profile_id: profile_id)
-                case .note(let note_target):
-                    create_in_app_event_zap_notification(profiles: profiles, zap: zap, evId: note_target.note_id)
-                }
-            }
-        }
-
-        return
-    }
-
     func handle_zap_event(_ ev: NostrEvent) {
-        // These are zap notifications
-        guard let ptag = event_tag(ev, name: "p") else {
-            return
-        }
+        process_zap_event(damus_state: damus_state, ev: ev) { zapres in
+            guard case .done(let zap) = zapres else { return }
+            
+            guard zap.target.pubkey == self.damus_state.keypair.pubkey else {
+                return
+            }
         
-        let our_keypair = damus_state.keypair
-        if let local_zapper = damus_state.profiles.lookup_zapper(pubkey: ptag) {
-            handle_zap_event_with_zapper(profiles: self.damus_state.profiles, ev: ev, our_keypair: our_keypair, zapper: local_zapper)
-            return
-        }
-        
-        guard let profile = damus_state.profiles.lookup(id: ptag) else {
-            return
-        }
-        
-        guard let lnurl = profile.lnurl else {
-            return
-        }
-        
-        Task {
-            guard let zapper = await fetch_zapper_from_lnurl(lnurl) else {
+            if !self.notifications.insert_zap(.zap(zap)) {
+                return
+            }
+
+            guard let new_bits = handle_last_events(new_events: self.new_events, ev: ev, timeline: .notifications, shouldNotify: true) else {
                 return
             }
             
-            DispatchQueue.main.async {
-                self.damus_state.profiles.zappers[ptag] = zapper
-                self.handle_zap_event_with_zapper(profiles: self.damus_state.profiles, ev: ev, our_keypair: our_keypair, zapper: zapper)
+            if self.damus_state.settings.zap_vibration {
+                // Generate zap vibration
+                zap_vibrate(zap_amount: zap.invoice.amount)
             }
+            
+            if self.damus_state.settings.zap_notification {
+                // Create in-app local notification for zap received.
+                switch zap.target {
+                case .profile(let profile_id):
+                    create_in_app_profile_zap_notification(profiles: self.damus_state.profiles, zap: zap, profile_id: profile_id)
+                case .note(let note_target):
+                    create_in_app_event_zap_notification(profiles: self.damus_state.profiles, zap: zap, evId: note_target.note_id)
+                }
+            }
+            
+            self.new_events = new_bits
         }
         
     }
@@ -1106,7 +1074,7 @@ func zap_notification_title(_ zap: Zap) -> String {
 }
 
 func zap_notification_body(profiles: Profiles, zap: Zap, locale: Locale = Locale.current) -> String {
-    let src = zap.private_request ?? zap.request.ev
+    let src = zap.request.ev
     let anon = event_is_anonymous(ev: src)
     let pk = anon ? "anon" : src.pubkey
     let profile = profiles.lookup(id: pk)
@@ -1248,5 +1216,77 @@ func create_local_notification(profiles: Profiles, notify: LocalNotification) {
             print("Local notification scheduled")
         }
     }
+}
+
+
+enum ProcessZapResult {
+    case already_processed(Zap)
+    case done(Zap)
+    case failed
+}
+
+func process_zap_event(damus_state: DamusState, ev: NostrEvent, completion: @escaping (ProcessZapResult) -> Void) {
+    // These are zap notifications
+    guard let ptag = event_tag(ev, name: "p") else {
+        completion(.failed)
+        return
+    }
+    
+    // just return the zap if we already have it
+    if let zap = damus_state.zaps.zaps[ev.id], case .zap(let z) = zap {
+        completion(.already_processed(z))
+        return
+    }
+    
+    if let local_zapper = damus_state.profiles.lookup_zapper(pubkey: ptag) {
+        guard let zap = process_zap_event_with_zapper(damus_state: damus_state, ev: ev, zapper: local_zapper) else {
+            completion(.failed)
+            return
+        }
+        damus_state.add_zap(zap: .zap(zap))
+        completion(.done(zap))
+        return
+    }
+    
+    guard let profile = damus_state.profiles.lookup(id: ptag) else {
+        completion(.failed)
+        return
+    }
+    
+    guard let lnurl = profile.lnurl else {
+        completion(.failed)
+        return
+    }
+    
+    Task {
+        guard let zapper = await fetch_zapper_from_lnurl(lnurl) else {
+            completion(.failed)
+            return
+        }
+        
+        DispatchQueue.main.async {
+            damus_state.profiles.zappers[ptag] = zapper
+            guard let zap = process_zap_event_with_zapper(damus_state: damus_state, ev: ev, zapper: zapper) else {
+                completion(.failed)
+                return
+            }
+            damus_state.add_zap(zap: .zap(zap))
+            completion(.done(zap))
+        }
+    }
+    
+       
+}
+
+fileprivate func process_zap_event_with_zapper(damus_state: DamusState, ev: NostrEvent, zapper: String) -> Zap? {
+    let our_keypair = damus_state.keypair
+    
+    guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: our_keypair.privkey) else {
+        return nil
+    }
+    
+    damus_state.add_zap(zap: .zap(zap))
+    
+    return zap
 }
 

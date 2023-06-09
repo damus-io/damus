@@ -150,7 +150,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         }
         
         for zap in incoming_zaps {
-            pks.insert(zap.request.pubkey)
+            pks.insert(zap.request.ev.pubkey)
         }
         
         return Array(pks)
@@ -307,7 +307,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         changed = changed || incoming_events.count != count
         
         count = profile_zaps.zaps.count
-        profile_zaps.zaps = profile_zaps.zaps.filter { zap in isIncluded(zap.request) }
+        profile_zaps.zaps = profile_zaps.zaps.filter { zap in isIncluded(zap.request.ev) }
         changed = changed || profile_zaps.zaps.count != count
         
         for el in reactions {
@@ -325,7 +325,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         for el in zaps {
             count = el.value.zaps.count
             el.value.zaps = el.value.zaps.filter {
-                isIncluded($0.request)
+                isIncluded($0.request.ev)
             }
             changed = changed || el.value.zaps.count != count
         }

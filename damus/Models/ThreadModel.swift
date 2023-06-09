@@ -10,13 +10,19 @@ import Foundation
 /// manages the lifetime of a thread
 class ThreadModel: ObservableObject {
     @Published var event: NostrEvent
+    let original_event: NostrEvent
     var event_map: Set<NostrEvent>
     
     init(event: NostrEvent, damus_state: DamusState) {
         self.damus_state = damus_state
         self.event_map = Set()
         self.event = event
+        self.original_event = event
         add_event(event)
+    }
+    
+    var is_original: Bool {
+        return original_event.id == event.id
     }
     
     let damus_state: DamusState
@@ -101,6 +107,10 @@ class ThreadModel: ObservableObject {
             
             if ev.known_kind == .metadata {
                 process_metadata_event(events: damus_state.events, our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
+            } else if ev.known_kind == .zap {
+                process_zap_event(damus_state: damus_state, ev: ev) { zap in
+                    
+                }
             } else if ev.is_textlike {
                 self.add_event(ev)
             }
@@ -115,4 +125,11 @@ class ThreadModel: ObservableObject {
         }
     }
 
+}
+
+
+func get_top_zap(events: EventCache, evid: String) -> Zapping? {
+    return events.get_cache_data(evid).zaps_model.zaps.first(where: { zap in
+        !zap.request.marked_hidden
+    })
 }

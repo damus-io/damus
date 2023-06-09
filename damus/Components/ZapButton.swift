@@ -35,7 +35,7 @@ struct ZapButton: View {
     @StateObject var button: ZapButtonModel = ZapButtonModel()
     
     var our_zap: Zapping? {
-        zaps.zaps.first(where: { z in z.request.pubkey == damus_state.pubkey })
+        zaps.zaps.first(where: { z in z.request.ev.pubkey == damus_state.pubkey })
     }
     
     var zap_img: String {

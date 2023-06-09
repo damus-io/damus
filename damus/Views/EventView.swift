@@ -38,8 +38,9 @@ struct EventView: View {
                 }
             } else if event.known_kind == .zap {
                 if let zap = damus.zaps.zaps[event.id] {
-                    ZapEvent(damus: damus, zap: zap)
+                    ZapEvent(damus: damus, zap: zap, is_top_zap: options.contains(.top_zap))
                 } else {
+                    Text("Invalid Zap")
                     EmptyView()
                 }
             } else {

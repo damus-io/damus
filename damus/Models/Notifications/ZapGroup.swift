@@ -21,12 +21,12 @@ class ZapGroup {
     }
     
     func zap_requests() -> [NostrEvent] {
-        zaps.map { z in z.request }
+        zaps.map { z in z.request.ev }
     }
     
     func would_filter(_ isIncluded: (NostrEvent) -> Bool) -> Bool {
         for zap in zaps {
-            if !isIncluded(zap.request) {
+            if !isIncluded(zap.request.ev) {
                 return true
             }
         }
@@ -35,7 +35,7 @@ class ZapGroup {
     }
     
     func filter(_ isIncluded: (NostrEvent) -> Bool) -> ZapGroup? {
-        let new_zaps = zaps.filter { isIncluded($0.request) }
+        let new_zaps = zaps.filter { isIncluded($0.request.ev) }
         guard new_zaps.count > 0 else {
             return nil
         }
@@ -60,8 +60,8 @@ class ZapGroup {
         
         msat_total += zap.amount
         
-        if !zappers.contains(zap.request.pubkey)  {
-            zappers.insert(zap.request.pubkey)
+        if !zappers.contains(zap.request.ev.pubkey)  {
+            zappers.insert(zap.request.ev.pubkey)
         }
         
         return true

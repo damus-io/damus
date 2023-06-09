@@ -41,7 +41,16 @@ public enum ZapTarget: Equatable {
 
 struct ZapRequest {
     let ev: NostrEvent
+    let marked_hidden: Bool
     
+    var is_in_thread: Bool {
+        return !self.ev.content.isEmpty && !marked_hidden
+    }
+    
+    init(ev: NostrEvent) {
+        self.ev = ev
+        self.marked_hidden = ev.tags.first(where: { t in t.count > 0 && t[0] == "hidden" }) != nil
+    }
 }
 
 enum ExtPendingZapStateType {
@@ -129,7 +138,7 @@ struct ZapRequestId: Equatable {
     let reqid: String
     
     init(from_zap: Zapping) {
-        self.reqid = from_zap.request.id
+        self.reqid = from_zap.request.ev.id
     }
     
     init(from_makezap: MakeZapRequest) {
@@ -198,12 +207,12 @@ enum Zapping {
         }
     }
     
-    var request: NostrEvent {
+    var request: ZapRequest {
         switch self {
         case .zap(let zap):
-            return zap.request_ev
+            return zap.request
         case .pending(let pzap):
-            return pzap.request.ev
+            return pzap.request
         }
     }
     
@@ -227,6 +236,15 @@ enum Zapping {
         }
     }
     
+    var is_in_thread: Bool {
+        switch self {
+        case .zap(let zap):
+            return zap.request.is_in_thread
+        case .pending(let pzap):
+            return pzap.request.is_in_thread
+        }
+    }
+    
     var is_anon: Bool {
         switch self {
         case .zap(let zap):
@@ -242,12 +260,12 @@ struct Zap {
     public let invoice: ZapInvoice
     public let zapper: String /// zap authorizer
     public let target: ZapTarget
-    public let request: ZapRequest
+    public let raw_request: ZapRequest
     public let is_anon: Bool
-    public let private_request: NostrEvent?
+    public let private_request: ZapRequest?
     
-    var request_ev: NostrEvent {
-        return private_request ?? self.request.ev
+    var request: ZapRequest {
+        return private_request ?? self.raw_request
     }
     
     public static func from_zap_event(zap_ev: NostrEvent, zapper: String, our_privkey: String?) -> Zap? {
@@ -295,8 +313,9 @@ struct Zap {
         }
         
         let is_anon = private_request == nil && event_is_anonymous(ev: zap_req)
+        let preq = private_request.map { pr in ZapRequest(ev: pr) }
         
-        return Zap(event: zap_ev, invoice: zap_invoice, zapper: zapper, target: target, request: ZapRequest(ev: zap_req), is_anon: is_anon, private_request: private_request)
+        return Zap(event: zap_ev, invoice: zap_invoice, zapper: zapper, target: target, raw_request: ZapRequest(ev: zap_req), is_anon: is_anon, private_request: preq)
     }
 }
 

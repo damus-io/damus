@@ -22,8 +22,8 @@ struct ZapsView: View {
     var body: some View {
         ScrollView {
             LazyVStack {
-                ForEach(zaps.zaps, id: \.request.id) { zap in
-                    ZapEvent(damus: state, zap: zap)
+                ForEach(zaps.zaps, id: \.request.ev.id) { zap in
+                    ZapEvent(damus: state, zap: zap, is_top_zap: false)
                         .padding([.horizontal])
                 }
             }

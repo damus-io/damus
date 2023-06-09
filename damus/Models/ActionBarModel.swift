@@ -20,7 +20,7 @@ class ActionBarModel: ObservableObject {
     @Published var our_zap: Zapping?
     @Published var likes: Int
     @Published var boosts: Int
-    @Published var zaps: Int
+    @Published private(set) var zaps: Int
     @Published var zap_total: Int64
     @Published var replies: Int
     

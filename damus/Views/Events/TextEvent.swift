@@ -18,6 +18,7 @@ struct EventViewOptions: OptionSet {
     static let no_translate = EventViewOptions(rawValue: 1 << 6)
     static let small_pfp = EventViewOptions(rawValue: 1 << 7)
     static let nested = EventViewOptions(rawValue: 1 << 8)
+    static let top_zap = EventViewOptions(rawValue: 1 << 9)
     
     static let embedded: EventViewOptions = [.no_action_bar, .small_pfp, .wide, .truncate_content, .nested]
 }

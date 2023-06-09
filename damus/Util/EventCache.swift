@@ -62,7 +62,7 @@ class ZapsDataModel: ObservableObject {
     }
     
     func confirm_nwc(reqid: String) {
-        guard let zap = zaps.first(where: { z in z.request.id == reqid }),
+        guard let zap = zaps.first(where: { z in z.request.ev.id == reqid }),
               case .pending(let pzap) = zap
         else {
             return
@@ -83,16 +83,16 @@ class ZapsDataModel: ObservableObject {
     }
    
     func from(_ pubkey: String) -> [Zapping] {
-        return self.zaps.filter { z in z.request.pubkey == pubkey }
+        return self.zaps.filter { z in z.request.ev.pubkey == pubkey }
     }
     
     @discardableResult
     func remove(reqid: String) -> Bool {
-        guard zaps.first(where: { z in z.request.id == reqid }) != nil else {
+        guard zaps.first(where: { z in z.request.ev.id == reqid }) != nil else {
             return false
         }
         
-        self.zaps = zaps.filter { z in z.request.id != reqid }
+        self.zaps = zaps.filter { z in z.request.ev.id != reqid }
         return true
     }
 }
@@ -175,6 +175,9 @@ class EventCache {
     @discardableResult
     func store_zap(zap: Zapping) -> Bool {
         let data = get_cache_data(zap.target.id).zaps_model
+        if let ev = zap.event {
+            insert(ev)
+        }
         return insert_uniq_sorted_zap_by_amount(zaps: &data.zaps, new_zap: zap)
     }
     
@@ -182,7 +185,7 @@ class EventCache {
         switch zap.target {
         case .note(let note_target):
             let zaps = get_cache_data(note_target.note_id).zaps_model
-            zaps.remove(reqid: zap.request.id)
+            zaps.remove(reqid: zap.request.ev.id)
         case .profile:
             // these aren't stored anywhere yet
             break

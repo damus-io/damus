@@ -53,15 +53,10 @@ class ZapsModel: ObservableObject {
         case .notice:
             break
         case .eose:
-            let events = state.events.lookup_zaps(target: target).map { $0.request }
+            let events = state.events.lookup_zaps(target: target).map { $0.request.ev }
             load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(events), damus_state: state)
         case .event(_, let ev):
             guard ev.kind == 9735 else {
-                return
-            }
-            
-            if let zap = state.zaps.zaps[ev.id] {
-                state.events.store_zap(zap: zap)
                 return
             }
             

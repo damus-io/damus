@@ -12,8 +12,8 @@ class Zaps {
     let our_pubkey: String
     var our_zaps: [String: [Zapping]]
     
-    var event_counts: [String: Int]
-    var event_totals: [String: Int64]
+    private(set) var event_counts: [String: Int]
+    private(set) var event_totals: [String: Int64]
     
     init(our_pubkey: String) {
         self.zaps = [:]
@@ -27,13 +27,13 @@ class Zaps {
         var res: Zapping? = nil
         for kv in our_zaps {
             let ours = kv.value
-            guard let zap = ours.first(where: { z in z.request.id == reqid }) else {
+            guard let zap = ours.first(where: { z in z.request.ev.id == reqid }) else {
                 continue
             }
             
             res = zap
             
-            our_zaps[kv.key] = ours.filter { z in z.request.id != reqid }
+            our_zaps[kv.key] = ours.filter { z in z.request.ev.id != reqid }
             
             if let count = event_counts[zap.target.id] {
                 event_counts[zap.target.id] = count - 1
@@ -51,13 +51,16 @@ class Zaps {
     }
     
     func add_zap(zap: Zapping) {
-        if zaps[zap.request.id] != nil {
+        if zaps[zap.request.ev.id] != nil {
             return
         }
-        self.zaps[zap.request.id] = zap
+        self.zaps[zap.request.ev.id] = zap
+        if let zap_id = zap.event?.id {
+            self.zaps[zap_id] = zap
+        }
         
         // record our zaps for an event
-        if zap.request.pubkey == our_pubkey {
+        if zap.request.ev.pubkey == our_pubkey {
             switch zap.target {
             case .note(let note_target):
                 if our_zaps[note_target.note_id] == nil {
@@ -71,7 +74,7 @@ class Zaps {
         }
         
         // don't count tips to self. lame.
-        guard zap.request.pubkey != zap.target.pubkey else {
+        guard zap.request.ev.pubkey != zap.target.pubkey else {
             return
         }
         
