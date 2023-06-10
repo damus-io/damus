@@ -375,6 +375,7 @@ class HomeModel: ObservableObject {
         pool.send(.subscribe(subscription), to: [relay_id])
     }
 
+    /// After initial connection or reconnect, send subscription filters for the home timeline, DMs, and notifications
     func send_home_filters(relay_id: String?) {
         // TODO: since times should be based on events from a specific relay
         // perhaps we could mark this in the relay pool somehow
