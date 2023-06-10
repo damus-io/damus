@@ -170,9 +170,14 @@ public extension VideoPlayer {
     
 }
 
-func get_video_size(player: AVPlayer) -> CGSize? {
-    // TODO: make this async?
-    return player.currentImage?.size
+func get_video_size(player: AVPlayer) async -> CGSize? {
+    let res = await withCheckedContinuation { continuation in
+        DispatchQueue.global().async {
+            let size = player.currentImage?.size
+            continuation.resume(returning: size)
+        }
+    }
+    return res
 }
 
 func video_has_audio(player: AVPlayer) async -> Bool {
@@ -220,7 +225,7 @@ extension VideoPlayer: UIViewRepresentable {
                 if let player = uiView.player {
                     Task {
                         let has_audio = await video_has_audio(player: player)
-                        let size = get_video_size(player: player)
+                        let size = await get_video_size(player: player)
                         Task { @MainActor in
                             if let size {
                                 self.model.size = size
