@@ -371,7 +371,8 @@ class HomeModel: ObservableObject {
     /// Send the initial filters, just our contact list mostly
     func send_initial_filters(relay_id: String) {
         let filter = NostrFilter(kinds: [.contacts], limit: 1, authors: [damus_state.pubkey])
-        pool.send(.subscribe(.init(filters: [filter], sub_id: init_subid)), to: [relay_id])
+        let subscription = NostrSubscribe(filters: [filter], sub_id: init_subid)
+        pool.send(.subscribe(subscription), to: [relay_id])
     }
 
     func send_home_filters(relay_id: String?) {
