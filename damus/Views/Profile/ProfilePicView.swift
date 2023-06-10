@@ -92,6 +92,7 @@ struct InnerProfilePicView: View {
     var Placeholder: some View {
         Circle()
             .frame(width: size, height: size)
+            .foregroundColor(DamusColors.mediumGrey)
             .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
             .padding(2)
     }
