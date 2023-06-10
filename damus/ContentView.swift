@@ -790,7 +790,6 @@ func find_event(state: DamusState, query query_: FindEvent, callback: @escaping 
             return
         }
     
-        var attempts = 0
         filter = NostrFilter(ids: [evid], limit: 1)
     }
     
