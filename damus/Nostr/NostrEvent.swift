@@ -161,7 +161,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
                 return decrypted_content
             } else {
                 self.decryptable = false
-                return "Error: failed to decrypt content"
+                return ""
             }
         }
         

@@ -106,7 +106,7 @@ struct NoteContentView: View {
     var MainContent: some View {
         VStack(alignment: .leading) {
             if !self.event.decryptable {
-                Text("Error: failed to decrypt content").italic().bold()
+                Text("Error: failed to decrypt content", comment: "Text error shown when Damus cannot decipher and understand a Direct message").italic().bold()
             } else {
                 if size == .selected {
                     if with_padding {
