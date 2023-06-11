@@ -81,13 +81,16 @@ final class RelayLog: ObservableObject {
     /// Adds content to the log
     /// - Parameter content: what to add to the log. The date and time are prepended to the content.
     func add(_ content: String) {
-        let line = "\(formatter.string(from: .now)) - \(content)"
-        lines.insert(line, at: 0)
-        truncateLines()
-        
         Task {
+            await addLine(content)
             await publishChanges()
         }
+    }
+    
+    @MainActor private func addLine(_ line: String) {
+        let line = "\(formatter.string(from: .now)) - \(line)"
+        lines.insert(line, at: 0)
+        truncateLines()
     }
     
     /// Tells views that our log has been updated
