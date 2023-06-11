@@ -66,6 +66,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     let created_at: Int64
     let kind: Int
     let content: String
+    var decryptable: Bool = true
     
     var is_textlike: Bool {
         return kind == 1 || kind == 42
@@ -156,7 +157,12 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
 
     func get_content(_ privkey: String?) -> String {
         if known_kind == .dm {
-            return decrypted(privkey: privkey) ?? "*failed to decrypt content*"
+            if let decrypted_content = decrypted(privkey: privkey) {
+                return decrypted_content
+            } else {
+                self.decryptable = false
+                return "Error: failed to decrypt content"
+            }
         }
         
         return content

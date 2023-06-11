@@ -105,55 +105,58 @@ struct NoteContentView: View {
     
     var MainContent: some View {
         VStack(alignment: .leading) {
-            if size == .selected {
-                if with_padding {
-                    SelectableText(attributedString: artifacts.content.attributed, size: self.size)
-                        .padding(.horizontal)
-                } else {
-                    SelectableText(attributedString: artifacts.content.attributed, size: self.size)
-                }
+            if !self.event.decryptable {
+                Text("Error: failed to decrypt content").italic().bold()
             } else {
-                if with_padding {
-                    truncatedText
-                        .padding(.horizontal)
+                if size == .selected {
+                    if with_padding {
+                        SelectableText(attributedString: artifacts.content.attributed, size: self.size)
+                    } else {
+                        SelectableText(attributedString: artifacts.content.attributed, size: self.size)
+                    }
                 } else {
-                    truncatedText
+                    if with_padding {
+                        truncatedText
+                            .padding(.horizontal)
+                    } else {
+                        truncatedText
+                    }
                 }
-            }
-
-            if !options.contains(.no_translate) && (size == .selected || damus_state.settings.auto_translate) {
-                if with_padding {
-                    translateView
-                        .padding(.horizontal)
-                } else {
-                    translateView
+                
+                if !options.contains(.no_translate) && (size == .selected || damus_state.settings.auto_translate) {
+                    if with_padding {
+                        translateView
+                            .padding(.horizontal)
+                    } else {
+                        translateView
+                    }
                 }
-            }
-
-            if show_images && artifacts.media.count > 0 {
-                ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media)
-            } else if !show_images && artifacts.media.count > 0 {
-                ZStack {
+                
+                if show_images && artifacts.media.count > 0 {
                     ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media)
-                    Blur()
-                        .disabled(true)
+                } else if !show_images && artifacts.media.count > 0 {
+                    ZStack {
+                        ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media)
+                        Blur()
+                            .disabled(true)
+                    }
+                    //.cornerRadius(10)
                 }
-                //.cornerRadius(10)
-            }
-            
-            if artifacts.invoices.count > 0 {
+                
+                if artifacts.invoices.count > 0 {
+                    if with_padding {
+                        invoicesView
+                            .padding(.horizontal)
+                    } else {
+                        invoicesView
+                    }
+                }
+                
                 if with_padding {
-                    invoicesView
-                        .padding(.horizontal)
+                    previewView.padding(.horizontal)
                 } else {
-                    invoicesView
+                    previewView
                 }
-            }
-            
-            if with_padding {
-                previewView.padding(.horizontal)
-            } else {
-                previewView
             }
             
         }
