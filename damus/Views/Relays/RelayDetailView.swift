@@ -12,7 +12,7 @@ struct RelayDetailView: View {
     let relay: String
     let nip11: RelayMetadata
     
-    @StateObject var log: RelayLog
+    @ObservedObject var log: RelayLog
     
     @Environment(\.dismiss) var dismiss
     
@@ -21,7 +21,7 @@ struct RelayDetailView: View {
         self.relay = relay
         self.nip11 = nip11
         
-        _log = StateObject(wrappedValue: state.pool.get_relay(relay)?.connection.log ?? RelayLog())
+        log = state.relay_model_cache.model(with_relay_id: relay)?.log ?? RelayLog()
     }
     
     func check_connection() -> Bool {
