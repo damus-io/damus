@@ -40,7 +40,7 @@ struct EventView: View {
                 if let zap = damus.zaps.zaps[event.id] {
                     ZapEvent(damus: damus, zap: zap, is_top_zap: options.contains(.top_zap))
                 } else {
-                    Text("Invalid Zap")
+                    Text("Invalid Zap", comment: "Text indicating that a zap event is malformed and could not be displayed.")
                     EmptyView()
                 }
             } else {

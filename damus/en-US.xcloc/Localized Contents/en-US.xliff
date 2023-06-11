@@ -73,9 +73,9 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs</target>
         <note>Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string.</note>
       </trans-unit>
-      <trans-unit id="%@. Tip your friend's notes and stack sats with Bitcoin⚡️, the native currency of the internet." xml:space="preserve">
-        <source>%@. Tip your friend's notes and stack sats with Bitcoin⚡️, the native currency of the internet.</source>
-        <target>%@. Tip your friend's notes and stack sats with Bitcoin⚡️, the native currency of the internet.</target>
+      <trans-unit id="%@. Tip your friends and stack sats with Bitcoin⚡️, the native currency of the internet." xml:space="preserve">
+        <source>%@. Tip your friends and stack sats with Bitcoin⚡️, the native currency of the internet.</source>
+        <target>%@. Tip your friends and stack sats with Bitcoin⚡️, the native currency of the internet.</target>
         <note>Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string.</note>
       </trans-unit>
       <trans-unit id="%lld%%" xml:space="preserve">
@@ -650,6 +650,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Invalid Tip Address</source>
         <target>Invalid Tip Address</target>
         <note>Title of alerting as invalid tip address.</note>
+      </trans-unit>
+      <trans-unit id="Invalid Zap" xml:space="preserve">
+        <source>Invalid Zap</source>
+        <target>Invalid Zap</target>
+        <note>Text indicating that a zap event is malformed and could not be displayed.</note>
       </trans-unit>
       <trans-unit id="Invalid key" xml:space="preserve">
         <source>Invalid key</source>
@@ -1395,6 +1400,11 @@ Button text to indicate that the zap type is a private zap.</note>
         <target>Thread</target>
         <note>Navigation bar title for note thread.</note>
       </trans-unit>
+      <trans-unit id="Top Zap" xml:space="preserve">
+        <source>Top Zap</source>
+        <target>Top Zap</target>
+        <note>Text indicating that this zap is the one with the highest amount of sats.</note>
+      </trans-unit>
       <trans-unit id="Translate DMs" xml:space="preserve">
         <source>Translate DMs</source>
         <target>Translate DMs</target>
@@ -1801,11 +1811,6 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <source>%@ and %@ zapped your profile</source>
         <target>%@ and %@ zapped your profile</target>
         <note>Notification that 2 users zapped the current user's profile</note>
-      </trans-unit>
-      <trans-unit id="⚡️ %@" xml:space="preserve">
-        <source>⚡️ %@</source>
-        <target>⚡️ %@</target>
-        <note>Text indicating the zap amount. i.e. number of satoshis that were tipped to a user</note>
       </trans-unit>
     </body>
   </file>
