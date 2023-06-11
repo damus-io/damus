@@ -18,16 +18,36 @@ struct WalletView: View {
         self._settings = ObservedObject(wrappedValue: damus_state.settings)
     }
     
+    func copyText(_ text: String) {
+        UIPasteboard.general.string = text
+    }
+    
     func MainWalletView(nwc: WalletConnectURL) -> some View {
         VStack {
             SupportDamus
             
             Spacer()
             
-            Text(verbatim: nwc.relay.id)
-            
+            HStack {
+                Button(action: {
+                    copyText(nwc.relay.id)
+                }) {
+                    Image(systemName: "doc.on.doc")
+                }
+                
+                Text(verbatim: nwc.relay.id)
+            }
+
             if let lud16 = nwc.lud16 {
-                Text(verbatim: lud16)
+                HStack {
+                    Button(action: {
+                        copyText(lud16)
+                    }) {
+                        Image(systemName: "doc.on.doc")
+                    }
+                    
+                    Text(verbatim: lud16)
+                }
             }
             
             BigButton(NSLocalizedString("Disconnect Wallet", comment: "Text for button to disconnect from Nostr Wallet Connect lightning wallet.")) {
