@@ -49,7 +49,7 @@ final class RelayConnection: ObservableObject {
     
     private var handleEvent: (NostrConnectionEvent) -> ()
     private let url: RelayURL
-    lazy var log = RelayLog(url.url)
+    var log: RelayLog?
 
     init(url: RelayURL, handleEvent: @escaping (NostrConnectionEvent) -> ()) {
         self.url = url
@@ -60,13 +60,13 @@ final class RelayConnection: ObservableObject {
         socket.ping { err in
             if err == nil {
                 self.last_pong = .now
-                self.log.add("Successful ping")
+                self.log?.add("Successful ping")
             } else {
                 print("pong failed, reconnecting \(self.url.id)")
                 self.isConnected = false
                 self.isConnecting = false
                 self.reconnect_with_backoff()
-                self.log.add("Ping failed")
+                self.log?.add("Ping failed")
             }
         }
     }
@@ -148,7 +148,7 @@ final class RelayConnection: ObservableObject {
         }
         
         if let description = event.description {
-            log.add(description)
+            log?.add(description)
         }
     }
     
@@ -163,7 +163,7 @@ final class RelayConnection: ObservableObject {
         }
         disconnect()
         connect()
-        log.add("Reconnecting...")
+        log?.add("Reconnecting...")
     }
     
     func reconnect_in(after: TimeInterval) {

@@ -880,6 +880,7 @@ func add_new_relay(model_cache: RelayModelCache, relay_filters: RelayFilters, po
         await MainActor.run {
             let model = RelayModel(url, metadata: meta)
             model_cache.insert(model: model)
+            pool.setLog(model.log, for: relay_id)
             
             // if this is the first time adding filters, we should filter non-paid relays
             if new_relay_filters && !meta.is_paid {
