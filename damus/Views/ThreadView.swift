@@ -9,20 +9,18 @@ import SwiftUI
 
 struct ThreadView: View {
     let state: DamusState
+    
     @ObservedObject var thread: ThreadModel
-    
-    var body: some View {
-        ThreadView_(state: state, thread: thread, zaps: state.events.get_cache_data(thread.event.id).zaps_model)
-    }
-}
-
-struct ThreadView_: View {
-    let state: DamusState
-    
-    let thread: ThreadModel
     @ObservedObject var zaps: ZapsDataModel
     
     @Environment(\.dismiss) var dismiss
+    
+    init(state: DamusState, thread: ThreadModel) {
+        self.state = state
+        self._thread = ObservedObject(wrappedValue: thread)
+        let zaps = state.events.get_cache_data(thread.event.id).zaps_model
+        self._zaps = ObservedObject(wrappedValue: zaps)
+    }
     
     var parent_events: [NostrEvent] {
         state.events.parent_events(event: thread.event)
