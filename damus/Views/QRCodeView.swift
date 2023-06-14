@@ -45,12 +45,12 @@ struct QRCodeView: View {
     @State var pubkey: String
     
     @Environment(\.presentationMode) var presentationMode
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     
     @State private var selectedTab = 0
     
     @State var scanResult: ProfileScanResult? = nil
-    
-    @State var showProfileView: Bool = false
+
     @State var profile: Profile? = nil
     @State var error: String? = nil
     
@@ -209,13 +209,6 @@ struct QRCodeView: View {
             
             Spacer()
             
-            if let scanResult {
-                let dst = ProfileView(damus_state: damus_state, pubkey: scanResult.pubkey)
-                NavigationLink(destination: dst, isActive: $showProfileView) {
-                    EmptyView()
-                }
-            }
-            
             Spacer()
             
             Button(action: {
@@ -271,9 +264,10 @@ struct QRCodeView: View {
     
     func show_profile_after_delay() {
         DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
-            showProfileView = true
+            if let scanResult {
+                navigationCoordinator.push(route: Route.ProfileByKey(pubkey: scanResult.pubkey))
+            }
         }
-        
     }
 
     func cameraAnimate(completion: @escaping () -> Void) {

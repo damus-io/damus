@@ -38,6 +38,7 @@ enum Route: Hashable {
     case SaveKeys(account: CreateAccountModel)
     case Wallet(wallet: WalletModel)
     case WalletScanner(result: Binding<WalletScanResult>)
+    case FollowersYouKnow(friendedFollowers: [String])
 
     @ViewBuilder
     func view(navigationCordinator: NavigationCoordinator, damusState: DamusState) -> some View {
@@ -115,6 +116,8 @@ enum Route: Hashable {
                 .environmentObject(navigationCordinator)
         case .WalletScanner(let walletScanResult):
             WalletScannerView(result: walletScanResult)
+        case .FollowersYouKnow(let friendedFollowers):
+            FollowersYouKnowView(damus_state: damusState, friended_followers: friendedFollowers)
         }
     }
 
@@ -180,6 +183,8 @@ enum Route: Hashable {
             return true
         case (.WalletScanner(_), .WalletScanner(_)):
             return true
+        case (.FollowersYouKnow(let lhs_friendedFollowers), .FollowersYouKnow(let rhs_friendedFollowers)):
+            return lhs_friendedFollowers == rhs_friendedFollowers
         default:
             return false
         }
@@ -263,6 +268,9 @@ enum Route: Hashable {
             hasher.combine("wallet")
         case .WalletScanner(_):
             hasher.combine("walletScanner")
+        case .FollowersYouKnow(let friendedFollowers):
+            hasher.combine("followersYouKnow")
+            hasher.combine(friendedFollowers)
         }
     }
 }

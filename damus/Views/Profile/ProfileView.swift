@@ -451,7 +451,7 @@ struct ProfileView: View {
                 if !friended_followers.isEmpty {
                     Spacer()
 
-                    NavigationLink(destination: FollowersYouKnowView(damus_state: damus_state, friended_followers: friended_followers)) {
+                    NavigationLink(value: Route.FollowersYouKnow(friendedFollowers: friended_followers)) {
                         HStack {
                             CondensedProfilePicturesView(state: damus_state, pubkeys: friended_followers, maxPictures: 3)
                             Text(followedByString(friended_followers, profiles: damus_state.profiles))
@@ -521,6 +521,7 @@ struct ProfileView: View {
             }
             .fullScreenCover(isPresented: $show_qr_code) {
                 QRCodeView(damus_state: damus_state, pubkey: profile.pubkey)
+                    .environmentObject(navigationCoordinator)
             }
 
             if damus_state.is_privkey_user {
