@@ -220,8 +220,6 @@ struct ContentView: View {
     }
     
     func open_event(ev: NostrEvent) {
-        popToRoot()
-
         let thread = ThreadModel(event: ev, damus_state: damus_state!)
         navigationCoordinator.push(route: Route.Thread(thread: thread))
     }
@@ -232,16 +230,12 @@ struct ContentView: View {
     }
     
     func open_profile(id: String) {
-        popToRoot()
-
         let profile_model = ProfileModel(pubkey: id, damus: damus_state!)
         let followers = FollowersModel(damus_state: damus_state!, target: id)
         navigationCoordinator.push(route: Route.Profile(profile: profile_model, followers: followers))
     }
     
     func open_search(filt: NostrFilter) {
-        popToRoot()
-
         let search = SearchModel(state: damus_state!, search: filt)
         navigationCoordinator.push(route: Route.Search(search: search))
     }
