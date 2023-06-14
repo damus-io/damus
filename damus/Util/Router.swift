@@ -57,6 +57,7 @@ enum Route: Hashable {
             RelayDetailView(state: damusState, relay: relay, nip11: metadata)
         case .Following(let following):
             FollowingView(damus_state: damusState, following: following)
+                .environmentObject(navigationCordinator)
         case .MuteList(let users):
             MutelistView(damus_state: damusState, users: users)
         case .RelayConfig:
@@ -88,8 +89,10 @@ enum Route: Hashable {
             ThreadView(state: damusState, thread: thread)
         case .Reposts(let reposts):
             RepostsView(damus_state: damusState, model: reposts)
+                .environmentObject(navigationCordinator)
         case .Reactions(let reactions):
             ReactionsView(damus_state: damusState, model: reactions)
+                .environmentObject(navigationCordinator)
         case .Zaps(let target):
             ZapsView(state: damusState, target: target)
         case .Search(let search):

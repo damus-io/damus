@@ -78,6 +78,7 @@ struct SearchHomeView: View {
     
     var SearchContent: some View {
         SearchResultsView(damus_state: damus_state, search: $search)
+            .environmentObject(navigationCoordinator)
             .refreshable {
                 // Fetch new information by unsubscribing and resubscribing to the relay
                 model.unsubscribe()

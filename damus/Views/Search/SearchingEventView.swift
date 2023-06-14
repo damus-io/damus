@@ -24,6 +24,7 @@ struct SearchingEventView: View {
     let state: DamusState
     let evid: String
     let search_type: SearchType
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     
     @State var search_state: SearchState = .searching
     
@@ -107,6 +108,7 @@ struct SearchingEventView: View {
             case .found_profile(let pk):
                 NavigationLink(value: Route.ProfileByKey(pubkey: pk)) {
                     FollowUserView(target: .pubkey(pk), damus_state: state)
+                        .environmentObject(navigationCoordinator)
                 }
                 .buttonStyle(PlainButtonStyle())
             case .not_found:
