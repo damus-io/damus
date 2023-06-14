@@ -42,9 +42,7 @@ struct RecommendedRelayView: View {
                 Text(relay).layoutPriority(1)
 
                 if let meta = damus.relay_metadata.lookup(relay_id: relay) {
-                    NavigationLink ( destination:
-                        RelayDetailView(state: damus, relay: relay, nip11: meta)
-                    ){
+                    NavigationLink(value: Route.RelayDetail(relay: relay, metadata: meta)){
                         EmptyView()
                     }
                     .opacity(0.0)
