@@ -10,12 +10,14 @@ import SwiftUI
 struct RepostsView: View {
     let damus_state: DamusState
     @StateObject var model: RepostsModel
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
 
     var body: some View {
         ScrollView {
             LazyVStack {
                 ForEach(model.events, id: \.id) { ev in
                     RepostView(damus_state: damus_state, repost: ev)
+                        .environmentObject(navigationCoordinator)
                 }
             }
             .padding()

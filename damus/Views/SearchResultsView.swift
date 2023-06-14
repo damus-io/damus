@@ -37,9 +37,11 @@ enum Search: Identifiable {
 struct InnerSearchResults: View {
     let damus_state: DamusState
     let search: Search?
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     
     func ProfileSearchResult(pk: String) -> some View {
         FollowUserView(target: .pubkey(pk), damus_state: damus_state)
+            .environmentObject(navigationCoordinator)
     }
     
     func HashtagSearch(_ ht: String) -> some View {
@@ -68,6 +70,7 @@ struct InnerSearchResults: View {
                 
             case .nip05(let addr):
                 SearchingEventView(state: damus_state, evid: addr, search_type: .nip05)
+                    .environmentObject(navigationCoordinator)
                 
             case .profile(let prof):
                 let decoded = try? bech32_decode(prof)
@@ -106,10 +109,12 @@ struct SearchResultsView: View {
     let damus_state: DamusState
     @Binding var search: String
     @State var result: Search? = nil
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     
     var body: some View {
         ScrollView {
             InnerSearchResults(damus_state: damus_state, search: result)
+                .environmentObject(navigationCoordinator)
                 .padding()
         }
         .frame(maxHeight: .infinity)
