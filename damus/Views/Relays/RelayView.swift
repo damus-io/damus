@@ -20,8 +20,8 @@ struct RelayView: View {
                     if showActionButtons {
                         RemoveButton(privkey: privkey, showText: false)
                     }
-                    else {
-                        RelayStatus(pool: state.pool, relay: relay)
+                    else if let relay_connection {
+                        RelayStatus(connection: relay_connection)
                     }
                 }
                 
@@ -65,6 +65,10 @@ struct RelayView: View {
                 RemoveButton(privkey: privkey, showText: true)
             }
         }
+    }
+    
+    private var relay_connection: RelayConnection? {
+        state.pool.get_relay(relay)?.connection
     }
     
     func CopyAction(relay: String) -> some View {
