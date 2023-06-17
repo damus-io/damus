@@ -1,5 +1,5 @@
 //
-//  RelayStatus.swift
+//  RelayStatusView.swift
 //  damus
 //
 //  Created by William Casarin on 2023-02-10.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct RelayStatus: View {
+struct RelayStatusView: View {
     @ObservedObject var connection: RelayConnection
     
     var body: some View {
@@ -28,6 +28,6 @@ struct RelayStatus: View {
 struct RelayStatusView_Previews: PreviewProvider {
     static var previews: some View {
         let connection = test_damus_state().pool.get_relay("relay")!.connection
-        RelayStatus(connection: connection)
+        RelayStatusView(connection: connection)
     }
 }

@@ -21,7 +21,7 @@ struct RelayView: View {
                         RemoveButton(privkey: privkey, showText: false)
                     }
                     else if let relay_connection {
-                        RelayStatus(connection: relay_connection)
+                        RelayStatusView(connection: relay_connection)
                     }
                 }
                 

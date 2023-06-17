@@ -80,7 +80,7 @@ struct RelayDetailView: View {
                         HStack {
                             Text(relay)
                             Spacer()
-                            RelayStatus(connection: relay_connection)
+                            RelayStatusView(connection: relay_connection)
                         }
                     }
                 }
