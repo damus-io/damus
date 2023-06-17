@@ -857,6 +857,7 @@ func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     
     if changed {
         save_bootstrap_relays(pubkey: state.pubkey, relays: Array(new))
+        state.pool.connect()
         notify(.relays_changed, ())
     }
 }
