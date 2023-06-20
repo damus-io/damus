@@ -440,7 +440,7 @@ class HomeModel: ObservableObject {
         notifications_filters = update_filters_with_since(last_of_kind: last_of_kind, filters: notifications_filters)
         dms_filters = update_filters_with_since(last_of_kind: last_of_kind, filters: dms_filters)
 
-        print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters, notifications_filters, dms_filters])
+        //print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters, notifications_filters, dms_filters])
 
         if let relay_id {
             pool.send(.subscribe(.init(filters: home_filters, sub_id: home_subid)), to: [relay_id])
