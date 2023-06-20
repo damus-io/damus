@@ -56,15 +56,18 @@ final class RelayConnection: ObservableObject {
     }
     
     func ping() {
-        socket.ping { err in
-            if err == nil {
-                self.last_pong = .now
-            } else {
-                print("pong failed, reconnecting \(self.url.id)")
+        Task {
+            do {
+                try await socket.ping()
+            } catch {
+                print("pong failed (\(error)), reconnecting \(self.url.id)")
                 self.isConnected = false
                 self.isConnecting = false
                 self.reconnect_with_backoff()
+                return
             }
+            
+            self.last_pong = .now
         }
     }
     

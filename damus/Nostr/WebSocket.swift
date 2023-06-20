@@ -45,8 +45,16 @@ final class WebSocket: NSObject, URLSessionWebSocketDelegate {
         self.session = session
     }
     
-    func ping(receiveHandler: @escaping (Error?) -> Void) {
-        self.webSocketTask.sendPing(pongReceiveHandler: receiveHandler)
+    func ping() async throws -> () {
+        return try await withCheckedThrowingContinuation { cont in
+            self.webSocketTask.sendPing { err in
+                if let err {
+                    cont.resume(throwing: err)
+                } else {
+                    cont.resume(returning: ())
+                }
+            }
+        }
     }
     
     func connect() {
