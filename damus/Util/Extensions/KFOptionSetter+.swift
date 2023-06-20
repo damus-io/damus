@@ -40,7 +40,7 @@ extension KFOptionSetter {
     
     func onFailure(fallbackUrl: URL?, cacheKey: String?) -> Self {
         guard let url = fallbackUrl, let key = cacheKey else { return self }
-        let imageResource = ImageResource(downloadURL: url, cacheKey: key)
+        let imageResource = Kingfisher.ImageResource(downloadURL: url, cacheKey: key)
         let source = imageResource.convertToSource()
         options.alternativeSources = [source]
         
