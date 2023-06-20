@@ -29,9 +29,27 @@ struct FollowUserView: View {
     }
 }
 
+struct FollowersYouKnowView: View {
+    let damus_state: DamusState
+    let friended_followers: [String]
+
+    @EnvironmentObject var followers: FollowersModel
+
+    var body: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading) {
+                ForEach(friended_followers, id: \.self) { pk in
+                    FollowUserView(target: .pubkey(pk), damus_state: damus_state)
+                }
+            }
+            .padding(.horizontal)
+        }
+        .navigationBarTitle(NSLocalizedString("Followers You Know", comment: "Navigation bar title for view that shows who is following a user."))
+    }
+}
+
 struct FollowersView: View {
     let damus_state: DamusState
-    let whos: String
     
     @EnvironmentObject var followers: FollowersModel
     
@@ -58,7 +76,6 @@ struct FollowingView: View {
     let damus_state: DamusState
     
     let following: FollowingModel
-    let whos: String
     
     var body: some View {
         ScrollView {

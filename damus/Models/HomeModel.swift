@@ -386,7 +386,7 @@ class HomeModel {
 
         var contacts_filter = NostrFilter(kinds: [.metadata])
         contacts_filter.authors = friends
-        
+
         var our_contacts_filter = NostrFilter(kinds: [.contacts, .metadata])
         our_contacts_filter.authors = [damus_state.pubkey]
         
