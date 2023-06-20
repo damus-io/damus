@@ -72,11 +72,14 @@ struct EventProfileName: View {
                     .font(eventviewsize_to_font(size))
             }
             
+            /*
             if let nip05 = current_nip05 {
                 NIP05Badge(nip05: nip05, pubkey: pubkey, contacts: damus_state.contacts, show_domain: false, clickable: false)
             }
+             */
             
-            if current_nip05 == nil, let frend = friend_type {
+             
+            if let frend = friend_type {
                 FriendIcon(friend: frend)
             }
             
