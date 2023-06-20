@@ -93,7 +93,6 @@ struct ProfileView: View {
     let damus_state: DamusState
     let pfp_size: CGFloat = 90.0
     let bannerHeight: CGFloat = 150.0
-    let max_about_length = 280
     
     static let markdown = Markdown()
     
@@ -104,7 +103,6 @@ struct ProfileView: View {
     @State var action_sheet_presented: Bool = false
     @State var filter_state : FilterState = .posts
     @State var yOffset: CGFloat = 0
-    @State var show_full_about: Bool = false
     
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
@@ -403,28 +401,7 @@ struct ProfileView: View {
             nameSection(profile_data: profile_data)
 
             if let about = profile_data?.about {
-                let blocks = parse_mentions(content: about, tags: [])
-                let about_string = render_blocks(blocks: blocks, profiles: damus_state.profiles).content.attributed
-                let truncated_about = show_full_about ? about_string : about_string.truncateOrNil(maxLength: max_about_length)
-
-                SelectableText(attributedString: truncated_about ?? about_string, size: .subheadline)
-
-                if truncated_about != nil {
-                    if show_full_about {
-                        Button(NSLocalizedString("Show less", comment: "Button to show less of a long profile description.")) {
-                            show_full_about = false
-                        }
-                        .font(.footnote)
-                    } else {
-                        Button(NSLocalizedString("Show more", comment: "Button to show more of a long profile description.")) {
-                            show_full_about = true
-                        }
-                        .font(.footnote)
-                    }
-                }
-            } else {
-                Text(verbatim: "")
-                    .font(.subheadline)
+                AboutView(state: damus_state, about: about)
             }
             
             if let url = profile_data?.website_url {
