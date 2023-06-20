@@ -18,11 +18,11 @@ struct ZapEvent: View {
                 Image("zap.fill")
                     .foregroundColor(.orange)
                 
-                Text("\(format_msats(zap.amount))", comment: "Text indicating the zap amount. i.e. number of satoshis that were tipped to a user")
+                Text(verbatim: format_msats(zap.amount))
                     .font(.headline)
                 
                 if is_top_zap {
-                    Text("Top Zap")
+                    Text("Top Zap", comment: "Text indicating that this zap is the one with the highest amount of sats.")
                         .font(.caption)
                         .foregroundColor(.gray)
                         .padding([.top], 2)
