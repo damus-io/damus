@@ -39,6 +39,7 @@ enum VideoHandler {
     case onStateChanged((VideoState) -> Void)
 }
     
+@MainActor
 public class VideoPlayerModel: ObservableObject {
     @Published var autoReplay: Bool = true
     @Published var muted: Bool = true
@@ -164,20 +165,11 @@ public extension VideoPlayer {
     }
 }
 
-@available(iOS 13, *)
-public extension VideoPlayer {
-    
-    
-}
-
 func get_video_size(player: AVPlayer) async -> CGSize? {
-    let res = await withCheckedContinuation { continuation in
-        DispatchQueue.global().async {
-            let size = player.currentImage?.size
-            continuation.resume(returning: size)
-        }
+    let res = Task.detached(priority: .background) {
+        return player.currentImage?.size
     }
-    return res
+    return await res.value
 }
 
 func video_has_audio(player: AVPlayer) async -> Bool {
@@ -290,13 +282,16 @@ extension VideoPlayer: UIViewRepresentable {
             self.videoPlayer = videoPlayer
         }
         
+        @MainActor
         func startObserver(uiView: VideoPlayerView) {
             guard observer == nil else { return }
             
             observer = uiView.addPeriodicTimeObserver(forInterval: .init(seconds: 0.25, preferredTimescale: 60)) { [weak self, unowned uiView] time in
                 guard let `self` = self else { return }
                 
-                self.videoPlayer.model.time = time
+                Task { @MainActor in
+                    self.videoPlayer.model.time = time
+                }
                 self.observerTime = time
                 
                 self.updateBuffer(uiView: uiView)
@@ -318,6 +313,7 @@ extension VideoPlayer: UIViewRepresentable {
             self.observerBuffer = nil
         }
         
+        @MainActor
         func updateBuffer(uiView: VideoPlayerView) {
             let bufferProgress = uiView.bufferProgress
             guard bufferProgress != observerBuffer else { return }

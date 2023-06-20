@@ -53,6 +53,7 @@ enum ImageShape {
 }
 
 // MARK: - Image Carousel
+@MainActor
 struct ImageCarousel: View {
     var urls: [MediaUrl]
     

@@ -204,6 +204,7 @@ class EventCache {
         return image_metadata[url.absoluteString.lowercased()]
     }
     
+    @MainActor
     func lookup_media_size(url: URL) -> CGSize? {
         if let img_meta = lookup_img_metadata(url: url) {
             return img_meta.meta.dim?.size
@@ -216,6 +217,7 @@ class EventCache {
         video_meta[url.absoluteString] = meta
     }
     
+    @MainActor
     func get_video_player_model(url: URL) -> VideoPlayerModel {
         if let model = video_meta[url.absoluteString] {
             return model
