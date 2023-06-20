@@ -11,6 +11,8 @@ import Foundation
 class Contacts {
     private var friends: Set<String> = Set()
     private var friend_of_friends: Set<String> = Set()
+    /// Tracks which friends are friends of a given pubkey.
+    private var pubkey_to_our_friends = [String : Set<String>]()
     private var muted: Set<String> = Set()
     
     let our_pubkey: String
@@ -58,6 +60,10 @@ class Contacts {
     
     func remove_friend(_ pubkey: String) {
         friends.remove(pubkey)
+
+        pubkey_to_our_friends.forEach {
+            pubkey_to_our_friends[$0.key]?.remove(pubkey)
+        }
     }
     
     func get_friend_list() -> [String] {
@@ -73,6 +79,15 @@ class Contacts {
         for tag in contact.tags {
             if tag.count >= 2 && tag[0] == "p" {
                 friend_of_friends.insert(tag[1])
+
+                // Exclude themself and us.
+                if contact.pubkey != our_pubkey && contact.pubkey != tag[1] {
+                    if pubkey_to_our_friends[tag[1]] == nil {
+                        pubkey_to_our_friends[tag[1]] = Set<String>()
+                    }
+
+                    pubkey_to_our_friends[tag[1]]?.insert(contact.pubkey)
+                }
             }
         }
     }
@@ -95,6 +110,11 @@ class Contacts {
     
     func follow_state(_ pubkey: String) -> FollowState {
         return is_friend(pubkey) ? .follows : .unfollows
+    }
+
+    /// Gets the list of pubkeys of our friends who follow the given pubkey.
+    func get_friended_followers(_ pubkey: String) -> [String] {
+        return Array((pubkey_to_our_friends[pubkey] ?? Set()))
     }
 }
 

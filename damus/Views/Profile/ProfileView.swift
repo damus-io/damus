@@ -46,6 +46,31 @@ func relaysCountString(_ count: Int, locale: Locale = Locale.current) -> String 
     return String(format: format, locale: locale, count)
 }
 
+func followedByString(_ friend_intersection: [String], profiles: Profiles, locale: Locale = Locale.current) -> String {
+    let bundle = bundleForLocale(locale: locale)
+    let names: [String] = friend_intersection.prefix(3).map {
+        let profile = profiles.lookup(id: $0)
+        return Profile.displayName(profile: profile, pubkey: $0).username.truncate(maxLength: 20)
+    }
+
+    switch friend_intersection.count {
+    case 0:
+        return ""
+    case 1:
+        let format = NSLocalizedString("Followed by %@", bundle: bundle, comment: "Text to indicate that the user is followed by one of our follows.")
+        return String(format: format, locale: locale, names[0])
+    case 2:
+        let format = NSLocalizedString("Followed by %@ & %@", bundle: bundle, comment: "Text to indicate that the user is followed by two of our follows.")
+        return String(format: format, locale: locale, names[0], names[1])
+    case 3:
+        let format = NSLocalizedString("Followed by %@, %@ & %@", bundle: bundle, comment: "Text to indicate that the user is followed by three of our follows.")
+        return String(format: format, locale: locale, names[0], names[1], names[2])
+    default:
+        let format = localizedStringFormat(key: "followed_by_three_and_others", locale: locale)
+        return String(format: format, locale: locale, friend_intersection.count - 3, names[0], names[1], names[2])
+    }
+}
+
 struct EditButton: View {
     let damus_state: DamusState
     
@@ -379,7 +404,7 @@ struct ProfileView: View {
                 if let contact = profile.contacts {
                     let contacts = contact.referenced_pubkeys.map { $0.ref_id }
                     let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
-                    NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model, whos: profile.pubkey)) {
+                    NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model)) {
                         HStack {
                             let noun_text = Text(verbatim: "\(followingCountString(profile.following))").font(.subheadline).foregroundColor(.gray)
                             Text("\(Text(verbatim: profile.following.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
@@ -387,7 +412,7 @@ struct ProfileView: View {
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
-                let fview = FollowersView(damus_state: damus_state, whos: profile.pubkey)
+                let fview = FollowersView(damus_state: damus_state)
                     .environmentObject(followers)
                 if followers.contacts != nil {
                     NavigationLink(destination: fview) {
@@ -417,6 +442,22 @@ struct ProfileView: View {
                             relay_text
                         }
                         .buttonStyle(PlainButtonStyle())
+                    }
+                }
+            }
+
+            if profile.pubkey != damus_state.pubkey {
+                let friended_followers = damus_state.contacts.get_friended_followers(profile.pubkey)
+                if !friended_followers.isEmpty {
+                    Spacer()
+
+                    NavigationLink(destination: FollowersYouKnowView(damus_state: damus_state, friended_followers: friended_followers)) {
+                        HStack {
+                            CondensedProfilePicturesView(state: damus_state, pubkeys: friended_followers, maxPictures: 3)
+                            Text(followedByString(friended_followers, profiles: damus_state.profiles))
+                                .font(.subheadline).foregroundColor(.gray)
+                                .multilineTextAlignment(.leading)
+                        }
                     }
                 }
             }
