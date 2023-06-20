@@ -132,6 +132,11 @@ final class RelayConnection: ObservableObject {
             }
         case .error(let error):
             print("⚠️ Warning: RelayConnection (\(self.url)) error: \(error)")
+            let nserr = error as NSError
+            if nserr.domain == NSPOSIXErrorDomain && nserr.code == 57 {
+                // ignore socket not connected?
+                return
+            }
             DispatchQueue.main.async {
                 self.isConnected = false
                 self.isConnecting = false
