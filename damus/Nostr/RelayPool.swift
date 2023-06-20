@@ -18,11 +18,16 @@ struct QueuedRequest {
     let relay: String
 }
 
+struct SeenEvent: Hashable {
+    let relay_id: String
+    let evid: String
+}
+
 class RelayPool {
     var relays: [Relay] = []
     var handlers: [RelayHandler] = []
     var request_queue: [QueuedRequest] = []
-    var seen: Set<String> = Set()
+    var seen: Set<SeenEvent> = Set()
     var counts: [String: UInt64] = [:]
     
     private let network_monitor = NWPathMonitor()
@@ -233,7 +238,7 @@ class RelayPool {
     func record_seen(relay_id: String, event: NostrConnectionEvent) {
         if case .nostr_event(let ev) = event {
             if case .event(_, let nev) = ev {
-                let k = relay_id + nev.id
+                let k = SeenEvent(relay_id: relay_id, evid: nev.id)
                 if !seen.contains(k) {
                     seen.insert(k)
                     if counts[relay_id] == nil {
