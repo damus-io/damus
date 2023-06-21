@@ -1803,13 +1803,13 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <note>Notification that 2 users zapped the current user's note</note>
       </trans-unit>
       <trans-unit id="zapped_your_profile_1" xml:space="preserve">
-        <source>%@ zapped your profile</source>
-        <target>%@ zapped your profile</target>
+        <source>%@ zapped you</source>
+        <target>%@ zapped you</target>
         <note>Notification that a user zapped the current user's profile</note>
       </trans-unit>
       <trans-unit id="zapped_your_profile_2" xml:space="preserve">
-        <source>%@ and %@ zapped your profile</source>
-        <target>%@ and %@ zapped your profile</target>
+        <source>%@ and %@ zapped you</source>
+        <target>%@ and %@ zapped you</target>
         <note>Notification that 2 users zapped the current user's profile</note>
       </trans-unit>
     </body>
@@ -2110,13 +2110,13 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <note/>
       </trans-unit>
       <trans-unit id="/zapped_your_profile_3:dict/ZAPPED:dict/one:dict/:string" xml:space="preserve">
-        <source>%2$@ and %1$d other zapped your profile</source>
-        <target>%2$@ and %1$d other zapped your profile</target>
+        <source>%2$@ and %1$d other zapped you</source>
+        <target>%2$@ and %1$d other zapped you</target>
         <note/>
       </trans-unit>
       <trans-unit id="/zapped_your_profile_3:dict/ZAPPED:dict/other:dict/:string" xml:space="preserve">
-        <source>%2$@ and %1$d others zapped your profile</source>
-        <target>%2$@ and %1$d others zapped your profile</target>
+        <source>%2$@ and %1$d others zapped you</source>
+        <target>%2$@ and %1$d others zapped you</target>
         <note/>
       </trans-unit>
       <trans-unit id="/zaps_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
