@@ -279,7 +279,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@ 和 %1$d 個其他用戶打閃了你的檔案</string>
+			<string>%2$@ 和%1$d個其他用戶打閃了你</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
