@@ -7,10 +7,20 @@
 
 import SwiftUI
 
+/// get coordinates in Global reference frame given a Local point & geometry
+func globalCoordinate(localX x: CGFloat, localY y: CGFloat,
+                      localGeometry geo: GeometryProxy) -> CGPoint {
+    let localPoint = CGPoint(x: x, y: y)
+    return geo.frame(in: .global).origin.applying(
+        .init(translationX: localPoint.x, y: localPoint.y)
+    )
+}
+
 struct DamusVideoPlayer: View {
     var url: URL
     @ObservedObject var model: VideoPlayerModel
     @Binding var video_size: CGSize?
+    @EnvironmentObject private var orientationTracker: OrientationTracker
     
     var mute_icon: String {
         if model.has_audio == false || model.muted {
@@ -45,10 +55,8 @@ struct DamusVideoPlayer: View {
     var body: some View {
         GeometryReader { geo in
             let localFrame = geo.frame(in: .local)
-            let localCenter = CGPoint(x: localFrame.midX, y: localFrame.midY)
-            let globalCenter = geo.frame(in: .global).origin.applying(.init(translationX: localCenter.x, y: localCenter.y))
-            let centerY = globalCenter.y
-
+            let centerY = globalCoordinate(localX: 0, localY: localFrame.midY, localGeometry: geo).y
+            let delta = localFrame.height / 2
             ZStack(alignment: .bottomTrailing) {
                 VideoPlayer(url: url, model: model)
                 if model.has_audio == true {
@@ -66,10 +74,14 @@ struct DamusVideoPlayer: View {
                 video_size = size
             }
             .onChange(of: centerY) { _ in
-                let screenHeight = UIScreen.main.bounds.height
-                let screenMidY = screenHeight / 2
-                let tol = 0.20 * screenHeight /// tolerance - can vary  to taste ie.,  %  of screen height of a centered box in which video plays
-                model.play = centerY > screenMidY - tol && centerY < screenMidY + tol /// video plays when inside tolerance box
+                /// pause video when it is scrolled beyond visible range
+                let isBelowTop = centerY + delta > 100, /// 100 =~ approx. bottom (y) of ContentView's TabView
+                    isAboveBottom = centerY - delta < orientationTracker.deviceMajorAxis
+                if isBelowTop && isAboveBottom {
+                    model.start()
+                } else {
+                    model.stop()
+                }
             }
         }
     }
