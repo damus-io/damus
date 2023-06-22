@@ -234,7 +234,7 @@ struct CustomizeZapView: View {
             ZapTypeButton()
                 .padding(.top, 50)
             
-            Spacer()
+            ZapUserView(state: state, pubkey: target.pubkey)
 
             CustomZapTextField
             
