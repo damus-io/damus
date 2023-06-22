@@ -241,10 +241,19 @@ struct CustomizeZapView: View {
         case .sent_from_nwc:
             dismiss()
         }
-}
+    }
     
     var body: some View {
         MainContent
+            .sheet(isPresented: $show_zap_types) {
+                if #available(iOS 16.0, *) {
+                    ZapPicker
+                        .presentationDetents([.medium])
+                        .presentationDragIndicator(.visible)
+                } else {
+                    ZapPicker
+                }
+            }
             .sheet(isPresented: $showing_wallet_selector) {
                 SelectWalletView(default_wallet: state.settings.default_wallet, showingSelectWallet: $showing_wallet_selector, our_pubkey: state.pubkey, invoice: invoice)
             }
@@ -302,15 +311,6 @@ struct CustomizeZapView: View {
             Spacer()
             
             Spacer()
-        }
-        .sheet(isPresented: $show_zap_types) {
-            if #available(iOS 16.0, *) {
-                ZapPicker
-                    .presentationDetents([.medium])
-                    .presentationDragIndicator(.visible)
-            } else {
-                ZapPicker
-            }
         }
     }
     
