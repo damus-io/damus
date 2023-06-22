@@ -244,26 +244,43 @@ struct CustomizeZapView: View {
     }
     
     var body: some View {
-        MainContent
-            .sheet(isPresented: $show_zap_types) {
-                if #available(iOS 16.0, *) {
-                    ZapPicker
-                        .presentationDetents([.medium])
-                        .presentationDragIndicator(.visible)
-                } else {
-                    ZapPicker
-                }
+        VStack(alignment: .center, spacing: 20) {
+            ZapTypeButton()
+                .padding(.top, 50)
+            
+            Spacer()
+
+            CustomZapTextField
+            
+            AmountPicker
+            
+            ZapReply
+            
+            ZapButton
+            
+            Spacer()
+            
+            Spacer()
+        }
+        .sheet(isPresented: $show_zap_types) {
+            if #available(iOS 16.0, *) {
+                ZapPicker
+                    .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
+            } else {
+                ZapPicker
             }
-            .sheet(isPresented: $showing_wallet_selector) {
-                SelectWalletView(default_wallet: state.settings.default_wallet, showingSelectWallet: $showing_wallet_selector, our_pubkey: state.pubkey, invoice: invoice)
-            }
-            .onReceive(handle_notify(.zapping)) { notif in
-                receive_zap(notif: notif)
-            }
-            .background(fillColor().edgesIgnoringSafeArea(.all))
-            .onTapGesture {
-                hideKeyboard()
-            }
+        }
+        .sheet(isPresented: $showing_wallet_selector) {
+            SelectWalletView(default_wallet: state.settings.default_wallet, showingSelectWallet: $showing_wallet_selector, our_pubkey: state.pubkey, invoice: invoice)
+        }
+        .onReceive(handle_notify(.zapping)) { notif in
+            receive_zap(notif: notif)
+        }
+        .background(fillColor().edgesIgnoringSafeArea(.all))
+        .onTapGesture {
+            hideKeyboard()
+        }
     }
     
     func ZapTypeButton() -> some View {
@@ -292,34 +309,8 @@ struct CustomizeZapView: View {
         .cornerRadius(15)
     }
 
-    var CustomZap: some View {
-        VStack(alignment: .center, spacing: 20) {
-            
-            ZapTypeButton()
-                .padding(.top, 50)
-            
-            Spacer()
-
-            CustomZapTextField
-            
-            AmountPicker
-            
-            ZapReply
-            
-            ZapButton
-            
-            Spacer()
-            
-            Spacer()
-        }
-    }
-    
     var ZapPicker: some View {
         ZapTypePicker(zap_type: $zap_type, settings: state.settings, profiles: state.profiles, pubkey: target.pubkey)
-    }
-    
-    var MainContent: some View {
-        CustomZap
     }
 }
 
