@@ -32,8 +32,15 @@ struct UserViewRow: View {
 struct UserView: View {
     let damus_state: DamusState
     let pubkey: String
+    let spacer: Bool
     
     @State var about_text: Text? = nil
+    
+    init(damus_state: DamusState, pubkey: String, spacer: Bool = true) {
+        self.damus_state = damus_state
+        self.pubkey = pubkey
+        self.spacer = spacer
+    }
     
     var body: some View {
         VStack {
@@ -50,7 +57,9 @@ struct UserView: View {
                     }
                 }
                 
-                Spacer()
+                if spacer {
+                    Spacer()
+                }
             }
         }
     }
