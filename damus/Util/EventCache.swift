@@ -113,6 +113,8 @@ class EventData {
     var relative_time: RelativeTimeModel = RelativeTimeModel()
     var validated: ValidationResult
     var media_metadata_model: MediaMetaModel
+    var bar_model: ActionBarModel
+    var zap_button_model: ZapButtonModel
     
     var translations: TranslateStatus {
         return translations_model.state
@@ -133,6 +135,8 @@ class EventData {
         self.validated = .unknown
         self.media_metadata_model = MediaMetaModel()
         self.preview_model = .init(state: .not_loaded)
+        self.bar_model = ActionBarModel()
+        self.zap_button_model = ZapButtonModel()
     }
 }
 

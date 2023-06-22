@@ -14,15 +14,15 @@ enum Zapped {
 }
 
 class ActionBarModel: ObservableObject {
-    @Published var our_like: NostrEvent?
-    @Published var our_boost: NostrEvent?
-    @Published var our_reply: NostrEvent?
-    @Published var our_zap: Zapping?
-    @Published var likes: Int
-    @Published var boosts: Int
-    @Published private(set) var zaps: Int
-    @Published var zap_total: Int64
-    @Published var replies: Int
+    private(set) var our_like: NostrEvent?
+    private(set) var our_boost: NostrEvent?
+    private(set) var our_reply: NostrEvent?
+    private(set) var our_zap: Zapping?
+    private(set) var likes: Int
+    private(set) var boosts: Int
+    private(set) var zaps: Int
+    private(set) var zap_total: Int64
+    private(set) var replies: Int
     
     static func empty() -> ActionBarModel {
         return ActionBarModel(likes: 0, boosts: 0, zaps: 0, zap_total: 0, replies: 0, our_like: nil, our_boost: nil, our_zap: nil, our_reply: nil)
@@ -62,6 +62,20 @@ class ActionBarModel: ObservableObject {
         self.our_boost = damus.boosts.our_events[evid]
         self.our_zap = damus.zaps.our_zaps[evid]?.first
         self.our_reply = damus.replies.our_reply(evid)
+        self.objectWillChange.send()
+    }
+    
+    func set_likes(likes: Int) {
+        guard likes != self.likes else { return }
+        
+        self.likes = likes
+        self.objectWillChange.send()
+    }
+    
+    func set_our_like(our_like: NostrEvent) {
+        guard self.our_like == nil else { return }
+        
+        self.our_like = our_like
         self.objectWillChange.send()
     }
     
