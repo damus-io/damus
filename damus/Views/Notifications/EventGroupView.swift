@@ -14,6 +14,19 @@ enum EventGroupType {
     case zap(ZapGroup)
     case profile_zap(ZapGroup)
     
+    var is_note_zap: Bool {
+        switch self {
+        case .repost(let eventGroup):
+            return false
+        case .reaction(let eventGroup):
+            return false
+        case .zap(let zapGroup):
+            return true
+        case .profile_zap(let zapGroup):
+            return false
+        }
+    }
+    
     var zap_group: ZapGroup? {
         switch self {
         case .profile_zap(let grp):
