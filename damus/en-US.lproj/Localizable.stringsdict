@@ -317,9 +317,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ and %1$d other zapped your profile</string>
+			<string>%2$@ and %1$d other zapped you</string>
 			<key>other</key>
-			<string>%2$@ and %1$d others zapped your profile</string>
+			<string>%2$@ and %1$d others zapped you</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
