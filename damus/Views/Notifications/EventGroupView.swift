@@ -16,14 +16,10 @@ enum EventGroupType {
     
     var is_note_zap: Bool {
         switch self {
-        case .repost(let eventGroup):
-            return false
-        case .reaction(let eventGroup):
-            return false
-        case .zap(let zapGroup):
-            return true
-        case .profile_zap(let zapGroup):
-            return false
+        case .repost: return false
+        case .reaction: return false
+        case .zap: return true
+        case .profile_zap: return false
         }
     }
     
