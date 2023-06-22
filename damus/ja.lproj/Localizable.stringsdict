@@ -58,7 +58,7 @@
 			<string>タグづけされた投稿に%2$@と他%1$d人がリアクションしました</string>
 		</dict>
 	</dict>
-	<key>reacted_your_post_3</key>
+	<key>reacted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REACTED@</string>
@@ -142,7 +142,7 @@
 			<string>タグづけされた投稿を%2$@と他%1$d人がリポストしました</string>
 		</dict>
 	</dict>
-	<key>reposted_your_post_3</key>
+	<key>reposted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REPOSTED@</string>
@@ -237,7 +237,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>other</key>
-			<string>%3$@ から %2$@ sats を受け取りました: "%4$@"</string>
+			<string>%3$@ から %2$@ sats を受け取りました: &quot;%4$@&quot;</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -254,7 +254,7 @@
 			<string>あなたがタグづけされた投稿に%2$@と他%1$d人がZapしました</string>
 		</dict>
 	</dict>
-	<key>zapped_your_post_3</key>
+	<key>zapped_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@ZAPPED@</string>
@@ -279,7 +279,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>other</key>
-			<string>%2$@と他%1$d人があなたのプロフィールにZapしました</string>
+			<string>%2$@と他%1$d人があなたにZapしました</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
