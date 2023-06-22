@@ -1,26 +1,21 @@
 {
-  "images": [
+  "images" : [
     {
-      "filename": "copy.svg",
-      "idiom": "universal",
-      "scale": "1x"
+      "filename" : "copy.svg",
+      "idiom" : "universal",
+      "scale" : "1x"
     },
     {
-      "idiom": "universal",
-      "scale": "2x",
-      "filename": "copy.svg"
+      "idiom" : "universal",
+      "scale" : "2x"
     },
     {
-      "idiom": "universal",
-      "scale": "3x",
-      "filename": "copy.svg"
+      "idiom" : "universal",
+      "scale" : "3x"
     }
   ],
-  "info": {
-    "author": "xcode",
-    "version": 1
-  },
-  "properties": {
-    "template-rendering-intent": "template"
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
   }
 }
