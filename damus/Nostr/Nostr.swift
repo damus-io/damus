@@ -100,8 +100,8 @@ class Profile: Codable {
     }
     
     var damus_donation: Int? {
-        get { return int("damus_donation"); }
-        set(s) { set_int("damus_donation", s) }
+        get { return int("damus_donation_v2"); }
+        set(s) { set_int("damus_donation_v2", s) }
     }
     
     var picture: String? {
