@@ -168,14 +168,14 @@ struct CustomizeZapView: View {
             if model.zapping {
                 Text("Zapping...", comment: "Text to indicate that the app is in the process of sending a zap.")
             } else {
-                Button(NSLocalizedString("Zap", comment: "Button to send a zap.")) {
+                Button(NSLocalizedString("Zap User", comment: "Button to send a zap.")) {
                     let amount = model.custom_amount_sats
                     send_zap(damus_state: state, target: target, lnurl: lnurl, is_custom: true, comment: model.comment, amount_sats: amount, zap_type: model.zap_type)
                     model.zapping = true
                 }
                 .disabled(model.custom_amount_sats == 0 || model.custom_amount.isEmpty)
                 .font(.system(size: 28, weight: .bold))
-                .frame(width: 130, height: 50)
+                .frame(width: 180, height: 50)
                 .foregroundColor(.white)
                 .background(LINEAR_GRADIENT)
                 .opacity(model.custom_amount_sats == 0 || model.custom_amount.isEmpty ? 0.5 : 1.0)
@@ -231,20 +231,24 @@ struct CustomizeZapView: View {
     
     var body: some View {
         VStack(alignment: .center, spacing: 20) {
-            ZapTypeButton()
-                .padding(.top, 50)
-            
-            ZapUserView(state: state, pubkey: target.pubkey)
+            ScrollView {
+                HStack(alignment: .center) {
+                    UserView(damus_state: state, pubkey: target.pubkey)
+                    
+                    ZapTypeButton()
+                }
+                .padding([.horizontal, .top])
 
-            CustomZapTextField
-            
-            AmountPicker
-            
-            ZapReply
-            
-            ZapButton
-            
-            Spacer()
+                CustomZapTextField
+                
+                AmountPicker
+                
+                ZapReply
+                
+                ZapButton
+                
+                Spacer()
+            }
         }
         .sheet(isPresented: $model.show_zap_types) {
             if #available(iOS 16.0, *) {
