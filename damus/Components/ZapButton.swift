@@ -252,7 +252,10 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
                     })
                 }
                 
-                let nwc_req = nwc_pay(url: nwc_state.url,  pool: damus_state.pool, post: damus_state.postbox, invoice: inv, on_flush: flusher)
+                // we don't have a delay on one-tap nozaps (since this will be from customize zap view)
+                let delay = damus_state.settings.nozaps ? nil : 5.0
+                
+                let nwc_req = nwc_pay(url: nwc_state.url, pool: damus_state.pool, post: damus_state.postbox, invoice: inv, delay: delay, on_flush: flusher)
                 
                 guard let nwc_req, case .nwc(let pzap_state) = pending_zap_state else {
                     print("nwc: failed to send nwc request for zapreq \(reqid.reqid)")
