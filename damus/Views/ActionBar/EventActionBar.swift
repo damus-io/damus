@@ -62,7 +62,7 @@ struct EventActionBar: View {
                         self.show_repost_action = true
                     }
                 }
-                .accessibilityLabel(NSLocalizedString("Boosts", comment: "Accessibility label for boosts button"))
+                .accessibilityLabel(NSLocalizedString("Reposts", comment: "Accessibility label for boosts button"))
                 Text(verbatim: "\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
                     .font(.footnote.weight(.medium))
                     .foregroundColor(bar.boosted ? Color.green : Color.gray)
