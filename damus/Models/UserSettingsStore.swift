@@ -126,6 +126,10 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "truncate_timeline_text", default_value: false)
     var truncate_timeline_text: Bool
     
+    /// Nozaps mode gimps note zapping to fit into apple's content-tipping guidelines. It can not be configurable to end-users on the app store
+    @Setting(key: "nozaps", default_value: true)
+    var nozaps: Bool
+    
     @Setting(key: "truncate_mention_text", default_value: true)
     var truncate_mention_text: Bool
     
