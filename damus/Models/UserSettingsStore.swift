@@ -84,7 +84,7 @@ class UserSettingsStore: ObservableObject {
     @StringSetting(key: "default_media_uploader", default_value: .nostrBuild)
     var default_media_uploader: MediaUploader
     
-    @Setting(key: "show_wallet_selector", default_value: true)
+    @Setting(key: "show_wallet_selector", default_value: false)
     var show_wallet_selector: Bool
     
     @Setting(key: "left_handed", default_value: false)
