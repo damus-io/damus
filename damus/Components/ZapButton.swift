@@ -32,7 +32,6 @@ struct ZapButton: View {
     let lnurl: String
     
     @ObservedObject var zaps: ZapsDataModel
-    @StateObject var button: ZapButtonModel = ZapButtonModel()
     
     var our_zap: Zapping? {
         zaps.zaps.first(where: { z in z.request.ev.pubkey == damus_state.pubkey })
@@ -133,43 +132,22 @@ struct ZapButton: View {
         }
         .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
         .simultaneousGesture(LongPressGesture().onEnded {_  in
-            button.showing_zap_customizer = true
+            // when we don't have nozaps mode enable, long press shows the zap customizer
+            if !damus_state.settings.nozaps {
+                present_sheet(.zap(target: target, lnurl: lnurl))
+            }
+            
+            // long press does nothing in nozaps mode
         })
         .highPriorityGesture(TapGesture().onEnded {
-            tap()
+            // when we have appstore mode on, only show the zap customizer as "user zaps"
+            if damus_state.settings.nozaps {
+                present_sheet(.zap(target: target, lnurl: lnurl))
+            } else {
+                // otherwise we restore the original behavior of one-tap zaps
+                tap()
+            }
         })
-        .sheet(isPresented: $button.showing_zap_customizer) {
-            CustomizeZapView(state: damus_state, target: target, lnurl: lnurl)
-        }
-        .sheet(isPresented: $button.showing_select_wallet, onDismiss: {button.showing_select_wallet = false}) {
-            SelectWalletView(default_wallet: damus_state.settings.default_wallet, showingSelectWallet: $button.showing_select_wallet, our_pubkey: damus_state.pubkey, invoice: button.invoice ?? "")
-        }
-        .onReceive(handle_notify(.zapping)) { notif in
-            let zap_ev = notif.object as! ZappingEvent
-            
-            guard zap_ev.target.id == self.target.id else {
-                return
-            }
-            
-            guard !zap_ev.is_custom else {
-                return
-            }
-            
-            switch zap_ev.type {
-            case .failed:
-                break
-            case .got_zap_invoice(let inv):
-                if damus_state.settings.show_wallet_selector {
-                    self.button.invoice = inv
-                    self.button.showing_select_wallet = true
-                } else {
-                    let wallet = damus_state.settings.default_wallet.model
-                    open_with_wallet(wallet: wallet, invoice: inv)
-                }
-            case .sent_from_nwc:
-                break
-            }
-        }
     }
 }
 

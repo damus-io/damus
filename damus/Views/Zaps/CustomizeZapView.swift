@@ -216,12 +216,11 @@ struct CustomizeZapView: View {
         case .got_zap_invoice(let inv):
             if state.settings.show_wallet_selector {
                 model.invoice = inv
-                model.showing_wallet_selector = true
+                present_sheet(.select_wallet(invoice: inv))
             } else {
                 end_editing()
                 let wallet = state.settings.default_wallet.model
                 open_with_wallet(wallet: wallet, invoice: inv)
-                model.showing_wallet_selector = false
                 dismiss()
             }
         case .sent_from_nwc:
@@ -258,9 +257,6 @@ struct CustomizeZapView: View {
             } else {
                 ZapPicker
             }
-        }
-        .sheet(isPresented: $model.showing_wallet_selector) {
-            SelectWalletView(default_wallet: state.settings.default_wallet, showingSelectWallet: $model.showing_wallet_selector, our_pubkey: state.pubkey, invoice: model.invoice)
         }
         .onAppear {
             model.set_defaults(settings: state.settings)

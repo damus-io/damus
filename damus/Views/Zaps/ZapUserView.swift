@@ -14,7 +14,7 @@ struct ZapUserView: View {
     var body: some View {
         HStack(alignment: .center) {
             Text("Zap")
-                .font(.largeTitle)
+                .font(.title2)
             
             UserView(damus_state: state, pubkey: pubkey, spacer: false)
         }

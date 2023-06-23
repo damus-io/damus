@@ -14,17 +14,38 @@ struct TimestampedProfile {
     let event: NostrEvent
 }
 
+struct ZapSheet {
+    let target: ZapTarget
+    let lnurl: String
+}
+
+struct SelectWallet {
+    let invoice: String
+}
+
 enum Sheets: Identifiable {
     case post(PostAction)
     case report(ReportTarget)
     case event(NostrEvent)
+    case zap(ZapSheet)
+    case select_wallet(SelectWallet)
     case filter
-
+    
+    static func zap(target: ZapTarget, lnurl: String) -> Sheets {
+        return .zap(ZapSheet(target: target, lnurl: lnurl))
+    }
+    
+    static func select_wallet(invoice: String) -> Sheets {
+        return .select_wallet(SelectWallet(invoice: invoice))
+    }
+    
     var id: String {
         switch self {
         case .report: return "report"
         case .post(let action): return "post-" + (action.ev?.id ?? "")
         case .event(let ev): return "event-" + ev.id
+        case .zap(let sheet): return "zap-" + sheet.target.id
+        case .select_wallet: return "select-wallet"
         case .filter: return "filter"
         }
     }
@@ -327,6 +348,10 @@ struct ContentView: View {
                 PostView(action: action, damus_state: damus_state!)
             case .event:
                 EventDetailView()
+            case .zap(let zapsheet):
+                CustomizeZapView(state: damus_state!, target: zapsheet.target, lnurl: zapsheet.lnurl)
+            case .select_wallet(let select):
+                SelectWalletView(default_wallet: damus_state!.settings.default_wallet, active_sheet: $active_sheet, our_pubkey: damus_state!.pubkey, invoice: select.invoice)
             case .filter:
                 let timeline = selected_timeline
                 if #available(iOS 16.0, *) {
@@ -433,6 +458,31 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.unmute_thread)) { notif in
             home.filter_events()
+        }
+        .onReceive(handle_notify(.present_sheet)) { notif in
+            let sheet = notif.object as! Sheets
+            self.active_sheet = sheet
+        }
+        .onReceive(handle_notify(.zapping)) { notif in
+            let zap_ev = notif.object as! ZappingEvent
+            
+            guard !zap_ev.is_custom else {
+                return
+            }
+            
+            switch zap_ev.type {
+            case .failed:
+                break
+            case .got_zap_invoice(let inv):
+                if damus_state!.settings.show_wallet_selector {
+                    present_sheet(.select_wallet(invoice: inv))
+                } else {
+                    let wallet = damus_state!.settings.default_wallet.model
+                    open_with_wallet(wallet: wallet, invoice: inv)
+                }
+            case .sent_from_nwc:
+                break
+            }
         }
         .onChange(of: scenePhase) { (phase: ScenePhase) in
             switch phase {

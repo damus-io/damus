@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SelectWalletView: View {
     let default_wallet: Wallet
-    @Binding var showingSelectWallet: Bool
+    @Binding var active_sheet: Sheets?
     let our_pubkey: String
     let invoice: String
     @State var invoice_copied: Bool = false
@@ -59,7 +59,7 @@ struct SelectWalletView: View {
                     }.padding(.vertical, 2.5)
                 }
             }.navigationBarTitle(Text("Pay the Lightning invoice", comment: "Navigation bar title for view to pay Lightning invoice."), displayMode: .inline).navigationBarItems(trailing: Button(action: {
-                self.showingSelectWallet = false
+                self.active_sheet = nil
             }) {
                 Text("Done", comment: "Button to dismiss wallet selection view for paying Lightning invoice.").bold()
             })
@@ -68,9 +68,9 @@ struct SelectWalletView: View {
 }
 
 struct SelectWalletView_Previews: PreviewProvider {
-    @State static var show: Bool = true
+    @State static var active_sheet: Sheets? = nil
     
     static var previews: some View {
-        SelectWalletView(default_wallet: .lnlink, showingSelectWallet: $show, our_pubkey: "", invoice: "")
+        SelectWalletView(default_wallet: .lnlink, active_sheet: $active_sheet, our_pubkey: "", invoice: "")
     }
 }
