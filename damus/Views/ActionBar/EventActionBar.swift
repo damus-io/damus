@@ -21,6 +21,12 @@ struct EventActionBar: View {
 
     @ObservedObject var bar: ActionBarModel
     
+    init(damus_state: DamusState, event: NostrEvent, bar: ActionBarModel? = nil) {
+        self.damus_state = damus_state
+        self.event = event
+        _bar = ObservedObject(wrappedValue: bar ?? make_actionbar_model(ev: event.id, damus: damus_state))
+    }
+    
     var lnurl: String? {
         damus_state.profiles.lookup(id: event.pubkey)?.lnurl
     }
@@ -82,7 +88,7 @@ struct EventActionBar: View {
 
             if let lnurl = self.lnurl {
                 Spacer()
-                ZapButton(damus_state: damus_state, target: ZapTarget.note(id: event.id, author: event.pubkey), lnurl: lnurl, zaps: self.damus_state.events.get_cache_data(self.event.id).zaps_model, button: damus_state.events.get_cache_data(event.id).zap_button_model)
+                ZapButton(damus_state: damus_state, target: ZapTarget.note(id: event.id, author: event.pubkey), lnurl: lnurl, zaps: self.damus_state.events.get_cache_data(self.event.id).zaps_model)
             }
 
             Spacer()
@@ -130,9 +136,9 @@ struct EventActionBar: View {
             if liked.id != event.id {
                 return
             }
-            self.bar.set_likes(likes: liked.total)
+            self.bar.likes = liked.total
             if liked.event.pubkey == damus_state.keypair.pubkey {
-                self.bar.set_our_like(our_like: liked.event)
+                self.bar.our_like = liked.event
             }
         }
     }
@@ -144,7 +150,7 @@ struct EventActionBar: View {
         
         let like_ev = make_like_event(pubkey: damus_state.pubkey, privkey: privkey, liked: event)
         
-        self.bar.set_our_like(our_like: like_ev)
+        self.bar.our_like = like_ev
 
         generator.impactOccurred()
         

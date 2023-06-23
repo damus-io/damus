@@ -269,7 +269,7 @@ class HomeModel {
         case .success(let n):
             let boosted = Counted(event: ev, id: e, total: n)
             notify(.boosted, boosted)
-            self.damus_state.events.get_cache_data(ev.id).bar_model.update(damus: self.damus_state, evid: ev.id)
+            notify(.update_stats, e)
         }
     }
 

@@ -153,7 +153,7 @@ struct TextEvent: View {
     }
     
     var ActionBar: some View {
-        return EventActionBar(damus_state: damus, event: event, bar: get_actionbar(state: damus, evid: event.id))
+        return EventActionBar(damus_state: damus, event: event)
             .padding([.top], 4)
     }
     
@@ -229,7 +229,3 @@ struct TextEvent_Previews: PreviewProvider {
     }
 }
 
-
-func get_actionbar(state: DamusState, evid: String) -> ActionBarModel {
-    return state.events.get_cache_data(evid).bar_model
-}

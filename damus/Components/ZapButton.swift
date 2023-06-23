@@ -32,7 +32,7 @@ struct ZapButton: View {
     let lnurl: String
     
     @ObservedObject var zaps: ZapsDataModel
-    @ObservedObject var button: ZapButtonModel
+    @StateObject var button: ZapButtonModel = ZapButtonModel()
     
     var our_zap: Zapping? {
         zaps.zaps.first(where: { z in z.request.ev.pubkey == damus_state.pubkey })
@@ -178,7 +178,7 @@ struct ZapButton_Previews: PreviewProvider {
         let pending_zap = PendingZap(amount_msat: 1000, target: ZapTarget.note(id: "noteid", author: "author"), request: .normal(test_zap_request), type: .pub, state: .external(.init(state: .fetching_invoice)))
         let zaps = ZapsDataModel([.pending(pending_zap)])
         
-        ZapButton(damus_state: test_damus_state(), target: ZapTarget.note(id: test_event.id, author: test_event.pubkey), lnurl: "lnurl", zaps: zaps, button: ZapButtonModel())
+        ZapButton(damus_state: test_damus_state(), target: ZapTarget.note(id: test_event.id, author: test_event.pubkey), lnurl: "lnurl", zaps: zaps)
     }
 }
 
