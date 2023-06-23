@@ -39,6 +39,10 @@ struct ZapButton: View {
     }
     
     var zap_img: String {
+        if damus_state.settings.nozaps {
+            return "zap"
+        }
+        
         switch our_zap {
         case .none:
             return "zap"
@@ -50,19 +54,16 @@ struct ZapButton: View {
     }
     
     var zap_color: Color {
+        if damus_state.settings.nozaps {
+            return Color.gray
+        }
+        
         if our_zap == nil {
             return Color.gray
         }
         
         // always orange !
         return Color.orange
-            /*
-        if our_zap.is_paid {
-            return Color.orange
-        } else {
-            return Color.yellow
-        }
-             */
     }
     
     func tap() {
