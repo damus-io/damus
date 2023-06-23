@@ -20,9 +20,11 @@ struct WalletView: View {
     
     func MainWalletView(nwc: WalletConnectURL) -> some View {
         VStack {
-            SupportDamus
-            
-            Spacer()
+            if !damus_state.settings.nozaps {
+                SupportDamus
+                
+                Spacer()
+            }
             
             Text(verbatim: nwc.relay.id)
             
