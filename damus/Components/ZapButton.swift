@@ -241,11 +241,12 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
                 }
                 
                 var flusher: OnFlush? = nil
-                // Don't donate on custom zaps
-                if !is_custom && damus_state.settings.donation_percent > 0 {
+                
+                // donations are only enabled on one-tap zaps and off appstore
+                if !damus_state.settings.nozaps && !is_custom && damus_state.settings.donation_percent > 0 {
                     flusher = .once({ pe in
                         // send donation zap when the pending zap is flushed, this allows user to cancel and not send a donation
-                        Task.init { @MainActor in
+                        Task { @MainActor in
                             await send_donation_zap(pool: damus_state.pool, postbox: damus_state.postbox, nwc: nwc_state.url, percent: damus_state.settings.donation_percent, base_msats: amount_msat)
                         }
                     })
