@@ -23,7 +23,7 @@ struct NewEventsBits: OptionSet {
     static let notifications: NewEventsBits = [.zaps, .likes, .reposts, .mentions]
 }
 
-class HomeModel: ObservableObject {
+class HomeModel {
     // Don't trigger a user notification for events older than a certain age
     static let event_max_age_for_notification: TimeInterval = 12 * 60 * 60
     
@@ -49,9 +49,9 @@ class HomeModel: ObservableObject {
 
     var signal = SignalModel()
     
-    @Published var new_events: NewEventsBits = NewEventsBits()
-    @Published var notifications = NotificationsModel()
-    @Published var events: EventHolder = EventHolder()
+    var notifications = NotificationsModel()
+    var notification_status = NotificationStatusModel()
+    var events: EventHolder = EventHolder()
     
     init() {
         self.damus_state = DamusState.empty
@@ -176,7 +176,7 @@ class HomeModel: ObservableObject {
                 return
             }
 
-            guard let new_bits = handle_last_events(new_events: self.new_events, ev: ev, timeline: .notifications, shouldNotify: true) else {
+            guard let new_bits = handle_last_events(new_events: self.notification_status.new_events, ev: ev, timeline: .notifications, shouldNotify: true) else {
                 return
             }
             
@@ -195,7 +195,7 @@ class HomeModel: ObservableObject {
                 }
             }
             
-            self.new_events = new_bits
+            self.notification_status.new_events = new_bits
         }
         
     }
@@ -523,8 +523,8 @@ class HomeModel: ObservableObject {
 
     @discardableResult
     func handle_last_event(ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) -> Bool {
-        if let new_bits = handle_last_events(new_events: self.new_events, ev: ev, timeline: timeline, shouldNotify: shouldNotify) {
-            new_events = new_bits
+        if let new_bits = handle_last_events(new_events: self.notification_status.new_events, ev: ev, timeline: timeline, shouldNotify: shouldNotify) {
+            self.notification_status.new_events = new_bits
             return true
         } else {
             return false
@@ -556,7 +556,7 @@ class HomeModel: ObservableObject {
     }
     
     func got_new_dm(notifs: NewEventsBits, ev: NostrEvent) {
-        self.new_events = notifs
+        notification_status.new_events = notifs
         
         if damus_state.settings.dm_notification && ev.age < HomeModel.event_max_age_for_notification {
             let convo = ev.decrypted(privkey: self.damus_state.keypair.privkey) ?? NSLocalizedString("New encrypted direct message", comment: "Notification that the user has received a new direct message")
@@ -574,7 +574,7 @@ class HomeModel: ObservableObject {
         
         if !should_debounce_dms {
             self.incoming_dms.append(ev)
-            if let notifs = handle_incoming_dms(prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
+            if let notifs = handle_incoming_dms(prev_events: notification_status.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
                 got_new_dm(notifs: notifs, ev: ev)
             }
             self.incoming_dms = []
@@ -584,7 +584,7 @@ class HomeModel: ObservableObject {
         incoming_dms.append(ev)
         
         dm_debouncer.debounce { [self] in
-            if let notifs = handle_incoming_dms(prev_events: self.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
+            if let notifs = handle_incoming_dms(prev_events: notification_status.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
                 got_new_dm(notifs: notifs, ev: ev)
             }
             self.incoming_dms = []

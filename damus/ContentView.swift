@@ -75,7 +75,7 @@ struct ContentView: View {
     @State var confirm_overwrite_mutelist: Bool = false
     @SceneStorage("ContentView.filter_state") var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
-    @StateObject var home: HomeModel = HomeModel()
+    var home: HomeModel = HomeModel()
 
     let sub_id = UUID().description
     
@@ -128,7 +128,7 @@ struct ContentView: View {
     func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
         ZStack {
             if let damus = self.damus_state {
-                TimelineView(events: home.events, loading: $home.loading, damus: damus, show_friend_icon: false, filter: filter)
+                TimelineView(events: home.events, loading: .constant(false), damus: damus, show_friend_icon: false, filter: filter)
             }
         }
     }
@@ -308,7 +308,7 @@ struct ContentView: View {
                 }
                 .navigationViewStyle(.stack)
             
-                TabBar(new_events: $home.new_events, selected: $selected_timeline, settings: damus.settings, action: switch_timeline)
+                TabBar(nstatus: home.notification_status, selected: $selected_timeline, settings: damus.settings, action: switch_timeline)
                     .padding([.bottom], 8)
                     .background(Color(uiColor: .systemBackground).ignoresSafeArea())
             }
