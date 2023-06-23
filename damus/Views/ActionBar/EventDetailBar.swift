@@ -19,7 +19,11 @@ struct EventDetailBar: View {
         self.target = target
         self.target_pk = target_pk
         self._bar = ObservedObject(wrappedValue: make_actionbar_model(ev: target, damus: state))
+    }
         
+    var ZapDetails: Text {
+        let noun = Text(verbatim: zapsCountString(bar.zaps)).foregroundColor(.gray)
+        return Text("\(Text(verbatim: bar.zaps.formatted()).font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.")
     }
     
     var body: some View {
@@ -40,13 +44,11 @@ struct EventDetailBar: View {
                 .buttonStyle(PlainButtonStyle())
             }
             
-            if bar.zaps > 0 {
+            if !state.settings.nozaps && bar.zaps > 0 {
                 let dst = ZapsView(state: state, target: .note(id: target, author: target_pk))
                 NavigationLink(destination: dst) {
-                    let noun = Text(verbatim: zapsCountString(bar.zaps)).foregroundColor(.gray)
-                    Text("\(Text(verbatim: bar.zaps.formatted()).font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.")
-                }
-                .buttonStyle(PlainButtonStyle())
+                    ZapDetails
+                }.buttonStyle(PlainButtonStyle())
             }
         }
     }
