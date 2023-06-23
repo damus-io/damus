@@ -15,10 +15,14 @@ struct InnerTimelineView: View {
     @State var nav_target: NostrEvent
     @State var navigating: Bool = false
     
+    static var count: Int = 0
+    
     init(events: EventHolder, damus: DamusState, filter: @escaping (NostrEvent) -> Bool) {
         self.events = events
         self.state = damus
         self.filter = filter
+        print("rendering InnerTimelineView \(InnerTimelineView.count)")
+        InnerTimelineView.count += 1
         // dummy event to avoid MaybeThreadView
         self._nav_target = State(initialValue: test_event)
     }
