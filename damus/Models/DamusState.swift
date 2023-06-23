@@ -38,7 +38,8 @@ struct DamusState {
         let stored = self.events.store_zap(zap: zap)
         
         // thread zaps
-        if let ev = zap.event, zap.is_in_thread {
+        if let ev = zap.event, !settings.nozaps, zap.is_in_thread {
+            // [nozaps]: thread zaps are only available outside of the app store
             replies.count_replies(ev)
             events.add_replies(ev: ev)
         }
