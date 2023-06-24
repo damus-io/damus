@@ -30,12 +30,10 @@ struct TimelineView: View {
                     .redacted(reason: loading ? .placeholder : [])
                     .shimmer(loading)
                     .disabled(loading)
-                /*
                     .background(GeometryReader { proxy -> Color in
                         handle_scroll_queue(proxy, queue: self.events)
                         return Color.clear
                     })
-                 */
             }
             .buttonStyle(BorderlessButtonStyle())
             .coordinateSpace(name: "scroll")
