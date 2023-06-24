@@ -310,13 +310,14 @@ struct ContentView: View {
                                         if selected_timeline == .search {
                                             Button(action: {
                                                 //isFilterVisible.toggle()
-                                                self.active_sheet = .filter
+                                                present_sheet(.filter)
                                             }) {
                                                 // checklist, checklist.checked, lisdt.bullet, list.bullet.circle, line.3.horizontal.decrease...,  line.3.horizontail.decrease
                                                 Label(NSLocalizedString("Filter", comment: "Button label text for filtering relay servers."), image: "filter")
                                                     .foregroundColor(.gray)
                                                     //.contentShape(Rectangle())
                                             }
+                                            .buttonStyle(.plain)
                                         }
                                     }
                                 }
