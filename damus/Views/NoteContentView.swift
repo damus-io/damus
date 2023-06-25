@@ -425,7 +425,7 @@ enum UrlType {
             case .image(let url):
                 return url
             case .video:
-                return url
+                return nil
             }
         case .link:
             return nil
