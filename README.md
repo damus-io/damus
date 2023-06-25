@@ -42,23 +42,14 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 
 #### Notes (under 🏠 Personal Feed)
 - Sending a Note is easy and it goes to both your 🏠 Personal and 🔍 Global Feeds 
-- To tag a user you must grab their pubkey:
-  1. Search their username in the search bar at the top of the 🔍 Global Feed and click their profile
-  2. Tap the 🔑 icon which will copy their pubkey to your clipboard
-  3. Go back to your 🏠 Personal Feed and tap the blue + button to compose your Note
-  4. Add @ direcly followed by the pubkey (e.g., `@npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s`)
+- To tag a user start typing out their handle.
 - You can also long-press a Note to grab their User ID aka pubkey or Note ID to link directly to a Note.
 - Currently you can't delete your Notes in the iOS app
-- Share images by pasting the image url which you can grab from imgbb, imgur, etc. (i.e., `https://i.ibb.co/2SHZbwm/alpha60.jpg`). Currently images only load for people you follow in the 🏠 Personal Feed. Images are not automatically loaded in 🔍 Global Feed
+- Share images by tapping the media button on the bottom left when composing a note. Currently images only load for people you follow in the 🏠 Personal Feed. Images are not automatically loaded in 🔍 Global Feed
 - Engaging with Notes
   - 💬 Replying to a Note: Tap the chat icon underneath the note. This will show up in the users’ notifications and in your 🏠 Personal and 🔍 Global Feeds
   - ♺ Reposts: Tap the repost icon which will show up in your 🏠 Personal and 🔍 Global Feeds
-  - ♡ Likes: Tap the heart icon. Users will not get a notification, and cannot see who liked their note (currently, web clients can see your pfp only)
-- Formatting Notes (may not format as intended in other web clients)
-  - Italics: 1 asterisk `*italic*`
-  - Bold: 2 asterisk `**bold**`
-  - Strikethrough: 1 tildes `~strikethrough~`
-  - Code: 1 back-tick `` `code` ``
+  - ♡ Likes: Tap the shaka icon.
 
 #### 💬 Encrypted DMs (chat app, bottom navigation)
 - Tap the chat icon and you'll notice there's nothing to see at first. Go to a user profile and tap the 💬 chat icon next to the follow button to begin a DM
@@ -73,7 +64,8 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 1. Go to your Profile Page on Damus app
 2. Tap on Edit button at the top
 3. You will see text fields to update your information and bio
-4. For PFP, insert a URL containing your image (support video: https://cdn.jb55.com/vid/pfp-editor.mp4)
+4. For PFP, tap on the camera icon and choose an image from your photo library
+   or take a new photo
 5. Save
 
 #### ⚡️ Request Sats 
