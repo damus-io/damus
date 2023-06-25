@@ -69,12 +69,17 @@ class ThreadModel: ObservableObject {
         
         meta_events.referenced_ids = [event.id]
 
-        var kinds: [NostrKind] = [.zap, .text, .boost]
+        var kinds: [NostrKind] = [.text, .boost]
+
         if !damus_state.settings.onlyzaps_mode {
             kinds.append(.like)
         }
-        meta_events.kinds = kinds
 
+        if !damus_state.settings.nozaps {
+            kinds.append(.zap)
+        }
+
+        meta_events.kinds = kinds
         meta_events.limit = 1000
         
         let base_filters = [event_filter, ref_events]
