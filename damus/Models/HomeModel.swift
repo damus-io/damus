@@ -1164,13 +1164,15 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
             create_local_notification(profiles: damus_state.profiles, notify: notify )
         }
     } else if type == .boost && damus_state.settings.repost_notification, let inner_ev = ev.get_inner_event(cache: damus_state.events) {
-        let notify = LocalNotification(type: .repost, event: ev, target: inner_ev, content: inner_ev.content)
+        let content = NSAttributedString(render_note_content(ev: inner_ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content.attributed).string
+        let notify = LocalNotification(type: .repost, event: ev, target: inner_ev, content: content)
         create_local_notification(profiles: damus_state.profiles, notify: notify)
     } else if type == .like && damus_state.settings.like_notification,
               let evid = ev.referenced_ids.last?.ref_id,
               let liked_event = damus_state.events.lookup(evid)
     {
-        let notify = LocalNotification(type: .like, event: ev, target: liked_event, content: liked_event.content)
+        let content = NSAttributedString(render_note_content(ev: liked_event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey).content.attributed).string
+        let notify = LocalNotification(type: .like, event: ev, target: liked_event, content: content)
         create_local_notification(profiles: damus_state.profiles, notify: notify)
     }
 
