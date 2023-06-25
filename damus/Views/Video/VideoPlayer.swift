@@ -48,7 +48,8 @@ public class VideoPlayerModel: ObservableObject {
     @Published var has_audio: Bool? = nil
     @Published var contentMode: UIView.ContentMode = .scaleAspectFill
     
-    var time: CMTime = CMTime()
+    fileprivate var time: CMTime?
+    
     var handlers: [VideoHandler] = []
     
     init() {
@@ -262,8 +263,9 @@ extension VideoPlayer: UIViewRepresentable {
         uiView.isMuted = model.muted
         uiView.isAutoReplay = model.autoReplay
         
-        if let observerTime = context.coordinator.observerTime, model.time != observerTime {
-            uiView.seek(to: model.time, toleranceBefore: model.time, toleranceAfter: model.time, completion: { _ in })
+        if let observerTime = context.coordinator.observerTime, let modelTime = model.time,
+           modelTime != observerTime && modelTime.isValid && modelTime.isNumeric {
+            uiView.seek(to: modelTime, completion: { _ in })
         }
     }
     
