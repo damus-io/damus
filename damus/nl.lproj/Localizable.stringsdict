@@ -18,6 +18,22 @@
 			<string>... %d andere notities ...</string>
 		</dict>
 	</dict>
+	<key>followed_by_three_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Gevolgd door %2$@, %3$@ en %1$d andere gebruiker</string>
+			<key>other</key>
+			<string>Gevolgd door %2$@, %3$@ en %1$d andere gebruikers</string>
+		</dict>
+	</dict>
 	<key>followers_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
