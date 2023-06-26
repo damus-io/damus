@@ -45,7 +45,7 @@
       <trans-unit id="%@ %@" xml:space="preserve">
         <source>%@ %@</source>
         <target>%@ %@</target>
-        <note>Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
+        <note>Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.
 Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.</note>
       </trans-unit>
       <trans-unit id="%@ has been muted" xml:space="preserve">
@@ -275,11 +275,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Bookmarks</target>
         <note>Sidebar menu label for Bookmarks view.
    Title of bookmarks view</note>
-      </trans-unit>
-      <trans-unit id="Boosts" xml:space="preserve">
-        <source>Boosts</source>
-        <target>Boosts</target>
-        <note>Accessibility label for boosts button</note>
       </trans-unit>
       <trans-unit id="Broadcast" xml:space="preserve">
         <source>Broadcast</source>
@@ -576,9 +571,29 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Follow me on Nostr</target>
         <note>Text on QR code view to prompt viewer looking at screen to follow the user.</note>
       </trans-unit>
+      <trans-unit id="Followed by %@" xml:space="preserve">
+        <source>Followed by %@</source>
+        <target>Followed by %@</target>
+        <note>Text to indicate that the user is followed by one of our follows.</note>
+      </trans-unit>
+      <trans-unit id="Followed by %@ &amp; %@" xml:space="preserve">
+        <source>Followed by %1$@ &amp; %2$@</source>
+        <target>Followed by %1$@ &amp; %2$@</target>
+        <note>Text to indicate that the user is followed by two of our follows.</note>
+      </trans-unit>
+      <trans-unit id="Followed by %@, %@ &amp; %@" xml:space="preserve">
+        <source>Followed by %1$@, %2$@ &amp; %3$@</source>
+        <target>Followed by %1$@, %2$@ &amp; %3$@</target>
+        <note>Text to indicate that the user is followed by three of our follows.</note>
+      </trans-unit>
       <trans-unit id="Followers" xml:space="preserve">
         <source>Followers</source>
         <target>Followers</target>
+        <note>Navigation bar title for view that shows who is following a user.</note>
+      </trans-unit>
+      <trans-unit id="Followers You Know" xml:space="preserve">
+        <source>Followers You Know</source>
+        <target>Followers You Know</target>
         <note>Navigation bar title for view that shows who is following a user.</note>
       </trans-unit>
       <trans-unit id="Following" xml:space="preserve">
@@ -1151,7 +1166,8 @@ Button text to indicate that the zap type is a private zap.</note>
       <trans-unit id="Reposts" xml:space="preserve">
         <source>Reposts</source>
         <target>Reposts</target>
-        <note>Navigation bar title for Reposts view.
+        <note>Accessibility label for boosts button
+   Navigation bar title for Reposts view.
    Setting to enable Repost Local Notification</note>
       </trans-unit>
       <trans-unit id="Requests" xml:space="preserve">
@@ -1230,9 +1246,9 @@ Button text to indicate that the zap type is a private zap.</note>
         <target>Send a message to start the conversation...</target>
         <note>Text prompt for user to send a message to the other user.</note>
       </trans-unit>
-      <trans-unit id="Send a reply with your zap..." xml:space="preserve">
-        <source>Send a reply with your zap...</source>
-        <target>Send a reply with your zap...</target>
+      <trans-unit id="Send a message with your zap..." xml:space="preserve">
+        <source>Send a message with your zap...</source>
+        <target>Send a message with your zap...</target>
         <note>Placeholder text for a comment to send as part of a zap to the user.</note>
       </trans-unit>
       <trans-unit id="Server" xml:space="preserve">
@@ -1620,8 +1636,12 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <source>Zap</source>
         <target>Zap</target>
         <note>Accessibility label for zap button
-   Button to send a zap.
    Title of notification when a non-private zap is received.</note>
+      </trans-unit>
+      <trans-unit id="Zap User" xml:space="preserve">
+        <source>Zap User</source>
+        <target>Zap User</target>
+        <note>Button to send a zap.</note>
       </trans-unit>
       <trans-unit id="Zap Vibration" xml:space="preserve">
         <source>Zap Vibration</source>
@@ -1832,6 +1852,21 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
       <trans-unit id="/collapsed_event_view_other_notes:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@NOTES@</source>
         <target>%#@NOTES@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/followed_by_three_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@OTHERS@</source>
+        <target>%#@OTHERS@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/followed_by_three_and_others:dict/OTHERS:dict/one:dict/:string" xml:space="preserve">
+        <source>Followed by %2$@, %3$@, %4$@ &amp; %1$d other</source>
+        <target>Followed by %2$@, %3$@, %4$@ &amp; %1$d other</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/followed_by_three_and_others:dict/OTHERS:dict/other:dict/:string" xml:space="preserve">
+        <source>Followed by %2$@, %3$@, %4$@ &amp; %1$d others</source>
+        <target>Followed by %2$@, %3$@, %4$@ &amp; %1$d others</target>
         <note/>
       </trans-unit>
       <trans-unit id="/followers_count:dict/FOLLOWERS:dict/one:dict/:string" xml:space="preserve">
