@@ -132,7 +132,7 @@ struct TextEvent: View {
     
     func ProfileName(is_anon: Bool) -> some View {
         let profile = damus.profiles.lookup(id: pubkey)
-        let pk = is_anon ? "anon" : pubkey
+        let pk = is_anon ? ANON_PUBKEY : pubkey
         return EventProfileName(pubkey: pk, profile: profile, damus: damus, size: .normal)
     }
     
