@@ -18,6 +18,22 @@
 			<string>...%d andra anteckningar...</string>
 		</dict>
 	</dict>
+	<key>followed_by_three_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Följd av %2$@, %3$@, %4$@ &amp; %1$d andra</string>
+			<key>other</key>
+			<string>Följd av %2$@, %3$@, %4$@ &amp; %1$d andra</string>
+		</dict>
+	</dict>
 	<key>followers_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
