@@ -99,7 +99,7 @@ enum NotificationItem {
 }
 
 class NotificationsModel: ObservableObject, ScrollQueue {
-    var incoming_zaps: [Zap]
+    var incoming_zaps: [Zapping]
     var incoming_events: [NostrEvent]
     var should_queue: Bool
     
@@ -249,7 +249,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         return false
     }
     
-    private func insert_zap_immediate(_ zap: Zap) -> Bool {
+    private func insert_zap_immediate(_ zap: Zapping) -> Bool {
         switch zap.target {
         case .note(let notezt):
             let id = notezt.note_id
@@ -285,7 +285,7 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         return false
     }
     
-    func insert_zap(_ zap: Zap) -> Bool {
+    func insert_zap(_ zap: Zapping) -> Bool {
         if should_queue {
             return insert_uniq_sorted_zap_by_created(zaps: &incoming_zaps, new_zap: zap)
         }

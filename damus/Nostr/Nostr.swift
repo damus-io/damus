@@ -10,7 +10,7 @@ import Foundation
 class Profile: Codable {
     var value: [String: AnyCodable]
     
-    init (name: String?, display_name: String?, about: String?, picture: String?, banner: String?, website: String?, lud06: String?, lud16: String?, nip05: String?) {
+    init (name: String?, display_name: String?, about: String?, picture: String?, banner: String?, website: String?, lud06: String?, lud16: String?, nip05: String?, damus_donation: Int?) {
         self.value = [:]
         self.name = name
         self.display_name = display_name
@@ -21,10 +21,28 @@ class Profile: Codable {
         self.lud06 = lud06
         self.lud16 = lud16
         self.nip05 = nip05
+        self.damus_donation = damus_donation
+    }
+    
+    convenience init(persisted_profile: PersistedProfile) {
+        self.init(name: persisted_profile.name,
+                  display_name: persisted_profile.display_name,
+                  about: persisted_profile.about,
+                  picture: persisted_profile.picture,
+                  banner: persisted_profile.banner,
+                  website: persisted_profile.website,
+                  lud06: persisted_profile.lud06,
+                  lud16: persisted_profile.lud16,
+                  nip05: persisted_profile.nip05,
+                  damus_donation: Int(persisted_profile.damus_donation))
     }
     
     private func str(_ str: String) -> String? {
         return get_val(str)
+    }
+    
+    private func int(_ key: String) -> Int? {
+        return get_val(key)
     }
     
     private func get_val<T>(_ v: String) -> T? {
@@ -52,6 +70,10 @@ class Profile: Codable {
         set_val(key, val)
     }
     
+    private func set_int(_ key: String, _ val: Int?) {
+        set_val(key, val)
+    }
+    
     var reactions: Bool? {
         get { return get_val("reactions"); }
         set(s) { set_val("reactions", s) }
@@ -75,6 +97,11 @@ class Profile: Codable {
     var about: String? {
         get { return str("about"); }
         set(s) { set_str("about", s) }
+    }
+    
+    var damus_donation: Int? {
+        get { return int("damus_donation_v2"); }
+        set(s) { set_int("damus_donation_v2", s) }
     }
     
     var picture: String? {
@@ -180,7 +207,7 @@ class Profile: Codable {
 }
 
 func make_test_profile() -> Profile {
-    return Profile(name: "jb55", display_name: "Will", about: "Its a me", picture: "https://cdn.jb55.com/img/red-me.jpg", banner: "https://pbs.twimg.com/profile_banners/9918032/1531711830/600x200",  website: "jb55.com", lud06: "jb55@jb55.com", lud16: nil, nip05: "jb55@jb55.com")
+    return Profile(name: "jb55", display_name: "Will", about: "Its a me", picture: "https://cdn.jb55.com/img/red-me.jpg", banner: "https://pbs.twimg.com/profile_banners/9918032/1531711830/600x200",  website: "jb55.com", lud06: "jb55@jb55.com", lud16: nil, nip05: "jb55@jb55.com", damus_donation: 1)
 }
 
 func make_ln_url(_ str: String?) -> URL? {

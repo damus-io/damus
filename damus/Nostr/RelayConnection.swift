@@ -37,9 +37,9 @@ public struct RelayURL: Hashable {
     }
 }
 
-final class RelayConnection {
-    private(set) var isConnected = false
-    private(set) var isConnecting = false
+final class RelayConnection: ObservableObject {
+    @Published private(set) var isConnected = false
+    @Published private(set) var isConnecting = false
     
     private(set) var last_connection_attempt: TimeInterval = 0
     private(set) var last_pong: Date? = nil
@@ -129,6 +129,11 @@ final class RelayConnection {
             }
         case .error(let error):
             print("⚠️ Warning: RelayConnection (\(self.url)) error: \(error)")
+            let nserr = error as NSError
+            if nserr.domain == NSPOSIXErrorDomain && nserr.code == 57 {
+                // ignore socket not connected?
+                return
+            }
             DispatchQueue.main.async {
                 self.isConnected = false
                 self.isConnecting = false

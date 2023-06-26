@@ -12,6 +12,7 @@ enum EventViewKind {
     case small
     case normal
     case selected
+    case subheadline
 }
 
 struct EventView: View {
@@ -37,8 +38,9 @@ struct EventView: View {
                 }
             } else if event.known_kind == .zap {
                 if let zap = damus.zaps.zaps[event.id] {
-                    ZapEvent(damus: damus, zap: zap)
+                    ZapEvent(damus: damus, zap: zap, is_top_zap: options.contains(.top_zap))
                 } else {
+                    Text("Invalid Zap", comment: "Text indicating that a zap event is malformed and could not be displayed.")
                     EmptyView()
                 }
             } else {
@@ -73,7 +75,7 @@ extension View {
             Button {
                     UIPasteboard.general.string = bech32_pubkey
             } label: {
-                Label(NSLocalizedString("Copy Account ID", comment: "Context menu option for copying the ID of the account that created the note."), systemImage: "doc.on.doc")
+                Label(NSLocalizedString("Copy Account ID", comment: "Context menu option for copying the ID of the account that created the note."), image: "copy2")
             }
         }
     }
@@ -106,6 +108,8 @@ func eventviewsize_to_font(_ size: EventViewKind) -> Font {
         return .body
     case .selected:
         return .custom("selected", size: 21.0)
+    case .subheadline:
+        return .subheadline
     }
 }
 
@@ -117,6 +121,8 @@ func eventviewsize_to_uifont(_ size: EventViewKind) -> UIFont {
         return .preferredFont(forTextStyle: .body)
     case .selected:
         return .preferredFont(forTextStyle: .title2)
+    case .subheadline:
+        return .preferredFont(forTextStyle: .subheadline)
     }
 }
 

@@ -18,11 +18,16 @@ struct QueuedRequest {
     let relay: String
 }
 
+struct SeenEvent: Hashable {
+    let relay_id: String
+    let evid: String
+}
+
 class RelayPool {
     var relays: [Relay] = []
     var handlers: [RelayHandler] = []
     var request_queue: [QueuedRequest] = []
-    var seen: Set<String> = Set()
+    var seen: Set<SeenEvent> = Set()
     var counts: [String: UInt64] = [:]
     
     private let network_monitor = NWPathMonitor()
@@ -42,7 +47,11 @@ class RelayPool {
         network_monitor.start(queue: network_monitor_queue)
     }
     
-    var descriptors: [RelayDescriptor] {
+    var our_descriptors: [RelayDescriptor] {
+        return all_descriptors.filter { d in !d.ephemeral }
+    }
+    
+    var all_descriptors: [RelayDescriptor] {
         relays.map { r in r.descriptor }
     }
     
@@ -87,7 +96,8 @@ class RelayPool {
         }
     }
     
-    func add_relay(_ url: RelayURL, info: RelayInfo) throws {
+    func add_relay(_ desc: RelayDescriptor) throws {
+        let url = desc.url
         let relay_id = get_relay_id(url)
         if get_relay(relay_id) != nil {
             throw RelayError.RelayAlreadyExists
@@ -95,8 +105,7 @@ class RelayPool {
         let conn = RelayConnection(url: url) { event in
             self.handle_event(relay_id: relay_id, event: event)
         }
-        let descriptor = RelayDescriptor(url: url, info: info)
-        let relay = Relay(descriptor: descriptor, connection: conn)
+        let relay = Relay(descriptor: desc, connection: conn)
         self.relays.append(relay)
     }
     
@@ -180,10 +189,22 @@ class RelayPool {
         request_queue.append(QueuedRequest(req: r, relay: relay))
     }
     
-    func send(_ req: NostrRequest, to: [String]? = nil) {
+    func send(_ req: NostrRequest, to: [String]? = nil, skip_ephemeral: Bool = true) {
         let relays = to.map{ get_relays($0) } ?? self.relays
 
         for relay in relays {
+            if req.is_read && !(relay.descriptor.info.read ?? true) {
+                continue
+            }
+            
+            if req.is_write && !(relay.descriptor.info.write ?? true) {
+                continue
+            }
+            
+            if relay.descriptor.ephemeral && skip_ephemeral {
+                continue
+            }
+            
             guard relay.connection.isConnected else {
                 queue_req(r: req, relay: relay.id)
                 continue
@@ -194,6 +215,7 @@ class RelayPool {
     }
     
     func get_relays(_ ids: [String]) -> [Relay] {
+        // don't include ephemeral relays in the default list to query
         relays.filter { ids.contains($0.id) }
     }
     
@@ -216,7 +238,7 @@ class RelayPool {
     func record_seen(relay_id: String, event: NostrConnectionEvent) {
         if case .nostr_event(let ev) = event {
             if case .event(_, let nev) = ev {
-                let k = relay_id + nev.id
+                let k = SeenEvent(relay_id: relay_id, evid: nev.id)
                 if !seen.contains(k) {
                     seen.insert(k)
                     if counts[relay_id] == nil {
@@ -249,7 +271,7 @@ func add_rw_relay(_ pool: RelayPool, _ url: String) {
     guard let url = RelayURL(url) else {
         return
     }
-    try? pool.add_relay(url, info: RelayInfo.rw)
+    try? pool.add_relay(RelayDescriptor(url: url, info: .rw))
 }
 
 

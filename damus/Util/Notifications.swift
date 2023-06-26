@@ -77,6 +77,9 @@ extension Notification.Name {
     static var update_stats: Notification.Name {
         return Notification.Name("update_stats")
     }
+    static var present_sheet: Notification.Name {
+        return Notification.Name("present_sheet")
+    }
     static var zapping: Notification.Name {
         return Notification.Name("zapping")
     }
@@ -91,6 +94,9 @@ extension Notification.Name {
     }
     static var onlyzaps_mode: Notification.Name {
         return Notification.Name("hide_reactions")
+    }
+    static var attached_wallet: Notification.Name {
+        return Notification.Name("attached_wallet")
     }
 }
 

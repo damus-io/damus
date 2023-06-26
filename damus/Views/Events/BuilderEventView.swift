@@ -61,7 +61,7 @@ struct BuilderEventView: View {
         subscribe(filters: [
             NostrFilter(ids: [self.event_id], limit: 1),
             NostrFilter(
-                kinds: [NostrKind.zap.rawValue],
+                kinds: [.zap],
                 referenced_ids: [self.event_id]
             )
         ])

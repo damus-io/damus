@@ -51,21 +51,9 @@ struct ParticipantsView: View {
                     ForEach(originalReferences.pRefs) { participant in
                         let pubkey = participant.id
                         HStack {
-                            ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                            UserView(damus_state: damus_state, pubkey: pubkey)
                             
-                            VStack(alignment: .leading) {
-                                let profile = damus_state.profiles.lookup(id: pubkey)
-                                ProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_nip5_domain: false)
-                                if let about = profile?.about {
-                                    Text(FollowUserView.markdown.process(about))
-                                        .lineLimit(3)
-                                        .font(.footnote)
-                                }
-                            }
-                            
-                            Spacer()
-                            
-                            Image(systemName: "checkmark.circle.fill")
+                            Image("check-circle.fill")
                                 .font(.system(size: 30))
                                 .foregroundColor(references.contains(participant) ? DamusColors.purple : .gray)
                         }

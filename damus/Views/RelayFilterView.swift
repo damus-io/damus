@@ -22,7 +22,7 @@ struct RelayFilterView: View {
     }
     
     var relays: [RelayDescriptor] {
-        return state.pool.descriptors
+        return state.pool.our_descriptors
     }
     
     var body: some View {

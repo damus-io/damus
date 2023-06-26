@@ -37,23 +37,27 @@ struct ConfigView: View {
             Form {
                 Section {
                     NavigationLink(destination: KeySettingsView(keypair: state.keypair)) {
-                        IconLabel(NSLocalizedString("Keys", comment: "Settings section for managing keys"), img_name: "key.fill", color: .purple)
+                        IconLabel(NSLocalizedString("Keys", comment: "Settings section for managing keys"), img_name: "key", color: .purple)
                     }
                     
                     NavigationLink(destination: AppearanceSettingsView(settings: settings)) {
-                        IconLabel(NSLocalizedString("Appearance", comment: "Section header for text and appearance settings"), img_name: "textformat", color: .red)
+                        IconLabel(NSLocalizedString("Appearance", comment: "Section header for text and appearance settings"), img_name: "eye", color: .red)
+                    }
+                    
+                    NavigationLink(destination: SearchSettingsView(settings: settings)) {
+                        IconLabel(NSLocalizedString("Search/Universe", comment: "Section header for search/universe settings"), img_name: "magnifyingglass", color: .red)
                     }
                     
                     NavigationLink(destination: NotificationSettingsView(settings: settings)) {
-                        IconLabel(NSLocalizedString("Notifications", comment: "Section header for Damus notifications"), img_name: "bell.fill", color: .blue)
+                        IconLabel(NSLocalizedString("Notifications", comment: "Section header for Damus notifications"), img_name: "notification-bell-on", color: .blue)
                     }
                     
                     NavigationLink(destination: ZapSettingsView(settings: settings)) {
-                        IconLabel(NSLocalizedString("Zaps", comment: "Section header for zap settings"), img_name: "bolt.fill", color: .orange)
+                        IconLabel(NSLocalizedString("Zaps", comment: "Section header for zap settings"), img_name: "zap.fill", color: .orange)
                     }
                     
                     NavigationLink(destination: TranslationSettingsView(settings: settings)) {
-                        IconLabel(NSLocalizedString("Translation", comment: "Section header for text and appearance settings"), img_name: "globe.americas.fill", color: .green)
+                        IconLabel(NSLocalizedString("Translation", comment: "Section header for text and appearance settings"), img_name: "globe", color: .green)
                     }
                 }
                 
@@ -66,19 +70,24 @@ struct ConfigView: View {
                             confirm_logout = true
                         }
                     }, label: {
-                        Label(NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account."), systemImage: "pip.exit")
+                        Label(NSLocalizedString("Sign out", comment: "Sidebar menu label to sign out of the account."), image: "logout")
                             .foregroundColor(textColor())
                             .frame(maxWidth: .infinity, alignment: .leading)
                     })
                 }
 
                 if state.is_privkey_user {
-                    Section(NSLocalizedString("Permanently Delete Account", comment: "Section title for deleting the user")) {
-                        Button(NSLocalizedString("Delete Account", comment: "Button to delete the user's account."), role: .destructive) {
+                    Section(header: Text(NSLocalizedString("Permanently Delete Account", comment: "Section title for deleting the user"))) {
+                        Button(action: {
                             delete_account_warning = true
-                        }
+                        }, label: {
+                            Label(NSLocalizedString("Delete Account", comment: "Button to delete the user's account."), image: "delete")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.red)
+                        })
                     }
                 }
+
 
                 if let bundleShortVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"], let bundleVersion = Bundle.main.infoDictionary?["CFBundleVersion"] {
                     Section(NSLocalizedString("Version", comment: "Section title for displaying the version number of the Damus app.")) {

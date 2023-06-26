@@ -9,18 +9,21 @@ import SwiftUI
 
 struct ZapsView: View {
     let state: DamusState
-    @StateObject var model: ZapsModel
+    var model: ZapsModel
+    
+    @ObservedObject var zaps: ZapsDataModel
     
     init(state: DamusState, target: ZapTarget) {
         self.state = state
-        self._model = StateObject(wrappedValue: ZapsModel(state: state, target: target))
+        self.model = ZapsModel(state: state, target: target)
+        self._zaps = ObservedObject(wrappedValue: state.events.get_cache_data(target.id).zaps_model)
     }
     
     var body: some View {
         ScrollView {
             LazyVStack {
-                ForEach(model.zaps, id: \.event.id) { zap in
-                    ZapEvent(damus: state, zap: zap)
+                ForEach(zaps.zaps, id: \.request.ev.id) { zap in
+                    ZapEvent(damus: state, zap: zap, is_top_zap: false)
                         .padding([.horizontal])
                 }
             }

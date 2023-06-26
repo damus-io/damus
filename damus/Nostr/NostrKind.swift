@@ -8,7 +8,7 @@
 import Foundation
 
 
-enum NostrKind: Int {
+enum NostrKind: Int, Codable {
     case metadata = 0
     case text = 1
     case contacts = 3
@@ -22,4 +22,6 @@ enum NostrKind: Int {
     case list = 30000
     case zap = 9735
     case zap_request = 9734
+    case nwc_request = 23194
+    case nwc_response = 23195
 }

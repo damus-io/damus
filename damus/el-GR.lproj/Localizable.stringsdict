@@ -66,7 +66,7 @@
 			<string>%2$@ και %1$d ακόμα αντέδρασαν σε μια δημοσίευση που σας επισημαίνει</string>
 		</dict>
 	</dict>
-	<key>reacted_your_post_3</key>
+	<key>reacted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REACTED@</string>
@@ -162,7 +162,7 @@
 			<string>%2$@ και %1$d ακόμα αναδημοσίευσαν μια δημοσίευση που σας επισημαίνει</string>
 		</dict>
 	</dict>
-	<key>reposted_your_post_3</key>
+	<key>reposted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REPOSTED@</string>
@@ -269,9 +269,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>Λάβατε %2$@ sat από %3$@: "%4$@"</string>
+			<string>Λάβατε %2$@ sat από %3$@: &quot;%4$@&quot;</string>
 			<key>other</key>
-			<string>Λάβατε %2$@ sats από %3$@: "%4$@"</string>
+			<string>Λάβατε %2$@ sats από %3$@: &quot;%4$@&quot;</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -290,7 +290,7 @@
 			<string>%2$@ και %1$d ακόμα έστειλαν zap σε μια δημοσίευση που σας επισημαίνει</string>
 		</dict>
 	</dict>
-	<key>zapped_your_post_3</key>
+	<key>zapped_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@ZAPPED@</string>

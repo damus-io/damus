@@ -14,7 +14,9 @@ struct RelayType: View {
         if is_paid {
             Image("bitcoin-logo")
         } else {
-            Image(systemName: "globe.americas.fill")
+            Image("globe")
+                .resizable()
+                .frame(width: 20, height: 20)
                 .foregroundColor(.gray)
         }
     }

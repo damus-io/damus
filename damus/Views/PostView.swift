@@ -13,7 +13,11 @@ enum NostrPostResult {
     case cancel
 }
 
-let POST_PLACEHOLDER = NSLocalizedString("Type your post here...", comment: "Text box prompt to ask user to type their post.")
+let POST_PLACEHOLDER = NSLocalizedString("Type your note here...", comment: "Text box prompt to ask user to type their note.")
+
+class TagModel: ObservableObject {
+    var diff = 0
+}
 
 enum PostAction {
     case replying_to(NostrEvent)
@@ -45,10 +49,12 @@ struct PostView: View {
     @State var references: [ReferencedId] = []
     @State var focusWordAttributes: (String?, NSRange?) = (nil, nil)
     @State var newCursorIndex: Int?
+    @State var postTextViewCanScroll: Bool = true
 
     @State var mediaToUpload: MediaUpload? = nil
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
+    @StateObject var tagModel: TagModel = TagModel()
 
     let action: PostAction
     let damus_state: DamusState
@@ -77,7 +83,9 @@ struct PostView: View {
             }
         }
 
-        var content = self.post.string.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        var content = self.post.string
+            .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            .replacingOccurrences(of: "\u{200B}", with: "") // these characters are added when adding mentions.
 
         let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
         
@@ -108,7 +116,7 @@ struct PostView: View {
         Button(action: {
             attach_media = true
         }, label: {
-            Image(systemName: "photo")
+            Image("images")
                 .padding(6)
         })
     }
@@ -117,7 +125,7 @@ struct PostView: View {
         Button(action: {
             attach_camera = true
         }, label: {
-            Image(systemName: "camera")
+            Image("camera")
                 .padding(6)
         })
     }
@@ -203,10 +211,11 @@ struct PostView: View {
     
     var TextEntry: some View {
         ZStack(alignment: .topLeading) {
-            TextViewWrapper(attributedText: $post, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
+            TextViewWrapper(attributedText: $post, postTextViewCanScroll: $postTextViewCanScroll, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
                 focusWordAttributes = (word, range)
                 self.newCursorIndex = nil
             })
+                .environmentObject(tagModel)
                 .focused($focus)
                 .textInputAutocapitalization(.sentences)
                 .onChange(of: post) { p in
@@ -335,8 +344,9 @@ struct PostView: View {
                 
                 // This if-block observes @ for tagging
                 if let searching {
-                    UserSearch(damus_state: damus_state, search: searching, focusWordAttributes: $focusWordAttributes, newCursorIndex: $newCursorIndex, post: $post)
+                    UserSearch(damus_state: damus_state, search: searching, focusWordAttributes: $focusWordAttributes, newCursorIndex: $newCursorIndex, postTextViewCanScroll: $postTextViewCanScroll, post: $post)
                         .frame(maxHeight: .infinity)
+                        .environmentObject(tagModel)
                 } else {
                     Divider()
                     VStack(alignment: .leading) {
@@ -463,11 +473,11 @@ struct PVImageCarouselView: View {
                                     Button(action: {
                                         UIPasteboard.general.string = uploadedURL.absoluteString
                                     }) {
-                                        Label(NSLocalizedString("Copy URL", comment: "Label for button in context menu to copy URL of the selected uploaded media asset."), systemImage: "doc.on.doc")
+                                        Label(NSLocalizedString("Copy URL", comment: "Label for button in context menu to copy URL of the selected uploaded media asset."), image: "copy")
                                     }
                                 }
                             }
-                        Image(systemName: "xmark.circle.fill")
+                        Image("close-circle")
                             .foregroundColor(.white)
                             .padding(20)
                             .shadow(radius: 5)

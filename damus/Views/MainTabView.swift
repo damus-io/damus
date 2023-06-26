@@ -29,7 +29,7 @@ struct TabButton: View {
     let timeline: Timeline
     let img: String
     @Binding var selected: Timeline
-    @Binding var new_events: NewEventsBits
+    @ObservedObject var nstatus: NotificationStatusModel
     
     let settings: UserSettingsStore
     let action: (Timeline) -> ()
@@ -38,7 +38,7 @@ struct TabButton: View {
         ZStack(alignment: .center) {
             Tab
             
-            if show_indicator(timeline: timeline, current: new_events, indicator_setting: settings.notification_indicators) {
+            if show_indicator(timeline: timeline, current: nstatus.new_events, indicator_setting: settings.notification_indicators) {
                 Circle()
                     .size(CGSize(width: 8, height: 8))
                     .frame(width: 10, height: 10, alignment: .topTrailing)
@@ -53,19 +53,19 @@ struct TabButton: View {
         Button(action: {
             action(timeline)
             let bits = timeline_to_notification_bits(timeline, ev: nil)
-            new_events = NewEventsBits(rawValue: new_events.rawValue & ~bits.rawValue)
+            nstatus.new_events = NewEventsBits(rawValue: nstatus.new_events.rawValue & ~bits.rawValue)
         }) {
-            Label("", systemImage: selected == timeline ? "\(img).fill" : img)
+            Image(selected != timeline ? img : "\(img).fill")
                 .contentShape(Rectangle())
                 .frame(maxWidth: .infinity, minHeight: 30.0)
         }
-        .foregroundColor(selected != timeline ? .gray : .primary)
+        .foregroundColor(.primary)
     }
 }
     
 
 struct TabBar: View {
-    @Binding var new_events: NewEventsBits
+    var nstatus: NotificationStatusModel
     @Binding var selected: Timeline
     
     let settings: UserSettingsStore
@@ -75,10 +75,10 @@ struct TabBar: View {
         VStack {
             Divider()
             HStack {
-                TabButton(timeline: .home, img: "house", selected: $selected, new_events: $new_events, settings: settings, action: action).keyboardShortcut("1")
-                TabButton(timeline: .dms, img: "bubble.left.and.bubble.right", selected: $selected, new_events: $new_events, settings: settings, action: action).keyboardShortcut("2")
-                TabButton(timeline: .search, img: "magnifyingglass.circle", selected: $selected, new_events: $new_events, settings: settings, action: action).keyboardShortcut("3")
-                TabButton(timeline: .notifications, img: "bell", selected: $selected, new_events: $new_events, settings: settings, action: action).keyboardShortcut("4")
+                TabButton(timeline: .home, img: "home", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("1")
+                TabButton(timeline: .dms, img: "messages", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("2")
+                TabButton(timeline: .search, img: "search", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("3")
+                TabButton(timeline: .notifications, img: "notification-bell", selected: $selected, nstatus: nstatus, settings: settings, action: action).keyboardShortcut("4")
             }
         }
     }

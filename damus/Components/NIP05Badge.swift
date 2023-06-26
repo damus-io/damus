@@ -32,11 +32,11 @@ struct NIP05Badge: View {
         Group {
             if nip05_color {
                 LINEAR_GRADIENT
-                    .mask(Image(systemName: "checkmark.seal.fill")
+                    .mask(Image("check-circle.fill")
                         .resizable()
                     ).frame(width: 14, height: 14)
             } else if show_domain {
-                Image(systemName: "checkmark.seal.fill")
+                Image("check-circle.fill")
                     .font(.footnote)
                     .nip05_colorized(gradient: nip05_color)
             }

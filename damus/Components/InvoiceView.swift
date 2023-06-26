@@ -25,10 +25,10 @@ struct InvoiceView: View {
             UIPasteboard.general.string = invoice.string
         } label: {
             if !copied {
-                Image(systemName: "doc.on.clipboard")
+                Image("copy2")
                     .foregroundColor(.gray)
             } else {
-                Image(systemName: "checkmark.circle")
+                Image("check-circle")
                     .foregroundColor(DamusColors.green)
             }
         }
@@ -37,7 +37,7 @@ struct InvoiceView: View {
     var PayButton: some View {
         Button {
             if settings.show_wallet_selector {
-                showing_select_wallet = true
+                present_sheet(.select_wallet(invoice: invoice.string))
             } else {
                 open_with_wallet(wallet: settings.default_wallet.model, invoice: invoice.string)
             }
@@ -63,7 +63,7 @@ struct InvoiceView: View {
             
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Label("", systemImage: "bolt.fill")
+                    Label("", image: "zap.fill")
                         .foregroundColor(.orange)
                     Text("Lightning Invoice", comment: "Indicates that the view is for paying a Lightning invoice.")
                     Spacer()
@@ -78,9 +78,6 @@ struct InvoiceView: View {
                     .zIndex(10.0)
             }
             .padding(30)
-        }
-        .sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
-            SelectWalletView(default_wallet: settings.default_wallet, showingSelectWallet: $showing_select_wallet, our_pubkey: our_pubkey, invoice: invoice.string)
         }
     }
 }
@@ -116,3 +113,7 @@ struct InvoiceView_Previews: PreviewProvider {
     }
 }
 
+
+func present_sheet(_ sheet: Sheets) {
+    notify(.present_sheet, sheet)
+}

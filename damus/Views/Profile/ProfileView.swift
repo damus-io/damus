@@ -46,6 +46,31 @@ func relaysCountString(_ count: Int, locale: Locale = Locale.current) -> String 
     return String(format: format, locale: locale, count)
 }
 
+func followedByString(_ friend_intersection: [String], profiles: Profiles, locale: Locale = Locale.current) -> String {
+    let bundle = bundleForLocale(locale: locale)
+    let names: [String] = friend_intersection.prefix(3).map {
+        let profile = profiles.lookup(id: $0)
+        return Profile.displayName(profile: profile, pubkey: $0).username.truncate(maxLength: 20)
+    }
+
+    switch friend_intersection.count {
+    case 0:
+        return ""
+    case 1:
+        let format = NSLocalizedString("Followed by %@", bundle: bundle, comment: "Text to indicate that the user is followed by one of our follows.")
+        return String(format: format, locale: locale, names[0])
+    case 2:
+        let format = NSLocalizedString("Followed by %@ & %@", bundle: bundle, comment: "Text to indicate that the user is followed by two of our follows.")
+        return String(format: format, locale: locale, names[0], names[1])
+    case 3:
+        let format = NSLocalizedString("Followed by %@, %@ & %@", bundle: bundle, comment: "Text to indicate that the user is followed by three of our follows.")
+        return String(format: format, locale: locale, names[0], names[1], names[2])
+    default:
+        let format = localizedStringFormat(key: "followed_by_three_and_others", locale: locale)
+        return String(format: format, locale: locale, friend_intersection.count - 3, names[0], names[1], names[2])
+    }
+}
+
 struct EditButton: View {
     let damus_state: DamusState
     
@@ -96,7 +121,6 @@ struct ProfileView: View {
     
     static let markdown = Markdown()
     
-    @State var showing_select_wallet: Bool = false
     @State var is_zoomed: Bool = false
     @State var show_share_sheet: Bool = false
     @State var show_qr_code: Bool = false
@@ -106,6 +130,7 @@ struct ProfileView: View {
     
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
+    @StateObject var zap_button_model: ZapButtonModel = ZapButtonModel()
     
     init(damus_state: DamusState, profile: ProfileModel, followers: FollowersModel) {
         self.damus_state = damus_state
@@ -168,8 +193,8 @@ struct ProfileView: View {
     }
     
     @ViewBuilder
-    func navImage(systemImage: String) -> some View {
-        Image(systemName: systemImage)
+    func navImage(img: String) -> some View {
+        Image(img)
             .frame(width: 33, height: 33)
             .background(Color.black.opacity(0.6))
             .clipShape(Circle())
@@ -179,7 +204,7 @@ struct ProfileView: View {
         Button {
             presentationMode.wrappedValue.dismiss()
         } label: {
-            navImage(systemImage: "chevron.left")
+            navImage(img: "chevron-left")
         }
     }
     
@@ -187,7 +212,7 @@ struct ProfileView: View {
         Button(action: {
             action_sheet_presented = true
         }) {
-            navImage(systemImage: "ellipsis")
+            navImage(img: "share3")
         }
         .confirmationDialog(NSLocalizedString("Actions", comment: "Title for confirmation dialog to either share, report, or mute a profile."), isPresented: $action_sheet_presented) {
             Button(NSLocalizedString("Share", comment: "Button to share the link to a profile.")) {
@@ -242,15 +267,12 @@ struct ProfileView: View {
     }
     
     func lnButton(lnurl: String, profile: Profile) -> some View {
-        let button_img = profile.reactions == false ? "bolt.brakesignal" : "bolt.circle"
+        let button_img = profile.reactions == false ? "zap.fill" : "zap"
         return Button(action: {
-            if damus_state.settings.show_wallet_selector  {
-                showing_select_wallet = true
-            } else {
-                open_with_wallet(wallet: damus_state.settings.default_wallet.model, invoice: lnurl)
-            }
+            present_sheet(.zap(target: .profile(self.profile.pubkey), lnurl: lnurl))
         }) {
-            Image(systemName: button_img)
+            Image(button_img)
+                .foregroundColor(button_img == "zap.fill" ? .orange : Color.primary)
                 .profile_button_style(scheme: colorScheme)
                 .contextMenu {
                     if profile.reactions == false {
@@ -261,29 +283,26 @@ struct ProfileView: View {
                         Button {
                             UIPasteboard.general.string = addr
                         } label: {
-                            Label(addr, systemImage: "doc.on.doc")
+                            Label(addr, image: "copy2")
                         }
                     } else if let lnurl = profile.lnurl {
                         Button {
                             UIPasteboard.general.string = lnurl
                         } label: {
-                            Label(NSLocalizedString("Copy LNURL", comment: "Context menu option for copying a user's Lightning URL."), systemImage: "doc.on.doc")
+                            Label(NSLocalizedString("Copy LNURL", comment: "Context menu option for copying a user's Lightning URL."), image: "copy")
                         }
                     }
                 }
             
         }
         .cornerRadius(24)
-        .sheet(isPresented: $showing_select_wallet, onDismiss: {showing_select_wallet = false}) {
-            SelectWalletView(default_wallet: damus_state.settings.default_wallet, showingSelectWallet: $showing_select_wallet, our_pubkey: damus_state.pubkey, invoice: lnurl)
-        }
     }
     
     var dmButton: some View {
         let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
         let dmview = DMChatView(damus_state: damus_state, dms: dm_model)
         return NavigationLink(destination: dmview) {
-            Image(systemName: "bubble.left.circle")
+            Image("messages")
                 .profile_button_style(scheme: colorScheme)
         }
     }
@@ -353,7 +372,9 @@ struct ProfileView: View {
     var followersCount: some View {
         HStack {
             if followers.count == nil {
-                Image(systemName: "square.and.arrow.down")
+                Image("download")
+                    .resizable()
+                    .frame(width: 20, height: 20)
                 Text("Followers", comment: "Label describing followers of a user.")
                     .font(.subheadline)
                     .foregroundColor(.gray)
@@ -370,9 +391,10 @@ struct ProfileView: View {
             let profile_data = damus_state.profiles.lookup(id: profile.pubkey)
             
             nameSection(profile_data: profile_data)
-            
-            Text(ProfileView.markdown.process(profile_data?.about ?? ""))
-                .font(.subheadline).textSelection(.enabled)
+
+            if let about = profile_data?.about {
+                AboutView(state: damus_state, about: about)
+            }
             
             if let url = profile_data?.website_url {
                 WebsiteLink(url: url)
@@ -382,7 +404,7 @@ struct ProfileView: View {
                 if let contact = profile.contacts {
                     let contacts = contact.referenced_pubkeys.map { $0.ref_id }
                     let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
-                    NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model, whos: profile.pubkey)) {
+                    NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model)) {
                         HStack {
                             let noun_text = Text(verbatim: "\(followingCountString(profile.following))").font(.subheadline).foregroundColor(.gray)
                             Text("\(Text(verbatim: profile.following.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
@@ -390,7 +412,7 @@ struct ProfileView: View {
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
-                let fview = FollowersView(damus_state: damus_state, whos: profile.pubkey)
+                let fview = FollowersView(damus_state: damus_state)
                     .environmentObject(followers)
                 if followers.contacts != nil {
                     NavigationLink(destination: fview) {
@@ -423,6 +445,22 @@ struct ProfileView: View {
                     }
                 }
             }
+
+            if profile.pubkey != damus_state.pubkey {
+                let friended_followers = damus_state.contacts.get_friended_followers(profile.pubkey)
+                if !friended_followers.isEmpty {
+                    Spacer()
+
+                    NavigationLink(destination: FollowersYouKnowView(damus_state: damus_state, friended_followers: friended_followers)) {
+                        HStack {
+                            CondensedProfilePicturesView(state: damus_state, pubkeys: friended_followers, maxPictures: 3)
+                            Text(followedByString(friended_followers, profiles: damus_state.profiles))
+                                .font(.subheadline).foregroundColor(.gray)
+                                .multilineTextAlignment(.leading)
+                        }
+                    }
+                }
+            }
         }
         .padding(.horizontal)
     }
@@ -438,8 +476,8 @@ struct ProfileView: View {
                 
                     VStack(spacing: 0) {
                         CustomPicker(selection: $filter_state, content: {
-                            Text("Posts", comment: "Label for filter for seeing only your posts (instead of posts and replies).").tag(FilterState.posts)
-                            Text("Posts & Replies", comment: "Label for filter for seeing your posts and replies (instead of only your posts).").tag(FilterState.posts_and_replies)
+                            Text("Notes", comment: "Label for filter for seeing only your notes (instead of notes and replies).").tag(FilterState.posts)
+                            Text("Notes & Replies", comment: "Label for filter for seeing your notes and replies (instead of only your notes).").tag(FilterState.posts_and_replies)
                         })
                         Divider()
                             .frame(height: 1)
@@ -497,7 +535,7 @@ func test_damus_state() -> DamusState {
     let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
     let damus = DamusState.empty
     
-    let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", banner: "", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io")
+    let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", banner: "", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io", damus_donation: nil)
     let tsprof = TimestampedProfile(profile: prof, timestamp: 0, event: test_event)
     damus.profiles.add(id: pubkey, profile: tsprof)
     return damus
@@ -531,24 +569,12 @@ struct KeyView: View {
         let bech32 = bech32_pubkey(pubkey) ?? pubkey
         
         HStack {
-            HStack {
-                Button {
-                    copyPubkey(bech32)
-                } label: {
-                    Label(NSLocalizedString("Public Key", comment: "Label indicating that the text is a user's public account key."), systemImage: "key.fill")
-                        .font(.custom("key", size: 12.0))
-                        .labelStyle(IconOnlyLabelStyle())
-                        .foregroundStyle(hex_to_rgb(pubkey))
-                        .symbolRenderingMode(.palette)
-                }
-                .padding(.trailing, 2)
-                Text(verbatim: "\(abbrev_pubkey(bech32, amount: 16))")
-                    .font(.footnote)
-                    .foregroundColor(keyColor())
-            }
-            .padding(2)
-            .padding([.leading, .trailing], 3)
-            .background(RoundedRectangle(cornerRadius: 11).foregroundColor(DamusColors.adaptableGrey))
+            Text(verbatim: "\(abbrev_pubkey(bech32, amount: 16))")
+                .font(.footnote)
+                .foregroundColor(keyColor())
+                .padding(5)
+                .padding([.leading, .trailing], 5)
+                .background(RoundedRectangle(cornerRadius: 11).foregroundColor(DamusColors.adaptableGrey))
                         
             if isCopied != true {
                 Button {
@@ -557,7 +583,8 @@ struct KeyView: View {
                     Label {
                         Text("Public key", comment: "Label indicating that the text is a user's public account key.")
                     } icon: {
-                        Image(systemName: "square.on.square.dashed")
+                        Image("copy2")
+                            .resizable()
                             .contentShape(Rectangle())
                             .foregroundColor(.accentColor)
                             .frame(width: 20, height: 20)
@@ -567,7 +594,8 @@ struct KeyView: View {
                 }
             } else {
                 HStack {
-                    Image(systemName: "checkmark.circle")
+                    Image("check-circle")
+                        .resizable()
                         .frame(width: 20, height: 20)
                     Text(NSLocalizedString("Copied", comment: "Label indicating that a user's key was copied."))
                         .font(.footnote)

@@ -21,7 +21,7 @@ let carousel_items = [
     CarouselItem(image: Image("undercover"),
                  text: Text("\(Text("Private", comment: "Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading.").bold()). Creating an account doesn't require a phone number, email or name. Get started right away with zero friction.", comment: "Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string.")),
     CarouselItem(image: Image("bitcoin-p2p"),
-                 text: Text("\(Text("Earn Money", comment: "Heading indicating that this application allows users to earn money.").bold()). Tip your friend's posts and stack sats with Bitcoin⚡️, the native currency of the internet.", comment: "Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string."))
+                 text: Text("\(Text("Earn Money", comment: "Heading indicating that this application allows users to earn money.").bold()). Tip your friends and stack sats with Bitcoin⚡️, the native currency of the internet.", comment: "Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string."))
 ]
 
 struct CarouselView: View {

@@ -60,24 +60,13 @@ func parse_nostr_ref_uri(_ p: Parser) -> ReferencedId? {
     if !parse_str(p, "nostr:") {
         return nil
     }
-    
-    guard let typ = parse_nostr_ref_uri_type(p) else {
+
+    guard let ref = parse_post_bech32_mention(p) else {
         p.pos = start
         return nil
     }
-    
-    if !parse_char(p, ":") {
-        p.pos = start
-        return nil
-    }
-    
-    guard let pk = parse_hexstr(p, len: 64) else {
-        p.pos = start
-        return nil
-    }
-    
-    // TODO: parse relays from nostr uris
-    return ReferencedId(ref_id: pk, relay_id: nil, key: typ)
+
+    return ref
 }
 
 func decode_universal_link(_ s: String) -> NostrLink? {
@@ -140,7 +129,7 @@ func decode_nostr_uri(_ s: String) -> NostrLink? {
         }
     
     if tag_is_hashtag(parts) {
-        return .filter(NostrFilter.filter_hashtag([parts[1]]))
+        return .filter(NostrFilter(hashtag: [parts[1].lowercased()]))
     }
     
     if let rid = tag_to_refid(parts) {

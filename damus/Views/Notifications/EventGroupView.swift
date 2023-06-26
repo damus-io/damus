@@ -14,6 +14,15 @@ enum EventGroupType {
     case zap(ZapGroup)
     case profile_zap(ZapGroup)
     
+    var is_note_zap: Bool {
+        switch self {
+        case .repost: return false
+        case .reaction: return false
+        case .zap: return true
+        case .profile_zap: return false
+        }
+    }
+    
     var zap_group: ZapGroup? {
         switch self {
         case .profile_zap(let grp):
@@ -42,18 +51,23 @@ enum EventGroupType {
 }
 
 enum ReactingTo {
-    case your_post
+    case your_note
     case tagged_in
     case your_profile
 }
 
-func determine_reacting_to(our_pubkey: String, ev: NostrEvent?) -> ReactingTo {
+func determine_reacting_to(our_pubkey: String, ev: NostrEvent?, group: EventGroupType, nozaps: Bool) -> ReactingTo {
     guard let ev else {
         return .your_profile
     }
     
+    if nozaps && group.is_note_zap {
+        // ZAPPING NOTES IS NOT ALLOWED!!!! EVIL!!!
+        return .your_profile
+    }
+    
     if ev.pubkey == our_pubkey {
-        return .your_post
+        return .your_note
     }
     
     return .tagged_in
@@ -61,16 +75,12 @@ func determine_reacting_to(our_pubkey: String, ev: NostrEvent?) -> ReactingTo {
 
 func event_author_name(profiles: Profiles, pubkey: String) -> String {
     let alice_prof = profiles.lookup(id: pubkey)
-    return Profile.displayName(profile: alice_prof, pubkey: pubkey).username
+    return Profile.displayName(profile: alice_prof, pubkey: pubkey).username.truncate(maxLength: 50)
 }
 
 func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType) -> String {
     if let zapgrp = group.zap_group {
         let zap = zapgrp.zaps[ind]
-        
-        if let privzap = zap.private_request {
-            return event_author_name(profiles: profiles, pubkey: privzap.pubkey)
-        }
         
         if zap.is_anon {
             return NSLocalizedString("Anonymous", comment: "Placeholder author name of the anonymous person who zapped an event.")
@@ -93,9 +103,9 @@ func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType
  "reacted_tagged_in_1" - returned when 1 reaction occurred to a post that the current user was tagged in
  "reacted_tagged_in_2" - returned when 2 reactions occurred to a post that the current user was tagged in
  "reacted_tagged_in_3" - returned when 3 or more reactions occurred to a post that the current user was tagged in
- "reacted_your_post_1" - returned when 1 reaction occurred to the current user's post
- "reacted_your_post_2" - returned when 2 reactions occurred to the current user's post
- "reacted_your_post_3" - returned when 3 or more reactions occurred to the current user's post
+ "reacted_your_note_1" - returned when 1 reaction occurred to the current user's post
+ "reacted_your_note_2" - returned when 2 reactions occurred to the current user's post
+ "reacted_your_note_3" - returned when 3 or more reactions occurred to the current user's post
  "reacted_your_profile_1" - returned when 1 reaction occurred to the current user's profile
  "reacted_your_profile_2" - returned when 2 reactions occurred to the current user's profile
  "reacted_your_profile_3" - returned when 3 or more reactions occurred to the current user's profile
@@ -103,9 +113,9 @@ func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType
  "reposted_tagged_in_1" - returned when 1 repost occurred to a post that the current user was tagged in
  "reposted_tagged_in_2" - returned when 2 reposts occurred to a post that the current user was tagged in
  "reposted_tagged_in_3" - returned when 3 or more reposts occurred to a post that the current user was tagged in
- "reposted_your_post_1" - returned when 1 repost occurred to the current user's post
- "reposted_your_post_2" - returned when 2 reposts occurred to the current user's post
- "reposted_your_post_3" - returned when 3 or more reposts occurred to the current user's post
+ "reposted_your_note_1" - returned when 1 repost occurred to the current user's post
+ "reposted_your_note_2" - returned when 2 reposts occurred to the current user's post
+ "reposted_your_note_3" - returned when 3 or more reposts occurred to the current user's post
  "reposted_your_profile_1" - returned when 1 repost occurred to the current user's profile
  "reposted_your_profile_2" - returned when 2 reposts occurred to the current user's profile
  "reposted_your_profile_3" - returned when 3 or more reposts occurred to the current user's profile
@@ -113,20 +123,20 @@ func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType
  "zapped_tagged_in_1" - returned when 1 zap occurred to a post that the current user was tagged in
  "zapped_tagged_in_2" - returned when 2 zaps occurred to a post that the current user was tagged in
  "zapped_tagged_in_3" - returned when 3 or more zaps occurred to a post that the current user was tagged in
- "zapped_your_post_1" - returned when 1 zap occurred to the current user's post
- "zapped_your_post_2" - returned when 2 zaps occurred to the current user's post
- "zapped_your_post_3" - returned when 3 or more zaps occurred to the current user's post
+ "zapped_your_note_1" - returned when 1 zap occurred to the current user's post
+ "zapped_your_note_2" - returned when 2 zaps occurred to the current user's post
+ "zapped_your_note_3" - returned when 3 or more zaps occurred to the current user's post
  "zapped_your_profile_1" - returned when 1 zap occurred to the current user's profile
  "zapped_your_profile_2" - returned when 2 zaps occurred to the current user's profile
  "zapped_your_profile_3" - returned when 3 or more zaps occurred to the current user's profile
  */
-func reacting_to_text(profiles: Profiles, our_pubkey: String, group: EventGroupType, ev: NostrEvent?, locale: Locale? = nil) -> String {
+func reacting_to_text(profiles: Profiles, our_pubkey: String, group: EventGroupType, ev: NostrEvent?, nozaps: Bool, locale: Locale? = nil) -> String {
     if group.events.count == 0 {
         return "??"
     }
 
     let verb = reacting_to_verb(group: group)
-    let reacting_to = determine_reacting_to(our_pubkey: our_pubkey, ev: ev)
+    let reacting_to = determine_reacting_to(our_pubkey: our_pubkey, ev: ev, group: group, nozaps: nozaps)
     let localization_key = "\(verb)_\(reacting_to)_\(min(group.events.count, 3))"
     let format = localizedStringFormat(key: localization_key, locale: locale)
 
@@ -166,13 +176,13 @@ struct EventGroupView: View {
     let group: EventGroupType
     
     var GroupDescription: some View {
-        Text(verbatim: "\(reacting_to_text(profiles: state.profiles, our_pubkey: state.pubkey, group: group, ev: event))")
+        Text(verbatim: "\(reacting_to_text(profiles: state.profiles, our_pubkey: state.pubkey, group: group, ev: event, nozaps: state.settings.nozaps))")
     }
     
     func ZapIcon(_ zapgrp: ZapGroup) -> some View {
         let fmt = format_msats_abbrev(zapgrp.msat_total)
         return VStack(alignment: .center) {
-            Image(systemName: "bolt.fill")
+            Image("zap.fill")
                 .foregroundColor(.orange)
             Text(verbatim: fmt)
                 .foregroundColor(Color.orange)
@@ -183,13 +193,15 @@ struct EventGroupView: View {
         Group {
             switch group {
             case .repost:
-                Image(systemName: "arrow.2.squarepath")
+                Image("repost")
                     .foregroundColor(DamusColors.green)
             case .reaction:
                 LINEAR_GRADIENT
-                    .mask(Image("shaka-full")
+                    .mask(Image("shaka.fill")
                         .resizable()
-                    ).frame(width: 24, height: 24)
+                        .aspectRatio(contentMode: .fit)
+                    )
+                    .frame(width: 20, height: 20)
             case .profile_zap(let zapgrp):
                 ZapIcon(zapgrp)
             case .zap(let zapgrp):
@@ -209,16 +221,18 @@ struct EventGroupView: View {
                 if let event {
                     let thread = ThreadModel(event: event, damus_state: state)
                     let dest = ThreadView(state: state, thread: thread)
-                    NavigationLink(destination: dest) {
-                        VStack(alignment: .leading) {
-                            GroupDescription
-                            EventBody(damus_state: state, event: event, size: .normal, options: [.truncate_content])
-                                .padding([.top], 1)
-                                .padding([.trailing])
-                                .foregroundColor(.gray)
+                    GroupDescription
+                    if !state.settings.nozaps || !group.is_note_zap {
+                        NavigationLink(destination: dest) {
+                            VStack(alignment: .leading) {
+                                EventBody(damus_state: state, event: event, size: .normal, options: [.truncate_content])
+                                    .padding([.top], 1)
+                                    .padding([.trailing])
+                                    .foregroundColor(.gray)
+                            }
                         }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 } else {
                     GroupDescription
                 }

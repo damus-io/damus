@@ -26,7 +26,7 @@ func PostButton(action: @escaping () -> ()) -> some View {
                         radius: 3,
                         x: 3,
                         y: 3)
-            Image(systemName: "plus")
+            Image("plus")
                 .font(.system(.title2))
                 .foregroundColor(Color.white)
         }

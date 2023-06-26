@@ -19,7 +19,7 @@ struct AddRelayView: View {
                     .autocorrectionDisabled(true)
                     .textInputAutocapitalization(.never)
                 
-                Label("", systemImage: "xmark.circle.fill")
+                Label("", image: "close-circle")
                     .foregroundColor(.accentColor)
                     .padding(.trailing, -25.0)
                     .opacity((relay == "") ? 0.0 : 1.0)
@@ -28,7 +28,7 @@ struct AddRelayView: View {
                     }
             }
             
-            Label("", systemImage: "doc.on.clipboard")
+            Label("", image: "copy2")
                 .padding(.leading, -10)
                 .onTapGesture {
                 if let pastedrelay = UIPasteboard.general.string {

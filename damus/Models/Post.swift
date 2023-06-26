@@ -21,7 +21,6 @@ struct NostrPost {
     }
 }
 
-// TODO: parse nostr:{e,p}:pubkey uris as well
 func parse_post_mention_type(_ p: Parser) -> MentionType? {
     if parse_char(p, "@") {
         return .pubkey

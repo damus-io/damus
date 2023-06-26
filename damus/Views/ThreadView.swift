@@ -10,7 +10,7 @@ import SwiftUI
 struct ThreadView: View {
     let state: DamusState
     
-    @StateObject var thread: ThreadModel
+    @ObservedObject var thread: ThreadModel
     @Environment(\.dismiss) var dismiss
     
     var parent_events: [NostrEvent] {
@@ -22,11 +22,13 @@ struct ThreadView: View {
     }
     
     var body: some View {
+        //let top_zap = get_top_zap(events: state.events, evid: thread.event.id)
         ScrollViewReader { reader in
             ScrollView {
                 LazyVStack {
                     // MARK: - Parents events view
                     ForEach(parent_events, id: \.id) { parent_event in
+                            
                         MutedEventView(damus_state: state,
                                        event: parent_event,
                                        selected: false)
@@ -39,6 +41,7 @@ struct ThreadView: View {
                         Divider()
                             .padding(.top, 4)
                             .padding(.leading, 25 * 2)
+                        
                     }.background(GeometryReader { geometry in
                         // get the height and width of the EventView view
                         let eventHeight = geometry.frame(in: .global).height
@@ -59,6 +62,13 @@ struct ThreadView: View {
                     )
                     .id(self.thread.event.id)
                     
+                    /*
+                    if let top_zap {
+                        ZapEvent(damus: state, zap: top_zap, is_top_zap: true)
+                            .padding(.horizontal)
+                    }
+                     */
+                    
                     ForEach(child_events, id: \.id) { child_event in
                         MutedEventView(
                             damus_state: state,
@@ -70,7 +80,7 @@ struct ThreadView: View {
                             thread.set_active_event(child_event)
                             scroll_to_event(scroller: reader, id: child_event.id, delay: 0.1, animate: false)
                         }
-
+                        
                         Divider()
                             .padding([.top], 4)
                     }

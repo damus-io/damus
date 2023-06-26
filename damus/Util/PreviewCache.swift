@@ -66,22 +66,12 @@ enum PreviewState {
 
 class PreviewCache {
     private var previews: [String: Preview]
-    private var image_meta: [String: ImageFill]
     
     func lookup(_ evid: String) -> Preview? {
         return previews[evid]
     }
     
-    func lookup_image_meta(_ evid: String) -> ImageFill? {
-        return image_meta[evid]
-    }
-    
-    func cache_image_meta(evid: String, image_fill: ImageFill) {
-        self.image_meta[evid] = image_fill
-    }
-    
     init() {
         self.previews = [:]
-        self.image_meta = [:]
     }
 }

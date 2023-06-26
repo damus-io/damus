@@ -59,16 +59,14 @@ struct ImageMetadata: Equatable {
 }
 
 func process_blurhash(blurhash: String, size: CGSize?) async -> UIImage? {
-    let res = Task.init {
+    let res = Task.detached(priority: .low) {
         let size = get_blurhash_size(img_size: size ?? CGSize(width: 100.0, height: 100.0))
         guard let img = UIImage.init(blurHash: blurhash, size: size) else {
             let noimg: UIImage? = nil
             return noimg
         }
-        
         return img
     }
-    
     
     return await res.value
 }
@@ -146,7 +144,7 @@ func calculate_blurhash(img: UIImage) async -> String? {
         return nil
     }
     
-    let res = Task.init {
+    let res = Task.detached(priority: .low) {
         let bhs = get_blurhash_size(img_size: img.size)
         let smaller = img.resized(to: bhs)
         

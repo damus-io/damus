@@ -21,7 +21,7 @@ struct IconLabel: View {
     
     var body: some View {
         HStack(spacing: 0) {
-            Image(systemName: img_name)
+            Image(img_name)
                 .foregroundColor(img_color)
                 .frame(width: 20)
                 .padding([.trailing], 20)

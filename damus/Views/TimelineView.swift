@@ -31,9 +31,7 @@ struct TimelineView: View {
                     .shimmer(loading)
                     .disabled(loading)
                     .background(GeometryReader { proxy -> Color in
-                        DispatchQueue.main.async {
-                            handle_scroll_queue(proxy, queue: self.events)
-                        }
+                        handle_scroll_queue(proxy, queue: self.events)
                         return Color.clear
                     })
             }

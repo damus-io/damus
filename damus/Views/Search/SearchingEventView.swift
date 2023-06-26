@@ -72,24 +72,20 @@ struct SearchingEventView: View {
             }
             
         case .event:
-            if let ev = state.events.lookup(evid) {
-                self.search_state = .found(ev)
-                return
-            }
-            find_event(state: state, evid: evid, search_type: search_type, find_from: nil) { ev in
-                if let ev {
-                    self.search_state = .found(ev)
-                } else {
+            find_event(state: state, query: .event(evid: evid)) { res in
+                guard case .event(let ev) = res else {
                     self.search_state = .not_found
+                    return
                 }
+                self.search_state = .found(ev)
             }
         case .profile:
-            find_event(state: state, evid: evid, search_type: search_type, find_from: nil) { ev in
-                if state.profiles.lookup(id: evid) != nil {
-                    self.search_state = .found_profile(evid)
-                } else {
+            find_event(state: state, query: .profile(pubkey: evid)) { res in
+                guard case .profile(_, let ev) = res else {
                     self.search_state = .not_found
+                    return
                 }
+                self.search_state = .found_profile(ev.pubkey)
             }
         }
     }

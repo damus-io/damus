@@ -26,11 +26,17 @@ struct RelayToggle: View {
     
     var body: some View {
         HStack {
-            RelayStatus(pool: state.pool, relay: relay_id)
+            if let relay_connection {
+                RelayStatusView(connection: relay_connection)
+            }
             RelayType(is_paid: state.relay_metadata.lookup(relay_id: relay_id)?.is_paid ?? false)
             Toggle(relay_id, isOn: toggle_binding(relay_id: relay_id))
                 .toggleStyle(SwitchToggleStyle(tint: .accentColor))
         }
+    }
+    
+    private var relay_connection: RelayConnection? {
+        state.pool.get_relay(relay_id)?.connection
     }
 }
 

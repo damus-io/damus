@@ -39,7 +39,7 @@ func reply_desc(profiles: Profiles, event: NostrEvent, locale: Locale = Locale.c
 
     let names: [String] = pubkeys.map {
         let prof = profiles.lookup(id: $0)
-        return Profile.displayName(profile: prof, pubkey: $0).username
+        return Profile.displayName(profile: prof, pubkey: $0).username.truncate(maxLength: 50)
     }
     
     let uniqueNames = NSOrderedSet(array: names).array as! [String]

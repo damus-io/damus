@@ -19,12 +19,12 @@ class ZapsModel: ObservableObject {
         self.target = target
     }
     
-    var zaps: [Zap] {
+    var zaps: [Zapping] {
         return state.events.lookup_zaps(target: target)
     }
     
     func subscribe() {
-        var filter = NostrFilter.filter_kinds([NostrKind.zap.rawValue])
+        var filter = NostrFilter(kinds: [.zap])
         switch target {
         case .profile(let profile_id):
             filter.pubkeys = [profile_id]
@@ -53,30 +53,22 @@ class ZapsModel: ObservableObject {
         case .notice:
             break
         case .eose:
-            let events = state.events.lookup_zaps(target: target).map { $0.request_ev }
+            let events = state.events.lookup_zaps(target: target).map { $0.request.ev }
             load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(events), damus_state: state)
         case .event(_, let ev):
             guard ev.kind == 9735 else {
                 return
             }
             
-            if let zap = state.zaps.zaps[ev.id] {
-                if state.events.store_zap(zap: zap) {
-                    objectWillChange.send()
-                }
-            } else {
-                guard let zapper = state.profiles.lookup_zapper(pubkey: target.pubkey) else {
-                    return
-                }
-                
-                guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: state.keypair.privkey) else {
-                    return
-                }
-                
-                if self.state.add_zap(zap: zap) {
-                    objectWillChange.send()
-                }
+            guard let zapper = state.profiles.lookup_zapper(pubkey: target.pubkey) else {
+                return
             }
+            
+            guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: state.keypair.privkey) else {
+                return
+            }
+            
+            self.state.add_zap(zap: .zap(zap))
         }
         
         

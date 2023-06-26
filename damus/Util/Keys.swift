@@ -10,7 +10,7 @@ import secp256k1
 
 let PUBKEY_HRP = "npub"
 
-struct FullKeypair {
+struct FullKeypair: Equatable {
     let pubkey: String
     let privkey: String
 }

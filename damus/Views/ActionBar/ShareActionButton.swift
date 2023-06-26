@@ -27,7 +27,7 @@ struct ShareActionButton: View {
     var body: some View {
         Button(action: action) {
             VStack() {
-                Image(systemName: img)
+                Image(img)
                     .foregroundColor(col)
                     .font(.system(size: 23, weight: .bold))
                     .overlay {
@@ -48,6 +48,6 @@ struct ShareActionButton: View {
 
 struct ShareActionButton_Previews: PreviewProvider {
     static var previews: some View {
-        ShareActionButton(img: "figure.flexibility", text: "Stretch", action: {})
+        ShareActionButton(img: "link", text: "Stretch", action: {})
     }
 }

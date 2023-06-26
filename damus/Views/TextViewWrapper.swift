@@ -9,12 +9,16 @@ import SwiftUI
 
 struct TextViewWrapper: UIViewRepresentable {
     @Binding var attributedText: NSMutableAttributedString
+    @Binding var postTextViewCanScroll: Bool
+    @EnvironmentObject var tagModel: TagModel
+    
     let cursorIndex: Int?
     var getFocusWordForMention: ((String?, NSRange?) -> Void)? = nil
     
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
         textView.delegate = context.coordinator
+        textView.isScrollEnabled = postTextViewCanScroll
         textView.showsVerticalScrollIndicator = false
         TextViewWrapper.setTextProperties(textView)
         return textView
@@ -29,9 +33,15 @@ struct TextViewWrapper: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UITextView, context: Context) {
+        uiView.isScrollEnabled = postTextViewCanScroll
+        let range = uiView.selectedRange
         uiView.attributedText = attributedText
+
         TextViewWrapper.setTextProperties(uiView)
         setCursorPosition(textView: uiView)
+
+        uiView.selectedRange = NSRange(location: range.location + tagModel.diff, length: range.length)
+        tagModel.diff = 0
     }
 
     private func setCursorPosition(textView: UITextView) {

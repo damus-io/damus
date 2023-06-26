@@ -60,9 +60,10 @@ struct EditMetadataView: View {
     
     func save() {
         let profile = to_profile()
-        guard let metadata_ev = make_metadata_event(keypair: damus_state.keypair, metadata: profile) else {
+        guard let keypair = damus_state.keypair.to_full() else {
             return
         }
+        let metadata_ev = make_metadata_event(keypair: keypair, metadata: profile)
         damus_state.postbox.send(metadata_ev)
     }
 
@@ -102,13 +103,15 @@ struct EditMetadataView: View {
             TopSection
             Form {
                 Section(NSLocalizedString("Your Name", comment: "Label for Your Name section of user profile form.")) {
-                    TextField("Satoshi Nakamoto", text: $display_name)
+                    let display_name_placeholder = "Satoshi Nakamoto"
+                    TextField(display_name_placeholder, text: $display_name)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                 }
                 
                 Section(NSLocalizedString("Username", comment: "Label for Username section of user profile form.")) {
-                    TextField("satoshi", text: $name)
+                    let username_placeholder = "satoshi"
+                    TextField(username_placeholder, text: $name)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
 

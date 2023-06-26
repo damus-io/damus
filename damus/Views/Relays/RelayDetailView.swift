@@ -24,7 +24,11 @@ struct RelayDetailView: View {
     }
     
     func FieldText(_ str: String?) -> some View {
-        Text(str ?? "No data available")
+        if let s = str {
+            return Text(verbatim: s)
+        } else {
+            return Text("No data available", comment: "Text indicating that there is no data available to show for specific metadata about a relay server.")
+        }
     }
     
     var body: some View {
@@ -38,7 +42,7 @@ struct RelayDetailView: View {
                                 return
                             }
 
-                            let descriptors = state.pool.descriptors
+                            let descriptors = state.pool.our_descriptors
                             guard let new_ev = remove_relay( ev: ev, current_relays: descriptors, privkey: privkey, relay: relay) else {
                                 return
                             }
@@ -54,7 +58,7 @@ struct RelayDetailView: View {
                             guard let ev_before_add = state.contacts.event else {
                                 return
                             }
-                            guard let ev_after_add = add_relay(ev: ev_before_add, privkey: privkey, current_relays: state.pool.descriptors, relay: relay, info: .rw) else {
+                            guard let ev_after_add = add_relay(ev: ev_before_add, privkey: privkey, current_relays: state.pool.our_descriptors, relay: relay, info: .rw) else {
                                 return
                             }
                             process_contact_event(state: state, ev: ev_after_add)
@@ -71,11 +75,13 @@ struct RelayDetailView: View {
                         UserViewRow(damus_state: state, pubkey: pubkey)
                     }
                 }
-                Section(NSLocalizedString("Relay", comment: "Label to display relay address.")) {
-                    HStack {
-                        Text(relay)
-                        Spacer()
-                        RelayStatus(pool: state.pool, relay: relay)
+                if let relay_connection {
+                    Section(NSLocalizedString("Relay", comment: "Label to display relay address.")) {
+                        HStack {
+                            Text(relay)
+                            Spacer()
+                            RelayStatusView(connection: relay_connection)
+                        }
                     }
                 }
                 if nip11.is_paid {
@@ -84,7 +90,7 @@ struct RelayDetailView: View {
                     }, header: {
                         Text("Paid Relay", comment: "Section header that indicates the relay server requires payment.")
                     }, footer: {
-                        Text("This is a paid relay, you must pay for posts to be accepted.", comment: "Footer description that explains that the relay server requires payment to post.")
+                        Text("This is a paid relay, you must pay for notes to be accepted.", comment: "Footer description that explains that the relay server requires payment to post.")
                     })
                 }
                 
@@ -129,6 +135,10 @@ struct RelayDetailView: View {
             }
         }
         return attrString
+    }
+    
+    private var relay_connection: RelayConnection? {
+        state.pool.get_relay(relay)?.connection
     }
 }
 

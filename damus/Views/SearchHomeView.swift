@@ -20,7 +20,7 @@ struct SearchHomeView: View {
     var SearchInput: some View {
         HStack {
             HStack{
-                Image(systemName: "magnifyingglass")
+                Image("search")
                     .foregroundColor(.gray)
                 TextField(NSLocalizedString("Search...", comment: "Placeholder text to prompt entry of search query."), text: $search)
                     .autocorrectionDisabled(true)

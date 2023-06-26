@@ -17,7 +17,7 @@ struct RelayConfigView: View {
     
     init(state: DamusState) {
         self.state = state
-        _relays = State(initialValue: state.pool.descriptors)
+        _relays = State(initialValue: state.pool.our_descriptors)
     }
     
     var recommended: [RelayDescriptor] {
@@ -32,7 +32,7 @@ struct RelayConfigView: View {
     var body: some View {
         MainContent
         .onReceive(handle_notify(.relays_changed)) { _ in
-            self.relays = state.pool.descriptors
+            self.relays = state.pool.our_descriptors
         }
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
@@ -88,14 +88,14 @@ struct RelayConfigView: View {
                                 }
                                 
                                 let info = RelayInfo.rw
-                                
-                                guard (try? state.pool.add_relay(url, info: info)) != nil else {
+                                let descriptor = RelayDescriptor(url: url, info: info)
+                                guard (try? state.pool.add_relay(descriptor)) != nil else {
                                     return
                                 }
                                 
                                 state.pool.connect(to: [new_relay])
                                 
-                                guard let new_ev = add_relay(ev: ev, privkey: privkey, current_relays: state.pool.descriptors, relay: new_relay, info: info) else {
+                                guard let new_ev = add_relay(ev: ev, privkey: privkey, current_relays: state.pool.our_descriptors, relay: new_relay, info: info) else {
                                     return
                                 }
                                 

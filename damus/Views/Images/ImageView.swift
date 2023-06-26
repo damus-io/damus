@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct ImageView: View {
-    
-    let urls: [URL?]
+    let cache: EventCache
+    let urls: [MediaUrl]
     
     @Environment(\.presentationMode) var presentationMode
     
@@ -39,7 +39,7 @@ struct ImageView: View {
             TabView(selection: $selectedIndex) {
                 ForEach(urls.indices, id: \.self) { index in
                     ZoomableScrollView {
-                        ImageContainerView(url: urls[index], disable_animation: disable_animation)
+                        ImageContainerView(cache: cache, url: urls[index], disable_animation: disable_animation)
                             .aspectRatio(contentMode: .fit)
                             .padding(.top, Theme.safeAreaInsets?.top)
                             .padding(.bottom, Theme.safeAreaInsets?.bottom)
@@ -79,6 +79,7 @@ struct ImageView: View {
 
 struct ImageView_Previews: PreviewProvider {
     static var previews: some View {
-        ImageView(urls: [URL(string: "https://jb55.com/red-me.jpg")], disable_animation: false)
+        let url: MediaUrl = .image(URL(string: "https://jb55.com/red-me.jpg")!)
+        ImageView(cache: test_damus_state().events, urls: [url], disable_animation: false)
     }
 }

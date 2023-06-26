@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "gsplayer",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/wxxsw/GSPlayer",
+      "state" : {
+        "revision" : "aa6dad7943d52f5207f7fcc2ad3e4274583443b8",
+        "version" : "0.2.26"
+      }
+    },
+    {
       "identity" : "kingfisher",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/onevcat/Kingfisher",

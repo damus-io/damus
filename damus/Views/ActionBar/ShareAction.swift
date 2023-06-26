@@ -41,7 +41,7 @@ struct ShareAction: View {
                     UIPasteboard.general.string = "https://damus.io/" + (bech32_note_id(event.id) ?? event.id)
                 }
                 
-                let bookmarkImg = isBookmarked ? "bookmark.slash" : "bookmark"
+                let bookmarkImg = isBookmarked ? "bookmark.fill" : "bookmark"
                 let bookmarkTxt = isBookmarked ? NSLocalizedString("Remove Bookmark", comment: "Button text to remove bookmark from a note.") : NSLocalizedString("Add Bookmark", comment: "Button text to add bookmark to a note.")
                 ShareActionButton(img: bookmarkImg, text: bookmarkTxt) {
                     dismiss()
@@ -54,7 +54,7 @@ struct ShareAction: View {
                     NotificationCenter.default.post(name: .broadcast_event, object: event)
                 }
                 
-                ShareActionButton(img: "square.and.arrow.up", text: NSLocalizedString("Share Via...", comment: "Button to present iOS share sheet")) {
+                ShareActionButton(img: "upload", text: NSLocalizedString("Share Via...", comment: "Button to present iOS share sheet")) {
                     show_share = true
                     dismiss()
                 }

@@ -14,11 +14,11 @@ struct Reposted: View {
     
     var body: some View {
         HStack(alignment: .center) {
-            Image(systemName: "arrow.2.squarepath")
+            Image("repost")
                 .foregroundColor(Color.gray)
             ProfileName(pubkey: pubkey, profile: profile, damus: damus, show_nip5_domain: false)
                     .foregroundColor(Color.gray)
-            Text("Reposted", comment: "Text indicating that the post was reposted (i.e. re-shared).")
+            Text("Reposted", comment: "Text indicating that the note was reposted (i.e. re-shared).")
                 .foregroundColor(Color.gray)
         }
     }

@@ -61,10 +61,10 @@ struct ZapTypePicker: View {
                     }
                 }
             }
-            ZapTypeSelection(text: "Public", comment: "Picker option to indicate that a zap should be sent publicly and identify the user as who sent it.", img: "person.2.circle.fill", action: {zap_type = ZapType.pub}, type: ZapType.pub)
-            ZapTypeSelection(text: "Private", comment: "Picker option to indicate that a zap should be sent privately and not identify the user to the public.", img: "lock.circle.fill", action: {zap_type = ZapType.priv}, type: ZapType.priv)
-            ZapTypeSelection(text: "Anonymous", comment: "Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.", img: "person.crop.circle.fill.badge.questionmark", action: {zap_type = ZapType.anon}, type: ZapType.anon)
-            ZapTypeSelection(text: "None", comment: "Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.", img: "bolt.circle.fill", action: {zap_type = ZapType.non_zap}, type: ZapType.non_zap)
+            ZapTypeSelection(text: "Public", comment: "Picker option to indicate that a zap should be sent publicly and identify the user as who sent it.", img: "globe", action: {zap_type = ZapType.pub}, type: ZapType.pub)
+            ZapTypeSelection(text: "Private", comment: "Picker option to indicate that a zap should be sent privately and not identify the user to the public.", img: "lock", action: {zap_type = ZapType.priv}, type: ZapType.priv)
+            ZapTypeSelection(text: "Anonymous", comment: "Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.", img: "question", action: {zap_type = ZapType.anon}, type: ZapType.anon)
+            ZapTypeSelection(text: "None", comment: "Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.", img: "zap", action: {zap_type = ZapType.non_zap}, type: ZapType.non_zap)
         }
         .padding(.horizontal)
     }
@@ -73,14 +73,19 @@ struct ZapTypePicker: View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 5) {
                 HStack {
-                    Image(systemName: img)
+                    Image(img)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 20, height: 20)
                         .foregroundColor(.gray)
-                        .font(.system(size: 24))
+                    
                     Text(text, comment: comment)
                         .font(.system(size: 20, weight: .semibold))
+                    
                     Spacer()
                 }
                 .padding(.horizontal)
+                
                 Text(zap_type_desc(type: type, profiles: profiles, pubkey: pubkey))
                     .padding(.horizontal)
                     .foregroundColor(.gray)
@@ -112,7 +117,7 @@ func zap_type_desc(type: ZapType, profiles: Profiles, pubkey: String) -> String 
         return NSLocalizedString("No one will see that you zapped", comment: "Description of anonymous zap type where the zap is sent anonymously and does not identify the user who sent it.")
     case .priv:
         let prof = profiles.lookup(id: pubkey)
-        let name = Profile.displayName(profile: prof, pubkey: pubkey).username
+        let name = Profile.displayName(profile: prof, pubkey: pubkey).username.truncate(maxLength: 50)
         return String.localizedStringWithFormat(NSLocalizedString("private_zap_description", value: "Only '%@' will see that you zapped them", comment: "Description of private zap type where the zap is sent privately and does not identify the user to the public."), name)
     case .non_zap:
         return NSLocalizedString("No zaps will be sent, only a lightning payment.", comment: "Description of non-zap type where sats are sent to the user's wallet as a regular Lightning payment, not as a zap.")

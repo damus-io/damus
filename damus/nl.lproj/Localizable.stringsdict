@@ -61,12 +61,12 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ en %1$d ander hebben gereageerd op een bericht waarin je getagd bent</string>
+			<string>%2$@ en %1$d ander hebben gereageerd op een notitie waarin je getagd bent</string>
 			<key>other</key>
-			<string>%2$@ en %1$d anderen hebben gereageerd op een bericht waarin je getagd bent</string>
+			<string>%2$@ en %1$d anderen hebben gereageerd op een notitie waarin je getagd bent</string>
 		</dict>
 	</dict>
-	<key>reacted_your_post_3</key>
+	<key>reacted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REACTED@</string>
@@ -77,9 +77,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ en %1$d ander hebben gereageerd op je bericht</string>
+			<string>%2$@ en %1$d ander hebben gereageerd op je notitie</string>
 			<key>other</key>
-			<string>%2$@ en %1$d anderen hebben gereageerd op je bericht</string>
+			<string>%2$@ en %1$d anderen hebben gereageerd op je notitie</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -157,12 +157,12 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ en %1$d ander hebben een bericht waarin je getagd bent herplaatst</string>
+			<string>%2$@ en %1$d ander hebben een notitie waarin je getagd bent herplaatst</string>
 			<key>other</key>
-			<string>%2$@ en %1$d anderen hebben een bericht waarin je getagd bent herplaatst</string>
+			<string>%2$@ en %1$d anderen hebben een notitie waarin je getagd bent herplaatst</string>
 		</dict>
 	</dict>
-	<key>reposted_your_post_3</key>
+	<key>reposted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REPOSTED@</string>
@@ -173,9 +173,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ en %1$d ander hebben je bericht herplaatst</string>
+			<string>%2$@ en %1$d ander hebben je notitie herplaatst</string>
 			<key>other</key>
-			<string>%2$@ en %1$d anderen hebben je bericht herplaatst</string>
+			<string>%2$@ en %1$d anderen hebben je notitie herplaatst</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -285,12 +285,12 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ en %1$d ander hebben een bericht waarin je getagd bent gezapt</string>
+			<string>%2$@ en %1$d ander hebben een notitie waarin je getagd bent gezapt</string>
 			<key>other</key>
-			<string>%2$@ en %1$d anderen hebben een bericht waarin je getagd bent gezapt</string>
+			<string>%2$@ en %1$d anderen hebben een notitie waarin je getagd bent gezapt</string>
 		</dict>
 	</dict>
-	<key>zapped_your_post_3</key>
+	<key>zapped_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@ZAPPED@</string>
@@ -301,9 +301,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ en %1$d ander hebben je bericht gezapt</string>
+			<string>%2$@ en %1$d ander hebben je notitie gezapt</string>
 			<key>other</key>
-			<string>%2$@ en %1$d anderen hebben je bericht gezapt</string>
+			<string>%2$@ en %1$d anderen hebben je notitie gezapt</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -317,9 +317,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ en %1$d ander hebben je profiel gezapt</string>
+			<string>%2$@ en %1$d ander heeft je gezapt</string>
 			<key>other</key>
-			<string>%2$@ en %1$d anderen hebben je profiel gezapt</string>
+			<string>%2$@ en %1$d anderen hebben je gezapt</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>

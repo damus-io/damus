@@ -18,6 +18,7 @@ class SearchHomeModel: ObservableObject {
     let base_subid = UUID().description
     let profiles_subid = UUID().description
     let limit: UInt32 = 250
+    //let multiple_events_per_pubkey: Bool = false
     
     init(damus_state: DamusState) {
         self.damus_state = damus_state
@@ -27,7 +28,7 @@ class SearchHomeModel: ObservableObject {
     }
     
     func get_base_filter() -> NostrFilter {
-        var filter = NostrFilter.filter_kinds([NostrKind.text.rawValue, NostrKind.chat.rawValue])
+        var filter = NostrFilter(kinds: [.text, .chat])
         filter.limit = self.limit
         filter.until = Int64(Date.now.timeIntervalSince1970)
         return filter
@@ -60,7 +61,7 @@ class SearchHomeModel: ObservableObject {
                 return
             }
             if ev.is_textlike && should_show_event(contacts: damus_state.contacts, ev: ev) && !ev.is_reply(nil) {
-                if seen_pubkey.contains(ev.pubkey) {
+                if !damus_state.settings.multiple_events_per_pubkey && seen_pubkey.contains(ev.pubkey) {
                     return
                 }
                 seen_pubkey.insert(ev.pubkey)
@@ -90,20 +91,6 @@ class SearchHomeModel: ObservableObject {
     }
 }
 
-func find_profiles_to_fetch_pk(profiles: Profiles, event_pubkeys: [String]) -> [String] {
-    var pubkeys = Set<String>()
-    
-    for pk in event_pubkeys {
-        if profiles.lookup(id: pk) != nil {
-            continue
-        }
-        
-        pubkeys.insert(pk)
-    }
-    
-    return Array(pubkeys)
-}
-
 func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: EventCache) -> [String] {
     switch load {
     case .from_events(let events):
@@ -114,17 +101,7 @@ func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: Even
 }
 
 func find_profiles_to_fetch_from_keys(profiles: Profiles, pks: [String]) -> [String] {
-    var pubkeys = Set<String>()
-    
-    for pk in pks {
-        if profiles.lookup(id: pk) != nil {
-            continue
-        }
-        
-        pubkeys.insert(pk)
-    }
-    
-    return Array(pubkeys)
+    Array(Set(pks.filter { pk in !profiles.has_fresh_profile(id: pk) }))
 }
 
 func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent], cache: EventCache) -> [String] {
@@ -132,11 +109,11 @@ func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent]
     
     for ev in events {
         // lookup profiles from boosted events
-        if ev.known_kind == .boost, let bev = ev.get_inner_event(cache: cache), profiles.lookup(id: bev.pubkey) == nil {
+        if ev.known_kind == .boost, let bev = ev.get_inner_event(cache: cache), !profiles.has_fresh_profile(id: bev.pubkey) {
             pubkeys.insert(bev.pubkey)
         }
         
-        if profiles.lookup(id: ev.pubkey) == nil {
+        if !profiles.has_fresh_profile(id: ev.pubkey) {
             pubkeys.insert(ev.pubkey)
         }
     }
@@ -150,15 +127,15 @@ enum PubkeysToLoad {
 }
 
 func load_profiles(profiles_subid: String, relay_id: String, load: PubkeysToLoad, damus_state: DamusState) {
-    var filter = NostrFilter.filter_profiles
     let authors = find_profiles_to_fetch(profiles: damus_state.profiles, load: load, cache: damus_state.events)
-    filter.authors = authors
-    
     guard !authors.isEmpty else {
         return
     }
     
     print("loading \(authors.count) profiles from \(relay_id)")
+    
+    let filter = NostrFilter(kinds: [.metadata],
+                             authors: authors)
     
     damus_state.pool.subscribe_to(sub_id: profiles_subid, filters: [filter], to: [relay_id]) { sub_id, conn_ev in
         let (sid, done) = handle_subid_event(pool: damus_state.pool, relay_id: relay_id, ev: conn_ev) { sub_id, ev in

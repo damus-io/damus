@@ -52,8 +52,10 @@ enum ImageShape {
     }
 }
 
+// MARK: - Image Carousel
+@MainActor
 struct ImageCarousel: View {
-    var urls: [URL]
+    var urls: [MediaUrl]
     
     let evid: String
     
@@ -62,14 +64,19 @@ struct ImageCarousel: View {
     @State private var open_sheet: Bool = false
     @State private var current_url: URL? = nil
     @State private var image_fill: ImageFill? = nil
+
+    @State private var fillHeight: CGFloat = 350
+    @State private var maxHeight: CGFloat = UIScreen.main.bounds.height * 1.2 // 1.2
+    @State private var firstImageHeight: CGFloat? = nil
+    @State private var currentImageHeight: CGFloat?
+    @State private var selectedIndex = 0
+    @State private var video_size: CGSize? = nil
     
-    let fillHeight: CGFloat = 350
-    let maxHeight: CGFloat = UIScreen.main.bounds.height * 1.2
-    
-    init(state: DamusState, evid: String, urls: [URL]) {
+    init(state: DamusState, evid: String, urls: [MediaUrl]) {
         _open_sheet = State(initialValue: false)
         _current_url = State(initialValue: nil)
-        _image_fill = State(initialValue: state.previews.lookup_image_meta(evid))
+        let media_model = state.events.get_cache_data(evid).media_metadata_model
+        _image_fill = State(initialValue: media_model.fill)
         self.urls = urls
         self.evid = evid
         self.state = state
@@ -80,74 +87,153 @@ struct ImageCarousel: View {
     }
     
     var height: CGFloat {
-        image_fill?.height ?? fillHeight
+        firstImageHeight ?? image_fill?.height ?? fillHeight
     }
     
-    func Placeholder(url: URL, geo_size: CGSize) -> some View {
+    func Placeholder(url: URL, geo_size: CGSize, num_urls: Int) -> some View {
         Group {
-            if let meta = state.events.lookup_img_metadata(url: url),
+            if num_urls > 1 {
+                // jb55: quick hack since carousel with multiple images looks horrible with blurhash background
+                Color.clear
+            } else if let meta = state.events.lookup_img_metadata(url: url),
                case .processed(let blurhash) = meta.state {
                 Image(uiImage: blurhash)
                     .resizable()
                     .frame(width: geo_size.width * UIScreen.main.scale, height: self.height * UIScreen.main.scale)
             } else {
-                EmptyView()
+                Color.clear
             }
         }
         .onAppear {
-            if self.image_fill == nil,
-               let meta = state.events.lookup_img_metadata(url: url),
-               let size = meta.meta.dim?.size
-            {
+            if self.image_fill == nil, let size = state.events.lookup_media_size(url: url) {
                 let fill = ImageFill.calculate_image_fill(geo_size: geo_size, img_size: size, maxHeight: maxHeight, fillHeight: fillHeight)
                 self.image_fill = fill
             }
         }
     }
     
-    var body: some View {
-        TabView {
-            ForEach(urls, id: \.absoluteString) { url in
+    func video_model(_ url: URL) -> VideoPlayerModel {
+        return state.events.get_video_player_model(url: url)
+    }
+    
+    func Media(geo: GeometryProxy, url: MediaUrl, index: Int) -> some View {
+        Group {
+            switch url {
+            case .image(let url):
+                Img(geo: geo, url: url, index: index)
+                    .onTapGesture {
+                        open_sheet = true
+                    }
+            case .video(let url):
+                DamusVideoPlayer(url: url, model: video_model(url), video_size: $video_size)
+                    .onChange(of: video_size) { size in
+                        guard let size else { return }
+                        
+                        let fill = ImageFill.calculate_image_fill(geo_size: geo.size, img_size: size, maxHeight: maxHeight, fillHeight: fillHeight)
+                        
+                        print("video_size changed \(size)")
+                        if self.image_fill == nil {
+                            print("video_size firstImageHeight \(fill.height)")
+                            firstImageHeight = fill.height
+                            state.events.get_cache_data(evid).media_metadata_model.fill = fill
+                        }
+                        
+                        self.image_fill = fill
+                    }
+            }
+        }
+    }
+    
+    func Img(geo: GeometryProxy, url: URL, index: Int) -> some View {
+        KFAnimatedImage(url)
+            .callbackQueue(.dispatch(.global(qos:.background)))
+            .backgroundDecode(true)
+            .imageContext(.note, disable_animation: state.settings.disable_animation)
+            .image_fade(duration: 0.25)
+            .cancelOnDisappear(true)
+            .configure { view in
+                view.framePreloadCount = 3
+            }
+            .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
+                state.events.get_cache_data(evid).media_metadata_model.fill = fill
+                // blur hash can be discarded when we have the url
+                // NOTE: this is the wrong place for this... we need to remove
+                //       it when the image is loaded in memory. This may happen
+                //       earlier than this (by the preloader, etc)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    state.events.lookup_img_metadata(url: url)?.state = .not_needed
+                }
+                image_fill = fill
+                if index == 0 {
+                    firstImageHeight = fill.height
+                    //maxHeight = firstImageHeight ?? maxHeight
+                } else {
+                    //maxHeight = firstImageHeight ?? fill.height
+                }
+            }
+            .background {
+                Placeholder(url: url, geo_size: geo.size, num_urls: urls.count)
+            }
+            .aspectRatio(contentMode: filling ? .fill : .fit)
+            .position(x: geo.size.width / 2, y: geo.size.height / 2)
+            .tabItem {
+                Text(url.absoluteString)
+            }
+            .id(url.absoluteString)
+            .padding(0)
+                
+    }
+    
+    var Medias: some View {
+        TabView(selection: $selectedIndex) {
+            ForEach(urls.indices, id: \.self) { index in
                 GeometryReader { geo in
-                    KFAnimatedImage(url)
-                        .callbackQueue(.dispatch(.global(qos:.background)))
-                        .backgroundDecode(true)
-                        .imageContext(.note, disable_animation: state.settings.disable_animation)
-                        .image_fade(duration: 0.25)
-                        .cancelOnDisappear(true)
-                        .configure { view in
-                            view.framePreloadCount = 3
-                        }
-                        .imageFill(for: geo.size, max: maxHeight, fill: fillHeight) { fill in
-                            state.previews.cache_image_meta(evid: evid, image_fill: fill)
-                            // blur hash can be discarded when we have the url
-                            // NOTE: this is the wrong place for this... we need to remove
-                            //       it when the image is loaded in memory. This may happen
-                            //       earlier than this (by the preloader, etc)
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                                state.events.lookup_img_metadata(url: url)?.state = .not_needed
-                            }
-                            image_fill = fill
-                        }
-                        .background {
-                            Placeholder(url: url, geo_size: geo.size)
-                        }
-                        .aspectRatio(contentMode: filling ? .fill : .fit)
-                        .tabItem {
-                            Text(url.absoluteString)
-                        }
-                        .id(url.absoluteString)
+                    Media(geo: geo, url: urls[index], index: index)
                 }
             }
         }
+        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
         .fullScreenCover(isPresented: $open_sheet) {
-            ImageView(urls: urls, disable_animation: state.settings.disable_animation)
+            ImageView(cache: state.events, urls: urls, disable_animation: state.settings.disable_animation)
         }
-        .frame(height: self.height)
-        .onTapGesture {
-            open_sheet = true
+        .frame(height: height)
+        .onChange(of: selectedIndex) { value in
+            selectedIndex = value
         }
         .tabViewStyle(PageTabViewStyle())
+    }
+    
+    var body: some View {
+        VStack {
+            Medias
+                .onTapGesture { }
+            
+            // This is our custom carousel image indicator
+            CarouselDotsView(urls: urls, selectedIndex: $selectedIndex)
+        }
+    }
+}
+
+// MARK: - Custom Carousel
+struct CarouselDotsView<T>: View {
+    let urls: [T]
+    @Binding var selectedIndex: Int
+
+    var body: some View {
+        if urls.count > 1 {
+            HStack {
+                ForEach(urls.indices, id: \.self) { index in
+                    Circle()
+                        .fill(index == selectedIndex ? Color("DamusPurple") : Color("DamusLightGrey"))
+                        .frame(width: 10, height: 10)
+                        .onTapGesture {
+                            selectedIndex = index
+                        }
+                }
+            }
+            .padding(.top, CGFloat(8))
+            .id(UUID())
+        }
     }
 }
 
@@ -199,9 +285,11 @@ public struct ImageFill {
     }
 }
 
+// MARK: - Preview Provider
 struct ImageCarousel_Previews: PreviewProvider {
     static var previews: some View {
-        ImageCarousel(state: test_damus_state(), evid: "evid", urls: [URL(string: "https://jb55.com/red-me.jpg")!,URL(string: "https://jb55.com/red-me.jpg")!])
+        let url: MediaUrl = .image(URL(string: "https://jb55.com/red-me.jpg")!)
+        ImageCarousel(state: test_damus_state(), evid: "evid", urls: [url, url])
     }
 }
 
