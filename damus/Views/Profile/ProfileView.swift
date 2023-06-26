@@ -466,60 +466,68 @@ struct ProfileView: View {
     }
         
     var body: some View {
-        ScrollView(.vertical) {
-            VStack(spacing: 0) {
-                bannerSection
-                    .zIndex(1)
-                
-                VStack() {
-                    aboutSection
-                
-                    VStack(spacing: 0) {
-                        CustomPicker(selection: $filter_state, content: {
-                            Text("Notes", comment: "Label for filter for seeing only your notes (instead of notes and replies).").tag(FilterState.posts)
-                            Text("Notes & Replies", comment: "Label for filter for seeing your notes and replies (instead of only your notes).").tag(FilterState.posts_and_replies)
-                        })
-                        Divider()
-                            .frame(height: 1)
-                    }
-                    .background(colorScheme == .dark ? Color.black : Color.white)
+        ZStack {
+            ScrollView(.vertical) {
+                VStack(spacing: 0) {
+                    bannerSection
+                        .zIndex(1)
                     
-                    if filter_state == FilterState.posts {
-                        InnerTimelineView(events: profile.events, damus: damus_state, filter: FilterState.posts.filter)
+                    VStack() {
+                        aboutSection
+
+                        VStack(spacing: 0) {
+                            CustomPicker(selection: $filter_state, content: {
+                                Text("Notes", comment: "Label for filter for seeing only your notes (instead of notes and replies).").tag(FilterState.posts)
+                                Text("Notes & Replies", comment: "Label for filter for seeing your notes and replies (instead of only your notes).").tag(FilterState.posts_and_replies)
+                            })
+                            Divider()
+                                .frame(height: 1)
+                        }
+                        .background(colorScheme == .dark ? Color.black : Color.white)
+
+                        if filter_state == FilterState.posts {
+                            InnerTimelineView(events: profile.events, damus: damus_state, filter: FilterState.posts.filter)
+                        }
+                        if filter_state == FilterState.posts_and_replies {
+                            InnerTimelineView(events: profile.events, damus: damus_state, filter: FilterState.posts_and_replies.filter)
+                        }
                     }
-                    if filter_state == FilterState.posts_and_replies {
-                        InnerTimelineView(events: profile.events, damus: damus_state, filter: FilterState.posts_and_replies.filter)
-                    }
-                }
-                .padding(.horizontal, Theme.safeAreaInsets?.left)
-                .zIndex(-yOffset > navbarHeight ? 0 : 1)
-            }
-        }
-        .ignoresSafeArea()
-        .navigationTitle("")
-        .navigationBarHidden(true)
-        .overlay(customNavbar, alignment: .top)
-        .onReceive(handle_notify(.switched_timeline)) { _ in
-            dismiss()
-        }
-        .onAppear() {
-            profile.subscribe()
-            //followers.subscribe()
-        }
-        .onDisappear {
-            profile.unsubscribe()
-            followers.unsubscribe()
-            // our profilemodel needs a bit more help
-        }
-        .sheet(isPresented: $show_share_sheet) {
-            if let npub = bech32_pubkey(profile.pubkey) {
-                if let url = URL(string: "https://damus.io/" + npub) {
-                    ShareSheet(activityItems: [url])
+                    .padding(.horizontal, Theme.safeAreaInsets?.left)
+                    .zIndex(-yOffset > navbarHeight ? 0 : 1)
                 }
             }
-        }
-        .fullScreenCover(isPresented: $show_qr_code) {
-            QRCodeView(damus_state: damus_state, pubkey: profile.pubkey)
+            .ignoresSafeArea()
+            .navigationTitle("")
+            .navigationBarHidden(true)
+            .overlay(customNavbar, alignment: .top)
+            .onReceive(handle_notify(.switched_timeline)) { _ in
+                dismiss()
+            }
+            .onAppear() {
+                profile.subscribe()
+                //followers.subscribe()
+            }
+            .onDisappear {
+                profile.unsubscribe()
+                followers.unsubscribe()
+                // our profilemodel needs a bit more help
+            }
+            .sheet(isPresented: $show_share_sheet) {
+                if let npub = bech32_pubkey(profile.pubkey) {
+                    if let url = URL(string: "https://damus.io/" + npub) {
+                        ShareSheet(activityItems: [url])
+                    }
+                }
+            }
+            .fullScreenCover(isPresented: $show_qr_code) {
+                QRCodeView(damus_state: damus_state, pubkey: profile.pubkey)
+            }
+
+            if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
+                PostButtonContainer(is_left_handed: damus_state.settings.left_handed) {
+                    notify(.compose, PostAction.posting)
+                }
+            }
         }
     }
 }
