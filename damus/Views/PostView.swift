@@ -111,6 +111,14 @@ struct PostView: View {
     var is_post_empty: Bool {
         return post.string.allSatisfy { $0.isWhitespace } && uploadedMedias.isEmpty
     }
+
+    var uploading_disabled: Bool {
+        return image_upload.progress != nil
+    }
+
+    var posting_disabled: Bool {
+        return is_post_empty || uploading_disabled
+    }
     
     var ImageButton: some View {
         Button(action: {
@@ -135,7 +143,7 @@ struct PostView: View {
             ImageButton
             CameraButton
         }
-        .disabled(image_upload.progress != nil)
+        .disabled(uploading_disabled)
     }
     
     var PostButton: some View {
@@ -146,12 +154,12 @@ struct PostView: View {
                 self.send_post()
             }
         }
-        .disabled(is_post_empty)
+        .disabled(posting_disabled)
         .font(.system(size: 14, weight: .bold))
         .frame(width: 80, height: 30)
         .foregroundColor(.white)
         .background(LINEAR_GRADIENT)
-        .opacity(is_post_empty ? 0.5 : 1.0)
+        .opacity(posting_disabled ? 0.5 : 1.0)
         .clipShape(Capsule())
     }
     
