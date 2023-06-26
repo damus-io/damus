@@ -96,9 +96,10 @@ Contributors welcome! Start by examining known issues: https://github.com/damus-
 
 ### Code
 
-[Email patches][git-send-email] to jb55@jb55.com are preferred, but I accept PRs on GitHub as well.
+[Email patches][git-send-email] to jb55@jb55.com are preferred, but I accept PRs on GitHub as well. 50,000 sats will be rewarded for patches sent via email or [nostr][patchstr]
 
 [git-send-email]: http://git-send-email.io
+[patchstr]: https://patchstr.com
 
 ### Privacy
 Your internet protocol (IP) address is exposed to the relays you connect to, and third party media hosters (e.g. nostr.build, imgur.com, giphy.com, youtube.com etc.) that render on Damus. If you want to improve your privacy, consider utilizing a service that masks your IP address (e.g. a VPN) from trackers online.
