@@ -23,6 +23,6 @@ struct ZapUserView: View {
 
 struct ZapUserView_Previews: PreviewProvider {
     static var previews: some View {
-        ZapUserView(state: test_damus_state(), pubkey: "anon")
+        ZapUserView(state: test_damus_state(), pubkey: ANON_PUBKEY)
     }
 }

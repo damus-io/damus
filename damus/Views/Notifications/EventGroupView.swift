@@ -78,19 +78,42 @@ func event_author_name(profiles: Profiles, pubkey: String) -> String {
     return Profile.displayName(profile: alice_prof, pubkey: pubkey).username.truncate(maxLength: 50)
 }
 
-func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType) -> String {
+func event_group_unique_pubkeys(profiles: Profiles, group: EventGroupType) -> [String] {
+    var seen = Set<String>()
+    var sorted = [String]()
+
     if let zapgrp = group.zap_group {
-        let zap = zapgrp.zaps[ind]
-        
-        if zap.is_anon {
-            return NSLocalizedString("Anonymous", comment: "Placeholder author name of the anonymous person who zapped an event.")
+        let zaps = zapgrp.zaps
+
+        for i in 0..<zaps.count {
+            let zap = zapgrp.zaps[i]
+            let pubkey: String
+
+            if zap.is_anon {
+                pubkey = ANON_PUBKEY
+            } else {
+                pubkey = zap.request.ev.pubkey
+            }
+
+            if !seen.contains(pubkey) {
+                seen.insert(pubkey)
+                sorted.append(pubkey)
+            }
         }
-        
-        return event_author_name(profiles: profiles, pubkey: zap.request.ev.pubkey)
     } else {
-        let ev = group.events[ind]
-        return event_author_name(profiles: profiles, pubkey: ev.pubkey)
+        let events = group.events
+
+        for i in 0..<events.count {
+            let ev = events[i]
+            let pubkey = ev.pubkey
+            if !seen.contains(pubkey) {
+                seen.insert(pubkey)
+                sorted.append(pubkey)
+            }
+        }
     }
+
+    return sorted
 }
 
 /**
@@ -130,29 +153,29 @@ func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType
  "zapped_your_profile_2" - returned when 2 zaps occurred to the current user's profile
  "zapped_your_profile_3" - returned when 3 or more zaps occurred to the current user's profile
  */
-func reacting_to_text(profiles: Profiles, our_pubkey: String, group: EventGroupType, ev: NostrEvent?, nozaps: Bool, locale: Locale? = nil) -> String {
-    if group.events.count == 0 {
+func reacting_to_text(profiles: Profiles, our_pubkey: String, group: EventGroupType, ev: NostrEvent?, nozaps: Bool, pubkeys: [String], locale: Locale? = nil) -> String {
+    if pubkeys.count == 0 {
         return "??"
     }
 
     let verb = reacting_to_verb(group: group)
     let reacting_to = determine_reacting_to(our_pubkey: our_pubkey, ev: ev, group: group, nozaps: nozaps)
-    let localization_key = "\(verb)_\(reacting_to)_\(min(group.events.count, 3))"
+    let localization_key = "\(verb)_\(reacting_to)_\(min(pubkeys.count, 3))"
     let format = localizedStringFormat(key: localization_key, locale: locale)
 
-    switch group.events.count {
+    switch pubkeys.count {
     case 1:
-        let display_name = event_group_author_name(profiles: profiles, ind: 0, group: group)
+        let display_name = event_author_name(profiles: profiles, pubkey: pubkeys[0])
 
         return String(format: format, locale: locale, display_name)
     case 2:
-        let alice_name = event_group_author_name(profiles: profiles, ind: 0, group: group)
-        let bob_name = event_group_author_name(profiles: profiles, ind: 1, group: group)
+        let alice_name = event_author_name(profiles: profiles, pubkey: pubkeys[0])
+        let bob_name = event_author_name(profiles: profiles, pubkey: pubkeys[1])
 
         return String(format: format, locale: locale, alice_name, bob_name)
     default:
-        let alice_name = event_group_author_name(profiles: profiles, ind: 0, group: group)
-        let count = group.events.count - 1
+        let alice_name = event_author_name(profiles: profiles, pubkey: pubkeys[0])
+        let count = pubkeys.count - 1
 
         return String(format: format, locale: locale, count, alice_name)
     }
@@ -175,8 +198,8 @@ struct EventGroupView: View {
     let event: NostrEvent?
     let group: EventGroupType
     
-    var GroupDescription: some View {
-        Text(verbatim: "\(reacting_to_text(profiles: state.profiles, our_pubkey: state.pubkey, group: group, ev: event, nozaps: state.settings.nozaps))")
+    func GroupDescription(_ pubkeys: [String]) -> some View {
+        Text(verbatim: "\(reacting_to_text(profiles: state.profiles, our_pubkey: state.pubkey, group: group, ev: event, nozaps: state.settings.nozaps, pubkeys: pubkeys))")
     }
     
     func ZapIcon(_ zapgrp: ZapGroup) -> some View {
@@ -216,12 +239,14 @@ struct EventGroupView: View {
                 .frame(width: PFP_SIZE + 10)
             
             VStack(alignment: .leading) {
-                ProfilePicturesView(state: state, pubkeys: group.events.map { $0.pubkey })
+                let unique_pubkeys = event_group_unique_pubkeys(profiles: state.profiles, group: group)
+
+                ProfilePicturesView(state: state, pubkeys: unique_pubkeys)
                 
                 if let event {
                     let thread = ThreadModel(event: event, damus_state: state)
                     let dest = ThreadView(state: state, thread: thread)
-                    GroupDescription
+                    GroupDescription(unique_pubkeys)
                     if !state.settings.nozaps || !group.is_note_zap {
                         NavigationLink(destination: dest) {
                             VStack(alignment: .leading) {
@@ -234,7 +259,7 @@ struct EventGroupView: View {
                         .buttonStyle(.plain)
                     }
                 } else {
-                    GroupDescription
+                    GroupDescription(unique_pubkeys)
                 }
             }
         }

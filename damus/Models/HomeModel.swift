@@ -1076,7 +1076,7 @@ func zap_notification_title(_ zap: Zap) -> String {
 
 func zap_notification_body(profiles: Profiles, zap: Zap, locale: Locale = Locale.current) -> String {
     let src = zap.request.ev
-    let pk = zap.is_anon ? "anon" : src.pubkey
+    let pk = zap.is_anon ? ANON_PUBKEY : src.pubkey
     let profile = profiles.lookup(id: pk)
     let sats = NSNumber(value: (Double(zap.invoice.amount) / 1000.0))
     let formattedSats = format_msats_abbrev(zap.invoice.amount)
