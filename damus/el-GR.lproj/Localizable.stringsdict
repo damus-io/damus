@@ -18,6 +18,22 @@
 			<string>... %d άλλες σημειώσεις ...</string>
 		</dict>
 	</dict>
+	<key>followed_by_three_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Σας ακολούθησε %2$@, %3$@, %4$@ &amp; %1$d ακόμα</string>
+			<key>other</key>
+			<string>Σας ακολούθησαν %2$@, %3$@, %4$@ &amp; %1$d ακόμα</string>
+		</dict>
+	</dict>
 	<key>followers_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -317,9 +333,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ και %1$d ακόμα έστειλε zap στο προφίλ σας</string>
+			<string>%2$@ και %1$d ακόμα σας έστειλε zap</string>
 			<key>other</key>
-			<string>%2$@ και %1$d ακόμα έστειλαν zap στο προφίλ σας</string>
+			<string>%2$@ και %1$d ακόμα σας έστειλαν zap</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
