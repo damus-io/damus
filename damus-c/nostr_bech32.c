@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "cursor.h"
 #include "bech32.h"
+#include <stdio.h>
 
 #define MAX_TLVS 16
 
@@ -43,8 +44,12 @@ static int parse_nostr_tlv(struct cursor *cur, struct nostr_tlv *tlv) {
         return 0;
     
     // is the reported length greater then our buffer? if so fail
-    if (cur->p + tlv->len > cur->end)
+    if (cur->p + tlv->len > cur->end) {
+		// print error here to stderr
+		fprintf(stderr, "The media file size is greater than the 10MB file size upload limit.\n");
+
         return 0;
+	}
     
     tlv->value = cur->p;
     cur->p += tlv->len;
