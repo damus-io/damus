@@ -29,9 +29,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Gevolgd door %2$@, %3$@ en %1$d andere gebruiker</string>
+			<string>Gevolgd door %2$@, %3$@ en %4$@ andere gebruiker</string>
 			<key>other</key>
-			<string>Gevolgd door %2$@, %3$@ en %1$d andere gebruikers</string>
+			<string>Gevolgd door %2$@, %3$@ en %4$@ andere gebruikers</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
