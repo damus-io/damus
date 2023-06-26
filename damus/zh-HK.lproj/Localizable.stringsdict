@@ -16,6 +16,20 @@
 			<string>...還有%d 条筆記...</string>
 		</dict>
 	</dict>
+	<key>followed_by_three_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>other</key>
+			<string>被 %2$@、%3$@、%4$@ 和 %1$d 個其他用戶關注</string>
+		</dict>
+	</dict>
 	<key>followers_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
