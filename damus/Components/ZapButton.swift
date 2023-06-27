@@ -38,10 +38,6 @@ struct ZapButton: View {
     }
     
     var zap_img: String {
-        if damus_state.settings.nozaps {
-            return "zap"
-        }
-        
         switch our_zap {
         case .none:
             return "zap"
@@ -53,10 +49,6 @@ struct ZapButton: View {
     }
     
     var zap_color: Color {
-        if damus_state.settings.nozaps {
-            return Color.gray
-        }
-        
         if our_zap == nil {
             return Color.gray
         }
@@ -114,17 +106,17 @@ struct ZapButton: View {
     
     var body: some View {
         HStack(spacing: 4) {
-            Button(action: {
-            }, label: {
-                Image(zap_img)
-                    .resizable()
-                    .foregroundColor(zap_color)
-                    .font(.footnote.weight(.medium))
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width:20, height: 20)
-            })
-
             if zaps.zap_total > 0 {
+                Button(action: {
+                }, label: {
+                    Image(zap_img)
+                        .resizable()
+                        .foregroundColor(zap_color)
+                        .font(.footnote.weight(.medium))
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width:20, height: 20)
+                })
+
                 Text(verbatim: format_msats_abbrev(zaps.zap_total))
                     .font(.footnote)
                     .foregroundColor(zap_color)
@@ -134,7 +126,7 @@ struct ZapButton: View {
         .simultaneousGesture(LongPressGesture().onEnded {_  in
             // when we don't have nozaps mode enable, long press shows the zap customizer
             if !damus_state.settings.nozaps {
-                present_sheet(.zap(target: target, lnurl: lnurl))
+                //present_sheet(.zap(target: target, lnurl: lnurl))
             }
             
             // long press does nothing in nozaps mode
@@ -142,7 +134,7 @@ struct ZapButton: View {
         .highPriorityGesture(TapGesture().onEnded {
             // when we have appstore mode on, only show the zap customizer as "user zaps"
             if damus_state.settings.nozaps {
-                present_sheet(.zap(target: target, lnurl: lnurl))
+                //present_sheet(.zap(target: target, lnurl: lnurl))
             } else {
                 // otherwise we restore the original behavior of one-tap zaps
                 tap()
