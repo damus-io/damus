@@ -76,7 +76,7 @@ class ProfileModel: ObservableObject, Equatable {
         profile_filter.authors = [pubkey]
         
         text_filter.authors = [pubkey]
-        text_filter.limit = 500
+        text_filter.limit = 50
         
         print("subscribing to profile \(pubkey) with sub_id \(sub_id)")
         print_filters(relay_id: "profile", filters: [[text_filter], [profile_filter]])
