@@ -148,7 +148,7 @@ func event_group_unique_pubkeys(profiles: Profiles, group: EventGroupType) -> [S
  "zapped_your_profile_2" - returned when 2 zaps occurred to the current user's profile
  "zapped_your_profile_3" - returned when 3 or more zaps occurred to the current user's profile
  */
-func reacting_to_text(profiles: Profiles, our_pubkey: String, group: EventGroupType, ev: NostrEvent?, locale: Locale? = nil, pubkeys: [String]) -> String {
+func reacting_to_text(profiles: Profiles, our_pubkey: String, group: EventGroupType, ev: NostrEvent?, pubkeys: [String], locale: Locale? = nil) -> String {
     if group.events.count == 0 {
         return "??"
     }
@@ -252,6 +252,7 @@ struct EventGroupView: View {
                     }
                     .buttonStyle(.plain)
                 } else {
+                    GroupDescription(unique_pubkeys)
                 }
             }
         }

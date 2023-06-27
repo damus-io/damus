@@ -49,16 +49,16 @@ final class EventGroupViewTests: XCTestCase {
         let repost3 = NostrEvent(id: "", content: encodedPost, pubkey: "pk3", kind: NostrKind.boost.rawValue, tags: [], createdAt: 1)
 
         let nozaps = true
-        XCTAssertEqual(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [])), ev: test_event, nozaps: nozaps, pubkeys: [], locale: enUsLocale), "??")
-        XCTAssertEqual(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1])), ev: test_event, nozaps: nozaps, pubkeys: ["pk1"], locale: enUsLocale), "pk1:pk1 reposted a note you were tagged in")
-        XCTAssertEqual(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1, repost2])), ev: test_event, nozaps: nozaps, pubkeys: ["pk1", "pk2"], locale: enUsLocale), "pk1:pk1 and pk2:pk2 reposted a note you were tagged in")
-        XCTAssertEqual(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1, repost2, repost2])), ev: test_event, nozaps: nozaps, pubkeys: ["pk1", "pk2", "pk3"], locale: enUsLocale), "pk1:pk1 and 2 others reposted a note you were tagged in")
+        XCTAssertEqual(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [])), ev: test_event, pubkeys: [], locale: enUsLocale), "??")
+        XCTAssertEqual(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1])), ev: test_event, pubkeys: ["pk1"], locale: enUsLocale), "pk1:pk1 reposted a note you were tagged in")
+        XCTAssertEqual(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1, repost2])), ev: test_event, pubkeys: ["pk1", "pk2"], locale: enUsLocale), "pk1:pk1 and pk2:pk2 reposted a note you were tagged in")
+        XCTAssertEqual(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1, repost2, repost2])), ev: test_event, pubkeys: ["pk1", "pk2", "pk3"], locale: enUsLocale), "pk1:pk1 and 2 others reposted a note you were tagged in")
 
         Bundle.main.localizations.map { Locale(identifier: $0) }.forEach {
-            XCTAssertNoThrow(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [])), ev: test_event, nozaps: nozaps, pubkeys: [], locale: $0), "??")
-            XCTAssertNoThrow(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1])), ev: test_event, nozaps: nozaps, pubkeys: ["pk1"], locale: $0))
-            XCTAssertNoThrow(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1, repost2])), ev: test_event, nozaps: nozaps, pubkeys: ["pk1", "pk2"], locale: $0))
-            XCTAssertNoThrow(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1, repost2, repost3])), ev: test_event, nozaps: nozaps, pubkeys: ["pk1", "pk2", "pk3"], locale: $0))
+            XCTAssertNoThrow(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [])), ev: test_event, pubkeys: [], locale: $0), "??")
+            XCTAssertNoThrow(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1])), ev: test_event, pubkeys: ["pk1"], locale: $0))
+            XCTAssertNoThrow(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1, repost2])), ev: test_event, pubkeys: ["pk1", "pk2"], locale: $0))
+            XCTAssertNoThrow(reacting_to_text(profiles: damusState.profiles, our_pubkey: damusState.pubkey, group: .repost(EventGroup(events: [repost1, repost2, repost3])), ev: test_event, pubkeys: ["pk1", "pk2", "pk3"], locale: $0))
         }
     }
 
