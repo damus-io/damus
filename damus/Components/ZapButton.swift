@@ -124,7 +124,7 @@ struct ZapButton: View {
                     .frame(width:20, height: 20)
             })
 
-            if !damus_state.settings.nozaps && zaps.zap_total > 0 {
+            if zaps.zap_total > 0 {
                 Text(verbatim: format_msats_abbrev(zaps.zap_total))
                     .font(.footnote)
                     .foregroundColor(zap_color)
