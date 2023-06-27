@@ -56,13 +56,8 @@ enum ReactingTo {
     case your_profile
 }
 
-func determine_reacting_to(our_pubkey: String, ev: NostrEvent?, group: EventGroupType, nozaps: Bool) -> ReactingTo {
+func determine_reacting_to(our_pubkey: String, ev: NostrEvent?) -> ReactingTo {
     guard let ev else {
-        return .your_profile
-    }
-    
-    if nozaps && group.is_note_zap {
-        // ZAPPING NOTES IS NOT ALLOWED!!!! EVIL!!!
         return .your_profile
     }
     
@@ -153,13 +148,13 @@ func event_group_unique_pubkeys(profiles: Profiles, group: EventGroupType) -> [S
  "zapped_your_profile_2" - returned when 2 zaps occurred to the current user's profile
  "zapped_your_profile_3" - returned when 3 or more zaps occurred to the current user's profile
  */
-func reacting_to_text(profiles: Profiles, our_pubkey: String, group: EventGroupType, ev: NostrEvent?, nozaps: Bool, pubkeys: [String], locale: Locale? = nil) -> String {
-    if pubkeys.count == 0 {
+func reacting_to_text(profiles: Profiles, our_pubkey: String, group: EventGroupType, ev: NostrEvent?, locale: Locale? = nil, pubkeys: [String]) -> String {
+    if group.events.count == 0 {
         return "??"
     }
 
     let verb = reacting_to_verb(group: group)
-    let reacting_to = determine_reacting_to(our_pubkey: our_pubkey, ev: ev, group: group, nozaps: nozaps)
+    let reacting_to = determine_reacting_to(our_pubkey: our_pubkey, ev: ev)
     let localization_key = "\(verb)_\(reacting_to)_\(min(pubkeys.count, 3))"
     let format = localizedStringFormat(key: localization_key, locale: locale)
 
@@ -199,7 +194,7 @@ struct EventGroupView: View {
     let group: EventGroupType
     
     func GroupDescription(_ pubkeys: [String]) -> some View {
-        Text(verbatim: "\(reacting_to_text(profiles: state.profiles, our_pubkey: state.pubkey, group: group, ev: event, nozaps: state.settings.nozaps, pubkeys: pubkeys))")
+        Text(verbatim: "\(reacting_to_text(profiles: state.profiles, our_pubkey: state.pubkey, group: group, ev: event, pubkeys: pubkeys))")
     }
     
     func ZapIcon(_ zapgrp: ZapGroup) -> some View {
@@ -246,20 +241,17 @@ struct EventGroupView: View {
                 if let event {
                     let thread = ThreadModel(event: event, damus_state: state)
                     let dest = ThreadView(state: state, thread: thread)
-                    GroupDescription(unique_pubkeys)
-                    if !state.settings.nozaps || !group.is_note_zap {
-                        NavigationLink(destination: dest) {
-                            VStack(alignment: .leading) {
-                                EventBody(damus_state: state, event: event, size: .normal, options: [.truncate_content])
-                                    .padding([.top], 1)
-                                    .padding([.trailing])
-                                    .foregroundColor(.gray)
-                            }
+                    NavigationLink(destination: dest) {
+                        VStack(alignment: .leading) {
+                            GroupDescription(unique_pubkeys)
+                            EventBody(damus_state: state, event: event, size: .normal, options: [.truncate_content])
+                                .padding([.top], 1)
+                                .padding([.trailing])
+                                .foregroundColor(.gray)
                         }
-                        .buttonStyle(.plain)
                     }
+                    .buttonStyle(.plain)
                 } else {
-                    GroupDescription(unique_pubkeys)
                 }
             }
         }
