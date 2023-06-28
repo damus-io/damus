@@ -39,7 +39,7 @@ struct UserSearch: View {
         guard let pk = bech32_pubkey(user.pubkey) else {
             return
         }
-        let tagAttributedString = createUserTag(for: user, with: pk)
+        let tagAttributedString = user_tag_attr_string(profile: user.profile, pubkey: pk)
         appendUserTag(withTag: tagAttributedString)
     }
 
@@ -55,19 +55,6 @@ struct UserSearch: View {
         post = mutableString
         focusWordAttributes = (nil, nil)
         newCursorIndex = wordRange.location + tagAttributedString.string.count
-    }
-
-    private func createUserTag(for user: SearchedUser, with pk: String) -> NSMutableAttributedString {
-        let name = Profile.displayName(profile: user.profile, pubkey: pk).username.truncate(maxLength: 50)
-        let tagString = "@\(name)\u{200B} "
-
-        let tagAttributedString = NSMutableAttributedString(string: tagString,
-                                   attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0),
-                                                NSAttributedString.Key.link: "nostr:\(pk)"])
-        tagAttributedString.removeAttribute(.link, range: NSRange(location: tagAttributedString.length - 2, length: 2))
-        tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 2, length: 2))
-        
-        return tagAttributedString
     }
 
     var body: some View {
@@ -161,3 +148,18 @@ func search_users_for_autocomplete(profiles: Profiles, tags: [[String]], search 
     
     return matches
 }
+
+func user_tag_attr_string(profile: Profile?, pubkey: String) -> NSMutableAttributedString {
+    let display_name = Profile.displayName(profile: profile, pubkey: pubkey)
+    let name = display_name.username.truncate(maxLength: 50)
+    let tagString = "@\(name)\u{200B} "
+
+    let tagAttributedString = NSMutableAttributedString(string: tagString,
+                               attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0),
+                                            NSAttributedString.Key.link: "nostr:\(pubkey)"])
+    tagAttributedString.removeAttribute(.link, range: NSRange(location: tagAttributedString.length - 2, length: 2))
+    tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 2, length: 2))
+    
+    return tagAttributedString
+}
+
