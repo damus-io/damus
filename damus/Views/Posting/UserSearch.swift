@@ -70,13 +70,6 @@ struct UserSearch: View {
         return tagAttributedString
     }
 
-    private func appendUserTag(_ tagAttributedString: NSMutableAttributedString) {
-        let mutableString = NSMutableAttributedString()
-        mutableString.append(post)
-        mutableString.append(tagAttributedString)
-        post = mutableString
-    }
-    
     var body: some View {
         VStack(spacing: 0) {
             Divider()
