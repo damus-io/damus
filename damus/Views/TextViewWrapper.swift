@@ -70,17 +70,21 @@ struct TextViewWrapper: UIViewRepresentable {
         }
 
         private func processFocusedWordForMention(textView: UITextView) {
-            if let selectedRange = textView.selectedTextRange {
-                var val: (String?, NSRange?)
-                if let wordRange = textView.tokenizer.rangeEnclosingPosition(selectedRange.start, with: .word, inDirection: .init(rawValue: UITextLayoutDirection.left.rawValue)) {
-                    if let startPosition = textView.position(from: wordRange.start, offset: -1),
-                       let cursorPosition = textView.position(from: selectedRange.start, offset: 0) {
-                        let word = textView.text(in: textView.textRange(from: startPosition, to: cursorPosition)!)
-                        val = (word, convertToNSRange(startPosition, cursorPosition, textView))
-                    }
-                }
-                getFocusWordForMention?(val.0, val.1)
+            var val: (String?, NSRange?) = (nil, nil)
+            
+            guard let selectedRange = textView.selectedTextRange else { return }
+            
+            let wordRange = textView.tokenizer.rangeEnclosingPosition(selectedRange.start, with: .word, inDirection: .init(rawValue: UITextLayoutDirection.left.rawValue))
+            
+            if let wordRange,
+               let startPosition = textView.position(from: wordRange.start, offset: -1),
+               let cursorPosition = textView.position(from: selectedRange.start, offset: 0)
+            {
+                let word = textView.text(in: textView.textRange(from: startPosition, to: cursorPosition)!)
+                val = (word, convertToNSRange(startPosition, cursorPosition, textView))
             }
+            
+            getFocusWordForMention?(val.0, val.1)
         }
 
         private func convertToNSRange( _ startPosition: UITextPosition, _ endPosition: UITextPosition, _ textView: UITextView) -> NSRange? {
