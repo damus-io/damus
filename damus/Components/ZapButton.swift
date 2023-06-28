@@ -106,7 +106,7 @@ struct ZapButton: View {
     
     var body: some View {
         HStack(spacing: 4) {
-            if zaps.zap_total > 0 {
+            if !damus_state.settings.nozaps || zaps.zap_total > 0 {
                 Button(action: {
                 }, label: {
                     Image(zap_img)
@@ -116,7 +116,9 @@ struct ZapButton: View {
                         .aspectRatio(contentMode: .fit)
                         .frame(width:20, height: 20)
                 })
+            }
 
+            if zaps.zap_total > 0 {
                 Text(verbatim: format_msats_abbrev(zaps.zap_total))
                     .font(.footnote)
                     .foregroundColor(zap_color)
@@ -124,21 +126,14 @@ struct ZapButton: View {
         }
         .accessibilityLabel(NSLocalizedString("Zap", comment: "Accessibility label for zap button"))
         .simultaneousGesture(LongPressGesture().onEnded {_  in
-            // when we don't have nozaps mode enable, long press shows the zap customizer
-            if !damus_state.settings.nozaps {
-                //present_sheet(.zap(target: target, lnurl: lnurl))
-            }
+            guard !damus_state.settings.nozaps else { return }
             
-            // long press does nothing in nozaps mode
+            present_sheet(.zap(target: target, lnurl: lnurl))
         })
         .highPriorityGesture(TapGesture().onEnded {
-            // when we have appstore mode on, only show the zap customizer as "user zaps"
-            if damus_state.settings.nozaps {
-                //present_sheet(.zap(target: target, lnurl: lnurl))
-            } else {
-                // otherwise we restore the original behavior of one-tap zaps
-                tap()
-            }
+            guard !damus_state.settings.nozaps else { return }
+            
+            tap()
         })
     }
 }
