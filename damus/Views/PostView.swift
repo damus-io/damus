@@ -19,10 +19,15 @@ class TagModel: ObservableObject {
     var diff = 0
 }
 
+enum PostTarget {
+    case none
+    case user(String)
+}
+
 enum PostAction {
     case replying_to(NostrEvent)
     case quoting(NostrEvent)
-    case posting
+    case posting(PostTarget)
     
     var ev: NostrEvent? {
         switch self {
@@ -155,9 +160,20 @@ struct PostView: View {
         .clipShape(Capsule())
     }
     
-    var isEmpty: Bool {
-        self.uploadedMedias.count == 0 &&
-        self.post.mutableString.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    func isEmpty() -> Bool {
+        return self.uploadedMedias.count == 0 &&
+            self.post.mutableString.trimmingCharacters(in: .whitespacesAndNewlines) ==
+                initialString().mutableString.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    
+    func initialString() -> NSMutableAttributedString {
+        guard case .posting(let target) = action,
+              case .user(let pubkey) = target else {
+            return .init(string: "")
+        }
+        
+        let profile = damus_state.profiles.lookup(id: pubkey)
+        return user_tag_attr_string(profile: profile, pubkey: pubkey)
     }
     
     func clear_draft() {
@@ -172,15 +188,17 @@ struct PostView: View {
 
     }
     
-    func load_draft() {
+    func load_draft() -> Bool {
         guard let draft = load_draft_for_post(drafts: self.damus_state.drafts, action: self.action) else {
             self.post = NSMutableAttributedString("")
             self.uploadedMedias = []
-            return
+            
+            return false
         }
         
         self.uploadedMedias = draft.media
         self.post = draft.content
+        return true
     }
     
     func post_changed(post: NSMutableAttributedString, media: [UploadedMedia]) {
@@ -321,6 +339,11 @@ struct PostView: View {
         .padding(.horizontal)
     }
     
+    func fill_target_content(target: PostTarget) {
+        self.post = initialString()
+        self.tagModel.diff = post.string.count
+    }
+    
     var body: some View {
         GeometryReader { (deviceSize: GeometryProxy) in
             VStack(alignment: .leading, spacing: 0) {
@@ -390,7 +413,7 @@ struct PostView: View {
                 }
             }
             .onAppear() {
-                load_draft()
+                let loaded_draft = load_draft()
                 
                 switch action {
                 case .replying_to(let replying_to):
@@ -399,8 +422,10 @@ struct PostView: View {
                 case .quoting(let quoting):
                     references = gather_quote_ids(our_pubkey: damus_state.pubkey, from: quoting)
                     originalReferences = references
-                case .posting:
-                    break
+                case .posting(let target):
+                    guard !loaded_draft else { break }
+                    
+                    fill_target_content(target: target)
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -408,7 +433,7 @@ struct PostView: View {
                 }
             }
             .onDisappear {
-                if isEmpty {
+                if isEmpty() {
                     clear_draft()
                 }
             }
@@ -448,7 +473,7 @@ func get_searching_string(_ word: String?) -> String? {
 
 struct PostView_Previews: PreviewProvider {
     static var previews: some View {
-        PostView(action: .posting, damus_state: test_damus_state())
+        PostView(action: .posting(.none), damus_state: test_damus_state())
     }
 }
 

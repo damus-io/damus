@@ -128,7 +128,7 @@ struct ContentView: View {
                 
                 if privkey != nil {
                     PostButtonContainer(is_left_handed: damus_state?.settings.left_handed ?? false) {
-                        self.active_sheet = .post(.posting)
+                        self.active_sheet = .post(.posting(.none))
                     }
                 }
             }

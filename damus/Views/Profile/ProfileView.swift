@@ -523,9 +523,9 @@ struct ProfileView: View {
                 QRCodeView(damus_state: damus_state, pubkey: profile.pubkey)
             }
 
-            if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
+            if damus_state.is_privkey_user {
                 PostButtonContainer(is_left_handed: damus_state.settings.left_handed) {
-                    notify(.compose, PostAction.posting)
+                    notify(.compose, PostAction.posting(.user(profile.pubkey)))
                 }
             }
         }
