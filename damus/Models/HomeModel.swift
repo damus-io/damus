@@ -753,6 +753,9 @@ func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: P
 }
 
 func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping () -> Void) {
+    guard ev.id==calculate_event_id(ev: ev) else {
+        return
+    }
     let validated = events.is_event_valid(ev.id)
     
     switch validated {
