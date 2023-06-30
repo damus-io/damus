@@ -752,7 +752,7 @@ func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping (
     
     switch validated {
     case .unknown:
-        Task {
+        Task.detached(priority: .medium) {
             let result = validate_event(ev: ev)
             
             DispatchQueue.main.async {
