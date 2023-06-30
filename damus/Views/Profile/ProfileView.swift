@@ -73,11 +73,11 @@ func followedByString(_ friend_intersection: [String], profiles: Profiles, local
 
 struct EditButton: View {
     let damus_state: DamusState
-    
+
     @Environment(\.colorScheme) var colorScheme
-    
+
     var body: some View {
-        NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
+        NavigationLink(value: Route.EditMetadata) {
             Text("Edit", comment: "Button to edit user's profile.")
                 .frame(height: 30)
                 .padding(.horizontal,25)
@@ -92,11 +92,11 @@ struct EditButton: View {
                 .lineLimit(1)
         }
     }
-    
+
     func fillColor() -> Color {
         colorScheme == .light ? DamusColors.black : DamusColors.white
     }
-    
+
     func borderColor() -> Color {
         colorScheme == .light ? DamusColors.black : DamusColors.white
     }
@@ -104,11 +104,11 @@ struct EditButton: View {
 
 struct VisualEffectView: UIViewRepresentable {
     var effect: UIVisualEffect?
-    
+
     func makeUIView(context: UIViewRepresentableContext<Self>) -> UIVisualEffectView {
         UIVisualEffectView()
     }
-    
+
     func updateUIView(_ uiView: UIVisualEffectView, context: UIViewRepresentableContext<Self>) {
         uiView.effect = effect
     }
@@ -120,52 +120,54 @@ struct ProfileView: View {
     let bannerHeight: CGFloat = 150.0
     
     static let markdown = Markdown()
-    
+
     @State var is_zoomed: Bool = false
     @State var show_share_sheet: Bool = false
     @State var show_qr_code: Bool = false
     @State var action_sheet_presented: Bool = false
     @State var filter_state : FilterState = .posts
     @State var yOffset: CGFloat = 0
-    
+
     @StateObject var profile: ProfileModel
     @StateObject var followers: FollowersModel
     @StateObject var zap_button_model: ZapButtonModel = ZapButtonModel()
-    
+
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
+
     init(damus_state: DamusState, profile: ProfileModel, followers: FollowersModel) {
         self.damus_state = damus_state
         self._profile = StateObject(wrappedValue: profile)
         self._followers = StateObject(wrappedValue: followers)
     }
-    
+
     init(damus_state: DamusState, pubkey: String) {
         self.damus_state = damus_state
         self._profile = StateObject(wrappedValue: ProfileModel(pubkey: pubkey, damus: damus_state))
         self._followers = StateObject(wrappedValue: FollowersModel(damus_state: damus_state, target: pubkey))
     }
-    
+
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.presentationMode) var presentationMode
-    
+
     func imageBorderColor() -> Color {
         colorScheme == .light ? DamusColors.white : DamusColors.black
     }
-    
+
     func bannerBlurViewOpacity() -> Double  {
         let progress = -(yOffset + navbarHeight) / 100
         return Double(-yOffset > navbarHeight ? progress : 0)
     }
-    
+
     var bannerSection: some View {
         GeometryReader { proxy -> AnyView in
-                            
+
             let minY = proxy.frame(in: .global).minY
-            
+
             DispatchQueue.main.async {
                 self.yOffset = minY
             }
-            
+
             return AnyView(
                 VStack(spacing: 0) {
                     ZStack {
@@ -173,10 +175,10 @@ struct ProfileView: View {
                             .aspectRatio(contentMode: .fill)
                             .frame(width: proxy.size.width, height: minY > 0 ? bannerHeight + minY : bannerHeight)
                             .clipped()
-                        
+
                         VisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial)).opacity(bannerBlurViewOpacity())
                     }
-                    
+
                     Divider().opacity(bannerBlurViewOpacity())
                 }
                 .frame(height: minY > 0 ? bannerHeight + minY : nil)
@@ -187,11 +189,11 @@ struct ProfileView: View {
         .frame(height: bannerHeight)
         .allowsHitTesting(false)
     }
-    
+
     var navbarHeight: CGFloat {
         return 100.0 - (Theme.safeAreaInsets?.top ?? 0)
     }
-    
+
     @ViewBuilder
     func navImage(img: String) -> some View {
         Image(img)
@@ -199,7 +201,7 @@ struct ProfileView: View {
             .background(Color.black.opacity(0.6))
             .clipShape(Circle())
     }
-    
+
     var navBackButton: some View {
         Button {
             presentationMode.wrappedValue.dismiss()
@@ -207,7 +209,7 @@ struct ProfileView: View {
             navImage(img: "chevron-left")
         }
     }
-    
+
     var navActionSheetButton: some View {
         Button(action: {
             action_sheet_presented = true
@@ -218,7 +220,7 @@ struct ProfileView: View {
             Button(NSLocalizedString("Share", comment: "Button to share the link to a profile.")) {
                 show_share_sheet = true
             }
-            
+
             Button(NSLocalizedString("QR Code", comment: "Button to view profile's qr code.")) {
                 show_qr_code = true
             }
@@ -238,7 +240,7 @@ struct ProfileView: View {
                         else {
                             return
                         }
-                        
+
                         guard let new_ev = remove_from_mutelist(keypair: keypair, prev: mutelist, to_remove: profile.pubkey) else {
                             return
                         }
@@ -254,7 +256,7 @@ struct ProfileView: View {
             }
         }
     }
-    
+
     var customNavbar: some View {
         HStack {
             navBackButton
@@ -265,7 +267,7 @@ struct ProfileView: View {
         .padding(.horizontal)
         .accentColor(DamusColors.white)
     }
-    
+
     func lnButton(lnurl: String, profile: Profile) -> some View {
         let button_img = profile.reactions == false ? "zap.fill" : "zap"
         return Button(action: {
@@ -278,7 +280,7 @@ struct ProfileView: View {
                     if profile.reactions == false {
                         Text("OnlyZaps Enabled", comment: "Non-tappable text in context menu that shows up when the zap button on profile is long pressed to indicate that the user has enabled OnlyZaps, meaning that they would like to be only zapped and not accept reactions to their notes.")
                     }
-                    
+
                     if let addr = profile.lud16 {
                         Button {
                             UIPasteboard.general.string = addr
@@ -293,31 +295,30 @@ struct ProfileView: View {
                         }
                     }
                 }
-            
+
         }
         .cornerRadius(24)
     }
     
     var dmButton: some View {
         let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
-        let dmview = DMChatView(damus_state: damus_state, dms: dm_model)
-        return NavigationLink(destination: dmview) {
+        return NavigationLink(value: Route.DMChat(dms: dm_model)) {
             Image("messages")
                 .profile_button_style(scheme: colorScheme)
         }
     }
-    
+
     func actionSection(profile_data: Profile?) -> some View {
         return Group {
-            
+
             if let profile = profile_data {
                 if let lnurl = profile.lnurl, lnurl != "" {
                     lnButton(lnurl: lnurl, profile: profile)
                 }
             }
-            
+
             dmButton
-            
+
             if profile.pubkey != damus_state.pubkey {
                 FollowButtonView(
                     target: profile.get_follow_target(),
@@ -325,26 +326,26 @@ struct ProfileView: View {
                     follow_state: damus_state.contacts.follow_state(profile.pubkey)
                 )
             } else if damus_state.keypair.privkey != nil {
-                NavigationLink(destination: EditMetadataView(damus_state: damus_state)) {
+                NavigationLink(value: Route.EditMetadata) {
                     EditButton(damus_state: damus_state)
                 }
             }
-            
+
         }
     }
-    
+
     func pfpOffset() -> CGFloat {
         let progress = -yOffset / navbarHeight
         let offset = (pfp_size / 4.0) * (progress < 1.0 ? progress : 1)
         return offset > 0 ? offset : 0
     }
-    
+
     func pfpScale() -> CGFloat {
         let progress = -yOffset / navbarHeight
         let scale = 1.0 - (0.5 * (progress < 1.0 ? progress : 1))
         return scale < 1 ? scale : 1
     }
-    
+
     func nameSection(profile_data: Profile?) -> some View {
         return Group {
             HStack(alignment: .center) {
@@ -358,17 +359,17 @@ struct ProfileView: View {
                     .fullScreenCover(isPresented: $is_zoomed) {
                         ProfilePicImageView(pubkey: profile.pubkey, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                     }
-                
+
                 Spacer()
-                
+
                 actionSection(profile_data: profile_data)
             }
-            
+
             let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
             ProfileNameView(pubkey: profile.pubkey, profile: profile_data, follows_you: follows_you, damus: damus_state)
         }
     }
-    
+
     var followersCount: some View {
         HStack {
             if followers.count == nil {
@@ -385,26 +386,26 @@ struct ProfileView: View {
             }
         }
     }
-    
+
     var aboutSection: some View {
         VStack(alignment: .leading, spacing: 8.0) {
             let profile_data = damus_state.profiles.lookup(id: profile.pubkey)
-            
+
             nameSection(profile_data: profile_data)
 
             if let about = profile_data?.about {
                 AboutView(state: damus_state, about: about)
             }
-            
+
             if let url = profile_data?.website_url {
                 WebsiteLink(url: url)
             }
-            
+
             HStack {
                 if let contact = profile.contacts {
                     let contacts = contact.referenced_pubkeys.map { $0.ref_id }
                     let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
-                    NavigationLink(destination: FollowingView(damus_state: damus_state, following: following_model)) {
+                    NavigationLink(value: Route.Following(following: following_model)) {
                         HStack {
                             let noun_text = Text(verbatim: "\(followingCountString(profile.following))").font(.subheadline).foregroundColor(.gray)
                             Text("\(Text(verbatim: profile.following.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
@@ -412,10 +413,9 @@ struct ProfileView: View {
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
-                let fview = FollowersView(damus_state: damus_state)
-                    .environmentObject(followers)
+
                 if followers.contacts != nil {
-                    NavigationLink(destination: fview) {
+                    NavigationLink(value: Route.Followers(environmentObject: followers)) {
                         followersCount
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -427,18 +427,18 @@ struct ProfileView: View {
                             followers.subscribe()
                         }
                 }
-                
+
                 if let relays = profile.relays {
                     // Only open relay config view if the user is logged in with private key and they are looking at their own profile.
                     let noun_text = Text(verbatim: relaysCountString(relays.keys.count)).font(.subheadline).foregroundColor(.gray)
                     let relay_text = Text("\(Text(verbatim: relays.keys.count.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
                     if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
-                        NavigationLink(destination: RelayConfigView(state: damus_state)) {
+                        NavigationLink(value: Route.RelayConfig) {
                             relay_text
                         }
                         .buttonStyle(PlainButtonStyle())
                     } else {
-                        NavigationLink(destination: UserRelaysView(state: damus_state, relays: Array(relays.keys).sorted())) {
+                        NavigationLink(value: Route.UserRelays(relays: Array(relays.keys).sorted())) {
                             relay_text
                         }
                         .buttonStyle(PlainButtonStyle())
@@ -451,7 +451,7 @@ struct ProfileView: View {
                 if !friended_followers.isEmpty {
                     Spacer()
 
-                    NavigationLink(destination: FollowersYouKnowView(damus_state: damus_state, friended_followers: friended_followers)) {
+                    NavigationLink(value: Route.FollowersYouKnow(friendedFollowers: friended_followers)) {
                         HStack {
                             CondensedProfilePicturesView(state: damus_state, pubkeys: friended_followers, maxPictures: 3)
                             Text(followedByString(friended_followers, profiles: damus_state.profiles))
@@ -464,7 +464,7 @@ struct ProfileView: View {
         }
         .padding(.horizontal)
     }
-        
+
     var body: some View {
         ZStack {
             ScrollView(.vertical) {
@@ -521,6 +521,7 @@ struct ProfileView: View {
             }
             .fullScreenCover(isPresented: $show_qr_code) {
                 QRCodeView(damus_state: damus_state, pubkey: profile.pubkey)
+                    .environmentObject(navigationCoordinator)
             }
 
             if damus_state.is_privkey_user {
@@ -542,7 +543,7 @@ struct ProfileView_Previews: PreviewProvider {
 func test_damus_state() -> DamusState {
     let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
     let damus = DamusState.empty
-    
+
     let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", banner: "", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io", damus_donation: nil)
     let tsprof = TimestampedProfile(profile: prof, timestamp: 0, event: test_event)
     damus.profiles.add(id: pubkey, profile: tsprof)
@@ -551,15 +552,15 @@ func test_damus_state() -> DamusState {
 
 struct KeyView: View {
     let pubkey: String
-    
+
     @Environment(\.colorScheme) var colorScheme
-    
+
     @State private var isCopied = false
-    
+
     func keyColor() -> Color {
         colorScheme == .light ? DamusColors.black : DamusColors.white
     }
-    
+
     private func copyPubkey(_ pubkey: String) {
         UIPasteboard.general.string = pubkey
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -572,10 +573,10 @@ struct KeyView: View {
             }
         }
     }
-    
+
     var body: some View {
         let bech32 = bech32_pubkey(pubkey) ?? pubkey
-        
+
         HStack {
             Text(verbatim: "\(abbrev_pubkey(bech32, amount: 16))")
                 .font(.footnote)
@@ -583,7 +584,7 @@ struct KeyView: View {
                 .padding(5)
                 .padding([.leading, .trailing], 5)
                 .background(RoundedRectangle(cornerRadius: 11).foregroundColor(DamusColors.adaptableGrey))
-                        
+
             if isCopied != true {
                 Button {
                     copyPubkey(bech32)

@@ -10,6 +10,7 @@ import SwiftUI
 struct ReactionView: View {
     let damus_state: DamusState
     let reaction: NostrEvent
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     
     var content: String {
         return to_reaction_emoji(ev: reaction) ?? ""
@@ -22,6 +23,7 @@ struct ReactionView: View {
                 .frame(width: 50, height: 50)
             
             FollowUserView(target: .pubkey(reaction.pubkey), damus_state: damus_state)
+                .environmentObject(navigationCoordinator)
         }
     }
 }

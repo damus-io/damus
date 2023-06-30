@@ -30,8 +30,9 @@ struct RelayView: View {
                 if let meta = state.relay_metadata.lookup(relay_id: relay) {
                     Text(relay)
                         .background(
-                            NavigationLink("", destination: RelayDetailView(state: state, relay: relay, nip11: meta)).opacity(0.0)
-                                .disabled(showActionButtons)
+                            NavigationLink(value: Route.RelayDetail(relay: relay, metadata: meta), label: {
+                                EmptyView()
+                            }).opacity(0.0).disabled(showActionButtons)
                         )
                     
                     Spacer()

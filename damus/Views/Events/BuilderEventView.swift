@@ -72,8 +72,7 @@ struct BuilderEventView: View {
             if let event {
                 let ev = event.get_inner_event(cache: damus.events) ?? event
                 let thread = ThreadModel(event: ev, damus_state: damus)
-                let dest = ThreadView(state: damus, thread: thread)
-                NavigationLink(destination: dest) {
+                NavigationLink(value: Route.Thread(thread: thread)) {
                     EventView(damus: damus, event: event, options: .embedded)
                         .padding([.top, .bottom], 8)
                 }.buttonStyle(.plain)

@@ -25,7 +25,7 @@ struct EventDetailBar: View {
     var body: some View {
         HStack {
             if bar.boosts > 0 {
-                NavigationLink(destination: RepostsView(damus_state: state, model: RepostsModel(state: state, target: target))) {
+                NavigationLink(value: Route.Reposts(reposts: RepostsModel(state: state, target: target))) {
                     let noun = Text(verbatim: repostsCountString(bar.boosts)).foregroundColor(.gray)
                     Text("\(Text(verbatim: bar.boosts.formatted()).font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.")
                 }
@@ -33,7 +33,7 @@ struct EventDetailBar: View {
             }
 
             if bar.likes > 0 && !state.settings.onlyzaps_mode {
-                NavigationLink(destination: ReactionsView(damus_state: state, model: ReactionsModel(state: state, target: target))) {
+                NavigationLink(value: Route.Reactions(reactions: ReactionsModel(state: state, target: target))) {
                     let noun = Text(verbatim: reactionsCountString(bar.likes)).foregroundColor(.gray)
                     Text("\(Text(verbatim: bar.likes.formatted()).font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.")
                 }
@@ -41,8 +41,7 @@ struct EventDetailBar: View {
             }
             
             if bar.zaps > 0 {
-                let dst = ZapsView(state: state, target: .note(id: target, author: target_pk))
-                NavigationLink(destination: dst) {
+                NavigationLink(value: Route.Zaps(target: .note(id: target, author: target_pk))) {
                     let noun = Text(verbatim: zapsCountString(bar.zaps)).foregroundColor(.gray)
                     Text("\(Text(verbatim: bar.zaps.formatted()).font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.")
                 }

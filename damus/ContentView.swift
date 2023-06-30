@@ -82,14 +82,6 @@ struct ContentView: View {
     @State var damus_state: DamusState? = nil
     @SceneStorage("ContentView.selected_timeline") var selected_timeline: Timeline = .home
     @State var is_deleted_account: Bool = false
-    @State var active_profile: String? = nil
-    @State var active_search: NostrFilter? = nil
-    @State var active_event: NostrEvent? = nil
-    @State var profile_open: Bool = false
-    @State var thread_open: Bool = false
-    @State var search_open: Bool = false
-    @State var wallet_open: Bool = false
-    @State var active_nwc: WalletConnectURL? = nil
     @State var muting: String? = nil
     @State var confirm_mute: Bool = false
     @State var user_muted_confirm: Bool = false
@@ -97,6 +89,7 @@ struct ContentView: View {
     @SceneStorage("ContentView.filter_state") var filter_state : FilterState = .posts_and_replies
     @State private var isSideBarOpened = false
     var home: HomeModel = HomeModel()
+    @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
 
     let sub_id = UUID().description
     
@@ -150,15 +143,13 @@ struct ContentView: View {
         ZStack {
             if let damus = self.damus_state {
                 TimelineView(events: home.events, loading: .constant(false), damus: damus, show_friend_icon: false, filter: filter)
+                    .environmentObject(navigationCoordinator)
             }
         }
     }
     
     func popToRoot() {
-        profile_open = false
-        thread_open = false
-        search_open = false
-        wallet_open = false
+        navigationCoordinator.popToRoot()
         isSideBarOpened = false
     }
     
@@ -169,29 +160,16 @@ struct ContentView: View {
     
     func MainContent(damus: DamusState) -> some View {
         VStack {
-            NavigationLink(destination: WalletView(damus_state: damus, model: damus_state!.wallet), isActive: $wallet_open) {
-                EmptyView()
-            }
-            NavigationLink(destination: MaybeProfileView, isActive: $profile_open) {
-                EmptyView()
-            }
-            if let active_event {
-                let thread = ThreadModel(event: active_event, damus_state: damus_state!)
-                NavigationLink(destination: ThreadView(state: damus_state!, thread: thread), isActive: $thread_open) {
-                    EmptyView()
-                }
-            }
-            NavigationLink(destination: MaybeSearchView, isActive: $search_open) {
-                EmptyView()
-            }
             switch selected_timeline {
             case .search:
                 if #available(iOS 16.0, *) {
                     SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
+                        .environmentObject(navigationCoordinator)
                         .scrollDismissesKeyboard(.immediately)
                 } else {
                     // Fallback on earlier versions
                     SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
+                        .environmentObject(navigationCoordinator)
                 }
                 
             case .home:
@@ -199,9 +177,11 @@ struct ContentView: View {
                 
             case .notifications:
                 NotificationsView(state: damus, notifications: home.notifications)
+                    .environmentObject(navigationCoordinator)
                 
             case .dms:
                 DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings)
+                    .environmentObject(navigationCoordinator)
             }
         }
         .navigationBarTitle(timeline_name(selected_timeline), displayMode: .inline)
@@ -225,28 +205,6 @@ struct ContentView: View {
         }
     }
     
-    var MaybeSearchView: some View {
-        Group {
-            if let search = self.active_search {
-                SearchView(appstate: damus_state!, search: SearchModel(state: damus_state!, search: search))
-            } else {
-                EmptyView()
-            }
-        }
-    }
-    
-    var MaybeProfileView: some View {
-        Group {
-            if let pk = self.active_profile {
-                let profile_model = ProfileModel(pubkey: pk, damus: damus_state!)
-                let followers = FollowersModel(damus_state: damus_state!, target: pk)
-                ProfileView(damus_state: damus_state!, profile: profile_model, followers: followers)
-            } else {
-                EmptyView()
-            }
-        }
-    }
-    
     func MaybeReportView(target: ReportTarget) -> some View {
         Group {
             if let damus_state {
@@ -262,32 +220,30 @@ struct ContentView: View {
     }
     
     func open_event(ev: NostrEvent) {
-        popToRoot()
-        self.active_event = ev
-        self.thread_open = true
+        let thread = ThreadModel(event: ev, damus_state: damus_state!)
+        navigationCoordinator.push(route: Route.Thread(thread: thread))
     }
     
     func open_wallet(nwc: WalletConnectURL) {
         self.damus_state!.wallet.new(nwc)
-        self.wallet_open = true
+        navigationCoordinator.push(route: Route.Wallet(wallet: damus_state!.wallet))
     }
     
     func open_profile(id: String) {
-        popToRoot()
-        self.active_profile = id
-        self.profile_open = true
+        let profile_model = ProfileModel(pubkey: id, damus: damus_state!)
+        let followers = FollowersModel(damus_state: damus_state!, target: id)
+        navigationCoordinator.push(route: Route.Profile(profile: profile_model, followers: followers))
     }
     
     func open_search(filt: NostrFilter) {
-        popToRoot()
-        self.active_search = filt
-        self.search_open = true
+        let search = SearchModel(state: damus_state!, search: filt)
+        navigationCoordinator.push(route: Route.Search(search: search))
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let damus = self.damus_state {
-                NavigationView {
+                NavigationStack(path: $navigationCoordinator.path) {
                     TabView { // Prevents navbar appearance change on scroll
                         MainContent(damus: damus)
                             .toolbar() {
@@ -326,7 +282,14 @@ struct ContentView: View {
                     .tabViewStyle(.page(indexDisplayMode: .never))
                     .overlay(
                         SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened.animation())
+                            .environmentObject(navigationCoordinator)
                     )
+                    .navigationDestination(for: Route.self) { route in
+                        route.view(navigationCordinator: navigationCoordinator, damusState: damus_state!)
+                    }
+                    .onReceive(handle_notify(.switched_timeline)) { _ in
+                        navigationCoordinator.popToRoot()
+                    }
                 }
                 .navigationViewStyle(.stack)
             
@@ -520,8 +483,8 @@ struct ContentView: View {
             switch local.type {
             case .dm:
                 selected_timeline = .dms
-                damus_state.dms.open_dm_by_pk(target.pubkey)
-                
+                damus_state.dms.set_active_dm(target.pubkey)
+                navigationCoordinator.push(route: Route.DMChat(dms: damus_state.dms.active_model))
             case .like: fallthrough
             case .zap: fallthrough
             case .mention: fallthrough
