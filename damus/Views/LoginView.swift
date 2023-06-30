@@ -37,7 +37,7 @@ struct LoginView: View {
     @State var is_pubkey: Bool = false
     @State var error: String? = nil
     @State private var credential_handler = CredentialHandler()
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
+    var nav: NavigationCoordinator
 
     func get_error(parsed_key: ParsedKey?) -> String? {
         if self.error != nil {
@@ -99,8 +99,7 @@ struct LoginView: View {
                     .padding(.top, 10)
                 }
 
-                CreateAccountPrompt()
-                    .environmentObject(navigationCoordinator)
+                CreateAccountPrompt(nav: nav)
                     .padding(.top, 10)
 
                 Spacer()
@@ -330,14 +329,14 @@ struct SignInEntry: View {
 }
 
 struct CreateAccountPrompt: View {
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
+    var nav: NavigationCoordinator
     var body: some View {
         HStack {
             Text("New to Nostr?", comment: "Ask the user if they are new to Nostr")
                 .foregroundColor(Color("DamusMediumGrey"))
             
             Button(NSLocalizedString("Create account", comment: "Button to navigate to create account view.")) {
-                navigationCoordinator.push(route: Route.CreateAccount)
+                nav.push(route: Route.CreateAccount)
             }
             
             Spacer()
@@ -351,8 +350,8 @@ struct LoginView_Previews: PreviewProvider {
         let pubkey = "npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955"
         let bech32_pubkey = "KeyInput"
         Group {
-            LoginView(key: pubkey)
-            LoginView(key: bech32_pubkey)
+            LoginView(key: pubkey, nav: .init())
+            LoginView(key: bech32_pubkey, nav: .init())
         }
     }
 }

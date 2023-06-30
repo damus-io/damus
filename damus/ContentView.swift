@@ -143,7 +143,6 @@ struct ContentView: View {
         ZStack {
             if let damus = self.damus_state {
                 TimelineView(events: home.events, loading: .constant(false), damus: damus, show_friend_icon: false, filter: filter)
-                    .environmentObject(navigationCoordinator)
             }
         }
     }
@@ -164,12 +163,10 @@ struct ContentView: View {
             case .search:
                 if #available(iOS 16.0, *) {
                     SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
-                        .environmentObject(navigationCoordinator)
                         .scrollDismissesKeyboard(.immediately)
                 } else {
                     // Fallback on earlier versions
                     SearchHomeView(damus_state: damus_state!, model: SearchHomeModel(damus_state: damus_state!))
-                        .environmentObject(navigationCoordinator)
                 }
                 
             case .home:
@@ -177,11 +174,9 @@ struct ContentView: View {
                 
             case .notifications:
                 NotificationsView(state: damus, notifications: home.notifications)
-                    .environmentObject(navigationCoordinator)
                 
             case .dms:
                 DirectMessagesView(damus_state: damus_state!, model: damus_state!.dms, settings: damus_state!.settings)
-                    .environmentObject(navigationCoordinator)
             }
         }
         .navigationBarTitle(timeline_name(selected_timeline), displayMode: .inline)
@@ -282,7 +277,6 @@ struct ContentView: View {
                     .tabViewStyle(.page(indexDisplayMode: .never))
                     .overlay(
                         SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened.animation())
-                            .environmentObject(navigationCoordinator)
                     )
                     .navigationDestination(for: Route.self) { route in
                         route.view(navigationCordinator: navigationCoordinator, damusState: damus_state!)
@@ -651,7 +645,8 @@ struct ContentView: View {
                                       bootstrap_relays: bootstrap_relays,
                                       replies: ReplyCounter(our_pubkey: pubkey),
                                       muted_threads: MutedThreadsManager(keypair: keypair),
-                                      wallet: WalletModel(settings: settings)
+                                      wallet: WalletModel(settings: settings),
+                                      nav: self.navigationCoordinator
         )
         home.damus_state = self.damus_state!
         

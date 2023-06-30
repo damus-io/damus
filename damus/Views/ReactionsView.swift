@@ -10,7 +10,6 @@ import SwiftUI
 struct ReactionsView: View {
     let damus_state: DamusState
     @StateObject var model: ReactionsModel
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     
     @Environment(\.dismiss) var dismiss
     
@@ -19,7 +18,6 @@ struct ReactionsView: View {
             LazyVStack {
                 ForEach(model.events, id: \.id) { ev in
                     ReactionView(damus_state: damus_state, reaction: ev)
-                        .environmentObject(navigationCoordinator)
                 }
             }
             .padding()

@@ -89,7 +89,6 @@ struct NotificationsView: View {
     @SceneStorage("NotificationsView.filter_state") var filter_state: NotificationFilterState = .all
     
     @Environment(\.colorScheme) var colorScheme
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     
     var mystery: some View {
         VStack(spacing: 20) {
@@ -174,7 +173,6 @@ struct NotificationsView: View {
                         .frame(height: 5)
                     ForEach(filter.filter(contacts: state.contacts, items: notifications.notifications), id: \.id) { item in
                         NotificationItemView(state: state, item: item)
-                            .environmentObject(navigationCoordinator)
                     }
                 }
                 .background(GeometryReader { proxy -> Color in

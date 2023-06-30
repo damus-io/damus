@@ -30,6 +30,7 @@ struct DamusState {
     let replies: ReplyCounter
     let muted_threads: MutedThreadsManager
     let wallet: WalletModel
+    let nav: NavigationCoordinator
     
     @discardableResult
     func add_zap(zap: Zapping) -> Bool {
@@ -57,5 +58,5 @@ struct DamusState {
     }
     
     static var empty: DamusState {
-        return DamusState.init(pool: RelayPool(), keypair: Keypair(pubkey: "", privkey: ""), likes: EventCounter(our_pubkey: ""), boosts: EventCounter(our_pubkey: ""), contacts: Contacts(our_pubkey: ""), profiles: Profiles(), dms: DirectMessagesModel(our_pubkey: ""), previews: PreviewCache(), zaps: Zaps(our_pubkey: ""), lnurls: LNUrls(), settings: UserSettingsStore(), relay_filters: RelayFilters(our_pubkey: ""), relay_metadata: RelayMetadatas(), drafts: Drafts(), events: EventCache(), bookmarks: BookmarksManager(pubkey: ""), postbox: PostBox(pool: RelayPool()), bootstrap_relays: [], replies: ReplyCounter(our_pubkey: ""), muted_threads: MutedThreadsManager(keypair: Keypair(pubkey: "", privkey: nil)), wallet: WalletModel(settings: UserSettingsStore())) }
+        return DamusState.init(pool: RelayPool(), keypair: Keypair(pubkey: "", privkey: ""), likes: EventCounter(our_pubkey: ""), boosts: EventCounter(our_pubkey: ""), contacts: Contacts(our_pubkey: ""), profiles: Profiles(), dms: DirectMessagesModel(our_pubkey: ""), previews: PreviewCache(), zaps: Zaps(our_pubkey: ""), lnurls: LNUrls(), settings: UserSettingsStore(), relay_filters: RelayFilters(our_pubkey: ""), relay_metadata: RelayMetadatas(), drafts: Drafts(), events: EventCache(), bookmarks: BookmarksManager(pubkey: ""), postbox: PostBox(pool: RelayPool()), bootstrap_relays: [], replies: ReplyCounter(our_pubkey: ""), muted_threads: MutedThreadsManager(keypair: Keypair(pubkey: "", privkey: nil)), wallet: WalletModel(settings: UserSettingsStore()), nav: NavigationCoordinator()) }
 }

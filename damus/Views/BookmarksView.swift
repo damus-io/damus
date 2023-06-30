@@ -14,7 +14,6 @@ struct BookmarksView: View {
     @State private var clearAllAlert: Bool = false
     
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     @ObservedObject var manager: BookmarksManager
 
     init(state: DamusState) {
@@ -39,8 +38,6 @@ struct BookmarksView: View {
             } else {
                 ScrollView {
                     InnerTimelineView(events: EventHolder(events: bookmarks, incoming: []), damus: state, filter: noneFilter)
-                        .environmentObject(navigationCoordinator)
-
                 }
             }
         }

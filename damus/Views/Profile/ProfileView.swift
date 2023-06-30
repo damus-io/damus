@@ -132,8 +132,6 @@ struct ProfileView: View {
     @StateObject var followers: FollowersModel
     @StateObject var zap_button_model: ZapButtonModel = ZapButtonModel()
 
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
-
     init(damus_state: DamusState, profile: ProfileModel, followers: FollowersModel) {
         self.damus_state = damus_state
         self._profile = StateObject(wrappedValue: profile)
@@ -415,7 +413,7 @@ struct ProfileView: View {
                 }
 
                 if followers.contacts != nil {
-                    NavigationLink(value: Route.Followers(environmentObject: followers)) {
+                    NavigationLink(value: Route.Followers(followers: followers)) {
                         followersCount
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -451,7 +449,7 @@ struct ProfileView: View {
                 if !friended_followers.isEmpty {
                     Spacer()
 
-                    NavigationLink(value: Route.FollowersYouKnow(friendedFollowers: friended_followers)) {
+                    NavigationLink(value: Route.FollowersYouKnow(friendedFollowers: friended_followers, followers: followers)) {
                         HStack {
                             CondensedProfilePicturesView(state: damus_state, pubkeys: friended_followers, maxPictures: 3)
                             Text(followedByString(friended_followers, profiles: damus_state.profiles))
@@ -521,7 +519,6 @@ struct ProfileView: View {
             }
             .fullScreenCover(isPresented: $show_qr_code) {
                 QRCodeView(damus_state: damus_state, pubkey: profile.pubkey)
-                    .environmentObject(navigationCoordinator)
             }
 
             if damus_state.is_privkey_user {

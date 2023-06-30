@@ -9,12 +9,12 @@ import SwiftUI
 
 struct ConnectWalletView: View {
     @Environment(\.openURL) private var openURL
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     @ObservedObject var model: WalletModel
     
     @State var scanning: Bool = false
     @State var error: String? = nil
     @State var wallet_scan_result: WalletScanResult = .scanning
+    var nav: NavigationCoordinator
     
     var body: some View {
         MainContent
@@ -70,7 +70,7 @@ struct ConnectWalletView: View {
             }
             
             BigButton(NSLocalizedString("Attach Wallet", comment: "Text for button to attach Nostr Wallet Connect lightning wallet.")) {
-                navigationCoordinator.push(route: Route.WalletScanner(result: $wallet_scan_result))
+                nav.push(route: Route.WalletScanner(result: $wallet_scan_result))
             }
             
             if let err = self.error {
@@ -96,6 +96,6 @@ struct ConnectWalletView: View {
 
 struct ConnectWalletView_Previews: PreviewProvider {
     static var previews: some View {
-        ConnectWalletView(model: WalletModel(settings: UserSettingsStore()))
+        ConnectWalletView(model: WalletModel(settings: UserSettingsStore()), nav: .init())
     }
 }

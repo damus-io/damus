@@ -193,8 +193,6 @@ struct EventGroupView: View {
     let event: NostrEvent?
     let group: EventGroupType
 
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
-    
     func GroupDescription(_ pubkeys: [String]) -> some View {
         Text(verbatim: "\(reacting_to_text(profiles: state.profiles, our_pubkey: state.pubkey, group: group, ev: event, pubkeys: pubkeys))")
     }
@@ -239,7 +237,6 @@ struct EventGroupView: View {
                 let unique_pubkeys = event_group_unique_pubkeys(profiles: state.profiles, group: group)
 
                 ProfilePicturesView(state: state, pubkeys: unique_pubkeys)
-                    .environmentObject(navigationCoordinator)
                 
                 if let event {
                     let thread = ThreadModel(event: event, damus_state: state)

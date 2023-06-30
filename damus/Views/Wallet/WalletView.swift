@@ -11,7 +11,6 @@ struct WalletView: View {
     let damus_state: DamusState
     @ObservedObject var model: WalletModel
     @ObservedObject var settings: UserSettingsStore
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     
     init(damus_state: DamusState, model: WalletModel? = nil) {
         self.damus_state = damus_state
@@ -156,11 +155,9 @@ struct WalletView: View {
     var body: some View {
         switch model.connect_state {
         case .new:
-            ConnectWalletView(model: model)
-                .environmentObject(navigationCoordinator)
+            ConnectWalletView(model: model, nav: damus_state.nav)
         case .none:
-            ConnectWalletView(model: model)
-                .environmentObject(navigationCoordinator)
+            ConnectWalletView(model: model, nav: damus_state.nav)
         case .existing(let nwc):
             MainWalletView(nwc: nwc)
                 .onAppear() {

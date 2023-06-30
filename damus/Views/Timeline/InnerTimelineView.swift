@@ -12,8 +12,6 @@ struct InnerTimelineView: View {
     @ObservedObject var events: EventHolder
     let state: DamusState
     let filter: (NostrEvent) -> Bool
-
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     
     static var count: Int = 0
     
@@ -48,7 +46,7 @@ struct InnerTimelineView: View {
                         .onTapGesture {
                             let event = ev.get_inner_event(cache: state.events) ?? ev
                             let thread = ThreadModel(event: event, damus_state: state)
-                            navigationCoordinator.push(route: Route.Thread(thread: thread))
+                            state.nav.push(route: Route.Thread(thread: thread))
                         }
                         .padding(.top, 7)
                         .onAppear {

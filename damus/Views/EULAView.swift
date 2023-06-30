@@ -58,7 +58,7 @@ By using our Application, you signify your acceptance of this EULA. If you do no
 struct EULAView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
+    var nav: NavigationCoordinator
 
     var body: some View {
         ZStack {
@@ -91,7 +91,7 @@ struct EULAView: View {
                     }
                     
                     Button(action: {
-                        navigationCoordinator.push(route: Route.Login)
+                        nav.push(route: Route.Login)
                     }) {
                         HStack {
                             Text("Accept", comment:  "Button to accept the end user license agreement before being allowed into the app.")
@@ -120,6 +120,6 @@ struct EULAView: View {
 
 struct EULAView_Previews: PreviewProvider {
     static var previews: some View {
-        EULAView()
+        EULAView(nav: .init())
     }
 }

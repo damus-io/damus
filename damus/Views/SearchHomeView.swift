@@ -14,7 +14,6 @@ struct SearchHomeView: View {
     @StateObject var model: SearchHomeModel
     @State var search: String = ""
     @FocusState private var isFocused: Bool
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
 
     let preferredLanguages = Set(Locale.preferredLanguages.map { localeToLanguage($0) })
     
@@ -68,7 +67,6 @@ struct SearchHomeView: View {
                 return preferredLanguages.contains(note_lang)
             }
         )
-        .environmentObject(navigationCoordinator)
         .refreshable {
             // Fetch new information by unsubscribing and resubscribing to the relay
             model.unsubscribe()
@@ -78,7 +76,6 @@ struct SearchHomeView: View {
     
     var SearchContent: some View {
         SearchResultsView(damus_state: damus_state, search: $search)
-            .environmentObject(navigationCoordinator)
             .refreshable {
                 // Fetch new information by unsubscribing and resubscribing to the relay
                 model.unsubscribe()
@@ -129,9 +126,6 @@ struct SearchHomeView: View {
 struct SearchHomeView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
-        SearchHomeView(
-            damus_state: state,
-            model: SearchHomeModel(damus_state: state)
-        )
+        SearchHomeView(damus_state: state, model: SearchHomeModel(damus_state: state))
     }
 }

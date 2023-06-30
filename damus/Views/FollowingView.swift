@@ -10,7 +10,6 @@ import SwiftUI
 struct FollowUserView: View {
     let target: FollowTarget
     let damus_state: DamusState
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
 
     static let markdown = Markdown()
 
@@ -18,7 +17,7 @@ struct FollowUserView: View {
         HStack {
             UserViewRow(damus_state: damus_state, pubkey: target.pubkey)
                 .onTapGesture {
-                    navigationCoordinator.push(route: Route.ProfileByKey(pubkey: target.pubkey))
+                    damus_state.nav.push(route: Route.ProfileByKey(pubkey: target.pubkey))
                 }
             
             FollowButtonView(target: target, follows_you: false, follow_state: damus_state.contacts.follow_state(target.pubkey))
@@ -30,8 +29,7 @@ struct FollowUserView: View {
 struct FollowersYouKnowView: View {
     let damus_state: DamusState
     let friended_followers: [String]
-
-    @EnvironmentObject var followers: FollowersModel
+    @ObservedObject var followers: FollowersModel
 
     var body: some View {
         ScrollView {
@@ -48,16 +46,13 @@ struct FollowersYouKnowView: View {
 
 struct FollowersView: View {
     let damus_state: DamusState
-    
-    @EnvironmentObject var followers: FollowersModel
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
+    @ObservedObject var followers: FollowersModel
     
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading) {
                 ForEach(followers.contacts ?? [], id: \.self) { pk in
                     FollowUserView(target: .pubkey(pk), damus_state: damus_state)
-                        .environmentObject(navigationCoordinator)
                 }
             }
             .padding(.horizontal)
@@ -77,14 +72,12 @@ struct FollowingView: View {
     
     let following: FollowingModel
 
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading) {
                 ForEach(following.contacts.reversed(), id: \.self) { pk in
                     FollowUserView(target: .pubkey(pk), damus_state: damus_state)
-                        .environmentObject(navigationCoordinator)
                 }
             }
             .padding()

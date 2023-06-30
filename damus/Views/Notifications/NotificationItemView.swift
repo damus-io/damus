@@ -30,8 +30,6 @@ func notification_item_event(events: EventCache, notif: NotificationItem) -> Sho
 struct NotificationItemView: View {
     let state: DamusState
     let item: NotificationItem
-
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     
     var show_item: ShowItem {
         notification_item_event(events: state.events, notif: item)
@@ -50,19 +48,15 @@ struct NotificationItemView: View {
             switch item {
             case .repost(_, let evgrp):
                 EventGroupView(state: state, event: ev, group: .repost(evgrp))
-                    .environmentObject(navigationCoordinator)
                 
             case .event_zap(_, let zapgrp):
                 EventGroupView(state: state, event: ev, group: .zap(zapgrp))
-                    .environmentObject(navigationCoordinator)
                 
             case .profile_zap(let grp):
                 EventGroupView(state: state, event: nil, group: .profile_zap(grp))
-                    .environmentObject(navigationCoordinator)
             
             case .reaction(_, let evgrp):
                 EventGroupView(state: state, event: ev, group: .reaction(evgrp))
-                    .environmentObject(navigationCoordinator)
             
             case .reply(let ev):
                 NavigationLink(value: Route.Thread(thread: ThreadModel(event: ev, damus_state: state))) {

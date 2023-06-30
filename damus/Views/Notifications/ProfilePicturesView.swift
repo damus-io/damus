@@ -10,15 +10,13 @@ import SwiftUI
 struct ProfilePicturesView: View {
     let state: DamusState
     let pubkeys: [String]
-
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     
     var body: some View {
         HStack {
             ForEach(pubkeys.prefix(8), id: \.self) { pubkey in
                 ProfilePicView(pubkey: pubkey, size: 32.0, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation)
                     .onTapGesture {
-                        navigationCoordinator.push(route: Route.ProfileByKey(pubkey: pubkey))
+                        state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
                     }
             }
         }

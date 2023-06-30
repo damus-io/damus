@@ -10,7 +10,7 @@ import SwiftUI
 struct CreateAccountView: View {
     @StateObject var account: CreateAccountModel = CreateAccountModel()
     @StateObject var profileUploadViewModel = ProfileUploadingViewModel()
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
+    var nav: NavigationCoordinator
     
     func SignupForm<FormContent: View>(@ViewBuilder content: () -> FormContent) -> some View {
         return VStack(alignment: .leading, spacing: 10.0, content: content)
@@ -58,7 +58,7 @@ struct CreateAccountView: View {
                 .padding(.top, 10)
 
                 Button(action: {
-                    navigationCoordinator.push(route: Route.SaveKeys(account: account))
+                    nav.push(route: Route.SaveKeys(account: account))
                 }) {
                     HStack {
                         Text("Create account now", comment: "Button to create account.")
@@ -130,7 +130,7 @@ extension View {
 struct CreateAccountView_Previews: PreviewProvider {
     static var previews: some View {
         let model = CreateAccountModel(real: "", nick: "jb55", about: "")
-        return CreateAccountView(account: model)
+        return CreateAccountView(account: model, nav: .init())
     }
 }
 

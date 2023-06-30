@@ -11,11 +11,9 @@ struct SideMenuView: View {
     let damus_state: DamusState
     @Binding var isSidebarVisible: Bool
     @State var confirm_logout: Bool = false
-
     @State private var showQRCode = false
-
+    
     @Environment(\.colorScheme) var colorScheme
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
 
     var sideBarWidth = min(UIScreen.main.bounds.size.width * 0.65, 400.0)
     let verticalSpacing: CGFloat = 20
@@ -162,7 +160,6 @@ struct SideMenuView: View {
                                 .dynamicTypeSize(.xSmall)
                         }).fullScreenCover(isPresented: $showQRCode) {
                             QRCodeView(damus_state: damus_state, pubkey: damus_state.pubkey)
-                                .environmentObject(navigationCoordinator)
                         }
                     }
                     .padding(.top, verticalSpacing)

@@ -19,8 +19,6 @@ struct DirectMessagesView: View {
     @ObservedObject var model: DirectMessagesModel
     @ObservedObject var settings: UserSettingsStore
 
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
-    
     func MainContent(requests: Bool) -> some View {
         ScrollView {
             LazyVStack(spacing: 0) {
@@ -53,7 +51,7 @@ struct DirectMessagesView: View {
                 EventView(damus: damus_state, event: ev, pubkey: model.pubkey, options: options)
                     .onTapGesture {
                         self.model.set_active_dm_model(model)
-                        navigationCoordinator.push(route: Route.DMChat(dms: self.model.active_model))
+                        damus_state.nav.push(route: Route.DMChat(dms: self.model.active_model))
                     }
                 
                 Divider()

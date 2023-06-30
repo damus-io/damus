@@ -10,11 +10,9 @@ import SwiftUI
 struct RepostView: View {
     let damus_state: DamusState
     let repost: NostrEvent
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
 
     var body: some View {
         FollowUserView(target: .pubkey(repost.pubkey), damus_state: damus_state)
-            .environmentObject(navigationCoordinator)
     }
 }
 

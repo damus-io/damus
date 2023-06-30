@@ -10,7 +10,7 @@ import SwiftUI
 enum Route: Hashable {
     case ProfileByKey(pubkey: String)
     case Profile(profile: ProfileModel, followers: FollowersModel)
-    case Followers(environmentObject: FollowersModel)
+    case Followers(followers: FollowersModel)
     case Relay(relay: String, showActionButtons: Binding<Bool>)
     case RelayDetail(relay: String, metadata: RelayMetadata)
     case Following(following: FollowingModel)
@@ -38,34 +38,29 @@ enum Route: Hashable {
     case SaveKeys(account: CreateAccountModel)
     case Wallet(wallet: WalletModel)
     case WalletScanner(result: Binding<WalletScanResult>)
-    case FollowersYouKnow(friendedFollowers: [String])
+    case FollowersYouKnow(friendedFollowers: [String], followers: FollowersModel)
 
     @ViewBuilder
     func view(navigationCordinator: NavigationCoordinator, damusState: DamusState) -> some View {
         switch self {
         case .ProfileByKey(let pubkey):
             ProfileView(damus_state: damusState, pubkey: pubkey)
-                .environmentObject(navigationCordinator)
         case .Profile(let profile, let followers):
             ProfileView(damus_state: damusState, profile: profile, followers: followers)
-                .environmentObject(navigationCordinator)
-        case .Followers(let environmentObject):
-            FollowersView(damus_state: damusState)
-                .environmentObject(environmentObject)
+        case .Followers(let followers):
+            FollowersView(damus_state: damusState, followers: followers)
         case .Relay(let relay, let showActionButtons):
             RelayView(state: damusState, relay: relay, showActionButtons: showActionButtons)
         case .RelayDetail(let relay, let metadata):
             RelayDetailView(state: damusState, relay: relay, nip11: metadata)
         case .Following(let following):
             FollowingView(damus_state: damusState, following: following)
-                .environmentObject(navigationCordinator)
         case .MuteList(let users):
             MutelistView(damus_state: damusState, users: users)
         case .RelayConfig:
             RelayConfigView(state: damusState)
         case .Bookmarks:
             BookmarksView(state: damusState)
-                .environmentObject(navigationCordinator)
         case .Config:
             ConfigView(state: damusState)
         case .EditMetadata:
@@ -90,34 +85,26 @@ enum Route: Hashable {
             ThreadView(state: damusState, thread: thread)
         case .Reposts(let reposts):
             RepostsView(damus_state: damusState, model: reposts)
-                .environmentObject(navigationCordinator)
         case .Reactions(let reactions):
             ReactionsView(damus_state: damusState, model: reactions)
-                .environmentObject(navigationCordinator)
         case .Zaps(let target):
             ZapsView(state: damusState, target: target)
         case .Search(let search):
             SearchView(appstate: damusState, search: search)
-                .environmentObject(navigationCordinator)
         case .EULA:
-            EULAView()
-                .environmentObject(navigationCordinator)
+            EULAView(nav: navigationCordinator)
         case .Login:
-            LoginView()
-                .environmentObject(navigationCordinator)
+            LoginView(nav: navigationCordinator)
         case .CreateAccount:
-            CreateAccountView()
-                .environmentObject(navigationCordinator)
+            CreateAccountView(nav: navigationCordinator)
         case .SaveKeys(let account):
             SaveKeysView(account: account)
-                .environmentObject(navigationCordinator)
         case .Wallet(let walletModel):
             WalletView(damus_state: damusState, model: walletModel)
-                .environmentObject(navigationCordinator)
         case .WalletScanner(let walletScanResult):
             WalletScannerView(result: walletScanResult)
-        case .FollowersYouKnow(let friendedFollowers):
-            FollowersYouKnowView(damus_state: damusState, friended_followers: friendedFollowers)
+        case .FollowersYouKnow(let friendedFollowers, let followers):
+            FollowersYouKnowView(damus_state: damusState, friended_followers: friendedFollowers, followers: followers)
         }
     }
 
@@ -183,8 +170,8 @@ enum Route: Hashable {
             return true
         case (.WalletScanner(_), .WalletScanner(_)):
             return true
-        case (.FollowersYouKnow(let lhs_friendedFollowers), .FollowersYouKnow(let rhs_friendedFollowers)):
-            return lhs_friendedFollowers == rhs_friendedFollowers
+        case (.FollowersYouKnow(_, _), .FollowersYouKnow(_, _)):
+            return true
         default:
             return false
         }
@@ -268,9 +255,10 @@ enum Route: Hashable {
             hasher.combine("wallet")
         case .WalletScanner(_):
             hasher.combine("walletScanner")
-        case .FollowersYouKnow(let friendedFollowers):
+        case .FollowersYouKnow(let friendedFollowers, let followers):
             hasher.combine("followersYouKnow")
             hasher.combine(friendedFollowers)
+            hasher.combine(followers.sub_id)
         }
     }
 }

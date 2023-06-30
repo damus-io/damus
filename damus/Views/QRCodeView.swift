@@ -45,16 +45,13 @@ struct QRCodeView: View {
     @State var pubkey: String
     
     @Environment(\.presentationMode) var presentationMode
-    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     
     @State private var selectedTab = 0
-    
     @State var scanResult: ProfileScanResult? = nil
-
     @State var profile: Profile? = nil
     @State var error: String? = nil
-    
     @State private var outerTrimEnd: CGFloat = 0
+
     var animationDuration: Double = 0.5
     
     let generator = UIImpactFeedbackGenerator(style: .light)
@@ -265,7 +262,7 @@ struct QRCodeView: View {
     func show_profile_after_delay() {
         DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
             if let scanResult {
-                navigationCoordinator.push(route: Route.ProfileByKey(pubkey: scanResult.pubkey))
+                damus_state.nav.push(route: Route.ProfileByKey(pubkey: scanResult.pubkey))
             }
         }
     }
