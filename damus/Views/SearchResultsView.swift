@@ -180,33 +180,21 @@ func make_hashtagable(_ str: String) -> String {
 }
 
 func search_profiles(profiles: Profiles, search: String) -> [SearchedUser] {
+    // Search by hex pubkey.
+    if search.count == 64 && hex_decode(search) != nil, let profile = profiles.lookup(id: search) {
+        return [SearchedUser(profile: profile, pubkey: search)]
+    }
+
+    // Search by npub pubkey.
+    if search.starts(with: "npub"), let bech32_key = decode_bech32_key(search), case Bech32Key.pub(let hex) = bech32_key, let profile = profiles.lookup(id: hex) {
+        return [SearchedUser(profile: profile, pubkey: hex)]
+    }
+
     let new = search.lowercased()
-    return profiles.enumerated().reduce(into: []) { acc, els in
-        let pk = els.element.key
-        let prof = els.element.value.profile
-        
-        if let searched = profile_search_matches(profiles: profiles, profile: prof, pubkey: pk, search: new) {
-            acc.append(searched)
-        }
-    }
-}
+    let matched_pubkeys = profiles.user_search_cache.search(key: new)
 
-
-func profile_search_matches(profiles: Profiles, profile prof: Profile, pubkey pk: String, search new: String) -> SearchedUser? {
-    let lowname = prof.name.map { $0.lowercased() }
-    let lownip05 = profiles.is_validated(pk).map { $0.host.lowercased() }
-    let lowdisp = prof.display_name.map { $0.lowercased() }
-    let ok = new.count == 1 ?
-    ((lowname?.starts(with: new) ?? false) ||
-     (lownip05?.starts(with: new) ?? false) ||
-     (lowdisp?.starts(with: new) ?? false)) : (pk.starts(with: new) || String(new.dropFirst()) == pk
-        || lowname?.contains(new) ?? false
-        || lownip05?.contains(new) ?? false
-        || lowdisp?.contains(new) ?? false)
-    
-    if ok {
-        return SearchedUser(petname: nil, profile: prof, pubkey: pk)
-    }
-    
-    return nil
+    return matched_pubkeys
+        .map { ($0, profiles.lookup(id: $0)) }
+        .filter { $1 != nil }
+        .map { SearchedUser(profile: $1, pubkey: $0) }
 }

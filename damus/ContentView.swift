@@ -624,13 +624,14 @@ struct ContentView: View {
            let nwc = WalletConnectURL(str: nwc_str) {
             try? pool.add_relay(.nwc(url: nwc.relay))
         }
-        
+
+        let user_search_cache = UserSearchCache()
         self.damus_state = DamusState(pool: pool,
                                       keypair: keypair,
                                       likes: EventCounter(our_pubkey: pubkey),
                                       boosts: EventCounter(our_pubkey: pubkey),
                                       contacts: Contacts(our_pubkey: pubkey),
-                                      profiles: Profiles(),
+                                      profiles: Profiles(user_search_cache: user_search_cache),
                                       dms: home.dms,
                                       previews: PreviewCache(),
                                       zaps: Zaps(our_pubkey: pubkey),
@@ -646,7 +647,8 @@ struct ContentView: View {
                                       replies: ReplyCounter(our_pubkey: pubkey),
                                       muted_threads: MutedThreadsManager(keypair: keypair),
                                       wallet: WalletModel(settings: settings),
-                                      nav: self.navigationCoordinator
+                                      nav: self.navigationCoordinator,
+                                      user_search_cache: user_search_cache
         )
         home.damus_state = self.damus_state!
         
@@ -876,17 +878,18 @@ func handle_unfollow(state: DamusState, notif: Notification) {
     
     let target = notif.object as! FollowTarget
     let pk = target.pubkey
+    let old_contacts = state.contacts.event
     
     if let ev = unfollow_user(postbox: state.postbox,
-                              our_contacts: state.contacts.event,
+                              our_contacts: old_contacts,
                               pubkey: state.pubkey,
                               privkey: privkey,
                               unfollow: pk) {
         notify(.unfollowed, pk)
-        
+
         state.contacts.event = ev
         state.contacts.remove_friend(pk)
-        //friend_events = friend_events.filter { $0.pubkey != pk }
+        state.user_search_cache.updateOwnContactsPetnames(id: state.pubkey, oldEvent: old_contacts, newEvent: ev)
     }
 }
 

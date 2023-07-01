@@ -612,7 +612,8 @@ func add_contact_if_friend(contacts: Contacts, ev: NostrEvent) {
     contacts.add_friend_contact(ev)
 }
 
-func load_our_contacts(contacts: Contacts, m_old_ev: NostrEvent?, ev: NostrEvent) {
+func load_our_contacts(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
+    let contacts = state.contacts
     var new_pks = Set<String>()
     // our contacts
     for tag in ev.tags {
@@ -641,6 +642,8 @@ func load_our_contacts(contacts: Contacts, m_old_ev: NostrEvent?, ev: NostrEvent
             contacts.remove_friend(pk)
         }
     }
+
+    state.user_search_cache.updateOwnContactsPetnames(id: contacts.our_pubkey, oldEvent: m_old_ev, newEvent: ev)
 }
 
 
@@ -701,7 +704,9 @@ func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: P
     }
 
     var old_nip05: String? = nil
-    if let mprof = profiles.lookup_with_timestamp(id: ev.pubkey) {
+    let mprof = profiles.lookup_with_timestamp(id: ev.pubkey)
+
+    if let mprof {
         old_nip05 = mprof.profile.nip05
         if mprof.event.created_at > ev.created_at {
             // skip if we already have an newer profile
@@ -810,7 +815,7 @@ func load_our_stuff(state: DamusState, ev: NostrEvent) {
     let m_old_ev = state.contacts.event
     state.contacts.event = ev
 
-    load_our_contacts(contacts: state.contacts, m_old_ev: m_old_ev, ev: ev)
+    load_our_contacts(state: state, m_old_ev: m_old_ev, ev: ev)
     load_our_relays(state: state, m_old_ev: m_old_ev, ev: ev)
 }
 
