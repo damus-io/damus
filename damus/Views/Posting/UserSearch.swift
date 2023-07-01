@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct SearchedUser: Identifiable {
-    let petname: String?
     let profile: Profile?
     let pubkey: String
     
@@ -28,11 +27,7 @@ struct UserSearch: View {
     @EnvironmentObject var tagModel: TagModel
     
     var users: [SearchedUser] {
-        guard let contacts = damus_state.contacts.event else {
-            return search_profiles(profiles: damus_state.profiles, search: search)
-        }
-        
-        return search_users_for_autocomplete(profiles: damus_state.profiles, tags: contacts.tags, search: search)
+        return search_profiles(profiles: damus_state.profiles, search: search)
     }
     
     func on_user_tapped(user: SearchedUser) {
@@ -97,56 +92,6 @@ struct UserSearch_Previews: PreviewProvider {
     static var previews: some View {
         UserSearch(damus_state: test_damus_state(), search: search, focusWordAttributes: $word, newCursorIndex: $newCursorIndex, postTextViewCanScroll: $postTextViewCanScroll, post: $post)
     }
-}
-
-
-func search_users_for_autocomplete(profiles: Profiles, tags: [[String]], search _search: String) -> [SearchedUser] {
-    var seen_user = Set<String>()
-    let search = _search.lowercased()
-    
-    var matches = tags.reduce(into: Array<SearchedUser>()) { arr, tag in
-        guard tag.count >= 2 && tag[0] == "p" else {
-            return
-        }
-        
-        let pubkey = tag[1]
-        guard !seen_user.contains(pubkey) else {
-            return
-        }
-        seen_user.insert(pubkey)
-        
-        var petname: String? = nil
-        if tag.count >= 4 {
-            petname = tag[3]
-        }
-        
-        let profile = profiles.lookup(id: pubkey)
-        
-        guard ((petname?.lowercased().hasPrefix(search) ?? false) ||
-            (profile?.name?.lowercased().hasPrefix(search) ?? false) ||
-            (profile?.display_name?.lowercased().hasPrefix(search) ?? false)) else {
-            return
-        }
-        
-        let searched_user = SearchedUser(petname: petname, profile: profile, pubkey: pubkey)
-        arr.append(searched_user)
-    }
-    
-    // search profile cache as well
-    for tup in profiles.enumerated() {
-        let pk = tup.element.key
-        let prof = tup.element.value.profile
-        
-        guard !seen_user.contains(pk) else {
-            continue
-        }
-        
-        if let match = profile_search_matches(profiles: profiles, profile: prof, pubkey: pk, search: search) {
-            matches.append(match)
-        }
-    }
-    
-    return matches
 }
 
 func user_tag_attr_string(profile: Profile?, pubkey: String) -> NSMutableAttributedString {

@@ -23,6 +23,12 @@ class Profiles {
     var zappers: [String: String] = [:]
     
     private let database = ProfileDatabase()
+
+    let user_search_cache: UserSearchCache
+
+    init(user_search_cache: UserSearchCache) {
+        self.user_search_cache = user_search_cache
+    }
     
     func is_validated(_ pk: String) -> NIP05? {
         validated[pk]
@@ -40,7 +46,9 @@ class Profiles {
     
     func add(id: String, profile: TimestampedProfile) {
         queue.async(flags: .barrier) {
+            let old_timestamped_profile = self.profiles[id]
             self.profiles[id] = profile
+            self.user_search_cache.updateProfile(id: id, profiles: self, oldProfile: old_timestamped_profile?.profile, newProfile: profile.profile)
         }
         
         Task {
