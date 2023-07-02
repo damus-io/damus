@@ -175,9 +175,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Respondiendo a %2$@, %3$@ &amp; %1$d más</string>
+			<string>Respondiendo a %2$@, %3$@ y %1$d más</string>
 			<key>many</key>
-			<string>Respondiendo a %2$@, %3$@ &amp; %1$d más</string>
+			<string>Respondiendo a %2$@, %3$@ y %1$d más</string>
 			<key>other</key>
 			<string>Respondiendo a %2$@, %3$@ y %1$d más</string>
 		</dict>
