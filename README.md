@@ -110,7 +110,7 @@ We have a few mailing lists that anyone can join to get involved in damus develo
 
 ### Code
 
-[Email patches][git-send-email] to patches@damus.io are preferred, but I accept PRs on GitHub as well. 10,000 sats will be rewarded for accepted patch sets sent via email. Please include a bolt11 below the `---` line after in the commit message so that you can get paid for shipping code!
+[Email patches][git-send-email] to patches@damus.io are preferred, but I accept PRs on GitHub as well. Patches sent via email may include a bolt11 lightning invoice, choosing the price you think the patch is worth, and I will pay it once the patch is accepted and if I think the price isn't unreasonable. You can also send an any-amount invoice and I will pay what I think it's worth if you prefer not to choose. You can include the bolt11 in the commit body or email so that it can be paid once it is applied.
 
 Recommended settings when submitting code via email:
 
