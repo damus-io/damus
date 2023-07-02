@@ -20,6 +20,24 @@
 			<string>... %d otras notas ...</string>
 		</dict>
 	</dict>
+	<key>followed_by_three_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Seguido por %2$@, %3$@, %4$@ y %1$d más</string>
+			<key>many</key>
+			<string>Seguido por %2$@, %3$@, %4$@ y %1$d más</string>
+			<key>other</key>
+			<string>Seguido por %2$@, %3$@, %4$@ y %1$d más</string>
+		</dict>
+	</dict>
 	<key>followers_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
