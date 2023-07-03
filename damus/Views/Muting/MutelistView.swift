@@ -42,6 +42,9 @@ struct MutelistView: View {
                 .swipeActions {
                     RemoveAction(pubkey: pubkey)
                 }
+                .onTapGesture {
+                    damus_state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
+                }
         }
         .navigationTitle(NSLocalizedString("Muted Users", comment: "Navigation title of view to see list of muted users."))
         .onAppear {

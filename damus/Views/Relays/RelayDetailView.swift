@@ -72,9 +72,10 @@ struct RelayDetailView: View {
                 
                 if let pubkey = nip11.pubkey {
                     Section(NSLocalizedString("Admin", comment: "Label to display relay contact user.")) {
-                        NavigationLink(value: Route.ProfileByKey(pubkey: pubkey), label: {
-                            UserViewRow(damus_state: state, pubkey: pubkey)
-                        })
+                        UserViewRow(damus_state: state, pubkey: pubkey)
+                            .onTapGesture {
+                                state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
+                            }
                     }
                 }
                 if let relay_connection {
