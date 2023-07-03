@@ -15,6 +15,9 @@ let fallback_zap_amount = 1000
     private var value: T
     
     init(key: String, default_value: T) {
+        if T is bool {
+            UserSettingsStore.bool_options.insert(key)
+        }
         self.key = pk_setting_key(UserSettingsStore.pubkey ?? "", key: key)
         if let loaded = UserDefaults.standard.object(forKey: self.key) as? T {
             self.value = loaded
@@ -77,6 +80,7 @@ let fallback_zap_amount = 1000
 class UserSettingsStore: ObservableObject {
     static var pubkey: String? = nil
     static var shared: UserSettingsStore? = nil
+    static var bool_options = Set<String>()
     
     @StringSetting(key: "default_wallet", default_value: .system_default_wallet)
     var default_wallet: Wallet
