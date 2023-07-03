@@ -154,14 +154,14 @@ class HomeModel {
                 print("nwc: \(resp.req_id) not found in the postbox, nothing to remove [\(relay)]")
             }
             
-            guard resp.response.error != nil else {
-                print("nwc success: \(resp.response.result.debugDescription) [\(relay)]")
-                nwc_success(state: self.damus_state, resp: resp)
+            guard resp.response.error == nil else {
+                print("nwc error: \(resp.response)")
+                nwc_error(zapcache: self.damus_state.zaps, evcache: self.damus_state.events, resp: resp)
                 return
             }
             
-            print("nwc error: \(resp.response)")
-            nwc_error(zapcache: self.damus_state.zaps, evcache: self.damus_state.events, resp: resp)
+            print("nwc success: \(resp.response.result.debugDescription) [\(relay)]")
+            nwc_success(state: self.damus_state, resp: resp)
         }
     }
     
