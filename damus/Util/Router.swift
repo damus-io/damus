@@ -78,7 +78,7 @@ enum Route: Hashable {
         case .ZapSettings(let settings):
             ZapSettingsView(settings: settings)
         case .TranslationSettings(let settings):
-            NotificationSettingsView(settings: settings)
+            TranslationSettingsView(settings: settings)
         case .SearchSettings(let settings):
             SearchSettingsView(settings: settings)
         case .Thread(let thread):
