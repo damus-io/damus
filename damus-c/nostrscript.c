@@ -97,6 +97,23 @@ static int nostr_log(struct wasm_interp *interp) {
     return 1;
 }
 
+static int nostr_set_bool(struct wasm_interp *interp) {
+    struct val *params = NULL;
+    const u16 *setting;
+    u32 val, len;
+
+    if (!get_params(interp, &params, 3) || params == NULL)
+        return 0;
+
+    if (!mem_ptr_str(interp, params[0].num.i32, (const char**)&setting))
+        return 0;
+
+    len = params[1].num.i32;
+    val = params[2].num.i32 > 0 ? 1 : 0;
+
+    return nscript_set_bool(interp, setting, len, val);
+}
+
 static int nostr_pool_send_to(struct wasm_interp *interp) {
     struct val *params = NULL;
     const u16 *req, *to;
@@ -149,6 +166,7 @@ static struct builtin nscript_builtins[] = {
     { .name = "nostr_log", .fn = nostr_log },
     { .name = "nostr_cmd", .fn = nostr_cmd },
     { .name = "nostr_pool_send_to", .fn = nostr_pool_send_to },
+    { .name = "nostr_set_bool", .fn = nostr_set_bool },
     { .name = "abort", .fn = nscript_abort },
 };
 

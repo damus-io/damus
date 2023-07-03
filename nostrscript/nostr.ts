@@ -24,6 +24,7 @@ enum Command {
 declare function nostr_log(log: string): void;
 declare function nostr_cmd(cmd: i32, val: i32, len: i32): i32;
 declare function nostr_pool_send_to(req: string, req_len: i32, to: string, to_len: i32): void;
+declare function nostr_set_bool(key: string, key_len: i32, val: i32): i32;
 
 export function pool_send(req: string): void {
 	nostr_cmd(Command.POOL_SEND, changetype<i32>(req), req.length)
@@ -50,6 +51,10 @@ export function event_get_type(ev: Event): EventType {
 export function event_get_note(ev: Event): Note {
 	if (!ev) return 0;
 	return nostr_cmd(Command.EVENT_GET_NOTE, ev, 0)
+}
+
+export function set_bool_setting(setting: string, value: boolean): i32 {
+	return nostr_set_bool(setting, setting.length, value)
 }
 
 export function note_get_kind(note: Note): u32 {

@@ -15,7 +15,7 @@ let fallback_zap_amount = 1000
     private var value: T
     
     init(key: String, default_value: T) {
-        if T is bool {
+        if T.self == Bool.self {
             UserSettingsStore.bool_options.insert(key)
         }
         self.key = pk_setting_key(UserSettingsStore.pubkey ?? "", key: key)

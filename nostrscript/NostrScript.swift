@@ -281,6 +281,23 @@ func nscript_add_relay(script: NostrScript, relay: String) -> Bool {
 }
 
 
+@_cdecl("nscript_set_bool")
+public func nscript_set_bool(interp: UnsafeMutablePointer<wasm_interp>?, setting: UnsafePointer<UInt16>, setting_len: Int32, val: Int32) -> Int32 {
+    
+    guard let setting = asm_str(cstr: setting, len: setting_len),
+          UserSettingsStore.bool_options.contains(setting)
+    else {
+        stack_push_i32(interp, 0);
+        return 1;
+    }
+    
+    let key = pk_setting_key(UserSettingsStore.pubkey ?? "", key: setting)
+    UserDefaults.standard.set(val > 0 ? true : false, forKey: key)
+    
+    stack_push_i32(interp, 1);
+    return 1;
+}
+
 @_cdecl("nscript_pool_send_to")
 public func nscript_pool_send_to(interp: UnsafeMutablePointer<wasm_interp>?, preq: UnsafePointer<UInt16>, req_len: Int32, to: UnsafePointer<UInt16>, to_len: Int32) -> Int32 {
     

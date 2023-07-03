@@ -18,6 +18,7 @@
 int nscript_load(struct wasm_parser *p, struct wasm_interp *interp, unsigned char *wasm, unsigned long len);
 int nscript_nostr_cmd(struct wasm_interp *interp, int, void*, int);
 int nscript_pool_send_to(struct wasm_interp *interp, const u16*, int, const u16 *, int);
+int nscript_set_bool(struct wasm_interp *interp, const u16*, int, int);
 
 
 #endif /* nostrscript_h */

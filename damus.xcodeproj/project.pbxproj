@@ -45,6 +45,7 @@
 		4C0A3F8F280F640A000448DE /* ThreadModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F8E280F640A000448DE /* ThreadModel.swift */; };
 		4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F92280F66F5000448DE /* ReplyMap.swift */; };
 		4C190F202A535FC200027FD5 /* CustomizeZapModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C190F1F2A535FC200027FD5 /* CustomizeZapModel.swift */; };
+		4C190F222A53950D00027FD5 /* bool_setting.wasm in Resources */ = {isa = PBXBuildFile; fileRef = 4C190F212A53950D00027FD5 /* bool_setting.wasm */; };
 		4C198DEF29F88C6B004C165C /* BlurHashEncode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C198DEB29F88C6B004C165C /* BlurHashEncode.swift */; };
 		4C198DF029F88C6B004C165C /* Readme.md in Resources */ = {isa = PBXBuildFile; fileRef = 4C198DEC29F88C6B004C165C /* Readme.md */; };
 		4C198DF129F88C6B004C165C /* License.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4C198DED29F88C6B004C165C /* License.txt */; };
@@ -468,6 +469,7 @@
 		4C0A3F8E280F640A000448DE /* ThreadModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadModel.swift; sourceTree = "<group>"; };
 		4C0A3F92280F66F5000448DE /* ReplyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyMap.swift; sourceTree = "<group>"; };
 		4C190F1F2A535FC200027FD5 /* CustomizeZapModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomizeZapModel.swift; sourceTree = "<group>"; };
+		4C190F212A53950D00027FD5 /* bool_setting.wasm */ = {isa = PBXFileReference; lastKnownFileType = file; name = bool_setting.wasm; path = nostrscript/bool_setting.wasm; sourceTree = SOURCE_ROOT; };
 		4C198DEB29F88C6B004C165C /* BlurHashEncode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlurHashEncode.swift; sourceTree = "<group>"; };
 		4C198DEC29F88C6B004C165C /* Readme.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Readme.md; sourceTree = "<group>"; };
 		4C198DED29F88C6B004C165C /* License.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = License.txt; sourceTree = "<group>"; };
@@ -1027,6 +1029,7 @@
 		4C4F14AA2A2A76270045A0B9 /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
+				4C190F212A53950D00027FD5 /* bool_setting.wasm */,
 				4C4F14AB2A2A763B0045A0B9 /* primal.wasm */,
 			);
 			path = Fixtures;
@@ -1717,6 +1720,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C190F222A53950D00027FD5 /* bool_setting.wasm in Resources */,
 				4C4F14AC2A2A763B0045A0B9 /* primal.wasm in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
