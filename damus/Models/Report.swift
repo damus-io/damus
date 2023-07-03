@@ -7,11 +7,27 @@
 
 import Foundation
 
-enum ReportType: String {
-    case explicit
-    case illegal
+enum ReportType: String, CustomStringConvertible, CaseIterable {
     case spam
+    case nudity
+    case profanity
+    case illegal
     case impersonation
+
+    var description: String {
+        switch self {
+        case .spam:
+            return NSLocalizedString("Spam", comment: "Description of report type for spam.")
+        case .nudity:
+            return NSLocalizedString("Nudity", comment: "Description of report type for nudity.")
+        case .profanity:
+            return NSLocalizedString("Profanity", comment: "Description of report type for profanity.")
+        case .illegal:
+            return NSLocalizedString("Illegal Content", comment: "Description of report type for illegal content.")
+        case .impersonation:
+            return NSLocalizedString("Impersonation", comment: "Description of report type for impersonation.")
+        }
+    }
 }
 
 struct ReportNoteTarget {
@@ -31,16 +47,12 @@ struct Report {
 }
 
 func create_report_tags(target: ReportTarget, type: ReportType) -> [[String]] {
-    var tags: [[String]]
     switch target {
     case .user(let pubkey):
-        tags = [["p", pubkey]]
+        return [["p", pubkey, type.rawValue]]
     case .note(let notet):
-        tags = [["e", notet.note_id], ["p", notet.pubkey]]
+        return [["e", notet.note_id, type.rawValue], ["p", notet.pubkey]]
     }
-    
-    tags.append(["report", type.rawValue])
-    return tags
 }
 
 func create_report_event(privkey: String, report: Report) -> NostrEvent? {
