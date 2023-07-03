@@ -50,18 +50,18 @@ extension Trie {
         }
 
         // Perform breadth-first search from matching branch and collect values from all descendants.
-        var exactMatches = Set<V>()
-        var substringMatches = Set<V>()
-        var queue = [currentNode]
+        let exactMatches = Array(currentNode.exactMatchValues)
+        var substringMatches = Set<V>(currentNode.substringMatchValues)
+        var queue = Array(currentNode.children.values)
 
         while !queue.isEmpty {
             let node = queue.removeFirst()
-            exactMatches.formUnion(node.exactMatchValues)
+            substringMatches.formUnion(node.exactMatchValues)
             substringMatches.formUnion(node.substringMatchValues)
             queue.append(contentsOf: node.children.values)
         }
 
-        return Array(exactMatches) + substringMatches
+        return exactMatches + substringMatches
     }
 
     /// Inserts value of type V into this trie for the specified key. This function stores all substring endings of the key, not only the key itself.
