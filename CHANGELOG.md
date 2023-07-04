@@ -1,3 +1,29 @@
+## [1.6] - 2023-07-04
+
+### Added
+
+- Speed up user search (Terry Yiu)
+- Add post button to profile pages (William Casarin)
+- Add post button when logged in with private key and on own profile view (Terry Yiu)
+
+### Changed
+
+- Drop iOS15 support (Scott Penrose)
+
+### Fixed
+
+- Load more content on profile view (William Casarin)
+- Fix reports to conform to NIP-56 (Terry Yiu)
+- Fix profile navigation bugs from muted users list and relay list views (Terry Yiu)
+- Fix navigation to translation settings view (Terry Yiu)
+- Fixed all navigation issues (Scott Penrose)
+- Disable post button when media upload in progress (Terry Yiu)
+- Fix taps on mentions in note drafts to not redirect to other Nostr clients (Terry Yiu)
+- Fix missing profile zap notification text (Terry Yiu)
+
+
+[1.6]: https://github.com/damus-io/damus/releases/tag/v1.6
+
 ## [1.5-5] - 2023-06-24
 
 ### Fixed
