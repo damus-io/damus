@@ -38,6 +38,7 @@ class ScriptModel: ObservableObject {
         self.state = state
     }
     
+    @MainActor
     func run() async {
         guard case .loaded(let script) = state else {
             return
