@@ -837,4 +837,14 @@ static INLINE struct callframe *top_callframes(struct cursor *cur, int top)
     return (struct callframe*)cursor_topn(cur, sizeof(struct callframe), top);
 }
 
+static INLINE int was_section_parsed(struct module *module,
+    enum section_tag section)
+{
+    if (section == section_custom)
+        return module->custom_sections > 0;
+
+    return module->parsed & (1 << section);
+}
+
+
 #endif /* PROTOVERSE_WASM_H */

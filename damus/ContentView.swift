@@ -224,6 +224,12 @@ struct ContentView: View {
         navigationCoordinator.push(route: Route.Wallet(wallet: damus_state!.wallet))
     }
     
+    func open_script(_ script: [UInt8]) {
+        print("pushing script nav")
+        let model = ScriptModel(data: script, state: .not_loaded)
+        navigationCoordinator.push(route: Route.Script(script: model))
+    }
+    
     func open_profile(id: String) {
         let profile_model = ProfileModel(pubkey: id, damus: damus_state!)
         let followers = FollowersModel(damus_state: damus_state!, target: id)
@@ -331,7 +337,9 @@ struct ContentView: View {
                 case .filter(let filt): self.open_search(filt: filt)
                 case .profile(let id):  self.open_profile(id: id)
                 case .event(let ev):    self.open_event(ev: ev)
-                case .wallet_connect(let nwc): self.open_wallet(nwc: nwc)}
+                case .wallet_connect(let nwc): self.open_wallet(nwc: nwc)
+                case .script(let data): self.open_script(data)
+                }
             }
         }
         .onReceive(handle_notify(.compose)) { notif in
@@ -946,6 +954,7 @@ enum OpenResult {
     case filter(NostrFilter)
     case event(NostrEvent)
     case wallet_connect(WalletConnectURL)
+    case script([UInt8])
 }
 
 func on_open_url(state: DamusState, url: URL, result: @escaping (OpenResult?) -> Void) {
@@ -973,5 +982,9 @@ func on_open_url(state: DamusState, url: URL, result: @escaping (OpenResult?) ->
         result(.filter(filt))
         break
         // TODO: handle filter searches?
+    case .script(let script):
+        result(.script(script))
+        break
     }
 }
+

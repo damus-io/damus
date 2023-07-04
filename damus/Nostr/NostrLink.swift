@@ -11,6 +11,7 @@ import Foundation
 enum NostrLink: Equatable {
     case ref(ReferencedId)
     case filter(NostrFilter)
+    case script([UInt8])
 }
 
 func encode_pubkey_uri(_ ref: ReferencedId) -> String {
@@ -105,6 +106,8 @@ func decode_nostr_bech32_uri(_ s: String) -> NostrLink? {
         return .ref(ReferencedId(ref_id: pubkey, relay_id: nil, key: "p"))
     case .note(let id):
         return .ref(ReferencedId(ref_id: id, relay_id: nil, key: "e"))
+    case .nscript(let data):
+        return .script(data)
     }
 }
 

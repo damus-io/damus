@@ -12,6 +12,7 @@ enum Bech32Object {
     case nsec(String)
     case npub(String)
     case note(String)
+    case nscript([UInt8])
     
     static func parse(_ str: String) -> Bech32Object? {
         guard let decoded = try? bech32_decode(str) else {
@@ -24,6 +25,8 @@ enum Bech32Object {
             return .nsec(hex_encode(decoded.data))
         } else if decoded.hrp == "note" {
             return .note(hex_encode(decoded.data))
+        } else if decoded.hrp == "nscript" {
+            return .nscript(decoded.data.bytes)
         }
         
         return nil

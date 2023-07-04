@@ -41,21 +41,29 @@ enum NostrScriptLoadResult {
     case loaded(wasm_interp)
 }
 
+enum NostrScriptError: Error {
+    case not_loaded
+}
+
 class NostrScript {
     private var interp: wasm_interp
     private var parser: wasm_parser
     var waiting_on: NScriptWaiting?
+    var loaded: Bool
+    var data: [UInt8]
     
     private(set) var runstate: NostrScriptRunResult?
     private(set) var pool: RelayPool
     private(set) var event: NostrResponse?
     
-    init(pool: RelayPool) {
+    init(pool: RelayPool, data: [UInt8]) {
         self.interp = wasm_interp()
         self.parser = wasm_parser()
         self.pool = pool
         self.event = nil
         self.runstate = nil
+        self.loaded = false
+        self.data = data
     }
     
     deinit {
@@ -80,15 +88,37 @@ class NostrScript {
         }
     }
     
-    func test(_ str: String) {
-        print("hello from \(str)")
+    func imports() -> [String] {
+        guard self.loaded,
+              was_section_parsed(interp.module, section_import) > 0,
+              let module = maybe_pointee(interp.module)
+        else {
+            return []
+        }
+        
+        var imports = [String]()
+        
+        var i = 0
+        while i < module.import_section.num_imports {
+            let imp = module.import_section.imports[i]
+            
+            imports.append(String(cString: imp.name))
+            
+            i += 1
+        }
+        
+        return imports
     }
     
-    func load(wasm: inout [UInt8]) -> NostrScriptLoadErr? {
-        switch nscript_load(&parser, &interp, &wasm, UInt(wasm.count))  {
+    func load() -> NostrScriptLoadErr? {
+        guard !loaded else {
+            return nil
+        }
+        switch nscript_load(&parser, &interp, &self.data, UInt(data.count))  {
         case NSCRIPT_LOADED:
             print("load num_exports \(interp.module.pointee.export_section.num_exports)")
             interp.context = Unmanaged.passUnretained(self).toOpaque()
+            self.loaded = true
             return nil
         case NSCRIPT_INIT_ERR:
             return .module_init
@@ -292,7 +322,9 @@ public func nscript_set_bool(interp: UnsafeMutablePointer<wasm_interp>?, setting
     }
     
     let key = pk_setting_key(UserSettingsStore.pubkey ?? "", key: setting)
-    UserDefaults.standard.set(val > 0 ? true : false, forKey: key)
+    let b = val > 0 ? true : false
+    print("nscript setting bool setting \(setting) to \(b)")
+    UserDefaults.standard.set(b, forKey: key)
     
     stack_push_i32(interp, 1);
     return 1;
@@ -316,7 +348,7 @@ public func nscript_pool_send_to(interp: UnsafeMutablePointer<wasm_interp>?, pre
 }
 
 func nscript_pool_send(script: NostrScript, req req_str: String) -> Int32 {
-    script.test("pool_send: '\(req_str)'")
+    //script.test("pool_send: '\(req_str)'")
     
     DispatchQueue.main.sync {
         script.pool.send_raw(.custom(req_str), skip_ephemeral: false)

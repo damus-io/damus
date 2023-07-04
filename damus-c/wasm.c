@@ -753,15 +753,6 @@ static char *instr_name(enum instr_tag tag)
 	return unk;
 }
 
-static INLINE int was_section_parsed(struct module *module,
-	enum section_tag section)
-{
-	if (section == section_custom)
-		return module->custom_sections > 0;
-
-    return module->parsed & (1 << section);
-}
-
 static INLINE int was_name_section_parsed(struct module *module,
 		enum name_subsection_tag subsection)
 {
@@ -1322,7 +1313,7 @@ static int parse_valtype(struct wasm_parser *p, enum valtype *valtype)
 	}
 
 	if (unlikely(!is_valtype((unsigned char)*valtype))) {
-		cursor_print_around(&p->cur, 10);
+		//cursor_print_around(&p->cur, 10);
 		p->cur.p = start;
 		return parse_err(p, "0x%02x is not a valid valtype tag", *valtype);
 	}
@@ -1684,7 +1675,7 @@ static int parse_reftype(struct wasm_parser *p, enum reftype *reftype)
 	}
 
 	if (!is_valid_reftype(tag)) {
-		cursor_print_around(&p->cur, 10);
+		//cursor_print_around(&p->cur, 10);
 		parse_err(p, "invalid reftype: 0x%02x", tag);
 		return 0;
 	}
@@ -2176,6 +2167,7 @@ static int parse_const_expr(struct expr_parser *p, struct expr *expr)
 		}
 
 		if (unlikely(!is_const_instr(tag))) {
+            //cursor_print_around(p->code, 20);
 			return note_error(p->errs, p->code,
 					"invalid const expr instruction: '%s'",
 					instr_name(tag));
@@ -2551,7 +2543,7 @@ static int parse_wdata(struct wasm_parser *p, struct wdata *data)
 	}
 
 	if (tag > 2) {
-		cursor_print_around(&p->cur, 10);
+		//cursor_print_around(&p->cur, 10);
 		return parse_err(p, "invalid datasegment tag: 0x%x", tag);
 	}
 

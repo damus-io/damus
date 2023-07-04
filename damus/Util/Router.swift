@@ -16,6 +16,7 @@ enum Route: Hashable {
     case Following(following: FollowingModel)
     case MuteList(users: [String])
     case RelayConfig
+    case Script(script: ScriptModel)
     case Bookmarks
     case Config
     case EditMetadata
@@ -105,6 +106,8 @@ enum Route: Hashable {
             WalletScannerView(result: walletScanResult)
         case .FollowersYouKnow(let friendedFollowers, let followers):
             FollowersYouKnowView(damus_state: damusState, friended_followers: friendedFollowers, followers: followers)
+        case .Script(let load_model):
+            LoadScript(pool: damusState.pool, model: load_model)
         }
     }
 
@@ -172,8 +175,10 @@ enum Route: Hashable {
             return true
         case (.FollowersYouKnow(_, _), .FollowersYouKnow(_, _)):
             return true
+        case (.Script(_), .Script(_)):
+            return true
         default:
-            return false
+            return true
         }
     }
 
@@ -259,6 +264,9 @@ enum Route: Hashable {
             hasher.combine("followersYouKnow")
             hasher.combine(friendedFollowers)
             hasher.combine(followers.sub_id)
+        case .Script(let model):
+            hasher.combine("script")
+            hasher.combine(model.data.count)
         }
     }
 }
