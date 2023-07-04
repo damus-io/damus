@@ -59,11 +59,7 @@ struct BuilderEventView: View {
     
     func load() {
         subscribe(filters: [
-            NostrFilter(ids: [self.event_id], limit: 1),
-            NostrFilter(
-                kinds: [.zap],
-                referenced_ids: [self.event_id]
-            )
+            NostrFilter(ids: [self.event_id], limit: 1)
         ])
     }
     
