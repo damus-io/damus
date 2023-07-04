@@ -8,7 +8,7 @@
 import Foundation
 
 class Zaps {
-    var zaps: [String: Zapping]
+    private(set) var zaps: [String: Zapping]
     let our_pubkey: String
     var our_zaps: [String: [Zapping]]
     
