@@ -19,8 +19,9 @@ final class UserSearchCacheTests: XCTestCase {
 
         if let keypair {
             let pubkey = keypair.pubkey
+            let validatedNip05 = try XCTUnwrap(NIP05.parse(nip05))
 
-            damusState.profiles.validated[pubkey] = NIP05.parse(nip05)
+            damusState.profiles.set_validated(pubkey, nip05: validatedNip05)
 
             let profile = Profile(name: "tyiu", display_name: "Terry Yiu", about: nil, picture: nil, banner: nil, website: nil, lud06: nil, lud16: nil, nip05: nip05, damus_donation: nil)
             let timestampedProfile = TimestampedProfile(profile: profile, timestamp: 0, event: test_event)
@@ -50,7 +51,9 @@ final class UserSearchCacheTests: XCTestCase {
         let keypair = try XCTUnwrap(keypair)
 
         let newNip05 = "_@other.xyz"
-        damusState.profiles.validated[keypair.pubkey] = NIP05.parse(newNip05)
+        let validatedNewNip05 = try XCTUnwrap(NIP05.parse(newNip05))
+
+        damusState.profiles.set_validated(keypair.pubkey, nip05: NIP05.parse(newNip05))
 
         let newProfile = Profile(name: "whoami", display_name: "T-DAWG", about: nil, picture: nil, banner: nil, website: nil, lud06: nil, lud16: nil, nip05: newNip05, damus_donation: nil)
         let newTimestampedProfile = TimestampedProfile(profile: newProfile, timestamp: 1000, event: test_event)

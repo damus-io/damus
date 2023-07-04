@@ -194,7 +194,6 @@ func search_profiles(profiles: Profiles, search: String) -> [SearchedUser] {
     let matched_pubkeys = profiles.user_search_cache.search(key: new)
 
     return matched_pubkeys
-        .map { ($0, profiles.lookup(id: $0)) }
-        .filter { $1 != nil }
-        .map { SearchedUser(profile: $1, pubkey: $0) }
+        .map { SearchedUser(profile: profiles.lookup(id: $0), pubkey: $0) }
+        .filter { $0.profile != nil }
 }

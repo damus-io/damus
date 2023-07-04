@@ -726,7 +726,7 @@ func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: P
             }
             
             Task { @MainActor in
-                profiles.validated[ev.pubkey] = validated
+                profiles.set_validated(ev.pubkey, nip05: validated)
                 profiles.nip05_pubkey[nip05] = ev.pubkey
                 notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
             }

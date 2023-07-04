@@ -50,7 +50,6 @@ extension Trie {
         }
 
         // Perform breadth-first search from matching branch and collect values from all descendants.
-        let exactMatches = Array(currentNode.exactMatchValues)
         var substringMatches = Set<V>(currentNode.substringMatchValues)
         var queue = Array(currentNode.children.values)
 
@@ -61,7 +60,8 @@ extension Trie {
             queue.append(contentsOf: node.children.values)
         }
 
-        return exactMatches + substringMatches
+        // Prioritize exact matches to be returned first, and then remove exact matches from the set of partial substring matches that are appended afterward.
+        return Array(currentNode.exactMatchValues) + (substringMatches.subtracting(currentNode.exactMatchValues))
     }
 
     /// Inserts value of type V into this trie for the specified key. This function stores all substring endings of the key, not only the key itself.

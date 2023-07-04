@@ -13,12 +13,16 @@ class Profiles {
     
     /// This queue is used to synchronize access to the profiles dictionary, which
     /// prevents data races from crashing the app.
-    private var queue = DispatchQueue(label: "io.damus.profiles",
+    private var profiles_queue = DispatchQueue(label: "io.damus.profiles",
                                       qos: .userInteractive,
                                       attributes: .concurrent)
+
+    private var validated_queue = DispatchQueue(label: "io.damus.profiles.validated",
+                                                  qos: .userInteractive,
+                                                  attributes: .concurrent)
     
     private var profiles: [String: TimestampedProfile] = [:]
-    var validated: [String: NIP05] = [:]
+    private var validated: [String: NIP05] = [:]
     var nip05_pubkey: [String: String] = [:]
     var zappers: [String: String] = [:]
     
@@ -31,11 +35,19 @@ class Profiles {
     }
     
     func is_validated(_ pk: String) -> NIP05? {
-        validated[pk]
+        validated_queue.sync {
+            validated[pk]
+        }
+    }
+
+    func set_validated(_ pk: String, nip05: NIP05?) {
+        validated_queue.async(flags: .barrier) {
+            self.validated[pk] = nip05
+        }
     }
     
     func enumerated() -> EnumeratedSequence<[String: TimestampedProfile]> {
-        return queue.sync {
+        return profiles_queue.sync {
             return profiles.enumerated()
         }
     }
@@ -45,7 +57,7 @@ class Profiles {
     }
     
     func add(id: String, profile: TimestampedProfile) {
-        queue.async(flags: .barrier) {
+        profiles_queue.async(flags: .barrier) {
             let old_timestamped_profile = self.profiles[id]
             self.profiles[id] = profile
             self.user_search_cache.updateProfile(id: id, profiles: self, oldProfile: old_timestamped_profile?.profile, newProfile: profile.profile)
@@ -62,14 +74,14 @@ class Profiles {
     
     func lookup(id: String) -> Profile? {
         var profile: Profile?
-        queue.sync {
+        profiles_queue.sync {
             profile = profiles[id]?.profile
         }
         return profile ?? database.get(id: id)
     }
     
     func lookup_with_timestamp(id: String) -> TimestampedProfile? {
-        queue.sync {
+        profiles_queue.sync {
             return profiles[id]
         }
     }
@@ -77,7 +89,7 @@ class Profiles {
     func has_fresh_profile(id: String) -> Bool {
         // check memory first
         var profile: Profile?
-        queue.sync {
+        profiles_queue.sync {
             profile = profiles[id]?.profile
         }
         if profile != nil {
