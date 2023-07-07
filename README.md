@@ -117,7 +117,6 @@ Recommended settings when submitting code via email:
 ```
 $ git config sendemail.to "patches@damus.io"
 $ git config format.subjectPrefix "PATCH damus"
-$ git config --global sendemail.annotate yes
 $ git config format.signOff yes
 ```
  
