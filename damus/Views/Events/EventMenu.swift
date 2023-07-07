@@ -13,12 +13,13 @@ struct EventMenuContext: View {
     let target_pubkey: String
     let bookmarks: BookmarksManager
     let muted_threads: MutedThreadsManager
+    @ObservedObject var settings: UserSettingsStore
     
     var body: some View {
         HStack {
             Menu {
 
-                MenuItems(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks, muted_threads: muted_threads)
+                MenuItems(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks, muted_threads: muted_threads, settings: settings)
                 
             } label: {
                 Label("", systemImage: "ellipsis")
@@ -36,11 +37,12 @@ struct MenuItems: View {
     let target_pubkey: String
     let bookmarks: BookmarksManager
     let muted_threads: MutedThreadsManager
+    @ObservedObject var settings: UserSettingsStore
     
     @State private var isBookmarked: Bool = false
     @State private var isMutedThread: Bool = false
     
-    init(event: NostrEvent, keypair: Keypair, target_pubkey: String, bookmarks: BookmarksManager, muted_threads: MutedThreadsManager) {
+    init(event: NostrEvent, keypair: Keypair, target_pubkey: String, bookmarks: BookmarksManager, muted_threads: MutedThreadsManager, settings: UserSettingsStore) {
         let bookmarked = bookmarks.isBookmarked(event)
         self._isBookmarked = State(initialValue: bookmarked)
 
@@ -52,6 +54,7 @@ struct MenuItems: View {
         self.event = event
         self.keypair = keypair
         self.target_pubkey = target_pubkey
+        self.settings = settings
     }
     
     var body: some View {
@@ -75,10 +78,12 @@ struct MenuItems: View {
                 Label(NSLocalizedString("Copy note ID", comment: "Context menu option for copying the ID of the note."), image: "note-book")
             }
 
-            Button {
-                UIPasteboard.general.string = event_to_json(ev: event)
-            } label: {
-                Label(NSLocalizedString("Copy note JSON", comment: "Context menu option for copying the JSON text from the note."), image: "code.on.square")
+            if settings.developer_mode {
+                Button {
+                    UIPasteboard.general.string = event_to_json(ev: event)
+                } label: {
+                    Label(NSLocalizedString("Copy note JSON", comment: "Context menu option for copying the JSON text from the note."), image: "code.on.square")
+                }
             }
             
             Button {
