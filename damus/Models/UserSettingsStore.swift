@@ -157,6 +157,9 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "donation_percent", default_value: 0)
     var donation_percent: Int
+    
+    @Setting(key: "developer_mode", default_value: false)
+    var developer_mode: Bool
 
     // Helper for inverse of disable_animation.
     // disable_animation was introduced as a setting first, but it's more natural for the settings UI to show the inverse.

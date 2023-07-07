@@ -59,6 +59,10 @@ struct ConfigView: View {
                     NavigationLink(value: Route.TranslationSettings(settings: settings)) {
                         IconLabel(NSLocalizedString("Translation", comment: "Section header for text and appearance settings"), img_name: "globe", color: .green)
                     }
+                    
+                    NavigationLink(value: Route.DeveloperSettings(settings: settings)) {
+                        IconLabel(NSLocalizedString("Developer", comment: "Section header for developer settings"), img_name: "magic-stick2.fill", color: .black)
+                    }
                 }
 
                 Section(NSLocalizedString("Sign Out", comment: "Section title for signing out")) {

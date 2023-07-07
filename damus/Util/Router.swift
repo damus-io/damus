@@ -28,6 +28,7 @@ enum Route: Hashable {
     case ZapSettings(settings: UserSettingsStore)
     case TranslationSettings(settings: UserSettingsStore)
     case SearchSettings(settings: UserSettingsStore)
+    case DeveloperSettings(settings: UserSettingsStore)
     case Thread(thread: ThreadModel)
     case Reposts(reposts: RepostsModel)
     case Reactions(reactions: ReactionsModel)
@@ -82,6 +83,8 @@ enum Route: Hashable {
             TranslationSettingsView(settings: settings)
         case .SearchSettings(let settings):
             SearchSettingsView(settings: settings)
+        case .DeveloperSettings(let settings):
+            DeveloperSettingsView(settings: settings)
         case .Thread(let thread):
             ThreadView(state: damusState, thread: thread)
         case .Reposts(let reposts):
@@ -230,6 +233,8 @@ enum Route: Hashable {
             hasher.combine("translationSettings")
         case .SearchSettings(_):
             hasher.combine("searchSettings")
+        case .DeveloperSettings:
+            hasher.combine("developerSettings")
         case .Thread(let threadModel):
             hasher.combine("thread")
             hasher.combine(threadModel.event.id)
