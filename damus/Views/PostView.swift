@@ -195,7 +195,8 @@ struct PostView: View {
         }
         
         let profile = damus_state.profiles.lookup(id: pubkey)
-        return user_tag_attr_string(profile: profile, pubkey: pubkey)
+        let bech32_pubkey = bech32_pubkey(pubkey) ?? ""
+        return user_tag_attr_string(profile: profile, pubkey: bech32_pubkey)
     }
     
     func clear_draft() {
