@@ -37,7 +37,7 @@ struct ConfigView: View {
             Form {
                 Section {
                     NavigationLink(value: Route.KeySettings(keypair: state.keypair)) {
-                        IconLabel(NSLocalizedString("Keys", comment: "Settings section for managing keys"), img_name: "key", color: .purple)
+                        IconLabel(NSLocalizedString("Keys", comment: "Settings section for managing keys"), img_name: "Key", color: .purple)
                     }
 
                     NavigationLink(value: Route.AppearanceSettings(settings: settings)) {
@@ -45,7 +45,7 @@ struct ConfigView: View {
                     }
 
                     NavigationLink(value: Route.SearchSettings(settings: settings)) {
-                        IconLabel(NSLocalizedString("Search/Universe", comment: "Section header for search/universe settings"), img_name: "magnifyingglass", color: .red)
+                        IconLabel(NSLocalizedString("Search/Universe", comment: "Section header for search/universe settings"), img_name: "search", color: .red)
                     }
 
                     NavigationLink(value: Route.NotificationSettings(settings: settings)) {
