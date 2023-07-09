@@ -61,15 +61,15 @@ struct ZapTypePicker: View {
                     }
                 }
             }
-            ZapTypeSelection(text: "Public", comment: "Picker option to indicate that a zap should be sent publicly and identify the user as who sent it.", img: "globe", action: {zap_type = ZapType.pub}, type: ZapType.pub)
-            ZapTypeSelection(text: "Private", comment: "Picker option to indicate that a zap should be sent privately and not identify the user to the public.", img: "lock", action: {zap_type = ZapType.priv}, type: ZapType.priv)
-            ZapTypeSelection(text: "Anonymous", comment: "Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.", img: "question", action: {zap_type = ZapType.anon}, type: ZapType.anon)
-            ZapTypeSelection(text: "None", comment: "Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.", img: "zap", action: {zap_type = ZapType.non_zap}, type: ZapType.non_zap)
+            ZapTypeSelection(text: NSLocalizedString("Public", comment: "Picker option to indicate that a zap should be sent publicly and identify the user as who sent it."), img: "globe", action: {zap_type = ZapType.pub}, type: ZapType.pub)
+            ZapTypeSelection(text: NSLocalizedString("Private", comment: "Picker option to indicate that a zap should be sent privately and not identify the user to the public."), img: "lock", action: {zap_type = ZapType.priv}, type: ZapType.priv)
+            ZapTypeSelection(text: NSLocalizedString("Anonymous", comment: "Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it."), img: "question", action: {zap_type = ZapType.anon}, type: ZapType.anon)
+            ZapTypeSelection(text: NSLocalizedString("None", comment: "Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap."), img: "zap", action: {zap_type = ZapType.non_zap}, type: ZapType.non_zap)
         }
         .padding(.horizontal)
     }
     
-    func ZapTypeSelection(text: LocalizedStringKey, comment: StaticString, img: String, action: @escaping () -> (), type: ZapType) -> some View {
+    func ZapTypeSelection(text: String, img: String, action: @escaping () -> (), type: ZapType) -> some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 5) {
                 HStack {
@@ -79,14 +79,15 @@ struct ZapTypePicker: View {
                         .frame(width: 20, height: 20)
                         .foregroundColor(.gray)
                     
-                    Text(text, comment: comment)
+                    Text(text)
                         .font(.system(size: 20, weight: .semibold))
                     
                     Spacer()
                 }
                 .padding(.horizontal)
-                
-                Text(zap_type_desc(type: type, profiles: profiles, pubkey: pubkey))
+
+                let zapTypeDescription = zap_type_desc(type: type, profiles: profiles, pubkey: pubkey)
+                Text(zapTypeDescription)
                     .padding(.horizontal)
                     .foregroundColor(.gray)
                     .font(.system(size: 16))

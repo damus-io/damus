@@ -80,6 +80,11 @@ class ScriptModel: ObservableObject {
     }
 }
 
+func imports_string(_ count: Int, locale: Locale = Locale.current) -> String {
+    let format = localizedStringFormat(key: "imports_count", locale: locale)
+    return String(format: format, locale: locale, count)
+}
+
 struct LoadScript: View {
     let pool: RelayPool
     
@@ -89,10 +94,9 @@ struct LoadScript: View {
         ScrollView {
             VStack {
                 let imports = script.script.imports()
-                
-                (Text(verbatim: "\(imports.count)") +
-                 Text(" Imports"))
-                    .font(.title)
+
+                let nounText = Text(verbatim: imports_string(imports.count)).font(.title)
+                Text("\(Text(verbatim: imports.count.formatted())) \(nounText)", comment: "Sentence composed of 2 variables to describe how many imports were performed from loading a NostrScript. In source English, the first variable is the number of imports, and the second variable is 'Import' or 'Imports'.")
                 
                 ForEach(imports.indices, id: \.self) { ind in
                     Text(imports[ind])
@@ -100,25 +104,25 @@ struct LoadScript: View {
                 
                 switch script.state {
                 case .loaded:
-                    BigButton("Run") {
+                    BigButton(NSLocalizedString("Run", comment: "Button that runs a NostrScript.")) {
                         Task {
                             await model.run()
                         }
                     }
                 case .running:
-                    Text("Running...")
+                    Text("Running...", comment: "Indication that the execution of a NostrScript is running.")
                 case .ran(let result):
                     switch result {
                     case .runtime_err(let errs):
-                        Text("Runtime error")
+                        Text("Runtime error", comment: "Indication that a runtime error occurred when running a NostrScript.")
                             .font(.title2)
                         ForEach(errs.indices, id: \.self) { ind in
                             Text(verbatim: errs[ind])
                         }
                     case .suspend:
-                        Text("Ran to suspension.")
+                        Text("Ran to suspension.", comment: "Indication that a NostrScript was run until it reached a suspended state.")
                     case .finished(let code):
-                        Text("Executed successfuly, returned with code \(code)")
+                        Text("Executed successfully, returned with code \(code.description)", comment: "Indication that the execution of running a NostrScript finished successfully, while providing a numeric return code.")
                     }
                 }
             }
@@ -138,13 +142,13 @@ struct LoadScript: View {
                 ScriptView(loaded)
             case .failed(let load_err):
                 VStack(spacing: 20) {
-                    Text("NostrScript Error")
+                    Text("NostrScript Error", comment: "Text indicating that there was an error with loading NostrScript. There is a more descriptive error message shown separately underneath.")
                         .font(.title)
                     switch load_err {
                     case .parse:
-                        Text("Failed to parse")
+                        Text("Failed to parse", comment: "NostrScript error message when it fails to parse a script.")
                     case .module_init:
-                        Text("Failed to initialize")
+                        Text("Failed to initialize", comment: "NostrScript error message when it fails to initialize a module.")
                     }
                 }
             }
@@ -152,7 +156,7 @@ struct LoadScript: View {
         .task {
             await model.load(pool: self.pool)
         }
-        .navigationTitle("NostrScript")
+        .navigationTitle(NSLocalizedString("NostrScript", comment: "Navigation title for the view showing NostrScript."))
     }
 }
 

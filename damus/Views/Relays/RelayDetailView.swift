@@ -126,7 +126,7 @@ struct RelayDetailView: View {
                 }
                 
                 if state.settings.developer_mode, let log_contents = log.contents {
-                    Section("Log") {
+                    Section(NSLocalizedString("Log", comment: "Label to display developer mode logs.")) {
                         Text(log_contents)
                             .font(.system(size: 13))
                             .lineLimit(nil)

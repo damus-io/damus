@@ -452,7 +452,8 @@ struct ProfileView: View {
                     NavigationLink(value: Route.FollowersYouKnow(friendedFollowers: friended_followers, followers: followers)) {
                         HStack {
                             CondensedProfilePicturesView(state: damus_state, pubkeys: friended_followers, maxPictures: 3)
-                            Text(followedByString(friended_followers, profiles: damus_state.profiles))
+                            let followedByString = followedByString(friended_followers, profiles: damus_state.profiles)
+                            Text(followedByString)
                                 .font(.subheadline).foregroundColor(.gray)
                                 .multilineTextAlignment(.leading)
                         }
