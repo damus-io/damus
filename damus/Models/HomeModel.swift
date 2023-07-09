@@ -1238,11 +1238,21 @@ enum ProcessZapResult {
 
 func process_zap_event(damus_state: DamusState, ev: NostrEvent, completion: @escaping (ProcessZapResult) -> Void) {
     // These are zap notifications
-    guard let ptag = event_tag(ev, name: "p") else {
+    let etag = event_tag(ev, name: "e")
+
+    var ptag: String? = nil
+    if let etag {
+        // we can't trust the p tag on note zaps because they can be faked
+        ptag = damus_state.events.lookup(etag)?.pubkey
+    } else {
+        ptag = event_tag(ev, name: "p")
+    }
+
+    guard let ptag else {
         completion(.failed)
         return
     }
-    
+
     // just return the zap if we already have it
     if let zap = damus_state.zaps.zaps[ev.id], case .zap(let z) = zap {
         completion(.already_processed(z))
