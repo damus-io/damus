@@ -29,7 +29,7 @@ struct RelayToggle: View {
             if let relay_connection {
                 RelayStatusView(connection: relay_connection)
             }
-            RelayType(is_paid: state.relay_metadata.lookup(relay_id: relay_id)?.is_paid ?? false)
+            RelayType(is_paid: state.relay_model_cache.model(with_relay_id: relay_id)?.metadata.is_paid ?? false)
             Toggle(relay_id, isOn: toggle_binding(relay_id: relay_id))
                 .toggleStyle(SwitchToggleStyle(tint: .accentColor))
         }

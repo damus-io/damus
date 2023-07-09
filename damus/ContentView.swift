@@ -609,7 +609,7 @@ struct ContentView: View {
 
     func connect() {
         let pool = RelayPool()
-        let metadatas = RelayMetadatas()
+        let model_cache = RelayModelCache()
         let relay_filters = RelayFilters(our_pubkey: pubkey)
         let bootstrap_relays = load_bootstrap_relays(pubkey: pubkey)
         
@@ -617,7 +617,7 @@ struct ContentView: View {
         for relay in bootstrap_relays {
             if let url = RelayURL(relay) {
                 let descriptor = RelayDescriptor(url: url, info: .rw)
-                add_new_relay(relay_filters: relay_filters, metadatas: metadatas, pool: pool, descriptor: descriptor, new_relay_filters: new_relay_filters)
+                add_new_relay(model_cache: model_cache, relay_filters: relay_filters, pool: pool, descriptor: descriptor, new_relay_filters: new_relay_filters)
             }
         }
         
@@ -646,7 +646,7 @@ struct ContentView: View {
                                       lnurls: LNUrls(),
                                       settings: settings,
                                       relay_filters: relay_filters,
-                                      relay_metadata: metadatas,
+                                      relay_model_cache: model_cache,
                                       drafts: Drafts(),
                                       events: EventCache(),
                                       bookmarks: BookmarksManager(pubkey: pubkey),

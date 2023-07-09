@@ -25,9 +25,9 @@ struct RelayView: View {
                     }
                 }
                 
-                RelayType(is_paid: state.relay_metadata.lookup(relay_id: relay)?.is_paid ?? false)
+                RelayType(is_paid: state.relay_model_cache.model(with_relay_id: relay)?.metadata.is_paid ?? false)
                 
-                if let meta = state.relay_metadata.lookup(relay_id: relay) {
+                if let meta = state.relay_model_cache.model(with_relay_id: relay)?.metadata {
                     Text(relay)
                         .background(
                             NavigationLink(value: Route.RelayDetail(relay: relay, metadata: meta), label: {
