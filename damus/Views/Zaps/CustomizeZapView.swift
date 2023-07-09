@@ -168,7 +168,7 @@ struct CustomizeZapView: View {
             if model.zapping {
                 Text("Zapping...", comment: "Text to indicate that the app is in the process of sending a zap.")
             } else {
-                Button(NSLocalizedString("Zap User", comment: "Button to send a zap.")) {
+                Button(NSLocalizedString("Zap", comment: "Button to send a zap.")) {
                     let amount = model.custom_amount_sats
                     send_zap(damus_state: state, target: target, lnurl: lnurl, is_custom: true, comment: model.comment, amount_sats: amount, zap_type: model.zap_type)
                     model.zapping = true
