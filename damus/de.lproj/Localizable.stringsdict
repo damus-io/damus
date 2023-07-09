@@ -2,20 +2,20 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>collapsed_event_view_other_notes</key>
+	<key>followed_by_three_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@NOTES@</string>
-		<key>NOTES</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>... %d andere Notiz ...</string>
+			<string>Gefolgt von %2$@, %3$@, %4$@ &amp; %1$d weiters Profil</string>
 			<key>other</key>
-			<string>... %d andere Notizen ...</string>
+			<string>Gefolgt von %2$@, %3$@, %4$@ &amp; %1$d weitere</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -61,12 +61,12 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere*r reagierten auf einen Beitrag in dem du markiert warst</string>
+			<string>%2$@ und %1$d weiteres Profil reagierten auf eine Notiz, in der du markiert warst</string>
 			<key>other</key>
-			<string>%2$@ und %1$d andere reagierten auf einen Beitrag in dem du markiert warst</string>
+			<string>%2$@ und %1$d weitere Profile reagierten auf eine Notiz, in der du markiert warst</string>
 		</dict>
 	</dict>
-	<key>reacted_your_post_3</key>
+	<key>reacted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REACTED@</string>
@@ -77,9 +77,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere*r reagierten auf deinen Beitrag</string>
+			<string>2$@ und %1$d weiteres Profil reagierten auf dein Profil</string>
 			<key>other</key>
-			<string>%2$@ und %1$d andere reagierten auf deinen Beitrag</string>
+			<string>2$@ und %1$d weitere reagierten auf  deine Notiz</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -157,12 +157,12 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere*r teilten einen Beitrag in dem du markiert warst</string>
+			<string>%2$@ und %1$d weiteres Profil teilten eine Notiz, in der du markiert warst</string>
 			<key>other</key>
-			<string>%2$@ und %1$d andere teilten ein Beitrag in dem du markiert warst</string>
+			<string>%2$@ und %1$d weitere Profile teiten eine Notiz, in der du markiert warst</string>
 		</dict>
 	</dict>
-	<key>reposted_your_post_3</key>
+	<key>reposted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REPOSTED@</string>
@@ -173,9 +173,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere*r teilten deinen Beitrag</string>
+			<string>2$@ und %1$d weiteres Profil teilten deine Notiz</string>
 			<key>other</key>
-			<string>%2$@ und %1$d andere teilten deinen Beitrag</string>
+			<string>2$@ und %1$d weitere teilten deine Notiz</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -269,9 +269,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>Du hast %2$@ Sat von %3$@ erhalten: "%4$@"</string>
+			<string>Du hast %2$@ Sats von %3$@: &quot;%4$@&quot; erhalten</string>
 			<key>other</key>
-			<string>Du hast %2$@ Sats von %3$@ erhalten: "%4$@"</string>
+			<string>Du hast %2$@ Sats von %3$@: &quot;%4$@&quot; erhalten</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -285,12 +285,12 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere:r zappten einen Beitrag in dem du markiert warst</string>
+			<string>%2$@ und %1$d weiteres Profil zappten eine Notiz, in der du markiert warst</string>
 			<key>other</key>
-			<string>%2$@ und %1$d andere zappten einen Beitrag in dem du markiert warst</string>
+			<string>%2$@ und %1$d weitere Profile zappten eine Notiz, in der du markiert warst</string>
 		</dict>
 	</dict>
-	<key>zapped_your_post_3</key>
+	<key>zapped_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@ZAPPED@</string>
@@ -301,9 +301,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere:r zappten deinen Beitrag</string>
+			<string>2$@ une %1$d ein weiteres Profil zappten deine Notiz</string>
 			<key>other</key>
-			<string>%2$@ und %1$d andere zappten deinen Beitrag</string>
+			<string>2$@ und %1$d weitere zappten deine Notiz</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -317,9 +317,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ und %1$d andere:r zappten dein Profil</string>
+			<string>2$@ und %1$d ein weiteres Profil zappten dein Profil</string>
 			<key>other</key>
-			<string>%2$@ und %1$d andere zappten dein Profil</string>
+			<string>2$@ und %1$d weitere zappten dein Profil</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>

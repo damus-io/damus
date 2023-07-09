@@ -2,30 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>collapsed_event_view_other_notes</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@NOTES@</string>
-		<key>NOTES</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>zero</key>
-			<string>... %d منشورات أخرى ...</string>
-			<key>one</key>
-			<string>... %d منشور اضافي ...</string>
-			<key>two</key>
-			<string>... %d منشوران ...</string>
-			<key>few</key>
-			<string>... %d منشورات اضافية ...</string>
-			<key>many</key>
-			<string>... %d منشورات اضافية ...</string>
-			<key>other</key>
-			<string>... %d منشورات اضافية ...</string>
-		</dict>
-	</dict>
 	<key>followers_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
