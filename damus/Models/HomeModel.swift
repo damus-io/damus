@@ -1242,10 +1242,20 @@ func get_zap_target_pubkey(ev: NostrEvent, events: EventCache) -> String? {
     let etags = ev.referenced_ids
 
     if let etag = etags.first {
+        // ensure that there is only 1 etag to stop fake note zap attacks
+        guard etags.count == 1 else {
+            return nil
+        }
         // we can't trust the p tag on note zaps because they can be faked
         return events.lookup(etag.id)?.pubkey
     } else {
         let ptags = ev.referenced_pubkeys
+
+        // ensure that there is only 1 ptag to stop fake profile zap attacks
+        guard ptags.count == 1 else {
+            return nil
+        }
+
         return ptags.first?.id
     }
 }
