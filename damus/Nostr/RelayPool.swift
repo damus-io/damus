@@ -43,6 +43,12 @@ class RelayPool {
                 }
             }
             
+            if let self, path.status != self.last_network_status {
+                for relay in relays {
+                    relay.connection.log?.add("Network state: \(path.status)")
+                }
+            }
+            
             self?.last_network_status = path.status
         }
         network_monitor.start(queue: network_monitor_queue)
@@ -108,6 +114,8 @@ class RelayPool {
         }
         let relay = Relay(descriptor: desc, connection: conn)
         self.relays.append(relay)
+        
+        relay.connection.log.add("Network state: \(network_monitor.currentPath.status)")
     }
     
     /// This is used to retry dead connections
