@@ -125,7 +125,7 @@ struct RelayDetailView: View {
                     }
                 }
                 
-                if let log_contents = log.contents {
+                if state.settings.developer_mode, let log_contents = log.contents {
                     Section("Log") {
                         Text(log_contents)
                             .font(.system(size: 13))
