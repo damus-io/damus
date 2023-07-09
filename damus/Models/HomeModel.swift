@@ -1236,19 +1236,23 @@ enum ProcessZapResult {
     case failed
 }
 
+// securely get the zap target's pubkey. this can be faked so we need to be
+// careful
+func get_zap_target_pubkey(ev: NostrEvent, events: EventCache) -> String? {
+    let etags = ev.referenced_ids
+
+    if let etag = etags.first {
+        // we can't trust the p tag on note zaps because they can be faked
+        return events.lookup(etag.id)?.pubkey
+    } else {
+        let ptags = ev.referenced_pubkeys
+        return ptags.first?.id
+    }
+}
+
 func process_zap_event(damus_state: DamusState, ev: NostrEvent, completion: @escaping (ProcessZapResult) -> Void) {
     // These are zap notifications
-    let etag = event_tag(ev, name: "e")
-
-    var ptag: String? = nil
-    if let etag {
-        // we can't trust the p tag on note zaps because they can be faked
-        ptag = damus_state.events.lookup(etag)?.pubkey
-    } else {
-        ptag = event_tag(ev, name: "p")
-    }
-
-    guard let ptag else {
+    guard let ptag = get_zap_target_pubkey(ev: ev, events: damus_state.events) else {
         completion(.failed)
         return
     }
