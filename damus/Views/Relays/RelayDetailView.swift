@@ -12,7 +12,17 @@ struct RelayDetailView: View {
     let relay: String
     let nip11: RelayMetadata
     
+    @ObservedObject var log: RelayLog
+    
     @Environment(\.dismiss) var dismiss
+    
+    init(state: DamusState, relay: String, nip11: RelayMetadata) {
+        self.state = state
+        self.relay = relay
+        self.nip11 = nip11
+        
+        log = state.relay_model_cache.model(with_relay_id: relay)?.log ?? RelayLog()
+    }
     
     func check_connection() -> Bool {
         for relay in state.pool.relays {
@@ -112,6 +122,15 @@ struct RelayDetailView: View {
                 if let nips = nip11.supported_nips, nips.count > 0 {
                     Section(NSLocalizedString("Supported NIPs", comment: "Label to display relay's supported NIPs.")) {
                         Text(nipsList(nips: nips))
+                    }
+                }
+                
+                if state.settings.developer_mode, let log_contents = log.contents {
+                    Section("Log") {
+                        Text(log_contents)
+                            .font(.system(size: 13))
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
             }

@@ -857,7 +857,7 @@ func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
         if new.contains(d) {
             if let url = RelayURL(d) {
                 let descriptor = RelayDescriptor(url: url, info: decoded[d] ?? .rw)
-                add_new_relay(relay_filters: state.relay_filters, metadatas: state.relay_metadata, pool: state.pool, descriptor: descriptor, new_relay_filters: new_relay_filters)
+                add_new_relay(model_cache: state.relay_model_cache, relay_filters: state.relay_filters, pool: state.pool, descriptor: descriptor, new_relay_filters: new_relay_filters, logging_enabled: state.settings.developer_mode)
             }
         } else {
             state.pool.remove_relay(d)
@@ -871,12 +871,12 @@ func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     }
 }
 
-func add_new_relay(relay_filters: RelayFilters, metadatas: RelayMetadatas, pool: RelayPool, descriptor: RelayDescriptor, new_relay_filters: Bool) {
+func add_new_relay(model_cache: RelayModelCache, relay_filters: RelayFilters, pool: RelayPool, descriptor: RelayDescriptor, new_relay_filters: Bool, logging_enabled: Bool) {
     try? pool.add_relay(descriptor)
     let url = descriptor.url
     
     let relay_id = url.id
-    guard metadatas.lookup(relay_id: relay_id) == nil else {
+    guard model_cache.model(withURL: url) == nil else {
         return
     }
     
@@ -885,8 +885,13 @@ func add_new_relay(relay_filters: RelayFilters, metadatas: RelayMetadatas, pool:
             return
         }
         
-        DispatchQueue.main.async {
-            metadatas.insert(relay_id: relay_id, metadata: meta)
+        await MainActor.run {
+            let model = RelayModel(url, metadata: meta)
+            model_cache.insert(model: model)
+            
+            if logging_enabled {
+                pool.setLog(model.log, for: relay_id)
+            }
             
             // if this is the first time adding filters, we should filter non-paid relays
             if new_relay_filters && !meta.is_paid {
