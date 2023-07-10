@@ -116,8 +116,12 @@ func decode_nostr_uri(_ s: String) -> NostrLink? {
         return decode_universal_link(s)
     }
 
-    var uri = s.replacingOccurrences(of: "nostr://", with: "")
+    var uri = s
+    uri = uri.replacingOccurrences(of: "nostr://", with: "")
     uri = uri.replacingOccurrences(of: "nostr:", with: "")
+
+    // Fix for non-latin characters resulting in second colon being encoded
+    uri = uri.replacingOccurrences(of: "damus:t%3A", with: "t:")
     
     uri = uri.replacingOccurrences(of: "damus://", with: "")
     uri = uri.replacingOccurrences(of: "damus:", with: "")
