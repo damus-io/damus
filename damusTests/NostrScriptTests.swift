@@ -105,6 +105,18 @@ final class NostrScriptTests: XCTestCase {
         self.wait(for: [resume_expected], timeout: 10.0)
     }
 
+    func test_imports_string() throws {
+        let enUsLocale = Locale(identifier: "en-US")
+        XCTAssertEqual(imports_string(0, locale: enUsLocale), "Imports")
+        XCTAssertEqual(imports_string(1, locale: enUsLocale), "Import")
+        XCTAssertEqual(imports_string(2, locale: enUsLocale), "Imports")
+        Bundle.main.localizations.map { Locale(identifier: $0) }.forEach {
+            for count in 1...10 {
+                XCTAssertNoThrow(imports_string(count, locale: $0))
+            }
+        }
+    }
+
     func testPerformanceExample() throws {
         // This is an example of a performance test case.
         self.measure {

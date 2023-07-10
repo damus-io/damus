@@ -13,13 +13,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Подписаны %2$@, %3$@ и %1$d другим</string>
-			<key>few</key>
-			<string>Подписаны %2$@, %3$@ и %1$d others</string>
-			<key>many</key>
-			<string>Подписаны %2$@, %3$@ и %1$d others</string>
+			<string>Fuatwa na %2$@, %3$@, %4$@ &amp; %1$d wengine</string>
 			<key>other</key>
-			<string>Подписаны %2$@, %3$@ и %1$d другим</string>
+			<string>Fuatwa na %2$@, %3$@, %4$@ &amp; %1$d wengine</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -33,13 +29,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Подписчик</string>
-			<key>few</key>
-			<string>Подписчика</string>
-			<key>many</key>
-			<string>Подписчиков</string>
+			<string>Wafuasi</string>
 			<key>other</key>
-			<string>Подписчики</string>
+			<string>Wafuasi</string>
 		</dict>
 	</dict>
 	<key>following_count</key>
@@ -53,13 +45,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Подписки</string>
-			<key>few</key>
-			<string>Подписки</string>
-			<key>many</key>
-			<string>Подписки</string>
+			<string>Unafuata</string>
 			<key>other</key>
-			<string>Подписки</string>
+			<string>Unafuata</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -73,13 +61,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ и %1$d отреагировали на заметку, в котором Вы были упомянуты</string>
-			<key>few</key>
-			<string>%2$@ и еще %1$d пользователя отреагировали на заметку, в котором Вы были упомянуты</string>
-			<key>many</key>
-			<string>%2$@ и еще  %1$d пользователей отреагировали на заметку, в котором Вы были упомянуты</string>
+			<string>%2$@ and %1$d wengine walijibu kwa taarifa uliyewekewa alama.</string>
 			<key>other</key>
-			<string>%2$@ и еще %1$d пользователь отреагировали на заметку, в котором Вы были упомянуты</string>
+			<string>%2$@ and %1$d wengine walijibu kwa taarifa uliyewekewa alama.</string>
 		</dict>
 	</dict>
 	<key>reacted_your_note_3</key>
@@ -93,13 +77,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ и %1$d отреагировали на Вашу заметку</string>
-			<key>few</key>
-			<string>%2$@ и еще %1$d пользователя отреагировали на Вашу заметку</string>
-			<key>many</key>
-			<string>%2$@ и еще %1$d пользователей отреагировали на Вашу заметку</string>
+			<string>%2$@ and %1$d wengine walijibu kwa kidokezo chako</string>
 			<key>other</key>
-			<string>%2$@ и еще %1$d пользователь отреагировали на Вашу заметку</string>
+			<string>%2$@ and %1$d wengine walijibu kwa kidokezo chako</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -113,13 +93,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ и %1$d отреагировали на ваш профиль</string>
-			<key>few</key>
-			<string>%2$@ и еще %1$d пользователя отреагировали на ваш профиль</string>
-			<key>many</key>
-			<string>%2$@ и еще %1$d пользователей отреагировали на ваш профиль</string>
+			<string>%2$@ na %1$d wengine walitoa hisia kwenye wasifu wako.</string>
 			<key>other</key>
-			<string>%2$@ и еще %1$d пользователь отреагировали на ваш профиль</string>
+			<string>%2$@ na %1$d wengine walitoa hisia kwenye wasifu wako.</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
@@ -133,13 +109,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Реакция</string>
-			<key>few</key>
-			<string>Реакции</string>
-			<key>many</key>
-			<string>Реакций</string>
+			<string>Hisia</string>
 			<key>other</key>
-			<string>Реакции</string>
+			<string>Hisia</string>
 		</dict>
 	</dict>
 	<key>relays_count</key>
@@ -153,13 +125,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Реле</string>
-			<key>few</key>
-			<string>Реле</string>
-			<key>many</key>
-			<string>Реле</string>
+			<string>Relays</string>
 			<key>other</key>
-			<string>Реле</string>
+			<string>Relays</string>
 		</dict>
 	</dict>
 	<key>replying_to_two_and_others</key>
@@ -173,13 +141,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>В ответ %2$@, %3$@ и %1$d другим</string>
-			<key>few</key>
-			<string>В ответ %2$@, %3$@ и %1$d others</string>
-			<key>many</key>
-			<string>В ответ %2$@, %3$@ и %1$d others</string>
+			<string>Jibu %2$@, %3$@, &amp; %1$@ wengine</string>
 			<key>other</key>
-			<string>В ответ %2$@, %3$@ и %1$d другим</string>
+			<string>Jibu %2$@, %3$@, &amp;  %1$@ wengine</string>
 		</dict>
 	</dict>
 	<key>reposted_tagged_in_3</key>
@@ -193,13 +157,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ и %1$d сделали репост заметки, в которой Вы были упомянуты</string>
-			<key>few</key>
-			<string>%2$@ и еще %1$d пользователя сделали репост заметки, в которой Вы были упомянуты</string>
-			<key>many</key>
-			<string>%2$@ и еще %1$d пользователей сделали репост заметки, в которой Вы были упомянуты</string>
+			<string>%2$@ na %1$d wengine walirudisha chapisho ambalo uliwekewa alama.</string>
 			<key>other</key>
-			<string>%2$@ и еще %1$d пользователь сделали репост заметки, в которой Вы были упомянуты</string>
+			<string>%2$@ na %1$d wengine walirudisha chapisho ambalo uliwekewa alama.</string>
 		</dict>
 	</dict>
 	<key>reposted_your_note_3</key>
@@ -213,13 +173,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ и %1$d сделали репост Вашей заметки</string>
-			<key>few</key>
-			<string>%2$@ и еще %1$d пользователя сделали репост Вашей заметки</string>
-			<key>many</key>
-			<string>%2$@ и еще %1$d пользователей сделали репост Вашей заметки</string>
+			<string>%2$@ na %1$d wengine wamerudisha tena kidokezo chako.</string>
 			<key>other</key>
-			<string>%2$@ и еще %1$d пользователь сделали репост Вашей заметки</string>
+			<string>%2$@ na %1$d wengine wamerudisha tena kidokezo chako.</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -233,13 +189,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ и %1$d сделали репост Вашего профиля</string>
-			<key>few</key>
-			<string>%2$@ и еще %1$d пользователя сделали репост Вашего профиля</string>
-			<key>many</key>
-			<string>%2$@ и еще %1$d пользователей сделали репост Вашего профиля</string>
+			<string>%2$@ na %1$d wengine  wameirudisha tena wasifu wako.</string>
 			<key>other</key>
-			<string>%2$@ и еще %1$d пользователь сделали репост Вашего профиля</string>
+			<string>"%2$@ na %1$d wengine  wameirudisha tena wasifu wako."</string>
 		</dict>
 	</dict>
 	<key>reposts_count</key>
@@ -253,13 +205,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Репост</string>
-			<key>few</key>
-			<string>Репостов</string>
-			<key>many</key>
-			<string>Репостов</string>
+			<string>Chapisho tena</string>
 			<key>other</key>
-			<string>Репосты</string>
+			<string>Chapisho tena</string>
 		</dict>
 	</dict>
 	<key>sats</key>
@@ -273,13 +221,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>сат</string>
-			<key>few</key>
-			<string>сата</string>
-			<key>many</key>
-			<string>сат</string>
+			<string>sats</string>
 			<key>other</key>
-			<string>сат</string>
+			<string>sats</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -293,13 +237,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>%2$@ сат</string>
-			<key>few</key>
-			<string>%2$@ сат</string>
-			<key>many</key>
-			<string>%2$@ сат</string>
+			<string>%2$@ sats</string>
 			<key>other</key>
-			<string>%2$@ сат</string>
+			<string>%2$@ sats</string>
 		</dict>
 	</dict>
 	<key>zap_notification_no_message</key>
@@ -313,13 +253,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>Вы получили %2$@ сат от %3$@</string>
-			<key>few</key>
-			<string>Вы получили %2$@ сат от %3$@</string>
-			<key>many</key>
-			<string>Вы получили %2$@ сат от %3$@</string>
+			<string>Ulipokea %2$@ sats kutoka kwa %3$@</string>
 			<key>other</key>
-			<string>Вы получили %2$@ сат от %3$@</string>
+			<string>Ulipokea %2$@ sats kutoka kwa %3$@</string>
 		</dict>
 	</dict>
 	<key>zap_notification_with_message</key>
@@ -333,13 +269,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>Вы получили %2$@ сат от %3$@: &quot;%4$@&quot;</string>
-			<key>few</key>
-			<string>Вы получили %2$@ сат от %3$@: &quot;%4$@&quot;</string>
-			<key>many</key>
-			<string>Вы получили %2$@ сат от %3$@: &quot;%4$@&quot;</string>
+			<string>Ume pokea %2$@ sats kutoka kwa %3$@: &quot;%4$@&quot;</string>
 			<key>other</key>
-			<string>Вы получили %2$@ сат от %3$@: &quot;%4$@&quot;</string>
+			<string>Ume pokea %2$@ sats kutoka kwa %3$@: &quot;%4$@&quot;</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -353,13 +285,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ и %1$d запнули заметку, в котором Вы были упомянуты</string>
-			<key>few</key>
-			<string>%2$@ и еще %1$d пользователя запнули заметку, в котором Вы были упомянуты</string>
-			<key>many</key>
-			<string>%2$@ и еще %1$d пользователей запнули заметку, в котором Вы были упомянуты</string>
+			<string>%2$@ na %1$d wengine wame zap kidokezo ambapo umetajwa</string>
 			<key>other</key>
-			<string>%2$@ и еще %1$d пользователь запнули заметку, в котором Вы были упомянуты</string>
+			<string>%2$@ na %1$d wengine wame zap kidokezo ambapo umetajwa</string>
 		</dict>
 	</dict>
 	<key>zapped_your_note_3</key>
@@ -373,13 +301,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ и %1$d запнули Вашу заметку</string>
-			<key>few</key>
-			<string>%2$@ и еще %1$d пользователя запнули Вашу заметку</string>
-			<key>many</key>
-			<string>%2$@ и еще %1$d пользователей запнули Вашу заметку</string>
+			<string>%2$@ na %1$d wengine wame zap kidokezo chako</string>
 			<key>other</key>
-			<string>%2$@ и еще %1$d пользователь запнули Вашу заметку</string>
+			<string>%2$@ na %1$d wengine wame zap kidokezo chako</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -393,13 +317,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ и %1$d запнули Вашу заметку</string>
-			<key>few</key>
-			<string>%2$@ и еще %1$d пользователя запнули Вашу заметку</string>
-			<key>many</key>
-			<string>%2$@ и еще %1$d пользователей запнули Вашу заметку</string>
+			<string>%2$@ na %1$d wengine wameku zap</string>
 			<key>other</key>
-			<string>%2$@ и еще %1$d пользователь запнули Вашу заметку</string>
+			<string>%2$@ na %1$d wengine wameku zap</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
@@ -413,13 +333,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>Зап</string>
-			<key>few</key>
-			<string>Zaps</string>
-			<key>many</key>
 			<string>Zaps</string>
 			<key>other</key>
-			<string>Запы</string>
+			<string>Zaps</string>
 		</dict>
 	</dict>
 </dict>
