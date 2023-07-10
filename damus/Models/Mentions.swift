@@ -409,7 +409,7 @@ func parse_while(_ p: Parser, match: (Character) -> Bool) -> String? {
 }
 
 func is_hashtag_char(_ c: Character) -> Bool {
-    return c.isLetter || c.isNumber
+    return (c.isLetter || c.isNumber || c.isASCII) && (!c.isPunctuation && !c.isWhitespace)
 }
 
 func prev_char(_ p: Parser, n: Int) -> Character? {
