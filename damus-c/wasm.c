@@ -102,6 +102,7 @@ u8 *interp_mem_ptr(struct wasm_interp *interp, u32 ptr, int size)
 	return pos;
 }
 
+/*
 static INLINE int read_mem(struct wasm_interp *interp, u32 ptr, int size,
 		void *dest)
 {
@@ -143,6 +144,7 @@ static INLINE int read_mem_i32(struct wasm_interp *interp, u32 ptr, int *i)
 {
 	return read_mem(interp, ptr, sizeof(*i), i);
 }
+ */
 
 static INLINE struct val *get_local(struct wasm_interp *interp, u32 ind)
 {
@@ -450,11 +452,12 @@ static INLINE int stack_push_i64(struct wasm_interp *interp, s64 i)
 	return cursor_push_u64(&interp->stack, (u64)i);
 }
 
+/*
 static INLINE int stack_push_u64(struct wasm_interp *interp, u64 i)
 {
 	return cursor_push_u64(&interp->stack, i);
 }
-
+ */
 
 static INLINE void make_i32_val(struct val *val, int v)
 {
@@ -479,6 +482,7 @@ static INLINE int stack_pushval(struct wasm_interp *interp, struct val *val)
 	return cursor_pushval(&interp->stack, val);
 }
 
+/*
 static int interp_exit(struct wasm_interp *interp)
 {
 	struct val *vals = NULL;
@@ -508,6 +512,7 @@ static int wasi_abort(struct wasm_interp *interp)
 
 	return 0;
 }
+ */
 
 static INLINE const char *get_function_name(struct module *module, int fn)
 {
@@ -518,12 +523,14 @@ static INLINE const char *get_function_name(struct module *module, int fn)
 	return func->name;
 }
 
+/*
 static int wasi_args_sizes_get(struct wasm_interp *interp);
 static int wasi_args_get(struct wasm_interp *interp);
 static int wasi_fd_write(struct wasm_interp *interp);
 static int wasi_fd_close(struct wasm_interp *interp);
 static int wasi_environ_sizes_get(struct wasm_interp *interp);
 static int wasi_environ_get(struct wasm_interp *interp);
+ */
 
 static int parse_instr(struct expr_parser *parser, u8 tag, struct instr *op);
 
@@ -3242,6 +3249,7 @@ static INLINE int interp_i64_xor(struct wasm_interp *interp)
 	return stack_pushval(interp, &c);
 }
 
+/*
 static INLINE int interp_f32_min(struct wasm_interp *interp)
 {
 	struct val lhs, rhs, c;
@@ -3250,6 +3258,7 @@ static INLINE int interp_f32_min(struct wasm_interp *interp)
 	c.num.f32 = lhs.num.f32 < rhs.num.f32 ? lhs.num.f32 : rhs.num.f32;
 	return stack_pushval(interp, &c);
 }
+ */
 
 static INLINE int interp_f32_max(struct wasm_interp *interp)
 {
@@ -4205,6 +4214,7 @@ static INLINE struct resolver *top_resolver(struct wasm_interp *interp, u32 inde
 	return top_resolver_stack(&interp->resolver_stack, index);
 }
 
+/*
 static void print_resolver_stack(struct wasm_interp *interp) {
 	int count, i, start_pos, end_pos;
 	struct label *label;
@@ -4226,6 +4236,7 @@ static void print_resolver_stack(struct wasm_interp *interp) {
 	}
 	printf("\n");
 }
+*/
 
 static INLINE int pop_resolver(struct wasm_interp *interp,
 		struct resolver *resolver)
@@ -5518,6 +5529,7 @@ static int store_val(struct wasm_interp *interp, int i,
 	return 1;
 }
 
+/*
 static INLINE int store_simple(struct wasm_interp *interp, int offset, struct val *val)
 {
 	struct memarg memarg = {};
@@ -5530,6 +5542,7 @@ static INLINE int store_i32(struct wasm_interp *interp, int offset, int i)
 	make_i32_val(&val, i);
 	return store_simple(interp, offset, &val);
 }
+ */
 
 static int interp_load(struct wasm_interp *interp, struct memarg *memarg,
 		enum valtype type, int N, int sign)
@@ -5567,6 +5580,7 @@ static int interp_load(struct wasm_interp *interp, struct memarg *memarg,
 	return 1;
 }
 
+/*
 static INLINE int load_i32(struct wasm_interp *interp, int addr, int *i)
 {
 	struct memarg memarg = { .offset = 0, .align = 0 };
@@ -5580,7 +5594,6 @@ static INLINE int load_i32(struct wasm_interp *interp, int addr, int *i)
 	return stack_pop_i32(interp, i);
 }
 
-/*
 static int wasi_fd_close(struct wasm_interp *interp)
 {
 	struct val *params = NULL;
