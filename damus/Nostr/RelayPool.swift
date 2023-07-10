@@ -44,7 +44,7 @@ class RelayPool {
             }
             
             if let self, path.status != self.last_network_status {
-                for relay in relays {
+                for relay in self.relays {
                     relay.connection.log?.add("Network state: \(path.status)")
                 }
             }
