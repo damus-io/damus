@@ -181,7 +181,7 @@ enum Route: Hashable {
         case (.Script(_), .Script(_)):
             return true
         default:
-            return true
+            return false
         }
     }
 
