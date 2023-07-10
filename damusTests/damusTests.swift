@@ -203,8 +203,17 @@ class damusTests: XCTestCase {
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
         XCTAssertEqual(parsed[0].is_text, "some hashtag ")
-        XCTAssertEqual(parsed[1].is_hashtag, "bitcoin")
-        XCTAssertEqual(parsed[2].is_text, "☕️ cool")
+        XCTAssertEqual(parsed[1].is_hashtag, "bitcoin☕️")
+        XCTAssertEqual(parsed[2].is_text, "cool")
+    }
+    
+    func testHashtagsWithNonLatinCharacters() {
+        let parsed = parse_mentions(content: "Hello from #türkiye", tags: [])
+        
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 2)
+        XCTAssertEqual(parsed[0].is_text, "Hello from")
+        XCTAssertEqual(parsed[1].is_hashtag, "türkiye")
     }
     
     func testParseHashtagEnd() {
