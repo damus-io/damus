@@ -56,7 +56,8 @@ static int nostr_cmd(struct wasm_interp *interp) {
     // length
     len = params[2].num.i32;
 
-    return nscript_nostr_cmd(interp, cmd, val ? (void*)val : (void*)ival, len);
+    intptr_t iptr = ival;
+    return nscript_nostr_cmd(interp, cmd, val ? (void*)val : (void*)iptr, len);
 }
 
 static int print_utf16_str(u16 *chars) {
