@@ -5164,7 +5164,7 @@ static INLINE int clz32(u32 x)
 
 static INLINE int clz64(u64 x)
 {
-	return x ? __builtin_clz(x) : sizeof(x) * 8;
+	return x ? __builtin_clzll(x) : sizeof(x) * 8;
 }
 
 static INLINE int ctz(u32 x)
