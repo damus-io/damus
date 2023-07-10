@@ -70,6 +70,15 @@ class ReplyTests: XCTestCase {
         XCTAssertEqual(blocks[1].is_hashtag, "awesome")
         XCTAssertEqual(blocks[2].is_text, " post\"")
     }
+
+    func testHashtagsWithNonLatinCharacters() {
+        let content = "Hello from #türkiye"
+        let blocks = parse_post_blocks(content: content)
+        
+        XCTAssertEqual(blocks.count, 2)
+        XCTAssertEqual(blocks[0].is_text, "Hello from")
+        XCTAssertEqual(blocks[1].is_hashtag, "türkiye")
+    }
     
     func testHashtagAtStartWorks() {
         let content = "#hashtag"
