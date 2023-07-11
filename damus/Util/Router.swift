@@ -154,6 +154,8 @@ enum Route: Hashable {
             return true
         case (.SearchSettings(_), .SearchSettings(_)):
             return true
+        case (.DeveloperSettings(_), .DeveloperSettings(_)):
+            return true
         case (.Thread(let lhs_threadModel), .Thread(thread: let rhs_threadModel)):
             return lhs_threadModel.event.id == rhs_threadModel.event.id
         case (.Reposts(let lhs_reposts), .Reposts(let rhs_reposts)):
