@@ -175,7 +175,7 @@
 			<key>one</key>
 			<string>%2$@ und %1$d weiteres Profil teilten eine Notiz, in der du markiert warst</string>
 			<key>other</key>
-			<string>%2$@ und %1$d weitere Profile teiten eine Notiz, in der du markiert warst</string>
+			<string>%2$@ und %1$d weitere teiten eine Notiz, in der du markiert warst</string>
 		</dict>
 	</dict>
 	<key>reposted_your_note_3</key>
