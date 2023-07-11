@@ -64,6 +64,7 @@ func parse_post_mention(_ p: Parser, mention_type: MentionType) -> ReferencedId?
     }
 }
 
+// TODO: replace this with our C parser
 func parse_post_bech32_mention(_ p: Parser) -> ReferencedId? {
     let start = p.pos
     if parse_str(p, "note") {
