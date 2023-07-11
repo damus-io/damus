@@ -1,3 +1,33 @@
+## [1.6-2] - 2023-07-11
+
+### Added
+
+- Add support for multilingual hashtags (cr0bar)
+- Add r tag when mentioning a url (William Casarin)
+- Add initial longform note support (William Casarin)
+- Enable banner image editing (Joel Klabo)
+- Add relay log in developer mode (Bryan Montz)
+
+
+### Fixed
+
+- Fix lag when creating large posts (William Casarin)
+- Fix npub mentions failing to parse in some cases (William Casarin)
+- Fix PostView initial string to skip mentioning self when on own profile (Terry Yiu)
+- Fix freezing bug when tapping Developer settings menu (Terry Yiu)
+- Fix potential fake profile zap attacks (William Casarin)
+- Fix issue where malicious zappers can send fake zaps to another user's posts (William Casarin)
+- Fix profile post button mentions (cr0bar)
+- Fix icons on settings view (cr0bar)
+- Fix Invalid Zap bug in reposts (William Casarin)
+
+
+### Removed
+
+- Remove old @ and & hex key mentions (William Casarin)
+
+
+[1.6-2]: https://github.com/damus-io/damus/releases/tag/v1.6-2
 ## [1.6] - 2023-07-04
 
 ### Added
