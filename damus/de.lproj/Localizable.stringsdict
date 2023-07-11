@@ -255,7 +255,7 @@
 			<key>one</key>
 			<string>%2$@ sat</string>
 			<key>other</key>
-			<string>%2$@ sats</string>
+			<string>%2$@ Sats</string>
 		</dict>
 	</dict>
 	<key>zap_notification_no_message</key>
