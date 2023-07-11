@@ -108,19 +108,9 @@ We have a few mailing lists that anyone can join to get involved in damus develo
 [product-list]: https://damus.io/list/product
 [design-list]: https://damus.io/list/design
 
-### Code
+### Contributing
 
-[Email patches][git-send-email] to patches@damus.io are preferred, but I accept PRs on GitHub as well. Patches sent via email may include a bolt11 lightning invoice, choosing the price you think the patch is worth, and I will pay it once the patch is accepted and if I think the price isn't unreasonable. You can also send an any-amount invoice and I will pay what I think it's worth if you prefer not to choose. You can include the bolt11 in the commit body or email so that it can be paid once it is applied.
-
-Recommended settings when submitting code via email:
-
-```
-$ git config sendemail.to "patches@damus.io"
-$ git config format.subjectPrefix "PATCH damus"
-$ git config format.signOff yes
-```
- 
-[git-send-email]: http://git-send-email.io
+See [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md)
 
 ### Privacy
 Your internet protocol (IP) address is exposed to the relays you connect to, and third party media hosters (e.g. nostr.build, imgur.com, giphy.com, youtube.com etc.) that render on Damus. If you want to improve your privacy, consider utilizing a service that masks your IP address (e.g. a VPN) from trackers online.

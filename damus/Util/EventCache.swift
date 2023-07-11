@@ -344,7 +344,7 @@ struct PreloadPlan {
     let load_preview: Bool
 }
 
-func load_preview(artifacts: NoteArtifacts) async -> Preview? {
+func load_preview(artifacts: NoteArtifactsSeparated) async -> Preview? {
     guard let link = artifacts.links.first else {
         return nil
     }
@@ -442,14 +442,18 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
         }
     }
     
-    if plan.load_preview {
+    if plan.load_preview, note_artifact_is_separated(kind: plan.event.known_kind) {
         let arts = artifacts ?? render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)
-        let preview = await load_preview(artifacts: arts)
-        DispatchQueue.main.async {
-            if let preview {
-                plan.data.preview_model.state = .loaded(preview)
-            } else {
-                plan.data.preview_model.state = .loaded(.failed)
+        
+        // only separated artifacts have previews
+        if case .separated(let sep) = arts {
+            let preview = await load_preview(artifacts: sep)
+            DispatchQueue.main.async {
+                if let preview {
+                    plan.data.preview_model.state = .loaded(preview)
+                } else {
+                    plan.data.preview_model.state = .loaded(.failed)
+                }
             }
         }
     }

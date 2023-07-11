@@ -6,6 +6,32 @@
 //
 
 import Foundation
+import SwiftUI
+
+func count_leading_hashes(_ str: String) -> Int {
+    var count = 0
+    for c in str {
+        if c == "#" {
+            count += 1
+        } else {
+            break
+        }
+    }
+    
+    return count
+}
+
+func get_heading_title_size(count: Int) -> SwiftUI.Font {
+    if count >= 3 {
+        return Font.title3
+    } else if count >= 2 {
+        return Font.title2
+    } else if count >= 1 {
+        return Font.title
+    }
+    
+    return Font.body
+}
 
 public struct Markdown {
     private var detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
@@ -19,6 +45,18 @@ public struct Markdown {
     public static func parse(content: String) -> AttributedString {
         let md_opts: AttributedString.MarkdownParsingOptions =
             .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        
+        guard content.utf8.count > 0 else {
+            return AttributedString(stringLiteral: "")
+        }
+        
+        let leading_hashes = count_leading_hashes(content)
+        if leading_hashes > 0 {
+            if var str = try? AttributedString(markdown: content) {
+                str.font = get_heading_title_size(count: leading_hashes)
+                return str
+            }
+        }
 
         // TODO: escape unintentional markdown
         let escaped = content.replacingOccurrences(of: "\\_", with: "\\\\\\_")

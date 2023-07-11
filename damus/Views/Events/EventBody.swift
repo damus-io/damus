@@ -23,6 +23,14 @@ struct EventBody: View {
     }
     
     var body: some View {
+        if event.known_kind == .longform {
+            let longform = LongformEvent.parse(from: event)
+            
+            Text(longform.title ?? "Untitled")
+                .font(.title)
+                .padding(.horizontal)
+        }
+        
         NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, size: size, options: options)
             .frame(maxWidth: .infinity, alignment: .leading)
     }

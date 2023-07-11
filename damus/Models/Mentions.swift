@@ -150,7 +150,12 @@ func render_blocks(blocks: [Block]) -> String {
     }
 }
 
-func parse_mentions(content: String, tags: [[String]]) -> [Block] {
+struct Blocks {
+    let words: Int
+    let blocks: [Block]
+}
+
+func parse_mentions(content: String, tags: [[String]]) -> Blocks {
     var out: [Block] = []
     
     var bs = note_blocks()
@@ -174,9 +179,10 @@ func parse_mentions(content: String, tags: [[String]]) -> [Block] {
         i += 1
     }
     
+    let words = Int(bs.words)
     blocks_free(&bs)
     
-    return out
+    return Blocks(words: words, blocks: out)
 }
 
 func strblock_to_string(_ s: str_block_t) -> String? {

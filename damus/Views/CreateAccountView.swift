@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CreateAccountView: View {
     @StateObject var account: CreateAccountModel = CreateAccountModel()
-    @StateObject var profileUploadViewModel = ProfileUploadingViewModel()
+    @StateObject var profileUploadObserver = ImageUploadingObserver()
     var nav: NavigationCoordinator
     
     func SignupForm<FormContent: View>(@ViewBuilder content: () -> FormContent) -> some View {
@@ -26,7 +26,7 @@ struct CreateAccountView: View {
         ZStack(alignment: .top) {
             VStack {
                 VStack(alignment: .center) {
-                    ProfilePictureSelector(pubkey: account.pubkey, viewModel: profileUploadViewModel, callback: uploadedProfilePicture(image_url:))
+                    EditPictureControl(uploader: .nostrBuild, pubkey: account.pubkey, image_url: $account.profile_image , uploadObserver: profileUploadObserver, callback: uploadedProfilePicture)
 
                     Text(NSLocalizedString("Public Key", comment: "Label to indicate the public key of the account."))
                         .bold()
@@ -67,8 +67,8 @@ struct CreateAccountView: View {
                     .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
                 }
                 .buttonStyle(GradientButtonStyle())
-                .disabled(profileUploadViewModel.isLoading)
-                .opacity(profileUploadViewModel.isLoading ? 0.5 : 1)
+                .disabled(profileUploadObserver.isLoading)
+                .opacity(profileUploadObserver.isLoading ? 0.5 : 1)
                 .padding(.top, 20)
 
                 LoginPrompt()
@@ -83,7 +83,7 @@ struct CreateAccountView: View {
     }
     
     func uploadedProfilePicture(image_url: URL?) {
-        account.profile_image = image_url?.absoluteString
+        account.profile_image = image_url
     }
 }
 

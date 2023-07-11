@@ -19,18 +19,9 @@ struct EventViewOptions: OptionSet {
     static let small_pfp = EventViewOptions(rawValue: 1 << 7)
     static let nested = EventViewOptions(rawValue: 1 << 8)
     static let top_zap = EventViewOptions(rawValue: 1 << 9)
+    static let no_mentions = EventViewOptions(rawValue: 1 << 10)
     
     static let embedded: EventViewOptions = [.no_action_bar, .small_pfp, .wide, .truncate_content, .nested]
-}
-
-struct RelativeTime: View {
-    @ObservedObject var time: RelativeTimeModel
-    
-    var body: some View {
-        Text(verbatim: "\(time.value)")
-            .font(.system(size: 16))
-            .foregroundColor(.gray)
-    }
 }
 
 struct TextEvent: View {
@@ -73,61 +64,18 @@ struct TextEvent: View {
     func TopPart(is_anon: Bool) -> some View {
         HStack(alignment: .center, spacing: 0) {
             ProfileName(is_anon: is_anon)
-            TimeDot
+            TimeDot()
             RelativeTime(time: self.evdata.relative_time)
             Spacer()
-            ContextButton
+            EventMenuContext(damus: damus, event: event)
         }
         .lineLimit(1)
     }
     
-    var ReplyPart: some View {
-        Group {
-            if event_is_reply(event, privkey: damus.keypair.privkey) {
-                ReplyDescription(event: event, profiles: damus.profiles)
-            } else {
-                EmptyView()
-            }
-        }
-    }
-    
     var WideStyle: some View {
-        VStack(alignment: .leading) {
-            let is_anon = event_is_anonymous(ev: event)
-            
-            HStack(spacing: 10) {
-                Pfp(is_anon: is_anon)
-                VStack {
-                    TopPart(is_anon: is_anon)
-                    ReplyPart
-                }
-            }
-            .padding(.horizontal)
-
+        EventShell(state: damus, event: event, options: options) {
             EvBody(options: self.options.union(.pad_content))
-            
-            if let mention = get_mention() {
-                Mention(mention)
-                    .padding(.horizontal)
-            }
-            
-            if has_action_bar {
-                //EmptyRect
-                ActionBar
-                    .padding(.horizontal)
-            }
         }
-    }
-    
-    var TimeDot: some View {
-        Text(verbatim: "⋅")
-            .font(.footnote)
-            .foregroundColor(.gray)
-    }
-    
-    var ContextButton: some View {
-        EventMenuContext(event: event, keypair: damus.keypair, target_pubkey: event.pubkey, bookmarks: damus.bookmarks, muted_threads: damus.muted_threads, settings: damus.settings)
-            .padding([.bottom], 4)
     }
     
     func ProfileName(is_anon: Bool) -> some View {
@@ -183,7 +131,7 @@ struct TextEvent: View {
                 TopPart(is_anon: is_anon)
                 
                 if !options.contains(.no_replying_to) {
-                    ReplyPart
+                    ReplyPart(event: event, privkey: damus.keypair.privkey, profiles: damus.profiles)
                 }
                 
                 EvBody(options: self.options)

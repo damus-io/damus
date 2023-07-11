@@ -33,6 +33,18 @@ class MarkdownTests: XCTestCase {
         let expected = try AttributedString(markdown: "prologue [damus.io](https://damus.io) epilogue", options: md_opts)
         XCTAssertEqual(md, expected)
     }
+    
+    func test_longform_rendering() throws {
+        let st = test_damus_state()
+        let artifacts = render_note_content(ev: test_longform_event.event, profiles: st.profiles, privkey: st.keypair.privkey)
+        
+        switch artifacts {
+        case .separated:
+            XCTAssert(false)
+        case .parts(let parts):
+            XCTAssertEqual(parts.parts.count, 1)
+        }
+    }
 
     func test_convert_links() throws {
         let helper = Markdown()
