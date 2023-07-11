@@ -142,7 +142,10 @@ struct EventView_Previews: PreviewProvider {
             EventView(damus: test_damus_state(), event: NostrEvent(content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jb55 cool", pubkey: "pk"), show_friend_icon: true, size: .big)
             
              */
+
             EventView( damus: test_damus_state(), event: test_event )
+
+            EventView( damus: test_damus_state(), event: test_longform_event.event, options: [.wide] )
         }
         .padding()
     }
@@ -154,3 +157,4 @@ let test_event =
             pubkey: "pk",
             createdAt: Int64(Date().timeIntervalSince1970 - 100)
         )
+

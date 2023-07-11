@@ -25,20 +25,64 @@ struct EventShell<Content: View>: View {
     }
     
     func get_mention() -> Mention? {
-        if self.options.contains(.nested) {
+        if self.options.contains(.nested) || self.options.contains(.no_mentions) {
             return nil
         }
         
         return first_eref_mention(ev: event, privkey: state.keypair.privkey)
     }
+
+    func Mention(_ mention: Mention) -> some View {
+        return BuilderEventView(damus: state, event_id: mention.ref.id)
+    }
     
-    var body: some View {
+    var ActionBar: some View {
+        return EventActionBar(damus_state: state, event: event)
+            .padding([.top], 4)
+    }
+
+    func Pfp(is_anon: Bool) -> some View {
+        return MaybeAnonPfpView(state: state, is_anon: is_anon, pubkey: event.pubkey, size: options.contains(.small_pfp) ? eventview_pfp_size(.small) : PFP_SIZE )
+    }
+
+    var Threaded: some View {
+        HStack(alignment: .top) {
+        
+            let is_anon = event_is_anonymous(ev: event)
+            VStack {
+                Pfp(is_anon: is_anon)
+                
+                Spacer()
+            }
+
+            VStack(alignment: .leading) {
+                EventTop(state: state, event: event, is_anon: is_anon)
+
+                if !options.contains(.no_replying_to) {
+                    ReplyPart(event: event, privkey: state.keypair.privkey, profiles: state.profiles)
+                }
+                
+                content
+
+                if let mention = get_mention() {
+                    Mention(mention)
+                }
+                
+                if has_action_bar {
+                    ActionBar
+                }
+            }
+            .padding([.leading], 2)
+        }
+    }
+
+    var Wide: some View {
         VStack(alignment: .leading) {
             let is_anon = event_is_anonymous(ev: event)
             
             HStack(spacing: 10) {
-                MaybeAnonPfpView(state: state, is_anon: is_anon, pubkey: event.pubkey, size: options.contains(.small_pfp) ? eventview_pfp_size(.small) : PFP_SIZE )
-                
+                Pfp(is_anon: is_anon)
+
                 VStack {
                     EventTop(state: state, event: event, is_anon: is_anon)
                     ReplyPart(event: event, privkey: state.keypair.privkey, profiles: state.profiles)
@@ -49,24 +93,44 @@ struct EventShell<Content: View>: View {
             content
             
             if !options.contains(.no_mentions), let mention = get_mention() {
-
-                BuilderEventView(damus: state, event_id: mention.ref.id)
+                Mention(mention)
                     .padding(.horizontal)
             }
             
             if has_action_bar {
-                //EmptyRect
-                EventActionBar(damus_state: state, event: event)
-                    .padding([.leading, .trailing, .top])
+                ActionBar
+                    .padding(.horizontal)
             }
         }
+    }
+
+    var body: some View {
+        Group {
+            if options.contains(.wide) {
+                Wide
+            } else {
+                Threaded
+            }
+        }
+        .contentShape(Rectangle())
+        .id(event.id)
+        .frame(maxWidth: .infinity, minHeight: PFP_SIZE)
+        .padding([.bottom], 2)
     }
 }
 
 struct EventShell_Previews: PreviewProvider {
+
     static var previews: some View {
-        EventShell(state: test_damus_state(), event: test_event, options: [.no_action_bar]) {
-            Text("Hello")
+        VStack {
+            EventShell(state: test_damus_state(), event: test_event, options: [.no_action_bar]) {
+                Text("Hello")
+            }
+
+            EventShell(state: test_damus_state(), event: test_event, options: [.no_action_bar, .wide]) {
+                Text("Hello")
+            }
         }
+        .frame(height: 300)
     }
 }

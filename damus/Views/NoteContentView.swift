@@ -54,7 +54,7 @@ struct NoteContentView: View {
     }
     
     var with_padding: Bool {
-        return options.contains(.pad_content)
+        return options.contains(.wide)
     }
     
     var preview: LinkViewRepresentable? {
@@ -185,16 +185,23 @@ struct NoteContentView: View {
     
     func artifactPartsView(_ parts: [ArtifactPart]) -> some View {
         
-        LazyVStack {
+        LazyVStack(alignment: .leading) {
             ForEach(parts.indices, id: \.self) { ind in
                 let part = parts[ind]
                 switch part {
                 case .text(let txt):
-                    txt
-                        .padding(.horizontal)
+                    if with_padding {
+                        txt.padding(.horizontal)
+                    } else {
+                        txt
+                    }
                 case .invoice(let inv):
-                    InvoiceView(our_pubkey: damus_state.pubkey, invoice: inv, settings: damus_state.settings)
-                        .padding(.horizontal)
+                    if with_padding {
+                        InvoiceView(our_pubkey: damus_state.pubkey, invoice: inv, settings: damus_state.settings)
+                            .padding(.horizontal)
+                    } else {
+                        InvoiceView(our_pubkey: damus_state.pubkey, invoice: inv, settings: damus_state.settings)
+                    }
                 case .media(let media):
                     Text("media \(media.url.absoluteString)")
                 }
@@ -211,6 +218,7 @@ struct NoteContentView: View {
                 MainContent(artifacts: separated)
             }
         }
+        .fixedSize(horizontal: false, vertical: true)
     }
     
     var body: some View {
@@ -276,15 +284,6 @@ func mention_str(_ m: Mention, profiles: Profiles) -> CompatibleText {
         return CompatibleText(attributed: attributedString)
     }
 }
-
-struct NoteContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        let state = test_damus_state()
-        let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
-        NoteContentView(damus_state: state, event: NostrEvent(content: content, pubkey: "pk"), show_images: true, size: .normal, options: [])
-    }
-}
-
 
 enum NoteArtifacts {
     case separated(NoteArtifactsSeparated)
@@ -652,3 +651,18 @@ func trim_suffix(_ str: String) -> String {
 func trim_prefix(_ str: String) -> String {
     return str.replacingOccurrences(of: "^\\s+", with: "", options: .regularExpression)
 }
+
+struct NoteContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        let state = test_damus_state()
+
+        VStack {
+            NoteContentView(damus_state: state, event: test_event, show_images: true, size: .normal, options: [])
+
+            NoteContentView(damus_state: state, event: test_longform_event.event, show_images: true, size: .normal, options: [.wide])
+                .border(Color.red)
+        }
+    }
+}
+
+

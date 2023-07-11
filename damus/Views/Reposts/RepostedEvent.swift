@@ -24,7 +24,7 @@ struct RepostedEvent: View {
            .buttonStyle(PlainButtonStyle())
             
             //SelectedEventView(damus: damus, event: inner_ev, size: .normal)
-            EventView(damus: damus, event: inner_ev, pubkey: inner_ev.pubkey, options: options)
+            EventView(damus: damus, event: inner_ev, pubkey: inner_ev.pubkey, options: options.union(.wide))
         }
     }
 }

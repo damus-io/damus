@@ -51,30 +51,41 @@ struct ReplyView: View {
             Spacer()
         }
     }
-        
+
+    func line(height: CGFloat) -> some View {
+        return Rectangle()
+            .fill(Color.gray.opacity(0.25))
+            .frame(width: 2, height: height)
+            .offset(x: 25, y: 40)
+            .padding(.leading)
+    }
+
     var body: some View {
         VStack(alignment: .leading) {
-
             EventView(damus: damus, event: replying_to, options: [.no_action_bar])
                 .padding()
                 .background(GeometryReader { geometry in
                     let eventHeight = geometry.frame(in: .global).height
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.25))
-                        .frame(width: 2, height: eventHeight + 7)
-                        .offset(x: 25, y: 40)
-                        .padding(.leading)
+                    line(height: eventHeight)
                 })
             
             ReplyingToSection
                 .background(GeometryReader { geometry in
                     let replyingToHeight = geometry.frame(in: .global).height
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.25))
-                        .frame(width: 2, height: replyingToHeight)
-                        .offset(x: 25, y: 40)
-                        .padding(.leading)
+                    line(height: replyingToHeight)
                 })
+        }
+    }
+}
+
+struct ReplyView_Previews: PreviewProvider {
+    static var previews: some View {
+        VStack {
+            ReplyView(replying_to: test_event, damus: test_damus_state(), originalReferences: .constant([]), references: .constant([]))
+                .frame(height: 300)
+
+            ReplyView(replying_to: test_longform_event.event, damus: test_damus_state(), originalReferences: .constant([]), references: .constant([]))
+                .frame(height: 300)
         }
     }
 }

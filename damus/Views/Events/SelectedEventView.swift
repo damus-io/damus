@@ -47,8 +47,8 @@ struct SelectedEventView: View {
                         .padding(.horizontal)
                 }
                 
-                EventBody(damus_state: damus, event: event, size: size, options: [.pad_content])
-                
+                EventBody(damus_state: damus, event: event, size: size, options: [.wide])
+
                 if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
                     BuilderEventView(damus: damus, event_id: mention.ref.id)
                         .padding(.horizontal)
@@ -88,6 +88,5 @@ struct SelectedEventView: View {
 struct SelectedEventView_Previews: PreviewProvider {
     static var previews: some View {
         SelectedEventView(damus: test_damus_state(), event: test_event, size: .selected)
-            .padding()
     }
 }

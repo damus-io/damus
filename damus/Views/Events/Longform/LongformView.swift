@@ -52,18 +52,16 @@ struct LongformView: View {
     
     var body: some View {
         EventShell(state: state, event: event.event, options: options) {
-            
-            VStack {
-                SelectableText(attributedString: AttributedString(stringLiteral: event.title ?? "Untitled"), size: .title)
-            
-                NoteContentView(damus_state: state, event: event.event, show_images: true, size: .selected, options: options)
-            }
+            SelectableText(attributedString: AttributedString(stringLiteral: event.title ?? "Untitled"), size: .title)
+
+            NoteContentView(damus_state: state, event: event.event, show_images: true, size: .selected, options: options)
         }
     }
 }
 
 let test_longform_event = LongformEvent.parse(from:
-        .init(content: "## Let me tell you why coffee is awesome\n**IT JUST IS**",
+        .init(id: "longform_id",
+              content: "## Let me tell you why coffee is awesome\n**IT JUST IS**",
               pubkey: "pk",
               kind: NostrKind.longform.rawValue,
               tags: [
