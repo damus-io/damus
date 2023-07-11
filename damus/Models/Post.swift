@@ -109,32 +109,7 @@ func parse_post_bech32_mention(_ p: Parser) -> ReferencedId? {
 }
 
 /// Return a list of tags
-func parse_post_blocks(content: String) -> [PostBlock] {
-    let p = Parser(pos: 0, str: content)
-    var blocks: [PostBlock] = []
-    var starting_from: Int = 0
-    
-    if content.count == 0 {
-        return []
-    }
-    
-    while p.pos < content.count {
-        let pre_mention = p.pos
-        if let reference = parse_post_reference(p) {
-            blocks.append(parse_post_textblock(str: p.str, from: starting_from, to: pre_mention))
-            blocks.append(.ref(reference))
-            starting_from = p.pos
-        } else if let hashtag = parse_hashtag(p) {
-            blocks.append(parse_post_textblock(str: p.str, from: starting_from, to: pre_mention))
-            blocks.append(.hashtag(hashtag))
-            starting_from = p.pos
-        } else {
-            p.pos += 1
-        }
-    }
-    
-    blocks.append(parse_post_textblock(str: content, from: starting_from, to: content.count))
-    
-    return blocks
+func parse_post_blocks(content: String) -> [Block] {
+    return parse_mentions(content: content, tags: []).blocks
 }
 

@@ -52,7 +52,7 @@ class DamusParseContentTests: XCTestCase {
                 return
             }
             
-            if currentBlock.is_mention {
+            if currentBlock.is_mention != nil {
                 XCTAssert(isMentionBlockSet.contains(i))
             } else {
                 XCTAssert(!isMentionBlockSet.contains(i))

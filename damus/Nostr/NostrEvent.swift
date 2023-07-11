@@ -36,6 +36,10 @@ struct ReferencedId: Identifiable, Hashable, Equatable {
     static func e(_ id: String, relay_id: String? = nil) -> ReferencedId {
         return ReferencedId(ref_id: id, relay_id: relay_id, key: "e")
     }
+
+    static func p(_ pk: String, relay_id: String? = nil) -> ReferencedId {
+        return ReferencedId(ref_id: pk, relay_id: relay_id, key: "p")
+    }
 }
 
 class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Hashable, Comparable {

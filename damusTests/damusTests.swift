@@ -74,8 +74,10 @@ class damusTests: XCTestCase {
         let parsed = parse_mentions(content: md, tags: []).blocks
         
         XCTAssertNotNil(parsed)
-        XCTAssertEqual(parsed.count, 1)
+        XCTAssertEqual(parsed.count, 3)
         XCTAssertNotNil(parsed[0].is_text)
+        XCTAssertNotNil(parsed[1].is_url)
+        XCTAssertNotNil(parsed[2].is_text)
     }
     
     func testParseUrlUpper() {

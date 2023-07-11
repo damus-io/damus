@@ -25,6 +25,14 @@ struct Mention: Equatable {
     let index: Int?
     let type: MentionType
     let ref: ReferencedId
+
+    static func note(_ id: String) -> Mention {
+        return Mention(index: nil, type: .event, ref: .e(id))
+    }
+
+    static func pubkey(_ pubkey: String) -> Mention {
+        return Mention(index: nil, type: .pubkey, ref: .p(pubkey))
+    }
 }
 
 typealias Invoice = LightningInvoice<Amount>
@@ -114,12 +122,12 @@ enum Block: Equatable {
         
         return mention.type == .event
     }
-    
-    var is_mention: Bool {
-        if case .mention = self {
-            return true
+
+    var is_mention: Mention? {
+        if case .mention(let m) = self {
+            return m
         }
-        return false
+        return nil
     }
 }
 
@@ -332,7 +340,13 @@ func convert_mention_bech32_block(_ b: mention_bech32_block) -> Block?
         let pubkey = hex_encode(Data(bytes: npub.pubkey, count: 32))
         let pubkey_ref = ReferencedId(ref_id: pubkey, relay_id: nil, key: "p")
         return .mention(Mention(index: nil, type: .pubkey, ref: pubkey_ref))
-        
+
+    case NOSTR_BECH32_NSEC:
+        let nsec = b.bech32.data.nsec
+        let nsec_bytes = Data(bytes: nsec.nsec, count: 32)
+        let pubkey = privkey_to_pubkey_raw(sec: nsec_bytes.bytes) ?? hex_encode(nsec_bytes)
+        return .mention(.pubkey(pubkey))
+
     case NOSTR_BECH32_NPROFILE:
         let nprofile = b.bech32.data.nprofile
         let pubkey = hex_encode(Data(bytes: nprofile.pubkey, count: 32))
@@ -394,65 +408,6 @@ func convert_mention_index_block(ind: Int32, tags: [[String]]) -> Block?
     return .mention(Mention(index: ind, type: mention_type, ref: ref))
 }
 
-func parse_while(_ p: Parser, match: (Character) -> Bool) -> String? {
-    var i: Int = 0
-    let sub = substring(p.str, start: p.pos, end: p.str.count)
-    let start = p.pos
-    for c in sub {
-        if match(c) {
-            p.pos += 1
-        } else {
-            break
-        }
-        i += 1
-    }
-    
-    let end = start + i
-    if start == end {
-        return nil
-    }
-    return String(substring(p.str, start: start, end: end))
-}
-
-func is_hashtag_char(_ c: Character) -> Bool {
-    return (c.isLetter || c.isNumber || c.isASCII) && (!c.isPunctuation && !c.isWhitespace)
-}
-
-func prev_char(_ p: Parser, n: Int) -> Character? {
-    if p.pos - n < 0 {
-        return nil
-    }
-    
-    let ind = p.str.index(p.str.startIndex, offsetBy: p.pos - n)
-    return p.str[ind]
-}
-
-func is_punctuation(_ c: Character) -> Bool {
-    return c.isWhitespace || c.isPunctuation
-}
-
-func parse_hashtag(_ p: Parser) -> String? {
-    let start = p.pos
-    
-    if !parse_char(p, "#") {
-        return nil
-    }
-    
-    if let prev = prev_char(p, n: 2) {
-        // we don't allow adjacent hashtags
-        if !is_punctuation(prev) {
-            return nil
-        }
-    }
-    
-    guard let str = parse_while(p, match: is_hashtag_char) else {
-        p.pos = start
-        return nil
-    }
-    
-    return str
-}
-
 func find_tag_ref(type: String, id: String, tags: [[String]]) -> Int? {
     var i: Int = 0
     for tag in tags {
@@ -483,47 +438,31 @@ func parse_mention_type(_ c: String) -> MentionType? {
 }
 
 /// Convert
-func make_post_tags(post_blocks: [PostBlock], tags: [[String]], silent_mentions: Bool) -> PostTags {
+func make_post_tags(post_blocks: [Block], tags: [[String]], silent_mentions: Bool) -> PostTags {
     var new_tags = tags
-    var blocks: [Block] = []
-    
+
     for post_block in post_blocks {
         switch post_block {
-        case .ref(let ref):
-            guard let mention_type = parse_mention_type(ref.key) else {
-                continue
-            }
-            
+        case .mention(let mention):
+            let mention_type = mention.type
+
             if silent_mentions || mention_type == .event {
-                let mention = Mention(index: nil, type: mention_type, ref: ref)
-                let block = Block.mention(mention)
-                blocks.append(block)
                 continue
             }
-            
-            if find_tag_ref(type: ref.key, id: ref.ref_id, tags: tags) != nil {
-                // Mention index is nil because indexed mentions from NIP-08 is deprecated.
-                // It has been replaced with NIP-27 text note references with nostr: prefixed URIs.
-                let mention = Mention(index: nil, type: mention_type, ref: ref)
-                let block = Block.mention(mention)
-                blocks.append(block)
-            } else {
-                new_tags.append(refid_to_tag(ref))
-                // Mention index is nil because indexed mentions from NIP-08 is deprecated.
-                // It has been replaced with NIP-27 text note references with nostr: prefixed URIs.
-                let mention = Mention(index: nil, type: mention_type, ref: ref)
-                let block = Block.mention(mention)
-                blocks.append(block)
-            }
+
+            new_tags.append(refid_to_tag(mention.ref))
         case .hashtag(let hashtag):
             new_tags.append(["t", hashtag.lowercased()])
-            blocks.append(.hashtag(hashtag))
-        case .text(let txt):
-            blocks.append(Block.text(txt))
+        case .text: break
+        case .invoice: break
+        case .relay: break
+        case .url(let url):
+            new_tags.append(["r", url.absoluteString])
+            break
         }
     }
     
-    return PostTags(blocks: blocks, tags: new_tags)
+    return PostTags(blocks: post_blocks, tags: new_tags)
 }
 
 func post_to_event(post: NostrPost, privkey: String, pubkey: String) -> NostrEvent {

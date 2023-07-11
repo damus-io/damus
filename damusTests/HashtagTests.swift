@@ -39,15 +39,37 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithEmoji() {
-        let parsed = parse_mentions(content: "some hashtag #bitcoin☕️ cool", tags: []).blocks
-        
+        let content = "some hashtag #bitcoin☕️ cool"
+        let parsed = parse_mentions(content: content, tags: []).blocks
+        let post_blocks = parse_post_blocks(content: content)
+
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
         XCTAssertEqual(parsed[0].is_text, "some hashtag ")
         XCTAssertEqual(parsed[1].is_hashtag, "bitcoin☕️")
         XCTAssertEqual(parsed[2].is_text, " cool")
+
+        XCTAssertEqual(post_blocks.count, 3)
+        XCTAssertEqual(post_blocks[0].is_text, "some hashtag ")
+        XCTAssertEqual(post_blocks[1].is_hashtag, "bitcoin☕️")
+        XCTAssertEqual(post_blocks[2].is_text, " cool")
     }
-    
+
+    func testPowHashtag() {
+        let content = "pow! #ぽわ〜"
+        let parsed = parse_mentions(content: content, tags: []).blocks
+        let post_blocks = parse_post_blocks(content: content)
+
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed.count, 2)
+        XCTAssertEqual(parsed[0].is_text, "pow! ")
+        XCTAssertEqual(parsed[1].is_hashtag, "ぽわ〜")
+
+        XCTAssertEqual(post_blocks.count, 2)
+        XCTAssertEqual(post_blocks[0].is_text, "pow! ")
+        XCTAssertEqual(post_blocks[1].is_hashtag, "ぽわ〜")
+    }
+
     func testHashtagWithAccents() {
         let parsed = parse_mentions(content: "hello from #türkiye", tags: []).blocks
         
