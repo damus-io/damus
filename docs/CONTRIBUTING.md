@@ -131,7 +131,10 @@ then only post say 15 or so at a time and wait for review and integration.
 You should always copy the appropriate people on any patch to code that
 they may have been involved with. You can use
 [git-contacts][git-contacts] to find people who have touched the code
-previously.
+previously:
+
+    $ git format-patch --cover-letter -o patches origin/master..my-feature
+    $ git send-email --dry-run --cc-cmd=git-contacts patches/*
 
 patches@damus.io should be used by default for all patches.
 
