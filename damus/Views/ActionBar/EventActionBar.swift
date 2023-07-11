@@ -56,11 +56,7 @@ struct EventActionBar: View {
             HStack(spacing: 4) {
                 
                 EventActionButton(img: "repost", col: bar.boosted ? Color.green : nil) {
-                    if bar.boosted {
-                        notify(.delete, bar.our_boost)
-                    } else {
-                        self.show_repost_action = true
-                    }
+                    self.show_repost_action = true
                 }
                 .accessibilityLabel(NSLocalizedString("Reposts", comment: "Accessibility label for boosts button"))
                 Text(verbatim: "\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
