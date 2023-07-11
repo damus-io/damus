@@ -253,7 +253,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>%2$@ sat</string>
+			<string>%2$@ Sat</string>
 			<key>other</key>
 			<string>%2$@ Sats</string>
 		</dict>
