@@ -10,13 +10,23 @@ import SwiftUI
 struct EventShell<Content: View>: View {
     let state: DamusState
     let event: NostrEvent
+    let pubkey: String
     let options: EventViewOptions
     let content: Content
     
+    init(state: DamusState, event: NostrEvent, pubkey: String, options: EventViewOptions, @ViewBuilder content: () -> Content) {
+        self.state = state
+        self.event = event
+        self.options = options
+        self.pubkey = pubkey
+        self.content = content()
+    }
+
     init(state: DamusState, event: NostrEvent, options: EventViewOptions, @ViewBuilder content: () -> Content) {
         self.state = state
         self.event = event
         self.options = options
+        self.pubkey = event.pubkey
         self.content = content()
     }
     
@@ -42,7 +52,7 @@ struct EventShell<Content: View>: View {
     }
 
     func Pfp(is_anon: Bool) -> some View {
-        return MaybeAnonPfpView(state: state, is_anon: is_anon, pubkey: event.pubkey, size: options.contains(.small_pfp) ? eventview_pfp_size(.small) : PFP_SIZE )
+        return MaybeAnonPfpView(state: state, is_anon: is_anon, pubkey: pubkey, size: options.contains(.small_pfp) ? eventview_pfp_size(.small) : PFP_SIZE )
     }
 
     var Threaded: some View {
@@ -56,7 +66,7 @@ struct EventShell<Content: View>: View {
             }
 
             VStack(alignment: .leading) {
-                EventTop(state: state, event: event, is_anon: is_anon)
+                EventTop(state: state, event: event, pubkey: pubkey, is_anon: is_anon)
 
                 if !options.contains(.no_replying_to) {
                     ReplyPart(event: event, privkey: state.keypair.privkey, profiles: state.profiles)
@@ -84,7 +94,7 @@ struct EventShell<Content: View>: View {
                 Pfp(is_anon: is_anon)
 
                 VStack {
-                    EventTop(state: state, event: event, is_anon: is_anon)
+                    EventTop(state: state, event: event, pubkey: pubkey, is_anon: is_anon)
                     ReplyPart(event: event, privkey: state.keypair.privkey, profiles: state.profiles)
                 }
             }

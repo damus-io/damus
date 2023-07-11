@@ -39,7 +39,7 @@ struct TextEvent: View {
     }
     
     var body: some View {
-        EventShell(state: damus, event: event, options: options) {
+        EventShell(state: damus, event: event, pubkey: pubkey, options: options) {
             EvBody(options: options)
         }
     }
