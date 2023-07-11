@@ -432,7 +432,7 @@ static inline int is_whitespace(char c) {
 }
 
 static inline int is_boundary(char c) {
-    return !isalnum(c);
+    return is_whitespace(c) || ispunct(c);
 }
 
 static inline int is_invalid_url_ending(char c) {

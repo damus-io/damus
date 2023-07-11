@@ -53,6 +53,7 @@
 		4C198DF229F88C6B004C165C /* BlurHashDecode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C198DEE29F88C6B004C165C /* BlurHashDecode.swift */; };
 		4C198DF529F88D2E004C165C /* ImageMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C198DF429F88D2E004C165C /* ImageMetadata.swift */; };
 		4C19AE512A5CEF7C00C90DB7 /* NostrScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C19AE4C2A5CEF7C00C90DB7 /* NostrScript.swift */; };
+		4C19AE552A5D977400C90DB7 /* HashtagTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C19AE542A5D977400C90DB7 /* HashtagTests.swift */; };
 		4C1A9A1A29DCA17E00516EAC /* ReplyCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A1929DCA17E00516EAC /* ReplyCounter.swift */; };
 		4C1A9A1D29DDCF9B00516EAC /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A1C29DDCF9B00516EAC /* NotificationSettingsView.swift */; };
 		4C1A9A1F29DDD24B00516EAC /* AppearanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A1E29DDD24B00516EAC /* AppearanceSettingsView.swift */; };
@@ -495,6 +496,7 @@
 		4C19AE4B2A5CEF7C00C90DB7 /* primal.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.typescript; path = primal.ts; sourceTree = "<group>"; };
 		4C19AE4C2A5CEF7C00C90DB7 /* NostrScript.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NostrScript.swift; sourceTree = "<group>"; };
 		4C19AE502A5CEF7C00C90DB7 /* nostr.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.typescript; path = nostr.ts; sourceTree = "<group>"; };
+		4C19AE542A5D977400C90DB7 /* HashtagTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HashtagTests.swift; sourceTree = "<group>"; };
 		4C1A9A1929DCA17E00516EAC /* ReplyCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyCounter.swift; sourceTree = "<group>"; };
 		4C1A9A1C29DDCF9B00516EAC /* NotificationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
 		4C1A9A1E29DDD24B00516EAC /* AppearanceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettingsView.swift; sourceTree = "<group>"; };
@@ -1510,6 +1512,7 @@
 				3A5E47C62A4A76C800C0D090 /* TrieTests.swift */,
 				3A90B1822A4EA3C600000D94 /* UserSearchCacheTests.swift */,
 				4C4F14A62A2A61A30045A0B9 /* NostrScriptTests.swift */,
+				4C19AE542A5D977400C90DB7 /* HashtagTests.swift */,
 			);
 			path = damusTests;
 			sourceTree = "<group>";
@@ -2114,6 +2117,7 @@
 			files = (
 				5019CADD2A0FB0A9000069E1 /* ProfileDatabaseTests.swift in Sources */,
 				3A90B1832A4EA3C600000D94 /* UserSearchCacheTests.swift in Sources */,
+				4C19AE552A5D977400C90DB7 /* HashtagTests.swift in Sources */,
 				3A3040ED29A5CB86008A0F29 /* ReplyDescriptionTests.swift in Sources */,
 				4C8D00D429E3C5D40036AF10 /* NIP19Tests.swift in Sources */,
 				3A30410129AB12AA008A0F29 /* EventGroupViewTests.swift in Sources */,
@@ -2405,7 +2409,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = damus/damus.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_PREVIEWS = YES;
@@ -2454,7 +2458,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = damus/damus.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_PREVIEWS = YES;
