@@ -10,7 +10,7 @@ import NaturalLanguage
 
 
 struct Translated: Equatable {
-    let artifacts: NoteArtifacts
+    let artifacts: NoteArtifactsSeparated
     let language: String
 }
 
@@ -42,7 +42,7 @@ struct TranslateView: View {
         .translate_button_style()
     }
     
-    func TranslatedView(lang: String?, artifacts: NoteArtifacts) -> some View {
+    func TranslatedView(lang: String?, artifacts: NoteArtifactsSeparated) -> some View {
         return VStack(alignment: .leading) {
             let translatedFromLanguageString = String(format: NSLocalizedString("Translated from %@", comment: "Button to indicate that the note has been translated from a different language."), lang ?? "ja")
             Text(translatedFromLanguageString)

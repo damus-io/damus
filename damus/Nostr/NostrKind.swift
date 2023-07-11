@@ -20,6 +20,7 @@ enum NostrKind: Int, Codable {
     case channel_meta = 41
     case chat = 42
     case list = 30000
+    case longform = 30023
     case zap = 9735
     case zap_request = 9734
     case nwc_request = 23194
