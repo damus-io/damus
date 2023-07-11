@@ -57,7 +57,7 @@ struct EventShell<Content: View>: View {
             if has_action_bar {
                 //EmptyRect
                 EventActionBar(damus_state: state, event: event)
-                    .padding(.horizontal)
+                    .padding([.leading, .trailing, .top])
             }
         }
     }

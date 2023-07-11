@@ -10,11 +10,14 @@ import SwiftUI
 struct LongformPreview: View {
     let state: DamusState
     let event: LongformEvent
+    let options: EventViewOptions
     @ObservedObject var artifacts: NoteArtifactsModel
     
-    init(state: DamusState, ev: NostrEvent) {
+    init(state: DamusState, ev: NostrEvent, options: EventViewOptions) {
         self.state = state
         self.event = LongformEvent.parse(from: ev)
+        self.options = options
+
         self._artifacts = ObservedObject(wrappedValue: state.events.get_cache_data(ev.id).artifacts_model)
     }
     
@@ -23,7 +26,7 @@ struct LongformPreview: View {
     }
     
     var body: some View {
-        EventShell(state: state, event: event.event, options: [.no_mentions]) {
+        EventShell(state: state, event: event.event, options: options.union(.no_mentions)) {
             VStack(alignment: .leading, spacing: 10) {
                 Text(event.title ?? "Untitled")
                     .font(.title)
@@ -44,6 +47,6 @@ struct LongformPreview: View {
 
 struct LongformPreview_Previews: PreviewProvider {
     static var previews: some View {
-        LongformPreview(state: test_damus_state(), ev: test_longform_event.event)
+        LongformPreview(state: test_damus_state(), ev: test_longform_event.event, options: [])
     }
 }
