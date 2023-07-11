@@ -285,7 +285,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>Du hast %2$@ Sats von %3$@: &quot;%4$@&quot; erhalten</string>
+			<string>Du hast %2$@ Sat von %3$@: &quot;%4$@&quot; erhalten</string>
 			<key>other</key>
 			<string>Du hast %2$@ Sats von %3$@: &quot;%4$@&quot; erhalten</string>
 		</dict>
