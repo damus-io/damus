@@ -104,10 +104,11 @@ struct LoginPrompt: View {
 }
 
 struct BackNav: View {
+    @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismiss
     var body: some View {
         Image("chevron-left")
-            .foregroundColor(.white)
+            .foregroundColor(colorScheme == .light ? DamusColors.black : DamusColors.white)
         .onTapGesture {
             self.dismiss()
         }
