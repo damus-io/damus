@@ -190,7 +190,8 @@ struct PostView: View {
     
     func initialString() -> NSMutableAttributedString {
         guard case .posting(let target) = action,
-              case .user(let pubkey) = target else {
+              case .user(let pubkey) = target,
+              damus_state.pubkey != pubkey else {
             return .init(string: "")
         }
         
