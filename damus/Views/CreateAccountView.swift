@@ -107,7 +107,7 @@ struct BackNav: View {
     @Environment(\.dismiss) var dismiss
     var body: some View {
         Image("chevron-left")
-            .foregroundColor(.white)
+            .foregroundColor(DamusColors.adaptableBlack)
         .onTapGesture {
             self.dismiss()
         }
