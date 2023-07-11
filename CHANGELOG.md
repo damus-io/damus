@@ -1,3 +1,19 @@
+## [1.6-3] - 2023-07-11
+
+### Changed
+
+- Start at top when reading longform events (William Casarin)
+- Allow reposting and quote reposting multiple times (William Casarin)
+
+
+### Fixed
+
+- Show longform previews in notifications instead of the entire post (William Casarin)
+- Fix padding on longform events (William Casarin)
+- Fix action bar appearing on quoted longform previews (William Casarin)
+
+
+[1.6-3]: https://github.com/damus-io/damus/releases/tag/v1.6-3
 ## [1.6-2] - 2023-07-11
 
 ### Added
