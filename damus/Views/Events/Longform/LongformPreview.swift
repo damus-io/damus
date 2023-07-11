@@ -7,12 +7,20 @@
 
 import SwiftUI
 
-struct LongformPreview: View {
+struct LongformPreviewBody: View {
     let state: DamusState
     let event: LongformEvent
     let options: EventViewOptions
     @ObservedObject var artifacts: NoteArtifactsModel
-    
+
+    init(state: DamusState, ev: LongformEvent, options: EventViewOptions) {
+        self.state = state
+        self.event = ev
+        self.options = options
+
+        self._artifacts = ObservedObject(wrappedValue: state.events.get_cache_data(ev.event.id).artifacts_model)
+    }
+
     init(state: DamusState, ev: NostrEvent, options: EventViewOptions) {
         self.state = state
         self.event = LongformEvent.parse(from: ev)
@@ -20,9 +28,19 @@ struct LongformPreview: View {
 
         self._artifacts = ObservedObject(wrappedValue: state.events.get_cache_data(ev.id).artifacts_model)
     }
-    
+
     func Words(_ words: Int) -> Text {
         Text(verbatim: words.description) + Text(verbatim: " ") + Text("Words")
+    }
+
+    var body: some View {
+        Group {
+            if options.contains(.wide) {
+                Main.padding(.horizontal)
+            } else {
+                Main
+            }
+        }
     }
 
     var Main: some View {
@@ -40,15 +58,22 @@ struct LongformPreview: View {
             }
         }
     }
+}
+
+struct LongformPreview: View {
+    let state: DamusState
+    let event: LongformEvent
+    let options: EventViewOptions
+
+    init(state: DamusState, ev: NostrEvent, options: EventViewOptions) {
+        self.state = state
+        self.event = LongformEvent.parse(from: ev)
+        self.options = options.union(.no_mentions)
+    }
 
     var body: some View {
-        EventShell(state: state, event: event.event, options: options.union(.no_mentions)) {
-
-            if options.contains(.wide) {
-                Main.padding(.horizontal)
-            } else {
-                Main
-            }
+        EventShell(state: state, event: event.event, options: options) {
+            LongformPreviewBody(state: state, ev: event, options: options)
         }
     }
 }
