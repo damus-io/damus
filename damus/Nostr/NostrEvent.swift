@@ -76,7 +76,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     }
     
     var too_big: Bool {
-        return self.content.utf8.count > 16000
+        return known_kind != .longform && self.content.utf8.count > 16000
     }
     
     var should_show_event: Bool {
