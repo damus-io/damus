@@ -58,7 +58,7 @@ struct ThreadView: View {
                     MutedEventView(
                         damus_state: state,
                         event: self.thread.event,
-                        selected: true
+                        selected: false
                     )
                     .id(self.thread.event.id)
                     
