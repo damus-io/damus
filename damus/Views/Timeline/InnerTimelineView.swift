@@ -71,6 +71,7 @@ struct InnerTimelineView: View {
     }
 }
 
+let test_event_holder = EventHolder(events: [], incoming: [test_event])
 
 struct InnerTimelineView_Previews: PreviewProvider {
     static var previews: some View {
