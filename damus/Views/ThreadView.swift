@@ -88,7 +88,8 @@ struct ThreadView: View {
             }.navigationBarTitle(NSLocalizedString("Thread", comment: "Navigation bar title for note thread."))
             .onAppear {
                 thread.subscribe()
-                scroll_to_event(scroller: reader, id: self.thread.event.id, delay: 0.0, animate: false)
+                let anchor: UnitPoint = self.thread.event.known_kind == .longform ? .top : .bottom
+                scroll_to_event(scroller: reader, id: self.thread.event.id, delay: 0.0, animate: false, anchor: anchor)
             }
             .onDisappear {
                 thread.unsubscribe()
