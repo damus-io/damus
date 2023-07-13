@@ -111,7 +111,7 @@
 			<key>one</key>
 			<string>%2$@ und %1$d weiteres Profil reagierten auf dein Profil</string>
 			<key>other</key>
-			<string>%2$@ und %1$d weitere reagierten auf dein Profil</string>
+			<string>%2$@ und %1$d andere reagierten auf dein Profil</string>
 		</dict>
 	</dict>
 	<key>reactions_count</key>
