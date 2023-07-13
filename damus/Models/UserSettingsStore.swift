@@ -173,6 +173,12 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "developer_mode", default_value: false)
     var developer_mode: Bool
+    
+    @Setting(key: "emoji_reactions", default_value: default_emoji_reactions)
+    var emoji_reactions: [String]
+    
+    @Setting(key: "default_emoji_reaction", default_value: "🤙")
+    var default_emoji_reaction: String
 
     // Helper for inverse of disable_animation.
     // disable_animation was introduced as a setting first, but it's more natural for the settings UI to show the inverse.

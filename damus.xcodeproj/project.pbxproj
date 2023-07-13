@@ -45,6 +45,7 @@
 		4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F92280F66F5000448DE /* ReplyMap.swift */; };
 		4C0C03992A61E27B0098B3B8 /* primal.wasm in Resources */ = {isa = PBXBuildFile; fileRef = 4C0C03972A61E27B0098B3B8 /* primal.wasm */; };
 		4C0C039A2A61E27B0098B3B8 /* bool_setting.wasm in Resources */ = {isa = PBXBuildFile; fileRef = 4C0C03982A61E27B0098B3B8 /* bool_setting.wasm */; };
+		4C15C7152A55DE7A00D0A0DB /* ReactionsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C15C7142A55DE7A00D0A0DB /* ReactionsSettingsView.swift */; };
 		4C190F202A535FC200027FD5 /* CustomizeZapModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C190F1F2A535FC200027FD5 /* CustomizeZapModel.swift */; };
 		4C190F252A547D2000027FD5 /* LoadScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C190F242A547D2000027FD5 /* LoadScript.swift */; };
 		4C198DEF29F88C6B004C165C /* BlurHashEncode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C198DEB29F88C6B004C165C /* BlurHashEncode.swift */; };
@@ -487,6 +488,7 @@
 		4C0A3F92280F66F5000448DE /* ReplyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyMap.swift; sourceTree = "<group>"; };
 		4C0C03972A61E27B0098B3B8 /* primal.wasm */ = {isa = PBXFileReference; lastKnownFileType = file; name = primal.wasm; path = nostrscript/primal.wasm; sourceTree = SOURCE_ROOT; };
 		4C0C03982A61E27B0098B3B8 /* bool_setting.wasm */ = {isa = PBXFileReference; lastKnownFileType = file; name = bool_setting.wasm; path = nostrscript/bool_setting.wasm; sourceTree = SOURCE_ROOT; };
+		4C15C7142A55DE7A00D0A0DB /* ReactionsSettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReactionsSettingsView.swift; sourceTree = "<group>"; };
 		4C190F1F2A535FC200027FD5 /* CustomizeZapModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomizeZapModel.swift; sourceTree = "<group>"; };
 		4C190F242A547D2000027FD5 /* LoadScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadScript.swift; sourceTree = "<group>"; };
 		4C198DEB29F88C6B004C165C /* BlurHashEncode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlurHashEncode.swift; sourceTree = "<group>"; };
@@ -1058,6 +1060,7 @@
 		4C1A9A1B29DDCF8B00516EAC /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				4C15C7142A55DE7A00D0A0DB /* ReactionsSettingsView.swift */,
 				4C1A9A1C29DDCF9B00516EAC /* NotificationSettingsView.swift */,
 				4C1A9A1E29DDD24B00516EAC /* AppearanceSettingsView.swift */,
 				4C1A9A2029DDD3E100516EAC /* KeySettingsView.swift */,
@@ -1867,6 +1870,7 @@
 				4C9F18E429ABDE6D008C55EC /* MaybeAnonPfpView.swift in Sources */,
 				4CA5588329F33F5B00DC6A45 /* StringCodable.swift in Sources */,
 				4C75EFB92804A2740006080F /* EventView.swift in Sources */,
+				4C15C7152A55DE7A00D0A0DB /* ReactionsSettingsView.swift in Sources */,
 				4C8D00C829DF791C0036AF10 /* CompatibleAttribute.swift in Sources */,
 				4C7D09742A0AEF9000943473 /* AlbyGradient.swift in Sources */,
 				4C687C272A6039500092C550 /* TestData.swift in Sources */,
