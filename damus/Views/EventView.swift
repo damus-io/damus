@@ -151,10 +151,3 @@ struct EventView_Previews: PreviewProvider {
     }
 }
 
-let test_event =
-        NostrEvent(
-            content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jpg cool",
-            pubkey: "pk",
-            createdAt: Int64(Date().timeIntervalSince1970 - 100)
-        )
-

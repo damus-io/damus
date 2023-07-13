@@ -71,8 +71,6 @@ struct InnerTimelineView: View {
     }
 }
 
-let test_event_holder = EventHolder(events: [], incoming: [test_event])
-
 struct InnerTimelineView_Previews: PreviewProvider {
     static var previews: some View {
         InnerTimelineView(events: test_event_holder, damus: test_damus_state(), filter: { _ in true })
