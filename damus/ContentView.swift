@@ -395,16 +395,12 @@ struct ContentView: View {
             }
         }
         .onReceive(handle_notify(.unfollow)) { notif in
-            guard let state = self.damus_state else {
-                return
-            }
-            handle_unfollow(state: state, notif: notif)
+            guard let state = self.damus_state else { return }
+            handle_unfollow_notif(state: state, notif: notif)
         }
         .onReceive(handle_notify(.follow)) { notif in
-            guard let state = self.damus_state else {
-                return
-            }
-            handle_follow(state: state, notif: notif)
+            guard let state = self.damus_state else { return }
+            handle_follow_notif(state: state, notif: notif)
         }
         .onReceive(handle_notify(.post)) { notif in
             guard let state = self.damus_state,
@@ -879,47 +875,67 @@ func timeline_name(_ timeline: Timeline?) -> String {
     }
 }
 
-func handle_unfollow(state: DamusState, notif: Notification) {
+func handle_unfollow(state: DamusState, unfollow: ReferencedId) {
     guard let keypair = state.keypair.to_full() else {
         return
     }
-    
-    let target = notif.object as! FollowTarget
-    let pk = target.pubkey
+
     let old_contacts = state.contacts.event
 
-    guard let ev = unfollow_reference(postbox: state.postbox, our_contacts: old_contacts, keypair: keypair, unfollow: .p(pk))
-    else { return }
-
-    notify(.unfollowed, pk)
-
-    state.contacts.event = ev
-    state.contacts.remove_friend(pk)
-    state.user_search_cache.updateOwnContactsPetnames(id: state.pubkey, oldEvent: old_contacts, newEvent: ev)
-}
-
-func handle_follow(state: DamusState, notif: Notification) {
-    guard let keypair = state.keypair.to_full() else {
-        return
-    }
-
-    let fnotify = notif.object as! FollowTarget
-
-    guard let ev = follow_reference(box: state.postbox, our_contacts: state.contacts.event, keypair: keypair, follow: .p(fnotify.pubkey))
+    guard let ev = unfollow_reference(postbox: state.postbox, our_contacts: old_contacts, keypair: keypair, unfollow: unfollow)
     else {
         return
     }
 
-    notify(.followed, fnotify.pubkey)
+    notify(.unfollowed, unfollow)
 
     state.contacts.event = ev
 
+    if unfollow.key == "p" {
+        state.contacts.remove_friend(unfollow.ref_id)
+        state.user_search_cache.updateOwnContactsPetnames(id: state.pubkey, oldEvent: old_contacts, newEvent: ev)
+    }
+}
+
+func handle_unfollow_notif(state: DamusState, notif: Notification) {
+    let target = notif.object as! FollowTarget
+    let pk = target.pubkey
+
+    handle_unfollow(state: state, unfollow: .p(pk))
+}
+
+@discardableResult
+func handle_follow(state: DamusState, follow: ReferencedId) -> Bool {
+    guard let keypair = state.keypair.to_full() else {
+        return false
+    }
+
+    guard let ev = follow_reference(box: state.postbox, our_contacts: state.contacts.event, keypair: keypair, follow: follow)
+    else {
+        return false
+    }
+
+    notify(.followed, follow)
+
+    state.contacts.event = ev
+    if follow.key == "p" {
+        state.contacts.add_friend_pubkey(follow.ref_id)
+    }
+
+    return true
+}
+
+@discardableResult
+func handle_follow_notif(state: DamusState, notif: Notification) -> Bool {
+    let fnotify = notif.object as! FollowTarget
     switch fnotify {
     case .pubkey(let pk):
         state.contacts.add_friend_pubkey(pk)
     case .contact(let ev):
         state.contacts.add_friend_contact(ev)
     }
+
+    return handle_follow(state: state, follow: .p(fnotify.pubkey))
 }
 
 func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: EventCache, notif: Notification) -> Bool {
