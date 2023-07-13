@@ -189,6 +189,20 @@ struct LikeButton: View {
         damus_state.settings.emoji_reactions
     }
     
+    @ViewBuilder
+    func buildMaskView(for emoji: String) -> some View {
+        if emoji == "🤙" {
+            LINEAR_GRADIENT
+                .mask(
+                    Image("shaka.fill")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                )
+        } else {
+            Text(emoji)
+        }
+    }
+
     var body: some View {
 
         Button(action: {
