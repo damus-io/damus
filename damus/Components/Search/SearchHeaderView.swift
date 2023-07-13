@@ -48,9 +48,9 @@ struct SearchHeaderView: View {
     var SearchText: Text {
         switch described {
         case .hashtag(let ht):
-            Text(verbatim: "#" + ht)
+            return Text(verbatim: "#" + ht)
         case .unknown:
-            Text("Search")
+            return Text("Search")
         }
     }
 

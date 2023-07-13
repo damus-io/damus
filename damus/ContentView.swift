@@ -396,10 +396,9 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.unfollow)) { notif in
             guard let state = self.damus_state else { return }
-            guard let unfollow = handle_unfollow_notif(state: state, notif: notif) else { return }
+            _ = handle_unfollow_notif(state: state, notif: notif)
         }
         .onReceive(handle_notify(.unfollowed)) { notif in
-            guard let state = self.damus_state else { return }
             let unfollow = notif.object as! ReferencedId
             home.resubscribe(.unfollowing(unfollow))
         }
@@ -408,8 +407,6 @@ struct ContentView: View {
             guard handle_follow_notif(state: state, notif: notif) else { return }
         }
         .onReceive(handle_notify(.followed)) { notif in
-            guard let state = self.damus_state else { return }
-            let follow = notif.object as! ReferencedId
             home.resubscribe(.following)
         }
         .onReceive(handle_notify(.post)) { notif in
