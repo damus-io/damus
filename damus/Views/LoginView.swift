@@ -106,13 +106,7 @@ struct LoginView: View {
             }
             .padding()
         }
-        .background(
-            Image("login-header")
-                .resizable()
-                .frame(maxWidth: .infinity, maxHeight: 350, alignment: .center)
-                .ignoresSafeArea(),
-            alignment: .top
-        )
+        .background(DamusBackground(maxHeight: 350), alignment: .top)
         .onAppear {
             credential_handler.check_credentials()
         }
