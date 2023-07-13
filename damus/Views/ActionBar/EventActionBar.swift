@@ -68,11 +68,11 @@ struct EventActionBar: View {
                 Spacer()
 
                 HStack(spacing: 4) {
-                    LikeButton(liked: bar.liked) {
+                    LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
                         if bar.liked {
                             notify(.delete, bar.our_like)
                         } else {
-                            send_like()
+                            send_like(emoji: emoji)
                         }
                     }
 
@@ -139,12 +139,12 @@ struct EventActionBar: View {
         }
     }
     
-    func send_like() {
+    func send_like(emoji: String) {
         guard let privkey = damus_state.keypair.privkey else {
             return
         }
         
-        let like_ev = make_like_event(pubkey: damus_state.pubkey, privkey: privkey, liked: event)
+        let like_ev = make_like_event(pubkey: damus_state.pubkey, privkey: privkey, liked: event, content: emoji)
         
         self.bar.our_like = like_ev
 
