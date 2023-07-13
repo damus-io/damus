@@ -144,6 +144,7 @@
 		4C64987E286D082C00EAE2B3 /* DirectMessagesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C64987D286D082C00EAE2B3 /* DirectMessagesModel.swift */; };
 		4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */ = {isa = PBXBuildFile; productRef = 4C649880286E0EE300EAE2B3 /* secp256k1 */; };
 		4C687C212A5F7ED00092C550 /* DamusBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C687C202A5F7ED00092C550 /* DamusBackground.swift */; };
+		4C687C242A5FA86D0092C550 /* SearchHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C687C232A5FA86D0092C550 /* SearchHeaderView.swift */; };
 		4C687C272A6039500092C550 /* TestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C687C262A6039500092C550 /* TestData.swift */; };
 		4C73C5142A4437C10062CAC0 /* ZapUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C73C5132A4437C10062CAC0 /* ZapUserView.swift */; };
 		4C75EFA427FA577B0006080F /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75EFA327FA577B0006080F /* PostView.swift */; };
@@ -619,6 +620,7 @@
 		4C64987B286D03E000EAE2B3 /* DirectMessagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectMessagesView.swift; sourceTree = "<group>"; };
 		4C64987D286D082C00EAE2B3 /* DirectMessagesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectMessagesModel.swift; sourceTree = "<group>"; };
 		4C687C202A5F7ED00092C550 /* DamusBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusBackground.swift; sourceTree = "<group>"; };
+		4C687C232A5FA86D0092C550 /* SearchHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHeaderView.swift; sourceTree = "<group>"; };
 		4C687C262A6039500092C550 /* TestData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestData.swift; sourceTree = "<group>"; };
 		4C73C5132A4437C10062CAC0 /* ZapUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapUserView.swift; sourceTree = "<group>"; };
 		4C75EFA327FA577B0006080F /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
@@ -1099,6 +1101,14 @@
 			path = Notifications;
 			sourceTree = "<group>";
 		};
+		4C687C2A2A6058450092C550 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				4C687C232A5FA86D0092C550 /* SearchHeaderView.swift */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
 		4C75EFA227FA576C0006080F /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -1404,6 +1414,7 @@
 		4CE4F9DF285287A000C00DD9 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				4C687C2A2A6058450092C550 /* Search */,
 				4C7D09702A0AEF4C00943473 /* Gradients */,
 				31D2E846295218AF006D67F8 /* Shimmer.swift */,
 				4CD7641A28A1641400B6928F /* EndBlock.swift */,
@@ -1946,6 +1957,7 @@
 				3169CAE6294E69C000EE4006 /* EmptyTimelineView.swift in Sources */,
 				4CC7AAF0297F11C700430951 /* SelectedEventView.swift in Sources */,
 				4CC7AAF8297F1CEE00430951 /* EventProfile.swift in Sources */,
+				4C687C242A5FA86D0092C550 /* SearchHeaderView.swift in Sources */,
 				64FBD06F296255C400D9D3B2 /* Theme.swift in Sources */,
 				4C1A9A2329DDDB8100516EAC /* IconLabel.swift in Sources */,
 				4C3EA64928FF597700C48A62 /* bech32.c in Sources */,
