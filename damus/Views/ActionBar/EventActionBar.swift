@@ -243,6 +243,16 @@ struct LikeButton: View {
                 amountOfAngleIncrease -= 2.5
             }
         }
+    private func emojiTapped(_ emoji: String) {
+        print("Tapped emoji: \(emoji)")
+        
+        self.action(emoji)
+
+        withAnimation(.easeOut(duration: 0.2)) {
+            isReactionsVisible = false
+            showReactionsBG = 0
+        }
+        showEmojis = []
     }
 }
 
