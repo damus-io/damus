@@ -32,12 +32,13 @@ struct NIP05Badge: View {
         Group {
             if nip05_color {
                 LINEAR_GRADIENT
-                    .mask(Image("check-circle.fill")
+                    .mask(Image("verified.fill")
                         .resizable()
-                    ).frame(width: 14, height: 14)
+                    ).frame(width: 18, height: 18)
             } else if show_domain {
-                Image("check-circle.fill")
-                    .font(.footnote)
+                Image("verified")
+                    .resizable()
+                    .frame(width: 18, height: 18)
                     .nip05_colorized(gradient: nip05_color)
             }
         }
@@ -84,7 +85,11 @@ func use_nip05_color(pubkey: String, contacts: Contacts) -> Bool {
 struct NIP05Badge_Previews: PreviewProvider {
     static var previews: some View {
         let test_state = test_damus_state()
-        NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true, clickable: false)
+        VStack {
+            NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true, clickable: false)
+
+            NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: Contacts(our_pubkey: "sdkfjsdf"), show_domain: true, clickable: false)
+        }
     }
 }
 
