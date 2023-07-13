@@ -66,10 +66,19 @@ class Contacts {
         }
     }
     
-    func get_friend_list() -> [String] {
-        return Array(friends)
+    func get_friend_list() -> Set<String> {
+        return friends
     }
-    
+
+    func get_followed_hashtags() -> Set<String> {
+        guard let ev = self.event else { return Set() }
+        return ev.tags.reduce(into: Set<String>(), { htags, tag in
+            if tag.count >= 2 && tag[0] == "t" && tag[1] != "" {
+                htags.insert(tag[1])
+            }
+        })
+    }
+
     func add_friend_pubkey(_ pubkey: String) {
         friends.insert(pubkey)
     }

@@ -32,16 +32,16 @@ struct FollowButtonView: View {
                 }
         }
         .onReceive(handle_notify(.followed)) { notif in
-            let pk = notif.object as! String
-            if pk != target.pubkey {
+            let pk = notif.object as! ReferencedId
+            if pk.key == "p", pk.ref_id != target.pubkey {
                 return
             }
             
             self.follow_state = .follows
         }
         .onReceive(handle_notify(.unfollowed)) { notif in
-            let pk = notif.object as! String
-            if pk != target.pubkey {
+            let pk = notif.object as! ReferencedId
+            if pk.key == "p", pk.ref_id != target.pubkey {
                 return
             }
             
