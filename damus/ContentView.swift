@@ -880,49 +880,45 @@ func timeline_name(_ timeline: Timeline?) -> String {
 }
 
 func handle_unfollow(state: DamusState, notif: Notification) {
-    guard let privkey = state.keypair.privkey else {
+    guard let keypair = state.keypair.to_full() else {
         return
     }
     
     let target = notif.object as! FollowTarget
     let pk = target.pubkey
     let old_contacts = state.contacts.event
-    
-    if let ev = unfollow_user(postbox: state.postbox,
-                              our_contacts: old_contacts,
-                              pubkey: state.pubkey,
-                              privkey: privkey,
-                              unfollow: pk) {
-        notify(.unfollowed, pk)
 
-        state.contacts.event = ev
-        state.contacts.remove_friend(pk)
-        state.user_search_cache.updateOwnContactsPetnames(id: state.pubkey, oldEvent: old_contacts, newEvent: ev)
-    }
+    guard let ev = unfollow_reference(postbox: state.postbox, our_contacts: old_contacts, keypair: keypair, unfollow: .p(pk))
+    else { return }
+
+    notify(.unfollowed, pk)
+
+    state.contacts.event = ev
+    state.contacts.remove_friend(pk)
+    state.user_search_cache.updateOwnContactsPetnames(id: state.pubkey, oldEvent: old_contacts, newEvent: ev)
 }
 
 func handle_follow(state: DamusState, notif: Notification) {
-    guard let privkey = state.keypair.privkey else {
+    guard let keypair = state.keypair.to_full() else {
         return
     }
 
     let fnotify = notif.object as! FollowTarget
 
-    if let ev = follow_user(pool: state.pool,
-                            our_contacts: state.contacts.event,
-                            pubkey: state.pubkey,
-                            privkey: privkey,
-                            follow: ReferencedId(ref_id: fnotify.pubkey, relay_id: nil, key: "p")) {
-        notify(.followed, fnotify.pubkey)
-        
-        state.contacts.event = ev
-        
-        switch fnotify {
-        case .pubkey(let pk):
-            state.contacts.add_friend_pubkey(pk)
-        case .contact(let ev):
-            state.contacts.add_friend_contact(ev)
-        }
+    guard let ev = follow_reference(box: state.postbox, our_contacts: state.contacts.event, keypair: keypair, follow: .p(fnotify.pubkey))
+    else {
+        return
+    }
+
+    notify(.followed, fnotify.pubkey)
+
+    state.contacts.event = ev
+
+    switch fnotify {
+    case .pubkey(let pk):
+        state.contacts.add_friend_pubkey(pk)
+    case .contact(let ev):
+        state.contacts.add_friend_contact(ev)
     }
 }
 

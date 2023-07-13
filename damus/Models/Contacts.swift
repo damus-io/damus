@@ -118,37 +118,36 @@ class Contacts {
     }
 }
 
-func follow_user(pool: RelayPool, our_contacts: NostrEvent?, pubkey: String, privkey: String, follow: ReferencedId) -> NostrEvent? {
-    guard let ev = follow_user_event(our_contacts: our_contacts, our_pubkey: pubkey, follow: follow) else {
+func follow_reference(box: PostBox, our_contacts: NostrEvent?, keypair: FullKeypair, follow: ReferencedId) -> NostrEvent? {
+    guard let ev = follow_user_event(our_contacts: our_contacts, our_pubkey: keypair.pubkey, follow: follow) else {
         return nil
     }
     
     ev.calculate_id()
-    ev.sign(privkey: privkey)
-    
-    
-    pool.send(.event(ev))
-    
+    ev.sign(privkey: keypair.privkey)
+
+    box.send(ev)
+
     return ev
 }
 
-func unfollow_user(postbox: PostBox, our_contacts: NostrEvent?, pubkey: String, privkey: String, unfollow: String) -> NostrEvent? {
+func unfollow_reference(postbox: PostBox, our_contacts: NostrEvent?, keypair: FullKeypair, unfollow: ReferencedId) -> NostrEvent? {
     guard let cs = our_contacts else {
         return nil
     }
     
-    let ev = unfollow_user_event(our_contacts: cs, our_pubkey: pubkey, unfollow: unfollow)
+    let ev = unfollow_reference_event(our_contacts: cs, our_pubkey: keypair.pubkey, unfollow: unfollow)
     ev.calculate_id()
-    ev.sign(privkey: privkey)
-    
+    ev.sign(privkey: keypair.privkey)
+
     postbox.send(ev)
     
     return ev
 }
 
-func unfollow_user_event(our_contacts: NostrEvent, our_pubkey: String, unfollow: String) -> NostrEvent {
+func unfollow_reference_event(our_contacts: NostrEvent, our_pubkey: String, unfollow: ReferencedId) -> NostrEvent {
     let tags = our_contacts.tags.filter { tag in
-        if tag.count >= 2 && tag[0] == "p" && tag[1] == unfollow {
+        if tag.count >= 2 && tag[0] == unfollow.key && tag[1] == unfollow.ref_id {
             return false
         }
         return true
@@ -220,12 +219,16 @@ func ensure_relay_info(relays: [RelayDescriptor], content: String) -> [String: R
     return relay_info
 }
 
+func is_already_following(contacts: NostrEvent, follow: ReferencedId) -> Bool {
+    return contacts.references(id: follow.ref_id, key: follow.key)
+}
+
 func follow_with_existing_contacts(our_pubkey: String, our_contacts: NostrEvent, follow: ReferencedId) -> NostrEvent? {
     // don't update if we're already following
-    if our_contacts.references(id: follow.ref_id, key: "p") {
+    if is_already_following(contacts: our_contacts, follow: follow) {
         return nil
     }
-    
+
     let kind = NostrKind.contacts.rawValue
     var tags = our_contacts.tags
     tags.append(refid_to_tag(follow))
