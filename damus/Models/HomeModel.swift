@@ -512,12 +512,12 @@ class HomeModel {
 
     func subscribe_to_home_filters(friends fs: [String]? = nil, relay_id: String? = nil) {
         // TODO: separate likes?
-        let home_filter_kinds: [NostrKind] = [
+        var home_filter_kinds: [NostrKind] = [
             .text, .longform, .boost
         ]
-        //if !damus_state.settings.onlyzaps_mode {
-            //home_filter_kinds.append(.like)
-        //}
+        if !damus_state.settings.onlyzaps_mode {
+            home_filter_kinds.append(.like)
+        }
 
         let friends = fs ?? get_friends()
         var home_filter = NostrFilter(kinds: home_filter_kinds)
