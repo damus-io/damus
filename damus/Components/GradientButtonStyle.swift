@@ -14,7 +14,7 @@ struct GradientButtonStyle: ButtonStyle {
             .foregroundColor(Color.white)
             .background {
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(PinkGradient.gradient)
+                    .fill(PinkGradient)
             }
             .scaleEffect(configuration.isPressed ? 0.8 : 1)
     }
