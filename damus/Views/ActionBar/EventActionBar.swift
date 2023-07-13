@@ -236,13 +236,24 @@ struct LikeButton: View {
                 timer.upstream.connect().cancel()
                 return
             }
-            amountOfAngleIncrease = -amountOfAngleIncrease
-            if amountOfAngleIncrease < 0 {
-                amountOfAngleIncrease += 2.5
-            } else {
-                amountOfAngleIncrease -= 2.5
+
+    // When reaction button is long pressed, it displays the multiple emojis overlay and displays the user's selected emojis with an animation
+    private func reactionLongPressed() {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        showEmojis = Array(repeating: 0, count: emojis.count) // Initialize the showEmojis array
+        
+        for (index, _) in emojis.enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1 * Double(index)) {
+                withAnimation(.interpolatingSpring(stiffness: 170, damping: 8)) {
+                    showEmojis[index] = 1
+                }
             }
         }
+        
+        isReactionsVisible = true
+        showReactionsBG = 1
+    }
+    
     private func emojiTapped(_ emoji: String) {
         print("Tapped emoji: \(emoji)")
         
