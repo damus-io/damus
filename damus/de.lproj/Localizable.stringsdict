@@ -333,7 +333,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>2$@ und %1$d ein weiteres Profil zappten dein Profil</string>
+			<string>2$@ und %1$d weiteres Profil zappten dich</string>
 			<key>other</key>
 			<string>2$@ und %1$d andere zappten dein Profil</string>
 		</dict>
