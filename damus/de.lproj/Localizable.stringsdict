@@ -15,7 +15,7 @@
 			<key>one</key>
 			<string>Gefolgt von %2$@, %3$@, %4$@ &amp; %1$d weiters Profil</string>
 			<key>other</key>
-			<string>Gefolgt von %2$@, %3$@, %4$@ &amp; %1$d weitere</string>
+			<string>Gefolgt von %2$@, %3$@, %4$@ &amp; %1$d andere</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
