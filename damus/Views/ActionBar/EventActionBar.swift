@@ -167,14 +167,27 @@ func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> 
 }
 
 struct LikeButton: View {
+    let damus_state: DamusState
     let liked: Bool
-    let action: () -> ()
+    let liked_emoji: String?
+    let action: (_ emoji: String) -> Void
+
+    // For reactions background
+    @State private var showReactionsBG = 0
+    @State private var showEmojis: [Int] = []
+    @State private var rotateThumb = -45
+
+    @State private var isReactionsVisible = false
 
     // Following four are Shaka animation properties
     let timer = Timer.publish(every: 0.10, on: .main, in: .common).autoconnect()
     @State private var shouldAnimate = false
     @State private var rotationAngle = 0.0
     @State private var amountOfAngleIncrease: Double = 0.0
+
+    var emojis: [String] {
+        damus_state.settings.emoji_reactions
+    }
     
     var body: some View {
 
