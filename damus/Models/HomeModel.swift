@@ -382,8 +382,7 @@ class HomeModel {
         // TODO: since times should be based on events from a specific relay
         // perhaps we could mark this in the relay pool somehow
 
-        var friends = damus_state.contacts.get_friend_list()
-        friends.append(damus_state.pubkey)
+        let friends = get_friends()
 
         var contacts_filter = NostrFilter(kinds: [.metadata])
         contacts_filter.authors = friends
@@ -405,18 +404,6 @@ class HomeModel {
         dms_filter.pubkeys = [ damus_state.pubkey ]
         our_dms_filter.authors = [ damus_state.pubkey ]
 
-        // TODO: separate likes?
-        var home_filter_kinds: [NostrKind] = [
-            .text, .longform, .boost
-        ]
-        if !damus_state.settings.onlyzaps_mode {
-            home_filter_kinds.append(.like)
-        }
-        var home_filter = NostrFilter(kinds: home_filter_kinds)
-        // include our pubkey as well even if we're not technically a friend
-        home_filter.authors = friends
-        home_filter.limit = 500
-
         var notifications_filter_kinds: [NostrKind] = [
             .text,
             .boost,
@@ -429,33 +416,71 @@ class HomeModel {
         notifications_filter.pubkeys = [damus_state.pubkey]
         notifications_filter.limit = 500
 
-        var home_filters = [home_filter]
         var notifications_filters = [notifications_filter]
         var contacts_filters = [contacts_filter, our_contacts_filter, our_blocklist_filter]
         var dms_filters = [dms_filter, our_dms_filter]
+        let last_of_kind = get_last_of_kind(relay_id: relay_id)
 
-        let last_of_kind = relay_id.flatMap { last_event_of_kind[$0] } ?? [:]
-
-        home_filters = update_filters_with_since(last_of_kind: last_of_kind, filters: home_filters)
         contacts_filters = update_filters_with_since(last_of_kind: last_of_kind, filters: contacts_filters)
         notifications_filters = update_filters_with_since(last_of_kind: last_of_kind, filters: notifications_filters)
         dms_filters = update_filters_with_since(last_of_kind: last_of_kind, filters: dms_filters)
 
         //print_filters(relay_id: relay_id, filters: [home_filters, contacts_filters, notifications_filters, dms_filters])
 
-        if let relay_id {
-            pool.send(.subscribe(.init(filters: home_filters, sub_id: home_subid)), to: [relay_id])
-            pool.send(.subscribe(.init(filters: contacts_filters, sub_id: contacts_subid)), to: [relay_id])
-            pool.send(.subscribe(.init(filters: notifications_filters, sub_id: notifications_subid)), to: [relay_id])
-            pool.send(.subscribe(.init(filters: dms_filters, sub_id: dms_subid)), to: [relay_id])
-        } else {
-            pool.send(.subscribe(.init(filters: home_filters, sub_id: home_subid)))
-            pool.send(.subscribe(.init(filters: contacts_filters, sub_id: contacts_subid)))
-            pool.send(.subscribe(.init(filters: notifications_filters, sub_id: notifications_subid)))
-            pool.send(.subscribe(.init(filters: dms_filters, sub_id: dms_subid)))
-        }
+        subscribe_to_home_filters(relay_id: relay_id)
+
+        let relay_ids = relay_id.map { [$0] }
+
+        pool.send(.subscribe(.init(filters: contacts_filters, sub_id: contacts_subid)), to: relay_ids)
+        pool.send(.subscribe(.init(filters: notifications_filters, sub_id: notifications_subid)), to: relay_ids)
+        pool.send(.subscribe(.init(filters: dms_filters, sub_id: dms_subid)), to: relay_ids)
     }
-    
+
+    func get_last_of_kind(relay_id: String?) -> [Int: NostrEvent] {
+        return relay_id.flatMap { last_event_of_kind[$0] } ?? [:]
+    }
+
+    func unsubscribe_to_home_filters() {
+        pool.send(.unsubscribe(home_subid))
+    }
+
+    func get_friends() -> [String] {
+        var friends = damus_state.contacts.get_friend_list()
+        friends.insert(damus_state.pubkey)
+        return Array(friends)
+    }
+
+    func subscribe_to_home_filters(friends fs: [String]? = nil, relay_id: String? = nil) {
+        // TODO: separate likes?
+        let home_filter_kinds: [NostrKind] = [
+            .text, .longform, .boost
+        ]
+        //if !damus_state.settings.onlyzaps_mode {
+            //home_filter_kinds.append(.like)
+        //}
+
+        let friends = fs ?? get_friends()
+        var home_filter = NostrFilter(kinds: home_filter_kinds)
+        // include our pubkey as well even if we're not technically a friend
+        home_filter.authors = friends
+        home_filter.limit = 500
+
+        var home_filters = [home_filter]
+
+        let followed_hashtags = Array(damus_state.contacts.get_followed_hashtags())
+        if followed_hashtags.count != 0 {
+            var hashtag_filter = NostrFilter.filter_hashtag(followed_hashtags)
+            hashtag_filter.limit = 100
+            home_filters.append(hashtag_filter)
+        }
+
+        let relay_ids = relay_id.map { [$0] }
+        home_filters = update_filters_with_since(last_of_kind: get_last_of_kind(relay_id: relay_id), filters: home_filters)
+        let sub = NostrSubscribe(filters: home_filters, sub_id: home_subid)
+
+        pool.send(.subscribe(sub), to: relay_ids)
+    }
+
     func handle_list_event(_ ev: NostrEvent) {
         // we only care about our lists
         guard ev.pubkey == damus_state.pubkey else {

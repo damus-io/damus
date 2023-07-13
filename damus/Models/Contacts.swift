@@ -66,8 +66,8 @@ class Contacts {
         }
     }
     
-    func get_friend_list() -> [String] {
-        return Array(friends)
+    func get_friend_list() -> Set<String> {
+        return friends
     }
 
     func get_followed_hashtags() -> Set<String> {
