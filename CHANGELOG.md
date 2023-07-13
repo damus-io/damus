@@ -1,3 +1,27 @@
+## [1.6-4] - 2023-07-13
+
+### Added
+
+- Add the ability to follow hashtags (William Casarin)
+
+### Changed
+
+- Remove note size restriction for longform events (William Casarin)
+
+### Fixed
+
+- Hide users and hashtags from home timeline when you unfollow (William Casarin)
+- Fixed a bug where following a user might not work due to poor connectivity (William Casarin)
+- Icon color for developer mode setting is incorrect in low-light mode (Bryan Montz)
+- Fixed nav bar color on login, eula, and account creation (ericholguin)
+
+
+### Removed
+
+- Remove following Damus Will by default (William Casarin)
+
+[1.6-4]: https://github.com/damus-io/damus/releases/tag/v1.6-4
+
 ## [1.6-3] - 2023-07-11
 
 ### Changed
