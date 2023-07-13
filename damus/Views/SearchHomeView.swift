@@ -44,7 +44,7 @@ struct SearchHomeView: View {
     }
     
     var GlobalContent: some View {
-        return TimelineView(
+        return TimelineView<AnyView>(
             events: model.events,
             loading: $model.loading,
             damus: damus_state,

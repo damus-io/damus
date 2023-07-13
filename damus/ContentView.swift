@@ -142,7 +142,7 @@ struct ContentView: View {
     func contentTimelineView(filter: (@escaping (NostrEvent) -> Bool)) -> some View {
         ZStack {
             if let damus = self.damus_state {
-                TimelineView(events: home.events, loading: .constant(false), damus: damus, show_friend_icon: false, filter: filter)
+                TimelineView<AnyView>(events: home.events, loading: .constant(false), damus: damus, show_friend_icon: false, filter: filter)
             }
         }
     }
