@@ -76,55 +76,14 @@ struct PostView: View {
     }
     
     func send_post() {
-        var kind: NostrKind = .text
-
-        if case .replying_to(let ev) = action, ev.known_kind == .chat {
-            kind = .chat
-        }
-
-        post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
-            if let link = attributes[.link] as? String {
-                let normalized_link: String
-                if link.hasPrefix("damus:nostr:") {
-                    // Replace damus:nostr: URI prefix with nostr: since the former is for internal navigation and not meant to be posted.
-                    normalized_link = String(link.dropFirst(6))
-                } else {
-                    normalized_link = link
-                }
-
-                // Add zero-width space in case text preceding the mention is not a whitespace.
-                // In the case where the character preceding the mention is a whitespace, the added zero-width space will be stripped out.
-                post.replaceCharacters(in: range, with: "\u{200B}\(normalized_link)\u{200B}")
-            }
-        }
-
-        var content = self.post.string
-            // If two zero-width spaces are next to each other, normalize it to just one zero-width space.
-            .replacingOccurrences(of: "\u{200B}\u{200B}", with: "\u{200B}")
-            // If zero-width space is next to an actual whitespace, remove the zero-width space.
-            .replacingOccurrences(of: " \u{200B}", with: " ")
-            .replacingOccurrences(of: "\u{200B} ", with: " ")
-            .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-
-        let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
-        
-        let img_meta_tags = uploadedMedias.compactMap { $0.metadata?.to_tag() }
-        
-        if !imagesString.isEmpty {
-            content.append(" " + imagesString + " ")
-        }
-
-        if case .quoting(let ev) = action, let id = bech32_note_id(ev.id) {
-            content.append(" nostr:" + id)
-        }
-        
-        let new_post = NostrPost(content: content, references: references, kind: kind, tags: img_meta_tags)
+        let new_post = build_post(post: self.post, action: action, uploadedMedias: uploadedMedias, references: references)
 
         NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
-        
+
         clear_draft()
 
         dismiss()
+
     }
 
     var is_post_empty: Bool {
@@ -594,4 +553,51 @@ func load_draft_for_post(drafts: Drafts, action: PostAction) -> DraftArtifacts? 
     case .posting:
         return drafts.post
     }
+}
+
+
+func build_post(post: NSMutableAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [ReferencedId]) -> NostrPost {
+    var kind: NostrKind = .text
+
+    if case .replying_to(let ev) = action, ev.known_kind == .chat {
+        kind = .chat
+    }
+
+    post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
+        if let link = attributes[.link] as? String {
+            let normalized_link: String
+            if link.hasPrefix("damus:nostr:") {
+                // Replace damus:nostr: URI prefix with nostr: since the former is for internal navigation and not meant to be posted.
+                normalized_link = String(link.dropFirst(6))
+            } else {
+                normalized_link = link
+            }
+
+            // Add zero-width space in case text preceding the mention is not a whitespace.
+            // In the case where the character preceding the mention is a whitespace, the added zero-width space will be stripped out.
+            post.replaceCharacters(in: range, with: "\u{200B}\(normalized_link)\u{200B}")
+        }
+    }
+
+    var content = post.string
+        // If two zero-width spaces are next to each other, normalize it to just one zero-width space.
+        .replacingOccurrences(of: "\u{200B}\u{200B}", with: "\u{200B}")
+        // If zero-width space is next to an actual whitespace, remove the zero-width space.
+        .replacingOccurrences(of: " \u{200B}", with: " ")
+        .replacingOccurrences(of: "\u{200B} ", with: " ")
+        .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+
+    let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
+
+    let img_meta_tags = uploadedMedias.compactMap { $0.metadata?.to_tag() }
+
+    if !imagesString.isEmpty {
+        content.append(" " + imagesString + " ")
+    }
+
+    if case .quoting(let ev) = action, let id = bech32_note_id(ev.id) {
+        content.append(" nostr:" + id)
+    }
+
+    return NostrPost(content: content, references: references, kind: kind, tags: img_meta_tags)
 }
