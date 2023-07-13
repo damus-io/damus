@@ -204,20 +204,29 @@ struct LikeButton: View {
     }
 
     var body: some View {
+        ZStack {
+            likeButton()
+                .accessibilityLabel(NSLocalizedString("Like", comment: "Accessibility Label for Like button"))
+                .rotationEffect(Angle(degrees: shouldAnimate ? rotationAngle : 0))
+                .onReceive(self.timer) { _ in
+                    shakaAnimationLogic()
+                }
+                .simultaneousGesture(longPressGesture())
+                .overlay(reactionsOverlay())
+        }
+    }
 
+    func likeButton() -> some View {
         Button(action: {
+            guard !isReactionsVisible else { return }
             withAnimation(Animation.easeOut(duration: 0.15)) {
-                self.action()
+                self.action(damus_state.settings.default_emoji_reaction)
                 shouldAnimate = true
                 amountOfAngleIncrease = 20.0
             }
         }) {
-            if liked {
-                LINEAR_GRADIENT
-                    .mask(Image("shaka.fill")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                    )
+            if let liked_emoji {
+                buildMaskView(for: liked_emoji)
                     .frame(width: 20, height: 20)
             } else {
                 Image("shaka")
@@ -227,15 +236,83 @@ struct LikeButton: View {
                     .foregroundColor(.gray)
             }
         }
-        .accessibilityLabel(NSLocalizedString("Like", comment: "Accessibility Label for Like button"))
-        .rotationEffect(Angle(degrees: shouldAnimate ? rotationAngle : 0))
-        .onReceive(self.timer) { _ in
-            // Shaka animation logic
-            rotationAngle = amountOfAngleIncrease
-            if amountOfAngleIncrease == 0 {
-                timer.upstream.connect().cancel()
-                return
+    }
+
+    func shakaAnimationLogic() {
+        rotationAngle = amountOfAngleIncrease
+        if amountOfAngleIncrease == 0 {
+            timer.upstream.connect().cancel()
+            return
+        }
+        amountOfAngleIncrease = -amountOfAngleIncrease
+        if amountOfAngleIncrease < 0 {
+            amountOfAngleIncrease += 2.5
+        } else {
+            amountOfAngleIncrease -= 2.5
+        }
+    }
+
+    func longPressGesture() -> some Gesture {
+        LongPressGesture(minimumDuration: 0.5).onEnded { _ in
+            reactionLongPressed()
+        }
+    }
+
+    func reactionsOverlay() -> some View {
+        Group {
+            if isReactionsVisible {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .frame(width: 250, height: 50)
+                        .foregroundColor(DamusColors.black)
+                        .scaleEffect(Double(showReactionsBG), anchor: .topTrailing)
+                        .animation(
+                            .interpolatingSpring(stiffness: 170, damping: 15).delay(0.05),
+                            value: showReactionsBG
+                        )
+                        .overlay(
+                            Rectangle()
+                                .foregroundColor(Color.white.opacity(0.2))
+                                .frame(width: 250, height: 50)
+                                .clipShape(
+                                    RoundedRectangle(cornerRadius: 10)
+                                )
+                        )
+                        .overlay(reactions())
+                }
+                .offset(y: -40)
+                .onTapGesture {
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        isReactionsVisible = false
+                        showReactionsBG = 0
+                    }
+                    showEmojis = []
+                }
+            } else {
+                EmptyView()
             }
+        }
+    }
+
+    func reactions() -> some View {
+        HStack {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 20) {
+                    ForEach(emojis, id: \.self) { emoji in
+                        if let index = emojis.firstIndex(of: emoji) {
+                            let scale = showEmojis.count >= index + 1 ? showEmojis[index] : 0
+                            Text(emoji)
+                                .scaleEffect(Double(scale))
+                                .onTapGesture {
+                                    emojiTapped(emoji)
+                                }
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+            }
+        }
+    }
 
     // When reaction button is long pressed, it displays the multiple emojis overlay and displays the user's selected emojis with an animation
     private func reactionLongPressed() {
