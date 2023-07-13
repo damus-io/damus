@@ -317,7 +317,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>2$@ une %1$d weiteres Profil zappten deine Notiz</string>
+			<string>%2$@ und %1$d weiteres Profil zappten deine Notiz</string>
 			<key>other</key>
 			<string>2$@ und %1$d andere zappten deine Notiz</string>
 		</dict>
