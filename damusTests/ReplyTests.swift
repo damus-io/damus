@@ -130,6 +130,29 @@ class ReplyTests: XCTestCase {
         let mentions = blocks.filter { $0.is_mention != nil }
         XCTAssertEqual(mentions.count, 1)
     }
+
+    func testNewlineMentions() throws {
+        let pk = "npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s"
+        guard let hex_pk = bech32_pubkey_decode(pk) else {
+            return
+        }
+        let content = """
+        @\(pk)
+        @\(pk)
+        """
+
+        let blocks = parse_mentions(content: content, tags: []).blocks
+
+        let rendered = render_blocks(blocks: blocks)
+        let expected_render = "nostr:\(pk)\nnostr:\(pk)"
+
+        XCTAssertEqual(rendered, expected_render)
+
+        XCTAssertEqual(blocks.count, 3)
+        XCTAssertEqual(blocks[0].is_mention, .pubkey(hex_pk))
+        XCTAssertEqual(blocks[1].is_text, "\n")
+        XCTAssertEqual(blocks[2].is_mention, .pubkey(hex_pk))
+    }
     
     func testThreadedReply() throws {
         let content = "this is some content"
