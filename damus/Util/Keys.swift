@@ -72,6 +72,14 @@ func bech32_pubkey(_ pubkey: String) -> String? {
     return bech32_encode(hrp: "npub", bytes)
 }
 
+func bech32_pubkey_decode(_ pubkey: String) -> String? {
+    guard let decoded = try? bech32_decode(pubkey), decoded.hrp == "npub" else {
+        return nil
+    }
+
+    return hex_encode(decoded.data)
+}
+
 func bech32_nopre_pubkey(_ pubkey: String) -> String? {
     guard let bytes = hex_decode(pubkey) else {
         return nil
