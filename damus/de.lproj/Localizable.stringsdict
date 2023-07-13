@@ -335,7 +335,7 @@
 			<key>one</key>
 			<string>2$@ und %1$d ein weiteres Profil zappten dein Profil</string>
 			<key>other</key>
-			<string>2$@ und %1$d weitere zappten dein Profil</string>
+			<string>2$@ und %1$d andere zappten dein Profil</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>
