@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SearchView: View {
     let appstate: DamusState
-    @StateObject var search: SearchModel
+    @ObservedObject var search: SearchModel
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
