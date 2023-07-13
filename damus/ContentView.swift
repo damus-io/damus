@@ -396,11 +396,21 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.unfollow)) { notif in
             guard let state = self.damus_state else { return }
-            handle_unfollow_notif(state: state, notif: notif)
+            guard let unfollow = handle_unfollow_notif(state: state, notif: notif) else { return }
+        }
+        .onReceive(handle_notify(.unfollowed)) { notif in
+            guard let state = self.damus_state else { return }
+            let unfollow = notif.object as! ReferencedId
+            home.resubscribe(.unfollowing(unfollow))
         }
         .onReceive(handle_notify(.follow)) { notif in
             guard let state = self.damus_state else { return }
-            handle_follow_notif(state: state, notif: notif)
+            guard handle_follow_notif(state: state, notif: notif) else { return }
+        }
+        .onReceive(handle_notify(.followed)) { notif in
+            guard let state = self.damus_state else { return }
+            let follow = notif.object as! ReferencedId
+            home.resubscribe(.following)
         }
         .onReceive(handle_notify(.post)) { notif in
             guard let state = self.damus_state,
@@ -875,16 +885,17 @@ func timeline_name(_ timeline: Timeline?) -> String {
     }
 }
 
-func handle_unfollow(state: DamusState, unfollow: ReferencedId) {
+@discardableResult
+func handle_unfollow(state: DamusState, unfollow: ReferencedId) -> Bool {
     guard let keypair = state.keypair.to_full() else {
-        return
+        return false
     }
 
     let old_contacts = state.contacts.event
 
     guard let ev = unfollow_reference(postbox: state.postbox, our_contacts: old_contacts, keypair: keypair, unfollow: unfollow)
     else {
-        return
+        return false
     }
 
     notify(.unfollowed, unfollow)
@@ -895,13 +906,20 @@ func handle_unfollow(state: DamusState, unfollow: ReferencedId) {
         state.contacts.remove_friend(unfollow.ref_id)
         state.user_search_cache.updateOwnContactsPetnames(id: state.pubkey, oldEvent: old_contacts, newEvent: ev)
     }
+
+    return true
 }
 
-func handle_unfollow_notif(state: DamusState, notif: Notification) {
+func handle_unfollow_notif(state: DamusState, notif: Notification) -> ReferencedId? {
     let target = notif.object as! FollowTarget
     let pk = target.pubkey
 
-    handle_unfollow(state: state, unfollow: .p(pk))
+    let ref = ReferencedId.p(pk)
+    if handle_unfollow(state: state, unfollow: ref) {
+        return ref
+    }
+
+    return nil
 }
 
 @discardableResult

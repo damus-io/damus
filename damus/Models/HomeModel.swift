@@ -23,6 +23,40 @@ struct NewEventsBits: OptionSet {
     static let notifications: NewEventsBits = [.zaps, .likes, .reposts, .mentions]
 }
 
+enum Resubscribe {
+    case following
+    case unfollowing(ReferencedId)
+}
+
+enum HomeResubFilter {
+    case pubkey(String)
+    case hashtag(String)
+
+    init?(from: ReferencedId) {
+        if from.key == "p" {
+            self = .pubkey(from.ref_id)
+            return
+        } else if from.key == "t" {
+            self = .hashtag(from.ref_id)
+            return
+        }
+
+        return nil
+    }
+
+    func filter(contacts: Contacts, ev: NostrEvent) -> Bool {
+        switch self {
+        case .pubkey(let pk):
+            return ev.pubkey == pk
+        case .hashtag(let ht):
+            if contacts.is_friend(ev.pubkey) {
+                return false
+            }
+            return ev.references(id: ht, key: "t")
+        }
+    }
+}
+
 class HomeModel {
     // Don't trigger a user notification for events older than a certain age
     static let event_max_age_for_notification: TimeInterval = 12 * 60 * 60
@@ -36,6 +70,7 @@ class HomeModel {
     var done_init: Bool = false
     var incoming_dms: [NostrEvent] = []
     let dm_debouncer = Debouncer(interval: 0.5)
+    let resub_debouncer = Debouncer(interval: 3.0)
     var should_debounce_dms = true
 
     let home_subid = UUID().description
@@ -87,6 +122,31 @@ class HomeModel {
         // turn off debouncer after initial load
         DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
             self.should_debounce_dms = false
+        }
+    }
+
+    func resubscribe(_ resubbing: Resubscribe) {
+        if self.should_debounce_dms {
+            // don't resub on initial load
+            return
+        }
+
+        print("hit resub debouncer")
+
+        resub_debouncer.debounce {
+            print("resub")
+            self.unsubscribe_to_home_filters()
+
+            switch resubbing {
+            case .following:
+                break
+            case .unfollowing(let r):
+                if let filter = HomeResubFilter(from: r) {
+                    self.events.filter { ev in !filter.filter(contacts: self.damus_state.contacts, ev: ev) }
+                }
+            }
+
+            self.subscribe_to_home_filters()
         }
     }
 
@@ -639,32 +699,34 @@ func add_contact_if_friend(contacts: Contacts, ev: NostrEvent) {
 
 func load_our_contacts(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     let contacts = state.contacts
-    var new_pks = Set<String>()
+    var new_refs = Set<ReferencedId>()
     // our contacts
     for tag in ev.tags {
-        if tag.count >= 2 && tag[0] == "p" {
-            new_pks.insert(tag[1])
-        }
+        guard let ref = tag_to_refid(tag) else { continue }
+        new_refs.insert(ref)
     }
     
-    var old_pks = Set<String>()
+    var old_refs = Set<ReferencedId>()
     // find removed contacts
     if let old_ev = m_old_ev {
         for tag in old_ev.tags {
-            if tag.count >= 2 && tag[0] == "p" {
-                old_pks.insert(tag[1])
-            }
+            guard let ref = tag_to_refid(tag) else { continue }
+            old_refs.insert(ref)
         }
     }
     
-    let diff = new_pks.symmetricDifference(old_pks)
-    for pk in diff {
-        if new_pks.contains(pk) {
-            notify(.followed, pk)
-            contacts.add_friend_pubkey(pk)
+    let diff = new_refs.symmetricDifference(old_refs)
+    for ref in diff {
+        if new_refs.contains(ref) {
+            notify(.followed, ref)
+            if ref.key == "p" {
+                contacts.add_friend_pubkey(ref.ref_id)
+            }
         } else {
-            notify(.unfollowed, pk)
-            contacts.remove_friend(pk)
+            notify(.unfollowed, ref)
+            if ref.key == "p" {
+                contacts.remove_friend(ref.ref_id)
+            }
         }
     }
 
