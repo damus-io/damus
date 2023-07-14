@@ -31,21 +31,6 @@ func follow_btn_txt(_ fs: FollowState, follows_you: Bool) -> String {
     }
 }
 
-func followersCountString(_ count: Int, locale: Locale = Locale.current) -> String {
-    let format = localizedStringFormat(key: "followers_count", locale: locale)
-    return String(format: format, locale: locale, count)
-}
-
-func followingCountString(_ count: Int, locale: Locale = Locale.current) -> String {
-    let format = localizedStringFormat(key: "following_count", locale: locale)
-    return String(format: format, locale: locale, count)
-}
-
-func relaysCountString(_ count: Int, locale: Locale = Locale.current) -> String {
-    let format = localizedStringFormat(key: "relays_count", locale: locale)
-    return String(format: format, locale: locale, count)
-}
-
 func followedByString(_ friend_intersection: [String], profiles: Profiles, locale: Locale = Locale.current) -> String {
     let bundle = bundleForLocale(locale: locale)
     let names: [String] = friend_intersection.prefix(3).map {
@@ -379,8 +364,9 @@ struct ProfileView: View {
                     .foregroundColor(.gray)
             } else {
                 let followerCount = followers.count!
-                let noun_text = Text(verbatim: followersCountString(followerCount)).font(.subheadline).foregroundColor(.gray)
-                Text("\(Text(verbatim: followerCount.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
+                let nounString = pluralizedString(key: "followers_count", count: followerCount)
+                let nounText = Text(verbatim: nounString).font(.subheadline).foregroundColor(.gray)
+                Text("\(Text(verbatim: followerCount.formatted()).font(.subheadline.weight(.medium))) \(nounText)", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
             }
         }
     }
@@ -405,7 +391,7 @@ struct ProfileView: View {
                     let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
                     NavigationLink(value: Route.Following(following: following_model)) {
                         HStack {
-                            let noun_text = Text(verbatim: "\(followingCountString(profile.following))").font(.subheadline).foregroundColor(.gray)
+                            let noun_text = Text(verbatim: "\(pluralizedString(key: "following_count", count: profile.following))").font(.subheadline).foregroundColor(.gray)
                             Text("\(Text(verbatim: profile.following.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.")
                         }
                     }
@@ -428,7 +414,8 @@ struct ProfileView: View {
 
                 if let relays = profile.relays {
                     // Only open relay config view if the user is logged in with private key and they are looking at their own profile.
-                    let noun_text = Text(verbatim: relaysCountString(relays.keys.count)).font(.subheadline).foregroundColor(.gray)
+                    let noun_string = pluralizedString(key: "relays_count", count: relays.keys.count)
+                    let noun_text = Text(noun_string).font(.subheadline).foregroundColor(.gray)
                     let relay_text = Text("\(Text(verbatim: relays.keys.count.formatted()).font(.subheadline.weight(.medium))) \(noun_text)", comment: "Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.")
                     if profile.pubkey == damus_state.pubkey && damus_state.is_privkey_user {
                         NavigationLink(value: Route.RelayConfig) {

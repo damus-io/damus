@@ -44,7 +44,7 @@ struct SearchView: View {
     }
 }
 
-enum DescribedSearch {
+enum DescribedSearch: CustomStringConvertible {
     case hashtag(String)
     case unknown
 

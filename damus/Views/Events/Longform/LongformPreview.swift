@@ -30,7 +30,8 @@ struct LongformPreviewBody: View {
     }
 
     func Words(_ words: Int) -> Text {
-        Text(verbatim: words.description) + Text(verbatim: " ") + Text("Words")
+        let wordCount = pluralizedString(key: "word_count", count: words)
+        return Text(wordCount)
     }
 
     var body: some View {
@@ -45,8 +46,13 @@ struct LongformPreviewBody: View {
 
     var Main: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(event.title ?? "Untitled")
-                .font(.title)
+            if let title = event.title {
+                Text(title)
+                    .font(.title)
+            } else {
+                Text("Untitled", comment: "Text indicating that the long-form note title is untitled.")
+                    .font(.title)
+            }
 
             Text(event.summary ?? "")
                 .foregroundColor(.gray)

@@ -603,6 +603,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Follow Back</target>
         <note>Button to follow a user back.</note>
       </trans-unit>
+      <trans-unit id="Follow hashtag" xml:space="preserve">
+        <source>Follow hashtag</source>
+        <target>Follow hashtag</target>
+        <note>Button to follow a given hashtag.</note>
+      </trans-unit>
       <trans-unit id="Follow me on Nostr" xml:space="preserve">
         <source>Follow me on Nostr</source>
         <target>Follow me on Nostr</target>
@@ -768,11 +773,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Likes</source>
         <target>Likes</target>
         <note>Setting to enable Like Local Notification</note>
-      </trans-unit>
-      <trans-unit id="Load %lld more" xml:space="preserve">
-        <source>Load %lld more</source>
-        <target>Load %lld more</target>
-        <note>Button text for loading more events, where the variable is the number of events.</note>
       </trans-unit>
       <trans-unit id="Local Notifications" xml:space="preserve">
         <source>Local Notifications</source>
@@ -1559,6 +1559,11 @@ Label for filter for seeing your notes and replies (instead of only your notes).
         <target>Unfollow</target>
         <note>Button to unfollow a user.</note>
       </trans-unit>
+      <trans-unit id="Unfollow hashtag" xml:space="preserve">
+        <source>Unfollow hashtag</source>
+        <target>Unfollow hashtag</target>
+        <note>Button to unfollow a given hashtag.</note>
+      </trans-unit>
       <trans-unit id="Unfollowing..." xml:space="preserve">
         <source>Unfollowing...</source>
         <target>Unfollowing...</target>
@@ -1578,6 +1583,11 @@ Label for filter for seeing your notes and replies (instead of only your notes).
         <source>Unmute conversation</source>
         <target>Unmute conversation</target>
         <note>Context menu option for unmuting a conversation.</note>
+      </trans-unit>
+      <trans-unit id="Untitled" xml:space="preserve">
+        <source>Untitled</source>
+        <target>Untitled</target>
+        <note>Text indicating that the long-form note title is untitled.</note>
       </trans-unit>
       <trans-unit id="Upload" xml:space="preserve">
         <source>Upload</source>
@@ -2159,6 +2169,21 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
       <trans-unit id="/sats_count:dict/SATS:dict/other:dict/:string" xml:space="preserve">
         <source>%2$@ sats</source>
         <target>%2$@ sats</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/word_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@WORDS@</source>
+        <target>%#@WORDS@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/word_count:dict/WORDS:dict/one:dict/:string" xml:space="preserve">
+        <source>%d Word</source>
+        <target>%d Word</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/word_count:dict/WORDS:dict/other:dict/:string" xml:space="preserve">
+        <source>%d Words</source>
+        <target>%d Words</target>
         <note/>
       </trans-unit>
       <trans-unit id="/zap_notification_no_message:dict/NOTIFICATION:dict/one:dict/:string" xml:space="preserve">

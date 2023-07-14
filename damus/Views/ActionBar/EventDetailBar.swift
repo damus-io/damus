@@ -26,7 +26,8 @@ struct EventDetailBar: View {
         HStack {
             if bar.boosts > 0 {
                 NavigationLink(value: Route.Reposts(reposts: RepostsModel(state: state, target: target))) {
-                    let noun = Text(verbatim: repostsCountString(bar.boosts)).foregroundColor(.gray)
+                    let nounString = pluralizedString(key: "reposts_count", count: bar.boosts)
+                    let noun = Text(nounString).foregroundColor(.gray)
                     Text("\(Text(verbatim: bar.boosts.formatted()).font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.")
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -34,7 +35,8 @@ struct EventDetailBar: View {
 
             if bar.likes > 0 && !state.settings.onlyzaps_mode {
                 NavigationLink(value: Route.Reactions(reactions: ReactionsModel(state: state, target: target))) {
-                    let noun = Text(verbatim: reactionsCountString(bar.likes)).foregroundColor(.gray)
+                    let nounString = pluralizedString(key: "reactions_count", count: bar.likes)
+                    let noun = Text(nounString).foregroundColor(.gray)
                     Text("\(Text(verbatim: bar.likes.formatted()).font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.")
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -42,28 +44,14 @@ struct EventDetailBar: View {
             
             if bar.zaps > 0 {
                 NavigationLink(value: Route.Zaps(target: .note(id: target, author: target_pk))) {
-                    let noun = Text(verbatim: zapsCountString(bar.zaps)).foregroundColor(.gray)
+                    let nounString = pluralizedString(key: "zaps_count", count: bar.zaps)
+                    let noun = Text(nounString).foregroundColor(.gray)
                     Text("\(Text(verbatim: bar.zaps.formatted()).font(.body.bold())) \(noun)", comment: "Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.")
                 }
                 .buttonStyle(PlainButtonStyle())
             }
         }
     }
-}
-
-func repostsCountString(_ count: Int, locale: Locale = Locale.current) -> String {
-    let format = localizedStringFormat(key: "reposts_count", locale: locale)
-    return String(format: format, locale: locale, count)
-}
-
-func reactionsCountString(_ count: Int, locale: Locale = Locale.current) -> String {
-    let format = localizedStringFormat(key: "reactions_count", locale: locale)
-    return String(format: format, locale: locale, count)
-}
-
-func zapsCountString(_ count: Int, locale: Locale = Locale.current) -> String {
-    let format = localizedStringFormat(key: "zaps_count", locale: locale)
-    return String(format: format, locale: locale, count)
 }
 
 struct EventDetailBar_Previews: PreviewProvider {

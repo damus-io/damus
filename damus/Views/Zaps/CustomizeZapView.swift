@@ -39,11 +39,6 @@ func get_zap_amount_items(_ default_zap_amt: Int) -> [ZapAmountItem] {
     return entries
 }
 
-func satsString(_ count: Int, locale: Locale = Locale.current) -> String {
-    let format = localizedStringFormat(key: "sats", locale: locale)
-    return String(format: format, locale: locale, count)
-}
-
 struct CustomizeZapView: View {
     let state: DamusState
     let target: ZapTarget
@@ -138,7 +133,8 @@ struct CustomizeZapView: View {
                    model.custom_amount_sats = nil
                }
             }
-            Text(verbatim: satsString(model.custom_amount_sats ?? 0))
+            let noun = pluralizedString(key: "sats", count: model.custom_amount_sats ?? 0)
+            Text(noun)
                 .font(.system(size: 18, weight: .heavy))
         }
     }

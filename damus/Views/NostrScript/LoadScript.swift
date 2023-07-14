@@ -80,11 +80,6 @@ class ScriptModel: ObservableObject {
     }
 }
 
-func imports_string(_ count: Int, locale: Locale = Locale.current) -> String {
-    let format = localizedStringFormat(key: "imports_count", locale: locale)
-    return String(format: format, locale: locale, count)
-}
-
 struct LoadScript: View {
     let pool: RelayPool
     
@@ -95,7 +90,8 @@ struct LoadScript: View {
             VStack {
                 let imports = script.script.imports()
 
-                let nounText = Text(verbatim: imports_string(imports.count)).font(.title)
+                let nounString = pluralizedString(key: "imports_count", count: imports.count)
+                let nounText = Text(nounString).font(.title)
                 Text("\(Text(verbatim: imports.count.formatted())) \(nounText)", comment: "Sentence composed of 2 variables to describe how many imports were performed from loading a NostrScript. In source English, the first variable is the number of imports, and the second variable is 'Import' or 'Imports'.")
                 
                 ForEach(imports.indices, id: \.self) { ind in

@@ -31,10 +31,10 @@ struct SearchHeaderView: View {
 
             switch described {
             case .hashtag:
-                Text("#")
+                Text(verbatim: "#")
                     .font(.largeTitle.bold())
                     .foregroundStyle(PinkGradient)
-                    .mask(Text("#")
+                    .mask(Text(verbatim: "#")
                         .font(.largeTitle.bold()))
 
             case .unknown:
@@ -46,12 +46,7 @@ struct SearchHeaderView: View {
     }
 
     var SearchText: Text {
-        switch described {
-        case .hashtag(let ht):
-            return Text(verbatim: "#" + ht)
-        case .unknown:
-            return Text("Search")
-        }
+        Text(described.description)
     }
 
     func unfollow(_ hashtag: String) {
@@ -66,7 +61,7 @@ struct SearchHeaderView: View {
 
     func FollowButton(_ ht: String) -> some View {
         return Button(action: { follow(ht) }) {
-            Text("Follow hashtag")
+            Text("Follow hashtag", comment: "Button to follow a given hashtag.")
                 .font(.footnote.bold())
         }
         .buttonStyle(GradientButtonStyle(padding: 10))
@@ -74,7 +69,7 @@ struct SearchHeaderView: View {
 
     func UnfollowButton(_ ht: String) -> some View {
         return Button(action: { unfollow(ht) }) {
-            Text("Unfollow hashtag")
+            Text("Unfollow hashtag", comment: "Button to unfollow a given hashtag.")
                 .font(.footnote.bold())
         }
         .buttonStyle(GradientButtonStyle(padding: 10))

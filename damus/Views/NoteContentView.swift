@@ -203,7 +203,7 @@ struct NoteContentView: View {
                         InvoiceView(our_pubkey: damus_state.pubkey, invoice: inv, settings: damus_state.settings)
                     }
                 case .media(let media):
-                    Text("media \(media.url.absoluteString)")
+                    Text(verbatim: "media \(media.url.absoluteString)")
                 }
             }
         }
