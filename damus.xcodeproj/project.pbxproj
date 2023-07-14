@@ -43,8 +43,9 @@
 		4C06670E28FDEAA000038D2A /* utf8.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C06670D28FDEAA000038D2A /* utf8.c */; };
 		4C0A3F8F280F640A000448DE /* ThreadModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F8E280F640A000448DE /* ThreadModel.swift */; };
 		4C0A3F93280F66F5000448DE /* ReplyMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0A3F92280F66F5000448DE /* ReplyMap.swift */; };
+		4C0C03992A61E27B0098B3B8 /* primal.wasm in Resources */ = {isa = PBXBuildFile; fileRef = 4C0C03972A61E27B0098B3B8 /* primal.wasm */; };
+		4C0C039A2A61E27B0098B3B8 /* bool_setting.wasm in Resources */ = {isa = PBXBuildFile; fileRef = 4C0C03982A61E27B0098B3B8 /* bool_setting.wasm */; };
 		4C190F202A535FC200027FD5 /* CustomizeZapModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C190F1F2A535FC200027FD5 /* CustomizeZapModel.swift */; };
-		4C190F222A53950D00027FD5 /* bool_setting.wasm in Resources */ = {isa = PBXBuildFile; fileRef = 4C190F212A53950D00027FD5 /* bool_setting.wasm */; };
 		4C190F252A547D2000027FD5 /* LoadScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C190F242A547D2000027FD5 /* LoadScript.swift */; };
 		4C198DEF29F88C6B004C165C /* BlurHashEncode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C198DEB29F88C6B004C165C /* BlurHashEncode.swift */; };
 		4C198DF029F88C6B004C165C /* Readme.md in Resources */ = {isa = PBXBuildFile; fileRef = 4C198DEC29F88C6B004C165C /* Readme.md */; };
@@ -128,7 +129,6 @@
 		4C3EA67F28FFC01D00C48A62 /* InvoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67E28FFC01D00C48A62 /* InvoiceView.swift */; };
 		4C42812C298C848200DBF26F /* TranslateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C42812B298C848200DBF26F /* TranslateView.swift */; };
 		4C4F14A72A2A61A30045A0B9 /* NostrScriptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C4F14A62A2A61A30045A0B9 /* NostrScriptTests.swift */; };
-		4C4F14AC2A2A763B0045A0B9 /* primal.wasm in Resources */ = {isa = PBXBuildFile; fileRef = 4C4F14AB2A2A763B0045A0B9 /* primal.wasm */; };
 		4C54AA0729A540BA003E4487 /* NotificationsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C54AA0629A540BA003E4487 /* NotificationsModel.swift */; };
 		4C54AA0A29A55429003E4487 /* EventGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C54AA0929A55429003E4487 /* EventGroup.swift */; };
 		4C54AA0C29A5543C003E4487 /* ZapGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C54AA0B29A5543C003E4487 /* ZapGroup.swift */; };
@@ -485,8 +485,9 @@
 		4C06670D28FDEAA000038D2A /* utf8.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = utf8.c; sourceTree = "<group>"; };
 		4C0A3F8E280F640A000448DE /* ThreadModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadModel.swift; sourceTree = "<group>"; };
 		4C0A3F92280F66F5000448DE /* ReplyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplyMap.swift; sourceTree = "<group>"; };
+		4C0C03972A61E27B0098B3B8 /* primal.wasm */ = {isa = PBXFileReference; lastKnownFileType = file; name = primal.wasm; path = nostrscript/primal.wasm; sourceTree = SOURCE_ROOT; };
+		4C0C03982A61E27B0098B3B8 /* bool_setting.wasm */ = {isa = PBXFileReference; lastKnownFileType = file; name = bool_setting.wasm; path = nostrscript/bool_setting.wasm; sourceTree = SOURCE_ROOT; };
 		4C190F1F2A535FC200027FD5 /* CustomizeZapModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomizeZapModel.swift; sourceTree = "<group>"; };
-		4C190F212A53950D00027FD5 /* bool_setting.wasm */ = {isa = PBXFileReference; lastKnownFileType = file; name = bool_setting.wasm; path = nostrscript/bool_setting.wasm; sourceTree = SOURCE_ROOT; };
 		4C190F242A547D2000027FD5 /* LoadScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadScript.swift; sourceTree = "<group>"; };
 		4C198DEB29F88C6B004C165C /* BlurHashEncode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlurHashEncode.swift; sourceTree = "<group>"; };
 		4C198DEC29F88C6B004C165C /* Readme.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Readme.md; sourceTree = "<group>"; };
@@ -604,7 +605,6 @@
 		4C4F14A62A2A61A30045A0B9 /* NostrScriptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrScriptTests.swift; sourceTree = "<group>"; };
 		4C4F14A82A2A71AB0045A0B9 /* nostrscript.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrscript.h; sourceTree = "<group>"; };
 		4C4F14A92A2A71AB0045A0B9 /* nostrscript.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nostrscript.c; sourceTree = "<group>"; };
-		4C4F14AB2A2A763B0045A0B9 /* primal.wasm */ = {isa = PBXFileReference; lastKnownFileType = file; name = primal.wasm; path = nostrscript/primal.wasm; sourceTree = SOURCE_ROOT; };
 		4C54AA0629A540BA003E4487 /* NotificationsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsModel.swift; sourceTree = "<group>"; };
 		4C54AA0929A55429003E4487 /* EventGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventGroup.swift; sourceTree = "<group>"; };
 		4C54AA0B29A5543C003E4487 /* ZapGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapGroup.swift; sourceTree = "<group>"; };
@@ -1001,6 +1001,15 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		4C0C03962A61E2670098B3B8 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				4C0C03982A61E27B0098B3B8 /* bool_setting.wasm */,
+				4C0C03972A61E27B0098B3B8 /* primal.wasm */,
+			);
+			name = Fixtures;
+			sourceTree = "<group>";
+		};
 		4C190F1E2A535FC200027FD5 /* Zaps */ = {
 			isa = PBXGroup;
 			children = (
@@ -1078,15 +1087,6 @@
 				4C30AC7F29A6A53F00E2BD5A /* ProfilePicturesView.swift */,
 			);
 			path = Notifications;
-			sourceTree = "<group>";
-		};
-		4C4F14AA2A2A76270045A0B9 /* Fixtures */ = {
-			isa = PBXGroup;
-			children = (
-				4C190F212A53950D00027FD5 /* bool_setting.wasm */,
-				4C4F14AB2A2A763B0045A0B9 /* primal.wasm */,
-			);
-			path = Fixtures;
 			sourceTree = "<group>";
 		};
 		4C54AA0829A55416003E4487 /* Notifications */ = {
@@ -1498,7 +1498,7 @@
 		4CE6DEF627F7A08200C66700 /* damusTests */ = {
 			isa = PBXGroup;
 			children = (
-				4C4F14AA2A2A76270045A0B9 /* Fixtures */,
+				4C0C03962A61E2670098B3B8 /* Fixtures */,
 				4C7D097D2A0C58B900943473 /* WalletConnectTests.swift */,
 				F944F56C29EA9CB20067B3BF /* Models */,
 				50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */,
@@ -1805,8 +1805,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4C190F222A53950D00027FD5 /* bool_setting.wasm in Resources */,
-				4C4F14AC2A2A763B0045A0B9 /* primal.wasm in Resources */,
+				4C0C039A2A61E27B0098B3B8 /* bool_setting.wasm in Resources */,
+				4C0C03992A61E27B0098B3B8 /* primal.wasm in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
