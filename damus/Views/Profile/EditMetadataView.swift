@@ -158,21 +158,23 @@ struct EditMetadataView: View {
                 }
                                 
                 Section(content: {
-                    TextField(NSLocalizedString("jb55@jb55.com", comment: "Placeholder example text for identifier used for NIP-05 verification."), text: $nip05)
+                    TextField(NSLocalizedString("jb55@jb55.com", comment: "Placeholder example text for identifier used for nostr addresses."), text: $nip05)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                         .onReceive(Just(nip05)) { newValue in
                             self.nip05 = newValue.trimmingCharacters(in: .whitespaces)
                         }
                 }, header: {
-                    Text("NIP-05 Verification", comment: "Label for NIP-05 Verification section of user profile form.")
+                    Text("Nostr Address", comment: "Label for the Nostr Address section of user profile form.")
                 }, footer: {
-                    if let parts = nip05_parts {
-                        Text("'\(parts.username)' at '\(parts.host)' will be used for verification", comment: "Description of how the nip05 identifier would be used for verification.")
-                    } else if !nip05.isEmpty {
-                        Text("'\(nip05)' is an invalid NIP-05 identifier. It should look like an email.", comment: "Description of why the nip05 identifier is invalid.")
-                    } else {
-                        Text("")    // without this, the keyboard dismisses unnecessarily when the footer changes state
+                    switch validate_nostr_address(nip05: nip05_parts, nip05_str: nip05) {
+                    case .empty:
+                        // without this, the keyboard dismisses unnecessarily when the footer changes state
+                        Text("")
+                    case .valid:
+                        Text("")
+                    case .invalid:
+                        Text("'\(nip05)' is an invalid nostr address. It should look like an email address.", comment: "Description of why the nostr address is invalid.")
                     }
                 })
 
@@ -210,4 +212,24 @@ struct EditMetadataView_Previews: PreviewProvider {
     static var previews: some View {
         EditMetadataView(damus_state: test_damus_state())
     }
+}
+
+enum NIP05ValidationResult {
+    case empty
+    case invalid
+    case valid
+}
+
+func validate_nostr_address(nip05: NIP05?, nip05_str: String) -> NIP05ValidationResult {
+    guard let nip05 else {
+        // couldn't parse
+        if nip05_str.isEmpty {
+            return .empty
+        } else {
+            return .invalid
+        }
+    }
+
+    // could parse so we valid.
+    return .valid
 }
