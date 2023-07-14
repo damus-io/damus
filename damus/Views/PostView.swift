@@ -183,30 +183,14 @@ struct PostView: View {
         self.post = draft.content
         return true
     }
-    
+
     func post_changed(post: NSMutableAttributedString, media: [UploadedMedia]) {
-        switch action {
-        case .replying_to(let ev):
-            if let draft = damus_state.drafts.replies[ev] {
-                draft.content = post
-                draft.media = media
-            } else {
-                damus_state.drafts.replies[ev] = DraftArtifacts(content: post, media: media)
-            }
-        case .quoting(let ev):
-            if let draft = damus_state.drafts.quotes[ev] {
-                draft.content = post
-                draft.media = media
-            } else {
-                damus_state.drafts.quotes[ev] = DraftArtifacts(content: post, media: media)
-            }
-        case .posting:
-            if let draft = damus_state.drafts.post {
-                draft.content = post
-                draft.media = media
-            } else {
-                damus_state.drafts.post = DraftArtifacts(content: post, media: media)
-            }
+        if let draft = load_draft_for_post(drafts: damus_state.drafts, action: action) {
+            draft.content = post
+            draft.media = media
+        } else {
+            let artifacts = DraftArtifacts(content: post, media: media)
+            set_draft_for_post(drafts: damus_state.drafts, action: action, artifacts: artifacts)
         }
     }
     
@@ -543,6 +527,17 @@ struct UploadedMedia: Equatable {
     let metadata: ImageMetadata?
 }
 
+
+func set_draft_for_post(drafts: Drafts, action: PostAction, artifacts: DraftArtifacts) {
+    switch action {
+    case .replying_to(let ev):
+        drafts.replies[ev] = artifacts
+    case .quoting(let ev):
+        drafts.quotes[ev] = artifacts
+    case .posting:
+        drafts.post = artifacts
+    }
+}
 
 func load_draft_for_post(drafts: Drafts, action: PostAction) -> DraftArtifacts? {
     switch action {
