@@ -12,6 +12,7 @@ struct RelayConfigView: View {
     @State var new_relay: String = ""
     @State var relays: [RelayDescriptor]
     @State private var showActionButtons = false
+    @State var relayAddErrorMessage: String? = nil
     
     @Environment(\.dismiss) var dismiss
     
@@ -89,7 +90,14 @@ struct RelayConfigView: View {
                                 
                                 let info = RelayInfo.rw
                                 let descriptor = RelayDescriptor(url: url, info: info)
-                                guard (try? state.pool.add_relay(descriptor)) != nil else {
+
+                                do {
+                                    try state.pool.add_relay(descriptor)
+                                    relayAddErrorMessage = nil	// Clear error message
+                                } catch RelayError.RelayAlreadyExists {
+                                    relayAddErrorMessage = NSLocalizedString("This relay is already in your list", comment: "An error message that appears when the user attempts to add a relay that has already been added.")
+                                    return
+                                } catch {
                                     return
                                 }
                                 
@@ -113,6 +121,13 @@ struct RelayConfigView: View {
                             .background(LINEAR_GRADIENT)
                             .clipShape(Capsule())
                             .padding(EdgeInsets(top: 15, leading: 0, bottom: 0, trailing: 0))
+                        }
+                    }
+                    if let errorMessage = relayAddErrorMessage {
+                        HStack {
+                            Spacer()
+                            Text(errorMessage)
+                                .foregroundColor(Color.red)
                         }
                     }
                 }
