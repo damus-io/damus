@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class RelayModelCache {
+final class RelayModelCache: ObservableObject {
     private var models = [RelayURL: RelayModel]()
     
     func model(withURL url: RelayURL) -> RelayModel? {
@@ -23,5 +23,6 @@ final class RelayModelCache {
     
     func insert(model: RelayModel) {
         models[model.url] = model
+        objectWillChange.send()
     }
 }
