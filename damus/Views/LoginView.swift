@@ -255,6 +255,7 @@ func get_nip05_pubkey(id: String) async -> NIP05User? {
 struct KeyInput: View {
     let title: String
     let key: Binding<String>
+    @State private var isSecured: Bool = true
 
     init(_ title: String, key: Binding<String>) {
         self.title = title
@@ -270,16 +271,34 @@ struct KeyInput: View {
                         self.key.wrappedValue = pastedkey
                     }
                 }
-            TextField("", text: key)
-                .placeholder(when: key.wrappedValue.isEmpty) {
-                    Text(title).foregroundColor(.white.opacity(0.6))
+            if(isSecured) {
+                SecureField("", text: key)
+                    .placeholder(when: key.wrappedValue.isEmpty) {
+                        Text(title).foregroundColor(.white.opacity(0.6))
+                    }
+                    .padding(10)
+                    .autocapitalization(.none)
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.never)
+                    .font(.body.monospaced())
+                    .textContentType(.password)
+            } else {
+                TextField("", text: key)
+                    .placeholder(when: key.wrappedValue.isEmpty) {
+                        Text(title).foregroundColor(.white.opacity(0.6))
+                    }
+                    .padding(10)
+                    .autocapitalization(.none)
+                    .autocorrectionDisabled(true)
+                    .textInputAutocapitalization(.never)
+                    .font(.body.monospaced())
+                    .textContentType(.password)
+            }
+            Image(systemName: "eye.slash")
+                .foregroundColor(.gray)
+                .onTapGesture {
+                    isSecured.toggle()
                 }
-                .padding(10)
-                .autocapitalization(.none)
-                .autocorrectionDisabled(true)
-                .textInputAutocapitalization(.never)
-                .font(.body.monospaced())
-                .textContentType(.password)
         }
         .padding(.horizontal, 10)
         .overlay {
