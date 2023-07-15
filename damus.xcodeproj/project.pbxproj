@@ -32,6 +32,7 @@
 		3AAA95CA298DF87B00F3D526 /* TranslationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AAA95C9298DF87B00F3D526 /* TranslationService.swift */; };
 		3AAA95CC298E07E900F3D526 /* DeepLPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AAA95CB298E07E900F3D526 /* DeepLPlan.swift */; };
 		3AAC7A022A60FE72002B50DF /* LocalizationUtilTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AAC7A012A60FE72002B50DF /* LocalizationUtilTests.swift */; };
+		3AAC7A042A626A75002B50DF /* CarouselDotsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AAC7A032A626A75002B50DF /* CarouselDotsView.swift */; };
 		3AB72AB9298ECF30004BB58C /* Translator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AB72AB8298ECF30004BB58C /* Translator.swift */; };
 		3ACB685C297633BC00C46468 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3ACB685A297633BC00C46468 /* InfoPlist.strings */; };
 		3ACB685F297633BC00C46468 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3ACB685D297633BC00C46468 /* Localizable.strings */; };
@@ -752,6 +753,7 @@
 		3AAA95C9298DF87B00F3D526 /* TranslationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationService.swift; sourceTree = "<group>"; };
 		3AAA95CB298E07E900F3D526 /* DeepLPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLPlan.swift; sourceTree = "<group>"; };
 		3AAC7A012A60FE72002B50DF /* LocalizationUtilTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationUtilTests.swift; sourceTree = "<group>"; };
+		3AAC7A032A626A75002B50DF /* CarouselDotsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarouselDotsView.swift; sourceTree = "<group>"; };
 		3AB5B86A2986D8A3006599D2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		3AB5B86B2986D8A3006599D2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3AB5B86C2986D8A3006599D2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = de; path = de.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
@@ -2372,6 +2374,7 @@
 				4C28595F2A12A2BE004746F7 /* SupporterBadge.swift */,
 				5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */,
 				5CC868DC2AA29B3200FB22BA /* NeutralButtonStyle.swift */,
+				3AAC7A032A626A75002B50DF /* CarouselDotsView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -3006,6 +3009,7 @@
 				BA4AB0AE2A63B9270070A32A /* AddEmojiView.swift in Sources */,
 				4C32B94D2A9AD44700DC3548 /* Offset.swift in Sources */,
 				4C633350283D40E500B1C9C3 /* HomeModel.swift in Sources */,
+				3AAC7A042A626A75002B50DF /* CarouselDotsView.swift in Sources */,
 				4C987B57283FD07F0042CE38 /* FollowersModel.swift in Sources */,
 				4C32B9552A9AD44700DC3548 /* ByteBuffer.swift in Sources */,
 				4C32B95B2A9AD44700DC3548 /* NativeObject.swift in Sources */,

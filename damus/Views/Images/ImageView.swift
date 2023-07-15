@@ -18,22 +18,6 @@ struct ImageView: View {
     let settings: UserSettingsStore
     @Binding var selectedIndex: Int
     
-    var tabViewIndicator: some View {
-        HStack(spacing: 10) {
-            ForEach(urls.indices, id: \.self) { index in
-                Capsule()
-                    .fill(index == selectedIndex ? Color(UIColor.label) : Color.secondary)
-                    .frame(width: 7, height: 7)
-                    .onTapGesture {
-                        selectedIndex = index
-                    }
-            }
-        }
-        .padding()
-        .background(.regularMaterial)
-        .clipShape(Capsule())
-    }
-    
     var body: some View {
         ZStack {
             Color(.systemBackground)
@@ -70,7 +54,7 @@ struct ImageView: View {
                             Spacer()
                             
                             if (urls.count > 1) {
-                                tabViewIndicator
+                                CarouselDotsView(maxCount: urls.count, maxVisibleCount: 18, selectedIndex: $selectedIndex)
                             }
                         }
                     }
