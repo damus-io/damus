@@ -30,11 +30,11 @@ struct SearchingEventView: View {
     var search_name: String {
         switch search_type {
         case .nip05:
-            return "nip05"
+            return "Nostr Address"
         case .profile:
-            return "profile"
+            return "Profile"
         case .event:
-            return "note"
+            return "Note"
         }
     }
     
@@ -110,7 +110,7 @@ struct SearchingEventView: View {
                 }
                 .buttonStyle(PlainButtonStyle())
             case .not_found:
-                Text("\(search_name.capitalized) not found", comment: "When a note or profile is not found when searching for it via its note id")
+                Text("\(search_name) not found", comment: "When a note or profile is not found when searching for it via its note id")
             }
         }
         .onChange(of: evid, debounceTime: 0.5) { evid in
