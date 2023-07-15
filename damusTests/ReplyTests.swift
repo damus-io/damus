@@ -136,15 +136,21 @@ class ReplyTests: XCTestCase {
         guard let hex_pk = bech32_pubkey_decode(pk) else {
             return
         }
-        let content = """
-        @\(pk)
-        @\(pk)
-        """
 
-        let blocks = parse_mentions(content: content, tags: []).blocks
+        let profile = Profile(name: "jb55", display_name: "Will", about: nil, picture: nil, banner: nil, website: nil, lud06: nil, lud16: nil, nip05: nil, damus_donation: nil)
 
-        let rendered = render_blocks(blocks: blocks)
+        let post = user_tag_attr_string(profile: profile, pubkey: pk)
+        post.append(.init(string: "\n"))
+        post.append(user_tag_attr_string(profile: profile, pubkey: pk))
+        post.append(.init(string: "\n"))
+
+        let post_note = build_post(post: post, action: .posting(.none), uploadedMedias: [], references: [.p(hex_pk)])
+
         let expected_render = "nostr:\(pk)\nnostr:\(pk)"
+        XCTAssertEqual(post_note.content, expected_render)
+
+        let blocks = parse_mentions(content: post_note.content, tags: []).blocks
+        let rendered = render_blocks(blocks: blocks)
 
         XCTAssertEqual(rendered, expected_render)
 

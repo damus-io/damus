@@ -34,8 +34,11 @@ struct UserSearch: View {
         guard let pk = bech32_pubkey(user.pubkey) else {
             return
         }
-        let tagAttributedString = user_tag_attr_string(profile: user.profile, pubkey: pk)
-        appendUserTag(withTag: tagAttributedString)
+
+        let user_tag = user_tag_attr_string(profile: user.profile, pubkey: pk)
+        user_tag.append(.init(string: " "))
+
+        appendUserTag(withTag: user_tag)
     }
 
     private func appendUserTag(withTag tagAttributedString: NSMutableAttributedString) {
@@ -97,14 +100,12 @@ struct UserSearch_Previews: PreviewProvider {
 func user_tag_attr_string(profile: Profile?, pubkey: String) -> NSMutableAttributedString {
     let display_name = Profile.displayName(profile: profile, pubkey: pubkey)
     let name = display_name.username.truncate(maxLength: 50)
-    let tagString = "@\(name)\u{200B} "
+    let tagString = "@\(name)"
 
-    let tagAttributedString = NSMutableAttributedString(string: tagString,
-                               attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0),
-                                            NSAttributedString.Key.link: "nostr:\(pubkey)"])
-    tagAttributedString.removeAttribute(.link, range: NSRange(location: tagAttributedString.length - 2, length: 2))
-    tagAttributedString.addAttributes([NSAttributedString.Key.foregroundColor: UIColor.label], range: NSRange(location: tagAttributedString.length - 2, length: 2))
-    
-    return tagAttributedString
+    return NSMutableAttributedString(string: tagString, attributes: [
+        NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0),
+        NSAttributedString.Key.foregroundColor: UIColor.label,
+        NSAttributedString.Key.link: "damus:nostr:\(pubkey)"
+    ])
 }
 

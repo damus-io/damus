@@ -570,16 +570,12 @@ func build_post(post: NSMutableAttributedString, action: PostAction, uploadedMed
 
             // Add zero-width space in case text preceding the mention is not a whitespace.
             // In the case where the character preceding the mention is a whitespace, the added zero-width space will be stripped out.
-            post.replaceCharacters(in: range, with: "\u{200B}\(normalized_link)\u{200B}")
+            post.replaceCharacters(in: range, with: "\(normalized_link)")
         }
     }
 
+
     var content = post.string
-        // If two zero-width spaces are next to each other, normalize it to just one zero-width space.
-        .replacingOccurrences(of: "\u{200B}\u{200B}", with: "\u{200B}")
-        // If zero-width space is next to an actual whitespace, remove the zero-width space.
-        .replacingOccurrences(of: " \u{200B}", with: " ")
-        .replacingOccurrences(of: "\u{200B} ", with: " ")
         .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 
     let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
