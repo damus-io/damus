@@ -255,7 +255,7 @@ func get_nip05_pubkey(id: String) async -> NIP05User? {
 struct KeyInput: View {
     let title: String
     let key: Binding<String>
-    @State private var isSecured: Bool = true
+    @State private var is_secured: Bool = true
 
     init(_ title: String, key: Binding<String>) {
         self.title = title
@@ -271,7 +271,7 @@ struct KeyInput: View {
                         self.key.wrappedValue = pastedkey
                     }
                 }
-            if(isSecured) {
+            if(is_secured) {
                 SecureField("", text: key)
                     .placeholder(when: key.wrappedValue.isEmpty) {
                         Text(title).foregroundColor(.white.opacity(0.6))
@@ -297,7 +297,7 @@ struct KeyInput: View {
             Image(systemName: "eye.slash")
                 .foregroundColor(.gray)
                 .onTapGesture {
-                    isSecured.toggle()
+                    is_secured.toggle()
                 }
         }
         .padding(.horizontal, 10)
