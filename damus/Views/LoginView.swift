@@ -115,6 +115,21 @@ struct LoginView: View {
     }
 }
 
+extension View {
+    func nsecLoginStyle(key: String, title: String) -> some View {
+        self
+            .placeholder(when: key.isEmpty) {
+                Text(title).foregroundColor(.white.opacity(0.6))
+            }
+            .padding(10)
+            .autocapitalization(.none)
+            .autocorrectionDisabled(true)
+            .textInputAutocapitalization(.never)
+            .font(.body.monospaced())
+            .textContentType(.password)
+    }
+}
+
 func parse_key(_ thekey: String) -> ParsedKey? {
     var key = thekey
     if key.count > 0 && key.first! == "@" {
@@ -255,6 +270,7 @@ func get_nip05_pubkey(id: String) async -> NIP05User? {
 struct KeyInput: View {
     let title: String
     let key: Binding<String>
+    @State private var is_secured: Bool = true
 
     init(_ title: String, key: Binding<String>) {
         self.title = title
@@ -270,16 +286,18 @@ struct KeyInput: View {
                         self.key.wrappedValue = pastedkey
                     }
                 }
-            TextField("", text: key)
-                .placeholder(when: key.wrappedValue.isEmpty) {
-                    Text(title).foregroundColor(.white.opacity(0.6))
+            if is_secured  {
+                     SecureField("", text: key)
+                         .nsecLoginStyle(key: key.wrappedValue, title: title)
+                 } else {
+                     TextField("", text: key)
+                         .nsecLoginStyle(key: key.wrappedValue, title: title)
+                 }
+            Image(systemName: "eye.slash")
+                .foregroundColor(.gray)
+                .onTapGesture {
+                    is_secured.toggle()
                 }
-                .padding(10)
-                .autocapitalization(.none)
-                .autocorrectionDisabled(true)
-                .textInputAutocapitalization(.never)
-                .font(.body.monospaced())
-                .textContentType(.password)
         }
         .padding(.horizontal, 10)
         .overlay {
