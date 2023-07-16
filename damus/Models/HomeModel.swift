@@ -165,9 +165,7 @@ class HomeModel {
         }
 
         switch kind {
-        case .chat: fallthrough
-        case .longform: fallthrough
-        case .text:
+        case .chat, .longform, .text:
             handle_text_event(sub_id: sub_id, ev)
         case .contacts:
             handle_contact_event(sub_id: sub_id, relay_id: relay_id, ev: ev)
@@ -862,8 +860,7 @@ func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping (
     case .ok:
         callback()
         
-    case .bad_id: fallthrough
-    case .bad_sig:
+    case .bad_id, .bad_sig:
         break
     }
 }

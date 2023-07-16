@@ -182,8 +182,7 @@ func reacting_to_verb(group: EventGroupType) -> String {
         return "reacted"
     case .repost:
         return "reposted"
-    case .zap: fallthrough
-    case .profile_zap:
+    case .zap, .profile_zap:
         return "zapped"
     }
 }
