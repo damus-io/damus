@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+import MarkdownUI
+
 let eula = """
 **End User License Agreement**
 
@@ -63,7 +65,7 @@ struct EULAView: View {
     var body: some View {
         ZStack {
             ScrollView {
-                Text(Markdown.parse(content: eula))
+                Markdown(eula)
                     .padding()
             }
             .padding(EdgeInsets(top: 20, leading: 10, bottom: 50, trailing: 10))

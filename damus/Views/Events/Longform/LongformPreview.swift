@@ -58,9 +58,9 @@ struct LongformPreviewBody: View {
                 .foregroundColor(.gray)
 
             if case .loaded(let arts) = artifacts.state,
-               case .parts(let parts) = arts
+               case .longform(let longform) = arts
             {
-                Words(parts.words).font(.footnote)
+                Words(longform.words).font(.footnote)
             }
         }
     }

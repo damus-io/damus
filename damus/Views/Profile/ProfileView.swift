@@ -103,8 +103,6 @@ struct ProfileView: View {
     let damus_state: DamusState
     let pfp_size: CGFloat = 90.0
     let bannerHeight: CGFloat = 150.0
-    
-    static let markdown = Markdown()
 
     @State var is_zoomed: Bool = false
     @State var show_share_sheet: Bool = false

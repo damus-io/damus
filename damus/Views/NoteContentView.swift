@@ -8,6 +8,7 @@
 import SwiftUI
 import LinkPresentation
 import NaturalLanguage
+import MarkdownUI
 
 struct Blur: UIViewRepresentable {
     var style: UIBlurEffect.Style = .systemUltraThinMaterial
@@ -212,8 +213,9 @@ struct NoteContentView: View {
     var ArtifactContent: some View {
         Group {
             switch self.note_artifacts {
-            case .parts(let parts):
-                artifactPartsView(parts.parts)
+            case .longform(let md):
+                Markdown(md.markdown)
+                    .padding(.horizontal)
             case .separated(let separated):
                 MainContent(artifacts: separated)
             }
@@ -285,22 +287,27 @@ func mention_str(_ m: Mention, profiles: Profiles) -> CompatibleText {
     }
 }
 
+struct LongformContent {
+    let markdown: MarkdownContent
+    let words: Int
+
+    init(_ markdown: String) {
+        let blocks = [BlockNode].init(markdown: markdown)
+        self.markdown = MarkdownContent(blocks: blocks)
+        self.words = count_markdown_words(blocks: blocks)
+    }
+}
+
 enum NoteArtifacts {
     case separated(NoteArtifactsSeparated)
-    case parts(NoteArtifactsParts)
-    
+    case longform(LongformContent)
+
     var images: [URL] {
         switch self {
         case .separated(let arts):
             return arts.images
-        case .parts(let parts):
-            return parts.parts.reduce(into: [URL]()) { acc, part in
-                guard case .media(let m) = part,
-                      case .image(let url) = m
-                else { return }
-                
-                acc.append(url)
-            }
+        case .longform:
+            return []
         }
     }
 }
@@ -390,7 +397,7 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -
     let blocks = ev.blocks(privkey)
     
     if ev.known_kind == .longform {
-        return .parts(render_blocks_parted(blocks: blocks, profiles: profiles))
+        return .longform(LongformContent(ev.content))
     }
     
     return .separated(render_blocks(blocks: blocks, profiles: profiles))
@@ -407,68 +414,6 @@ fileprivate func artifact_part_last_text_ind(parts: [ArtifactPart]) -> (Int, Tex
     }
     
     return (ind, txt)
-}
-
-func render_blocks_parted(blocks bs: Blocks, profiles: Profiles) -> NoteArtifactsParts {
-    let blocks = bs.blocks
-    
-    let new_parts = NoteArtifactsParts(parts: [], words: bs.words)
-    
-    return blocks.reduce(into: new_parts) { parts, block in
-        
-        switch block {
-        case .mention(let m):
-            guard let (last_ind, txt) = artifact_part_last_text_ind(parts: parts.parts) else {
-                parts.parts.append(.text(mention_str(m, profiles: profiles).text))
-                return
-            }
-            parts.parts[last_ind] = .text(txt + mention_str(m, profiles: profiles).text)
-            
-        case .text(let str):
-            guard let (last_ind, txt) = artifact_part_last_text_ind(parts: parts.parts) else {
-                // TODO: (jb55) md is longform specific
-                let md = Markdown.parse(content: str)
-                parts.parts.append(.text(Text(md)))
-                return
-            }
-            
-            parts.parts[last_ind] = .text(txt + Text(str))
-            
-        case .relay(let relay):
-            guard let (last_ind, txt) = artifact_part_last_text_ind(parts: parts.parts) else {
-                parts.parts.append(.text(Text(relay)))
-                return
-            }
-            
-            parts.parts[last_ind] = .text(txt + Text(relay))
-            
-        case .hashtag(let htag):
-            guard let (last_ind, txt) = artifact_part_last_text_ind(parts: parts.parts) else {
-                parts.parts.append(.text(hashtag_str(htag).text))
-                return
-            }
-            
-            parts.parts[last_ind] = .text(txt + hashtag_str(htag).text)
-            
-        case .invoice(let invoice):
-            parts.parts.append(.invoice(invoice))
-            return
-            
-        case .url(let url):
-            let url_type = classify_url(url)
-            switch url_type {
-            case .media(let media_url):
-                parts.parts.append(.media(media_url))
-            case .link(let url):
-                guard let (last_ind, txt) = artifact_part_last_text_ind(parts: parts.parts) else {
-                    parts.parts.append(.text(url_str(url).text))
-                    return
-                }
-                
-                parts.parts[last_ind] = .text(txt + url_str(url).text)
-            }
-        }
-    }
 }
 
 func reduce_text_block(blocks: [Block], ind: Int, txt: String, one_note_ref: Bool) -> CompatibleText {

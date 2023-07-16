@@ -11,8 +11,6 @@ struct FollowUserView: View {
     let target: FollowTarget
     let damus_state: DamusState
 
-    static let markdown = Markdown()
-
     var body: some View {
         HStack {
             UserViewRow(damus_state: damus_state, pubkey: target.pubkey)

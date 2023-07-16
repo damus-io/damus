@@ -1243,7 +1243,7 @@ func render_notification_content_preview(cache: EventCache, ev: NostrEvent, prof
     }
     
     switch artifacts {
-    case .parts:
+    case .longform:
         // we should never hit this until we have more note types built out of parts
         // since we handle this case above in known_kind == .longform
         return String(ev.content.prefix(prefix_len))
