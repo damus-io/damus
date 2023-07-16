@@ -10,6 +10,31 @@ import UIKit
 
 let fallback_zap_amount = 1000
 
+func setting_property_key(key: String) -> String {
+    return pk_setting_key(UserSettingsStore.pubkey ?? "", key: key)
+}
+
+func setting_get_property_value<T>(key: String, scoped_key: String, default_value: T) -> T {
+    if let loaded = UserDefaults.standard.object(forKey: scoped_key) as? T {
+        return loaded
+    } else if let loaded = UserDefaults.standard.object(forKey: key) as? T {
+        // If pubkey-scoped setting does not exist but the deprecated non-pubkey-scoped setting does,
+        // migrate the deprecated setting into the pubkey-scoped one and delete the deprecated one.
+        UserDefaults.standard.set(loaded, forKey: scoped_key)
+        UserDefaults.standard.removeObject(forKey: key)
+        return loaded
+    } else {
+        return default_value
+    }
+}
+
+func setting_set_property_value<T: Equatable>(scoped_key: String, old_value: T, new_value: T) -> T? {
+    guard old_value != new_value else { return nil }
+    UserDefaults.standard.set(new_value, forKey: scoped_key)
+    UserSettingsStore.shared!.objectWillChange.send()
+    return new_value
+}
+
 @propertyWrapper struct Setting<T: Equatable> {
     private let key: String
     private var value: T
@@ -18,29 +43,17 @@ let fallback_zap_amount = 1000
         if T.self == Bool.self {
             UserSettingsStore.bool_options.insert(key)
         }
-        self.key = pk_setting_key(UserSettingsStore.pubkey ?? "", key: key)
-        if let loaded = UserDefaults.standard.object(forKey: self.key) as? T {
-            self.value = loaded
-        } else if let loaded = UserDefaults.standard.object(forKey: key) as? T {
-            // If pubkey-scoped setting does not exist but the deprecated non-pubkey-scoped setting does,
-            // migrate the deprecated setting into the pubkey-scoped one and delete the deprecated one.
-            self.value = loaded
-            UserDefaults.standard.set(loaded, forKey: self.key)
-            UserDefaults.standard.removeObject(forKey: key)
-        } else {
-            self.value = default_value
-        }
+        let scoped_key = setting_property_key(key: key)
+
+        self.value = setting_get_property_value(key: key, scoped_key: scoped_key, default_value: default_value)
+        self.key = scoped_key
     }
-    
+
     var wrappedValue: T {
         get { return value }
         set {
-            guard self.value != newValue else {
-                return
-            }
-            self.value = newValue
-            UserDefaults.standard.set(newValue, forKey: key)
-            UserSettingsStore.shared!.objectWillChange.send()
+            guard let new_val = setting_set_property_value(scoped_key: key, old_value: value, new_value: newValue) else { return }
+            self.value = new_val
         }
     }
 }
