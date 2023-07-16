@@ -1,3 +1,26 @@
+## [1.6-6] - 2023-07-16
+
+### Added
+
+- New markdown renderer (William Casarin)
+- Added feedback when user adds a relay that is already on the list (Daniel D'Aquino)
+
+### Changed
+
+- Hide nsec when logging in (cr0bar)
+- Remove nip05 on events (William Casarin)
+- Rename NIP05 to "nostr address" (William Casarin)
+
+### Fixed
+
+- Fixed issue where hashtags were leaking in DMs (William Casarin)
+- Fix issue with emojis next to hashtags and urls (William Casarin)
+- relay detail view is not immediately available after adding new relay (Bryan Montz)
+- Fix nostr:nostr:... bugs (William Casarin)
+
+
+[1.6-6]: https://github.com/damus-io/damus/releases/tag/v1.6-6
+
 ## [1.6-4] - 2023-07-13
 
 ### Added
@@ -1375,4 +1398,5 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
+
 
