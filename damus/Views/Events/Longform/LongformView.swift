@@ -61,12 +61,12 @@ struct LongformView: View {
 
 let test_longform_event = LongformEvent.parse(from:
         .init(id: "longform_id",
-              content: "## Let me tell you why coffee is awesome\n**IT JUST IS**",
+              content: longform_long_test_data,
               pubkey: "pk",
               kind: NostrKind.longform.rawValue,
               tags: [
-                ["title", "Coffee is awesome"],
-                ["summary", "Did you know coffee is awesome?"],
+                ["title", "What is WASTOIDS?"],
+                ["summary", "WASTOIDS is an audio/visual feed, created by Sam Means..."],
                 ["published_at", "1685638715"],
                 ["t", "coffee"],
                 ["t", "coffeechain"],
@@ -80,6 +80,8 @@ struct LongformView_Previews: PreviewProvider {
         let artifacts = render_note_content(ev: test_longform_event.event, profiles: st.profiles, privkey: nil)
         
         let model = NoteArtifactsModel(state: .loaded(artifacts))
-        LongformView(state: st, event: test_longform_event, artifacts: model)
+        ScrollView {
+            LongformView(state: st, event: test_longform_event, artifacts: model)
+        }
     }
 }
