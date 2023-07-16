@@ -35,16 +35,8 @@ struct ProfileName: View {
     @State var display_name: DisplayName?
     @State var nip05: NIP05?
     @State var donation: Int?
-
-    init(pubkey: String, profile: Profile?, damus: DamusState, show_nip5_domain: Bool = true) {
-        self.pubkey = pubkey
-        self.profile = profile
-        self.prefix = ""
-        self.show_nip5_domain = show_nip5_domain
-        self.damus_state = damus
-    }
     
-    init(pubkey: String, profile: Profile?, prefix: String, damus: DamusState, show_nip5_domain: Bool = true) {
+    init(pubkey: String, profile: Profile?, prefix: String = "", damus: DamusState, show_nip5_domain: Bool = true) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = prefix

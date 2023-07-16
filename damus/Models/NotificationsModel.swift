@@ -99,34 +99,20 @@ enum NotificationItem {
 }
 
 class NotificationsModel: ObservableObject, ScrollQueue {
-    var incoming_zaps: [Zapping]
-    var incoming_events: [NostrEvent]
-    var should_queue: Bool
+    var incoming_zaps: [Zapping] = []
+    var incoming_events: [NostrEvent] = []
+    var should_queue: Bool = true
     
     // mappings from events to
-    var zaps: [String: ZapGroup]
-    var profile_zaps: ZapGroup
-    var reactions: [String: EventGroup]
-    var reposts: [String: EventGroup]
-    var replies: [NostrEvent]
-    var has_reply: Set<String>
-    var has_ev: Set<String>
+    var zaps: [String: ZapGroup] = [:]
+    var profile_zaps = ZapGroup()
+    var reactions: [String: EventGroup] = [:]
+    var reposts: [String: EventGroup] = [:]
+    var replies: [NostrEvent] = []
+    var has_reply = Set<String>()
+    var has_ev = Set<String>()
     
-    @Published var notifications: [NotificationItem]
-    
-    init() {
-        self.zaps = [:]
-        self.reactions = [:]
-        self.reposts = [:]
-        self.replies = []
-        self.has_reply = Set()
-        self.should_queue = true
-        self.incoming_zaps = []
-        self.incoming_events = []
-        self.profile_zaps = ZapGroup()
-        self.notifications = []
-        self.has_ev = Set()
-    }
+    @Published var notifications: [NotificationItem] = []
     
     func set_should_queue(_ val: Bool) {
         self.should_queue = val

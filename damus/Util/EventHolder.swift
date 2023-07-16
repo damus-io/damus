@@ -9,10 +9,10 @@ import Foundation
 
 /// Used for holding back events until they're ready to be displayed
 class EventHolder: ObservableObject, ScrollQueue {
-    private var has_event: Set<String>
+    private var has_event = Set<String>()
     @Published var events: [NostrEvent]
     var incoming: [NostrEvent]
-    var should_queue: Bool
+    var should_queue = false
     var on_queue: ((NostrEvent) -> Void)?
     
     func set_should_queue(_ val: Bool) {
@@ -27,28 +27,10 @@ class EventHolder: ObservableObject, ScrollQueue {
         events + incoming
     }
     
-    init() {
-        self.should_queue = false
-        self.events = []
-        self.incoming = []
-        self.has_event = Set()
-        self.on_queue = nil
-    }
-    
-    init(on_queue: @escaping (NostrEvent) -> ()) {
-        self.should_queue = false
-        self.events = []
-        self.incoming = []
-        self.has_event = Set()
-        self.on_queue = on_queue
-    }
-    
-    init(events: [NostrEvent], incoming: [NostrEvent]) {
-        self.should_queue = false
+    init(events: [NostrEvent] = [], incoming: [NostrEvent] = [], on_queue: ((NostrEvent) -> ())? = nil) {
         self.events = events
         self.incoming = incoming
-        self.has_event = Set()
-        self.on_queue = nil
+        self.on_queue = on_queue
     }
     
     func filter(_ isIncluded: (NostrEvent) -> Bool) {

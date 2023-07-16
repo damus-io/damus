@@ -11,12 +11,7 @@ class DraftArtifacts {
     var content: NSMutableAttributedString
     var media: [UploadedMedia]
     
-    init() {
-        self.content = NSMutableAttributedString(string: "")
-        self.media = []
-    }
-    
-    init(content: NSMutableAttributedString, media: [UploadedMedia]) {
+    init(content: NSMutableAttributedString = NSMutableAttributedString(string: ""), media: [UploadedMedia] = []) {
         self.content = content
         self.media = media
     }

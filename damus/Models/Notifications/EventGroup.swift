@@ -18,11 +18,7 @@ class EventGroup {
         return first.created_at
     }
     
-    init() {
-        self.events = []
-    }
-    
-    init(events: [NostrEvent]) {
+    init(events: [NostrEvent] = []) {
         self.events = events
     }
     

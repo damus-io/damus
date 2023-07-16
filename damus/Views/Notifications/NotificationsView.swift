@@ -41,12 +41,7 @@ class NotificationFilter: ObservableObject, Equatable {
         return lhs.state == rhs.state && lhs.fine_filter == rhs.fine_filter
     }
     
-    init() {
-        self.state = .all
-        self.fine_filter = .all
-    }
-    
-    init(state: NotificationFilterState, fine_filter: FriendFilter) {
+    init(state: NotificationFilterState = .all, fine_filter: FriendFilter = .all) {
         self.state = state
         self.fine_filter = fine_filter
     }

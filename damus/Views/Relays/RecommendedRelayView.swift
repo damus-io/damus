@@ -14,14 +14,7 @@ struct RecommendedRelayView: View {
     
     @Binding var showActionButtons: Bool
     
-    init(damus: DamusState, relay: String, showActionButtons: Binding<Bool>) {
-        self.damus = damus
-        self.relay = relay
-        self.add_button = true
-        self._showActionButtons = showActionButtons
-    }
-    
-    init(damus: DamusState, relay: String, add_button: Bool, showActionButtons: Binding<Bool>) {
+    init(damus: DamusState, relay: String, add_button: Bool = true, showActionButtons: Binding<Bool>) {
         self.damus = damus
         self.relay = relay
         self.add_button = add_button

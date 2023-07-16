@@ -12,12 +12,7 @@ class SignalModel: ObservableObject {
     @Published var signal: Int
     @Published var max_signal: Int
     
-    init() {
-        self.signal = 0
-        self.max_signal = 0
-    }
-    
-    init(signal: Int, max_signal: Int) {
+    init(signal: Int = 0, max_signal: Int = 0) {
         self.signal = signal
         self.max_signal = max_signal
     }
