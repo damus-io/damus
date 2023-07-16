@@ -66,6 +66,7 @@
 		4C216F34286F5ACD00040376 /* DMView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F33286F5ACD00040376 /* DMView.swift */; };
 		4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F352870A9A700040376 /* InputDismissKeyboard.swift */; };
 		4C216F382871EDE300040376 /* DirectMessageModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F372871EDE300040376 /* DirectMessageModel.swift */; };
+		4C27C9322A64766F007DBC75 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 4C27C9312A64766F007DBC75 /* MarkdownUI */; };
 		4C2859602A12A2BE004746F7 /* SupporterBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C28595F2A12A2BE004746F7 /* SupporterBadge.swift */; };
 		4C2859622A12A7F0004746F7 /* GoldSupportGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2859612A12A7F0004746F7 /* GoldSupportGradient.swift */; };
 		4C285C8228385570008A31F1 /* CarouselView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C285C8128385570008A31F1 /* CarouselView.swift */; };
@@ -842,6 +843,7 @@
 				4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */,
 				4CCF9AB22A1FE80C00E03CFB /* GSPlayer in Frameworks */,
 				4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */,
+				4C27C9322A64766F007DBC75 /* MarkdownUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1667,6 +1669,7 @@
 				4C649880286E0EE300EAE2B3 /* secp256k1 */,
 				4C06670328FC7EC500038D2A /* Kingfisher */,
 				4CCF9AB12A1FE80C00E03CFB /* GSPlayer */,
+				4C27C9312A64766F007DBC75 /* MarkdownUI */,
 			);
 			productName = damus;
 			productReference = 4CE6DEE327F7A08100C66700 /* damus.app */;
@@ -1773,6 +1776,7 @@
 				4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */,
 				4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				4CCF9AB02A1FE80B00E03CFB /* XCRemoteSwiftPackageReference "GSPlayer" */,
+				4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -2636,6 +2640,14 @@
 				minimumVersion = 7.0.0;
 			};
 		};
+		4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/damus-io/swift-markdown-ui";
+			requirement = {
+				branch = 76bb7971da7fbf429de1c84f1244adf657242fee;
+				kind = branch;
+			};
+		};
 		4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/jb55/secp256k1.swift";
@@ -2659,6 +2671,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
+		};
+		4C27C9312A64766F007DBC75 /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
+			productName = MarkdownUI;
 		};
 		4C649880286E0EE300EAE2B3 /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;

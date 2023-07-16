@@ -25,6 +25,14 @@
       "state" : {
         "revision" : "40b4b38b3b1c83f7088c76189a742870e0ca06a9"
       }
+    },
+    {
+      "identity" : "swift-markdown-ui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/damus-io/swift-markdown-ui",
+      "state" : {
+        "revision" : "76bb7971da7fbf429de1c84f1244adf657242fee"
+      }
     }
   ],
   "version" : 2
