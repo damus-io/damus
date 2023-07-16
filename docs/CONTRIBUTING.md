@@ -125,6 +125,24 @@ you introduce bugs in the middle.
 If you cannot condense your patch set into a smaller set of patches,
 then only post say 15 or so at a time and wait for review and integration.
 
+Include `patch changelogs` which describe what has changed between the v1 and
+v2 version of the patch. Please put this information **after** the `---` line
+which separates the changelog from the rest of the patch. The version
+information is not part of the changelog which gets committed to the git tree.
+It is additional information for the reviewers. If it's placed above the commit
+tags, it needs manual interaction to remove it. If it is below the separator
+line, it gets automatically stripped off when applying the patch::
+
+    <commit message>
+    ...
+    Signed-off-by: Author <author@mail>
+    ---
+    V2 -> V3: Removed redundant helper function
+    V1 -> V2: Cleaned up coding style and addressed review comments
+    
+    path/to/file | 5+++--
+    ...
+
 
 ### Select the recipients for your patch
 
