@@ -18,7 +18,7 @@ enum WebSocketEvent {
         switch self {
         case .connected:
             return "Connected"
-        case .message(_):
+        case .message:
             return nil  // adding this to the RelayLog was too noisy
         case .disconnected(let close_code, let reason):
             return "Disconnected: Close code: \(close_code), reason: \(reason ?? "unknown")"

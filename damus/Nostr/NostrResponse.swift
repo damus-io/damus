@@ -21,7 +21,7 @@ enum NostrResponse: Decodable {
     
     var subid: String? {
         switch self {
-        case .ok(_):
+        case .ok:
             return nil
         case .event(let sub_id, _):
             return sub_id

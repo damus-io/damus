@@ -120,13 +120,13 @@ enum Route: Hashable {
             return lhs_pubkey == rhs_pubkey
         case (.Profile (let lhs_profile, _), .Profile(let rhs_profile, _)):
             return lhs_profile == rhs_profile
-        case (.Followers (_), .Followers (_)):
+        case (.Followers, .Followers):
             return true
         case (.Relay (let lhs_relay, _), .Relay (let rhs_relay, _)):
             return lhs_relay == rhs_relay
         case (.RelayDetail(let lhs_relay, _), .RelayDetail(let rhs_relay, _)):
             return lhs_relay == rhs_relay
-        case (.Following(_), .Following(_)):
+        case (.Following, .Following):
             return true
         case (.MuteList(let lhs_users), .MuteList(let rhs_users)):
             return lhs_users == rhs_users
@@ -144,17 +144,17 @@ enum Route: Hashable {
             return lhs_relays == rhs_relays
         case (.KeySettings(let lhs_keypair), .KeySettings(let rhs_keypair)):
             return lhs_keypair.pubkey == rhs_keypair.pubkey
-        case (.AppearanceSettings(_), .AppearanceSettings(_)):
+        case (.AppearanceSettings, .AppearanceSettings):
             return true
-        case (.NotificationSettings(_), .NotificationSettings(_)):
+        case (.NotificationSettings, .NotificationSettings):
             return true
-        case (.ZapSettings(_), .ZapSettings(_)):
+        case (.ZapSettings, .ZapSettings):
             return true
-        case (.TranslationSettings(_), .TranslationSettings(_)):
+        case (.TranslationSettings, .TranslationSettings):
             return true
-        case (.SearchSettings(_), .SearchSettings(_)):
+        case (.SearchSettings, .SearchSettings):
             return true
-        case (.DeveloperSettings(_), .DeveloperSettings(_)):
+        case (.DeveloperSettings, .DeveloperSettings):
             return true
         case (.Thread(let lhs_threadModel), .Thread(thread: let rhs_threadModel)):
             return lhs_threadModel.event.id == rhs_threadModel.event.id
@@ -174,13 +174,13 @@ enum Route: Hashable {
             return true
         case (.SaveKeys(let lhs_account), .SaveKeys(let rhs_account)):
             return lhs_account.pubkey == rhs_account.pubkey
-        case (.Wallet(_), .Wallet(_)):
+        case (.Wallet, .Wallet):
             return true
-        case (.WalletScanner(_), .WalletScanner(_)):
+        case (.WalletScanner, .WalletScanner):
             return true
-        case (.FollowersYouKnow(_, _), .FollowersYouKnow(_, _)):
+        case (.FollowersYouKnow, .FollowersYouKnow):
             return true
-        case (.Script(_), .Script(_)):
+        case (.Script, .Script):
             return true
         default:
             return false
@@ -195,7 +195,7 @@ enum Route: Hashable {
         case .Profile(let profile, _):
             hasher.combine("profile")
             hasher.combine(profile.pubkey)
-        case .Followers(_):
+        case .Followers:
             hasher.combine("followers")
         case .Relay(let relay, _):
             hasher.combine("relay")
@@ -203,7 +203,7 @@ enum Route: Hashable {
         case .RelayDetail(let relay, _):
             hasher.combine("relayDetail")
             hasher.combine(relay)
-        case .Following(_):
+        case .Following:
             hasher.combine("following")
         case .MuteList(let users):
             hasher.combine("muteList")
@@ -225,15 +225,15 @@ enum Route: Hashable {
         case .KeySettings(let keypair):
             hasher.combine("keySettings")
             hasher.combine(keypair.pubkey)
-        case .AppearanceSettings(_):
+        case .AppearanceSettings:
             hasher.combine("appearanceSettings")
-        case .NotificationSettings(_):
+        case .NotificationSettings:
             hasher.combine("notificationSettings")
-        case .ZapSettings(_):
+        case .ZapSettings:
             hasher.combine("zapSettings")
-        case .TranslationSettings(_):
+        case .TranslationSettings:
             hasher.combine("translationSettings")
-        case .SearchSettings(_):
+        case .SearchSettings:
             hasher.combine("searchSettings")
         case .DeveloperSettings:
             hasher.combine("developerSettings")
@@ -263,9 +263,9 @@ enum Route: Hashable {
         case .SaveKeys(let account):
             hasher.combine("saveKeys")
             hasher.combine(account.pubkey)
-        case .Wallet(_):
+        case .Wallet:
             hasher.combine("wallet")
-        case .WalletScanner(_):
+        case .WalletScanner:
             hasher.combine("walletScanner")
         case .FollowersYouKnow(let friendedFollowers, let followers):
             hasher.combine("followersYouKnow")

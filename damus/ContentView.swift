@@ -856,7 +856,7 @@ func find_event(state: DamusState, query query_: FindEvent, callback: @escaping 
                 }
                 state.pool.unsubscribe(sub_id: subid, to: [relay_id])
             }
-        case .notice(_):
+        case .notice:
             break
         }
 

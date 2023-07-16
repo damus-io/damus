@@ -86,7 +86,7 @@ struct CustomImageProcessor: ImageProcessor {
     func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage? {
         
         switch item {
-        case .image(_):
+        case .image:
             // This case will never run
             return DefaultImageProcessor.default.process(item: item, options: options)
         case .data(let data):

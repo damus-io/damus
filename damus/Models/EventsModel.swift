@@ -62,11 +62,11 @@ class EventsModel: ObservableObject {
         switch nev {
         case .event(_, let ev):
             handle_event(relay_id: relay_id, ev: ev)
-        case .notice(_):
+        case .notice:
             break
         case .ok:
             break
-        case .eose(_):
+        case .eose:
             load_profiles(profiles_subid: profiles_id, relay_id: relay_id, load: .from_events(events), damus_state: state)
         }
     }
