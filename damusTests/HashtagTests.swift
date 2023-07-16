@@ -19,7 +19,7 @@ final class HashtagTests: XCTestCase {
     }
 
     func testParseHashtag() {
-        let parsed = parse_mentions(content: "some hashtag #bitcoin derp", tags: []).blocks
+        let parsed = parse_note_content(content: "some hashtag #bitcoin derp", tags: []).blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -29,7 +29,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testHashtagWithComma() {
-        let parsed = parse_mentions(content: "some hashtag #bitcoin, cool", tags: []).blocks
+        let parsed = parse_note_content(content: "some hashtag #bitcoin, cool", tags: []).blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -40,7 +40,7 @@ final class HashtagTests: XCTestCase {
     
     func testHashtagWithEmoji() {
         let content = "some hashtag #bitcoin☕️ cool"
-        let parsed = parse_mentions(content: content, tags: []).blocks
+        let parsed = parse_note_content(content: content, tags: []).blocks
         let post_blocks = parse_post_blocks(content: content)
 
         XCTAssertNotNil(parsed)
@@ -57,7 +57,7 @@ final class HashtagTests: XCTestCase {
 
     func testPowHashtag() {
         let content = "pow! #ぽわ〜"
-        let parsed = parse_mentions(content: content, tags: []).blocks
+        let parsed = parse_note_content(content: content, tags: []).blocks
         let post_blocks = parse_post_blocks(content: content)
 
         XCTAssertNotNil(parsed)
@@ -71,7 +71,7 @@ final class HashtagTests: XCTestCase {
     }
 
     func testHashtagWithAccents() {
-        let parsed = parse_mentions(content: "hello from #türkiye", tags: []).blocks
+        let parsed = parse_note_content(content: "hello from #türkiye", tags: []).blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 2)
@@ -80,7 +80,7 @@ final class HashtagTests: XCTestCase {
     }
 
     func testHashtagWithNonLatinCharacters() {
-        let parsed = parse_mentions(content: "this is a #시험 hope it works", tags: []).blocks
+        let parsed = parse_note_content(content: "this is a #시험 hope it works", tags: []).blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -90,7 +90,7 @@ final class HashtagTests: XCTestCase {
     }
     
     func testParseHashtagEnd() {
-        let parsed = parse_mentions(content: "some hashtag #bitcoin", tags: []).blocks
+        let parsed = parse_note_content(content: "some hashtag #bitcoin", tags: []).blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 2)

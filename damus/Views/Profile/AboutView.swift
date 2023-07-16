@@ -39,7 +39,7 @@ struct AboutView: View {
             }
         }
         .onAppear {
-            let blocks = parse_mentions(content: about, tags: [])
+            let blocks = parse_note_content(content: about, tags: [])
             about_string = render_blocks(blocks: blocks, profiles: state.profiles).content.attributed
         }
         

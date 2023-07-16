@@ -111,6 +111,6 @@ func parse_post_bech32_mention(_ p: Parser) -> ReferencedId? {
 
 /// Return a list of tags
 func parse_post_blocks(content: String) -> [Block] {
-    return parse_mentions(content: content, tags: []).blocks
+    return parse_note_content(content: content, tags: []).blocks
 }
 

@@ -102,7 +102,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     }
 
     func get_blocks(content: String) -> Blocks {
-        return parse_mentions(content: content, tags: self.tags)
+        return parse_note_content(content: content, tags: self.tags)
     }
 
     private lazy var inner_event: NostrEvent? = {

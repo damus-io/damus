@@ -21,7 +21,7 @@ class ReplyTests: XCTestCase {
     func testMentionIsntReply() throws {
         let content = "this is #[0] a mention"
         let tags = [["e", "event_id"]]
-        let blocks = parse_mentions(content: content, tags: tags).blocks
+        let blocks = parse_note_content(content: content, tags: tags).blocks
         let event_refs = interpret_event_refs(blocks: blocks, tags: tags)
         
         XCTAssertEqual(event_refs.count, 1)
@@ -94,7 +94,7 @@ class ReplyTests: XCTestCase {
     func testRootReplyWithMention() throws {
         let content = "this is #[1] a mention"
         let tags = [["e", "thread_id"], ["e", "mentioned_id"]]
-        let blocks = parse_mentions(content: content, tags: tags).blocks
+        let blocks = parse_note_content(content: content, tags: tags).blocks
         let event_refs = interpret_event_refs(blocks: blocks, tags: tags)
         
         XCTAssertEqual(event_refs.count, 2)
@@ -112,7 +112,7 @@ class ReplyTests: XCTestCase {
     func testEmptyMention() throws {
         let content = "this is some & content"
         let tags: [[String]] = []
-        let blocks = parse_mentions(content: content, tags: tags).blocks
+        let blocks = parse_note_content(content: content, tags: tags).blocks
         let post_blocks = parse_post_blocks(content: content)
         let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags, silent_mentions: false)
         let event_refs = interpret_event_refs(blocks: blocks, tags: tags)
@@ -126,7 +126,7 @@ class ReplyTests: XCTestCase {
     func testManyMentions() throws {
         let content = "#[10]"
         let tags: [[String]] = [[],[],[],[],[],[],[],[],[],[],["p", "3e999f94e2cb34ef44a64b351141ac4e51b5121b2d31aed4a6c84602a1144692"]]
-        let blocks = parse_mentions(content: content, tags: tags).blocks
+        let blocks = parse_note_content(content: content, tags: tags).blocks
         let mentions = blocks.filter { $0.is_mention != nil }
         XCTAssertEqual(mentions.count, 1)
     }
@@ -149,7 +149,7 @@ class ReplyTests: XCTestCase {
         let expected_render = "nostr:\(pk)\nnostr:\(pk)"
         XCTAssertEqual(post_note.content, expected_render)
 
-        let blocks = parse_mentions(content: post_note.content, tags: []).blocks
+        let blocks = parse_note_content(content: post_note.content, tags: []).blocks
         let rendered = render_blocks(blocks: blocks)
 
         XCTAssertEqual(rendered, expected_render)
@@ -163,7 +163,7 @@ class ReplyTests: XCTestCase {
     func testThreadedReply() throws {
         let content = "this is some content"
         let tags = [["e", "thread_id"], ["e", "reply_id"]]
-        let blocks = parse_mentions(content: content, tags: tags).blocks
+        let blocks = parse_note_content(content: content, tags: tags).blocks
         let event_refs = interpret_event_refs(blocks: blocks, tags: tags)
         
         XCTAssertEqual(event_refs.count, 2)
@@ -179,7 +179,7 @@ class ReplyTests: XCTestCase {
     func testRootReply() throws {
         let content = "this is a reply"
         let tags = [["e", "thread_id"]]
-        let blocks = parse_mentions(content: content, tags: tags).blocks
+        let blocks = parse_note_content(content: content, tags: tags).blocks
         let event_refs = interpret_event_refs(blocks: blocks, tags: tags)
         
         XCTAssertEqual(event_refs.count, 1)
@@ -193,14 +193,14 @@ class ReplyTests: XCTestCase {
     
     func testNoReply() throws {
         let content = "this is a #[0] reply"
-        let blocks = parse_mentions(content: content, tags: []).blocks
+        let blocks = parse_note_content(content: content, tags: []).blocks
         let event_refs = interpret_event_refs(blocks: blocks, tags: [])
         
         XCTAssertEqual(event_refs.count, 0)
     }
     
     func testParseMention() throws {
-        let parsed = parse_mentions(content: "this is #[0] a mention", tags: [["e", "event_id"]]).blocks
+        let parsed = parse_note_content(content: "this is #[0] a mention", tags: [["e", "event_id"]]).blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
@@ -375,7 +375,7 @@ class ReplyTests: XCTestCase {
     }
     
     func testParseInvalidMention() throws {
-        let parsed = parse_mentions(content: "this is #[0] a mention", tags: []).blocks
+        let parsed = parse_note_content(content: "this is #[0] a mention", tags: []).blocks
         
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)

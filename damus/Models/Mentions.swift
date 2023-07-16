@@ -163,7 +163,7 @@ struct Blocks {
     let blocks: [Block]
 }
 
-func parse_mentions(content: String, tags: [[String]]) -> Blocks {
+func parse_note_content(content: String, tags: [[String]]) -> Blocks {
     var out: [Block] = []
     
     var bs = note_blocks()
