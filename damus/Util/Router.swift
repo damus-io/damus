@@ -43,7 +43,7 @@ enum Route: Hashable {
     case FollowersYouKnow(friendedFollowers: [String], followers: FollowersModel)
 
     @ViewBuilder
-    func view(navigationCordinator: NavigationCoordinator, damusState: DamusState) -> some View {
+    func view(navigationCoordinator: NavigationCoordinator, damusState: DamusState) -> some View {
         switch self {
         case .ProfileByKey(let pubkey):
             ProfileView(damus_state: damusState, pubkey: pubkey)
@@ -96,11 +96,11 @@ enum Route: Hashable {
         case .Search(let search):
             SearchView(appstate: damusState, search: search)
         case .EULA:
-            EULAView(nav: navigationCordinator)
+            EULAView(nav: navigationCoordinator)
         case .Login:
-            LoginView(nav: navigationCordinator)
+            LoginView(nav: navigationCoordinator)
         case .CreateAccount:
-            CreateAccountView(nav: navigationCordinator)
+            CreateAccountView(nav: navigationCoordinator)
         case .SaveKeys(let account):
             SaveKeysView(account: account)
         case .Wallet(let walletModel):

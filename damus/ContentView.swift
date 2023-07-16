@@ -285,7 +285,7 @@ struct ContentView: View {
                         SideMenuView(damus_state: damus, isSidebarVisible: $isSideBarOpened.animation())
                     )
                     .navigationDestination(for: Route.self) { route in
-                        route.view(navigationCordinator: navigationCoordinator, damusState: damus_state!)
+                        route.view(navigationCoordinator: navigationCoordinator, damusState: damus_state!)
                     }
                     .onReceive(handle_notify(.switched_timeline)) { _ in
                         navigationCoordinator.popToRoot()
