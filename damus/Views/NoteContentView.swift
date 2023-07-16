@@ -666,3 +666,35 @@ struct NoteContentView_Previews: PreviewProvider {
 }
 
 
+func count_words(_ s: String) -> Int {
+    return s.components(separatedBy: .whitespacesAndNewlines).count
+}
+
+func count_inline_nodes_words(nodes: [InlineNode]) -> Int {
+    return nodes.reduce(0) { words, node in
+        switch node {
+        case .text(let words):
+            return count_words(words)
+        case .emphasis(let children):
+            return words + count_inline_nodes_words(nodes: children)
+        case .strong(let children):
+            return words + count_inline_nodes_words(nodes: children)
+        case .strikethrough(let children):
+            return words + count_inline_nodes_words(nodes: children)
+        case .softBreak, .lineBreak, .code, .html, .image, .link:
+            return words
+        }
+    }
+}
+
+func count_markdown_words(blocks: [BlockNode]) -> Int {
+    return blocks.reduce(0) { words, block in
+        switch block {
+        case .paragraph(let content):
+            return words + count_inline_nodes_words(nodes: content)
+        case .blockquote, .bulletedList, .numberedList, .taskList, .codeBlock, .htmlBlock, .heading, .table, .thematicBreak:
+            return words
+        }
+    }
+}
+
