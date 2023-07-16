@@ -8,7 +8,7 @@
 import XCTest
 @testable import damus
 
-class DamusParseContentTests: XCTestCase {
+class ContentParserTests: XCTestCase {
     
     private let decoder = JSONDecoder()
     
@@ -19,7 +19,18 @@ class DamusParseContentTests: XCTestCase {
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
-    
+
+    func test_url_parsing_with_emoji() throws {
+        let url = "https://media.tenor.com/5MibLt95scAAAAAC/%ED%98%BC%ED%8C%8C%EB%A7%9D-%ED%94%BC%EC%9E%90.gif"
+        let content = "gm 🤙\(url)"
+
+        let blocks = parse_note_content(content: content, tags: []).blocks
+        XCTAssertEqual(blocks.count, 2)
+        XCTAssertEqual(blocks[0], .text("gm 🤙"))
+        XCTAssertEqual(blocks[1], .url(URL(string: url)!))
+    }
+
+
     func test_damus_parse_content_can_parse_mention_without_white_space_at_front() throws {
         var bs = note_blocks()
         bs.num_blocks = 0;
