@@ -221,7 +221,7 @@ enum NIP05ValidationResult {
 }
 
 func validate_nostr_address(nip05: NIP05?, nip05_str: String) -> NIP05ValidationResult {
-    guard let nip05 else {
+    guard nip05 != nil else {
         // couldn't parse
         if nip05_str.isEmpty {
             return .empty
