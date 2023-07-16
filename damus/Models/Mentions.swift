@@ -438,15 +438,14 @@ func parse_mention_type(_ c: String) -> MentionType? {
 }
 
 /// Convert
-func make_post_tags(post_blocks: [Block], tags: [[String]], silent_mentions: Bool) -> PostTags {
+func make_post_tags(post_blocks: [Block], tags: [[String]]) -> PostTags {
     var new_tags = tags
 
     for post_block in post_blocks {
         switch post_block {
         case .mention(let mention):
             let mention_type = mention.type
-
-            if silent_mentions || mention_type == .event {
+            if mention_type == .event {
                 continue
             }
 
@@ -468,7 +467,7 @@ func make_post_tags(post_blocks: [Block], tags: [[String]], silent_mentions: Boo
 func post_to_event(post: NostrPost, privkey: String, pubkey: String) -> NostrEvent {
     let tags = post.references.map(refid_to_tag) + post.tags
     let post_blocks = parse_post_blocks(content: post.content)
-    let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags, silent_mentions: false)
+    let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
     let content = render_blocks(blocks: post_tags.blocks)
     let new_ev = NostrEvent(content: content, pubkey: pubkey, kind: post.kind.rawValue, tags: post_tags.tags)
     new_ev.calculate_id()
