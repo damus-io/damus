@@ -431,8 +431,16 @@ static inline int is_whitespace(char c) {
     return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
 }
 
-static inline int is_boundary(char c) {
+static inline int is_utf8_byte(u8 c) {
+    return c & 0x80;
+}
+
+static inline int is_right_boundary(char c) {
     return is_whitespace(c) || ispunct(c);
+}
+
+static inline int is_left_boundary(char c) {
+    return is_right_boundary(c) || is_utf8_byte(c);
 }
 
 static inline int is_invalid_url_ending(char c) {
@@ -449,7 +457,7 @@ static inline int consume_until_boundary(struct cursor *cur) {
     while (cur->p < cur->end) {
         c = *cur->p;
         
-        if (is_boundary(c))
+        if (is_right_boundary(c))
             return 1;
         
         cur->p++;

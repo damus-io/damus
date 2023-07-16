@@ -231,7 +231,7 @@ int damus_parse_content(struct note_blocks *blocks, const char *content) {
         }
         
         pre_mention = cur.p;
-        if (cp == -1 || is_boundary(cp) || c == '#') {
+        if (cp == -1 || is_left_boundary(cp) || c == '#') {
             if (c == '#' && (parse_mention_index(&cur, &block) || parse_hashtag(&cur, &block))) {
                 if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;
