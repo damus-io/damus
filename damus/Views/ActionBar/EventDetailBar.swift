@@ -14,7 +14,7 @@ struct EventDetailBar: View {
     
     @ObservedObject var bar: ActionBarModel
     
-    init (state: DamusState, target: String, target_pk: String) {
+    init(state: DamusState, target: String, target_pk: String) {
         self.state = state
         self.target = target
         self.target_pk = target_pk

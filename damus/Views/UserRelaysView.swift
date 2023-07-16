@@ -14,7 +14,7 @@ struct UserRelaysView: View {
     @State var relay_state: [(String, Bool)]
     @State private var showAddButton = false
     
-    init (state: DamusState, relays: [String]) {
+    init(state: DamusState, relays: [String]) {
         self.state = state
         self.relays = relays
         let relay_state = UserRelaysView.make_relay_state(pool: state.pool, relays: relays)

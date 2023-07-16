@@ -16,7 +16,7 @@ struct NIP05Badge: View {
     
     @Environment(\.openURL) var openURL
     
-    init (nip05: NIP05, pubkey: String, contacts: Contacts, show_domain: Bool, clickable: Bool) {
+    init(nip05: NIP05, pubkey: String, contacts: Contacts, show_domain: Bool, clickable: Bool) {
         self.nip05 = nip05
         self.pubkey = pubkey
         self.contacts = contacts

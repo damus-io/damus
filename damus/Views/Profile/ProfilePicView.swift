@@ -75,7 +75,7 @@ struct ProfilePicView: View {
     
     @State var picture: String?
     
-    init (pubkey: String, size: CGFloat, highlight: Highlight, profiles: Profiles, disable_animation: Bool, picture: String? = nil) {
+    init(pubkey: String, size: CGFloat, highlight: Highlight, profiles: Profiles, disable_animation: Bool, picture: String? = nil) {
         self.pubkey = pubkey
         self.profiles = profiles
         self.size = size

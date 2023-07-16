@@ -68,7 +68,7 @@ struct BannerImageView: View {
     
     @State var banner: String?
     
-    init (pubkey: String, profiles: Profiles, disable_animation: Bool, banner: String? = nil) {
+    init(pubkey: String, profiles: Profiles, disable_animation: Bool, banner: String? = nil) {
         self.pubkey = pubkey
         self.profiles = profiles
         self._banner = State(initialValue: banner)

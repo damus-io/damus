@@ -18,7 +18,7 @@ class EventCounter {
     var our_events: [String: NostrEvent] = [:]
     var our_pubkey: String
     
-    init (our_pubkey: String) {
+    init(our_pubkey: String) {
         self.our_pubkey = our_pubkey
     }
     

@@ -29,7 +29,7 @@ struct EditMetadataView: View {
     @StateObject var profileUploadObserver = ImageUploadingObserver()
     @StateObject var bannerUploadObserver = ImageUploadingObserver()
     
-    init (damus_state: DamusState) {
+    init(damus_state: DamusState) {
         self.damus_state = damus_state
         let data = damus_state.profiles.lookup(id: damus_state.pubkey)
         self.profile = data

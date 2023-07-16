@@ -13,7 +13,7 @@ struct NostrPost {
     let references: [ReferencedId]
     let tags: [[String]]
     
-    init (content: String, references: [ReferencedId], kind: NostrKind = .text, tags: [[String]] = []) {
+    init(content: String, references: [ReferencedId], kind: NostrKind = .text, tags: [[String]] = []) {
         self.content = content
         self.references = references
         self.kind = kind
