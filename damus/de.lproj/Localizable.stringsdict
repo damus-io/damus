@@ -319,7 +319,7 @@
 			<key>one</key>
 			<string>%2$@ und %1$d weiteres Profil zappten deine Notiz</string>
 			<key>other</key>
-			<string>2$@ und %1$d andere zappten deine Notiz</string>
+			<string>2$@ und %1$d weitere zappten deine Notiz</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
