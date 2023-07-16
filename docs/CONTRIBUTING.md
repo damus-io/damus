@@ -49,13 +49,14 @@ the dedicated `Separate your changes` section because this is very
 important.
 
 When you submit or resubmit a patch or patch series, include the complete
-patch description and justification for it (-v2,v3,vn... option on
-git-send-email).  Don't just say that this is version N of the patch
-(series).  Don't expect the reviewer to refer back to earlier patch
-versions or referenced URLs to find the patch description and put that
-into the patch. I.e., the patch (series) and its description should be
-self-contained. This benefits both the maintainers and reviewers.  Some
-reviewers probably didn't even receive earlier versions of the patch.
+patch description and justification for it. Each new version should use
+the -v2,v3,vN option on git-send-email for each new patch revision. Don't
+just say that this is version N of the patch (series).  Don't expect the
+reviewer to refer back to earlier patch versions or referenced URLs to
+find the patch description and put that into the patch. I.e., the patch
+(series) and its description should be self-contained. This benefits both
+the maintainers and reviewers.  Some reviewers probably didn't even
+receive earlier versions of the patch.
 
 Describe your changes in imperative mood, e.g. "make xyzzy do frotz"
 instead of "[This patch] makes xyzzy do frotz" or "[I] changed xyzzy
