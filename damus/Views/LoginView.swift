@@ -115,6 +115,21 @@ struct LoginView: View {
     }
 }
 
+extension View {
+    func nsecLoginStyle(key: String, title: String) -> some View {
+        self
+            .placeholder(when: key.isEmpty) {
+                Text(title).foregroundColor(.white.opacity(0.6))
+            }
+            .padding(10)
+            .autocapitalization(.none)
+            .autocorrectionDisabled(true)
+            .textInputAutocapitalization(.never)
+            .font(.body.monospaced())
+            .textContentType(.password)
+    }
+}
+
 func parse_key(_ thekey: String) -> ParsedKey? {
     var key = thekey
     if key.count > 0 && key.first! == "@" {
@@ -271,29 +286,13 @@ struct KeyInput: View {
                         self.key.wrappedValue = pastedkey
                     }
                 }
-            if(is_secured) {
-                SecureField("", text: key)
-                    .placeholder(when: key.wrappedValue.isEmpty) {
-                        Text(title).foregroundColor(.white.opacity(0.6))
-                    }
-                    .padding(10)
-                    .autocapitalization(.none)
-                    .autocorrectionDisabled(true)
-                    .textInputAutocapitalization(.never)
-                    .font(.body.monospaced())
-                    .textContentType(.password)
-            } else {
-                TextField("", text: key)
-                    .placeholder(when: key.wrappedValue.isEmpty) {
-                        Text(title).foregroundColor(.white.opacity(0.6))
-                    }
-                    .padding(10)
-                    .autocapitalization(.none)
-                    .autocorrectionDisabled(true)
-                    .textInputAutocapitalization(.never)
-                    .font(.body.monospaced())
-                    .textContentType(.password)
-            }
+            if is_secured  {
+                     SecureField("", text: key)
+                         .nsecLoginStyle(key: key.wrappedValue, title: title)
+                 } else {
+                     TextField("", text: key)
+                         .nsecLoginStyle(key: key.wrappedValue, title: title)
+                 }
             Image(systemName: "eye.slash")
                 .foregroundColor(.gray)
                 .onTapGesture {
