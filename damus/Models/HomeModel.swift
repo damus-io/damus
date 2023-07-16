@@ -305,7 +305,7 @@ class HomeModel {
             boost_ev_id = inner_ev.id
             
             
-            Task.init {
+            Task {
                 guard validate_event(ev: inner_ev) == .ok else {
                     return
                 }

@@ -48,7 +48,7 @@ struct SearchingEventView: View {
                     self.search_state = .found_profile(pk)
                 }
             } else {
-                Task.init {
+                Task {
                     guard let nip05 = NIP05.parse(evid) else {
                         self.search_state = .not_found
                         return

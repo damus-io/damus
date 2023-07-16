@@ -494,7 +494,7 @@ func preload_events(state: DamusState, events: [NostrEvent]) {
         return
     }
     
-    Task.init {
+    Task {
         for plan in plans {
             await preload_event(plan: plan, state: state)
         }

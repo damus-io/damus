@@ -246,7 +246,7 @@ struct PostView: View {
     
     func handle_upload(media: MediaUpload) {
         let uploader = damus_state.settings.default_media_uploader
-        Task.init {
+        Task {
             let img = getImage(media: media)
             print("img size w:\(img.size.width) h:\(img.size.height)")
             async let blurhash = calculate_blurhash(img: img)
