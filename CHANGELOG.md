@@ -1,3 +1,24 @@
+## 1.6 (7): "Less bad" - 2023-07-16
+
+### Added
+
+- Show nostr address username and support abbreviated _ usernames (William Casarin)
+- Re-add nip05 badges to profiles (William Casarin)
+- Add space when tagging users in posts if needed (William Casarin)
+- Added padding under word count on longform account (William Casarin)
+
+
+### Fixed
+
+- Don't spam lnurls when validating zaps (William Casarin)
+- Eliminate nostr address validation bandwidth on startup (William Casarin)
+- Allow user to login to deleted profile (William Casarin)
+- Fix issue where typing cc@bob would produce brokenb ccnostr:bob mention (William Casarin)
+
+
+
+[1.6-7]: https://github.com/damus-io/damus/releases/tag/v1.6-7
+
 ## [1.6-6] - 2023-07-16
 
 ### Added
@@ -1398,5 +1419,4 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
 
