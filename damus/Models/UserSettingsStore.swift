@@ -31,7 +31,7 @@ func setting_get_property_value<T>(key: String, scoped_key: String, default_valu
 func setting_set_property_value<T: Equatable>(scoped_key: String, old_value: T, new_value: T) -> T? {
     guard old_value != new_value else { return nil }
     UserDefaults.standard.set(new_value, forKey: scoped_key)
-    UserSettingsStore.shared!.objectWillChange.send()
+    UserSettingsStore.shared?.objectWillChange.send()
     return new_value
 }
 
