@@ -11,7 +11,7 @@ class Zaps {
     private(set) var zaps: [String: Zapping]
     let our_pubkey: String
     var our_zaps: [String: [Zapping]]
-    
+
     private(set) var event_counts: [String: Int]
     private(set) var event_totals: [String: Int64]
     

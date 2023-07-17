@@ -1390,9 +1390,9 @@ func process_zap_event(damus_state: DamusState, ev: NostrEvent, completion: @esc
         completion(.failed)
         return
     }
-    
+
     Task {
-        guard let zapper = await fetch_zapper_from_lnurl(lnurl) else {
+        guard let zapper = await fetch_zapper_from_lnurl(lnurls: damus_state.lnurls, pubkey: ptag, lnurl: lnurl) else {
             completion(.failed)
             return
         }

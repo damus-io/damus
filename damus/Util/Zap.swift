@@ -412,8 +412,9 @@ func decode_nostr_event_json(_ desc: String) -> NostrEvent? {
     return ev
 }
 
-func fetch_zapper_from_lnurl(_ lnurl: String) async -> String? {
-    guard let endpoint = await fetch_static_payreq(lnurl) else {
+
+func fetch_zapper_from_lnurl(lnurls: LNUrls, pubkey: String, lnurl: String) async -> String? {
+    guard let endpoint = await lnurls.lookup_or_fetch(pubkey: pubkey, lnurl: lnurl) else {
         return nil
     }
     
@@ -442,6 +443,8 @@ func decode_lnurl(_ lnurl: String) -> URL? {
 }
 
 func fetch_static_payreq(_ lnurl: String) async -> LNUrlPayRequest? {
+    print("fetching static payreq \(lnurl)")
+
     guard let url = decode_lnurl(lnurl) else {
         return nil
     }
