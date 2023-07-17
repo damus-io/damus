@@ -97,6 +97,54 @@ struct UserSearch_Previews: PreviewProvider {
     }
 }
 
+/// Pad an attributed string: `@jb55` -> ` @jb55 `
+func pad_attr_string(tag: NSAttributedString, before: Bool = true) -> NSAttributedString {
+    let new_tag = NSMutableAttributedString(string: "")
+    if before {
+        new_tag.append(.init(string: " "))
+    }
+
+    new_tag.append(tag)
+    new_tag.append(.init(string: " "))
+    return new_tag
+}
+
+/// Checks if whitespace precedes a tag. Useful to add spacing if we don't have it.
+func whitespace_precedes_tag(tag: NSAttributedString, post: NSMutableAttributedString, word_range: NSRange) -> Bool {
+    if word_range.location == 0 { // If the range starts at the very beginning of the post, there's nothing preceding it.
+        return true
+    }
+
+    // Range for the character preceding the tag
+    let precedingCharacterRange = NSRange(location: word_range.location - 1, length: 1)
+
+    // Get the preceding character
+    let precedingCharacter = post.attributedSubstring(from: precedingCharacterRange)
+
+    // Check if the preceding character is a whitespace character
+    return precedingCharacter.string.rangeOfCharacter(from: CharacterSet.whitespaces) != nil
+}
+
+struct AppendedTag {
+    let post: NSMutableAttributedString
+    let tag: NSAttributedString
+}
+
+/// Appends a user tag (eg: @jb55) to a post. This handles adding additional padding as well.
+func append_user_tag(tag: NSAttributedString, post: NSMutableAttributedString, word_range: NSRange) -> AppendedTag {
+    let new_post = NSMutableAttributedString(attributedString: post)
+
+    // If we have a non-empty post and the last character is not whitespace, append a space
+    // This prevents issues such as users typing cc@will and have it expand to ccnostr:bech32...
+    let should_prepad = !whitespace_precedes_tag(tag: tag, post: post, word_range: word_range)
+    let tag = pad_attr_string(tag: tag, before: should_prepad)
+
+    new_post.replaceCharacters(in: word_range, with: tag)
+
+    return AppendedTag(post: new_post, tag: tag)
+}
+
+/// Generate a mention attributed string, including the internal damus:nostr: link
 func user_tag_attr_string(profile: Profile?, pubkey: String) -> NSMutableAttributedString {
     let display_name = Profile.displayName(profile: profile, pubkey: pubkey)
     let name = display_name.username.truncate(maxLength: 50)
