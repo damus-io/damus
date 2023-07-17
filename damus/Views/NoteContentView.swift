@@ -215,7 +215,7 @@ struct NoteContentView: View {
             switch self.note_artifacts {
             case .longform(let md):
                 Markdown(md.markdown)
-                    .padding(.horizontal)
+                    .padding([.leading, .trailing, .top])
             case .separated(let separated):
                 MainContent(artifacts: separated)
             }
