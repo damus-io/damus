@@ -623,7 +623,8 @@ func classify_url(_ url: URL) -> UrlType {
         return .media(.image(url))
     }
     
-    if str.hasSuffix(".mp4") || str.hasSuffix(".mov") {
+    if str.hasSuffix(".mp4") || str.hasSuffix(".mov") ||
+        str.hasSuffix(".m3u8") {
         return .media(.video(url))
     }
     
