@@ -224,6 +224,26 @@ class ReplyTests: XCTestCase {
         XCTAssertEqual(new_post.string, "😎 @jb55 ")
     }
 
+    func testComposedMentionNewline() throws {
+        let content = """
+        
+        @jb55
+        """
+
+        let profile = Profile(name: "jb55")
+        let tag = user_tag_attr_string(profile: profile, pubkey: "pk")
+        let appended = append_user_tag(tag: tag, post: .init(string: content), word_range: .init(1...5))
+        let new_post = appended.post
+
+        try new_post.testAttributes(conditions: [
+            { let link = $0[.link] as? String; XCTAssertNil(link) },
+            { let link = $0[.link] as! String; XCTAssertEqual(link, "damus:nostr:pk") },
+            { let link = $0[.link] as? String; XCTAssertNil(link) },
+        ])
+
+        XCTAssertEqual(new_post.string, "\n@jb55 ")
+    }
+
     func testComposedMention() throws {
         let content = "@jb55"
 

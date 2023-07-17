@@ -108,9 +108,9 @@ func pad_attr_string(tag: NSAttributedString, before: Bool = true) -> NSAttribut
 }
 
 /// Checks if whitespace precedes a tag. Useful to add spacing if we don't have it.
-func whitespace_precedes_tag(tag: NSAttributedString, post: NSMutableAttributedString, word_range: NSRange) -> Bool {
+func should_prepad_tag(tag: NSAttributedString, post: NSMutableAttributedString, word_range: NSRange) -> Bool {
     if word_range.location == 0 { // If the range starts at the very beginning of the post, there's nothing preceding it.
-        return true
+        return false
     }
 
     // Range for the character preceding the tag
@@ -119,8 +119,16 @@ func whitespace_precedes_tag(tag: NSAttributedString, post: NSMutableAttributedS
     // Get the preceding character
     let precedingCharacter = post.attributedSubstring(from: precedingCharacterRange)
 
+    guard let char = precedingCharacter.string.first else {
+        return false
+    }
+
+    if char.isNewline {
+        return false
+    }
+
     // Check if the preceding character is a whitespace character
-    return precedingCharacter.string.rangeOfCharacter(from: CharacterSet.whitespaces) != nil
+    return !char.isWhitespace
 }
 
 struct AppendedTag {
@@ -134,7 +142,7 @@ func append_user_tag(tag: NSAttributedString, post: NSMutableAttributedString, w
 
     // If we have a non-empty post and the last character is not whitespace, append a space
     // This prevents issues such as users typing cc@will and have it expand to ccnostr:bech32...
-    let should_prepad = !whitespace_precedes_tag(tag: tag, post: post, word_range: word_range)
+    let should_prepad = should_prepad_tag(tag: tag, post: post, word_range: word_range)
     let tag = pad_attr_string(tag: tag, before: should_prepad)
 
     new_post.replaceCharacters(in: word_range, with: tag)
