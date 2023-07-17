@@ -189,6 +189,7 @@
 		4C987B57283FD07F0042CE38 /* FollowersModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C987B56283FD07F0042CE38 /* FollowersModel.swift */; };
 		4C9AA14A2A4587A6003F49FD /* NotificationStatusModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9AA1492A4587A6003F49FD /* NotificationStatusModel.swift */; };
 		4C9B0DEE2A65A75F00CBDA21 /* AttrStringTestExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9B0DED2A65A75F00CBDA21 /* AttrStringTestExtensions.swift */; };
+		4C9B0DF32A65C46800CBDA21 /* ProfileEditButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9B0DF22A65C46800CBDA21 /* ProfileEditButton.swift */; };
 		4C9BB83129C0ED4F00FC4E37 /* DisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9BB83029C0ED4F00FC4E37 /* DisplayName.swift */; };
 		4C9BB83429C12D9900FC4E37 /* EventProfileName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9BB83329C12D9900FC4E37 /* EventProfileName.swift */; };
 		4C9F18E229AA9B6C008C55EC /* CustomizeZapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */; };
@@ -666,6 +667,7 @@
 		4C987B56283FD07F0042CE38 /* FollowersModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowersModel.swift; sourceTree = "<group>"; };
 		4C9AA1492A4587A6003F49FD /* NotificationStatusModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationStatusModel.swift; sourceTree = "<group>"; };
 		4C9B0DED2A65A75F00CBDA21 /* AttrStringTestExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttrStringTestExtensions.swift; sourceTree = "<group>"; };
+		4C9B0DF22A65C46800CBDA21 /* ProfileEditButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditButton.swift; sourceTree = "<group>"; };
 		4C9BB83029C0ED4F00FC4E37 /* DisplayName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayName.swift; sourceTree = "<group>"; };
 		4C9BB83329C12D9900FC4E37 /* EventProfileName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventProfileName.swift; sourceTree = "<group>"; };
 		4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomizeZapView.swift; sourceTree = "<group>"; };
@@ -1376,6 +1378,7 @@
 				4C9BB83329C12D9900FC4E37 /* EventProfileName.swift */,
 				4C8D1A6B29F1DFC200ACDF75 /* FriendIcon.swift */,
 				3A4647CE2A413ADC00386AD8 /* CondensedProfilePicturesView.swift */,
+				4C9B0DF22A65C46800CBDA21 /* ProfileEditButton.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -2128,6 +2131,7 @@
 				4C9AA14A2A4587A6003F49FD /* NotificationStatusModel.swift in Sources */,
 				4CB9D4A72992D02B00A9A7E4 /* ProfileNameView.swift in Sources */,
 				4CE4F0F429D779B5005914DB /* PostBox.swift in Sources */,
+				4C9B0DF32A65C46800CBDA21 /* ProfileEditButton.swift in Sources */,
 				4C2859622A12A7F0004746F7 /* GoldSupportGradient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

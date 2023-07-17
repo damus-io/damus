@@ -56,37 +56,6 @@ func followedByString(_ friend_intersection: [String], profiles: Profiles, local
     }
 }
 
-struct EditButton: View {
-    let damus_state: DamusState
-
-    @Environment(\.colorScheme) var colorScheme
-
-    var body: some View {
-        NavigationLink(value: Route.EditMetadata) {
-            Text("Edit", comment: "Button to edit user's profile.")
-                .frame(height: 30)
-                .padding(.horizontal,25)
-                .font(.caption.weight(.bold))
-                .foregroundColor(fillColor())
-                .cornerRadius(24)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 24)
-                        .stroke(borderColor(), lineWidth: 1)
-                }
-                .minimumScaleFactor(0.5)
-                .lineLimit(1)
-        }
-    }
-
-    func fillColor() -> Color {
-        colorScheme == .light ? DamusColors.black : DamusColors.white
-    }
-
-    func borderColor() -> Color {
-        colorScheme == .light ? DamusColors.black : DamusColors.white
-    }
-}
-
 struct VisualEffectView: UIViewRepresentable {
     var effect: UIVisualEffect?
 
@@ -308,7 +277,7 @@ struct ProfileView: View {
                 )
             } else if damus_state.keypair.privkey != nil {
                 NavigationLink(value: Route.EditMetadata) {
-                    EditButton(damus_state: damus_state)
+                    ProfileEditButton(damus_state: damus_state)
                 }
             }
 
