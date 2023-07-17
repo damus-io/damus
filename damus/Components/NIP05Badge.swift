@@ -12,16 +12,14 @@ struct NIP05Badge: View {
     let pubkey: String
     let contacts: Contacts
     let show_domain: Bool
-    let clickable: Bool
     
     @Environment(\.openURL) var openURL
     
-    init(nip05: NIP05, pubkey: String, contacts: Contacts, show_domain: Bool, clickable: Bool) {
+    init(nip05: NIP05, pubkey: String, contacts: Contacts, show_domain: Bool) {
         self.nip05 = nip05
         self.pubkey = pubkey
         self.contacts = contacts
         self.show_domain = show_domain
-        self.clickable = clickable
     }
     
     var nip05_color: Bool {
@@ -54,23 +52,16 @@ struct NIP05Badge: View {
 
     var body: some View {
         HStack(spacing: 2) {
-
-
             Seal
 
             if show_domain {
-                if clickable {
-                    Text(nip05_string)
-                        .nip05_colorized(gradient: nip05_color)
-                        .onTapGesture {
-                            if let nip5url = nip05.siteUrl {
-                                openURL(nip5url)
-                            }
+                Text(nip05_string)
+                    .nip05_colorized(gradient: nip05_color)
+                    .onTapGesture {
+                        if let nip5url = nip05.siteUrl {
+                            openURL(nip5url)
                         }
-                } else {
-                    Text(nip05_string)
-                        .foregroundColor(.gray)
-                }
+                    }
             }
         }
 
@@ -96,13 +87,13 @@ struct NIP05Badge_Previews: PreviewProvider {
     static var previews: some View {
         let test_state = test_damus_state()
         VStack {
-            NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true, clickable: true)
+            NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true)
 
-            NIP05Badge(nip05: NIP05(username: "_", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true, clickable: true)
+            NIP05Badge(nip05: NIP05(username: "_", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true)
 
-            NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true, clickable: false)
+            NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true)
 
-            NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: Contacts(our_pubkey: "sdkfjsdf"), show_domain: true, clickable: false)
+            NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: Contacts(our_pubkey: "sdkfjsdf"), show_domain: true)
         }
     }
 }
