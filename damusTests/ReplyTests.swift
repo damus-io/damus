@@ -114,7 +114,7 @@ class ReplyTests: XCTestCase {
         let tags: [[String]] = []
         let blocks = parse_note_content(content: content, tags: tags).blocks
         let post_blocks = parse_post_blocks(content: content)
-        let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags, silent_mentions: false)
+        let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
         let event_refs = interpret_event_refs(blocks: blocks, tags: tags)
         
         XCTAssertEqual(event_refs.count, 0)
