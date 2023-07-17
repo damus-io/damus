@@ -84,12 +84,10 @@ struct ProfileName: View {
             Text(verbatim: "\(prefix)\(name_choice)")
                 .font(.body)
                 .fontWeight(prefix == "@" ? .none : .bold)
-            /*
             if let nip05 = current_nip05 {
                 NIP05Badge(nip05: nip05, pubkey: pubkey, contacts: damus_state.contacts, show_domain: show_nip5_domain, clickable: true)
             }
-             */
-            if let friend = friend_type {
+            if let friend = friend_type, current_nip05 == nil {
                 FriendIcon(friend: friend)
             }
             if onlyzapper {
