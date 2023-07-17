@@ -36,7 +36,6 @@ struct UserSearch: View {
         }
 
         let user_tag = user_tag_attr_string(profile: user.profile, pubkey: pk)
-        user_tag.append(.init(string: " "))
 
         appendUserTag(withTag: user_tag)
     }
@@ -44,15 +43,14 @@ struct UserSearch: View {
     private func appendUserTag(withTag tag: NSMutableAttributedString) {
         guard let wordRange = focusWordAttributes.1 else { return }
 
-        let new_post = NSMutableAttributedString(attributedString: post)
-        new_post.replaceCharacters(in: wordRange, with: tag)
+        let appended = append_user_tag(tag: tag, post: post, word_range: wordRange)
+        self.post = appended.post
 
-        /// adjust cursor position appropriately: ('diff' used in TextViewWrapper / updateUIView after below update of 'post')
-        tagModel.diff = tag.length - wordRange.length
+        // adjust cursor position appropriately: ('diff' used in TextViewWrapper / updateUIView after below update of 'post')
+        tagModel.diff = appended.tag.length - wordRange.length
 
-        post = new_post
         focusWordAttributes = (nil, nil)
-        newCursorIndex = wordRange.location + tag.string.count
+        newCursorIndex = wordRange.location + appended.tag.string.count
     }
 
     var body: some View {
