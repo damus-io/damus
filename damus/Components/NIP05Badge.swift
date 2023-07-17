@@ -43,14 +43,24 @@ struct NIP05Badge: View {
             }
         }
     }
-    
+
+    var nip05_string: String {
+        if nip05.username == "_" {
+            return nip05.host
+        } else {
+            return "\(nip05.username)@\(nip05.host)"
+        }
+    }
+
     var body: some View {
         HStack(spacing: 2) {
+
+
             Seal
-            
+
             if show_domain {
                 if clickable {
-                    Text(nip05.host)
+                    Text(nip05_string)
                         .nip05_colorized(gradient: nip05_color)
                         .onTapGesture {
                             if let nip5url = nip05.siteUrl {
@@ -58,7 +68,7 @@ struct NIP05Badge: View {
                             }
                         }
                 } else {
-                    Text(nip05.host)
+                    Text(nip05_string)
                         .foregroundColor(.gray)
                 }
             }
@@ -86,6 +96,10 @@ struct NIP05Badge_Previews: PreviewProvider {
     static var previews: some View {
         let test_state = test_damus_state()
         VStack {
+            NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true, clickable: true)
+
+            NIP05Badge(nip05: NIP05(username: "_", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true, clickable: true)
+
             NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true, clickable: false)
 
             NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: Contacts(our_pubkey: "sdkfjsdf"), show_domain: true, clickable: false)
