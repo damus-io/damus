@@ -51,6 +51,7 @@ struct DamusVideoPlayer: View {
 
             ZStack(alignment: .bottomTrailing) {
                 VideoPlayer(url: url, model: model)
+                    .aspectRatio(model.size.map { $0.width / $0.height } ?? 1, contentMode: .fill)
                 if model.has_audio == true {
                     MuteIcon
                         .zIndex(11.0)
@@ -59,6 +60,7 @@ struct DamusVideoPlayer: View {
                         }
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             .onChange(of: model.size) { size in
                 guard let size else {
                     return
@@ -75,7 +77,7 @@ struct DamusVideoPlayer: View {
     }
 }
 struct DamusVideoPlayer_Previews: PreviewProvider {
-    @StateObject static var model: VideoPlayerModel = VideoPlayerModel()
+    @StateObject static var model: VideoPlayerModel = VideoPlayerModel(url: URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!)
     
     static var previews: some View {
         DamusVideoPlayer(url: URL(string: "http://cdn.jb55.com/s/zaps-build.mp4")!, model: model, video_size: .constant(nil))
