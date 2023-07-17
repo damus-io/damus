@@ -137,8 +137,7 @@ class ReplyTests: XCTestCase {
             return
         }
 
-        let profile = Profile(name: "jb55", display_name: "Will", about: nil, picture: nil, banner: nil, website: nil, lud06: nil, lud16: nil, nip05: nil, damus_donation: nil)
-
+        let profile = Profile(name: "jb55")
         let post = user_tag_attr_string(profile: profile, pubkey: pk)
         post.append(.init(string: "\n"))
         post.append(user_tag_attr_string(profile: profile, pubkey: pk))
@@ -190,7 +189,74 @@ class ReplyTests: XCTestCase {
         XCTAssertEqual(r.is_thread_id!.ref_id, "thread_id")
         XCTAssertNil(r.is_mention)
     }
-    
+
+    func testAdjacentComposedMention() throws {
+        let content = "cc@jb55"
+
+        let profile = Profile(name: "jb55")
+        let tag = user_tag_attr_string(profile: profile, pubkey: "pk")
+        let appended = append_user_tag(tag: tag, post: .init(string: content), word_range: .init(2...6))
+        let new_post = appended.post
+
+        try new_post.testAttributes(conditions: [
+            { let link = $0[.link] as? String; XCTAssertNil(link) },
+            { let link = $0[.link] as! String; XCTAssertEqual(link, "damus:nostr:pk") },
+            { let link = $0[.link] as? String; XCTAssertNil(link) }
+        ])
+
+        XCTAssertEqual(new_post.string, "cc @jb55 ")
+    }
+
+    func testAdjacentEmojiComposedMention() throws {
+        let content = "😎@jb55"
+
+        let profile = Profile(name: "jb55")
+        let tag = user_tag_attr_string(profile: profile, pubkey: "pk")
+        let appended = append_user_tag(tag: tag, post: .init(string: content), word_range: .init(2...6))
+        let new_post = appended.post
+
+        try new_post.testAttributes(conditions: [
+            { let link = $0[.link] as? String; XCTAssertNil(link) },
+            { let link = $0[.link] as! String; XCTAssertEqual(link, "damus:nostr:pk") },
+            { let link = $0[.link] as? String; XCTAssertNil(link) }
+        ])
+
+        XCTAssertEqual(new_post.string, "😎 @jb55 ")
+    }
+
+    func testComposedMention() throws {
+        let content = "@jb55"
+
+        let profile = Profile(name: "jb55")
+        let tag = user_tag_attr_string(profile: profile, pubkey: "pk")
+        let appended = append_user_tag(tag: tag, post: .init(string: content), word_range: .init(0...4))
+        let new_post = appended.post
+
+        try new_post.testAttributes(conditions: [
+            { let link = $0[.link] as! String; XCTAssertEqual(link, "damus:nostr:pk") },
+            { let link = $0[.link] as? String; XCTAssertNil(link) },
+        ])
+
+        XCTAssertEqual(new_post.string, "@jb55 ")
+    }
+
+    func testAdjacentSpaceComposedMention() throws {
+        let content = "cc @jb55"
+
+        let profile = Profile(name: "jb55")
+        let tag = user_tag_attr_string(profile: profile, pubkey: "pk")
+        let appended = append_user_tag(tag: tag, post: .init(string: content), word_range: .init(3...7))
+        let new_post = appended.post
+
+        try new_post.testAttributes(conditions: [
+            { let link = $0[.link] as? String; XCTAssertNil(link) },
+            { let link = $0[.link] as! String; XCTAssertEqual(link, "damus:nostr:pk") },
+            { let link = $0[.link] as? String; XCTAssertNil(link) }
+        ])
+
+        XCTAssertEqual(new_post.string, "cc @jb55 ")
+    }
+
     func testNoReply() throws {
         let content = "this is a #[0] reply"
         let blocks = parse_note_content(content: content, tags: []).blocks
