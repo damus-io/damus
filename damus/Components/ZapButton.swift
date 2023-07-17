@@ -183,90 +183,74 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
     UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
     damus_state.add_zap(zap: .pending(pending_zap))
     
-    Task {
-        var mpayreq = damus_state.lnurls.lookup(target.pubkey)
-        if mpayreq == nil {
-            mpayreq = await fetch_static_payreq(lnurl)
-        }
-        
-        guard let payreq = mpayreq else {
+    Task { @MainActor in
+        guard let payreq = await damus_state.lnurls.lookup_or_fetch(pubkey: target.pubkey, lnurl: lnurl) else {
             // TODO: show error
-            DispatchQueue.main.async {
-                remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
-                let typ = ZappingEventType.failed(.bad_lnurl)
-                let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
-                notify(.zapping, ev)
-            }
+            remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
+            let typ = ZappingEventType.failed(.bad_lnurl)
+            let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
+            notify(.zapping, ev)
             return
         }
-        
-        DispatchQueue.main.async {
-            damus_state.lnurls.endpoints[target.pubkey] = payreq
-        }
-        
+
         guard let inv = await fetch_zap_invoice(payreq, zapreq: zapreq, msats: amount_msat, zap_type: zap_type, comment: comment) else {
-            DispatchQueue.main.async {
-                remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
-                let typ = ZappingEventType.failed(.fetching_invoice)
-                let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
-                notify(.zapping, ev)
-            }
+            remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
+            let typ = ZappingEventType.failed(.fetching_invoice)
+            let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
+            notify(.zapping, ev)
             return
         }
-        
-        DispatchQueue.main.async {
-            
-            switch pending_zap_state {
-            case .nwc(let nwc_state):
-                // don't both continuing, user has canceled
-                if case .cancel_fetching_invoice = nwc_state.state {
-                    remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
-                    let typ = ZappingEventType.failed(.canceled)
-                    let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
-                    notify(.zapping, ev)
-                    return
-                }
-                
-                var flusher: OnFlush? = nil
-                
-                // donations are only enabled on one-tap zaps and off appstore
-                if !damus_state.settings.nozaps && !is_custom && damus_state.settings.donation_percent > 0 {
-                    flusher = .once({ pe in
-                        // send donation zap when the pending zap is flushed, this allows user to cancel and not send a donation
-                        Task { @MainActor in
-                            await send_donation_zap(pool: damus_state.pool, postbox: damus_state.postbox, nwc: nwc_state.url, percent: damus_state.settings.donation_percent, base_msats: amount_msat)
-                        }
-                    })
-                }
-                
-                // we don't have a delay on one-tap nozaps (since this will be from customize zap view)
-                let delay = damus_state.settings.nozaps ? nil : 5.0
-                
-                let nwc_req = nwc_pay(url: nwc_state.url, pool: damus_state.pool, post: damus_state.postbox, invoice: inv, delay: delay, on_flush: flusher)
-                
-                guard let nwc_req, case .nwc(let pzap_state) = pending_zap_state else {
-                    print("nwc: failed to send nwc request for zapreq \(reqid.reqid)")
 
-                    let typ = ZappingEventType.failed(.send_failed)
-                    let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
-                    notify(.zapping, ev)
-                    return
-                }
-                
-                print("nwc: sending request \(nwc_req.id) zap_req_id \(reqid.reqid)")
-                
-                if pzap_state.update_state(state: .postbox_pending(nwc_req)) {
-                    // we don't need to trigger a ZapsDataModel update here
-                }
-
-                let ev = ZappingEvent(is_custom: is_custom, type: .sent_from_nwc, target: target)
+        switch pending_zap_state {
+        case .nwc(let nwc_state):
+            // don't both continuing, user has canceled
+            if case .cancel_fetching_invoice = nwc_state.state {
+                remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
+                let typ = ZappingEventType.failed(.canceled)
+                let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
                 notify(.zapping, ev)
-
-            case .external(let pending_ext):
-                pending_ext.state = .done
-                let ev = ZappingEvent(is_custom: is_custom, type: .got_zap_invoice(inv), target: target)
-                notify(.zapping, ev)
+                return
             }
+
+            var flusher: OnFlush? = nil
+
+            // donations are only enabled on one-tap zaps and off appstore
+            if !damus_state.settings.nozaps && !is_custom && damus_state.settings.donation_percent > 0 {
+                flusher = .once({ pe in
+                    // send donation zap when the pending zap is flushed, this allows user to cancel and not send a donation
+                    Task { @MainActor in
+                        await send_donation_zap(pool: damus_state.pool, postbox: damus_state.postbox, nwc: nwc_state.url, percent: damus_state.settings.donation_percent, base_msats: amount_msat)
+                    }
+                })
+            }
+
+            // we don't have a delay on one-tap nozaps (since this will be from customize zap view)
+            let delay = damus_state.settings.nozaps ? nil : 5.0
+
+            let nwc_req = nwc_pay(url: nwc_state.url, pool: damus_state.pool, post: damus_state.postbox, invoice: inv, delay: delay, on_flush: flusher)
+
+            guard let nwc_req, case .nwc(let pzap_state) = pending_zap_state else {
+                print("nwc: failed to send nwc request for zapreq \(reqid.reqid)")
+
+                let typ = ZappingEventType.failed(.send_failed)
+                let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
+                notify(.zapping, ev)
+                return
+            }
+
+            print("nwc: sending request \(nwc_req.id) zap_req_id \(reqid.reqid)")
+
+            if pzap_state.update_state(state: .postbox_pending(nwc_req)) {
+                // we don't need to trigger a ZapsDataModel update here
+            }
+
+            let ev = ZappingEvent(is_custom: is_custom, type: .sent_from_nwc, target: target)
+            notify(.zapping, ev)
+
+        case .external(let pending_ext):
+            pending_ext.state = .done
+            let ev = ZappingEvent(is_custom: is_custom, type: .got_zap_invoice(inv), target: target)
+            notify(.zapping, ev)
         }
     }
     
