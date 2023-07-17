@@ -40,6 +40,12 @@ class Profiles {
         }
     }
 
+    func invalidate_nip05(_ pk: String) {
+        validated_queue.async(flags: .barrier) {
+            self.validated.removeValue(forKey: pk)
+        }
+    }
+
     func set_validated(_ pk: String, nip05: NIP05?) {
         validated_queue.async(flags: .barrier) {
             self.validated[pk] = nip05

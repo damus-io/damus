@@ -794,25 +794,14 @@ func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: P
         }
     }
 
+    if old_nip05 != profile.nip05 {
+        // if it's been validated before, invalidate it now
+        profiles.invalidate_nip05(ev.pubkey)
+    }
+
     let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at, event: ev)
     profiles.add(id: ev.pubkey, profile: tprof)
-    
-    if let nip05 = profile.nip05, old_nip05 != profile.nip05 {
-        
-        Task.detached(priority: .background) {
-            let validated = await validate_nip05(pubkey: ev.pubkey, nip05_str: nip05)
-            if validated != nil {
-                print("validated nip05 for '\(nip05)'")
-            }
-            
-            Task { @MainActor in
-                profiles.set_validated(ev.pubkey, nip05: validated)
-                profiles.nip05_pubkey[nip05] = ev.pubkey
-                notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
-            }
-        }
-    }
-    
+
     // load pfps asap
     
     var changed = false

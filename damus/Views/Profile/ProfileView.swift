@@ -457,6 +457,7 @@ struct ProfileView: View {
                 dismiss()
             }
             .onAppear() {
+                check_nip05_validity(pubkey: self.profile.pubkey, profiles: self.damus_state.profiles)
                 profile.subscribe()
                 //followers.subscribe()
             }
@@ -563,5 +564,27 @@ extension View {
         self.symbolRenderingMode(.palette)
             .font(.system(size: 32).weight(.thin))
             .foregroundStyle(scheme == .dark ? .white : .black, scheme == .dark ? .white : .black)
+    }
+}
+
+func check_nip05_validity(pubkey: String, profiles: Profiles) {
+    guard let profile = profiles.lookup(id: pubkey),
+          let nip05 = profile.nip05,
+          profiles.is_validated(pubkey) == nil
+    else {
+        return
+    }
+
+    Task.detached(priority: .background) {
+        let validated = await validate_nip05(pubkey: pubkey, nip05_str: nip05)
+        if validated != nil {
+            print("validated nip05 for '\(nip05)'")
+        }
+
+        Task { @MainActor in
+            profiles.set_validated(pubkey, nip05: validated)
+            profiles.nip05_pubkey[nip05] = pubkey
+            notify(.profile_updated, ProfileUpdate(pubkey: pubkey, profile: profile))
+        }
     }
 }

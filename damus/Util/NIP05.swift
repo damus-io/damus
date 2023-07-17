@@ -37,7 +37,8 @@ func fetch_nip05(nip05: NIP05) async -> NIP05Response? {
     guard let url = nip05.url else {
         return nil
     }
-    
+
+    print("fetching nip05 \(url.absoluteString)")
     guard let ret = try? await URLSession.shared.data(from: url) else {
         return nil
     }
