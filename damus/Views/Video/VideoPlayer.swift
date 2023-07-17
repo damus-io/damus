@@ -41,6 +41,7 @@ enum VideoHandler {
     
 @MainActor
 public class VideoPlayerModel: ObservableObject {
+    @Published var player: AVPlayer
     @Published var autoReplay: Bool = true
     @Published var muted: Bool = true
     @Published var play: Bool = true
@@ -52,7 +53,22 @@ public class VideoPlayerModel: ObservableObject {
     
     var handlers: [VideoHandler] = []
     
-    init() {
+    private var playerItemContext = 0
+    private var playerStatusObservation: NSKeyValueObservation?
+
+    init(url: URL) {
+        let playerItem = AVPlayerItem(url: url)
+        self.player = AVPlayer(playerItem: playerItem)
+
+        playerStatusObservation = playerItem.observe(\.status, options: .new) { [weak self] item, change in
+            if item.status == .readyToPlay {
+                if let strongSelf = self {
+                    Task {
+                        await strongSelf.updateAssetInfo()
+                    }
+                }
+            }
+        }
     }
     
     func stop() {
@@ -114,6 +130,31 @@ public class VideoPlayerModel: ObservableObject {
         self.handlers.append(.onStateChanged(handler))
         return self
     }
+
+    func updateAssetInfo() async {
+        guard let playerItem = player.currentItem else { return }
+
+        do {
+            let _ = try await playerItem.asset.load(.availableMediaCharacteristicsWithMediaSelectionOptions)
+            let tracks = try await playerItem.asset.load(.tracks)
+            let videoTracks = tracks.filter { $0.mediaType == .video }
+
+            guard let videoTrack = videoTracks.first else { return }
+            let naturalSize = try await videoTrack.load(.naturalSize)
+            let preferredTransform = try await videoTrack.load(.preferredTransform)
+
+            let size = naturalSize.applying(preferredTransform)
+            DispatchQueue.main.async {
+                self.size = CGSize(width: abs(size.width), height: abs(size.height))
+            }
+        } catch {
+            print("Failed to load asset properties: \(error)")
+        }
+    }
+
+    deinit {
+        playerStatusObservation?.invalidate()
+    }
 }
 
 @available(iOS 13, *)
@@ -167,15 +208,43 @@ public extension VideoPlayer {
 }
 
 func get_video_size(player: AVPlayer) async -> CGSize? {
-    let res = Task.detached(priority: .background) {
-        return player.currentImage?.size
+    guard let asset = player.currentItem?.asset else {
+        return nil
     }
-    return await res.value
+
+    let tracks = try? await asset.load(.tracks)
+    let videoTracks = tracks?.filter({ $0.mediaType == .video })
+
+    guard let videoTrack = videoTracks?.first else {
+        // Return default size with 16:9 aspect ratio
+        return CGSize(width: 1280, height: 720)
+    }
+
+    let naturalSize = try? await videoTrack.load(.naturalSize)
+    let preferredTransform = try? await videoTrack.load(.preferredTransform)
+
+    if let size = naturalSize, let transform = preferredTransform {
+        let adjustedSize = size.applying(transform)
+        // Return absolute values to avoid negative size
+        return CGSize(width: abs(adjustedSize.width), height: abs(adjustedSize.height))
+    }
+
+    // Return default size with 16:9 aspect ratio
+    return CGSize(width: 1280, height: 720)
 }
 
 func video_has_audio(player: AVPlayer) async -> Bool {
-    let tracks = try? await player.currentItem?.asset.load(.tracks)
-    return tracks?.filter({ t in t.mediaType == .audio }).first != nil
+    guard let asset = player.currentItem?.asset else {
+        return false
+    }
+
+    // Force return true for HLS streams
+    if let urlAsset = asset as? AVURLAsset, urlAsset.url.absoluteString.lowercased().hasSuffix(".m3u8") {
+        return true
+    }
+
+    let audioTracks = try? await asset.loadTracks(withMediaType: .audio)
+    return audioTracks?.isEmpty == false
 }
 
 @available(iOS 13, *)
@@ -262,6 +331,7 @@ extension VideoPlayer: UIViewRepresentable {
         
         uiView.isMuted = model.muted
         uiView.isAutoReplay = model.autoReplay
+        uiView.contentMode = model.contentMode
         
         if let observerTime = context.coordinator.observerTime, let modelTime = model.time,
            modelTime != observerTime && modelTime.isValid && modelTime.isNumeric {
