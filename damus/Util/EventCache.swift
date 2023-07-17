@@ -223,7 +223,7 @@ class EventCache {
             return model
         }
         
-        let model = VideoPlayerModel()
+        let model = VideoPlayerModel(url: url)
         video_meta[url.absoluteString] = model
         return model
     }
