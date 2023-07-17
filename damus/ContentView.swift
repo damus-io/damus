@@ -81,7 +81,6 @@ struct ContentView: View {
     @State var active_sheet: Sheets? = nil
     @State var damus_state: DamusState? = nil
     @SceneStorage("ContentView.selected_timeline") var selected_timeline: Timeline = .home
-    @State var is_deleted_account: Bool = false
     @State var muting: String? = nil
     @State var confirm_mute: Bool = false
     @State var user_muted_confirm: Bool = false
@@ -349,9 +348,6 @@ struct ContentView: View {
         .onReceive(timer) { n in
             self.damus_state?.postbox.try_flushing_events()
         }
-        .onReceive(handle_notify(.deleted_account)) { notif in
-            self.is_deleted_account = true
-        }
         .onReceive(handle_notify(.report)) { notif in
             let target = notif.object as! ReportTarget
             self.active_sheet = .report(target)
@@ -511,12 +507,6 @@ struct ContentView: View {
             profile.reactions = !hide
             let profile_ev = make_metadata_event(keypair: keypair, metadata: profile)
             damus_state.postbox.send(profile_ev)
-        }
-        .alert(NSLocalizedString("Deleted Account", comment: "Alert message to indicate this is a deleted account"), isPresented: $is_deleted_account) {
-            Button(NSLocalizedString("Logout", comment: "Button to close the alert that informs that the current account has been deleted.")) {
-                is_deleted_account = false
-                notify(.logout, ())
-            }
         }
         .alert(NSLocalizedString("User muted", comment: "Alert message to indicate the user has been muted"), isPresented: $user_muted_confirm, actions: {
             Button(NSLocalizedString("Thanks!", comment: "Button to close out of alert that informs that the action to muted a user was successful.")) {

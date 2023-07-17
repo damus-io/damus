@@ -783,11 +783,6 @@ func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
 }
 
 func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: Profile, ev: NostrEvent) {
-    if our_pubkey == ev.pubkey && (profile.deleted ?? false) {
-        notify(.deleted_account, ())
-        return
-    }
-
     var old_nip05: String? = nil
     let mprof = profiles.lookup_with_timestamp(id: ev.pubkey)
 
