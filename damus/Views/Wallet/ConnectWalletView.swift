@@ -30,7 +30,7 @@ struct ConnectWalletView: View {
                     self.model.new(url)
                     
                 case .failed:
-                    error = "Invalid nostr wallet connection string"
+                    error = NSLocalizedString("Invalid Nostr wallet connection string", comment: "Error message when an invalid Nostr wallet connection string is provided.")
                 
                 case .scanning:
                     error = nil
