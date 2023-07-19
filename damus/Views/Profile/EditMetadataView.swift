@@ -158,7 +158,7 @@ struct EditMetadataView: View {
                 }
                                 
                 Section(content: {
-                    TextField(NSLocalizedString("jb55@jb55.com", comment: "Placeholder example text for identifier used for nostr addresses."), text: $nip05)
+                    TextField(NSLocalizedString("jb55@jb55.com", comment: "Placeholder example text for identifier used for Nostr addresses."), text: $nip05)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                         .onReceive(Just(nip05)) { newValue in
@@ -174,7 +174,7 @@ struct EditMetadataView: View {
                     case .valid:
                         Text("")
                     case .invalid:
-                        Text("'\(nip05)' is an invalid nostr address. It should look like an email address.", comment: "Description of why the nostr address is invalid.")
+                        Text("'\(nip05)' is an invalid Nostr address. It should look like an email address.", comment: "Description of why the Nostr address is invalid.")
                     }
                 })
 

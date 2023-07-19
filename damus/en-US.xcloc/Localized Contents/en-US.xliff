@@ -89,15 +89,10 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>%lld/%lld</target>
         <note>Fraction of how many of the user's relay servers that are operational.</note>
       </trans-unit>
-      <trans-unit id="'%@' at '%@' will be used for verification" xml:space="preserve">
-        <source>'%@' at '%@' will be used for verification</source>
-        <target>'%@' at '%@' will be used for verification</target>
-        <note>Description of how the nip05 identifier would be used for verification.</note>
-      </trans-unit>
-      <trans-unit id="'%@' is an invalid NIP-05 identifier. It should look like an email." xml:space="preserve">
-        <source>'%@' is an invalid NIP-05 identifier. It should look like an email.</source>
-        <target>'%@' is an invalid NIP-05 identifier. It should look like an email.</target>
-        <note>Description of why the nip05 identifier is invalid.</note>
+      <trans-unit id="'%@' is an invalid Nostr address. It should look like an email address." xml:space="preserve">
+        <source>'%@' is an invalid Nostr address. It should look like an email address.</source>
+        <target>'%@' is an invalid Nostr address. It should look like an email address.</target>
+        <note>Description of why the Nostr address is invalid.</note>
       </trans-unit>
       <trans-unit id="API Key (optional)" xml:space="preserve">
         <source>API Key (optional)</source>
@@ -482,11 +477,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Delete Account</target>
         <note>Button to delete the user's account.</note>
       </trans-unit>
-      <trans-unit id="Deleted Account" xml:space="preserve">
-        <source>Deleted Account</source>
-        <target>Deleted Account</target>
-        <note>Alert message to indicate this is a deleted account</note>
-      </trans-unit>
       <trans-unit id="Description" xml:space="preserve">
         <source>Description</source>
         <target>Description</target>
@@ -708,6 +698,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Impersonation</target>
         <note>Description of report type for impersonation.</note>
       </trans-unit>
+      <trans-unit id="Invalid Nostr wallet connection string" xml:space="preserve">
+        <source>Invalid Nostr wallet connection string</source>
+        <target>Invalid Nostr wallet connection string</target>
+        <note>Error message when an invalid Nostr wallet connection string is provided.</note>
+      </trans-unit>
       <trans-unit id="Invalid Tip Address" xml:space="preserve">
         <source>Invalid Tip Address</source>
         <target>Invalid Tip Address</target>
@@ -803,8 +798,7 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Logout</source>
         <target>Logout</target>
         <note>Alert for logging out the user.
-   Button for logging out the user.
-   Button to close the alert that informs that the current account has been deleted.</note>
+   Button for logging out the user.</note>
       </trans-unit>
       <trans-unit id="Looking for %@..." xml:space="preserve">
         <source>Looking for %@...</source>
@@ -867,11 +861,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Muted Users</target>
         <note>Navigation title of view to see list of muted users.</note>
       </trans-unit>
-      <trans-unit id="NIP-05 Verification" xml:space="preserve">
-        <source>NIP-05 Verification</source>
-        <target>NIP-05 Verification</target>
-        <note>Label for NIP-05 Verification section of user profile form.</note>
-      </trans-unit>
       <trans-unit id="New encrypted direct message" xml:space="preserve">
         <source>New encrypted direct message</source>
         <target>New encrypted direct message</target>
@@ -916,6 +905,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>None</source>
         <target>None</target>
         <note>Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.</note>
+      </trans-unit>
+      <trans-unit id="Nostr Address" xml:space="preserve">
+        <source>Nostr Address</source>
+        <target>Nostr Address</target>
+        <note>Label for the Nostr Address section of user profile form.</note>
       </trans-unit>
       <trans-unit id="Nostr is a protocol, designed for simplicity, that aims to create a censorship-resistant global social network" xml:space="preserve">
         <source>Nostr is a protocol, designed for simplicity, that aims to create a censorship-resistant global social network</source>
@@ -1493,6 +1487,11 @@ Label for filter for seeing your notes and replies (instead of only your notes).
         <target>This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!</target>
         <note>Label to describe that a private key is the user's secret account key and what they should do with it.</note>
       </trans-unit>
+      <trans-unit id="This relay is already in your list" xml:space="preserve">
+        <source>This relay is already in your list</source>
+        <target>This relay is already in your list</target>
+        <note>An error message that appears when the user attempts to add a relay that has already been added.</note>
+      </trans-unit>
       <trans-unit id="Thread" xml:space="preserve">
         <source>Thread</source>
         <target>Thread</target>
@@ -1782,7 +1781,7 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
       <trans-unit id="jb55@jb55.com" xml:space="preserve">
         <source>jb55@jb55.com</source>
         <target>jb55@jb55.com</target>
-        <note>Placeholder example text for identifier used for NIP-05 verification.</note>
+        <note>Placeholder example text for identifier used for Nostr addresses.</note>
       </trans-unit>
       <trans-unit id="none" xml:space="preserve">
         <source>none</source>
