@@ -51,7 +51,7 @@ final class UserSearchCacheTests: XCTestCase {
         let keypair = try XCTUnwrap(keypair)
 
         let newNip05 = "_@other.xyz"
-        let validatedNewNip05 = try XCTUnwrap(NIP05.parse(newNip05))
+        _ = try XCTUnwrap(NIP05.parse(newNip05))
 
         damusState.profiles.set_validated(keypair.pubkey, nip05: NIP05.parse(newNip05))
 

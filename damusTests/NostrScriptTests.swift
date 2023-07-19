@@ -36,7 +36,7 @@ final class NostrScriptTests: XCTestCase {
     }
     
     func test_bool_set() throws {
-        var data = try load_bool_set_test_wasm().bytes
+        let data = try load_bool_set_test_wasm().bytes
         let pool = RelayPool()
         let script = NostrScript(pool: pool, data: data)
         let pk = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
@@ -60,7 +60,7 @@ final class NostrScriptTests: XCTestCase {
     }
 
     func test_nostrscript() throws {
-        var data = try loadTestWasm().bytes
+        let data = try loadTestWasm().bytes
         let pool = RelayPool()
         let script = NostrScript(pool: pool, data: data)
         
