@@ -189,9 +189,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>2$@ und %1$d weiteres Profil teilten deine Notiz</string>
+			<string>%2$@ und %1$d weiteres Profil teilten deine Notiz</string>
 			<key>other</key>
-			<string>2$@ und %1$d weitere teilten deine Notiz</string>
+			<string>%2$@ und %1$d weitere teilten deine Notiz</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
