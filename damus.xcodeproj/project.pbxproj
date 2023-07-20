@@ -348,6 +348,12 @@
 		E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */; };
 		E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E990020E2955F837003BBC5A /* EditMetadataView.swift */; };
 		E9E4ED0B295867B900DD7078 /* ThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E4ED0A295867B900DD7078 /* ThreadView.swift */; };
+		F71694EA2A662232001F4053 /* SuggestedUsersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694E92A662232001F4053 /* SuggestedUsersView.swift */; };
+		F71694EC2A662292001F4053 /* SuggestedUsersViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694EB2A662292001F4053 /* SuggestedUsersViewModel.swift */; };
+		F71694EE2A6624F9001F4053 /* suggested_users.json in Resources */ = {isa = PBXBuildFile; fileRef = F71694ED2A6624F9001F4053 /* suggested_users.json */; };
+		F71694F22A67314D001F4053 /* SuggestedUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694F12A67314D001F4053 /* SuggestedUserView.swift */; };
+		F71694F42A6732B7001F4053 /* GradientFollowButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694F32A6732B7001F4053 /* GradientFollowButton.swift */; };
+		F71694F82A6983AF001F4053 /* GrayGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71694F72A6983AF001F4053 /* GrayGradient.swift */; };
 		F757933A29D7AECD007DEAC1 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F757933929D7AECD007DEAC1 /* ImagePicker.swift */; };
 		F75BA12D29A1855400E10810 /* BookmarksManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F75BA12C29A1855400E10810 /* BookmarksManager.swift */; };
 		F75BA12F29A18EF500E10810 /* BookmarksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F75BA12E29A18EF500E10810 /* BookmarksView.swift */; };
@@ -855,6 +861,12 @@
 		E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSettingsView.swift; sourceTree = "<group>"; };
 		E990020E2955F837003BBC5A /* EditMetadataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMetadataView.swift; sourceTree = "<group>"; };
 		E9E4ED0A295867B900DD7078 /* ThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadView.swift; sourceTree = "<group>"; };
+		F71694E92A662232001F4053 /* SuggestedUsersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedUsersView.swift; sourceTree = "<group>"; };
+		F71694EB2A662292001F4053 /* SuggestedUsersViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedUsersViewModel.swift; sourceTree = "<group>"; };
+		F71694ED2A6624F9001F4053 /* suggested_users.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = suggested_users.json; sourceTree = "<group>"; };
+		F71694F12A67314D001F4053 /* SuggestedUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedUserView.swift; sourceTree = "<group>"; };
+		F71694F32A6732B7001F4053 /* GradientFollowButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientFollowButton.swift; sourceTree = "<group>"; };
+		F71694F72A6983AF001F4053 /* GrayGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrayGradient.swift; sourceTree = "<group>"; };
 		F757933929D7AECD007DEAC1 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		F75BA12C29A1855400E10810 /* BookmarksManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarksManager.swift; sourceTree = "<group>"; };
 		F75BA12E29A18EF500E10810 /* BookmarksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarksView.swift; sourceTree = "<group>"; };
@@ -1146,6 +1158,7 @@
 		4C75EFA227FA576C0006080F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				F71694E82A66221E001F4053 /* Onboarding */,
 				4C190F232A547D1700027FD5 /* NostrScript */,
 				4C7D09692A0AEA0400943473 /* CodeScanner */,
 				4C7D095A2A098C5C00943473 /* Wallet */,
@@ -1263,6 +1276,7 @@
 				4C7D09732A0AEF9000943473 /* AlbyGradient.swift */,
 				4C2859612A12A7F0004746F7 /* GoldSupportGradient.swift */,
 				5C6E1DAE2A194075008FC15A /* PinkGradient.swift */,
+				F71694F72A6983AF001F4053 /* GrayGradient.swift */,
 				5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */,
 				4C687C202A5F7ED00092C550 /* DamusBackground.swift */,
 			);
@@ -1325,6 +1339,7 @@
 			isa = PBXGroup;
 			children = (
 				4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */,
+				F71694F32A6732B7001F4053 /* GradientFollowButton.swift */,
 				4C7D09652A0AE62100943473 /* AlbyButton.swift */,
 			);
 			path = Buttons;
@@ -1707,6 +1722,17 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		F71694E82A66221E001F4053 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				F71694E92A662232001F4053 /* SuggestedUsersView.swift */,
+				F71694F12A67314D001F4053 /* SuggestedUserView.swift */,
+				F71694EB2A662292001F4053 /* SuggestedUsersViewModel.swift */,
+				F71694ED2A6624F9001F4053 /* suggested_users.json */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
 		F7F0BA23297892AE009531F3 /* Modifiers */ = {
 			isa = PBXGroup;
 			children = (
@@ -1875,6 +1901,7 @@
 				4CE6DEEB27F7A08200C66700 /* Assets.xcassets in Resources */,
 				4C198DF129F88C6B004C165C /* License.txt in Resources */,
 				4C198DF029F88C6B004C165C /* Readme.md in Resources */,
+				F71694EE2A6624F9001F4053 /* suggested_users.json in Resources */,
 				3A4325A82961E11400BFCD9D /* Localizable.stringsdict in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1984,6 +2011,7 @@
 				F7F0BA25297892BD009531F3 /* SwipeToDismiss.swift in Sources */,
 				4C8D00CA29DF80350036AF10 /* TruncatedText.swift in Sources */,
 				4C4DD3DB2A6CA7E8005B4E85 /* ContentParsing.swift in Sources */,
+				F71694F22A67314D001F4053 /* SuggestedUserView.swift in Sources */,
 				4C9BB83429C12D9900FC4E37 /* EventProfileName.swift in Sources */,
 				4C7D09602A098C5D00943473 /* WalletView.swift in Sources */,
 				4CB8838F296F781C00DC99E7 /* ReactionsView.swift in Sources */,
@@ -2073,6 +2101,7 @@
 				4C363A8828236948006E126D /* BlocksView.swift in Sources */,
 				4C06670628FCB08600038D2A /* ImageCarousel.swift in Sources */,
 				3A23838E2A297DD200E5AA2E /* ZapButtonModel.swift in Sources */,
+				F71694F82A6983AF001F4053 /* GrayGradient.swift in Sources */,
 				5053ACA72A56DF3B00851AE3 /* DeveloperSettingsView.swift in Sources */,
 				F79C7FAD29D5E9620000F946 /* EditPictureControl.swift in Sources */,
 				4C9F18E229AA9B6C008C55EC /* CustomizeZapView.swift in Sources */,
@@ -2112,6 +2141,7 @@
 				4C1A9A2729DDE31900516EAC /* TranslationSettingsView.swift in Sources */,
 				4CB8838629656C8B00DC99E7 /* NIP05.swift in Sources */,
 				4CF0ABD82981980C00D66079 /* Lists.swift in Sources */,
+				F71694EA2A662232001F4053 /* SuggestedUsersView.swift in Sources */,
 				501F8C5829FF5FC5001AFC1D /* Damus.xcdatamodeld in Sources */,
 				4C30AC8029A6A53F00E2BD5A /* ProfilePicturesView.swift in Sources */,
 				5C6E1DAD2A193EC2008FC15A /* GradientButtonStyle.swift in Sources */,
@@ -2145,6 +2175,7 @@
 				4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */,
 				4C06670E28FDEAA000038D2A /* utf8.c in Sources */,
 				4C3EA66D28FF782800C48A62 /* amount.c in Sources */,
+				F71694F42A6732B7001F4053 /* GradientFollowButton.swift in Sources */,
 				4C3AC7A728369BA200E1F516 /* SearchHomeView.swift in Sources */,
 				4CB883B0297705DD00DC99E7 /* ZapButton.swift in Sources */,
 				4C363A922825FCF2006E126D /* ProfileUpdate.swift in Sources */,
@@ -2168,6 +2199,7 @@
 				4C1A9A1A29DCA17E00516EAC /* ReplyCounter.swift in Sources */,
 				50B5685329F97CB400A23243 /* CredentialHandler.swift in Sources */,
 				643EA5C8296B764E005081BB /* RelayFilterView.swift in Sources */,
+				F71694EC2A662292001F4053 /* SuggestedUsersViewModel.swift in Sources */,
 				4C3EA67D28FFBBA300C48A62 /* InvoicesView.swift in Sources */,
 				4C363A8E28236FE4006E126D /* NoteContentView.swift in Sources */,
 				4C90BD1A283AA67F008EE7EF /* Bech32.swift in Sources */,
