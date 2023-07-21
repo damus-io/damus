@@ -303,6 +303,10 @@ static inline int cursor_pull_int(struct cursor *cursor, int *i)
 	return cursor_pull(cursor, (u8*)i, sizeof(*i));
 }
 
+static inline int cursor_push_u32(struct cursor *cursor, uint32_t i) {
+    return cursor_push(cursor, (unsigned char*)&i, sizeof(i));
+}
+
 static inline int cursor_push_u16(struct cursor *cursor, u16 i)
 {
 	return cursor_push(cursor, (u8*)&i, sizeof(i));
