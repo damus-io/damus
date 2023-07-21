@@ -134,6 +134,9 @@
 		4C54AA0C29A5543C003E4487 /* ZapGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C54AA0B29A5543C003E4487 /* ZapGroup.swift */; };
 		4C5C7E68284ED36500A22DF5 /* SearchHomeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5C7E67284ED36500A22DF5 /* SearchHomeModel.swift */; };
 		4C5C7E6A284EDE2E00A22DF5 /* SearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5C7E69284EDE2E00A22DF5 /* SearchResultsView.swift */; };
+		4C5D5C992A6AF8F80024563C /* NdbNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90548A2A6AEDEE00811EEC /* NdbNote.swift */; };
+		4C5D5C9A2A6AF8F80024563C /* NdbTagIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9054882A6AED4700811EEC /* NdbTagIterator.swift */; };
+		4C5D5C9D2A6B2CB40024563C /* AsciiCharacter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5D5C9C2A6B2CB40024563C /* AsciiCharacter.swift */; };
 		4C5F9114283D694D0052CD1C /* FollowTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5F9113283D694D0052CD1C /* FollowTarget.swift */; };
 		4C5F9116283D855D0052CD1C /* EventsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5F9115283D855D0052CD1C /* EventsModel.swift */; };
 		4C5F9118283D88E40052CD1C /* FollowingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5F9117283D88E40052CD1C /* FollowingModel.swift */; };
@@ -180,6 +183,7 @@
 		4C8D1A6C29F1DFC200ACDF75 /* FriendIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6B29F1DFC200ACDF75 /* FriendIcon.swift */; };
 		4C8D1A6F29F31E5000ACDF75 /* FriendsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */; };
 		4C8EC52529D1FA6C0085D9A8 /* DamusColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */; };
+		4C9054852A6AEAA000811EEC /* NdbTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9054842A6AEAA000811EEC /* NdbTests.swift */; };
 		4C90BD18283A9EE5008EE7EF /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD17283A9EE5008EE7EF /* LoginView.swift */; };
 		4C90BD1A283AA67F008EE7EF /* Bech32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD19283AA67F008EE7EF /* Bech32.swift */; };
 		4C90BD1C283AC38E008EE7EF /* Bech32Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C90BD1B283AC38E008EE7EF /* Bech32Tests.swift */; };
@@ -246,6 +250,8 @@
 		4CD7641B28A1641400B6928F /* EndBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD7641A28A1641400B6928F /* EndBlock.swift */; };
 		4CDA128A29E9D10C0006FA5A /* SignalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDA128929E9D10C0006FA5A /* SignalView.swift */; };
 		4CDA128C29EB19C40006FA5A /* LocalNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDA128B29EB19C40006FA5A /* LocalNotification.swift */; };
+		4CDD1AE02A6B305F001CD4DF /* NdbTagElem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDD1ADF2A6B305F001CD4DF /* NdbTagElem.swift */; };
+		4CDD1AE22A6B3074001CD4DF /* NdbTagsIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDD1AE12A6B3074001CD4DF /* NdbTagsIterator.swift */; };
 		4CE0E2AF29A2E82100DB4CA2 /* EventHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0E2AE29A2E82100DB4CA2 /* EventHolder.swift */; };
 		4CE0E2B629A3ED5500DB4CA2 /* InnerTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE0E2B529A3ED5500DB4CA2 /* InnerTimelineView.swift */; };
 		4CE1399029F0661A00AC6A0B /* RepostAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE1398F29F0661A00AC6A0B /* RepostAction.swift */; };
@@ -610,6 +616,7 @@
 		4C54AA0B29A5543C003E4487 /* ZapGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapGroup.swift; sourceTree = "<group>"; };
 		4C5C7E67284ED36500A22DF5 /* SearchHomeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHomeModel.swift; sourceTree = "<group>"; };
 		4C5C7E69284EDE2E00A22DF5 /* SearchResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsView.swift; sourceTree = "<group>"; };
+		4C5D5C9C2A6B2CB40024563C /* AsciiCharacter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsciiCharacter.swift; sourceTree = "<group>"; };
 		4C5F9113283D694D0052CD1C /* FollowTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowTarget.swift; sourceTree = "<group>"; };
 		4C5F9115283D855D0052CD1C /* EventsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsModel.swift; sourceTree = "<group>"; };
 		4C5F9117283D88E40052CD1C /* FollowingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowingModel.swift; sourceTree = "<group>"; };
@@ -660,7 +667,9 @@
 		4C8D1A6B29F1DFC200ACDF75 /* FriendIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendIcon.swift; sourceTree = "<group>"; };
 		4C8D1A6E29F31E5000ACDF75 /* FriendsButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsButton.swift; sourceTree = "<group>"; };
 		4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusColors.swift; sourceTree = "<group>"; };
-		4C9054802A6A065700811EEC /* jsmn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = jsmn.h; sourceTree = "<group>"; };
+		4C9054842A6AEAA000811EEC /* NdbTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTests.swift; sourceTree = "<group>"; };
+		4C9054882A6AED4700811EEC /* NdbTagIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTagIterator.swift; sourceTree = "<group>"; };
+		4C90548A2A6AEDEE00811EEC /* NdbNote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbNote.swift; sourceTree = "<group>"; };
 		4C90BD17283A9EE5008EE7EF /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		4C90BD19283AA67F008EE7EF /* Bech32.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32.swift; sourceTree = "<group>"; };
 		4C90BD1B283AC38E008EE7EF /* Bech32Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bech32Tests.swift; sourceTree = "<group>"; };
@@ -731,6 +740,8 @@
 		4CD7641A28A1641400B6928F /* EndBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndBlock.swift; sourceTree = "<group>"; };
 		4CDA128929E9D10C0006FA5A /* SignalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalView.swift; sourceTree = "<group>"; };
 		4CDA128B29EB19C40006FA5A /* LocalNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalNotification.swift; sourceTree = "<group>"; };
+		4CDD1ADF2A6B305F001CD4DF /* NdbTagElem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTagElem.swift; sourceTree = "<group>"; };
+		4CDD1AE12A6B3074001CD4DF /* NdbTagsIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTagsIterator.swift; sourceTree = "<group>"; };
 		4CDD1AE72A6B3611001CD4DF /* jsmn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = jsmn.h; sourceTree = "<group>"; };
 		4CE0E2AE29A2E82100DB4CA2 /* EventHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventHolder.swift; sourceTree = "<group>"; };
 		4CE0E2B529A3ED5500DB4CA2 /* InnerTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InnerTimelineView.swift; sourceTree = "<group>"; };
@@ -1298,6 +1309,34 @@
 			path = Buttons;
 			sourceTree = "<group>";
 		};
+		4C9054832A6AEA7B00811EEC /* NDB */ = {
+			isa = PBXGroup;
+			children = (
+				4C9054842A6AEAA000811EEC /* NdbTests.swift */,
+			);
+			path = NDB;
+			sourceTree = "<group>";
+		};
+		4C9054862A6AEB4500811EEC /* nostrdb */ = {
+			isa = PBXGroup;
+			children = (
+				4C9054892A6AEDCD00811EEC /* Tests */,
+				4C9054882A6AED4700811EEC /* NdbTagIterator.swift */,
+				4C90548A2A6AEDEE00811EEC /* NdbNote.swift */,
+				4C5D5C9C2A6B2CB40024563C /* AsciiCharacter.swift */,
+				4CDD1ADF2A6B305F001CD4DF /* NdbTagElem.swift */,
+				4CDD1AE12A6B3074001CD4DF /* NdbTagsIterator.swift */,
+			);
+			path = nostrdb;
+			sourceTree = "<group>";
+		};
+		4C9054892A6AEDCD00811EEC /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
 		4C9B0DEC2A65A74000CBDA21 /* Util */ = {
 			isa = PBXGroup;
 			children = (
@@ -1455,6 +1494,7 @@
 		4CE6DEDA27F7A08100C66700 = {
 			isa = PBXGroup;
 			children = (
+				4C9054862A6AEB4500811EEC /* nostrdb */,
 				4C19AE4A2A5CEF7C00C90DB7 /* nostrscript */,
 				4C06670728FDE62900038D2A /* damus-c */,
 				4CE6DEE527F7A08100C66700 /* damus */,
@@ -1511,6 +1551,7 @@
 		4CE6DEF627F7A08200C66700 /* damusTests */ = {
 			isa = PBXGroup;
 			children = (
+				4C9054832A6AEA7B00811EEC /* NDB */,
 				4C9B0DEC2A65A74000CBDA21 /* Util */,
 				4C0C03962A61E2670098B3B8 /* Fixtures */,
 				4C7D097D2A0C58B900943473 /* WalletConnectTests.swift */,
@@ -1845,6 +1886,7 @@
 				4CE4F8CD281352B30009DFBB /* Notifications.swift in Sources */,
 				4C30AC7829A577AB00E2BD5A /* EventCache.swift in Sources */,
 				4C285C8428385690008A31F1 /* CreateAccountView.swift in Sources */,
+				4CDD1AE22A6B3074001CD4DF /* NdbTagsIterator.swift in Sources */,
 				4C216F34286F5ACD00040376 /* DMView.swift in Sources */,
 				4C3EA64428FF558100C48A62 /* sha256.c in Sources */,
 				4CCF9AAF2A1FDBDB00E03CFB /* VideoPlayer.swift in Sources */,
@@ -1899,6 +1941,7 @@
 				F7F0BA272978E54D009531F3 /* ParticipantsView.swift in Sources */,
 				4CF0ABE32981BC7D00D66079 /* UserView.swift in Sources */,
 				4CE0E2AF29A2E82100DB4CA2 /* EventHolder.swift in Sources */,
+				4C5D5C992A6AF8F80024563C /* NdbNote.swift in Sources */,
 				4CF0ABF029857E9200D66079 /* Bech32Object.swift in Sources */,
 				4C3D52B8298DB5C6001C5831 /* TextEvent.swift in Sources */,
 				4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */,
@@ -2035,6 +2078,7 @@
 				4CFF8F6B29CD0079008DB934 /* RepostedEvent.swift in Sources */,
 				4C8682872814DE470026224F /* ProfileView.swift in Sources */,
 				5C0707D12A1ECB38004E7B51 /* DamusLogoGradient.swift in Sources */,
+				4CDD1AE02A6B305F001CD4DF /* NdbTagElem.swift in Sources */,
 				4C5F9114283D694D0052CD1C /* FollowTarget.swift in Sources */,
 				4CF0ABD629817F5B00D66079 /* ReportView.swift in Sources */,
 				4C1A9A2729DDE31900516EAC /* TranslationSettingsView.swift in Sources */,
@@ -2089,6 +2133,7 @@
 				4C54AA0729A540BA003E4487 /* NotificationsModel.swift in Sources */,
 				4CB55EF3295E5D59007FD187 /* RecommendedRelayView.swift in Sources */,
 				4CE4F0F229D4FCFA005914DB /* DebouncedOnChange.swift in Sources */,
+				4C5D5C9D2A6B2CB40024563C /* AsciiCharacter.swift in Sources */,
 				4CF0ABEC29844B4700D66079 /* AnyDecodable.swift in Sources */,
 				4C9146FE2A2A87C200DDEA40 /* nostrscript.c in Sources */,
 				4C5F9118283D88E40052CD1C /* FollowingModel.swift in Sources */,
@@ -2114,6 +2159,7 @@
 				4FE60CDD295E1C5E00105A1F /* Wallet.swift in Sources */,
 				3AA247FF297E3D900090C62D /* RepostsView.swift in Sources */,
 				3AE45AF6297BB2E700C1D842 /* LibreTranslateServer.swift in Sources */,
+				4C5D5C9A2A6AF8F80024563C /* NdbTagIterator.swift in Sources */,
 				4CE879502996B2BD00F758CC /* RelayStatusView.swift in Sources */,
 				4CC7AAF4297F18B400430951 /* ReplyDescription.swift in Sources */,
 				4C75EFA427FA577B0006080F /* PostView.swift in Sources */,
@@ -2159,6 +2205,7 @@
 				4C7D097E2A0C58B900943473 /* WalletConnectTests.swift in Sources */,
 				4CB883AA297612FF00DC99E7 /* ZapTests.swift in Sources */,
 				4CB8839A297322D200DC99E7 /* DMTests.swift in Sources */,
+				4C9054852A6AEAA000811EEC /* NdbTests.swift in Sources */,
 				F944F56E29EA9CCC0067B3BF /* DamusParseContentTests.swift in Sources */,
 				3A5E47C72A4A76C800C0D090 /* TrieTests.swift in Sources */,
 				4CB883AE2976FA9300DC99E7 /* FormatTests.swift in Sources */,
