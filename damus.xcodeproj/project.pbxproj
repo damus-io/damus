@@ -278,6 +278,7 @@
 		4CE879552996BAB900F758CC /* RelayPaidDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE879542996BAB900F758CC /* RelayPaidDetail.swift */; };
 		4CE879582996C45300F758CC /* ZapsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE879572996C45300F758CC /* ZapsView.swift */; };
 		4CE8795B2996C47A00F758CC /* ZapsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8795A2996C47A00F758CC /* ZapsModel.swift */; };
+		4CE9FBBA2A6B3C63007E485C /* nostrdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CE9FBB82A6B3B26007E485C /* nostrdb.c */; };
 		4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */; };
 		4CEE2AF1280B216B00AB5EEF /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */; };
 		4CEE2AF3280B25C500AB5EEF /* ProfilePicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF2280B25C500AB5EEF /* ProfilePicView.swift */; };
@@ -772,6 +773,8 @@
 		4CE879542996BAB900F758CC /* RelayPaidDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayPaidDetail.swift; sourceTree = "<group>"; };
 		4CE879572996C45300F758CC /* ZapsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapsView.swift; sourceTree = "<group>"; };
 		4CE8795A2996C47A00F758CC /* ZapsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapsModel.swift; sourceTree = "<group>"; };
+		4CE9FBB82A6B3B26007E485C /* nostrdb.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nostrdb.c; sourceTree = "<group>"; };
+		4CE9FBB92A6B3B26007E485C /* nostrdb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrdb.h; sourceTree = "<group>"; };
 		4CEE2AE72804F57C00AB5EEF /* libsecp256k1.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libsecp256k1.a; sourceTree = "<group>"; };
 		4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrRequest.swift; sourceTree = "<group>"; };
 		4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
@@ -907,8 +910,6 @@
 				4CA9276F2A2A5D470098A105 /* parser.h */,
 				4CA9276E2A2A5D110098A105 /* wasm.c */,
 				4CA9276D2A2A5D110098A105 /* wasm.h */,
-				4C4F14A82A2A71AB0045A0B9 /* nostrscript.h */,
-				4C4F14A92A2A71AB0045A0B9 /* nostrscript.c */,
 				4C06670928FDE64700038D2A /* damus.h */,
 				4C06670A28FDE64700038D2A /* damus.c */,
 				4C06670828FDE64700038D2A /* damus-Bridging-Header.h */,
@@ -1067,6 +1068,8 @@
 				4C19AE4B2A5CEF7C00C90DB7 /* primal.ts */,
 				4C19AE4C2A5CEF7C00C90DB7 /* NostrScript.swift */,
 				4C19AE502A5CEF7C00C90DB7 /* nostr.ts */,
+				4C4F14A82A2A71AB0045A0B9 /* nostrscript.h */,
+				4C4F14A92A2A71AB0045A0B9 /* nostrscript.c */,
 			);
 			path = nostrscript;
 			sourceTree = "<group>";
@@ -1320,21 +1323,15 @@
 		4C9054862A6AEB4500811EEC /* nostrdb */ = {
 			isa = PBXGroup;
 			children = (
-				4C9054892A6AEDCD00811EEC /* Tests */,
 				4C9054882A6AED4700811EEC /* NdbTagIterator.swift */,
 				4C90548A2A6AEDEE00811EEC /* NdbNote.swift */,
 				4C5D5C9C2A6B2CB40024563C /* AsciiCharacter.swift */,
 				4CDD1ADF2A6B305F001CD4DF /* NdbTagElem.swift */,
 				4CDD1AE12A6B3074001CD4DF /* NdbTagsIterator.swift */,
+				4CE9FBB82A6B3B26007E485C /* nostrdb.c */,
+				4CE9FBB92A6B3B26007E485C /* nostrdb.h */,
 			);
 			path = nostrdb;
-			sourceTree = "<group>";
-		};
-		4C9054892A6AEDCD00811EEC /* Tests */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Tests;
 			sourceTree = "<group>";
 		};
 		4C9B0DEC2A65A74000CBDA21 /* Util */ = {
@@ -1880,6 +1877,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CE9FBBA2A6B3C63007E485C /* nostrdb.c in Sources */,
 				4C3AC79D2833036D00E1F516 /* FollowingView.swift in Sources */,
 				5CF72FC229B9142F00124A13 /* ShareAction.swift in Sources */,
 				4C8D1A6C29F1DFC200ACDF75 /* FriendIcon.swift in Sources */,

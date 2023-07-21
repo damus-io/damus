@@ -30,13 +30,13 @@ struct NdbNote {
 
         var note: UnsafeMutablePointer<ndb_note>?
 
-        let len = data.withUnsafeMutableBytes { (bytes: UnsafeMutableRawBufferPointer) -> Int in
-            return Int(ndb_note_from_json(&json_cstr, Int32(json_cstr.count), &note, bytes.baseAddress, Int32(bufsize)))
+        let len = data.withUnsafeMutableBytes { (bytes: UnsafeMutableRawBufferPointer) in
+            return ndb_note_from_json(&json_cstr, Int32(json_cstr.count), &note, bytes.baseAddress, Int32(bufsize))
         }
 
         guard let note else { return nil }
 
         // Create new Data with just the valid bytes
-        let validData = Data(bytes: &note.pointee, count: len)
+        let validData = Data(bytes: &note.pointee, count: Int(len))
         return NdbNote(notePointer: note, data: validData)
     }}

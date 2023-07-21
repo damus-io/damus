@@ -26,13 +26,13 @@ final class NdbTests: XCTestCase {
         let id = "20d0ff27d6fcb13de8366328c5b1a7af26bcac07f2e558fbebd5e9242e608c09"
         XCTAssertEqual(hex_encode(note.id), id)
 
-        XCTAssertEqual(note.tags().underestimatedCount, 786)
-        XCTAssertEqual(note.tags().underestimatedCount, 786)
+        XCTAssertEqual(note.tags().reduce(0, { sum, _ in sum + 1 }), 786)
+        XCTAssertEqual(note.tags().reduce(0, { sum, _ in sum + 1 }), 786)
 
         //let tags = note.tags()
         for tag in note.tags() {
             for elem in tag {
-                print("test_ndb_iterator \(elem.)")
+                print("test_ndb_iterator \(elem.string())")
             }
         }
 

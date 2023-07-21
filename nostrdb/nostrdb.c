@@ -231,6 +231,7 @@ static inline int ndb_builder_process_json_tags(struct ndb_json_parser *p,
 }
 
 
+
 int ndb_note_from_json(const char *json, int len, struct ndb_note **note,
 		       unsigned char *buf, int bufsize)
 {
