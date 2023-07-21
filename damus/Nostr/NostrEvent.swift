@@ -47,22 +47,37 @@ struct ReferencedId: Identifiable, Hashable, Equatable {
 }
 
 class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Hashable, Comparable {
-    static func == (lhs: NostrEvent, rhs: NostrEvent) -> Bool {
-        return lhs.id == rhs.id
+    // TODO: memory mapped db events
+    /*
+    private var note_data: UnsafeMutablePointer<ndb_note>
+
+    init(data: UnsafeMutablePointer<ndb_note>) {
+        self.note_data = data
     }
-    
-    static func < (lhs: NostrEvent, rhs: NostrEvent) -> Bool {
-        return lhs.created_at < rhs.created_at
+
+    var id: [UInt8] {
+        let buffer = UnsafeBufferPointer(start: ndb_note_id(note_data), count: 32)
+        return Array(buffer)
     }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+
+    var content: String {
+        String(cString: ndb_note_content(self.note_data))
     }
-    
+
+    var sig: [UInt8] {
+        let buffer = UnsafeBufferPointer(start: ndb_note_signature(note_data), count: 64)
+        return Array(buffer)
+    }
+
+    var tags: TagIterator
+     */
+
     var id: String
+    var content: String
     var sig: String
     var tags: [[String]]
-    var boosted_by: String?
+
+    //var boosted_by: String?
 
     // cached field for pow calc
     //var pow: Int?
@@ -73,25 +88,57 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     let pubkey: String
     let created_at: Int64
     let kind: Int
-    let content: String
-    
+
+    // cached stuff
+    private var _event_refs: [EventRef]? = nil
+    var decrypted_content: String? = nil
+    private var _blocks: Blocks? = nil
+    private lazy var inner_event: NostrEvent? = {
+        return event_from_json(dat: self.content)
+    }()
+
+    static func == (lhs: NostrEvent, rhs: NostrEvent) -> Bool {
+        return lhs.id == rhs.id
+    }
+
+    static func < (lhs: NostrEvent, rhs: NostrEvent) -> Bool {
+        return lhs.created_at < rhs.created_at
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+    init(id: String = "", content: String, pubkey: String, kind: Int = 1, tags: [[String]] = [], createdAt: Int64 = Int64(Date().timeIntervalSince1970)) {
+
+        self.id = id
+        self.sig = ""
+
+        self.content = content
+        self.pubkey = pubkey
+        self.kind = kind
+        self.tags = tags
+        self.created_at = createdAt
+    }
+}
+
+extension NostrEvent {
     var is_textlike: Bool {
         return kind == 1 || kind == 42 || kind == 30023
     }
-    
+
     var too_big: Bool {
         return known_kind != .longform && self.content.utf8.count > 16000
     }
-    
+
     var should_show_event: Bool {
         return !too_big
     }
-    
+
     var is_valid_id: Bool {
         return calculate_event_id(ev: self) == self.id
     }
-    
-    private var _blocks: Blocks? = nil
+
     func blocks(_ privkey: String?) -> Blocks {
         if let bs = _blocks {
             return bs
@@ -105,23 +152,19 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         return parse_note_content(content: content, tags: self.tags)
     }
 
-    private lazy var inner_event: NostrEvent? = {
-        return event_from_json(dat: self.content)
-    }()
-    
+
     func get_inner_event(cache: EventCache) -> NostrEvent? {
         guard self.known_kind == .boost else {
             return nil
         }
-        
+
         if self.content == "", let ref = self.referenced_ids.first {
             return cache.lookup(ref.ref_id)
         }
-        
+
         return self.inner_event
     }
-    
-    private var _event_refs: [EventRef]? = nil
+
     func event_refs(_ privkey: String?) -> [EventRef] {
         if let rs = _event_refs {
             return rs
@@ -131,7 +174,6 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         return refs
     }
 
-    var decrypted_content: String? = nil
 
     func decrypted(privkey: String?) -> String? {
         if let decrypted_content = decrypted_content {
@@ -141,18 +183,18 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         guard let key = privkey else {
             return nil
         }
-        
+
         guard let our_pubkey = privkey_to_pubkey(privkey: key) else {
             return nil
         }
-        
+
         var pubkey = self.pubkey
         // This is our DM, we need to use the pubkey of the person we're talking to instead
         if our_pubkey == pubkey {
             guard let refkey = self.referenced_pubkeys.first else {
                 return nil
             }
-            
+
             pubkey = refkey.ref_id
         }
 
@@ -166,7 +208,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         if known_kind == .dm {
             return decrypted(privkey: privkey) ?? "*failed to decrypt content*"
         }
-        
+
         return content
     }
 
@@ -193,14 +235,14 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
             }
         }
     }
-    
+
     public func thread_id(privkey: String?) -> String {
         for ref in event_refs(privkey) {
             if let thread_id = ref.is_thread_id {
                 return thread_id.ref_id
             }
         }
-        
+
         return self.id
     }
 
@@ -268,17 +310,6 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         return (self.flags & 1) != 0
     }
 
-    init(id: String = "", content: String, pubkey: String, kind: Int = 1, tags: [[String]] = [], createdAt: Int64 = Int64(Date().timeIntervalSince1970)) {
-        self.id = id
-        self.sig = ""
-
-        self.content = content
-        self.pubkey = pubkey
-        self.kind = kind
-        self.tags = tags
-        self.created_at = createdAt
-    }
-
     func calculate_id() {
         self.id = calculate_event_id(ev: self)
     }
@@ -286,7 +317,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     func sign(privkey: String) {
         self.sig = sign_event(privkey: privkey, ev: self)
     }
-    
+
     var age: TimeInterval {
         let event_date = Date(timeIntervalSince1970: TimeInterval(created_at))
         return Date.now.timeIntervalSince(event_date)
@@ -321,6 +352,31 @@ func encode_json<T: Encodable>(_ val: T) -> String? {
 func decode_nostr_event_json(json: String) -> NostrEvent? {
     return decode_json(json)
 }
+
+/*
+func decode_nostr_event_json(json: String) -> NostrEvent? {
+    guard let json_str = json.cString(using: .utf8) else {
+        return nil
+    }
+
+    // Allocate a double pointer (pointer to pointer) for ndb_note
+    var notePtr: UnsafeMutablePointer<ndb_note>? = nil
+
+    // Create the buffer
+    var buf = [Int8](repeating: 0, count: 2<<18)
+
+    // Call the C function
+    let result = withUnsafeMutablePointer(to: &notePtr) { (ptr) -> Int32 in
+        return ndb_note_from_json(json_str, Int32(json_str.count), ptr, &buf, Int32(buf.count))
+    }
+
+    guard result == 0, let note = notePtr?.pointee else {
+        return nil
+    }
+
+    return .init(data: note)
+}
+*/
 
 func decode_json<T: Decodable>(_ val: String) -> T? {
     return try? JSONDecoder().decode(T.self, from: Data(val.utf8))
