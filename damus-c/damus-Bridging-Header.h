@@ -8,4 +8,5 @@
 #include "nostr_bech32.h"
 #include "wasm.h"
 #include "nostrscript.h"
+#include "nostrdb.h"
 
