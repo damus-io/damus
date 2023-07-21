@@ -901,7 +901,6 @@
 		4C06670728FDE62900038D2A /* damus-c */ = {
 			isa = PBXGroup;
 			children = (
-				4CDD1AE72A6B3611001CD4DF /* jsmn.h */,
 				4C9146FF2A2A891E00DDEA40 /* error.c */,
 				4CA927752A2A5E2F0098A105 /* typedefs.h */,
 				4CA927742A2A5E2F0098A105 /* varint.h */,
@@ -1312,17 +1311,10 @@
 			path = Buttons;
 			sourceTree = "<group>";
 		};
-		4C9054832A6AEA7B00811EEC /* NDB */ = {
-			isa = PBXGroup;
-			children = (
-				4C9054842A6AEAA000811EEC /* NdbTests.swift */,
-			);
-			path = NDB;
-			sourceTree = "<group>";
-		};
 		4C9054862A6AEB4500811EEC /* nostrdb */ = {
 			isa = PBXGroup;
 			children = (
+				4CE9FBBB2A6B3D9C007E485C /* Test */,
 				4C9054882A6AED4700811EEC /* NdbTagIterator.swift */,
 				4C90548A2A6AEDEE00811EEC /* NdbNote.swift */,
 				4C5D5C9C2A6B2CB40024563C /* AsciiCharacter.swift */,
@@ -1330,6 +1322,7 @@
 				4CDD1AE12A6B3074001CD4DF /* NdbTagsIterator.swift */,
 				4CE9FBB82A6B3B26007E485C /* nostrdb.c */,
 				4CE9FBB92A6B3B26007E485C /* nostrdb.h */,
+				4CDD1AE72A6B3611001CD4DF /* jsmn.h */,
 			);
 			path = nostrdb;
 			sourceTree = "<group>";
@@ -1548,7 +1541,6 @@
 		4CE6DEF627F7A08200C66700 /* damusTests */ = {
 			isa = PBXGroup;
 			children = (
-				4C9054832A6AEA7B00811EEC /* NDB */,
 				4C9B0DEC2A65A74000CBDA21 /* Util */,
 				4C0C03962A61E2670098B3B8 /* Fixtures */,
 				4C7D097D2A0C58B900943473 /* WalletConnectTests.swift */,
@@ -1616,6 +1608,14 @@
 				4C73C5132A4437C10062CAC0 /* ZapUserView.swift */,
 			);
 			path = Zaps;
+			sourceTree = "<group>";
+		};
+		4CE9FBBB2A6B3D9C007E485C /* Test */ = {
+			isa = PBXGroup;
+			children = (
+				4C9054842A6AEAA000811EEC /* NdbTests.swift */,
+			);
+			path = Test;
 			sourceTree = "<group>";
 		};
 		4CEE2AE62804F57B00AB5EEF /* Frameworks */ = {

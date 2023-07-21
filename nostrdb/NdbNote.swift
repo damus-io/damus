@@ -8,16 +8,21 @@
 import Foundation
 
 struct NdbNote {
+    // we can have owned notes, but we can also have lmdb virtual-memory mapped notes so its optional
     private var owned: Data?
     let note: UnsafeMutablePointer<ndb_note>
 
-    init(notePointer: UnsafeMutablePointer<ndb_note>, data: Data?) {
-        self.note = notePointer
+    init(note: UnsafeMutablePointer<ndb_note>, data: Data?) {
+        self.note = note
         self.owned = data
     }
 
     var id: Data {
         Data(buffer: UnsafeBufferPointer(start: ndb_note_id(note), count: 32))
+    }
+
+    var pubkey: Data {
+        Data(buffer: UnsafeBufferPointer(start: ndb_note_pubkey(note), count: 32))
     }
 
     func tags() -> TagsSequence {
@@ -37,6 +42,6 @@ struct NdbNote {
         guard let note else { return nil }
 
         // Create new Data with just the valid bytes
-        let validData = Data(bytes: &note.pointee, count: Int(len))
-        return NdbNote(notePointer: note, data: validData)
+        let smol_data = Data(bytes: &note.pointee, count: Int(len))
+        return NdbNote(note: note, data: smol_data)
     }}

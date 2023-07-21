@@ -24,7 +24,9 @@ final class NdbTests: XCTestCase {
         guard let note else { return }
 
         let id = "20d0ff27d6fcb13de8366328c5b1a7af26bcac07f2e558fbebd5e9242e608c09"
+        let pubkey = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
         XCTAssertEqual(hex_encode(note.id), id)
+        XCTAssertEqual(hex_encode(note.pubkey), pubkey)
 
         XCTAssertEqual(note.tags().reduce(0, { sum, _ in sum + 1 }), 786)
         XCTAssertEqual(note.tags().reduce(0, { sum, _ in sum + 1 }), 786)
