@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+cp ~/src/c/nostrdb/nostrdb.{c,h} .
+cp ~/src/c/nostrdb/jsmn.h .
