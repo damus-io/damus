@@ -136,7 +136,7 @@ extension NostrEvent {
     }
 
     var is_valid_id: Bool {
-        return calculate_event_id(ev: self) == self.id
+        return hex_encode(calculate_event_id(ev: self)) == self.id
     }
 
     func blocks(_ privkey: String?) -> Blocks {
@@ -311,7 +311,7 @@ extension NostrEvent {
     }
 
     func calculate_id() {
-        self.id = calculate_event_id(ev: self)
+        self.id = hex_encode(calculate_event_id(ev: self))
     }
 
     func sign(privkey: String) {
@@ -414,11 +414,11 @@ func calculate_event_commitment(ev: NostrEvent) -> Data {
     return target_data
 }
 
-func calculate_event_id(ev: NostrEvent) -> String {
+func calculate_event_id(ev: NostrEvent) -> Data {
     let commitment = calculate_event_commitment(ev: ev)
     let hash = sha256(commitment)
 
-    return hex_encode(hash)
+    return hash
 }
 
 
@@ -584,7 +584,7 @@ func make_private_zap_request_event(identity: FullKeypair, enc_key: FullKeypair,
     let tags = zap_target_to_tags(target)
     
     let note = NostrEvent(content: message, pubkey: identity.pubkey, kind: 9733, tags: tags)
-    note.id = calculate_event_id(ev: note)
+    note.id = hex_encode(calculate_event_id(ev: note))
     note.sig = sign_event(privkey: identity.privkey, ev: note)
     
     guard let note_json = encode_json(note),
@@ -715,7 +715,7 @@ func make_zap_request_event(keypair: FullKeypair, content: String, relays: [Rela
     }
     
     let ev = NostrEvent(content: message, pubkey: kp.pubkey, kind: 9734, tags: tags, createdAt: now)
-    ev.id = calculate_event_id(ev: ev)
+    ev.id = hex_encode(calculate_event_id(ev: ev))
     ev.sig = sign_event(privkey: kp.privkey, ev: ev)
     let zapreq = ZapRequest(ev: ev)
     if let privzap_req {

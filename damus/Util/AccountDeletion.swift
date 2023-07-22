@@ -16,7 +16,7 @@ func created_deleted_account_profile(keypair: FullKeypair) -> NostrEvent {
     
     let content = encode_json(profile)!
     let ev = NostrEvent(content: content, pubkey: keypair.pubkey, kind: 0)
-    ev.id = calculate_event_id(ev: ev)
+    ev.id = hex_encode(calculate_event_id(ev: ev))
     ev.sig = sign_event(privkey: keypair.privkey, ev: ev)
     return ev
 }

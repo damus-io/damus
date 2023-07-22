@@ -28,7 +28,7 @@ func create_or_update_list_event(keypair: FullKeypair, mprev: NostrEvent?, to_ad
     let ev = NostrEvent(content: "", pubkey: pubkey, kind: 30000, tags: tags)
     
     ev.tags = tags
-    ev.id = calculate_event_id(ev: ev)
+    ev.id = hex_encode(calculate_event_id(ev: ev))
     ev.sig = sign_event(privkey: keypair.privkey, ev: ev)
     
     return ev
@@ -52,7 +52,7 @@ func remove_from_list_event(keypair: FullKeypair, prev: NostrEvent, to_remove: S
     }
         
     let ev = NostrEvent(content: prev.content, pubkey: keypair.pubkey, kind: 30000, tags: new_tags)
-    ev.id = calculate_event_id(ev: ev)
+    ev.id = hex_encode(calculate_event_id(ev: ev))
     ev.sig = sign_event(privkey: keypair.privkey, ev: ev)
     
     return ev
@@ -68,7 +68,7 @@ func add_to_list_event(keypair: FullKeypair, prev: NostrEvent, to_add: String, t
     
     let new = NostrEvent(content: prev.content, pubkey: keypair.pubkey, kind: 30000, tags: prev.tags)
     new.tags.append([tag_type, to_add])
-    new.id = calculate_event_id(ev: new)
+    new.id = hex_encode(calculate_event_id(ev: new))
     new.sig = sign_event(privkey: keypair.privkey, ev: new)
     
     return new

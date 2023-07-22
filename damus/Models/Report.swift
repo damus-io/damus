@@ -64,7 +64,7 @@ func create_report_event(privkey: String, report: Report) -> NostrEvent? {
     let tags = create_report_tags(target: report.target, type: report.type)
     let ev = NostrEvent(content: report.message, pubkey: pubkey, kind: kind, tags: tags)
     
-    ev.id = calculate_event_id(ev: ev)
+    ev.id = hex_encode(calculate_event_id(ev: ev))
     ev.sig = sign_event(privkey: privkey, ev: ev)
     
     return ev
