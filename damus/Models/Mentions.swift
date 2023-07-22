@@ -427,6 +427,15 @@ struct PostTags {
     let tags: [[String]]
 }
 
+func parse_mention_type_ndb(_ tag: NdbTagElem) -> MentionType? {
+    if tag.matches_char("e") {
+        return .event
+    } else if tag.matches_char("p") {
+        return .pubkey
+    }
+    return nil
+}
+
 func parse_mention_type(_ c: String) -> MentionType? {
     if c == "e" {
         return .event
