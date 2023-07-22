@@ -40,6 +40,14 @@ struct TagIterator: IteratorProtocol {
         return el
     }
 
+    subscript(index: Int) -> NdbTagElem? {
+        if index >= tag.pointee.count {
+            return nil
+        }
+
+        return NdbTagElem(note: note, tag: tag, index: Int32(index))
+    }
+
     var index: Int32
     let note: NdbNote
     var tag: UnsafeMutablePointer<ndb_tag>

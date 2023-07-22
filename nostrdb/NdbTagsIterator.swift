@@ -40,6 +40,21 @@ struct TagsIterator: IteratorProtocol {
 struct TagsSequence: Sequence {
     let note: NdbNote
 
+    var count: UInt16 {
+        note.note.pointee.tags.count
+    }
+
+    subscript(index: Int) -> Iterator.Element? {
+        var i = 0
+        for element in self {
+            if i == index {
+                return element
+            }
+            i += 1
+        }
+        return nil
+    }
+
     func makeIterator() -> TagsIterator {
         return .init(note: note)
     }
