@@ -17,6 +17,14 @@ struct NdbNote {
         self.owned = data
     }
 
+    var owned_size: Int? {
+        return owned?.count
+    }
+
+    var content: String {
+        String(cString: ndb_note_content(note), encoding: .utf8) ?? ""
+    }
+
     var id: Data {
         Data(buffer: UnsafeBufferPointer(start: ndb_note_id(note), count: 32))
     }

@@ -409,7 +409,6 @@ static int parse_unsigned_int(const char *start, int len, unsigned int *num)
 }
 
 
-
 int ndb_note_from_json(const char *json, int len, struct ndb_note **note,
 		       unsigned char *buf, int bufsize)
 {

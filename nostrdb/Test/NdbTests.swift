@@ -28,7 +28,7 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(hex_encode(note.id), id)
         XCTAssertEqual(hex_encode(note.pubkey), pubkey)
 
-        XCTAssertEqual(note.tags().reduce(0, { sum, _ in sum + 1 }), 786)
+        XCTAssertEqual(note.owned_size, 59106)
         XCTAssertEqual(note.tags().reduce(0, { sum, _ in sum + 1 }), 786)
 
         //let tags = note.tags()
