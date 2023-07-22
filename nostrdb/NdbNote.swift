@@ -34,7 +34,7 @@ struct NdbNote {
     }
 
     func tags() -> TagsSequence {
-        return .init(note: note)
+        return .init(note: self)
     }
 
     static func owned_from_json(json: String, bufsize: Int = 2 << 18) -> NdbNote? {

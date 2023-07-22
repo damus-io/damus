@@ -8,8 +8,20 @@
 import Foundation
 
 struct TagSequence: Sequence {
-    let note: UnsafeMutablePointer<ndb_note>
+    let note: NdbNote
     let tag: UnsafeMutablePointer<ndb_tag>
+
+    var count: UInt16 {
+        tag.pointee.count
+    }
+
+    subscript(index: Int) -> NdbTagElem? {
+        if index >= tag.pointee.count {
+            return nil
+        }
+
+        return NdbTagElem(note: note, tag: tag, index: Int32(index))
+    }
 
     func makeIterator() -> TagIterator {
         return TagIterator(note: note, tag: tag)
@@ -29,10 +41,14 @@ struct TagIterator: IteratorProtocol {
     }
 
     var index: Int32
-    let note: UnsafeMutablePointer<ndb_note>
+    let note: NdbNote
     var tag: UnsafeMutablePointer<ndb_tag>
 
-    init(note: UnsafeMutablePointer<ndb_note>, tag: UnsafeMutablePointer<ndb_tag>) {
+    var count: UInt16 {
+        tag.pointee.count
+    }
+
+    init(note: NdbNote, tag: UnsafeMutablePointer<ndb_tag>) {
         self.note = note
         self.tag = tag
         self.index = 0

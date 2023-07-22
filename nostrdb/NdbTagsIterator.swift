@@ -12,11 +12,12 @@ struct TagsIterator: IteratorProtocol {
 
     var done: Bool
     var iter: ndb_iterator
+    var note: NdbNote
 
     mutating func next() -> TagSequence? {
         guard !done else { return nil }
 
-        let tag_seq = TagSequence(note: iter.note, tag: self.iter.tag)
+        let tag_seq = TagSequence(note: note, tag: self.iter.tag)
 
         let ok = ndb_tags_iterate_next(&self.iter)
         done = ok == 0
@@ -24,15 +25,20 @@ struct TagsIterator: IteratorProtocol {
         return tag_seq
     }
 
-    init(note: UnsafeMutablePointer<ndb_note>) {
+    var count: UInt16 {
+        return iter.tag.pointee.count
+    }
+
+    init(note: NdbNote) {
         self.iter = ndb_iterator()
-        let res = ndb_tags_iterate_start(note, &self.iter)
+        let res = ndb_tags_iterate_start(note.note, &self.iter)
         self.done = res == 0
+        self.note = note
     }
 }
 
 struct TagsSequence: Sequence {
-    let note: UnsafeMutablePointer<ndb_note>
+    let note: NdbNote
 
     func makeIterator() -> TagsIterator {
         return .init(note: note)
