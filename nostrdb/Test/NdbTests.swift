@@ -80,20 +80,31 @@ final class NdbTests: XCTestCase {
             return
         }
 
-        var count = 0
-        var char_count = 0
-        for tag in note.tags() {
-            for elem in tag {
-                print("iter_elem \(elem.string())")
-                for _ in elem {
-                    char_count += 1
+
+        self.measure {
+            var count = 0
+            var char_count = 0
+
+            for tag in note.tags() {
+                for elem in tag {
+                    print("iter_elem \(elem.string())")
+                    for c in elem {
+                        if char_count == 0 {
+                            let ac = AsciiCharacter(c)
+                            XCTAssertEqual(ac, "p")
+                        } else if char_count == 0 {
+                            XCTAssertEqual(c, 0x6c)
+                        }
+                        char_count += 1
+                    }
                 }
+                count += 1
             }
-            count += 1
+
+            XCTAssertEqual(count, 786)
+            XCTAssertEqual(char_count, 24370)
         }
 
-        XCTAssertEqual(count, 786)
-        XCTAssertEqual(char_count, 24370)
     }
 
 }
