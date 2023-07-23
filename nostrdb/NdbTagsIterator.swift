@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct TagsSequence: Sequence, IteratorProtocol {
+struct TagsIterator: IteratorProtocol {
     typealias Element = TagSequence
 
     var done: Bool
@@ -17,23 +17,12 @@ struct TagsSequence: Sequence, IteratorProtocol {
     mutating func next() -> TagSequence? {
         guard !done else { return nil }
 
-        let tag_seq = TagSequence(note: note, tag: self.iter.tag, index: self.iter.index)
+        let tag_seq = TagSequence(note: note, tag: self.iter.tag)
 
         let ok = ndb_tags_iterate_next(&self.iter)
         done = ok == 0
 
         return tag_seq
-    }
-
-    subscript(index: Int) -> Iterator.Element? {
-        var i = 0
-        for element in self {
-            if i == index {
-                return element
-            }
-            i += 1
-        }
-        return nil
     }
 
     var count: UInt16 {
@@ -48,3 +37,25 @@ struct TagsSequence: Sequence, IteratorProtocol {
     }
 }
 
+struct TagsSequence: Sequence {
+    let note: NdbNote
+
+    var count: UInt16 {
+        note.note.pointee.tags.count
+    }
+
+    subscript(index: Int) -> Iterator.Element? {
+        var i = 0
+        for element in self {
+            if i == index {
+                return element
+            }
+            i += 1
+        }
+        return nil
+    }
+
+    func makeIterator() -> TagsIterator {
+        return .init(note: note)
+    }
+}
