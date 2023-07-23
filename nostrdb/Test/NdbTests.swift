@@ -28,25 +28,74 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(hex_encode(note.id), id)
         XCTAssertEqual(hex_encode(note.pubkey), pubkey)
 
-        XCTAssertEqual(note.owned_size, 59062)
+        XCTAssertEqual(note.count, 34058)
         XCTAssertEqual(note.kind, 3)
         XCTAssertEqual(note.created_at, 1689904312)
-        XCTAssertEqual(note.tags().reduce(0, { sum, _ in sum + 1 }), 786)
 
+        let expected_count: UInt16 = 786
+        XCTAssertEqual(note.tags().count, expected_count)
+        XCTAssertEqual(note.tags().reduce(0, { sum, _ in sum + 1 }), expected_count)
+
+        var count = 0
+        var tags = 0
+        var total_count_stored = 0
+        var total_count_iter = 0
         //let tags = note.tags()
         for tag in note.tags() {
-            for elem in tag {
-                print("test_ndb_iterator \(elem.string())")
+            total_count_stored += Int(tag.count)
+
+            if tags == 0 || tags == 1 || tags == 2 {
+                XCTAssertEqual(tag.count, 3)
             }
+
+            if tags == 6 {
+                XCTAssertEqual(tag.count, 2)
+            }
+
+            if tags == 7 {
+                XCTAssertEqual(tag[2]?.string(), "wss://nostr-pub.wellorder.net")
+            }
+
+            for elem in tag {
+                print("tag[\(tags)][\(elem.index)]")
+                total_count_iter += 1
+            }
+
+            tags += 1
         }
 
+        XCTAssertEqual(tags, 786)
+        XCTAssertEqual(total_count_stored, total_count_iter)
     }
 
-    func testPerformanceExample() throws {
+    func test_decode_perf() throws {
         // This is an example of a performance test case.
         self.measure {
-            // Put the code you want to measure the time of here.
+            _ = NdbNote.owned_from_json(json: test_contact_list_json)
         }
+    }
+
+    func test_iteration_perf() throws {
+        guard let note = NdbNote.owned_from_json(json: test_contact_list_json) else {
+            XCTAssert(false)
+            return
+        }
+
+        var count = 0
+        for tag in note.tags() {
+            for elem in tag {
+                print("iter_elem \(elem.string())")
+                /*
+                for _ in elem {
+                    count += 1
+                }
+                 */
+            }
+            count += 1
+        }
+
+        XCTAssertEqual(count, 786)
     }
 
 }
+

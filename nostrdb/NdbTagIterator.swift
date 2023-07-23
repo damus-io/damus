@@ -16,9 +16,7 @@ struct TagSequence: Sequence {
     }
 
     subscript(index: Int) -> NdbTagElem? {
-        if index >= tag.pointee.count {
-            return nil
-        }
+        guard index < count else { return nil }
 
         return NdbTagElem(note: note, tag: tag, index: Int32(index))
     }
@@ -40,14 +38,6 @@ struct TagIterator: IteratorProtocol {
         return el
     }
 
-    subscript(index: Int) -> NdbTagElem? {
-        if index >= tag.pointee.count {
-            return nil
-        }
-
-        return NdbTagElem(note: note, tag: tag, index: Int32(index))
-    }
-
     var index: Int32
     let note: NdbNote
     var tag: UnsafeMutablePointer<ndb_tag>
@@ -62,10 +52,3 @@ struct TagIterator: IteratorProtocol {
         self.index = 0
     }
 }
-
-
-func ndb_maybe_pointee<T>(_ p: UnsafeMutablePointer<T>!) -> T? {
-    guard p != nil else { return nil }
-    return p.pointee
-}
-

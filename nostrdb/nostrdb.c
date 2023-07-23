@@ -57,24 +57,6 @@ int ndb_builder_new(struct ndb_builder *builder, unsigned char *buf,
 	return 1;
 }
 
-/// Check for small strings to pack
-static inline int ndb_builder_try_compact_str(struct ndb_builder *builder,
-					      const char *str, int len,
-					      union packed_str *pstr)
-{
-	if (len == 0) {
-		*pstr = ndb_char_to_packed_str(0);
-		return 1;
-	} else if (len == 1) {
-		*pstr = ndb_char_to_packed_str(str[0]);
-		return 1;
-	} else if (len == 2) {
-		*pstr = ndb_chars_to_packed_str(str[0], str[1]);
-		return 1;
-	}
-
-	return 0;
-}
 
 
 static inline int ndb_json_parser_init(struct ndb_json_parser *p,
@@ -146,7 +128,7 @@ struct ndb_note * ndb_builder_note(struct ndb_builder *builder)
 /// builder phase just for this purpose.
 static inline int ndb_builder_find_str(struct ndb_builder *builder,
 				       const char *str, int len,
-				       union packed_str *pstr)
+				       union ndb_packed_str *pstr)
 {
 	// find existing matching string to avoid duplicate strings
 	int indices = cursor_count(&builder->str_indices, sizeof(uint32_t));
@@ -165,7 +147,7 @@ static inline int ndb_builder_find_str(struct ndb_builder *builder,
 }
 
 static int ndb_builder_push_str(struct ndb_builder *builder, const char *str,
-				int len, union packed_str *pstr)
+				int len, union ndb_packed_str *pstr)
 {
 	uint32_t loc;
 
@@ -185,9 +167,52 @@ static int ndb_builder_push_str(struct ndb_builder *builder, const char *str,
 	return 1;
 }
 
+static int ndb_builder_push_packed_id(struct ndb_builder *builder,
+				      unsigned char *id,
+				      union ndb_packed_str *pstr)
+{
+	if (ndb_builder_find_str(builder, (const char*)id, 32, pstr)) {
+		pstr->packed.flag = NDB_PACKED_ID;
+		return 1;
+	}
+
+	if (ndb_builder_push_str(builder, (const char*)id, 32, pstr)) {
+		pstr->packed.flag = NDB_PACKED_ID;
+		return 1;
+	}
+
+	return 0;
+}
+
+
+/// Check for small strings to pack
+static inline int ndb_builder_try_compact_str(struct ndb_builder *builder,
+					      const char *str, int len,
+					      union ndb_packed_str *pstr,
+					      int pack_ids)
+{
+	unsigned char id_buf[32];
+
+	if (len == 0) {
+		*pstr = ndb_char_to_packed_str(0);
+		return 1;
+	} else if (len == 1) {
+		*pstr = ndb_char_to_packed_str(str[0]);
+		return 1;
+	} else if (len == 2) {
+		*pstr = ndb_chars_to_packed_str(str[0], str[1]);
+		return 1;
+	} else if (pack_ids && len == 64 && hex_decode(str, 64, id_buf, 32)) {
+		return ndb_builder_push_packed_id(builder, id_buf, pstr);
+	}
+
+	return 0;
+}
+
+
 static int ndb_builder_push_unpacked_str(struct ndb_builder *builder,
 					 const char *str, int len,
-					 union packed_str *pstr)
+					 union ndb_packed_str *pstr)
 {
 	if (ndb_builder_find_str(builder, str, len, pstr))
 		return 1;
@@ -196,9 +221,9 @@ static int ndb_builder_push_unpacked_str(struct ndb_builder *builder,
 }
 
 int ndb_builder_make_str(struct ndb_builder *builder, const char *str, int len,
-			 union packed_str *pstr)
+			 union ndb_packed_str *pstr, int pack_ids)
 {
-	if (ndb_builder_try_compact_str(builder, str, len, pstr))
+	if (ndb_builder_try_compact_str(builder, str, len, pstr, pack_ids))
 		return 1;
 
 	return ndb_builder_push_unpacked_str(builder, str, len, pstr);
@@ -207,8 +232,10 @@ int ndb_builder_make_str(struct ndb_builder *builder, const char *str, int len,
 int ndb_builder_set_content(struct ndb_builder *builder, const char *content,
 			    int len)
 {
+	int pack_ids = 0;
 	builder->note->content_length = len;
-	return ndb_builder_make_str(builder, content, len, &builder->note->content);
+	return ndb_builder_make_str(builder, content, len,
+				    &builder->note->content, pack_ids);
 }
 
 
@@ -228,7 +255,7 @@ static inline int toksize(jsmntok_t *tok)
 }
 
 static int ndb_builder_finalize_tag(struct ndb_builder *builder,
-				    union packed_str offset)
+				    union ndb_packed_str offset)
 {
 	if (!cursor_push_u32(&builder->note_cur, offset.offset))
 		return 0;
@@ -239,8 +266,8 @@ static int ndb_builder_finalize_tag(struct ndb_builder *builder,
 /// Unescape and push json strings
 static int ndb_builder_make_json_str(struct ndb_builder *builder,
 				     const char *str, int len,
-				     union packed_str *pstr,
-				     int *written)
+				     union ndb_packed_str *pstr,
+				     int *written, int pack_ids)
 {
 	// let's not care about de-duping these. we should just unescape
 	// in-place directly into the strings table. 
@@ -249,7 +276,7 @@ static int ndb_builder_make_json_str(struct ndb_builder *builder,
 	unsigned char *builder_start;
 
 	// always try compact strings first
-	if (ndb_builder_try_compact_str(builder, str, len, pstr))
+	if (ndb_builder_try_compact_str(builder, str, len, pstr, pack_ids))
 		return 1;
 
 	end = str + len;
@@ -327,8 +354,9 @@ static int ndb_builder_make_json_str(struct ndb_builder *builder,
 static int ndb_builder_push_json_tag(struct ndb_builder *builder,
 				     const char *str, int len)
 {
-	union packed_str pstr;
-	if (!ndb_builder_make_json_str(builder, str, len, &pstr, NULL))
+	union ndb_packed_str pstr;
+	int pack_ids = 1;
+	if (!ndb_builder_make_json_str(builder, str, len, &pstr, NULL, pack_ids))
 		return 0;
 	return ndb_builder_finalize_tag(builder, pstr);
 }
@@ -474,13 +502,13 @@ int ndb_note_from_json(const char *json, int len, struct ndb_note **note,
 			} else if (jsoneq(json, tok, tok_len, "content")) {
 				// content
 				tok = &parser.toks[i+1];
-				union packed_str pstr;
+				union ndb_packed_str pstr;
 				tok_len = toksize(tok);
-				int written;
+				int written, pack_ids = 0;
 				if (!ndb_builder_make_json_str(&parser.builder,
 							json + tok->start,
 							tok_len, &pstr,
-							&written)) {
+							&written, pack_ids)) {
 					return 0;
 				}
 				parser.builder.note->content_length = written;
@@ -531,8 +559,9 @@ int ndb_builder_new_tag(struct ndb_builder *builder)
 inline int ndb_builder_push_tag_str(struct ndb_builder *builder,
 				    const char *str, int len)
 {
-	union packed_str pstr;
-	if (!ndb_builder_make_str(builder, str, len, &pstr))
+	union ndb_packed_str pstr;
+	int pack_ids = 1;
+	if (!ndb_builder_make_str(builder, str, len, &pstr, pack_ids))
 		return 0;
 	return ndb_builder_finalize_tag(builder, pstr);
 }

@@ -4,25 +4,36 @@
 #include <inttypes.h>
 #include "cursor.h"
 
+struct ndb_str {
+	unsigned char flag;
+	union {
+		const char *str;
+		unsigned char *id;
+	};
+};
+
 // these must be byte-aligned, they are directly accessing the serialized data
 // representation
 #pragma pack(push, 1)
 
-union packed_str {
-	uint32_t offset;
+/// We can store byte data in the string table, so 
+#define NDB_PACKED_STR     0x1
+#define NDB_PACKED_ID      0x2
 
+union ndb_packed_str {
 	struct {
 		char str[3];
 		// we assume little endian everywhere. sorry not sorry.
-		unsigned char flag;
+		unsigned char flag; // NDB_PACKED_STR, etc
 	} packed;
 
+	uint32_t offset;
 	unsigned char bytes[4];
 };
 
 struct ndb_tag {
 	uint16_t count;
-	union packed_str strs[0];
+	union ndb_packed_str strs[0];
 };
 
 struct ndb_tags {
@@ -41,9 +52,8 @@ struct ndb_note {
 	uint32_t created_at;
 	uint32_t kind;
 	uint32_t content_length;
-	union packed_str content;
+	union ndb_packed_str content;
 	uint32_t strings;
-	uint32_t json;
 
 	// nothing can come after tags since it contains variadic data
 	struct ndb_tags tags;
@@ -80,40 +90,40 @@ int ndb_builder_new_tag(struct ndb_builder *builder);
 int ndb_builder_push_tag_str(struct ndb_builder *builder, const char *str, int len);
 // BYE BUILDER
 
-static inline int ndb_str_is_packed(union packed_str str)
+static inline struct ndb_str ndb_note_str(struct ndb_note *note,
+					  union ndb_packed_str *pstr)
 {
-	return (str.offset >> 31) & 0x1;
+	struct ndb_str str;
+	str.flag = pstr->packed.flag;
+
+	if (str.flag == NDB_PACKED_STR) {
+		str.str = pstr->packed.str;
+		return str;
+	}
+
+	str.str = ((const char *)note) + note->strings + (pstr->offset & 0xFFFFFF);
+	return str;
 }
 
-
-static inline const char * ndb_note_str(struct ndb_note *note,
-					union packed_str *str)
-{
-	if (ndb_str_is_packed(*str))
-		return str->packed.str;
-
-	return ((const char *)note) + note->strings + str->offset;
-}
-
-static inline const char * ndb_tag_str(struct ndb_note *note,
-				       struct ndb_tag *tag, int ind)
+static inline struct ndb_str ndb_tag_str(struct ndb_note *note,
+					 struct ndb_tag *tag, int ind)
 {
 	return ndb_note_str(note, &tag->strs[ind]);
 }
 
-static int ndb_tag_matches_char(struct ndb_note *note,
+static inline int ndb_tag_matches_char(struct ndb_note *note,
 				       struct ndb_tag *tag, int ind, char c)
 {
-	const char *str = ndb_tag_str(note, tag, ind);
-	if (str[0] == '\0')
+	struct ndb_str str = ndb_tag_str(note, tag, ind);
+	if (str.str[0] == '\0')
 		return 0;
-	else if (str[0] == c)
+	else if (str.str[0] == c)
 		return 1;
 	return 0;
 }
 
-static inline const char * ndb_iter_tag_str(struct ndb_iterator *iter,
-					    int ind)
+static inline struct ndb_str ndb_iter_tag_str(struct ndb_iterator *iter,
+					      int ind)
 {
 	return ndb_tag_str(iter->note, iter->tag, ind);
 }
@@ -143,9 +153,9 @@ static inline uint32_t ndb_note_kind(struct ndb_note *note)
 	return note->kind;
 }
 
-static inline const char * ndb_note_content(struct ndb_note *note)
+static inline const char *ndb_note_content(struct ndb_note *note)
 {
-	return ndb_note_str(note, &note->content);
+	return ndb_note_str(note, &note->content).str;
 }
 
 static inline uint32_t ndb_note_content_length(struct ndb_note *note)
@@ -161,55 +171,50 @@ static inline struct ndb_note * ndb_note_from_bytes(unsigned char *bytes)
 	return note;
 }
 
-static inline union packed_str ndb_offset_str(uint32_t offset)
+static inline union ndb_packed_str ndb_offset_str(uint32_t offset)
 {
 	// ensure accidents like -1 don't corrupt our packed_str
-	union packed_str str;
-	str.offset = offset & 0x7FFFFFFF;
+	union ndb_packed_str str;
+	// most significant byte is reserved for ndb_packtype
+	str.offset = offset & 0xFFFFFF;
 	return str;
 }
 
-static inline union packed_str ndb_char_to_packed_str(char c)
+static inline union ndb_packed_str ndb_char_to_packed_str(char c)
 {
-	union packed_str str;
-	str.packed.flag = 0xFF;
+	union ndb_packed_str str;
+	str.packed.flag = NDB_PACKED_STR;
 	str.packed.str[0] = c;
 	str.packed.str[1] = '\0';
 	return str;
 }
 
-static inline union packed_str ndb_chars_to_packed_str(char c1, char c2)
+static inline union ndb_packed_str ndb_chars_to_packed_str(char c1, char c2)
 {
-	union packed_str str;
-	str.packed.flag = 0xFF;
+	union ndb_packed_str str;
+	str.packed.flag = NDB_PACKED_STR;
 	str.packed.str[0] = c1;
 	str.packed.str[1] = c2;
 	str.packed.str[2] = '\0';
 	return str;
 }
 
-static inline const char * ndb_note_tag_index(struct ndb_note *note,
-					      struct ndb_tag *tag, int index)
-{
-	if (index >= tag->count) {
-		return 0;
-	}
-
-	return ndb_note_str(note, &tag->strs[index]);
-}
-
-static inline int ndb_tags_iterate_start(struct ndb_note *note,
-					 struct ndb_iterator *iter)
+static inline void ndb_tags_iterate_start(struct ndb_note *note,
+					  struct ndb_iterator *iter)
 {
 	iter->note = note;
-	iter->tag = note->tags.tag;
-	iter->index = 0;
-
-	return note->tags.count != 0 && iter->tag->count != 0;
+	iter->tag = NULL;
+	iter->index = -1;
 }
 
 static inline int ndb_tags_iterate_next(struct ndb_iterator *iter)
 {
+	if (iter->tag == NULL || iter->index == -1) {
+		iter->tag = iter->note->tags.tag;
+		iter->index = 0;
+		return iter->note->tags.count != 0;
+	}
+
 	struct ndb_tags *tags = &iter->note->tags;
 
 	if (++iter->index < tags->count) {

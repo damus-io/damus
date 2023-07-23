@@ -15,24 +15,22 @@ struct TagsIterator: IteratorProtocol {
     var note: NdbNote
 
     mutating func next() -> TagSequence? {
-        guard !done else { return nil }
+        guard ndb_tags_iterate_next(&self.iter) == 1 else {
+            done = true
+            return nil
+        }
 
-        let tag_seq = TagSequence(note: note, tag: self.iter.tag)
-
-        let ok = ndb_tags_iterate_next(&self.iter)
-        done = ok == 0
-
-        return tag_seq
+        return TagSequence(note: note, tag: self.iter.tag)
     }
 
     var count: UInt16 {
-        return iter.tag.pointee.count
+        return note.note.pointee.tags.count
     }
 
     init(note: NdbNote) {
         self.iter = ndb_iterator()
-        let res = ndb_tags_iterate_start(note.note, &self.iter)
-        self.done = res == 0
+        ndb_tags_iterate_start(note.note, &self.iter)
+        self.done = false
         self.note = note
     }
 }
@@ -44,6 +42,9 @@ struct TagsSequence: Sequence {
         note.note.pointee.tags.count
     }
 
+    // no O(1) indexing on top-level tag lists unfortunately :(
+    // bit it's very fast to iterate over each tag since the number of tags
+    // are stored and the elements are fixed size.
     subscript(index: Int) -> Iterator.Element? {
         var i = 0
         for element in self {

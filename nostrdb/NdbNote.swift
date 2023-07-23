@@ -7,20 +7,44 @@
 
 import Foundation
 
-struct NdbNote {
+
+struct NdbStr {
+    let note: NdbNote
+    let str: UnsafePointer<CChar>
+}
+
+struct NdbId {
+    let note: NdbNote
+    let id: Data
+}
+
+enum NdbData {
+    case id(NdbId)
+    case str(NdbStr)
+
+    init(note: NdbNote, str: ndb_str) {
+        guard str.flag == NDB_PACKED_ID else {
+            self = .str(NdbStr(note: note, str: str.str))
+            return
+        }
+
+        let buffer = UnsafeBufferPointer(start: str.id, count: 32)
+        self = .id(NdbId(note: note, id: Data(buffer: buffer)))
+    }
+}
+
+class NdbNote {
     // we can have owned notes, but we can also have lmdb virtual-memory mapped notes so its optional
-    private var owned: Data?
+    private let owned: Bool
+    let count: Int
     let note: UnsafeMutablePointer<ndb_note>
 
-    init(note: UnsafeMutablePointer<ndb_note>, data: Data?) {
+    init(note: UnsafeMutablePointer<ndb_note>, owned_size: Int?) {
         self.note = note
-        self.owned = data
+        self.owned = owned_size != nil
+        self.count = owned_size ?? 0
     }
-    
-    var owned_size: Int? {
-        return owned?.count
-    }
-    
+
     var content: String {
         String(cString: content_raw, encoding: .utf8) ?? ""
     }
@@ -33,10 +57,12 @@ struct NdbNote {
         ndb_note_content_length(note)
     }
 
+    /// These are unsafe if working on owned data and if this outlives the NdbNote
     var id: Data {
         Data(buffer: UnsafeBufferPointer(start: ndb_note_id(note), count: 32))
     }
     
+    /// Make a copy if this outlives the note and the note has owned data!
     var pubkey: Data {
         Data(buffer: UnsafeBufferPointer(start: ndb_note_pubkey(note), count: 32))
     }
@@ -48,26 +74,35 @@ struct NdbNote {
     var kind: UInt32 {
         ndb_note_kind(note)
     }
-    
+
     func tags() -> TagsSequence {
         return .init(note: self)
     }
-    
+
+    deinit {
+        if self.owned {
+            free(note)
+        }
+    }
+
     static func owned_from_json(json: String, bufsize: Int = 2 << 18) -> NdbNote? {
-        var data = Data(capacity: bufsize)
+        let data = malloc(bufsize)
         guard var json_cstr = json.cString(using: .utf8) else { return nil }
         
         var note: UnsafeMutablePointer<ndb_note>?
         
-        let len = data.withUnsafeMutableBytes { (bytes: UnsafeMutableRawBufferPointer) in
-            return ndb_note_from_json(&json_cstr, Int32(json_cstr.count), &note, bytes.baseAddress, Int32(bufsize))
+        let len = ndb_note_from_json(&json_cstr, Int32(json_cstr.count), &note, data, Int32(bufsize))
+
+        if len == 0 {
+            free(data)
+            return nil
         }
-        
-        guard let note else { return nil }
-        
+
         // Create new Data with just the valid bytes
-        let smol_data = Data(bytes: &note.pointee, count: Int(len))
-        return NdbNote(note: note, data: smol_data)
+        guard let note_data = realloc(data, Int(len)) else { return nil }
+
+        let new_note = note_data.assumingMemoryBound(to: ndb_note.self)
+        return NdbNote(note: new_note, owned_size: Int(len))
     }
 }
 
@@ -99,19 +134,34 @@ extension NdbNote {
         return parse_note_content_ndb(note: self)
     }
 
-    /*
-
     func get_inner_event(cache: EventCache) -> NostrEvent? {
         guard self.known_kind == .boost else {
             return nil
         }
 
         if self.content == "", let ref = self.referenced_ids.first {
-            return cache.lookup(ref.ref_id)
+            // TODO: raw id cache lookups
+            let id = ref.id.string()
+            return cache.lookup(id)
         }
 
-        return self.inner_event
+        // TODO: how to handle inner events?
+        return nil
+        //return self.inner_event
     }
+
+    // TODO: References iterator
+    public var referenced_ids: LazyFilterSequence<References> {
+        References(note: self).lazy
+            .filter() { ref in ref.key == "e" }
+    }
+
+    public var referenced_pubkeys: LazyFilterSequence<References> {
+        References(note: self).lazy
+            .filter() { ref in ref.key == "p" }
+    }
+
+    /*
 
     func event_refs(_ privkey: String?) -> [EventRef] {
         if let rs = _event_refs {
@@ -121,7 +171,6 @@ extension NdbNote {
         self._event_refs = refs
         return refs
     }
-
 
     func decrypted(privkey: String?) -> String? {
         if let decrypted_content = decrypted_content {
@@ -271,4 +320,10 @@ extension NdbNote {
         return Date.now.timeIntervalSince(event_date)
     }
      */
+}
+
+extension LazyFilterSequence {
+    var first: Element? {
+        self.first(where: { _ in true })
+    }
 }
