@@ -136,7 +136,7 @@ static inline int ndb_builder_find_str(struct ndb_builder *builder,
 		uint32_t index = ((uint32_t*)builder->str_indices.start)[i];
 		const char *some_str = (const char*)builder->strings.start + index;
 
-		if (!strncmp(some_str, str, len)) {
+		if (!memcmp(some_str, str, len)) {
 			// found an existing matching str, use that index
 			*pstr = ndb_offset_str(index);
 			return 1;
@@ -171,10 +171,13 @@ static int ndb_builder_push_packed_id(struct ndb_builder *builder,
 				      unsigned char *id,
 				      union ndb_packed_str *pstr)
 {
-	if (ndb_builder_find_str(builder, (const char*)id, 32, pstr)) {
-		pstr->packed.flag = NDB_PACKED_ID;
-		return 1;
-	}
+	// Don't both find id duplicates. very rarely are they duplicated
+	// and it slows things down quite a bit. If we really care about this
+	// We can switch to a hash table.
+	//if (ndb_builder_find_str(builder, (const char*)id, 32, pstr)) {
+	//	pstr->packed.flag = NDB_PACKED_ID;
+	//	return 1;
+	//}
 
 	if (ndb_builder_push_str(builder, (const char*)id, 32, pstr)) {
 		pstr->packed.flag = NDB_PACKED_ID;

@@ -28,7 +28,7 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(hex_encode(note.id), id)
         XCTAssertEqual(hex_encode(note.pubkey), pubkey)
 
-        XCTAssertEqual(note.count, 34058)
+        XCTAssertEqual(note.count, 34322)
         XCTAssertEqual(note.kind, 3)
         XCTAssertEqual(note.created_at, 1689904312)
 
@@ -82,19 +82,19 @@ final class NdbTests: XCTestCase {
         }
 
         var count = 0
+        var char_count = 0
         for tag in note.tags() {
             for elem in tag {
                 print("iter_elem \(elem.string())")
-                /*
-                for _ in elem {
-                    count += 1
+                for c in elem {
+                    char_count += 1
                 }
-                 */
             }
             count += 1
         }
 
         XCTAssertEqual(count, 786)
+        XCTAssertEqual(char_count, 24370)
     }
 
 }
