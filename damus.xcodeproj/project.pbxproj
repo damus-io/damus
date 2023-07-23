@@ -128,6 +128,7 @@
 		4C3EA67D28FFBBA300C48A62 /* InvoicesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67C28FFBBA200C48A62 /* InvoicesView.swift */; };
 		4C3EA67F28FFC01D00C48A62 /* InvoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67E28FFC01D00C48A62 /* InvoiceView.swift */; };
 		4C42812C298C848200DBF26F /* TranslateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C42812B298C848200DBF26F /* TranslateView.swift */; };
+		4C4DD3DB2A6CA7E8005B4E85 /* ContentParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C4DD3DA2A6CA7E8005B4E85 /* ContentParsing.swift */; };
 		4C4F14A72A2A61A30045A0B9 /* NostrScriptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C4F14A62A2A61A30045A0B9 /* NostrScriptTests.swift */; };
 		4C54AA0729A540BA003E4487 /* NotificationsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C54AA0629A540BA003E4487 /* NotificationsModel.swift */; };
 		4C54AA0A29A55429003E4487 /* EventGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C54AA0929A55429003E4487 /* EventGroup.swift */; };
@@ -609,6 +610,7 @@
 		4C3EA67E28FFC01D00C48A62 /* InvoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvoiceView.swift; sourceTree = "<group>"; };
 		4C42812B298C848200DBF26F /* TranslateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslateView.swift; sourceTree = "<group>"; };
 		4C4A3A5A288A1B2200453788 /* damus.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = damus.entitlements; sourceTree = "<group>"; };
+		4C4DD3DA2A6CA7E8005B4E85 /* ContentParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentParsing.swift; sourceTree = "<group>"; };
 		4C4F14A62A2A61A30045A0B9 /* NostrScriptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrScriptTests.swift; sourceTree = "<group>"; };
 		4C4F14A82A2A71AB0045A0B9 /* nostrscript.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nostrscript.h; sourceTree = "<group>"; };
 		4C4F14A92A2A71AB0045A0B9 /* nostrscript.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nostrscript.c; sourceTree = "<group>"; };
@@ -1526,6 +1528,7 @@
 				4CE6DEEC27F7A08200C66700 /* Preview Content */,
 				3A4325AA2961E11400BFCD9D /* Localizable.stringsdict */,
 				4C687C262A6039500092C550 /* TestData.swift */,
+				4C4DD3DA2A6CA7E8005B4E85 /* ContentParsing.swift */,
 			);
 			path = damus;
 			sourceTree = "<group>";
@@ -1955,6 +1958,7 @@
 				4C285C8E28399BFE008A31F1 /* SaveKeysView.swift in Sources */,
 				F7F0BA25297892BD009531F3 /* SwipeToDismiss.swift in Sources */,
 				4C8D00CA29DF80350036AF10 /* TruncatedText.swift in Sources */,
+				4C4DD3DB2A6CA7E8005B4E85 /* ContentParsing.swift in Sources */,
 				4C9BB83429C12D9900FC4E37 /* EventProfileName.swift in Sources */,
 				4C7D09602A098C5D00943473 /* WalletView.swift in Sources */,
 				4CB8838F296F781C00DC99E7 /* ReactionsView.swift in Sources */,
