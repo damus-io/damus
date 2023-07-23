@@ -36,7 +36,6 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(note.tags().count, expected_count)
         XCTAssertEqual(note.tags().reduce(0, { sum, _ in sum + 1 }), expected_count)
 
-        var count = 0
         var tags = 0
         var total_count_stored = 0
         var total_count_iter = 0
@@ -86,7 +85,7 @@ final class NdbTests: XCTestCase {
         for tag in note.tags() {
             for elem in tag {
                 print("iter_elem \(elem.string())")
-                for c in elem {
+                for _ in elem {
                     char_count += 1
                 }
             }
