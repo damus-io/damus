@@ -7,11 +7,20 @@
 
 import Foundation
 
-struct AsciiCharacter: ExpressibleByStringLiteral {
+struct AsciiCharacter: ExpressibleByStringLiteral, Equatable, Hashable {
     private let value: UInt8
 
     var cchar: CChar {
         return CChar(bitPattern: value)
+    }
+
+    var string: String {
+        return String(UnicodeScalar(UInt8(bitPattern: cchar)))
+    }
+
+    init?(_ cchar: CChar) {
+        guard cchar < 127 else { return nil }
+        self.value = UInt8(cchar)
     }
 
     init?(_ character: Character) {
