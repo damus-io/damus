@@ -68,14 +68,14 @@ struct EULAView: View {
                 Markdown(eula)
                     .padding()
             }
-            .padding(EdgeInsets(top: 20, leading: 10, bottom: 50, trailing: 10))
-            
+            .padding(EdgeInsets(top: 20, leading: 10, bottom: 60, trailing: 10))
+
             VStack {
                 Spacer()
-                
+
                 HStack {
                     Spacer()
-                    
+
                     Button(action: {
                         dismiss()
                     }) {
@@ -91,7 +91,9 @@ struct EULAView: View {
                                 .fill(DamusColors.darkGrey, strokeBorder: DamusColors.mediumGrey, lineWidth: 1)
                         }
                     }
-                    
+
+                    Spacer()
+
                     Button(action: {
                         nav.push(route: Route.Login)
                     }) {
@@ -102,9 +104,11 @@ struct EULAView: View {
                         .frame(minWidth: 75, maxHeight: 12, alignment: .center)
                     }
                     .buttonStyle(GradientButtonStyle())
+
+                    Spacer()
                 }
-                .padding(.trailing, 30)
             }
+            .padding(.bottom, 5)
         }
         .background(
             Image("eula-bg")
