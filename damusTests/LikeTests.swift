@@ -37,7 +37,6 @@ class LikeTests: XCTestCase {
         let pubkey  = "30c6d1dc7f7c156794fa15055e651b758a61b99f50fcf759de59386050bf6ae2"
         let liked = NostrEvent(content: "awesome #[0] post", pubkey: "orig_pk", tags: [["p", "cindy"], ["e", "bob"]])
         liked.calculate_id()
-        let id = liked.id
 
         let emptyReaction = make_like_event(pubkey: pubkey, privkey: privkey, liked: liked, content: "")
         let plusReaction = make_like_event(pubkey: pubkey, privkey: privkey, liked: liked, content: "+")
