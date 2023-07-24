@@ -20,7 +20,10 @@ enum ValidationResult: Decodable {
     case bad_sig
 }
 
-class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Hashable, Comparable {
+//typealias NostrEvent = NdbNote
+typealias NostrEvent = NostrEventOld
+
+class NostrEventOld: Codable, Identifiable, CustomStringConvertible, Equatable, Hashable, Comparable {
     // TODO: memory mapped db events
     /*
     private var note_data: UnsafeMutablePointer<ndb_note>
@@ -67,15 +70,15 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     private var _event_refs: [EventRef]? = nil
     var decrypted_content: String? = nil
     private var _blocks: Blocks? = nil
-    private lazy var inner_event: NostrEvent? = {
+    private lazy var inner_event: NostrEventOld? = {
         return event_from_json(dat: self.content)
     }()
 
-    static func == (lhs: NostrEvent, rhs: NostrEvent) -> Bool {
+    static func == (lhs: NostrEventOld, rhs: NostrEventOld) -> Bool {
         return lhs.id == rhs.id
     }
 
-    static func < (lhs: NostrEvent, rhs: NostrEvent) -> Bool {
+    static func < (lhs: NostrEventOld, rhs: NostrEventOld) -> Bool {
         return lhs.created_at < rhs.created_at
     }
 
@@ -96,7 +99,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     }
 }
 
-extension NostrEvent {
+extension NostrEventOld {
     var is_textlike: Bool {
         return kind == 1 || kind == 42 || kind == 30023
     }
@@ -127,7 +130,7 @@ extension NostrEvent {
     }
 
 
-    func get_inner_event(cache: EventCache) -> NostrEvent? {
+    func get_inner_event(cache: EventCache) -> NostrEventOld? {
         guard self.known_kind == .boost else {
             return nil
         }
