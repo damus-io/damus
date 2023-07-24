@@ -42,7 +42,7 @@ struct SelectedEventView: View {
                 .minimumScaleFactor(0.75)
                 .lineLimit(1)
                 
-                if event_is_reply(event, privkey: damus.keypair.privkey) {
+                if event_is_reply(event.event_refs(damus.keypair.privkey)) {
                     ReplyDescription(event: event, profiles: damus.profiles)
                         .padding(.horizontal)
                 }

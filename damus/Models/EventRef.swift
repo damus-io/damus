@@ -146,8 +146,8 @@ func interpret_event_refs(blocks: [Block], tags: [[String]]) -> [EventRef] {
 }
 
 
-func event_is_reply(_ ev: NostrEvent, privkey: String?) -> Bool {
-    return ev.event_refs(privkey).contains { evref in
+func event_is_reply(_ refs: [EventRef]) -> Bool {
+    return refs.contains { evref in
         return evref.is_reply != nil
     }
 }

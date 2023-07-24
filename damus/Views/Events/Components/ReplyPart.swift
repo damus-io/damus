@@ -14,7 +14,7 @@ struct ReplyPart: View {
     
     var body: some View {
         Group {
-            if event_is_reply(event, privkey: privkey) {
+            if event_is_reply(event.event_refs(privkey)) {
                 ReplyDescription(event: event, profiles: profiles)
             } else {
                 EmptyView()

@@ -250,7 +250,7 @@ extension NostrEvent {
     }
 
     func is_reply(_ privkey: String?) -> Bool {
-        return event_is_reply(self, privkey: privkey)
+        return event_is_reply(self.event_refs(privkey))
     }
 
     func note_language(_ privkey: String?) -> String? {
