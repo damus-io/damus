@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import NaturalLanguage
 
 
 struct NdbStr {
@@ -233,20 +234,17 @@ extension NdbNote {
         return dec
     }
 
-
     /*
 
     var description: String {
         return "NostrEvent { id: \(id) pubkey \(pubkey) kind \(kind) tags \(tags) content '\(content)' }"
     }
 
-    private enum CodingKeys: String, CodingKey {
-        case id, sig, tags, pubkey, created_at, kind, content
-    }
-
+    // Not sure I should implement this
     private func get_referenced_ids(key: String) -> [ReferencedId] {
         return damus.get_referenced_ids(tags: self.tags, key: key)
     }
+     */
 
     public func direct_replies(_ privkey: String?) -> [ReferencedId] {
         return event_refs(privkey).reduce(into: []) { acc, evref in
@@ -256,6 +254,7 @@ extension NdbNote {
         }
     }
 
+    // NDBTODO: just use Id
     public func thread_id(privkey: String?) -> String {
         for ref in event_refs(privkey) {
             if let thread_id = ref.is_thread_id {
@@ -263,32 +262,18 @@ extension NdbNote {
             }
         }
 
-        return self.id
+        return hex_encode(self.id)
     }
 
     public func last_refid() -> ReferencedId? {
-        var mlast: Int? = nil
-        var i: Int = 0
-        for tag in tags {
-            if tag.count >= 2 && tag[0] == "e" {
-                mlast = i
-            }
-            i += 1
-        }
-
-        guard let last = mlast else {
-            return nil
-        }
-
-        return tag_to_refid(tags[last])
+        return self.referenced_ids.last?.to_referenced_id()
     }
 
-    public func references(id: String, key: String) -> Bool {
-        for tag in tags {
-            if tag.count >= 2 && tag[0] == key {
-                if tag[1] == id {
-                    return true
-                }
+    // NDBTODO: id -> data
+    public func references(id: String, key: AsciiCharacter) -> Bool {
+        for ref in References(tags: self.tags()) {
+            if ref.key == key && ref.id.string() == id {
+                return true
             }
         }
 
@@ -299,36 +284,31 @@ extension NdbNote {
         return event_is_reply(self.event_refs(privkey))
     }
 
-    func note_language(_ privkey: String?) -> String? {
-        // Rely on Apple's NLLanguageRecognizer to tell us which language it thinks the note is in
-        // and filter on only the text portions of the content as URLs and hashtags confuse the language recognizer.
-        let originalBlocks = blocks(privkey).blocks
-        let originalOnlyText = originalBlocks.compactMap { $0.is_text }.joined(separator: " ")
+    func note_language(_ privkey: String?) async -> String? {
+        let t = Task.detached {
+            // Rely on Apple's NLLanguageRecognizer to tell us which language it thinks the note is in
+            // and filter on only the text portions of the content as URLs and hashtags confuse the language recognizer.
+            let originalBlocks = self.blocks(privkey).blocks
+            let originalOnlyText = originalBlocks.compactMap { $0.is_text }.joined(separator: " ")
 
-        // Only accept language recognition hypothesis if there's at least a 50% probability that it's accurate.
-        let languageRecognizer = NLLanguageRecognizer()
-        languageRecognizer.processString(originalOnlyText)
+            // Only accept language recognition hypothesis if there's at least a 50% probability that it's accurate.
+            let languageRecognizer = NLLanguageRecognizer()
+            languageRecognizer.processString(originalOnlyText)
 
-        guard let locale = languageRecognizer.languageHypotheses(withMaximum: 1).first(where: { $0.value >= 0.5 })?.key.rawValue else {
-            return nil
+            guard let locale = languageRecognizer.languageHypotheses(withMaximum: 1).first(where: { $0.value >= 0.5 })?.key.rawValue else {
+                let nstr: String? = nil
+                return nstr
+            }
+
+            // Remove the variant component and just take the language part as translation services typically only supports the variant-less language.
+            // Moreover, speakers of one variant can generally understand other variants.
+            return localeToLanguage(locale)
         }
 
-        // Remove the variant component and just take the language part as translation services typically only supports the variant-less language.
-        // Moreover, speakers of one variant can generally understand other variants.
-        return localeToLanguage(locale)
+        return await t.value
     }
 
-    public var referenced_ids: [ReferencedId] {
-        return get_referenced_ids(key: "e")
-    }
-
-    public var referenced_pubkeys: [ReferencedId] {
-        return get_referenced_ids(key: "p")
-    }
-
-    public var is_local: Bool {
-        return (self.flags & 1) != 0
-    }
+    /*
 
     func calculate_id() {
         self.id = calculate_event_id(ev: self)
@@ -348,5 +328,13 @@ extension NdbNote {
 extension LazyFilterSequence {
     var first: Element? {
         self.first(where: { _ in true })
+    }
+
+    var last: Element? {
+        var ev: Element? = nil
+        for e in self {
+            ev = e
+        }
+        return ev
     }
 }
