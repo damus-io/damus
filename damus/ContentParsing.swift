@@ -83,7 +83,7 @@ func interpret_event_refs_ndb(blocks: [Block], tags: TagsSequence) -> [EventRef]
     
     /// simpler case with no mentions
     if mention_indices.count == 0 {
-        let ev_refs = References(tags: tags).ids()
+        let ev_refs = References.ids(tags: tags)
         return interp_event_refs_without_mentions_ndb(ev_refs)
     }
     

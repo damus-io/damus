@@ -168,11 +168,11 @@ extension NdbNote {
 
     // TODO: References iterator
     public var referenced_ids: LazyFilterSequence<References> {
-        References(tags: self.tags()).ids()
+        References.ids(tags: self.tags())
     }
 
     public var referenced_pubkeys: LazyFilterSequence<References> {
-        References(tags: self.tags()).pubkeys()
+        References.pubkeys(tags: self.tags())
     }
 
     func event_refs(_ privkey: String?) -> [EventRef] {

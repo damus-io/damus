@@ -39,12 +39,12 @@ struct References: Sequence, IteratorProtocol {
     }
 
 
-    func ids() -> LazyFilterSequence<References> {
+    static func ids(tags: TagsSequence) -> LazyFilterSequence<References> {
         References(tags: tags).lazy
             .filter() { ref in ref.key == "e" }
     }
 
-    func pubkeys() -> LazyFilterSequence<References> {
+    static func pubkeys(tags: TagsSequence) -> LazyFilterSequence<References> {
         References(tags: tags).lazy
             .filter() { ref in ref.key == "p" }
     }
