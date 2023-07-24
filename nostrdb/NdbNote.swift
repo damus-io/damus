@@ -34,7 +34,7 @@ enum NdbData {
     }
 }
 
-class NdbNote {
+class NdbNote: Equatable {
     // we can have owned notes, but we can also have lmdb virtual-memory mapped notes so its optional
     private let owned: Bool
     let count: Int
@@ -92,6 +92,10 @@ class NdbNote {
         if self.owned {
             free(note)
         }
+    }
+
+    static func == (lhs: NdbNote, rhs: NdbNote) -> Bool {
+        return lhs.id == rhs.id
     }
 
     static func owned_from_json(json: String, bufsize: Int = 2 << 18) -> NdbNote? {
