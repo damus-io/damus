@@ -158,7 +158,7 @@ func render_blocks(blocks: [Block]) -> String {
     }
 }
 
-struct Blocks {
+struct Blocks: Equatable {
     let words: Int
     let blocks: [Block]
 }

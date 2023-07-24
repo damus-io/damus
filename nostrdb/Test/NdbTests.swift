@@ -74,6 +74,72 @@ final class NdbTests: XCTestCase {
         }
     }
 
+    func test_perf_old_decoding() {
+        self.measure {
+            let event = decode_nostr_event_json(test_contact_list_json)
+            XCTAssertNotNil(event)
+        }
+    }
+
+    func test_perf_old_iter()  {
+        self.measure {
+            let event = decode_nostr_event_json(test_contact_list_json)
+            XCTAssertNotNil(event)
+        }
+    }
+
+    func longer_iter(_ n: Int = 1000) -> XCTMeasureOptions {
+        let opts = XCTMeasureOptions()
+        opts.iterationCount = n
+        return opts
+    }
+
+    func test_perf_interp_evrefs_old() {
+        guard let event = decode_nostr_event_json(test_reply_json) else {
+            return
+        }
+        self.measure(options: longer_iter()) {
+            let blocks = event.blocks(nil).blocks
+            let xs = interpret_event_refs(blocks: blocks, tags: event.tags)
+            XCTAssertEqual(xs.count, 1)
+        }
+    }
+
+    func test_perf_interp_evrefs_ndb() {
+        guard let note = NdbNote.owned_from_json(json: test_reply_json) else {
+            return
+        }
+        self.measure(options: longer_iter()) {
+            let blocks = note.blocks(nil).blocks
+            let xs = interpret_event_refs_ndb(blocks: blocks, tags: note.tags())
+            XCTAssertEqual(xs.count, 1)
+        }
+    }
+
+    func test_decoded_events_are_equal() {
+        let event = decode_nostr_event_json(test_reply_json)
+        let note = NdbNote.owned_from_json(json: test_reply_json)
+
+        XCTAssertNotNil(note)
+        XCTAssertNotNil(event)
+        guard let note else { return }
+        guard let event else { return }
+
+        XCTAssertEqual(note.content_len, UInt32(event.content.utf8.count))
+        XCTAssertEqual(hex_encode(note.pubkey), event.pubkey)
+        XCTAssertEqual(hex_encode(note.id), event.id)
+
+        let ev_blocks = event.blocks(nil)
+        let note_blocks = note.blocks(nil)
+
+        XCTAssertEqual(ev_blocks, note_blocks)
+
+        let event_refs = interpret_event_refs(blocks: ev_blocks.blocks, tags: event.tags)
+        let note_refs  = interpret_event_refs_ndb(blocks: note_blocks.blocks, tags: note.tags())
+
+        XCTAssertEqual(event_refs, note_refs)
+    }
+
     func test_iteration_perf() throws {
         guard let note = NdbNote.owned_from_json(json: test_contact_list_json) else {
             XCTAssert(false)

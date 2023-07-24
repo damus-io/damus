@@ -39,6 +39,14 @@ class NdbNote {
     let count: Int
     let note: UnsafeMutablePointer<ndb_note>
 
+    // cached stuff (TODO: remove these)
+    private var _event_refs: [EventRef]? = nil
+    var decrypted_content: String? = nil
+    private var _blocks: Blocks? = nil
+    private lazy var inner_event: NdbNote? = {
+        return NdbNote.owned_from_json_cstr(json: content_raw, json_len: content_len)
+    }()
+
     init(note: UnsafeMutablePointer<ndb_note>, owned_size: Int?) {
         self.note = note
         self.owned = owned_size != nil
@@ -86,12 +94,20 @@ class NdbNote {
     }
 
     static func owned_from_json(json: String, bufsize: Int = 2 << 18) -> NdbNote? {
+        return json.withCString { cstr in
+            return NdbNote.owned_from_json_cstr(
+                json: cstr, json_len: UInt32(json.utf8.count), bufsize: bufsize)
+        }
+    }
+
+    static func owned_from_json_cstr(json: UnsafePointer<CChar>, json_len: UInt32, bufsize: Int = 2 << 18) -> NdbNote? {
         let data = malloc(bufsize)
-        guard var json_cstr = json.cString(using: .utf8) else { return nil }
-        
+        //guard var json_cstr = json.cString(using: .utf8) else { return nil }
+
+        //json_cs
         var note: UnsafeMutablePointer<ndb_note>?
         
-        let len = ndb_note_from_json(&json_cstr, Int32(json_cstr.count), &note, data, Int32(bufsize))
+        let len = ndb_note_from_json(json, Int32(json_len), &note, data, Int32(bufsize))
 
         if len == 0 {
             free(data)
@@ -100,8 +116,8 @@ class NdbNote {
 
         // Create new Data with just the valid bytes
         guard let note_data = realloc(data, Int(len)) else { return nil }
-
         let new_note = note_data.assumingMemoryBound(to: ndb_note.self)
+
         return NdbNote(note: new_note, owned_size: Int(len))
     }
 }
@@ -152,26 +168,39 @@ extension NdbNote {
 
     // TODO: References iterator
     public var referenced_ids: LazyFilterSequence<References> {
-        References(note: self).lazy
-            .filter() { ref in ref.key == "e" }
+        References(tags: self.tags()).ids()
     }
 
     public var referenced_pubkeys: LazyFilterSequence<References> {
-        References(note: self).lazy
-            .filter() { ref in ref.key == "p" }
+        References(tags: self.tags()).pubkeys()
     }
-
-    /*
 
     func event_refs(_ privkey: String?) -> [EventRef] {
         if let rs = _event_refs {
             return rs
         }
-        let refs = interpret_event_refs(blocks: self.blocks(privkey).blocks, tags: self.tags)
+        let refs = interpret_event_refs_ndb(blocks: self.blocks(privkey).blocks, tags: self.tags())
         self._event_refs = refs
         return refs
     }
 
+    func get_content(_ privkey: String?) -> String {
+        if known_kind == .dm {
+            return decrypted(privkey: privkey) ?? "*failed to decrypt content*"
+        }
+
+        return content
+    }
+
+    func blocks(_ privkey: String?) -> Blocks {
+        if let bs = _blocks { return bs }
+
+        let blocks = get_blocks(content: self.get_content(privkey))
+        self._blocks = blocks
+        return blocks
+    }
+
+    // NDBTODO: switch this to operating on bytes not strings
     func decrypted(privkey: String?) -> String? {
         if let decrypted_content = decrypted_content {
             return decrypted_content
@@ -185,36 +214,30 @@ extension NdbNote {
             return nil
         }
 
-        var pubkey = self.pubkey
+        // NDBTODO: don't hex encode
+        var pubkey = hex_encode(self.pubkey)
         // This is our DM, we need to use the pubkey of the person we're talking to instead
+
         if our_pubkey == pubkey {
             guard let refkey = self.referenced_pubkeys.first else {
                 return nil
             }
 
-            pubkey = refkey.ref_id
+            pubkey = refkey.ref_id.string()
         }
 
+        // NDBTODO: pass data to pubkey
         let dec = decrypt_dm(key, pubkey: pubkey, content: self.content, encoding: .base64)
         self.decrypted_content = dec
 
         return dec
     }
 
-    func get_content(_ privkey: String?) -> String {
-        if known_kind == .dm {
-            return decrypted(privkey: privkey) ?? "*failed to decrypt content*"
-        }
 
-        return content
-    }
+    /*
 
     var description: String {
         return "NostrEvent { id: \(id) pubkey \(pubkey) kind \(kind) tags \(tags) content '\(content)' }"
-    }
-
-    var known_kind: NostrKind? {
-        return NostrKind.init(rawValue: kind)
     }
 
     private enum CodingKeys: String, CodingKey {

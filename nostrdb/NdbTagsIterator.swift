@@ -56,6 +56,10 @@ struct TagsSequence: Sequence {
         return nil
     }
 
+    func references() -> References {
+        return References(tags: self)
+    }
+
     func makeIterator() -> TagsIterator {
         return .init(note: note)
     }

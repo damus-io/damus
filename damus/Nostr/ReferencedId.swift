@@ -10,6 +10,9 @@ import Foundation
 struct Reference {
     let key: AsciiCharacter
     let id: NdbTagElem
+    var ref_id: NdbTagElem {
+        id
+    }
 
     func to_referenced_id() -> ReferencedId {
         ReferencedId(ref_id: id.string(), relay_id: nil, key: key.string)
@@ -17,11 +20,11 @@ struct Reference {
 }
 
 struct References: Sequence, IteratorProtocol {
-    let note: NdbNote
-    var tags: TagsIterator
+    let tags: TagsSequence
+    var tags_iter: TagsIterator
 
     mutating func next() -> Reference? {
-        while let tag = tags.next() {
+        while let tag = tags_iter.next() {
             guard let key = tag[0], key.count == 1,
                   let id = tag[1], id.is_id
             else { continue }
@@ -35,9 +38,20 @@ struct References: Sequence, IteratorProtocol {
         return nil
     }
 
-    init(note: NdbNote) {
-        self.note = note
-        self.tags = note.tags().makeIterator()
+
+    func ids() -> LazyFilterSequence<References> {
+        References(tags: tags).lazy
+            .filter() { ref in ref.key == "e" }
+    }
+
+    func pubkeys() -> LazyFilterSequence<References> {
+        References(tags: tags).lazy
+            .filter() { ref in ref.key == "p" }
+    }
+
+    init(tags: TagsSequence) {
+        self.tags = tags
+        self.tags_iter = tags.makeIterator()
     }
 }
 

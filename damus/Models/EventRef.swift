@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum EventRef {
+enum EventRef: Equatable {
     case mention(Mention)
     case thread_id(ReferencedId)
     case reply(ReferencedId)
