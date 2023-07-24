@@ -60,7 +60,7 @@ func parse_note_content_ndb(note: NdbNote) -> Blocks {
     while (i < bs.num_blocks) {
         let block = bs.blocks[i]
         
-        if let converted = convert_block_ndb(block, tags: note.tags()) {
+        if let converted = convert_block_ndb(block, tags: note.tags) {
             out.append(converted)
         }
         

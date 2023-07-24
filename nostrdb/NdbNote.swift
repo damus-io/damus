@@ -84,8 +84,8 @@ class NdbNote {
         ndb_note_kind(note)
     }
 
-    func tags() -> TagsSequence {
-        return .init(note: self)
+    var tags: TagsSequence {
+        .init(note: self)
     }
 
     deinit {
@@ -169,18 +169,18 @@ extension NdbNote {
 
     // TODO: References iterator
     public var referenced_ids: LazyFilterSequence<References> {
-        References.ids(tags: self.tags())
+        References.ids(tags: self.tags)
     }
 
     public var referenced_pubkeys: LazyFilterSequence<References> {
-        References.pubkeys(tags: self.tags())
+        References.pubkeys(tags: self.tags)
     }
 
     func event_refs(_ privkey: String?) -> [EventRef] {
         if let rs = _event_refs {
             return rs
         }
-        let refs = interpret_event_refs_ndb(blocks: self.blocks(privkey).blocks, tags: self.tags())
+        let refs = interpret_event_refs_ndb(blocks: self.blocks(privkey).blocks, tags: self.tags)
         self._event_refs = refs
         return refs
     }
@@ -271,7 +271,7 @@ extension NdbNote {
 
     // NDBTODO: id -> data
     public func references(id: String, key: AsciiCharacter) -> Bool {
-        for ref in References(tags: self.tags()) {
+        for ref in References(tags: self.tags) {
             if ref.key == key && ref.id.string() == id {
                 return true
             }

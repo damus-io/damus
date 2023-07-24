@@ -33,14 +33,14 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(note.created_at, 1689904312)
 
         let expected_count: UInt16 = 786
-        XCTAssertEqual(note.tags().count, expected_count)
-        XCTAssertEqual(note.tags().reduce(0, { sum, _ in sum + 1 }), expected_count)
+        XCTAssertEqual(note.tags.count, expected_count)
+        XCTAssertEqual(note.tags.reduce(0, { sum, _ in sum + 1 }), expected_count)
 
         var tags = 0
         var total_count_stored = 0
         var total_count_iter = 0
         //let tags = note.tags()
-        for tag in note.tags() {
+        for tag in note.tags {
             total_count_stored += Int(tag.count)
 
             if tags == 0 || tags == 1 || tags == 2 {
@@ -111,7 +111,7 @@ final class NdbTests: XCTestCase {
         }
         self.measure(options: longer_iter()) {
             let blocks = note.blocks(nil).blocks
-            let xs = interpret_event_refs_ndb(blocks: blocks, tags: note.tags())
+            let xs = interpret_event_refs_ndb(blocks: blocks, tags: note.tags)
             XCTAssertEqual(xs.count, 1)
         }
     }
@@ -135,7 +135,7 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(ev_blocks, note_blocks)
 
         let event_refs = interpret_event_refs(blocks: ev_blocks.blocks, tags: event.tags)
-        let note_refs  = interpret_event_refs_ndb(blocks: note_blocks.blocks, tags: note.tags())
+        let note_refs  = interpret_event_refs_ndb(blocks: note_blocks.blocks, tags: note.tags)
 
         XCTAssertEqual(event_refs, note_refs)
     }
@@ -151,7 +151,7 @@ final class NdbTests: XCTestCase {
             var count = 0
             var char_count = 0
 
-            for tag in note.tags() {
+            for tag in note.tags {
                 for elem in tag {
                     print("iter_elem \(elem.string())")
                     for c in elem {
