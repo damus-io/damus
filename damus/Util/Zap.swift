@@ -49,7 +49,7 @@ struct ZapRequest {
     
     init(ev: NostrEvent) {
         self.ev = ev
-        self.marked_hidden = ev.tags.first(where: { t in t.count > 0 && t[0] == "hidden" }) != nil
+        self.marked_hidden = ev.tags.first(where: { t in t.count > 0 && t[0].matches_str("hidden") }) != nil
     }
 }
 
@@ -295,7 +295,7 @@ struct Zap {
         guard let desc = get_zap_description(zap_ev, inv_desc: zap_invoice.description) else {
             return nil
         }
-        
+
         guard let zap_req = decode_nostr_event_json(desc) else {
             return nil
         }
@@ -392,8 +392,8 @@ func decode_bolt11(_ s: String) -> Invoice? {
 
 func event_tag(_ ev: NostrEvent, name: String) -> String? {
     for tag in ev.tags {
-        if tag.count >= 2 && tag[0] == name {
-            return tag[1]
+        if tag.count >= 2 && tag[0].matches_str(name) {
+            return tag[1].string()
         }
     }
     
@@ -401,15 +401,7 @@ func event_tag(_ ev: NostrEvent, name: String) -> String? {
 }
 
 func decode_nostr_event_json(_ desc: String) -> NostrEvent? {
-    let decoder = JSONDecoder()
-    guard let dat = desc.data(using: .utf8) else {
-        return nil
-    }
-    guard let ev = try? decoder.decode(NostrEvent.self, from: dat) else {
-        return nil
-    }
-    
-    return ev
+    return NostrEvent.owned_from_json(json: desc)
 }
 
 

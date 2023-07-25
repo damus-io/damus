@@ -21,6 +21,8 @@ enum ValidationResult: Decodable {
 }
 
 //typealias NostrEvent = NdbNote
+//typealias Tags = TagsSequence
+typealias Tags = [[String]]
 typealias NostrEvent = NostrEventOld
 
 let MAX_NOTE_SIZE: Int = 2 << 18
@@ -54,7 +56,7 @@ class NostrEventOld: Codable, Identifiable, CustomStringConvertible, Equatable, 
     let id: String
     let content: String
     let sig: String
-    let tags: [[String]]
+    let tags: Tags
 
     //var boosted_by: String?
 
@@ -86,6 +88,18 @@ class NostrEventOld: Codable, Identifiable, CustomStringConvertible, Equatable, 
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+    }
+
+    static func owned_from_json(json: String) -> NostrEvent? {
+        let decoder = JSONDecoder()
+        guard let dat = json.data(using: .utf8) else {
+            return nil
+        }
+        guard let ev = try? decoder.decode(NostrEvent.self, from: dat) else {
+            return nil
+        }
+
+        return ev
     }
 
     init?(content: String, keypair: Keypair, kind: UInt32 = 1, tags: [[String]] = [], createdAt: UInt32 = UInt32(Date().timeIntervalSince1970)) {
@@ -935,16 +949,6 @@ func validate_event(ev: NostrEvent) -> ValidationResult {
     
     ok = secp256k1_schnorrsig_verify(ctx, &sig64, &raw_id_bytes, raw_id.count, &xonly_pubkey) > 0
     return ok ? .ok : .bad_sig
-}
-
-func last_etag(tags: [[String]]) -> String? {
-    var e: String? = nil
-    for tag in tags {
-        if tag.count >= 2 && tag[0] == "e" {
-            e = tag[1]
-        }
-    }
-    return e
 }
 
 func first_eref_mention(ev: NostrEvent, privkey: String?) -> Mention? {

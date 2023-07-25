@@ -15,8 +15,12 @@ struct TagSequence: Sequence {
         tag.pointee.count
     }
 
-    subscript(index: Int) -> NdbTagElem? {
-        guard index < count else { return nil }
+    func strings() -> [String] {
+        return self.map { $0.string() }
+    }
+
+    subscript(index: Int) -> NdbTagElem {
+        precondition(index < count, "Index out of bounds")
 
         return NdbTagElem(note: note, tag: tag, index: Int32(index))
     }

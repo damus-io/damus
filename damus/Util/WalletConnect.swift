@@ -94,8 +94,8 @@ struct FullWalletResponse {
             return nil
         }
         
-        self.req_id = req_id.ref_id
-        
+        self.req_id = req_id.ref_id.string()
+
         let ares = Task {
             guard let json = decrypt_dm(nwc.keypair.privkey, pubkey: nwc.pubkey, content: from.content, encoding: .base64),
                   let resp: WalletResponse = decode_json(json)

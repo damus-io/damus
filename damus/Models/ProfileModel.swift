@@ -35,12 +35,11 @@ class ProfileModel: ObservableObject, Equatable {
         }
         
         for tag in contacts.tags {
-            guard tag.count >= 2 && tag[0].matches_char("p") else {
+            guard tag.count >= 2,
+                  tag[0].matches_char("p"),
+                  tag[1].matches_str(pubkey)
+            else {
                 continue
-            }
-            
-            if tag[1] == pubkey {
-                return true
             }
         }
         
@@ -145,10 +144,10 @@ class ProfileModel: ObservableObject, Equatable {
 }
 
 
-func count_pubkeys(_ tags: [[String]]) -> Int {
+func count_pubkeys(_ tags: Tags) -> Int {
     var c: Int = 0
     for tag in tags {
-        if tag.count >= 2 && tag[0] == "p" {
+        if tag.count >= 2 && tag[0].matches_char("p") {
             c += 1
         }
     }

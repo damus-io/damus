@@ -52,7 +52,7 @@ final class NdbTests: XCTestCase {
             }
 
             if tags == 7 {
-                XCTAssertEqual(tag[2]?.string(), "wss://nostr-pub.wellorder.net")
+                XCTAssertEqual(tag[2].string(), "wss://nostr-pub.wellorder.net")
             }
 
             for elem in tag {

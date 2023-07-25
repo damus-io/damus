@@ -104,7 +104,7 @@ class NdbNote: Equatable, Hashable {
 
     static let max_note_size: Int = 2 << 18
 
-    init?(content: String, keypair: Keypair, kind: Int = 1, tags: [[String]] = [], createdAt: UInt32 = UInt32(Date().timeIntervalSince1970)) {
+    init?(content: String, keypair: Keypair, kind: UInt32 = 1, tags: [[String]] = [], createdAt: UInt32 = UInt32(Date().timeIntervalSince1970)) {
 
         var builder = ndb_builder()
         let buflen = MAX_NOTE_SIZE

@@ -45,7 +45,7 @@ class EventsModel: ObservableObject {
             return
         }
         
-        guard last_etag(tags: ev.tags) == target else {
+        guard ev.referenced_ids.last?.ref_id.string() == target else {
             return
         }
         

@@ -214,11 +214,11 @@ class NotificationsModel: ObservableObject, ScrollQueue {
         
         let id = ref_id.id
         
-        if let evgrp = self.reactions[id] {
+        if let evgrp = self.reactions[id.string()] {
             return evgrp.insert(ev)
         } else {
             let evgrp = EventGroup()
-            self.reactions[id] = evgrp
+            self.reactions[id.string()] = evgrp
             return evgrp.insert(ev)
         }
     }

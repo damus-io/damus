@@ -147,22 +147,22 @@ func unfollow_reference(postbox: PostBox, our_contacts: NostrEvent?, keypair: Fu
 }
 
 func unfollow_reference_event(our_contacts: NostrEvent, keypair: FullKeypair, unfollow: ReferencedId) -> NostrEvent? {
-    let tags = our_contacts.tags.filter { tag in
-        if let key = tag[safe: 0],
-           let ref = tag[safe: 1],
+    let tags = our_contacts.tags.reduce(into: [[String]]()) { ts, tag in
+        if tag.count >= 2,
            let fst = unfollow.key.first,
            let afst = AsciiCharacter(fst),
-           key.matches_char(afst),
-           ref.string() == unfollow.ref_id
+           tag[0].matches_char(afst),
+           tag[1].matches_str(unfollow.ref_id)
         {
-            return false
+            return
         }
-        return true
+
+        ts.append(tag.strings())
     }
-    
+
     let kind = NostrKind.contacts.rawValue
 
-    return NostrEvent(content: our_contacts.content, keypair: keypair.to_keypair(), kind: kind, tags: tags)
+    return NostrEvent(content: our_contacts.content, keypair: keypair.to_keypair(), kind: kind, tags: Array(tags))
 }
 
 func follow_user_event(our_contacts: NostrEvent?, keypair: FullKeypair, follow: ReferencedId) -> NostrEvent? {
@@ -193,7 +193,7 @@ func remove_relay(ev: NostrEvent, current_relays: [RelayDescriptor], keypair: Fu
         return nil
     }
     
-    return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 3, tags: ev.tags)
+    return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 3, tags: ev.tags.strings())
 }
 
 func add_relay(ev: NostrEvent, keypair: FullKeypair, current_relays: [RelayDescriptor], relay: String, info: RelayInfo) -> NostrEvent? {
@@ -209,7 +209,7 @@ func add_relay(ev: NostrEvent, keypair: FullKeypair, current_relays: [RelayDescr
         return nil
     }
     
-    return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 3, tags: ev.tags)
+    return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 3, tags: ev.tags.strings())
 }
 
 func ensure_relay_info(relays: [RelayDescriptor], content: String) -> [String: RelayInfo] {

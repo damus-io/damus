@@ -8,10 +8,15 @@
 import Foundation
 
 func tag_to_refid_ndb(_ tag: TagSequence) -> ReferencedId? {
-    guard let ref_id = tag[1]?.string(),
-          let key = tag[0]?.string() else { return nil }
+    guard tag.count >= 2 else { return nil }
 
-    let relay_id = tag[2]?.string()
+    let key = tag[0].string()
+    let ref_id = tag[1].string()
+
+    var relay_id: String? = nil
+    if tag.count >= 3 {
+        relay_id = tag[2].string()
+    }
 
     return ReferencedId(ref_id: ref_id, relay_id: relay_id, key: key)
 }
@@ -123,7 +128,8 @@ func interp_event_refs_with_mentions_ndb(tags: TagsSequence, mention_indices: Se
     var i: Int = 0
     
     for tag in tags {
-        if tag.count >= 2, let t = tag[0], t.matches_char("e"),
+        if tag.count >= 2,
+           tag[0].matches_char("e"),
            let ref = tag_to_refid_ndb(tag)
         {
             if mention_indices.contains(i) {

@@ -83,6 +83,19 @@ struct NdbTagElem: Sequence, Hashable {
         return str.str[0] == c.cchar && str.str[1] == 0
     }
 
+    func matches_str(_ s: String) -> Bool {
+        if str.flag == NDB_PACKED_ID,
+           s.utf8.count == 64,
+           var decoded = hex_decode(s), decoded.count == 32
+        {
+            return memcmp(&decoded, str.id, 32) == 0
+        }
+
+        let len = strlen(str.str)
+        guard len == s.utf8.count else { return false }
+        return s.withCString { cstr in memcmp(str.str, cstr, len) == 0 }
+    }
+
     var ndbstr: ndb_str {
         return ndb_tag_str(note.note, tag, index)
     }

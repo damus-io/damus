@@ -170,8 +170,8 @@ func calculate_image_metadata(url: URL, img: UIImage, blurhash: String) -> Image
 
 func event_image_metadata(ev: NostrEvent) -> [ImageMetadata] {
     return ev.tags.reduce(into: [ImageMetadata]()) { meta, tag in
-        guard tag.count >= 2 && tag[0] == "imeta",
-              let data = ImageMetadata(tag: tag) else {
+        guard tag.count >= 2, tag[0].matches_str("imeta"),
+              let data = ImageMetadata(tag: tag.strings()) else {
             return
         }
         

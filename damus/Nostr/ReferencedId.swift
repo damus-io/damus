@@ -29,9 +29,11 @@ struct References: Sequence, IteratorProtocol {
 
     mutating func next() -> Reference? {
         while let tag = tags_iter.next() {
-            guard let key = tag[0], key.count == 1,
-                  let id = tag[1], tagref_should_be_id(key)
-            else { continue }
+            guard tag.count >= 2 else { continue }
+            let key = tag[0]
+            let id  = tag[1]
+
+            guard key.count == 1, tagref_should_be_id(id) else { continue }
 
             for c in key {
                 guard let a = AsciiCharacter(c) else { break }
@@ -64,12 +66,21 @@ struct References: Sequence, IteratorProtocol {
     }
 }
 
+// TagsSequence transition helpers
 extension [[String]] {
     func strings() -> [[String]] {
         return self
     }
 }
 
+// TagsSequence transition helpers
+extension [String] {
+    func strings() -> [String] {
+        return self
+    }
+}
+
+// NdbTagElem transition helpers
 extension String {
     func string() -> String {
         return self
@@ -81,6 +92,10 @@ extension String {
 
     func matches_char(_ c: AsciiCharacter) -> Bool {
         return self.first == c.character
+    }
+    
+    func matches_str(_ str: String) -> Bool {
+        return self == str
     }
 }
 
