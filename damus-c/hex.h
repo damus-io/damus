@@ -70,4 +70,15 @@ static inline size_t hex_data_size(size_t strlen)
 {
     return strlen / 2;
 }
+
+static inline char hexchar(unsigned int val)
+{
+    if (val < 10)
+        return '0' + val;
+    if (val < 16)
+        return 'a' + val - 10;
+    abort();
+}
+
+
 #endif /* CCAN_HEX_H */

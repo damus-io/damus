@@ -39,15 +39,6 @@ bool hex_decode(const char *str, size_t slen, void *buf, size_t bufsize)
     return slen == 0 && bufsize == 0;
 }
 
-static char hexchar(unsigned int val)
-{
-    if (val < 10)
-        return '0' + val;
-    if (val < 16)
-        return 'a' + val - 10;
-    abort();
-}
-
 bool hex_encode(const void *buf, size_t bufsize, char *dest, size_t destsize)
 {
     size_t i;
