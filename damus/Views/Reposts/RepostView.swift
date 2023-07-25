@@ -18,7 +18,7 @@ struct RepostView: View {
 
 struct RepostView_Previews: PreviewProvider {
     static var previews: some View {
-        RepostView(damus_state: test_damus_state(), repost: NostrEvent(id: "", content: "", pubkey: ""))
+        RepostView(damus_state: test_damus_state(), repost: NostrEvent(content: "", keypair: test_keypair)!)
     }
 }
 

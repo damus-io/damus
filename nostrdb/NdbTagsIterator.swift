@@ -42,6 +42,12 @@ struct TagsSequence: Sequence {
         note.note.pointee.tags.count
     }
 
+    func strings() -> [[String]] {
+        return self.map { tag in
+            tag.map { t in t.string() }
+        }
+    }
+
     // no O(1) indexing on top-level tag lists unfortunately :(
     // bit it's very fast to iterate over each tag since the number of tags
     // are stored and the elements are fixed size.

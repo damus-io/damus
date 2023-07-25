@@ -62,10 +62,12 @@ struct EditMetadataView: View {
     
     func save() {
         let profile = to_profile()
-        guard let keypair = damus_state.keypair.to_full() else {
+        guard let keypair = damus_state.keypair.to_full(),
+              let metadata_ev = make_metadata_event(keypair: keypair, metadata: profile)
+        else {
             return
         }
-        let metadata_ev = make_metadata_event(keypair: keypair, metadata: profile)
+
         damus_state.postbox.send(metadata_ev)
     }
 

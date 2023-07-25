@@ -3,8 +3,14 @@
 #include "jsmn.h"
 #include "hex.h"
 #include "cursor.h"
+#include "random.h"
+#include "sha256.h"
 #include <stdlib.h>
 #include <limits.h>
+
+#include "secp256k1.h"
+#include "secp256k1_ecdh.h"
+#include "secp256k1_schnorrsig.h"
 
 struct ndb_json_parser {
 	const char *json;
@@ -20,11 +26,10 @@ static inline int cursor_push_tag(struct cursor *cur, struct ndb_tag *tag)
 	return cursor_push_u16(cur, tag->count);
 }
 
-int ndb_builder_new(struct ndb_builder *builder, unsigned char *buf,
-		    int bufsize)
+int ndb_builder_init(struct ndb_builder *builder, unsigned char *buf,
+		     int bufsize)
 {
 	struct ndb_note *note;
-	struct cursor mem;
 	int half, size, str_indices_size;
 
 	// come on bruh
@@ -38,20 +43,21 @@ int ndb_builder_new(struct ndb_builder *builder, unsigned char *buf,
 	//debug("size %d half %d str_indices %d\n", size, half, str_indices_size);
 
 	// make a safe cursor of our available memory
-	make_cursor(buf, buf + bufsize, &mem);
+	make_cursor(buf, buf + bufsize, &builder->mem);
 
 	note = builder->note = (struct ndb_note *)buf;
 
 	// take slices of the memory into subcursors
-	if (!(cursor_slice(&mem, &builder->note_cur, half) &&
-	      cursor_slice(&mem, &builder->strings, half) &&
-	      cursor_slice(&mem, &builder->str_indices, str_indices_size))) {
+	if (!(cursor_slice(&builder->mem, &builder->note_cur, half) &&
+	      cursor_slice(&builder->mem, &builder->strings, half) &&
+	      cursor_slice(&builder->mem, &builder->str_indices, str_indices_size))) {
 		return 0;
 	}
 
 	memset(note, 0, sizeof(*note));
 	builder->note_cur.p += sizeof(*note);
 
+	note->strings = builder->strings.start - buf;
 	note->version = 1;
 
 	return 1;
@@ -82,7 +88,7 @@ static inline int ndb_json_parser_init(struct ndb_json_parser *p,
 	// the more important stuff gets a larger chunk and then it spirals
 	// downward into smaller chunks. Thanks for coming to my TED talk.
 
-	if (!ndb_builder_new(&p->builder, buf, half))
+	if (!ndb_builder_init(&p->builder, buf, half))
 		return 0;
 
 	jsmn_init(&p->json_parser);
@@ -99,11 +105,234 @@ static inline int ndb_json_parser_parse(struct ndb_json_parser *p)
 	return p->num_tokens;
 }
 
-int ndb_builder_finalize(struct ndb_builder *builder, struct ndb_note **note)
+static int cursor_push_unescaped_char(struct cursor *cur, char c1, char c2)
+{
+	switch (c2) {
+	case 't':  return cursor_push_byte(cur, '\t');
+	case 'n':  return cursor_push_byte(cur, '\n');
+	case 'r':  return cursor_push_byte(cur, '\r');
+	case 'b':  return cursor_push_byte(cur, '\b');
+	case 'f':  return cursor_push_byte(cur, '\f');
+	case '\\': return cursor_push_byte(cur, '\\');
+	case '"':  return cursor_push_byte(cur, '"');
+	case 'u':
+		// these aren't handled yet
+		return 0;
+	default:
+		return cursor_push_byte(cur, c1) && cursor_push_byte(cur, c2);
+	}
+}
+
+static int cursor_push_escaped_char(struct cursor *cur, char c)
+{
+        switch (c) {
+        case '"':  return cursor_push_str(cur, "\\\"");
+        case '\\': return cursor_push_str(cur, "\\\\");
+        case '\b': return cursor_push_str(cur, "\\b");
+        case '\f': return cursor_push_str(cur, "\\f");
+        case '\n': return cursor_push_str(cur, "\\n");
+        case '\r': return cursor_push_str(cur, "\\r");
+        case '\t': return cursor_push_str(cur, "\\t");
+        // TODO: \u hex hex hex hex
+        }
+        return cursor_push_byte(cur, c);
+}
+
+static int cursor_push_hex_str(struct cursor *cur, unsigned char *buf, int len)
+{
+	int i;
+
+	if (len % 2 != 0)
+		return 0;
+
+        if (!cursor_push_byte(cur, '"'))
+                return 0;
+
+	for (i = 0; i < len; i++) {
+		unsigned int c = ((const unsigned char *)buf)[i];
+		if (!cursor_push_byte(cur, hexchar(c >> 4)))
+			return 0;
+		if (!cursor_push_byte(cur, hexchar(c & 0xF)))
+			return 0;
+	}
+
+        if (!cursor_push_byte(cur, '"'))
+                return 0;
+
+	return 1;
+}
+
+static int cursor_push_jsonstr(struct cursor *cur, const char *str)
+{
+	int i;
+        int len;
+
+	len = strlen(str);
+
+        if (!cursor_push_byte(cur, '"'))
+                return 0;
+
+        for (i = 0; i < len; i++) {
+                if (!cursor_push_escaped_char(cur, str[i]))
+                        return 0;
+        }
+
+        if (!cursor_push_byte(cur, '"'))
+                return 0;
+
+        return 1;
+}
+
+
+static inline int cursor_push_json_tag_str(struct cursor *cur, struct ndb_str str)
+{
+	if (str.flag == NDB_PACKED_ID)
+		return cursor_push_hex_str(cur, str.id, 32);
+
+	return cursor_push_jsonstr(cur, str.str);
+}
+
+static int cursor_push_json_tag(struct cursor *cur, struct ndb_note *note,
+				struct ndb_tag *tag)
+{
+        int i;
+
+        if (!cursor_push_byte(cur, '['))
+                return 0;
+
+        for (i = 0; i < tag->count; i++) {
+                if (!cursor_push_json_tag_str(cur, ndb_note_str(note, &tag->strs[i])))
+                        return 0;
+                if (i != tag->count-1 && !cursor_push_byte(cur, ','))
+			return 0;
+        }
+
+        return cursor_push_byte(cur, ']');
+}
+
+static int cursor_push_json_tags(struct cursor *cur, struct ndb_note *note)
+{
+	int i;
+	struct ndb_iterator iter, *it = &iter;
+	ndb_tags_iterate_start(note, it);
+
+        if (!cursor_push_byte(cur, '['))
+                return 0;
+
+	i = 0;
+	while (ndb_tags_iterate_next(it)) {
+		if (!cursor_push_json_tag(cur, note, it->tag))
+			return 0;
+                if (i != note->tags.count-1 && !cursor_push_str(cur, ","))
+			return 0;
+		i++;
+	}
+
+        if (!cursor_push_byte(cur, ']'))
+                return 0;
+
+	return 1;
+}
+
+static int ndb_event_commitment(struct ndb_note *ev, unsigned char *buf, int buflen)
+{
+	char timebuf[16] = {0};
+	char kindbuf[16] = {0};
+	char pubkey[65];
+	struct cursor cur;
+	int ok;
+
+	if (!hex_encode(ev->pubkey, sizeof(ev->pubkey), pubkey, 32))
+		return 0;
+
+	make_cursor(buf, buf + buflen, &cur);
+
+	snprintf(timebuf, sizeof(timebuf), "%d", ev->created_at);
+	snprintf(kindbuf, sizeof(kindbuf), "%d", ev->kind);
+
+	ok =
+		cursor_push_str(&cur, "[0,\"") &&
+		cursor_push_str(&cur, pubkey) &&
+		cursor_push_str(&cur, "\",") &&
+		cursor_push_str(&cur, timebuf) &&
+		cursor_push_str(&cur, ",") &&
+		cursor_push_str(&cur, kindbuf) &&
+		cursor_push_str(&cur, ",") &&
+		cursor_push_json_tags(&cur, ev) &&
+		cursor_push_str(&cur, ",") &&
+		cursor_push_jsonstr(&cur, ndb_note_str(ev, &ev->content).str) &&
+		cursor_push_str(&cur, "]");
+
+	if (!ok)
+		return 0;
+
+	return cur.p - cur.start;
+}
+
+int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen) {
+	int len;
+
+	if (!(len = ndb_event_commitment(note, buf, buflen)))
+		return 0;
+
+	//fprintf(stderr, "%.*s\n", len, buf);
+
+	sha256((struct sha256*)note->id, buf, len);
+
+	return 1;
+}
+
+int ndb_sign_id(struct ndb_keypair *keypair, unsigned char id[32],
+		unsigned char sig[64])
+{
+	unsigned char aux[32];
+	secp256k1_keypair *pair = (secp256k1_keypair*) keypair->pair;
+
+	if (!fill_random(aux, sizeof(aux)))
+		return 0;
+
+	secp256k1_context *ctx =
+		secp256k1_context_create(SECP256K1_CONTEXT_NONE);
+
+	return secp256k1_schnorrsig_sign32(ctx, sig, id, pair, aux);
+}
+
+int ndb_create_keypair(struct ndb_keypair *kp)
+{
+	secp256k1_keypair *keypair = (secp256k1_keypair*)kp->pair;
+	secp256k1_xonly_pubkey pubkey;
+
+	secp256k1_context *ctx =
+		secp256k1_context_create(SECP256K1_CONTEXT_NONE);;
+
+	/* Try to create a keypair with a valid context, it should only
+	 * fail if the secret key is zero or out of range. */
+	if (!secp256k1_keypair_create(ctx, keypair, kp->secret))
+		return 0;
+
+	if (!secp256k1_keypair_xonly_pub(ctx, &pubkey, NULL, keypair))
+		return 0;
+
+	/* Serialize the public key. Should always return 1 for a valid public key. */
+	return secp256k1_xonly_pubkey_serialize(ctx, kp->pubkey, &pubkey);
+}
+
+int ndb_decode_key(const char *secstr, struct ndb_keypair *keypair)
+{
+	if (!hex_decode(secstr, strlen(secstr), keypair->secret, 32)) {
+		fprintf(stderr, "could not hex decode secret key\n");
+		return 0;
+	}
+
+	return ndb_create_keypair(keypair);
+}
+
+int ndb_builder_finalize(struct ndb_builder *builder, struct ndb_note **note,
+			 struct ndb_keypair *keypair)
 {
 	int strings_len = builder->strings.p - builder->strings.start;
-	unsigned char *end = builder->note_cur.p + strings_len;
-	int total_size = end - builder->note_cur.start;
+	unsigned char *note_end = builder->note_cur.p + strings_len;
+	int total_size = note_end - builder->note_cur.start;
 
 	// move the strings buffer next to the end of our ndb_note
 	memmove(builder->note_cur.p, builder->strings.start, strings_len);
@@ -115,6 +344,19 @@ int ndb_builder_finalize(struct ndb_builder *builder, struct ndb_note **note)
 	//builder->note->size = total_size;
 
 	*note = builder->note;
+
+	// generate id and sign if we're building this manually
+	if (keypair) {
+		// use the remaining memory for building our id buffer
+		unsigned char *end   = builder->mem.end;
+		unsigned char *start = (unsigned char*)(*note) + total_size;
+
+		if (!ndb_calculate_id(*note, start, end - start))
+			return 0;
+
+		if (!ndb_sign_id(keypair, (*note)->id, (*note)->sig))
+			return 0;
+	}
 
 	return total_size;
 }
@@ -297,44 +539,8 @@ static int ndb_builder_make_json_str(struct ndb_builder *builder,
 				return 0;
 			}
 
-			switch (*(p+1)) {
-			case 't':
-				if (!cursor_push_byte(&builder->strings, '\t'))
-					return 0;
-				break;
-			case 'n':
-				if (!cursor_push_byte(&builder->strings, '\n'))
-					return 0;
-				break;
-			case 'r':
-				if (!cursor_push_byte(&builder->strings, '\r'))
-					return 0;
-				break;
-			case 'b':
-				if (!cursor_push_byte(&builder->strings, '\b'))
-					return 0;
-				break;
-			case 'f':
-				if (!cursor_push_byte(&builder->strings, '\f'))
-					return 0;
-				break;
-			case '\\':
-				if (!cursor_push_byte(&builder->strings, '\\'))
-					return 0;
-				break;
-			case '"':
-				if (!cursor_push_byte(&builder->strings, '"'))
-					return 0;
-				break;
-			case 'u':
-				// these aren't handled yet
+			if (!cursor_push_unescaped_char(&builder->strings, *p, *(p+1)))
 				return 0;
-			default:
-				if (!cursor_push_byte(&builder->strings, *p) ||
-				    !cursor_push_byte(&builder->strings, *(p+1)))
-					return 0;
-				break;
-			}
 
 			p++; // Skip the character following the backslash
 			start = p + 1; // Update the start pointer to the next character
@@ -482,7 +688,7 @@ int ndb_note_from_json(const char *json, int len, struct ndb_note **note,
 			// sig
 			tok = &parser.toks[i+1];
 			hex_decode(json + tok->start, toksize(tok), hexbuf, sizeof(hexbuf));
-			ndb_builder_set_signature(&parser.builder, hexbuf);
+			ndb_builder_set_sig(&parser.builder, hexbuf);
 		} else if (start[0] == 'k' && jsoneq(json, tok, tok_len, "kind")) {
 			// kind
 			tok = &parser.toks[i+1];
@@ -524,7 +730,7 @@ int ndb_note_from_json(const char *json, int len, struct ndb_note **note,
 		}
 	}
 
-	return ndb_builder_finalize(&parser.builder, note);
+	return ndb_builder_finalize(&parser.builder, note, NULL);
 }
 
 void ndb_builder_set_pubkey(struct ndb_builder *builder, unsigned char *pubkey)
@@ -537,15 +743,19 @@ void ndb_builder_set_id(struct ndb_builder *builder, unsigned char *id)
 	memcpy(builder->note->id, id, 32);
 }
 
-void ndb_builder_set_signature(struct ndb_builder *builder,
-			       unsigned char *signature)
+void ndb_builder_set_sig(struct ndb_builder *builder, unsigned char *sig)
 {
-	memcpy(builder->note->signature, signature, 64);
+	memcpy(builder->note->sig, sig, 64);
 }
 
 void ndb_builder_set_kind(struct ndb_builder *builder, uint32_t kind)
 {
 	builder->note->kind = kind;
+}
+
+void ndb_builder_set_created_at(struct ndb_builder *builder, uint32_t created_at)
+{
+	builder->note->created_at = created_at;
 }
 
 int ndb_builder_new_tag(struct ndb_builder *builder)

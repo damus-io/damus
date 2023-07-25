@@ -130,8 +130,8 @@ struct SaveKeysView: View {
                 let metadata = create_account_to_metadata(account)
                 let contacts_ev = make_first_contact_event(keypair: account.keypair)
                 
-                if let keypair = account.keypair.to_full() {
-                    let metadata_ev = make_metadata_event(keypair: keypair, metadata: metadata)
+                if let keypair = account.keypair.to_full(),
+                   let metadata_ev = make_metadata_event(keypair: keypair, metadata: metadata) {
                     self.pool.send(.event(metadata_ev))
                 }
                 

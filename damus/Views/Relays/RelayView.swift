@@ -95,7 +95,8 @@ struct RelayView: View {
             }
             
             let descriptors = state.pool.our_descriptors
-            guard let new_ev = remove_relay( ev: ev, current_relays: descriptors, privkey: privkey, relay: relay) else {
+            guard let keypair = state.keypair.to_full(),
+                  let new_ev = remove_relay(ev: ev, current_relays: descriptors, keypair: keypair, relay: relay) else {
                 return
             }
             

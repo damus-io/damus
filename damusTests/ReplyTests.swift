@@ -331,8 +331,8 @@ class ReplyTests: XCTestCase {
         let reply_ref = ReferencedId(ref_id: evid, relay_id: nil, key: "e")
         let blocks = parse_post_blocks(content: content)
         let post = NostrPost(content: content, references: [reply_ref])
-        let ev = post_to_event(post: post, privkey: evid, pubkey: pk)
-        
+        let ev = post_to_event(post: post, keypair: test_keypair_full)!
+
         XCTAssertEqual(ev.tags.count, 2)
         XCTAssertEqual(blocks.count, 3)
         XCTAssertEqual(blocks[1].is_mention, .pubkey(hex_pk))
@@ -347,8 +347,8 @@ class ReplyTests: XCTestCase {
         let reply_ref = ReferencedId(ref_id: evid, relay_id: nil, key: "e")
         let blocks = parse_post_blocks(content: content)
         let post = NostrPost(content: content, references: [reply_ref])
-        let ev = post_to_event(post: post, privkey: evid, pubkey: pk)
-        
+        let ev = post_to_event(post: post, keypair: test_keypair_full)!
+
         XCTAssertEqual(ev.tags.count, 2)
         XCTAssertEqual(blocks.count, 3)
         XCTAssertEqual(blocks[1].is_mention, .pubkey(hex_pk))
@@ -367,7 +367,7 @@ class ReplyTests: XCTestCase {
         ]
         
         let post = NostrPost(content: "this is a (@\(npub)) mention", references: refs)
-        let ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
+        let ev = post_to_event(post: post, keypair: test_keypair_full)!
         
         XCTAssertEqual(ev.content, "this is a (nostr:\(npub)) mention")
         XCTAssertEqual(ev.tags[2][1], pubkey)

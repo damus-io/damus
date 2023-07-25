@@ -34,7 +34,7 @@ enum NdbData {
     }
 }
 
-class NdbNote: Equatable {
+class NdbNote: Equatable, Hashable {
     // we can have owned notes, but we can also have lmdb virtual-memory mapped notes so its optional
     private let owned: Bool
     let count: Int
@@ -66,14 +66,14 @@ class NdbNote: Equatable {
         ndb_note_content_length(note)
     }
 
-    /// These are unsafe if working on owned data and if this outlives the NdbNote
-    var id: Data {
-        Data(buffer: UnsafeBufferPointer(start: ndb_note_id(note), count: 32))
+    /// NDBTODO: make this into data
+    var id: String {
+        hex_encode(Data(buffer: UnsafeBufferPointer(start: ndb_note_id(note), count: 32)))
     }
     
-    /// Make a copy if this outlives the note and the note has owned data!
-    var pubkey: Data {
-        Data(buffer: UnsafeBufferPointer(start: ndb_note_pubkey(note), count: 32))
+    /// NDBTODO: make this into data
+    var pubkey: String {
+        hex_encode(Data(buffer: UnsafeBufferPointer(start: ndb_note_pubkey(note), count: 32)))
     }
     
     var created_at: UInt32 {
@@ -96,6 +96,64 @@ class NdbNote: Equatable {
 
     static func == (lhs: NdbNote, rhs: NdbNote) -> Bool {
         return lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+    static let max_note_size: Int = 2 << 18
+
+    init?(content: String, keypair: Keypair, kind: Int = 1, tags: [[String]] = [], createdAt: UInt32 = UInt32(Date().timeIntervalSince1970)) {
+
+        var builder = ndb_builder()
+        let buflen = MAX_NOTE_SIZE
+        let buf = malloc(buflen)
+        let idbuf = malloc(buflen)
+
+        ndb_builder_init(&builder, buf, Int32(buflen))
+
+        guard var pk_raw = hex_decode(keypair.pubkey) else { return nil }
+
+        ndb_builder_set_pubkey(&builder, &pk_raw)
+        ndb_builder_set_kind(&builder, UInt32(kind))
+        ndb_builder_set_created_at(&builder, createdAt)
+
+        for tag in tags {
+            ndb_builder_new_tag(&builder);
+            for elem in tag {
+                _ = elem.withCString { eptr in
+                    ndb_builder_push_tag_str(&builder, eptr, Int32(elem.utf8.count))
+                }
+            }
+        }
+
+        _ = content.withCString { cptr in
+            ndb_builder_set_content(&builder, content, Int32(content.utf8.count));
+        }
+
+        var n = UnsafeMutablePointer<ndb_note>?(nil)
+
+        let keypair = keypair.privkey.map { sec in
+            var kp = ndb_keypair()
+            return sec.withCString { secptr in
+                ndb_decode_key(secptr, &kp)
+                return kp
+            }
+        }
+
+        var len: Int32 = 0
+        if var keypair {
+            len = ndb_builder_finalize(&builder, &n, &keypair)
+        } else {
+            len = ndb_builder_finalize(&builder, &n, nil)
+        }
+
+        free(idbuf)
+
+        self.owned = true
+        self.count = Int(len)
+        self.note = realloc(n, Int(len)).assumingMemoryBound(to: ndb_note.self)
     }
 
     static func owned_from_json(json: String, bufsize: Int = 2 << 18) -> NdbNote? {
@@ -135,7 +193,7 @@ extension NdbNote {
     }
 
     var known_kind: NostrKind? {
-        return NostrKind.init(rawValue: Int(kind))
+        return NostrKind.init(rawValue: kind)
     }
 
     var too_big: Bool {
@@ -180,6 +238,10 @@ extension NdbNote {
         References.pubkeys(tags: self.tags)
     }
 
+    public var referenced_hashtags: LazyFilterSequence<References> {
+        References.hashtags(tags: self.tags)
+    }
+
     func event_refs(_ privkey: String?) -> [EventRef] {
         if let rs = _event_refs {
             return rs
@@ -220,7 +282,7 @@ extension NdbNote {
         }
 
         // NDBTODO: don't hex encode
-        var pubkey = hex_encode(self.pubkey)
+        var pubkey = self.pubkey
         // This is our DM, we need to use the pubkey of the person we're talking to instead
 
         if our_pubkey == pubkey {
@@ -266,7 +328,7 @@ extension NdbNote {
             }
         }
 
-        return hex_encode(self.id)
+        return self.id
     }
 
     public func last_refid() -> ReferencedId? {

@@ -35,7 +35,7 @@ class ProfileModel: ObservableObject, Equatable {
         }
         
         for tag in contacts.tags {
-            guard tag.count >= 2 && tag[0] == "p" else {
+            guard tag.count >= 2 && tag[0].matches_char("p") else {
                 continue
             }
             

@@ -116,15 +116,11 @@ struct ConfigView: View {
                 confirm_delete_account = false
             }
             Button(NSLocalizedString("Delete", comment: "Button for deleting the users account."), role: .destructive) {
-                guard let full_kp = state.keypair.to_full() else {
+                guard let keypair = state.keypair.to_full(),
+                      delete_text == DELETE_KEYWORD,
+                      let ev = created_deleted_account_profile(keypair: keypair) else {
                     return
                 }
-
-                guard delete_text == DELETE_KEYWORD else {
-                    return
-                }
-
-                let ev = created_deleted_account_profile(keypair: full_kp)
                 state.postbox.send(ev)
                 notify(.logout, ())
             }

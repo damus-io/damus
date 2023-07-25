@@ -180,11 +180,9 @@ class damusTests: XCTestCase {
     }
     
     func testMakeHashtagPost() {
-        let privkey = "d05f5fcceef3e4529703f62a29222d6ee2d1b7bf1f24729b5e01df7c633cec8a"
-        let pubkey = "6e59d3b78b1c1490a6489c94405873b57d8ef398a830ae5e39608f4107e9a790"
         let post = NostrPost(content: "#damus some content #bitcoin derp", references: [])
-        let ev = post_to_event(post: post, privkey: privkey, pubkey: pubkey)
-        
+        let ev = post_to_event(post: post, keypair: test_keypair_full)!
+
         XCTAssertEqual(ev.tags.count, 2)
         XCTAssertEqual(ev.content, "#damus some content #bitcoin derp")
         XCTAssertEqual(ev.tags[0][0], "t")

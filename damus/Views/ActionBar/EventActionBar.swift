@@ -140,12 +140,11 @@ struct EventActionBar: View {
     }
     
     func send_like() {
-        guard let privkey = damus_state.keypair.privkey else {
+        guard let keypair = damus_state.keypair.to_full(),
+              let like_ev = make_like_event(keypair: keypair, liked: event) else {
             return
         }
-        
-        let like_ev = make_like_event(pubkey: damus_state.pubkey, privkey: privkey, liked: event)
-        
+
         self.bar.our_like = like_ev
 
         generator.impactOccurred()
@@ -222,10 +221,9 @@ struct LikeButton: View {
 
 struct EventActionBar_Previews: PreviewProvider {
     static var previews: some View {
-        let pk = "pubkey"
         let ds = test_damus_state()
-        let ev = NostrEvent(content: "hi", pubkey: pk)
-        
+        let ev = NostrEvent(content: "hi", keypair: test_keypair)!
+
         let bar = ActionBarModel.empty()
         let likedbar = ActionBarModel(likes: 10, boosts: 0, zaps: 0, zap_total: 0, replies: 0, our_like: nil, our_boost: nil, our_zap: nil, our_reply: nil)
         let likedbar_ours = ActionBarModel(likes: 10, boosts: 0, zaps: 0, zap_total: 0, replies: 0, our_like: test_event, our_boost: nil, our_zap: nil, our_reply: nil)

@@ -473,14 +473,11 @@ func make_post_tags(post_blocks: [Block], tags: [[String]]) -> PostTags {
     return PostTags(blocks: post_blocks, tags: new_tags)
 }
 
-func post_to_event(post: NostrPost, privkey: String, pubkey: String) -> NostrEvent {
+func post_to_event(post: NostrPost, keypair: FullKeypair) -> NostrEvent? {
     let tags = post.references.map(refid_to_tag) + post.tags
     let post_blocks = parse_post_blocks(content: post.content)
     let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
     let content = render_blocks(blocks: post_tags.blocks)
-    let new_ev = NostrEvent(content: content, pubkey: pubkey, kind: post.kind.rawValue, tags: post_tags.tags)
-    new_ev.calculate_id()
-    new_ev.sign(privkey: privkey)
-    return new_ev
+    return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: post.kind.rawValue, tags: post_tags.tags)
 }
 

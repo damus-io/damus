@@ -54,7 +54,7 @@ struct RelayConfigView: View {
                 VStack {
                     HStack {
                         Spacer()
-                        if(!new_relay.isEmpty) {
+                        if !new_relay.isEmpty {
                             Button(NSLocalizedString("Cancel", comment: "Button to cancel out of view adding user inputted relay.")) {
                                 new_relay = ""
                                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
@@ -76,15 +76,9 @@ struct RelayConfigView: View {
                                     new_relay.removeLast();
                                 }
                                 
-                                guard let url = RelayURL(new_relay) else {
-                                    return
-                                }
-                                
-                                guard let ev = state.contacts.event else {
-                                    return
-                                }
-                                
-                                guard let privkey = state.keypair.privkey else {
+                                guard let url = RelayURL(new_relay),
+                                      let ev = state.contacts.event,
+                                      let keypair = state.keypair.to_full() else {
                                     return
                                 }
                                 
@@ -103,7 +97,7 @@ struct RelayConfigView: View {
                                 
                                 state.pool.connect(to: [new_relay])
                                 
-                                guard let new_ev = add_relay(ev: ev, privkey: privkey, current_relays: state.pool.our_descriptors, relay: new_relay, info: info) else {
+                                guard let new_ev = add_relay(ev: ev, keypair: keypair, current_relays: state.pool.our_descriptors, relay: new_relay, info: info) else {
                                     return
                                 }
                                 

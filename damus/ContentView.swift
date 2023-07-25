@@ -202,8 +202,8 @@ struct ContentView: View {
     func MaybeReportView(target: ReportTarget) -> some View {
         Group {
             if let damus_state {
-                if let sec = damus_state.keypair.privkey {
-                    ReportView(postbox: damus_state.postbox, target: target, privkey: sec)
+                if let keypair = damus_state.keypair.to_full() {
+                    ReportView(postbox: damus_state.postbox, target: target, keypair: keypair)
                 } else {
                     EmptyView()
                 }
@@ -377,7 +377,9 @@ struct ContentView: View {
             }
             
             profile.lud16 = lud16
-            let ev = make_metadata_event(keypair: keypair, metadata: profile)
+            guard let ev = make_metadata_event(keypair: keypair, metadata: profile) else {
+                return
+            }
             ds.postbox.send(ev)
         }
         .onReceive(handle_notify(.broadcast_event)) { obj in
@@ -505,7 +507,9 @@ struct ContentView: View {
             }
             
             profile.reactions = !hide
-            let profile_ev = make_metadata_event(keypair: keypair, metadata: profile)
+            guard let profile_ev = make_metadata_event(keypair: keypair, metadata: profile) else {
+                return
+            }
             damus_state.postbox.send(profile_ev)
         }
         .alert(NSLocalizedString("User muted", comment: "Alert message to indicate the user has been muted"), isPresented: $user_muted_confirm, actions: {
@@ -947,7 +951,9 @@ func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: Ev
         //let post = tup.0
         //let to_relays = tup.1
         print("post \(post.content)")
-        let new_ev = post_to_event(post: post, privkey: keypair.privkey, pubkey: keypair.pubkey)
+        guard let new_ev = post_to_event(post: post, keypair: keypair) else {
+            return false
+        }
         postbox.send(new_ev)
         for eref in new_ev.referenced_ids.prefix(3) {
             // also broadcast at most 3 referenced events

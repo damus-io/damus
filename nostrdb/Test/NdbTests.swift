@@ -25,8 +25,8 @@ final class NdbTests: XCTestCase {
 
         let id = "20d0ff27d6fcb13de8366328c5b1a7af26bcac07f2e558fbebd5e9242e608c09"
         let pubkey = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
-        XCTAssertEqual(hex_encode(note.id), id)
-        XCTAssertEqual(hex_encode(note.pubkey), pubkey)
+        XCTAssertEqual(note.id, id)
+        XCTAssertEqual(note.pubkey, pubkey)
 
         XCTAssertEqual(note.count, 34322)
         XCTAssertEqual(note.kind, 3)
@@ -126,8 +126,8 @@ final class NdbTests: XCTestCase {
         guard let event else { return }
 
         XCTAssertEqual(note.content_len, UInt32(event.content.utf8.count))
-        XCTAssertEqual(hex_encode(note.pubkey), event.pubkey)
-        XCTAssertEqual(hex_encode(note.id), event.id)
+        XCTAssertEqual(note.pubkey, event.pubkey)
+        XCTAssertEqual(note.id, event.id)
 
         let ev_blocks = event.blocks(nil)
         let note_blocks = note.blocks(nil)

@@ -20,12 +20,11 @@ struct RepostAction: View {
             Button {
                 dismiss()
                             
-                guard let privkey = self.damus_state.keypair.privkey else {
+                guard let keypair = self.damus_state.keypair.to_full(),
+                      let boost = make_boost_event(keypair: keypair, boosted: self.event) else {
                     return
                 }
-                
-                let boost = make_boost_event(pubkey: damus_state.keypair.pubkey, privkey: privkey, boosted: self.event)
-                
+
                 damus_state.postbox.send(boost)
             } label: {
                 Label(NSLocalizedString("Repost", comment: "Button to repost a note"), image: "repost")

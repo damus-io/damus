@@ -181,7 +181,9 @@ struct WalletView: View {
                     }
                     
                     profile.damus_donation = settings.donation_percent
-                    let meta = make_metadata_event(keypair: keypair, metadata: profile)
+                    guard let meta = make_metadata_event(keypair: keypair, metadata: profile) else {
+                        return
+                    }
                     let tsprofile = TimestampedProfile(profile: profile, timestamp: meta.created_at, event: meta)
                     damus_state.profiles.add(id: damus_state.pubkey, profile: tsprofile)
                     damus_state.postbox.send(meta)

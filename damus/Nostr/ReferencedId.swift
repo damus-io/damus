@@ -19,6 +19,10 @@ struct Reference {
     }
 }
 
+func tagref_should_be_id(_ tag: NdbTagElem) -> Bool {
+    return !tag.matches_char("t")
+}
+
 struct References: Sequence, IteratorProtocol {
     let tags: TagsSequence
     var tags_iter: TagsIterator
@@ -26,7 +30,7 @@ struct References: Sequence, IteratorProtocol {
     mutating func next() -> Reference? {
         while let tag = tags_iter.next() {
             guard let key = tag[0], key.count == 1,
-                  let id = tag[1], id.is_id
+                  let id = tag[1], tagref_should_be_id(key)
             else { continue }
 
             for c in key {
@@ -49,9 +53,34 @@ struct References: Sequence, IteratorProtocol {
             .filter() { ref in ref.key == "p" }
     }
 
+    static func hashtags(tags: TagsSequence) -> LazyFilterSequence<References> {
+        References(tags: tags).lazy
+            .filter() { ref in ref.key == "t" }
+    }
+
     init(tags: TagsSequence) {
         self.tags = tags
         self.tags_iter = tags.makeIterator()
+    }
+}
+
+extension [[String]] {
+    func strings() -> [[String]] {
+        return self
+    }
+}
+
+extension String {
+    func string() -> String {
+        return self
+    }
+
+    func first_char() -> AsciiCharacter? {
+        self.first.flatMap { chr in AsciiCharacter(chr) }
+    }
+
+    func matches_char(_ c: AsciiCharacter) -> Bool {
+        return self.first == c.character
     }
 }
 

@@ -10,8 +10,8 @@ import SwiftUI
 struct ReportView: View {
     let postbox: PostBox
     let target: ReportTarget
-    let privkey: String
-     
+    let keypair: FullKeypair
+
     @State var report_sent: Bool = false
     @State var report_id: String = ""
     @State var report_message: String = ""
@@ -46,7 +46,8 @@ struct ReportView: View {
     }
     
     func do_send_report() {
-        guard let selected_report_type, let ev = send_report(privkey: privkey, postbox: postbox, target: target, type: selected_report_type, message: report_message) else {
+        guard let selected_report_type,
+              let ev = send_report(keypair: keypair, postbox: postbox, target: target, type: selected_report_type, message: report_message) else {
             return
         }
         
@@ -116,9 +117,9 @@ struct ReportView: View {
     }
 }
 
-func send_report(privkey: String, postbox: PostBox, target: ReportTarget, type: ReportType, message: String) -> NostrEvent? {
+func send_report(keypair: FullKeypair, postbox: PostBox, target: ReportTarget, type: ReportType, message: String) -> NostrEvent? {
     let report = Report(type: type, target: target, message: message)
-    guard let ev = create_report_event(privkey: privkey, report: report) else {
+    guard let ev = create_report_event(keypair: keypair, report: report) else {
         return nil
     }
     postbox.send(ev)
@@ -130,10 +131,10 @@ struct ReportView_Previews: PreviewProvider {
         let ds = test_damus_state()
         VStack {
         
-        ReportView(postbox: ds.postbox, target: ReportTarget.user(""), privkey: "")
-        
-            ReportView(postbox: ds.postbox, target: ReportTarget.user(""), privkey: "", report_sent: true, report_id: "report_id")
-            
+            ReportView(postbox: ds.postbox, target: ReportTarget.user(""), keypair: test_keypair.to_full()!)
+
+            ReportView(postbox: ds.postbox, target: ReportTarget.user(""), keypair: test_keypair.to_full()!, report_sent: true, report_id: "report_id")
+
         }
     }
 }

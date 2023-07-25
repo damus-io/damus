@@ -24,9 +24,9 @@ struct RecommendedRelayView: View {
     var body: some View {
         ZStack {
             HStack {
-                if let privkey = damus.keypair.privkey {
+                if let keypair = damus.keypair.to_full() {
                     if showActionButtons && add_button {
-                        AddButton(privkey: privkey, showText: false)
+                        AddButton(keypair: keypair, showText: false)
                     }
                 }
                 
@@ -59,8 +59,8 @@ struct RecommendedRelayView: View {
         }
         .swipeActions {
             if add_button {
-                if let privkey = damus.keypair.privkey {
-                    AddButton(privkey: privkey, showText: false)
+                if let keypair = damus.keypair.to_full() {
+                    AddButton(keypair: keypair, showText: false)
                         .tint(.accentColor)
                 }
             }
@@ -68,8 +68,8 @@ struct RecommendedRelayView: View {
         .contextMenu {
             CopyAction(relay: relay)
             
-            if let privkey = damus.keypair.privkey {
-                AddButton(privkey: privkey, showText: true)
+            if let keypair = damus.keypair.to_full() {
+                AddButton(keypair: keypair, showText: true)
             }
         }
     }
@@ -82,9 +82,9 @@ struct RecommendedRelayView: View {
         }
     }
     
-    func AddButton(privkey: String, showText: Bool) -> some View {
+    func AddButton(keypair: FullKeypair, showText: Bool) -> some View {
         Button(action: {
-            add_action(privkey: privkey)
+            add_action(keypair: keypair)
         }) {
             if showText {
                 Text(NSLocalizedString("Connect", comment: "Button to connect to recommended relay server."))
@@ -97,11 +97,11 @@ struct RecommendedRelayView: View {
         }
     }
     
-    func add_action(privkey: String) {
+    func add_action(keypair: FullKeypair) {
         guard let ev_before_add = damus.contacts.event else {
             return
         }
-        guard let ev_after_add = add_relay(ev: ev_before_add, privkey: privkey, current_relays: damus.pool.our_descriptors, relay: relay, info: .rw) else {
+        guard let ev_after_add = add_relay(ev: ev_before_add, keypair: keypair, current_relays: damus.pool.our_descriptors, relay: relay, info: .rw) else {
             return
         }
         process_contact_event(state: damus, ev: ev_after_add)

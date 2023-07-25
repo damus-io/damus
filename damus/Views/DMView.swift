@@ -73,7 +73,7 @@ struct DMView: View {
 
 struct DMView_Previews: PreviewProvider {
     static var previews: some View {
-        let ev = NostrEvent(content: "Hey there *buddy*, want to grab some drinks later? 🍻", pubkey: "pubkey", kind: 1, tags: [])
+        let ev = NostrEvent(content: "Hey there *buddy*, want to grab some drinks later? 🍻", keypair: test_keypair, kind: 1, tags: [])!
         DMView(event: ev, damus_state: test_damus_state())
     }
 }

@@ -7,23 +7,44 @@
 
 import Foundation
 
+let test_seckey = "8e33316b227de8215d36f4787573beaaf532229bb00398430a0ae963b658e656"
+let test_pubkey = "a9952fe066ced622167acb8069a0dfd1d44d9493ef2a4c28cf93e2877248b41a"
+let test_keypair = Keypair(pubkey: test_pubkey, privkey: test_seckey)
+let test_keypair_full = test_keypair.to_full()!
 
 let test_event_holder = EventHolder(events: [], incoming: [test_event])
 
 let test_event =
         NostrEvent(
             content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jpg cool",
-            pubkey: "pk",
-            createdAt: Int64(Date().timeIntervalSince1970 - 100)
-        )
+            keypair: test_keypair,
+            createdAt: UInt32(Date().timeIntervalSince1970 - 100)
+        )!
+
+let test_encoded_post = "{\"id\": \"8ba545ab96959fe0ce7db31bc10f3ac3aa5353bc4428dbf1e56a7be7062516db\",\"pubkey\": \"7e27509ccf1e297e1df164912a43406218f8bd80129424c3ef798ca3ef5c8444\",\"created_at\": 1677013417,\"kind\": 1,\"tags\": [],\"content\": \"hello\",\"sig\": \"93684f15eddf11f42afbdd81828ee9fc35350344d8650c78909099d776e9ad8d959cd5c4bff7045be3b0b255144add43d0feef97940794a1bc9c309791bebe4a\"}"
+
+let test_repost_1 = NostrEvent(content: test_encoded_post, keypair: test_keypair, kind: 6, tags: [], createdAt: 1)!
+let test_repost_2 = NostrEvent(content: test_encoded_post, keypair: test_keypair, kind: 6, tags: [], createdAt: 1)!
+
+let test_reposts = [test_repost_1, test_repost_2]
+let test_event_group = EventGroup(events: test_reposts)
+
+let test_zap_invoice = ZapInvoice(description: .description("description"), amount: 10000, string: "lnbc1", expiry: 1000000, payment_hash: Data(), created_at: 1000000)
+let test_zap_request_ev = NostrEvent(content: "hi", keypair: test_keypair, kind: 9734)!
+let test_zap_request = ZapRequest(ev: test_zap_request_ev)
+let test_zap = Zap(event: test_event, invoice: test_zap_invoice, zapper: "zapper", target: .profile("pk"), raw_request: test_zap_request, is_anon: false, private_request: nil)
+
+let test_private_zap = Zap(event: test_event, invoice: test_zap_invoice, zapper: "zapper", target: .profile("pk"), raw_request: test_zap_request, is_anon: false, private_request: .init(ev: test_event))
+
+let test_pending_zap = PendingZap(amount_msat: 10000, target: .note(id: "id", author: "pk"), request: .normal(test_zap_request), type: .pub, state: .external(.init(state: .fetching_invoice)))
+
 
 func test_damus_state() -> DamusState {
-    let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
     let damus = DamusState.empty
 
     let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", banner: "", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io", damus_donation: nil)
     let tsprof = TimestampedProfile(profile: prof, timestamp: 0, event: test_event)
-    damus.profiles.add(id: pubkey, profile: tsprof)
+    damus.profiles.add(id: test_pubkey, profile: tsprof)
     return damus
 }
 

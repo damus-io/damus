@@ -59,19 +59,18 @@ struct LongformView: View {
     }
 }
 
-let test_longform_event = LongformEvent.parse(from:
-        .init(id: "longform_id",
-              content: longform_long_test_data,
-              pubkey: "pk",
-              kind: NostrKind.longform.rawValue,
-              tags: [
-                ["title", "What is WASTOIDS?"],
-                ["summary", "WASTOIDS is an audio/visual feed, created by Sam Means..."],
-                ["published_at", "1685638715"],
-                ["t", "coffee"],
-                ["t", "coffeechain"],
-                ["image", "https://cdn.jb55.com/s/038fe8f558153b52.jpg"],
-              ])
+let test_longform_event = LongformEvent.parse(from: NostrEvent(
+    content: longform_long_test_data,
+    keypair: test_keypair,
+    kind: NostrKind.longform.rawValue,
+    tags: [
+        ["title", "What is WASTOIDS?"],
+        ["summary", "WASTOIDS is an audio/visual feed, created by Sam Means..."],
+        ["published_at", "1685638715"],
+        ["t", "coffee"],
+        ["t", "coffeechain"],
+        ["image", "https://cdn.jb55.com/s/038fe8f558153b52.jpg"],
+    ])!
 )
 
 struct LongformView_Previews: PreviewProvider {

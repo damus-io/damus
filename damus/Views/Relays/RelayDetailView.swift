@@ -40,35 +40,38 @@ struct RelayDetailView: View {
             return Text("No data available", comment: "Text indicating that there is no data available to show for specific metadata about a relay server.")
         }
     }
-    
+
+    func RemoveRelayButton(_ keypair: FullKeypair) -> some View {
+        Button(action: {
+            guard let ev = state.contacts.event else {
+                return
+            }
+
+            let descriptors = state.pool.our_descriptors
+            guard let new_ev = remove_relay( ev: ev, current_relays: descriptors, keypair: keypair, relay: relay) else {
+                return
+            }
+
+            process_contact_event(state: state, ev: new_ev)
+            state.postbox.send(new_ev)
+            dismiss()
+        }) {
+            Text("Disconnect From Relay", comment: "Button to disconnect from the relay.")
+        }
+    }
+
     var body: some View {
         Group {
             Form {
-                
-                if let privkey = state.keypair.privkey {
+                if let keypair = state.keypair.to_full() {
                     if check_connection() {
-                        Button(action: {
-                            guard let ev = state.contacts.event else {
-                                return
-                            }
-
-                            let descriptors = state.pool.our_descriptors
-                            guard let new_ev = remove_relay( ev: ev, current_relays: descriptors, privkey: privkey, relay: relay) else {
-                                return
-                            }
-
-                            process_contact_event(state: state, ev: new_ev)
-                            state.postbox.send(new_ev)
-                            dismiss()
-                        }) {
-                            Text("Disconnect From Relay", comment: "Button to disconnect from the relay.")
-                        }
+                        RemoveRelayButton(keypair)
                     } else {
                         Button(action: {
                             guard let ev_before_add = state.contacts.event else {
                                 return
                             }
-                            guard let ev_after_add = add_relay(ev: ev_before_add, privkey: privkey, current_relays: state.pool.our_descriptors, relay: relay, info: .rw) else {
+                            guard let ev_after_add = add_relay(ev: ev_before_add, keypair: keypair, current_relays: state.pool.our_descriptors, relay: relay, info: .rw) else {
                                 return
                             }
                             process_contact_event(state: state, ev: ev_after_add)

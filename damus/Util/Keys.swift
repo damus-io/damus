@@ -14,6 +14,10 @@ let ANON_PUBKEY = "anon"
 struct FullKeypair: Equatable {
     let pubkey: String
     let privkey: String
+
+    func to_keypair() -> Keypair {
+        return Keypair(pubkey: pubkey, privkey: privkey)
+    }
 }
 
 struct Keypair {

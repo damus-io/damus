@@ -31,32 +31,60 @@ struct NdbStrIter: IteratorProtocol {
     }
 }
 
-struct NdbTagElem: Sequence {
+struct NdbTagElem: Sequence, Hashable {
+
     let note: NdbNote
     let tag: UnsafeMutablePointer<ndb_tag>
     let index: Int32
+    let str: ndb_str
+
+    func hash(into hasher: inout Hasher) {
+        if str.flag == NDB_PACKED_ID {
+            hasher.combine(bytes: UnsafeRawBufferPointer(start: str.id, count: 32))
+        } else {
+            hasher.combine(bytes: UnsafeRawBufferPointer(start: str.str, count: strlen(str.str)))
+        }
+    }
+
+    static func == (lhs: NdbTagElem, rhs: NdbTagElem) -> Bool {
+        if lhs.str.flag == NDB_PACKED_ID && rhs.str.flag == NDB_PACKED_ID {
+            return memcmp(lhs.str.id, rhs.str.id, 32) == 0
+        } else if lhs.str.flag == NDB_PACKED_ID || rhs.str.flag == NDB_PACKED_ID {
+            return false
+        }
+
+        let l = strlen(lhs.str.str)
+        let r = strlen(rhs.str.str)
+        if l != r { return false }
+
+        return memcmp(lhs.str.str, rhs.str.str, r) == 0
+    }
 
     init(note: NdbNote, tag: UnsafeMutablePointer<ndb_tag>, index: Int32) {
         self.note = note
         self.tag = tag
         self.index = index
+        self.str = ndb_tag_str(note.note, tag, index)
     }
 
     var is_id: Bool {
-        return ndb_tag_str(note.note, tag, index).flag == NDB_PACKED_ID
+        return str.flag == NDB_PACKED_ID
     }
 
     var count: Int {
-        let r = ndb_tag_str(note.note, tag, index)
-        if r.flag == NDB_PACKED_ID {
+        if str.flag == NDB_PACKED_ID {
             return 32
         } else {
-            return strlen(r.str)
+            return strlen(str.str)
         }
     }
 
     func matches_char(_ c: AsciiCharacter) -> Bool {
-        return ndb_tag_matches_char(note.note, tag, index, c.cchar) == 1
+        return str.str[0] == c.cchar && str.str[1] == 0
+    }
+
+    var ndbstr: ndb_str {
+        return ndb_tag_str(note.note, tag, index)
     }
 
     func data() -> NdbData {

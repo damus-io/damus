@@ -177,9 +177,9 @@ struct DMChatView: View, KeyboardReadable {
 
 struct DMChatView_Previews: PreviewProvider {
     static var previews: some View {
-        let ev = NostrEvent(content: "hi", pubkey: "pubkey", kind: 1, tags: [])
+        let ev = NostrEvent(content: "hi", keypair: test_keypair, kind: 1, tags: [])!
 
-        let model = DirectMessageModel(events: [ev], our_pubkey: "pubkey", pubkey: "the_pk")
+        let model = DirectMessageModel(events: [ev], our_pubkey: test_pubkey, pubkey: test_pubkey)
 
         DMChatView(damus_state: test_damus_state(), dms: model)
     }
@@ -216,11 +216,7 @@ func create_encrypted_event(_ message: String, to_pk: String, tags: [[String]], 
         return nil
     }
     
-    let ev = NostrEvent(content: enc_content, pubkey: keypair.pubkey, kind: kind, tags: tags, createdAt: created_at)
-    
-    ev.calculate_id()
-    ev.sign(privkey: privkey)
-    return ev
+    return NostrEvent(content: enc_content, keypair: keypair.to_keypair(), kind: kind, tags: tags, createdAt: created_at)
 }
 
 func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair, created_at: UInt32? = nil) -> NostrEvent?

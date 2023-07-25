@@ -12,6 +12,12 @@ struct ndb_str {
 	};
 };
 
+struct ndb_keypair {
+	unsigned char pubkey[32];
+	unsigned char secret[32];
+	unsigned char pair[96];
+};
+
 // these must be byte-aligned, they are directly accessing the serialized data
 // representation
 #pragma pack(push, 1)
@@ -47,7 +53,7 @@ struct ndb_note {
 	unsigned char padding[3]; // keep things aligned
 	unsigned char id[32];
 	unsigned char pubkey[32];
-	unsigned char signature[64];
+	unsigned char sig[64];
 
 	uint32_t created_at;
 	uint32_t kind;
@@ -62,6 +68,7 @@ struct ndb_note {
 #pragma pack(pop)
 
 struct ndb_builder {
+	struct cursor mem;
 	struct cursor note_cur;
 	struct cursor strings;
 	struct cursor str_indices;
@@ -77,18 +84,24 @@ struct ndb_iterator {
 	int index;
 };
 
-// HI BUILDER
+// HELPERS
+int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen);
+int ndb_sign_id(struct ndb_keypair *keypair, unsigned char id[32], unsigned char sig[64]);
+int ndb_create_keypair(struct ndb_keypair *key);
+int ndb_decode_key(const char *secstr, struct ndb_keypair *keypair);
+
+// BUILDER
 int ndb_note_from_json(const char *json, int len, struct ndb_note **, unsigned char *buf, int buflen);
-int ndb_builder_new(struct ndb_builder *builder, unsigned char *buf, int bufsize);
-int ndb_builder_finalize(struct ndb_builder *builder, struct ndb_note **note);
+int ndb_builder_init(struct ndb_builder *builder, unsigned char *buf, int bufsize);
+int ndb_builder_finalize(struct ndb_builder *builder, struct ndb_note **note, struct ndb_keypair *privkey);
 int ndb_builder_set_content(struct ndb_builder *builder, const char *content, int len);
-void ndb_builder_set_signature(struct ndb_builder *builder, unsigned char *signature);
+void ndb_builder_set_created_at(struct ndb_builder *builder, uint32_t created_at);
+void ndb_builder_set_sig(struct ndb_builder *builder, unsigned char *sig);
 void ndb_builder_set_pubkey(struct ndb_builder *builder, unsigned char *pubkey);
 void ndb_builder_set_id(struct ndb_builder *builder, unsigned char *id);
 void ndb_builder_set_kind(struct ndb_builder *builder, uint32_t kind);
 int ndb_builder_new_tag(struct ndb_builder *builder);
 int ndb_builder_push_tag_str(struct ndb_builder *builder, const char *str, int len);
-// BYE BUILDER
 
 static inline struct ndb_str ndb_note_str(struct ndb_note *note,
 					  union ndb_packed_str *pstr)
@@ -111,17 +124,6 @@ static inline struct ndb_str ndb_tag_str(struct ndb_note *note,
 	return ndb_note_str(note, &tag->strs[ind]);
 }
 
-static inline int ndb_tag_matches_char(struct ndb_note *note,
-				       struct ndb_tag *tag, int ind, char c)
-{
-	struct ndb_str str = ndb_tag_str(note, tag, ind);
-	if (str.str[0] == '\0')
-		return 0;
-	else if (str.str[0] == c)
-		return 1;
-	return 0;
-}
-
 static inline struct ndb_str ndb_iter_tag_str(struct ndb_iterator *iter,
 					      int ind)
 {
@@ -138,9 +140,9 @@ static inline unsigned char * ndb_note_pubkey(struct ndb_note *note)
 	return note->pubkey;
 }
 
-static inline unsigned char * ndb_note_signature(struct ndb_note *note)
+static inline unsigned char * ndb_note_sig(struct ndb_note *note)
 {
-	return note->signature;
+	return note->sig;
 }
 
 static inline uint32_t ndb_note_created_at(struct ndb_note *note)

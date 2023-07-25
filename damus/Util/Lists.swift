@@ -16,22 +16,15 @@ func remove_from_mutelist(keypair: FullKeypair, prev: NostrEvent, to_remove: Str
 }
 
 func create_or_update_list_event(keypair: FullKeypair, mprev: NostrEvent?, to_add: String, list_name: String, list_type: String) -> NostrEvent? {
-    let pubkey = keypair.pubkey
-    
-    if let prev = mprev {
-        if let okprev = ensure_list_name(list: prev, name: list_name), prev.pubkey == keypair.pubkey {
-            return add_to_list_event(keypair: keypair, prev: okprev, to_add: to_add, tag_type: list_type)
-        }
+    if let prev = mprev,
+       prev.pubkey == keypair.pubkey,
+       matches_list_name(tags: prev.tags, name: list_name)
+    {
+        return add_to_list_event(keypair: keypair, prev: prev, to_add: to_add, tag_type: list_type)
     }
     
     let tags = [["d", list_name], [list_type, to_add]]
-    let ev = NostrEvent(content: "", pubkey: pubkey, kind: 30000, tags: tags)
-    
-    ev.tags = tags
-    ev.id = hex_encode(calculate_event_id(ev: ev))
-    ev.sig = sign_event(privkey: keypair.privkey, ev: ev)
-    
-    return ev
+    return NostrEvent(content: "", keypair: keypair.to_keypair(), kind: 30000, tags: tags)
 }
 
 func remove_from_list_event(keypair: FullKeypair, prev: NostrEvent, to_remove: String, tag_type: String) -> NostrEvent? {
@@ -51,11 +44,7 @@ func remove_from_list_event(keypair: FullKeypair, prev: NostrEvent, to_remove: S
         !(tag.count >= 2 && tag[0] == tag_type && tag[1] == to_remove)
     }
         
-    let ev = NostrEvent(content: prev.content, pubkey: keypair.pubkey, kind: 30000, tags: new_tags)
-    ev.id = hex_encode(calculate_event_id(ev: ev))
-    ev.sig = sign_event(privkey: keypair.privkey, ev: ev)
-    
-    return ev
+    return NostrEvent(content: prev.content, keypair: keypair.to_keypair(), kind: 30000, tags: new_tags)
 }
 
 func add_to_list_event(keypair: FullKeypair, prev: NostrEvent, to_add: String, tag_type: String) -> NostrEvent? {
@@ -65,27 +54,19 @@ func add_to_list_event(keypair: FullKeypair, prev: NostrEvent, to_add: String, t
             return nil
         }
     }
-    
-    let new = NostrEvent(content: prev.content, pubkey: keypair.pubkey, kind: 30000, tags: prev.tags)
-    new.tags.append([tag_type, to_add])
-    new.id = hex_encode(calculate_event_id(ev: new))
-    new.sig = sign_event(privkey: keypair.privkey, ev: new)
-    
-    return new
+
+    var tags = Array(prev.tags)
+    tags.append([tag_type, to_add])
+
+    return NostrEvent(content: prev.content, keypair: keypair.to_keypair(), kind: 30000, tags: tags)
 }
 
-func ensure_list_name(list: NostrEvent, name: String) -> NostrEvent? {
-    for tag in list.tags {
+func matches_list_name(tags: [[String]], name: String) -> Bool {
+    for tag in tags {
         if tag.count >= 2 && tag[0] == "d" {
-            if tag[1] != name {
-                return nil
-            } else {
-                return list
-            }
+            return tag[1] == name
         }
     }
-    
-    list.tags.insert(["d", name], at: 0)
-    
-    return list
+
+    return false
 }

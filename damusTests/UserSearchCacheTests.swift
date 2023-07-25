@@ -116,7 +116,6 @@ final class UserSearchCacheTests: XCTestCase {
 
     private func createContactsEventWithPetnames(pubkeysToPetnames: [String: String]) throws -> NostrEvent {
         let keypair = try XCTUnwrap(keypair)
-        let privkey = try XCTUnwrap(keypair.privkey)
 
         let bootstrapRelays = load_bootstrap_relays(pubkey: keypair.pubkey)
         let relayInfo = RelayInfo(read: true, write: true)
@@ -132,13 +131,7 @@ final class UserSearchCacheTests: XCTestCase {
             ["p", $0.element.key, "", $0.element.value]
         }
 
-        let ev = NostrEvent(content: relayJson,
-                            pubkey: keypair.pubkey,
-                            kind: NostrKind.contacts.rawValue,
-                            tags: tags)
-        ev.calculate_id()
-        ev.sign(privkey: privkey)
-        return ev
+        return NostrEvent(content: relayJson, keypair: keypair, kind: NostrKind.contacts.rawValue, tags: tags)!
     }
 
 }

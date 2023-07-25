@@ -55,17 +55,8 @@ func create_report_tags(target: ReportTarget, type: ReportType) -> [[String]] {
     }
 }
 
-func create_report_event(privkey: String, report: Report) -> NostrEvent? {
-    guard let pubkey = privkey_to_pubkey(privkey: privkey) else {
-        return nil
-    }
-    
-    let kind = 1984
+func create_report_event(keypair: FullKeypair, report: Report) -> NostrEvent? {
+    let kind: UInt32 = 1984
     let tags = create_report_tags(target: report.target, type: report.type)
-    let ev = NostrEvent(content: report.message, pubkey: pubkey, kind: kind, tags: tags)
-    
-    ev.id = hex_encode(calculate_event_id(ev: ev))
-    ev.sig = sign_event(privkey: privkey, ev: ev)
-    
-    return ev
+    return NostrEvent(content: report.message, keypair: keypair.to_keypair(), kind: kind, tags: tags)
 }
