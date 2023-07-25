@@ -10,7 +10,7 @@ import AVKit
 
 struct TimestampedProfile {
     let profile: Profile
-    let timestamp: Int64
+    let timestamp: UInt32
     let event: NostrEvent
 }
 
@@ -662,7 +662,7 @@ struct ContentView_Previews: PreviewProvider {
     }
 }
 
-func get_since_time(last_event: NostrEvent?) -> Int64? {
+func get_since_time(last_event: NostrEvent?) -> UInt32? {
     if let last_event = last_event {
         return last_event.created_at - 60 * 10
     }
@@ -705,15 +705,15 @@ func save_last_event(_ ev: NostrEvent, timeline: Timeline) {
     UserDefaults.standard.set(String(ev.created_at), forKey: "last_\(str)_time")
 }
 
-func update_filters_with_since(last_of_kind: [Int: NostrEvent], filters: [NostrFilter]) -> [NostrFilter] {
-    
+func update_filters_with_since(last_of_kind: [UInt32: NostrEvent], filters: [NostrFilter]) -> [NostrFilter] {
+
     return filters.map { filter in
         let kinds = filter.kinds ?? []
-        let initial: Int64? = nil
+        let initial: UInt32? = nil
         let earliest = kinds.reduce(initial) { earliest, kind in
             let last = last_of_kind[kind.rawValue]
-            let since: Int64? = get_since_time(last_event: last)
-            
+            let since: UInt32? = get_since_time(last_event: last)
+
             if earliest == nil {
                 if since == nil {
                     return nil

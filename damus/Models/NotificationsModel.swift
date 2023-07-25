@@ -51,7 +51,7 @@ enum NotificationItem {
         }
     }
     
-    var last_event_at: Int64 {
+    var last_event_at: UInt32 {
         switch self {
         case .reaction(_, let evgrp):
             return evgrp.last_event_at

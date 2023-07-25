@@ -167,7 +167,7 @@ struct PayInvoiceRequest: Codable {
 
 func make_wallet_connect_request<T>(req: WalletRequest<T>, to_pk: String, keypair: FullKeypair) -> NostrEvent? {
     let tags = [["p", to_pk]]
-    let created_at = Int64(Date().timeIntervalSince1970)
+    let created_at = UInt32(Date().timeIntervalSince1970)
     guard let content = encode_json(req) else {
         return nil
     }

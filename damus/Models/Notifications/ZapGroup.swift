@@ -12,7 +12,7 @@ class ZapGroup {
     var msat_total: Int64 = 0
     var zappers = Set<String>()
     
-    var last_event_at: Int64 {
+    var last_event_at: UInt32 {
         guard let first = zaps.first else {
             return 0
         }

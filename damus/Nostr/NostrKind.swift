@@ -8,7 +8,7 @@
 import Foundation
 
 
-enum NostrKind: Int, Codable {
+enum NostrKind: UInt32, Codable {
     case metadata = 0
     case text = 1
     case contacts = 3

@@ -45,8 +45,8 @@ final class DMTests: XCTestCase {
         let pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
         let model = DirectMessagesModel(our_pubkey: pubkey)
         
-        let now = Int64(Date().timeIntervalSince1970)
-        
+        let now = UInt32(Date().timeIntervalSince1970)
+
         let alice_to_bob = create_dm("hi bob", to_pk: bob.pubkey, tags: [["p", bob.pubkey]], keypair: alice, created_at: now)!
         handle_incoming_dms(prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [alice_to_bob])
         

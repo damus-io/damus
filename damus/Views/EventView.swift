@@ -83,12 +83,12 @@ extension View {
     }
 }
 
-func format_relative_time(_ created_at: Int64) -> String
+func format_relative_time(_ created_at: UInt32) -> String
 {
     return time_ago_since(Date(timeIntervalSince1970: Double(created_at)))
 }
 
-func format_date(_ created_at: Int64) -> String {
+func format_date(_ created_at: UInt32) -> String {
     let date = Date(timeIntervalSince1970: TimeInterval(created_at))
     let dateFormatter = DateFormatter()
     dateFormatter.timeStyle = .short

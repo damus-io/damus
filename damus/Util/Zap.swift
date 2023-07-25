@@ -216,7 +216,7 @@ enum Zapping {
         }
     }
     
-    var created_at: Int64 {
+    var created_at: UInt32 {
         switch self {
         case .zap(let zap):
             return zap.event.created_at

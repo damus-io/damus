@@ -209,8 +209,7 @@ func encrypt_message(message: String, privkey: String, to_pk: String, encoding: 
     
 }
 
-func create_encrypted_event(_ message: String, to_pk: String, tags: [[String]], keypair: FullKeypair, created_at: Int64, kind: Int) -> NostrEvent? {
-    
+func create_encrypted_event(_ message: String, to_pk: String, tags: [[String]], keypair: FullKeypair, created_at: UInt32, kind: UInt32) -> NostrEvent? {
     let privkey = keypair.privkey
     
     guard let enc_content = encrypt_message(message: message, privkey: privkey, to_pk: to_pk) else {
@@ -224,10 +223,10 @@ func create_encrypted_event(_ message: String, to_pk: String, tags: [[String]], 
     return ev
 }
 
-func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair, created_at: Int64? = nil) -> NostrEvent?
+func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair, created_at: UInt32? = nil) -> NostrEvent?
 {
-    let created = created_at ?? Int64(Date().timeIntervalSince1970)
-    
+    let created = created_at ?? UInt32(Date().timeIntervalSince1970)
+
     guard let keypair = keypair.to_full() else {
         return nil
     }

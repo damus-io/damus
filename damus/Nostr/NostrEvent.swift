@@ -63,8 +63,8 @@ class NostrEventOld: Codable, Identifiable, CustomStringConvertible, Equatable, 
     var flags: Int = 0
 
     let pubkey: String
-    let created_at: Int64
-    let kind: Int
+    let created_at: UInt32
+    let kind: UInt32
 
     // cached stuff
     private var _event_refs: [EventRef]? = nil
@@ -665,8 +665,8 @@ func make_zap_request_event(keypair: FullKeypair, content: String, relays: [Rela
     
     var kp = keypair
     
-    let now = Int64(Date().timeIntervalSince1970)
-    
+    let now = UInt32(Date().timeIntervalSince1970)
+
     var privzap_req: PrivateZapRequest?
     
     var message = content

@@ -66,7 +66,7 @@ class HomeModel {
     var has_event: [String: Set<String>] = [:]
     var deleted_events: Set<String> = Set()
     var channels: [String: NostrEvent] = [:]
-    var last_event_of_kind: [String: [Int: NostrEvent]] = [:]
+    var last_event_of_kind: [String: [UInt32: NostrEvent]] = [:]
     var done_init: Bool = false
     var incoming_dms: [NostrEvent] = []
     let dm_debouncer = Debouncer(interval: 0.5)
@@ -494,7 +494,7 @@ class HomeModel {
         pool.send(.subscribe(.init(filters: dms_filters, sub_id: dms_subid)), to: relay_ids)
     }
 
-    func get_last_of_kind(relay_id: String?) -> [Int: NostrEvent] {
+    func get_last_of_kind(relay_id: String?) -> [UInt32: NostrEvent] {
         return relay_id.flatMap { last_event_of_kind[$0] } ?? [:]
     }
 
@@ -566,7 +566,7 @@ class HomeModel {
         process_metadata_event(events: damus_state.events, our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
     }
 
-    func get_last_event_of_kind(relay_id: String, kind: Int) -> NostrEvent? {
+    func get_last_event_of_kind(relay_id: String, kind: UInt32) -> NostrEvent? {
         guard let m = last_event_of_kind[relay_id] else {
             last_event_of_kind[relay_id] = [:]
             return nil

@@ -12,8 +12,8 @@ struct NostrFilter: Codable, Equatable {
     var kinds: [NostrKind]?
     var referenced_ids: [String]?
     var pubkeys: [String]?
-    var since: Int64?
-    var until: Int64?
+    var since: UInt32?
+    var until: UInt32?
     var limit: UInt32?
     var authors: [String]?
     var hashtag: [String]?
@@ -32,7 +32,7 @@ struct NostrFilter: Codable, Equatable {
         case limit
     }
     
-    init(ids: [String]? = nil, kinds: [NostrKind]? = nil, referenced_ids: [String]? = nil, pubkeys: [String]? = nil, since: Int64? = nil, until: Int64? = nil, limit: UInt32? = nil, authors: [String]? = nil, hashtag: [String]? = nil) {
+    init(ids: [String]? = nil, kinds: [NostrKind]? = nil, referenced_ids: [String]? = nil, pubkeys: [String]? = nil, since: UInt32? = nil, until: UInt32? = nil, limit: UInt32? = nil, authors: [String]? = nil, hashtag: [String]? = nil) {
         self.ids = ids
         self.kinds = kinds
         self.referenced_ids = referenced_ids

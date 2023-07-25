@@ -10,7 +10,7 @@ import Foundation
 class EventGroup {
     var events: [NostrEvent]
     
-    var last_event_at: Int64 {
+    var last_event_at: UInt32 {
         guard let first = self.events.first else {
             return 0
         }
