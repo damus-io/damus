@@ -43,9 +43,9 @@ enum Sheets: Identifiable {
     var id: String {
         switch self {
         case .report: return "report"
-        case .post(let action): return "post-" + (action.ev?.id ?? "")
-        case .event(let ev): return "event-" + ev.id
-        case .zap(let sheet): return "zap-" + sheet.target.id
+        case .post(let action): return "post-" + (action.ev?.id.hex() ?? "")
+        case .event(let ev): return "event-" + ev.id.hex()
+        case .zap(let sheet): return "zap-" + hex_encode(sheet.target.id)
         case .select_wallet: return "select-wallet"
         case .filter: return "filter"
         case .suggestedUsers: return "suggested-users"
@@ -397,14 +397,14 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.unfollow)) { target in
             guard let state = self.damus_state else { return }
-            _ = handle_unfollow_notif(state: state, target: target)
+            _ = handle_unfollow(state: state, unfollow: target.follow_ref)
         }
         .onReceive(handle_notify(.unfollowed)) { unfollow in
             home.resubscribe(.unfollowing(unfollow))
         }
         .onReceive(handle_notify(.follow)) { target in
             guard let state = self.damus_state else { return }
-            guard handle_follow_notif(state: state, target: target) else { return }
+            handle_follow_notif(state: state, target: target)
         }
         .onReceive(handle_notify(.followed)) { _ in
             home.resubscribe(.following)
@@ -469,26 +469,29 @@ struct ContentView: View {
         .onReceive(handle_notify(.local_notification)) { local in
             guard let damus_state else { return }
 
-            if local.type == .profile_zap {
-                open_profile(pubkey: local.event_id)
-                return
+            switch local.mention {
+            case .pubkey(let pubkey):
+                open_profile(pubkey: pubkey)
+
+            case .note(let noteId):
+                guard let target = damus_state.events.lookup(noteId) else {
+                    return
+                }
+
+                switch local.type {
+                case .dm:
+                    selected_timeline = .dms
+                    damus_state.dms.set_active_dm(target.pubkey)
+                    navigationCoordinator.push(route: Route.DMChat(dms: damus_state.dms.active_model))
+                case .like, .zap, .mention, .repost:
+                    open_event(ev: target)
+                case .profile_zap:
+                    // Handled separately above.
+                    break
+                }
             }
-            
-            guard let target = damus_state.events.lookup(local.event_id) else {
-                return
-            }
-            
-            switch local.type {
-            case .dm:
-                selected_timeline = .dms
-                damus_state.dms.set_active_dm(target.pubkey)
-                navigationCoordinator.push(route: Route.DMChat(dms: damus_state.dms.active_model))
-            case .like, .zap, .mention, .repost:
-                open_event(ev: target)
-            case .profile_zap:
-                // Handled separately above.
-                break
-            }
+
+
         }
         .onReceive(handle_notify(.onlyzaps_mode)) { hide in
             home.filter_events()
@@ -529,7 +532,7 @@ struct ContentView: View {
                 guard let ds = damus_state,
                       let keypair = ds.keypair.to_full(),
                       let pubkey = muting,
-                      let mutelist = create_or_update_mutelist(keypair: keypair, mprev: nil, to_add: pubkey)
+                      let mutelist = create_or_update_mutelist(keypair: keypair, mprev: nil, to_add: .pubkey(pubkey))
                 else {
                     return
                 }
@@ -556,16 +559,16 @@ struct ContentView: View {
                 if ds.contacts.mutelist == nil {
                     confirm_overwrite_mutelist = true
                 } else {
-                    guard let keypair = ds.keypair.to_full() else {
-                        return
-                    }
-                    guard let pubkey = muting else {
+                    guard let keypair = ds.keypair.to_full(),
+                          let pubkey = muting
+                    else {
                         return
                     }
 
-                    guard let ev = create_or_update_mutelist(keypair: keypair, mprev: ds.contacts.mutelist, to_add: pubkey) else {
+                    guard let ev = create_or_update_mutelist(keypair: keypair, mprev: ds.contacts.mutelist, to_add: .pubkey(pubkey)) else {
                         return
                     }
+
                     damus_state?.contacts.set_mutelist(ev)
                     ds.postbox.send(ev)
                 }
@@ -871,7 +874,7 @@ func timeline_name(_ timeline: Timeline?) -> String {
 }
 
 @discardableResult
-func handle_unfollow(state: DamusState, unfollow: ReferencedId) -> Bool {
+func handle_unfollow(state: DamusState, unfollow: FollowRef) -> Bool {
     guard let keypair = state.keypair.to_full() else {
         return false
     }
@@ -887,27 +890,20 @@ func handle_unfollow(state: DamusState, unfollow: ReferencedId) -> Bool {
 
     state.contacts.event = ev
 
-    if unfollow.key == "p" {
-        state.contacts.remove_friend(unfollow.ref_id)
+    switch unfollow {
+    case .pubkey(let pk):
+        state.contacts.remove_friend(pk)
         state.user_search_cache.updateOwnContactsPetnames(id: state.pubkey, oldEvent: old_contacts, newEvent: ev)
+    case .hashtag:
+        // nothing to handle here really
+        break
     }
 
     return true
 }
 
-func handle_unfollow_notif(state: DamusState, target: FollowTarget) -> ReferencedId? {
-    let pk = target.pubkey
-
-    let ref = ReferencedId.p(pk)
-    if handle_unfollow(state: state, unfollow: ref) {
-        return ref
-    }
-
-    return nil
-}
-
 @discardableResult
-func handle_follow(state: DamusState, follow: ReferencedId) -> Bool {
+func handle_follow(state: DamusState, follow: FollowRef) -> Bool {
     guard let keypair = state.keypair.to_full() else {
         return false
     }
@@ -920,8 +916,12 @@ func handle_follow(state: DamusState, follow: ReferencedId) -> Bool {
     notify(.followed(follow))
 
     state.contacts.event = ev
-    if follow.key == "p" {
-        state.contacts.add_friend_pubkey(follow.ref_id)
+    switch follow {
+    case .pubkey(let pubkey):
+        state.contacts.add_friend_pubkey(pubkey)
+    case .hashtag:
+        // nothing to do
+        break
     }
 
     return true
@@ -936,7 +936,7 @@ func handle_follow_notif(state: DamusState, target: FollowTarget) -> Bool {
         state.contacts.add_friend_contact(ev)
     }
 
-    return handle_follow(state: state, follow: .p(target.pubkey))
+    return handle_follow(state: state, follow: target.follow_ref)
 }
 
 func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: EventCache, post: NostrPostResult) -> Bool {
@@ -951,7 +951,7 @@ func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: Ev
         postbox.send(new_ev)
         for eref in new_ev.referenced_ids.prefix(3) {
             // also broadcast at most 3 referenced events
-            if let ev = events.lookup(eref.ref_id) {
+            if let ev = events.lookup(eref) {
                 postbox.send(ev)
             }
         }
@@ -984,13 +984,19 @@ func on_open_url(state: DamusState, url: URL, result: @escaping (OpenResult?) ->
     
     switch link {
     case .ref(let ref):
-        if ref.key == "p" {
-            result(.profile(ref.ref_id))
-        } else if ref.key == "e" {
-            find_event(state: state, query: .event(evid: ref.ref_id)) { res in
+        switch ref {
+        case .pubkey(let pk):
+            result(.profile(pk))
+        case .event(let noteid):
+            find_event(state: state, query: .event(evid: noteid)) { res in
                 guard let res, case .event(let ev) = res else { return }
                 result(.event(ev))
             }
+        case .hashtag(let ht):
+            result(.filter(.filter_hashtag([ht.string()])))
+        case .param, .quote:
+            // doesn't really make sense here
+            break
         }
     case .filter(let filt):
         result(.filter(filt))

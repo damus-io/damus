@@ -39,7 +39,7 @@ class FollowingModel {
             return
         }
         let filters = [filter]
-        print_filters(relay_id: "following", filters: [filters])
+        //print_filters(relay_id: "following", filters: [filters])
         self.damus_state.pool.subscribe(sub_id: sub_id, filters: filters, handler: handle_event)
     }
     

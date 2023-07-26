@@ -31,8 +31,7 @@ struct NdbStrIter: IteratorProtocol {
     }
 }
 
-struct NdbTagElem: Sequence, Hashable {
-
+struct NdbTagElem: Sequence, Hashable, Equatable {
     let note: NdbNote
     let tag: UnsafeMutablePointer<ndb_tag>
     let index: Int32
@@ -71,6 +70,13 @@ struct NdbTagElem: Sequence, Hashable {
         return str.flag == NDB_PACKED_ID
     }
 
+    var isEmpty: Bool {
+        if str.flag == NDB_PACKED_ID {
+            return false
+        }
+        return str.str[0] == 0
+    }
+
     var count: Int {
         if str.flag == NDB_PACKED_ID {
             return 32
@@ -79,11 +85,24 @@ struct NdbTagElem: Sequence, Hashable {
         }
     }
 
+    var single_char: AsciiCharacter? {
+        let c = str.str[0]
+        guard c != 0 && str.str[1] == 0 else { return nil }
+        return AsciiCharacter(c)
+    }
+
     func matches_char(_ c: AsciiCharacter) -> Bool {
         return str.str[0] == c.cchar && str.str[1] == 0
     }
 
-    func matches_str(_ s: String) -> Bool {
+    func matches_id(_ d: Data) -> Bool {
+        if str.flag == NDB_PACKED_ID, d.count == 32 {
+            return memcmp(d.bytes, str.id, 32) == 0
+        }
+        return false
+    }
+
+    func matches_str(_ s: String, tag_len: Int? = nil) -> Bool {
         if str.flag == NDB_PACKED_ID,
            s.utf8.count == 64,
            var decoded = hex_decode(s), decoded.count == 32
@@ -91,18 +110,19 @@ struct NdbTagElem: Sequence, Hashable {
             return memcmp(&decoded, str.id, 32) == 0
         }
 
-        let len = strlen(str.str)
-        guard len == s.utf8.count else { return false }
-        return s.withCString { cstr in memcmp(str.str, cstr, len) == 0 }
-    }
+        // Ensure the Swift string's utf8 count matches the C string's length.
+        guard (tag_len ?? strlen(str.str)) == s.utf8.count else {
+            return false
+        }
 
-    var ndbstr: ndb_str {
-        return ndb_tag_str(note.note, tag, index)
+        // Compare directly using the utf8 view.
+        return s.utf8.withContiguousStorageIfAvailable { buffer in
+            memcmp(buffer.baseAddress, str.str, buffer.count) == 0
+        } ?? false
     }
 
     func data() -> NdbData {
-        let s = ndb_tag_str(note.note, tag, index)
-        return NdbData(note: note, str: s)
+        return NdbData(note: note, str: self.str)
     }
 
     func id() -> Data? {

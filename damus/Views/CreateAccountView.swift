@@ -135,8 +135,7 @@ struct CreateAccountView_Previews: PreviewProvider {
 }
 
 func KeyText(_ pubkey: Binding<Pubkey>) -> some View {
-    let decoded = hex_decode(pubkey.wrappedValue)!
-    let bechkey = bech32_encode(hrp: PUBKEY_HRP, decoded)
+    let bechkey = bech32_encode(hrp: PUBKEY_HRP, pubkey.wrappedValue.bytes)
     return Text(bechkey)
         .textSelection(.enabled)
         .multilineTextAlignment(.center)

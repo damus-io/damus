@@ -91,6 +91,7 @@ struct RelayDetailView: View {
                             }
                     }
                 }
+
                 if let relay_connection {
                     Section(NSLocalizedString("Relay", comment: "Label to display relay address.")) {
                         HStack {
@@ -101,7 +102,7 @@ struct RelayDetailView: View {
                     }
                 }
                 
-                if let nip11 = nip11 {
+                if let nip11 {
                     if nip11.is_paid {
                         Section(content: {
                             RelayPaidDetail(payments_url: nip11.payments_url)
@@ -172,7 +173,7 @@ struct RelayDetailView: View {
 
 struct RelayDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        let metadata = RelayMetadata(name: "name", description: "desc", pubkey: "pubkey", contact: "contact", supported_nips: [1,2,3], software: "software", version: "version", limitation: Limitations.empty, payments_url: "https://jb55.com")
+        let metadata = RelayMetadata(name: "name", description: "desc", pubkey: test_pubkey, contact: "contact", supported_nips: [1,2,3], software: "software", version: "version", limitation: Limitations.empty, payments_url: "https://jb55.com")
         RelayDetailView(state: test_damus_state(), relay: "relay", nip11: metadata)
     }
 }

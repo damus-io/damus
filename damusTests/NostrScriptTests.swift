@@ -39,7 +39,7 @@ final class NostrScriptTests: XCTestCase {
         let data = try load_bool_set_test_wasm().bytes
         let pool = RelayPool()
         let script = NostrScript(pool: pool, data: data)
-        let pk = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
+        let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
         UserSettingsStore.pubkey = pk
         let key = pk_setting_key(pk, key: "nozaps")
         UserDefaults.standard.set(true, forKey: key)
@@ -103,7 +103,7 @@ final class NostrScriptTests: XCTestCase {
         
         pool.connect(to: ["wss://cache0.primal.net/cache17"])
         
-        self.wait(for: [resume_expected], timeout: 10.0)
+        self.wait(for: [resume_expected], timeout: 5.0)
     }
      */
 

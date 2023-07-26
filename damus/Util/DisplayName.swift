@@ -60,7 +60,6 @@ func parse_display_name(profile: Profile?, pubkey: Pubkey) -> DisplayName {
     return .one(abbrev_bech32_pubkey(pubkey: pubkey))
 }
 
-func abbrev_bech32_pubkey(pubkey: String) -> String {
-    let pk = bech32_nopre_pubkey(pubkey) ?? pubkey
-    return abbrev_pubkey(pk)
+func abbrev_bech32_pubkey(pubkey: Pubkey) -> String {
+    return abbrev_pubkey(String(pubkey.npub.dropFirst(4)))
 }

@@ -16,14 +16,6 @@ class CreateAccountModel: ObservableObject {
     @Published var privkey: Privkey = .empty
     @Published var profile_image: URL? = nil
 
-    var pubkey_bech32: String {
-        return bech32_pubkey(self.pubkey) ?? ""
-    }
-    
-    var privkey_bech32: String {
-        return bech32_privkey(self.privkey) ?? ""
-    }
-    
     var rendered_name: String {
         if real_name.isEmpty {
             return nick_name

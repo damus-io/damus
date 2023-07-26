@@ -106,11 +106,7 @@ struct EventActionBar: View {
             }
         }
         .sheet(isPresented: $show_share_sheet, onDismiss: { self.show_share_sheet = false }) {
-            if let note_id = bech32_note_id(event.id) {
-                if let url = URL(string: "https://damus.io/" + note_id) {
-                    ShareSheet(activityItems: [url])
-                }
-            }
+            ShareSheet(activityItems: [URL(string: "https://damus.io/" + event.id.bech32)!])
         }
         .sheet(isPresented: $show_repost_action, onDismiss: { self.show_repost_action = false }) {
         

@@ -72,10 +72,10 @@ func should_show_images(settings: UserSettingsStore, contacts: Contacts, ev: Nos
 }
 
 extension View {
-    func pubkey_context_menu(bech32_pubkey: Pubkey) -> some View {
+    func pubkey_context_menu(pubkey: Pubkey) -> some View {
         return self.contextMenu {
             Button {
-                    UIPasteboard.general.string = bech32_pubkey
+                UIPasteboard.general.string = pubkey.npub
             } label: {
                 Label(NSLocalizedString("Copy Account ID", comment: "Context menu option for copying the ID of the account that created the note."), image: "copy2")
             }

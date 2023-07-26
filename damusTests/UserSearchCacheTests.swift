@@ -83,8 +83,8 @@ final class UserSearchCacheTests: XCTestCase {
 
     func testUpdateOwnContactsPetnames() throws {
         let keypair = try XCTUnwrap(keypair)
-        let damus = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
-        let jb55 = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
+        let damus = Pubkey(hex: "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681")!
+        let jb55 = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
 
         var pubkeysToPetnames = [Pubkey: String]()
         pubkeysToPetnames[damus] = "damus"
@@ -127,8 +127,8 @@ final class UserSearchCacheTests: XCTestCase {
 
         let relayJson = encode_json(relays)!
 
-        let tags = pubkeysToPetnames.enumerated().map {
-            ["p", $0.element.key, "", $0.element.value]
+        let tags: [[String]] = pubkeysToPetnames.enumerated().map {
+            ["p", $0.element.key.description, "", $0.element.value]
         }
 
         return NostrEvent(content: relayJson, keypair: keypair.to_keypair(), kind: NostrKind.contacts.rawValue, tags: tags)!

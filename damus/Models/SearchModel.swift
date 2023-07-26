@@ -68,10 +68,6 @@ class SearchModel: ObservableObject {
         let (sub_id, done) = handle_subid_event(pool: state.pool, relay_id: relay_id, ev: ev) { sub_id, ev in
             if ev.is_textlike && ev.should_show_event {
                 self.add_event(ev)
-            } else if ev.known_kind == .channel_create {
-                // unimplemented
-            } else if ev.known_kind == .channel_meta {
-                // unimplemented
             }
         }
         
@@ -89,16 +85,16 @@ class SearchModel: ObservableObject {
 
 func event_matches_hashtag(_ ev: NostrEvent, hashtags: [String]) -> Bool {
     for tag in ev.tags {
-        if tag_is_hashtag(tag) && hashtags.contains(tag[1]) {
+        if tag_is_hashtag(tag) && hashtags.contains(tag[1].string()) {
             return true
         }
     }
     return false
 }
 
-func tag_is_hashtag(_ tag: [String]) -> Bool {
+func tag_is_hashtag(_ tag: Tag) -> Bool {
     // "hashtag" is deprecated, will remove in the future
-    return tag.count >= 2 && (tag[0] == "hashtag" || tag[0] == "t")
+    return tag.count >= 2 && tag[0].matches_char("t")
 }
 
 func event_matches_filter(_ ev: NostrEvent, filter: NostrFilter) -> Bool {

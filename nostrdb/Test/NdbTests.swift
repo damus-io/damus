@@ -18,13 +18,27 @@ final class NdbTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
+    func test_decode_eose() throws {
+        let json = "[\"EOSE\",\"DC268DBD-55DA-458A-B967-540925AF3497\"]"
+        let resp = decode_nostr_event(txt: json)
+        XCTAssertNotNil(resp)
+    }
+
+    func test_decode_command_result() throws {
+        let json = "[\"OK\",\"b1d8f68d39c07ce5c5ea10c235100d529b2ed2250140b36a35d940b712dc6eff\",true,\"\"]"
+        let resp = decode_nostr_event(txt: json)
+        XCTAssertNotNil(resp)
+
+    }
+
     func test_ndb_note() throws {
         let note = NdbNote.owned_from_json(json: test_contact_list_json)
         XCTAssertNotNil(note)
         guard let note else { return }
 
-        let id = "20d0ff27d6fcb13de8366328c5b1a7af26bcac07f2e558fbebd5e9242e608c09"
-        let pubkey = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
+        let id = NoteId(hex: "20d0ff27d6fcb13de8366328c5b1a7af26bcac07f2e558fbebd5e9242e608c09")!
+        let pubkey = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+
         XCTAssertEqual(note.id, id)
         XCTAssertEqual(note.pubkey, pubkey)
 

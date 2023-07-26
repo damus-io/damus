@@ -25,20 +25,17 @@ struct NewEventsBits: OptionSet {
 
 enum Resubscribe {
     case following
-    case unfollowing(ReferencedId)
+    case unfollowing(FollowRef)
 }
 
 enum HomeResubFilter {
     case pubkey(Pubkey)
     case hashtag(String)
 
-    init?(from: ReferencedId) {
-        if from.key == "p" {
-            self = .pubkey(from.ref_id)
-            return
-        } else if from.key == "t" {
-            self = .hashtag(from.ref_id)
-            return
+    init?(from: FollowRef) {
+        switch from {
+        case .hashtag(let ht): self = .hashtag(ht.string())
+        case .pubkey(let pk):  self = .pubkey(pk)
         }
 
         return nil
@@ -52,7 +49,9 @@ enum HomeResubFilter {
             if contacts.is_friend(ev.pubkey) {
                 return false
             }
-            return ev.references(id: ht, key: "t")
+            return ev.referenced_hashtags.contains(where: { ref_ht in
+                ht == ref_ht.hashtag
+            })
         }
     }
 }
@@ -63,7 +62,6 @@ class HomeModel {
     
     var damus_state: DamusState
 
-    var channels: [String: NostrEvent] = [:]
     // NDBTODO: let's get rid of this entirely, let nostrdb handle it
     var has_event: [String: Set<NoteId>] = [:]
     var deleted_events: Set<NoteId> = Set()
@@ -183,10 +181,6 @@ class HomeModel {
             handle_dm(ev)
         case .delete:
             handle_delete_event(ev)
-        case .channel_create:
-            handle_channel_create(ev)
-        case .channel_meta:
-            break
         case .zap:
             handle_zap_event(ev)
         case .zap_request:
@@ -262,10 +256,6 @@ class HomeModel {
         
     }
     
-    func handle_channel_create(_ ev: NostrEvent) {
-        self.channels[ev.id] = ev
-    }
-    
     func filter_events() {
         events.filter { ev in
             !damus_state.contacts.is_muted(ev.pubkey)
@@ -301,12 +291,11 @@ class HomeModel {
     }
 
     func handle_boost_event(sub_id: String, _ ev: NostrEvent) {
-        var boost_ev_id = ev.last_refid()?.ref_id
+        var boost_ev_id = ev.last_refid()
 
         if let inner_ev = ev.get_inner_event(cache: damus_state.events) {
             boost_ev_id = inner_ev.id
-            
-            
+
             Task {
                 guard validate_event(ev: inner_ev) == .ok else {
                     return
@@ -318,7 +307,6 @@ class HomeModel {
                     }
                 }
             }
-           
         }
 
         guard let e = boost_ev_id else {
@@ -345,14 +333,14 @@ class HomeModel {
             return
         }
 
-        switch damus_state.likes.add_event(ev, target: e.ref_id) {
+        switch damus_state.likes.add_event(ev, target: e) {
         case .already_counted:
             break
         case .success(let n):
             handle_notification(ev: ev)
-            let liked = Counted(event: ev, id: e.ref_id, total: n)
+            let liked = Counted(event: ev, id: e, total: n)
             notify(.liked(liked))
-            notify(.update_stats(note_id: e.ref_id))
+            notify(.update_stats(note_id: e))
         }
     }
 
@@ -553,14 +541,10 @@ class HomeModel {
             }
         }
         
-        guard let name = get_referenced_ids(tags: ev.tags, key: "d").first else {
+        guard ev.referenced_params.contains(where: { p in p.param.matches_str("mute") }) else {
             return
         }
-        
-        guard name.ref_id == "mute" else {
-            return
-        }
-        
+
         damus_state.contacts.set_mutelist(ev)
     }
     
@@ -631,7 +615,7 @@ class HomeModel {
         
         // TODO: will we need to process this in other places like zap request contents, etc?
         process_image_metadatas(cache: damus_state.events, ev: ev)
-        damus_state.replies.count_replies(ev)
+        damus_state.replies.count_replies(ev, privkey: self.damus_state.keypair.privkey)
         damus_state.events.insert(ev)
 
         if sub_id == home_subid {
@@ -699,33 +683,26 @@ func add_contact_if_friend(contacts: Contacts, ev: NostrEvent) {
 
 func load_our_contacts(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     let contacts = state.contacts
-    var new_refs = Set<ReferencedId>()
-    // our contacts
-    for tag in ev.tags {
-        guard let ref = tag_to_refid(tag) else { continue }
-        new_refs.insert(ref)
-    }
-    
-    var old_refs = Set<ReferencedId>()
-    // find removed contacts
-    if let old_ev = m_old_ev {
-        for tag in old_ev.tags {
-            guard let ref = tag_to_refid(tag) else { continue }
-            old_refs.insert(ref)
-        }
-    }
-    
+    let new_refs = Set<FollowRef>(ev.referenced_follows)
+    let old_refs = m_old_ev.map({ old_ev in Set(old_ev.referenced_follows) }) ?? Set()
+
     let diff = new_refs.symmetricDifference(old_refs)
     for ref in diff {
         if new_refs.contains(ref) {
             notify(.followed(ref))
-            if ref.key == "p" {
-                contacts.add_friend_pubkey(ref.ref_id)
+            switch ref {
+            case .pubkey(let pk):
+                contacts.add_friend_pubkey(pk)
+            case .hashtag:
+                // I guess I could cache followed hashtags here... whatever
+                break
             }
         } else {
             notify(.unfollowed(ref))
-            if ref.key == "p" {
-                contacts.remove_friend(ref.ref_id)
+            switch ref {
+            case .pubkey(let pk):
+                contacts.remove_friend(pk)
+            case .hashtag: break
             }
         }
     }
@@ -758,6 +735,7 @@ func abbrev_ids_field(_ n: String, _ ids: [String]?) -> String {
     return "\(n): \(abbrev_ids(ids))"
 }
 
+/*
 func print_filter(_ f: NostrFilter) {
     let fmt = [
         abbrev_ids_field("ids", f.ids),
@@ -783,6 +761,7 @@ func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
     }
     print("-----")
 }
+ */
 
 func process_metadata_profile(our_pubkey: Pubkey, profiles: Profiles, profile: Profile, ev: NostrEvent) {
     var old_nip05: String? = nil
@@ -1003,7 +982,7 @@ func handle_incoming_dm(debouncer: Debouncer?, ev: NostrEvent, our_pubkey: Pubke
     var the_pk = ev.pubkey
     if ours {
         if let ref_pk = ev.referenced_pubkeys.first {
-            the_pk = ref_pk.ref_id
+            the_pk = ref_pk
         } else {
             // self dm!?
             print("TODO: handle self dm?")
@@ -1123,14 +1102,8 @@ func handle_last_events(debouncer: Debouncer?, new_events: NewEventsBits, ev: No
 
 
 /// Sometimes we get garbage in our notifications. Ensure we have our pubkey on this event
-func event_has_our_pubkey(_ ev: NostrEvent, our_pubkey: String) -> Bool {
-    for tag in ev.tags {
-        if tag.count >= 2 && tag[0] == "p" && tag[1] == our_pubkey {
-            return true
-        }
-    }
-    
-    return false
+func event_has_our_pubkey(_ ev: NostrEvent, our_pubkey: Pubkey) -> Bool {
+    return ev.referenced_pubkeys.contains(our_pubkey)
 }
 
 
@@ -1185,7 +1158,7 @@ func create_in_app_profile_zap_notification(profiles: Profiles, zap: Zap, locale
     content.title = zap_notification_title(zap)
     content.body = zap_notification_body(profiles: profiles, zap: zap, locale: locale)
     content.sound = UNNotificationSound.default
-    content.userInfo = LossyLocalNotification(type: .profile_zap, event_id: profile_id).to_user_info()
+    content.userInfo = LossyLocalNotification(type: .profile_zap, mention: .pubkey(profile_id)).to_user_info()
 
     let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
 
@@ -1206,7 +1179,7 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
     content.title = zap_notification_title(zap)
     content.body = zap_notification_body(profiles: profiles, zap: zap, locale: locale)
     content.sound = UNNotificationSound.default
-    content.userInfo = LossyLocalNotification(type: .zap, event_id: evId).to_user_info()
+    content.userInfo = LossyLocalNotification(type: .zap, mention: .note(evId)).to_user_info()
 
     let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
 
@@ -1264,19 +1237,26 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
         return
     }
 
-    if type == .text && damus_state.settings.mention_notification {
+    if type == .text, damus_state.settings.mention_notification {
         let blocks = ev.blocks(damus_state.keypair.privkey).blocks
-        for case .mention(let mention) in blocks where mention.ref.ref_id == damus_state.keypair.pubkey {
+        for case .mention(let mention) in blocks {
+            guard case .pubkey(let pk) = mention.ref, pk == damus_state.keypair.pubkey else {
+                continue
+            }
             let content_preview = render_notification_content_preview(cache: damus_state.events, ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
             let notify = LocalNotification(type: .mention, event: ev, target: ev, content: content_preview)
             create_local_notification(profiles: damus_state.profiles, notify: notify )
         }
-    } else if type == .boost && damus_state.settings.repost_notification, let inner_ev = ev.get_inner_event(cache: damus_state.events) {
+    } else if type == .boost,
+              damus_state.settings.repost_notification,
+              let inner_ev = ev.get_inner_event(cache: damus_state.events)
+    {
         let content_preview = render_notification_content_preview(cache: damus_state.events, ev: inner_ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
         let notify = LocalNotification(type: .repost, event: ev, target: inner_ev, content: content_preview)
         create_local_notification(profiles: damus_state.profiles, notify: notify)
-    } else if type == .like && damus_state.settings.like_notification,
-              let evid = ev.referenced_ids.last?.ref_id,
+    } else if type == .like,
+              damus_state.settings.like_notification,
+              let evid = ev.referenced_ids.last,
               let liked_event = damus_state.events.lookup(evid)
     {
         let content_preview = render_notification_content_preview(cache: damus_state.events, ev: liked_event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
@@ -1335,22 +1315,35 @@ enum ProcessZapResult {
     case failed
 }
 
+extension Sequence {
+    func just_one() -> Element? {
+        var got_one = false
+        var the_x: Element? = nil
+        for x in self {
+            guard !got_one else {
+                return nil
+            }
+            the_x = x
+            got_one = true
+        }
+        return the_x
+    }
+}
+
 // securely get the zap target's pubkey. this can be faked so we need to be
 // careful
 func get_zap_target_pubkey(ev: NostrEvent, events: EventCache) -> Pubkey? {
-    let etags = ev.referenced_ids
+    let etags = Array(ev.referenced_ids)
 
     guard let etag = etags.first else {
         // no etags, ptag-only case
 
-        let ptags = ev.referenced_pubkeys
-
-        // ensure that there is only 1 ptag to stop fake profile zap attacks
-        guard ptags.count == 1 else {
+        guard let a = ev.referenced_pubkeys.just_one() else {
             return nil
         }
 
-        return ptags.first?.id
+        // TODO: just return data here
+        return a
     }
 
     // we have an e-tag
@@ -1361,7 +1354,7 @@ func get_zap_target_pubkey(ev: NostrEvent, events: EventCache) -> Pubkey? {
     }
 
     // we can't trust the p tag on note zaps because they can be faked
-    return events.lookup(etag.id)?.pubkey
+    return events.lookup(etag)?.pubkey
 }
 
 func process_zap_event(damus_state: DamusState, ev: NostrEvent, completion: @escaping (ProcessZapResult) -> Void) {

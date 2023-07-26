@@ -22,7 +22,7 @@ struct EventTop: View {
     
     func ProfileName(is_anon: Bool) -> some View {
         let profile = state.profiles.lookup(id: self.pubkey)
-        let pk = is_anon ? "anon" : self.pubkey
+        let pk = is_anon ? ANON_PUBKEY : self.pubkey
         return EventProfileName(pubkey: pk, profile: profile, damus: state, size: .normal)
     }
     

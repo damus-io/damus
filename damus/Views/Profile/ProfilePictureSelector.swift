@@ -42,7 +42,8 @@ struct EditProfilePictureView: View {
     private func get_profile_url() -> URL? {
         if let profile_url {
             return profile_url
-        } else if let state = damus_state, let picture = state.profiles.lookup(id: pubkey)?.picture {
+        } else if let state = damus_state,
+                  let picture = state.profiles.lookup(id: pubkey)?.picture {
             return URL(string: picture)
         } else {
             return profile_url ?? URL(string: robohash(pubkey))

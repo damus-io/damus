@@ -32,8 +32,8 @@ class ProfileDatabaseTests: XCTestCase {
     }
 
     func testStoreAndRetrieveProfile() async throws {
-        let id = "test-id"
-        
+        let id = test_pubkey
+
         let profile = test_profile
         
         // make sure it's not there yet
@@ -58,7 +58,7 @@ class ProfileDatabaseTests: XCTestCase {
     }
     
     func testRejectOutdatedProfile() async throws {
-        let id = "test-id"
+        let id = test_pubkey
         
         // store a profile
         let profile = test_profile
@@ -80,8 +80,8 @@ class ProfileDatabaseTests: XCTestCase {
     }
     
     func testUpdateExistingProfile() async throws {
-        let id = "test-id"
-        
+        let id = test_pubkey
+
         // store a profile
         let profile = test_profile
         let profile_last_update = Date.now
@@ -102,7 +102,7 @@ class ProfileDatabaseTests: XCTestCase {
         XCTAssertEqual(database.count, 0)
         
         // store a profile
-        let id = "test-id"
+        let id = test_pubkey
         let profile = test_profile
         let profile_last_update = Date.now
         try await database.upsert(id: id, profile: profile, last_update: profile_last_update)
@@ -110,7 +110,7 @@ class ProfileDatabaseTests: XCTestCase {
         XCTAssertEqual(database.count, 1)
         
         // store another profile
-        let id2 = "test-id-2"
+        let id2 = test_pubkey_2
         let profile2 = test_profile
         let profile_last_update2 = Date.now
         try await database.upsert(id: id2, profile: profile2, last_update: profile_last_update2)

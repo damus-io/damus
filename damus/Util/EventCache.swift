@@ -87,12 +87,12 @@ class ZapsDataModel: ObservableObject {
     }
     
     @discardableResult
-    func remove(reqid: String) -> Bool {
-        guard zaps.first(where: { z in z.request.ev.id == reqid }) != nil else {
+    func remove(reqid: ZapRequestId) -> Bool {
+        guard zaps.first(where: { z in z.request.id == reqid }) != nil else {
             return false
         }
         
-        self.zaps = zaps.filter { z in z.request.ev.id != reqid }
+        self.zaps = zaps.filter { z in z.request.id != reqid }
         return true
     }
 }
@@ -140,10 +140,10 @@ class EventCache {
     private var events: [NoteId: NostrEvent] = [:]
     private var replies = ReplyMap()
     private var cancellable: AnyCancellable?
-    private var image_metadata: [String: ImageMetadataState] = [:]
-    private var video_meta: [String: VideoPlayerModel] = [:]
-    private var event_data: [String: EventData] = [:]
-    
+    private var image_metadata: [String: ImageMetadataState] = [:] // lowercased URL key
+    private var video_meta: [URL: VideoPlayerModel] = [:]
+    private var event_data: [NoteId: EventData] = [:]
+
     //private var thread_latest: [String: Int64]
     
     init() {
@@ -174,7 +174,7 @@ class EventCache {
     
     @discardableResult
     func store_zap(zap: Zapping) -> Bool {
-        let data = get_cache_data(zap.target.id).zaps_model
+        let data = get_cache_data(NoteId(zap.target.id)).zaps_model
         if let ev = zap.event {
             insert(ev)
         }
@@ -185,7 +185,7 @@ class EventCache {
         switch zap.target {
         case .note(let note_target):
             let zaps = get_cache_data(note_target.note_id).zaps_model
-            zaps.remove(reqid: zap.request.ev.id)
+            zaps.remove(reqid: zap.request.id)
         case .profile:
             // these aren't stored anywhere yet
             break
@@ -193,7 +193,7 @@ class EventCache {
     }
     
     func lookup_zaps(target: ZapTarget) -> [Zapping] {
-        return get_cache_data(target.id).zaps_model.zaps
+        return get_cache_data(NoteId(target.id)).zaps_model.zaps
     }
     
     func store_img_metadata(url: URL, meta: ImageMetadataState) {
@@ -214,31 +214,29 @@ class EventCache {
     }
     
     func store_video_player_model(url: URL, meta: VideoPlayerModel) {
-        video_meta[url.absoluteString] = meta
+        video_meta[url] = meta
     }
     
     @MainActor
     func get_video_player_model(url: URL) -> VideoPlayerModel {
-        if let model = video_meta[url.absoluteString] {
+        if let model = video_meta[url] {
             return model
         }
         
         let model = VideoPlayerModel()
-        video_meta[url.absoluteString] = model
+        video_meta[url] = model
         return model
     }
     
-    func parent_events(event: NostrEvent) -> [NostrEvent] {
+    func parent_events(event: NostrEvent, privkey: Privkey?) -> [NostrEvent] {
         var parents: [NostrEvent] = []
         
         var ev = event
         
         while true {
-            guard let direct_reply = ev.direct_replies(nil).last else {
-                break
-            }
-            
-            guard let next_ev = lookup(direct_reply.ref_id), next_ev != ev else {
+            guard let direct_reply = ev.direct_replies(privkey).last,
+                  let next_ev = lookup(direct_reply), next_ev != ev
+            else {
                 break
             }
             
@@ -249,9 +247,9 @@ class EventCache {
         return parents.reversed()
     }
     
-    func add_replies(ev: NostrEvent) {
-        for reply in ev.direct_replies(nil) {
-            replies.add(id: reply.ref_id, reply_id: ev.id)
+    func add_replies(ev: NostrEvent, privkey: Privkey?) {
+        for reply in ev.direct_replies(privkey) {
+            replies.add(id: reply, reply_id: ev.id)
         }
     }
     
@@ -360,7 +358,7 @@ func get_preload_plan(evcache: EventCache, ev: NostrEvent, our_keypair: Keypair,
     }
 
     // Cached event might not have the note language determined yet, so determine the language here before figuring out if translations should be preloaded.
-    let note_lang = cache.translations_model.note_language ?? ev.note_language(our_keypair.privkey) ?? current_language()
+    let note_lang = cache.translations_model.note_language ?? /*ev.note_language(our_keypair.privkey)*/ current_language()
 
     let load_translations = should_preload_translation(event: ev, our_keypair: our_keypair, current_status: cache.translations, settings: settings, note_lang: note_lang)
     if load_translations {
@@ -459,7 +457,7 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     }
     
     let note_language = plan.data.translations_model.note_language ?? plan.event.note_language(our_keypair.privkey) ?? current_language()
-    
+
     var translations: TranslateStatus? = nil
     // We have to recheck should_translate here now that we have note_language
     if plan.load_translations && should_translate(event: plan.event, our_keypair: our_keypair, settings: settings, note_lang: note_language) && settings.auto_translate

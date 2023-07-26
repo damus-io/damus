@@ -31,18 +31,16 @@ struct FollowButtonView: View {
                         .stroke(follow_state == .unfollows ? .clear : borderColor(), lineWidth: 1)
                 }
         }
-        .onReceive(handle_notify(.followed)) { pk in
-            guard pk.key == "p", target.pubkey == pk.ref_id else {
-                return
-            }
-            
+        .onReceive(handle_notify(.followed)) { follow in
+            guard case .pubkey(let pk) = follow,
+                  pk == target.pubkey else { return }
+
             self.follow_state = .follows
         }
-        .onReceive(handle_notify(.unfollowed)) { pk in
-            guard pk.key == "p", target.pubkey == pk.ref_id else {
-                return
-            }
-            
+        .onReceive(handle_notify(.unfollowed)) { unfollow in
+            guard case .pubkey(let pk) = unfollow,
+                  pk == target.pubkey else { return }
+
             self.follow_state = .unfollows
         }
     }
@@ -65,7 +63,7 @@ struct FollowButtonView: View {
 }
 
 struct FollowButtonPreviews: View {
-    let target: FollowTarget = .pubkey("")
+    let target: FollowTarget = .pubkey(test_pubkey)
     var body: some View {
         VStack {
             Text(verbatim: "Unfollows")

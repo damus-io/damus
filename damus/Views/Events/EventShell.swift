@@ -34,7 +34,7 @@ struct EventShell<Content: View>: View {
         !options.contains(.no_action_bar)
     }
     
-    func get_mention() -> Mention? {
+    func get_mention() -> Mention<NoteId>? {
         if self.options.contains(.nested) || self.options.contains(.no_mentions) {
             return nil
         }
@@ -42,8 +42,8 @@ struct EventShell<Content: View>: View {
         return first_eref_mention(ev: event, privkey: state.keypair.privkey)
     }
 
-    func Mention(_ mention: Mention) -> some View {
-        return BuilderEventView(damus: state, event_id: mention.ref.id)
+    func Mention(_ mention: Mention<NoteId>) -> some View {
+        return BuilderEventView(damus: state, event_id: mention.ref)
     }
     
     var ActionBar: some View {

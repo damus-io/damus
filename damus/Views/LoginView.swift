@@ -146,10 +146,8 @@ func parse_key(_ thekey: String) -> ParsedKey? {
 
     if let bech_key = decode_bech32_key(key) {
         switch bech_key {
-        case .pub(let pk):
-            return .pub(pk)
-        case .sec(let sec):
-            return .priv(sec)
+        case .pub(let pk):  return .pub(pk)
+        case .sec(let sec): return .priv(sec)
         }
     }
 
@@ -195,11 +193,12 @@ func process_login(_ key: ParsedKey, is_pubkey: Bool) async throws {
         save_pubkey(pubkey: nip05.pubkey)
 
     case .hex(let hexstr):
-        if is_pubkey {
+        if is_pubkey, let pubkey = hex_decode_pubkey(hexstr) {
             try clear_saved_privkey()
-            save_pubkey(pubkey: hexstr)
-        } else {
-            try handle_privkey(hexstr)
+
+            save_pubkey(pubkey: pubkey)
+        } else if let privkey = hex_decode_privkey(hexstr) {
+            try handle_privkey(privkey)
         }
     }
     
@@ -209,10 +208,8 @@ func process_login(_ key: ParsedKey, is_pubkey: Bool) async throws {
         guard let pk = privkey_to_pubkey(privkey: privkey) else {
             throw LoginError.invalid_key
         }
-        
-        if let pub = bech32_pubkey(pk), let priv = bech32_privkey(privkey) {
-            CredentialHandler().save_credential(pubkey: pub, privkey: priv)
-        }
+
+        CredentialHandler().save_credential(pubkey: pk, privkey: privkey)
         save_pubkey(pubkey: pk)
     }
 
@@ -232,7 +229,7 @@ struct NIP05Result: Decodable {
 
 struct NIP05User {
     let pubkey: Pubkey
-    let relays: [String]
+    //let relays: [String]
 }
 
 func get_nip05_pubkey(id: String) async -> NIP05User? {
@@ -245,30 +242,24 @@ func get_nip05_pubkey(id: String) async -> NIP05User? {
     let user = parts[0]
     let host = parts[1]
 
-    guard let url = URL(string: "https://\(host)/.well-known/nostr.json?name=\(user)") else {
+    guard let url = URL(string: "https://\(host)/.well-known/nostr.json?name=\(user)"),
+          let (data, _) = try? await URLSession.shared.data(for: URLRequest(url: url)),
+          let json: NIP05Result = decode_data(data),
+          let pubkey_hex = json.names[user],
+          let pubkey = hex_decode_pubkey(pubkey_hex)
+    else {
         return nil
     }
 
-    guard let (data, _) = try? await URLSession.shared.data(for: URLRequest(url: url)) else {
-        return nil
-    }
-
-    guard let json: NIP05Result = decode_data(data) else {
-        return nil
-    }
-
-    guard let pubkey = json.names[user] else {
-        return nil
-    }
-
+    /*
     var relays: [String] = []
-    if let rs = json.relays {
-        if let rs = rs[pubkey] {
-            relays = rs
-        }
-    }
 
-    return NIP05User(pubkey: pubkey, relays: relays)
+    if let rs = json.relays, let rs = rs[pubkey] {
+        relays = rs
+    }
+     */
+
+    return NIP05User(pubkey: pubkey/*, relays: relays*/)
 }
 
 struct KeyInput: View {

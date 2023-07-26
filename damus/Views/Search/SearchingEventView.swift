@@ -14,15 +14,14 @@ enum SearchState {
     case not_found
 }
 
-enum SearchType {
-    case event
-    case profile
-    case nip05
+enum SearchType: Equatable {
+    case event(NoteId)
+    case profile(Pubkey)
+    case nip05(String)
 }
 
 struct SearchingEventView: View {
     let state: DamusState
-    let evid: String
     let search_type: SearchType
     
     @State var search_state: SearchState = .searching
@@ -38,18 +37,18 @@ struct SearchingEventView: View {
         }
     }
     
-    func handle_search(_ evid: String) {
+    func handle_search(search: SearchType) {
         self.search_state = .searching
         
-        switch search_type {
-        case .nip05:
-            if let pk = state.profiles.nip05_pubkey[evid] {
+        switch search {
+        case .nip05(let nip05):
+            if let pk = state.profiles.nip05_pubkey[nip05] {
                 if state.profiles.lookup(id: pk) != nil {
                     self.search_state = .found_profile(pk)
                 }
             } else {
                 Task {
-                    guard let nip05 = NIP05.parse(evid) else {
+                    guard let nip05 = NIP05.parse(nip05) else {
                         self.search_state = .not_found
                         return
                     }
@@ -71,16 +70,16 @@ struct SearchingEventView: View {
                 }
             }
             
-        case .event:
-            find_event(state: state, query: .event(evid: evid)) { res in
+        case .event(let note_id):
+            find_event(state: state, query: .event(evid: note_id)) { res in
                 guard case .event(let ev) = res else {
                     self.search_state = .not_found
                     return
                 }
                 self.search_state = .found(ev)
             }
-        case .profile:
-            find_event(state: state, query: .profile(pubkey: evid)) { res in
+        case .profile(let pubkey):
+            find_event(state: state, query: .profile(pubkey: pubkey)) { res in
                 guard case .profile(_, let ev) = res else {
                     self.search_state = .not_found
                     return
@@ -113,11 +112,11 @@ struct SearchingEventView: View {
                 Text("\(search_name) not found", comment: "When a note or profile is not found when searching for it via its note id")
             }
         }
-        .onChange(of: evid, debounceTime: 0.5) { evid in
-            handle_search(evid)
+        .onChange(of: search_type, debounceTime: 0.5) { stype in
+            handle_search(search: stype)
         }
         .onAppear {
-            handle_search(evid)
+            handle_search(search: search_type)
         }
     }
 }
@@ -125,6 +124,6 @@ struct SearchingEventView: View {
 struct SearchingEventView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
-        SearchingEventView(state: state, evid: test_note.id, search_type: .event)
+        SearchingEventView(state: state, search_type: .event(test_note.id))
     }
 }

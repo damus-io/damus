@@ -56,15 +56,10 @@ class ZapsModel: ObservableObject {
             let events = state.events.lookup_zaps(target: target).map { $0.request.ev }
             load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(events), damus_state: state)
         case .event(_, let ev):
-            guard ev.kind == 9735 else {
-                return
-            }
-            
-            guard let zapper = state.profiles.lookup_zapper(pubkey: target.pubkey) else {
-                return
-            }
-            
-            guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: state.keypair.privkey) else {
+            guard ev.kind == 9735,
+                  let zapper = state.profiles.lookup_zapper(pubkey: target.pubkey),
+                  let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: state.keypair.privkey)
+            else {
                 return
             }
             

@@ -7,78 +7,43 @@
 
 import Foundation
 
-struct Reference {
-    let key: AsciiCharacter
-    let id: NdbTagElem
-    var ref_id: NdbTagElem {
-        id
-    }
-
-    func to_referenced_id() -> ReferencedId {
-        ReferencedId(ref_id: id.string(), relay_id: nil, key: key.description)
-    }
-}
-
 func tagref_should_be_id(_ tag: NdbTagElem) -> Bool {
-    return !tag.matches_char("t")
+    return !(tag.matches_char("t") || tag.matches_char("d"))
 }
 
-struct References: Sequence, IteratorProtocol {
+
+struct References<T: TagConvertible>: Sequence, IteratorProtocol {
     let tags: TagsSequence
     var tags_iter: TagsIterator
-
-    mutating func next() -> Reference? {
-        while let tag = tags_iter.next() {
-            guard tag.count >= 2 else { continue }
-            let key = tag[0]
-            let id  = tag[1]
-
-            guard key.count == 1, tagref_should_be_id(id) else { continue }
-
-            for c in key {
-                guard let a = AsciiCharacter(c) else { break }
-                return Reference(key: a, id: id)
-            }
-        }
-
-        return nil
-    }
-
-
-    static func ids(tags: TagsSequence) -> LazyFilterSequence<References> {
-        References(tags: tags).lazy
-            .filter() { ref in ref.key == "e" }
-    }
-
-    static func pubkeys(tags: TagsSequence) -> LazyFilterSequence<References> {
-        References(tags: tags).lazy
-            .filter() { ref in ref.key == "p" }
-    }
-
-    static func hashtags(tags: TagsSequence) -> LazyFilterSequence<References> {
-        References(tags: tags).lazy
-            .filter() { ref in ref.key == "t" }
-    }
 
     init(tags: TagsSequence) {
         self.tags = tags
         self.tags_iter = tags.makeIterator()
     }
-}
 
-// TagsSequence transition helpers
-extension [[String]] {
-    func strings() -> [[String]] {
-        return self
+    mutating func next() -> T? {
+        while let tag = tags_iter.next() {
+            guard let evref = T.from_tag(tag: tag) else { continue }
+            return evref
+        }
+        return nil
     }
 }
 
-// TagsSequence transition helpers
-extension [String] {
-    func strings() -> [String] {
-        return self
+extension References {
+    var first: T? {
+        self.first(where: { _ in true })
+    }
+
+    var last: T? {
+        var last: T? = nil
+        for t in self {
+            last = t
+        }
+        return last
     }
 }
+
 
 // NdbTagElem transition helpers
 extension String {
@@ -99,29 +64,117 @@ extension String {
     }
 }
 
-struct ReferencedId: Identifiable, Hashable, Equatable {
-    let ref_id: String
-    let relay_id: String?
-    let key: String
+enum FollowRef: TagKeys, Hashable, TagConvertible, Equatable {
 
-    var id: String {
-        return ref_id
-    }
-    
-    static func q(_ id: String, relay_id: String? = nil) -> ReferencedId {
-        return ReferencedId(ref_id: id, relay_id: relay_id, key: "q")
-    }
-    
-    static func e(_ id: String, relay_id: String? = nil) -> ReferencedId {
-        return ReferencedId(ref_id: id, relay_id: relay_id, key: "e")
+    // NOTE: When adding cases make sure to update key and from_tag
+    case pubkey(Pubkey)
+    case hashtag(String)
+
+    var key: FollowKeys {
+        switch self {
+        case .hashtag: return .t
+        case .pubkey:  return .p
+        }
     }
 
-    static func p(_ pk: String, relay_id: String? = nil) -> ReferencedId {
-        return ReferencedId(ref_id: pk, relay_id: relay_id, key: "p")
+    enum FollowKeys: AsciiCharacter, TagKey, CustomStringConvertible {
+        case p, t
+
+        var keychar: AsciiCharacter { self.rawValue }
+        var description: String { self.rawValue.description }
     }
 
-    static func t(_ hashtag: String, relay_id: String? = nil) -> ReferencedId {
-        return ReferencedId(ref_id: hashtag, relay_id: relay_id, key: "t")
+    static func from_tag(tag: TagSequence) -> FollowRef? {
+        guard tag.count >= 2 else { return nil }
+
+        var i = tag.makeIterator()
+
+        guard let t0   = i.next(),
+              let c    = t0.single_char,
+              let fkey = FollowKeys(rawValue: c),
+              let t1   = i.next()
+        else {
+            return nil
+        }
+
+        switch fkey {
+        case .p: return t1.id().map({ .pubkey(Pubkey($0)) })
+        case .t: return .hashtag(t1.string())
+        }
+    }
+
+    var tag: [String] {
+        [key.description, self.description]
+    }
+
+    var description: String {
+        switch self {
+        case .pubkey(let pubkey): return pubkey.description
+        case .hashtag(let string): return string
+        }
+    }
+}
+
+enum RefId: TagConvertible, TagKeys, Equatable, Hashable {
+    case event(NoteId)
+    case pubkey(Pubkey)
+    case quote(QuoteId)
+    case hashtag(TagElem)
+    case param(TagElem)
+
+    var key: RefKey {
+        switch self {
+        case .event:   return .e
+        case .pubkey:  return .p
+        case .quote:   return .q
+        case .hashtag: return .t
+        case .param:   return .d
+        }
+    }
+
+    enum RefKey: AsciiCharacter, TagKey, CustomStringConvertible {
+        case e, p, t, d, q
+
+        var keychar: AsciiCharacter {
+            self.rawValue
+        }
+
+        var description: String {
+            self.keychar.description
+        }
+    }
+
+    var tag: [String] {
+        [self.key.description, self.description]
+    }
+
+    var description: String {
+        switch self {
+        case .event(let noteId): return noteId.hex()
+        case .pubkey(let pubkey): return pubkey.hex()
+        case .quote(let quote): return quote.hex()
+        case .hashtag(let string): return string.string()
+        case .param(let string): return string.string()
+        }
+    }
+
+    static func from_tag(tag: TagSequence) -> RefId? {
+        var i = tag.makeIterator()
+
+        guard tag.count >= 2,
+              let t0 = i.next(),
+              let key = t0.single_char,
+              let rkey = RefKey(rawValue: key),
+              let t1 = i.next()
+        else { return nil }
+
+        switch rkey {
+        case .e: return t1.id().map({ .event(NoteId($0)) })
+        case .p: return t1.id().map({ .pubkey(Pubkey($0)) })
+        case .q: return t1.id().map({ .quote(QuoteId($0)) })
+        case .t: return .hashtag(t1)
+        case .d: return .param(t1)
+        }
     }
 }
 

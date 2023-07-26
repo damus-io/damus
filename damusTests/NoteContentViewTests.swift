@@ -10,8 +10,10 @@ import XCTest
 
 class NoteContentViewTests: XCTestCase {
     func testRenderBlocksWithNonLatinHashtags() {
-        let parsed: Blocks = parse_note_content(content: "Damusはかっこいいです #cool #かっこいい", tags: [["t", "かっこいい"]])
-        
+        let content = "Damusはかっこいいです #cool #かっこいい"
+        let note = NostrEvent(content: content, keypair: test_keypair, tags: [["t", "かっこいい"]])!
+        let parsed: Blocks = parse_note_content(content: .init(note: note, privkey: test_keypair.privkey))
+
         let testState = test_damus_state()
         
         let text: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles)

@@ -25,20 +25,14 @@ class Bech32Tests: XCTestCase {
         // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
         // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
         
-        let pubkey = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
-        guard let b32_pubkey = bech32_pubkey(pubkey) else {
+        let pubkey = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+
+        guard let decoded = try? bech32_decode(pubkey.npub) else {
             XCTAssert(false)
             return
         }
-        
-        guard let decoded = try? bech32_decode(b32_pubkey) else {
-            XCTAssert(false)
-            return
-        }
-        
-        let encoded = hex_encode(decoded.data)
-        
-        XCTAssertEqual(encoded, pubkey)
+
+        XCTAssertEqual(decoded.data, pubkey.id)
     }
 
     func testPerformanceExample() throws {

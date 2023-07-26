@@ -200,6 +200,7 @@ final class RelayConnection: ObservableObject {
                 }
                 return
             }
+            print("failed to decode event \(messageString)")
         case .data(let messageData):
             if let messageString = String(data: messageData, encoding: .utf8) {
                 receive(message: .string(messageString))

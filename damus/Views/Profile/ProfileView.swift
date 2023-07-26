@@ -190,7 +190,7 @@ struct ProfileView: View {
                             return
                         }
 
-                        guard let new_ev = remove_from_mutelist(keypair: keypair, prev: mutelist, to_remove: profile.pubkey) else {
+                        guard let new_ev = remove_from_mutelist(keypair: keypair, prev: mutelist, to_remove: .pubkey(profile.pubkey)) else {
                             return
                         }
 
@@ -260,10 +260,11 @@ struct ProfileView: View {
     func actionSection(profile_data: Profile?) -> some View {
         return Group {
 
-            if let profile = profile_data {
-                if let lnurl = profile.lnurl, lnurl != "" {
-                    lnButton(lnurl: lnurl, profile: profile)
-                }
+            if let profile = profile_data,
+               let lnurl = profile.lnurl,
+               lnurl != ""
+            {
+                lnButton(lnurl: lnurl, profile: profile)
             }
 
             dmButton
@@ -353,7 +354,7 @@ struct ProfileView: View {
 
             HStack {
                 if let contact = profile.contacts {
-                    let contacts = contact.referenced_pubkeys.map { $0.ref_id }
+                    let contacts = Array(contact.referenced_pubkeys)
                     let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
                     NavigationLink(value: Route.Following(following: following_model)) {
                         HStack {
@@ -466,11 +467,8 @@ struct ProfileView: View {
                 // our profilemodel needs a bit more help
             }
             .sheet(isPresented: $show_share_sheet) {
-                if let npub = bech32_pubkey(profile.pubkey) {
-                    if let url = URL(string: "https://damus.io/" + npub) {
-                        ShareSheet(activityItems: [url])
-                    }
-                }
+                let url = URL(string: "https://damus.io/" + profile.pubkey.npub)!
+                ShareSheet(activityItems: [url])
             }
             .fullScreenCover(isPresented: $show_qr_code) {
                 QRCodeView(damus_state: damus_state, pubkey: profile.pubkey)
@@ -517,7 +515,7 @@ struct KeyView: View {
     }
 
     var body: some View {
-        let bech32 = bech32_pubkey(pubkey) ?? pubkey
+        let bech32 = pubkey.npub
 
         HStack {
             Text(verbatim: "\(abbrev_pubkey(bech32, amount: 16))")

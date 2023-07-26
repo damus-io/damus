@@ -13,7 +13,11 @@ fileprivate func getMutedThreadsKey(pubkey: Pubkey) -> String {
 
 func loadMutedThreads(pubkey: Pubkey) -> [NoteId] {
     let key = getMutedThreadsKey(pubkey: pubkey)
-    return UserDefaults.standard.stringArray(forKey: key) ?? []
+    let xs = UserDefaults.standard.stringArray(forKey: key) ?? []
+    return xs.reduce(into: [NoteId]()) { ids, k in
+        guard let note_id = hex_decode(k) else { return }
+        ids.append(NoteId(Data(note_id)))
+    }
 }
 
 func saveMutedThreads(pubkey: Pubkey, currentValue: [NoteId], value: [NoteId]) -> Bool {

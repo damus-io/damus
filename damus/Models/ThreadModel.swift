@@ -18,7 +18,7 @@ class ThreadModel: ObservableObject {
         self.event_map = Set()
         self.event = event
         self.original_event = event
-        add_event(event)
+        add_event(event, privkey: damus_state.keypair.privkey)
     }
     
     var is_original: Bool {
@@ -46,10 +46,10 @@ class ThreadModel: ObservableObject {
     }
     
     @discardableResult
-    func set_active_event(_ ev: NostrEvent) -> Bool {
+    func set_active_event(_ ev: NostrEvent, privkey: Privkey?) -> Bool {
         self.event = ev
-        add_event(ev)
-        
+        add_event(ev, privkey: privkey)
+
         //self.objectWillChange.send()
         return false
     }
@@ -85,15 +85,15 @@ class ThreadModel: ObservableObject {
         damus_state.pool.subscribe(sub_id: meta_subid, filters: meta_filters, handler: handle_event)
     }
     
-    func add_event(_ ev: NostrEvent) {
+    func add_event(_ ev: NostrEvent, privkey: Privkey?) {
         if event_map.contains(ev) {
             return
         }
         
         let the_ev = damus_state.events.upsert(ev)
-        damus_state.replies.count_replies(the_ev)
-        damus_state.events.add_replies(ev: the_ev)
-        
+        damus_state.replies.count_replies(the_ev, privkey: privkey)
+        damus_state.events.add_replies(ev: the_ev, privkey: privkey)
+
         event_map.insert(ev)
         objectWillChange.send()
     }
@@ -112,7 +112,7 @@ class ThreadModel: ObservableObject {
                     
                 }
             } else if ev.is_textlike {
-                self.add_event(ev)
+                self.add_event(ev, privkey: damus_state.keypair.privkey)
             }
         }
         

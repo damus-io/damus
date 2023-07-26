@@ -521,6 +521,8 @@ static int ndb_builder_make_json_str(struct ndb_builder *builder,
 {
 	// let's not care about de-duping these. we should just unescape
 	// in-place directly into the strings table. 
+	if (written)
+		*written = len;
 
 	const char *p, *end, *start;
 	unsigned char *builder_start;

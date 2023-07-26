@@ -50,7 +50,7 @@ struct SelectedEventView: View {
                 EventBody(damus_state: damus, event: event, size: size, options: [.wide])
 
                 if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
-                    BuilderEventView(damus: damus, event_id: mention.ref.id)
+                    BuilderEventView(damus: damus, event_id: mention.ref)
                         .padding(.horizontal)
                 }
                 

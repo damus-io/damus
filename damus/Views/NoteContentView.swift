@@ -230,7 +230,7 @@ struct NoteContentView: View {
                 for block in blocks.blocks {
                     switch block {
                     case .mention(let m):
-                        if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
+                        if case .pubkey(let pk) = m.ref, pk == profile.pubkey {
                             load(force_artifacts: true)
                             return
                         }
@@ -265,21 +265,21 @@ func url_str(_ url: URL) -> CompatibleText {
     return CompatibleText(attributed: attributedString)
  }
 
-func mention_str(_ m: Mention, profiles: Profiles) -> CompatibleText {
-    switch m.type {
-    case .pubkey:
-        let pk = m.ref.ref_id
+func mention_str(_ m: Mention<MentionRef>, profiles: Profiles) -> CompatibleText {
+    switch m.ref {
+    case .pubkey(let pk):
+        let npub = bech32_pubkey(pk) 
         let profile = profiles.lookup(id: pk)
         let disp = Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 50)
         var attributedString = AttributedString(stringLiteral: "@\(disp)")
-        attributedString.link = URL(string: "damus:\(encode_pubkey_uri(m.ref))")
+        attributedString.link = URL(string: "damus:nostr:\(npub)")
         attributedString.foregroundColor = DamusColors.purple
         
         return CompatibleText(attributed: attributedString)
-    case .event:
-        let bevid = bech32_note_id(m.ref.ref_id) ?? m.ref.ref_id
+    case .note(let note_id):
+        let bevid = bech32_note_id(note_id)
         var attributedString = AttributedString(stringLiteral: "@\(abbrev_pubkey(bevid))")
-        attributedString.link = URL(string: "damus:\(encode_event_id_uri(m.ref))")
+        attributedString.link = URL(string: "damus:nostr:\(bevid)")
         attributedString.foregroundColor = DamusColors.purple
 
         return CompatibleText(attributed: attributedString)
@@ -394,7 +394,7 @@ func note_artifact_is_separated(kind: NostrKind?) -> Bool {
 
 func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: Privkey?) -> NoteArtifacts {
     let blocks = ev.blocks(privkey)
-    
+
     if ev.known_kind == .longform {
         return .longform(LongformContent(ev.content))
     }
@@ -427,7 +427,9 @@ func reduce_text_block(blocks: [Block], ind: Int, txt: String, one_note_ref: Boo
     if let next = blocks[safe: ind+1] {
         if case .url(let u) = next, classify_url(u).is_media != nil {
             trimmed = trim_suffix(trimmed)
-        } else if case .mention(let m) = next, m.type == .event, one_note_ref {
+        } else if case .mention(let m) = next,
+                  case .note = m.ref,
+                  one_note_ref {
             trimmed = trim_suffix(trimmed)
         }
     }
@@ -450,7 +452,7 @@ func render_blocks(blocks bs: Blocks, profiles: Profiles) -> NoteArtifactsSepara
         
         switch block {
         case .mention(let m):
-            if m.type == .event && one_note_ref {
+            if case .note = m.ref, one_note_ref {
                 return str
             }
             return str + mention_str(m, profiles: profiles)

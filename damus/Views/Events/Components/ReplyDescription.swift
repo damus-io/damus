@@ -37,9 +37,9 @@ func reply_desc(profiles: Profiles, event: NostrEvent, locale: Locale = Locale.c
         return NSLocalizedString("Replying to self", bundle: bundle, comment: "Label to indicate that the user is replying to themself.")
     }
 
-    let names: [String] = pubkeys.map {
-        let prof = profiles.lookup(id: $0)
-        return Profile.displayName(profile: prof, pubkey: $0).username.truncate(maxLength: 50)
+    let names: [String] = pubkeys.map { pk in
+        let prof = profiles.lookup(id: pk)
+        return Profile.displayName(profile: prof, pubkey: pk).username.truncate(maxLength: 50)
     }
     
     let uniqueNames = NSOrderedSet(array: names).array as! [String]

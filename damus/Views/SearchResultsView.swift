@@ -18,7 +18,7 @@ enum Search: Identifiable {
     case profile(Pubkey)
     case note(NoteId)
     case nip05(String)
-    case hex(String)
+    case hex(Data)
     case multi(MultiSearch)
     
     var id: String {
@@ -67,28 +67,22 @@ struct InnerSearchResults: View {
                 HashtagSearch(ht)
                 
             case .nip05(let addr):
-                SearchingEventView(state: damus_state, evid: addr, search_type: .nip05)
-                
-            case .profile(let prof):
-                let decoded = try? bech32_decode(prof)
-                let hex = hex_encode(decoded!.data)
-                
-                SearchingEventView(state: damus_state, evid: hex, search_type: .profile)
+                SearchingEventView(state: damus_state, search_type: .nip05(addr))
+
+            case .profile(let pubkey):
+                SearchingEventView(state: damus_state, search_type: .profile(pubkey))
+
             case .hex(let h):
-                //let prof_view = ProfileView(damus_state: damus_state, pubkey: h)
-                //let ev_view = ThreadView(damus: damus_state, event_id: h)
-                
+
                 VStack(spacing: 10) {
-                    SearchingEventView(state: damus_state, evid: h, search_type: .event)
-                    
-                    SearchingEventView(state: damus_state, evid: h, search_type: .profile)
+                    SearchingEventView(state: damus_state, search_type: .event(NoteId(h)))
+
+                    SearchingEventView(state: damus_state, search_type: .profile(Pubkey(h)))
                 }
                 
             case .note(let nid):
-                let decoded = try? bech32_decode(nid)
-                let hex = hex_encode(decoded!.data)
-                
-                SearchingEventView(state: damus_state, evid: hex, search_type: .event)
+                SearchingEventView(state: damus_state, search_type: .event(nid))
+
             case .multi(let multi):
                 VStack {
                     HashtagSearch(multi.hashtag)
@@ -146,20 +140,18 @@ func search_for_string(profiles: Profiles, _ new: String) -> Search? {
         return .hashtag(make_hashtagable(new))
     }
     
-    if hex_decode(new) != nil, new.count == 64 {
+    if let new = hex_decode_id(new) {
         return .hex(new)
     }
-    
+
     if new.starts(with: "npub") {
-        if (try? bech32_decode(new)) != nil {
-            return .profile(new)
+        if let decoded = bech32_pubkey_decode(new) {
+            return .profile(decoded)
         }
     }
     
-    if new.starts(with: "note") {
-        if (try? bech32_decode(new)) != nil {
-            return .note(new)
-        }
+    if new.starts(with: "note"), let decoded = try? bech32_decode(new) {
+        return .note(NoteId(decoded.data))
     }
     
     let multisearch = MultiSearch(hashtag: make_hashtagable(new), profiles: search_profiles(profiles: profiles, search: new))
@@ -181,13 +173,19 @@ func make_hashtagable(_ str: String) -> String {
 
 func search_profiles(profiles: Profiles, search: String) -> [SearchedUser] {
     // Search by hex pubkey.
-    if search.count == 64 && hex_decode(search) != nil, let profile = profiles.lookup(id: search) {
-        return [SearchedUser(profile: profile, pubkey: search)]
+    if let pubkey = hex_decode_pubkey(search),
+       let profile = profiles.lookup(id: pubkey)
+    {
+        return [SearchedUser(profile: profile, pubkey: pubkey)]
     }
 
     // Search by npub pubkey.
-    if search.starts(with: "npub"), let bech32_key = decode_bech32_key(search), case Bech32Key.pub(let hex) = bech32_key, let profile = profiles.lookup(id: hex) {
-        return [SearchedUser(profile: profile, pubkey: hex)]
+    if search.starts(with: "npub"),
+       let bech32_key = decode_bech32_key(search),
+       case Bech32Key.pub(let pk) = bech32_key,
+       let profile = profiles.lookup(id: pk)
+    {
+        return [SearchedUser(profile: profile, pubkey: pk)]
     }
 
     let new = search.lowercased()

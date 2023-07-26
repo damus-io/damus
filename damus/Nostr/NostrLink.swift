@@ -9,18 +9,18 @@ import Foundation
 
 
 enum NostrLink: Equatable {
-    case ref(ReferencedId)
+    case ref(RefId)
     case filter(NostrFilter)
     case script([UInt8])
 }
 
-func encode_pubkey_uri(_ ref: ReferencedId) -> String {
-    return "p:" + ref.ref_id
+func encode_pubkey_uri(_ pubkey: Pubkey) -> String {
+    return "p:" + pubkey.hex()
 }
 
 // TODO: bech32 and relay hints
-func encode_event_id_uri(_ ref: ReferencedId) -> String {
-    return "e:" + ref.ref_id
+func encode_event_id_uri(_ noteid: NoteId) -> String {
+    return "e:" + noteid.hex()
 }
 
 func parse_nostr_ref_uri_type(_ p: Parser) -> String? {
@@ -55,36 +55,21 @@ func parse_hexstr(_ p: Parser, len: Int) -> String? {
     return String(substring(p.str, start: start, end: p.pos))
 }
 
-func parse_nostr_ref_uri(_ p: Parser) -> ReferencedId? {
-    let start = p.pos
-    
-    if !parse_str(p, "nostr:") {
-        return nil
-    }
-
-    guard let ref = parse_post_bech32_mention(p) else {
-        p.pos = start
-        return nil
-    }
-
-    return ref
-}
-
 func decode_universal_link(_ s: String) -> NostrLink? {
     var uri = s.replacingOccurrences(of: "https://damus.io/r/", with: "")
     uri = uri.replacingOccurrences(of: "https://damus.io/", with: "")
     uri = uri.replacingOccurrences(of: "/", with: "")
     
-    guard let decoded = try? bech32_decode(uri) else {
+    guard let decoded = try? bech32_decode(uri),
+          decoded.data.count == 32
+    else {
         return nil
     }
-    
-    let h = hex_encode(decoded.data)
-    
+
     if decoded.hrp == "note" {
-        return .ref(ReferencedId(ref_id: h, relay_id: nil, key: "e"))
+        return .ref(.event(NoteId(decoded.data)))
     } else if decoded.hrp == "npub" {
-        return .ref(ReferencedId(ref_id: h, relay_id: nil, key: "p"))
+        return .ref(.pubkey(Pubkey(decoded.data)))
     }
     // TODO: handle nprofile, etc
     
@@ -98,14 +83,12 @@ func decode_nostr_bech32_uri(_ s: String) -> NostrLink? {
     
     switch obj {
     case .nsec(let privkey):
-        guard let pubkey = privkey_to_pubkey(privkey: privkey) else {
-            return nil
-        }
-        return .ref(ReferencedId(ref_id: pubkey, relay_id: nil, key: "p"))
+        guard let pubkey = privkey_to_pubkey(privkey: privkey) else { return nil }
+        return .ref(.pubkey(pubkey))
     case .npub(let pubkey):
-        return .ref(ReferencedId(ref_id: pubkey, relay_id: nil, key: "p"))
+        return .ref(.pubkey(pubkey))
     case .note(let id):
-        return .ref(ReferencedId(ref_id: id, relay_id: nil, key: "e"))
+        return .ref(.event(id))
     case .nscript(let data):
         return .script(data)
     }
@@ -134,19 +117,15 @@ func decode_nostr_uri(_ s: String) -> NostrLink? {
             acc.append(decoded)
             return
         }
-    
-    if tag_is_hashtag(parts) {
+
+    if parts.count >= 2 && parts[0] == "t" {
         return .filter(NostrFilter(hashtag: [parts[1].lowercased()]))
     }
-    
-    if let rid = tag_to_refid(parts) {
-        return .ref(rid)
-    }
-    
+
     guard parts.count == 1 else {
         return nil
     }
-    
+
     let part = parts[0]
     
     return decode_nostr_bech32_uri(part)

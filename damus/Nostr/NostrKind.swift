@@ -16,8 +16,6 @@ enum NostrKind: UInt32, Codable {
     case delete = 5
     case boost = 6
     case like = 7
-    case channel_create = 40
-    case channel_meta = 41
     case chat = 42
     case list = 30000
     case longform = 30023

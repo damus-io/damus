@@ -193,17 +193,15 @@ class NotificationsModel: ObservableObject, ScrollQueue {
     }
     
     private func insert_reaction(_ ev: NostrEvent) -> Bool {
-        guard let ref_id = ev.referenced_ids.last else {
+        guard let id = ev.referenced_ids.last else {
             return false
         }
-        
-        let id = ref_id.id
-        
-        if let evgrp = self.reactions[id.string()] {
+
+        if let evgrp = self.reactions[id] {
             return evgrp.insert(ev)
         } else {
             let evgrp = EventGroup()
-            self.reactions[id.string()] = evgrp
+            self.reactions[id] = evgrp
             return evgrp.insert(ev)
         }
     }

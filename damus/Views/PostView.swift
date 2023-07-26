@@ -50,8 +50,8 @@ struct PostView: View {
     @State var error: String? = nil
     @State var uploadedMedias: [UploadedMedia] = []
     @State var image_upload_confirm: Bool = false
-    @State var originalReferences: [ReferencedId] = []
-    @State var references: [ReferencedId] = []
+    @State var references: [RefId] = []
+    @State var filtered_pubkeys: Set<Pubkey> = []
     @State var focusWordAttributes: (String?, NSRange?) = (nil, nil)
     @State var newCursorIndex: Int?
     @State var postTextViewCanScroll: Bool = true
@@ -76,7 +76,13 @@ struct PostView: View {
     }
     
     func send_post() {
-        let new_post = build_post(post: self.post, action: action, uploadedMedias: uploadedMedias, references: references)
+        let refs = references.filter { ref in
+            if case .pubkey(let pk) = ref, filtered_pubkeys.contains(pk) {
+                return false
+            }
+            return true
+        }
+        let new_post = build_post(post: self.post, action: action, uploadedMedias: uploadedMedias, references: refs)
 
         notify(.post(.post(new_post)))
 
@@ -155,8 +161,7 @@ struct PostView: View {
         }
         
         let profile = damus_state.profiles.lookup(id: pubkey)
-        let bech32_pubkey = bech32_pubkey(pubkey) ?? ""
-        return user_tag_attr_string(profile: profile, pubkey: bech32_pubkey)
+        return user_tag_attr_string(profile: profile, pubkey: pubkey)
     }
     
     func clear_draft() {
@@ -310,7 +315,17 @@ struct PostView: View {
         self.post = initialString()
         self.tagModel.diff = post.string.count
     }
-    
+
+    var pubkeys: [Pubkey] {
+        self.references.reduce(into: [Pubkey]()) { pks, ref in
+            guard case .pubkey(let pk) = ref else {
+                return
+            }
+
+            pks.append(pk)
+        }
+    }
+
     var body: some View {
         GeometryReader { (deviceSize: GeometryProxy) in
             VStack(alignment: .leading, spacing: 0) {
@@ -321,7 +336,7 @@ struct PostView: View {
                 ScrollViewReader { scroller in
                     ScrollView {
                         if case .replying_to(let replying_to) = self.action {
-                            ReplyView(replying_to: replying_to, damus: damus_state, originalReferences: $originalReferences, references: $references)
+                            ReplyView(replying_to: replying_to, damus: damus_state, original_pubkeys: pubkeys, filtered_pubkeys: $filtered_pubkeys)
                         }
                         
                         Editor(deviceSize: deviceSize)
@@ -385,10 +400,8 @@ struct PostView: View {
                 switch action {
                 case .replying_to(let replying_to):
                     references = gather_reply_ids(our_pubkey: damus_state.pubkey, from: replying_to)
-                    originalReferences = references
                 case .quoting(let quoting):
                     references = gather_quote_ids(our_pubkey: damus_state.pubkey, from: quoting)
-                    originalReferences = references
                 case .posting(let target):
                     guard !loaded_draft else { break }
                     
@@ -551,13 +564,7 @@ func load_draft_for_post(drafts: Drafts, action: PostAction) -> DraftArtifacts? 
 }
 
 
-func build_post(post: NSMutableAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [ReferencedId]) -> NostrPost {
-    var kind: NostrKind = .text
-
-    if case .replying_to(let ev) = action, ev.known_kind == .chat {
-        kind = .chat
-    }
-
+func build_post(post: NSMutableAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId]) -> NostrPost {
     post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
         if let link = attributes[.link] as? String {
             let normalized_link: String
@@ -586,9 +593,9 @@ func build_post(post: NSMutableAttributedString, action: PostAction, uploadedMed
         content.append(" " + imagesString + " ")
     }
 
-    if case .quoting(let ev) = action, let id = bech32_note_id(ev.id) {
-        content.append(" nostr:" + id)
+    if case .quoting(let ev) = action {
+        content.append(" nostr:" + bech32_note_id(ev.id))
     }
 
-    return NostrPost(content: content, references: references, kind: kind, tags: img_meta_tags)
+    return NostrPost(content: content, references: references, kind: .text, tags: img_meta_tags)
 }

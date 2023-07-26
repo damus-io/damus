@@ -93,7 +93,7 @@ struct RelayView: View {
         }
     }
         
-    func RemoveButton(privkey: String, showText: Bool) -> some View {
+    func RemoveButton(privkey: Privkey, showText: Bool) -> some View {
         Button(action: {
             guard let ev = state.contacts.event else {
                 return

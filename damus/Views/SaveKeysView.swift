@@ -38,7 +38,7 @@ struct SaveKeysView: View {
                 Text("This is your account ID, you can give this to your friends so that they can follow you. Tap to copy.", comment: "Label to describe that a public key is the user's account ID and what they can do with it.")
                     .padding(.bottom, 10)
                 
-                SaveKeyView(text: account.pubkey_bech32, textContentType: .username, is_copied: $pub_copied, focus: $pubkey_focused)
+                SaveKeyView(text: account.pubkey.npub, textContentType: .username, is_copied: $pub_copied, focus: $pubkey_focused)
                     .padding(.bottom, 10)
                 
                 if pub_copied {
@@ -49,7 +49,7 @@ struct SaveKeysView: View {
                     Text("This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!", comment: "Label to describe that a private key is the user's secret account key and what they should do with it.")
                         .padding(.bottom, 10)
                     
-                    SaveKeyView(text: account.privkey_bech32, textContentType: .newPassword, is_copied: $priv_copied, focus: $privkey_focused)
+                    SaveKeyView(text: account.privkey.nsec, textContentType: .newPassword, is_copied: $priv_copied, focus: $privkey_focused)
                         .padding(.bottom, 10)
                 }
                 
@@ -115,8 +115,8 @@ struct SaveKeysView: View {
 
         self.pool.register_handler(sub_id: "signup", handler: handle_event)
         
-        credential_handler.save_credential(pubkey: account.pubkey_bech32, privkey: account.privkey_bech32)
-        
+        credential_handler.save_credential(pubkey: account.pubkey, privkey: account.privkey)
+
         self.loading = true
         
         self.pool.connect()

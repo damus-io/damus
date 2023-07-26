@@ -16,7 +16,7 @@ struct ZapsView: View {
     init(state: DamusState, target: ZapTarget) {
         self.state = state
         self.model = ZapsModel(state: state, target: target)
-        self._zaps = ObservedObject(wrappedValue: state.events.get_cache_data(target.id).zaps_model)
+        self._zaps = ObservedObject(wrappedValue: state.events.get_cache_data(NoteId(target.id)).zaps_model)
     }
     
     var body: some View {
@@ -40,6 +40,6 @@ struct ZapsView: View {
 
 struct ZapsView_Previews: PreviewProvider {
     static var previews: some View {
-        ZapsView(state: test_damus_state(), target: .profile("pk"))
+        ZapsView(state: test_damus_state(), target: .profile(test_pubkey))
     }
 }

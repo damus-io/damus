@@ -321,7 +321,7 @@ public func nscript_set_bool(interp: UnsafeMutablePointer<wasm_interp>?, setting
         return 1;
     }
     
-    let key = pk_setting_key(UserSettingsStore.pubkey ?? "", key: setting)
+    let key = pk_setting_key(UserSettingsStore.pubkey ?? .empty, key: setting)
     let b = val > 0 ? true : false
     print("nscript setting bool setting \(setting) to \(b)")
     UserDefaults.standard.set(b, forKey: key)

@@ -61,31 +61,35 @@ class UserSearchCache {
             return
         }
 
-        var petnames: [String: String] = [:]
-
-        // Gets all petnames from our new contacts list.
-        newEvent.tags.forEach { tag in
-            guard tag.count >= 4 && tag[0] == "p" else {
+        var petnames: [Pubkey: String] = [:]
+        for tag in newEvent.tags {
+            guard tag.count > 3,
+                  let chr = tag[0].single_char, chr == "p",
+                  let id = tag[1].id()
+            else {
                 return
             }
 
-            let pubkey = tag[1]
-            let petname = tag[3]
+            let pubkey = Pubkey(id)
 
-            petnames[pubkey] = petname
+            petnames[pubkey] = tag[3].string()
         }
 
         // Compute the diff with the old contacts list, if it exists,
         // mark the ones that are the same to not be removed from the user search cache,
         // and remove the old ones that are different from the user search cache.
-        if let oldEvent, oldEvent.known_kind == .contacts && oldEvent.pubkey == id {
-            oldEvent.tags.forEach { tag in
-                guard tag.count >= 4 && tag[0] == "p" else {
+        if let oldEvent, oldEvent.known_kind == .contacts, oldEvent.pubkey == id {
+            for tag in oldEvent.tags {
+                guard tag.count >= 4,
+                      tag[0].matches_char("p"),
+                      let id = tag[1].id()
+                else {
                     return
                 }
 
-                let pubkey = tag[1]
-                let oldPetname = tag[3]
+                let pubkey = Pubkey(id)
+
+                let oldPetname = tag[3].string()
 
                 if let newPetname = petnames[pubkey] {
                     if newPetname.caseInsensitiveCompare(oldPetname) == .orderedSame {

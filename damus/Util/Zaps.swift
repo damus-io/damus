@@ -34,14 +34,17 @@ class Zaps {
             res = zap
             
             our_zaps[kv.key] = ours.filter { z in z.request.ev.id != reqid }
-            
-            if let count = event_counts[zap.target.id] {
-                event_counts[zap.target.id] = count - 1
+
+            // counts for note zaps
+            if let note_id = zap.target.note_id {
+                if let count = event_counts[note_id] {
+                    event_counts[note_id] = count - 1
+                }
+                if let total = event_totals[note_id] {
+                    event_totals[note_id] = total - zap.amount
+                }
             }
-            if let total = event_totals[zap.target.id] {
-                event_totals[zap.target.id] = total - zap.amount
-            }
-            
+
             // we found the request id, we can stop looking
             break
         }
@@ -55,6 +58,7 @@ class Zaps {
             return
         }
         self.zaps[zap.request.ev.id] = zap
+
         if let zap_id = zap.event?.id {
             self.zaps[zap_id] = zap
         }
@@ -62,11 +66,12 @@ class Zaps {
         // record our zaps for an event
         if zap.request.ev.pubkey == our_pubkey {
             switch zap.target {
-            case .note(let note_target):
-                if our_zaps[note_target.note_id] == nil {
-                    our_zaps[note_target.note_id] = [zap]
+            case .note(let note_zap):
+                let note_id = note_zap.note_id
+                if our_zaps[note_id] == nil {
+                    our_zaps[note_id] = [zap]
                 } else {
-                    insert_uniq_sorted_zap_by_amount(zaps: &(our_zaps[note_target.note_id]!), new_zap: zap)
+                    insert_uniq_sorted_zap_by_amount(zaps: &(our_zaps[note_id]!), new_zap: zap)
                 }
             case .profile:
                 break
@@ -78,19 +83,20 @@ class Zaps {
             return
         }
         
-        let id = zap.target.id
-        if event_counts[id] == nil {
-            event_counts[id] = 0
-        }
-        
-        if event_totals[id] == nil {
-            event_totals[id] = 0
-        }
-        
-        event_counts[id] = event_counts[id]! + 1
-        event_totals[id] = event_totals[id]! + zap.amount
+        if let note_id = zap.target.note_id {
+            if event_counts[note_id] == nil {
+                event_counts[note_id] = 0
+            }
 
-        notify(.update_stats(note_id: zap.target.id))
+            if event_totals[note_id] == nil {
+                event_totals[note_id] = 0
+            }
+
+            event_counts[note_id] = event_counts[note_id]! + 1
+            event_totals[note_id] = event_totals[note_id]! + zap.amount
+
+            notify(.update_stats(note_id: note_id))
+        }
     }
 }
 
@@ -98,5 +104,5 @@ func remove_zap(reqid: ZapRequestId, zapcache: Zaps, evcache: EventCache) {
     guard let zap = zapcache.remove_zap(reqid: reqid.reqid) else {
         return
     }
-    evcache.get_cache_data(zap.target.id).zaps_model.remove(reqid: reqid.reqid)
+    evcache.get_cache_data(NoteId(zap.target.id)).zaps_model.remove(reqid: reqid)
 }

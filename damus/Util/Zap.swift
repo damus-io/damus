@@ -28,13 +28,22 @@ enum ZapTarget: Equatable, Hashable {
             return note_target.author
         }
     }
-    
-    var id: String {
+
+    var note_id: NoteId? {
         switch self {
-        case .note(let note_target):
-            return note_target.note_id
-        case .profile(let pk):
-            return pk
+        case .profile:
+            return nil
+        case .note(let noteZapTarget):
+            return noteZapTarget.note_id
+        }
+    }
+
+    var id: Data {
+        switch self {
+        case .profile(let pubkey):
+            return pubkey.id
+        case .note(let noteZapTarget):
+            return noteZapTarget.note_id.id
         }
     }
 }
@@ -42,7 +51,11 @@ enum ZapTarget: Equatable, Hashable {
 struct ZapRequest {
     let ev: NostrEvent
     let marked_hidden: Bool
-    
+
+    var id: ZapRequestId {
+        ZapRequestId(from_zap_request: self)
+    }
+
     var is_in_thread: Bool {
         return !self.ev.content.isEmpty && !marked_hidden
     }
@@ -134,9 +147,13 @@ class PendingZap {
     }
 }
 
-struct ZapRequestId: Equatable {
-    let reqid: String
-    
+struct ZapRequestId: Equatable, Hashable {
+    let reqid: NoteId
+
+    init(from_zap_request: ZapRequest) {
+        self.reqid = from_zap_request.ev.id
+    }
+
     init(from_zap: Zapping) {
         self.reqid = from_zap.request.ev.id
     }
@@ -348,11 +365,11 @@ func invoice_to_zap_invoice(_ invoice: Invoice) -> ZapInvoice? {
 }
 
 func determine_zap_target(_ ev: NostrEvent) -> ZapTarget? {
-    guard let ptag = event_tag(ev, name: "p") else {
+    guard let ptag = ev.referenced_pubkeys.first else {
         return nil
     }
     
-    if let etag = event_tag(ev, name: "e") {
+    if let etag = ev.referenced_ids.first {
         return ZapTarget.note(id: etag, author: ptag)
     }
     
@@ -376,7 +393,7 @@ func decode_bolt11(_ s: String) -> Invoice? {
     
     let block = bs.blocks[0]
     
-    guard let converted = convert_block(block, tags: []) else {
+    guard let converted = convert_block(block, tags: nil) else {
         blocks_free(&bs)
         return nil
     }
@@ -405,20 +422,16 @@ func decode_nostr_event_json(_ desc: String) -> NostrEvent? {
 }
 
 
-func fetch_zapper_from_lnurl(lnurls: LNUrls, pubkey: String, lnurl: String) async -> String? {
-    guard let endpoint = await lnurls.lookup_or_fetch(pubkey: pubkey, lnurl: lnurl) else {
+func fetch_zapper_from_lnurl(lnurls: LNUrls, pubkey: Pubkey, lnurl: String) async -> Pubkey? {
+    guard let endpoint = await lnurls.lookup_or_fetch(pubkey: pubkey, lnurl: lnurl),
+          let allows = endpoint.allowsNostr, allows,
+          let key = endpoint.nostrPubkey,
+          let pk = hex_decode_pubkey(key)
+    else {
         return nil
     }
     
-    guard let allows = endpoint.allowsNostr, allows else {
-        return nil
-    }
-    
-    guard let key = endpoint.nostrPubkey, key.count == 64 else {
-        return nil
-    }
-    
-    return endpoint.nostrPubkey
+    return pk
 }
 
 func decode_lnurl(_ lnurl: String) -> URL? {

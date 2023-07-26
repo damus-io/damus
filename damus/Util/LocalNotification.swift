@@ -9,21 +9,21 @@ import Foundation
 
 struct LossyLocalNotification {
     let type: LocalNotificationType
-    let event_id: String
-    
+    let mention: MentionRef
+
     func to_user_info() -> [AnyHashable: Any] {
         return [
             "type": self.type.rawValue,
-            "evid": self.event_id
+            "id": self.mention.bech32
         ]
     }
     
     static func from_user_info(user_info: [AnyHashable: Any]) -> LossyLocalNotification {
-        let target_id = user_info["evid"] as! String
+        let target_id = MentionRef.from_bech32(str: user_info["id"] as! String)!
         let typestr = user_info["type"] as! String
         let type = LocalNotificationType(rawValue: typestr)!
         
-        return LossyLocalNotification(type: type, event_id: target_id)
+        return LossyLocalNotification(type: type, mention: target_id)
     }
 }
 
@@ -34,7 +34,7 @@ struct LocalNotification {
     let content: String
     
     func to_lossy() -> LossyLocalNotification {
-        return LossyLocalNotification(type: self.type, event_id: self.target.id)
+        return LossyLocalNotification(type: self.type, mention: .note(self.target.id))
     }
 }
 

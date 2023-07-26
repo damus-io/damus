@@ -31,10 +31,7 @@ struct UserSearch: View {
     }
     
     func on_user_tapped(user: SearchedUser) {
-        guard let pk = bech32_pubkey(user.pubkey) else {
-            return
-        }
-
+        let pk = user.pubkey
         let user_tag = user_tag_attr_string(profile: user.profile, pubkey: pk)
 
         appendUserTag(withTag: user_tag)
@@ -159,7 +156,7 @@ func user_tag_attr_string(profile: Profile?, pubkey: Pubkey) -> NSMutableAttribu
     return NSMutableAttributedString(string: tagString, attributes: [
         NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0),
         NSAttributedString.Key.foregroundColor: UIColor.label,
-        NSAttributedString.Key.link: "damus:nostr:\(pubkey)"
+        NSAttributedString.Key.link: "damus:nostr:\(pubkey.npub)"
     ])
 }
 

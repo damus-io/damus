@@ -45,7 +45,7 @@ struct ProfileNameView: View {
                 Spacer()
                 
                 KeyView(pubkey: pubkey)
-                    .pubkey_context_menu(bech32_pubkey: pubkey)
+                    .pubkey_context_menu(pubkey: pubkey)
             }
         }
     }

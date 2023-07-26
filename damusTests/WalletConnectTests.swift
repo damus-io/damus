@@ -36,8 +36,8 @@ final class WalletConnectTests: XCTestCase {
     }
     
     func testDoesNWCParse() {
-        let pk = "9d088f4760422443d4699b485e2ac66e565a2f5da1198c55ddc5679458e3f67a"
-        let sec = "ff2eefd57196d42089e1b42acc39916d7ecac52e0625bd70597bbd5be14aff18"
+        let pk = Pubkey(hex: "9d088f4760422443d4699b485e2ac66e565a2f5da1198c55ddc5679458e3f67a")!
+        let sec = Privkey(hex: "ff2eefd57196d42089e1b42acc39916d7ecac52e0625bd70597bbd5be14aff18")!
         let relay = "wss://relay.getalby.com/v1"
         let str = "nostrwalletconnect://\(pk)?relay=\(relay)&secret=\(sec)&lud16=jb55@jb55.com"
         

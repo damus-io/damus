@@ -10,10 +10,10 @@ import Foundation
 struct NostrPost {
     let kind: NostrKind
     let content: String
-    let references: [ReferencedId]
+    let references: [RefId]
     let tags: [[String]]
-    
-    init(content: String, references: [ReferencedId], kind: NostrKind = .text, tags: [[String]] = []) {
+
+    init(content: String, references: [RefId], kind: NostrKind = .text, tags: [[String]] = []) {
         self.content = content
         self.references = references
         self.kind = kind
@@ -21,96 +21,9 @@ struct NostrPost {
     }
 }
 
-func parse_post_mention_type(_ p: Parser) -> MentionType? {
-    if parse_char(p, "@") {
-        return .pubkey
-    }
-    
-    if parse_char(p, "&") {
-        return .event
-    }
-    
-    return nil
-}
-
-func parse_post_reference(_ p: Parser) -> ReferencedId? {
-    let start = p.pos
-    
-    guard let typ = parse_post_mention_type(p) else {
-        return parse_nostr_ref_uri(p)
-    }
-    
-    if let ref = parse_post_mention(p, mention_type: typ) {
-        return ref
-    }
-    
-    p.pos = start
-    
-    return nil
-}
-
-func is_bech32_char(_ c: Character) -> Bool {
-    let contains = "qpzry9x8gf2tvdw0s3jn54khce6mua7l".contains(c)
-    return contains
-}
-
-func parse_post_mention(_ p: Parser, mention_type: MentionType) -> ReferencedId? {
-    if let id = parse_hexstr(p, len: 64) {
-        return ReferencedId(ref_id: id, relay_id: nil, key: mention_type.ref)
-    } else if let bech32_ref = parse_post_bech32_mention(p) {
-        return bech32_ref
-    } else {
-        return nil
-    }
-}
-
-// TODO: replace this with our C parser
-func parse_post_bech32_mention(_ p: Parser) -> ReferencedId? {
-    let start = p.pos
-    if parse_str(p, "note") {
-    } else if parse_str(p, "npub") {
-    } else if parse_str(p, "nsec") {
-    } else {
-        return nil
-    }
-    
-    if !parse_char(p, "1") {
-        p.pos = start
-        return nil
-    }
-    
-    guard consume_until(p, match: { c in !is_bech32_char(c) }, end_ok: true) else {
-        return nil
-    }
-    
-    let end = p.pos
-    
-    let sliced = String(substring(p.str, start: start, end: end))
-    guard let decoded = try? bech32_decode(sliced) else {
-        p.pos = start
-        return nil
-    }
-    
-    let hex = hex_encode(decoded.data)
-    switch decoded.hrp {
-    case "note":
-        return ReferencedId(ref_id: hex, relay_id: nil, key: "e")
-    case "npub":
-        return ReferencedId(ref_id: hex, relay_id: nil, key: "p")
-    case "nsec":
-        guard let pubkey = privkey_to_pubkey(privkey: hex) else {
-            p.pos = start
-            return nil
-        }
-        return ReferencedId(ref_id: pubkey, relay_id: nil, key: "p")
-    default:
-        p.pos = start
-        return nil
-    }
-}
 
 /// Return a list of tags
 func parse_post_blocks(content: String) -> [Block] {
-    return parse_note_content(content: content, tags: []).blocks
+    return parse_note_content(content: .content(content, nil)).blocks
 }
 

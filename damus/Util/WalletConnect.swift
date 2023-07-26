@@ -38,21 +38,25 @@ struct WalletConnectURL: Equatable {
     init?(str: String) {
         guard let url = URL(string: str),
               url.scheme == "nostrwalletconnect" || url.scheme == "nostr+walletconnect",
-              let pk = url.host, pk.utf8.count == 64,
+              let pkhost = url.host,
+              let pubkey = hex_decode_pubkey(pkhost),
               let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
               let items = components.queryItems,
               let relay = items.first(where: { qi in qi.name == "relay" })?.value,
               let relay_url = RelayURL(relay),
               let secret = items.first(where: { qi in qi.name == "secret" })?.value,
               secret.utf8.count == 64,
-              let our_pk = privkey_to_pubkey(privkey: secret)
+              let decoded = hex_decode(secret)
         else {
             return nil
         }
-        
+
+        let privkey = Privkey(Data(decoded))
+        guard let our_pk = privkey_to_pubkey(privkey: privkey) else { return nil }
+
         let lud16 = items.first(where: { qi in qi.name == "lud16" })?.value
-        let keypair = FullKeypair(pubkey: our_pk, privkey: secret)
-        self = WalletConnectURL(pubkey: pk, relay: relay_url, keypair: keypair, lud16: lud16)
+        let keypair = FullKeypair(pubkey: our_pk, privkey: privkey)
+        self = WalletConnectURL(pubkey: pubkey, relay: relay_url, keypair: keypair, lud16: lud16)
     }
     
     init(pubkey: Pubkey, relay: RelayURL, keypair: FullKeypair, lud16: String?) {
@@ -90,11 +94,11 @@ struct FullWalletResponse {
     let response: WalletResponse
     
     init?(from: NostrEvent, nwc: WalletConnectURL) async {
-        guard let req_id = from.referenced_ids.first else {
+        guard let note_id = from.referenced_ids.first else {
             return nil
         }
-        
-        self.req_id = req_id.ref_id.string()
+
+        self.req_id = note_id
 
         let ares = Task {
             guard let json = decrypt_dm(nwc.keypair.privkey, pubkey: nwc.pubkey, content: from.content, encoding: .base64),
@@ -166,7 +170,7 @@ struct PayInvoiceRequest: Codable {
 }
 
 func make_wallet_connect_request<T>(req: WalletRequest<T>, to_pk: Pubkey, keypair: FullKeypair) -> NostrEvent? {
-    let tags = [["p", to_pk]]
+    let tags = [to_pk.tag]
     let created_at = UInt32(Date().timeIntervalSince1970)
     guard let content = encode_json(req) else {
         return nil
@@ -213,7 +217,7 @@ func nwc_success(state: DamusState, resp: FullWalletResponse) {
             
             if nwc_state.update_state(state: .confirmed) {
                 // notify the zaps model of an update so it can mark them as paid
-                state.events.get_cache_data(pzap.target.id).zaps_model.objectWillChange.send()
+                state.events.get_cache_data(NoteId(pzap.target.id)).zaps_model.objectWillChange.send()
                 print("NWC success confirmed")
             }
             

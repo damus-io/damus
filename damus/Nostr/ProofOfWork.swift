@@ -55,3 +55,22 @@ func hex_decode(_ str: String) -> [UInt8]?
 }
 
 
+func hex_decode_id(_ str: String) -> Data? {
+    guard str.utf8.count == 64, let decoded = hex_decode(str) else {
+        return nil
+    }
+
+    return Data(decoded)
+}
+
+func hex_decode_noteid(_ str: String) -> NoteId? {
+    return hex_decode_id(str).map(NoteId.init)
+}
+
+func hex_decode_pubkey(_ str: String) -> Pubkey? {
+    return hex_decode_id(str).map(Pubkey.init)
+}
+
+func hex_decode_privkey(_ str: String) -> Privkey? {
+    return hex_decode_id(str).map(Privkey.init)
+}

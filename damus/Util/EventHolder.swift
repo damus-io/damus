@@ -9,7 +9,7 @@ import Foundation
 
 /// Used for holding back events until they're ready to be displayed
 class EventHolder: ObservableObject, ScrollQueue {
-    private var has_event = Set<String>()
+    private var has_event = Set<NoteId>()
     @Published var events: [NostrEvent]
     var incoming: [NostrEvent]
     var should_queue = false

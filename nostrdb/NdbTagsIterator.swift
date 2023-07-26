@@ -35,7 +35,7 @@ struct TagsIterator: IteratorProtocol {
     }
 }
 
-struct TagsSequence: Sequence {
+struct TagsSequence: Encodable, Sequence {
     let note: NdbNote
 
     var count: UInt16 {
@@ -48,10 +48,19 @@ struct TagsSequence: Sequence {
         }
     }
 
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+        
+        // Iterate and create the [[String]] for encoding
+        for tag in self {
+            try container.encode(tag.map { $0.string() })
+        }
+    }
+
     // no O(1) indexing on top-level tag lists unfortunately :(
     // bit it's very fast to iterate over each tag since the number of tags
     // are stored and the elements are fixed size.
-    subscript(index: Int) -> Iterator.Element? {
+    subscript(index: Int) -> Iterator.Element {
         var i = 0
         for element in self {
             if i == index {
@@ -59,11 +68,9 @@ struct TagsSequence: Sequence {
             }
             i += 1
         }
-        return nil
-    }
-
-    func references() -> References {
-        return References(tags: self)
+        precondition(false, "sequence subscript oob")
+        // it seems like the compiler needs this or it gets bitchy
+        return .init(note: .init(note: .allocate(capacity: 1), owned_size: nil), tag: .allocate(capacity: 1))
     }
 
     func makeIterator() -> TagsIterator {

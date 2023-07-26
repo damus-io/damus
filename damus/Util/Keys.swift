@@ -9,7 +9,14 @@ import Foundation
 import secp256k1
 
 let PUBKEY_HRP = "npub"
-let ANON_PUBKEY = "anon"
+
+// some random pubkey
+let ANON_PUBKEY = Pubkey(Data([
+    0x85, 0x41, 0x5d, 0x63, 0x5c, 0x2b, 0xaf, 0x55,
+    0xf5, 0xb9, 0xa1, 0xa6, 0xce, 0xb7, 0x75, 0xcc,
+    0x5c, 0x45, 0x4a, 0x3a, 0x61, 0xb5, 0x3f, 0xe8,
+    0x50, 0x42, 0xdc, 0x42, 0xac, 0xe1, 0x7f, 0x12
+]))
 
 struct FullKeypair: Equatable {
     let pubkey: Pubkey
@@ -41,8 +48,8 @@ struct Keypair {
     init(pubkey: Pubkey, privkey: Privkey?) {
         self.pubkey = pubkey
         self.privkey = privkey
-        self.pubkey_bech32 = bech32_pubkey(pubkey) ?? pubkey
-        self.privkey_bech32 = privkey.flatMap { bech32_privkey($0) }
+        self.pubkey_bech32 = pubkey.npub
+        self.privkey_bech32 = privkey?.nsec
     }
 }
 
@@ -52,60 +59,52 @@ enum Bech32Key {
 }
 
 func decode_bech32_key(_ key: String) -> Bech32Key? {
-    guard let decoded = try? bech32_decode(key) else {
+    guard let decoded = try? bech32_decode(key),
+          decoded.data.count == 32
+    else {
         return nil
     }
-    
-    let hexed = hex_encode(decoded.data)
+
     if decoded.hrp == "npub" {
-        return .pub(hexed)
+        return .pub(Pubkey(decoded.data))
     } else if decoded.hrp == "nsec" {
-        return .sec(hexed)
+        return .sec(Privkey(decoded.data))
     }
     
     return nil
 }
 
-func bech32_privkey(_ privkey: String) -> String? {
-    guard let bytes = hex_decode(privkey) else {
-        return nil
-    }
-    return bech32_encode(hrp: "nsec", bytes)
+func bech32_privkey(_ privkey: Privkey) -> String {
+    return bech32_encode(hrp: "nsec", privkey.bytes)
 }
 
-func bech32_pubkey(_ pubkey: String) -> String? {
-    guard let bytes = hex_decode(pubkey) else {
-        return nil
-    }
-    return bech32_encode(hrp: "npub", bytes)
+func bech32_pubkey(_ pubkey: Pubkey) -> String {
+    return bech32_encode(hrp: "npub", pubkey.bytes)
 }
 
-func bech32_pubkey_decode(_ pubkey: String) -> String? {
-    guard let decoded = try? bech32_decode(pubkey), decoded.hrp == "npub" else {
+func bech32_pubkey_decode(_ pubkey: String) -> Pubkey? {
+    guard let decoded = try? bech32_decode(pubkey),
+          decoded.hrp == "npub",
+          decoded.data.count == 32
+    else {
         return nil
     }
 
-    return hex_encode(decoded.data)
+    return Pubkey(decoded.data)
 }
 
-func bech32_nopre_pubkey(_ pubkey: String) -> String? {
-    guard let bytes = hex_decode(pubkey) else {
-        return nil
-    }
-    return bech32_encode(hrp: "", bytes)
+func bech32_nopre_pubkey(_ pubkey: Pubkey) -> String {
+    return bech32_encode(hrp: "", pubkey.bytes)
 }
 
-func bech32_note_id(_ evid: String) -> String? {
-    guard let bytes = hex_decode(evid) else {
-        return nil
-    }
-    return bech32_encode(hrp: "note", bytes)
+func bech32_note_id(_ evid: NoteId) -> String {
+    return bech32_encode(hrp: "note", evid.bytes)
 }
 
 func generate_new_keypair() -> FullKeypair {
     let key = try! secp256k1.Signing.PrivateKey()
-    let privkey = hex_encode(key.rawRepresentation)
-    let pubkey = hex_encode(Data(key.publicKey.xonly.bytes))
+    let privkey = Privkey(key.rawRepresentation)
+    let pubkey = Pubkey(Data(key.publicKey.xonly.bytes))
     return FullKeypair(pubkey: pubkey, privkey: privkey)
 }
 
@@ -113,12 +112,11 @@ func privkey_to_pubkey_raw(sec: [UInt8]) -> Pubkey? {
     guard let key = try? secp256k1.Signing.PrivateKey(rawRepresentation: sec) else {
         return nil
     }
-    return hex_encode(Data(key.publicKey.xonly.bytes))
+    return Pubkey(Data(key.publicKey.xonly.bytes))
 }
 
-func privkey_to_pubkey(privkey: String) -> String? {
-    guard let sec = hex_decode(privkey) else { return nil }
-    return privkey_to_pubkey_raw(sec: sec)
+func privkey_to_pubkey(privkey: Privkey) -> Pubkey? {
+    return privkey_to_pubkey_raw(sec: privkey.bytes)
 }
 
 func save_pubkey(pubkey: Pubkey) {
@@ -155,11 +153,18 @@ func clear_keypair() throws {
 func get_saved_keypair() -> Keypair? {
     do {
         try removePrivateKeyFromUserDefaults()
-        
-        return get_saved_pubkey().flatMap { pubkey in
-            let privkey = get_saved_privkey()
-            return Keypair(pubkey: pubkey, privkey: privkey)
+
+        guard let pubkey = get_saved_pubkey(),
+              let pk = hex_decode(pubkey)
+        else {
+            return nil
         }
+
+        let privkey = get_saved_privkey().flatMap { sec in
+            hex_decode(sec).map { Privkey(Data($0)) }
+        }
+
+        return Keypair(pubkey: Pubkey(Data(pk)), privkey: privkey)
     } catch {
         return nil
     }
@@ -189,7 +194,10 @@ func contentContainsPrivateKey(_ content: String) -> Bool {
 }
 
 fileprivate func removePrivateKeyFromUserDefaults() throws {
-    guard let privKey = UserDefaults.standard.string(forKey: "privkey") else { return }
-    try save_privkey(privkey: privKey)
+    guard let privkey_str = UserDefaults.standard.string(forKey: "privkey"),
+          let privkey = hex_decode_privkey(privkey_str)
+    else { return }
+
+    try save_privkey(privkey: privkey)
     UserDefaults.standard.removeObject(forKey: "privkey")
 }

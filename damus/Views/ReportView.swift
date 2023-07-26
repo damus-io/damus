@@ -51,12 +51,8 @@ struct ReportView: View {
             return
         }
         
-        guard let note_id = bech32_note_id(ev.id) else {
-            return
-        }
-        
         report_sent = true
-        report_id = note_id
+        report_id = bech32_note_id(ev.id)
     }
 
     var send_report_button_text: String {
@@ -131,9 +127,9 @@ struct ReportView_Previews: PreviewProvider {
         let ds = test_damus_state()
         VStack {
         
-            ReportView(postbox: ds.postbox, target: ReportTarget.user(""), keypair: test_keypair.to_full()!)
+            ReportView(postbox: ds.postbox, target: ReportTarget.user(test_pubkey), keypair: test_keypair.to_full()!)
 
-            ReportView(postbox: ds.postbox, target: ReportTarget.user(""), keypair: test_keypair.to_full()!, report_sent: true, report_id: "report_id")
+            ReportView(postbox: ds.postbox, target: ReportTarget.user(test_pubkey), keypair: test_keypair.to_full()!, report_sent: true, report_id: "report_id")
 
         }
     }

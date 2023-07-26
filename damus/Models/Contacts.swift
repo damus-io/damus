@@ -30,9 +30,9 @@ class Contacts {
     func set_mutelist(_ ev: NostrEvent) {
         let oldlist = self.mutelist
         self.mutelist = ev
-        
-        let old = Set(oldlist?.referenced_pubkeys.map({ $0.ref_id }) ?? [])
-        let new = Set(ev.referenced_pubkeys.map({ $0.ref_id }))
+
+        let old = oldlist.map({ ev in Set(ev.referenced_pubkeys) }) ?? Set<Pubkey>()
+        let new = Set(ev.referenced_pubkeys)
         let diff = old.symmetricDifference(new)
         
         var new_mutes = Set<Pubkey>()
@@ -40,14 +40,14 @@ class Contacts {
 
         for d in diff {
             if new.contains(d) {
-                new_mutes.insert(d.string())
+                new_mutes.insert(d)
             } else {
-                new_unmutes.insert(d.string())
+                new_unmutes.insert(d)
             }
         }
 
         // TODO: set local mutelist here
-        self.muted = Set(ev.referenced_pubkeys.map({ $0.ref_id.string() }))
+        self.muted = Set(ev.referenced_pubkeys)
 
         if new_mutes.count > 0 {
             notify(.new_mutes(new_mutes))
@@ -72,7 +72,7 @@ class Contacts {
 
     func get_followed_hashtags() -> Set<String> {
         guard let ev = self.event else { return Set() }
-        return Set(ev.referenced_hashtags.map({ $0.ref_id.string() }))
+        return Set(ev.referenced_hashtags.map({ $0.hashtag }))
     }
 
     func add_friend_pubkey(_ pubkey: Pubkey) {
@@ -81,8 +81,7 @@ class Contacts {
     
     func add_friend_contact(_ contact: NostrEvent) {
         friends.insert(contact.pubkey)
-        for tag in contact.referenced_pubkeys {
-            let pk = tag.id.string()
+        for pk in contact.referenced_pubkeys {
             friend_of_friends.insert(pk)
 
             // Exclude themself and us.
@@ -122,7 +121,7 @@ class Contacts {
     }
 }
 
-func follow_reference(box: PostBox, our_contacts: NostrEvent?, keypair: FullKeypair, follow: ReferencedId) -> NostrEvent? {
+func follow_reference(box: PostBox, our_contacts: NostrEvent?, keypair: FullKeypair, follow: FollowRef) -> NostrEvent? {
     guard let ev = follow_user_event(our_contacts: our_contacts, keypair: keypair, follow: follow) else {
         return nil
     }
@@ -132,7 +131,7 @@ func follow_reference(box: PostBox, our_contacts: NostrEvent?, keypair: FullKeyp
     return ev
 }
 
-func unfollow_reference(postbox: PostBox, our_contacts: NostrEvent?, keypair: FullKeypair, unfollow: ReferencedId) -> NostrEvent? {
+func unfollow_reference(postbox: PostBox, our_contacts: NostrEvent?, keypair: FullKeypair, unfollow: FollowRef) -> NostrEvent? {
     guard let cs = our_contacts else {
         return nil
     }
@@ -146,14 +145,9 @@ func unfollow_reference(postbox: PostBox, our_contacts: NostrEvent?, keypair: Fu
     return ev
 }
 
-func unfollow_reference_event(our_contacts: NostrEvent, keypair: FullKeypair, unfollow: ReferencedId) -> NostrEvent? {
+func unfollow_reference_event(our_contacts: NostrEvent, keypair: FullKeypair, unfollow: FollowRef) -> NostrEvent? {
     let tags = our_contacts.tags.reduce(into: [[String]]()) { ts, tag in
-        if tag.count >= 2,
-           let fst = unfollow.key.first,
-           let afst = AsciiCharacter(fst),
-           tag[0].matches_char(afst),
-           tag[1].matches_str(unfollow.ref_id)
-        {
+        if let tag = FollowRef.from_tag(tag: tag), tag == unfollow {
             return
         }
 
@@ -165,7 +159,7 @@ func unfollow_reference_event(our_contacts: NostrEvent, keypair: FullKeypair, un
     return NostrEvent(content: our_contacts.content, keypair: keypair.to_keypair(), kind: kind, tags: Array(tags))
 }
 
-func follow_user_event(our_contacts: NostrEvent?, keypair: FullKeypair, follow: ReferencedId) -> NostrEvent? {
+func follow_user_event(our_contacts: NostrEvent?, keypair: FullKeypair, follow: FollowRef) -> NostrEvent? {
     guard let cs = our_contacts else {
         // don't create contacts for now so we don't nuke our contact list due to connectivity issues
         // we should only create contacts during profile creation
@@ -219,12 +213,20 @@ func ensure_relay_info(relays: [RelayDescriptor], content: String) -> [String: R
     return relay_info
 }
 
-func is_already_following(contacts: NostrEvent, follow: ReferencedId) -> Bool {
-    guard let key = follow.key.first_char() else { return false }
-    return contacts.references(id: follow.ref_id, key: key)
+func is_already_following(contacts: NostrEvent, follow: FollowRef) -> Bool {
+    return contacts.references.contains { ref in
+        switch (ref, follow) {
+        case let (.hashtag(ht), .hashtag(follow_ht)):
+            return ht.string() == follow_ht
+        case let (.pubkey(pk), .pubkey(follow_pk)):
+            return pk == follow_pk
+        case (.hashtag, .pubkey), (.pubkey, .hashtag),
+             (.event, _), (.quote, _), (.param, _):
+            return false
+        }
+    }
 }
-
-func follow_with_existing_contacts(keypair: FullKeypair, our_contacts: NostrEvent, follow: ReferencedId) -> NostrEvent? {
+func follow_with_existing_contacts(keypair: FullKeypair, our_contacts: NostrEvent, follow: FollowRef) -> NostrEvent? {
     // don't update if we're already following
     if is_already_following(contacts: our_contacts, follow: follow) {
         return nil
@@ -233,7 +235,7 @@ func follow_with_existing_contacts(keypair: FullKeypair, our_contacts: NostrEven
     let kind = NostrKind.contacts.rawValue
 
     var tags = our_contacts.tags.strings()
-    tags.append(refid_to_tag(follow))
+    tags.append(follow.tag)
 
     return NostrEvent(content: our_contacts.content, keypair: keypair.to_keypair(), kind: kind, tags: tags)
 }

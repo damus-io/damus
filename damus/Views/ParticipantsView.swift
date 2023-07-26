@@ -10,10 +10,10 @@ import SwiftUI
 struct ParticipantsView: View {
     
     let damus_state: DamusState
-    
-    @Binding var references: [ReferencedId]
-    @Binding var originalReferences: [ReferencedId]
-    
+    let original_pubkeys: [Pubkey]
+
+    @Binding var filtered_pubkeys: Set<Pubkey>
+
     var body: some View {
         VStack {
             Text("Replying to", comment: "Text indicating that the view is used for editing which participants are replied to in a note.")
@@ -23,7 +23,7 @@ struct ParticipantsView: View {
                 
                 Button {
                     // Remove all "p" refs, keep "e" refs
-                    references = originalReferences.eRefs
+                    filtered_pubkeys = Set(original_pubkeys)
                 } label: {
                     Text("Remove all", comment: "Button label to remove all participants from a note reply.")
                 }
@@ -34,7 +34,7 @@ struct ParticipantsView: View {
                 .clipShape(Capsule())
 
                 Button {
-                    references = originalReferences
+                    filtered_pubkeys = []
                 } label: {
                     Text("Add all", comment: "Button label to re-add all original participants as profiles to reply to in a note")
                 }
@@ -48,26 +48,19 @@ struct ParticipantsView: View {
             }
             VStack {
                 ScrollView {
-                    ForEach(originalReferences.pRefs) { participant in
-                        let pubkey = participant.id
+                    ForEach(original_pubkeys) { pubkey in
                         HStack {
                             UserView(damus_state: damus_state, pubkey: pubkey)
                             
                             Image("check-circle.fill")
                                 .font(.system(size: 30))
-                                .foregroundColor(references.contains(participant) ? DamusColors.purple : .gray)
+                                .foregroundColor(filtered_pubkeys.contains(pubkey) ? .gray : DamusColors.purple)
                         }
                         .onTapGesture {
-                            if references.contains(participant) {
-                                references = references.filter {
-                                    $0 != participant
-                                }
+                            if filtered_pubkeys.contains(pubkey) {
+                                filtered_pubkeys.remove(pubkey)
                             } else {
-                                if references.contains(participant) {
-                                    // Don't add it twice
-                                } else {
-                                    references.append(participant)
-                                }
+                                filtered_pubkeys.insert(pubkey)
                             }
                         }
                     }                    

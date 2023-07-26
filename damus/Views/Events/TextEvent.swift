@@ -59,7 +59,7 @@ struct TextEvent: View {
 
 func event_has_tag(ev: NostrEvent, tag: String) -> Bool {
     for t in ev.tags {
-        if t.count >= 1 && t[0] == tag {
+        if t.count >= 1 && t[0].matches_str(tag) {
             return true
         }
     }
