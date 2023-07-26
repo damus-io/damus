@@ -12,12 +12,15 @@ struct MaybeAnonPfpView: View {
     let is_anon: Bool
     let pubkey: String
     let size: CGFloat
+    /// Disallows navigation upon pfp tap
+    let preventNavLink: Bool
     
-    init(state: DamusState, is_anon: Bool, pubkey: String, size: CGFloat) {
+    init(state: DamusState, is_anon: Bool, pubkey: String, size: CGFloat, preventNavLink: Bool = false) {
         self.state = state
         self.is_anon = is_anon
         self.pubkey = pubkey
         self.size = size
+        self.preventNavLink = preventNavLink
     }
     
     var body: some View {
@@ -28,8 +31,12 @@ struct MaybeAnonPfpView: View {
                     .font(.largeTitle)
                     .frame(width: size, height: size)
             } else {
-                NavigationLink(value: Route.ProfileByKey(pubkey: pubkey)) {
+                if preventNavLink {
                     ProfilePicView(pubkey: pubkey, size: size, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation)
+                } else {
+                    NavigationLink(value: Route.ProfileByKey(pubkey: pubkey)) {
+                        ProfilePicView(pubkey: pubkey, size: size, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation)
+                    }
                 }
             }
         }
