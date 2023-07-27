@@ -52,21 +52,16 @@ struct EventShell<Content: View>: View {
     }
 
     func Pfp(is_anon: Bool) -> some View {
-        // Prevent navigation from pfp if on profile
-        var preventNavLink = false
+        var profilePubKey: String?
         
         // Look at nav stack to determine if last (current) view is a profile, via its route,
         // then compare pubKeys
         if let route = state.nav.path.last {
             switch route {
-            case .ProfileByKey(let profilePubKey):
-                if profilePubKey == pubkey {
-                    preventNavLink = true
-                }
+            case .ProfileByKey(let profileKey):
+                profilePubKey = profileKey
             case .Profile(let profileModel, _):
-                if profileModel.pubkey == pubkey {
-                    preventNavLink = true
-                }
+                profilePubKey = profileModel.pubkey
             default:
                 break
             }
@@ -77,7 +72,7 @@ struct EventShell<Content: View>: View {
             is_anon: is_anon,
             pubkey: pubkey,
             size: options.contains(.small_pfp) ? eventview_pfp_size(.small) : PFP_SIZE,
-            preventNavLink: preventNavLink
+            preventNavLink: profilePubKey == pubkey
         )
     }
 
