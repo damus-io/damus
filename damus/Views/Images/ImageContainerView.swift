@@ -15,7 +15,8 @@ struct ImageContainerView: View {
     
     @State private var image: UIImage?
     @State private var showShareSheet = false
-    
+    @ObservedObject var imageSaver = ImageSaver()
+
     let disable_animation: Bool
     
     private struct ImageHandler: ImageModifier {
@@ -35,10 +36,23 @@ struct ImageContainerView: View {
             }
             .imageModifier(ImageHandler(handler: $image))
             .clipped()
-            .modifier(ImageContextMenuModifier(url: url, image: image, showShareSheet: $showShareSheet))
+            .modifier(ImageContextMenuModifier(url: url, image: image, imageSaver: imageSaver, showShareSheet: $showShareSheet))
             .sheet(isPresented: $showShareSheet) {
                 ShareSheet(activityItems: [url])
             }
+            .alert(
+                imageSaver.errorTitle,
+                isPresented: $imageSaver.error,
+                actions: {
+                    if imageSaver.errorType == .permissions {
+                        Button("Settings") {
+                            UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+                        }
+                        Button("Cancel", role: .cancel) {}
+                    }
+                },
+                message: { Text(imageSaver.errorMessage) }
+            )
     }
     
     var body: some View {

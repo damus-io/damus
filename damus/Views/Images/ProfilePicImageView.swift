@@ -12,6 +12,7 @@ struct ProfileImageContainerView: View {
     
     @State private var image: UIImage?
     @State private var showShareSheet = false
+    @ObservedObject var imageSaver = ImageSaver()
     
     let disable_animation: Bool
     
@@ -33,10 +34,23 @@ struct ProfileImageContainerView: View {
             }
             .imageModifier(ImageHandler(handler: $image))
             .clipShape(Circle())
-            .modifier(ImageContextMenuModifier(url: url, image: image, showShareSheet: $showShareSheet))
+            .modifier(ImageContextMenuModifier(url: url, image: image, imageSaver: imageSaver, showShareSheet: $showShareSheet))
             .sheet(isPresented: $showShareSheet) {
                 ShareSheet(activityItems: [url])
             }
+            .alert(
+                imageSaver.errorTitle,
+                isPresented: $imageSaver.error,
+                actions: {
+                    if imageSaver.errorType == .permissions {
+                        Button("Settings") {
+                            UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+                        }
+                        Button("Cancel", role: .cancel) {}
+                    }
+                },
+                message: { Text(imageSaver.errorMessage) }
+            )
     }
 }
 
