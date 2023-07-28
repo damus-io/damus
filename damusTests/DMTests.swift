@@ -48,55 +48,56 @@ final class DMTests: XCTestCase {
         let now = UInt32(Date().timeIntervalSince1970)
 
         let alice_to_bob = create_dm("hi bob", to_pk: bob.pubkey, tags: [["p", bob.pubkey]], keypair: alice, created_at: now)!
-        handle_incoming_dms(prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [alice_to_bob])
-        
+        let debouncer = Debouncer(interval: 3.0)
+        handle_incoming_dms(debouncer: debouncer, prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [alice_to_bob])
+
         XCTAssertEqual(model.dms.count, 1)
         XCTAssertEqual(model.dms[0].pubkey, bob.pubkey)
 
         let bob_to_alice = create_dm("hi alice", to_pk: alice.pubkey, tags: [["p", alice.pubkey]], keypair: bob, created_at: now + 1)!
-        handle_incoming_dms(prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [bob_to_alice])
-        
+        handle_incoming_dms(debouncer: debouncer, prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [bob_to_alice])
+
         XCTAssertEqual(model.dms.count, 1)
         XCTAssertEqual(model.dms[0].pubkey, bob.pubkey)
         
         let alice_to_bob_2 = create_dm("hi bob", to_pk: bob.pubkey, tags: [["p", bob.pubkey]], keypair: alice, created_at: now + 2)!
-        handle_incoming_dms(prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [alice_to_bob_2])
-        
+        handle_incoming_dms(debouncer: debouncer, prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [alice_to_bob_2])
+
         XCTAssertEqual(model.dms.count, 1)
         XCTAssertEqual(model.dms[0].pubkey, bob.pubkey)
         
         let fiatjaf_to_alice = create_dm("hi alice", to_pk: alice.pubkey, tags: [["p", alice.pubkey]], keypair: fiatjaf, created_at: now+5)!
-        handle_incoming_dms(prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [fiatjaf_to_alice])
-        
+        handle_incoming_dms(debouncer: debouncer, prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [fiatjaf_to_alice])
+
         XCTAssertEqual(model.dms.count, 2)
         XCTAssertEqual(model.dms[0].pubkey, fiatjaf.pubkey)
         
         let dave_to_alice = create_dm("hi alice", to_pk: alice.pubkey, tags: [["p", alice.pubkey]], keypair: dave, created_at: now + 10)!
-        handle_incoming_dms(prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [dave_to_alice])
+        handle_incoming_dms(debouncer: debouncer, prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [dave_to_alice])
 
         XCTAssertEqual(model.dms.count, 3)
         XCTAssertEqual(model.dms[0].pubkey, dave.pubkey)
 
         let bob_to_alice_2 = create_dm("hi alice 2", to_pk: alice.pubkey, tags: [["p", alice.pubkey]], keypair: bob, created_at: now + 15)!
-        handle_incoming_dms(prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [bob_to_alice_2])
+        handle_incoming_dms(debouncer: debouncer, prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [bob_to_alice_2])
 
         XCTAssertEqual(model.dms.count, 3)
         XCTAssertEqual(model.dms[0].pubkey, bob.pubkey)
 
         let charlie_to_alice = create_dm("hi alice", to_pk: alice.pubkey, tags: [["p", alice.pubkey]], keypair: charlie, created_at: now + 20)!
-        handle_incoming_dms(prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [charlie_to_alice])
+        handle_incoming_dms(debouncer: debouncer, prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [charlie_to_alice])
 
         XCTAssertEqual(model.dms.count, 4)
         XCTAssertEqual(model.dms[0].pubkey, charlie.pubkey)
 
         let bob_to_alice_3 = create_dm("hi alice 3", to_pk: alice.pubkey, tags: [["p", alice.pubkey]], keypair: bob, created_at: now + 25)!
-        handle_incoming_dms(prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [bob_to_alice_3])
+        handle_incoming_dms(debouncer: debouncer, prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [bob_to_alice_3])
 
         XCTAssertEqual(model.dms.count, 4)
         XCTAssertEqual(model.dms[0].pubkey, bob.pubkey)
 
         let charlie_to_alice_2 = create_dm("hi alice 2", to_pk: alice.pubkey, tags: [["p", alice.pubkey]], keypair: charlie, created_at: now + 30)!
-        handle_incoming_dms(prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [charlie_to_alice_2])
+        handle_incoming_dms(debouncer: debouncer, prev_events: notif, dms: model, our_pubkey: alice.pubkey, evs: [charlie_to_alice_2])
 
         XCTAssertEqual(model.dms.count, 4)
         XCTAssertEqual(model.dms[0].pubkey, charlie.pubkey)
