@@ -40,6 +40,7 @@ public struct RelayURL: Hashable {
 final class RelayConnection: ObservableObject {
     @Published private(set) var isConnected = false
     @Published private(set) var isConnecting = false
+    private var isDisabled = false
     
     private(set) var last_connection_attempt: TimeInterval = 0
     private(set) var last_pong: Date? = nil
@@ -57,7 +58,11 @@ final class RelayConnection: ObservableObject {
     }
     
     func ping() {
-        socket.ping { err in
+        socket.ping { [weak self] err in
+            guard let self else {
+                return
+            }
+            
             if err == nil {
                 self.last_pong = .now
                 self.log?.add("Successful ping")
@@ -101,6 +106,10 @@ final class RelayConnection: ObservableObject {
         
         isConnected = false
         isConnecting = false
+    }
+    
+    func disablePermanently() {
+        isDisabled = true
     }
     
     func send_raw(_ req: String) {
@@ -168,8 +177,8 @@ final class RelayConnection: ObservableObject {
     }
     
     func reconnect() {
-        guard !isConnecting else {
-            return  // we're already trying to connect
+        guard !isConnecting && !isDisabled else {
+            return  // we're already trying to connect or we're disabled
         }
         disconnect()
         connect()

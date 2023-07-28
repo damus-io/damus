@@ -95,6 +95,7 @@ class RelayPool {
         
         for relay in relays {
             if relay.id == relay_id {
+                relay.connection.disablePermanently()
                 relays.remove(at: i)
                 break
             }
