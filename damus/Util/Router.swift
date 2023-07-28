@@ -12,7 +12,7 @@ enum Route: Hashable {
     case Profile(profile: ProfileModel, followers: FollowersModel)
     case Followers(followers: FollowersModel)
     case Relay(relay: String, showActionButtons: Binding<Bool>)
-    case RelayDetail(relay: String, metadata: RelayMetadata)
+    case RelayDetail(relay: String, metadata: RelayMetadata?)
     case Following(following: FollowingModel)
     case MuteList(users: [String])
     case RelayConfig

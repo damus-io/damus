@@ -10,13 +10,13 @@ import SwiftUI
 struct RelayDetailView: View {
     let state: DamusState
     let relay: String
-    let nip11: RelayMetadata
+    let nip11: RelayMetadata?
     
     @ObservedObject var log: RelayLog
     
     @Environment(\.dismiss) var dismiss
     
-    init(state: DamusState, relay: String, nip11: RelayMetadata) {
+    init(state: DamusState, relay: String, nip11: RelayMetadata?) {
         self.state = state
         self.relay = relay
         self.nip11 = nip11
@@ -83,7 +83,7 @@ struct RelayDetailView: View {
                     }
                 }
                 
-                if let pubkey = nip11.pubkey {
+                if let pubkey = nip11?.pubkey {
                     Section(NSLocalizedString("Admin", comment: "Label to display relay contact user.")) {
                         UserViewRow(damus_state: state, pubkey: pubkey)
                             .onTapGesture {
@@ -100,37 +100,40 @@ struct RelayDetailView: View {
                         }
                     }
                 }
-                if nip11.is_paid {
-                    Section(content: {
-                        RelayPaidDetail(payments_url: nip11.payments_url)
-                    }, header: {
-                        Text("Paid Relay", comment: "Section header that indicates the relay server requires payment.")
-                    }, footer: {
-                        Text("This is a paid relay, you must pay for notes to be accepted.", comment: "Footer description that explains that the relay server requires payment to post.")
-                    })
-                }
                 
-                Section(NSLocalizedString("Description", comment: "Label to display relay description.")) {
-                    FieldText(nip11.description)
-                }
-                Section(NSLocalizedString("Contact", comment: "Label to display relay contact information.")) {
-                    FieldText(nip11.contact)
-                }
-                Section(NSLocalizedString("Software", comment: "Label to display relay software.")) {
-                    FieldText(nip11.software)
-                }
-                Section(NSLocalizedString("Version", comment: "Label to display relay software version.")) {
-                    FieldText(nip11.version)
-                }
-                if let nips = nip11.supported_nips, nips.count > 0 {
-                    Section(NSLocalizedString("Supported NIPs", comment: "Label to display relay's supported NIPs.")) {
-                        Text(nipsList(nips: nips))
+                if let nip11 = nip11 {
+                    if nip11.is_paid {
+                        Section(content: {
+                            RelayPaidDetail(payments_url: nip11.payments_url)
+                        }, header: {
+                            Text("Paid Relay", comment: "Section header that indicates the relay server requires payment.")
+                        }, footer: {
+                            Text("This is a paid relay, you must pay for notes to be accepted.", comment: "Footer description that explains that the relay server requires payment to post.")
+                        })
+                    }
+                    
+                    Section(NSLocalizedString("Description", comment: "Label to display relay description.")) {
+                        FieldText(nip11.description)
+                    }
+                    Section(NSLocalizedString("Contact", comment: "Label to display relay contact information.")) {
+                        FieldText(nip11.contact)
+                    }
+                    Section(NSLocalizedString("Software", comment: "Label to display relay software.")) {
+                        FieldText(nip11.software)
+                    }
+                    Section(NSLocalizedString("Version", comment: "Label to display relay software version.")) {
+                        FieldText(nip11.version)
+                    }
+                    if let nips = nip11.supported_nips, nips.count > 0 {
+                        Section(NSLocalizedString("Supported NIPs", comment: "Label to display relay's supported NIPs.")) {
+                            Text(nipsList(nips: nips))
+                        }
                     }
                 }
                 
-                if state.settings.developer_mode, let log_contents = log.contents {
+                if state.settings.developer_mode {
                     Section(NSLocalizedString("Log", comment: "Label to display developer mode logs.")) {
-                        Text(log_contents)
+                        Text(log.contents ?? NSLocalizedString("No logs to display", comment: "Label to indicate that there are no developer mode logs available to be displayed on the screen"))
                             .font(.system(size: 13))
                             .lineLimit(nil)
                             .fixedSize(horizontal: false, vertical: true)
@@ -141,7 +144,7 @@ struct RelayDetailView: View {
         .onReceive(handle_notify(.switched_timeline)) { notif in
             dismiss()
         }
-        .navigationTitle(nip11.name ?? "")
+        .navigationTitle(nip11?.name ?? relay)
         .navigationBarTitleDisplayMode(.inline)
     }
     

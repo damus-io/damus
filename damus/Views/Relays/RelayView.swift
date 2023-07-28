@@ -51,6 +51,11 @@ struct RelayView: View {
                         .foregroundColor(Color.accentColor)
                 } else {
                     Text(relay)
+                        .background(
+                            NavigationLink(value: Route.RelayDetail(relay: relay, metadata: nil), label: {
+                                EmptyView()
+                            }).opacity(0.0).disabled(showActionButtons)
+                        )
                     
                     Spacer()
                     
