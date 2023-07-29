@@ -166,8 +166,9 @@ struct NotificationsView: View {
                     Color.white.opacity(0)
                         .id("startblock")
                         .frame(height: 5)
-                    ForEach(filter.filter(contacts: state.contacts, items: notifications.notifications), id: \.id) { item in
-                        NotificationItemView(state: state, item: item)
+                    let notifs = Array(zip(1..., filter.filter(contacts: state.contacts, items: notifications.notifications)))
+                    ForEach(notifs, id: \.0) { zip in
+                        NotificationItemView(state: state, item: zip.1)
                     }
                 }
                 .background(GeometryReader { proxy -> Color in

@@ -35,22 +35,7 @@ enum NotificationItem {
             return nil
         }
     }
-    
-    var id: String {
-        switch self {
-        case .repost(let evid, _):
-            return "repost_" + evid
-        case .reaction(let evid, _):
-            return "reaction_" + evid
-        case .profile_zap:
-            return "profile_zap"
-        case .event_zap(let evid, _):
-            return "event_zap_" + evid
-        case .reply(let ev):
-            return "reply_" + ev.id
-        }
-    }
-    
+
     var last_event_at: UInt32 {
         switch self {
         case .reaction(_, let evgrp):
