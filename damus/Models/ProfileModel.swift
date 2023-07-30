@@ -130,8 +130,9 @@ class ProfileModel: ObservableObject, Equatable {
                 break
             case .event(_, let ev):
                 add_event(ev)
-            case .notice(let notice):
-                notify(.notice, notice)
+            case .notice:
+                break
+                //notify(.notice, notice)
             case .eose:
                 if resp.subid == sub_id {
                     load_profiles(profiles_subid: prof_subid, relay_id: relay_id, load: .from_events(events.events), damus_state: damus)
