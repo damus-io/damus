@@ -51,7 +51,7 @@ struct TimelineView<Content: View>: View {
             }
             .buttonStyle(BorderlessButtonStyle())
             .coordinateSpace(name: "scroll")
-            .onReceive(NotificationCenter.default.publisher(for: .scroll_to_top)) { _ in
+            .onReceive(handle_notify(.scroll_to_top)) { () in
                 events.flush()
                 self.events.should_queue = false
                 scroll_to_event(scroller: scroller, id: "startblock", delay: 0.0, animate: true, anchor: .top)

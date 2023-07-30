@@ -7,17 +7,14 @@
 
 import Foundation
 
-
 enum FollowTarget {
-    case pubkey(String)
+    case pubkey(Pubkey)
     case contact(NostrEvent)
     
-    var pubkey: String {
+    var pubkey: Pubkey {
         switch self {
-        case .pubkey(let pk):
-            return pk
-        case .contact(let ev):
-            return ev.pubkey
+        case .pubkey(let pk):   return pk
+        case .contact(let ev):  return ev.pubkey
         }
     }
 }

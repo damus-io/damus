@@ -215,9 +215,13 @@ func process_login(_ key: ParsedKey, is_pubkey: Bool) async throws {
         }
         save_pubkey(pubkey: pk)
     }
-    
+
+    guard let keypair = get_saved_keypair() else {
+        return
+    }
+
     await MainActor.run {
-        notify(.login, ())
+        notify(.login(keypair))
     }
 }
 

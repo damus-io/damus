@@ -44,7 +44,7 @@ class SuggestedUsersViewModel: ObservableObject {
 
     func follow(pubkeys: [String]) {
         for pubkey in pubkeys {
-            notify(.follow, FollowTarget.pubkey(pubkey))
+            notify(.follow(.pubkey(pubkey)))
         }
     }
 

@@ -51,7 +51,7 @@ struct ShareAction: View {
                 
                 ShareActionButton(img: "globe", text: NSLocalizedString("Broadcast", comment: "Button to broadcast note to all your relays")) {
                     dismiss()
-                    NotificationCenter.default.post(name: .broadcast_event, object: event)
+                    notify(.broadcast(event))
                 }
                 
                 ShareActionButton(img: "upload", text: NSLocalizedString("Share Via...", comment: "Button to present iOS share sheet")) {

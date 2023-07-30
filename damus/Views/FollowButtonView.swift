@@ -31,17 +31,15 @@ struct FollowButtonView: View {
                         .stroke(follow_state == .unfollows ? .clear : borderColor(), lineWidth: 1)
                 }
         }
-        .onReceive(handle_notify(.followed)) { notif in
-            let pk = notif.object as! ReferencedId
-            if pk.key == "p", pk.ref_id != target.pubkey {
+        .onReceive(handle_notify(.followed)) { pk in
+            guard pk.key == "p", target.pubkey == pk.ref_id else {
                 return
             }
             
             self.follow_state = .follows
         }
-        .onReceive(handle_notify(.unfollowed)) { notif in
-            let pk = notif.object as! ReferencedId
-            if pk.key == "p", pk.ref_id != target.pubkey {
+        .onReceive(handle_notify(.unfollowed)) { pk in
+            guard pk.key == "p", target.pubkey == pk.ref_id else {
                 return
             }
             
@@ -97,14 +95,14 @@ struct FollowButtonView_Previews: PreviewProvider {
 func perform_follow_btn_action(_ fs: FollowState, target: FollowTarget) -> FollowState {
     switch fs {
     case .follows:
-        notify(.unfollow, target)
+        notify(.unfollow(target))
         return .following
     case .following:
         return .following
     case .unfollowing:
         return .following
     case .unfollows:
-        notify(.follow, target)
+        notify(.follow(target))
         return .unfollowing
     }
 }

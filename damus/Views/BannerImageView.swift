@@ -77,9 +77,7 @@ struct BannerImageView: View {
     
     var body: some View {
         InnerBannerImageView(disable_animation: disable_animation, url: get_banner_url(banner: banner, pubkey: pubkey, profiles: profiles))
-            .onReceive(handle_notify(.profile_updated)) { notif in
-                let updated = notif.object as! ProfileUpdate
-
+            .onReceive(handle_notify(.profile_updated)) { updated in
                 guard updated.pubkey == self.pubkey else {
                     return
                 }

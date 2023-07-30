@@ -75,8 +75,7 @@ struct SelectedEventView: View {
                 Divider()
                     .padding([.top], 4)
             }
-            .onReceive(handle_notify(.update_stats)) { n in
-                let target = n.object as! String
+            .onReceive(handle_notify(.update_stats)) { target in
                 guard target == self.event.id else { return }
                 self.bar.update(damus: self.damus, evid: target)
             }

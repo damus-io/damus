@@ -44,7 +44,7 @@ struct EventActionBar: View {
             if damus_state.keypair.privkey != nil {
                 HStack(spacing: 4) {
                     EventActionButton(img: "bubble2", col: bar.replied ? DamusColors.purple : Color.gray) {
-                        notify(.compose, PostAction.replying_to(event))
+                        notify(.compose(.replying_to(event)))
                     }
                     .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
                     Text(verbatim: "\(bar.replies > 0 ? "\(bar.replies)" : "")")
@@ -70,7 +70,7 @@ struct EventActionBar: View {
                 HStack(spacing: 4) {
                     LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
                         if bar.liked {
-                            notify(.delete, bar.our_like)
+                            //notify(.delete, bar.our_like)
                         } else {
                             send_like(emoji: emoji)
                         }
@@ -122,13 +122,11 @@ struct EventActionBar: View {
                 RepostAction(damus_state: self.damus_state, event: event)
             }
         }
-        .onReceive(handle_notify(.update_stats)) { n in
-            let target = n.object as! String
+        .onReceive(handle_notify(.update_stats)) { target in
             guard target == self.event.id else { return }
             self.bar.update(damus: self.damus_state, evid: target)
         }
-        .onReceive(handle_notify(.liked)) { n in
-            let liked = n.object as! Counted
+        .onReceive(handle_notify(.liked)) { liked in
             if liked.id != event.id {
                 return
             }

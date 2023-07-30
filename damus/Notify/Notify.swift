@@ -31,12 +31,12 @@ struct Notifications<T: Notify> {
 
 struct NotifyHandler<T> { }
 
-func notify_safe<T: Notify>(_ notify: Notifications<T>) {
+func notify<T: Notify>(_ notify: Notifications<T>) {
     let notify = notify.notify
     NotificationCenter.default.post(name: T.name, object: notify.payload)
 }
 
-func handle_notify_safe<T: Notify>(_ handler: NotifyHandler<T>) -> AnyPublisher<T.Payload, Never> {
+func handle_notify<T: Notify>(_ handler: NotifyHandler<T>) -> AnyPublisher<T.Payload, Never> {
     return NotificationCenter.default.publisher(for: T.name)
         //.compactMap { notification in notification.object as? T.Payload }
         .map { notification in notification.object as! T.Payload }

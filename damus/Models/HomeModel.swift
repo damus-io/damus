@@ -328,8 +328,8 @@ class HomeModel {
             break
         case .success(let n):
             let boosted = Counted(event: ev, id: e, total: n)
-            notify(.boosted, boosted)
-            notify(.update_stats, e)
+            notify(.reposted(boosted))
+            notify(.update_stats(note_id: e))
         }
     }
 
@@ -349,8 +349,8 @@ class HomeModel {
         case .success(let n):
             handle_notification(ev: ev)
             let liked = Counted(event: ev, id: e.ref_id, total: n)
-            notify(.liked, liked)
-            notify(.update_stats, e.ref_id)
+            notify(.liked(liked))
+            notify(.update_stats(note_id: e.ref_id))
         }
     }
 
@@ -716,12 +716,12 @@ func load_our_contacts(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent)
     let diff = new_refs.symmetricDifference(old_refs)
     for ref in diff {
         if new_refs.contains(ref) {
-            notify(.followed, ref)
+            notify(.followed(ref))
             if ref.key == "p" {
                 contacts.add_friend_pubkey(ref.ref_id)
             }
         } else {
-            notify(.unfollowed, ref)
+            notify(.unfollowed(ref))
             if ref.key == "p" {
                 contacts.remove_friend(ref.ref_id)
             }
@@ -817,7 +817,7 @@ func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: P
     }
     
     if changed {
-        notify(.profile_updated, ProfileUpdate(pubkey: ev.pubkey, profile: profile))
+        notify(.profile_updated(pubkey: ev.pubkey, profile: profile))
     }
 }
 
@@ -933,7 +933,7 @@ func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
     if changed {
         save_bootstrap_relays(pubkey: state.pubkey, relays: Array(new))
         state.pool.connect()
-        notify(.relays_changed, ())
+        notify(.relays_changed)
     }
 }
 

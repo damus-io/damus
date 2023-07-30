@@ -60,20 +60,12 @@ struct MutedEventView: View {
                 Event
             }
         }
-        .onReceive(handle_notify(.new_mutes)) { notif in
-            guard let mutes = notif.object as? [String] else {
-                return
-            }
-            
+        .onReceive(handle_notify(.new_mutes)) { mutes in
             if mutes.contains(event.pubkey) {
                 shown = false
             }
         }
-        .onReceive(handle_notify(.new_unmutes)) { notif in
-            guard let unmutes = notif.object as? [String] else {
-                return
-            }
-            
+        .onReceive(handle_notify(.new_unmutes)) { unmutes in
             if unmutes.contains(event.pubkey) {
                 shown = true
             }

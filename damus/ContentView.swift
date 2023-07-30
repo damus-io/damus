@@ -349,26 +349,22 @@ struct ContentView: View {
                 }
             }
         }
-        .onReceive(handle_notify(.compose)) { notif in
-            let action = notif.object as! PostAction
+        .onReceive(handle_notify(.compose)) { action in
             self.active_sheet = .post(action)
         }
         .onReceive(timer) { n in
             self.damus_state?.postbox.try_flushing_events()
         }
-        .onReceive(handle_notify(.report)) { notif in
-            let target = notif.object as! ReportTarget
+        .onReceive(handle_notify(.report)) { target in
             self.active_sheet = .report(target)
         }
-        .onReceive(handle_notify(.mute)) { notif in
-            let pubkey = notif.object as! String
+        .onReceive(handle_notify(.mute)) { pubkey in
             self.muting = pubkey
             self.confirm_mute = true
         }
-        .onReceive(handle_notify(.attached_wallet)) { notif in
+        .onReceive(handle_notify(.attached_wallet)) { nwc in
             // update the lightning address on our profile when we attach a
             // wallet with an associated
-            let nwc = notif.object as! WalletConnectURL
             guard let ds = self.damus_state,
                   let lud16 = nwc.lud16,
                   let keypair = ds.keypair.to_full(),
@@ -390,8 +386,7 @@ struct ContentView: View {
             }
             ds.postbox.send(ev)
         }
-        .onReceive(handle_notify(.broadcast_event)) { obj in
-            let ev = obj.object as! NostrEvent
+        .onReceive(handle_notify(.broadcast)) { ev in
             guard let ds = self.damus_state else {
                 return
             }
@@ -400,47 +395,43 @@ struct ContentView: View {
                 ds.postbox.send(profile.event)
             }
         }
-        .onReceive(handle_notify(.unfollow)) { notif in
+        .onReceive(handle_notify(.unfollow)) { target in
             guard let state = self.damus_state else { return }
-            _ = handle_unfollow_notif(state: state, notif: notif)
+            _ = handle_unfollow_notif(state: state, target: target)
         }
-        .onReceive(handle_notify(.unfollowed)) { notif in
-            let unfollow = notif.object as! ReferencedId
+        .onReceive(handle_notify(.unfollowed)) { unfollow in
             home.resubscribe(.unfollowing(unfollow))
         }
-        .onReceive(handle_notify(.follow)) { notif in
+        .onReceive(handle_notify(.follow)) { target in
             guard let state = self.damus_state else { return }
-            guard handle_follow_notif(state: state, notif: notif) else { return }
+            guard handle_follow_notif(state: state, target: target) else { return }
         }
-        .onReceive(handle_notify(.followed)) { notif in
+        .onReceive(handle_notify(.followed)) { _ in
             home.resubscribe(.following)
         }
-        .onReceive(handle_notify(.post)) { notif in
+        .onReceive(handle_notify(.post)) { post in
             guard let state = self.damus_state,
                   let keypair = state.keypair.to_full() else {
                       return
             }
 
-            if !handle_post_notification(keypair: keypair, postbox: state.postbox, events: state.events, notif: notif) {
+            if !handle_post_notification(keypair: keypair, postbox: state.postbox, events: state.events, post: post) {
                 self.active_sheet = nil
             }
         }
-        .onReceive(handle_notify(.new_mutes)) { notif in
+        .onReceive(handle_notify(.new_mutes)) { _ in
             home.filter_events()
         }
-        .onReceive(handle_notify(.mute_thread)) { notif in
+        .onReceive(handle_notify(.mute_thread)) { _ in
             home.filter_events()
         }
-        .onReceive(handle_notify(.unmute_thread)) { notif in
+        .onReceive(handle_notify(.unmute_thread)) { _ in
             home.filter_events()
         }
-        .onReceive(handle_notify(.present_sheet)) { notif in
-            let sheet = notif.object as! Sheets
+        .onReceive(handle_notify(.present_sheet)) { sheet in
             self.active_sheet = sheet
         }
-        .onReceive(handle_notify(.zapping)) { notif in
-            let zap_ev = notif.object as! ZappingEvent
-            
+        .onReceive(handle_notify(.zapping)) { zap_ev in
             guard !zap_ev.is_custom else {
                 return
             }
@@ -475,12 +466,8 @@ struct ContentView: View {
                 break
             }
         }
-        .onReceive(handle_notify(.local_notification)) { notif in
-            
-            guard let local = notif.object as? LossyLocalNotification,
-                let damus_state else {
-                return
-            }
+        .onReceive(handle_notify(.local_notification)) { local in
+            guard let damus_state else { return }
 
             if local.type == .profile_zap {
                 open_profile(id: local.event_id)
@@ -503,8 +490,7 @@ struct ContentView: View {
                 break
             }
         }
-        .onReceive(handle_notify(.onlyzaps_mode)) { notif in
-            let hide = notif.object as! Bool
+        .onReceive(handle_notify(.onlyzaps_mode)) { hide in
             home.filter_events()
             
             guard let damus_state,
@@ -597,12 +583,12 @@ struct ContentView: View {
     
     func switch_timeline(_ timeline: Timeline) {
         self.isSideBarOpened = false
-        
         self.popToRoot()
-        NotificationCenter.default.post(name: .switched_timeline, object: timeline)
-        
+
+        notify(.switched_timeline(timeline))
+
         if timeline == self.selected_timeline {
-            NotificationCenter.default.post(name: .scroll_to_top, object: nil)
+            notify(.scroll_to_top)
             return
         }
         
@@ -894,7 +880,7 @@ func handle_unfollow(state: DamusState, unfollow: ReferencedId) -> Bool {
         return false
     }
 
-    notify(.unfollowed, unfollow)
+    notify(.unfollowed(unfollow))
 
     state.contacts.event = ev
 
@@ -906,8 +892,7 @@ func handle_unfollow(state: DamusState, unfollow: ReferencedId) -> Bool {
     return true
 }
 
-func handle_unfollow_notif(state: DamusState, notif: Notification) -> ReferencedId? {
-    let target = notif.object as! FollowTarget
+func handle_unfollow_notif(state: DamusState, target: FollowTarget) -> ReferencedId? {
     let pk = target.pubkey
 
     let ref = ReferencedId.p(pk)
@@ -929,7 +914,7 @@ func handle_follow(state: DamusState, follow: ReferencedId) -> Bool {
         return false
     }
 
-    notify(.followed, follow)
+    notify(.followed(follow))
 
     state.contacts.event = ev
     if follow.key == "p" {
@@ -940,21 +925,19 @@ func handle_follow(state: DamusState, follow: ReferencedId) -> Bool {
 }
 
 @discardableResult
-func handle_follow_notif(state: DamusState, notif: Notification) -> Bool {
-    let fnotify = notif.object as! FollowTarget
-    switch fnotify {
+func handle_follow_notif(state: DamusState, target: FollowTarget) -> Bool {
+    switch target {
     case .pubkey(let pk):
         state.contacts.add_friend_pubkey(pk)
     case .contact(let ev):
         state.contacts.add_friend_contact(ev)
     }
 
-    return handle_follow(state: state, follow: .p(fnotify.pubkey))
+    return handle_follow(state: state, follow: .p(target.pubkey))
 }
 
-func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: EventCache, notif: Notification) -> Bool {
-    let post_res = notif.object as! NostrPostResult
-    switch post_res {
+func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: EventCache, post: NostrPostResult) -> Bool {
+    switch post {
     case .post(let post):
         //let post = tup.0
         //let to_relays = tup.1

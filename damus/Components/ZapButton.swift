@@ -189,7 +189,7 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
             remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
             let typ = ZappingEventType.failed(.bad_lnurl)
             let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
-            notify(.zapping, ev)
+            notify(.zapping(ev))
             return
         }
 
@@ -197,7 +197,7 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
             remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
             let typ = ZappingEventType.failed(.fetching_invoice)
             let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
-            notify(.zapping, ev)
+            notify(.zapping(ev))
             return
         }
 
@@ -208,7 +208,7 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
                 remove_zap(reqid: reqid, zapcache: damus_state.zaps, evcache: damus_state.events)
                 let typ = ZappingEventType.failed(.canceled)
                 let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
-                notify(.zapping, ev)
+                notify(.zapping(ev))
                 return
             }
 
@@ -234,7 +234,7 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
 
                 let typ = ZappingEventType.failed(.send_failed)
                 let ev = ZappingEvent(is_custom: is_custom, type: typ, target: target)
-                notify(.zapping, ev)
+                notify(.zapping(ev))
                 return
             }
 
@@ -245,12 +245,12 @@ func send_zap(damus_state: DamusState, target: ZapTarget, lnurl: String, is_cust
             }
 
             let ev = ZappingEvent(is_custom: is_custom, type: .sent_from_nwc, target: target)
-            notify(.zapping, ev)
+            notify(.zapping(ev))
 
         case .external(let pending_ext):
             pending_ext.state = .done
             let ev = ZappingEvent(is_custom: is_custom, type: .got_zap_invoice(inv), target: target)
-            notify(.zapping, ev)
+            notify(.zapping(ev))
         }
     }
     

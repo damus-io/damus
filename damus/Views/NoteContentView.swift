@@ -225,8 +225,7 @@ struct NoteContentView: View {
     
     var body: some View {
         ArtifactContent
-            .onReceive(handle_notify(.profile_updated)) { notif in
-                let profile = notif.object as! ProfileUpdate
+            .onReceive(handle_notify(.profile_updated)) { profile in
                 let blocks = event.blocks(damus_state.keypair.privkey)
                 for block in blocks.blocks {
                     switch block {

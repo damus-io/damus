@@ -178,8 +178,7 @@ struct ProfileView: View {
             // Only allow reporting if logged in with private key and the currently viewed profile is not the logged in profile.
             if profile.pubkey != damus_state.pubkey && damus_state.is_privkey_user {
                 Button(NSLocalizedString("Report", comment: "Button to report a profile."), role: .destructive) {
-                    let target: ReportTarget = .user(profile.pubkey)
-                    notify(.report, target)
+                    notify(.report(.user(profile.pubkey)))
                 }
 
                 if damus_state.contacts.is_muted(profile.pubkey) {
@@ -200,7 +199,7 @@ struct ProfileView: View {
                     }
                 } else {
                     Button(NSLocalizedString("Mute", comment: "Button to mute a profile."), role: .destructive) {
-                        notify(.mute, profile.pubkey)
+                        notify(.mute(profile.pubkey))
                     }
                 }
             }
@@ -479,7 +478,7 @@ struct ProfileView: View {
 
             if damus_state.is_privkey_user {
                 PostButtonContainer(is_left_handed: damus_state.settings.left_handed) {
-                    notify(.compose, PostAction.posting(.user(profile.pubkey)))
+                    notify(.compose(.posting(.user(profile.pubkey))))
                 }
             }
         }
@@ -584,7 +583,7 @@ func check_nip05_validity(pubkey: String, profiles: Profiles) {
         Task { @MainActor in
             profiles.set_validated(pubkey, nip05: validated)
             profiles.nip05_pubkey[nip05] = pubkey
-            notify(.profile_updated, ProfileUpdate(pubkey: pubkey, profile: profile))
+            notify(.profile_updated(pubkey: pubkey, profile: profile))
         }
     }
 }

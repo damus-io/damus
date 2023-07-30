@@ -169,8 +169,8 @@ struct WalletView: View {
                     }
                     
                     profile.damus_donation = p
-                    
-                    notify(.profile_updated, ProfileUpdate(pubkey: damus_state.pubkey, profile: profile))
+
+                    notify(.profile_updated(pubkey: damus_state.pubkey, profile: profile))
                 }
                 .onDisappear {
                     guard let keypair = damus_state.keypair.to_full(),

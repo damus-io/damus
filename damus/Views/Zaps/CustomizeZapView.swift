@@ -185,12 +185,8 @@ struct CustomizeZapView: View {
         }
     }
     
-    func receive_zap(notif: Notification) {
-        let zap_ev = notif.object as! ZappingEvent
-        guard zap_ev.is_custom else {
-            return
-        }
-        guard zap_ev.target.id == target.id else {
+    func receive_zap(zap_ev: ZappingEvent) {
+        guard zap_ev.is_custom, zap_ev.target.id == target.id else {
             return
         }
         
@@ -257,8 +253,8 @@ struct CustomizeZapView: View {
         .onAppear {
             model.set_defaults(settings: state.settings)
         }
-        .onReceive(handle_notify(.zapping)) { notif in
-            receive_zap(notif: notif)
+        .onReceive(handle_notify(.zapping)) { zap_ev in
+            receive_zap(zap_ev: zap_ev)
         }
         .background(fillColor().edgesIgnoringSafeArea(.all))
         .onTapGesture {

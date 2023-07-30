@@ -98,8 +98,7 @@ struct ProfileName: View {
                 SupporterBadge(percent: supporter)
             }
         }
-        .onReceive(handle_notify(.profile_updated)) { notif in
-            let update = notif.object as! ProfileUpdate
+        .onReceive(handle_notify(.profile_updated)) { update in
             if update.pubkey != pubkey {
                 return
             }

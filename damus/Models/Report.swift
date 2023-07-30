@@ -38,12 +38,17 @@ struct ReportNoteTarget {
 enum ReportTarget {
     case user(String)
     case note(ReportNoteTarget)
+
+    static func note(pubkey: Pubkey, note_id: NoteId) -> ReportTarget {
+        return .note(ReportNoteTarget(pubkey: pubkey, note_id: note_id))
+    }
 }
 
 struct Report {
     let type: ReportType
     let target: ReportTarget
     let message: String
+
 }
 
 func create_report_tags(target: ReportTarget, type: ReportType) -> [[String]] {

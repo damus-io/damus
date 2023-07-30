@@ -35,14 +35,14 @@ class Contacts {
         let new = Set(ev.referenced_pubkeys.map({ $0.ref_id }))
         let diff = old.symmetricDifference(new)
         
-        var new_mutes = Array<String>()
-        var new_unmutes = Array<String>()
-        
+        var new_mutes = Set<Pubkey>()
+        var new_unmutes = Set<Pubkey>()
+
         for d in diff {
             if new.contains(d) {
-                new_mutes.append(d.string())
+                new_mutes.insert(d.string())
             } else {
-                new_unmutes.append(d.string())
+                new_unmutes.insert(d.string())
             }
         }
 
@@ -50,11 +50,11 @@ class Contacts {
         self.muted = Set(ev.referenced_pubkeys.map({ $0.ref_id.string() }))
 
         if new_mutes.count > 0 {
-            notify(.new_mutes, new_mutes)
+            notify(.new_mutes(new_mutes))
         }
         
         if new_unmutes.count > 0 {
-            notify(.new_unmutes, new_unmutes)
+            notify(.new_unmutes(new_unmutes))
         }
     }
     

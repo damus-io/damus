@@ -137,7 +137,7 @@ struct SideMenuView: View {
                         Button(action: {
                             //ConfigView(state: damus_state)
                             if damus_state.keypair.privkey == nil {
-                                notify(.logout, ())
+                                notify(.logout)
                             } else {
                                 confirm_logout = true
                             }
@@ -175,7 +175,7 @@ struct SideMenuView: View {
                     confirm_logout = false
                 }
                 Button(NSLocalizedString("Logout", comment: "Button for logging out the user."), role: .destructive) {
-                    notify(.logout, ())
+                    notify(.logout)
                 }
             } message: {
                 Text("Make sure your nsec account key is saved before you logout or you will lose access to this account", comment: "Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out.")

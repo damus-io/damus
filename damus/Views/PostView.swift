@@ -67,7 +67,7 @@ struct PostView: View {
     @Environment(\.presentationMode) var presentationMode
 
     func cancel() {
-        NotificationCenter.default.post(name: .post, object: NostrPostResult.cancel)
+        notify(.post(.cancel))
         dismiss()
     }
 
@@ -78,7 +78,7 @@ struct PostView: View {
     func send_post() {
         let new_post = build_post(post: self.post, action: action, uploadedMedias: uploadedMedias, references: references)
 
-        NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
+        notify(.post(.post(new_post)))
 
         clear_draft()
 

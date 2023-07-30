@@ -89,8 +89,8 @@ class Zaps {
         
         event_counts[id] = event_counts[id]! + 1
         event_totals[id] = event_totals[id]! + zap.amount
-        
-        notify(.update_stats, zap.target.id)
+
+        notify(.update_stats(note_id: zap.target.id))
     }
 }
 

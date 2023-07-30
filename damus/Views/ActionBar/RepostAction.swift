@@ -38,7 +38,7 @@ struct RepostAction: View {
             Button {
                 dismiss()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    notify(.compose, PostAction.quoting(self.event))
+                    notify(.compose(.quoting(self.event)))
                 }
                 
             } label: {

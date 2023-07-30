@@ -60,11 +60,11 @@ class MutedThreadsManager: ObservableObject {
         if isMutedThread(ev, privkey: keypair.privkey) {
             mutedThreads = mutedThreads.filter { $0 != threadId }
             _mutedThreadsSet.remove(threadId)
-            notify(.unmute_thread, ev)
+            notify(.unmute_thread(ev))
         } else {
             mutedThreads.append(threadId)
             _mutedThreadsSet.insert(threadId)
-            notify(.mute_thread, ev)
+            notify(.mute_thread(ev))
         }
     }
 }

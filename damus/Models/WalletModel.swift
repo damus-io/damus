@@ -57,7 +57,7 @@ class WalletModel: ObservableObject {
     
     func connect(_ nwc: WalletConnectURL) {
         self.settings.nostr_wallet_connect = nwc.to_url().absoluteString
-        notify(.attached_wallet, nwc)
+        notify(.attached_wallet(nwc))
         self.connect_state = .existing(nwc)
         self.previous_state = .existing(nwc)
     }

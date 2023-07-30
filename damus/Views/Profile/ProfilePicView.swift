@@ -86,9 +86,7 @@ struct ProfilePicView: View {
     
     var body: some View {
         InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: size, highlight: highlight, disable_animation: disable_animation)
-            .onReceive(handle_notify(.profile_updated)) { notif in
-                let updated = notif.object as! ProfileUpdate
-
+            .onReceive(handle_notify(.profile_updated)) { updated in
                 guard updated.pubkey == self.pubkey else {
                     return
                 }

@@ -93,13 +93,11 @@ struct SearchHeaderView: View {
                 }
             }
         }
-        .onReceive(handle_notify(.followed)) { notif in
-            let ref = notif.object as! ReferencedId
+        .onReceive(handle_notify(.followed)) { ref in
             guard hashtag_matches_search(desc: self.described, ref: ref) else { return }
             self.is_following = true
         }
-        .onReceive(handle_notify(.unfollowed)) { notif in
-            let ref = notif.object as! ReferencedId
+        .onReceive(handle_notify(.unfollowed)) { ref in
             guard hashtag_matches_search(desc: self.described, ref: ref) else { return }
             self.is_following = false
         }

@@ -115,5 +115,5 @@ struct InvoiceView_Previews: PreviewProvider {
 
 
 func present_sheet(_ sheet: Sheets) {
-    notify(.present_sheet, sheet)
+    notify(.present_sheet(sheet))
 }

@@ -35,20 +35,12 @@ struct GradientFollowButton: View {
                             .stroke(grayBorder, lineWidth: follow_state == .unfollows ? 0 : 1)
                     )
         }
-        .onReceive(handle_notify(.followed)) { notif in
-            let pk = notif.object as? ReferencedId
-            if pk?.ref_id != target.pubkey {
-                return
-            }
-
+        .onReceive(handle_notify(.followed)) { ref in
+            guard target.pubkey == ref.ref_id else { return }
             self.follow_state = .follows
         }
-        .onReceive(handle_notify(.unfollowed)) { notif in
-            let pk = notif.object as? ReferencedId
-            if pk?.ref_id != target.pubkey {
-                return
-            }
-
+        .onReceive(handle_notify(.unfollowed)) { ref in
+            guard target.pubkey == ref.ref_id else { return }
             self.follow_state = .unfollows
         }
     }

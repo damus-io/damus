@@ -120,7 +120,7 @@ struct MenuItems: View {
             }
 
             Button {
-                NotificationCenter.default.post(name: .broadcast_event, object: event)
+                notify(.broadcast(event))
             } label: {
                 Label(NSLocalizedString("Broadcast", comment: "Context menu option for broadcasting the user's note to all of the user's connected relay servers."), image: "globe")
             }
@@ -128,14 +128,13 @@ struct MenuItems: View {
             // Only allow reporting if logged in with private key and the currently viewed profile is not the logged in profile.
             if keypair.pubkey != target_pubkey && keypair.privkey != nil {
                 Button(role: .destructive) {
-                    let target: ReportTarget = .note(ReportNoteTarget(pubkey: target_pubkey, note_id: event.id))
-                    notify(.report, target)
+                    notify(.report(.note(pubkey: target_pubkey, note_id: event.id)))
                 } label: {
                     Label(NSLocalizedString("Report", comment: "Context menu option for reporting content."), image: "raising-hand")
                 }
                 
                 Button(role: .destructive) {
-                    notify(.mute, target_pubkey)
+                    notify(.mute(target_pubkey))
                 } label: {
                     Label(NSLocalizedString("Mute user", comment: "Context menu option for muting users."), image: "mute")
                 }

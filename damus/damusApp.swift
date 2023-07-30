@@ -34,7 +34,7 @@ struct MainView: View {
             }
         }
         .dynamicTypeSize(.xSmall ... .xxxLarge)
-        .onReceive(handle_notify(.logout)) { _ in
+        .onReceive(handle_notify(.logout)) { () in
             try? clear_keypair()
             keypair = nil
         }
@@ -59,7 +59,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
         let notification = LossyLocalNotification.from_user_info(user_info: userInfo)
-        notify(.local_notification, notification)
+        notify(.local_notification(notification))
         completionHandler()
     }
 }
