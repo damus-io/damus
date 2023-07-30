@@ -50,6 +50,22 @@
 			<string>Követek</string>
 		</dict>
 	</dict>
+	<key>imports_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@IMPORTS@</string>
+		<key>IMPORTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Import</string>
+			<key>other</key>
+			<string>Importok</string>
+		</dict>
+	</dict>
 	<key>reacted_tagged_in_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
