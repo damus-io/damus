@@ -63,12 +63,12 @@ struct InnerBannerImageView: View {
 
 struct BannerImageView: View {
     let disable_animation: Bool
-    let pubkey: String
+    let pubkey: Pubkey
     let profiles: Profiles
     
     @State var banner: String?
     
-    init(pubkey: String, profiles: Profiles, disable_animation: Bool, banner: String? = nil) {
+    init(pubkey: Pubkey, profiles: Profiles, disable_animation: Bool, banner: String? = nil) {
         self.pubkey = pubkey
         self.profiles = profiles
         self._banner = State(initialValue: banner)
@@ -89,7 +89,7 @@ struct BannerImageView: View {
     }
 }
 
-func get_banner_url(banner: String?, pubkey: String, profiles: Profiles) -> URL? {
+func get_banner_url(banner: String?, pubkey: Pubkey, profiles: Profiles) -> URL? {
     let bannerUrlString = banner ?? profiles.lookup(id: pubkey)?.banner ?? ""
     if let url = URL(string: bannerUrlString) {
         return url
@@ -98,12 +98,10 @@ func get_banner_url(banner: String?, pubkey: String, profiles: Profiles) -> URL?
 }
 
 struct BannerImageView_Previews: PreviewProvider {
-    static let pubkey = "ca48854ac6555fed8e439ebb4fa2d928410e0eef13fa41164ec45aaaa132d846"
-    
     static var previews: some View {
         BannerImageView(
-            pubkey: pubkey,
-            profiles: make_preview_profiles(pubkey),
+            pubkey: test_pubkey,
+            profiles: make_preview_profiles(test_pubkey),
             disable_animation: false
         )
     }

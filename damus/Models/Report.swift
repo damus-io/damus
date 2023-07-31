@@ -31,12 +31,12 @@ enum ReportType: String, CustomStringConvertible, CaseIterable {
 }
 
 struct ReportNoteTarget {
-    let pubkey: String
-    let note_id: String
+    let pubkey: Pubkey
+    let note_id: NoteId
 }
 
 enum ReportTarget {
-    case user(String)
+    case user(Pubkey)
     case note(ReportNoteTarget)
 
     static func note(pubkey: Pubkey, note_id: NoteId) -> ReportTarget {
@@ -54,9 +54,10 @@ struct Report {
 func create_report_tags(target: ReportTarget, type: ReportType) -> [[String]] {
     switch target {
     case .user(let pubkey):
-        return [["p", pubkey, type.rawValue]]
+        return [["p", pubkey.hex(), type.rawValue]]
     case .note(let notet):
-        return [["e", notet.note_id, type.rawValue], ["p", notet.pubkey]]
+        return [["e", notet.note_id.hex(), type.rawValue],
+                ["p", notet.pubkey.hex()]]
     }
 }
 

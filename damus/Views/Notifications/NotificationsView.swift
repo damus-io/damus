@@ -23,7 +23,7 @@ enum FriendFilter: String, StringCodable {
         self.rawValue
     }
     
-    func filter(contacts: Contacts, pubkey: String) -> Bool {
+    func filter(contacts: Contacts, pubkey: Pubkey) -> Bool {
         switch self {
         case .all:
             return true

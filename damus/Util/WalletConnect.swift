@@ -16,16 +16,16 @@ struct WalletConnectURL: Equatable {
     
     let relay: RelayURL
     let keypair: FullKeypair
-    let pubkey: String
+    let pubkey: Pubkey
     let lud16: String?
     
     func to_url() -> URL {
         var urlComponents = URLComponents()
         urlComponents.scheme = "nostrwalletconnect"
-        urlComponents.host = pubkey
+        urlComponents.host = pubkey.hex()
         urlComponents.queryItems = [
             URLQueryItem(name: "relay", value: relay.id),
-            URLQueryItem(name: "secret", value: keypair.privkey)
+            URLQueryItem(name: "secret", value: keypair.privkey.hex())
         ]
 
         if let lud16 {
@@ -55,7 +55,7 @@ struct WalletConnectURL: Equatable {
         self = WalletConnectURL(pubkey: pk, relay: relay_url, keypair: keypair, lud16: lud16)
     }
     
-    init(pubkey: String, relay: RelayURL, keypair: FullKeypair, lud16: String?) {
+    init(pubkey: Pubkey, relay: RelayURL, keypair: FullKeypair, lud16: String?) {
         self.pubkey = pubkey
         self.relay = relay
         self.keypair = keypair
@@ -86,7 +86,7 @@ enum WalletResponseResult {
 }
 
 struct FullWalletResponse {
-    let req_id: String
+    let req_id: NoteId
     let response: WalletResponse
     
     init?(from: NostrEvent, nwc: WalletConnectURL) async {
@@ -165,7 +165,7 @@ struct PayInvoiceRequest: Codable {
     let invoice: String
 }
 
-func make_wallet_connect_request<T>(req: WalletRequest<T>, to_pk: String, keypair: FullKeypair) -> NostrEvent? {
+func make_wallet_connect_request<T>(req: WalletRequest<T>, to_pk: Pubkey, keypair: FullKeypair) -> NostrEvent? {
     let tags = [["p", to_pk]]
     let created_at = UInt32(Date().timeIntervalSince1970)
     guard let content = encode_json(req) else {

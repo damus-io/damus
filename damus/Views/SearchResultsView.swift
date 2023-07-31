@@ -15,8 +15,8 @@ struct MultiSearch {
 enum Search: Identifiable {
     case profiles([SearchedUser])
     case hashtag(String)
-    case profile(String)
-    case note(String)
+    case profile(Pubkey)
+    case note(NoteId)
     case nip05(String)
     case hex(String)
     case multi(MultiSearch)
@@ -38,7 +38,7 @@ struct InnerSearchResults: View {
     let damus_state: DamusState
     let search: Search?
     
-    func ProfileSearchResult(pk: String) -> some View {
+    func ProfileSearchResult(pk: Pubkey) -> some View {
         FollowUserView(target: .pubkey(pk), damus_state: damus_state)
     }
     

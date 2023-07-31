@@ -14,14 +14,14 @@ class ProfileModel: ObservableObject, Equatable {
     @Published var progress: Int = 0
     
     var events: EventHolder
-    let pubkey: String
+    let pubkey: Pubkey
     let damus: DamusState
     
-    var seen_event: Set<String> = Set()
+    var seen_event: Set<NoteId> = Set()
     var sub_id = UUID().description
     var prof_subid = UUID().description
     
-    init(pubkey: String, damus: DamusState) {
+    init(pubkey: Pubkey, damus: DamusState) {
         self.pubkey = pubkey
         self.damus = damus
         self.events = EventHolder(on_queue: { ev in
@@ -29,7 +29,7 @@ class ProfileModel: ObservableObject, Equatable {
         })
     }
     
-    func follows(pubkey: String) -> Bool {
+    func follows(pubkey: Pubkey) -> Bool {
         guard let contacts = self.contacts else {
             return false
         }

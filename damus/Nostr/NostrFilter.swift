@@ -8,14 +8,14 @@
 import Foundation
 
 struct NostrFilter: Codable, Equatable {
-    var ids: [String]?
+    var ids: [NoteId]?
     var kinds: [NostrKind]?
-    var referenced_ids: [String]?
-    var pubkeys: [String]?
+    var referenced_ids: [NoteId]?
+    var pubkeys: [Pubkey]?
     var since: UInt32?
     var until: UInt32?
     var limit: UInt32?
-    var authors: [String]?
+    var authors: [Pubkey]?
     var hashtag: [String]?
     var parameter: [String]?
 
@@ -32,7 +32,7 @@ struct NostrFilter: Codable, Equatable {
         case limit
     }
     
-    init(ids: [String]? = nil, kinds: [NostrKind]? = nil, referenced_ids: [String]? = nil, pubkeys: [String]? = nil, since: UInt32? = nil, until: UInt32? = nil, limit: UInt32? = nil, authors: [String]? = nil, hashtag: [String]? = nil) {
+    init(ids: [NoteId]? = nil, kinds: [NostrKind]? = nil, referenced_ids: [NoteId]? = nil, pubkeys: [Pubkey]? = nil, since: UInt32? = nil, until: UInt32? = nil, limit: UInt32? = nil, authors: [Pubkey]? = nil, hashtag: [String]? = nil) {
         self.ids = ids
         self.kinds = kinds
         self.referenced_ids = referenced_ids

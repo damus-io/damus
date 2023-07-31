@@ -10,7 +10,7 @@ import SwiftUI
 /// Profile Name used when displaying an event in the timeline
 struct EventProfileName: View {
     let damus_state: DamusState
-    let pubkey: String
+    let pubkey: Pubkey
     let profile: Profile?
     
     @State var display_name: DisplayName?
@@ -19,7 +19,7 @@ struct EventProfileName: View {
     
     let size: EventViewKind
     
-    init(pubkey: String, profile: Profile?, damus: DamusState, size: EventViewKind = .normal) {
+    init(pubkey: Pubkey, profile: Profile?, damus: DamusState, size: EventViewKind = .normal) {
         self.damus_state = damus
         self.pubkey = pubkey
         self.profile = profile

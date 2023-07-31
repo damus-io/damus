@@ -26,7 +26,7 @@ struct FollowUserView: View {
 
 struct FollowersYouKnowView: View {
     let damus_state: DamusState
-    let friended_followers: [String]
+    let friended_followers: [Pubkey]
     @ObservedObject var followers: FollowersModel
 
     var body: some View {

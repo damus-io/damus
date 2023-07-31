@@ -9,6 +9,6 @@ import Foundation
 
 
 struct ProfileUpdate {
-    let pubkey: String
+    let pubkey: Pubkey
     let profile: Profile
 }

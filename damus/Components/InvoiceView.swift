@@ -9,7 +9,7 @@ import SwiftUI
 
 struct InvoiceView: View {
     @Environment(\.colorScheme) var colorScheme
-    let our_pubkey: String
+    let our_pubkey: Pubkey
     let invoice: Invoice
     @State var showing_select_wallet: Bool = false
     @State var copied = false
@@ -108,7 +108,7 @@ let test_invoice = Invoice(description: .description("this is a description"), a
 
 struct InvoiceView_Previews: PreviewProvider {
     static var previews: some View {
-        InvoiceView(our_pubkey: "", invoice: test_invoice, settings: test_damus_state().settings)
+        InvoiceView(our_pubkey: .empty, invoice: test_invoice, settings: test_damus_state().settings)
             .frame(width: 300, height: 200)
     }
 }

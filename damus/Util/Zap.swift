@@ -7,20 +7,20 @@
 
 import Foundation
 
-public struct NoteZapTarget: Equatable, Hashable {
-    public let note_id: String
-    public let author: String
+struct NoteZapTarget: Equatable, Hashable {
+    public let note_id: NoteId
+    public let author: Pubkey
 }
 
-public enum ZapTarget: Equatable {
-    case profile(String)
+enum ZapTarget: Equatable, Hashable {
+    case profile(Pubkey)
     case note(NoteZapTarget)
     
-    public static func note(id: String, author: String) -> ZapTarget {
+    static func note(id: NoteId, author: Pubkey) -> ZapTarget {
         return .note(NoteZapTarget(note_id: id, author: author))
     }
-    
-    var pubkey: String {
+
+    var pubkey: Pubkey {
         switch self {
         case .profile(let pk):
             return pk
@@ -258,7 +258,7 @@ enum Zapping {
 struct Zap {
     public let event: NostrEvent
     public let invoice: ZapInvoice
-    public let zapper: String /// zap authorizer
+    public let zapper: Pubkey /// zap authorizer
     public let target: ZapTarget
     public let raw_request: ZapRequest
     public let is_anon: Bool
@@ -268,7 +268,7 @@ struct Zap {
         return private_request ?? self.raw_request
     }
     
-    public static func from_zap_event(zap_ev: NostrEvent, zapper: String, our_privkey: String?) -> Zap? {
+    public static func from_zap_event(zap_ev: NostrEvent, zapper: Pubkey, our_privkey: Privkey?) -> Zap? {
         /// Make sure that we only create a zap event if it is authorized by the profile or event
         guard zapper == zap_ev.pubkey else {
             return nil

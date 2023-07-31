@@ -30,7 +30,7 @@ struct NIP05 {
 
 
 struct NIP05Response: Decodable {
-    let names: [String: String]
+    let names: [String: Pubkey]
 }
 
 func fetch_nip05(nip05: NIP05) async -> NIP05Response? {
@@ -51,7 +51,7 @@ func fetch_nip05(nip05: NIP05) async -> NIP05Response? {
     return decoded
 }
 
-func validate_nip05(pubkey: String, nip05_str: String) async -> NIP05? {
+func validate_nip05(pubkey: Pubkey, nip05_str: String) async -> NIP05? {
     guard let nip05 = NIP05.parse(nip05_str) else {
         return nil
     }

@@ -9,12 +9,12 @@ import SwiftUI
 
 struct EventDetailBar: View {
     let state: DamusState
-    let target: String
-    let target_pk: String
-    
+    let target: NoteId
+    let target_pk: Pubkey
+
     @ObservedObject var bar: ActionBarModel
     
-    init(state: DamusState, target: String, target_pk: String) {
+    init(state: DamusState, target: NoteId, target_pk: Pubkey) {
         self.state = state
         self.target = target
         self.target_pk = target_pk
@@ -56,6 +56,6 @@ struct EventDetailBar: View {
 
 struct EventDetailBar_Previews: PreviewProvider {
     static var previews: some View {
-        EventDetailBar(state: test_damus_state(), target: "", target_pk: "")
+        EventDetailBar(state: test_damus_state(), target: .empty, target_pk: .empty)
     }
 }

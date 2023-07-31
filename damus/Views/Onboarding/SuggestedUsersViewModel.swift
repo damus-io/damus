@@ -11,7 +11,7 @@ import Combine
 struct SuggestedUserGroup: Identifiable, Codable {
     let id = UUID()
     let title: String
-    let users: [String]
+    let users: [Pubkey]
 
     enum CodingKeys: String, CodingKey {
         case title, users
@@ -34,7 +34,7 @@ class SuggestedUsersViewModel: ObservableObject {
         subscribeToSuggestedProfiles(pubkeys: pubkeys)
     }
 
-    func suggestedUser(pubkey: String) -> SuggestedUser? {
+    func suggestedUser(pubkey: Pubkey) -> SuggestedUser? {
         if let profile = damus_state.profiles.lookup(id: pubkey),
            let user = SuggestedUser(profile: profile, pubkey: pubkey) {
             return user
@@ -42,7 +42,7 @@ class SuggestedUsersViewModel: ObservableObject {
         return nil
     }
 
-    func follow(pubkeys: [String]) {
+    func follow(pubkeys: [Pubkey]) {
         for pubkey in pubkeys {
             notify(.follow(.pubkey(pubkey)))
         }
@@ -66,17 +66,16 @@ class SuggestedUsersViewModel: ObservableObject {
         }
     }
 
-    private func getPubkeys(groups: [SuggestedUserGroup]) -> [String] {
-        var pubkeys: [String] = []
+    private func getPubkeys(groups: [SuggestedUserGroup]) -> [Pubkey] {
+        var pubkeys: [Pubkey] = []
         for group in groups {
             pubkeys.append(contentsOf: group.users)
         }
         return pubkeys
     }
 
-    private func subscribeToSuggestedProfiles(pubkeys: [String]) {
-        let filter = NostrFilter(kinds: [.metadata],
-                                 authors: pubkeys)
+    private func subscribeToSuggestedProfiles(pubkeys: [Pubkey]) {
+        let filter = NostrFilter(kinds: [.metadata], authors: pubkeys)
         damus_state.pool.subscribe(sub_id: sub_id, filters: [filter], handler: handle_event)
     }
 

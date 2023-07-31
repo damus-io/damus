@@ -12,7 +12,7 @@ struct SelectedEventView: View {
     let event: NostrEvent
     let size: EventViewKind
     
-    var pubkey: String {
+    var pubkey: Pubkey {
         event.pubkey
     }
     

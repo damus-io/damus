@@ -24,7 +24,7 @@ func eventview_pfp_size(_ size: EventViewKind) -> CGFloat {
 
 struct EventProfile: View {
     let damus_state: DamusState
-    let pubkey: String
+    let pubkey: Pubkey
     let profile: Profile?
     let size: EventViewKind
     

@@ -134,8 +134,8 @@ struct CreateAccountView_Previews: PreviewProvider {
     }
 }
 
-func KeyText(_ text: Binding<String>) -> some View {
-    let decoded = hex_decode(text.wrappedValue)!
+func KeyText(_ pubkey: Binding<Pubkey>) -> some View {
+    let decoded = hex_decode(pubkey.wrappedValue)!
     let bechkey = bech32_encode(hrp: PUBKEY_HRP, decoded)
     return Text(bechkey)
         .textSelection(.enabled)

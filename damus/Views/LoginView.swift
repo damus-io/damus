@@ -8,8 +8,8 @@
 import SwiftUI
 
 enum ParsedKey {
-    case pub(String)
-    case priv(String)
+    case pub(Pubkey)
+    case priv(Privkey)
     case hex(String)
     case nip05(String)
 
@@ -203,7 +203,7 @@ func process_login(_ key: ParsedKey, is_pubkey: Bool) async throws {
         }
     }
     
-    func handle_privkey(_ privkey: String) throws {
+    func handle_privkey(_ privkey: Privkey) throws {
         try save_privkey(privkey: privkey)
         
         guard let pk = privkey_to_pubkey(privkey: privkey) else {
@@ -231,7 +231,7 @@ struct NIP05Result: Decodable {
 }
 
 struct NIP05User {
-    let pubkey: String
+    let pubkey: Pubkey
     let relays: [String]
 }
 

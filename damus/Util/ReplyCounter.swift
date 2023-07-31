@@ -8,23 +8,23 @@
 import Foundation
 
 class ReplyCounter {
-    private var replies: [String: Int]
-    private var counted: Set<String>
-    private var our_replies: [String: NostrEvent]
-    private let our_pubkey: String
-    
-    init(our_pubkey: String) {
+    private var replies: [NoteId: Int]
+    private var counted: Set<NoteId>
+    private var our_replies: [NoteId: NostrEvent]
+    private let our_pubkey: Pubkey
+
+    init(our_pubkey: Pubkey) {
         self.our_pubkey = our_pubkey
         replies = [:]
         counted = Set()
         our_replies = [:]
     }
     
-    func our_reply(_ evid: String) -> NostrEvent? {
+    func our_reply(_ evid: NoteId) -> NostrEvent? {
         return our_replies[evid]
     }
     
-    func get_replies(_ evid: String) -> Int {
+    func get_replies(_ evid: NoteId) -> Int {
         return replies[evid] ?? 0
     }
     

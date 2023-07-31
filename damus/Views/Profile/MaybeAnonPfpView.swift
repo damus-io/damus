@@ -10,10 +10,10 @@ import SwiftUI
 struct MaybeAnonPfpView: View {
     let state: DamusState
     let is_anon: Bool
-    let pubkey: String
+    let pubkey: Pubkey
     let size: CGFloat
     
-    init(state: DamusState, is_anon: Bool, pubkey: String, size: CGFloat) {
+    init(state: DamusState, is_anon: Bool, pubkey: Pubkey, size: CGFloat) {
         self.state = state
         self.is_anon = is_anon
         self.pubkey = pubkey

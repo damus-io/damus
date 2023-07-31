@@ -7,16 +7,16 @@
 
 import Foundation
 
-fileprivate func getMutedThreadsKey(pubkey: String) -> String {
+fileprivate func getMutedThreadsKey(pubkey: Pubkey) -> String {
     pk_setting_key(pubkey, key: "muted_threads")
 }
 
-func loadMutedThreads(pubkey: String) -> [String] {
+func loadMutedThreads(pubkey: Pubkey) -> [NoteId] {
     let key = getMutedThreadsKey(pubkey: pubkey)
     return UserDefaults.standard.stringArray(forKey: key) ?? []
 }
 
-func saveMutedThreads(pubkey: String, currentValue: [String], value: [String]) -> Bool {
+func saveMutedThreads(pubkey: Pubkey, currentValue: [NoteId], value: [NoteId]) -> Bool {
     let uniqueMutedThreads = Array(Set(value))
 
     if uniqueMutedThreads != currentValue {
@@ -31,9 +31,9 @@ class MutedThreadsManager: ObservableObject {
 
     private let keypair: Keypair
 
-    private var _mutedThreadsSet: Set<String>
-    private var _mutedThreads: [String]
-    var mutedThreads: [String] {
+    private var _mutedThreadsSet: Set<NoteId>
+    private var _mutedThreads: [NoteId]
+    var mutedThreads: [NoteId] {
         get {
             return _mutedThreads
         }
@@ -51,7 +51,7 @@ class MutedThreadsManager: ObservableObject {
         self.keypair = keypair
     }
 
-    func isMutedThread(_ ev: NostrEvent, privkey: String?) -> Bool {
+    func isMutedThread(_ ev: NostrEvent, privkey: Privkey?) -> Bool {
         return _mutedThreadsSet.contains(ev.thread_id(privkey: privkey))
     }
 

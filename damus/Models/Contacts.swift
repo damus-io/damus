@@ -9,21 +9,21 @@ import Foundation
 
 
 class Contacts {
-    private var friends: Set<String> = Set()
-    private var friend_of_friends: Set<String> = Set()
+    private var friends: Set<Pubkey> = Set()
+    private var friend_of_friends: Set<Pubkey> = Set()
     /// Tracks which friends are friends of a given pubkey.
-    private var pubkey_to_our_friends = [String : Set<String>]()
-    private var muted: Set<String> = Set()
-    
-    let our_pubkey: String
+    private var pubkey_to_our_friends = [Pubkey : Set<Pubkey>]()
+    private var muted: Set<Pubkey> = Set()
+
+    let our_pubkey: Pubkey
     var event: NostrEvent?
     var mutelist: NostrEvent?
     
-    init(our_pubkey: String) {
+    init(our_pubkey: Pubkey) {
         self.our_pubkey = our_pubkey
     }
     
-    func is_muted(_ pk: String) -> Bool {
+    func is_muted(_ pk: Pubkey) -> Bool {
         return muted.contains(pk)
     }
     
@@ -58,7 +58,7 @@ class Contacts {
         }
     }
     
-    func remove_friend(_ pubkey: String) {
+    func remove_friend(_ pubkey: Pubkey) {
         friends.remove(pubkey)
 
         pubkey_to_our_friends.forEach {
@@ -66,7 +66,7 @@ class Contacts {
         }
     }
     
-    func get_friend_list() -> Set<String> {
+    func get_friend_list() -> Set<Pubkey> {
         return friends
     }
 
@@ -75,7 +75,7 @@ class Contacts {
         return Set(ev.referenced_hashtags.map({ $0.ref_id.string() }))
     }
 
-    func add_friend_pubkey(_ pubkey: String) {
+    func add_friend_pubkey(_ pubkey: Pubkey) {
         friends.insert(pubkey)
     }
     
@@ -88,7 +88,7 @@ class Contacts {
             // Exclude themself and us.
             if contact.pubkey != our_pubkey && contact.pubkey != pk {
                 if pubkey_to_our_friends[pk] == nil {
-                    pubkey_to_our_friends[pk] = Set<String>()
+                    pubkey_to_our_friends[pk] = Set<Pubkey>()
                 }
 
                 pubkey_to_our_friends[pk]?.insert(contact.pubkey)
@@ -96,28 +96,28 @@ class Contacts {
         }
     }
     
-    func is_friend_of_friend(_ pubkey: String) -> Bool {
+    func is_friend_of_friend(_ pubkey: Pubkey) -> Bool {
         return friend_of_friends.contains(pubkey)
     }
     
-    func is_in_friendosphere(_ pubkey: String) -> Bool {
+    func is_in_friendosphere(_ pubkey: Pubkey) -> Bool {
         return friends.contains(pubkey) || friend_of_friends.contains(pubkey)
     }
 
-    func is_friend(_ pubkey: String) -> Bool {
+    func is_friend(_ pubkey: Pubkey) -> Bool {
         return friends.contains(pubkey)
     }
     
-    func is_friend_or_self(_ pubkey: String) -> Bool {
+    func is_friend_or_self(_ pubkey: Pubkey) -> Bool {
         return pubkey == our_pubkey || is_friend(pubkey)
     }
     
-    func follow_state(_ pubkey: String) -> FollowState {
+    func follow_state(_ pubkey: Pubkey) -> FollowState {
         return is_friend(pubkey) ? .follows : .unfollows
     }
 
     /// Gets the list of pubkeys of our friends who follow the given pubkey.
-    func get_friended_followers(_ pubkey: String) -> [String] {
+    func get_friended_followers(_ pubkey: Pubkey) -> [Pubkey] {
         return Array((pubkey_to_our_friends[pubkey] ?? Set()))
     }
 }

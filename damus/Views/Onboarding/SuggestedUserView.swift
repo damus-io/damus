@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct SuggestedUser: Codable {
-    let pubkey: String
+    let pubkey: Pubkey
     let name: String
     let about: String
     let pfp: URL
     let profile: Profile
 
-    init?(profile: Profile, pubkey: String) {
+    init?(profile: Profile, pubkey: Pubkey) {
 
         guard let name = profile.name,
                 let about = profile.about,
@@ -64,7 +64,7 @@ struct SuggestedUserView_Previews: PreviewProvider {
     static var previews: some View {
         let profile = Profile(name: "klabo", about: "A person who likes nostr a lot and I like to tell people about myself in very long-winded ways that push the limits of UI and almost break things", picture: "https://primal.b-cdn.net/media-cache?s=m&a=1&u=https%3A%2F%2Fpbs.twimg.com%2Fprofile_images%2F1599994711430742017%2F33zLk9Wi_400x400.jpg")
 
-        let user = SuggestedUser(profile: profile, pubkey: "abcd")!
+        let user = SuggestedUser(profile: profile, pubkey: test_pubkey)!
         List {
             SuggestedUserView(user: user, damus_state: test_damus_state())
         }

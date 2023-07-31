@@ -242,7 +242,7 @@ extension NdbNote {
         References.hashtags(tags: self.tags)
     }
 
-    func event_refs(_ privkey: String?) -> [EventRef] {
+    func event_refs(_ privkey: Privkey?) -> [EventRef] {
         if let rs = _event_refs {
             return rs
         }
@@ -251,7 +251,7 @@ extension NdbNote {
         return refs
     }
 
-    func get_content(_ privkey: String?) -> String {
+    func get_content(_ privkey: Privkey?) -> String {
         if known_kind == .dm {
             return decrypted(privkey: privkey) ?? "*failed to decrypt content*"
         }
@@ -259,7 +259,7 @@ extension NdbNote {
         return content
     }
 
-    func blocks(_ privkey: String?) -> Blocks {
+    func blocks(_ privkey: Privkey?) -> Blocks {
         if let bs = _blocks { return bs }
 
         let blocks = get_blocks(content: self.get_content(privkey))
@@ -268,8 +268,8 @@ extension NdbNote {
     }
 
     // NDBTODO: switch this to operating on bytes not strings
-    func decrypted(privkey: String?) -> String? {
-        if let decrypted_content = decrypted_content {
+    func decrypted(privkey: Privkey?) -> String? {
+        if let decrypted_content {
             return decrypted_content
         }
 
@@ -312,7 +312,7 @@ extension NdbNote {
     }
      */
 
-    public func direct_replies(_ privkey: String?) -> [ReferencedId] {
+    public func direct_replies(_ privkey: Privkey?) -> [ReferencedId] {
         return event_refs(privkey).reduce(into: []) { acc, evref in
             if let direct_reply = evref.is_direct_reply {
                 acc.append(direct_reply)
@@ -321,7 +321,7 @@ extension NdbNote {
     }
 
     // NDBTODO: just use Id
-    public func thread_id(privkey: String?) -> String {
+    public func thread_id(privkey: Privkey?) -> NoteId {
         for ref in event_refs(privkey) {
             if let thread_id = ref.is_thread_id {
                 return thread_id.ref_id
@@ -346,11 +346,11 @@ extension NdbNote {
         return false
     }
 
-    func is_reply(_ privkey: String?) -> Bool {
+    func is_reply(_ privkey: Privkey?) -> Bool {
         return event_is_reply(self.event_refs(privkey))
     }
 
-    func note_language(_ privkey: String?) async -> String? {
+    func note_language(_ privkey: Privkey?) async -> String? {
         let t = Task.detached {
             // Rely on Apple's NLLanguageRecognizer to tell us which language it thinks the note is in
             // and filter on only the text portions of the content as URLs and hashtags confuse the language recognizer.

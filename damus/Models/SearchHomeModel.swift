@@ -13,7 +13,7 @@ class SearchHomeModel: ObservableObject {
     var events: EventHolder
     @Published var loading: Bool = false
 
-    var seen_pubkey: Set<String> = Set()
+    var seen_pubkey: Set<Pubkey> = Set()
     let damus_state: DamusState
     let base_subid = UUID().description
     let profiles_subid = UUID().description
@@ -91,7 +91,7 @@ class SearchHomeModel: ObservableObject {
     }
 }
 
-func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: EventCache) -> [String] {
+func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: EventCache) -> [Pubkey] {
     switch load {
     case .from_events(let events):
         return find_profiles_to_fetch_from_events(profiles: profiles, events: events, cache: cache)
@@ -100,13 +100,13 @@ func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: Even
     }
 }
 
-func find_profiles_to_fetch_from_keys(profiles: Profiles, pks: [String]) -> [String] {
+func find_profiles_to_fetch_from_keys(profiles: Profiles, pks: [Pubkey]) -> [Pubkey] {
     Array(Set(pks.filter { pk in !profiles.has_fresh_profile(id: pk) }))
 }
 
-func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent], cache: EventCache) -> [String] {
-    var pubkeys = Set<String>()
-    
+func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent], cache: EventCache) -> [Pubkey] {
+    var pubkeys = Set<Pubkey>()
+
     for ev in events {
         // lookup profiles from boosted events
         if ev.known_kind == .boost, let bev = ev.get_inner_event(cache: cache), !profiles.has_fresh_profile(id: bev.pubkey) {
@@ -123,7 +123,7 @@ func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent]
 
 enum PubkeysToLoad {
     case from_events([NostrEvent])
-    case from_keys([String])
+    case from_keys([Pubkey])
 }
 
 func load_profiles(profiles_subid: String, relay_id: String, load: PubkeysToLoad, damus_state: DamusState) {

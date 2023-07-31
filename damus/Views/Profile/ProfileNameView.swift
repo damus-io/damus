@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ProfileNameView: View {
-    let pubkey: String
+    let pubkey: Pubkey
     let profile: Profile?
     let follows_you: Bool
     let damus: DamusState

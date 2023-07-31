@@ -9,8 +9,8 @@ import SwiftUI
 
 struct ProfilePicturesView: View {
     let state: DamusState
-    let pubkeys: [String]
-    
+    let pubkeys: [Pubkey]
+
     var body: some View {
         HStack {
             ForEach(pubkeys.prefix(8), id: \.self) { pubkey in

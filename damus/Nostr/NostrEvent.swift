@@ -379,7 +379,7 @@ func decode_data<T: Decodable>(_ data: Data) -> T? {
     return nil
 }
 
-func event_commitment(pubkey: String, created_at: UInt32, kind: UInt32, tags: [[String]], content: String) -> String {
+func event_commitment(pubkey: Pubkey, created_at: UInt32, kind: UInt32, tags: [[String]], content: String) -> String {
     let encoder = JSONEncoder()
     encoder.outputFormatting = .withoutEscapingSlashes
     let str_data = try! encoder.encode(content)
@@ -393,12 +393,12 @@ func event_commitment(pubkey: String, created_at: UInt32, kind: UInt32, tags: [[
     return "[0,\"\(pubkey)\",\(created_at),\(kind),\(tags),\(content)]"
 }
 
-func calculate_event_commitment(pubkey: String, created_at: UInt32, kind: UInt32, tags: [[String]], content: String) -> Data {
+func calculate_event_commitment(pubkey: Pubkey, created_at: UInt32, kind: UInt32, tags: [[String]], content: String) -> Data {
     let target = event_commitment(pubkey: pubkey, created_at: created_at, kind: kind, tags: tags, content: content)
     return target.data(using: .utf8)!
 }
 
-func calculate_event_id(pubkey: String, created_at: UInt32, kind: UInt32, tags: [[String]], content: String) -> Data {
+func calculate_event_id(pubkey: Pubkey, created_at: UInt32, kind: UInt32, tags: [[String]], content: String) -> Data {
     let commitment = calculate_event_commitment(pubkey: pubkey, created_at: created_at, kind: kind, tags: tags, content: content)
     return sha256(commitment)
 }
@@ -497,7 +497,7 @@ func make_first_contact_event(keypair: Keypair) -> NostrEvent? {
     let damus_pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
     let tags = [
         ["p", damus_pubkey],
-        ["p", keypair.pubkey] // you're a friend of yourself!
+        ["p", keypair.pubkey.hex()] // you're a friend of yourself!
     ]
     return NostrEvent(content: relay_json, keypair: keypair, kind: NostrKind.contacts.rawValue, tags: tags)
 }
@@ -514,24 +514,25 @@ func make_boost_event(keypair: FullKeypair, boosted: NostrEvent) -> NostrEvent? 
     var tags: [[String]] = boosted.tags.filter { tag in tag.count >= 2 && (tag[0] == "e" || tag[0] == "p") }
     
     tags.append(["e", boosted.id, "", "root"])
-    tags.append(["p", boosted.pubkey])
+    tags.append(["p", boosted.pubkey.hex()])
 
     return NostrEvent(content: event_to_json(ev: boosted), keypair: keypair.to_keypair(), kind: 6, tags: tags)
 }
 
 func make_like_event(keypair: FullKeypair, liked: NostrEvent, content: String = "🤙") -> NostrEvent? {
     var tags: [[String]] = liked.tags.filter { tag in tag.count >= 2 && (tag[0] == "e" || tag[0] == "p") }
-    tags.append(["e", liked.id])
-    tags.append(["p", liked.pubkey])
+    tags.append(["e", liked.id.hex()])
+    tags.append(["p", liked.pubkey.hex()])
     return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 7, tags: tags)
 }
 
 func zap_target_to_tags(_ target: ZapTarget) -> [[String]] {
     switch target {
     case .profile(let pk):
-        return [["p", pk]]
+        return [["p", pk.hex()]]
     case .note(let note_target):
-        return [["e", note_target.note_id], ["p", note_target.author]]
+        return [["e", note_target.note_id.hex()],
+                ["p", note_target.author.hex()]]
     }
 }
 
@@ -554,7 +555,7 @@ func make_private_zap_request_event(identity: FullKeypair, enc_key: FullKeypair,
     return PrivateZapRequest(req: ZapRequest(ev: note), enc: enc)
 }
 
-func decrypt_private_zap(our_privkey: String, zapreq: NostrEvent, target: ZapTarget) -> NostrEvent? {
+func decrypt_private_zap(our_privkey: Privkey, zapreq: NostrEvent, target: ZapTarget) -> NostrEvent? {
     guard let anon_tag = zapreq.tags.first(where: { t in t.count >= 2 && t[0] == "anon" }) else {
         return nil
     }
@@ -732,7 +733,7 @@ func event_to_json(ev: NostrEvent) -> String {
     return str
 }
 
-func decrypt_dm(_ privkey: String?, pubkey: String, content: String, encoding: EncEncoding) -> String? {
+func decrypt_dm(_ privkey: Privkey?, pubkey: Pubkey, content: String, encoding: EncEncoding) -> String? {
     guard let privkey = privkey else {
         return nil
     }
@@ -748,7 +749,7 @@ func decrypt_dm(_ privkey: String?, pubkey: String, content: String, encoding: E
     return String(data: dat, encoding: .utf8)
 }
 
-func decrypt_note(our_privkey: String, their_pubkey: String, enc_note: String, encoding: EncEncoding) -> NostrEvent? {
+func decrypt_note(our_privkey: Privkey, their_pubkey: Pubkey, enc_note: String, encoding: EncEncoding) -> NostrEvent? {
     guard let dec = decrypt_dm(our_privkey, pubkey: their_pubkey, content: enc_note, encoding: encoding) else {
         return nil
     }

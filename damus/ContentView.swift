@@ -70,11 +70,11 @@ enum FilterState : Int {
 struct ContentView: View {
     let keypair: Keypair
     
-    var pubkey: String {
+    var pubkey: Pubkey {
         return keypair.pubkey
     }
     
-    var privkey: String? {
+    var privkey: Privkey? {
         return keypair.privkey
     }
     
@@ -83,7 +83,7 @@ struct ContentView: View {
     @State var active_sheet: Sheets? = nil
     @State var damus_state: DamusState? = nil
     @SceneStorage("ContentView.selected_timeline") var selected_timeline: Timeline = .home
-    @State var muting: String? = nil
+    @State var muting: Pubkey? = nil
     @State var confirm_mute: Bool = false
     @State var user_muted_confirm: Bool = false
     @State var confirm_overwrite_mutelist: Bool = false
@@ -231,9 +231,9 @@ struct ContentView: View {
         navigationCoordinator.push(route: Route.Script(script: model))
     }
     
-    func open_profile(id: String) {
-        let profile_model = ProfileModel(pubkey: id, damus: damus_state!)
-        let followers = FollowersModel(damus_state: damus_state!, target: id)
+    func open_profile(pubkey: Pubkey) {
+        let profile_model = ProfileModel(pubkey: pubkey, damus: damus_state!)
+        let followers = FollowersModel(damus_state: damus_state!, target: pubkey)
         navigationCoordinator.push(route: Route.Profile(profile: profile_model, followers: followers))
     }
     
@@ -342,7 +342,7 @@ struct ContentView: View {
                 
                 switch res {
                 case .filter(let filt): self.open_search(filt: filt)
-                case .profile(let id):  self.open_profile(id: id)
+                case .profile(let pk):  self.open_profile(pubkey: pk)
                 case .event(let ev):    self.open_event(ev: ev)
                 case .wallet_connect(let nwc): self.open_wallet(nwc: nwc)
                 case .script(let data): self.open_script(data)
@@ -470,7 +470,7 @@ struct ContentView: View {
             guard let damus_state else { return }
 
             if local.type == .profile_zap {
-                open_profile(id: local.event_id)
+                open_profile(pubkey: local.event_id)
                 return
             }
             
@@ -656,7 +656,7 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(keypair: Keypair(pubkey: "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681", privkey: nil))
+        ContentView(keypair: Keypair(pubkey: test_pubkey, privkey: nil))
     }
 }
 
@@ -680,7 +680,7 @@ extension UINavigationController: UIGestureRecognizerDelegate {
 }
 
 struct LastNotification {
-    let id: String
+    let id: NoteId
     let created_at: Int64
 }
 
@@ -689,17 +689,20 @@ func get_last_event(_ timeline: Timeline) -> LastNotification? {
     let last = UserDefaults.standard.string(forKey: "last_\(str)")
     let last_created = UserDefaults.standard.string(forKey: "last_\(str)_time")
         .flatMap { Int64($0) }
-    
-    return last.flatMap { id in
-        last_created.map { created in
-            return LastNotification(id: id, created_at: created)
-        }
+
+    guard let last,
+          let note_id = NoteId(hex: last),
+          let last_created
+    else {
+        return nil
     }
+
+    return LastNotification(id: note_id, created_at: last_created)
 }
 
 func save_last_event(_ ev: NostrEvent, timeline: Timeline) {
     let str = timeline.rawValue
-    UserDefaults.standard.set(ev.id, forKey: "last_\(str)")
+    UserDefaults.standard.set(ev.id.hex(), forKey: "last_\(str)")
     UserDefaults.standard.set(String(ev.created_at), forKey: "last_\(str)_time")
 }
 
@@ -757,18 +760,18 @@ struct FindEvent {
     let type: FindEventType
     let find_from: [String]?
     
-    static func profile(pubkey: String, find_from: [String]? = nil) -> FindEvent {
+    static func profile(pubkey: Pubkey, find_from: [String]? = nil) -> FindEvent {
         return FindEvent(type: .profile(pubkey), find_from: find_from)
     }
     
-    static func event(evid: String, find_from: [String]? = nil) -> FindEvent {
+    static func event(evid: NoteId, find_from: [String]? = nil) -> FindEvent {
         return FindEvent(type: .event(evid), find_from: find_from)
     }
 }
 
 enum FindEventType {
-    case profile(String)
-    case event(String)
+    case profile(Pubkey)
+    case event(NoteId)
 }
 
 enum FoundEvent {
@@ -961,7 +964,7 @@ func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: Ev
 
 
 enum OpenResult {
-    case profile(String)
+    case profile(Pubkey)
     case filter(NostrFilter)
     case event(NostrEvent)
     case wallet_connect(WalletConnectURL)

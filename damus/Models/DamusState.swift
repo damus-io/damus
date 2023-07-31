@@ -50,7 +50,7 @@ struct DamusState {
         return stored
     }
     
-    var pubkey: String {
+    var pubkey: Pubkey {
         return keypair.pubkey
     }
     

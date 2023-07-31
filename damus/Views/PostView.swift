@@ -21,7 +21,7 @@ class TagModel: ObservableObject {
 
 enum PostTarget {
     case none
-    case user(String)
+    case user(Pubkey)
 }
 
 enum PostAction {

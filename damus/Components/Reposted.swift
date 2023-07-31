@@ -9,7 +9,7 @@ import SwiftUI
 
 struct Reposted: View {
     let damus: DamusState
-    let pubkey: String
+    let pubkey: Pubkey
     let profile: Profile?
     
     var body: some View {

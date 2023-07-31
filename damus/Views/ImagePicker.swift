@@ -15,7 +15,7 @@ struct ImagePicker: UIViewControllerRepresentable {
 
     let uploader: MediaUploader
     let sourceType: UIImagePickerController.SourceType
-    let pubkey: String
+    let pubkey: Pubkey
     @Binding var image_upload_confirm: Bool
     var imagesOnly: Bool = false
     let onImagePicked: (URL) -> Void

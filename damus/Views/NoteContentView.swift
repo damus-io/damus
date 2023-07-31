@@ -392,7 +392,7 @@ func note_artifact_is_separated(kind: NostrKind?) -> Bool {
     return kind != .longform
 }
 
-func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -> NoteArtifacts {
+func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: Privkey?) -> NoteArtifacts {
     let blocks = ev.blocks(privkey)
     
     if ev.known_kind == .longform {
@@ -574,7 +574,7 @@ func classify_url(_ url: URL) -> UrlType {
     return .link(url)
 }
 
-func lookup_cached_preview_size(previews: PreviewCache, evid: String) -> CGFloat? {
+func lookup_cached_preview_size(previews: PreviewCache, evid: NoteId) -> CGFloat? {
     guard case .value(let cached) = previews.lookup(evid) else {
         return nil
     }

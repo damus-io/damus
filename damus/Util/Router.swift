@@ -8,13 +8,13 @@
 import SwiftUI
 
 enum Route: Hashable {
-    case ProfileByKey(pubkey: String)
+    case ProfileByKey(pubkey: Pubkey)
     case Profile(profile: ProfileModel, followers: FollowersModel)
     case Followers(followers: FollowersModel)
     case Relay(relay: String, showActionButtons: Binding<Bool>)
     case RelayDetail(relay: String, metadata: RelayMetadata?)
     case Following(following: FollowingModel)
-    case MuteList(users: [String])
+    case MuteList(users: [Pubkey])
     case RelayConfig
     case Script(script: ScriptModel)
     case Bookmarks
@@ -41,7 +41,7 @@ enum Route: Hashable {
     case SaveKeys(account: CreateAccountModel)
     case Wallet(wallet: WalletModel)
     case WalletScanner(result: Binding<WalletScanResult>)
-    case FollowersYouKnow(friendedFollowers: [String], followers: FollowersModel)
+    case FollowersYouKnow(friendedFollowers: [Pubkey], followers: FollowersModel)
 
     @ViewBuilder
     func view(navigationCoordinator: NavigationCoordinator, damusState: DamusState) -> some View {

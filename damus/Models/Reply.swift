@@ -8,13 +8,13 @@
 import Foundation
 
 struct ReplyDesc {
-    let pubkeys: [String]
+    let pubkeys: [Pubkey]
     let others: Int
 }
 
 func make_reply_description(_ tags: [[String]]) -> ReplyDesc {
     var c = 0
-    var ns: [String] = []
+    var ns: [Pubkey] = []
     var i = tags.count - 1
         
     while i >= 0 {

@@ -9,9 +9,9 @@ import SwiftUI
 
 struct SearchedUser: Identifiable {
     let profile: Profile?
-    let pubkey: String
-    
-    var id: String {
+    let pubkey: Pubkey
+
+    var id: Pubkey {
         return pubkey
     }
 }
@@ -151,7 +151,7 @@ func append_user_tag(tag: NSAttributedString, post: NSMutableAttributedString, w
 }
 
 /// Generate a mention attributed string, including the internal damus:nostr: link
-func user_tag_attr_string(profile: Profile?, pubkey: String) -> NSMutableAttributedString {
+func user_tag_attr_string(profile: Profile?, pubkey: Pubkey) -> NSMutableAttributedString {
     let display_name = Profile.displayName(profile: profile, pubkey: pubkey)
     let name = display_name.username.truncate(maxLength: 50)
     let tagString = "@\(name)"

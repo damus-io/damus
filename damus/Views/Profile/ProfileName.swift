@@ -12,7 +12,7 @@ enum FriendType {
     case fof
 }
 
-func get_friend_type(contacts: Contacts, pubkey: String) -> FriendType? {
+func get_friend_type(contacts: Contacts, pubkey: Pubkey) -> FriendType? {
     if contacts.is_friend_or_self(pubkey) {
         return .friend
     }
@@ -26,7 +26,7 @@ func get_friend_type(contacts: Contacts, pubkey: String) -> FriendType? {
 
 struct ProfileName: View {
     let damus_state: DamusState
-    let pubkey: String
+    let pubkey: Pubkey
     let profile: Profile?
     let prefix: String
     
@@ -36,7 +36,7 @@ struct ProfileName: View {
     @State var nip05: NIP05?
     @State var donation: Int?
     
-    init(pubkey: String, profile: Profile?, prefix: String = "", damus: DamusState, show_nip5_domain: Bool = true) {
+    init(pubkey: Pubkey, profile: Profile?, prefix: String = "", damus: DamusState, show_nip5_domain: Bool = true) {
         self.pubkey = pubkey
         self.profile = profile
         self.prefix = prefix

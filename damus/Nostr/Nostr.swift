@@ -201,7 +201,7 @@ class Profile: Codable {
         try container.encode(value)
     }
     
-    static func displayName(profile: Profile?, pubkey: String) -> DisplayName {
+    static func displayName(profile: Profile?, pubkey: Pubkey) -> DisplayName {
         return parse_display_name(profile: profile, pubkey: pubkey)
     }
 }

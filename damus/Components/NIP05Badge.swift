@@ -9,14 +9,14 @@ import SwiftUI
 
 struct NIP05Badge: View {
     let nip05: NIP05
-    let pubkey: String
+    let pubkey: Pubkey
     let contacts: Contacts
     let show_domain: Bool
     let profiles: Profiles
 
     @Environment(\.openURL) var openURL
     
-    init(nip05: NIP05, pubkey: String, contacts: Contacts, show_domain: Bool, profiles: Profiles) {
+    init(nip05: NIP05, pubkey: Pubkey, contacts: Contacts, show_domain: Bool, profiles: Profiles) {
         self.nip05 = nip05
         self.pubkey = pubkey
         self.contacts = contacts
@@ -91,7 +91,7 @@ extension View {
     }
 }
 
-func use_nip05_color(pubkey: String, contacts: Contacts) -> Bool {
+func use_nip05_color(pubkey: Pubkey, contacts: Contacts) -> Bool {
     return contacts.is_friend_or_self(pubkey) ? true : false
 }
 
@@ -105,7 +105,7 @@ struct NIP05Badge_Previews: PreviewProvider {
 
             NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true, profiles: test_state.profiles)
 
-            NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: Contacts(our_pubkey: "sdkfjsdf"), show_domain: true, profiles: test_state.profiles)
+            NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: Contacts(our_pubkey: test_pubkey), show_domain: true, profiles: test_state.profiles)
         }
     }
 }

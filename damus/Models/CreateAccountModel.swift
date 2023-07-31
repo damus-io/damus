@@ -12,8 +12,8 @@ class CreateAccountModel: ObservableObject {
     @Published var real_name: String = ""
     @Published var nick_name: String = ""
     @Published var about: String = ""
-    @Published var pubkey: String = ""
-    @Published var privkey: String = ""
+    @Published var pubkey: Pubkey = .empty
+    @Published var privkey: Privkey = .empty
     @Published var profile_image: URL? = nil
 
     var pubkey_bech32: String {

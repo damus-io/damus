@@ -86,7 +86,7 @@ final class UserSearchCacheTests: XCTestCase {
         let damus = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
         let jb55 = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"
 
-        var pubkeysToPetnames = [String: String]()
+        var pubkeysToPetnames = [Pubkey: String]()
         pubkeysToPetnames[damus] = "damus"
         pubkeysToPetnames[jb55] = "jb55"
 
@@ -114,7 +114,7 @@ final class UserSearchCacheTests: XCTestCase {
         XCTAssertEqual(damusState.user_search_cache.search(key: "l"), [jb55])
     }
 
-    private func createContactsEventWithPetnames(pubkeysToPetnames: [String: String]) throws -> NostrEvent {
+    private func createContactsEventWithPetnames(pubkeysToPetnames: [Pubkey: String]) throws -> NostrEvent {
         let keypair = try XCTUnwrap(keypair)
 
         let bootstrapRelays = load_bootstrap_relays(pubkey: keypair.pubkey)

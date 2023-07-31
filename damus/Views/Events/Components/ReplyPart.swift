@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ReplyPart: View {
     let event: NostrEvent
-    let privkey: String?
+    let privkey: Privkey?
     let profiles: Profiles
     
     var body: some View {

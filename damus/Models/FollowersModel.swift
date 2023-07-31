@@ -9,11 +9,11 @@ import Foundation
 
 class FollowersModel: ObservableObject {
     let damus_state: DamusState
-    let target: String
-    
-    @Published var contacts: [String]? = nil
-    var has_contact: Set<String> = Set()
-    
+    let target: Pubkey
+
+    @Published var contacts: [Pubkey]? = nil
+    var has_contact: Set<Pubkey> = Set()
+
     let sub_id: String = UUID().description
     let profiles_id: String = UUID().description
     
@@ -24,14 +24,13 @@ class FollowersModel: ObservableObject {
         return contacts.count
     }
     
-    init(damus_state: DamusState, target: String) {
+    init(damus_state: DamusState, target: Pubkey) {
         self.damus_state = damus_state
         self.target = target
     }
     
     func get_filter() -> NostrFilter {
-        NostrFilter(kinds: [.contacts],
-                    pubkeys: [target])
+        NostrFilter(kinds: [.contacts], pubkeys: [target])
     }
     
     func subscribe() {

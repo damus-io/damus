@@ -12,8 +12,8 @@ let PUBKEY_HRP = "npub"
 let ANON_PUBKEY = "anon"
 
 struct FullKeypair: Equatable {
-    let pubkey: String
-    let privkey: String
+    let pubkey: Pubkey
+    let privkey: Privkey
 
     func to_keypair() -> Keypair {
         return Keypair(pubkey: pubkey, privkey: privkey)
@@ -21,11 +21,11 @@ struct FullKeypair: Equatable {
 }
 
 struct Keypair {
-    let pubkey: String
-    let privkey: String?
+    let pubkey: Pubkey
+    let privkey: Privkey?
     let pubkey_bech32: String
     let privkey_bech32: String?
-    
+
     func to_full() -> FullKeypair? {
         guard let privkey = self.privkey else {
             return nil
@@ -33,8 +33,12 @@ struct Keypair {
         
         return FullKeypair(pubkey: pubkey, privkey: privkey)
     }
-    
-    init(pubkey: String, privkey: String?) {
+
+    static func just_pubkey(_ pk: Pubkey) -> Keypair {
+        return .init(pubkey: pk, privkey: nil)
+    }
+
+    init(pubkey: Pubkey, privkey: Privkey?) {
         self.pubkey = pubkey
         self.privkey = privkey
         self.pubkey_bech32 = bech32_pubkey(pubkey) ?? pubkey
@@ -43,8 +47,8 @@ struct Keypair {
 }
 
 enum Bech32Key {
-    case pub(String)
-    case sec(String)
+    case pub(Pubkey)
+    case sec(Privkey)
 }
 
 func decode_bech32_key(_ key: String) -> Bech32Key? {
@@ -105,7 +109,7 @@ func generate_new_keypair() -> Keypair {
     return Keypair(pubkey: pubkey, privkey: privkey)
 }
 
-func privkey_to_pubkey_raw(sec: [UInt8]) -> String? {
+func privkey_to_pubkey_raw(sec: [UInt8]) -> Pubkey? {
     guard let key = try? secp256k1.Signing.PrivateKey(rawRepresentation: sec) else {
         return nil
     }
@@ -117,8 +121,8 @@ func privkey_to_pubkey(privkey: String) -> String? {
     return privkey_to_pubkey_raw(sec: sec)
 }
 
-func save_pubkey(pubkey: String) {
-    UserDefaults.standard.set(pubkey, forKey: "pubkey")
+func save_pubkey(pubkey: Pubkey) {
+    UserDefaults.standard.set(pubkey.hex(), forKey: "pubkey")
 }
 
 enum Keys {
@@ -126,8 +130,8 @@ enum Keys {
     static var privkey: String?
 }
 
-func save_privkey(privkey: String) throws {
-    Keys.privkey = privkey
+func save_privkey(privkey: Privkey) throws {
+    Keys.privkey = privkey.hex()
 }
 
 func clear_saved_privkey() throws {
@@ -138,7 +142,7 @@ func clear_saved_pubkey() {
     UserDefaults.standard.removeObject(forKey: "pubkey")
 }
 
-func save_keypair(pubkey: String, privkey: String) throws {
+func save_keypair(pubkey: Pubkey, privkey: Privkey) throws {
     save_pubkey(pubkey: pubkey)
     try save_privkey(privkey: privkey)
 }

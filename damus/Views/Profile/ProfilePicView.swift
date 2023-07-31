@@ -31,7 +31,7 @@ func pfp_line_width(_ h: Highlight) -> CGFloat {
 struct InnerProfilePicView: View {
     let url: URL?
     let fallbackUrl: URL?
-    let pubkey: String
+    let pubkey: Pubkey
     let size: CGFloat
     let highlight: Highlight
     let disable_animation: Bool
@@ -67,7 +67,7 @@ struct InnerProfilePicView: View {
 }
 
 struct ProfilePicView: View {
-    let pubkey: String
+    let pubkey: Pubkey
     let size: CGFloat
     let highlight: Highlight
     let profiles: Profiles
@@ -75,7 +75,7 @@ struct ProfilePicView: View {
     
     @State var picture: String?
     
-    init(pubkey: String, size: CGFloat, highlight: Highlight, profiles: Profiles, disable_animation: Bool, picture: String? = nil) {
+    init(pubkey: Pubkey, size: CGFloat, highlight: Highlight, profiles: Profiles, disable_animation: Bool, picture: String? = nil) {
         self.pubkey = pubkey
         self.profiles = profiles
         self.size = size
@@ -98,7 +98,7 @@ struct ProfilePicView: View {
     }
 }
 
-func get_profile_url(picture: String?, pubkey: String, profiles: Profiles) -> URL {
+func get_profile_url(picture: String?, pubkey: Pubkey, profiles: Profiles) -> URL {
     let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
     if let url = URL(string: pic) {
         return url

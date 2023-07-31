@@ -31,7 +31,7 @@ struct ZapTypePicker: View {
     @Binding var zap_type: ZapType
     @ObservedObject var settings: UserSettingsStore
     let profiles: Profiles
-    let pubkey: String
+    let pubkey: Pubkey
     
     @Environment(\.colorScheme) var colorScheme
     
@@ -106,11 +106,11 @@ struct ZapTypePicker_Previews: PreviewProvider {
     @State static var zap_type: ZapType = .pub
     static var previews: some View {
         let ds = test_damus_state()
-        ZapTypePicker(zap_type: $zap_type, settings: ds.settings, profiles: ds.profiles, pubkey: "bob")
+        ZapTypePicker(zap_type: $zap_type, settings: ds.settings, profiles: ds.profiles, pubkey: test_pubkey)
     }
 }
 
-func zap_type_desc(type: ZapType, profiles: Profiles, pubkey: String) -> String {
+func zap_type_desc(type: ZapType, profiles: Profiles, pubkey: Pubkey) -> String {
     switch type {
     case .pub:
         return NSLocalizedString("Everyone will see that you zapped", comment: "Description of public zap type where the zap is sent publicly and identifies the user who sent it.")

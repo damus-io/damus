@@ -16,11 +16,11 @@ class DirectMessageModel: ObservableObject {
 
     @Published var draft: String = ""
     
-    let pubkey: String
-    
+    let pubkey: Pubkey
+
     var is_request = false
-    var our_pubkey: String
-    
+    var our_pubkey: Pubkey
+
     func determine_is_request() -> Bool {
         for event in events {
             if event.pubkey == our_pubkey {
@@ -31,7 +31,7 @@ class DirectMessageModel: ObservableObject {
         return true
     }
     
-    init(events: [NostrEvent] = [], our_pubkey: String, pubkey: String) {
+    init(events: [NostrEvent] = [], our_pubkey: Pubkey, pubkey: Pubkey) {
         self.events = events
         self.our_pubkey = our_pubkey
         self.pubkey = pubkey

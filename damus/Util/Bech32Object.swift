@@ -9,9 +9,9 @@ import Foundation
 
 
 enum Bech32Object {
-    case nsec(String)
-    case npub(String)
-    case note(String)
+    case nsec(Privkey)
+    case npub(Pubkey)
+    case note(NoteId)
     case nscript([UInt8])
     
     static func parse(_ str: String) -> Bech32Object? {

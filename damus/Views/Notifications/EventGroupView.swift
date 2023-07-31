@@ -56,7 +56,7 @@ enum ReactingTo {
     case your_profile
 }
 
-func determine_reacting_to(our_pubkey: String, ev: NostrEvent?) -> ReactingTo {
+func determine_reacting_to(our_pubkey: Pubkey, ev: NostrEvent?) -> ReactingTo {
     guard let ev else {
         return .your_profile
     }
@@ -68,21 +68,21 @@ func determine_reacting_to(our_pubkey: String, ev: NostrEvent?) -> ReactingTo {
     return .tagged_in
 }
 
-func event_author_name(profiles: Profiles, pubkey: String) -> String {
+func event_author_name(profiles: Profiles, pubkey: Pubkey) -> String {
     let alice_prof = profiles.lookup(id: pubkey)
     return Profile.displayName(profile: alice_prof, pubkey: pubkey).username.truncate(maxLength: 50)
 }
 
-func event_group_unique_pubkeys(profiles: Profiles, group: EventGroupType) -> [String] {
-    var seen = Set<String>()
-    var sorted = [String]()
+func event_group_unique_pubkeys(profiles: Profiles, group: EventGroupType) -> [Pubkey] {
+    var seen = Set<Pubkey>()
+    var sorted = [Pubkey]()
 
     if let zapgrp = group.zap_group {
         let zaps = zapgrp.zaps
 
         for i in 0..<zaps.count {
             let zap = zapgrp.zaps[i]
-            let pubkey: String
+            let pubkey: Pubkey
 
             if zap.is_anon {
                 pubkey = ANON_PUBKEY
@@ -148,7 +148,7 @@ func event_group_unique_pubkeys(profiles: Profiles, group: EventGroupType) -> [S
  "zapped_your_profile_2" - returned when 2 zaps occurred to the current user's profile
  "zapped_your_profile_3" - returned when 3 or more zaps occurred to the current user's profile
  */
-func reacting_to_text(profiles: Profiles, our_pubkey: String, group: EventGroupType, ev: NostrEvent?, pubkeys: [String], locale: Locale? = nil) -> String {
+func reacting_to_text(profiles: Profiles, our_pubkey: Pubkey, group: EventGroupType, ev: NostrEvent?, pubkeys: [Pubkey], locale: Locale? = nil) -> String {
     if group.events.count == 0 {
         return "??"
     }
@@ -192,7 +192,7 @@ struct EventGroupView: View {
     let event: NostrEvent?
     let group: EventGroupType
 
-    func GroupDescription(_ pubkeys: [String]) -> some View {
+    func GroupDescription(_ pubkeys: [Pubkey]) -> some View {
         Text(verbatim: "\(reacting_to_text(profiles: state.profiles, our_pubkey: state.pubkey, group: group, ev: event, pubkeys: pubkeys))")
     }
     

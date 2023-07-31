@@ -10,7 +10,7 @@ import SwiftUI
 struct EventMenuContext: View {
     let event: NostrEvent
     let keypair: Keypair
-    let target_pubkey: String
+    let target_pubkey: Pubkey
     let bookmarks: BookmarksManager
     let muted_threads: MutedThreadsManager
     @ObservedObject var settings: UserSettingsStore
@@ -44,7 +44,7 @@ struct EventMenuContext: View {
 struct MenuItems: View {
     let event: NostrEvent
     let keypair: Keypair
-    let target_pubkey: String
+    let target_pubkey: Pubkey
     let bookmarks: BookmarksManager
     let muted_threads: MutedThreadsManager
     @ObservedObject var settings: UserSettingsStore
@@ -52,7 +52,7 @@ struct MenuItems: View {
     @State private var isBookmarked: Bool = false
     @State private var isMutedThread: Bool = false
     
-    init(event: NostrEvent, keypair: Keypair, target_pubkey: String, bookmarks: BookmarksManager, muted_threads: MutedThreadsManager, settings: UserSettingsStore) {
+    init(event: NostrEvent, keypair: Keypair, target_pubkey: Pubkey, bookmarks: BookmarksManager, muted_threads: MutedThreadsManager, settings: UserSettingsStore) {
         let bookmarked = bookmarks.isBookmarked(event)
         self._isBookmarked = State(initialValue: bookmarked)
 

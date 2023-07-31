@@ -128,7 +128,7 @@ class ThreadModel: ObservableObject {
 }
 
 
-func get_top_zap(events: EventCache, evid: String) -> Zapping? {
+func get_top_zap(events: EventCache, evid: NoteId) -> Zapping? {
     return events.get_cache_data(evid).zaps_model.zaps.first(where: { zap in
         !zap.request.marked_hidden
     })

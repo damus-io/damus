@@ -8,10 +8,10 @@
 import Foundation
 
 enum NotificationItem {
-    case repost(String, EventGroup)
-    case reaction(String, EventGroup)
+    case repost(NoteId, EventGroup)
+    case reaction(NoteId, EventGroup)
     case profile_zap(ZapGroup)
-    case event_zap(String, ZapGroup)
+    case event_zap(NoteId, ZapGroup)
     case reply(NostrEvent)
     
     var is_reply: NostrEvent? {
@@ -104,23 +104,23 @@ class NotificationsModel: ObservableObject, ScrollQueue {
     var should_queue: Bool = true
     
     // mappings from events to
-    var zaps: [String: ZapGroup] = [:]
+    var zaps: [NoteId: ZapGroup] = [:]
     var profile_zaps = ZapGroup()
-    var reactions: [String: EventGroup] = [:]
-    var reposts: [String: EventGroup] = [:]
+    var reactions: [NoteId: EventGroup] = [:]
+    var reposts: [NoteId: EventGroup] = [:]
     var replies: [NostrEvent] = []
-    var has_reply = Set<String>()
-    var has_ev = Set<String>()
-    
+    var has_reply = Set<NoteId>()
+    var has_ev = Set<NoteId>()
+
     @Published var notifications: [NotificationItem] = []
     
     func set_should_queue(_ val: Bool) {
         self.should_queue = val
     }
     
-    func uniq_pubkeys() -> [String] {
-        var pks = Set<String>()
-        
+    func uniq_pubkeys() -> [Pubkey] {
+        var pks = Set<Pubkey>()
+
         for ev in incoming_events {
             pks.insert(ev.pubkey)
         }

@@ -29,7 +29,7 @@ enum Resubscribe {
 }
 
 enum HomeResubFilter {
-    case pubkey(String)
+    case pubkey(Pubkey)
     case hashtag(String)
 
     init?(from: ReferencedId) {
@@ -63,9 +63,10 @@ class HomeModel {
     
     var damus_state: DamusState
 
-    var has_event: [String: Set<String>] = [:]
-    var deleted_events: Set<String> = Set()
     var channels: [String: NostrEvent] = [:]
+    // NDBTODO: let's get rid of this entirely, let nostrdb handle it
+    var has_event: [String: Set<NoteId>] = [:]
+    var deleted_events: Set<NoteId> = Set()
     var last_event_of_kind: [String: [UInt32: NostrEvent]] = [:]
     var done_init: Bool = false
     var incoming_dms: [NostrEvent] = []
@@ -109,7 +110,7 @@ class HomeModel {
         return damus_state.dms
     }
 
-    func has_sub_id_event(sub_id: String, ev_id: String) -> Bool {
+    func has_sub_id_event(sub_id: String, ev_id: NoteId) -> Bool {
         if !has_event.keys.contains(sub_id) {
             has_event[sub_id] = Set()
             return false
@@ -502,13 +503,13 @@ class HomeModel {
         pool.send(.unsubscribe(home_subid))
     }
 
-    func get_friends() -> [String] {
+    func get_friends() -> [Pubkey] {
         var friends = damus_state.contacts.get_friend_list()
         friends.insert(damus_state.pubkey)
         return Array(friends)
     }
 
-    func subscribe_to_home_filters(friends fs: [String]? = nil, relay_id: String? = nil) {
+    func subscribe_to_home_filters(friends fs: [Pubkey]? = nil, relay_id: String? = nil) {
         // TODO: separate likes?
         var home_filter_kinds: [NostrKind] = [
             .text, .longform, .boost
@@ -782,7 +783,7 @@ func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
     print("-----")
 }
 
-func process_metadata_profile(our_pubkey: String, profiles: Profiles, profile: Profile, ev: NostrEvent) {
+func process_metadata_profile(our_pubkey: Pubkey, profiles: Profiles, profile: Profile, ev: NostrEvent) {
     var old_nip05: String? = nil
     let mprof = profiles.lookup_with_timestamp(id: ev.pubkey)
 
@@ -847,7 +848,7 @@ func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping (
     }
 }
 
-func process_metadata_event(events: EventCache, our_pubkey: String, profiles: Profiles, ev: NostrEvent, completion: ((Profile?) -> Void)? = nil) {
+func process_metadata_event(events: EventCache, our_pubkey: Pubkey, profiles: Profiles, ev: NostrEvent, completion: ((Profile?) -> Void)? = nil) {
     guard_valid_event(events: events, ev: ev) {
         DispatchQueue.global(qos: .background).async {
             guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
@@ -865,8 +866,8 @@ func process_metadata_event(events: EventCache, our_pubkey: String, profiles: Pr
     }
 }
 
-func robohash(_ pk: String) -> String {
-    return "https://robohash.org/" + pk
+func robohash(_ pk: Pubkey) -> String {
+    return "https://robohash.org/" + pk.hex()
 }
 
 func load_our_stuff(state: DamusState, ev: NostrEvent) {
@@ -1171,7 +1172,7 @@ func zap_notification_body(profiles: Profiles, zap: Zap, locale: Locale = Locale
     }
 }
 
-func create_in_app_profile_zap_notification(profiles: Profiles, zap: Zap, locale: Locale = Locale.current, profile_id: String) {
+func create_in_app_profile_zap_notification(profiles: Profiles, zap: Zap, locale: Locale = Locale.current, profile_id: Pubkey) {
     let content = UNMutableNotificationContent()
 
     content.title = zap_notification_title(zap)
@@ -1192,7 +1193,7 @@ func create_in_app_profile_zap_notification(profiles: Profiles, zap: Zap, locale
     }
 }
 
-func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: Locale = Locale.current, evId: String) {
+func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: Locale = Locale.current, evId: NoteId) {
     let content = UNMutableNotificationContent()
 
     content.title = zap_notification_title(zap)
@@ -1213,7 +1214,7 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
     }
 }
 
-func render_notification_content_preview(cache: EventCache, ev: NostrEvent, profiles: Profiles, privkey: String?) -> String {
+func render_notification_content_preview(cache: EventCache, ev: NostrEvent, profiles: Profiles, privkey: Privkey?) -> String {
     
     let prefix_len = 50
     let artifacts = cache.get_cache_data(ev.id).artifacts.artifacts ?? render_note_content(ev: ev, profiles: profiles, privkey: privkey)
@@ -1329,7 +1330,7 @@ enum ProcessZapResult {
 
 // securely get the zap target's pubkey. this can be faked so we need to be
 // careful
-func get_zap_target_pubkey(ev: NostrEvent, events: EventCache) -> String? {
+func get_zap_target_pubkey(ev: NostrEvent, events: EventCache) -> Pubkey? {
     let etags = ev.referenced_ids
 
     guard let etag = etags.first else {
@@ -1409,7 +1410,7 @@ func process_zap_event(damus_state: DamusState, ev: NostrEvent, completion: @esc
        
 }
 
-fileprivate func process_zap_event_with_zapper(damus_state: DamusState, ev: NostrEvent, zapper: String) -> Zap? {
+fileprivate func process_zap_event_with_zapper(damus_state: DamusState, ev: NostrEvent, zapper: Pubkey) -> Zap? {
     let our_keypair = damus_state.keypair
     
     guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: our_keypair.privkey) else {

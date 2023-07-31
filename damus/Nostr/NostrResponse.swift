@@ -8,7 +8,7 @@
 import Foundation
 
 struct CommandResult {
-    let event_id: String
+    let event_id: NoteId
     let ok: Bool
     let msg: String
 }

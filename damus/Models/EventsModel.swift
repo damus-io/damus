@@ -10,14 +10,14 @@ import Foundation
 
 class EventsModel: ObservableObject {
     let state: DamusState
-    let target: String
+    let target: NoteId
     let kind: NostrKind
     let sub_id = UUID().uuidString
     let profiles_id = UUID().uuidString
     
     @Published var events: [NostrEvent] = []
     
-    init(state: DamusState, target: String, kind: NostrKind) {
+    init(state: DamusState, target: NoteId, kind: NostrKind) {
         self.state = state
         self.target = target
         self.kind = kind

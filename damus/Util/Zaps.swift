@@ -8,14 +8,14 @@
 import Foundation
 
 class Zaps {
-    private(set) var zaps: [String: Zapping]
-    let our_pubkey: String
-    var our_zaps: [String: [Zapping]]
+    private(set) var zaps: [NoteId: Zapping]
+    let our_pubkey: Pubkey
+    var our_zaps: [NoteId: [Zapping]]
 
-    private(set) var event_counts: [String: Int]
-    private(set) var event_totals: [String: Int64]
-    
-    init(our_pubkey: String) {
+    private(set) var event_counts: [NoteId: Int]
+    private(set) var event_totals: [NoteId: Int64]
+
+    init(our_pubkey: Pubkey) {
         self.zaps = [:]
         self.our_pubkey = our_pubkey
         self.our_zaps = [:]
@@ -23,7 +23,7 @@ class Zaps {
         self.event_totals = [:]
     }
     
-    func remove_zap(reqid: String) -> Zapping? {
+    func remove_zap(reqid: NoteId) -> Zapping? {
         var res: Zapping? = nil
         for kv in our_zaps {
             let ours = kv.value

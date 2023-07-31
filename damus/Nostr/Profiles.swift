@@ -21,11 +21,11 @@ class Profiles {
                                                   qos: .userInteractive,
                                                   attributes: .concurrent)
     
-    private var profiles: [String: TimestampedProfile] = [:]
-    private var validated: [String: NIP05] = [:]
-    var nip05_pubkey: [String: String] = [:]
-    var zappers: [String: String] = [:]
-    
+    private var profiles: [Pubkey: TimestampedProfile] = [:]
+    private var validated: [Pubkey: NIP05] = [:]
+    var nip05_pubkey: [String: Pubkey] = [:]
+    var zappers: [Pubkey: Pubkey] = [:]
+
     private let database = ProfileDatabase()
 
     let user_search_cache: UserSearchCache
@@ -34,35 +34,35 @@ class Profiles {
         self.user_search_cache = user_search_cache
     }
     
-    func is_validated(_ pk: String) -> NIP05? {
+    func is_validated(_ pk: Pubkey) -> NIP05? {
         validated_queue.sync {
             validated[pk]
         }
     }
 
-    func invalidate_nip05(_ pk: String) {
+    func invalidate_nip05(_ pk: Pubkey) {
         validated_queue.async(flags: .barrier) {
             self.validated.removeValue(forKey: pk)
         }
     }
 
-    func set_validated(_ pk: String, nip05: NIP05?) {
+    func set_validated(_ pk: Pubkey, nip05: NIP05?) {
         validated_queue.async(flags: .barrier) {
             self.validated[pk] = nip05
         }
     }
     
-    func enumerated() -> EnumeratedSequence<[String: TimestampedProfile]> {
+    func enumerated() -> EnumeratedSequence<[Pubkey: TimestampedProfile]> {
         return profiles_queue.sync {
             return profiles.enumerated()
         }
     }
     
-    func lookup_zapper(pubkey: String) -> String? {
+    func lookup_zapper(pubkey: Pubkey) -> Pubkey? {
         zappers[pubkey]
     }
     
-    func add(id: String, profile: TimestampedProfile) {
+    func add(id: Pubkey, profile: TimestampedProfile) {
         profiles_queue.async(flags: .barrier) {
             let old_timestamped_profile = self.profiles[id]
             self.profiles[id] = profile
@@ -78,7 +78,7 @@ class Profiles {
         }
     }
     
-    func lookup(id: String) -> Profile? {
+    func lookup(id: Pubkey) -> Profile? {
         var profile: Profile?
         profiles_queue.sync {
             profile = profiles[id]?.profile
@@ -86,14 +86,13 @@ class Profiles {
         return profile ?? database.get(id: id)
     }
     
-    func lookup_with_timestamp(id: String) -> TimestampedProfile? {
+    func lookup_with_timestamp(id: Pubkey) -> TimestampedProfile? {
         profiles_queue.sync {
             return profiles[id]
         }
     }
     
-    func has_fresh_profile(id: String) -> Bool {
-        // check memory first
+    func has_fresh_profile(id: Pubkey) -> Bool {
         var profile: Profile?
         profiles_queue.sync {
             profile = profiles[id]?.profile
@@ -111,7 +110,7 @@ class Profiles {
 }
 
 
-func invalidate_zapper_cache(pubkey: String, profiles: Profiles, lnurl: LNUrls) {
+func invalidate_zapper_cache(pubkey: Pubkey, profiles: Profiles, lnurl: LNUrls) {
     profiles.zappers.removeValue(forKey: pubkey)
     lnurl.endpoints.removeValue(forKey: pubkey)
 }

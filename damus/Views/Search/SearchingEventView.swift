@@ -10,7 +10,7 @@ import SwiftUI
 enum SearchState {
     case searching
     case found(NostrEvent)
-    case found_profile(String)
+    case found_profile(Pubkey)
     case not_found
 }
 

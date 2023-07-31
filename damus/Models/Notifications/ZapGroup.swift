@@ -10,8 +10,8 @@ import Foundation
 class ZapGroup {
     var zaps: [Zapping] = []
     var msat_total: Int64 = 0
-    var zappers = Set<String>()
-    
+    var zappers = Set<Pubkey>()
+
     var last_event_at: UInt32 {
         guard let first = zaps.first else {
             return 0

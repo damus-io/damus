@@ -13,7 +13,7 @@ struct DMChatView: View, KeyboardReadable {
     @ObservedObject var dms: DirectMessageModel
     @State var showPrivateKeyWarning: Bool = false
     
-    var pubkey: String {
+    var pubkey: Pubkey {
         dms.pubkey
     }
     
@@ -128,7 +128,7 @@ struct DMChatView: View, KeyboardReadable {
     }
 
     func send_message() {
-        let tags = [["p", pubkey]]
+        let tags = [["p", pubkey.hex()]]
         let post_blocks = parse_post_blocks(content: dms.draft)
         let content = render_blocks(blocks: post_blocks)
 
@@ -190,7 +190,7 @@ enum EncEncoding {
     case bech32
 }
 
-func encrypt_message(message: String, privkey: String, to_pk: String, encoding: EncEncoding = .base64) -> String? {
+func encrypt_message(message: String, privkey: Privkey, to_pk: Pubkey, encoding: EncEncoding = .base64) -> String? {
     let iv = random_bytes(count: 16).bytes
     guard let shared_sec = get_shared_secret(privkey: privkey, pubkey: to_pk) else {
         return nil
@@ -209,7 +209,7 @@ func encrypt_message(message: String, privkey: String, to_pk: String, encoding: 
     
 }
 
-func create_encrypted_event(_ message: String, to_pk: String, tags: [[String]], keypair: FullKeypair, created_at: UInt32, kind: UInt32) -> NostrEvent? {
+func create_encrypted_event(_ message: String, to_pk: Pubkey, tags: [[String]], keypair: FullKeypair, created_at: UInt32, kind: UInt32) -> NostrEvent? {
     let privkey = keypair.privkey
     
     guard let enc_content = encrypt_message(message: message, privkey: privkey, to_pk: to_pk) else {
@@ -219,7 +219,7 @@ func create_encrypted_event(_ message: String, to_pk: String, tags: [[String]], 
     return NostrEvent(content: enc_content, keypair: keypair.to_keypair(), kind: kind, tags: tags, createdAt: created_at)
 }
 
-func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair, created_at: UInt32? = nil) -> NostrEvent?
+func create_dm(_ message: String, to_pk: Pubkey, tags: [[String]], keypair: Keypair, created_at: UInt32? = nil) -> NostrEvent?
 {
     let created = created_at ?? UInt32(Date().timeIntervalSince1970)
 

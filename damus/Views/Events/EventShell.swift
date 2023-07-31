@@ -10,11 +10,11 @@ import SwiftUI
 struct EventShell<Content: View>: View {
     let state: DamusState
     let event: NostrEvent
-    let pubkey: String
+    let pubkey: Pubkey
     let options: EventViewOptions
     let content: Content
     
-    init(state: DamusState, event: NostrEvent, pubkey: String, options: EventViewOptions, @ViewBuilder content: () -> Content) {
+    init(state: DamusState, event: NostrEvent, pubkey: Pubkey, options: EventViewOptions, @ViewBuilder content: () -> Content) {
         self.state = state
         self.event = event
         self.options = options

@@ -9,10 +9,10 @@ import SwiftUI
 
 struct CondensedProfilePicturesView: View {
     let state: DamusState
-    let pubkeys: [String]
+    let pubkeys: [Pubkey]
     let maxPictures: Int
 
-    init(state: DamusState, pubkeys: [String], maxPictures: Int) {
+    init(state: DamusState, pubkeys: [Pubkey], maxPictures: Int) {
         self.state = state
         self.pubkeys = pubkeys
         self.maxPictures = min(maxPictures, pubkeys.count)
@@ -33,6 +33,6 @@ struct CondensedProfilePicturesView: View {
 
 struct CondensedProfilePicturesView_Previews: PreviewProvider {
     static var previews: some View {
-        CondensedProfilePicturesView(state: test_damus_state(), pubkeys: ["a", "b", "c", "d"], maxPictures: 3)
+        CondensedProfilePicturesView(state: test_damus_state(), pubkeys: [test_pubkey, test_pubkey, test_pubkey, test_pubkey], maxPictures: 3)
     }
 }

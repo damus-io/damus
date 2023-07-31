@@ -31,7 +31,7 @@ func follow_btn_txt(_ fs: FollowState, follows_you: Bool) -> String {
     }
 }
 
-func followedByString(_ friend_intersection: [String], profiles: Profiles, locale: Locale = Locale.current) -> String {
+func followedByString(_ friend_intersection: [Pubkey], profiles: Profiles, locale: Locale = Locale.current) -> String {
     let bundle = bundleForLocale(locale: locale)
     let names: [String] = friend_intersection.prefix(3).map {
         let profile = profiles.lookup(id: $0)
@@ -90,7 +90,7 @@ struct ProfileView: View {
         self._followers = StateObject(wrappedValue: followers)
     }
 
-    init(damus_state: DamusState, pubkey: String) {
+    init(damus_state: DamusState, pubkey: Pubkey) {
         self.damus_state = damus_state
         self._profile = StateObject(wrappedValue: ProfileModel(pubkey: pubkey, damus: damus_state))
         self._followers = StateObject(wrappedValue: FollowersModel(damus_state: damus_state, target: pubkey))
@@ -493,7 +493,7 @@ struct ProfileView_Previews: PreviewProvider {
 }
 
 struct KeyView: View {
-    let pubkey: String
+    let pubkey: Pubkey
 
     @Environment(\.colorScheme) var colorScheme
 
@@ -566,7 +566,7 @@ extension View {
     }
 }
 
-func check_nip05_validity(pubkey: String, profiles: Profiles) {
+func check_nip05_validity(pubkey: Pubkey, profiles: Profiles) {
     guard let profile = profiles.lookup(id: pubkey),
           let nip05 = profile.nip05,
           profiles.is_validated(pubkey) == nil

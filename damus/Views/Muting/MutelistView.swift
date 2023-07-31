@@ -9,9 +9,9 @@ import SwiftUI
 
 struct MutelistView: View {
     let damus_state: DamusState
-    @State var users: [String]
+    @State var users: [Pubkey]
     
-    func RemoveAction(pubkey: String) -> some View {
+    func RemoveAction(pubkey: Pubkey) -> some View {
         Button {
             guard let mutelist = damus_state.contacts.mutelist else {
                 return

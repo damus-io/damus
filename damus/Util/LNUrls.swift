@@ -15,14 +15,14 @@ enum LNUrlState {
 }
 
 class LNUrls {
-    var endpoints: [String: LNUrlState]
+    var endpoints: [Pubkey: LNUrlState]
 
     init() {
         self.endpoints = [:]
     }
 
     @MainActor
-    func lookup_or_fetch(pubkey: String, lnurl: String) async -> LNUrlPayRequest? {
+    func lookup_or_fetch(pubkey: Pubkey, lnurl: String) async -> LNUrlPayRequest? {
         switch lookup(pubkey: pubkey) {
         case .failed(let tries):
             print("lnurls.lookup_or_fetch failed \(tries) \(lnurl)")
@@ -57,7 +57,7 @@ class LNUrls {
         return v
     }
 
-    func lookup(pubkey: String) -> LNUrlState {
+    func lookup(pubkey: Pubkey) -> LNUrlState {
         return self.endpoints[pubkey] ?? .not_fetched
     }
 }

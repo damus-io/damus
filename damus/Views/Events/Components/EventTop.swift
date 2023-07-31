@@ -10,10 +10,10 @@ import SwiftUI
 struct EventTop: View {
     let state: DamusState
     let event: NostrEvent
-    let pubkey: String
+    let pubkey: Pubkey
     let is_anon: Bool
     
-    init(state: DamusState, event: NostrEvent, pubkey: String, is_anon: Bool) {
+    init(state: DamusState, event: NostrEvent, pubkey: Pubkey, is_anon: Bool) {
         self.state = state
         self.event = event
         self.pubkey = pubkey

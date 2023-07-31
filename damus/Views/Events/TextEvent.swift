@@ -26,11 +26,11 @@ struct EventViewOptions: OptionSet {
 struct TextEvent: View {
     let damus: DamusState
     let event: NostrEvent
-    let pubkey: String
+    let pubkey: Pubkey
     let options: EventViewOptions
     let evdata: EventData
     
-    init(damus: DamusState, event: NostrEvent, pubkey: String, options: EventViewOptions) {
+    init(damus: DamusState, event: NostrEvent, pubkey: Pubkey, options: EventViewOptions) {
         self.damus = damus
         self.event = event
         self.pubkey = pubkey

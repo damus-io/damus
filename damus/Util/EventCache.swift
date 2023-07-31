@@ -61,7 +61,7 @@ class ZapsDataModel: ObservableObject {
         self.zaps = zaps
     }
     
-    func confirm_nwc(reqid: String) {
+    func confirm_nwc(reqid: NoteId) {
         guard let zap = zaps.first(where: { z in z.request.ev.id == reqid }),
               case .pending(let pzap) = zap
         else {
@@ -82,7 +82,7 @@ class ZapsDataModel: ObservableObject {
         zaps.reduce(0) { total, zap in total + zap.amount }
     }
    
-    func from(_ pubkey: String) -> [Zapping] {
+    func from(_ pubkey: Pubkey) -> [Zapping] {
         return self.zaps.filter { z in z.request.ev.pubkey == pubkey }
     }
     
@@ -137,7 +137,7 @@ class EventData {
 }
 
 class EventCache {
-    private var events: [String: NostrEvent] = [:]
+    private var events: [NoteId: NostrEvent] = [:]
     private var replies = ReplyMap()
     private var cancellable: AnyCancellable?
     private var image_metadata: [String: ImageMetadataState] = [:]
@@ -154,7 +154,7 @@ class EventCache {
         }
     }
     
-    func get_cache_data(_ evid: String) -> EventData {
+    func get_cache_data(_ evid: NoteId) -> EventData {
         guard let data = event_data[evid] else {
             let data = EventData()
             event_data[evid] = data
@@ -164,11 +164,11 @@ class EventCache {
         return data
     }
     
-    func is_event_valid(_ evid: String) -> ValidationResult {
+    func is_event_valid(_ evid: NoteId) -> ValidationResult {
         return get_cache_data(evid).validated
     }
     
-    func store_event_validation(evid: String, validated: ValidationResult) {
+    func store_event_validation(evid: NoteId, validated: ValidationResult) {
         get_cache_data(evid).validated = validated
     }
     
@@ -278,7 +278,7 @@ class EventCache {
         return ev
     }
     
-    func lookup(_ evid: String) -> NostrEvent? {
+    func lookup(_ evid: NoteId) -> NostrEvent? {
         return events[evid]
     }
     

@@ -21,7 +21,7 @@ struct QueuedRequest {
 
 struct SeenEvent: Hashable {
     let relay_id: String
-    let evid: String
+    let evid: NoteId
 }
 
 class RelayPool {

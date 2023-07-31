@@ -40,7 +40,7 @@ class ActionBarModel: ObservableObject {
         self.our_reply = our_reply
     }
     
-    func update(damus: DamusState, evid: String) {
+    func update(damus: DamusState, evid: NoteId) {
         self.likes = damus.likes.counts[evid] ?? 0
         self.boosts = damus.boosts.counts[evid] ?? 0
         self.zaps = damus.zaps.event_counts[evid] ?? 0

@@ -125,7 +125,7 @@ struct TranslateView_Previews: PreviewProvider {
     }
 }
 
-func translate_note(profiles: Profiles, privkey: String?, event: NostrEvent, settings: UserSettingsStore, note_lang: String) async -> TranslateStatus {
+func translate_note(profiles: Profiles, privkey: Privkey?, event: NostrEvent, settings: UserSettingsStore, note_lang: String) async -> TranslateStatus {
     
     // If the note language is different from our preferred languages, send a translation request.
     let translator = Translator(settings)

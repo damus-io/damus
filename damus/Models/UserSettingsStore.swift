@@ -11,7 +11,7 @@ import UIKit
 let fallback_zap_amount = 1000
 
 func setting_property_key(key: String) -> String {
-    return pk_setting_key(UserSettingsStore.pubkey ?? "", key: key)
+    return pk_setting_key(UserSettingsStore.pubkey ?? .empty, key: key)
 }
 
 func setting_get_property_value<T>(key: String, scoped_key: String, default_value: T) -> T {
@@ -63,7 +63,7 @@ func setting_set_property_value<T: Equatable>(scoped_key: String, old_value: T, 
     private var value: T
     
     init(key: String, default_value: T) {
-        self.key = pk_setting_key(UserSettingsStore.pubkey ?? "", key: key)
+        self.key = pk_setting_key(UserSettingsStore.pubkey ?? .empty, key: key)
         if let loaded = UserDefaults.standard.string(forKey: self.key), let val = T.init(from: loaded) {
             self.value = val
         } else if let loaded = UserDefaults.standard.string(forKey: key), let val = T.init(from: loaded) {
@@ -91,7 +91,7 @@ func setting_set_property_value<T: Equatable>(scoped_key: String, old_value: T, 
 }
 
 class UserSettingsStore: ObservableObject {
-    static var pubkey: String? = nil
+    static var pubkey: Pubkey? = nil
     static var shared: UserSettingsStore? = nil
     static var bool_options = Set<String>()
     
@@ -261,6 +261,6 @@ class UserSettingsStore: ObservableObject {
     }
 }
 
-func pk_setting_key(_ pubkey: String, key: String) -> String {
-    return "\(pubkey)_\(key)"
+func pk_setting_key(_ pubkey: Pubkey, key: String) -> String {
+    return "\(pubkey.hex())_\(key)"
 }

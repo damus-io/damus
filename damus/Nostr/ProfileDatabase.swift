@@ -25,8 +25,8 @@ final class ProfileDatabase {
     private var queue = DispatchQueue(label: "io.damus.profile_db",
                                       qos: .userInteractive,
                                       attributes: .concurrent)
-    private var network_pull_date_cache = [String: Date]()
-    
+    private var network_pull_date_cache = [Pubkey: Date]()
+
     init(cache_url: URL = ProfileDatabase.profile_cache_url) {
         self.cache_url = cache_url
         set_up()
@@ -73,14 +73,14 @@ final class ProfileDatabase {
         background_context?.mergePolicy = NSMergePolicy(merge: .mergeByPropertyObjectTrumpMergePolicyType)
     }
     
-    private func get_persisted(id: String, context: NSManagedObjectContext) -> PersistedProfile? {
+    private func get_persisted(id: Pubkey, context: NSManagedObjectContext) -> PersistedProfile? {
         let request = NSFetchRequest<PersistedProfile>(entityName: entity_name)
-        request.predicate = NSPredicate(format: "id == %@", id)
+        request.predicate = NSPredicate(format: "id == %@", id.hex())
         request.fetchLimit = 1
         return try? context.fetch(request).first
     }
     
-    func get_network_pull_date(id: String) -> Date? {
+    func get_network_pull_date(id: Pubkey) -> Date? {
         var pull_date: Date?
         queue.sync {
             pull_date = network_pull_date_cache[id]
@@ -90,7 +90,7 @@ final class ProfileDatabase {
         }
         
         let request = NSFetchRequest<PersistedProfile>(entityName: entity_name)
-        request.predicate = NSPredicate(format: "id == %@", id)
+        request.predicate = NSPredicate(format: "id == %@", id.hex())
         request.fetchLimit = 1
         request.propertiesToFetch = ["network_pull_date"]
         guard let profile = try? persistent_container?.viewContext.fetch(request).first else {
@@ -111,7 +111,7 @@ final class ProfileDatabase {
     ///   - id: Profile id (pubkey)
     ///   - profile: Profile object to be stored
     ///   - last_update: Date that the Profile was updated
-    func upsert(id: String, profile: Profile, last_update: Date) async throws {
+    func upsert(id: Pubkey, profile: Profile, last_update: Date) async throws {
         guard let context = background_context else {
             throw ProfileDatabaseError.missing_context
         }
@@ -126,7 +126,7 @@ final class ProfileDatabase {
                 }
             } else {
                 persisted_profile = NSEntityDescription.insertNewObject(forEntityName: self.entity_name, into: context) as? PersistedProfile
-                persisted_profile?.id = id
+                persisted_profile?.id = id.hex()
             }
             persisted_profile?.copyValues(from: profile)
             persisted_profile?.last_update = last_update
@@ -141,7 +141,7 @@ final class ProfileDatabase {
         }
     }
     
-    func get(id: String) -> Profile? {
+    func get(id: Pubkey) -> Profile? {
         guard let container = persistent_container,
               let profile = get_persisted(id: id, context: container.viewContext) else {
             return nil

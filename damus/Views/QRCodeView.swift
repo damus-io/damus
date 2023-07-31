@@ -9,7 +9,7 @@ import SwiftUI
 import CoreImage.CIFilterBuiltins
 
 struct ProfileScanResult: Equatable {
-    let pubkey: String
+    let pubkey: Pubkey
     
     init(hex: String) {
         self.pubkey = hex
@@ -42,7 +42,7 @@ struct ProfileScanResult: Equatable {
 
 struct QRCodeView: View {
     let damus_state: DamusState
-    @State var pubkey: String
+    @State var pubkey: Pubkey
     
     @Environment(\.presentationMode) var presentationMode
     

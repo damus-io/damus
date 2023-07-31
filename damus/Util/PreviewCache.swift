@@ -65,9 +65,9 @@ enum PreviewState {
 }
 
 class PreviewCache {
-    private var previews: [String: Preview] = [:]
+    private var previews: [NoteId: Preview] = [:]
     
-    func lookup(_ evid: String) -> Preview? {
+    func lookup(_ evid: NoteId) -> Preview? {
         return previews[evid]
     }
 }
