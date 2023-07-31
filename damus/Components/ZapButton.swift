@@ -141,10 +141,10 @@ struct ZapButton: View {
 
 struct ZapButton_Previews: PreviewProvider {
     static var previews: some View {
-        let pending_zap = PendingZap(amount_msat: 1000, target: ZapTarget.note(id: "noteid", author: "author"), request: .normal(test_zap_request), type: .pub, state: .external(.init(state: .fetching_invoice)))
+        let pending_zap = PendingZap(amount_msat: 1000, target: ZapTarget.note(id: test_note.id, author: test_note.pubkey), request: .normal(test_zap_request), type: .pub, state: .external(.init(state: .fetching_invoice)))
         let zaps = ZapsDataModel([.pending(pending_zap)])
         
-        ZapButton(damus_state: test_damus_state(), target: ZapTarget.note(id: test_event.id, author: test_event.pubkey), lnurl: "lnurl", zaps: zaps)
+        ZapButton(damus_state: test_damus_state(), target: ZapTarget.note(id: test_note.id, author: test_note.pubkey), lnurl: "lnurl", zaps: zaps)
     }
 }
 

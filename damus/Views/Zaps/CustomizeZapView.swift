@@ -302,7 +302,7 @@ extension View {
 
 struct CustomizeZapView_Previews: PreviewProvider {
     static var previews: some View {
-        CustomizeZapView(state: test_damus_state(), target: ZapTarget.note(id: test_event.id, author: test_event.pubkey), lnurl: "")
+        CustomizeZapView(state: test_damus_state(), target: ZapTarget.note(id: test_note.id, author: test_note.pubkey), lnurl: "")
             .frame(width: 400, height: 600)
     }
 }

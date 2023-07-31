@@ -12,9 +12,9 @@ let test_pubkey = "a9952fe066ced622167acb8069a0dfd1d44d9493ef2a4c28cf93e2877248b
 let test_keypair = Keypair(pubkey: test_pubkey, privkey: test_seckey)
 let test_keypair_full = test_keypair.to_full()!
 
-let test_event_holder = EventHolder(events: [], incoming: [test_event])
+let test_event_holder = EventHolder(events: [], incoming: [test_note])
 
-let test_event =
+let test_note =
         NostrEvent(
             content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jpg cool",
             keypair: test_keypair,
@@ -32,18 +32,18 @@ let test_event_group = EventGroup(events: test_reposts)
 let test_zap_invoice = ZapInvoice(description: .description("description"), amount: 10000, string: "lnbc1", expiry: 1000000, payment_hash: Data(), created_at: 1000000)
 let test_zap_request_ev = NostrEvent(content: "hi", keypair: test_keypair, kind: 9734)!
 let test_zap_request = ZapRequest(ev: test_zap_request_ev)
-let test_zap = Zap(event: test_event, invoice: test_zap_invoice, zapper: "zapper", target: .profile("pk"), raw_request: test_zap_request, is_anon: false, private_request: nil)
+let test_zap = Zap(event: test_note, invoice: test_zap_invoice, zapper: test_note.pubkey, target: .profile(test_pubkey), raw_request: test_zap_request, is_anon: false, private_request: nil)
 
-let test_private_zap = Zap(event: test_event, invoice: test_zap_invoice, zapper: "zapper", target: .profile("pk"), raw_request: test_zap_request, is_anon: false, private_request: .init(ev: test_event))
+let test_private_zap = Zap(event: test_note, invoice: test_zap_invoice, zapper: test_note.pubkey, target: .profile(test_pubkey), raw_request: test_zap_request, is_anon: false, private_request: .init(ev: test_note))
 
-let test_pending_zap = PendingZap(amount_msat: 10000, target: .note(id: "id", author: "pk"), request: .normal(test_zap_request), type: .pub, state: .external(.init(state: .fetching_invoice)))
+let test_pending_zap = PendingZap(amount_msat: 10000, target: .note(id: test_note.id, author: test_note.pubkey), request: .normal(test_zap_request), type: .pub, state: .external(.init(state: .fetching_invoice)))
 
 
 func test_damus_state() -> DamusState {
     let damus = DamusState.empty
 
     let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", banner: "", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io", damus_donation: nil)
-    let tsprof = TimestampedProfile(profile: prof, timestamp: 0, event: test_event)
+    let tsprof = TimestampedProfile(profile: prof, timestamp: 0, event: test_note)
     damus.profiles.add(id: test_pubkey, profile: tsprof)
     return damus
 }

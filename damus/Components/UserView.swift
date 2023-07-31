@@ -56,6 +56,6 @@ struct UserView: View {
 
 struct UserView_Previews: PreviewProvider {
     static var previews: some View {
-        UserView(damus_state: test_damus_state(), pubkey: "pk")
+        UserView(damus_state: test_damus_state(), pubkey: test_note.pubkey)
     }
 }

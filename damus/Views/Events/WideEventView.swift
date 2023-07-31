@@ -17,6 +17,6 @@ struct WideEventView: View {
 
 struct WideEventView_Previews: PreviewProvider {
     static var previews: some View {
-        WideEventView(event: test_event)
+        WideEventView(event: test_note)
     }
 }

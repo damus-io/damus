@@ -84,7 +84,7 @@ struct NotificationItemView: View {
     }
 }
 
-let test_notification_item: NotificationItem = .repost("evid", test_event_group)
+let test_notification_item: NotificationItem = .repost(test_note.id, test_event_group)
 
 struct NotificationItemView_Previews: PreviewProvider {
     static var previews: some View {

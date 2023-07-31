@@ -54,9 +54,9 @@ struct ProfileNameView: View {
 struct ProfileNameView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
-            ProfileNameView(pubkey: test_event.pubkey, profile: nil, follows_you: true, damus: test_damus_state())
-            
-            ProfileNameView(pubkey: test_event.pubkey, profile: nil, follows_you: false, damus: test_damus_state())
+            ProfileNameView(pubkey: test_note.pubkey, profile: nil, follows_you: true, damus: test_damus_state())
+
+            ProfileNameView(pubkey: test_note.pubkey, profile: nil, follows_you: false, damus: test_damus_state())
         }
     }
 }

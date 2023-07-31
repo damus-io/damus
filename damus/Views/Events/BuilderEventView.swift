@@ -93,7 +93,7 @@ struct BuilderEventView: View {
 
 struct BuilderEventView_Previews: PreviewProvider {
     static var previews: some View {
-        BuilderEventView(damus: test_damus_state(), event_id: "536bee9e83c818e3b82c101935128ae27a0d4290039aaf253efe5f09232c1962")
+        BuilderEventView(damus: test_damus_state(), event_id: test_note.id)
     }
 }
 

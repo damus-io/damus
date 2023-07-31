@@ -33,6 +33,6 @@ struct RepostsView: View {
 struct RepostsView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
-        RepostsView(damus_state: state, model: RepostsModel(state: state, target: "pubkey"))
+        RepostsView(damus_state: state, model: RepostsModel(state: state, target: test_note.id))
     }
 }

@@ -77,7 +77,7 @@ struct MutedEventView_Previews: PreviewProvider {
     
     static var previews: some View {
         
-        MutedEventView(damus_state: test_damus_state(), event: test_event, selected: false)
+        MutedEventView(damus_state: test_damus_state(), event: test_note, selected: false)
             .frame(width: .infinity, height: 50)
     }
 }

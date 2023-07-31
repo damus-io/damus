@@ -121,7 +121,7 @@ extension View {
 struct TranslateView_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state()
-        TranslateView(damus_state: ds, event: test_event, size: .normal)
+        TranslateView(damus_state: ds, event: test_note, size: .normal)
     }
 }
 

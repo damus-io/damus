@@ -75,10 +75,10 @@ func event_is_anonymous(ev: NostrEvent) -> Bool {
 struct TextEvent_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 20) {
-            TextEvent(damus: test_damus_state(), event: test_event, pubkey: "pk", options: [])
+            TextEvent(damus: test_damus_state(), event: test_note, pubkey: test_pubkey, options: [])
                 .frame(height: 400)
             
-            TextEvent(damus: test_damus_state(), event: test_event, pubkey: "pk", options: [.wide])
+            TextEvent(damus: test_damus_state(), event: test_note, pubkey: test_pubkey, options: [.wide])
                 .frame(height: 400)
         }
     }

@@ -601,7 +601,7 @@ struct NoteContentView_Previews: PreviewProvider {
         let state = test_damus_state()
 
         VStack {
-            NoteContentView(damus_state: state, event: test_event, show_images: true, size: .normal, options: [])
+            NoteContentView(damus_state: state, event: test_note, show_images: true, size: .normal, options: [])
 
             NoteContentView(damus_state: state, event: test_longform_event.event, show_images: true, size: .normal, options: [.wide])
                 .border(Color.red)

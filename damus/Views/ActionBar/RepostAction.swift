@@ -61,6 +61,6 @@ struct RepostAction: View {
 
 struct RepostAction_Previews: PreviewProvider {
     static var previews: some View {
-        RepostAction(damus_state: test_damus_state(), event: test_event)
+        RepostAction(damus_state: test_damus_state(), event: test_note)
     }
 }

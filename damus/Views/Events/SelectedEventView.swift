@@ -86,6 +86,6 @@ struct SelectedEventView: View {
 
 struct SelectedEventView_Previews: PreviewProvider {
     static var previews: some View {
-        SelectedEventView(damus: test_damus_state(), event: test_event, size: .selected)
+        SelectedEventView(damus: test_damus_state(), event: test_note, size: .selected)
     }
 }

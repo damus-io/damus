@@ -143,7 +143,7 @@ struct EventView_Previews: PreviewProvider {
             
              */
 
-            EventView( damus: test_damus_state(), event: test_event )
+            EventView( damus: test_damus_state(), event: test_note )
 
             EventView( damus: test_damus_state(), event: test_longform_event.event, options: [.wide] )
         }

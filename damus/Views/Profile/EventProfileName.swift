@@ -106,6 +106,6 @@ struct EventProfileName: View {
 
 struct EventProfileName_Previews: PreviewProvider {
     static var previews: some View {
-        EventProfileName(pubkey: "pk", profile: nil, damus: test_damus_state())
+        EventProfileName(pubkey: test_note.pubkey, profile: nil, damus: test_damus_state())
     }
 }

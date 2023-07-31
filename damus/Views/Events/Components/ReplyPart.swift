@@ -25,6 +25,6 @@ struct ReplyPart: View {
 
 struct ReplyPart_Previews: PreviewProvider {
     static var previews: some View {
-        ReplyPart(event: test_event, privkey: nil, profiles: test_damus_state().profiles)
+        ReplyPart(event: test_note, privkey: nil, profiles: test_damus_state().profiles)
     }
 }

@@ -261,11 +261,11 @@ struct EventGroupView: View {
 struct EventGroupView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
-            EventGroupView(state: test_damus_state(), event: test_event, group: .repost(test_event_group))
+            EventGroupView(state: test_damus_state(), event: test_note, group: .repost(test_event_group))
                 .frame(height: 200)
                 .padding()
             
-            EventGroupView(state: test_damus_state(), event: test_event, group: .reaction(test_event_group))
+            EventGroupView(state: test_damus_state(), event: test_note, group: .reaction(test_event_group))
                 .frame(height: 200)
                 .padding()
         }

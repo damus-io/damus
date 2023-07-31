@@ -51,6 +51,6 @@ struct EventProfile: View {
 
 struct EventProfile_Previews: PreviewProvider {
     static var previews: some View {
-        EventProfile(damus_state: test_damus_state(), pubkey: "pk", profile: nil, size: .normal)
+        EventProfile(damus_state: test_damus_state(), pubkey: test_note.pubkey, profile: nil, size: .normal)
     }
 }

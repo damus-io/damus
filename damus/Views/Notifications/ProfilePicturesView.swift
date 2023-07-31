@@ -25,6 +25,7 @@ struct ProfilePicturesView: View {
 
 struct ProfilePicturesView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfilePicturesView(state: test_damus_state(), pubkeys: ["a", "b"])
+        let pubkey = test_note.pubkey
+        ProfilePicturesView(state: test_damus_state(), pubkeys: [pubkey, pubkey])
     }
 }

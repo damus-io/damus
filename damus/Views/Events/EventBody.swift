@@ -43,6 +43,6 @@ struct EventBody: View {
 
 struct EventBody_Previews: PreviewProvider {
     static var previews: some View {
-        EventBody(damus_state: test_damus_state(), event: test_event, size: .normal, options: [])
+        EventBody(damus_state: test_damus_state(), event: test_note, size: .normal, options: [])
     }
 }
