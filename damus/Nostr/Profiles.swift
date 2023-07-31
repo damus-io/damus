@@ -100,7 +100,9 @@ class Profiles {
         if profile != nil {
             return true
         }
-        
+        // check memory first
+        return false
+
         // then disk
         guard let pull_date = database.get_network_pull_date(id: id) else {
             return false
