@@ -7,14 +7,14 @@
 
 import Foundation
 
-struct AsciiCharacter: ExpressibleByStringLiteral, Equatable, Hashable {
+struct AsciiCharacter: ExpressibleByStringLiteral, CustomStringConvertible, Equatable, Hashable {
     private let value: UInt8
 
     var cchar: CChar {
         return CChar(bitPattern: value)
     }
 
-    var string: String {
+    var description: String {
         return String(UnicodeScalar(UInt8(bitPattern: cchar)))
     }
 

@@ -15,7 +15,7 @@ struct Reference {
     }
 
     func to_referenced_id() -> ReferencedId {
-        ReferencedId(ref_id: id.string(), relay_id: nil, key: key.string)
+        ReferencedId(ref_id: id.string(), relay_id: nil, key: key.description)
     }
 }
 
