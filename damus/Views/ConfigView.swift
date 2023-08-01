@@ -94,12 +94,16 @@ struct ConfigView: View {
                         })
                     }
                 }
-
-
-                if let bundleShortVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"], let bundleVersion = Bundle.main.infoDictionary?["CFBundleVersion"] {
-                    Section(NSLocalizedString("Version", comment: "Section title for displaying the version number of the Damus app.")) {
-                        Text(verbatim: "\(bundleShortVersion) (\(bundleVersion))")
-                    }
+                
+                Section(NSLocalizedString("Version", comment: "Section title for displaying the version number of the Damus app.")) {
+                    Text(verbatim: VersionInfo.version)
+                        .contextMenu {
+                            Button {
+                                UIPasteboard.general.string = VersionInfo.version
+                            } label: {
+                                Label(NSLocalizedString("Copy", comment: "Context menu option for copying the version of damus."), image: "copy2")
+                            }
+                        }
                 }
             }
         }

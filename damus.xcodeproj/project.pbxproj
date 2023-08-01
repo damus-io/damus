@@ -78,6 +78,8 @@
 		4C1A9A2529DDDF2600516EAC /* ZapSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2429DDDF2600516EAC /* ZapSettingsView.swift */; };
 		4C1A9A2729DDE31900516EAC /* TranslationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2629DDE31900516EAC /* TranslationSettingsView.swift */; };
 		4C1A9A2A29DDF54400516EAC /* DamusVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1A9A2929DDF54400516EAC /* DamusVideoPlayer.swift */; };
+		4C1D4FB12A7958E60024F453 /* VersionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1D4FB02A7958E60024F453 /* VersionInfo.swift */; };
+		4C1D4FB42A7967990024F453 /* build-git-hash.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4C1D4FB32A7967990024F453 /* build-git-hash.txt */; };
 		4C216F32286E388800040376 /* DMChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F31286E388800040376 /* DMChatView.swift */; };
 		4C216F34286F5ACD00040376 /* DMView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F33286F5ACD00040376 /* DMView.swift */; };
 		4C216F362870A9A700040376 /* InputDismissKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C216F352870A9A700040376 /* InputDismissKeyboard.swift */; };
@@ -569,6 +571,8 @@
 		4C1A9A2429DDDF2600516EAC /* ZapSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapSettingsView.swift; sourceTree = "<group>"; };
 		4C1A9A2629DDE31900516EAC /* TranslationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationSettingsView.swift; sourceTree = "<group>"; };
 		4C1A9A2929DDF54400516EAC /* DamusVideoPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusVideoPlayer.swift; sourceTree = "<group>"; };
+		4C1D4FB02A7958E60024F453 /* VersionInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VersionInfo.swift; sourceTree = "<group>"; };
+		4C1D4FB32A7967990024F453 /* build-git-hash.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "build-git-hash.txt"; sourceTree = SOURCE_ROOT; };
 		4C216F31286E388800040376 /* DMChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMChatView.swift; sourceTree = "<group>"; };
 		4C216F33286F5ACD00040376 /* DMView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMView.swift; sourceTree = "<group>"; };
 		4C216F352870A9A700040376 /* InputDismissKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputDismissKeyboard.swift; sourceTree = "<group>"; };
@@ -1343,6 +1347,7 @@
 		4C7FF7D628233637009601DB /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				4C1D4FB02A7958E60024F453 /* VersionInfo.swift */,
 				4C7D09612A098D0E00943473 /* WalletConnect.swift */,
 				4C198DF329F88D23004C165C /* Images */,
 				4C198DEA29F88C6B004C165C /* BlurHash */,
@@ -1640,6 +1645,7 @@
 		4CE6DEE527F7A08100C66700 /* damus */ = {
 			isa = PBXGroup;
 			children = (
+				4C1D4FB32A7967990024F453 /* build-git-hash.txt */,
 				4CA3529C2A76AE47003BB08B /* Notify */,
 				F7F0BA23297892AE009531F3 /* Modifiers */,
 				4C4A3A5A288A1B2200453788 /* damus.entitlements */,
@@ -1850,6 +1856,7 @@
 			buildPhases = (
 				4CE6DEDF27F7A08100C66700 /* Sources */,
 				4CE6DEE027F7A08100C66700 /* Frameworks */,
+				4C1D4FB22A7965230024F453 /* ShellScript */,
 				4CE6DEE127F7A08100C66700 /* Resources */,
 			);
 			buildRules = (
@@ -1986,6 +1993,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C1D4FB42A7967990024F453 /* build-git-hash.txt in Resources */,
 				3ACB685F297633BC00C46468 /* Localizable.strings in Resources */,
 				4CE6DEEE27F7A08200C66700 /* Preview Assets.xcassets in Resources */,
 				3ACB685C297633BC00C46468 /* InfoPlist.strings in Resources */,
@@ -2015,6 +2023,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		4C1D4FB22A7965230024F453 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "git rev-parse --short HEAD > \"${SRCROOT}/build-git-hash.txt\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4CE6DEDF27F7A08100C66700 /* Sources */ = {
@@ -2209,6 +2237,7 @@
 				4C06670628FCB08600038D2A /* ImageCarousel.swift in Sources */,
 				3A23838E2A297DD200E5AA2E /* ZapButtonModel.swift in Sources */,
 				F71694F82A6983AF001F4053 /* GrayGradient.swift in Sources */,
+				4C1D4FB12A7958E60024F453 /* VersionInfo.swift in Sources */,
 				5053ACA72A56DF3B00851AE3 /* DeveloperSettingsView.swift in Sources */,
 				F79C7FAD29D5E9620000F946 /* EditPictureControl.swift in Sources */,
 				4C9F18E229AA9B6C008C55EC /* CustomizeZapView.swift in Sources */,
@@ -2570,7 +2599,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -2634,7 +2663,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "";
