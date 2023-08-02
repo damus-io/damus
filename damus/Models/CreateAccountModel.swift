@@ -38,8 +38,8 @@ class CreateAccountModel: ObservableObject {
     init(real: String = "", nick: String = "", about: String = "") {
         let keypair = generate_new_keypair()
         self.pubkey = keypair.pubkey
-        self.privkey = keypair.privkey!
-        
+        self.privkey = keypair.privkey
+
         self.real_name = real
         self.nick_name = nick
         self.about = about

@@ -10,7 +10,7 @@ import XCTest
 
 final class UserSearchCacheTests: XCTestCase {
 
-    var keypair: Keypair? = nil
+    var keypair: FullKeypair? = nil
     let damusState = DamusState.empty
     let nip05 = "_@somedomain.com"
 

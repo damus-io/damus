@@ -102,11 +102,11 @@ func bech32_note_id(_ evid: String) -> String? {
     return bech32_encode(hrp: "note", bytes)
 }
 
-func generate_new_keypair() -> Keypair {
+func generate_new_keypair() -> FullKeypair {
     let key = try! secp256k1.Signing.PrivateKey()
     let privkey = hex_encode(key.rawRepresentation)
     let pubkey = hex_encode(Data(key.publicKey.xonly.bytes))
-    return Keypair(pubkey: pubkey, privkey: privkey)
+    return FullKeypair(pubkey: pubkey, privkey: privkey)
 }
 
 func privkey_to_pubkey_raw(sec: [UInt8]) -> Pubkey? {

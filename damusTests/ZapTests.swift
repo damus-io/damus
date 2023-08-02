@@ -20,8 +20,8 @@ final class ZapTests: XCTestCase {
     }
     
     func test_private_zap() throws {
-        let alice = generate_new_keypair().to_full()!
-        let bob = generate_new_keypair().to_full()!
+        let alice = generate_new_keypair()
+        let bob = generate_new_keypair()
         let target = ZapTarget.profile(bob.pubkey)
         
         let message = "hey bob!"

@@ -19,7 +19,7 @@ struct CreateAccountView: View {
     func regen_key() {
         let keypair = generate_new_keypair()
         self.account.pubkey = keypair.pubkey
-        self.account.privkey = keypair.privkey!
+        self.account.privkey = keypair.privkey
     }
     
     var body: some View {

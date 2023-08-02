@@ -659,7 +659,7 @@ func make_zap_request_event(keypair: FullKeypair, content: String, relays: [Rela
         break
     case .anon:
         tags.append(["anon"])
-        kp = generate_new_keypair().to_full()!
+        kp = generate_new_keypair()
     case .priv:
         guard let priv_kp = generate_private_keypair(our_privkey: keypair.privkey, id: target.id, created_at: now) else {
             return nil

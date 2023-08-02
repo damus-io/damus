@@ -110,7 +110,7 @@ struct KeySettingsView: View {
 struct KeySettingsView_Previews: PreviewProvider {
     static var previews: some View {
         let kp = generate_new_keypair()
-        KeySettingsView(keypair: kp)
+        KeySettingsView(keypair: kp.to_keypair())
     }
 }
 
