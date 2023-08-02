@@ -118,78 +118,7 @@ enum Route: Hashable {
     }
 
     static func == (lhs: Route, rhs: Route) -> Bool {
-        switch (lhs, rhs) {
-        case (.ProfileByKey (let lhs_pubkey), .ProfileByKey(let rhs_pubkey)):
-            return lhs_pubkey == rhs_pubkey
-        case (.Profile (let lhs_profile, _), .Profile(let rhs_profile, _)):
-            return lhs_profile == rhs_profile
-        case (.Followers, .Followers):
-            return true
-        case (.Relay (let lhs_relay, _), .Relay (let rhs_relay, _)):
-            return lhs_relay == rhs_relay
-        case (.RelayDetail(let lhs_relay, _), .RelayDetail(let rhs_relay, _)):
-            return lhs_relay == rhs_relay
-        case (.Following, .Following):
-            return true
-        case (.MuteList(let lhs_users), .MuteList(let rhs_users)):
-            return lhs_users == rhs_users
-        case (.RelayConfig, .RelayConfig):
-            return true
-        case (.Bookmarks, .Bookmarks):
-            return true
-        case (.Config, .Config):
-            return true
-        case (.EditMetadata, .EditMetadata):
-            return true
-        case (.DMChat(let lhs_dms), .DMChat(let rhs_dms)):
-            return lhs_dms.our_pubkey == rhs_dms.our_pubkey
-        case (.UserRelays(let lhs_relays), .UserRelays(let rhs_relays)):
-            return lhs_relays == rhs_relays
-        case (.KeySettings(let lhs_keypair), .KeySettings(let rhs_keypair)):
-            return lhs_keypair.pubkey == rhs_keypair.pubkey
-        case (.AppearanceSettings, .AppearanceSettings):
-            return true
-        case (.NotificationSettings, .NotificationSettings):
-            return true
-        case (.ZapSettings, .ZapSettings):
-            return true
-        case (.TranslationSettings, .TranslationSettings):
-            return true
-        case (.SearchSettings, .SearchSettings):
-            return true
-        case (.ReactionsSettings, .ReactionsSettings):
-            return true
-        case (.DeveloperSettings, .DeveloperSettings):
-            return true
-        case (.Thread(let lhs_threadModel), .Thread(thread: let rhs_threadModel)):
-            return lhs_threadModel.event.id == rhs_threadModel.event.id
-        case (.Reposts(let lhs_reposts), .Reposts(let rhs_reposts)):
-            return lhs_reposts.target == rhs_reposts.target
-        case (.Reactions(let lhs_reactions), .Reactions(let rhs_reactions)):
-            return lhs_reactions.target == rhs_reactions.target
-        case (.Zaps(let lhs_target), .Zaps(let rhs_target)):
-            return lhs_target == rhs_target
-        case (.Search(let lhs_search), .Search(let rhs_search)):
-            return lhs_search.sub_id == rhs_search.sub_id && lhs_search.profiles_subid == rhs_search.profiles_subid
-        case (.EULA, .EULA):
-            return true
-        case (.Login, .Login):
-            return true
-        case (.CreateAccount, .CreateAccount):
-            return true
-        case (.SaveKeys(let lhs_account), .SaveKeys(let rhs_account)):
-            return lhs_account.pubkey == rhs_account.pubkey
-        case (.Wallet, .Wallet):
-            return true
-        case (.WalletScanner, .WalletScanner):
-            return true
-        case (.FollowersYouKnow, .FollowersYouKnow):
-            return true
-        case (.Script, .Script):
-            return true
-        default:
-            return false
-        }
+        return lhs.hashValue == rhs.hashValue
     }
 
     func hash(into hasher: inout Hasher) {
