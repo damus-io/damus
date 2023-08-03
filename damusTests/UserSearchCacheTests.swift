@@ -131,7 +131,7 @@ final class UserSearchCacheTests: XCTestCase {
             ["p", $0.element.key, "", $0.element.value]
         }
 
-        return NostrEvent(content: relayJson, keypair: keypair, kind: NostrKind.contacts.rawValue, tags: tags)!
+        return NostrEvent(content: relayJson, keypair: keypair.to_keypair(), kind: NostrKind.contacts.rawValue, tags: tags)!
     }
 
 }
