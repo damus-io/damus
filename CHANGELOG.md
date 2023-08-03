@@ -1,3 +1,28 @@
+## [1.6-8]: "nostrdb prep" 2023-08-03
+
+### Added
+
+- Suggested Users to Follow (Joel Klabo)
+- Add support for multiple reactions (Suhail Saqan)
+
+
+### Changed
+
+- Improved memory usage and performance when processing events (William Casarin)
+
+
+### Fixed
+
+- Fixed disappearing text on iOS17 (cr0bar)
+- Fix UTF support for hashtags (Daniel D‘Aquino)
+- Fix compilation error on test target in UserSearchCacheTests (Daniel D‘Aquino)
+- Fix nav crashing and buggyness (William Casarin)
+- Allow relay logs to be opened in dev mode even if relay (Daniel D'Aquino)
+- endless connection attempt loop after user removes relay (Bryan Montz)
+
+
+[1.6-8]: https://github.com/damus-io/damus/releases/tag/v1.6-8
+
 ## 1.6 (7): "Less bad" - 2023-07-16
 
 ### Added
