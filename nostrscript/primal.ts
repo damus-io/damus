@@ -3,7 +3,7 @@ import * as nostr from './nostr'
 
 export function go(): i32 {
 	let subid = "sidebar_trending"
-	let relay = 'wss://cache3.primal.net/cache15'
+	let relay = 'wss://cache0.primal.net/cache17'
 	var done: i32 = 0
 	var events: i32 = 0
 

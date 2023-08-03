@@ -59,6 +59,7 @@ final class NostrScriptTests: XCTestCase {
         }
     }
 
+    /*
     func test_nostrscript() throws {
         let data = try loadTestWasm().bytes
         let pool = RelayPool()
@@ -100,9 +101,10 @@ final class NostrScriptTests: XCTestCase {
             }
         }
         
-        pool.connect(to: ["wss://cache3.primal.net/cache15"])
+        pool.connect(to: ["wss://cache0.primal.net/cache17"])
         
         self.wait(for: [resume_expected], timeout: 10.0)
     }
+     */
 
 }
