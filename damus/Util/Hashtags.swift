@@ -42,7 +42,7 @@ let custom_hashtags: [String: CustomHashtag] = [
 
 func hashtag_str(_ htag: String) -> CompatibleText {
     var attributedString = AttributedString(stringLiteral: "#\(htag)")
-    attributedString.link = URL(string: "damus:t:\(htag)")
+    attributedString.link = URL(string: "damus:t:\(htag.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? htag)")
     
     let lowertag = htag.lowercased()
     
