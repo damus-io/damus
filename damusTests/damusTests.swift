@@ -180,15 +180,17 @@ class damusTests: XCTestCase {
     }
     
     func testMakeHashtagPost() {
-        let post = NostrPost(content: "#damus some content #bitcoin derp", references: [])
+        let post = NostrPost(content: "#damus some content #bitcoin derp #かっこいい wow", references: [])
         let ev = post_to_event(post: post, keypair: test_keypair_full)!
 
-        XCTAssertEqual(ev.tags.count, 2)
-        XCTAssertEqual(ev.content, "#damus some content #bitcoin derp")
+        XCTAssertEqual(ev.tags.count, 3)
+        XCTAssertEqual(ev.content, "#damus some content #bitcoin derp #かっこいい wow")
         XCTAssertEqual(ev.tags[0][0], "t")
         XCTAssertEqual(ev.tags[0][1], "damus")
         XCTAssertEqual(ev.tags[1][0], "t")
         XCTAssertEqual(ev.tags[1][1], "bitcoin")
+        XCTAssertEqual(ev.tags[2][0], "t")
+        XCTAssertEqual(ev.tags[2][1], "かっこいい")
         
     }
     func testParseMentionOnlyText() {
