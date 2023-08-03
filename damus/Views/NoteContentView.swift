@@ -599,12 +599,19 @@ func trim_prefix(_ str: String) -> String {
 struct NoteContentView_Previews: PreviewProvider {
     static var previews: some View {
         let state = test_damus_state()
+        let state2 = test_damus_state()
 
-        VStack {
-            NoteContentView(damus_state: state, event: test_note, show_images: true, size: .normal, options: [])
+        Group {
+            VStack {
+                NoteContentView(damus_state: state, event: test_note, show_images: true, size: .normal, options: [])
+            }
+            .previewDisplayName("Short note")
 
-            NoteContentView(damus_state: state, event: test_longform_event.event, show_images: true, size: .normal, options: [.wide])
-                .border(Color.red)
+            VStack {
+                NoteContentView(damus_state: state2, event: test_longform_event.event, show_images: true, size: .normal, options: [.wide])
+                    .border(Color.red)
+            }
+            .previewDisplayName("Long-form note")
         }
     }
 }
