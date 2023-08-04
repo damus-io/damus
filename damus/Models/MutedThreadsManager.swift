@@ -24,7 +24,8 @@ func saveMutedThreads(pubkey: Pubkey, currentValue: [NoteId], value: [NoteId]) -
     let uniqueMutedThreads = Array(Set(value))
 
     if uniqueMutedThreads != currentValue {
-        UserDefaults.standard.set(uniqueMutedThreads, forKey: getMutedThreadsKey(pubkey: pubkey))
+        let ids = uniqueMutedThreads.map { note_id in return note_id.hex() }
+        UserDefaults.standard.set(ids, forKey: getMutedThreadsKey(pubkey: pubkey))
         return true
     }
 
