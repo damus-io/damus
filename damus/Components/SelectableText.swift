@@ -29,7 +29,6 @@ struct SelectableText: View {
             .padding([.leading, .trailing], -1.0)
             .onAppear {
                 self.selectedTextWidth = geo.size.width
-                self.selectedTextHeight = 100000.0
             }
             .onChange(of: geo.size) { newSize in
                 self.selectedTextWidth = newSize.width
