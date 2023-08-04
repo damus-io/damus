@@ -75,7 +75,7 @@ enum Route: Hashable {
         case .KeySettings(let keypair):
             KeySettingsView(keypair: keypair)
         case .AppearanceSettings(let settings):
-            AppearanceSettingsView(settings: settings)
+            AppearanceSettingsView(damus_state: damusState, settings: settings)
         case .NotificationSettings(let settings):
             NotificationSettingsView(settings: settings)
         case .ZapSettings(let settings):

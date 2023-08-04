@@ -33,7 +33,8 @@ struct NoteContentView: View {
 
     @ObservedObject var artifacts_model: NoteArtifactsModel
     @ObservedObject var preview_model: PreviewModel
-    
+    @ObservedObject var settings: UserSettingsStore
+
     var note_artifacts: NoteArtifacts {
         return self.artifacts_model.state.artifacts ?? .separated(.just_content(event.get_content(damus_state.keypair.privkey)))
     }
@@ -48,6 +49,7 @@ struct NoteContentView: View {
         let cached = damus_state.events.get_cache_data(event.id)
         self._preview_model = ObservedObject(wrappedValue: cached.preview_model)
         self._artifacts_model = ObservedObject(wrappedValue: cached.artifacts_model)
+        self._settings = ObservedObject(wrappedValue: damus_state.settings)
     }
     
     var truncate: Bool {
@@ -72,10 +74,10 @@ struct NoteContentView: View {
         Group {
             if truncate {
                 TruncatedText(text: content)
-                    .font(eventviewsize_to_font(size))
+                    .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
             } else {
                 content.text
-                    .font(eventviewsize_to_font(size))
+                    .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
             }
         }
     }

@@ -102,18 +102,18 @@ func make_actionbar_model(ev: NoteId, damus: DamusState) -> ActionBarModel {
     return model
 }
 
-func eventviewsize_to_font(_ size: EventViewKind) -> Font {
+func eventviewsize_to_font(_ size: EventViewKind, font_size: Double) -> Font {
     switch size {
     case .small:
-        return .body
+        return Font.system(size: 12.0 * font_size)
     case .normal:
-        return .body
+        return Font.system(size: 17.0 * font_size) // Assuming .body is 17pt by default
     case .selected:
-        return .custom("selected", size: 21.0)
+        return .custom("selected", size: 21.0 * font_size)
     case .title:
-        return .title
+        return Font.system(size: 24.0 * font_size) // Assuming .title is 24pt by default
     case .subheadline:
-        return .subheadline
+        return Font.system(size: 14.0 * font_size) // Assuming .subheadline is 14pt by default
     }
 }
 

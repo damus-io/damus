@@ -42,7 +42,7 @@ struct TranslateView: View {
         .translate_button_style()
     }
     
-    func TranslatedView(lang: String?, artifacts: NoteArtifactsSeparated) -> some View {
+    func TranslatedView(lang: String?, artifacts: NoteArtifactsSeparated, font_size: Double) -> some View {
         return VStack(alignment: .leading) {
             let translatedFromLanguageString = String(format: NSLocalizedString("Translated from %@", comment: "Button to indicate that the note has been translated from a different language."), lang ?? "ja")
             Text(translatedFromLanguageString)
@@ -54,7 +54,7 @@ struct TranslateView: View {
                 SelectableText(attributedString: artifacts.content.attributed, size: self.size)
             } else {
                 artifacts.content.text
-                    .font(eventviewsize_to_font(self.size))
+                    .font(eventviewsize_to_font(self.size, font_size: font_size))
             }
         }
     }
@@ -98,7 +98,7 @@ struct TranslateView: View {
                 Text("")
             case .translated(let translated):
                 let languageName = Locale.current.localizedString(forLanguageCode: translated.language)
-                TranslatedView(lang: languageName, artifacts: translated.artifacts)
+                TranslatedView(lang: languageName, artifacts: translated.artifacts, font_size: damus_state.settings.font_size)
             case .not_needed:
                 Text("")
             }

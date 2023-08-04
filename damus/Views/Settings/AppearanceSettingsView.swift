@@ -8,12 +8,39 @@
 import SwiftUI
 
 
+struct ResizedEventPreview: View {
+    let damus_state: DamusState
+    @ObservedObject var settings: UserSettingsStore
+
+    var body: some View {
+        EventView(damus: damus_state, event: test_note, pubkey: test_note.pubkey, options: [.wide, .no_action_bar])
+    }
+}
+
 struct AppearanceSettingsView: View {
+    let damus_state: DamusState
     @ObservedObject var settings: UserSettingsStore
     @Environment(\.dismiss) var dismiss
 
+    var FontSize: some View {
+        VStack(alignment: .leading) {
+            Slider(value: $settings.font_size, in: 0.5...2.0, step: 0.1) {
+                Text("Font Size")
+            }
+            .padding()
+
+            // Sample text to show how the font size would look
+            ResizedEventPreview(damus_state: damus_state, settings: settings)
+
+        }
+    }
+
     var body: some View {
         Form {
+            Section("Font Size") {
+                FontSize
+            }
+
             // MARK: - Text Truncation
             Section(header: Text(NSLocalizedString("Text Truncation", comment: "Section header for damus text truncation user configuration"))) {
                 Toggle(NSLocalizedString("Truncate timeline text", comment: "Setting to truncate text in timeline"), isOn: $settings.truncate_timeline_text)
@@ -63,6 +90,6 @@ struct AppearanceSettingsView: View {
 
 struct TextFormattingSettings_Previews: PreviewProvider {
     static var previews: some View {
-        AppearanceSettingsView(settings: UserSettingsStore())
+        AppearanceSettingsView(damus_state: test_damus_state(), settings: UserSettingsStore())
     }
 }

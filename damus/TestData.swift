@@ -20,10 +20,11 @@ let test_keypair_full = test_keypair.to_full()!
 
 let test_event_holder = EventHolder(events: [], incoming: [test_note])
 
+let jack_keypair = Keypair(pubkey: bech32_pubkey_decode("npub1sg6plzptd64u62a878hep2kev88swjh3tw00gjsfl8f237lmu63q0uf63m")!, privkey: nil)
 let test_note =
         NostrEvent(
-            content: "hello there https://jb55.com/s/Oct12-150217.png https://jb55.com/red-me.jpg cool",
-            keypair: test_keypair,
+            content: "Nostr is the super app. Because it’s actually an ecosystem of apps, all of which make each other better. People haven’t grasped that yet. They will when it’s more accessible and onboarding is more straightforward and intuitive.",
+            keypair: jack_keypair,
             createdAt: UInt32(Date().timeIntervalSince1970 - 100)
         )!
 

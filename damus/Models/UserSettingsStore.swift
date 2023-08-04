@@ -127,7 +127,10 @@ class UserSettingsStore: ObservableObject {
 
     @Setting(key: "repost_notification", default_value: true)
     var repost_notification: Bool
-    
+
+    @Setting(key: "font_size", default_value: 1.0)
+    var font_size: Double
+
     @Setting(key: "dm_notification", default_value: true)
     var dm_notification: Bool
     
