@@ -98,10 +98,8 @@ struct QRCodeView: View {
                 TabView(selection: $selectedTab) {
                     QRView
                         .tag(0)
-                    if pubkey == damus_state.pubkey {
-                        QRCameraView()
-                            .tag(1)
-                    }
+                    QRCameraView()
+                        .tag(1)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 .onAppear {
