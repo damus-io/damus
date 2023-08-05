@@ -290,6 +290,19 @@ struct LikeButton: View {
 
     func reactions() -> some View {
         HStack {
+            Button(action: {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    isReactionsVisible = false
+                    showReactionsBG = 0
+                }
+                showEmojis = []
+            }) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.body)
+                    .foregroundColor(.gray)
+            }
+            .padding(.leading, 7.5)
+            
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 20) {
                     ForEach(emojis, id: \.self) { emoji in
@@ -303,7 +316,7 @@ struct LikeButton: View {
                         }
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.trailing, 10)
             }
         }
     }
