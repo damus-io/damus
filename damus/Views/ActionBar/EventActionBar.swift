@@ -335,6 +335,11 @@ struct LikeButton: View {
             showReactionsBG = 0
         }
         showEmojis = []
+        
+        withAnimation(Animation.easeOut(duration: 0.15)) {
+            shouldAnimate = true
+            amountOfAngleIncrease = 20.0
+        }
     }
 }
 
