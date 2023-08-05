@@ -68,8 +68,11 @@ struct ReactionsSettingsView: View {
             }
             
             Section {
-                List(settings.emoji_reactions, id: \.self) { emoji in
-                    EmojiListItemView(settings: settings, emoji: emoji, recommended: false, showActionButtons: $showActionButtons)
+                List {
+                    ForEach(Array(zip(settings.emoji_reactions, 1...)), id: \.1) { tup in
+                        EmojiListItemView(settings: settings, emoji: tup.0, recommended: false, showActionButtons: $showActionButtons)
+                    }
+                    .onMove(perform: showActionButtons ? move: nil)
                 }
             } header: {
                 Text("Emoji Reactions", comment: "Section title for emoji reactions that are currently added.")
@@ -79,8 +82,8 @@ struct ReactionsSettingsView: View {
             
             if recommended.count > 0 {
                 Section {
-                    List(Array(recommended), id: \.self) { emoji in
-                        EmojiListItemView(settings: settings, emoji: emoji, recommended: true, showActionButtons: $showActionButtons)
+                    List(Array(zip(recommended, 1...)), id: \.1) { tup in
+                        EmojiListItemView(settings: settings, emoji: tup.0, recommended: true, showActionButtons: $showActionButtons)
                     }
                 } header: {
                     Text("Recommended Emojis", comment: "Section title for recommend emojis")
@@ -102,6 +105,10 @@ struct ReactionsSettingsView: View {
                 }
             }
         }
+    }
+    
+    private func move(from: IndexSet, to: Int) {
+        settings.emoji_reactions.move(fromOffsets: from, toOffset: to)
     }
     
     // Returns the emojis that are in the recommended list but the user has not added yet
