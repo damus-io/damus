@@ -39,7 +39,9 @@ struct EmojiListItemView: View {
             }
         }
         .contextMenu {
-            CopyAction(emoji: emoji)
+            if !showActionButtons {
+                CopyAction(emoji: emoji)
+            }
         }
     }
     
