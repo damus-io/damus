@@ -205,19 +205,20 @@ struct LikeButton: View {
                     shakaAnimationLogic()
                 }
                 .simultaneousGesture(longPressGesture())
+                .highPriorityGesture(TapGesture().onEnded {
+                    guard !isReactionsVisible else { return }
+                    withAnimation(Animation.easeOut(duration: 0.15)) {
+                        self.action(damus_state.settings.default_emoji_reaction)
+                        shouldAnimate = true
+                        amountOfAngleIncrease = 20.0
+                    }
+                })
                 .overlay(reactionsOverlay())
         }
     }
 
     func likeButton() -> some View {
-        Button(action: {
-            guard !isReactionsVisible else { return }
-            withAnimation(Animation.easeOut(duration: 0.15)) {
-                self.action(damus_state.settings.default_emoji_reaction)
-                shouldAnimate = true
-                amountOfAngleIncrease = 20.0
-            }
-        }) {
+        Group {
             if let liked_emoji {
                 buildMaskView(for: liked_emoji)
                     .frame(width: 20, height: 20)
