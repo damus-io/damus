@@ -63,7 +63,7 @@ struct EmojiListItemView: View {
                 .resizable()
                 .frame(width: 20, height: 20)
                 .foregroundColor(.red)
-                .padding(.leading, 5)
+                .padding(.leading, -5)
         }
     }
     
@@ -75,7 +75,7 @@ struct EmojiListItemView: View {
                 .resizable()
                 .frame(width: 20, height: 20)
                 .foregroundColor(.green)
-                .padding(.leading, 5)
+                .padding(.leading, -5)
         }
     }
 }
