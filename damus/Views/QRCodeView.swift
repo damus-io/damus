@@ -258,6 +258,7 @@ struct QRCodeView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
             if let scanResult {
                 damus_state.nav.push(route: Route.ProfileByKey(pubkey: scanResult.pubkey))
+                presentationMode.wrappedValue.dismiss()
             }
         }
     }
