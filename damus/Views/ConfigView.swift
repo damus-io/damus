@@ -60,12 +60,12 @@ struct ConfigView: View {
                         IconLabel(NSLocalizedString("Translation", comment: "Section header for text and appearance settings"), img_name: "globe", color: .green)
                     }
                     
-                    NavigationLink(value: Route.DeveloperSettings(settings: settings)) {
-                        IconLabel(NSLocalizedString("Developer", comment: "Section header for developer settings"), img_name: "magic-stick2.fill", color: DamusColors.adaptableBlack)
-                    }
-                    
                     NavigationLink(value: Route.ReactionsSettings(settings: settings)) {
                         IconLabel(NSLocalizedString("Reactions", comment: "Section header for reactions settings"), img_name: "shaka.fill", color: .purple)
+                    }
+                    
+                    NavigationLink(value: Route.DeveloperSettings(settings: settings)) {
+                        IconLabel(NSLocalizedString("Developer", comment: "Section header for developer settings"), img_name: "magic-stick2.fill", color: DamusColors.adaptableBlack)
                     }
                 }
 
