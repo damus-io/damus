@@ -784,7 +784,11 @@ enum FoundEvent {
 }
 
 func find_event(state: DamusState, query query_: FindEvent, callback: @escaping (FoundEvent?) -> ()) {
-    
+    return find_event_with_subid(state: state, query: query_, subid: UUID().description, callback: callback)
+}
+
+func find_event_with_subid(state: DamusState, query query_: FindEvent, subid: String, callback: @escaping (FoundEvent?) -> ()) {
+
     var filter: NostrFilter? = nil
     let find_from = query_.find_from
     let query = query_.type
@@ -806,7 +810,6 @@ func find_event(state: DamusState, query query_: FindEvent, callback: @escaping 
         filter = NostrFilter(ids: [evid], limit: 1)
     }
     
-    let subid = UUID().description
     var attempts: Int = 0
     var has_event = false
     guard let filter else { return }
