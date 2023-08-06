@@ -104,6 +104,69 @@ static int add_text_block(struct note_blocks *blocks, const u8 *start, const u8 
     return add_block(blocks, b);
 }
 
+static int consume_url_fragment(struct cursor *cur)
+{
+    int c;
+
+    if ((c = peek_char(cur, 0)) < 0)
+        return 1;
+
+    if (c != '#' && c != '?') {
+        return 1;
+    }
+
+    cur->p++;
+
+    return consume_until_whitespace(cur, 1);
+}
+
+static int consume_url_path(struct cursor *cur)
+{
+    int c;
+
+    if ((c = peek_char(cur, 0)) < 0)
+        return 1;
+
+    if (c != '/') {
+        return 1;
+    }
+
+    while (cur->p < cur->end) {
+        c = *cur->p;
+
+        if (c == '?' || c == '#' || is_whitespace(c)) {
+            return 1;
+        }
+
+        cur->p++;
+    }
+
+    return 1;
+}
+
+static int consume_url_host(struct cursor *cur)
+{
+	char c;
+	int count = 0;
+
+	while (cur->p < cur->end) {
+		c = *cur->p;
+		// TODO: handle IDNs
+        if (is_alphanumeric(c) || c == '.' || c == '-')
+		{
+			count++;
+			cur->p++;
+			continue;
+		}
+
+		return count != 0;
+	}
+
+
+	// this means the end of the URL hostname is the end of the buffer and we finished
+	return count != 0;
+}
+
 static int parse_url(struct cursor *cur, struct note_block *block) {
     u8 *start = cur->p;
     
@@ -121,14 +184,14 @@ static int parse_url(struct cursor *cur, struct note_block *block) {
             return 0;
         }
     }
-    
-    if (!consume_until_whitespace(cur, 1)) {
+
+    if (!(consume_url_host(cur) &&
+          consume_url_path(cur) &&
+          consume_url_fragment(cur)))
+    {
         cur->p = start;
         return 0;
     }
-    
-    // strip any unwanted characters
-    while(is_invalid_url_ending(peek_char(cur, -1))) cur->p--;
     
     block->type = BLOCK_URL;
     block->block.str.start = (const char *)start;

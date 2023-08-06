@@ -447,12 +447,8 @@ static inline int is_left_boundary(char c) {
     return is_right_boundary(c) || is_utf8_byte(c);
 }
 
-static inline int is_invalid_url_ending(char c) {
-    return c == '!' || c == '?' || c == ')' || c == '.' || c == ',' || c == ';';
-}
-
 static inline int is_alphanumeric(char c) {
-    return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9');
+    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9');
 }
 
 static inline int consume_until_boundary(struct cursor *cur) {
