@@ -18,8 +18,11 @@ struct LossyLocalNotification {
         ]
     }
     
-    static func from_user_info(user_info: [AnyHashable: Any]) -> LossyLocalNotification {
-        let target_id = MentionRef.from_bech32(str: user_info["id"] as! String)!
+    static func from_user_info(user_info: [AnyHashable: Any]) -> LossyLocalNotification? {
+        guard let id = user_info["id"] as? String,
+              let target_id = MentionRef.from_bech32(str: id) else {
+            return nil
+        }
         let typestr = user_info["type"] as! String
         let type = LocalNotificationType(rawValue: typestr)!
         

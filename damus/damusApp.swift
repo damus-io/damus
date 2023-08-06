@@ -58,7 +58,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
-        let notification = LossyLocalNotification.from_user_info(user_info: userInfo)
+        guard let notification = LossyLocalNotification.from_user_info(user_info: userInfo) else {
+            return
+        }
         notify(.local_notification(notification))
         completionHandler()
     }
