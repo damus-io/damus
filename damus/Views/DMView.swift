@@ -41,21 +41,23 @@ struct DMView: View {
 
             let should_show_img = should_show_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
 
-            NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, size: .normal, options: dm_options)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding([.top, .leading, .trailing], 10)
-                .padding([.bottom], 25)
-                .background(VisualEffectView(effect: UIBlurEffect(style: .prominent))
-                    .background(is_ours ? Color.accentColor.opacity(0.9) : Color.secondary.opacity(0.15))
-                )
-                .cornerRadius(8.0)
-                .tint(is_ours ? Color.white : Color.accentColor)
-                .overlay(Text(format_relative_time(event.created_at))
-                               .font(.footnote)
-                               .foregroundColor(.gray)
-                               .opacity(0.8)
-                               .offset(x: -10, y: -5), alignment: .bottomTrailing)
-            
+            VStack(alignment: .trailing) {
+                NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, size: .normal, options: dm_options)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding([.top, .leading, .trailing], 10)
+                    .padding([.bottom], 25)
+                    .background(VisualEffectView(effect: UIBlurEffect(style: .prominent))
+                        .background(is_ours ? Color.accentColor.opacity(0.9) : Color.secondary.opacity(0.15))
+                    )
+                    .cornerRadius(8.0)
+                    .tint(is_ours ? Color.white : Color.accentColor)
+
+                Text(format_relative_time(event.created_at))
+                   .font(.footnote)
+                   .foregroundColor(.gray)
+                   .opacity(0.8)
+            }
+
             if !is_ours {
                 Spacer(minLength: UIScreen.main.bounds.width * 0.2)
             }
