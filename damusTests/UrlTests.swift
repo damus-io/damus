@@ -25,6 +25,30 @@ final class UrlTests: XCTestCase {
         XCTAssertEqual(url1.url.absoluteString, "wss://jb55.com")
     }
 
+    func testParseUrlTrailingParenthesis() {
+        let testString = "https://en.m.wikipedia.org/wiki/Delicious_(website)"
+        let parsed = parse_note_content(content: .content(testString, nil)).blocks
+
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed[0].is_url?.absoluteString, testString)
+    }
+
+    func testParseUrlTrailingParenthesisAndInitialParenthesis() {
+        let testString = "( https://en.m.wikipedia.org/wiki/Delicious_(website)"
+        let parsed = parse_note_content(content: .content(testString, nil)).blocks
+
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed[1].is_url?.absoluteString, "https://en.m.wikipedia.org/wiki/Delicious_(website)")
+    }
+
+    func testParseUrlTrailingParenthesisShouldntParse() {
+        let testString = "(https://jb55.com)"
+        let parsed = parse_note_content(content: .content(testString, nil)).blocks
+
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed[1].is_url?.absoluteString, "https://jb55.com")
+    }
+
     func testLinkIsNotAHashtag() {
         let link = "https://github.com/damus-io/damus/blob/b7513f28fa1d31c2747865067256ad1d7cf43aac/damus/Nostr/NostrEvent.swift#L560"
 
