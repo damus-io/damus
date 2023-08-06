@@ -170,6 +170,7 @@
 		4C64987C286D03E000EAE2B3 /* DirectMessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C64987B286D03E000EAE2B3 /* DirectMessagesView.swift */; };
 		4C64987E286D082C00EAE2B3 /* DirectMessagesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C64987D286D082C00EAE2B3 /* DirectMessagesModel.swift */; };
 		4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */ = {isa = PBXBuildFile; productRef = 4C649880286E0EE300EAE2B3 /* secp256k1 */; };
+		4C684A552A7E91FE005E6031 /* LongPostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C684A542A7E91FE005E6031 /* LongPostTests.swift */; };
 		4C687C212A5F7ED00092C550 /* DamusBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C687C202A5F7ED00092C550 /* DamusBackground.swift */; };
 		4C687C242A5FA86D0092C550 /* SearchHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C687C232A5FA86D0092C550 /* SearchHeaderView.swift */; };
 		4C687C272A6039500092C550 /* TestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C687C262A6039500092C550 /* TestData.swift */; };
@@ -697,6 +698,7 @@
 		4C633351283D419F00B1C9C3 /* SignalModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalModel.swift; sourceTree = "<group>"; };
 		4C64987B286D03E000EAE2B3 /* DirectMessagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectMessagesView.swift; sourceTree = "<group>"; };
 		4C64987D286D082C00EAE2B3 /* DirectMessagesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectMessagesModel.swift; sourceTree = "<group>"; };
+		4C684A542A7E91FE005E6031 /* LongPostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongPostTests.swift; sourceTree = "<group>"; };
 		4C687C202A5F7ED00092C550 /* DamusBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusBackground.swift; sourceTree = "<group>"; };
 		4C687C232A5FA86D0092C550 /* SearchHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHeaderView.swift; sourceTree = "<group>"; };
 		4C687C262A6039500092C550 /* TestData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestData.swift; sourceTree = "<group>"; };
@@ -1712,7 +1714,6 @@
 		4CE6DEF627F7A08200C66700 /* damusTests */ = {
 			isa = PBXGroup;
 			children = (
-				4C0379642A7BFE8E0037B8C4 /* Events */,
 				4C9B0DEC2A65A74000CBDA21 /* Util */,
 				4C0C03962A61E2670098B3B8 /* Fixtures */,
 				4C7D097D2A0C58B900943473 /* WalletConnectTests.swift */,
@@ -1740,6 +1741,7 @@
 				4C19AE542A5D977400C90DB7 /* HashtagTests.swift */,
 				3AAC7A012A60FE72002B50DF /* LocalizationUtilTests.swift */,
 				D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */,
+				4C684A542A7E91FE005E6031 /* LongPostTests.swift */,
 			);
 			path = damusTests;
 			sourceTree = "<group>";
@@ -2465,6 +2467,7 @@
 				4CE6DEF827F7A08200C66700 /* damusTests.swift in Sources */,
 				3A3040F329A91366008A0F29 /* ProfileViewTests.swift in Sources */,
 				4CF0ABDC2981A19E00D66079 /* ListTests.swift in Sources */,
+				4C684A552A7E91FE005E6031 /* LongPostTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2734,7 +2737,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = damus/damus.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_PREVIEWS = YES;
@@ -2783,7 +2786,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = damus/damus.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_ASSET_PATHS = "\"damus/Preview Content\"";
 				DEVELOPMENT_TEAM = XK7H4JAB3D;
 				ENABLE_PREVIEWS = YES;
