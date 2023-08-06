@@ -69,7 +69,7 @@ struct EventShell<Content: View>: View {
                 EventTop(state: state, event: event, pubkey: pubkey, is_anon: is_anon)
 
                 if !options.contains(.no_replying_to) {
-                    ReplyPart(event: event, privkey: state.keypair.privkey, profiles: state.profiles)
+                    ReplyPart(events: state.events, event: event, privkey: state.keypair.privkey, profiles: state.profiles)
                 }
                 
                 content
@@ -95,7 +95,7 @@ struct EventShell<Content: View>: View {
 
                 VStack {
                     EventTop(state: state, event: event, pubkey: pubkey, is_anon: is_anon)
-                    ReplyPart(event: event, privkey: state.keypair.privkey, profiles: state.profiles)
+                    ReplyPart(events: state.events, event: event, privkey: state.keypair.privkey, profiles: state.profiles)
                 }
             }
             .padding(.horizontal)

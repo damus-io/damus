@@ -17,6 +17,14 @@ struct SelectedEventView: View {
     }
     
     @StateObject var bar: ActionBarModel
+
+    var replying_to: NostrEvent? {
+        guard let note_ref = event.event_refs(damus.keypair.privkey).first(where: { evref in evref.is_direct_reply != nil })?.is_direct_reply else {
+            return nil
+        }
+
+        return damus.events.lookup(note_ref.note_id)
+    }
     
     init(damus: DamusState, event: NostrEvent, size: EventViewKind) {
         self.damus = damus
@@ -43,7 +51,7 @@ struct SelectedEventView: View {
                 .lineLimit(1)
                 
                 if event_is_reply(event.event_refs(damus.keypair.privkey)) {
-                    ReplyDescription(event: event, profiles: damus.profiles)
+                    ReplyDescription(event: event, replying_to: replying_to, profiles: damus.profiles)
                         .padding(.horizontal)
                 }
                 

@@ -12,16 +12,24 @@ struct ReplyDesc {
     let others: Int
 }
 
-func make_reply_description(_ tags: Tags) -> ReplyDesc {
+func make_reply_description(_ event: NostrEvent, replying_to: NostrEvent?) -> ReplyDesc {
     var c = 0
     var ns: [Pubkey] = []
-    var i = tags.count
+    var i = event.tags.count
 
-    for tag in tags {
+    if let replying_to {
+        ns.append(replying_to.pubkey)
+    }
+
+    for tag in event.tags {
         if let pk = Pubkey.from_tag(tag: tag) {
             c += 1
             if ns.count < 2 {
-                ns.append(pk)
+                if let replying_to, pk == replying_to.pubkey {
+                    continue
+                } else {
+                    ns.append(pk)
+                }
             }
         }
         i -= 1

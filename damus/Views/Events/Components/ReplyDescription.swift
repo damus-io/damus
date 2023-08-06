@@ -10,10 +10,11 @@ import SwiftUI
 // jb55 - TODO: this could be a lot better
 struct ReplyDescription: View {
     let event: NostrEvent
+    let replying_to: NostrEvent?
     let profiles: Profiles
     
     var body: some View {
-        Text(verbatim: "\(reply_desc(profiles: profiles, event: event))")
+        Text(verbatim: "\(reply_desc(profiles: profiles, event: event, replying_to: replying_to))")
             .font(.footnote)
             .foregroundColor(.gray)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -22,12 +23,12 @@ struct ReplyDescription: View {
 
 struct ReplyDescription_Previews: PreviewProvider {
     static var previews: some View {
-        ReplyDescription(event: test_note, profiles: test_damus_state().profiles)
+        ReplyDescription(event: test_note, replying_to: test_note, profiles: test_damus_state().profiles)
     }
 }
 
-func reply_desc(profiles: Profiles, event: NostrEvent, locale: Locale = Locale.current) -> String {
-    let desc = make_reply_description(event.tags)
+func reply_desc(profiles: Profiles, event: NostrEvent, replying_to: NostrEvent?, locale: Locale = Locale.current) -> String {
+    let desc = make_reply_description(event, replying_to: replying_to)
     let pubkeys = desc.pubkeys
     let n = desc.others
 
