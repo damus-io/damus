@@ -70,7 +70,6 @@ class HomeModel {
     var incoming_dms: [NostrEvent] = []
     let dm_debouncer = Debouncer(interval: 0.5)
     let resub_debouncer = Debouncer(interval: 3.0)
-    let save_last_event_debouncer = Debouncer(interval: 3.0)
     var should_debounce_dms = true
 
     let home_subid = UUID().description
@@ -232,7 +231,7 @@ class HomeModel {
                 return
             }
 
-            guard let new_bits = handle_last_events(debouncer: self.save_last_event_debouncer, new_events: self.notification_status.new_events, ev: ev, timeline: .notifications, shouldNotify: true) else {
+            guard let new_bits = handle_last_events(new_events: self.notification_status.new_events, ev: ev, timeline: .notifications, shouldNotify: true) else {
                 return
             }
             
@@ -593,7 +592,7 @@ class HomeModel {
 
     @discardableResult
     func handle_last_event(ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) -> Bool {
-        if let new_bits = handle_last_events(debouncer: save_last_event_debouncer, new_events: self.notification_status.new_events, ev: ev, timeline: timeline, shouldNotify: shouldNotify) {
+        if let new_bits = handle_last_events(new_events: self.notification_status.new_events, ev: ev, timeline: timeline, shouldNotify: shouldNotify) {
             self.notification_status.new_events = new_bits
             return true
         } else {
@@ -644,7 +643,7 @@ class HomeModel {
         
         if !should_debounce_dms {
             self.incoming_dms.append(ev)
-            if let notifs = handle_incoming_dms(debouncer: save_last_event_debouncer, prev_events: notification_status.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
+            if let notifs = handle_incoming_dms(prev_events: notification_status.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
                 got_new_dm(notifs: notifs, ev: ev)
             }
             self.incoming_dms = []
@@ -654,7 +653,7 @@ class HomeModel {
         incoming_dms.append(ev)
         
         dm_debouncer.debounce { [self] in
-            if let notifs = handle_incoming_dms(debouncer: save_last_event_debouncer, prev_events: notification_status.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
+            if let notifs = handle_incoming_dms(prev_events: notification_status.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {
                 got_new_dm(notifs: notifs, ev: ev)
             }
             self.incoming_dms = []
@@ -972,7 +971,7 @@ func fetch_relay_metadata(relay_id: String) async throws -> RelayMetadata? {
 }
 
 @discardableResult
-func handle_incoming_dm(debouncer: Debouncer?, ev: NostrEvent, our_pubkey: Pubkey, dms: DirectMessagesModel, prev_events: NewEventsBits) -> (Bool, NewEventsBits?) {
+func handle_incoming_dm(ev: NostrEvent, our_pubkey: String, dms: DirectMessagesModel, prev_events: NewEventsBits) -> (Bool, NewEventsBits?) {
     var inserted = false
     var found = false
     
@@ -1009,20 +1008,20 @@ func handle_incoming_dm(debouncer: Debouncer?, ev: NostrEvent, our_pubkey: Pubke
     
     var new_bits: NewEventsBits? = nil
     if inserted {
-        new_bits = handle_last_events(debouncer: debouncer, new_events: prev_events, ev: ev, timeline: .dms, shouldNotify: !ours)
+        new_bits = handle_last_events(new_events: prev_events, ev: ev, timeline: .dms, shouldNotify: !ours)
     }
     
     return (inserted, new_bits)
 }
 
 @discardableResult
-func handle_incoming_dms(debouncer: Debouncer, prev_events: NewEventsBits, dms: DirectMessagesModel, our_pubkey: Pubkey, evs: [NostrEvent]) -> NewEventsBits? {
+func handle_incoming_dms(prev_events: NewEventsBits, dms: DirectMessagesModel, our_pubkey: String, evs: [NostrEvent]) -> NewEventsBits? {
     var inserted = false
 
     var new_events: NewEventsBits? = nil
     
     for ev in evs {
-        let res = handle_incoming_dm(debouncer: debouncer, ev: ev, our_pubkey: our_pubkey, dms: dms, prev_events: prev_events)
+        let res = handle_incoming_dm(ev: ev, our_pubkey: our_pubkey, dms: dms, prev_events: prev_events)
         inserted = res.0 || inserted
         if let new = res.1 {
             new_events = new
@@ -1081,17 +1080,11 @@ func timeline_to_notification_bits(_ timeline: Timeline, ev: NostrEvent?) -> New
 }
 
 /// A helper to determine if we need to notify the user of new events
-func handle_last_events(debouncer: Debouncer?, new_events: NewEventsBits, ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) -> NewEventsBits? {
+func handle_last_events(new_events: NewEventsBits, ev: NostrEvent, timeline: Timeline, shouldNotify: Bool = true) -> NewEventsBits? {
     let last_ev = get_last_event(timeline)
 
     if last_ev == nil || last_ev!.created_at < ev.created_at {
-        if let debouncer {
-            debouncer.debounce {
-                save_last_event(ev, timeline: timeline)
-            }
-        } else {
-            save_last_event(ev, timeline: timeline)
-        }
+        save_last_event(ev, timeline: timeline)
         if shouldNotify {
             return new_events.union(timeline_to_notification_bits(timeline, ev: ev))
         }
