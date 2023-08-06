@@ -49,6 +49,14 @@ final class UrlTests: XCTestCase {
         XCTAssertEqual(parsed[1].is_url?.absoluteString, "https://jb55.com")
     }
 
+    func testParseSmartParens() {
+        let testString = "(https://nostr-con.com/simplex)"
+        let parsed = parse_note_content(content: .content(testString, nil)).blocks
+
+        XCTAssertNotNil(parsed)
+        XCTAssertEqual(parsed[1].is_url?.absoluteString, "https://nostr-con.com/simplex")
+    }
+
     func testLinkIsNotAHashtag() {
         let link = "https://github.com/damus-io/damus/blob/b7513f28fa1d31c2747865067256ad1d7cf43aac/damus/Nostr/NostrEvent.swift#L560"
 

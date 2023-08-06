@@ -192,7 +192,17 @@ static int parse_url(struct cursor *cur, struct note_block *block) {
         cur->p = start;
         return 0;
     }
-    
+
+    // smart parens
+    if (start - 1 >= 0 &&
+        start < cur->end &&
+        *(start - 1) == '(' &&
+        (cur->p - 1) < cur->end &&
+        *(cur->p - 1) == ')')
+    {
+        cur->p--;
+    }
+
     block->type = BLOCK_URL;
     block->block.str.start = (const char *)start;
     block->block.str.end = (const char *)cur->p;
