@@ -21,7 +21,14 @@ public struct RelayURL: Hashable {
     }
     
     init?(_ str: String) {
-        guard let url = URL(string: str) else {
+        guard let last = str.last else { return nil }
+
+        var urlstr = str
+        if last == "/" {
+            urlstr = String(str.dropLast(1))
+        }
+
+        guard let url = URL(string: urlstr) else {
             return nil
         }
         
