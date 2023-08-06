@@ -1189,7 +1189,7 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
 
 func render_notification_content_preview(cache: EventCache, ev: NostrEvent, profiles: Profiles, privkey: Privkey?) -> String {
     
-    let prefix_len = 50
+    let prefix_len = 300
     let artifacts = cache.get_cache_data(ev.id).artifacts.artifacts ?? render_note_content(ev: ev, profiles: profiles, privkey: privkey)
     
     // special case for longform events
