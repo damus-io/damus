@@ -307,7 +307,7 @@ struct LikeButton: View {
                 HStack(spacing: 20) {
                     ForEach(emojis, id: \.self) { emoji in
                         if let index = emojis.firstIndex(of: emoji) {
-                            let scale = showEmojis.count >= index + 1 ? showEmojis[index] : 0
+                            let scale = index < showEmojis.count ? showEmojis[index] : 0
                             Text(emoji)
                                 .scaleEffect(Double(scale))
                                 .onTapGesture {
