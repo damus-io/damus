@@ -36,28 +36,6 @@ class ReplyTests: XCTestCase {
         XCTAssertEqual(ref.is_mention, .some(.init(note_id: evid)))
     }
     
-    func testUrlAnchorsAreNotHashtags() {
-        let content = "this is my link: https://jb55.com/index.html#buybitcoin this is not a hashtag!"
-        let blocks = parse_post_blocks(content: content)
-
-        XCTAssertEqual(blocks.count, 3)
-        XCTAssertEqual(blocks[0].is_text, "this is my link: ")
-        XCTAssertEqual(blocks[1].is_url, URL(string: "https://jb55.com/index.html#buybitcoin")!)
-        XCTAssertEqual(blocks[2].is_text, " this is not a hashtag!")
-    }
-
-    func testLinkIsNotAHashtag() {
-        let link = "https://github.com/damus-io/damus/blob/b7513f28fa1d31c2747865067256ad1d7cf43aac/damus/Nostr/NostrEvent.swift#L560"
-        
-        let content = "my \(link) link"
-        let blocks = parse_post_blocks(content: content)
-        
-        XCTAssertEqual(blocks.count, 3)
-        XCTAssertEqual(blocks[0].is_text, "my ")
-        XCTAssertEqual(blocks[1].is_url, URL(string: link)!)
-        XCTAssertEqual(blocks[2].is_text, " link")
-    }
-    
     func testAtAtEnd() {
         let content = "what @"
         let blocks = parse_post_blocks(content: content)

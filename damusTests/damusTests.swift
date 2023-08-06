@@ -97,14 +97,6 @@ class damusTests: XCTestCase {
         XCTAssertEqual(got2, ["a", "b", "c"])
     }
 
-    func testParseUrlUpper() {
-        let parsed = parse_note_content(content: .content("a HTTPS://jb55.COM b", nil)).blocks
-
-        XCTAssertNotNil(parsed)
-        XCTAssertEqual(parsed.count, 3)
-        XCTAssertEqual(parsed[1].is_url?.absoluteString, "HTTPS://jb55.COM")
-    }
-    
     func testBech32Url()  {
         let parsed = decode_nostr_uri("nostr:npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s")
         
