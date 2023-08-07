@@ -60,7 +60,7 @@ enum FilterState : Int {
     func filter(ev: NostrEvent) -> Bool {
         switch self {
         case .posts:
-            return !ev.is_reply(nil)
+            return ev.known_kind == .boost || !ev.is_reply(nil)
         case .posts_and_replies:
             return true
         }
