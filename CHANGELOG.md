@@ -1,3 +1,35 @@
+## [1.6-11]: "Bugfix Sunday" - 2023-08-07
+
+### Added
+
+- Add close button to custom reactions (Suhail Saqan)
+- Add ability to change order of custom reactions (Suhail Saqan)
+- Adjustable font size (William Casarin)
+
+
+### Changed
+
+- Show renotes in Notes timeline (William Casarin)
+
+### Fixed
+
+- Ensure the person you're replying to is the first entry in the reply description (William Casarin)
+- Don't cutoff text in notifications (William Casarin)
+- Fix wikipedia url detection with parenthesis (William Casarin)
+- Fixed old notifications always appearing on first start (William Casarin)
+- Fix issue with slashes on relay urls causing relay connection problems (William Casarin)
+- Fix rare crash triggered by local notifications (William Casarin)
+- Fix crash when long-pressing reactions (William Casarin)
+- Fixed nostr reporting decoding (William Casarin)
+- Dismiss qr screen on scan (Suhail Saqan)
+- Show QRCameraView regardless of same user (Suhail Saqan)
+- Fix wiggle when long press reactions (Suhail Saqan)
+- Fix reaction button breaking scrolling (Suhail Saqan)
+- Fix crash when muting threads (Bryan Montz)
+
+
+[1.6-11]: https://github.com/damus-io/damus/releases/tag/v1.6-11
+
 ## [1.6-8]: "nostrdb prep" 2023-08-03
 
 ### Added
