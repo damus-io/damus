@@ -60,36 +60,10 @@ struct DMChatView: View, KeyboardReadable {
     var Messages: some View {
         ScrollViewReader { scroller in
             ScrollView {
-                if (dms.events.isEmpty) {
-                    Text("Send a message to start the conversation...", comment: "Text prompt for user to send a message to the other user.")
-                        .lineLimit(nil)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 40)
-                        .padding(.vertical)
-                        .foregroundColor(.gray)
+                if dms.events.isEmpty {
+                    EmptyMessageView()
                 } else {
-                    VStack(alignment: .leading) {
-                        let groups = groupEventsByDateAndPubkey(events: dms.events)
-
-                        ForEach(Array(groups.keys).sorted(), id: \.self) { date in
-                            VStack(alignment: .leading) {
-                                Text(date, style: .date)
-                                    .font(.footnote)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.gray)
-                                    .padding(.horizontal)
-                                    .frame(maxWidth: .infinity)
-
-                                ForEach(Array(groups[date]!.keys).sorted(), id: \.self) { key in
-                                    let events = groups[date]![key]!
-                                    ForEach(events) { event in
-                                        DMView(event: event, damus_state: damus_state, isLastInGroup: event == events.last)
-                                    }
-                                }
-                            }
-                        }
-                        EndBlock(height: 5)
-                    }.padding(.horizontal)
+                    GroupedEventsView(groups: groupEventsByDateAndPubkey(events: dms.events), damus_state: damus_state)
                 }
             }
             .onAppear {
@@ -98,6 +72,63 @@ struct DMChatView: View, KeyboardReadable {
                 scroll_to_end(scroller, animated: true)
             }.onChange(of: textHeight) { _ in
                 scroll_to_end(scroller, animated: true)
+            }
+        }
+    }
+    
+    struct EmptyMessageView: View {
+        var body: some View {
+            Text("Send a message to start the conversation...", comment: "Text prompt for user to send a message to the other user.")
+                .lineLimit(nil)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+                .padding(.vertical)
+                .foregroundColor(.gray)
+        }
+    }
+
+    struct GroupedEventsView: View {
+        var groups: [Date: [String: [NostrEvent]]]
+        var damus_state: DamusState
+        
+        var body: some View {
+            VStack(alignment: .leading) {
+                ForEach(Array(groups.keys).sorted(), id: \.self) { date in
+                    GroupedDateView(date: date, events: groups[date]!, damus_state: damus_state)
+                }
+                EndBlock(height: 5)
+            }.padding(.horizontal)
+        }
+    }
+
+    struct GroupedDateView: View {
+        var date: Date
+        var events: [String: [NostrEvent]]
+        var damus_state: DamusState
+        
+        var body: some View {
+            VStack(alignment: .leading) {
+                Text(date, style: .date)
+                    .font(.footnote)
+                    .fontWeight(.bold)
+                    .foregroundColor(.gray)
+                    .padding(.horizontal)
+                    .frame(maxWidth: .infinity)
+                
+                ForEach(Array(events.keys).sorted(), id: \.self) { key in
+                    GroupedEventView(events: events[key]!, damus_state: damus_state)
+                }
+            }
+        }
+    }
+    
+    struct GroupedEventView: View {
+        var events: [NostrEvent]
+        var damus_state: DamusState
+        
+        var body: some View {
+            ForEach(events, id: \.self) { event in
+                DMView(event: event, damus_state: damus_state, isLastInGroup: event == events.last)
             }
         }
     }
@@ -311,7 +342,7 @@ extension String {
     }
 }
 
-func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair, created_at: UInt32? = nil) -> NostrEvent?
+func create_dm(_ message: String, to_pk: Pubkey, tags: [[String]], keypair: Keypair, created_at: UInt32? = nil) -> NostrEvent?
 {
     let created = created_at ?? UInt32(Date().timeIntervalSince1970)
 

@@ -955,8 +955,8 @@ func first_eref_mention(ev: NostrEvent, privkey: Privkey?) -> Mention<NoteId>? {
     return nil
 }
 
-func separate_images(ev: NostrEvent, privkey: String?) -> [MediaUrl]? {
-    let urlBlocks: [URL] = ev.blocks(privkey).reduce(into: []) { urls, block in
+func separate_images(ev: NostrEvent, privkey: Privkey?) -> [MediaUrl]? {
+    let urlBlocks: [URL] = ev.blocks(privkey).blocks.reduce(into: []) { urls, block in
         guard case .url(let url) = block else {
             return
         }
@@ -968,8 +968,8 @@ func separate_images(ev: NostrEvent, privkey: String?) -> [MediaUrl]? {
     return mediaUrls.isEmpty ? nil : mediaUrls
 }
 
-func separate_invoices(ev: NostrEvent, privkey: String?) -> [Invoice]? {
-    let invoiceBlocks: [Invoice] = ev.blocks(privkey).reduce(into: []) { invoices, block in
+func separate_invoices(ev: NostrEvent, privkey: Privkey?) -> [Invoice]? {
+    let invoiceBlocks: [Invoice] = ev.blocks(privkey).blocks.reduce(into: []) { invoices, block in
         guard case .invoice(let invoice) = block else {
             return
         }

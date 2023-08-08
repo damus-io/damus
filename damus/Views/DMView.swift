@@ -36,7 +36,7 @@ struct DMView: View {
         return options
     }
     
-    func format_timestamp(timestamp: Int64) -> String {
+    func format_timestamp(timestamp: UInt32) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "h:mm a"
         let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
@@ -83,7 +83,7 @@ struct DMView: View {
         }
     }
 
-    func Mention(mention: Mention) -> some View {
+    func Mention(mention: Mention<NoteId>) -> some View {
         Group {
             HStack {
                 if is_ours {
@@ -100,6 +100,7 @@ struct DMView: View {
         }
     }
 
+    @MainActor
     func Image(urls: [MediaUrl], isLastInDM: Bool) -> some View {
         return Group {
             HStack {
@@ -166,7 +167,9 @@ struct DMView: View {
         }
     }
 
-    func filter_content(blocks: [Block], profiles: Profiles, privkey: String?) -> (Bool, CompatibleText?) {
+    func filter_content(blocks bs: Blocks, profiles: Profiles, privkey: Privkey?) -> (Bool, CompatibleText?) {
+        let blocks = bs.blocks
+        
         let one_note_ref = blocks
             .filter({ $0.is_note_mention })
             .count == 1
@@ -178,10 +181,10 @@ struct DMView: View {
             
             switch block {
             case .mention(let m):
-                if m.type == .event && one_note_ref {
+                if case .note = m.ref, one_note_ref {
                     return str
                 }
-                if m.type == .pubkey {
+                if case .pubkey(_) = m.ref {
                     show_text = true
                 }
                 return str + mention_str(m, profiles: profiles)
@@ -192,9 +195,9 @@ struct DMView: View {
                 }
                 
                 if let next = blocks[safe: ind+1] {
-                    if case .url(let u) = next, classify_url(u).is_media != nil  {
+                    if case .url(let u) = next, classify_url(u).is_media != nil {
                         trimmed = trim_suffix(trimmed)
-                    } else if case .mention(let m) = next, m.type == .event, one_note_ref {
+                    } else if case .mention(let m) = next, case .note = m.ref, one_note_ref {
                         trimmed = trim_suffix(trimmed)
                     }
                 }
@@ -219,11 +222,11 @@ struct DMView: View {
                 }
             }
         }
-
+        
         return (show_text, txt)
     }
     
-    func getLastInDM(text: CompatibleText?, mention: Mention?, url: [MediaUrl]?, invoices: [Invoice]?) -> DMContentType? {
+    func getLastInDM(text: CompatibleText?, mention: Mention<NoteId>?, url: [MediaUrl]?, invoices: [Invoice]?) -> DMContentType? {
         var last: DMContentType?
         if let text {
             last = .text

@@ -405,7 +405,7 @@ func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: Privkey?, 
         return .longform(LongformContent(ev.content))
     }
     
-    return .separated(render_blocks(blocks: blocks, profiles: profiles))
+    return .separated(render_blocks(blocks: blocks, profiles: profiles, only_text: only_text))
 }
 
 fileprivate func artifact_part_last_text_ind(parts: [ArtifactPart]) -> (Int, Text)? {
