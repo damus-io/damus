@@ -477,18 +477,12 @@ func make_metadata_event(keypair: FullKeypair, metadata: Profile) -> NostrEvent?
 }
 
 func make_boost_event(keypair: FullKeypair, boosted: NostrEvent) -> NostrEvent? {
-    var tags = boosted.tags.reduce(into: [[String]]()) { ts, tag in
-        guard tag.count >= 2 && (tag[0].matches_char("e") || tag[0].matches_char("p")) else {
-            return
-        }
-
-        ts.append(tag.strings())
-    }
+    var tags = Array(boosted.referenced_pubkeys).map({ pk in pk.tag })
 
     tags.append(["e", boosted.id.hex(), "", "root"])
     tags.append(["p", boosted.pubkey.hex()])
 
-    let content = boosted.content_len <= 100 ? event_to_json(ev: boosted) : ""
+    let content = event_to_json(ev: boosted)
     return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 6, tags: tags)
 }
 
