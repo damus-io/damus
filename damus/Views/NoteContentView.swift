@@ -417,7 +417,7 @@ fileprivate func artifact_part_last_text_ind(parts: [ArtifactPart]) -> (Int, Tex
     return (ind, txt)
 }
 
-func reduce_text_block(blocks: [Block], ind: Int, txt: String, one_note_ref: Bool) -> CompatibleText {
+func reduce_text_block(blocks: [Block], ind: Int, txt: String, one_note_ref: Bool) -> String {
     var trimmed = txt
     
     if let prev = blocks[safe: ind-1],
@@ -436,7 +436,7 @@ func reduce_text_block(blocks: [Block], ind: Int, txt: String, one_note_ref: Boo
         }
     }
     
-    return CompatibleText(stringLiteral: trimmed)
+    return trimmed
 }
 
 func render_blocks(blocks bs: Blocks, profiles: Profiles) -> NoteArtifactsSeparated {
@@ -459,8 +459,8 @@ func render_blocks(blocks bs: Blocks, profiles: Profiles) -> NoteArtifactsSepara
             }
             return str + mention_str(m, profiles: profiles)
         case .text(let txt):
-            return str + reduce_text_block(blocks: blocks, ind: ind, txt: txt, one_note_ref: one_note_ref)
-            
+            return str + CompatibleText(stringLiteral: reduce_text_block(blocks: blocks, ind: ind, txt: txt, one_note_ref: one_note_ref))
+
         case .relay(let relay):
             return str + CompatibleText(stringLiteral: relay)
             
