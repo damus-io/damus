@@ -1347,7 +1347,17 @@ func get_zap_target_pubkey(ev: NostrEvent, events: EventCache) -> Pubkey? {
     }
 
     // we can't trust the p tag on note zaps because they can be faked
-    return events.lookup(etag)?.pubkey
+    guard let pk = events.lookup(etag)?.pubkey else {
+        // We don't have the event in cache so we can't check the pubkey.
+
+        // We could return this as an invalid zap but that wouldn't be correct
+        // all of the time, and may reject valid zaps. What we need is a new
+        // unvalidated zap state, but for now we simply leak a bit of correctness...
+
+        return ev.referenced_pubkeys.just_one()
+    }
+
+    return pk
 }
 
 func process_zap_event(damus_state: DamusState, ev: NostrEvent, completion: @escaping (ProcessZapResult) -> Void) {
