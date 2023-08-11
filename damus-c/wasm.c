@@ -7100,7 +7100,7 @@ int wasm_interp_init(struct wasm_interp *interp, struct module *module)
 		return 0;
 	}
 
-	memory_pages_size = 64 * 256 * WASM_PAGE_SIZE; /* 1 gb virt */
+	memory_pages_size = 8 * WASM_PAGE_SIZE;
 
 	memsize =
 		stack_size +
