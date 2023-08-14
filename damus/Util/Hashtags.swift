@@ -38,6 +38,7 @@ let custom_hashtags: [String: CustomHashtag] = [
     "zaps": CustomHashtag.zap,
     "zapathon": CustomHashtag.zap,
     "onlyzaps": CustomHashtag.zap,
+    "eurothon": CustomHashtag.zap,
 ]
 
 func hashtag_str(_ htag: String) -> CompatibleText {
