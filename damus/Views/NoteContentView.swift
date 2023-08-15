@@ -610,6 +610,11 @@ struct NoteContentView_Previews: PreviewProvider {
                 NoteContentView(damus_state: state, event: test_note, show_images: true, size: .normal, options: [])
             }
             .previewDisplayName("Short note")
+            
+            VStack {
+                NoteContentView(damus_state: state, event: test_encoded_note_with_image!, show_images: true, size: .normal, options: [])
+            }
+            .previewDisplayName("Note with image")
 
             VStack {
                 NoteContentView(damus_state: state2, event: test_longform_event.event, show_images: true, size: .normal, options: [.wide])

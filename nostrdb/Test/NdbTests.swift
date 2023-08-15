@@ -80,6 +80,14 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(tags, 786)
         XCTAssertEqual(total_count_stored, total_count_iter)
     }
+    
+    /// Based on https://github.com/damus-io/damus/issues/1468
+    /// Tests whether a JSON with optional escaped slash characters is correctly unescaped (In accordance to https://datatracker.ietf.org/doc/html/rfc8259#section-7)
+    func test_decode_json_with_escaped_slashes() {
+        let testJSONWithEscapedSlashes = "{\"tags\":[],\"pubkey\":\"f8e6c64342f1e052480630e27e1016dce35fc3a614e60434fef4aa2503328ca9\",\"content\":\"https:\\/\\/cdn.nostr.build\\/i\\/5c1d3296f66c2630131bf123106486aeaf051ed8466031c0e0532d70b33cddb2.jpg\",\"created_at\":1691864981,\"kind\":1,\"sig\":\"fc0033aa3d4df50b692a5b346fa816fdded698de2045e36e0642a021391468c44ca69c2471adc7e92088131872d4aaa1e90ea6e1ad97f3cc748f4aed96dfae18\",\"id\":\"e8f6eca3b161abba034dac9a02bb6930ecde9fd2fb5d6c5f22a05526e11382cb\"}"
+        let testNote = NdbNote.owned_from_json(json: testJSONWithEscapedSlashes)!
+        XCTAssertEqual(testNote.content, "https://cdn.nostr.build/i/5c1d3296f66c2630131bf123106486aeaf051ed8466031c0e0532d70b33cddb2.jpg")
+    }
 
     func test_decode_perf() throws {
         // This is an example of a performance test case.

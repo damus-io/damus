@@ -383,6 +383,7 @@
 		BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
 		D2277EEA2A089BD5006C3807 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
 		D78525252A7B2EA4002FA637 /* NoteContentViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */; };
+		D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */; };
 		E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */; };
 		E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E990020E2955F837003BBC5A /* EditMetadataView.swift */; };
 		E9E4ED0B295867B900DD7078 /* ThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E4ED0A295867B900DD7078 /* ThreadView.swift */; };
@@ -934,6 +935,7 @@
 		BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectWalletView.swift; sourceTree = "<group>"; };
 		D2277EE92A089BD5006C3807 /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteContentViewTests.swift; sourceTree = "<group>"; };
+		D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrEventTests.swift; sourceTree = "<group>"; };
 		E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSettingsView.swift; sourceTree = "<group>"; };
 		E990020E2955F837003BBC5A /* EditMetadataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMetadataView.swift; sourceTree = "<group>"; };
 		E9E4ED0A295867B900DD7078 /* ThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadView.swift; sourceTree = "<group>"; };
@@ -1745,6 +1747,7 @@
 				D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */,
 				4C684A542A7E91FE005E6031 /* LongPostTests.swift */,
 				4C684A562A7FFAE6005E6031 /* UrlTests.swift */,
+				D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */,
 			);
 			path = damusTests;
 			sourceTree = "<group>";
@@ -2451,6 +2454,7 @@
 				4C19AE552A5D977400C90DB7 /* HashtagTests.swift in Sources */,
 				3A3040ED29A5CB86008A0F29 /* ReplyDescriptionTests.swift in Sources */,
 				3AAC7A022A60FE72002B50DF /* LocalizationUtilTests.swift in Sources */,
+				D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */,
 				4C8D00D429E3C5D40036AF10 /* NIP19Tests.swift in Sources */,
 				3A30410129AB12AA008A0F29 /* EventGroupViewTests.swift in Sources */,
 				501F8C822A0224EB001AFC1D /* KeychainStorageTests.swift in Sources */,
