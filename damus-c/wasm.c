@@ -7100,6 +7100,7 @@ int wasm_interp_init(struct wasm_interp *interp, struct module *module)
 		return 0;
 	}
 
+	// keep total memory size small for now, iOS doesn't like like mallocs
 	memory_pages_size = 8 * WASM_PAGE_SIZE;
 
 	memsize =
