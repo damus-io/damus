@@ -1,3 +1,17 @@
+## [1.6-13] - 2023-08-18
+
+### Fixed
+
+- Fix bug where it would sometimes show -1 in replies (tappu75e@duck.com)
+- Fix images and links occasionally appearing with escaped slashes (Daniel D‘Aquino)
+- Fixed nostrscript not working on smaller phones (William Casarin)
+- Fix zaps sometimes not appearing (William Casarin)
+- Fixed issue where reposts would sometimes repost the wrong thing (William Casarin)
+- Fixed issue where sometimes there would be empty entries on your profile (William Casarin)
+
+[1.6-13]: https://github.com/damus-io/damus/releases/tag/v1.6-13
+
+
 ## [1.6-11]: "Bugfix Sunday" - 2023-08-07
 
 ### Added
