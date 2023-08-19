@@ -6,25 +6,28 @@
 //
 
 import Foundation
-
+import UIKit // Import UIKit to access UIDevice
 
 class VersionInfo {
     private static var _version: String? = nil
 
     static var version: String {
-        if let _version {
+        if let _version = _version {
             return _version
         }
 
-        guard let short_version = Bundle.main.infoDictionary?["CFBundleShortVersionString"],
-              let bundle_version = Bundle.main.infoDictionary?["CFBundleVersion"]
+        guard let short_version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
+              let bundle_version = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
         else {
             return "Unknown"
         }
 
+        // Retrieve the iOS version
+        let iOSVersion = UIDevice.current.systemVersion
+
         // we only have these in debug builds
         let hash = git_hash ?? ""
-        let ver = "\(short_version) (\(bundle_version)) \(hash)"
+        let ver = "Damus Version: \(short_version) (\(bundle_version)) \(hash) | iOS Version: \(iOSVersion)"
 
         _version = ver
         return ver
