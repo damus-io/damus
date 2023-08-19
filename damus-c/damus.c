@@ -11,6 +11,7 @@
 #include "bech32.h"
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h> 
 
 static int parse_digit(struct cursor *cur, int *digit) {
     int c;
@@ -26,7 +27,6 @@ static int parse_digit(struct cursor *cur, int *digit) {
     }
     return 0;
 }
-
 
 static int parse_mention_index(struct cursor *cur, struct note_block *block) {
     int d1, d2, d3, ind;
@@ -249,7 +249,6 @@ static int parse_invoice(struct cursor *cur, struct note_block *block) {
     return 1;
 }
 
-
 static int parse_mention_bech32(struct cursor *cur, struct note_block *block) {
     u8 *start = cur->p;
     
@@ -258,9 +257,14 @@ static int parse_mention_bech32(struct cursor *cur, struct note_block *block) {
 
     block->block.str.start = (const char *)cur->p;
     
-    if (!parse_nostr_bech32(cur, &block->block.mention_bech32.bech32)) {
-        cur->p = start;
-        return 0;
+    // Parse the mention characters (alphanumeric, dashes, underscores, etc.)
+    while (is_valid_mention_char(*cur->p)) {
+        cur->p++;
+    }
+
+    // Include any punctuation characters in the mention
+    while (ispunct((unsigned char)*cur->p)) {
+        cur->p++;
     }
     
     block->block.str.end = (const char *)cur->p;
