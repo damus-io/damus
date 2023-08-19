@@ -204,6 +204,8 @@ struct PostView: View {
             TextViewWrapper(attributedText: $post, postTextViewCanScroll: $postTextViewCanScroll, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
                 focusWordAttributes = (word, range)
                 self.newCursorIndex = nil
+            }, updateCursorPosition: { newCursorIndex in
+                self.newCursorIndex = newCursorIndex
             })
                 .environmentObject(tagModel)
                 .focused($focus)
