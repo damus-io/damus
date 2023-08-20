@@ -188,6 +188,8 @@ class HomeModel {
             break
         case .nwc_response:
             handle_nwc_response(ev, relay: relay_id)
+        case .http_auth:
+            break
         }
     }
     

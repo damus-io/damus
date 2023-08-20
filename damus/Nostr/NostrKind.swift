@@ -23,4 +23,5 @@ enum NostrKind: UInt32, Codable {
     case zap_request = 9734
     case nwc_request = 23194
     case nwc_response = 23195
+    case http_auth = 27235
 }
