@@ -226,6 +226,10 @@ class HomeModel {
             guard zap.target.pubkey == self.damus_state.keypair.pubkey else {
                 return
             }
+            
+            if damus_state.contacts.is_muted(ev.pubkey){
+                return
+            }
         
             if !self.notifications.insert_zap(.zap(zap)) {
                 return
