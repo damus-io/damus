@@ -255,7 +255,7 @@ struct PostView: View {
             let img = getImage(media: media)
             print("img size w:\(img.size.width) h:\(img.size.height)")
             async let blurhash = calculate_blurhash(img: img)
-            let res = await image_upload.start(media: media, uploader: uploader)
+            let res = await image_upload.start(media: media, uploader: uploader, keypair: damus_state.keypair)
             
             switch res {
             case .success(let url):
