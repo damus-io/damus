@@ -228,6 +228,10 @@ class HomeModel {
             guard zap.target.pubkey == self.damus_state.keypair.pubkey else {
                 return
             }
+            
+            guard should_show_event(privkey: damus_state.keypair.privkey, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: zap.request.ev) else {
+                return
+            }
         
             if !self.notifications.insert_zap(.zap(zap)) {
                 return
