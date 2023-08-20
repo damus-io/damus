@@ -18,11 +18,11 @@ struct MutedEventView: View {
         self.damus_state = damus_state
         self.event = event
         self.selected = selected
-        self._shown = State(initialValue: should_show_event(contacts: damus_state.contacts, ev: event))
+        self._shown = State(initialValue: should_show_event(privkey: damus_state.keypair.privkey, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: event))
     }
     
     var should_mute: Bool {
-        return !should_show_event(contacts: damus_state.contacts, ev: event)
+        return !should_show_event(privkey: damus_state.keypair.privkey, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: event)
     }
     
     var MutedBox: some View {

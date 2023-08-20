@@ -562,15 +562,9 @@ class HomeModel {
     
     func handle_notification(ev: NostrEvent) {
         // don't show notifications from ourselves
-        guard ev.pubkey != damus_state.pubkey else {
-            return
-        }
-        
-        guard event_has_our_pubkey(ev, our_pubkey: self.damus_state.pubkey) else {
-            return
-        }
-        
-        guard should_show_event(contacts: damus_state.contacts, ev: ev) && !damus_state.muted_threads.isMutedThread(ev, privkey: damus_state.keypair.privkey) else {
+        guard ev.pubkey != damus_state.pubkey,
+              event_has_our_pubkey(ev, our_pubkey: self.damus_state.pubkey),
+              should_show_event(privkey: self.damus_state.keypair.privkey, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) else {
             return
         }
         
@@ -608,7 +602,7 @@ class HomeModel {
 
 
     func handle_text_event(sub_id: String, _ ev: NostrEvent) {
-        guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
+        guard should_show_event(privkey: damus_state.keypair.privkey, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) else {
             return
         }
         
@@ -635,7 +629,7 @@ class HomeModel {
     }
     
     func handle_dm(_ ev: NostrEvent) {
-        guard should_show_event(contacts: damus_state.contacts, ev: ev) else {
+        guard should_show_event(privkey: damus_state.keypair.privkey, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) else {
             return
         }
         
@@ -1100,10 +1094,15 @@ func event_has_our_pubkey(_ ev: NostrEvent, our_pubkey: Pubkey) -> Bool {
 }
 
 
-func should_show_event(contacts: Contacts, ev: NostrEvent) -> Bool {
+func should_show_event(privkey: Privkey?, hellthreads: MutedThreadsManager, contacts: Contacts, ev: NostrEvent) -> Bool {
     if contacts.is_muted(ev.pubkey) {
         return false
     }
+
+    if hellthreads.isMutedThread(ev, privkey: privkey) {
+        return false
+    }
+
     return ev.should_show_event
 }
 
