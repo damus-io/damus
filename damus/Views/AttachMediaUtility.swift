@@ -28,7 +28,7 @@ fileprivate func create_upload_body(mediaData: Data, boundary: String, mediaUplo
         return body as Data
     }
 
-func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploader, progress: URLSessionTaskDelegate) async -> ImageUploadResult {
+func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploader, progress: URLSessionTaskDelegate, keypair: Keypair? = nil) async -> ImageUploadResult {
     var mediaData: Data?
     guard let url = URL(string: mediaUploader.postAPI) else {
         return .failed(nil)
@@ -38,6 +38,15 @@ func create_upload_request(mediaToUpload: MediaUpload, mediaUploader: MediaUploa
     request.httpMethod = "POST";
     let boundary = "Boundary-\(UUID().description)"
     request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+    
+    // If uploading to a media host that support NIP-98 authorization, add the header
+    if mediaUploader == .nostrBuild,
+       let keypair,
+        let method = request.httpMethod,
+        let signature = create_nip98_signature(keypair: keypair, method: method, url: url) {
+
+         request.setValue(signature, forHTTPHeaderField: "Authorization")
+    }
     
     switch mediaToUpload {
     case .image(let url):
@@ -139,7 +148,7 @@ enum MediaUploader: String, CaseIterable, Identifiable, StringCodable {
     var postAPI: String {
         switch self {
         case .nostrBuild:
-            return "https://nostr.build/api/upload/ios.php"
+            return "https://nostr.build/api/v2/upload/files"
         case .nostrImg:
             return "https://nostrimg.com/api/upload"
         }
@@ -149,11 +158,30 @@ enum MediaUploader: String, CaseIterable, Identifiable, StringCodable {
         switch self {
         case .nostrBuild:
             do {
-                return try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? String
+                if let jsonObject = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any],
+                   let status = jsonObject["status"] as? String {
+                   
+                    if status == "success", let dataArray = jsonObject["data"] as? [[String: Any]] {
+                        
+                        var urls: [String] = []
+
+                        for dataDict in dataArray {
+                            if let mainUrl = dataDict["url"] as? String {
+                                urls.append(mainUrl)
+                            }
+                        }
+                        
+                        return urls.joined(separator: "\n")
+                    } else if status == "error", let message = jsonObject["message"] as? String {
+                        print("Upload Error: \(message)")
+                        return nil
+                    }
+                }
             } catch {
                 print("Failed JSONSerialization")
                 return nil
             }
+            return nil
         case .nostrImg:
             guard let responseString = String(data: data, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue)) else {
                 print("Upload failed getting response string")
