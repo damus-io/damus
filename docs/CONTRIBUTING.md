@@ -1,9 +1,5 @@
 # Contributing
 
-You can use github PRs to submit code but it is not encouraged. Damus is
-a decentralized social media protocol and we prefer to use decentralized
-techniques during the code submission process.
-
 [Email patches][git-send-email] to patches@damus.io are preferred, but we
 accept PRs on GitHub as well. Patches sent via email may include a bolt11
 lightning invoice, choosing the price you think the patch is worth, and
