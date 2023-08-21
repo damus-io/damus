@@ -144,7 +144,6 @@ struct ProfileView: View {
         return 100.0 - (Theme.safeAreaInsets?.top ?? 0)
     }
 
-    @ViewBuilder
     func navImage(img: String) -> some View {
         Image(img)
             .frame(width: 33, height: 33)
