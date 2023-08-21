@@ -393,7 +393,7 @@ func decode_bolt11(_ s: String) -> Invoice? {
     
     let block = bs.blocks[0]
     
-    guard let converted = convert_block(block, tags: nil) else {
+    guard let converted = Block(block) else {
         blocks_free(&bs)
         return nil
     }

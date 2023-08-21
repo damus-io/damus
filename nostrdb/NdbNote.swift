@@ -415,7 +415,15 @@ extension NdbNote {
         // Rely on Apple's NLLanguageRecognizer to tell us which language it thinks the note is in
         // and filter on only the text portions of the content as URLs and hashtags confuse the language recognizer.
         let originalBlocks = self.blocks(privkey).blocks
-        let originalOnlyText = originalBlocks.compactMap { $0.is_text }.joined(separator: " ")
+        let originalOnlyText = originalBlocks.compactMap {
+                if case .text(let txt) = $0 {
+                    return txt
+                }
+                else {
+                    return nil
+                }
+            }
+            .joined(separator: " ")
 
         // Only accept language recognition hypothesis if there's at least a 50% probability that it's accurate.
         let languageRecognizer = NLLanguageRecognizer()

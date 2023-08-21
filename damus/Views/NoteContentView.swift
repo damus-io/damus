@@ -445,7 +445,15 @@ func render_blocks(blocks bs: Blocks, profiles: Profiles) -> NoteArtifactsSepara
     let blocks = bs.blocks
     
     let one_note_ref = blocks
-        .filter({ $0.is_note_mention })
+        .filter({
+            if case .mention(let mention) = $0,
+               case .note = mention.ref {
+                return true
+            }
+            else {
+                return false
+            }
+        })
         .count == 1
     
     var ind: Int = -1
