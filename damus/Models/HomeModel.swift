@@ -227,7 +227,7 @@ class HomeModel {
                 return
             }
             
-            if damus_state.contacts.is_muted(ev.pubkey){
+            guard should_show_event(privkey: damus_state.keypair.privkey, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) else {
                 return
             }
         
