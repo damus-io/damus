@@ -130,7 +130,9 @@ struct DMChatView: View, KeyboardReadable {
     func send_message() {
         let tags = [["p", pubkey.hex()]]
         let post_blocks = parse_post_blocks(content: dms.draft)
-        let content = render_blocks(blocks: post_blocks)
+        let content = post_blocks
+            .map(\.asString)
+            .joined(separator: "")
 
         guard let dm = create_dm(content, to_pk: pubkey, tags: tags, keypair: damus_state.keypair) else {
             print("error creating dm")
