@@ -123,145 +123,9 @@ struct LightningInvoice<T> {
     }
 }
 
-enum Block: Equatable {
-    static func == (lhs: Block, rhs: Block) -> Bool {
-        switch (lhs, rhs) {
-        case (.text(let a), .text(let b)):
-            return a == b
-        case (.mention(let a), .mention(let b)):
-            return a == b
-        case (.hashtag(let a), .hashtag(let b)):
-            return a == b
-        case (.url(let a), .url(let b)):
-            return a == b
-        case (.invoice(let a), .invoice(let b)):
-            return a.string == b.string
-        case (_, _):
-            return false
-        }
-    }
-    
-    case text(String)
-    case mention(Mention<MentionRef>)
-    case hashtag(String)
-    case url(URL)
-    case invoice(Invoice)
-    case relay(String)
-    
-    var is_invoice: Invoice? {
-        if case .invoice(let invoice) = self {
-            return invoice
-        }
-        return nil
-    }
-    
-    var is_hashtag: String? {
-        if case .hashtag(let htag) = self {
-            return htag
-        }
-        return nil
-    }
-    
-    var is_url: URL? {
-        if case .url(let url) = self {
-            return url
-        }
-        
-        return nil
-    }
-    
-    var is_text: String? {
-        if case .text(let txt) = self {
-            return txt
-        }
-        return nil
-    }
-    
-    var is_note_mention: Bool {
-        if case .mention(let mention) = self,
-           case .note = mention.ref {
-            return true
-        }
-        return false
-    }
-
-    var is_mention: Mention<MentionRef>? {
-        if case .mention(let m) = self {
-            return m
-        }
-        return nil
-    }
-}
-
-func render_blocks(blocks: [Block]) -> String {
-    return blocks.reduce("") { str, block in
-        switch block {
-        case .mention(let m):
-            if let idx = m.index {
-                return str + "#[\(idx)]"
-            }
-
-            switch m.ref {
-            case .pubkey(let pk):    return str + "nostr:\(pk.npub)"
-            case .note(let note_id): return str + "nostr:\(note_id.bech32)"
-            }
-        case .relay(let relay):
-            return str + relay
-        case .text(let txt):
-            return str + txt
-        case .hashtag(let htag):
-            return str + "#" + htag
-        case .url(let url):
-            return str + url.absoluteString
-        case .invoice(let inv):
-            return str + inv.string
-        }
-    }
-}
-
 struct Blocks: Equatable {
     let words: Int
     let blocks: [Block]
-}
-
-func strblock_to_string(_ s: str_block_t) -> String? {
-    let len = s.end - s.start
-    let bytes = Data(bytes: s.start, count: len)
-    return String(bytes: bytes, encoding: .utf8)
-}
-
-func convert_block(_ b: block_t, tags: TagsSequence?) -> Block? {
-    if b.type == BLOCK_HASHTAG {
-        guard let str = strblock_to_string(b.block.str) else {
-            return nil
-        }
-        return .hashtag(str)
-    } else if b.type == BLOCK_TEXT {
-        guard let str = strblock_to_string(b.block.str) else {
-            return nil
-        }
-        return .text(str)
-    } else if b.type == BLOCK_MENTION_INDEX {
-        return convert_mention_index_block(ind: Int(b.block.mention_index), tags: tags)
-    } else if b.type == BLOCK_URL {
-        return convert_url_block(b.block.str)
-    } else if b.type == BLOCK_INVOICE {
-        return convert_invoice_block(b.block.invoice)
-    } else if b.type == BLOCK_MENTION_BECH32 {
-        return convert_mention_bech32_block(b.block.mention_bech32)
-    }
-
-    return nil
-}
-
-func convert_url_block(_ b: str_block) -> Block? {
-    guard let str = strblock_to_string(b) else {
-        return nil
-    }
-    guard let url = URL(string: str) else {
-        return .text(str)
-    }
-    return .url(url)
 }
 
 func maybe_pointee<T>(_ p: UnsafeMutablePointer<T>!) -> T? {
@@ -326,75 +190,6 @@ func format_msats(_ msat: Int64, locale: Locale = Locale.current) -> String {
     return String(format: format, locale: locale, sats.decimalValue as NSDecimalNumber, formattedSats)
 }
 
-func convert_invoice_block(_ b: invoice_block) -> Block? {
-    guard let invstr = strblock_to_string(b.invstr) else {
-        return nil
-    }
-    
-    guard var b11 = maybe_pointee(b.bolt11) else {
-        return nil
-    }
-    
-    guard let description = convert_invoice_description(b11: b11) else {
-        return nil
-    }
-    
-    let amount: Amount = maybe_pointee(b11.msat).map { .specific(Int64($0.millisatoshis)) } ?? .any
-    let payment_hash = Data(bytes: &b11.payment_hash, count: 32)
-    let created_at = b11.timestamp
-    
-    tal_free(b.bolt11)
-    return .invoice(Invoice(description: description, amount: amount, string: invstr, expiry: b11.expiry, payment_hash: payment_hash, created_at: created_at))
-}
-
-func convert_mention_bech32_block(_ b: mention_bech32_block) -> Block?
-{
-    switch b.bech32.type {
-    case NOSTR_BECH32_NOTE:
-        let note = b.bech32.data.note;
-        let note_id = NoteId(Data(bytes: note.event_id, count: 32))
-        return .mention(.any(.note(note_id)))
-
-    case NOSTR_BECH32_NEVENT:
-        let nevent = b.bech32.data.nevent;
-        let note_id = NoteId(Data(bytes: nevent.event_id, count: 32))
-        return .mention(.any(.note(note_id)))
-
-    case NOSTR_BECH32_NPUB:
-        let npub = b.bech32.data.npub
-        let pubkey = Pubkey(Data(bytes: npub.pubkey, count: 32))
-        return .mention(.any(.pubkey(pubkey)))
-
-    case NOSTR_BECH32_NSEC:
-        let nsec = b.bech32.data.nsec
-        let privkey = Privkey(Data(bytes: nsec.nsec, count: 32))
-        guard let pubkey = privkey_to_pubkey(privkey: privkey) else { return nil }
-        return .mention(.any(.pubkey(pubkey)))
-
-    case NOSTR_BECH32_NPROFILE:
-        let nprofile = b.bech32.data.nprofile
-        let pubkey = Pubkey(Data(bytes: nprofile.pubkey, count: 32))
-        return .mention(.any(.pubkey(pubkey)))
-
-    case NOSTR_BECH32_NRELAY:
-        let nrelay = b.bech32.data.nrelay
-        guard let relay_str = strblock_to_string(nrelay.relay) else {
-            return nil
-        }
-        return .relay(relay_str)
-        
-    case NOSTR_BECH32_NADDR:
-        // TODO: wtf do I do with this
-        guard let naddr = strblock_to_string(b.str) else {
-            return nil
-        }
-        return .text("nostr:" + naddr)
-
-    default:
-        return nil
-    }
-}
-
 func convert_invoice_description(b11: bolt11) -> InvoiceDescription? {
     if let desc = b11.description {
         return .description(String(cString: desc))
@@ -405,24 +200,6 @@ func convert_invoice_description(b11: bolt11) -> InvoiceDescription? {
     }
     
     return nil
-}
-
-func convert_mention_index_block(ind: Int, tags: TagsSequence?) -> Block?
-{
-    guard let tags,
-          ind >= 0,
-          ind + 1 <= tags.count
-    else {
-        return .text("#[\(ind)]")
-    }
-
-    let tag = tags[ind]
-
-    guard let mention = MentionRef.from_tag(tag: tag) else {
-        return .text("#[\(ind)]")
-    }
-
-    return .mention(.any(mention, index: ind))
 }
 
 func find_tag_ref(type: String, id: String, tags: [[String]]) -> Int? {
@@ -474,7 +251,9 @@ func post_to_event(post: NostrPost, keypair: FullKeypair) -> NostrEvent? {
     let tags = post.references.map({ r in r.tag }) + post.tags
     let post_blocks = parse_post_blocks(content: post.content)
     let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags)
-    let content = render_blocks(blocks: post_tags.blocks)
+    let content = post_tags.blocks
+        .map(\.asString)
+        .joined(separator: "")
     return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: post.kind.rawValue, tags: post_tags.tags)
 }
 
