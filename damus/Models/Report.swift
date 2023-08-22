@@ -39,9 +39,4 @@ enum ReportTarget {
     case user(Pubkey)
     case note(ReportNoteTarget)
 }
-struct Report {
-    let type: ReportType
-    let target: ReportTarget
-    let message: String
-}
 
