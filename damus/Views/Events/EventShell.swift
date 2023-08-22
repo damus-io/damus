@@ -93,8 +93,9 @@ struct EventShell<Content: View>: View {
             HStack(spacing: 10) {
                 Pfp(is_anon: is_anon)
 
-                VStack {
+                VStack(alignment: .leading, spacing: 2) {
                     EventTop(state: state, event: event, pubkey: pubkey, is_anon: is_anon)
+                    UserStatusView(status: state.profiles.profile_data(pubkey).status)
                     ReplyPart(events: state.events, event: event, privkey: state.keypair.privkey, profiles: state.profiles)
                 }
             }

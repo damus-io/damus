@@ -83,23 +83,37 @@ struct SideMenuView: View {
 
     var TopProfile: some View {
         let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
-        return HStack {
-            ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+        return VStack(alignment: .leading, spacing: verticalSpacing) {
+            HStack {
+                ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
 
-            VStack(alignment: .leading) {
-                if let display_name = profile?.display_name {
-                    Text(display_name)
-                        .foregroundColor(textColor())
-                        .font(.title)
-                        .lineLimit(1)
-                }
-                if let name = profile?.name {
-                    Text("@" + name)
-                        .foregroundColor(DamusColors.mediumGrey)
-                        .font(.body)
-                        .lineLimit(1)
+                VStack(alignment: .leading) {
+                    if let display_name = profile?.display_name {
+                        Text(display_name)
+                            .foregroundColor(textColor())
+                            .font(.title)
+                            .lineLimit(1)
+                    }
+                    if let name = profile?.name {
+                        Text("@" + name)
+                            .foregroundColor(DamusColors.mediumGrey)
+                            .font(.body)
+                            .lineLimit(1)
+                    }
                 }
             }
+
+            navLabel(title: NSLocalizedString("Set Status", comment: "Sidebar menu label to set user status"), img: "add-reaction")
+                .font(.title2)
+                .foregroundColor(textColor())
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .dynamicTypeSize(.xSmall)
+                .onTapGesture {
+                    present_sheet(.user_status)
+                }
+
+            UserStatusView(status: damus_state.profiles.profile_data(damus_state.pubkey).status)
+                .dynamicTypeSize(.xSmall)
         }
     }
 
@@ -190,17 +204,17 @@ struct SideMenuView: View {
         }
     }
 
-
-    @ViewBuilder
     func navLabel(title: String, img: String) -> some View {
-        Image(img)
-            .tint(DamusColors.adaptableBlack)
-
-        Text(title)
-            .font(.title2)
-            .foregroundColor(textColor())
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .dynamicTypeSize(.xSmall)
+        HStack {
+            Image(img)
+                .tint(DamusColors.adaptableBlack)
+            
+            Text(title)
+                .font(.title2)
+                .foregroundColor(textColor())
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .dynamicTypeSize(.xSmall)
+        }
     }
 
     struct SideMenuLabelStyle: LabelStyle {

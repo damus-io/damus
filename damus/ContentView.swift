@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVKit
+import MediaPlayer
 
 struct TimestampedProfile {
     let profile: Profile
@@ -30,6 +31,7 @@ enum Sheets: Identifiable {
     case zap(ZapSheet)
     case select_wallet(SelectWallet)
     case filter
+    case user_status
     case suggestedUsers
     
     static func zap(target: ZapTarget, lnurl: String) -> Sheets {
@@ -43,6 +45,7 @@ enum Sheets: Identifiable {
     var id: String {
         switch self {
         case .report: return "report"
+        case .user_status: return "user_status"
         case .post(let action): return "post-" + (action.ev?.id.hex() ?? "")
         case .event(let ev): return "event-" + ev.id.hex()
         case .zap(let sheet): return "zap-" + hex_encode(sheet.target.id)
@@ -315,6 +318,8 @@ struct ContentView: View {
                 MaybeReportView(target: target)
             case .post(let action):
                 PostView(action: action, damus_state: damus_state!)
+            case .user_status:
+                UserStatusSheet(postbox: damus_state!.postbox, keypair: damus_state!.keypair, status: damus_state!.profiles.profile_data(damus_state!.pubkey).status)
             case .event:
                 EventDetailView()
             case .zap(let zapsheet):
@@ -647,14 +652,32 @@ struct ContentView: View {
                                       muted_threads: MutedThreadsManager(keypair: keypair),
                                       wallet: WalletModel(settings: settings),
                                       nav: self.navigationCoordinator,
-                                      user_search_cache: user_search_cache
+                                      user_search_cache: user_search_cache,
+                                      music: MusicController(onChange: music_changed)
         )
         home.damus_state = self.damus_state!
         
         pool.connect()
     }
 
-    
+    func music_changed(_ state: MusicState) {
+        guard let damus_state else { return }
+        switch state {
+        case .playback_state:
+            break
+        case .song(let song):
+            guard let song, let kp = damus_state.keypair.to_full() else { return }
+
+            let pdata = damus_state.profiles.profile_data(damus_state.pubkey)
+
+            let music = UserStatus(type: .music, expires_at: Date.now.addingTimeInterval(song.playbackDuration), content: "\(song.title ?? "Unknown") - \(song.artist ?? "Unknown")")
+            pdata.status.music = music
+
+            guard let ev = music.to_note(keypair: kp) else { return }
+            damus_state.postbox.send(ev)
+        }
+    }
+
 }
 
 struct ContentView_Previews: PreviewProvider {
@@ -744,7 +767,6 @@ func update_filters_with_since(last_of_kind: [UInt32: NostrEvent], filters: [Nos
 
 
 func setup_notifications() {
-    
     UIApplication.shared.registerForRemoteNotifications()
     let center = UNUserNotificationCenter.current()
     

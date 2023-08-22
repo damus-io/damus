@@ -55,7 +55,7 @@ struct EventProfileName: View {
         
         return donation
     }
-    
+
     var body: some View {
         HStack(spacing: 2) {
             switch current_display_name {

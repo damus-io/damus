@@ -43,8 +43,11 @@ struct EventProfile: View {
                     ProfilePicView(pubkey: pubkey, size: pfp_size, highlight: .none, profiles: damus_state.profiles, disable_animation: disable_animation)
                 }
             }
-            
-            EventProfileName(pubkey: pubkey, profile: profile, damus: damus_state, size: size)
+
+            VStack(alignment: .leading) {
+                EventProfileName(pubkey: pubkey, profile: profile, damus: damus_state, size: size)
+                UserStatusView(status: damus_state.profiles.profile_data(pubkey).status)
+            }
         }
     }
 }

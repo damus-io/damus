@@ -34,7 +34,6 @@ struct EventTop: View {
             Spacer()
             EventMenuContext(damus: state, event: event)
         }
-        
         .lineLimit(1)
     }
 }

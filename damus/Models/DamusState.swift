@@ -32,7 +32,8 @@ struct DamusState {
     let wallet: WalletModel
     let nav: NavigationCoordinator
     let user_search_cache: UserSearchCache
-    
+    let music: MusicController?
+
     @discardableResult
     func add_zap(zap: Zapping) -> Bool {
         // store generic zap mapping
@@ -87,6 +88,8 @@ struct DamusState {
             muted_threads: MutedThreadsManager(keypair: kp),
             wallet: WalletModel(settings: UserSettingsStore()),
             nav: NavigationCoordinator(),
-            user_search_cache: user_search_cache)
+            user_search_cache: user_search_cache,
+            music: nil
+        )
     }
 }

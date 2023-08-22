@@ -24,4 +24,5 @@ enum NostrKind: UInt32, Codable {
     case nwc_request = 23194
     case nwc_response = 23195
     case http_auth = 27235
+    case status = 30315
 }

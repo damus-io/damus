@@ -190,9 +190,19 @@ class HomeModel {
             handle_nwc_response(ev, relay: relay_id)
         case .http_auth:
             break
+        case .status:
+            handle_status_event(ev)
         }
     }
-    
+
+    func handle_status_event(_ ev: NostrEvent) {
+        guard let st = UserStatus(ev: ev) else {
+            return
+        }
+
+        damus_state.profiles.profile_data(ev.pubkey).status.update_status(st)
+    }
+
     func handle_nwc_response(_ ev: NostrEvent, relay: String) {
         Task { @MainActor in
             // TODO: Adapt KeychainStorage to StringCodable and instead of parsing to WalletConnectURL every time
@@ -502,7 +512,7 @@ class HomeModel {
     func subscribe_to_home_filters(friends fs: [Pubkey]? = nil, relay_id: String? = nil) {
         // TODO: separate likes?
         var home_filter_kinds: [NostrKind] = [
-            .text, .longform, .boost
+            .text, .longform, .boost, .status
         ]
         if !damus_state.settings.onlyzaps_mode {
             home_filter_kinds.append(.like)
@@ -1401,7 +1411,7 @@ func process_zap_event(damus_state: DamusState, ev: NostrEvent, completion: @esc
         }
         
         DispatchQueue.main.async {
-            damus_state.profiles.zappers[ptag] = zapper
+            damus_state.profiles.profile_data(ptag).zapper = zapper
             guard let zap = process_zap_event_with_zapper(damus_state: damus_state, ev: ev, zapper: zapper) else {
                 completion(.failed)
                 return
