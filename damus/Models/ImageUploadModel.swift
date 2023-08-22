@@ -47,8 +47,8 @@ enum MediaUpload {
 class ImageUploadModel: NSObject, URLSessionTaskDelegate, ObservableObject {
     @Published var progress: Double? = nil
     
-    func start(media: MediaUpload, uploader: MediaUploader) async -> ImageUploadResult {
-        let res = await create_upload_request(mediaToUpload: media, mediaUploader: uploader, progress: self)
+    func start(media: MediaUpload, uploader: MediaUploader, keypair: Keypair? = nil) async -> ImageUploadResult {
+        let res = await create_upload_request(mediaToUpload: media, mediaUploader: uploader, progress: self, keypair: keypair)
         DispatchQueue.main.async {
             self.progress = nil
         }
