@@ -7,6 +7,18 @@
 
 import SwiftUI
 
+fileprivate extension ReportTarget {
+    func reportTags(type: ReportType) -> [[String]] {
+        switch self {
+        case .user(let pubkey):
+            return [["p", pubkey.hex(), type.rawValue]]
+        case .note(let notet):
+            return [["e", notet.note_id.hex(), type.rawValue],
+                    ["p", notet.pubkey.hex()]]
+        }
+    }
+}
+
 struct ReportView: View {
     let postbox: PostBox
     let target: ReportTarget
@@ -47,9 +59,11 @@ struct ReportView: View {
     
     func do_send_report() {
         guard let selected_report_type,
-              let ev = send_report(keypair: keypair, postbox: postbox, target: target, type: selected_report_type, message: report_message) else {
+              let ev = NostrEvent(content: report_message, keypair: keypair.to_keypair(), kind: 1984, tags: target.reportTags(type: selected_report_type)) else {
             return
         }
+        
+        postbox.send(ev)
         
         report_sent = true
         report_id = bech32_note_id(ev.id)
@@ -111,15 +125,6 @@ struct ReportView: View {
             }
         }
     }
-}
-
-func send_report(keypair: FullKeypair, postbox: PostBox, target: ReportTarget, type: ReportType, message: String) -> NostrEvent? {
-    let report = Report(type: type, target: target, message: message)
-    guard let ev = create_report_event(keypair: keypair, report: report) else {
-        return nil
-    }
-    postbox.send(ev)
-    return ev
 }
 
 struct ReportView_Previews: PreviewProvider {
