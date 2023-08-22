@@ -66,7 +66,6 @@ struct MenuItems: View {
     }
     
     var body: some View {
-
         Group {
             Button {
                 UIPasteboard.general.string = event.get_content(keypair.privkey)
@@ -126,7 +125,7 @@ struct MenuItems: View {
             // Only allow reporting if logged in with private key and the currently viewed profile is not the logged in profile.
             if keypair.pubkey != target_pubkey && keypair.privkey != nil {
                 Button(role: .destructive) {
-                    notify(.report(.note(pubkey: target_pubkey, note_id: event.id)))
+                    notify(.report(.note(ReportNoteTarget(pubkey: target_pubkey, note_id: event.id))))
                 } label: {
                     Label(NSLocalizedString("Report", comment: "Context menu option for reporting content."), image: "raising-hand")
                 }
