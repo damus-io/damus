@@ -200,6 +200,10 @@ class HomeModel {
             return
         }
 
+        if let expires = st.expires_at, Date.now >= expires {
+            return
+        }
+
         damus_state.profiles.profile_data(ev.pubkey).status.update_status(st)
     }
 
