@@ -77,11 +77,22 @@ class UserStatusModel: ObservableObject {
     @Published var music: UserStatus?
 
     func update_status(_ s: UserStatus) {
+        // whitespace = delete
+        let del = s.content.allSatisfy({ c in c.isWhitespace })
+
         switch s.type {
         case .music:
-            self.music = s
+            if del {
+                self.music = nil
+            } else {
+                self.music = s
+            }
         case .general:
-            self.general = s
+            if del {
+                self.general = nil
+            } else {
+                self.general = s
+            }
         }
     }
 
