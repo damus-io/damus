@@ -223,13 +223,9 @@ class HomeModel {
     
     func handle_zap_event(_ ev: NostrEvent) {
         process_zap_event(damus_state: damus_state, ev: ev) { zapres in
-            guard case .done(let zap) = zapres else { return }
-            
-            guard zap.target.pubkey == self.damus_state.keypair.pubkey else {
-                return
-            }
-            
-            guard should_show_event(privkey: self.damus_state.keypair.privkey, hellthreads: self.damus_state.muted_threads, contacts: self.damus_state.contacts, ev: zap.request.ev) else {
+            guard case .done(let zap) = zapres,
+                  zap.target.pubkey == self.damus_state.keypair.pubkey,
+                  should_show_event(privkey: self.damus_state.keypair.privkey, hellthreads: self.damus_state.muted_threads, contacts: self.damus_state.contacts, ev: zap.request.ev) else {
                 return
             }
         
