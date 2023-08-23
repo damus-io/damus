@@ -68,6 +68,8 @@ struct EventShell<Content: View>: View {
             VStack(alignment: .leading) {
                 EventTop(state: state, event: event, pubkey: pubkey, is_anon: is_anon)
 
+                UserStatusView(status: state.profiles.profile_data(pubkey).status)
+
                 if !options.contains(.no_replying_to) {
                     ReplyPart(events: state.events, event: event, privkey: state.keypair.privkey, profiles: state.profiles)
                 }
