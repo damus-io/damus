@@ -159,6 +159,12 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "auto_translate", default_value: true)
     var auto_translate: Bool
 
+    @Setting(key: "show_general_statuses", default_value: true)
+    var show_general_statuses: Bool
+
+    @Setting(key: "show_music_statuses", default_value: true)
+    var show_music_statuses: Bool
+
     @Setting(key: "show_only_preferred_languages", default_value: false)
     var show_only_preferred_languages: Bool
     

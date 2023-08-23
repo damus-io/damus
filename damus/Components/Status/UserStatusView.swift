@@ -12,16 +12,19 @@ import MediaPlayer
 struct UserStatusView: View {
     @ObservedObject var status: UserStatusModel
 
+    var show_general: Bool
+    var show_music: Bool
+
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            if let general = status.general {
+            if show_general, let general = status.general {
                 Text(verbatim: "\(general.content)")
                     .lineLimit(1)
                     .foregroundColor(.gray)
                     .font(.callout.italic())
             }
 
-            if let playing = status.music {
+            if show_music, let playing = status.music {
                 Text(verbatim: "🎵\(playing.content)")
                     .lineLimit(1)
                     .foregroundColor(.gray)
@@ -34,6 +37,6 @@ struct UserStatusView: View {
 
 struct UserStatusView_Previews: PreviewProvider {
     static var previews: some View {
-        UserStatusView(status: .init())
+        UserStatusView(status: .init(), show_general: true, show_music: true)
     }
 }

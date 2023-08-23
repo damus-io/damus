@@ -112,7 +112,7 @@ struct SideMenuView: View {
                     present_sheet(.user_status)
                 }
 
-            UserStatusView(status: damus_state.profiles.profile_data(damus_state.pubkey).status)
+            UserStatusView(status: damus_state.profiles.profile_data(damus_state.pubkey).status, show_general: true, show_music: true)
                 .dynamicTypeSize(.xSmall)
         }
     }

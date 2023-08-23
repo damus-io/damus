@@ -530,10 +530,15 @@ class HomeModel {
     func subscribe_to_home_filters(friends fs: [Pubkey]? = nil, relay_id: String? = nil) {
         // TODO: separate likes?
         var home_filter_kinds: [NostrKind] = [
-            .text, .longform, .boost, .status
+            .text, .longform, .boost
         ]
         if !damus_state.settings.onlyzaps_mode {
             home_filter_kinds.append(.like)
+        }
+
+        // only pull status data if we care for it
+        if damus_state.settings.show_music_statuses || damus_state.settings.show_general_statuses {
+            home_filter_kinds.append(.status)
         }
 
         let friends = fs ?? get_friends()

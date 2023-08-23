@@ -48,7 +48,15 @@ struct AppearanceSettingsView: View {
                 Toggle(NSLocalizedString("Truncate notification mention text", comment: "Setting to truncate text in mention notifications"), isOn: $settings.truncate_mention_text)
                     .toggleStyle(.switch)
             }
-            
+
+            Section(header: Text("User Statuses")) {
+                Toggle(NSLocalizedString("Show general statuses", comment: "Settings toggle for enabling general user statuses"), isOn: $settings.show_general_statuses)
+                    .toggleStyle(.switch)
+
+                Toggle(NSLocalizedString("Show music statuses", comment: "Settings toggle for enabling now playing music statuses"), isOn: $settings.show_music_statuses)
+                    .toggleStyle(.switch)
+            }
+
             // MARK: - Accessibility
             Section(header: Text(NSLocalizedString("Accessibility", comment: "Section header for accessibility settings"))) {
                 Toggle(NSLocalizedString("Left Handed", comment: "Moves the post button to the left side of the screen"), isOn: $settings.left_handed)

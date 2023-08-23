@@ -46,7 +46,8 @@ struct EventProfile: View {
 
             VStack(alignment: .leading) {
                 EventProfileName(pubkey: pubkey, profile: profile, damus: damus_state, size: size)
-                UserStatusView(status: damus_state.profiles.profile_data(pubkey).status)
+
+                UserStatusView(status: damus_state.profiles.profile_data(pubkey).status, show_general: damus_state.settings.show_general_statuses, show_music: damus_state.settings.show_music_statuses)
             }
         }
     }
