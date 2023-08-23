@@ -229,7 +229,7 @@ class HomeModel {
                 return
             }
             
-            guard should_show_event(privkey: damus_state.keypair.privkey, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: zap.request.ev) else {
+            guard should_show_event(privkey: self.damus_state.keypair.privkey, hellthreads: self.damus_state.muted_threads, contacts: self.damus_state.contacts, ev: zap.request.ev) else {
                 return
             }
         
