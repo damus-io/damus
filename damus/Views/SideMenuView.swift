@@ -81,32 +81,37 @@ struct SideMenuView: View {
         }
     }
 
+    var TopProfile: some View {
+        let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
+        return HStack {
+            ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+
+            VStack(alignment: .leading) {
+                if let display_name = profile?.display_name {
+                    Text(display_name)
+                        .foregroundColor(textColor())
+                        .font(.title)
+                        .lineLimit(1)
+                }
+                if let name = profile?.name {
+                    Text("@" + name)
+                        .foregroundColor(DamusColors.mediumGrey)
+                        .font(.body)
+                        .lineLimit(1)
+                }
+            }
+        }
+    }
+
     var MainSidemenu: some View {
         VStack(alignment: .leading, spacing: 0) {
-            let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
             let followers = FollowersModel(damus_state: damus_state, target: damus_state.pubkey)
             let profile_model = ProfileModel(pubkey: damus_state.pubkey, damus: damus_state)
 
             NavigationLink(value: Route.Profile(profile: profile_model, followers: followers), label: {
-                HStack {
-                    ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
 
-                    VStack(alignment: .leading) {
-                        if let display_name = profile?.display_name {
-                            Text(display_name)
-                                .foregroundColor(textColor())
-                                .font(.title)
-                                .lineLimit(1)
-                        }
-                        if let name = profile?.name {
-                            Text("@" + name)
-                                .foregroundColor(DamusColors.mediumGrey)
-                                .font(.body)
-                                .lineLimit(1)
-                        }
-                    }
-                }
-                .padding(.bottom, verticalSpacing)
+                TopProfile
+                    .padding(.bottom, verticalSpacing)
             })
 
             Divider()
