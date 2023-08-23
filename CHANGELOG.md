@@ -1,3 +1,19 @@
+## [1.6-16] - 2023-08-23
+
+### Added
+
+- Added live music statuses (William Casarin)
+- Added generic user statuses (William Casarin)
+
+### Fixed
+
+- Avoid notification for zaps from muted profiles (tappu75e@duck.com)
+- Fix text editing issues on characters added right after mention link (Daniel D’Aquino)
+- Mute hellthreads everywhere (William Casarin)
+
+
+[1.6-16]: https://github.com/damus-io/damus/releases/tag/v1.6-16
+
 ## [1.6-13] - 2023-08-18
 
 ### Fixed
