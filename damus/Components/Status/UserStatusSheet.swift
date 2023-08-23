@@ -45,7 +45,7 @@ struct UserStatusSheet: View {
         Binding(get: {
             status.general?.content ?? ""
         }, set: { v in
-            status.general = UserStatus(type: .general, expires_at: duration.expiration, content: v)
+            status.general = UserStatus(type: .general, expires_at: duration.expiration, content: v, created_at: UInt32(Date.now.timeIntervalSince1970))
         })
     }
 

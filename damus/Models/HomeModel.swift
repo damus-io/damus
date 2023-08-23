@@ -200,11 +200,25 @@ class HomeModel {
             return
         }
 
+        // don't process expired events
         if let expires = st.expires_at, Date.now >= expires {
             return
         }
 
-        damus_state.profiles.profile_data(ev.pubkey).status.update_status(st)
+        let pdata = damus_state.profiles.profile_data(ev.pubkey)
+
+        // don't use old events
+        if st.type == .music,
+           let music = pdata.status.music,
+           ev.created_at < music.created_at {
+            return
+        } else if st.type == .general,
+                  let general = pdata.status.general,
+                  ev.created_at < general.created_at {
+            return
+        }
+
+        pdata.status.update_status(st)
     }
 
     func handle_nwc_response(_ ev: NostrEvent, relay: String) {

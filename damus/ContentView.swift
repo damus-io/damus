@@ -359,6 +359,7 @@ struct ContentView: View {
         }
         .onReceive(timer) { n in
             self.damus_state?.postbox.try_flushing_events()
+            self.damus_state!.profiles.profile_data(self.damus_state!.pubkey).status.try_expire()
         }
         .onReceive(handle_notify(.report)) { target in
             self.active_sheet = .report(target)
@@ -670,7 +671,8 @@ struct ContentView: View {
 
             let pdata = damus_state.profiles.profile_data(damus_state.pubkey)
 
-            let music = UserStatus(type: .music, expires_at: Date.now.addingTimeInterval(song.playbackDuration), content: "\(song.title ?? "Unknown") - \(song.artist ?? "Unknown")")
+            let music = UserStatus(type: .music, expires_at: Date.now.addingTimeInterval(song.playbackDuration), content: "\(song.title ?? "Unknown") - \(song.artist ?? "Unknown")", created_at: UInt32(Date.now.timeIntervalSince1970))
+
             pdata.status.music = music
 
             guard let ev = music.to_note(keypair: kp) else { return }

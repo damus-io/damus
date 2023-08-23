@@ -19,15 +19,22 @@ struct UserStatus {
     let type: UserStatusType
     let expires_at: Date?
     let content: String
+    let created_at: UInt32
 
     func to_note(keypair: FullKeypair) -> NostrEvent? {
         return make_user_status_note(status: self, keypair: keypair)
     }
 
-    init(type: UserStatusType, expires_at: Date?, content: String) {
+    init(type: UserStatusType, expires_at: Date?, content: String, created_at: UInt32) {
         self.type = type
         self.expires_at = expires_at
         self.content = content
+        self.created_at = created_at
+    }
+
+    func expired() -> Bool {
+        guard let expires_at else { return false }
+        return Date.now >= expires_at
     }
 
     init?(ev: NostrEvent) {
@@ -54,6 +61,7 @@ struct UserStatus {
         }
 
         self.content = ev.content
+        self.created_at = ev.created_at
     }
 
 }
@@ -74,6 +82,16 @@ class UserStatusModel: ObservableObject {
             self.music = s
         case .general:
             self.general = s
+        }
+    }
+
+    func try_expire() {
+        if let general, general.expired() {
+            self.general = nil
+        }
+
+        if let music, music.expired() {
+            self.music = nil
         }
     }
 
