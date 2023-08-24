@@ -1,3 +1,22 @@
+## [1.6-17] - 2023-08-23
+
+### Added
+
+- Add support for status URLs (William Casarin)
+- Click music statuses to display in spotify (William Casarin)
+- Add settings for disabling user statuses (William Casarin)
+
+### Changed
+
+- clear statuses if they only contain whitespace (William Casarin)
+
+### Fixed
+
+- Fix long status lines (William Casarin)
+- Fix status events not expiring locally (William Casarin)
+
+[1.6-17]: https://github.com/damus-io/damus/releases/tag/v1.6-17
+
 ## [1.6-16] - 2023-08-23
 
 ### Added
@@ -1506,4 +1525,5 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
+
 
