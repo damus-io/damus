@@ -11,16 +11,14 @@ import MediaPlayer
 struct Song {
     let started_playing: Date
     let content: String
-
-
 }
 
 struct UserStatus {
     let type: UserStatusType
     let expires_at: Date?
-    let content: String
+    var content: String
     let created_at: UInt32
-    let url: URL?
+    var url: URL?
 
     func to_note(keypair: FullKeypair) -> NostrEvent? {
         return make_user_status_note(status: self, keypair: keypair)

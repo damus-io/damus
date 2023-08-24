@@ -38,6 +38,7 @@ struct UserStatusSheet: View {
     let keypair: Keypair
 
     @State var duration: StatusDuration = .never
+    
     @ObservedObject var status: UserStatusModel
     @Environment(\.dismiss) var dismiss
 
@@ -45,7 +46,23 @@ struct UserStatusSheet: View {
         Binding(get: {
             status.general?.content ?? ""
         }, set: { v in
-            status.general = UserStatus(type: .general, expires_at: duration.expiration, content: v, created_at: UInt32(Date.now.timeIntervalSince1970))
+            if let general = status.general {
+                status.general = UserStatus(type: .general, expires_at: duration.expiration, content: v, created_at: UInt32(Date.now.timeIntervalSince1970), url: general.url)
+            } else {
+                status.general = UserStatus(type: .general, expires_at: duration.expiration, content: v, created_at: UInt32(Date.now.timeIntervalSince1970), url: nil)
+            }
+        })
+    }
+
+    var url_binding: Binding<String> {
+        Binding(get: {
+            status.general?.url?.absoluteString ?? ""
+        }, set: { v in
+            if let general = status.general {
+                status.general = UserStatus(type: .general, expires_at: duration.expiration, content: general.content, created_at: UInt32(Date.now.timeIntervalSince1970), url: URL(string: v))
+            } else {
+                status.general = UserStatus(type: .general, expires_at: duration.expiration, content: "", created_at: UInt32(Date.now.timeIntervalSince1970), url: URL(string: v))
+            }
         })
     }
 
@@ -57,6 +74,14 @@ struct UserStatusSheet: View {
             TextField(text: status_binding, label: {
                 Text("📋 Working")
             })
+
+            HStack {
+                Image("link")
+
+                TextField(text: url_binding, label: {
+                    Text("https://example.com")
+                })
+            }
 
             HStack {
                 Text("Clear status")

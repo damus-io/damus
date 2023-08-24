@@ -17,38 +17,45 @@ struct UserStatusView: View {
 
     @Environment(\.openURL) var openURL
 
+    func Status(st: UserStatus, prefix: String = "") -> some View {
+        HStack {
+            Text(verbatim: "\(prefix)\(st.content)")
+                .lineLimit(1)
+                .foregroundColor(.gray)
+                .font(.callout.italic())
+            if st.url != nil {
+                Image("link")
+                    .resizable()
+                    .frame(width: 16, height: 16)
+                    .foregroundColor(.gray)
+            }
+        }
+        .onTapGesture {
+            if let url = st.url {
+                openURL(url)
+            }
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             if show_general, let general = status.general {
-                Text(verbatim: "\(general.content)")
-                    .lineLimit(1)
-                    .foregroundColor(.gray)
-                    .font(.callout.italic())
-                    .onTapGesture {
-                        if let url = general.url {
-                            openURL(url)
-                        }
-                    }
+                Status(st: general)
             }
 
             if show_music, let playing = status.music {
-                Text(verbatim: "🎵\(playing.content)")
-                    .lineLimit(1)
-                    .foregroundColor(.gray)
-                    .font(.callout.italic())
-                    .onTapGesture {
-                        if let url = playing.url {
-                            openURL(url)
-                        }
-                    }
+                Status(st: playing, prefix: "🎵")
             }
         }
 
     }
 }
 
+/*
 struct UserStatusView_Previews: PreviewProvider {
     static var previews: some View {
-        UserStatusView(status: .init(), show_general: true, show_music: true)
+        UserStatusView(status: UserStatus(type: .music, expires_at: nil, content: "Track - Artist", created_at: 0, url: URL(string: "spotify:search:abc")), show_general: true, show_music: true)
     }
 }
+
+*/
