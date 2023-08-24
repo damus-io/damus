@@ -15,6 +15,8 @@ struct UserStatusView: View {
     var show_general: Bool
     var show_music: Bool
 
+    @Environment(\.openURL) var openURL
+
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             if show_general, let general = status.general {
@@ -22,6 +24,11 @@ struct UserStatusView: View {
                     .lineLimit(1)
                     .foregroundColor(.gray)
                     .font(.callout.italic())
+                    .onTapGesture {
+                        if let url = general.url {
+                            openURL(url)
+                        }
+                    }
             }
 
             if show_music, let playing = status.music {
@@ -29,6 +36,11 @@ struct UserStatusView: View {
                     .lineLimit(1)
                     .foregroundColor(.gray)
                     .font(.callout.italic())
+                    .onTapGesture {
+                        if let url = playing.url {
+                            openURL(url)
+                        }
+                    }
             }
         }
 

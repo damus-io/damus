@@ -20,16 +20,18 @@ struct UserStatus {
     let expires_at: Date?
     let content: String
     let created_at: UInt32
+    let url: URL?
 
     func to_note(keypair: FullKeypair) -> NostrEvent? {
         return make_user_status_note(status: self, keypair: keypair)
     }
 
-    init(type: UserStatusType, expires_at: Date?, content: String, created_at: UInt32) {
+    init(type: UserStatusType, expires_at: Date?, content: String, created_at: UInt32, url: URL? = nil) {
         self.type = type
         self.expires_at = expires_at
         self.content = content
         self.created_at = created_at
+        self.url = url
     }
 
     func expired() -> Bool {
@@ -49,6 +51,15 @@ struct UserStatus {
             self.type = .music
         } else {
             return nil
+        }
+
+        if let tag = ev.tags.first(where: { t in t.count >= 2 && t[0].matches_char("r") }),
+           tag.count >= 2,
+           let url = URL(string: tag[1].string())
+        {
+            self.url = url
+        } else {
+            self.url = nil
         }
 
         if let tag = ev.tags.first(where: { t in t.count >= 2 && t[0].matches_str("expiration") }),
@@ -158,6 +169,10 @@ func make_user_status_note(status: UserStatus, keypair: FullKeypair, expiry: Dat
         tags.append(["expiration", String(UInt32(expiry.timeIntervalSince1970))])
     } else if let expiry = status.expires_at  {
         tags.append(["expiration", String(UInt32(expiry.timeIntervalSince1970))])
+    }
+
+    if let url = status.url {
+        tags.append(["r", url.absoluteString])
     }
 
     let kind = NostrKind.status.rawValue

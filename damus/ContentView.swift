@@ -671,7 +671,12 @@ struct ContentView: View {
 
             let pdata = damus_state.profiles.profile_data(damus_state.pubkey)
 
-            let music = UserStatus(type: .music, expires_at: Date.now.addingTimeInterval(song.playbackDuration), content: "\(song.title ?? "Unknown") - \(song.artist ?? "Unknown")", created_at: UInt32(Date.now.timeIntervalSince1970))
+            let desc = "\(song.title ?? "Unknown") - \(song.artist ?? "Unknown")"
+            let encodedDesc = desc.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+            let url = encodedDesc.flatMap { enc in
+                URL(string: "spotify:search:\(enc)")
+            }
+            let music = UserStatus(type: .music, expires_at: Date.now.addingTimeInterval(song.playbackDuration), content: desc, created_at: UInt32(Date.now.timeIntervalSince1970), url: url)
 
             pdata.status.music = music
 
