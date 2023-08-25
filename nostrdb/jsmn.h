@@ -100,7 +100,7 @@ JSMN_API void jsmn_init(jsmn_parser *parser);
  * a single JSON object.
  */
 JSMN_API int jsmn_parse(jsmn_parser *parser, const char *js, const size_t len,
-                        jsmntok_t *tokens, const unsigned int num_tokens);
+                        jsmntok_t *tokens, const unsigned int num_tokens, int stop_at_id);
 
 #ifndef JSMN_HEADER
 /**
@@ -269,11 +269,12 @@ static int jsmn_parse_string(jsmn_parser *parser, const char *js,
  * Parse JSON string and fill tokens.
  */
 JSMN_API int jsmn_parse(jsmn_parser *parser, const char *js, const size_t len,
-                        jsmntok_t *tokens, const unsigned int num_tokens) {
-  int r;
-  int i;
+                        jsmntok_t *tokens, const unsigned int num_tokens, int stop_at_id) {
+  int r, i, idkey;
   jsmntok_t *token;
   int count = parser->toknext;
+
+  idkey = 0;
 
   for (; parser->pos < len && js[parser->pos] != '\0'; parser->pos++) {
     char c;
@@ -370,6 +371,22 @@ JSMN_API int jsmn_parse(jsmn_parser *parser, const char *js, const size_t len,
       if (parser->toksuper != -1 && tokens != NULL) {
         tokens[parser->toksuper].size++;
       }
+
+      // big hack. resumable parsing when encountering the id field
+      if (stop_at_id) {
+        token = &tokens[parser->toknext-1];
+        if (idkey == 1 && (token->end - token->start) == 64) {
+          //printf("jsmn: found id '%.*s'\n", token->end - token->start, js + token->start);
+          parser->pos++;
+          return -42;
+        } else if (idkey == 0 && (token->end - token->start) == 2 &&
+                   (js + token->start)[0] == 'i' &&
+		   (js + token->start)[1] == 'd') {
+          //printf("jsmn: found id key\n");
+          idkey = 1;
+        }
+      }
+
       break;
     case '\t':
     case '\r':

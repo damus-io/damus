@@ -156,7 +156,7 @@ class NdbNote: Encodable, Equatable, Hashable {
 
         ndb_builder_set_pubkey(&builder, &pk_raw)
         ndb_builder_set_kind(&builder, UInt32(kind))
-        ndb_builder_set_created_at(&builder, createdAt)
+        ndb_builder_set_created_at(&builder, UInt64(createdAt))
 
         var ok = true
         for tag in tags {

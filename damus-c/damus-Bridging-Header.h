@@ -9,4 +9,5 @@
 #include "wasm.h"
 #include "nostrscript.h"
 #include "nostrdb.h"
+#include "lmdb.h"
 

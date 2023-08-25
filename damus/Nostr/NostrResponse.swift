@@ -51,7 +51,7 @@ enum NostrResponse {
             //json_cs
             var tce = ndb_tce()
 
-            let len = ndb_ws_event_from_json(cstr, Int32(json.utf8.count), &tce, data, Int32(bufsize))
+            let len = ndb_ws_event_from_json(cstr, Int32(json.utf8.count), &tce, data, Int32(bufsize), nil)
             if len <= 0 {
                 free(data)
                 return nil

@@ -7,7 +7,20 @@
 #define NDB_PACKED_STR     0x1
 #define NDB_PACKED_ID      0x2
 
+//#define DEBUG 1
+
+#ifdef DEBUG
+#define ndb_debug(...) printf(__VA_ARGS__)
+#else
+#define ndb_debug(...) (void)0
+#endif
+
 struct ndb_json_parser;
+struct ndb;
+
+struct ndb_t {
+	struct ndb *ndb;
+};
 
 // To-client event types
 enum tce_type {
@@ -15,6 +28,15 @@ enum tce_type {
 	NDB_TCE_OK     = 0x2,
 	NDB_TCE_NOTICE = 0x3,
 	NDB_TCE_EOSE   = 0x4,
+};
+
+// function pointer for controlling what to do after we parse an id
+typedef enum ndb_idres (*ndb_id_fn)(void *, const char *);
+
+// id callback + closure data
+struct ndb_id_cb {
+	ndb_id_fn fn;
+	void *data;
 };
 
 struct ndb_str {
@@ -80,6 +102,7 @@ struct ndb_tag {
 };
 
 struct ndb_tags {
+	uint16_t padding;
 	uint16_t count;
 	struct ndb_tag tag[0];
 };
@@ -92,12 +115,12 @@ struct ndb_note {
 	unsigned char pubkey[32];
 	unsigned char sig[64];
 
-	uint32_t created_at;
+	uint64_t created_at;
 	uint32_t kind;
 	uint32_t content_length;
 	union ndb_packed_str content;
 	uint32_t strings;
-
+	uint32_t reserved[4]; // expansion slots
 	// nothing can come after tags since it contains variadic data
 	struct ndb_tags tags;
 };
@@ -126,16 +149,24 @@ int ndb_calculate_id(struct ndb_note *note, unsigned char *buf, int buflen);
 int ndb_sign_id(struct ndb_keypair *keypair, unsigned char id[32], unsigned char sig[64]);
 int ndb_create_keypair(struct ndb_keypair *key);
 int ndb_decode_key(const char *secstr, struct ndb_keypair *keypair);
+int ndb_note_verify(void *secp_ctx, unsigned char pubkey[32], unsigned char id[32], unsigned char signature[64]);
+
+// NDB
+int ndb_init(struct ndb **ndb, const char *dbdir, size_t mapsize, int ingester_threads);
+int ndb_process_event(struct ndb *, const char *json, int len);
+int ndb_process_events(struct ndb *, const char *ldjson, size_t len);
+int ndb_get_profile(struct ndb *, unsigned char pubkey[32], void **out);
+struct ndb_note *ndb_get_note_by_id(struct ndb *, const unsigned char *id);
+void ndb_destroy(struct ndb *);
 
 // BUILDER
-
 int ndb_parse_json_note(struct ndb_json_parser *, struct ndb_note **);
-int ndb_ws_event_from_json(const char *json, int len, struct ndb_tce *tce, unsigned char *buf, int bufsize);
+int ndb_ws_event_from_json(const char *json, int len, struct ndb_tce *tce, unsigned char *buf, int bufsize, struct ndb_id_cb *);
 int ndb_note_from_json(const char *json, int len, struct ndb_note **, unsigned char *buf, int buflen);
 int ndb_builder_init(struct ndb_builder *builder, unsigned char *buf, int bufsize);
 int ndb_builder_finalize(struct ndb_builder *builder, struct ndb_note **note, struct ndb_keypair *privkey);
 int ndb_builder_set_content(struct ndb_builder *builder, const char *content, int len);
-void ndb_builder_set_created_at(struct ndb_builder *builder, uint32_t created_at);
+void ndb_builder_set_created_at(struct ndb_builder *builder, uint64_t created_at);
 void ndb_builder_set_sig(struct ndb_builder *builder, unsigned char *sig);
 void ndb_builder_set_pubkey(struct ndb_builder *builder, unsigned char *pubkey);
 void ndb_builder_set_id(struct ndb_builder *builder, unsigned char *id);
