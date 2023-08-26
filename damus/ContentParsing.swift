@@ -27,7 +27,7 @@ func parsed_blocks_finish(bs: inout note_blocks, tags: TagsSequence?) -> Blocks 
     while (i < bs.num_blocks) {
         let block = bs.blocks[i]
 
-        if let converted = Block(block, tags: tags) {
+        if let converted = convert_block(block, tags: tags) {
             out.append(converted)
         }
 
