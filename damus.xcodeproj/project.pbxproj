@@ -103,6 +103,7 @@
 		4C30AC7629A5770900E2BD5A /* NotificationItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C30AC7529A5770900E2BD5A /* NotificationItemView.swift */; };
 		4C30AC7829A577AB00E2BD5A /* EventCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C30AC7729A577AB00E2BD5A /* EventCache.swift */; };
 		4C30AC8029A6A53F00E2BD5A /* ProfilePicturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C30AC7F29A6A53F00E2BD5A /* ProfilePicturesView.swift */; };
+		4C32B9332A99845B00DC3548 /* Ndb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C478E242A9932C100489948 /* Ndb.swift */; };
 		4C363A8428233689006E126D /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8328233689006E126D /* Parser.swift */; };
 		4C363A8828236948006E126D /* BlocksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8728236948006E126D /* BlocksView.swift */; };
 		4C363A8C28236B92006E126D /* PubkeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C363A8B28236B92006E126D /* PubkeyView.swift */; };
@@ -1732,6 +1733,7 @@
 				4C90548A2A6AEDEE00811EEC /* NdbNote.swift */,
 				4C5D5C9C2A6B2CB40024563C /* AsciiCharacter.swift */,
 				4CDD1ADF2A6B305F001CD4DF /* NdbTagElem.swift */,
+				4C478E242A9932C100489948 /* Ndb.swift */,
 				4CDD1AE12A6B3074001CD4DF /* NdbTagsIterator.swift */,
 				4CE9FBB82A6B3B26007E485C /* nostrdb.c */,
 				4C4793032A993DB900489948 /* midl.c */,
@@ -1749,7 +1751,6 @@
 				4C78EFD72A707C4D007E8197 /* secp256k1_schnorrsig.h */,
 				4C78EFDA2A707C67007E8197 /* secp256k1_extrakeys.h */,
 				4C78EFD92A707C4D007E8197 /* secp256k1.h */,
-				4C478E242A9932C100489948 /* Ndb.swift */,
 			);
 			path = nostrdb;
 			sourceTree = "<group>";
@@ -2403,6 +2404,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C32B9332A99845B00DC3548 /* Ndb.swift in Sources */,
 				4C4793082A993E8900489948 /* refmap.c in Sources */,
 				4C4793072A993E6200489948 /* emitter.c in Sources */,
 				4C4793062A993E5300489948 /* json_parser.c in Sources */,
