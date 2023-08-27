@@ -11,7 +11,7 @@ class Ndb {
     let ndb: ndb_t
 
     static var db_path: String {
-        (FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.absoluteString.replacingOccurrences(of: "file://", with: ""))!
+        (FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.absoluteString.replacingOccurrences(of: "file://", with: ""))!
     }
 
     init?() {
