@@ -44,7 +44,8 @@ class Ndb {
                 return nil
             }
 
-            return NdbProfile(.init(memory: profile_p, count: size), o: 0)
+            let buf = ByteBuffer(assumingMemoryBound: profile_p, capacity: size)
+            return NdbProfile(buf, o: 0)
         }
     }
 
