@@ -2476,6 +2476,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C32B9342A9AD01A00DC3548 /* NdbProfile.swift in Sources */,
 				4C32B9332A99845B00DC3548 /* Ndb.swift in Sources */,
 				4C4793082A993E8900489948 /* refmap.c in Sources */,
 				4C4793072A993E6200489948 /* emitter.c in Sources */,

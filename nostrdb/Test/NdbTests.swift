@@ -12,6 +12,8 @@ final class NdbTests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
+        try FileManager.default.removeItem(atPath: Ndb.db_path + "/lock.mdb")
+        try FileManager.default.removeItem(atPath: Ndb.db_path + "/data.mdb")
     }
 
     override func tearDownWithError() throws {
@@ -41,14 +43,18 @@ final class NdbTests: XCTestCase {
 
         do {
             let ndb = Ndb()!
-            let id1 = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
-            let note1 = ndb.lookup_note(id1)
-            XCTAssertNotNil(note1)
-            let id = NoteId(hex: "b2e03951843b191b5d9d1969f48db0156b83cc7dbd841f543f109362e24c4a9c")!
+            let id = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
             let note = ndb.lookup_note(id)
             XCTAssertNotNil(note)
             guard let note else { return }
-            XCTAssertEqual(note.pubkey, Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!)
+            let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+            XCTAssertEqual(note.pubkey, pk)
+
+            let profile = ndb.lookup_profile(pk)
+            XCTAssertNotNil(profile)
+            guard let profile else { return }
+
+            XCTAssertEqual(profile.name, "jb55")
         }
 
 
