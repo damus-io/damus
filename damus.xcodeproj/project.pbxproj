@@ -173,8 +173,8 @@
 		4C3EA67D28FFBBA300C48A62 /* InvoicesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67C28FFBBA200C48A62 /* InvoicesView.swift */; };
 		4C3EA67F28FFC01D00C48A62 /* InvoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA67E28FFC01D00C48A62 /* InvoiceView.swift */; };
 		4C42812C298C848200DBF26F /* TranslateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C42812B298C848200DBF26F /* TranslateView.swift */; };
-		4C4793012A993CDA00489948 /* mdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4793002A993B9A00489948 /* mdb.c */; };
-		4C4793042A993DC000489948 /* midl.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4793032A993DB900489948 /* midl.c */; };
+		4C4793012A993CDA00489948 /* mdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4793002A993B9A00489948 /* mdb.c */; settings = {COMPILER_FLAGS = "-w"; }; };
+		4C4793042A993DC000489948 /* midl.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4793032A993DB900489948 /* midl.c */; settings = {COMPILER_FLAGS = "-w"; }; };
 		4C4793052A993E3200489948 /* builder.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4792942A9939BD00489948 /* builder.c */; };
 		4C4793062A993E5300489948 /* json_parser.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4792C82A9939BD00489948 /* json_parser.c */; };
 		4C4793072A993E6200489948 /* emitter.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4792CF2A9939BD00489948 /* emitter.c */; };
@@ -351,7 +351,7 @@
 		4CE879552996BAB900F758CC /* RelayPaidDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE879542996BAB900F758CC /* RelayPaidDetail.swift */; };
 		4CE879582996C45300F758CC /* ZapsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE879572996C45300F758CC /* ZapsView.swift */; };
 		4CE8795B2996C47A00F758CC /* ZapsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8795A2996C47A00F758CC /* ZapsModel.swift */; };
-		4CE9FBBA2A6B3C63007E485C /* nostrdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CE9FBB82A6B3B26007E485C /* nostrdb.c */; };
+		4CE9FBBA2A6B3C63007E485C /* nostrdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CE9FBB82A6B3B26007E485C /* nostrdb.c */; settings = {COMPILER_FLAGS = "-w"; }; };
 		4CEE2AED2805B22500AB5EEF /* NostrRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */; };
 		4CEE2AF1280B216B00AB5EEF /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF0280B216B00AB5EEF /* EventDetailView.swift */; };
 		4CEE2AF3280B25C500AB5EEF /* ProfilePicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF2280B25C500AB5EEF /* ProfilePicView.swift */; };
