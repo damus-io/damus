@@ -79,11 +79,6 @@ class Profile: Codable {
         set(s) { set_val("reactions", s) }
     }
     
-    var deleted: Bool? {
-        get { return get_val("deleted"); }
-        set(s) { set_val("deleted", s) }
-    }
-    
     var display_name: String? {
         get { return str("display_name"); }
         set(s) { set_str("display_name", s) }
