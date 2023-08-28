@@ -1205,6 +1205,7 @@ static int cursor_push_unescaped_char(struct cursor *cur, char c1, char c2)
 	case 'b':  return cursor_push_byte(cur, '\b');
 	case 'f':  return cursor_push_byte(cur, '\f');
 	case '\\': return cursor_push_byte(cur, '\\');
+	case '/':  return cursor_push_byte(cur, '/');
 	case '"':  return cursor_push_byte(cur, '"');
 	case 'u':
 		// these aren't handled yet
