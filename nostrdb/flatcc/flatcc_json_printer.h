@@ -32,8 +32,8 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 
-#include "flatcc/flatcc_rtconfig.h"
-#include "flatcc/flatcc_flatbuffers.h"
+#include "flatcc_rtconfig.h"
+#include "flatcc_flatbuffers.h"
 
 /* -DFLATCC_PORTABLE may help if inttypes.h is missing. */
 #ifndef PRId64

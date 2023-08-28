@@ -69,7 +69,7 @@ extern "C" {
 #ifndef FLATCC_USE_GENERIC_ALIGNED_ALLOC
 
 #ifndef FLATCC_NO_PALIGNED_ALLOC
-#include "paligned_alloc.h"
+#include "portable/paligned_alloc.h"
 #else
 #if !defined(__aligned_free_is_defined) || !__aligned_free_is_defined
 #define aligned_free free

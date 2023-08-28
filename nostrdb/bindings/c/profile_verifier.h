@@ -6,10 +6,11 @@
 #ifndef PROFILE_READER_H
 #include "profile_reader.h"
 #endif
-#include "flatcc/flatcc_verifier.h"
-#include "flatcc/flatcc_prologue.h"
+#include "flatcc_verifier.h"
+#include "flatcc_prologue.h"
 
 static int NdbProfile_verify_table(flatcc_table_verifier_descriptor_t *td);
+static int NdbProfileRecord_verify_table(flatcc_table_verifier_descriptor_t *td);
 
 static int NdbProfile_verify_table(flatcc_table_verifier_descriptor_t *td)
 {
@@ -25,6 +26,7 @@ static int NdbProfile_verify_table(flatcc_table_verifier_descriptor_t *td)
     if ((ret = flatcc_verify_string_field(td, 8, 0) /* nip05 */)) return ret;
     if ((ret = flatcc_verify_field(td, 9, 4, 4) /* damus_donation */)) return ret;
     if ((ret = flatcc_verify_field(td, 10, 4, 4) /* damus_donation_v2 */)) return ret;
+    if ((ret = flatcc_verify_string_field(td, 11, 0) /* lud06 */)) return ret;
     return flatcc_verify_ok;
 }
 
@@ -48,5 +50,35 @@ static inline int NdbProfile_verify_as_root_with_type_hash(const void *buf, size
     return flatcc_verify_table_as_typed_root(buf, bufsiz, thash, &NdbProfile_verify_table);
 }
 
-#include "flatcc/flatcc_epilogue.h"
+static int NdbProfileRecord_verify_table(flatcc_table_verifier_descriptor_t *td)
+{
+    int ret;
+    if ((ret = flatcc_verify_table_field(td, 0, 0, &NdbProfile_verify_table) /* profile */)) return ret;
+    if ((ret = flatcc_verify_field(td, 1, 8, 8) /* received_at */)) return ret;
+    if ((ret = flatcc_verify_field(td, 2, 8, 8) /* note_key */)) return ret;
+    if ((ret = flatcc_verify_string_field(td, 3, 0) /* lnurl */)) return ret;
+    return flatcc_verify_ok;
+}
+
+static inline int NdbProfileRecord_verify_as_root(const void *buf, size_t bufsiz)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, NdbProfileRecord_identifier, &NdbProfileRecord_verify_table);
+}
+
+static inline int NdbProfileRecord_verify_as_typed_root(const void *buf, size_t bufsiz)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, NdbProfileRecord_type_identifier, &NdbProfileRecord_verify_table);
+}
+
+static inline int NdbProfileRecord_verify_as_root_with_identifier(const void *buf, size_t bufsiz, const char *fid)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, fid, &NdbProfileRecord_verify_table);
+}
+
+static inline int NdbProfileRecord_verify_as_root_with_type_hash(const void *buf, size_t bufsiz, flatbuffers_thash_t thash)
+{
+    return flatcc_verify_table_as_typed_root(buf, bufsiz, thash, &NdbProfileRecord_verify_table);
+}
+
+#include "flatcc_epilogue.h"
 #endif /* PROFILE_VERIFIER_H */

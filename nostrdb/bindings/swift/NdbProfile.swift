@@ -2,6 +2,8 @@
 // swiftlint:disable all
 // swiftformat:disable all
 
+
+
 public struct NdbProfile: FlatBufferObject, Verifiable {
 
   static func validateVersion() { FlatBuffersVersion_23_5_26() }
@@ -23,6 +25,7 @@ public struct NdbProfile: FlatBufferObject, Verifiable {
     case nip05 = 20
     case damusDonation = 22
     case damusDonationV2 = 24
+    case lud06 = 26
     var v: Int32 { Int32(self.rawValue) }
     var p: VOffset { self.rawValue }
   }
@@ -46,7 +49,9 @@ public struct NdbProfile: FlatBufferObject, Verifiable {
   public var nip05SegmentArray: [UInt8]? { return _accessor.getVector(at: VTOFFSET.nip05.v) }
   public var damusDonation: Int32 { let o = _accessor.offset(VTOFFSET.damusDonation.v); return o == 0 ? 0 : _accessor.readBuffer(of: Int32.self, at: o) }
   public var damusDonationV2: Int32 { let o = _accessor.offset(VTOFFSET.damusDonationV2.v); return o == 0 ? 0 : _accessor.readBuffer(of: Int32.self, at: o) }
-  public static func startNdbProfile(_ fbb: inout FlatBufferBuilder) -> UOffset { fbb.startTable(with: 11) }
+  public var lud06: String? { let o = _accessor.offset(VTOFFSET.lud06.v); return o == 0 ? nil : _accessor.string(at: o) }
+  public var lud06SegmentArray: [UInt8]? { return _accessor.getVector(at: VTOFFSET.lud06.v) }
+  public static func startNdbProfile(_ fbb: inout FlatBufferBuilder) -> UOffset { fbb.startTable(with: 12) }
   public static func add(name: Offset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: name, at: VTOFFSET.name.p) }
   public static func add(website: Offset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: website, at: VTOFFSET.website.p) }
   public static func add(about: Offset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: about, at: VTOFFSET.about.p) }
@@ -59,6 +64,7 @@ public struct NdbProfile: FlatBufferObject, Verifiable {
   public static func add(nip05: Offset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: nip05, at: VTOFFSET.nip05.p) }
   public static func add(damusDonation: Int32, _ fbb: inout FlatBufferBuilder) { fbb.add(element: damusDonation, def: 0, at: VTOFFSET.damusDonation.p) }
   public static func add(damusDonationV2: Int32, _ fbb: inout FlatBufferBuilder) { fbb.add(element: damusDonationV2, def: 0, at: VTOFFSET.damusDonationV2.p) }
+  public static func add(lud06: Offset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: lud06, at: VTOFFSET.lud06.p) }
   public static func endNdbProfile(_ fbb: inout FlatBufferBuilder, start: UOffset) -> Offset { let end = Offset(offset: fbb.endTable(at: start)); return end }
   public static func createNdbProfile(
     _ fbb: inout FlatBufferBuilder,
@@ -72,7 +78,8 @@ public struct NdbProfile: FlatBufferObject, Verifiable {
     pictureOffset picture: Offset = Offset(),
     nip05Offset nip05: Offset = Offset(),
     damusDonation: Int32 = 0,
-    damusDonationV2: Int32 = 0
+    damusDonationV2: Int32 = 0,
+    lud06Offset lud06: Offset = Offset()
   ) -> Offset {
     let __start = NdbProfile.startNdbProfile(&fbb)
     NdbProfile.add(name: name, &fbb)
@@ -86,6 +93,7 @@ public struct NdbProfile: FlatBufferObject, Verifiable {
     NdbProfile.add(nip05: nip05, &fbb)
     NdbProfile.add(damusDonation: damusDonation, &fbb)
     NdbProfile.add(damusDonationV2: damusDonationV2, &fbb)
+    NdbProfile.add(lud06: lud06, &fbb)
     return NdbProfile.endNdbProfile(&fbb, start: __start)
   }
 
@@ -102,7 +110,122 @@ public struct NdbProfile: FlatBufferObject, Verifiable {
     try _v.visit(field: VTOFFSET.nip05.p, fieldName: "nip05", required: false, type: ForwardOffset<String>.self)
     try _v.visit(field: VTOFFSET.damusDonation.p, fieldName: "damusDonation", required: false, type: Int32.self)
     try _v.visit(field: VTOFFSET.damusDonationV2.p, fieldName: "damusDonationV2", required: false, type: Int32.self)
+    try _v.visit(field: VTOFFSET.lud06.p, fieldName: "lud06", required: false, type: ForwardOffset<String>.self)
     _v.finish()
+  }
+}
+
+extension NdbProfile: Encodable {
+
+  enum CodingKeys: String, CodingKey {
+    case name = "name"
+    case website = "website"
+    case about = "about"
+    case lud16 = "lud16"
+    case banner = "banner"
+    case displayName = "display_name"
+    case reactions = "reactions"
+    case picture = "picture"
+    case nip05 = "nip05"
+    case damusDonation = "damus_donation"
+    case damusDonationV2 = "damus_donation_v2"
+    case lud06 = "lud06"
+  }
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encodeIfPresent(name, forKey: .name)
+    try container.encodeIfPresent(website, forKey: .website)
+    try container.encodeIfPresent(about, forKey: .about)
+    try container.encodeIfPresent(lud16, forKey: .lud16)
+    try container.encodeIfPresent(banner, forKey: .banner)
+    try container.encodeIfPresent(displayName, forKey: .displayName)
+    if reactions != true {
+      try container.encodeIfPresent(reactions, forKey: .reactions)
+    }
+    try container.encodeIfPresent(picture, forKey: .picture)
+    try container.encodeIfPresent(nip05, forKey: .nip05)
+    if damusDonation != 0 {
+      try container.encodeIfPresent(damusDonation, forKey: .damusDonation)
+    }
+    if damusDonationV2 != 0 {
+      try container.encodeIfPresent(damusDonationV2, forKey: .damusDonationV2)
+    }
+    try container.encodeIfPresent(lud06, forKey: .lud06)
+  }
+}
+
+public struct NdbProfileRecord: FlatBufferObject, Verifiable {
+
+  static func validateVersion() { FlatBuffersVersion_23_5_26() }
+  public var __buffer: ByteBuffer! { return _accessor.bb }
+  private var _accessor: Table
+
+  private init(_ t: Table) { _accessor = t }
+  public init(_ bb: ByteBuffer, o: Int32) { _accessor = Table(bb: bb, position: o) }
+
+  private enum VTOFFSET: VOffset {
+    case profile = 4
+    case receivedAt = 6
+    case noteKey = 8
+    case lnurl = 10
+    var v: Int32 { Int32(self.rawValue) }
+    var p: VOffset { self.rawValue }
+  }
+
+  public var profile: NdbProfile? { let o = _accessor.offset(VTOFFSET.profile.v); return o == 0 ? nil : NdbProfile(_accessor.bb, o: _accessor.indirect(o + _accessor.postion)) }
+  public var receivedAt: UInt64 { let o = _accessor.offset(VTOFFSET.receivedAt.v); return o == 0 ? 0 : _accessor.readBuffer(of: UInt64.self, at: o) }
+  public var noteKey: UInt64 { let o = _accessor.offset(VTOFFSET.noteKey.v); return o == 0 ? 0 : _accessor.readBuffer(of: UInt64.self, at: o) }
+  public var lnurl: String? { let o = _accessor.offset(VTOFFSET.lnurl.v); return o == 0 ? nil : _accessor.string(at: o) }
+  public var lnurlSegmentArray: [UInt8]? { return _accessor.getVector(at: VTOFFSET.lnurl.v) }
+  public static func startNdbProfileRecord(_ fbb: inout FlatBufferBuilder) -> UOffset { fbb.startTable(with: 4) }
+  public static func add(profile: Offset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: profile, at: VTOFFSET.profile.p) }
+  public static func add(receivedAt: UInt64, _ fbb: inout FlatBufferBuilder) { fbb.add(element: receivedAt, def: 0, at: VTOFFSET.receivedAt.p) }
+  public static func add(noteKey: UInt64, _ fbb: inout FlatBufferBuilder) { fbb.add(element: noteKey, def: 0, at: VTOFFSET.noteKey.p) }
+  public static func add(lnurl: Offset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: lnurl, at: VTOFFSET.lnurl.p) }
+  public static func endNdbProfileRecord(_ fbb: inout FlatBufferBuilder, start: UOffset) -> Offset { let end = Offset(offset: fbb.endTable(at: start)); return end }
+  public static func createNdbProfileRecord(
+    _ fbb: inout FlatBufferBuilder,
+    profileOffset profile: Offset = Offset(),
+    receivedAt: UInt64 = 0,
+    noteKey: UInt64 = 0,
+    lnurlOffset lnurl: Offset = Offset()
+  ) -> Offset {
+    let __start = NdbProfileRecord.startNdbProfileRecord(&fbb)
+    NdbProfileRecord.add(profile: profile, &fbb)
+    NdbProfileRecord.add(receivedAt: receivedAt, &fbb)
+    NdbProfileRecord.add(noteKey: noteKey, &fbb)
+    NdbProfileRecord.add(lnurl: lnurl, &fbb)
+    return NdbProfileRecord.endNdbProfileRecord(&fbb, start: __start)
+  }
+
+  public static func verify<T>(_ verifier: inout Verifier, at position: Int, of type: T.Type) throws where T: Verifiable {
+    var _v = try verifier.visitTable(at: position)
+    try _v.visit(field: VTOFFSET.profile.p, fieldName: "profile", required: false, type: ForwardOffset<NdbProfile>.self)
+    try _v.visit(field: VTOFFSET.receivedAt.p, fieldName: "receivedAt", required: false, type: UInt64.self)
+    try _v.visit(field: VTOFFSET.noteKey.p, fieldName: "noteKey", required: false, type: UInt64.self)
+    try _v.visit(field: VTOFFSET.lnurl.p, fieldName: "lnurl", required: false, type: ForwardOffset<String>.self)
+    _v.finish()
+  }
+}
+
+extension NdbProfileRecord: Encodable {
+
+  enum CodingKeys: String, CodingKey {
+    case profile = "profile"
+    case receivedAt = "received_at"
+    case noteKey = "note_key"
+    case lnurl = "lnurl"
+  }
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encodeIfPresent(profile, forKey: .profile)
+    if receivedAt != 0 {
+      try container.encodeIfPresent(receivedAt, forKey: .receivedAt)
+    }
+    if noteKey != 0 {
+      try container.encodeIfPresent(noteKey, forKey: .noteKey)
+    }
+    try container.encodeIfPresent(lnurl, forKey: .lnurl)
   }
 }
 

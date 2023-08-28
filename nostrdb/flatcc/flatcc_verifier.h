@@ -51,7 +51,7 @@ extern "C" {
  *
  */
 
-#include "flatcc/flatcc_types.h"
+#include "flatcc_types.h"
 
 #define FLATCC_VERIFY_ERROR_MAP(XX)\
     XX(ok, "ok")\

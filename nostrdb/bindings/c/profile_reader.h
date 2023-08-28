@@ -6,11 +6,11 @@
 #ifndef FLATBUFFERS_COMMON_READER_H
 #include "flatbuffers_common_reader.h"
 #endif
-#include "flatcc/flatcc_flatbuffers.h"
+#include "flatcc_flatbuffers.h"
 #ifndef __alignas_is_defined
 #include <stdalign.h>
 #endif
-#include "flatcc/flatcc_prologue.h"
+#include "flatcc_prologue.h"
 #ifndef flatbuffers_identifier
 #define flatbuffers_identifier 0
 #endif
@@ -23,6 +23,10 @@ typedef const struct NdbProfile_table *NdbProfile_table_t;
 typedef struct NdbProfile_table *NdbProfile_mutable_table_t;
 typedef const flatbuffers_uoffset_t *NdbProfile_vec_t;
 typedef flatbuffers_uoffset_t *NdbProfile_mutable_vec_t;
+typedef const struct NdbProfileRecord_table *NdbProfileRecord_table_t;
+typedef struct NdbProfileRecord_table *NdbProfileRecord_mutable_table_t;
+typedef const flatbuffers_uoffset_t *NdbProfileRecord_vec_t;
+typedef flatbuffers_uoffset_t *NdbProfileRecord_mutable_vec_t;
 #ifndef NdbProfile_file_identifier
 #define NdbProfile_file_identifier 0
 #endif
@@ -34,6 +38,18 @@ typedef flatbuffers_uoffset_t *NdbProfile_mutable_vec_t;
 #define NdbProfile_type_identifier "\x28\x9e\x63\xba"
 #ifndef NdbProfile_file_extension
 #define NdbProfile_file_extension "bin"
+#endif
+#ifndef NdbProfileRecord_file_identifier
+#define NdbProfileRecord_file_identifier 0
+#endif
+/* deprecated, use NdbProfileRecord_file_identifier */
+#ifndef NdbProfileRecord_identifier
+#define NdbProfileRecord_identifier 0
+#endif
+#define NdbProfileRecord_type_hash ((flatbuffers_thash_t)0xa1a8569d)
+#define NdbProfileRecord_type_identifier "\x9d\x56\xa8\xa1"
+#ifndef NdbProfileRecord_file_extension
+#define NdbProfileRecord_file_extension "bin"
 #endif
 
 
@@ -57,7 +73,21 @@ __flatbuffers_define_string_field(7, NdbProfile, picture, 0)
 __flatbuffers_define_string_field(8, NdbProfile, nip05, 0)
 __flatbuffers_define_scalar_field(9, NdbProfile, damus_donation, flatbuffers_int32, int32_t, INT32_C(0))
 __flatbuffers_define_scalar_field(10, NdbProfile, damus_donation_v2, flatbuffers_int32, int32_t, INT32_C(0))
+__flatbuffers_define_string_field(11, NdbProfile, lud06, 0)
+
+struct NdbProfileRecord_table { uint8_t unused__; };
+
+static inline size_t NdbProfileRecord_vec_len(NdbProfileRecord_vec_t vec)
+__flatbuffers_vec_len(vec)
+static inline NdbProfileRecord_table_t NdbProfileRecord_vec_at(NdbProfileRecord_vec_t vec, size_t i)
+__flatbuffers_offset_vec_at(NdbProfileRecord_table_t, vec, i, 0)
+__flatbuffers_table_as_root(NdbProfileRecord)
+
+__flatbuffers_define_table_field(0, NdbProfileRecord, profile, NdbProfile_table_t, 0)
+__flatbuffers_define_scalar_field(1, NdbProfileRecord, received_at, flatbuffers_uint64, uint64_t, UINT64_C(0))
+__flatbuffers_define_scalar_field(2, NdbProfileRecord, note_key, flatbuffers_uint64, uint64_t, UINT64_C(0))
+__flatbuffers_define_string_field(3, NdbProfileRecord, lnurl, 0)
 
 
-#include "flatcc/flatcc_epilogue.h"
+#include "flatcc_epilogue.h"
 #endif /* PROFILE_READER_H */

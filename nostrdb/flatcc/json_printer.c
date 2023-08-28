@@ -6,8 +6,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "flatcc/flatcc_rtconfig.h"
-#include "flatcc/flatcc_assert.h"
+#include "flatcc_rtconfig.h"
+#include "flatcc_assert.h"
 
 /*
  * Grisu significantly improves printing speed of floating point values
@@ -18,13 +18,13 @@
 #define PORTABLE_USE_GRISU3 1
 #endif
 
-#include "flatcc/flatcc_flatbuffers.h"
-#include "flatcc/flatcc_json_printer.h"
-#include "flatcc/flatcc_identifier.h"
+#include "flatcc_flatbuffers.h"
+#include "flatcc_json_printer.h"
+#include "flatcc_identifier.h"
 
-#include "flatcc/portable/pprintint.h"
-#include "flatcc/portable/pprintfp.h"
-#include "flatcc/portable/pbase64.h"
+#include "portable/pprintint.h"
+#include "portable/pprintfp.h"
+#include "portable/pbase64.h"
 
 
 #define RAISE_ERROR(err) flatcc_json_printer_set_error(ctx, flatcc_json_printer_error_##err)

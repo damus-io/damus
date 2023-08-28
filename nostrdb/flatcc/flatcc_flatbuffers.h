@@ -4,7 +4,7 @@
  *
  * Outside include guard to handle scope counter.
  */
-#include "pstatic_assert.h"
+#include "portable/pstatic_assert.h"
 
 #ifndef FLATCC_FLATBUFFERS_H
 #define FLATCC_FLATBUFFERS_H
@@ -17,14 +17,14 @@ extern "C" {
 #define flatcc_flatbuffers_defined
 
 #ifdef FLATCC_PORTABLE
-#include "flatcc/flatcc_portable.h"
+#include "flatcc_portable.h"
 #endif
-#include "pwarnings.h"
+#include "portable/pwarnings.h"
 /* Needed by C99 compilers without FLATCC_PORTABLE. */
-#include "pstdalign.h"
+#include "portable/pstdalign.h"
 
 /* Handle fallthrough attribute in switch statements. */
-#include "pattributes.h"
+#include "portable/pattributes.h"
 
 #include "flatcc_alloc.h"
 #include "flatcc_assert.h"
@@ -37,7 +37,7 @@ extern "C" {
  * "flatcc_endian.h" requires the preceeding include files,
  * or compatible definitions.
  */
-#include "pendian.h"
+#include "portable/pendian.h"
 #include "flatcc_types.h"
 #include "flatcc_endian.h"
 #include "flatcc_identifier.h"

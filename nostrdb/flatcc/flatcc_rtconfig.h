@@ -8,7 +8,7 @@ extern "C" {
 
 /* Include portability layer here since all other files depend on it. */
 #ifdef FLATCC_PORTABLE
-#include "flatcc/portable/portable.h"
+#include "portable/portable.h"
 #endif
 
 /*

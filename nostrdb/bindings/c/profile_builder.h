@@ -9,7 +9,7 @@
 #ifndef FLATBUFFERS_COMMON_BUILDER_H
 #include "flatbuffers_common_builder.h"
 #endif
-#include "flatcc/flatcc_prologue.h"
+#include "flatcc_prologue.h"
 #ifndef flatbuffers_identifier
 #define flatbuffers_identifier 0
 #endif
@@ -20,18 +20,28 @@
 static const flatbuffers_voffset_t __NdbProfile_required[] = { 0 };
 typedef flatbuffers_ref_t NdbProfile_ref_t;
 static NdbProfile_ref_t NdbProfile_clone(flatbuffers_builder_t *B, NdbProfile_table_t t);
-__flatbuffers_build_table(flatbuffers_, NdbProfile, 11)
+__flatbuffers_build_table(flatbuffers_, NdbProfile, 12)
+
+static const flatbuffers_voffset_t __NdbProfileRecord_required[] = { 0 };
+typedef flatbuffers_ref_t NdbProfileRecord_ref_t;
+static NdbProfileRecord_ref_t NdbProfileRecord_clone(flatbuffers_builder_t *B, NdbProfileRecord_table_t t);
+__flatbuffers_build_table(flatbuffers_, NdbProfileRecord, 4)
 
 #define __NdbProfile_formal_args ,\
   flatbuffers_string_ref_t v0, flatbuffers_string_ref_t v1, flatbuffers_string_ref_t v2, flatbuffers_string_ref_t v3,\
   flatbuffers_string_ref_t v4, flatbuffers_string_ref_t v5, flatbuffers_bool_t v6, flatbuffers_string_ref_t v7,\
-  flatbuffers_string_ref_t v8, int32_t v9, int32_t v10
+  flatbuffers_string_ref_t v8, int32_t v9, int32_t v10, flatbuffers_string_ref_t v11
 #define __NdbProfile_call_args ,\
   v0, v1, v2, v3,\
   v4, v5, v6, v7,\
-  v8, v9, v10
+  v8, v9, v10, v11
 static inline NdbProfile_ref_t NdbProfile_create(flatbuffers_builder_t *B __NdbProfile_formal_args);
 __flatbuffers_build_table_prolog(flatbuffers_, NdbProfile, NdbProfile_file_identifier, NdbProfile_type_identifier)
+
+#define __NdbProfileRecord_formal_args , NdbProfile_ref_t v0, uint64_t v1, uint64_t v2, flatbuffers_string_ref_t v3
+#define __NdbProfileRecord_call_args , v0, v1, v2, v3
+static inline NdbProfileRecord_ref_t NdbProfileRecord_create(flatbuffers_builder_t *B __NdbProfileRecord_formal_args);
+__flatbuffers_build_table_prolog(flatbuffers_, NdbProfileRecord, NdbProfileRecord_file_identifier, NdbProfileRecord_type_identifier)
 
 __flatbuffers_build_string_field(0, flatbuffers_, NdbProfile_name, NdbProfile)
 __flatbuffers_build_string_field(1, flatbuffers_, NdbProfile_website, NdbProfile)
@@ -44,6 +54,7 @@ __flatbuffers_build_string_field(7, flatbuffers_, NdbProfile_picture, NdbProfile
 __flatbuffers_build_string_field(8, flatbuffers_, NdbProfile_nip05, NdbProfile)
 __flatbuffers_build_scalar_field(9, flatbuffers_, NdbProfile_damus_donation, flatbuffers_int32, int32_t, 4, 4, INT32_C(0), NdbProfile)
 __flatbuffers_build_scalar_field(10, flatbuffers_, NdbProfile_damus_donation_v2, flatbuffers_int32, int32_t, 4, 4, INT32_C(0), NdbProfile)
+__flatbuffers_build_string_field(11, flatbuffers_, NdbProfile_lud06, NdbProfile)
 
 static inline NdbProfile_ref_t NdbProfile_create(flatbuffers_builder_t *B __NdbProfile_formal_args)
 {
@@ -58,6 +69,7 @@ static inline NdbProfile_ref_t NdbProfile_create(flatbuffers_builder_t *B __NdbP
         || NdbProfile_nip05_add(B, v8)
         || NdbProfile_damus_donation_add(B, v9)
         || NdbProfile_damus_donation_v2_add(B, v10)
+        || NdbProfile_lud06_add(B, v11)
         || NdbProfile_reactions_add(B, v6)) {
         return 0;
     }
@@ -78,11 +90,42 @@ static NdbProfile_ref_t NdbProfile_clone(flatbuffers_builder_t *B, NdbProfile_ta
         || NdbProfile_nip05_pick(B, t)
         || NdbProfile_damus_donation_pick(B, t)
         || NdbProfile_damus_donation_v2_pick(B, t)
+        || NdbProfile_lud06_pick(B, t)
         || NdbProfile_reactions_pick(B, t)) {
         return 0;
     }
     __flatbuffers_memoize_end(B, t, NdbProfile_end(B));
 }
 
-#include "flatcc/flatcc_epilogue.h"
+__flatbuffers_build_table_field(0, flatbuffers_, NdbProfileRecord_profile, NdbProfile, NdbProfileRecord)
+__flatbuffers_build_scalar_field(1, flatbuffers_, NdbProfileRecord_received_at, flatbuffers_uint64, uint64_t, 8, 8, UINT64_C(0), NdbProfileRecord)
+__flatbuffers_build_scalar_field(2, flatbuffers_, NdbProfileRecord_note_key, flatbuffers_uint64, uint64_t, 8, 8, UINT64_C(0), NdbProfileRecord)
+__flatbuffers_build_string_field(3, flatbuffers_, NdbProfileRecord_lnurl, NdbProfileRecord)
+
+static inline NdbProfileRecord_ref_t NdbProfileRecord_create(flatbuffers_builder_t *B __NdbProfileRecord_formal_args)
+{
+    if (NdbProfileRecord_start(B)
+        || NdbProfileRecord_received_at_add(B, v1)
+        || NdbProfileRecord_note_key_add(B, v2)
+        || NdbProfileRecord_profile_add(B, v0)
+        || NdbProfileRecord_lnurl_add(B, v3)) {
+        return 0;
+    }
+    return NdbProfileRecord_end(B);
+}
+
+static NdbProfileRecord_ref_t NdbProfileRecord_clone(flatbuffers_builder_t *B, NdbProfileRecord_table_t t)
+{
+    __flatbuffers_memoize_begin(B, t);
+    if (NdbProfileRecord_start(B)
+        || NdbProfileRecord_received_at_pick(B, t)
+        || NdbProfileRecord_note_key_pick(B, t)
+        || NdbProfileRecord_profile_pick(B, t)
+        || NdbProfileRecord_lnurl_pick(B, t)) {
+        return 0;
+    }
+    __flatbuffers_memoize_end(B, t, NdbProfileRecord_end(B));
+}
+
+#include "flatcc_epilogue.h"
 #endif /* PROFILE_BUILDER_H */

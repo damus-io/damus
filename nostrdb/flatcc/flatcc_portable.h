@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "flatcc/portable/portable_basic.h"
+#include "portable/portable_basic.h"
 
 #ifdef __cplusplus
 }
