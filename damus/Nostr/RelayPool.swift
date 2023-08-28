@@ -30,12 +30,15 @@ class RelayPool {
     var request_queue: [QueuedRequest] = []
     var seen: Set<SeenEvent> = Set()
     var counts: [String: UInt64] = [:]
-    
+    var ndb: Ndb
+
     private let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
     private var last_network_status: NWPath.Status = .unsatisfied
 
-    init() {
+    init(ndb: Ndb) {
+        self.ndb = ndb
+
         network_monitor.pathUpdateHandler = { [weak self] path in
             if (path.status == .satisfied || path.status == .requiresConnection) && self?.last_network_status != path.status {
                 DispatchQueue.main.async {
@@ -110,9 +113,15 @@ class RelayPool {
         if get_relay(relay_id) != nil {
             throw RelayError.RelayAlreadyExists
         }
-        let conn = RelayConnection(url: url) { event in
+        let conn = RelayConnection(url: url, handleEvent: { event in
             self.handle_event(relay_id: relay_id, event: event)
-        }
+        }, processEvent: { wsev in
+            guard case .message(let msg) = wsev,
+                  case .string(let str) = msg
+            else { return }
+
+            self.ndb.process_event(str)
+        })
         let relay = Relay(descriptor: desc, connection: conn)
         self.relays.append(relay)
     }

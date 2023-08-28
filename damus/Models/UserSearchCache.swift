@@ -10,6 +10,9 @@ import Foundation
 /// Cache of searchable users by name, display_name, NIP-05 identifier, or own contact list petname.
 /// Optimized for fast searches of substrings by using a Trie.
 /// Optimal for performing user searches that could be initiated by typing quickly on a keyboard into a text input field.
+
+// TODO: replace with lmdb (the b tree should handle this just fine ?)
+//       we just need a name to profile index
 class UserSearchCache {
     private let trie = Trie<Pubkey>()
 
@@ -19,6 +22,7 @@ class UserSearchCache {
     }
 
     /// Computes the differences between an old profile, if it exists, and a new profile, and updates the user search cache accordingly.
+    @MainActor
     func updateProfile(id: Pubkey, profiles: Profiles, oldProfile: Profile?, newProfile: Profile) {
         // Remove searchable keys tied to the old profile if they differ from the new profile
         // to keep the trie clean without empty nodes while avoiding excessive graph searching.
@@ -38,6 +42,7 @@ class UserSearchCache {
     }
 
     /// Adds a profile to the user search cache.
+    @MainActor
     private func addProfile(id: Pubkey, profiles: Profiles, profile: Profile) {
         // Searchable by name.
         if let name = profile.name {

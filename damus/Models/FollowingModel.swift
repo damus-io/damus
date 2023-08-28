@@ -54,22 +54,6 @@ class FollowingModel {
     }
     
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
-        switch ev {
-        case .ws_event:
-            break
-        case .nostr_event(let nev):
-            switch nev {
-            case .ok:
-                break
-            case .event(_, let ev):
-                if ev.kind == 0 {
-                    process_metadata_event(events: damus_state.events, our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
-                }
-            case .notice(let msg):
-                print("followingmodel notice: \(msg)")
-            case .eose:
-                break
-            }
-        }
+        // don't need to do anything here really
     }
 }

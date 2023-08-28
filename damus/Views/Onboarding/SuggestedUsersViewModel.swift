@@ -86,13 +86,7 @@ class SuggestedUsersViewModel: ObservableObject {
 
         switch nev {
         case .event(let sub_id, let ev):
-            guard sub_id == self.sub_id else {
-                return
-            }
-
-            if ev.known_kind == .metadata {
-                process_metadata_event(events: damus_state.events, our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
-            }
+            break
 
         case .notice(let msg):
             print("suggested user profiles notice: \(msg)")

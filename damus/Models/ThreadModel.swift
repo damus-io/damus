@@ -97,7 +97,8 @@ class ThreadModel: ObservableObject {
         event_map.insert(ev)
         objectWillChange.send()
     }
-    
+
+    @MainActor
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
         
         let (sub_id, done) = handle_subid_event(pool: damus_state.pool, relay_id: relay_id, ev: ev) { sid, ev in
@@ -105,9 +106,7 @@ class ThreadModel: ObservableObject {
                 return
             }
             
-            if ev.known_kind == .metadata {
-                process_metadata_event(events: damus_state.events, our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
-            } else if ev.known_kind == .zap {
+            if ev.known_kind == .zap {
                 process_zap_event(damus_state: damus_state, ev: ev) { zap in
                     
                 }

@@ -8,6 +8,7 @@
 import SwiftUI
 
 /// Profile Name used when displaying an event in the timeline
+@MainActor
 struct EventProfileName: View {
     let damus_state: DamusState
     let pubkey: Pubkey
