@@ -76,7 +76,7 @@ let test_longform_event = LongformEvent.parse(from: NostrEvent(
 struct LongformView_Previews: PreviewProvider {
     static var previews: some View {
         let st = test_damus_state()
-        let artifacts = render_note_content(ev: test_longform_event.event, profiles: st.profiles, keypair: Keypair(pubkey: .empty, privkey: nil))
+        let artifacts = render_note_content(ev: test_longform_event.event, profiles: st.profiles, keypair: .empty)
 
         let model = NoteArtifactsModel(state: .loaded(artifacts))
         ScrollView {

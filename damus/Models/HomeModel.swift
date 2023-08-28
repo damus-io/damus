@@ -602,13 +602,14 @@ class HomeModel {
               should_show_event(keypair: self.damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) else {
             return
         }
-        
-        damus_state.events.insert(ev)
-        
+
+        // NDBTODO: process inner events
+        /*
         if let inner_ev = ev.get_inner_event(cache: damus_state.events) {
             damus_state.events.insert(inner_ev)
         }
-        
+         */
+
         if !notifications.insert_event(ev, damus_state: damus_state) {
             return
         }
@@ -644,7 +645,6 @@ class HomeModel {
         // TODO: will we need to process this in other places like zap request contents, etc?
         process_image_metadatas(cache: damus_state.events, ev: ev)
         damus_state.replies.count_replies(ev, keypair: self.damus_state.keypair)
-        damus_state.events.insert(ev)
 
         if sub_id == home_subid {
             insert_home_event(ev)
@@ -667,9 +667,7 @@ class HomeModel {
         guard should_show_event(keypair: damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) else {
             return
         }
-        
-        damus_state.events.insert(ev)
-        
+
         if !should_debounce_dms {
             self.incoming_dms.append(ev)
             if let notifs = handle_incoming_dms(prev_events: notification_status.new_events, dms: self.dms, our_pubkey: self.damus_state.pubkey, evs: self.incoming_dms) {

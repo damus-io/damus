@@ -138,7 +138,6 @@ class EventData {
 
 class EventCache {
     private let ndb: Ndb
-    private var events: [NoteId: NostrEvent] = [:]
     private var replies = ReplyMap()
     private var cancellable: AnyCancellable?
     private var image_metadata: [String: ImageMetadataState] = [:] // lowercased URL key
@@ -177,9 +176,6 @@ class EventCache {
     @discardableResult
     func store_zap(zap: Zapping) -> Bool {
         let data = get_cache_data(NoteId(zap.target.id)).zaps_model
-        if let ev = zap.event {
-            insert(ev)
-        }
         return insert_uniq_sorted_zap_by_amount(zaps: &data.zaps, new_zap: zap)
     }
     
@@ -268,33 +264,16 @@ class EventCache {
         }).sorted(by: { $0.created_at < $1.created_at })
         return evs
     }
-    
-    func upsert(_ ev: NostrEvent) -> NostrEvent {
-        if let found = lookup(ev.id) {
-            return found
-        }
-        
-        insert(ev)
-        return ev
-    }
 
     func lookup_by_key(_ key: UInt64) -> NostrEvent? {
         ndb.lookup_note_by_key(key)
     }
 
     func lookup(_ evid: NoteId) -> NostrEvent? {
-        return events[evid]
-    }
-    
-    func insert(_ ev: NostrEvent) {
-        guard events[ev.id] == nil else {
-            return
-        }
-        events[ev.id] = ev
+        return ndb.lookup_note(evid)
     }
     
     private func prune() {
-        events = [:]
         video_meta = [:]
         event_data = [:]
         replies.replies = [:]

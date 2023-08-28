@@ -90,7 +90,6 @@ class ThreadModel: ObservableObject {
             return
         }
         
-        let the_ev = damus_state.events.upsert(ev)
         damus_state.replies.count_replies(ev, keypair: keypair)
         damus_state.events.add_replies(ev: ev, keypair: keypair)
 
