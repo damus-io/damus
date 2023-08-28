@@ -56,13 +56,13 @@ class MutedThreadsManager: ObservableObject {
         self.keypair = keypair
     }
 
-    func isMutedThread(_ ev: NostrEvent, privkey: Privkey?) -> Bool {
-        return _mutedThreadsSet.contains(ev.thread_id(privkey: privkey))
+    func isMutedThread(_ ev: NostrEvent, keypair: Keypair) -> Bool {
+        return _mutedThreadsSet.contains(ev.thread_id(keypair: keypair))
     }
 
     func updateMutedThread(_ ev: NostrEvent) {
-        let threadId = ev.thread_id(privkey: nil)
-        if isMutedThread(ev, privkey: keypair.privkey) {
+        let threadId = ev.thread_id(keypair: keypair)
+        if isMutedThread(ev, keypair: keypair) {
             mutedThreads = mutedThreads.filter { $0 != threadId }
             _mutedThreadsSet.remove(threadId)
             notify(.unmute_thread(ev))

@@ -39,7 +39,7 @@ struct EventShell<Content: View>: View {
             return nil
         }
         
-        return first_eref_mention(ev: event, privkey: state.keypair.privkey)
+        return first_eref_mention(ev: event, keypair: state.keypair)
     }
 
     func Mention(_ mention: Mention<NoteId>) -> some View {
@@ -71,7 +71,7 @@ struct EventShell<Content: View>: View {
                 UserStatusView(status: state.profiles.profile_data(pubkey).status, show_general: state.settings.show_general_statuses, show_music: state.settings.show_music_statuses)
 
                 if !options.contains(.no_replying_to) {
-                    ReplyPart(events: state.events, event: event, privkey: state.keypair.privkey, profiles: state.profiles)
+                    ReplyPart(events: state.events, event: event, keypair: state.keypair, profiles: state.profiles)
                 }
                 
                 content
@@ -98,7 +98,7 @@ struct EventShell<Content: View>: View {
                 VStack(alignment: .leading, spacing: 2) {
                     EventTop(state: state, event: event, pubkey: pubkey, is_anon: is_anon)
                     UserStatusView(status: state.profiles.profile_data(pubkey).status, show_general: state.settings.show_general_statuses, show_music: state.settings.show_music_statuses)
-                    ReplyPart(events: state.events, event: event, privkey: state.keypair.privkey, profiles: state.profiles)
+                    ReplyPart(events: state.events, event: event, keypair: state.keypair, profiles: state.profiles)
                 }
             }
             .padding(.horizontal)

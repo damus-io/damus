@@ -253,7 +253,7 @@ class HomeModel {
         process_zap_event(damus_state: damus_state, ev: ev) { zapres in
             guard case .done(let zap) = zapres,
                   zap.target.pubkey == self.damus_state.keypair.pubkey,
-                  should_show_event(privkey: self.damus_state.keypair.privkey, hellthreads: self.damus_state.muted_threads, contacts: self.damus_state.contacts, ev: zap.request.ev) else {
+                  should_show_event(keypair: self.damus_state.keypair, hellthreads: self.damus_state.muted_threads, contacts: self.damus_state.contacts, ev: zap.request.ev) else {
                 return
             }
         
@@ -299,7 +299,7 @@ class HomeModel {
                 return false
             }
 
-            return !damus_state.contacts.is_muted(ev.pubkey) && !damus_state.muted_threads.isMutedThread(ev, privkey: damus_state.keypair.privkey)
+            return !damus_state.contacts.is_muted(ev.pubkey) && !damus_state.muted_threads.isMutedThread(ev, keypair: damus_state.keypair)
         }
     }
     
@@ -599,7 +599,7 @@ class HomeModel {
         // don't show notifications from ourselves
         guard ev.pubkey != damus_state.pubkey,
               event_has_our_pubkey(ev, our_pubkey: self.damus_state.pubkey),
-              should_show_event(privkey: self.damus_state.keypair.privkey, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) else {
+              should_show_event(keypair: self.damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) else {
             return
         }
         
@@ -637,13 +637,13 @@ class HomeModel {
 
 
     func handle_text_event(sub_id: String, _ ev: NostrEvent) {
-        guard should_show_event(privkey: damus_state.keypair.privkey, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) else {
+        guard should_show_event(keypair: damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) else {
             return
         }
         
         // TODO: will we need to process this in other places like zap request contents, etc?
         process_image_metadatas(cache: damus_state.events, ev: ev)
-        damus_state.replies.count_replies(ev, privkey: self.damus_state.keypair.privkey)
+        damus_state.replies.count_replies(ev, keypair: self.damus_state.keypair)
         damus_state.events.insert(ev)
 
         if sub_id == home_subid {
@@ -657,14 +657,14 @@ class HomeModel {
         notification_status.new_events = notifs
         
         if damus_state.settings.dm_notification && ev.age < HomeModel.event_max_age_for_notification {
-            let convo = ev.decrypted(privkey: self.damus_state.keypair.privkey) ?? NSLocalizedString("New encrypted direct message", comment: "Notification that the user has received a new direct message")
+            let convo = ev.decrypted(keypair: self.damus_state.keypair) ?? NSLocalizedString("New encrypted direct message", comment: "Notification that the user has received a new direct message")
             let notify = LocalNotification(type: .dm, event: ev, target: ev, content: convo)
             create_local_notification(profiles: damus_state.profiles, notify: notify)
         }
     }
     
     func handle_dm(_ ev: NostrEvent) {
-        guard should_show_event(privkey: damus_state.keypair.privkey, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) else {
+        guard should_show_event(keypair: damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) else {
             return
         }
         
@@ -1129,12 +1129,12 @@ func event_has_our_pubkey(_ ev: NostrEvent, our_pubkey: Pubkey) -> Bool {
 }
 
 
-func should_show_event(privkey: Privkey?, hellthreads: MutedThreadsManager, contacts: Contacts, ev: NostrEvent) -> Bool {
+func should_show_event(keypair: Keypair, hellthreads: MutedThreadsManager, contacts: Contacts, ev: NostrEvent) -> Bool {
     if contacts.is_muted(ev.pubkey) {
         return false
     }
 
-    if hellthreads.isMutedThread(ev, privkey: privkey) {
+    if hellthreads.isMutedThread(ev, keypair: keypair) {
         return false
     }
 
@@ -1221,11 +1221,11 @@ func create_in_app_event_zap_notification(profiles: Profiles, zap: Zap, locale: 
     }
 }
 
-func render_notification_content_preview(cache: EventCache, ev: NostrEvent, profiles: Profiles, privkey: Privkey?) -> String {
-    
+func render_notification_content_preview(cache: EventCache, ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> String {
+
     let prefix_len = 300
-    let artifacts = cache.get_cache_data(ev.id).artifacts.artifacts ?? render_note_content(ev: ev, profiles: profiles, privkey: privkey)
-    
+    let artifacts = cache.get_cache_data(ev.id).artifacts.artifacts ?? render_note_content(ev: ev, profiles: profiles, keypair: keypair)
+
     // special case for longform events
     if ev.known_kind == .longform {
         let longform = LongformEvent(event: ev)
@@ -1255,7 +1255,7 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
     }
 
     // Don't show notifications from muted threads.
-    if damus_state.muted_threads.isMutedThread(ev, privkey: damus_state.keypair.privkey) {
+    if damus_state.muted_threads.isMutedThread(ev, keypair: damus_state.keypair) {
         return
     }
     
@@ -1265,12 +1265,12 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
     }
 
     if type == .text, damus_state.settings.mention_notification {
-        let blocks = ev.blocks(damus_state.keypair.privkey).blocks
+        let blocks = ev.blocks(damus_state.keypair).blocks
         for case .mention(let mention) in blocks {
             guard case .pubkey(let pk) = mention.ref, pk == damus_state.keypair.pubkey else {
                 continue
             }
-            let content_preview = render_notification_content_preview(cache: damus_state.events, ev: ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+            let content_preview = render_notification_content_preview(cache: damus_state.events, ev: ev, profiles: damus_state.profiles, keypair: damus_state.keypair)
             let notify = LocalNotification(type: .mention, event: ev, target: ev, content: content_preview)
             create_local_notification(profiles: damus_state.profiles, notify: notify )
         }
@@ -1278,7 +1278,7 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
               damus_state.settings.repost_notification,
               let inner_ev = ev.get_inner_event(cache: damus_state.events)
     {
-        let content_preview = render_notification_content_preview(cache: damus_state.events, ev: inner_ev, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+        let content_preview = render_notification_content_preview(cache: damus_state.events, ev: inner_ev, profiles: damus_state.profiles, keypair: damus_state.keypair)
         let notify = LocalNotification(type: .repost, event: ev, target: inner_ev, content: content_preview)
         create_local_notification(profiles: damus_state.profiles, notify: notify)
     } else if type == .like,
@@ -1286,7 +1286,7 @@ func process_local_notification(damus_state: DamusState, event ev: NostrEvent) {
               let evid = ev.referenced_ids.last,
               let liked_event = damus_state.events.lookup(evid)
     {
-        let content_preview = render_notification_content_preview(cache: damus_state.events, ev: liked_event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+        let content_preview = render_notification_content_preview(cache: damus_state.events, ev: liked_event, profiles: damus_state.profiles, keypair: damus_state.keypair)
         let notify = LocalNotification(type: .like, event: ev, target: liked_event, content: content_preview)
         create_local_notification(profiles: damus_state.profiles, notify: notify)
     }

@@ -33,6 +33,10 @@ struct Keypair {
     let pubkey_bech32: String
     let privkey_bech32: String?
 
+    static var empty: Keypair {
+        Keypair(pubkey: .empty, privkey: nil)
+    }
+
     func to_full() -> FullKeypair? {
         guard let privkey = self.privkey else {
             return nil

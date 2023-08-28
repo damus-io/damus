@@ -19,7 +19,7 @@ struct SelectedEventView: View {
     @StateObject var bar: ActionBarModel
 
     var replying_to: NostrEvent? {
-        guard let note_ref = event.event_refs(damus.keypair.privkey).first(where: { evref in evref.is_direct_reply != nil })?.is_direct_reply else {
+        guard let note_ref = event.event_refs(damus.keypair).first(where: { evref in evref.is_direct_reply != nil })?.is_direct_reply else {
             return nil
         }
 
@@ -50,14 +50,14 @@ struct SelectedEventView: View {
                 .minimumScaleFactor(0.75)
                 .lineLimit(1)
 
-                if event_is_reply(event.event_refs(damus.keypair.privkey)) {
+                if event_is_reply(event.event_refs(damus.keypair)) {
                     ReplyDescription(event: event, replying_to: replying_to, profiles: damus.profiles)
                         .padding(.horizontal)
                 }
                 
                 EventBody(damus_state: damus, event: event, size: size, options: [.wide])
 
-                if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
+                if let mention = first_eref_mention(ev: event, keypair: damus.keypair) {
                     BuilderEventView(damus: damus, event_id: mention.ref)
                         .padding(.horizontal)
                 }

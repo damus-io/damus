@@ -228,13 +228,13 @@ class EventCache {
         return model
     }
     
-    func parent_events(event: NostrEvent, privkey: Privkey?) -> [NostrEvent] {
+    func parent_events(event: NostrEvent, keypair: Keypair) -> [NostrEvent] {
         var parents: [NostrEvent] = []
         
         var ev = event
         
         while true {
-            guard let direct_reply = ev.direct_replies(privkey).last,
+            guard let direct_reply = ev.direct_replies(keypair).last,
                   let next_ev = lookup(direct_reply), next_ev != ev
             else {
                 break
@@ -247,8 +247,8 @@ class EventCache {
         return parents.reversed()
     }
     
-    func add_replies(ev: NostrEvent, privkey: Privkey?) {
-        for reply in ev.direct_replies(privkey) {
+    func add_replies(ev: NostrEvent, keypair: Keypair) {
+        for reply in ev.direct_replies(keypair) {
             replies.add(id: reply, reply_id: ev.id)
         }
     }
@@ -420,7 +420,7 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     print("Preloading event \(plan.event.content)")
     
     if artifacts == nil && plan.load_artifacts {
-        let arts = render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)
+        let arts = render_note_content(ev: plan.event, profiles: profiles, keypair: our_keypair)
         artifacts = arts
         
         // we need these asap
@@ -441,8 +441,8 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     }
     
     if plan.load_preview, note_artifact_is_separated(kind: plan.event.known_kind) {
-        let arts = artifacts ?? render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)
-        
+        let arts = artifacts ?? render_note_content(ev: plan.event, profiles: profiles, keypair: our_keypair)
+
         // only separated artifacts have previews
         if case .separated(let sep) = arts {
             let preview = await load_preview(artifacts: sep)
@@ -456,13 +456,13 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
         }
     }
     
-    let note_language = plan.data.translations_model.note_language ?? plan.event.note_language(our_keypair.privkey) ?? current_language()
+    let note_language = plan.data.translations_model.note_language ?? plan.event.note_language(our_keypair) ?? current_language()
 
     var translations: TranslateStatus? = nil
     // We have to recheck should_translate here now that we have note_language
     if plan.load_translations && should_translate(event: plan.event, our_keypair: our_keypair, settings: settings, note_lang: note_language) && settings.auto_translate
     {
-        translations = await translate_note(profiles: profiles, privkey: our_keypair.privkey, event: plan.event, settings: settings, note_lang: note_language)
+        translations = await translate_note(profiles: profiles, keypair: our_keypair, event: plan.event, settings: settings, note_lang: note_language)
     }
     
     let ts = translations

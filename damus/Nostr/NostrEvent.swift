@@ -928,8 +928,8 @@ func validate_event(ev: NostrEvent) -> ValidationResult {
     return ok ? .ok : .bad_sig
 }
 
-func first_eref_mention(ev: NostrEvent, privkey: Privkey?) -> Mention<NoteId>? {
-    let blocks = ev.blocks(privkey).blocks.filter { block in
+func first_eref_mention(ev: NostrEvent, keypair: Keypair) -> Mention<NoteId>? {
+    let blocks = ev.blocks(keypair).blocks.filter { block in
         guard case .mention(let mention) = block,
               case .note = mention.ref else {
             return false

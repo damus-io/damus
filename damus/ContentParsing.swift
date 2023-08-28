@@ -11,9 +11,9 @@ enum NoteContent {
     case note(NostrEvent)
     case content(String, TagsSequence?)
 
-    init(note: NostrEvent, privkey: Privkey?) {
+    init(note: NostrEvent, keypair: Keypair) {
         if note.known_kind == .dm {
-            self = .content(note.get_content(privkey), note.tags)
+            self = .content(note.get_content(keypair), note.tags)
         } else {
             self = .note(note)
         }

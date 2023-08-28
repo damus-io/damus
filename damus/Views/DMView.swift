@@ -17,7 +17,7 @@ struct DMView: View {
     
     var Mention: some View {
         Group {
-            if let mention = first_eref_mention(ev: event, privkey: damus_state.keypair.privkey) {
+            if let mention = first_eref_mention(ev: event, keypair: damus_state.keypair) {
                 BuilderEventView(damus: damus_state, event_id: mention.ref)
             } else {
                 EmptyView()

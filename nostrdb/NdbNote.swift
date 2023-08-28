@@ -268,8 +268,8 @@ extension NdbNote {
         return !too_big
     }
 
-    func get_blocks(privkey: Privkey?) -> Blocks {
-        return parse_note_content(content: .init(note: self, privkey: privkey))
+    func get_blocks(keypair: Keypair) -> Blocks {
+        return parse_note_content(content: .init(note: self, keypair: keypair))
     }
 
     func get_inner_event(cache: EventCache) -> NostrEvent? {
@@ -314,41 +314,38 @@ extension NdbNote {
         References<RefId>(tags: self.tags)
     }
 
-    func event_refs(_ privkey: Privkey?) -> [EventRef] {
+    func event_refs(_ keypair: Keypair) -> [EventRef] {
         if let rs = _event_refs {
             return rs
         }
-        let refs = interpret_event_refs_ndb(blocks: self.blocks(privkey).blocks, tags: self.tags)
+        let refs = interpret_event_refs_ndb(blocks: self.blocks(keypair).blocks, tags: self.tags)
         self._event_refs = refs
         return refs
     }
 
-    func get_content(_ privkey: Privkey?) -> String {
+    func get_content(_ keypair: Keypair) -> String {
         if known_kind == .dm {
-            return decrypted(privkey: privkey) ?? "*failed to decrypt content*"
+            return decrypted(keypair: keypair) ?? "*failed to decrypt content*"
         }
 
         return content
     }
 
-    func blocks(_ privkey: Privkey?) -> Blocks {
+    func blocks(_ keypair: Keypair) -> Blocks {
         if let bs = _blocks { return bs }
 
-        let blocks = get_blocks(privkey: privkey)
+        let blocks = get_blocks(keypair: keypair)
         self._blocks = blocks
         return blocks
     }
 
     // NDBTODO: switch this to operating on bytes not strings
-    func decrypted(privkey: Privkey?) -> String? {
+    func decrypted(keypair: Keypair) -> String? {
         if let decrypted_content {
             return decrypted_content
         }
 
-        guard let privkey,
-              let our_pubkey = privkey_to_pubkey(privkey: privkey) else {
-            return nil
-        }
+        let our_pubkey = keypair.pubkey
 
         // NDBTODO: don't hex encode
         var pubkey = self.pubkey
@@ -359,14 +356,14 @@ extension NdbNote {
         }
 
         // NDBTODO: pass data to pubkey
-        let dec = decrypt_dm(privkey, pubkey: pubkey, content: self.content, encoding: .base64)
+        let dec = decrypt_dm(keypair.privkey, pubkey: pubkey, content: self.content, encoding: .base64)
         self.decrypted_content = dec
 
         return dec
     }
 
-    public func direct_replies(_ privkey: Privkey?) -> [NoteId] {
-        return event_refs(privkey).reduce(into: []) { acc, evref in
+    public func direct_replies(_ keypair: Keypair) -> [NoteId] {
+        return event_refs(keypair).reduce(into: []) { acc, evref in
             if let direct_reply = evref.is_direct_reply {
                 acc.append(direct_reply.note_id)
             }
@@ -374,8 +371,8 @@ extension NdbNote {
     }
 
     // NDBTODO: just use Id
-    public func thread_id(privkey: Privkey?) -> NoteId {
-        for ref in event_refs(privkey) {
+    public func thread_id(keypair: Keypair) -> NoteId {
+        for ref in event_refs(keypair) {
             if let thread_id = ref.is_thread_id {
                 return thread_id.note_id
             }
@@ -405,16 +402,16 @@ extension NdbNote {
     }
      */
 
-    func is_reply(_ privkey: Privkey?) -> Bool {
-        return event_is_reply(self.event_refs(privkey))
+    func is_reply(_ keypair: Keypair) -> Bool {
+        return event_is_reply(self.event_refs(keypair))
     }
 
-    func note_language(_ privkey: Privkey?) -> String? {
+    func note_language(_ keypair: Keypair) -> String? {
         assert(!Thread.isMainThread, "This function must not be run on the main thread.")
 
         // Rely on Apple's NLLanguageRecognizer to tell us which language it thinks the note is in
         // and filter on only the text portions of the content as URLs and hashtags confuse the language recognizer.
-        let originalBlocks = self.blocks(privkey).blocks
+        let originalBlocks = self.blocks(keypair).blocks
         let originalOnlyText = originalBlocks.compactMap { $0.is_text }.joined(separator: " ")
 
         // Only accept language recognition hypothesis if there's at least a 50% probability that it's accurate.

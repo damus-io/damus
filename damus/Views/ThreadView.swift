@@ -14,7 +14,7 @@ struct ThreadView: View {
     @Environment(\.dismiss) var dismiss
     
     var parent_events: [NostrEvent] {
-        state.events.parent_events(event: thread.event, privkey: state.keypair.privkey)
+        state.events.parent_events(event: thread.event, keypair: state.keypair)
     }
     
     var child_events: [NostrEvent] {
@@ -34,7 +34,7 @@ struct ThreadView: View {
                                        selected: false)
                         .padding(.horizontal)
                         .onTapGesture {
-                            thread.set_active_event(parent_event, privkey: self.state.keypair.privkey)
+                            thread.set_active_event(parent_event, keypair: self.state.keypair)
                             scroll_to_event(scroller: reader, id: parent_event.id, delay: 0.1, animate: false)
                         }
                         
@@ -77,7 +77,7 @@ struct ThreadView: View {
                         )
                         .padding(.horizontal)
                         .onTapGesture {
-                            thread.set_active_event(child_event, privkey: state.keypair.privkey)
+                            thread.set_active_event(child_event, keypair: state.keypair)
                             scroll_to_event(scroller: reader, id: child_event.id, delay: 0.1, animate: false)
                         }
                         
