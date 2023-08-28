@@ -37,7 +37,8 @@ class ZapsModel: ObservableObject {
     func unsubscribe() {
         state.pool.unsubscribe(sub_id: zaps_subid)
     }
-    
+
+    @MainActor
     func handle_event(relay_id: String, conn_ev: NostrConnectionEvent) {
         guard case .nostr_event(let resp) = conn_ev else {
             return

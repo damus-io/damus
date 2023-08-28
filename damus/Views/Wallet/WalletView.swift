@@ -168,9 +168,9 @@ struct WalletView: View {
                         return
                     }
                     
-                    profile.damus_donation = p
+                    let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: profile.lud16, nip05: profile.nip05, damus_donation: p, reactions: profile.reactions)
 
-                    notify(.profile_updated(pubkey: damus_state.pubkey, profile: profile))
+                    notify(.profile_updated(pubkey: damus_state.pubkey, profile: prof))
                 }
                 .onDisappear {
                     guard let keypair = damus_state.keypair.to_full(),
@@ -180,12 +180,11 @@ struct WalletView: View {
                         return
                     }
                     
-                    profile.damus_donation = settings.donation_percent
-                    guard let meta = make_metadata_event(keypair: keypair, metadata: profile) else {
+                    let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: profile.lud16, nip05: profile.nip05, damus_donation: settings.donation_percent, reactions: profile.reactions)
+
+                    guard let meta = make_metadata_event(keypair: keypair, metadata: prof) else {
                         return
                     }
-                    let tsprofile = TimestampedProfile(profile: profile, timestamp: meta.created_at, event: meta)
-                    damus_state.profiles.add(id: damus_state.pubkey, profile: tsprofile)
                     damus_state.postbox.send(meta)
                 }
         }

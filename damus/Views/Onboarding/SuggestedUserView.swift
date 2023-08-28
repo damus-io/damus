@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SuggestedUser: Codable {
+struct SuggestedUser {
     let pubkey: Pubkey
     let name: String
     let about: String

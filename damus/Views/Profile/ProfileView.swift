@@ -216,7 +216,8 @@ struct ProfileView: View {
         .accentColor(DamusColors.white)
     }
 
-    func lnButton(lnurl: String, profile: Profile) -> some View {
+    func lnButton(lnurl: String, record: ProfileRecord, profile: Profile) -> some View {
+        let profile = record.profile!
         let button_img = profile.reactions == false ? "zap.fill" : "zap"
         return Button(action: {
             present_sheet(.zap(target: .profile(self.profile.pubkey), lnurl: lnurl))
@@ -235,7 +236,7 @@ struct ProfileView: View {
                         } label: {
                             Label(addr, image: "copy2")
                         }
-                    } else if let lnurl = profile.lnurl {
+                    } else if let lnurl = record.lnurl {
                         Button {
                             UIPasteboard.general.string = lnurl
                         } label: {
@@ -268,14 +269,14 @@ struct ProfileView: View {
             .font(.footnote)
     }
 
-    func actionSection(profile_data: Profile?) -> some View {
+    func actionSection(record: ProfileRecord?) -> some View {
         return Group {
-
-            if let profile = profile_data,
-               let lnurl = profile.lnurl,
+            if let record,
+               let profile = record.profile,
+               let lnurl = record.lnurl,
                lnurl != ""
             {
-                lnButton(lnurl: lnurl, profile: profile)
+                lnButton(lnurl: lnurl, record: record, profile: profile)
             }
 
             dmButton
@@ -307,8 +308,9 @@ struct ProfileView: View {
         return scale < 1 ? scale : 1
     }
 
-    func nameSection(profile_data: Profile?) -> some View {
+    func nameSection(profile_data: ProfileRecord?) -> some View {
         return Group {
+            let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
             HStack(alignment: .center) {
                 ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                     .padding(.top, -(pfp_size / 2.0))
@@ -322,48 +324,46 @@ struct ProfileView: View {
                     }
 
                 Spacer()
-                
-                let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
+
                 if follows_you {
                     followsYouBadge
                 }
 
-                actionSection(profile_data: profile_data)
+                actionSection(record: profile_data)
             }
-            
-            ProfileNameView(pubkey: profile.pubkey, profile: profile_data, damus: damus_state)
+
+            ProfileNameView(pubkey: profile.pubkey, profile: profile_data?.profile, damus: damus_state)
         }
     }
 
     var followersCount: some View {
         HStack {
-            if followers.count == nil {
+            if let followerCount = followers.count {
+                let nounString = pluralizedString(key: "followers_count", count: followerCount)
+                let nounText = Text(verbatim: nounString).font(.subheadline).foregroundColor(.gray)
+                Text("\(Text(verbatim: followerCount.formatted()).font(.subheadline.weight(.medium))) \(nounText)", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
+            } else {
                 Image("download")
                     .resizable()
                     .frame(width: 20, height: 20)
                 Text("Followers", comment: "Label describing followers of a user.")
                     .font(.subheadline)
                     .foregroundColor(.gray)
-            } else {
-                let followerCount = followers.count!
-                let nounString = pluralizedString(key: "followers_count", count: followerCount)
-                let nounText = Text(verbatim: nounString).font(.subheadline).foregroundColor(.gray)
-                Text("\(Text(verbatim: followerCount.formatted()).font(.subheadline.weight(.medium))) \(nounText)", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
             }
         }
     }
 
     var aboutSection: some View {
         VStack(alignment: .leading, spacing: 8.0) {
-            let profile_data = damus_state.profiles.lookup(id: profile.pubkey)
+            let profile_data = damus_state.profiles.lookup_with_timestamp(profile.pubkey)
 
             nameSection(profile_data: profile_data)
 
-            if let about = profile_data?.about {
+            if let about = profile_data?.profile?.about {
                 AboutView(state: damus_state, about: about)
             }
 
-            if let url = profile_data?.website_url {
+            if let url = profile_data?.profile?.website_url {
                 WebsiteLink(url: url)
             }
 
@@ -513,6 +513,7 @@ extension View {
     }
 }
 
+@MainActor
 func check_nip05_validity(pubkey: Pubkey, profiles: Profiles) {
     guard let profile = profiles.lookup(id: pubkey),
           let nip05 = profile.nip05,

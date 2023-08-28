@@ -105,11 +105,11 @@ func get_profile_url(picture: String?, pubkey: Pubkey, profiles: Profiles) -> UR
 
 func make_preview_profiles(_ pubkey: Pubkey) -> Profiles {
     let user_search_cache = UserSearchCache()
-    let profiles = Profiles(user_search_cache: user_search_cache)
+    let profiles = Profiles(user_search_cache: user_search_cache, ndb: .empty)
     let picture = "http://cdn.jb55.com/img/red-me.jpg"
     let profile = Profile(name: "jb55", display_name: "William Casarin", about: "It's me", picture: picture, banner: "", website: "https://jb55.com", lud06: nil, lud16: nil, nip05: "jb55.com", damus_donation: nil)
-    let ts_profile = TimestampedProfile(profile: profile, timestamp: 0, event: test_note)
-    profiles.add(id: pubkey, profile: ts_profile)
+    //let ts_profile = TimestampedProfile(profile: profile, timestamp: 0, event: test_note)
+    //profiles.add(id: pubkey, profile: ts_profile)
     return profiles
 }
 

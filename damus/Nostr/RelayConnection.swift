@@ -56,12 +56,17 @@ final class RelayConnection: ObservableObject {
     private var subscriptionToken: AnyCancellable?
     
     private var handleEvent: (NostrConnectionEvent) -> ()
+    private var processEvent: (WebSocketEvent) -> ()
     private let url: RelayURL
     var log: RelayLog?
 
-    init(url: RelayURL, handleEvent: @escaping (NostrConnectionEvent) -> ()) {
+    init(url: RelayURL,
+         handleEvent: @escaping (NostrConnectionEvent) -> (),
+         processEvent: @escaping (WebSocketEvent) -> ())
+    {
         self.url = url
         self.handleEvent = handleEvent
+        self.processEvent = processEvent
     }
     
     func ping() {
@@ -138,6 +143,7 @@ final class RelayConnection: ObservableObject {
     }
     
     private func receive(event: WebSocketEvent) {
+        processEvent(event)
         switch event {
         case .connected:
             DispatchQueue.main.async {

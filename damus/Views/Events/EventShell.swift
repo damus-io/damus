@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 struct EventShell<Content: View>: View {
     let state: DamusState
     let event: NostrEvent

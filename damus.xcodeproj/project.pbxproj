@@ -355,6 +355,7 @@
 		4CEE2AF5280B29E600AB5EEF /* TimeAgo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF4280B29E600AB5EEF /* TimeAgo.swift */; };
 		4CEE2AF7280B2DEA00AB5EEF /* ProfileName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2AF6280B2DEA00AB5EEF /* ProfileName.swift */; };
 		4CEE2B02280B39E800AB5EEF /* EventActionBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CEE2B01280B39E800AB5EEF /* EventActionBar.swift */; };
+		4CEF958D2A9CE650000F901B /* verifier.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C4792D42A9939BD00489948 /* verifier.c */; };
 		4CF0ABD42980996B00D66079 /* Report.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABD32980996B00D66079 /* Report.swift */; };
 		4CF0ABD629817F5B00D66079 /* ReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABD529817F5B00D66079 /* ReportView.swift */; };
 		4CF0ABD82981980C00D66079 /* Lists.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0ABD72981980C00D66079 /* Lists.swift */; };
@@ -377,10 +378,6 @@
 		4CFF8F6D29CD022E008DB934 /* WideEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFF8F6C29CD022E008DB934 /* WideEventView.swift */; };
 		4FE60CDD295E1C5E00105A1F /* Wallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE60CDC295E1C5E00105A1F /* Wallet.swift */; };
 		50088DA129E8271A008A1FDF /* WebSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50088DA029E8271A008A1FDF /* WebSocket.swift */; };
-		5019CADD2A0FB0A9000069E1 /* ProfileDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5019CADC2A0FB0A9000069E1 /* ProfileDatabaseTests.swift */; };
-		501F8C5529FF5EF6001AFC1D /* PersistedProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C5429FF5EF6001AFC1D /* PersistedProfile.swift */; };
-		501F8C5829FF5FC5001AFC1D /* Damus.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C5629FF5FC5001AFC1D /* Damus.xcdatamodeld */; };
-		501F8C5A29FF70F5001AFC1D /* ProfileDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C5929FF70F5001AFC1D /* ProfileDatabase.swift */; };
 		501F8C802A0220E1001AFC1D /* KeychainStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */; };
 		501F8C822A0224EB001AFC1D /* KeychainStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */; };
 		504323A72A34915F006AE6DC /* RelayModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504323A62A34915F006AE6DC /* RelayModel.swift */; };
@@ -1059,10 +1056,6 @@
 		4CFF8F6C29CD022E008DB934 /* WideEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WideEventView.swift; sourceTree = "<group>"; };
 		4FE60CDC295E1C5E00105A1F /* Wallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wallet.swift; sourceTree = "<group>"; };
 		50088DA029E8271A008A1FDF /* WebSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocket.swift; sourceTree = "<group>"; };
-		5019CADC2A0FB0A9000069E1 /* ProfileDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileDatabaseTests.swift; sourceTree = "<group>"; };
-		501F8C5429FF5EF6001AFC1D /* PersistedProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedProfile.swift; sourceTree = "<group>"; };
-		501F8C5729FF5FC5001AFC1D /* Damus.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Damus.xcdatamodel; sourceTree = "<group>"; };
-		501F8C5929FF70F5001AFC1D /* ProfileDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileDatabase.swift; sourceTree = "<group>"; };
 		501F8C7F2A0220E1001AFC1D /* KeychainStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorage.swift; sourceTree = "<group>"; };
 		501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorageTests.swift; sourceTree = "<group>"; };
 		504323A62A34915F006AE6DC /* RelayModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayModel.swift; sourceTree = "<group>"; };
@@ -1690,7 +1683,6 @@
 		4C75EFAB28049CC80006080F /* Nostr */ = {
 			isa = PBXGroup;
 			children = (
-				501F8C5329FF5EE2001AFC1D /* CoreData */,
 				4CE6DF1527F8DEBF00C66700 /* RelayConnection.swift */,
 				50A60D132A28BEEE00186190 /* RelayLog.swift */,
 				4C75EFA527FF87A20006080F /* Nostr.swift */,
@@ -1703,7 +1695,6 @@
 				4C75EFBA2804A34C0006080F /* ProofOfWork.swift */,
 				4CEE2AEC2805B22500AB5EEF /* NostrRequest.swift */,
 				4CACA9DB280C38C000D9BBE8 /* Profiles.swift */,
-				501F8C5929FF70F5001AFC1D /* ProfileDatabase.swift */,
 				4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */,
 				4C363A8F28247A1D006E126D /* NostrLink.swift */,
 				50088DA029E8271A008A1FDF /* WebSocket.swift */,
@@ -2136,7 +2127,6 @@
 				4CB883A9297612FF00DC99E7 /* ZapTests.swift */,
 				4CB883AD2976FA9300DC99E7 /* FormatTests.swift */,
 				3A3040EC29A5CB86008A0F29 /* ReplyDescriptionTests.swift */,
-				5019CADC2A0FB0A9000069E1 /* ProfileDatabaseTests.swift */,
 				3A3040F229A91366008A0F29 /* ProfileViewTests.swift */,
 				3A30410029AB12AA008A0F29 /* EventGroupViewTests.swift */,
 				4C8D00D329E3C5D40036AF10 /* NIP19Tests.swift */,
@@ -2246,15 +2236,6 @@
 				4CFD502E2A2DA45800A229DB /* MediaView.swift */,
 			);
 			path = Images;
-			sourceTree = "<group>";
-		};
-		501F8C5329FF5EE2001AFC1D /* CoreData */ = {
-			isa = PBXGroup;
-			children = (
-				501F8C5429FF5EF6001AFC1D /* PersistedProfile.swift */,
-				501F8C5629FF5FC5001AFC1D /* Damus.xcdatamodeld */,
-			);
-			path = CoreData;
 			sourceTree = "<group>";
 		};
 		7C0F392D29B57C8F0039859C /* Extensions */ = {
@@ -2498,6 +2479,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CEF958D2A9CE650000F901B /* verifier.c in Sources */,
 				4C32B9342A9AD01A00DC3548 /* NdbProfile.swift in Sources */,
 				4C32B9332A99845B00DC3548 /* Ndb.swift in Sources */,
 				4C4793082A993E8900489948 /* refmap.c in Sources */,
@@ -2625,7 +2607,6 @@
 				4CD348EF29C3659D00497EB2 /* ImageUploadModel.swift in Sources */,
 				4C7D096E2A0AEA0400943473 /* ScannerCoordinator.swift in Sources */,
 				4C3BEFDC281DCE6100B3DE84 /* Liked.swift in Sources */,
-				501F8C5A29FF70F5001AFC1D /* ProfileDatabase.swift in Sources */,
 				4CF0ABE7298444FD00D66079 /* MutedEventView.swift in Sources */,
 				9C83F89329A937B900136C08 /* TextViewWrapper.swift in Sources */,
 				4C1253502A76C5B20004F4B8 /* UnfollowedNotify.swift in Sources */,
@@ -2758,7 +2739,6 @@
 				4CB8838629656C8B00DC99E7 /* NIP05.swift in Sources */,
 				4CF0ABD82981980C00D66079 /* Lists.swift in Sources */,
 				F71694EA2A662232001F4053 /* SuggestedUsersView.swift in Sources */,
-				501F8C5829FF5FC5001AFC1D /* Damus.xcdatamodeld in Sources */,
 				4C12536A2A76D3850004F4B8 /* RelaysChangedNotify.swift in Sources */,
 				4C30AC8029A6A53F00E2BD5A /* ProfilePicturesView.swift in Sources */,
 				5C6E1DAD2A193EC2008FC15A /* GradientButtonStyle.swift in Sources */,
@@ -2849,7 +2829,6 @@
 				4CE879552996BAB900F758CC /* RelayPaidDetail.swift in Sources */,
 				4C1253602A76CF890004F4B8 /* ScrollToTopNotify.swift in Sources */,
 				4CA3529E2A76AE67003BB08B /* FollowNotify.swift in Sources */,
-				501F8C5529FF5EF6001AFC1D /* PersistedProfile.swift in Sources */,
 				4CF0ABD42980996B00D66079 /* Report.swift in Sources */,
 				4C06670B28FDE64700038D2A /* damus.c in Sources */,
 				4C1253642A76D08F0004F4B8 /* ReportNotify.swift in Sources */,
@@ -2893,7 +2872,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C684A572A7FFAE6005E6031 /* UrlTests.swift in Sources */,
-				5019CADD2A0FB0A9000069E1 /* ProfileDatabaseTests.swift in Sources */,
 				3A90B1832A4EA3C600000D94 /* UserSearchCacheTests.swift in Sources */,
 				4C9B0DEE2A65A75F00CBDA21 /* AttrStringTestExtensions.swift in Sources */,
 				4C19AE552A5D977400C90DB7 /* HashtagTests.swift in Sources */,
@@ -3464,19 +3442,6 @@
 			productName = TLDExtract;
 		};
 /* End XCSwiftPackageProductDependency section */
-
-/* Begin XCVersionGroup section */
-		501F8C5629FF5FC5001AFC1D /* Damus.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				501F8C5729FF5FC5001AFC1D /* Damus.xcdatamodel */,
-			);
-			currentVersion = 501F8C5729FF5FC5001AFC1D /* Damus.xcdatamodel */;
-			path = Damus.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = 4CE6DEDB27F7A08100C66700 /* Project object */;
 }

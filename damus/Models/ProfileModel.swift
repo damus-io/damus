@@ -102,8 +102,6 @@ class ProfileModel: ObservableObject, Equatable {
             }
         } else if ev.known_kind == .contacts {
             handle_profile_contact_event(ev)
-        } else if ev.known_kind == .metadata {
-            process_metadata_event(events: damus.events, our_pubkey: damus.pubkey, profiles: damus.profiles, ev: ev)
         }
         seen_event.insert(ev.id)
     }

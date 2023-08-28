@@ -9,12 +9,11 @@ import Foundation
 
 
 func created_deleted_account_profile(keypair: FullKeypair) -> NostrEvent? {
-    let profile = Profile()
-    profile.about = "account deleted"
-    profile.name = "nobody"
-    
-    guard let content = encode_json(profile) else {
-        return nil
-    }
+    let about = "account deleted"
+    let name = "nobody"
+
+    let profile = Profile(name: name, about: about)
+
+    guard let content = encode_json(profile) else { return nil }
     return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 0)
 }
