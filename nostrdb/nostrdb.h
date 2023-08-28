@@ -120,7 +120,6 @@ struct ndb_note {
 	uint32_t content_length;
 	union ndb_packed_str content;
 	uint32_t strings;
-	uint32_t reserved[4]; // expansion slots
 	// nothing can come after tags since it contains variadic data
 	struct ndb_tags tags;
 };
@@ -157,6 +156,7 @@ int ndb_process_event(struct ndb *, const char *json, int len);
 int ndb_process_events(struct ndb *, const char *ldjson, size_t len);
 void *ndb_get_profile_by_pubkey(struct ndb *, const unsigned char *pubkey, size_t *len);
 struct ndb_note *ndb_get_note_by_id(struct ndb *, const unsigned char *id, size_t *len);
+struct ndb_note *ndb_get_note_by_key(struct ndb *, uint64_t key, size_t *len);
 void ndb_destroy(struct ndb *);
 
 // BUILDER
