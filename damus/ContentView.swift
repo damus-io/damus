@@ -9,12 +9,6 @@ import SwiftUI
 import AVKit
 import MediaPlayer
 
-struct TimestampedProfile {
-    let profile: Profile
-    let timestamp: UInt32
-    let event: NostrEvent
-}
-
 struct ZapSheet {
     let target: ZapTarget
     let lnurl: String
@@ -386,10 +380,9 @@ struct ContentView: View {
                 invalidate_zapper_cache(pubkey: keypair.pubkey, profiles: ds.profiles, lnurl: ds.lnurls)
             }
             
-            profile.lud16 = lud16
-            guard let ev = make_metadata_event(keypair: keypair, metadata: profile) else {
-                return
-            }
+            let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: lud16, nip05: profile.nip05, damus_donation: profile.damus_donation, reactions: profile.reactions)
+
+            guard let ev = make_metadata_event(keypair: keypair, metadata: prof) else { return }
             ds.postbox.send(ev)
         }
         .onReceive(handle_notify(.broadcast)) { ev in
@@ -397,8 +390,10 @@ struct ContentView: View {
                 return
             }
             ds.postbox.send(ev)
-            if let profile = ds.profiles.lookup_with_timestamp(id: ev.pubkey) {
-                ds.postbox.send(profile.event)
+            if let record = ds.profiles.lookup_with_timestamp(ev.pubkey),
+               let event = ds.events.lookup_by_key(record.noteKey)
+            {
+                ds.postbox.send(event)
             }
         }
         .onReceive(handle_notify(.unfollow)) { target in
@@ -508,11 +503,10 @@ struct ContentView: View {
             else {
                 return
             }
-            
-            profile.reactions = !hide
-            guard let profile_ev = make_metadata_event(keypair: keypair, metadata: profile) else {
-                return
-            }
+
+            let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: profile.lud16, nip05: profile.nip05, damus_donation: profile.damus_donation, reactions: !hide)
+
+            guard let profile_ev = make_metadata_event(keypair: keypair, metadata: prof) else { return }
             damus_state.postbox.send(profile_ev)
         }
         .alert(NSLocalizedString("User muted", comment: "Alert message to indicate the user has been muted"), isPresented: $user_muted_confirm, actions: {
@@ -605,7 +599,10 @@ struct ContentView: View {
     }
 
     func connect() {
-        let pool = RelayPool()
+        // nostrdb
+        let ndb = Ndb()!
+
+        let pool = RelayPool(ndb: ndb)
         let model_cache = RelayModelCache()
         let relay_filters = RelayFilters(our_pubkey: pubkey)
         let bootstrap_relays = load_bootstrap_relays(pubkey: pubkey)
@@ -630,13 +627,14 @@ struct ContentView: View {
             try? pool.add_relay(.nwc(url: nwc.relay))
         }
 
+
         let user_search_cache = UserSearchCache()
         self.damus_state = DamusState(pool: pool,
                                       keypair: keypair,
                                       likes: EventCounter(our_pubkey: pubkey),
                                       boosts: EventCounter(our_pubkey: pubkey),
                                       contacts: Contacts(our_pubkey: pubkey),
-                                      profiles: Profiles(user_search_cache: user_search_cache),
+                                      profiles: Profiles(user_search_cache: user_search_cache, ndb: ndb),
                                       dms: home.dms,
                                       previews: PreviewCache(),
                                       zaps: Zaps(our_pubkey: pubkey),
@@ -645,7 +643,7 @@ struct ContentView: View {
                                       relay_filters: relay_filters,
                                       relay_model_cache: model_cache,
                                       drafts: Drafts(),
-                                      events: EventCache(),
+                                      events: EventCache(ndb: ndb),
                                       bookmarks: BookmarksManager(pubkey: pubkey),
                                       postbox: PostBox(pool: pool),
                                       bootstrap_relays: bootstrap_relays,
@@ -654,7 +652,8 @@ struct ContentView: View {
                                       wallet: WalletModel(settings: settings),
                                       nav: self.navigationCoordinator,
                                       user_search_cache: user_search_cache,
-                                      music: MusicController(onChange: music_changed)
+                                      music: MusicController(onChange: music_changed),
+                                      ndb: ndb
         )
         home.damus_state = self.damus_state!
         
@@ -824,8 +823,11 @@ func find_event_with_subid(state: DamusState, query query_: FindEvent, subid: St
     
     switch query {
     case .profile(let pubkey):
-        if let profile = state.profiles.lookup_with_timestamp(id: pubkey) {
-            callback(.profile(profile.profile, profile.event))
+        if let record = state.profiles.lookup_with_timestamp(pubkey),
+           let profile = record.profile,
+           let event = state.events.lookup_by_key(record.noteKey)
+        {
+            callback(.profile(profile, event))
             return
         }
         filter = NostrFilter(kinds: [.metadata], limit: 1, authors: [pubkey])
@@ -862,14 +864,11 @@ func find_event_with_subid(state: DamusState, query query_: FindEvent, subid: St
             switch query {
             case .profile:
                 if ev.known_kind == .metadata {
-                    process_metadata_event(events: state.events, our_pubkey: state.pubkey, profiles: state.profiles, ev: ev) { profile in
-                        guard let profile else {
-                            callback(.invalid_profile(ev))
-                            return
-                        }
-                        callback(.profile(profile, ev))
+                    guard let profile = state.profiles.lookup(id: ev.pubkey) else {
+                        callback(.invalid_profile(ev))
                         return
                     }
+                    callback(.profile(profile, ev))
                 }
             case .event:
                 callback(.event(ev))

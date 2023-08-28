@@ -33,6 +33,11 @@ final class NdbTests: XCTestCase {
 
     }
 
+    func test_profile_creation() {
+        let profile = make_test_profile()
+        XCTAssertEqual(profile.name, "jb55")
+    }
+
     func test_ndb_init() {
 
         do {
@@ -54,7 +59,8 @@ final class NdbTests: XCTestCase {
             XCTAssertNotNil(profile)
             guard let profile else { return }
 
-            XCTAssertEqual(profile.name, "jb55")
+            XCTAssertEqual(profile.profile?.name, "jb55")
+            XCTAssertEqual(profile.lnurl, "fixme")
         }
 
 
@@ -71,7 +77,7 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(note.id, id)
         XCTAssertEqual(note.pubkey, pubkey)
 
-        XCTAssertEqual(note.count, 34322)
+        XCTAssertEqual(note.count, 34328)
         XCTAssertEqual(note.kind, 3)
         XCTAssertEqual(note.created_at, 1689904312)
 

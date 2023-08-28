@@ -137,6 +137,7 @@ class EventData {
 }
 
 class EventCache {
+    private let ndb: Ndb
     private var events: [NoteId: NostrEvent] = [:]
     private var replies = ReplyMap()
     private var cancellable: AnyCancellable?
@@ -146,7 +147,8 @@ class EventCache {
 
     //private var thread_latest: [String: Int64]
     
-    init() {
+    init(ndb: Ndb) {
+        self.ndb = ndb
         cancellable = NotificationCenter.default.publisher(
             for: UIApplication.didReceiveMemoryWarningNotification
         ).sink { [weak self] _ in
@@ -275,7 +277,11 @@ class EventCache {
         insert(ev)
         return ev
     }
-    
+
+    func lookup_by_key(_ key: UInt64) -> NostrEvent? {
+        ndb.lookup_note_by_key(key)
+    }
+
     func lookup(_ evid: NoteId) -> NostrEvent? {
         return events[evid]
     }

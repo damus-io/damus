@@ -47,7 +47,8 @@ struct ProfileName: View {
     var friend_type: FriendType? {
         return get_friend_type(contacts: damus_state.contacts, pubkey: self.pubkey)
     }
-    
+
+    @MainActor
     var current_nip05: NIP05? {
         nip05 ?? damus_state.profiles.is_validated(pubkey)
     }

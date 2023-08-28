@@ -45,18 +45,14 @@ struct EditMetadataView: View {
     }
     
     func to_profile() -> Profile {
-        let profile = self.profile ?? Profile()
-        
-        profile.name = name
-        profile.display_name = display_name
-        profile.about = about
-        profile.website = website
-        profile.nip05 = nip05.isEmpty ? nil : nip05
-        profile.picture = picture.isEmpty ? nil : picture
-        profile.banner = banner.isEmpty ? nil : banner
-        profile.lud06 = ln.contains("@") ? nil : ln
-        profile.lud16 = ln.contains("@") ? ln : nil
-        
+        let new_nip05 = nip05.isEmpty ? nil : nip05
+        let new_picture = picture.isEmpty ? nil : picture
+        let new_banner = banner.isEmpty ? nil : banner
+        let new_lud06 = ln.contains("@") ? nil : ln
+        let new_lud16 = ln.contains("@") ? ln : nil
+
+        let profile = self.profile ?? Profile(name: name, display_name: display_name, about: about, picture: new_picture, banner: new_banner, website: website, lud06: new_lud06, lud16: new_lud16, nip05: new_nip05, damus_donation: nil)
+
         return profile
     }
     

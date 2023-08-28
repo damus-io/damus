@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 struct SideMenuView: View {
     let damus_state: DamusState
     @Binding var isSidebarVisible: Bool

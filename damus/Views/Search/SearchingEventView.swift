@@ -20,6 +20,7 @@ enum SearchType: Equatable {
     case nip05(String)
 }
 
+@MainActor
 struct SearchingEventView: View {
     let state: DamusState
     let search_type: SearchType

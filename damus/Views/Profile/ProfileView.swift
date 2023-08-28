@@ -216,7 +216,8 @@ struct ProfileView: View {
         .accentColor(DamusColors.white)
     }
 
-    func lnButton(lnurl: String, profile: Profile) -> some View {
+    func lnButton(lnurl: String, record: ProfileRecord, profile: Profile) -> some View {
+        let profile = record.profile!
         let button_img = profile.reactions == false ? "zap.fill" : "zap"
         return Button(action: {
             present_sheet(.zap(target: .profile(self.profile.pubkey), lnurl: lnurl))
@@ -235,7 +236,7 @@ struct ProfileView: View {
                         } label: {
                             Label(addr, image: "copy2")
                         }
-                    } else if let lnurl = profile.lnurl {
+                    } else if let lnurl = record.lnurl {
                         Button {
                             UIPasteboard.general.string = lnurl
                         } label: {
@@ -256,14 +257,14 @@ struct ProfileView: View {
         }
     }
 
-    func actionSection(profile_data: Profile?) -> some View {
+    func actionSection(record: ProfileRecord?) -> some View {
         return Group {
-
-            if let profile = profile_data,
-               let lnurl = profile.lnurl,
+            if let record,
+               let profile = record.profile,
+               let lnurl = record.lnurl,
                lnurl != ""
             {
-                lnButton(lnurl: lnurl, profile: profile)
+                lnButton(lnurl: lnurl, record: record, profile: profile)
             }
 
             dmButton
@@ -295,7 +296,7 @@ struct ProfileView: View {
         return scale < 1 ? scale : 1
     }
 
-    func nameSection(profile_data: Profile?) -> some View {
+    func nameSection(profile_data: ProfileRecord?) -> some View {
         return Group {
             HStack(alignment: .center) {
                 ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
@@ -311,11 +312,11 @@ struct ProfileView: View {
 
                 Spacer()
 
-                actionSection(profile_data: profile_data)
+                actionSection(record: profile_data)
             }
 
             let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
-            ProfileNameView(pubkey: profile.pubkey, profile: profile_data, follows_you: follows_you, damus: damus_state)
+            ProfileNameView(pubkey: profile.pubkey, profile: profile_data?.profile, follows_you: follows_you, damus: damus_state)
         }
     }
 
@@ -339,15 +340,15 @@ struct ProfileView: View {
 
     var aboutSection: some View {
         VStack(alignment: .leading, spacing: 8.0) {
-            let profile_data = damus_state.profiles.lookup(id: profile.pubkey)
+            let profile_data = damus_state.profiles.lookup_with_timestamp(profile.pubkey)
 
             nameSection(profile_data: profile_data)
 
-            if let about = profile_data?.about {
+            if let about = profile_data?.profile?.about {
                 AboutView(state: damus_state, about: about)
             }
 
-            if let url = profile_data?.website_url {
+            if let url = profile_data?.profile?.website_url {
                 WebsiteLink(url: url)
             }
 
@@ -563,6 +564,7 @@ extension View {
     }
 }
 
+@MainActor
 func check_nip05_validity(pubkey: Pubkey, profiles: Profiles) {
     guard let profile = profiles.lookup(id: pubkey),
           let nip05 = profile.nip05,

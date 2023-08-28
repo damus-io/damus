@@ -14,11 +14,28 @@ class Ndb {
         (FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.absoluteString.replacingOccurrences(of: "file://", with: ""))!
     }
 
+    static var empty: Ndb {
+        Ndb(ndb: ndb_t(ndb: nil))
+    }
+
     init?() {
+        //try? FileManager.default.removeItem(atPath: Ndb.db_path + "/lock.mdb")
+        //try? FileManager.default.removeItem(atPath: Ndb.db_path + "/data.mdb")
+
         var ndb_p: OpaquePointer? = nil
 
+        let ingest_threads: Int32 = 4
+        var mapsize: Int = 1024 * 1024 * 1024 * 32
+
         let ok = Ndb.db_path.withCString { testdir in
-            return ndb_init(&ndb_p, testdir, 1024 * 1024 * 1024 * 32, 4) != 0
+            var ok = false
+            while !ok && mapsize > 1024 * 1024 * 700 {
+                ok = ndb_init(&ndb_p, testdir, mapsize, ingest_threads) != 0
+                if !ok {
+                    mapsize /= 2
+                }
+            }
+            return ok
         }
 
         if !ok {
@@ -28,24 +45,51 @@ class Ndb {
         self.ndb = ndb_t(ndb: ndb_p)
     }
 
+    init(ndb: ndb_t) {
+        self.ndb = ndb
+    }
+
+    func lookup_note_by_key(_ key: UInt64) -> NdbNote? {
+        guard let note_p = ndb_get_note_by_key(ndb.ndb, key, nil) else {
+            return nil
+        }
+        return NdbNote(note: note_p, owned_size: nil)
+    }
+
     func lookup_note(_ id: NoteId) -> NdbNote? {
-        id.id.withUnsafeBytes { bs in
-            guard let note_p = ndb_get_note_by_id(ndb.ndb, bs, nil) else {
+        id.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> NdbNote? in
+            guard let baseAddress = ptr.baseAddress,
+                  let note_p = ndb_get_note_by_id(ndb.ndb, baseAddress, nil) else {
                 return nil
             }
             return NdbNote(note: note_p, owned_size: nil)
         }
     }
 
-    func lookup_profile(_ pubkey: Pubkey) -> NdbProfile? {
-        return pubkey.id.withUnsafeBytes { pk_bytes in
+    func lookup_profile(_ pubkey: Pubkey) -> NdbProfileRecord? {
+        return pubkey.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> NdbProfileRecord? in
             var size: Int = 0
-            guard let profile_p = ndb_get_profile_by_pubkey(ndb.ndb, pk_bytes, &size) else {
+
+            guard let baseAddress = ptr.baseAddress,
+                  let profile_p = ndb_get_profile_by_pubkey(ndb.ndb, baseAddress, &size)
+            else {
                 return nil
             }
 
-            let buf = ByteBuffer(assumingMemoryBound: profile_p, capacity: size)
-            return NdbProfile(buf, o: 0)
+            do {
+                var buf = ByteBuffer(assumingMemoryBound: profile_p, capacity: size)
+                let rec: NdbProfileRecord = try getCheckedRoot(byteBuffer: &buf)
+                return rec
+            } catch {
+                // Handle error appropriately
+                print("UNUSUAL: \(error)")
+                return nil
+            }
+        }
+    }
+    func process_event(_ str: String) -> Bool {
+        return str.withCString { cstr in
+            return ndb_process_event(ndb.ndb, cstr, Int32(str.utf8.count)) != 0
         }
     }
 
