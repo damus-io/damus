@@ -12,8 +12,8 @@ final class NdbTests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        try FileManager.default.removeItem(atPath: Ndb.db_path + "/lock.mdb")
-        try FileManager.default.removeItem(atPath: Ndb.db_path + "/data.mdb")
+        try? FileManager.default.removeItem(atPath: Ndb.db_path + "/lock.mdb")
+        try? FileManager.default.removeItem(atPath: Ndb.db_path + "/data.mdb")
     }
 
     override func tearDownWithError() throws {
