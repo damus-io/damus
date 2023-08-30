@@ -190,7 +190,7 @@ class damusTests: XCTestCase {
     func testParseMentionOnlyText() {
         let tags = [["e", "event_id"]]
         let ev = NostrEvent(content: "there is no mention here", keypair: test_keypair, tags: tags)!
-        let parsed = parse_note_content(content: .init(note: ev, privkey: test_keypair.privkey)).blocks
+        let parsed = parse_note_content(content: .init(note: ev, keypair: test_keypair)).blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 1)

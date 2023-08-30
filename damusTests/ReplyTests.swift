@@ -23,7 +23,7 @@ class ReplyTests: XCTestCase {
         let content = "this is #[0] a mention"
         let tags = [evid.tag]
         let ev = NostrEvent(content: content, keypair: test_keypair, tags: tags)!
-        let blocks = parse_note_content(content: .init(note: ev, privkey: test_keypair.privkey)).blocks
+        let blocks = parse_note_content(content: .init(note: ev, keypair: test_keypair)).blocks
         let event_refs = interpret_event_refs(blocks: blocks, tags: ev.tags)
 
         XCTAssertEqual(event_refs.count, 1)
@@ -76,7 +76,7 @@ class ReplyTests: XCTestCase {
         let mentioned_id = NoteId(hex: "5a534797e8cd3b9f4c1cf63e20e48bd0e8bd7f8c4d6353fbd576df000f6f54d3")!
         let tags = [thread_id.tag, mentioned_id.tag]
         let ev = NostrEvent(content: content, keypair: test_keypair, tags: tags)!
-        let blocks = parse_note_content(content: .init(note: ev, privkey: test_keypair.privkey)).blocks
+        let blocks = parse_note_content(content: .init(note: ev, keypair: test_keypair)).blocks
         let event_refs = interpret_event_refs(blocks: blocks, tags: ev.tags)
 
         XCTAssertEqual(event_refs.count, 2)
@@ -93,7 +93,7 @@ class ReplyTests: XCTestCase {
     func testEmptyMention() throws {
         let content = "this is some & content"
         let ev = NostrEvent(content: content, keypair: test_keypair, tags: [])!
-        let blocks = parse_note_content(content: .init(note: ev, privkey: test_keypair.privkey)).blocks
+        let blocks = parse_note_content(content: .init(note: ev, keypair: test_keypair)).blocks
         let post_blocks = parse_post_blocks(content: content)
         let post_tags = make_post_tags(post_blocks: post_blocks, tags: [])
         let event_refs = interpret_event_refs(blocks: blocks, tags: ev.tags)
@@ -108,7 +108,7 @@ class ReplyTests: XCTestCase {
         let content = "#[10]"
         let tags: [[String]] = [[],[],[],[],[],[],[],[],[],[],["p", "3e999f94e2cb34ef44a64b351141ac4e51b5121b2d31aed4a6c84602a1144692"]]
         let ev = NostrEvent(content: content, keypair: test_keypair, tags: tags)!
-        let blocks = parse_note_content(content: .init(note: ev, privkey: test_keypair.privkey)).blocks
+        let blocks = parse_note_content(content: .init(note: ev, keypair: test_keypair)).blocks
         let mentions = blocks.filter { $0.is_mention != nil }
         XCTAssertEqual(mentions.count, 1)
     }
@@ -145,7 +145,7 @@ class ReplyTests: XCTestCase {
         let reply_id = NoteId(hex: "80093e9bdb495728f54cda2bad4aed096877189552b3d41264e73b9a9595be22")!
         let tags = [thread_id.tag, reply_id.tag]
         let ev = NostrEvent(content: content, keypair: test_keypair, tags: tags)!
-        let blocks = parse_note_content(content: .init(note: ev, privkey: test_keypair.privkey)).blocks
+        let blocks = parse_note_content(content: .init(note: ev, keypair: test_keypair)).blocks
         let event_refs = interpret_event_refs(blocks: blocks, tags: ev.tags)
 
         XCTAssertEqual(event_refs.count, 2)
@@ -265,7 +265,7 @@ class ReplyTests: XCTestCase {
     func testNoReply() throws {
         let content = "this is a #[0] reply"
         let ev = NostrEvent(content: content, keypair: test_keypair, tags: [])!
-        let blocks = parse_note_content(content: .init(note: ev, privkey: test_keypair.privkey)).blocks
+        let blocks = parse_note_content(content: .init(note: ev, keypair: test_keypair)).blocks
         let event_refs = interpret_event_refs(blocks: blocks, tags:ev.tags)
 
         XCTAssertEqual(event_refs.count, 0)
@@ -275,7 +275,7 @@ class ReplyTests: XCTestCase {
         let note_id = NoteId(hex: "53f60f5114c06f069ffe9da2bc033e533d09cae44d37a8462154a663771a4ce6")!
         let tags = [note_id.tag]
         let ev = NostrEvent(content: "this is #[0] a mention", keypair: test_keypair, tags: tags)!
-        let parsed = parse_note_content(content: .init(note: ev, privkey: test_keypair.privkey)).blocks
+        let parsed = parse_note_content(content: .init(note: ev, keypair: test_keypair)).blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)

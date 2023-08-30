@@ -34,7 +34,7 @@ final class LongPostTests: XCTestCase {
         XCTAssertEqual(subid, "subid")
         XCTAssertTrue(ev.should_show_event)
         XCTAssertTrue(!ev.too_big)
-        XCTAssertTrue(should_show_event(privkey: test_keypair.privkey, hellthreads: test_damus_state().muted_threads, contacts: contacts, ev: ev))
+        XCTAssertTrue(should_show_event(keypair: test_keypair, hellthreads: test_damus_state().muted_threads, contacts: contacts, ev: ev))
         XCTAssertTrue(validate_event(ev: ev) == .ok )
     }
 

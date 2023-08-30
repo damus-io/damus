@@ -150,7 +150,7 @@ final class NdbTests: XCTestCase {
             return
         }
         self.measure(options: longer_iter()) {
-            let blocks = event.blocks(nil).blocks
+            let blocks = event.blocks(test_keypair).blocks
             let xs = interpret_event_refs(blocks: blocks, tags: event.tags)
             XCTAssertEqual(xs.count, 1)
         }
@@ -161,7 +161,7 @@ final class NdbTests: XCTestCase {
             return
         }
         self.measure(options: longer_iter()) {
-            let blocks = note.blocks(nil).blocks
+            let blocks = note.blocks(test_keypair).blocks
             let xs = interpret_event_refs_ndb(blocks: blocks, tags: note.tags)
             XCTAssertEqual(xs.count, 1)
         }
@@ -180,8 +180,8 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(note.pubkey, event.pubkey)
         XCTAssertEqual(note.id, event.id)
 
-        let ev_blocks = event.blocks(nil)
-        let note_blocks = note.blocks(nil)
+        let ev_blocks = event.blocks(test_keypair)
+        let note_blocks = note.blocks(test_keypair)
 
         XCTAssertEqual(ev_blocks, note_blocks)
 
