@@ -26,65 +26,86 @@ final class UrlTests: XCTestCase {
     }
 
     func testParseUrlTrailingParenthesis() {
+        let testURL = URL(string: "https://en.m.wikipedia.org/wiki/Delicious_(website)")
+        XCTAssertNotNil(testURL)
+        
         let testString = "https://en.m.wikipedia.org/wiki/Delicious_(website)"
+        
         let parsed = parse_note_content(content: .content(testString, nil)).blocks
 
         XCTAssertNotNil(parsed)
-        XCTAssertEqual(parsed[0].is_url?.absoluteString, testString)
+        XCTAssertEqual(parsed[0].asURL, testURL)
     }
 
     func testParseUrlTrailingParenthesisAndInitialParenthesis() {
+        let testURL = URL(string: "https://en.m.wikipedia.org/wiki/Delicious_(website)")
+        XCTAssertNotNil(testURL)
+        
         let testString = "( https://en.m.wikipedia.org/wiki/Delicious_(website)"
         let parsed = parse_note_content(content: .content(testString, nil)).blocks
-
+        
         XCTAssertNotNil(parsed)
-        XCTAssertEqual(parsed[1].is_url?.absoluteString, "https://en.m.wikipedia.org/wiki/Delicious_(website)")
+        XCTAssertEqual(parsed[1].asURL, testURL)
     }
 
     func testParseUrlTrailingParenthesisShouldntParse() {
+        let testURL = URL(string: "https://jb55.com")
+        XCTAssertNotNil(testURL)
+        
         let testString = "(https://jb55.com)"
         let parsed = parse_note_content(content: .content(testString, nil)).blocks
 
         XCTAssertNotNil(parsed)
-        XCTAssertEqual(parsed[1].is_url?.absoluteString, "https://jb55.com")
+        XCTAssertEqual(parsed[1].asURL, testURL)
     }
 
     func testParseSmartParens() {
+        let testURL = URL(string: "https://nostr-con.com/simplex")
+        XCTAssertNotNil(testURL)
+        
         let testString = "(https://nostr-con.com/simplex)"
         let parsed = parse_note_content(content: .content(testString, nil)).blocks
 
         XCTAssertNotNil(parsed)
-        XCTAssertEqual(parsed[1].is_url?.absoluteString, "https://nostr-con.com/simplex")
+        XCTAssertEqual(parsed[1].asURL, testURL)
     }
 
     func testLinkIsNotAHashtag() {
         let link = "https://github.com/damus-io/damus/blob/b7513f28fa1d31c2747865067256ad1d7cf43aac/damus/Nostr/NostrEvent.swift#L560"
+        let testURL = URL(string: link)
+        XCTAssertNotNil(testURL)
 
         let content = "my \(link) link"
         let blocks = parse_post_blocks(content: content)
 
         XCTAssertEqual(blocks.count, 3)
-        XCTAssertEqual(blocks[0].is_text, "my ")
-        XCTAssertEqual(blocks[1].is_url, URL(string: link)!)
-        XCTAssertEqual(blocks[2].is_text, " link")
+        XCTAssertEqual(blocks[0].asText, "my ")
+        XCTAssertEqual(blocks[1].asURL, testURL)
+        XCTAssertEqual(blocks[2].asText, " link")
     }
 
     func testParseUrlUpper() {
+        let testURL = URL(string: "HTTPS://jb55.COM")
+        XCTAssertNotNil(testURL)
+        
         let parsed = parse_note_content(content: .content("a HTTPS://jb55.COM b", nil)).blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
-        XCTAssertEqual(parsed[1].is_url?.absoluteString, "HTTPS://jb55.COM")
+        XCTAssertEqual(parsed[1].asURL, testURL)
     }
     
     func testUrlAnchorsAreNotHashtags() {
+        let testURL = URL(string: "https://jb55.com/index.html#buybitcoin")
+        XCTAssertNotNil(testURL)
+        
         let content = "this is my link: https://jb55.com/index.html#buybitcoin this is not a hashtag!"
         let blocks = parse_post_blocks(content: content)
 
         XCTAssertEqual(blocks.count, 3)
-        XCTAssertEqual(blocks[0].is_text, "this is my link: ")
-        XCTAssertEqual(blocks[1].is_url, URL(string: "https://jb55.com/index.html#buybitcoin")!)
-        XCTAssertEqual(blocks[2].is_text, " this is not a hashtag!")
+        XCTAssertEqual(blocks[0].asText, "this is my link: ")
+        XCTAssertEqual(blocks[1].asURL, testURL)
+        XCTAssertEqual(blocks[2].asText, " this is not a hashtag!")
     }
 
 }
