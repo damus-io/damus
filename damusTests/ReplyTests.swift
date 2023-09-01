@@ -41,7 +41,7 @@ class ReplyTests: XCTestCase {
         let blocks = parse_post_blocks(content: content)
         
         XCTAssertEqual(blocks.count, 1)
-        XCTAssertEqual(blocks[0].is_text, "what @")
+        XCTAssertEqual(blocks[0].asString, "what @")
     }
     
     func testHashtagsInQuote() {
@@ -49,25 +49,25 @@ class ReplyTests: XCTestCase {
         let blocks = parse_post_blocks(content: content)
         
         XCTAssertEqual(blocks.count, 3)
-        XCTAssertEqual(blocks[0].is_text, "This is my \"")
-        XCTAssertEqual(blocks[1].is_hashtag, "awesome")
-        XCTAssertEqual(blocks[2].is_text, " post\"")
+        XCTAssertEqual(blocks[0].asText, "This is my \"")
+        XCTAssertEqual(blocks[1].asHashtag, "awesome")
+        XCTAssertEqual(blocks[2].asText, " post\"")
     }
     
     func testHashtagAtStartWorks() {
         let content = "#hashtag"
         let blocks = parse_post_blocks(content: content)
         XCTAssertEqual(blocks.count, 1)
-        XCTAssertEqual(blocks[0].is_hashtag, "hashtag")
+        XCTAssertEqual(blocks[0].asHashtag, "hashtag")
     }
     
     func testGroupOfHashtags() {
         let content = "#hashtag#what#nope"
         let blocks = parse_post_blocks(content: content)
         XCTAssertEqual(blocks.count, 3)
-        XCTAssertEqual(blocks[0].is_hashtag, "hashtag")
-        XCTAssertEqual(blocks[1].is_hashtag, "what")
-        XCTAssertEqual(blocks[2].is_hashtag, "nope")
+        XCTAssertEqual(blocks[0].asHashtag, "hashtag")
+        XCTAssertEqual(blocks[1].asHashtag, "what")
+        XCTAssertEqual(blocks[2].asHashtag, "nope")
     }
     
     func testRootReplyWithMention() throws {
@@ -109,7 +109,7 @@ class ReplyTests: XCTestCase {
         let tags: [[String]] = [[],[],[],[],[],[],[],[],[],[],["p", "3e999f94e2cb34ef44a64b351141ac4e51b5121b2d31aed4a6c84602a1144692"]]
         let ev = NostrEvent(content: content, keypair: test_keypair, tags: tags)!
         let blocks = parse_note_content(content: .init(note: ev, keypair: test_keypair)).blocks
-        let mentions = blocks.filter { $0.is_mention != nil }
+        let mentions = blocks.filter { $0.asMention != nil }
         XCTAssertEqual(mentions.count, 1)
     }
 
@@ -129,14 +129,14 @@ class ReplyTests: XCTestCase {
         XCTAssertEqual(post_note.content, expected_render)
 
         let blocks = parse_note_content(content: .content(post_note.content,nil)).blocks
-        let rendered = render_blocks(blocks: blocks)
+        let rendered = blocks.map { $0.asString }.joined(separator: "")
 
         XCTAssertEqual(rendered, expected_render)
 
         XCTAssertEqual(blocks.count, 3)
-        XCTAssertEqual(blocks[0].is_mention, .any(.pubkey(pk)))
-        XCTAssertEqual(blocks[1].is_text, "\n")
-        XCTAssertEqual(blocks[2].is_mention, .any(.pubkey(pk)))
+        XCTAssertEqual(blocks[0].asMention, .any(.pubkey(pk)))
+        XCTAssertEqual(blocks[1].asText, "\n")
+        XCTAssertEqual(blocks[2].asMention, .any(.pubkey(pk)))
     }
     
     func testThreadedReply() throws {
@@ -279,9 +279,9 @@ class ReplyTests: XCTestCase {
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
-        XCTAssertEqual(parsed[0].is_text, "this is ")
-        XCTAssertNotNil(parsed[1].is_mention)
-        XCTAssertEqual(parsed[2].is_text, " a mention")
+        XCTAssertEqual(parsed[0].asText, "this is ")
+        XCTAssertNotNil(parsed[1].asMention)
+        XCTAssertEqual(parsed[2].asText, " a mention")
     }
     
     func testEmptyPostReference() throws {
@@ -295,8 +295,8 @@ class ReplyTests: XCTestCase {
         let blocks = parse_post_blocks(content: content)
         
         XCTAssertEqual(blocks.count, 2)
-        XCTAssertEqual(blocks[0].is_mention, .any(.pubkey(pk)))
-        XCTAssertEqual(blocks[1].is_text, " hello there")
+        XCTAssertEqual(blocks[0].asMention, .any(.pubkey(pk)))
+        XCTAssertEqual(blocks[1].asText, " hello there")
 
     }
     
@@ -306,8 +306,8 @@ class ReplyTests: XCTestCase {
         let blocks = parse_post_blocks(content: content)
         
         XCTAssertEqual(blocks.count, 2)
-        XCTAssertEqual(blocks[1].is_mention, .any(.pubkey(pk)))
-        XCTAssertEqual(blocks[0].is_text, "this is a ")
+        XCTAssertEqual(blocks[1].asMention, .any(.pubkey(pk)))
+        XCTAssertEqual(blocks[0].asText, "this is a ")
     }
     
     func testNpubMention() throws {
@@ -320,7 +320,7 @@ class ReplyTests: XCTestCase {
 
         XCTAssertEqual(ev.tags.count, 2)
         XCTAssertEqual(blocks.count, 3)
-        XCTAssertEqual(blocks[1].is_mention, .any(.pubkey(pk)))
+        XCTAssertEqual(blocks[1].asMention, .any(.pubkey(pk)))
         XCTAssertEqual(ev.content, "this is a nostr:npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s mention")
     }
     
@@ -335,7 +335,7 @@ class ReplyTests: XCTestCase {
 
         XCTAssertEqual(ev.tags.count, 2)
         XCTAssertEqual(blocks.count, 3)
-        XCTAssertEqual(blocks[1].is_mention, .any(.pubkey(pk)))
+        XCTAssertEqual(blocks[1].asMention, .any(.pubkey(pk)))
         XCTAssertEqual(ev.content, "this is a nostr:npub1enu46e5x2qtcmm72ttzsx6fmve5wkauftassz78l3mvluh8efqhqejf3v4 mention")
     }
     
@@ -402,9 +402,9 @@ class ReplyTests: XCTestCase {
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
-        XCTAssertEqual(parsed[0].is_text, "this is a ")
-        XCTAssertEqual(parsed[1].is_mention, .any(.pubkey(id)))
-        XCTAssertEqual(parsed[2].is_text, " event mention")
+        XCTAssertEqual(parsed[0].asText, "this is a ")
+        XCTAssertEqual(parsed[1].asMention, .any(.pubkey(id)))
+        XCTAssertEqual(parsed[2].asText, " event mention")
         
         guard case .text(let t1) = parsed[0] else {
             XCTAssertTrue(false)
@@ -425,9 +425,9 @@ class ReplyTests: XCTestCase {
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
-        XCTAssertEqual(parsed[0].is_text, "this is a ")
-        XCTAssertEqual(parsed[1].is_mention, .any(.note(id)))
-        XCTAssertEqual(parsed[2].is_text, " event mention")
+        XCTAssertEqual(parsed[0].asText, "this is a ")
+        XCTAssertEqual(parsed[1].asMention, .any(.note(id)))
+        XCTAssertEqual(parsed[2].asText, " event mention")
 
         guard case .text(let t1) = parsed[0] else {
             XCTAssertTrue(false)
@@ -447,9 +447,9 @@ class ReplyTests: XCTestCase {
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
-        XCTAssertEqual(parsed[0].is_text, "this is ")
-        XCTAssertEqual(parsed[1].is_text, "#[0]")
-        XCTAssertEqual(parsed[2].is_text, " a mention")
+        XCTAssertEqual(parsed[0].asText, "this is ")
+        XCTAssertEqual(parsed[1].asText, "#[0]")
+        XCTAssertEqual(parsed[2].asText, " a mention")
     }
 
 }

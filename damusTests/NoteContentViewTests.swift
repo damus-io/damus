@@ -33,7 +33,7 @@ class NoteContentViewTests: XCTestCase {
         let testNote = NostrEvent.owned_from_json(json: testJSONWithEscapedSlashes)!
         let parsed = parse_note_content(content: .init(note: testNote, keypair: test_keypair))
         
-        XCTAssertTrue((parsed.blocks[0].is_url != nil), "NoteContentView does not correctly parse an image block when url in JSON content contains optional escaped slashes.")
+        XCTAssertTrue((parsed.blocks[0].asURL != nil), "NoteContentView does not correctly parse an image block when url in JSON content contains optional escaped slashes.")
     }
 
 }
