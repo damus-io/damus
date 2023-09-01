@@ -159,8 +159,13 @@ class damusTests: XCTestCase {
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 2)
-//        XCTAssertEqual(parsed[0].is_url?.absoluteString, "https://jb55.com")
-//        XCTAssertEqual(parsed[1].is_text, " br")
+        
+        let testURL = URL(string: "https://jb55.com")
+        XCTAssertNotNil(testURL)
+        
+        XCTAssertEqual(parsed[0].asURL, testURL)
+        
+        XCTAssertEqual(parsed[1].asText, " br")
     }
     
     func testNoParseUrlWithOnlyWhitespace() {
@@ -168,15 +173,19 @@ class damusTests: XCTestCase {
         let parsed = parse_note_content(content: .content(testString,nil)).blocks
 
         XCTAssertNotNil(parsed)
-//        XCTAssertEqual(parsed[0].is_text, testString)
+        XCTAssertFalse(parsed[0].isURL)
+        XCTAssertEqual(parsed[0].asText, testString)
     }
     
     func testNoParseUrlTrailingCharacters() {
         let testString = "https://foo.bar, "
         let parsed = parse_note_content(content: .content(testString,nil)).blocks
 
+        let testURL = URL(string: "https://foo.bar")
+        XCTAssertNotNil(testURL)
+        
         XCTAssertNotNil(parsed)
-//        XCTAssertEqual(parsed[0].is_url?.absoluteString, "https://foo.bar")
+        XCTAssertEqual(parsed[0].asURL, testURL)
     }
 
 
@@ -210,7 +219,7 @@ class damusTests: XCTestCase {
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 1)
-//        XCTAssertEqual(parsed[0].is_text, "there is no mention here")
+        XCTAssertEqual(parsed[0].asText, "there is no mention here")
         
         guard case .text(let txt) = parsed[0] else {
             XCTAssertTrue(false)

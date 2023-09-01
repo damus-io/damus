@@ -41,7 +41,7 @@ class ReplyTests: XCTestCase {
         let blocks = parse_post_blocks(content: content)
         
         XCTAssertEqual(blocks.count, 1)
-        XCTAssertEqual(blocks[0].asString, "what @")
+        XCTAssertEqual(blocks[0].asText, "what @")
     }
     
     func testHashtagsInQuote() {
