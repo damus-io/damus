@@ -255,6 +255,18 @@ struct ProfileView: View {
                 .profile_button_style(scheme: colorScheme)
         }
     }
+    
+    private var followsYouBadge: some View {
+        Text("Follows you", comment: "Text to indicate that a user is following your profile.")
+            .padding([.leading, .trailing], 6.0)
+            .padding([.top, .bottom], 2.0)
+            .foregroundColor(.gray)
+            .background {
+                RoundedRectangle(cornerRadius: 5.0)
+                    .foregroundColor(DamusColors.adaptableGrey)
+            }
+            .font(.footnote)
+    }
 
     func actionSection(profile_data: Profile?) -> some View {
         return Group {
@@ -310,12 +322,16 @@ struct ProfileView: View {
                     }
 
                 Spacer()
+                
+                let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
+                if follows_you {
+                    followsYouBadge
+                }
 
                 actionSection(profile_data: profile_data)
             }
-
-            let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
-            ProfileNameView(pubkey: profile.pubkey, profile: profile_data, follows_you: follows_you, damus: damus_state)
+            
+            ProfileNameView(pubkey: profile.pubkey, profile: profile_data, damus: damus_state)
         }
     }
 
@@ -486,72 +502,6 @@ struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         let ds = test_damus_state()
         ProfileView(damus_state: ds, pubkey: ds.pubkey)
-    }
-}
-
-struct KeyView: View {
-    let pubkey: Pubkey
-
-    @Environment(\.colorScheme) var colorScheme
-
-    @State private var isCopied = false
-
-    func keyColor() -> Color {
-        colorScheme == .light ? DamusColors.black : DamusColors.white
-    }
-
-    private func copyPubkey(_ pubkey: String) {
-        UIPasteboard.general.string = pubkey
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        withAnimation {
-            isCopied = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                withAnimation {
-                    isCopied = false
-                }
-            }
-        }
-    }
-
-    var body: some View {
-        let bech32 = pubkey.npub
-
-        HStack {
-            Text(verbatim: "\(abbrev_pubkey(bech32, amount: 16))")
-                .font(.footnote)
-                .foregroundColor(keyColor())
-                .padding(5)
-                .padding([.leading, .trailing], 5)
-                .background(RoundedRectangle(cornerRadius: 11).foregroundColor(DamusColors.adaptableGrey))
-
-            if isCopied != true {
-                Button {
-                    copyPubkey(bech32)
-                } label: {
-                    Label {
-                        Text("Public key", comment: "Label indicating that the text is a user's public account key.")
-                    } icon: {
-                        Image("copy2")
-                            .resizable()
-                            .contentShape(Rectangle())
-                            .foregroundColor(.accentColor)
-                            .frame(width: 20, height: 20)
-                    }
-                    .labelStyle(IconOnlyLabelStyle())
-                    .symbolRenderingMode(.hierarchical)
-                }
-            } else {
-                HStack {
-                    Image("check-circle")
-                        .resizable()
-                        .frame(width: 20, height: 20)
-                    Text(NSLocalizedString("Copied", comment: "Label indicating that a user's key was copied."))
-                        .font(.footnote)
-                        .layoutPriority(1)
-                }
-                .foregroundColor(DamusColors.green)
-            }
-        }
     }
 }
 

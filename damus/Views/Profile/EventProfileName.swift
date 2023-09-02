@@ -63,11 +63,11 @@ struct EventProfileName: View {
                 Text(one)
                     .font(.body.weight(.bold))
                 
-            case .both(let both):
-                Text(both.display_name)
+            case .both(username: let username, displayName: let displayName):
+                Text(verbatim: displayName)
                     .font(.body.weight(.bold))
                 
-                Text(verbatim: "@\(both.username)")
+                Text(verbatim: username)
                     .foregroundColor(.gray)
                     .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
             }

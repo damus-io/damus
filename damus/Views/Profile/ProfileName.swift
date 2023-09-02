@@ -57,7 +57,7 @@ struct ProfileName: View {
     }
     
     var name_choice: String {
-        return prefix == "@" ? current_display_name.username.truncate(maxLength: 50) : current_display_name.display_name.truncate(maxLength: 50)
+        return prefix == "@" ? current_display_name.username.truncate(maxLength: 50) : current_display_name.displayName.truncate(maxLength: 50)
     }
     
     var onlyzapper: Bool {
