@@ -80,22 +80,24 @@ struct ProfileName: View {
     }
     
     var body: some View {
-        HStack(spacing: 2) {
-            Text(verbatim: "\(prefix)\(name_choice)")
-                .font(.body)
-                .fontWeight(prefix == "@" ? .none : .bold)
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 2) {
+                Text(verbatim: "\(prefix)\(name_choice)")
+                    .font(.body)
+                    .fontWeight(prefix == "@" ? .none : .bold)
+                if let friend = friend_type, current_nip05 == nil {
+                    FriendIcon(friend: friend)
+                }
+                if onlyzapper {
+                    Image("zap-hashtag")
+                        .frame(width: 14, height: 14)
+                }
+                if let supporter {
+                    SupporterBadge(percent: supporter)
+                }
+            }
             if let nip05 = current_nip05 {
                 NIP05Badge(nip05: nip05, pubkey: pubkey, contacts: damus_state.contacts, show_domain: show_nip5_domain, profiles: damus_state.profiles)
-            }
-            if let friend = friend_type, current_nip05 == nil {
-                FriendIcon(friend: friend)
-            }
-            if onlyzapper {
-                Image("zap-hashtag")
-                    .frame(width: 14, height: 14)
-            }
-            if let supporter {
-                SupporterBadge(percent: supporter)
             }
         }
         .onReceive(handle_notify(.profile_updated)) { update in
