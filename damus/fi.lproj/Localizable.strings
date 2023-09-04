@@ -1,0 +1,1165 @@
+/* Notification that a user reacted to a note that the current user was tagged in */
+"reacted_tagged_in_1" = "%@ reagoi viestiin, johon sinut oli merkitty";
+
+/* Notification that 2 users reacted to a note that the current user was tagged in */  
+"reacted_tagged_in_2" = "%@ ja %@ reagoivat viestiin, johon sinut oli merkitty";
+
+/* Notification that a user reposted a note that the current user was tagged in  */  
+"reposted_tagged_in_1" = "%@ jakoi uudelleen viestin, johon sinut oli merkitty";
+
+/* Notification that 2 users reposted a note that the current user was tagged in  */  
+"reposted_tagged_in_2" = "%@ ja %@ jakoivat uudelleen viestin, johon sinut oli merkitty";
+
+/* Notification that a user zapped a note that the current user was tagged in  */  
+"zapped_tagged_in_1" = "%@ zappasi viestiä, johon sinut oli merkitty";
+
+/* Notification that 2 users zapped a note that the current user was tagged in */  
+"zapped_tagged_in_2" = "%@ ja %@ zappasivat viestin, johon sinut oli merkitty";
+
+/* Notification that a user reacted to the current user's note  */  
+"reacted_your_note_1" = "%@ reagoi viestiisi";
+
+/* Notification that 2 users reacted to the current user's profile  */  
+"reacted_your_note_2" = "%@ ja %@ reagoivat viestiisi";
+
+/* Notification that a user reposted the current user's note  */  
+"reposted_your_note_1" = "%@ jakoi viestisi uudelleen";
+
+/* Notification that 2 users reposted the current user's note  */  
+"reposted_your_note_2" = "%@ ja %@ jakoivat viestisi uudelleen";
+
+/* Notification that a user zapped the current user's note  */  
+"zapped_your_note_1" = "%@ zappasi viestisi";
+
+/* Notification that 2 users zapped the current user's note  */  
+"zapped_your_note_2" = "%@ ja %@ zappasivat viestisi";
+
+/* Notification that a user reacted to the current user's profile  */  
+"reacted_your_profile_1" = "%@ reagoi profiiliisi";
+
+/* Notification that 2 users reacted to the current user's profile  */  
+"reacted_your_profile_2" = "%@ ja %@ reagoivat profiiliisi";  
+
+/* Notification that a user reposted the current user's profile  */  
+"reposted_your_profile_1" = "%@ jakoi profiilisi uudelleen";
+
+/* Notification that 2 users reposted the current user's profile  */  
+"reposted_your_profile_2" = "%@ ja %@ jakoivat profiilisi uudelleen";
+
+/* Notification that a user zapped the current user's profile  */  
+"zapped_your_profile_1" = "%@ zappasi profiiliasi";
+
+/* Notification that 2 users zapped the current user's profile  */  
+"zapped_your_profile_2" = "%@ ja %@ zappasivat profiiliasi";
+/* Sentence composed of 2 variables to describe how many imports were performed from loading a NostrScript. In source English, the first variable is the number of imports, and the second variable is 'Import' or 'Imports'.
+   Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.
+   Sentence composed of 2 variables to describe how many profiles a user is following. In source English, the first variable is the number of profiles being followed, and the second variable is 'Following'.
+   Sentence composed of 2 variables to describe how many reactions there are on a post. In source English, the first variable is the number of reactions, and the second variable is 'Reaction' or 'Reactions'.
+   Sentence composed of 2 variables to describe how many relay servers a user is connected. In source English, the first variable is the number of relay servers, and the second variable is 'Relay' or 'Relays'.
+   Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
+   Sentence composed of 2 variables to describe how many zap payments there are on a post. In source English, the first variable is the number of zap payments, and the second variable is 'Zap' or 'Zaps'.  */  
+"%@ %@" = "%1$@%2$@";
+
+/* Alert message that informs a user was muted.  */  
+"%@ has been muted" = "%@ on mykistetty";
+
+/* When a note or profile is not found when searching for it via its note id  */  
+"%@ not found" = "%@ ei löytynyt";
+
+/* Reacted by heading in local notification  */  
+"%@ reacted with %@" = "%1$@ reagoi merkinnällä %2$@";
+
+/* Percentage of additional zap that should be sent to support Damus development.  */  
+"%@%" = "%1$@%2$";
+
+/* Explanation of what is done to keep personally identifiable information private. There is a heading that precedes this explanation which is a variable to this string.  */  
+"%@. Creating an account doesn't require a phone number, email or name. Get started right away with zero friction." = "%@. Tilin luominen ei vaadi puhelinnumeroa, sähköpostia tai nimeä. Aloita heti kitkattomasti.";
+
+/* Explanation of what is done to keep private data encrypted. There is a heading that precedes this explanation which is a variable to this string.  */  
+"%@. End-to-End encrypted private messaging. Keep Big Tech out of your DMs" = "%@. Päästä päähän salatut yksityiset viestit. Pidä suuryritykset poissa viesteistäsi.";  
+
+/* Explanation of what can be done by users to earn money. There is a heading that precedes this explanation which is a variable to this string.  */  
+"%@. Tip your friends and stack sats with Bitcoin⚡️, the native currency of the internet." = "%@. Tippaa ystäviäsi ja kasaa satseja Bitcoineilla, Internetin omalla valuutalla.";
+
+/* Fraction of how many of the user's relay servers that are operational.  */  
+"%@/%@" = "%1$@/%2$@";
+
+/* Description of why the Nostr address is invalid.  */  
+"'%@' is an invalid Nostr address. It should look like an email address." = "'%@' on virheellinen Nostr-osoite. Sen pitäisi näyttää sähköpostiosoitteelta.";
+
+/* No comment provided by engineer.  */  
+"@" = "@";
+
+/* Label to prompt for about text entry for user to describe about themself.  */  
+"About" = "Tietoja";  
+
+/* Label for About Me section of user profile form.  */  
+"About Me" = "Tietoja minusta"; 
+
+/* Placeholder text for About Me description.  */  
+"Absolute Boss" = "Täyspomo";
+
+/* Button to accept the end user license agreement before being allowed into the app.  */  
+"Accept" = "Hyväksy";
+
+/* Section header for accessibility settings  */  
+"Accessibility" = "Saavutettavuus";
+
+/* Title for confirmation dialog to either share, report, or mute a profile.  */  
+"Actions" = "Toiminnot";
+
+/* Button to confirm adding user inputted relay.  */  
+"Add" = "Lisää";
+
+/* Button label to re-add all original participants as profiles to reply to in a note  */  
+"Add all" = "Lisää kaikki";
+
+/* Context menu option for adding a note bookmark.  */  
+"Add bookmark" = "Lisää kirjanmerkki";  
+
+/* Button text to add bookmark to a note.  */  
+"Add Bookmark" = "Lisää kirjanmerkki";
+
+/* Header text to prompt user to optionally provide additional information when reporting a user or note.  */  
+"Additional information" = "Lisätietoja";
+
+/* Label to display relay contact user.  */  
+"Admin" = "Ylläpitäjä";
+
+/* Label for filter for all notifications.  */  
+"All" = "Kaikki";
+
+/* Ask the user if they already have an account on Nostr  */  
+"Already on Nostr?" = "Onko sinulla jo tili Nostrissa?";
+
+/* Setting to always show and never blur images  */  
+"Always show images" = "Näytä kuvat aina";
+
+/* Text indicating that they can contribute zaps to support Damus development.  */  
+"An additional percentage of each zap will be sent to support Damus development" = "Lisäprosentti jokaisesta zapista lähetetään Damuksen kehittämisen tukemiseksi";
+
+/* Toggle to enable or disable image animation  */  
+"Animations" = "Animaatiot"; 
+
+/* Button text to indicate that the zap type is a anonymous zap.
+   Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.
+   Placeholder display name of anonymous user.  */  
+"Anonymous" = "Anonyymi";
+
+/* Any amount of sats  */  
+"Any" = "Mikä tahansa";
+
+/* Prompt for optional entry of API Key to use translation server.  */  
+"API Key (optional)" = "API-avain (valinnainen)"; 
+
+/* Prompt for required entry of API Key to use translation server.  */  
+"API Key (required)" = "API-avain (pakollinen)";
+
+/* Navigation title for text and appearance settings.
+   Section header for text and appearance settings  */  
+"Appearance" = "Ulkoasu";
+
+/* Text asking the user if they are lost in the app.  */  
+"Are you lost?" = "Oletko eksyksissä?";
+
+/* Prompt to ask user if they want to attach their Nostr Wallet Connect lightning wallet.  */  
+"Are you sure you want to attach this wallet?" = "Haluatko varmasti liittää tämän lompakon?";  
+
+/* Alert for deleting all of the bookmarks.  */  
+"Are you sure you want to delete all of your bookmarks?" = "Haluatko varmasti poistaa kaikki kirjanmerkkisi?";
+
+/* Alert message asking if the user wants to upload an image.  */  
+"Are you sure you want to upload this image?" = "Haluatko varmasti ladata tämän kuvan?";
+
+/* Alert message asking if the user wants to upload media.  */  
+"Are you sure you want to upload this media?" = "Haluatko varmasti ladata tämän median?";
+
+/* Text for button to attach Nostr Wallet Connect lightning wallet.  */  
+"Attach" = "Liitä";
+
+/* Navigation title for attaching Nostr Wallet Connect lightning wallet. */  
+"Attach a Wallet" = "Liitä lompakko";
+
+/* Button to attach an Alby Wallet, a service that provides a Lightning wallet for zapping sats. Alby is the name of the service and should not be translated.  */  
+"Attach Alby Wallet" = "Liitä Alby-lompakko"; 
+
+/* Text for button to attach Nostr Wallet Connect lightning wallet.  */  
+"Attach Wallet" = "Liitä lompakko";
+
+/* Toggle to automatically translate notes.  */  
+"Automatically translate notes" = "Käännä viestit automaattisesti";
+
+/* Label for Banner Image section of user profile form.  */  
+"Banner Image" = "Bannerikuva";
+
+/* Reminder to user that they should save their account information.  */  
+"Before we get started, you'll need to save your account info, otherwise you won't be able to login in the future if you ever uninstall Damus." = "Ennen aloittamista sinun on tallennettava tilisi tiedot, muuten et pysty kirjautumaan sisään tulevaisuudessa, jos poistat Damus-sovelluksen.";
+
+/* Label for Bitcoin Lightning Tips section of user profile form.  */  
+"Bitcoin Lightning Tips" = "Bitcoin Lightning tipit";
+
+/* Sidebar menu label for Bookmarks view.
+   Title of bookmarks view  */  
+"Bookmarks" = "Kirjanmerkit";
+
+/* Button to broadcast note to all your relays
+   Context menu option for broadcasting the user's note to all of the user's connected relay servers.  */  
+"Broadcast" = "Lähetä"; 
+
+/* Alert button to cancel out of alert for muting a user.
+   Button to cancel a repost.
+   Button to cancel out of alert that creates a new mutelist.
+   Button to cancel out of posting a note.
+   Button to cancel out of view adding user inputted relay.
+   Button to cancel the upload.
+   Cancel deleting bookmarks.
+   Cancel deleting the user.
+   Cancel out of logging out the user.
+   Cancel out of search view.
+   Text for button to cancel out of connecting Nostr Wallet Connect lightning ewallet.  */  
+"Cancel" = "Peruuta";
+
+/* Option to select photo from library  */  
+"Choose from Library" = "Valitse kirjastosta";
+
+/* Button for clearing bookmarks data.  */  
+"Clear All" = "Tyhjennä kaikki"; 
+
+/* Button to clear image cache.  */  
+"Clear Cache" = "Tyhjennä välimuisti";
+
+/* Button to connect to recommended relay server.  */  
+"Connect" = "Yhdistä";
+
+/* Button to connect to the relay.
+   Label for section for adding a relay server.  */  
+"Connect To Relay" = "Yhdistä välittäjään";
+
+/* Section title for relay servers that are connected.  */  
+"Connected Relays" = "Yhdistetyt välittäjät";
+
+/* Label to display relay contact information.  */  
+"Contact" = "Yhteystiedot";
+
+/* Continue with bookmarks.
+   Continue with deleting the user.  */  
+"Continue" = "Jatka";
+
+/* Label indicating that a user's key was copied.  */  
+"Copied" = "Kopioitu";
+
+/* Button to copy a relay server address.  */  
+"Copy" = "Kopioi"; 
+
+/* Context menu option for copying the ID of the account that created the note.  */  
+"Copy Account ID" = "Kopioi tilin tunniste";
+
+/* Context menu option to copy an image into clipboard.  */  
+"Copy Image" = "Kopioi kuva";
+
+/* Context menu option to copy the URL of an image into clipboard.  */  
+"Copy Image URL" = "Kopioi kuvan URL";
+
+/* Title of section for copying a Lightning invoice identifier.  */  
+"Copy invoice" = "Kopioi lasku";
+
+/* Button to copy link to note  */  
+"Copy Link" = "Kopioi linkki";
+
+/* Context menu option for copying a user's Lightning URL.  */  
+"Copy LNURL" = "Kopioi LNURL"; 
+
+/* Context menu option for copying the ID of the note.  */  
+"Copy note ID" = "Kopioi viestin tunniste";
+
+/* Context menu option for copying the JSON text from the note.  */  
+"Copy note JSON" = "Kopioi viestin JSON";
+
+/* Button to copy report ID.  */  
+"Copy Report ID" = "Kopioi ilmoituksen tunniste";
+
+/* Context menu option for copying the text from an note.  */  
+"Copy text" = "Kopioi teksti"; 
+
+/* Label for button in context menu to copy URL of the selected uploaded media asset.  */  
+"Copy URL" = "Kopioi URL-osoite";
+
+/* Context menu option for copying the ID of the user who created the note.  */  
+"Copy user public key" = "Kopioi käyttäjän julkinen avain"; 
+
+/* Indicates that there are no users found.  */  
+"Could not find the user you're looking for" = "Etsimääsi käyttäjää ei löytynyt";
+
+/* Alert message to indicate that the muted user could not be found.  */  
+"Could not find user to mute..." = "Mykistettävää käyttäjää ei löytynyt...";
+
+/* Button to navigate to create account view.  */  
+"Create account" = "Luo tili";
+
+/* Button to create account. */
+"Create account now" = "Luo tili nyt";
+
+/* Title of alert prompting the user to create a new mutelist. */
+"Create new mutelist" = "Luo uusi mykistyslista";
+
+/* Example description about Bitcoin creator(s), Satoshi Nakamoto. */
+"Creator(s) of Bitcoin. Absolute legend." = "Bitcoinin luoja(t). Absoluuttinen legenda."; 
+
+/* Dropdown option for selecting a custom translation server. */
+"Custom" = "Mukautettu";
+
+/* Dropdown option for selecting DeepL as the translation service. */  
+"DeepL (Proprietary, Higher Accuracy)" = "DeepL (kaupallinen, tarkempi)";
+
+/* Button to pay a Lightning invoice with the user's default Lightning wallet. */
+"Default Wallet" = "Oletuslompakko";
+
+/* Title for section in zap settings that controls the default zap amount in sats. */
+"Default Zap Amount in sats" = "Oletus zap-määrä satseissa";
+
+/* Button for deleting the users account.
+   Button to remove a user from their mutelist. */
+"Delete" = "Poista"; 
+
+/* Button to delete the user's account. */
+"Delete Account" = "Poista tili";
+
+/* Label to display relay description. */
+"Description" = "Kuvaus";  
+
+/* Navigation title for developer settings
+   Section header for developer settings */
+"Developer" = "Kehittäjä"; 
+
+/* Setting to enable developer mode */
+"Developer Mode" = "Kehittäjätila";
+
+/* Section header for Developer Settings view */
+"Developer Mode enables features and options that may help developers diagnose issues and improve this app. Most users will not need Developer Mode." = "Kehittäjätila ottaa käyttöön ominaisuuksia ja vaihtoehtoja, jotka voivat auttaa kehittäjiä diagnosoimaan ongelmia ja parantamaan tätä sovellusta. Useimmat käyttäjät eivät tarvitse kehittäjätilaa.";
+
+/* Button to disconnect from a relay server. */
+"Disconnect" = "Katkaise yhteys";  
+
+/* Button to disconnect from the relay. */
+"Disconnect From Relay" = "Katkaise yhteys välittäjään";
+
+/* Text for button to disconnect from Nostr Wallet Connect lightning wallet. */
+"Disconnect Wallet" = "Katkaise lompakon yhteys";
+
+/* Label to prompt display name entry. */
+"Display name" = "Näyttönimi";
+
+/* Navigation title for DMs view, where DM is the English abbreviation for Direct Message.
+   Navigation title for view of DMs, where DM is an English abbreviation for Direct Message.
+   Picker option for DM selector for seeing only DMs that have been responded to. DM is the English abbreviation for Direct Message.
+   Setting to enable DM Local Notification
+   Toolbar label for DMs view, where DM is the English abbreviation for Direct Message. */
+"DMs" = "Yksityisviestit";  
+
+/* Button that, when tapped, will finish adding a different user's relays to your relay by hiding the + buttons next to the relays.
+   Button to dismiss wallet selection view for paying Lightning invoice. */
+"Done" = "Valmis";
+
+/* Heading indicating that this application allows users to earn money. */
+"Earn Money" = "Ansaitse rahaa";
+
+/* Button to edit user's profile. */
+"Edit" = "Muokkaa";  
+
+/* Heading indicating that this application keeps private messaging end-to-end encrypted. */
+"Encrypted" = "Salattu";
+
+/* Prompt for user to enter an account key to login. */
+"Enter your account key" = "Syötä tilisi avain";
+
+/* Message to display when there was an error fetching a lightning invoice while attempting to zap. */
+"Error fetching lightning invoice" = "Virhe noutaessa lightning-laskua";
+
+/* Error message indicating why saving keys failed. */
+"Error: %@" = "Virhe: %@"; 
+
+/* Navigation title of view that shows the EULA, an acronym for End User License Agreement. */
+"EULA" = "Käyttöehdot";
+
+/* Description of public zap type where the zap is sent publicly and identifies the user who sent it. */
+"Everyone will see that you zapped" = "Kaikki näkevät, että zappasit";
+
+/* Indication that the execution of running a NostrScript finished successfully, while providing a numeric return code. */
+"Executed successfully, returned with code %@" = "Suoritettu onnistuneesti, palautti koodin %@";
+
+/* NostrScript error message when it fails to initialize a module. */
+"Failed to initialize" = "Alustus epäonnistui"; 
+
+/* NostrScript error message when it fails to parse a script. */
+"Failed to parse" = "Jäsentäminen epäonnistui";
+
+/* Button label text for filtering relay servers. */
+"Filter" = "Suodatin";
+
+/* Button to follow a user. */
+"Follow" = "Seuraa";  
+
+/* Button to follow a user back. */
+"Follow Back" = "Seuraa takaisin";
+
+/* Button to follow a given hashtag. */
+"Follow hashtag" = "Seuraa aihetunnistetta";
+
+/* Text on QR code view to prompt viewer looking at screen to follow the user. */
+"Follow me on Nostr" = "Seuraa minua Nostrissa"; 
+
+/* Text to indicate that the user is followed by one of our follows. */
+"Followed by %@" = "Seuraaja: %@";
+
+/* Text to indicate that the user is followed by two of our follows. */
+"Followed by %@ & %@" = "Seuraajat: %1$@ & %2$@"; 
+
+/* Text to indicate that the user is followed by three of our follows. */
+"Followed by %@, %@ & %@" = "Seuraajat: %1$@, %2$@ & %3$@";
+
+/* Label describing followers of a user.
+   Navigation bar title for view that shows who is following a user. */
+"Followers" = "Seuraajat";  
+
+/* Navigation bar title for view that shows who is following a user. */
+"Followers You Know" = "Tuntemasi seuraajat";
+
+/* Navigation bar title for view that shows who a user is following. */
+"Following" = "Seurattavat"; 
+
+/* Label to indicate that the user is in the process of following another user. */
+"Following..." = "Seurataan...";
+
+/* Text to indicate that a user is following your profile. */
+"Follows you" = "Seuraa sinua";
+
+/* Dropdown option for selecting Free plan for DeepL translation service. */
+"Free" = "Ilmainen";
+
+/* Button to navigate to DeepL website to get a translation API key. */
+"Get API Key" = "Hanki API-avain"; 
+
+/* Button to navigate to nokyctranslate website to get a translation API key. */
+"Get API Key with BTC/Lightning" = "Hanki API-avain BTC:llä/Lightningilla";
+
+/* Text indicating the goal of developing Damus which the user can help with. */
+"Help build the future of decentralized communication on the web." = "Auta rakentamaan hajautetun viestinnän tulevaisuutta verkossa.";
+
+/* Button to hide a note from a user who has been muted. */  
+"Hide" = "Piilota";
+
+/* Section footer describing OnlyZaps mode */
+"Hide all 🤙's" = "Piilota kaikki 🤙:t";
+
+/* Navigation bar title for Home view where notes and replies appear from those who the user is following. */
+"Home" = "Etusivu";
+
+/* Placeholder example text for profile picture URL. */
+"https://example.com/pic.jpg" = "https://esimerkki.com/kuva.jpg"; 
+
+/* Placeholder example text for website URL for user profile. */
+"https://jb55.com" = "https://jb55.com";
+
+/* Description of report type for illegal content. */
+"Illegal Content" = "Laiton sisältö";
+
+/* Prompt selection of user's image uploader */  
+"Image uploader" = "Kuvan lataaja";
+
+/* Section title for images configuration. */
+"Images" = "Kuvat";
+
+/* Description of report type for impersonation. */
+"Impersonation" = "Henkilönä esiintyminen"; 
+
+/* Error message indicating that an invalid account key was entered for login. */
+"Invalid key" = "Virheellinen avain";
+
+/* Message to display when there was an error attempting to zap due to an invalid lightning address. */
+"Invalid lightning address" = "Virheellinen lightning-osoite";
+
+/* Error message when an invalid Nostr wallet connection string is provided. */
+"Invalid Nostr wallet connection string" = "Virheellinen Nostr-lompakon yhteysmerkkijono";
+
+/* Title of alerting as invalid tip address. */
+"Invalid Tip Address" = "Virheellinen tippiosoite";
+
+/* Placeholder example text for identifier used for Nostr addresses. */
+"jb55@jb55.com" = "jb55@jb55.com";
+
+/* Navigation title for managing keys.
+   Settings section for managing keys */
+"Keys" = "Avaimet";
+
+/* Button that opens up a webpage where the user can learn more about Nostr. */
+"Learn more about Nostr" = "Lue lisää Nostrista";
+
+/* Moves the post button to the left side of the screen */
+"Left Handed" = "Vasenkätinen";
+
+/* Button to continue to login page. */
+"Let's get started!" = "Aloitetaan!";  
+
+/* Button to complete account creation and start using the app. */
+"Let's go!" = "Mennään!";
+
+/* Dropdown option for selecting LibreTranslate as the translation service. */
+"LibreTranslate (Open Source)" = "LibreTranslate (Avoin lähdekoodi)";
+
+/* Placeholder text for entry of Lightning Address or LNURL. */
+"Lightning Address or LNURL" = "Lightning-osoite tai LNURL";
+
+/* Indicates that the view is for paying a Lightning invoice. */
+"Lightning Invoice" = "Lightning-lasku";  
+
+/* Accessibility Label for Like button */
+"Like" = "Tykkää";
+
+/* Setting to enable Like Local Notification */
+"Likes" = "Tykkäykset"; 
+
+/* Face ID usage description shown when trying to access private key */
+"Local authentication to access private key" = "Paikallinen tunnistautuminen yksityisen avaimen käyttöön";
+
+/* Dropdown option label for system default for Lightning wallet. */
+"Local default" = "Paikallinen oletus";
+
+/* Section header for damus local notifications user configuration */
+"Local Notifications" = "Paikalliset ilmoitukset";
+
+/* Label to display developer mode logs. */
+"Log" = "Loki";
+
+/* Button to log into account.
+   Button to navigate to login view. */
+"Login" = "Kirjaudu sisään";  
+
+/* Alert for logging out the user.
+   Button for logging out the user. */
+"Logout" = "Kirjaudu ulos";
+
+/* Label that appears when searching for note or profile */
+"Looking for %@..." = "Etsitään %@...";
+
+/* Button label to indicate that tapping it will make the selected zap type be the default for future zaps. */
+"Make Default" = "Aseta oletukseksi"; 
+
+/* Reminder message in alert to get customer to verify that their private security account key is saved saved before logging out. */
+"Make sure your nsec account key is saved before you logout or you will lose access to this account" = "Varmista, että nsec-tilin avain on tallennettu ennen uloskirjautumista, muuten menetät pääsyn tähän tiliin";
+
+/* Mentioned by heading in local notification */  
+"Mentioned by %@" = "Maininta käyttäjältä %@";
+
+/* Label for filter for seeing mention notifications (replies, etc).
+   Setting to enable Mention Local Notification */
+"Mentions" = "Maininnat";
+
+/* Alert button to mute a user.
+   Button to mute a profile. */
+"Mute" = "Mykistä";
+
+/* Alert message prompt to ask if a user should be muted. */
+"Mute %@?" = "Mykistä %@?"; 
+
+/* Context menu option for muting a conversation. */
+"Mute conversation" = "Mykistä keskustelu";
+
+/* Context menu option for muting users. */
+"Mute user" = "Mykistä käyttäjä";  
+
+/* Title of alert for muting a user. */
+"Mute User" = "Mykistä käyttäjä";
+
+/* Sidebar menu label for muted users view. */
+"Muted" = "Mykistetyt";
+
+/* Navigation title of view to see list of muted users. */
+"Muted Users" = "Mykistetyt käyttäjät";  
+
+/* Notification that the user has received a new direct message */
+"New encrypted direct message" = "Uusi salattu yksityisviesti";
+
+/* Ask the user if they are new to Nostr */
+"New to Nostr?" = "Uusi Nostrissa?";
+
+/* Button to cancel out of posting a note after being alerted that it looks like they might be posting a private key. */
+"No" = "Ei";
+
+/* Text indicating that there is no data available to show for specific metadata about a relay server. */
+"No data available" = "Ei saatavilla olevia tietoja";
+
+/* Alert message prompt that asks if the user wants to create a new mute list, overwriting previous mute lists. */ 
+"No mute list found, create a new one? This will overwrite any previous mute lists." = "Mykistyslistaa ei löytynyt, luodaanko uusi? Tämä korvaa aiemmat mykistyslistat.";
+
+/* Description of anonymous zap type where the zap is sent anonymously and does not identify the user who sent it. */
+"No one will see that you zapped" = "Kukaan ei näe, että zappasit";
+
+/* Description of non-zap type where sats are sent to the user's wallet as a regular Lightning payment, not as a zap. */
+"No zaps will be sent, only a lightning payment." = "Zappeja ei lähetetä, vain lightning-maksu.";
+
+/* Dropdown option for selecting NoKYCTranslate.com as the translation service. */
+"NoKYCTranslate.com (Prepay with BTC)" = "NoKYCTranslate.com (Ennakkomaksu BTC:llä)"; 
+
+/* Button text to indicate that the zap type is a private zap.
+   Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap. */
+"None" = "Ei mitään";
+
+/* No search results. */
+"none" = "ei mitään"; 
+
+/* Dropdown option for selecting no translation service. */
+"none_translation_service" = "Ei mitään";
+
+/* Label for the Nostr Address section of user profile form. */
+"Nostr Address" = "Nostr-osoite"; 
+
+/* Description about what is Nostr. */
+"Nostr is a protocol, designed for simplicity, that aims to create a censorship-resistant global social network" = "Nostr on yksinkertaiseksi suunniteltu protokolla, jonka tavoitteena on luoda sensuurinkestävä maailmanlaajuinen sosiaalinen verkosto";
+
+/* Navigation title for the view showing NostrScript. */
+"NostrScript" = "NostrScript";
+
+/* Text indicating that there was an error with loading NostrScript. There is a more descriptive error message shown separately underneath. */
+"NostrScript Error" = "NostrScript-virhe"; 
+
+/* Alert user that they might be attempting to paste a private key and ask them to confirm. */
+"Note contains \"nsec1\" private key. Are you sure?" = "Viesti sisältää \"nsec1\" yksityisavaimen. Oletko varma?";
+
+/* Text to indicate that what is being shown is a note from a user who has been muted. */
+"Note from a user you've muted" = "Viesti käyttäjältä, jonka olet mykistänyt";
+
+/* Label for filter for seeing only notes (instead of notes and replies).
+   Label for filter for seeing only your notes (instead of notes and replies). */
+"Notes" = "Viestit";
+
+/* Label for filter for seeing notes and replies (instead of only notes).
+   Label for filter for seeing your notes and replies (instead of only your notes). */  
+"Notes & Replies" = "Viestit & Vastaukset";
+
+/* Indicates that there are no notes in the timeline to view. */
+"Nothing to see here. Check back later!" = "Täällä ei ole mitään nähtävää. Tarkista myöhemmin uudelleen!";
+
+/* Section header for notification indicator dot settings */
+"Notification Dots" = "Ilmoituspisteet";
+
+/* Section header for Notification Preferences */
+"Notification Preference" = "Ilmoitusasetukset";  
+
+/* Section header for Damus notifications
+   Toolbar label for Notifications view. */
+"Notifications" = "Ilmoitukset";
+
+/* String indicating that a given timestamp just occurred */
+"now" = "nyt";
+
+/* Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key. */
+"nsec1..." = "nsec1...";  
+
+/* Description of report type for nudity. */
+"Nudity" = "Alastomuus";
+
+/* Button to dismiss the alert. */
+"Ok" = "OK";
+
+/* Help text on green lock icon that explains that only the current user can see the message of a zap event and who sent the zap. */
+"Only you can see this message and who sent it." = "Vain sinä voit nähdä tämän viestin ja kuka sen lähetti.";
+
+/* Section header for enabling OnlyZaps mode (hide reactions) */
+"OnlyZaps" = "VainZapit"; 
+
+/* Non-tappable text in context menu that shows up when the zap button on profile is long pressed to indicate that the user has enabled OnlyZaps, meaning that they would like to be only zapped and not accept reactions to their notes. */
+"OnlyZaps Enabled" = "VainZapit käytössä";
+
+/* Setting toggle to hide reactions. */
+"OnlyZaps mode" = "VainZapit -tila";  
+
+/* Prompt for user to enter optional additional information when reporting an account or content. */
+"Optional" = "Valinnainen";
+
+/* Label indicating that a form input is optional. */
+"optional" = "valinnainen";
+
+/* Section header that indicates the relay server requires payment. */
+"Paid Relay" = "Maksullinen välittäjä";
+
+/* Button to paste a Nostr Wallet Connect string to connect the wallet for use in Damus for zaps. */
+"Paste" = "Liitä";
+
+/* Button to pay a Lightning invoice. */
+"Pay" = "Maksa";
+
+/* Navigation bar title for view to pay Lightning invoice. */
+"Pay the Lightning invoice" = "Maksa lightning-lasku";
+
+/* Alert for deleting the users account.
+   Section title for deleting the user */
+"Permanently Delete Account" = "Poista tili pysyvästi";
+
+/* Prompt selection of DeepL subscription plan to perform machine translations on notes */ 
+"Plan" = "Vaihtoehto";
+
+/* Instructions on how to filter a specific timeline feed by choosing relay servers to filter on. */
+"Please choose relays from the list below to filter the current feed:" = "Valitse alla olevasta listasta välittäjät, joilla haluat suodattaa nykyistä syötettä:";
+
+/* Button to post a note. */
+"Post" = "Lähetä";
+
+/* Button text to indicate that the zap type is a private zap.
+   Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading.
+   Picker option to indicate that a zap should be sent privately and not identify the user to the public. */
+"Private" = "Yksityinen"; 
+
+/* Label to indicate that the text below is the user's private key used by only the user themself as a secret to login to access their account.
+   Title of the secure field that holds the user's private key. */
+"Private Key" = "Yksityisavain";
+
+/* Title of notification when a private zap is received. */
+"Private Zap" = "Yksityinen zap";
+
+/* Description of private zap type where the zap is sent privately and does not identify the user to the public. */
+"private_zap_description" = "Vain '%@' näkee, että olet zappannut häntä";
+
+/* Dropdown option for selecting Pro plan for DeepL translation service. */
+"Pro" = "Pro";
+
+/* Description of report type for profanity. */
+"Profanity" = "Hävyttömyydet";
+
+/* Sidebar menu label for Profile view. */  
+"Profile" = "Profiili";
+
+/* Label for Profile Picture section of user profile form. */
+"Profile Picture" = "Profiilikuva";
+
+/* Button text to indicate that the zap type is a public zap.
+   Picker option to indicate that a zap should be sent publicly and identify the user as who sent it. */
+"Public" = "Julkinen";
+
+/* Section title for the user's public account ID. */
+"Public Account ID" = "Julkinen tilin tunniste";  
+
+/* Label to indicate that text below is the user's public key used by others to uniquely refer to the user.
+   Label to indicate the public key of the account. */
+"Public Key" = "Julkinen avain";
+
+/* Label indicating that the text is a user's public account key. */
+"Public key" = "Julkinen avain";
+
+/* Button to view profile's qr code. */
+"QR Code" = "QR-koodi"; 
+
+/* Button to compose a quoted note */
+"Quote" = "Lainaa";
+
+/* Indication that a NostrScript was run until it reached a suspended state. */
+"Ran to suspension." = "Ajettiin keskeytykseen asti.";
+
+/* Navigation bar title for Reactions view. */
+"Reactions" = "Reaktiot";  
+
+/* Section title for recommend relay servers that could be added as part of configuration */
+"Recommended Relays" = "Suositellut välittäjät";
+
+/* Button to reject the end user license agreement, which disallows the user from being let into the app. */
+"Reject" = "Hylkää";
+
+/* Label to display relay address. */
+"Relay" = "Välitin";
+
+/* Navigation bar title that shows the list of relays for a user.
+   Sidebar menu label for Relays view.
+   Title of relays view */
+"Relays" = "Välittäjät";
+
+/* Description of what was done as a result of sending a report to relay servers. */
+"Relays have been notified and clients will be able to use this information to filter content. Thank you!" = "Välittäjät on ilmoitettu ja asiakkaat voivat käyttää tätä tietoa sisällön suodattamiseen. Kiitos!";
+
+/* Button label to remove all participants from a note reply. */  
+"Remove all" = "Poista kaikki";
+
+/* Button text to remove bookmark from a note. */
+"Remove Bookmark" = "Poista kirjanmerkki";
+
+/* Context menu option for removing a note bookmark. */
+"Remove bookmark" = "Poista kirjanmerkki";
+
+/* Accessibility label for reply button */
+"Reply" = "Vastaa";
+
+/* Text indicating that the view is used for editing which participants are replied to in a note. */
+"Replying to" = "Vastaanottajat";
+
+/* Indicating that the user is replying to the following listed people.
+   Indicating that the user is replying to the themself and no one else, where the parameter is 'self' in US English.
+   Label to indicate that the user is replying to 1 user. */
+"Replying to %@" = "Vastaa käyttäjälle %@";  
+
+/* Label to indicate that the user is replying to 2 users. */
+"Replying to %@ & %@" = "Vastaa käyttäjille %1$@ & %2$@";
+
+/* Label to indicate that the user is replying to themself. */
+"Replying to self" = "Vastaan itselleni";
+
+/* Button to report a profile.
+   Context menu option for reporting content.
+   Label indicating that the current view is for the user to report content. */
+"Report" = "Ilmoita";
+
+/* Label indicating that the text underneath is the identifier of the report that was sent to relay servers. */
+"Report ID:" = "Ilmoituksen tunniste:";
+
+/* Button to report a note. */
+"Report Note" = "Ilmoita vististä";
+
+/* Message indicating that a report was successfully sent to relay servers. */ 
+"Report sent!" = "Ilmoitus lähetetty!";
+
+/* Button to report a user. */
+"Report User" = "Ilmoita käyttäjästä";
+
+/* Button to repost a note */
+"Repost" = "Jaa uudelleen";
+
+/* Text indicating that the note was reposted (i.e. re-shared). */
+"Reposted" = "Jaettu uudelleen"; 
+
+/* Reposted by heading in local notification */
+"Reposted by %@" = "Jaettu uudelleen käyttäjän %@ toimesta";
+
+/* Accessibility label for boosts button
+   Navigation bar title for Reposts view.
+   Setting to enable Repost Local Notification */
+"Reposts" = "Uudelleenjakamiset";
+
+/* Picker option for DM selector for seeing only message requests (DMs that someone else sent the user which has not been responded to yet). DM is the English abbreviation for Direct Message. */
+"Requests" = "Pyynnöt";
+
+/* Button to retry completing account creation after an error occurred. */
+"Retry" = "Yritä uudelleen";  
+
+/* Button that runs a NostrScript. */
+"Run" = "Suorita";
+
+/* Indication that the execution of a NostrScript is running. */
+"Running..." = "Suoritetaan...";
+
+/* Indication that a runtime error occurred when running a NostrScript. */
+"Runtime error" = "Suoritusaikainen virhe";
+
+/* Name of Bitcoin creator(s). */
+"Satoshi Nakamoto" = "Satoshi Nakamoto";
+
+/* Button for saving profile. */
+"Save" = "Tallenna"; 
+
+/* Context menu option to save an image. */
+"Save Image" = "Tallenna kuva";
+
+/* Text to prompt scanning a QR code of a user's pubkey to open their profile. */  
+"Scan a user's pubkey" = "Skannaa käyttäjän julkinen avain";
+
+/* Button to switch to scan QR Code page. */
+"Scan Code" = "Skannaa koodi";
+
+/* Text on QR code view to prompt viewer looking at screen to scan the QR code on screen with their device camera. */
+"Scan the code" = "Skannaa koodi";
+
+/* Navigation link to search hashtag. */
+"Search hashtag: #%@" = "Etsi aihetunniste: #%@";
+
+/* Placeholder text to prompt entry of search query. */
+"Search..." = "Haku...";
+
+/* Navigation title for universe/search settings.
+   Section header for search/universe settings */
+"Search/Universe" = "Haku/Kaikki"; 
+
+/* Section title for user's secret account login key. */
+"Secret Account Login Key" = "Salainen kirjautumisavain";
+
+/* Title of section for selecting a Lightning wallet to pay a Lightning invoice. */
+"Select a Lightning wallet" = "Valitse salamalompakko"; 
+
+/* Prompt selection of user's default wallet */
+"Select default wallet" = "Valitse oletuslompakko";
+
+/* Part of a larger sentence 'Replying to self' in US English. 'self' indicates that the user is replying to themself and no one else. */
+"self" = "itselleni";
+
+/* Text prompt for user to send a message to the other user. */  
+"Send a message to start the conversation..." = "Lähetä viesti aloittaaksesi keskustelun...";
+
+/* Placeholder text for a comment to send as part of a zap to the user. */
+"Send a message with your zap..." = "Lähetä viesti zapin mukana...";
+
+/* Prompt selection of LibreTranslate server to perform machine translations on notes */
+"Server" = "Palvelin";
+
+/* Prompt selection of translation service provider. */
+"Service" = "Palvelu"; 
+
+/* Navigation title for Settings view.
+   Sidebar menu label for accessing the app settings */
+"Settings" = "Asetukset";
+
+/* Button to share a note
+   Button to share an image.
+   Button to share the link to a profile. */
+"Share" = "Jaa";
+
+/* Title text to indicate that the buttons below are meant to be used to share a note with others. */
+"Share Note" = "Jaa viesti";  
+
+/* Button to present iOS share sheet */
+"Share Via..." = "Jaa kautta...";
+
+/* Button to show a note from a user who has been muted.
+   Toggle to show or hide user's secret account login key. */
+"Show" = "Näytä"; 
+
+/* Button that, when tapped, will show + buttons next to a user's relays. */
+"Show +" = "Näytä +";
+
+/* Button to show less of a long profile description. */
+"Show less" = "Näytä vähemmän"; 
+
+/* Button to show entire note.
+   Button to show more of a long profile description. */
+"Show more" = "Näytä lisää"; 
+
+/* Setting to Show notifications only associated to users your follow */
+"Show only from users you follow" = "Näytä vain käyttäjiltä, joita seuraat";
+
+/* Toggle to show notes that are only in the device's preferred languages on the Universe feed and hide notes that are in other languages. */
+"Show only preferred languages on Universe feed" = "Näytä Universum-syötteessä vain suosikkikieliä";
+
+/* Toggle to show or hide selection of wallet. */
+"Show wallet selector" = "Näytä lompakonvalitsin"; 
+
+/* Title of view to log into an account. */
+"Sign in" = "Kirjaudu sisään";
+
+/* Section title for signing out */  
+"Sign Out" = "Kirjaudu ulos";
+
+/* Sidebar menu label to sign out of the account. */
+"Sign out" = "Kirjaudu ulos";
+
+/* Description about why Nostr is needed. */
+"Social media has developed into a key way information flows around the world. Unfortunately, our current social media systems are broken" = "Sosiaalinen media on kehittynyt tärkeäksi tavaksi, jolla tieto liikkuu maailmassa. Valitettavasti nykyiset sosiaalisen median järjestelmät ovat rikki";
+
+/* Label to display relay software. */
+"Software" = "Ohjelmisto"; 
+
+/* Description of report type for spam.
+   Section header for Universe/Search spam */
+"Spam" = "Roskaposti";
+
+/* Text calling for the user to support Damus through zaps */
+"Support Damus" = "Tue Damusta"; 
+
+/* Label to display relay's supported NIPs. */
+"Supported NIPs" = "Tuetut NIP:t";
+
+/* Option to take a photo with the camera */
+"Take Photo" = "Ota valokuva";
+
+/* Section header for damus text truncation user configuration */
+"Text Truncation" = "Tekstin typistys";
+
+/* Button to close out of alert that informs that the action to muted a user was successful. */
+"Thanks!" = "Kiitos!"; 
+
+/* Giving the description of the alert message. */
+"The address should either begin with LNURL or should look like an email address." = "Osoitteen tulisi alkaa LNURL:llä tai näyttää sähköpostiosoitteelta.";
+
+/* Quick description of what Damus is */
+"The go-to iOS Nostr client" = "iOS:n Nostr-asiakasohjelma";
+
+/* Footer description that explains that the relay server requires payment to post. */
+"This is a paid relay, you must pay for notes to be accepted." = "Tämä on maksullinen välittäjä, merkintöjä varten pitää maksaa.";
+
+/* Warning that the inputted account key is a public key and the result of what happens because of it. */
+"This is a public key, you will not be able to make notes or interact in any way. This is used for viewing accounts from their perspective." = "Tämä on julkinen avain, et voi tehdä merkintöjä tai vuorovaikuttaa millään tavalla. Tätä käytetään tilien tarkastelemiseen niiden näkökulmasta.";
+
+/* Label to describe that a public key is the user's account ID and what they can do with it. */
+"This is your account ID, you can give this to your friends so that they can follow you. Tap to copy." = "Tämä on tilisi tunniste. Voit antaa sen ystävillesi, jotta he voivat seurata sinua. Napauta kopioidaksesi."; 
+
+/* Label to describe that a private key is the user's secret account key and what they should do with it. */
+"This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!" = "Tämä on salainen tiliavaimasi. Tarvitset tätä päästäksesi tilillesi. Älä jaa tätä kenenkään kanssa! Tallenna se salasananhallintaohjelmaan ja pidä turvassa!";
+
+/* An error message that appears when the user attempts to add a relay that has already been added. */
+"This relay is already in your list" = "Tämä välittäjä on jo listallasi";
+
+/* Navigation bar title for note thread. */
+"Thread" = "Ketju";  
+
+/* Text indicating that this zap is the one with the highest amount of sats. */
+"Top Zap" = "Paras zap";
+
+/* Toggle to translate direct messages. */
+"Translate DMs" = "Käännä ykstyisviestit";
+
+/* Button to translate note from different language. */
+"Translate Note" = "Käännä viesti";
+
+/* Button to indicate that the note has been translated from a different language. */
+"Translated from %@" = "Käännetty kielestä %@";
+
+/* Navigation title for translation settings.
+   Section header for text and appearance settings */
+"Translation" = "Käännös";
+
+/* Section title for selecting the translation service. */ 
+"Translations" = "Käännökset";
+
+/* Setting to truncate text in mention notifications */
+"Truncate notification mention text" = "Typistä maininta-ilmoitusten teksti";
+
+/* Setting to truncate text in timeline */
+"Truncate timeline text" = "Typistä aikajanan teksti"; 
+
+/* Text field prompt asking user to type DELETE in all caps to confirm that they want to proceed with deleting their account. */
+"Type %@ to delete" = "Kirjoita %@ poistaaksesi";
+
+/* Text box prompt to ask user to type their note. */
+"Type your note here..." = "Kirjoita viestisi tähän...";
+
+/* Button to unfollow a user. */
+"Unfollow" = "Lopeta seuraaminen";
+
+/* Button to unfollow a given hashtag. */
+"Unfollow hashtag" = "Lopeta aihetunnisteen seuraaminen"; 
+
+/* Label to indicate that the user is in the process of unfollowing another user. */
+"Unfollowing..." = "Lopetetaan seuraamista..."; 
+
+/* Toolbar label for the universal view where notes from all connected relay servers appear. */
+"Universe 🛸" = "Kaikki 🛸";
+
+/* Button to unmute a profile. */
+"Unmute" = "Poista mykistys";
+
+/* Context menu option for unmuting a conversation. */
+"Unmute conversation" = "Poista keskustelun mykistys"; 
+
+/* Text indicating that the long-form note title is untitled. */
+"Untitled" = "Nimeämätön";
+
+/* Button to proceed with uploading. */
+"Upload" = "Lataa";  
+
+/* Example URL to LibreTranslate server */
+"URL" = "URL-osoite";
+
+/* Alert message that informs a user was d. */
+"User has been muted" = "Käyttäjä on mykistetty";
+
+/* Alert message to indicate the user has been muted */
+"User muted" = "Käyttäjä mykistetty"; 
+
+/* Label for Username section of user profile form. */
+"Username" = "Käyttäjätunnus";
+
+/* Label to display relay software version.
+   Section title for displaying the version number of the Damus app. */
+"Version" = "Versio";
+
+/* Setting to only see 1 event per user (npub) in the search/universe */
+"View multiple events per user" = "Näytä useita tapahtumia käyttäjää kohden";
+
+/* Button to switch to view users QR Code */ 
+"View QR Code" = "Näytä QR-koodi";
+
+/* Text telling the user to wake up, where the argument is their display name. */
+"Wake up, %@" = "Herää, %@";
+
+/* Sidebar menu label for Wallet view. */
+"wallet" = "lompakko";
+
+/* Navigation title for Wallet view
+   Sidebar menu label for Wallet view.
+   Title for section in zap settings that controls the Lightning wallet selection. */
+"Wallet" = "Lompakko"; 
+
+/* Alert for deleting the users account. */
+"WARNING:\n\nTHIS WILL SIGN AN EVENT THAT DELETES THIS ACCOUNT.\n\nYOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.\n\n ARE YOU SURE YOU WANT TO CONTINUE?" = "VAROITUS:\n\nTÄMÄ ALLEKIRJOITTAA TAPAHTUMAN, JOKA POISTAA TÄMÄN TILIN.\n\nET VOIT ENÄÄ KIRJAUTUA DAMUKSEEN TÄLLÄ TILIAVAIMELLA.\n\nHALUATKO VARMASTI JATKAA?";
+
+/* Label for Website section of user profile form. */
+"Website" = "Verkkosivusto";
+
+/* Welcome text shown on the first screen when user is not logged in. */
+"Welcome to Damus" = "Tervetuloa Damukseen"; 
+
+/* Welcoming message to the reader. The variable is 'you', the reader. */  
+"Welcome to the social network %@ control." = "Tervetuloa sosiaaliseen verkostoon, jota %@ hallitset.";
+
+/* Welcome text */
+"Welcome to the social network you control" = "Tervetuloa sosiaaliseen verkostoon, jota hallitset";
+
+/* Text to welcome user. */
+"Welcome, %@!" = "Tervetuloa, %@!";
+
+/* Header text to prompt user what issue they want to report. */
+"What do you want to report?" = "Mitä haluat ilmoittaa?";
+
+/* Heading text for section describing what is Nostr. */
+"What is Nostr?" = "Mikä on Nostr?"; 
+
+/* Heading text for section describing why Nostr is needed. */
+"Why we need Nostr?" = "Miksi Nostria tarvitaan?";
+
+/* Placeholder example for relay server address. */
+"wss://some.relay.com" = "wss://joku.valittaja.com";
+
+/* Text of button that confirms to overwrite the existing mutelist. */
+"Yes, Overwrite" = "Kyllä, korvaa";
+
+/* Button to proceed with posting a note even though it looks like they might be posting a private key. */
+"Yes, Post with Private Key" = "Kyllä, jaa yksityisavaimella"; 
+
+/* You, in this context, is the person who controls their own social network. You is used in the context of a larger sentence that welcomes the reader to the social network that they control themself. */
+"you" = "sinä";
+
+/* Text telling the user that they are dreaming. */
+"You are dreaming..." = "Sinä uneksit...";
+
+/* Text indicating that there are no bookmarks to be viewed */  
+"You have no bookmarks yet, add them in the context menu" = "Sinulla ei ole vielä kirjanmerkkejä, lisää niitä pikavalikosta";
+
+/* Label for Your Name section of user profile form. */
+"Your Name" = "Nimesi";
+
+/* Footer text to inform user what will happen when the report is submitted. */
+"Your report will be sent to the relays you are connected to" = "Ilmoituksesi lähetetään välittäjille, joihin olet yhteydessä";
+
+/* Accessibility label for zap button
+   Text underneath the number of sats indicating that it's the amount used for zaps.
+   Title of notification when a non-private zap is received. */
+"Zap" = "Zap";
+
+/* Message to display when sending a zap from the user's connected wallet failed. */
+"Zap attempt from connected wallet failed." = "Yhdistetystä lompakosta lähetetty zap-yritys epäonnistui."; 
+
+/* Message to display when a zap from the user's connected wallet was canceled. */
+"Zap attempt from connected wallet was canceled." = "Yhdistetystä lompakosta lähetetty zap-yritys peruutettiin.";
+
+/* Text to indicate that the buttons below it is for choosing the type of zap to send. */
+"Zap type" = "Zap-tyyppi";
+
+/* Button to send a zap. */
+"Zap User" = "Zap käyttäjälle"; 
+
+/* Setting to enable vibration on zap */
+"Zap Vibration" = "Zap-värinä";
+
+/* Text to indicate that the app is in the process of sending a zap. */
+"Zapping..." = "Zappaa..."; 
+
+/* Label for filter for zap notifications.
+   Navigation bar title for the Zaps view.
+   Navigation title for zap settings.
+   Section header for zap settings
+   Setting to enable Zap Local Notification
+   Title for section in zap settings that controls general zap preferences. */
+"Zaps" = "Zapit";
