@@ -42,13 +42,13 @@ enum VideoHandler {
     
 @MainActor
 public class VideoPlayerModel: ObservableObject {
-    @Published var autoReplay: Bool = true
-    @Published var muted: Bool = true
-    @Published var play: Bool = true
+    @Published var autoReplay = true
+    @Published var muted = true
+    @Published var play = true
     @Published var size: CGSize? = nil
     @Published var has_audio: Bool? = nil
     @Published var contentMode: UIView.ContentMode = .scaleAspectFill
-    @Published var currentTime: Double = 0.0
+    @Published var currentTime = 0.0
     @Published var playbackRate: Float = 1.0
     @Published var volume: Float = 1.0
     // Split out a deliberate stream for *setting* currentTime manually, that way system-driven updates don't cause infinite loops and strange fighting behavior.
@@ -208,13 +208,13 @@ fileprivate extension AVPlayer {
 
 @available(iOS 13, *)
 extension VideoPlayer: UIViewRepresentable {
-    
     public func makeUIView(context: Context) -> VideoPlayerView {
         let uiView = VideoPlayerView()
         
-        uiView.playToEndTime = {
-            if self.model.autoReplay == false {
-                self.model.play = false
+        uiView.playToEndTime = { [weak model] in
+            guard let model else { return }
+            if model.autoReplay == false {
+                model.play = false
             }
             DispatchQueue.main.async {
                 for handler in model.handlers {
@@ -227,7 +227,8 @@ extension VideoPlayer: UIViewRepresentable {
         
         uiView.contentMode = self.model.contentMode
         
-        uiView.replay = {
+        uiView.replay = { [weak model] in
+            guard let model else { return }
             DispatchQueue.main.async {
                 for handler in model.handlers {
                     if case .onReplay(let cb) = handler {
@@ -237,30 +238,29 @@ extension VideoPlayer: UIViewRepresentable {
             }
         }
         
-        uiView.stateDidChanged = { [unowned uiView] _ in
+        uiView.stateDidChanged = { [weak model, unowned uiView] _ in
+            guard let model else { return }
             let state: VideoState = uiView.videoState
             
             if case .playing = uiView.videoState {
+                model.totalDuration = uiView.totalDuration
                 context.coordinator.startObserver(uiView: uiView)
-                
                 if let player = uiView.player {
                     Task {
                         let has_audio = await player.hasAudio
                         let size = await player.videoSize
                         Task { @MainActor in
                             if let size {
-                                self.model.size = size
+                                model.size = size
                             }
-                            self.model.has_audio = has_audio
+                            model.has_audio = has_audio
                         }
                     }
                 }
-                
-            } else {
-                context.coordinator.stopObserver(uiView: uiView)
             }
             
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak model] in
+                guard let model else { return }
                 for handler in model.handlers {
                     if case .onStateChanged(let cb) = handler {
                         cb(state)
@@ -268,6 +268,21 @@ extension VideoPlayer: UIViewRepresentable {
                 }
             }
         }
+        
+        // Split this out because calling `uiView.play(for:)` will initialize the coordinator, which will result in an initialization loop.
+        context.coordinator.disposeSet.insert(context.coordinator.videoPlayer.model.$play.sink { [weak model, unowned uiView] play in
+            if play {
+                uiView.resume()
+                // We have to re-set the AVPlayer.rate property because internally AVPlayer sets this value to 0.0 for pausing.
+                guard let model else { return }
+                uiView.player?.rate = model.playbackRate
+            }
+            else {
+                uiView.pause(reason: .userInteraction)
+            }
+        })
+        
+        uiView.play(for: self.url)
         
         return uiView
     }
@@ -277,19 +292,7 @@ extension VideoPlayer: UIViewRepresentable {
     }
     
     public func updateUIView(_ uiView: VideoPlayerView, context: Context) {
-        if context.coordinator.observingURL != url {
-            context.coordinator.clean()
-            context.coordinator.observingURL = url
-        }
-        
-        if model.play {
-            uiView.play(for: url)
-        } else {
-            uiView.pause(reason: .userInteraction)
-        }
-        
-        uiView.isMuted = model.muted
-        uiView.isAutoReplay = model.autoReplay
+        // This method is called A LOT for this view, so model properties have been moved to publishers to allow for event-driven changes instead of performance heavy checks here.
     }
     
     public static func dismantleUIView(_ uiView: VideoPlayerView, coordinator: VideoPlayer.Coordinator) {
@@ -301,47 +304,49 @@ extension VideoPlayer: UIViewRepresentable {
         var observingURL: URL?
         var observer: Any?
         var observerBuffer: Double?
-        var videoModeSub: AnyCancellable?
-        var playbackRateSub: AnyCancellable?
-        var volumeSub: AnyCancellable?
-        var currentTimeSub: AnyCancellable?
+        var disposeSet: Set<AnyCancellable> = []
 
         init(_ videoPlayer: VideoPlayer) {
             self.videoPlayer = videoPlayer
+        }
+        
+        deinit {
+            print("Coordinator.deinit!")
         }
         
         @MainActor
         func startObserver(uiView: VideoPlayerView) {
             guard observer == nil else { return }
             
-            self.videoModeSub = self.videoPlayer.model.$contentMode.sink { mode in
+            disposeSet.insert(videoPlayer.model.$muted.sink { [unowned uiView] muted in
+                uiView.isMuted = muted
+            })
+            
+            disposeSet.insert(videoPlayer.model.$autoReplay.sink { [unowned uiView] autoReplay in
+                uiView.isAutoReplay = autoReplay
+            })
+            
+            disposeSet.insert(videoPlayer.model.$contentMode.sink { [unowned uiView] mode in
                 uiView.contentMode = mode
-            }
+            })
             
-            self.playbackRateSub = self.videoPlayer.model.$playbackRate.sink { rate in
+            disposeSet.insert(videoPlayer.model.$playbackRate.sink { [unowned uiView] rate in
                 uiView.player?.rate = rate
-            }
+            })
             
-            self.volumeSub = self.videoPlayer.model.$volume.sink { volume in
-                uiView.player?.volume = volume
-            }
+            disposeSet.insert(videoPlayer.model.$volume.sink { [unowned uiView] volume in
+                uiView.volume = Double(volume)
+            })
             
-            self.currentTimeSub = self.videoPlayer.model.currentTimeSubject.sink { seconds in
-                let currentTimeScale = uiView.player?.currentTime().timescale ?? 1
-                let newTime = CMTimeMakeWithSeconds(seconds, preferredTimescale: currentTimeScale)
-                let halfSecondBefore = CMTimeMakeWithSeconds(seconds - 0.5, preferredTimescale: currentTimeScale)
-                let halfSecondAfter = CMTimeMakeWithSeconds(seconds + 0.5, preferredTimescale: currentTimeScale)
-                uiView.player?.seek(to: newTime,
-                                    toleranceBefore: halfSecondBefore,
-                                    toleranceAfter: halfSecondAfter)
-            }
+            disposeSet.insert(videoPlayer.model.currentTimeSubject.sink { [unowned uiView] seconds in
+                uiView.seek(to: CMTime(seconds: seconds, preferredTimescale: uiView.player?.currentTime().timescale ?? 1000))
+            })
             
             observer = uiView.addPeriodicTimeObserver(forInterval: .init(seconds: 0.25, preferredTimescale: 60)) { [weak self, unowned uiView] time in
                 guard let self else { return }
                 
-                self.videoPlayer.model.totalDuration = uiView.player?.totalDuration ?? 0.0
                 Task { @MainActor in
-                    self.videoPlayer.model.currentTime = CMTimeGetSeconds(time)
+                    self.videoPlayer.model.currentTime = uiView.currentDuration
                 }
                 
                 self.updateBuffer(uiView: uiView)
@@ -354,18 +359,13 @@ extension VideoPlayer: UIViewRepresentable {
             uiView.removeTimeObserver(observer)
             
             self.observer = nil
-            
-            // TODO: Should this call `clean()`?
         }
         
         func clean() {
             self.observingURL = nil
             self.observer = nil
             self.observerBuffer = nil
-            self.videoModeSub = nil
-            self.playbackRateSub = nil
-            self.volumeSub = nil
-            self.currentTimeSub = nil
+            self.disposeSet = []
         }
         
         @MainActor

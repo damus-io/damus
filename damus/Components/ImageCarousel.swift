@@ -125,7 +125,7 @@ struct ImageCarousel: View {
                         open_sheet = true
                     }
             case .video(let url):
-                DamusVideoPlayer(url: url, model: video_model(url), video_size: $video_size)
+                DamusVideoPlayer(url: url, model: video_model(url), video_size: $video_size, showControls: false)
                     .onChange(of: video_size) { size in
                         guard let size else { return }
                         

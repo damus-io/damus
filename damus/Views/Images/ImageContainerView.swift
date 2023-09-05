@@ -47,7 +47,7 @@ struct ImageContainerView: View {
             case .image(let url):
                 Img(url: url)
             case .video(let url):
-                DamusVideoPlayer(url: url, model: cache.get_video_player_model(url: url), video_size: .constant(nil))
+                DamusVideoPlayer(url: url, model: cache.get_video_player_model(url: url), video_size: .constant(nil), showControls: true)
             }
         }
     }
