@@ -122,11 +122,8 @@ struct DamusVideoPlayer: View {
             .popover(isPresented: $isOptionsPopoverPresented,
                      attachmentAnchor: .point(.top),
                      arrowEdge: .top) {
-                if #available(iOS 16.4, macOS 13.3, *) {
-                    OptionsMenu
-                        .presentationCompactAdaptation(.popover)
-                }
-                else {
+                VStack {
+                    Text("Playback Speed").font(.title)
                     OptionsMenu
                 }
             }
