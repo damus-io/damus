@@ -129,20 +129,6 @@ struct DamusVideoPlayer: View {
             }
     }
     
-    private var FullscreenButton: some View {
-        VideoButton(imageName: self.model.contentMode == .scaleAspectFill ?  "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
-            .onTapGesture {
-                switch self.model.contentMode {
-                case .scaleAspectFit:
-                    self.model.contentMode = .scaleAspectFill
-                case .scaleAspectFill:
-                    self.model.contentMode = .scaleAspectFit
-                default:
-                    break
-                }
-            }
-    }
-    
     private var VideoTime: some View {
         Text("\(self.model.currentTime.secondsToHumanReadableTimecode) / \(self.model.totalDuration.secondsToHumanReadableTimecode)")
             .foregroundColor(muteIconColor)
@@ -226,20 +212,15 @@ struct DamusVideoPlayer: View {
                                     .padding([.leading, .trailing], 1)
                                     .padding([.top, .bottom], nil)
                                 
-                                // Settings, Fullscreen, and Volume
+                                // Settings and Volume
                                 HStack {
                                     SettingsButton
+                                    // Keep button spacing even if the VolumeButton is not present
+                                        .padding([.trailing], model.has_audio == true ? 0 : 47)
                                     
                                     if model.has_audio == true {
-                                        FullscreenButton
-                                        
                                         VolumeButton
                                             .padding([.trailing], 8)
-                                    }
-                                    else {
-                                        FullscreenButton
-                                        // Keep button spacing even if the VolumeButton is not present
-                                            .padding([.trailing], 32 + 16)
                                     }
                                 }
                             }

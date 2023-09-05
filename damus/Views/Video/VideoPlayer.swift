@@ -238,8 +238,8 @@ extension VideoPlayer: UIViewRepresentable {
             }
         }
         
-        uiView.stateDidChanged = { [weak model, unowned uiView] _ in
-            guard let model else { return }
+        uiView.stateDidChanged = { [weak model, weak uiView] _ in
+            guard let model, let uiView else { return }
             let state: VideoState = uiView.videoState
             
             if case .playing = uiView.videoState {
@@ -270,7 +270,8 @@ extension VideoPlayer: UIViewRepresentable {
         }
         
         // Split this out because calling `uiView.play(for:)` will initialize the coordinator, which will result in an initialization loop.
-        context.coordinator.disposeSet.insert(context.coordinator.videoPlayer.model.$play.sink { [weak model, unowned uiView] play in
+        context.coordinator.disposeSet.insert(context.coordinator.videoPlayer.model.$play.sink { [weak model, weak uiView] play in
+            guard let uiView else { return }
             if play {
                 uiView.resume()
                 // We have to re-set the AVPlayer.rate property because internally AVPlayer sets this value to 0.0 for pausing.
@@ -314,32 +315,32 @@ extension VideoPlayer: UIViewRepresentable {
         func startObserver(uiView: VideoPlayerView) {
             guard observer == nil else { return }
             
-            disposeSet.insert(videoPlayer.model.$muted.sink { [unowned uiView] muted in
-                uiView.isMuted = muted
+            disposeSet.insert(videoPlayer.model.$muted.sink { [weak uiView] muted in
+                uiView?.isMuted = muted
             })
             
-            disposeSet.insert(videoPlayer.model.$autoReplay.sink { [unowned uiView] autoReplay in
-                uiView.isAutoReplay = autoReplay
+            disposeSet.insert(videoPlayer.model.$autoReplay.sink { [weak uiView] autoReplay in
+                uiView?.isAutoReplay = autoReplay
             })
             
-            disposeSet.insert(videoPlayer.model.$contentMode.sink { [unowned uiView] mode in
-                uiView.contentMode = mode
+            disposeSet.insert(videoPlayer.model.$contentMode.sink { [weak uiView] mode in
+                uiView?.contentMode = mode
             })
             
-            disposeSet.insert(videoPlayer.model.$playbackRate.sink { [unowned uiView] rate in
-                uiView.player?.rate = rate
+            disposeSet.insert(videoPlayer.model.$playbackRate.sink { [weak uiView] rate in
+                uiView?.player?.rate = rate
             })
             
-            disposeSet.insert(videoPlayer.model.$volume.sink { [unowned uiView] volume in
-                uiView.volume = Double(volume)
+            disposeSet.insert(videoPlayer.model.$volume.sink { [weak uiView] volume in
+                uiView?.volume = Double(volume)
             })
             
-            disposeSet.insert(videoPlayer.model.currentTimeSubject.sink { [unowned uiView] seconds in
-                uiView.seek(to: CMTime(seconds: seconds, preferredTimescale: uiView.player?.currentTime().timescale ?? 1000))
+            disposeSet.insert(videoPlayer.model.currentTimeSubject.sink { [weak uiView] seconds in
+                uiView?.seek(to: CMTime(seconds: seconds, preferredTimescale: uiView?.player?.currentTime().timescale ?? 1000))
             })
             
-            observer = uiView.addPeriodicTimeObserver(forInterval: .init(seconds: 0.25, preferredTimescale: 60)) { [weak self, unowned uiView] time in
-                guard let self else { return }
+            observer = uiView.addPeriodicTimeObserver(forInterval: .init(seconds: 0.25, preferredTimescale: 60)) { [weak self, weak uiView] time in
+                guard let self, let uiView else { return }
                 
                 Task { @MainActor in
                     self.videoPlayer.model.currentTime = uiView.currentDuration
