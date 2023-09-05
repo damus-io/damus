@@ -15,6 +15,7 @@ import Foundation
 //
 
 import AVFoundation
+import Combine
 import GSPlayer
 import SwiftUI
 
@@ -47,8 +48,13 @@ public class VideoPlayerModel: ObservableObject {
     @Published var size: CGSize? = nil
     @Published var has_audio: Bool? = nil
     @Published var contentMode: UIView.ContentMode = .scaleAspectFill
+    @Published var currentTime: Double = 0.0
+    @Published var playbackRate: Float = 1.0
+    @Published var volume: Float = 1.0
+    // Split out a deliberate stream for *setting* currentTime manually, that way system-driven updates don't cause infinite loops and strange fighting behavior.
+    let currentTimeSubject = PassthroughSubject<Double, Never>()
     
-    fileprivate var time: CMTime?
+    var totalDuration: Double = 0.0
     
     var handlers: [VideoHandler] = []
     
@@ -72,20 +78,36 @@ public class VideoPlayerModel: ObservableObject {
     }
     
     /// Whether the video will be automatically replayed until the end of the video playback.
-    func autoReplay(_ value: Bool) -> Self {
+    func set(autoReplay value: Bool) -> Self {
         autoReplay = value
         return self
     }
     
     /// Whether the video is muted, only for this instance.
-    func mute(_ value: Bool) -> Self {
+    func set(muted value: Bool) -> Self {
         muted = value
+        return self
+    }
+    
+    func set(volume value: Float) -> Self {
+        volume = value
+        return self
+    }
+    
+    func set(playbackRate value: Float) -> Self {
+        self.playbackRate = value
+        return self
+    }
+    
+    func set(seekSeconds: Double) -> Self {
+        self.currentTime = seekSeconds
+        self.currentTimeSubject.send(self.currentTime)
         return self
     }
     
     /// A string defining how the video is displayed within an AVPlayerLayer bounds rect.
     /// scaleAspectFill -> resizeAspectFill, scaleAspectFit -> resizeAspect, other -> resize
-    func contentMode(_ value: UIView.ContentMode) -> Self {
+    func set(contentMode value: UIView.ContentMode) -> Self {
         contentMode = value
         return self
     }
@@ -166,16 +188,22 @@ public extension VideoPlayer {
     }
 }
 
-func get_video_size(player: AVPlayer) async -> CGSize? {
-    let res = Task.detached(priority: .background) {
-        return player.currentImage?.size
+fileprivate extension AVPlayer {
+    var videoSize: CGSize? {
+        get async {
+            let res = Task.detached(priority: .background) {
+                return self.currentImage?.size
+            }
+            return await res.value
+        }
     }
-    return await res.value
-}
-
-func video_has_audio(player: AVPlayer) async -> Bool {
-    let tracks = try? await player.currentItem?.asset.load(.tracks)
-    return tracks?.filter({ t in t.mediaType == .audio }).first != nil
+    
+    var hasAudio: Bool {
+        get async {
+            let tracks = try? await self.currentItem?.asset.load(.tracks)
+            return tracks?.filter({ t in t.mediaType == .audio }).first != nil
+        }
+    }
 }
 
 @available(iOS 13, *)
@@ -210,15 +238,15 @@ extension VideoPlayer: UIViewRepresentable {
         }
         
         uiView.stateDidChanged = { [unowned uiView] _ in
-            let state: VideoState = uiView.convertState()
+            let state: VideoState = uiView.videoState
             
-            if case .playing = state {
+            if case .playing = uiView.videoState {
                 context.coordinator.startObserver(uiView: uiView)
                 
                 if let player = uiView.player {
                     Task {
-                        let has_audio = await video_has_audio(player: player)
-                        let size = await get_video_size(player: player)
+                        let has_audio = await player.hasAudio
+                        let size = await player.videoSize
                         Task { @MainActor in
                             if let size {
                                 self.model.size = size
@@ -262,11 +290,6 @@ extension VideoPlayer: UIViewRepresentable {
         
         uiView.isMuted = model.muted
         uiView.isAutoReplay = model.autoReplay
-        
-        if let observerTime = context.coordinator.observerTime, let modelTime = model.time,
-           modelTime != observerTime && modelTime.isValid && modelTime.isNumeric {
-            uiView.seek(to: modelTime, completion: { _ in })
-        }
     }
     
     public static func dismantleUIView(_ uiView: VideoPlayerView, coordinator: VideoPlayer.Coordinator) {
@@ -277,8 +300,11 @@ extension VideoPlayer: UIViewRepresentable {
         var videoPlayer: VideoPlayer
         var observingURL: URL?
         var observer: Any?
-        var observerTime: CMTime?
         var observerBuffer: Double?
+        var videoModeSub: AnyCancellable?
+        var playbackRateSub: AnyCancellable?
+        var volumeSub: AnyCancellable?
+        var currentTimeSub: AnyCancellable?
 
         init(_ videoPlayer: VideoPlayer) {
             self.videoPlayer = videoPlayer
@@ -288,31 +314,58 @@ extension VideoPlayer: UIViewRepresentable {
         func startObserver(uiView: VideoPlayerView) {
             guard observer == nil else { return }
             
+            self.videoModeSub = self.videoPlayer.model.$contentMode.sink { mode in
+                uiView.contentMode = mode
+            }
+            
+            self.playbackRateSub = self.videoPlayer.model.$playbackRate.sink { rate in
+                uiView.player?.rate = rate
+            }
+            
+            self.volumeSub = self.videoPlayer.model.$volume.sink { volume in
+                uiView.player?.volume = volume
+            }
+            
+            self.currentTimeSub = self.videoPlayer.model.currentTimeSubject.sink { seconds in
+                let currentTimeScale = uiView.player?.currentTime().timescale ?? 1
+                let newTime = CMTimeMakeWithSeconds(seconds, preferredTimescale: currentTimeScale)
+                let halfSecondBefore = CMTimeMakeWithSeconds(seconds - 0.5, preferredTimescale: currentTimeScale)
+                let halfSecondAfter = CMTimeMakeWithSeconds(seconds + 0.5, preferredTimescale: currentTimeScale)
+                uiView.player?.seek(to: newTime,
+                                    toleranceBefore: halfSecondBefore,
+                                    toleranceAfter: halfSecondAfter)
+            }
+            
             observer = uiView.addPeriodicTimeObserver(forInterval: .init(seconds: 0.25, preferredTimescale: 60)) { [weak self, unowned uiView] time in
-                guard let `self` = self else { return }
+                guard let self else { return }
                 
+                self.videoPlayer.model.totalDuration = uiView.player?.totalDuration ?? 0.0
                 Task { @MainActor in
-                    self.videoPlayer.model.time = time
+                    self.videoPlayer.model.currentTime = CMTimeGetSeconds(time)
                 }
-                self.observerTime = time
                 
                 self.updateBuffer(uiView: uiView)
             }
         }
         
         func stopObserver(uiView: VideoPlayerView) {
-            guard let observer = observer else { return }
+            guard let observer else { return }
             
             uiView.removeTimeObserver(observer)
             
             self.observer = nil
+            
+            // TODO: Should this call `clean()`?
         }
         
         func clean() {
             self.observingURL = nil
             self.observer = nil
-            self.observerTime = nil
             self.observerBuffer = nil
+            self.videoModeSub = nil
+            self.playbackRateSub = nil
+            self.volumeSub = nil
+            self.currentTimeSub = nil
         }
         
         @MainActor
@@ -334,8 +387,7 @@ extension VideoPlayer: UIViewRepresentable {
 }
 
 private extension VideoPlayerView {
-    
-    func convertState() -> VideoState {
+    var videoState: VideoState {
         switch state {
         case .none, .loading:
             return .loading
