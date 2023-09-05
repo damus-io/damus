@@ -148,10 +148,9 @@ struct DamusVideoPlayer: View {
     
     private var VideoTime: some View {
         Text("\(self.model.currentTime.secondsToHumanReadableTimecode) / \(self.model.totalDuration.secondsToHumanReadableTimecode)")
-            .padding([.leading, .trailing], 1)
-            .padding([.top, .bottom], nil)
-            .monospacedDigit()
             .foregroundColor(muteIconColor)
+            // Both of these ensure that the Text label doesn't jump around from digit width changes
+            .monospacedDigit()
             .fixedSize(horizontal: true, vertical: true)
             .onTapGesture {
                 self.model.play.toggle()
@@ -175,9 +174,6 @@ struct DamusVideoPlayer: View {
                 
                 VideoPlayer(url: url, model: model)
                     .zIndex(0.0)
-//                    .onAppear {
-//                        self.model.start()
-//                    }
                     .onTapGesture {
                         if let tapHandler = onVideoTapped {
                             tapHandler()
@@ -230,10 +226,11 @@ struct DamusVideoPlayer: View {
                                 
                                 VideoTime
                                     .frame(maxWidth: .infinity, alignment: .center)
+                                    .padding([.leading, .trailing], 1)
+                                    .padding([.top, .bottom], nil)
                                 
                                 // Settings, Fullscreen, and Volume
                                 HStack {
-                                    // TODO: Changing playback speed is currently broken for unknown reasons.
                                     SettingsButton
                                     
                                     if model.has_audio == true {
@@ -383,7 +380,7 @@ fileprivate extension DamusVideoPlayer {
 fileprivate extension DamusVideoPlayer {
     /// A seek time slider ranging from 0.0 (beginning) to `totalDuration` at the end.
     /// `onEditingChanged` is called when the user begins or ends editing the current play location using this slider.
-    /// `onTimeFinalized` is called when the user end editing and the new time has been calculated, ready for seek.
+    /// `onTimeFinalized` is called when the user ends editing and the new time has been calculated, ready for seek.
     /// Inspired by [pratikg29's VerticalVolumeSlider](https://github.com/pratikg29/Custom-Slider-Control/blob/main/AppleMusicSlider/AppleMusicSlider/VerticalVolumeSlider.swift)
     struct SeekSlider : View {
         @Binding var time: Double

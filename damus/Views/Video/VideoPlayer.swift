@@ -310,10 +310,6 @@ extension VideoPlayer: UIViewRepresentable {
             self.videoPlayer = videoPlayer
         }
         
-        deinit {
-            print("Coordinator.deinit!")
-        }
-        
         @MainActor
         func startObserver(uiView: VideoPlayerView) {
             guard observer == nil else { return }
