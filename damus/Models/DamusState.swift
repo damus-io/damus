@@ -33,6 +33,7 @@ struct DamusState {
     let nav: NavigationCoordinator
     let user_search_cache: UserSearchCache
     let music: MusicController?
+    let video: VideoController
 
     @discardableResult
     func add_zap(zap: Zapping) -> Bool {
@@ -89,7 +90,8 @@ struct DamusState {
             wallet: WalletModel(settings: UserSettingsStore()),
             nav: NavigationCoordinator(),
             user_search_cache: user_search_cache,
-            music: nil
+            music: nil,
+            video: VideoController()
         )
     }
 }
