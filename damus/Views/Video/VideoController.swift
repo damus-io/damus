@@ -37,4 +37,8 @@ final class VideoController: ObservableObject {
     func metadata(for url: URL) -> VideoMetadata? {
         metadatas[url]
     }
+    
+    func size_for_url(_ url: URL) -> CGSize? {
+        metadatas[url]?.size
+    }
 }

@@ -105,7 +105,7 @@ struct ImageCarousel: View {
             }
         }
         .onAppear {
-            if self.image_fill == nil, let size = state.events.lookup_media_size(url: url) {
+            if self.image_fill == nil, let size = state.video.size_for_url(url) {
                 let fill = ImageFill.calculate_image_fill(geo_size: geo_size, img_size: size, maxHeight: maxHeight, fillHeight: fillHeight)
                 self.image_fill = fill
             }
