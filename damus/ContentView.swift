@@ -654,7 +654,8 @@ struct ContentView: View {
                                       wallet: WalletModel(settings: settings),
                                       nav: self.navigationCoordinator,
                                       user_search_cache: user_search_cache,
-                                      music: MusicController(onChange: music_changed)
+                                      music: MusicController(onChange: music_changed),
+                                      video: VideoController()
         )
         home.damus_state = self.damus_state!
         
