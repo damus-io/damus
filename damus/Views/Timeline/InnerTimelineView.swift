@@ -12,15 +12,11 @@ struct InnerTimelineView: View {
     @ObservedObject var events: EventHolder
     let state: DamusState
     let filter: (NostrEvent) -> Bool
-    
-    static var count: Int = 0
-    
+
     init(events: EventHolder, damus: DamusState, filter: @escaping (NostrEvent) -> Bool) {
         self.events = events
         self.state = damus
         self.filter = filter
-        print("rendering InnerTimelineView \(InnerTimelineView.count)")
-        InnerTimelineView.count += 1
     }
     
     var event_options: EventViewOptions {
