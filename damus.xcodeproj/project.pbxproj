@@ -388,6 +388,7 @@
 		504323A72A34915F006AE6DC /* RelayModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504323A62A34915F006AE6DC /* RelayModel.swift */; };
 		504323A92A3495B6006AE6DC /* RelayModelCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504323A82A3495B6006AE6DC /* RelayModelCache.swift */; };
 		5053ACA72A56DF3B00851AE3 /* DeveloperSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5053ACA62A56DF3B00851AE3 /* DeveloperSettingsView.swift */; };
+		50A16FFB2AA6C06600DFEC1F /* AVPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A16FFA2AA6C06600DFEC1F /* AVPlayerView.swift */; };
 		50A50A8D29A09E1C00C01BE7 /* RequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */; };
 		50A60D142A28BEEE00186190 /* RelayLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A60D132A28BEEE00186190 /* RelayLog.swift */; };
 		50B5685329F97CB400A23243 /* CredentialHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B5685229F97CB400A23243 /* CredentialHandler.swift */; };
@@ -1063,6 +1064,7 @@
 		504323A62A34915F006AE6DC /* RelayModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayModel.swift; sourceTree = "<group>"; };
 		504323A82A3495B6006AE6DC /* RelayModelCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayModelCache.swift; sourceTree = "<group>"; };
 		5053ACA62A56DF3B00851AE3 /* DeveloperSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperSettingsView.swift; sourceTree = "<group>"; };
+		50A16FFA2AA6C06600DFEC1F /* AVPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVPlayerView.swift; sourceTree = "<group>"; };
 		50A50A8C29A09E1C00C01BE7 /* RequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestTests.swift; sourceTree = "<group>"; };
 		50A60D132A28BEEE00186190 /* RelayLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayLog.swift; sourceTree = "<group>"; };
 		50B5685229F97CB400A23243 /* CredentialHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialHandler.swift; sourceTree = "<group>"; };
@@ -1359,6 +1361,7 @@
 			children = (
 				4C1A9A2929DDF54400516EAC /* DamusVideoPlayer.swift */,
 				4CCF9AAE2A1FDBDB00E03CFB /* VideoPlayer.swift */,
+				50A16FFA2AA6C06600DFEC1F /* AVPlayerView.swift */,
 			);
 			path = Video;
 			sourceTree = "<group>";
@@ -2795,6 +2798,7 @@
 				4C3EA63D28FF52D600C48A62 /* bolt11.c in Sources */,
 				4C9BB83129C0ED4F00FC4E37 /* DisplayName.swift in Sources */,
 				7CFF6317299FEFE5005D382A /* SelectableText.swift in Sources */,
+				50A16FFB2AA6C06600DFEC1F /* AVPlayerView.swift in Sources */,
 				4CA352A82A76B37E003BB08B /* NewMutesNotify.swift in Sources */,
 				4CFF8F6929CC9ED1008DB934 /* ImageContainerView.swift in Sources */,
 				7527271E2A93FF0100214108 /* Block.swift in Sources */,
