@@ -141,7 +141,6 @@ class EventCache {
     private var replies = ReplyMap()
     private var cancellable: AnyCancellable?
     private var image_metadata: [String: ImageMetadataState] = [:] // lowercased URL key
-    private var video_meta: [URL: VideoPlayerModel] = [:]
     private var event_data: [NoteId: EventData] = [:]
 
     //private var thread_latest: [String: Int64]
@@ -202,30 +201,6 @@ class EventCache {
     
     func lookup_img_metadata(url: URL) -> ImageMetadataState? {
         return image_metadata[url.absoluteString.lowercased()]
-    }
-    
-    @MainActor
-    func lookup_media_size(url: URL) -> CGSize? {
-        if let img_meta = lookup_img_metadata(url: url) {
-            return img_meta.meta.dim?.size
-        }
-        
-        return get_video_player_model(url: url).size
-    }
-    
-    func store_video_player_model(url: URL, meta: VideoPlayerModel) {
-        video_meta[url] = meta
-    }
-    
-    @MainActor
-    func get_video_player_model(url: URL) -> VideoPlayerModel {
-        if let model = video_meta[url] {
-            return model
-        }
-        
-        let model = VideoPlayerModel()
-        video_meta[url] = model
-        return model
     }
     
     func parent_events(event: NostrEvent, keypair: Keypair) -> [NostrEvent] {
@@ -289,7 +264,6 @@ class EventCache {
     
     private func prune() {
         events = [:]
-        video_meta = [:]
         event_data = [:]
         replies.replies = [:]
     }

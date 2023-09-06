@@ -10,6 +10,18 @@ import Combine
 import Foundation
 import SwiftUI
 
+func get_video_size(player: AVPlayer) async -> CGSize? {
+    let res = Task.detached(priority: .background) {
+        return player.currentImage?.size
+    }
+    return await res.value
+}
+
+func video_has_audio(player: AVPlayer) async -> Bool {
+    let tracks = try? await player.currentItem?.asset.load(.tracks)
+    return tracks?.filter({ t in t.mediaType == .audio }).first != nil
+}
+
 @MainActor
 final class DamusVideoPlayerViewModel: ObservableObject {
     
