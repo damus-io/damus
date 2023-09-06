@@ -112,10 +112,6 @@ struct ImageCarousel: View {
         }
     }
     
-    func video_model(_ url: URL) -> VideoPlayerModel {
-        return state.events.get_video_player_model(url: url)
-    }
-    
     func Media(geo: GeometryProxy, url: MediaUrl, index: Int) -> some View {
         Group {
             switch url {
@@ -125,7 +121,7 @@ struct ImageCarousel: View {
                         open_sheet = true
                     }
             case .video(let url):
-                DamusVideoPlayer(url: url, model: video_model(url), video_size: $video_size)
+                DamusVideoPlayer(url: url, video_size: $video_size, controller: state.video)
                     .onChange(of: video_size) { size in
                         guard let size else { return }
                         
@@ -194,7 +190,7 @@ struct ImageCarousel: View {
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
         .fullScreenCover(isPresented: $open_sheet) {
-            ImageView(cache: state.events, urls: urls, disable_animation: state.settings.disable_animation)
+            ImageView(video_controller: state.video, urls: urls, disable_animation: state.settings.disable_animation)
         }
         .frame(height: height)
         .onChange(of: selectedIndex) { value in
