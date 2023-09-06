@@ -317,7 +317,6 @@
 		4CC7AAFA297F64AC00430951 /* EventMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC7AAF9297F64AC00430951 /* EventMenu.swift */; };
 		4CCEB7AE29B53D260078AA28 /* SearchingEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CCEB7AD29B53D260078AA28 /* SearchingEventView.swift */; };
 		4CCEB7B029B5415A0078AA28 /* SearchingProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CCEB7AF29B5415A0078AA28 /* SearchingProfileView.swift */; };
-		4CCF9AB22A1FE80C00E03CFB /* GSPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 4CCF9AB12A1FE80C00E03CFB /* GSPlayer */; };
 		4CD348EF29C3659D00497EB2 /* ImageUploadModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD348EE29C3659D00497EB2 /* ImageUploadModel.swift */; };
 		4CD7641B28A1641400B6928F /* EndBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD7641A28A1641400B6928F /* EndBlock.swift */; };
 		4CDA128A29E9D10C0006FA5A /* SignalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDA128929E9D10C0006FA5A /* SignalView.swift */; };
@@ -1127,7 +1126,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */,
-				4CCF9AB22A1FE80C00E03CFB /* GSPlayer in Frameworks */,
 				4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */,
 				4C27C9322A64766F007DBC75 /* MarkdownUI in Frameworks */,
 			);
@@ -2305,7 +2303,6 @@
 			packageProductDependencies = (
 				4C649880286E0EE300EAE2B3 /* secp256k1 */,
 				4C06670328FC7EC500038D2A /* Kingfisher */,
-				4CCF9AB12A1FE80C00E03CFB /* GSPlayer */,
 				4C27C9312A64766F007DBC75 /* MarkdownUI */,
 			);
 			productName = damus;
@@ -3436,11 +3433,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
 			productName = secp256k1;
-		};
-		4CCF9AB12A1FE80C00E03CFB /* GSPlayer */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4CCF9AB02A1FE80B00E03CFB /* XCRemoteSwiftPackageReference "GSPlayer" */;
-			productName = GSPlayer;
 		};
 /* End XCSwiftPackageProductDependency section */
 
