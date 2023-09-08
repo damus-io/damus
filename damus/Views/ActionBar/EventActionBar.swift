@@ -256,8 +256,8 @@ struct LikeButton: View {
         Group {
             if isReactionsVisible {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .frame(width: 250, height: 50)
+                    RoundedRectangle(cornerRadius: 20)
+                        .frame(width: calculateOverlayWidth(), height: 50)
                         .foregroundColor(DamusColors.black)
                         .scaleEffect(Double(showReactionsBG), anchor: .topTrailing)
                         .animation(
@@ -267,9 +267,9 @@ struct LikeButton: View {
                         .overlay(
                             Rectangle()
                                 .foregroundColor(Color.white.opacity(0.2))
-                                .frame(width: 250, height: 50)
+                                .frame(width: calculateOverlayWidth(), height: 50)
                                 .clipShape(
-                                    RoundedRectangle(cornerRadius: 10)
+                                    RoundedRectangle(cornerRadius: 20)
                                 )
                         )
                         .overlay(reactions())
@@ -308,6 +308,22 @@ struct LikeButton: View {
 
     func reactions() -> some View {
         HStack {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 15) {
+                    ForEach(emojis, id: \.self) { emoji in
+                        if let index = emojis.firstIndex(of: emoji) {
+                            let scale = index < showEmojis.count ? showEmojis[index] : 0
+                            Text(emoji)
+                                .font(.system(size: 25))
+                                .scaleEffect(Double(scale))
+                                .onTapGesture {
+                                    emojiTapped(emoji)
+                                }
+                        }
+                    }
+                }
+                .padding(.leading, 10)
+            }
             Button(action: {
                 withAnimation(.easeOut(duration: 0.2)) {
                     isReactionsVisible = false
@@ -316,26 +332,10 @@ struct LikeButton: View {
                 showEmojis = []
             }) {
                 Image(systemName: "xmark.circle.fill")
-                    .font(.body)
+                    .font(.system(size: 18))
                     .foregroundColor(.gray)
             }
-            .padding(.leading, 7.5)
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 20) {
-                    ForEach(emojis, id: \.self) { emoji in
-                        if let index = emojis.firstIndex(of: emoji) {
-                            let scale = index < showEmojis.count ? showEmojis[index] : 0
-                            Text(emoji)
-                                .scaleEffect(Double(scale))
-                                .onTapGesture {
-                                    emojiTapped(emoji)
-                                }
-                        }
-                    }
-                }
-                .padding(.trailing, 10)
-            }
+            .padding(.trailing, 7.5)
         }
     }
 
