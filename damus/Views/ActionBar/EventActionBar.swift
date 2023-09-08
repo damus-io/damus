@@ -287,6 +287,24 @@ struct LikeButton: View {
             }
         }
     }
+    
+    func calculateOverlayWidth() -> CGFloat {
+        let maxWidth: CGFloat = 250
+        let numberOfEmojis = emojis.count
+        let minimumWidth: CGFloat = 75
+        
+        if numberOfEmojis > 0 {
+            let emojiWidth: CGFloat = 25
+            let padding: CGFloat = 15
+            let buttonWidth: CGFloat = 18
+            let buttonPadding: CGFloat = 20
+            
+            let totalWidth = CGFloat(numberOfEmojis) * (emojiWidth + padding) + buttonWidth + buttonPadding
+            return min(maxWidth, max(minimumWidth, totalWidth))
+        } else {
+            return minimumWidth
+        }
+    }
 
     func reactions() -> some View {
         HStack {
