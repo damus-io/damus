@@ -13,11 +13,6 @@ struct RelayType: View {
     var body: some View {
         if is_paid {
             Image("bitcoin-logo")
-        } else {
-            Image("globe")
-                .resizable()
-                .frame(width: 20, height: 20)
-                .foregroundColor(.gray)
         }
     }
 }
