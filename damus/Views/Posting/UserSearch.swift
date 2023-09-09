@@ -47,7 +47,7 @@ struct UserSearch: View {
         tagModel.diff = appended.tag.length - wordRange.length
 
         focusWordAttributes = (nil, nil)
-        newCursorIndex = wordRange.location + appended.tag.string.count
+        newCursorIndex = wordRange.location + appended.tag.length
     }
 
     var body: some View {
