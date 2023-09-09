@@ -75,6 +75,7 @@ struct RelayMetadata: Codable {
     let version: String?
     let limitation: Limitations?
     let payments_url: String?
+    let icon: String?
     
     var is_paid: Bool {
         return limitation?.payment_required ?? false
