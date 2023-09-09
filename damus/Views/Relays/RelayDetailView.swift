@@ -173,7 +173,7 @@ struct RelayDetailView: View {
 
 struct RelayDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        let metadata = RelayMetadata(name: "name", description: "desc", pubkey: test_pubkey, contact: "contact", supported_nips: [1,2,3], software: "software", version: "version", limitation: Limitations.empty, payments_url: "https://jb55.com")
+        let metadata = RelayMetadata(name: "name", description: "desc", pubkey: test_pubkey, contact: "contact", supported_nips: [1,2,3], software: "software", version: "version", limitation: Limitations.empty, payments_url: "https://jb55.com", icon: "")
         RelayDetailView(state: test_damus_state(), relay: "relay", nip11: metadata)
     }
 }
