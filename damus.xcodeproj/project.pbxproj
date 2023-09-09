@@ -370,6 +370,10 @@
 		5C513FCC2984ACA60072348F /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C513FCB2984ACA60072348F /* QRCodeView.swift */; };
 		5C6E1DAD2A193EC2008FC15A /* GradientButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */; };
 		5C6E1DAF2A194075008FC15A /* PinkGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6E1DAE2A194075008FC15A /* PinkGradient.swift */; };
+		5CC868DD2AA29B3200FB22BA /* NeutralButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC868DC2AA29B3200FB22BA /* NeutralButtonStyle.swift */; };
+		5CF2DCCA2AA3A49B00984B8D /* TLDExtract in Frameworks */ = {isa = PBXBuildFile; productRef = 5CF2DCC92AA3A49B00984B8D /* TLDExtract */; };
+		5CF2DCCC2AA3AF0B00984B8D /* RelayPicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF2DCCB2AA3AF0B00984B8D /* RelayPicView.swift */; };
+		5CF2DCCE2AABE1A500984B8D /* DamusLightGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF2DCCD2AABE1A500984B8D /* DamusLightGradient.swift */; };
 		5CF72FC229B9142F00124A13 /* ShareAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF72FC129B9142F00124A13 /* ShareAction.swift */; };
 		6439E014296790CF0020672B /* ProfilePicImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6439E013296790CF0020672B /* ProfilePicImageView.swift */; };
 		643EA5C8296B764E005081BB /* RelayFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 643EA5C7296B764E005081BB /* RelayFilterView.swift */; };
@@ -929,6 +933,9 @@
 		5C513FCB2984ACA60072348F /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientButtonStyle.swift; sourceTree = "<group>"; };
 		5C6E1DAE2A194075008FC15A /* PinkGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinkGradient.swift; sourceTree = "<group>"; };
+		5CC868DC2AA29B3200FB22BA /* NeutralButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeutralButtonStyle.swift; sourceTree = "<group>"; };
+		5CF2DCCB2AA3AF0B00984B8D /* RelayPicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayPicView.swift; sourceTree = "<group>"; };
+		5CF2DCCD2AABE1A500984B8D /* DamusLightGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusLightGradient.swift; sourceTree = "<group>"; };
 		5CF72FC129B9142F00124A13 /* ShareAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareAction.swift; sourceTree = "<group>"; };
 		6439E013296790CF0020672B /* ProfilePicImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePicImageView.swift; sourceTree = "<group>"; };
 		643EA5C7296B764E005081BB /* RelayFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayFilterView.swift; sourceTree = "<group>"; };
@@ -979,6 +986,7 @@
 				4CCF9AB22A1FE80C00E03CFB /* GSPlayer in Frameworks */,
 				4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */,
 				4C27C9322A64766F007DBC75 /* MarkdownUI in Frameworks */,
+				5CF2DCCA2AA3A49B00984B8D /* TLDExtract in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1392,6 +1400,7 @@
 				F71694F72A6983AF001F4053 /* GrayGradient.swift */,
 				5C0707D02A1ECB38004E7B51 /* DamusLogoGradient.swift */,
 				4C687C202A5F7ED00092C550 /* DamusBackground.swift */,
+				5CF2DCCD2AABE1A500984B8D /* DamusLightGradient.swift */,
 			);
 			path = Gradients;
 			sourceTree = "<group>";
@@ -1557,6 +1566,7 @@
 				4CE8794F2996B2BD00F758CC /* RelayStatusView.swift */,
 				4CE879512996B68900F758CC /* RelayType.swift */,
 				4CDA128929E9D10C0006FA5A /* SignalView.swift */,
+				5CF2DCCB2AA3AF0B00984B8D /* RelayPicView.swift */,
 			);
 			path = Relays;
 			sourceTree = "<group>";
@@ -1686,6 +1696,7 @@
 				4C8D00C929DF80350036AF10 /* TruncatedText.swift */,
 				4C28595F2A12A2BE004746F7 /* SupporterBadge.swift */,
 				5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */,
+				5CC868DC2AA29B3200FB22BA /* NeutralButtonStyle.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -1949,6 +1960,7 @@
 				4C06670328FC7EC500038D2A /* Kingfisher */,
 				4CCF9AB12A1FE80C00E03CFB /* GSPlayer */,
 				4C27C9312A64766F007DBC75 /* MarkdownUI */,
+				5CF2DCC92AA3A49B00984B8D /* TLDExtract */,
 			);
 			productName = damus;
 			productReference = 4CE6DEE327F7A08100C66700 /* damus.app */;
@@ -2056,6 +2068,7 @@
 				4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				4CCF9AB02A1FE80B00E03CFB /* XCRemoteSwiftPackageReference "GSPlayer" */,
 				4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
+				5CF2DCC82AA3A49B00984B8D /* XCRemoteSwiftPackageReference "TLDExtractSwift" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -2281,6 +2294,7 @@
 				3169CAE6294E69C000EE4006 /* EmptyTimelineView.swift in Sources */,
 				4CC7AAF0297F11C700430951 /* SelectedEventView.swift in Sources */,
 				4CC7AAF8297F1CEE00430951 /* EventProfile.swift in Sources */,
+				5CF2DCCC2AA3AF0B00984B8D /* RelayPicView.swift in Sources */,
 				4C687C242A5FA86D0092C550 /* SearchHeaderView.swift in Sources */,
 				64FBD06F296255C400D9D3B2 /* Theme.swift in Sources */,
 				4C1A9A2329DDDB8100516EAC /* IconLabel.swift in Sources */,
@@ -2412,6 +2426,7 @@
 				4C3AC7A728369BA200E1F516 /* SearchHomeView.swift in Sources */,
 				4CB883B0297705DD00DC99E7 /* ZapButton.swift in Sources */,
 				4C363A922825FCF2006E126D /* ProfileUpdate.swift in Sources */,
+				5CF2DCCE2AABE1A500984B8D /* DamusLightGradient.swift in Sources */,
 				4CB9D4A92992D2F400A9A7E4 /* FollowsYou.swift in Sources */,
 				4C3BEFDA281DCA1400B3DE84 /* LikeCounter.swift in Sources */,
 				50A60D142A28BEEE00186190 /* RelayLog.swift in Sources */,
@@ -2469,6 +2484,7 @@
 				4C73C5142A4437C10062CAC0 /* ZapUserView.swift in Sources */,
 				501F8C802A0220E1001AFC1D /* KeychainStorage.swift in Sources */,
 				4C1A9A1D29DDCF9B00516EAC /* NotificationSettingsView.swift in Sources */,
+				5CC868DD2AA29B3200FB22BA /* NeutralButtonStyle.swift in Sources */,
 				4C75EFB528049D790006080F /* Relay.swift in Sources */,
 				4CEE2AF1280B216B00AB5EEF /* EventDetailView.swift in Sources */,
 				4CC7AAFA297F64AC00430951 /* EventMenu.swift in Sources */,
@@ -2798,6 +2814,7 @@
 				INFOPLIST_FILE = damus/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Damus;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Damus needs access to your media library for playback statuses";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Damus needs access to your camera if you want to upload photos from it";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Local authentication to access private key";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Damus needs access to your microphone if you want to upload recorded videos from it";
@@ -2847,6 +2864,7 @@
 				INFOPLIST_FILE = damus/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Damus;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Damus needs access to your media library for playback statuses";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Damus needs access to your camera if you want to upload photos from it";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Local authentication to access private key";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Damus needs access to your microphone if you want to upload recorded videos from it";
@@ -3029,6 +3047,14 @@
 				minimumVersion = 0.2.26;
 			};
 		};
+		5CF2DCC82AA3A49B00984B8D /* XCRemoteSwiftPackageReference "TLDExtractSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/MarcoEidinger/TLDExtractSwift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -3051,6 +3077,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4CCF9AB02A1FE80B00E03CFB /* XCRemoteSwiftPackageReference "GSPlayer" */;
 			productName = GSPlayer;
+		};
+		5CF2DCC92AA3A49B00984B8D /* TLDExtract */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5CF2DCC82AA3A49B00984B8D /* XCRemoteSwiftPackageReference "TLDExtractSwift" */;
+			productName = TLDExtract;
 		};
 /* End XCSwiftPackageProductDependency section */
 
