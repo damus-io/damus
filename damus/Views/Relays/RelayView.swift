@@ -28,41 +28,35 @@ struct RelayView: View {
                     if showActionButtons {
                         RemoveButton(privkey: privkey, showText: false)
                     }
-                    else if let relay_connection {
-                        RelayStatusView(connection: relay_connection)
-                    }
                 }
-                
-                RelayType(is_paid: state.relay_model_cache.model(with_relay_id: relay)?.metadata.is_paid ?? false)
-                
-                if let meta = model_cache.model(with_relay_id: relay)?.metadata {
+
+                let meta = model_cache.model(with_relay_id: relay)?.metadata
+            
+                RelayPicView(relay: relay, icon: meta?.icon, size: 55, highlight: .none, disable_animation: false)
+                    
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text(meta?.name ?? relay)
+                            .font(.headline)
+                            .padding(.bottom, 2)
+                        RelayType(is_paid: state.relay_model_cache.model(with_relay_id: relay)?.metadata.is_paid ?? false)
+                    }
                     Text(relay)
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
+                    
+                Spacer()
+                    
+                if let relay_connection {
+                    RelayStatusView(connection: relay_connection)
                         .background(
                             NavigationLink(value: Route.RelayDetail(relay: relay, metadata: meta), label: {
                                 EmptyView()
-                            }).opacity(0.0).disabled(showActionButtons)
+                            })
+                            .buttonStyle(.plain)
+                            .disabled(showActionButtons)
                         )
-                    
-                    Spacer()
-
-                    Image("info")
-                        .resizable()
-                        .frame(width: 20, height: 20)
-                        .foregroundColor(Color.accentColor)
-                } else {
-                    Text(relay)
-                        .background(
-                            NavigationLink(value: Route.RelayDetail(relay: relay, metadata: nil), label: {
-                                EmptyView()
-                            }).opacity(0.0).disabled(showActionButtons)
-                        )
-                    
-                    Spacer()
-                    
-                    Image("question")
-                        .resizable()
-                        .frame(width: 20, height: 20)
-                        .foregroundColor(.gray)
                 }
             }
         }
