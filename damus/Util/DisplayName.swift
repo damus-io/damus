@@ -7,22 +7,16 @@
 
 import Foundation
 
-
-struct BothNames {
-    let username: String
-    let display_name: String
-}
-
 enum DisplayName {
-    case both(BothNames)
+    case both(username: String, displayName: String)
     case one(String)
     
-    var display_name: String {
+    var displayName: String {
         switch self {
         case .one(let one):
             return one
-        case .both(let b):
-            return b.display_name
+        case .both(username: _, displayName: let displayName):
+            return displayName
         }
     }
     
@@ -30,8 +24,8 @@ enum DisplayName {
         switch self {
         case .one(let one):
             return one
-        case .both(let b):
-            return b.username
+        case .both(username: let username, displayName: _):
+            return username
         }
     }
 }
@@ -50,7 +44,7 @@ func parse_display_name(profile: Profile?, pubkey: Pubkey) -> DisplayName {
     let disp_name = profile.display_name?.isEmpty == false ? profile.display_name : nil
     
     if let name, let disp_name, name != disp_name {
-        return .both(BothNames(username: name, display_name: disp_name))
+        return .both(username: name, displayName: disp_name)
     }
     
     if let one = name ?? disp_name {

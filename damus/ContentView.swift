@@ -59,11 +59,11 @@ enum Sheets: Identifiable {
 enum FilterState : Int {
     case posts_and_replies = 1
     case posts = 0
-    
+
     func filter(ev: NostrEvent) -> Bool {
         switch self {
         case .posts:
-            return ev.known_kind == .boost || !ev.is_reply(nil)
+            return ev.known_kind == .boost || !ev.is_reply(.empty)
         case .posts_and_replies:
             return true
         }
@@ -654,7 +654,8 @@ struct ContentView: View {
                                       wallet: WalletModel(settings: settings),
                                       nav: self.navigationCoordinator,
                                       user_search_cache: user_search_cache,
-                                      music: MusicController(onChange: music_changed)
+                                      music: MusicController(onChange: music_changed),
+                                      video: VideoController()
         )
         home.damus_state = self.damus_state!
         

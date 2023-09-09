@@ -36,7 +36,7 @@ struct NoteContentView: View {
     @ObservedObject var settings: UserSettingsStore
 
     var note_artifacts: NoteArtifacts {
-        return self.artifacts_model.state.artifacts ?? .separated(.just_content(event.get_content(damus_state.keypair.privkey)))
+        return self.artifacts_model.state.artifacts ?? .separated(.just_content(event.get_content(damus_state.keypair)))
     }
     
     init(damus_state: DamusState, event: NostrEvent, show_images: Bool, size: EventViewKind, options: EventViewOptions) {
@@ -180,7 +180,7 @@ struct NoteContentView: View {
                 }
                 await preload_event(plan: plan, state: damus_state)
             } else if force_artifacts {
-                let arts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+                let arts = render_note_content(ev: event, profiles: damus_state.profiles, keypair: damus_state.keypair)
                 self.artifacts_model.state = .loaded(arts)
             }
         }
@@ -228,7 +228,7 @@ struct NoteContentView: View {
     var body: some View {
         ArtifactContent
             .onReceive(handle_notify(.profile_updated)) { profile in
-                let blocks = event.blocks(damus_state.keypair.privkey)
+                let blocks = event.blocks(damus_state.keypair)
                 for block in blocks.blocks {
                     switch block {
                     case .mention(let m):
@@ -394,8 +394,8 @@ func note_artifact_is_separated(kind: NostrKind?) -> Bool {
     return kind != .longform
 }
 
-func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: Privkey?) -> NoteArtifacts {
-    let blocks = ev.blocks(privkey)
+func render_note_content(ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> NoteArtifacts {
+    let blocks = ev.blocks(keypair)
 
     if ev.known_kind == .longform {
         return .longform(LongformContent(ev.content))

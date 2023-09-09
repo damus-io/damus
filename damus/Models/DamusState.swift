@@ -33,6 +33,7 @@ struct DamusState {
     let nav: NavigationCoordinator
     let user_search_cache: UserSearchCache
     let music: MusicController?
+    let video: VideoController
 
     @discardableResult
     func add_zap(zap: Zapping) -> Bool {
@@ -43,8 +44,8 @@ struct DamusState {
         // thread zaps
         if let ev = zap.event, !settings.nozaps, zap.is_in_thread {
             // [nozaps]: thread zaps are only available outside of the app store
-            replies.count_replies(ev, privkey: self.keypair.privkey)
-            events.add_replies(ev: ev, privkey: self.keypair.privkey)
+            replies.count_replies(ev, keypair: self.keypair)
+            events.add_replies(ev: ev, keypair: self.keypair)
         }
 
         // associate with events as well
@@ -89,7 +90,8 @@ struct DamusState {
             wallet: WalletModel(settings: UserSettingsStore()),
             nav: NavigationCoordinator(),
             user_search_cache: user_search_cache,
-            music: nil
+            music: nil,
+            video: VideoController()
         )
     }
 }

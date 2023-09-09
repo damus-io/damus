@@ -28,7 +28,7 @@ class ReplyCounter {
         return replies[evid] ?? 0
     }
     
-    func count_replies(_ event: NostrEvent, privkey: Privkey?) {
+    func count_replies(_ event: NostrEvent, keypair: Keypair) {
         guard event.is_textlike else {
             return
         }
@@ -39,7 +39,7 @@ class ReplyCounter {
         
         counted.insert(event.id)
         
-        for reply in event.direct_replies(privkey) {
+        for reply in event.direct_replies(keypair) {
             if event.pubkey == our_pubkey {
                 self.our_replies[reply] = event
             }

@@ -28,7 +28,7 @@ class SearchModel: ObservableObject {
     
     func filter_muted()  {
         self.events.filter {
-            should_show_event(privkey: state.keypair.privkey, hellthreads: state.muted_threads, contacts: state.contacts, ev: $0)
+            should_show_event(keypair: state.keypair, hellthreads: state.muted_threads, contacts: state.contacts, ev: $0)
         }
         self.objectWillChange.send()
     }
@@ -57,7 +57,7 @@ class SearchModel: ObservableObject {
             return
         }
         
-        guard should_show_event(privkey: state.keypair.privkey, hellthreads: state.muted_threads, contacts: state.contacts, ev: ev) else {
+        guard should_show_event(keypair: state.keypair, hellthreads: state.muted_threads, contacts: state.contacts, ev: ev) else {
             return
         }
         

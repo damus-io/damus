@@ -10,11 +10,11 @@ import SwiftUI
 struct ReplyPart: View {
     let events: EventCache
     let event: NostrEvent
-    let privkey: Privkey?
+    let keypair: Keypair
     let profiles: Profiles
 
     var replying_to: NostrEvent? {
-        guard let note_ref = event.event_refs(privkey).first(where: { evref in evref.is_direct_reply != nil })?.is_direct_reply else {
+        guard let note_ref = event.event_refs(keypair).first(where: { evref in evref.is_direct_reply != nil })?.is_direct_reply else {
             return nil
         }
 
@@ -23,7 +23,7 @@ struct ReplyPart: View {
 
     var body: some View {
         Group {
-            if event_is_reply(event.event_refs(privkey)) {
+            if event_is_reply(event.event_refs(keypair)) {
                 ReplyDescription(event: event, replying_to: replying_to, profiles: profiles)
             } else {
                 EmptyView()
@@ -34,6 +34,6 @@ struct ReplyPart: View {
 
 struct ReplyPart_Previews: PreviewProvider {
     static var previews: some View {
-        ReplyPart(events: test_damus_state().events, event: test_note, privkey: nil, profiles: test_damus_state().profiles)
+        ReplyPart(events: test_damus_state().events, event: test_note, keypair: Keypair(pubkey: .empty, privkey: nil), profiles: test_damus_state().profiles)
     }
 }

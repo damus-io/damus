@@ -71,18 +71,6 @@ func should_show_images(settings: UserSettingsStore, contacts: Contacts, ev: Nos
     return false
 }
 
-extension View {
-    func pubkey_context_menu(pubkey: Pubkey) -> some View {
-        return self.contextMenu {
-            Button {
-                UIPasteboard.general.string = pubkey.npub
-            } label: {
-                Label(NSLocalizedString("Copy Account ID", comment: "Context menu option for copying the ID of the account that created the note."), image: "copy2")
-            }
-        }
-    }
-}
-
 func format_relative_time(_ created_at: UInt32) -> String
 {
     return time_ago_since(Date(timeIntervalSince1970: Double(created_at)))

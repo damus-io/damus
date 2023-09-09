@@ -54,7 +54,7 @@ struct MenuItems: View {
         let bookmarked = bookmarks.isBookmarked(event)
         self._isBookmarked = State(initialValue: bookmarked)
 
-        let muted_thread = muted_threads.isMutedThread(event, privkey: keypair.privkey)
+        let muted_thread = muted_threads.isMutedThread(event, keypair: keypair)
         self._isMutedThread = State(initialValue: muted_thread)
         
         self.bookmarks = bookmarks
@@ -68,7 +68,7 @@ struct MenuItems: View {
     var body: some View {
         Group {
             Button {
-                UIPasteboard.general.string = event.get_content(keypair.privkey)
+                UIPasteboard.general.string = event.get_content(keypair)
             } label: {
                 Label(NSLocalizedString("Copy text", comment: "Context menu option for copying the text from an note."), image: "copy2")
             }
@@ -106,7 +106,7 @@ struct MenuItems: View {
             if event.known_kind != .dm {
                 Button {
                     self.muted_threads.updateMutedThread(event)
-                    let muted = self.muted_threads.isMutedThread(event, privkey: self.keypair.privkey)
+                    let muted = self.muted_threads.isMutedThread(event, keypair: self.keypair)
                     isMutedThread = muted
                 } label: {
                     let imageName = isMutedThread ? "mute" : "mute"

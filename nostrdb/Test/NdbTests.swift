@@ -12,6 +12,8 @@ final class NdbTests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
+        try? FileManager.default.removeItem(atPath: Ndb.db_path + "/lock.mdb")
+        try? FileManager.default.removeItem(atPath: Ndb.db_path + "/data.mdb")
     }
 
     override func tearDownWithError() throws {
@@ -28,6 +30,33 @@ final class NdbTests: XCTestCase {
         let json = "[\"OK\",\"b1d8f68d39c07ce5c5ea10c235100d529b2ed2250140b36a35d940b712dc6eff\",true,\"\"]"
         let resp = decode_nostr_event(txt: json)
         XCTAssertNotNil(resp)
+
+    }
+
+    func test_ndb_init() {
+
+        do {
+            let ndb = Ndb()!
+            let ok = ndb.process_events(test_wire_events)
+            XCTAssertTrue(ok)
+        }
+
+        do {
+            let ndb = Ndb()!
+            let id = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
+            let note = ndb.lookup_note(id)
+            XCTAssertNotNil(note)
+            guard let note else { return }
+            let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+            XCTAssertEqual(note.pubkey, pk)
+
+            let profile = ndb.lookup_profile(pk)
+            XCTAssertNotNil(profile)
+            guard let profile else { return }
+
+            XCTAssertEqual(profile.name, "jb55")
+        }
+
 
     }
 
@@ -121,7 +150,7 @@ final class NdbTests: XCTestCase {
             return
         }
         self.measure(options: longer_iter()) {
-            let blocks = event.blocks(nil).blocks
+            let blocks = event.blocks(test_keypair).blocks
             let xs = interpret_event_refs(blocks: blocks, tags: event.tags)
             XCTAssertEqual(xs.count, 1)
         }
@@ -132,7 +161,7 @@ final class NdbTests: XCTestCase {
             return
         }
         self.measure(options: longer_iter()) {
-            let blocks = note.blocks(nil).blocks
+            let blocks = note.blocks(test_keypair).blocks
             let xs = interpret_event_refs_ndb(blocks: blocks, tags: note.tags)
             XCTAssertEqual(xs.count, 1)
         }
@@ -151,8 +180,8 @@ final class NdbTests: XCTestCase {
         XCTAssertEqual(note.pubkey, event.pubkey)
         XCTAssertEqual(note.id, event.id)
 
-        let ev_blocks = event.blocks(nil)
-        let note_blocks = note.blocks(nil)
+        let ev_blocks = event.blocks(test_keypair)
+        let note_blocks = note.blocks(test_keypair)
 
         XCTAssertEqual(ev_blocks, note_blocks)
 

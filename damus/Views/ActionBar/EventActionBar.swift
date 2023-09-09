@@ -329,7 +329,9 @@ struct LikeButton: View {
         for (index, _) in emojis.enumerated() {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1 * Double(index)) {
                 withAnimation(.interpolatingSpring(stiffness: 170, damping: 8)) {
-                    showEmojis[index] = 1
+                    if index < showEmojis.count {
+                        showEmojis[index] = 1
+                    }
                 }
             }
         }

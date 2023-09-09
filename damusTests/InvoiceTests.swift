@@ -8,6 +8,19 @@
 import XCTest
 @testable import damus
 
+
+extension Block {
+    var asInvoice: Invoice? {
+        switch self {
+        case .invoice(let invoice):
+            return invoice
+        default:
+            return nil
+        }
+    }
+}
+
+
 final class InvoiceTests: XCTestCase {
 
     override func setUpWithError() throws {
@@ -24,8 +37,9 @@ final class InvoiceTests: XCTestCase {
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 1)
-        XCTAssertNotNil(parsed[0].is_invoice)
-        guard let invoice = parsed[0].is_invoice else {
+        let invoiceOrNil = parsed[0].asInvoice
+        XCTAssertNotNil(invoiceOrNil)
+        guard let invoice = invoiceOrNil else {
             return
         }
         XCTAssertEqual(invoice.amount, .any)
@@ -42,9 +56,10 @@ LNBC1P3MR5UJSP5G7SA48YD4JWTTPCHWMY4QYN4UWZQCJQ8NMWKD6QE3HCRVYTDLH9SPP57YM9TSA9NN
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 2)
-        XCTAssertNotNil(parsed[0].is_invoice)
-        XCTAssertEqual(parsed[1].is_text, "  hi there")
-        guard let invoice = parsed[0].is_invoice else {
+        let invoiceOrNil = parsed[0].asInvoice
+        XCTAssertNotNil(invoiceOrNil)
+        XCTAssertEqual(parsed[1].asText, "  hi there")
+        guard let invoice = invoiceOrNil else {
             return
         }
         XCTAssertEqual(invoice.amount, .any)
@@ -58,8 +73,9 @@ LNBC1P3MR5UJSP5G7SA48YD4JWTTPCHWMY4QYN4UWZQCJQ8NMWKD6QE3HCRVYTDLH9SPP57YM9TSA9NN
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 1)
-        XCTAssertNotNil(parsed[0].is_invoice)
-        guard let invoice = parsed[0].is_invoice else {
+        let invoiceOrNil = parsed[0].asInvoice
+        XCTAssertNotNil(invoiceOrNil)
+        guard let invoice = invoiceOrNil else {
             return
         }
         XCTAssertEqual(invoice.amount, .specific(10000))
@@ -74,7 +90,7 @@ LNBC1P3MR5UJSP5G7SA48YD4JWTTPCHWMY4QYN4UWZQCJQ8NMWKD6QE3HCRVYTDLH9SPP57YM9TSA9NN
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 1)
-        XCTAssertNotNil(parsed[0].is_invoice)
+        XCTAssertNotNil(parsed[0].asInvoice)
     }
     
     func testParseInvoiceWithPrefixCapitalized() throws {
@@ -83,7 +99,7 @@ LNBC1P3MR5UJSP5G7SA48YD4JWTTPCHWMY4QYN4UWZQCJQ8NMWKD6QE3HCRVYTDLH9SPP57YM9TSA9NN
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 1)
-        XCTAssertNotNil(parsed[0].is_invoice)
+        XCTAssertNotNil(parsed[0].asInvoice)
     }
     
     func testParseInvoice() throws {
@@ -92,8 +108,9 @@ LNBC1P3MR5UJSP5G7SA48YD4JWTTPCHWMY4QYN4UWZQCJQ8NMWKD6QE3HCRVYTDLH9SPP57YM9TSA9NN
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 1)
-        XCTAssertNotNil(parsed[0].is_invoice)
-        guard let invoice = parsed[0].is_invoice else {
+        let invoiceOrNil = parsed[0].asInvoice
+        XCTAssertNotNil(invoiceOrNil)
+        guard let invoice = invoiceOrNil else {
             return
         }
         XCTAssertEqual(invoice.amount, .specific(10000))

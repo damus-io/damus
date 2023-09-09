@@ -58,6 +58,11 @@ func test_damus_state() -> DamusState {
     return damus
 }
 
+let test_wire_events = """
+["EVENT","s",{"id":"d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349","pubkey":"32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245","created_at":1650049978,"kind":0,"tags":[],"content":"{\\"name\\\":\\"jb55\\",\\"picture\\":\\\"http://cdn.jb55.com/img/red-me.jpg\\",\\"about\\":\\"bitcoin, lightning and nostr dev\\",\\"nip05\\":\\"jb55.com\\"}","sig":"1315045da793c4825de1517149172bf35a6da39d91b7787afb3263721e07bc816cb898996ed8d69af05d6efcd1c926a089bd66cad870bcc361405c11ba302c51"}]
+["EVENT","s",{"id":"b2e03951843b191b5d9d1969f48db0156b83cc7dbd841f543f109362e24c4a9c","pubkey":"32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245","created_at":1650050002,"kind":1,"tags":[],"content":"hello, this is my new key","sig":"4342eff1d78a82b42522cd26ec66a5293eca997f81d4b80efd02230d3d27317fb63d42656e8f32383562f075a2b6d999b60dcf70e2df18cf5e8b3801faeb0bd6"}]
+"""
+
 let test_failing_nostr_report = """
 {
   "id": "99198ecb6a34372b7e39b88280bab3394654a00f5f8504466fac2d6acb569663",

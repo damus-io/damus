@@ -8,15 +8,17 @@
 import XCTest
 @testable import damus
 
+
 final class HashtagTests: XCTestCase {
     func testParseHashtag() {
         let parsed = parse_note_content(content: .content("some hashtag #bitcoin derp",nil)).blocks
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
-        XCTAssertEqual(parsed[0].is_text, "some hashtag ")
-        XCTAssertEqual(parsed[1].is_hashtag, "bitcoin")
-        XCTAssertEqual(parsed[2].is_text, " derp")
+        
+        XCTAssertEqual(parsed[0].asText, "some hashtag ")
+        XCTAssertEqual(parsed[1].asHashtag, "bitcoin")
+        XCTAssertEqual(parsed[2].asText, " derp")
     }
     
     func testHashtagWithComma() {
@@ -24,9 +26,9 @@ final class HashtagTests: XCTestCase {
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
-        XCTAssertEqual(parsed[0].is_text, "some hashtag ")
-        XCTAssertEqual(parsed[1].is_hashtag, "bitcoin")
-        XCTAssertEqual(parsed[2].is_text, ", cool")
+        XCTAssertEqual(parsed[0].asText, "some hashtag ")
+        XCTAssertEqual(parsed[1].asHashtag, "bitcoin")
+        XCTAssertEqual(parsed[2].asText, ", cool")
     }
     
     func testHashtagWithEmoji() {
@@ -36,14 +38,14 @@ final class HashtagTests: XCTestCase {
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
-        XCTAssertEqual(parsed[0].is_text, "some hashtag ")
-        XCTAssertEqual(parsed[1].is_hashtag, "bitcoin☕️")
-        XCTAssertEqual(parsed[2].is_text, " cool")
+        XCTAssertEqual(parsed[0].asText, "some hashtag ")
+        XCTAssertEqual(parsed[1].asHashtag, "bitcoin☕️")
+        XCTAssertEqual(parsed[2].asText, " cool")
 
         XCTAssertEqual(post_blocks.count, 3)
-        XCTAssertEqual(post_blocks[0].is_text, "some hashtag ")
-        XCTAssertEqual(post_blocks[1].is_hashtag, "bitcoin☕️")
-        XCTAssertEqual(post_blocks[2].is_text, " cool")
+        XCTAssertEqual(post_blocks[0].asText, "some hashtag ")
+        XCTAssertEqual(post_blocks[1].asHashtag, "bitcoin☕️")
+        XCTAssertEqual(post_blocks[2].asText, " cool")
     }
 
     func testPowHashtag() {
@@ -53,12 +55,12 @@ final class HashtagTests: XCTestCase {
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 2)
-        XCTAssertEqual(parsed[0].is_text, "pow! ")
-        XCTAssertEqual(parsed[1].is_hashtag, "ぽわ〜")
+        XCTAssertEqual(parsed[0].asText, "pow! ")
+        XCTAssertEqual(parsed[1].asHashtag, "ぽわ〜")
 
         XCTAssertEqual(post_blocks.count, 2)
-        XCTAssertEqual(post_blocks[0].is_text, "pow! ")
-        XCTAssertEqual(post_blocks[1].is_hashtag, "ぽわ〜")
+        XCTAssertEqual(post_blocks[0].asText, "pow! ")
+        XCTAssertEqual(post_blocks[1].asHashtag, "ぽわ〜")
     }
 
     func testHashtagWithAccents() {
@@ -66,8 +68,8 @@ final class HashtagTests: XCTestCase {
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 2)
-        XCTAssertEqual(parsed[0].is_text, "hello from ")
-        XCTAssertEqual(parsed[1].is_hashtag, "türkiye")
+        XCTAssertEqual(parsed[0].asText, "hello from ")
+        XCTAssertEqual(parsed[1].asHashtag, "türkiye")
     }
 
     func testHashtagWithNonLatinCharacters() {
@@ -75,9 +77,9 @@ final class HashtagTests: XCTestCase {
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 3)
-        XCTAssertEqual(parsed[0].is_text, "this is a ")
-        XCTAssertEqual(parsed[1].is_hashtag, "시험")
-        XCTAssertEqual(parsed[2].is_text, " hope it works")
+        XCTAssertEqual(parsed[0].asText, "this is a ")
+        XCTAssertEqual(parsed[1].asHashtag, "시험")
+        XCTAssertEqual(parsed[2].asText, " hope it works")
     }
     
     func testParseHashtagEnd() {
@@ -85,8 +87,8 @@ final class HashtagTests: XCTestCase {
 
         XCTAssertNotNil(parsed)
         XCTAssertEqual(parsed.count, 2)
-        XCTAssertEqual(parsed[0].is_text, "some hashtag ")
-        XCTAssertEqual(parsed[1].is_hashtag, "bitcoin")
+        XCTAssertEqual(parsed[0].asText, "some hashtag ")
+        XCTAssertEqual(parsed[1].asHashtag, "bitcoin")
     }
     
 }
