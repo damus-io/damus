@@ -23,7 +23,7 @@ struct ReplyDescription: View {
 
 struct ReplyDescription_Previews: PreviewProvider {
     static var previews: some View {
-        ReplyDescription(event: test_note, replying_to: test_note, ndb: test_damus_state().ndb)
+        ReplyDescription(event: test_note, replying_to: test_note, ndb: test_damus_state.ndb)
     }
 }
 

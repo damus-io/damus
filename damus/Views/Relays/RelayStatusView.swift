@@ -27,7 +27,7 @@ struct RelayStatusView: View {
 
 struct RelayStatusView_Previews: PreviewProvider {
     static var previews: some View {
-        let connection = test_damus_state().pool.get_relay("relay")!.connection
+        let connection = test_damus_state.pool.get_relay("relay")!.connection
         RelayStatusView(connection: connection)
     }
 }

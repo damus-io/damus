@@ -28,6 +28,6 @@ struct ReactionView: View {
 
 struct ReactionView_Previews: PreviewProvider {
     static var previews: some View {
-        ReactionView(damus_state: test_damus_state(), reaction: NostrEvent(content: "🤙🏼", keypair: test_keypair)!)
+        ReactionView(damus_state: test_damus_state, reaction: NostrEvent(content: "🤙🏼", keypair: test_keypair)!)
     }
 }

@@ -49,8 +49,50 @@ let test_private_zap = Zap(event: test_note, invoice: test_zap_invoice, zapper: 
 let test_pending_zap = PendingZap(amount_msat: 10000, target: .note(id: test_note.id, author: test_note.pubkey), request: .normal(test_zap_request), type: .pub, state: .external(.init(state: .fetching_invoice)))
 
 
-func test_damus_state() -> DamusState {
-    let damus = DamusState.empty
+var test_damus_state: DamusState = ({
+    // Create a unique temporary directory
+    var tempDir: String!
+    do {
+        let fileManager = FileManager.default
+        let temp = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try fileManager.createDirectory(at: temp, withIntermediateDirectories: true, attributes: nil)
+        tempDir = temp.absoluteString
+    } catch {
+        tempDir = "."
+    }
+
+    print("opening \(tempDir!)")
+    let ndb = Ndb(path: tempDir)!
+    let our_pubkey = test_pubkey
+    let user_search_cache = UserSearchCache()
+    let pool = RelayPool(ndb: ndb)
+    let settings = UserSettingsStore()
+    let damus = DamusState(pool: pool,
+                           keypair: test_keypair,
+                           likes: .init(our_pubkey: our_pubkey),
+                           boosts: .init(our_pubkey: our_pubkey),
+                           contacts: .init(our_pubkey: our_pubkey),
+                           profiles: .init(user_search_cache: user_search_cache, ndb: ndb),
+                           dms: .init(our_pubkey: our_pubkey),
+                           previews: .init(),
+                           zaps: .init(our_pubkey: our_pubkey),
+                           lnurls: .init(),
+                           settings: settings,
+                           relay_filters: .init(our_pubkey: our_pubkey),
+                           relay_model_cache: .init(),
+                           drafts: .init(),
+                           events: .init(ndb: ndb),
+                           bookmarks: .init(pubkey: our_pubkey),
+                           postbox: .init(pool: pool),
+                           bootstrap_relays: .init(),
+                           replies: .init(our_pubkey: our_pubkey),
+                           muted_threads: .init(keypair: test_keypair),
+                           wallet: .init(settings: settings),
+                           nav: .init(),
+                           user_search_cache: user_search_cache,
+                           music: .init(onChange: {_ in }),
+                           video: .init(),
+                           ndb: ndb)
 
     /*
     let prof = Profile(name: "damus", display_name: "damus", about: "iOS app!", picture: "https://damus.io/img/logo.png", banner: "", website: "https://damus.io", lud06: nil, lud16: "jb55@sendsats.lol", nip05: "damus.io", damus_donation: nil)
@@ -58,7 +100,7 @@ func test_damus_state() -> DamusState {
     damus.profiles.add(id: test_pubkey, profile: tsprof)
      */
     return damus
-}
+})()
 
 let test_wire_events = """
 ["EVENT","s",{"id":"d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349","pubkey":"32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245","created_at":1650049978,"kind":0,"tags":[],"content":"{\\"name\\\":\\"jb55\\",\\"picture\\":\\\"http://cdn.jb55.com/img/red-me.jpg\\",\\"about\\":\\"bitcoin, lightning and nostr dev\\",\\"nip05\\":\\"jb55.com\\"}","sig":"1315045da793c4825de1517149172bf35a6da39d91b7787afb3263721e07bc816cb898996ed8d69af05d6efcd1c926a089bd66cad870bcc361405c11ba302c51"}]

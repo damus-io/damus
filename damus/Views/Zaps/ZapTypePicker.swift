@@ -105,7 +105,7 @@ struct ZapTypePicker: View {
 struct ZapTypePicker_Previews: PreviewProvider {
     @State static var zap_type: ZapType = .pub
     static var previews: some View {
-        let ds = test_damus_state()
+        let ds = test_damus_state
         ZapTypePicker(zap_type: $zap_type, settings: ds.settings, profiles: ds.profiles, pubkey: test_pubkey)
     }
 }

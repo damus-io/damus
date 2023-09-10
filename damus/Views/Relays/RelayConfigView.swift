@@ -171,6 +171,6 @@ struct RelayConfigView: View {
 
 struct RelayConfigView_Previews: PreviewProvider {
     static var previews: some View {
-        RelayConfigView(state: test_damus_state())
+        RelayConfigView(state: test_damus_state)
     }
 }

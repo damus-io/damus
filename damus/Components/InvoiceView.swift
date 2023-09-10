@@ -108,7 +108,7 @@ let test_invoice = Invoice(description: .description("this is a description"), a
 
 struct InvoiceView_Previews: PreviewProvider {
     static var previews: some View {
-        InvoiceView(our_pubkey: .empty, invoice: test_invoice, settings: test_damus_state().settings)
+        InvoiceView(our_pubkey: .empty, invoice: test_invoice, settings: test_damus_state.settings)
             .frame(width: 300, height: 200)
     }
 }

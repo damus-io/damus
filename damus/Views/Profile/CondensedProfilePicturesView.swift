@@ -33,6 +33,6 @@ struct CondensedProfilePicturesView: View {
 
 struct CondensedProfilePicturesView_Previews: PreviewProvider {
     static var previews: some View {
-        CondensedProfilePicturesView(state: test_damus_state(), pubkeys: [test_pubkey, test_pubkey, test_pubkey, test_pubkey], maxPictures: 3)
+        CondensedProfilePicturesView(state: test_damus_state, pubkeys: [test_pubkey, test_pubkey, test_pubkey, test_pubkey], maxPictures: 3)
     }
 }

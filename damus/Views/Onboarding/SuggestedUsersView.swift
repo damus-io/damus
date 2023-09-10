@@ -72,6 +72,6 @@ struct SuggestedUsersSectionHeader: View {
 
 struct SuggestedUsersView_Previews: PreviewProvider {
     static var previews: some View {
-        SuggestedUsersView(model: SuggestedUsersViewModel(damus_state: test_damus_state()))
+        SuggestedUsersView(model: SuggestedUsersViewModel(damus_state: test_damus_state))
     }
 }

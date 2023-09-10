@@ -80,7 +80,7 @@ struct UserSearch_Previews: PreviewProvider {
     @State static var postTextViewCanScroll: Bool = false
     
     static var previews: some View {
-        UserSearch(damus_state: test_damus_state(), search: search, focusWordAttributes: $word, newCursorIndex: $newCursorIndex, postTextViewCanScroll: $postTextViewCanScroll, post: $post)
+        UserSearch(damus_state: test_damus_state, search: search, focusWordAttributes: $word, newCursorIndex: $newCursorIndex, postTextViewCanScroll: $postTextViewCanScroll, post: $post)
     }
 }
 

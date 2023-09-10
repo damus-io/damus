@@ -21,7 +21,7 @@ final class ProfileViewTests: XCTestCase {
     }
 
     func testFollowedByString() throws {
-        let profiles = test_damus_state().profiles
+        let profiles = test_damus_state.profiles
 
         let pk1 = test_pubkey
         let pk2 = test_pubkey_2

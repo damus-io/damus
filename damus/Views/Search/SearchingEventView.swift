@@ -126,7 +126,7 @@ struct SearchingEventView: View {
 
 struct SearchingEventView_Previews: PreviewProvider {
     static var previews: some View {
-        let state = test_damus_state()
+        let state = test_damus_state
         SearchingEventView(state: state, search_type: .event(test_note.id))
     }
 }

@@ -9,11 +9,18 @@ import XCTest
 @testable import damus
 
 final class NdbTests: XCTestCase {
+    var db_dir: URL!
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-        try? FileManager.default.removeItem(atPath: Ndb.db_path + "/lock.mdb")
-        try? FileManager.default.removeItem(atPath: Ndb.db_path + "/data.mdb")
+        // Create a unique temporary directory
+        do {
+            let fileManager = FileManager.default
+            let tempDir = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
+            db_dir = tempDir
+        } catch {
+            XCTFail("Could not create temp directory: \(error)")
+        }
     }
 
     override func tearDownWithError() throws {
@@ -41,26 +48,27 @@ final class NdbTests: XCTestCase {
     func test_ndb_init() {
 
         do {
-            let ndb = Ndb()!
+            let ndb = Ndb(path: db_dir.absoluteString)!
             let ok = ndb.process_events(test_wire_events)
             XCTAssertTrue(ok)
         }
 
         do {
-            let ndb = Ndb()!
+            let ndb = Ndb(path: db_dir.absoluteString)!
             let id = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
-            let note = ndb.lookup_note(id)
+            let txn = NdbTxn(ndb: ndb)
+            let note = ndb.lookup_note_with_txn(id: id, txn: txn)
             XCTAssertNotNil(note)
             guard let note else { return }
             let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
             XCTAssertEqual(note.pubkey, pk)
 
-            let profile = ndb.lookup_profile(pk)
+            let profile = ndb.lookup_profile_with_txn(pk, txn: txn)
             XCTAssertNotNil(profile)
             guard let profile else { return }
 
             XCTAssertEqual(profile.profile?.name, "jb55")
-            XCTAssertEqual(profile.lnurl, "fixme")
+            XCTAssertEqual(profile.lnurl, nil)
         }
 
 

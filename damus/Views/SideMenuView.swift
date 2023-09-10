@@ -233,7 +233,7 @@ struct SideMenuView: View {
 
 struct Previews_SideMenuView_Previews: PreviewProvider {
     static var previews: some View {
-        let ds = test_damus_state()
+        let ds = test_damus_state
         SideMenuView(damus_state: ds, isSidebarVisible: .constant(true))
     }
 }

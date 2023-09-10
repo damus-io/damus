@@ -456,7 +456,7 @@ func get_searching_string(_ word: String?) -> String? {
 
 struct PostView_Previews: PreviewProvider {
     static var previews: some View {
-        PostView(action: .posting(.none), damus_state: test_damus_state())
+        PostView(action: .posting(.none), damus_state: test_damus_state)
     }
 }
 

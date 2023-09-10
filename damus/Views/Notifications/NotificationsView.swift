@@ -195,7 +195,7 @@ struct NotificationsView: View {
 
 struct NotificationsView_Previews: PreviewProvider {
     static var previews: some View {
-        NotificationsView(state: test_damus_state(), notifications: NotificationsModel(), filter: NotificationFilter())
+        NotificationsView(state: test_damus_state, notifications: NotificationsModel(), filter: NotificationFilter())
     }
 }
 

@@ -140,6 +140,6 @@ struct ProfileName: View {
 
 struct ProfileName_Previews: PreviewProvider {
     static var previews: some View {
-        ProfileName(pubkey: test_damus_state().pubkey, damus: test_damus_state())
+        ProfileName(pubkey: test_damus_state.pubkey, damus: test_damus_state)
     }
 }

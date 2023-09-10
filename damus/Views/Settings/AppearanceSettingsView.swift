@@ -98,6 +98,6 @@ struct AppearanceSettingsView: View {
 
 struct TextFormattingSettings_Previews: PreviewProvider {
     static var previews: some View {
-        AppearanceSettingsView(damus_state: test_damus_state(), settings: UserSettingsStore())
+        AppearanceSettingsView(damus_state: test_damus_state, settings: UserSettingsStore())
     }
 }

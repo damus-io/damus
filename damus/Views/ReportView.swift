@@ -129,7 +129,7 @@ struct ReportView: View {
 
 struct ReportView_Previews: PreviewProvider {
     static var previews: some View {
-        let ds = test_damus_state()
+        let ds = test_damus_state
         VStack {
         
             ReportView(postbox: ds.postbox, target: ReportTarget.user(test_pubkey), keypair: test_keypair.to_full()!)

@@ -611,8 +611,8 @@ func trim_prefix(_ str: String) -> String {
 
 struct NoteContentView_Previews: PreviewProvider {
     static var previews: some View {
-        let state = test_damus_state()
-        let state2 = test_damus_state()
+        let state = test_damus_state
+        let state2 = test_damus_state
 
         Group {
             VStack {

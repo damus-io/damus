@@ -53,6 +53,6 @@ struct UserRelaysView: View {
 
 struct UserRelaysView_Previews: PreviewProvider {
     static var previews: some View {
-        UserRelaysView(state: test_damus_state(), relays: [])
+        UserRelaysView(state: test_damus_state, relays: [])
     }
 }

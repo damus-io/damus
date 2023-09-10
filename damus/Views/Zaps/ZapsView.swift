@@ -40,6 +40,6 @@ struct ZapsView: View {
 
 struct ZapsView_Previews: PreviewProvider {
     static var previews: some View {
-        ZapsView(state: test_damus_state(), target: .profile(test_pubkey))
+        ZapsView(state: test_damus_state, target: .profile(test_pubkey))
     }
 }

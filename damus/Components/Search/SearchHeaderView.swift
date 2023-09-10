@@ -124,9 +124,9 @@ func is_following_hashtag(contacts: NostrEvent?, hashtag: String) -> Bool {
 struct SearchHeaderView_Previews: PreviewProvider {
     static var previews: some View {
         VStack(alignment: .leading) {
-            SearchHeaderView(state: test_damus_state(), described: .hashtag("damus"))
+            SearchHeaderView(state: test_damus_state, described: .hashtag("damus"))
 
-            SearchHeaderView(state: test_damus_state(), described: .unknown)
+            SearchHeaderView(state: test_damus_state, described: .unknown)
         }
     }
 }

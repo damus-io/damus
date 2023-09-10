@@ -153,7 +153,7 @@ struct ConfigView: View {
 struct ConfigView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            ConfigView(state: test_damus_state())
+            ConfigView(state: test_damus_state)
         }
     }
 }

@@ -29,6 +29,6 @@ struct SignalView: View {
 
 struct SignalView_Previews: PreviewProvider {
     static var previews: some View {
-        SignalView(state: test_damus_state(), signal: SignalModel(signal: 5, max_signal: 10))
+        SignalView(state: test_damus_state, signal: SignalModel(signal: 5, max_signal: 10))
     }
 }

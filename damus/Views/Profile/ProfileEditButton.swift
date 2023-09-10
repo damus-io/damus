@@ -42,7 +42,7 @@ struct ProfileEditButton: View {
 struct ProfileEditButton_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            ProfileEditButton(damus_state: test_damus_state())
+            ProfileEditButton(damus_state: test_damus_state)
         }
     }
 }
