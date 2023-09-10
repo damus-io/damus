@@ -24,6 +24,9 @@ struct ImageView: View {
                 Capsule()
                     .fill(index == selectedIndex ? Color(UIColor.label) : Color.secondary)
                     .frame(width: 7, height: 7)
+                    .onTapGesture {
+                        selectedIndex = index
+                    }
             }
         }
         .padding()
