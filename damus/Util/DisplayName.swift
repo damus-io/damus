@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum DisplayName {
+enum DisplayName: Equatable {
     case both(username: String, displayName: String)
     case one(String)
     

@@ -20,8 +20,7 @@ struct EditMetadataView: View {
     @State var name: String
     @State var ln: String
     @State var website: String
-    let profile: Profile?
-    
+
     @Environment(\.dismiss) var dismiss
 
     @State var confirm_ln_address: Bool = false
@@ -31,9 +30,8 @@ struct EditMetadataView: View {
     
     init(damus_state: DamusState) {
         self.damus_state = damus_state
-        let data = damus_state.profiles.lookup(id: damus_state.pubkey)
-        self.profile = data
-        
+        let data = damus_state.profiles.lookup(id: damus_state.pubkey).unsafeUnownedValue
+
         _name = State(initialValue: data?.name ?? "")
         _display_name = State(initialValue: data?.display_name ?? "")
         _about = State(initialValue: data?.about ?? "")

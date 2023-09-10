@@ -83,7 +83,8 @@ struct SideMenuView: View {
     }
 
     var TopProfile: some View {
-        let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
+        let profile_txn = damus_state.profiles.lookup(id: damus_state.pubkey)
+        let profile = profile_txn.unsafeUnownedValue
         return VStack(alignment: .leading, spacing: verticalSpacing) {
             HStack {
                 ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)

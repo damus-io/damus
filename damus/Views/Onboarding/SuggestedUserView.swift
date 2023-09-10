@@ -12,14 +12,10 @@ struct SuggestedUser {
     let name: String
     let about: String
     let pfp: URL
-    let profile: Profile
 
-    init?(profile: Profile, pubkey: Pubkey) {
-
-        guard let name = profile.name,
-                let about = profile.about,
-                let picture = profile.picture,
-                let pfpURL = URL(string: picture) else {
+    init?(name: String?, about: String?, picture: String?, pubkey: Pubkey) {
+        guard let name, let about, let picture,
+              let pfpURL = URL(string: picture) else {
             return nil
         }
 
@@ -27,12 +23,10 @@ struct SuggestedUser {
         self.name = name
         self.about = about
         self.pfp = pfpURL
-        self.profile = profile
     }
 }
 
 struct SuggestedUserView: View {
-
     let user: SuggestedUser
     let damus_state: DamusState
 
@@ -47,7 +41,7 @@ struct SuggestedUserView: View {
                                 disable_animation: false)
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    ProfileName(pubkey: user.pubkey, profile: user.profile, damus: damus_state)
+                    ProfileName(pubkey: user.pubkey, damus: damus_state)
                 }
                 Text(user.about)
                     .lineLimit(3)
@@ -62,9 +56,10 @@ struct SuggestedUserView: View {
 
 struct SuggestedUserView_Previews: PreviewProvider {
     static var previews: some View {
-        let profile = Profile(name: "klabo", about: "A person who likes nostr a lot and I like to tell people about myself in very long-winded ways that push the limits of UI and almost break things", picture: "https://primal.b-cdn.net/media-cache?s=m&a=1&u=https%3A%2F%2Fpbs.twimg.com%2Fprofile_images%2F1599994711430742017%2F33zLk9Wi_400x400.jpg")
+        let pfp = "https://primal.b-cdn.net/media-cache?s=m&a=1&u=https%3A%2F%2Fpbs.twimg.com%2Fprofile_images%2F1599994711430742017%2F33zLk9Wi_400x400.jpg"
+        let profile = Profile(name: "klabo", about: "A person who likes nostr a lot and I like to tell people about myself in very long-winded ways that push the limits of UI and almost break things", picture: pfp)
 
-        let user = SuggestedUser(profile: profile, pubkey: test_pubkey)!
+        let user = SuggestedUser(name: "klabo", about: "name", picture: "about", pubkey: test_pubkey)!
         List {
             SuggestedUserView(user: user, damus_state: test_damus_state())
         }

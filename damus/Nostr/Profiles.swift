@@ -76,18 +76,25 @@ class Profiles {
         profile_data(pubkey).zapper
     }
 
-    func lookup_with_timestamp(_ pubkey: Pubkey) -> ProfileRecord? {
+    func lookup_with_timestamp(_ pubkey: Pubkey) -> NdbTxn<ProfileRecord?> {
         return ndb.lookup_profile(pubkey)
     }
 
-    func lookup(id: Pubkey) -> Profile? {
-        return ndb.lookup_profile(id)?.profile
+    func lookup_by_key(key: ProfileKey) -> NdbTxn<ProfileRecord?> {
+        return ndb.lookup_profile_by_key(key: key)
+    }
+
+    func lookup(id: Pubkey) -> NdbTxn<Profile?> {
+        return ndb.lookup_profile(id).map({ pr in pr?.profile })
+    }
+
+    func lookup_key_by_pubkey(_ pubkey: Pubkey) -> ProfileKey? {
+        return ndb.lookup_profile_key(pubkey)
     }
 
     func has_fresh_profile(id: Pubkey) -> Bool {
-        var profile: Profile?
-        guard let profile = lookup_with_timestamp(id) else { return false }
-        return Date.now.timeIntervalSince(Date(timeIntervalSince1970: Double(profile.receivedAt))) < Profiles.db_freshness_threshold
+        guard let recv = lookup_with_timestamp(id).unsafeUnownedValue?.receivedAt else { return false }
+        return Date.now.timeIntervalSince(Date(timeIntervalSince1970: Double(recv))) < Profiles.db_freshness_threshold
     }
 }
 

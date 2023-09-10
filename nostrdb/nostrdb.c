@@ -264,7 +264,9 @@ int ndb_get_tsid(MDB_txn *txn, struct ndb_lmdb *lmdb, enum ndb_dbs db,
 	int success = 0;
 	struct ndb_tsid tsid;
 
+	// position at the most recent
 	ndb_tsid_high(&tsid, id);
+
 	k.mv_data = &tsid;
 	k.mv_size = sizeof(tsid);
 
@@ -341,32 +343,44 @@ static void *ndb_lookup_tsid(struct ndb_txn *txn, enum ndb_dbs ind,
 	return res;
 }
 
-void *ndb_get_profile_by_pubkey(struct ndb_txn *txn, const unsigned char *pk, size_t *len, uint32_t *key)
+void *ndb_get_profile_by_pubkey(struct ndb_txn *txn, const unsigned char *pk, size_t *len, uint64_t *key)
 {
 	return ndb_lookup_tsid(txn, NDB_DB_PROFILE_PK, NDB_DB_PROFILE, pk, len, key);
 }
 
-struct ndb_note *ndb_get_note_by_id(struct ndb_txn *txn, const unsigned char *id, size_t *len, uint32_t *key)
+struct ndb_note *ndb_get_note_by_id(struct ndb_txn *txn, const unsigned char *id, size_t *len, uint64_t *key)
 {
 	return ndb_lookup_tsid(txn, NDB_DB_NOTE_ID, NDB_DB_NOTE, id, len, key);
 }
 
-uint32_t ndb_get_notekey_by_id(struct ndb_txn *txn, const unsigned char *id)
+static inline uint64_t ndb_get_indexkey_by_id(struct ndb_txn *txn,
+					      enum ndb_dbs db,
+					      const unsigned char *id)
 {
 	MDB_val k;
 
-	if (!ndb_get_tsid(txn->mdb_txn, &txn->ndb->lmdb, NDB_DB_NOTE_ID, id, &k))
+	if (!ndb_get_tsid(txn->mdb_txn, &txn->ndb->lmdb, db, id, &k))
 		return 0;
 
 	return *(uint32_t*)k.mv_data;
 }
 
-struct ndb_note *ndb_get_note_by_key(struct ndb_txn *txn, uint32_t key, size_t *len)
+uint64_t ndb_get_notekey_by_id(struct ndb_txn *txn, const unsigned char *id)
+{
+	return ndb_get_indexkey_by_id(txn, NDB_DB_NOTE_ID, id);
+}
+
+uint64_t ndb_get_profilekey_by_pubkey(struct ndb_txn *txn, const unsigned char *id)
+{
+	return ndb_get_indexkey_by_id(txn, NDB_DB_PROFILE_PK, id);
+}
+
+struct ndb_note *ndb_get_note_by_key(struct ndb_txn *txn, uint64_t key, size_t *len)
 {
 	return ndb_lookup_by_key(txn, key, NDB_DB_NOTE, len);
 }
 
-void *ndb_get_profile_by_key(struct ndb_txn *txn, uint32_t key, size_t *len)
+void *ndb_get_profile_by_key(struct ndb_txn *txn, uint64_t key, size_t *len)
 {
 	return ndb_lookup_by_key(txn, key, NDB_DB_PROFILE, len);
 }

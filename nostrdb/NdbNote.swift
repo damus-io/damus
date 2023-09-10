@@ -38,6 +38,7 @@ class NdbNote: Encodable, Equatable, Hashable {
     // we can have owned notes, but we can also have lmdb virtual-memory mapped notes so its optional
     private let owned: Bool
     let count: Int
+    let key: NoteKey?
     let note: UnsafeMutablePointer<ndb_note>
 
     // cached stuff (TODO: remove these)
@@ -48,10 +49,11 @@ class NdbNote: Encodable, Equatable, Hashable {
         return NdbNote.owned_from_json_cstr(json: content_raw, json_len: content_len)
     }()
 
-    init(note: UnsafeMutablePointer<ndb_note>, owned_size: Int?) {
+    init(note: UnsafeMutablePointer<ndb_note>, owned_size: Int?, key: NoteKey?) {
         self.note = note
         self.owned = owned_size != nil
         self.count = owned_size ?? 0
+        self.key = key
 
         #if DEBUG_NOTE_SIZE
         if let owned_size {
@@ -218,6 +220,7 @@ class NdbNote: Encodable, Equatable, Hashable {
         }
 
         self.note = r.assumingMemoryBound(to: ndb_note.self)
+        self.key = nil
     }
 
     static func owned_from_json(json: String, bufsize: Int = 2 << 18) -> NdbNote? {
@@ -245,7 +248,7 @@ class NdbNote: Encodable, Equatable, Hashable {
         guard let note_data = realloc(data, Int(len)) else { return nil }
         let new_note = note_data.assumingMemoryBound(to: ndb_note.self)
 
-        return NdbNote(note: new_note, owned_size: Int(len))
+        return NdbNote(note: new_note, owned_size: Int(len), key: nil)
     }
 }
 

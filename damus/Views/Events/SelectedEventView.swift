@@ -35,11 +35,9 @@ struct SelectedEventView: View {
     
     var body: some View {
         HStack(alignment: .top) {
-            let profile = damus.profiles.lookup(id: pubkey)
-
             VStack(alignment: .leading) {
                 HStack {
-                    EventProfile(damus_state: damus, pubkey: pubkey, profile: profile, size: .normal)
+                    EventProfile(damus_state: damus, pubkey: pubkey, size: .normal)
                     
                     Spacer()
                     
@@ -51,7 +49,7 @@ struct SelectedEventView: View {
                 .lineLimit(1)
 
                 if event_is_reply(event.event_refs(damus.keypair)) {
-                    ReplyDescription(event: event, replying_to: replying_to, profiles: damus.profiles)
+                    ReplyDescription(event: event, replying_to: replying_to, ndb: damus.ndb)
                         .padding(.horizontal)
                 }
                 

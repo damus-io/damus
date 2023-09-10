@@ -49,44 +49,130 @@ class Ndb {
         self.ndb = ndb
     }
 
-    func lookup_note_by_key(_ key: UInt64) -> NdbNote? {
-        guard let note_p = ndb_get_note_by_key(ndb.ndb, key, nil) else {
+    func lookup_note_by_key_with_txn<Y>(_ key: NoteKey, txn: NdbTxn<Y>) -> NdbNote? {
+        guard let note_p = ndb_get_note_by_key(&txn.txn, key, nil) else {
             return nil
         }
-        return NdbNote(note: note_p, owned_size: nil)
+        return NdbNote(note: note_p, owned_size: nil, key: key)
     }
 
-    func lookup_note(_ id: NoteId) -> NdbNote? {
-        id.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> NdbNote? in
-            guard let baseAddress = ptr.baseAddress,
-                  let note_p = ndb_get_note_by_id(ndb.ndb, baseAddress, nil) else {
-                return nil
-            }
-            return NdbNote(note: note_p, owned_size: nil)
+    func lookup_note_by_key(_ key: NoteKey) -> NdbTxn<NdbNote?> {
+        return NdbTxn(ndb: self) { txn in
+            lookup_note_by_key_with_txn(key, txn: txn)
         }
     }
 
-    func lookup_profile(_ pubkey: Pubkey) -> ProfileRecord? {
+    private func lookup_profile_by_key_inner<Y>(_ key: ProfileKey, txn: NdbTxn<Y>) -> ProfileRecord? {
+        var size: Int = 0
+        guard let profile_p = ndb_get_profile_by_key(&txn.txn, key, &size) else {
+            return nil
+        }
+
+        return profile_flatbuf_to_record(ptr: profile_p, size: size, key: key)
+    }
+
+    private func profile_flatbuf_to_record(ptr: UnsafeMutableRawPointer, size: Int, key: UInt64) -> ProfileRecord? {
+        do {
+            var buf = ByteBuffer(assumingMemoryBound: ptr, capacity: size)
+            let rec: NdbProfileRecord = try getDebugCheckedRoot(byteBuffer: &buf)
+            return ProfileRecord(data: rec, key: key)
+        } catch {
+            // Handle error appropriately
+            print("UNUSUAL: \(error)")
+            return nil
+        }
+    }
+
+    private func lookup_note_with_txn_inner<Y>(id: NoteId, txn: NdbTxn<Y>) -> NdbNote? {
+        return id.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> NdbNote? in
+            var key: UInt64 = 0
+            guard let baseAddress = ptr.baseAddress,
+                  let note_p = ndb_get_note_by_id(&txn.txn, baseAddress, nil, &key) else {
+                return nil
+            }
+            return NdbNote(note: note_p, owned_size: nil, key: key)
+        }
+    }
+
+    private func lookup_profile_with_txn_inner<Y>(pubkey: Pubkey, txn: NdbTxn<Y>) -> ProfileRecord? {
         return pubkey.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> ProfileRecord? in
             var size: Int = 0
+            var key: UInt64 = 0
 
             guard let baseAddress = ptr.baseAddress,
-                  let profile_p = ndb_get_profile_by_pubkey(ndb.ndb, baseAddress, &size)
+                  let profile_p = ndb_get_profile_by_pubkey(&txn.txn, baseAddress, &size, &key)
             else {
                 return nil
             }
 
-            do {
-                var buf = ByteBuffer(assumingMemoryBound: profile_p, capacity: size)
-                let rec: NdbProfileRecord = try getDebugCheckedRoot(byteBuffer: &buf)
-                return ProfileRecord(data: rec)
-            } catch {
-                // Handle error appropriately
-                print("UNUSUAL: \(error)")
-                return nil
-            }
+            return profile_flatbuf_to_record(ptr: profile_p, size: size, key: key)
         }
     }
+
+    func lookup_profile_by_key_with_txn<Y>(key: ProfileKey, txn: NdbTxn<Y>) -> ProfileRecord? {
+        lookup_profile_by_key_inner(key, txn: txn)
+    }
+
+    func lookup_profile_by_key(key: ProfileKey) -> NdbTxn<ProfileRecord?> {
+        return NdbTxn(ndb: self) { txn in
+            lookup_profile_by_key_inner(key, txn: txn)
+        }
+    }
+
+    func lookup_note_with_txn<Y>(id: NoteId, txn: NdbTxn<Y>) -> NdbNote? {
+        lookup_note_with_txn_inner(id: id, txn: txn)
+    }
+
+    func lookup_profile_key(_ pubkey: Pubkey) -> ProfileKey? {
+        return NdbTxn(ndb: self) { txn in
+            lookup_profile_key_with_txn(pubkey, txn: txn)
+        }.value
+    }
+
+    func lookup_profile_key_with_txn<Y>(_ pubkey: Pubkey, txn: NdbTxn<Y>) -> ProfileKey? {
+        return pubkey.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> NoteKey? in
+            guard let p = ptr.baseAddress else { return nil }
+            let r = ndb_get_profilekey_by_pubkey(&txn.txn, p)
+            if r == 0 {
+                return nil
+            }
+            return r
+        }
+    }
+
+    func lookup_note_key_with_txn<Y>(_ id: NoteId, txn: NdbTxn<Y>) -> NoteKey? {
+        return id.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> NoteKey? in
+            guard let p = ptr.baseAddress else {
+                return nil
+            }
+            let r = ndb_get_notekey_by_id(&txn.txn, p)
+            if r == 0 {
+                return nil
+            }
+            return r
+        }
+    }
+
+    func lookup_note_key(_ id: NoteId) -> NoteKey? {
+        NdbTxn(ndb: self, with: { txn in lookup_note_key_with_txn(id, txn: txn) }).value
+    }
+
+    func lookup_note(_ id: NoteId) -> NdbTxn<NdbNote?> {
+        return NdbTxn(ndb: self) { txn in
+            lookup_note_with_txn_inner(id: id, txn: txn)
+        }
+    }
+
+    func lookup_profile(_ pubkey: Pubkey) -> NdbTxn<ProfileRecord?> {
+        return NdbTxn(ndb: self) { txn in
+            lookup_profile_with_txn_inner(pubkey: pubkey, txn: txn)
+        }
+    }
+
+    func lookup_profile_with_txn<Y>(_ pubkey: Pubkey, txn: NdbTxn<Y>) -> ProfileRecord? {
+        lookup_profile_with_txn_inner(pubkey: pubkey, txn: txn)
+    }
+
     func process_event(_ str: String) -> Bool {
         return str.withCString { cstr in
             return ndb_process_event(ndb.ndb, cstr, Int32(str.utf8.count)) != 0
@@ -106,7 +192,7 @@ class Ndb {
 
 #if DEBUG
 func getDebugCheckedRoot<T: FlatBufferObject & Verifiable>(byteBuffer: inout ByteBuffer) throws -> T {
-    return try getCheckedRoot(byteBuffer: &byteBuffer)
+    return try getRoot(byteBuffer: &byteBuffer)
 }
 #else
 func getDebugCheckedRoot<T: FlatBufferObject>(byteBuffer: inout ByteBuffer) throws -> T {

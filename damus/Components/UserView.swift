@@ -37,8 +37,7 @@ struct UserView: View {
                 ProfilePicView(pubkey: pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
             
                 VStack(alignment: .leading) {
-                    let profile = damus_state.profiles.lookup(id: pubkey)
-                    ProfileName(pubkey: pubkey, profile: profile, damus: damus_state, show_nip5_domain: false)
+                    ProfileName(pubkey: pubkey, damus: damus_state, show_nip5_domain: false)
                     if let about_text {
                         about_text
                             .lineLimit(3)
