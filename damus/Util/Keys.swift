@@ -30,8 +30,8 @@ struct FullKeypair: Equatable {
 struct Keypair {
     let pubkey: Pubkey
     let privkey: Privkey?
-    let pubkey_bech32: String
-    let privkey_bech32: String?
+    //let pubkey_bech32: String
+    //let privkey_bech32: String?
 
     static var empty: Keypair {
         Keypair(pubkey: .empty, privkey: nil)
@@ -52,8 +52,8 @@ struct Keypair {
     init(pubkey: Pubkey, privkey: Privkey?) {
         self.pubkey = pubkey
         self.privkey = privkey
-        self.pubkey_bech32 = pubkey.npub
-        self.privkey_bech32 = privkey?.nsec
+        //self.pubkey_bech32 = pubkey.npub
+        //self.privkey_bech32 = privkey?.nsec
     }
 }
 
