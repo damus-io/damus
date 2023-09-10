@@ -85,6 +85,6 @@ struct ImageView: View {
 struct ImageView_Previews: PreviewProvider {
     static var previews: some View {
         let url: MediaUrl = .image(URL(string: "https://jb55.com/red-me.jpg")!)
-        ImageView(video_controller: test_damus_state().video, urls: [url], disable_animation: false)
+        ImageView(video_controller: test_damus_state.video, urls: [url], disable_animation: false)
     }
 }

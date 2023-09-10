@@ -295,7 +295,7 @@ struct QRCodeView: View {
 
 struct QRCodeView_Previews: PreviewProvider {
     static var previews: some View {
-        QRCodeView(damus_state: test_damus_state(), pubkey: test_note.pubkey)
+        QRCodeView(damus_state: test_damus_state, pubkey: test_note.pubkey)
     }
 }
 

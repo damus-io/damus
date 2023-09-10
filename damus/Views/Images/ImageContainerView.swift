@@ -57,6 +57,6 @@ let test_image_url = URL(string: "https://jb55.com/red-me.jpg")!
 
 struct ImageContainerView_Previews: PreviewProvider {
     static var previews: some View {
-        ImageContainerView(video_controller: test_damus_state().video, url: .image(test_image_url), disable_animation: false)
+        ImageContainerView(video_controller: test_damus_state.video, url: .image(test_image_url), disable_animation: false)
     }
 }

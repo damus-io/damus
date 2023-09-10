@@ -206,7 +206,7 @@ struct EditMetadataView: View {
 
 struct EditMetadataView_Previews: PreviewProvider {
     static var previews: some View {
-        EditMetadataView(damus_state: test_damus_state())
+        EditMetadataView(damus_state: test_damus_state)
     }
 }
 

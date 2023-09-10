@@ -61,7 +61,7 @@ struct SuggestedUserView_Previews: PreviewProvider {
 
         let user = SuggestedUser(name: "klabo", about: "name", picture: "about", pubkey: test_pubkey)!
         List {
-            SuggestedUserView(user: user, damus_state: test_damus_state())
+            SuggestedUserView(user: user, damus_state: test_damus_state)
         }
     }
 }

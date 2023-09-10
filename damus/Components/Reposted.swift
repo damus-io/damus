@@ -25,7 +25,7 @@ struct Reposted: View {
 
 struct Reposted_Previews: PreviewProvider {
     static var previews: some View {
-        let test_state = test_damus_state()
+        let test_state = test_damus_state
         Reposted(damus: test_state, pubkey: test_state.pubkey)
     }
 }

@@ -103,7 +103,7 @@ struct ThreadView: View {
 
 struct ThreadView_Previews: PreviewProvider {
     static var previews: some View {
-        let state = test_damus_state()
+        let state = test_damus_state
         let thread = ThreadModel(event: test_note, damus_state: state)
         ThreadView(state: state, thread: thread)
     }

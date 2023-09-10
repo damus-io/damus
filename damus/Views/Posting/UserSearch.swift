@@ -72,7 +72,7 @@ struct UserSearch_Previews: PreviewProvider {
     @State static var newCursorIndex: Int?
 
     static var previews: some View {
-        UserSearch(damus_state: test_damus_state(), search: search, focusWordAttributes: $word, newCursorIndex: $newCursorIndex, post: $post)
+        UserSearch(damus_state: test_damus_state, search: search, focusWordAttributes: $word, newCursorIndex: $newCursorIndex, post: $post)
     }
 }
 

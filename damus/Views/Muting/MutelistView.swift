@@ -58,6 +58,6 @@ func get_mutelist_users(_ mutelist: NostrEvent?) -> Array<Pubkey> {
 
 struct MutelistView_Previews: PreviewProvider {
     static var previews: some View {
-        MutelistView(damus_state: test_damus_state(), users: [test_note.pubkey, test_note.pubkey])
+        MutelistView(damus_state: test_damus_state, users: [test_note.pubkey, test_note.pubkey])
     }
 }

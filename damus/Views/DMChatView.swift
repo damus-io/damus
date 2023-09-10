@@ -182,7 +182,7 @@ struct DMChatView_Previews: PreviewProvider {
 
         let model = DirectMessageModel(events: [ev], our_pubkey: test_pubkey, pubkey: test_pubkey)
 
-        DMChatView(damus_state: test_damus_state(), dms: model)
+        DMChatView(damus_state: test_damus_state, dms: model)
     }
 }
 

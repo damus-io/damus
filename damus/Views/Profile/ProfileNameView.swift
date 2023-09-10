@@ -126,9 +126,9 @@ struct ProfileNameView: View {
 struct ProfileNameView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
-            ProfileNameView(pubkey: test_note.pubkey, damus: test_damus_state())
+            ProfileNameView(pubkey: test_note.pubkey, damus: test_damus_state)
 
-            ProfileNameView(pubkey: test_note.pubkey, damus: test_damus_state())
+            ProfileNameView(pubkey: test_note.pubkey, damus: test_damus_state)
         }
     }
 }

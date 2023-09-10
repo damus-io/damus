@@ -134,7 +134,7 @@ struct SearchHomeView: View {
 
 struct SearchHomeView_Previews: PreviewProvider {
     static var previews: some View {
-        let state = test_damus_state()
+        let state = test_damus_state
         SearchHomeView(damus_state: state, model: SearchHomeModel(damus_state: state))
     }
 }

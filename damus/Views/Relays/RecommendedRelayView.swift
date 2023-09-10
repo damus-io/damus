@@ -128,6 +128,6 @@ struct RecommendedRelayView: View {
 
 struct RecommendedRelayView_Previews: PreviewProvider {
     static var previews: some View {
-        RecommendedRelayView(damus: test_damus_state(), relay: "wss://relay.damus.io", user_recommended: true)
+        RecommendedRelayView(damus: test_damus_state, relay: "wss://relay.damus.io", user_recommended: true)
     }
 }

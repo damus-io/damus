@@ -158,6 +158,6 @@ struct AddRelayView_Previews: PreviewProvider {
     @State static var relay: String = ""
     
     static var previews: some View {
-        AddRelayView(state: test_damus_state())
+        AddRelayView(state: test_damus_state)
     }
 }

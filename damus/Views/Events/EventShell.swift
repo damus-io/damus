@@ -137,11 +137,11 @@ struct EventShell_Previews: PreviewProvider {
 
     static var previews: some View {
         VStack {
-            EventShell(state: test_damus_state(), event: test_note, options: [.no_action_bar]) {
+            EventShell(state: test_damus_state, event: test_note, options: [.no_action_bar]) {
                 Text(verbatim: "Hello")
             }
 
-            EventShell(state: test_damus_state(), event: test_note, options: [.no_action_bar, .wide]) {
+            EventShell(state: test_damus_state, event: test_note, options: [.no_action_bar, .wide]) {
                 Text(verbatim: "Hello")
             }
         }

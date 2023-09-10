@@ -11,14 +11,15 @@ class Ndb {
     let ndb: ndb_t
 
     static var db_path: String {
-        (FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.absoluteString.replacingOccurrences(of: "file://", with: ""))!
+        let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.absoluteString
+        return remove_file_prefix(path!)
     }
 
     static var empty: Ndb {
         Ndb(ndb: ndb_t(ndb: nil))
     }
 
-    init?() {
+    init?(path: String? = nil) {
         //try? FileManager.default.removeItem(atPath: Ndb.db_path + "/lock.mdb")
         //try? FileManager.default.removeItem(atPath: Ndb.db_path + "/data.mdb")
 
@@ -27,7 +28,9 @@ class Ndb {
         let ingest_threads: Int32 = 4
         var mapsize: Int = 1024 * 1024 * 1024 * 32
 
-        let ok = Ndb.db_path.withCString { testdir in
+        let path = path.map(remove_file_prefix) ?? Ndb.db_path
+
+        let ok = path.withCString { testdir in
             var ok = false
             while !ok && mapsize > 1024 * 1024 * 700 {
                 ok = ndb_init(&ndb_p, testdir, mapsize, ingest_threads) != 0
@@ -199,3 +202,8 @@ func getDebugCheckedRoot<T: FlatBufferObject>(byteBuffer: inout ByteBuffer) thro
     return getRoot(byteBuffer: &byteBuffer)
 }
 #endif
+
+func remove_file_prefix(_ str: String) -> String {
+    return str.replacingOccurrences(of: "file://", with: "")
+}
+

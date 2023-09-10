@@ -69,8 +69,9 @@ func determine_reacting_to(our_pubkey: Pubkey, ev: NostrEvent?) -> ReactingTo {
 }
 
 func event_author_name(profiles: Profiles, pubkey: Pubkey) -> String {
-    let alice_prof_txn = profiles.lookup(id: pubkey).unsafeUnownedValue
-    return Profile.displayName(profile: alice_prof_txn, pubkey: pubkey).username.truncate(maxLength: 50)
+    return profiles.lookup(id: pubkey).map({ profile in
+        Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
+    }).value
 }
 
 func event_group_unique_pubkeys(profiles: Profiles, group: EventGroupType) -> [Pubkey] {
@@ -261,11 +262,11 @@ struct EventGroupView: View {
 struct EventGroupView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
-            EventGroupView(state: test_damus_state(), event: test_note, group: .repost(test_event_group))
+            EventGroupView(state: test_damus_state, event: test_note, group: .repost(test_event_group))
                 .frame(height: 200)
                 .padding()
             
-            EventGroupView(state: test_damus_state(), event: test_note, group: .reaction(test_event_group))
+            EventGroupView(state: test_damus_state, event: test_note, group: .reaction(test_event_group))
                 .frame(height: 200)
                 .padding()
         }

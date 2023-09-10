@@ -93,13 +93,13 @@ struct ReplyView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
             ReplyView(replying_to: test_note,
-                      damus: test_damus_state(),
+                      damus: test_damus_state,
                       original_pubkeys: [],
                       filtered_pubkeys: .constant([]))
                 .frame(height: 300)
 
             ReplyView(replying_to: test_longform_event.event,
-                      damus: test_damus_state(),
+                      damus: test_damus_state,
                       original_pubkeys: [],
                       filtered_pubkeys: .constant([]))
                 .frame(height: 300)

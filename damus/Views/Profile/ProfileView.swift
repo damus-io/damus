@@ -505,7 +505,7 @@ struct ProfileView: View {
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        let ds = test_damus_state()
+        let ds = test_damus_state
         ProfileView(damus_state: ds, pubkey: ds.pubkey)
     }
 }

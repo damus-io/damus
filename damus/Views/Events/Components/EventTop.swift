@@ -40,6 +40,6 @@ struct EventTop: View {
 
 struct EventTop_Previews: PreviewProvider {
     static var previews: some View {
-        EventTop(state: test_damus_state(), event: test_note, pubkey: test_note.pubkey, is_anon: false)
+        EventTop(state: test_damus_state, event: test_note, pubkey: test_note.pubkey, is_anon: false)
     }
 }

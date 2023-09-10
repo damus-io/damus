@@ -96,7 +96,7 @@ func use_nip05_color(pubkey: Pubkey, contacts: Contacts) -> Bool {
 
 struct NIP05Badge_Previews: PreviewProvider {
     static var previews: some View {
-        let test_state = test_damus_state()
+        let test_state = test_damus_state
         VStack {
             NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true, profiles: test_state.profiles)
 
