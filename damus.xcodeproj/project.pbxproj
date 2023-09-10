@@ -401,6 +401,7 @@
 		5C6E1DAD2A193EC2008FC15A /* GradientButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6E1DAC2A193EC2008FC15A /* GradientButtonStyle.swift */; };
 		5C6E1DAF2A194075008FC15A /* PinkGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6E1DAE2A194075008FC15A /* PinkGradient.swift */; };
 		5CC868DD2AA29B3200FB22BA /* NeutralButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC868DC2AA29B3200FB22BA /* NeutralButtonStyle.swift */; };
+		5CF2DCCA2AA3A49B00984B8D /* TLDExtract in Frameworks */ = {isa = PBXBuildFile; productRef = 5CF2DCC92AA3A49B00984B8D /* TLDExtract */; };
 		5CF2DCCE2AABE1A500984B8D /* DamusLightGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF2DCCD2AABE1A500984B8D /* DamusLightGradient.swift */; };
 		5CF72FC229B9142F00124A13 /* ShareAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF72FC129B9142F00124A13 /* ShareAction.swift */; };
 		6439E014296790CF0020672B /* ProfilePicImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6439E013296790CF0020672B /* ProfilePicImageView.swift */; };
@@ -1132,6 +1133,7 @@
 				4C06670428FC7EC500038D2A /* Kingfisher in Frameworks */,
 				4C649881286E0EE300EAE2B3 /* secp256k1 in Frameworks */,
 				4C27C9322A64766F007DBC75 /* MarkdownUI in Frameworks */,
+				5CF2DCCA2AA3A49B00984B8D /* TLDExtract in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2310,6 +2312,7 @@
 				4C649880286E0EE300EAE2B3 /* secp256k1 */,
 				4C06670328FC7EC500038D2A /* Kingfisher */,
 				4C27C9312A64766F007DBC75 /* MarkdownUI */,
+				5CF2DCC92AA3A49B00984B8D /* TLDExtract */,
 			);
 			productName = damus;
 			productReference = 4CE6DEE327F7A08100C66700 /* damus.app */;
@@ -2417,6 +2420,7 @@
 				4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				4CCF9AB02A1FE80B00E03CFB /* XCRemoteSwiftPackageReference "GSPlayer" */,
 				4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
+				5CF2DCC82AA3A49B00984B8D /* XCRemoteSwiftPackageReference "TLDExtractSwift" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -3424,6 +3428,14 @@
 				minimumVersion = 0.2.26;
 			};
 		};
+		5CF2DCC82AA3A49B00984B8D /* XCRemoteSwiftPackageReference "TLDExtractSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/MarcoEidinger/TLDExtractSwift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -3441,6 +3453,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
 			productName = secp256k1;
+		};
+		5CF2DCC92AA3A49B00984B8D /* TLDExtract */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5CF2DCC82AA3A49B00984B8D /* XCRemoteSwiftPackageReference "TLDExtractSwift" */;
+			productName = TLDExtract;
 		};
 /* End XCSwiftPackageProductDependency section */
 

@@ -33,6 +33,15 @@
       "state" : {
         "revision" : "76bb7971da7fbf429de1c84f1244adf657242fee"
       }
+    },
+    {
+      "identity" : "tldextractswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/MarcoEidinger/TLDExtractSwift",
+      "state" : {
+        "revision" : "d4cbc911ab087e34439879df7f0314075886ae21",
+        "version" : "2.3.5"
+      }
     }
   ],
   "version" : 2
