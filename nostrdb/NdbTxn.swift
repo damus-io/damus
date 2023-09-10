@@ -17,7 +17,7 @@ class NdbTxn<T> {
     private var val: T!
     var moved: Bool
 
-    init(ndb: Ndb, with: (NdbTxn<T>) -> T) {
+    init(ndb: Ndb, with: (NdbTxn<T>) -> T = { _ in () }) {
         self.txn = ndb_txn()
         #if TXNDEBUG
         txn_count += 1

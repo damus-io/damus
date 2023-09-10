@@ -166,6 +166,7 @@ void ndb_end_query(struct ndb_txn *);
 void *ndb_get_profile_by_pubkey(struct ndb_txn *txn, const unsigned char *pubkey, size_t *len, uint64_t *primkey);
 void *ndb_get_profile_by_key(struct ndb_txn *txn, uint64_t key, size_t *len);
 uint64_t ndb_get_notekey_by_id(struct ndb_txn *txn, const unsigned char *id);
+uint64_t ndb_get_profilekey_by_pubkey(struct ndb_txn *txn, const unsigned char *id);
 struct ndb_note *ndb_get_note_by_id(struct ndb_txn *txn, const unsigned char *id, size_t *len, uint64_t *primkey);
 struct ndb_note *ndb_get_note_by_key(struct ndb_txn *txn, uint64_t key, size_t *len);
 void ndb_destroy(struct ndb *);

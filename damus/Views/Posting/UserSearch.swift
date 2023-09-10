@@ -7,15 +7,6 @@
 
 import SwiftUI
 
-struct SearchedUser: Identifiable {
-    let profile: Profile?
-    let pubkey: Pubkey
-
-    var id: Pubkey {
-        return pubkey
-    }
-}
-
 struct UserSearch: View {
     let damus_state: DamusState
     let search: String
@@ -25,13 +16,14 @@ struct UserSearch: View {
     @Binding var post: NSMutableAttributedString
     @EnvironmentObject var tagModel: TagModel
     
-    var users: [SearchedUser] {
+    var users: [Pubkey] {
         return search_profiles(profiles: damus_state.profiles, search: search)
     }
     
-    func on_user_tapped(user: SearchedUser) {
-        let pk = user.pubkey
-        let user_tag = user_tag_attr_string(profile: user.profile, pubkey: pk)
+    func on_user_tapped(pk: Pubkey) {
+        let profile_txn = damus_state.profiles.lookup(id: pk)
+        let profile = profile_txn.unsafeUnownedValue
+        let user_tag = user_tag_attr_string(profile: profile, pubkey: pk)
 
         appendUserTag(withTag: user_tag)
     }
@@ -57,11 +49,11 @@ struct UserSearch: View {
                     if users.count == 0 {
                         EmptyUserSearchView()
                     } else {
-                        ForEach(users) { user in
-                            UserView(damus_state: damus_state, pubkey: user.pubkey)
+                        ForEach(users) { pk in
+                            UserView(damus_state: damus_state, pubkey: pk)
                                 .contentShape(Rectangle())
                                 .onTapGesture {
-                                    on_user_tapped(user: user)
+                                    on_user_tapped(pk: pk)
                                 }
                         }
                     }

@@ -69,8 +69,8 @@ func determine_reacting_to(our_pubkey: Pubkey, ev: NostrEvent?) -> ReactingTo {
 }
 
 func event_author_name(profiles: Profiles, pubkey: Pubkey) -> String {
-    let alice_prof = profiles.lookup(id: pubkey)
-    return Profile.displayName(profile: alice_prof, pubkey: pubkey).username.truncate(maxLength: 50)
+    let alice_prof_txn = profiles.lookup(id: pubkey).unsafeUnownedValue
+    return Profile.displayName(profile: alice_prof_txn, pubkey: pubkey).username.truncate(maxLength: 50)
 }
 
 func event_group_unique_pubkeys(profiles: Profiles, group: EventGroupType) -> [Pubkey] {

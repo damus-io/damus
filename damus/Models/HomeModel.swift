@@ -1108,10 +1108,13 @@ func zap_notification_title(_ zap: Zap) -> String {
 func zap_notification_body(profiles: Profiles, zap: Zap, locale: Locale = Locale.current) -> String {
     let src = zap.request.ev
     let pk = zap.is_anon ? ANON_PUBKEY : src.pubkey
-    let profile = profiles.lookup(id: pk)
+
+    let name = profiles.lookup(id: pk).map { profile in
+        Profile.displayName(profile: profile, pubkey: pk).displayName.truncate(maxLength: 50)
+    }.value
+
     let sats = NSNumber(value: (Double(zap.invoice.amount) / 1000.0))
     let formattedSats = format_msats_abbrev(zap.invoice.amount)
-    let name = Profile.displayName(profile: profile, pubkey: pk).displayName.truncate(maxLength: 50)
 
     if src.content.isEmpty {
         let format = localizedStringFormat(key: "zap_notification_no_message", locale: locale)
@@ -1361,8 +1364,8 @@ func process_zap_event(damus_state: DamusState, ev: NostrEvent, completion: @esc
         return
     }
     
-    guard let record = damus_state.profiles.lookup_with_timestamp(ptag),
-          let lnurl = record.lnurl else {
+    guard let lnurl = damus_state.profiles.lookup_with_timestamp(ptag)
+                        .map({ pr in pr?.lnurl }).value else {
         completion(.failed)
         return
     }

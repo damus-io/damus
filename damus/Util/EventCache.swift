@@ -137,6 +137,7 @@ class EventData {
 }
 
 class EventCache {
+    // TODO: remove me and change code to use ndb directly
     private let ndb: Ndb
     private var events: [NoteId: NostrEvent] = [:]
     private var replies = ReplyMap()
@@ -253,9 +254,11 @@ class EventCache {
         return ev
     }
 
+    /*
     func lookup_by_key(_ key: UInt64) -> NostrEvent? {
         ndb.lookup_note_by_key(key)
     }
+     */
 
     func lookup(_ evid: NoteId) -> NostrEvent? {
         return events[evid]

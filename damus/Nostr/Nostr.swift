@@ -8,15 +8,18 @@
 import Foundation
 
 typealias Profile = NdbProfile
+typealias ProfileKey = UInt64
 //typealias ProfileRecord = NdbProfileRecord
 
 class ProfileRecord {
     let data: NdbProfileRecord
 
-    init(data: NdbProfileRecord) {
+    init(data: NdbProfileRecord, key: ProfileKey) {
         self.data = data
+        self.profileKey = key
     }
 
+    let profileKey: ProfileKey
     var profile: Profile? { return data.profile }
     var receivedAt: UInt64 { data.receivedAt }
     var noteKey: UInt64 { data.noteKey }

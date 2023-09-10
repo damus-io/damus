@@ -28,7 +28,7 @@ struct EventActionBar: View {
     }
     
     var lnurl: String? {
-        damus_state.profiles.lookup_with_timestamp(event.pubkey)?.lnurl
+        damus_state.profiles.lookup_with_timestamp(event.pubkey).map({ pr in pr?.lnurl }).value
     }
     
     var show_like: Bool {

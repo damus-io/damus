@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct NIP05 {
+struct NIP05: Equatable {
     let username: String
     let host: String
     

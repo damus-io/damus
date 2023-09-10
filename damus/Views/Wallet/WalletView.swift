@@ -145,7 +145,7 @@ struct WalletView: View {
                     Spacer()
                 }
                 
-                EventProfile(damus_state: damus_state, pubkey: damus_state.pubkey, profile: damus_state.profiles.lookup(id: damus_state.pubkey), size: .small)
+                EventProfile(damus_state: damus_state, pubkey: damus_state.pubkey, size: .small)
             }
             .padding(25)
         }
@@ -164,17 +164,20 @@ struct WalletView: View {
                     model.initial_percent = settings.donation_percent
                 }
                 .onChange(of: settings.donation_percent) { p in
-                    guard let profile = damus_state.profiles.lookup(id: damus_state.pubkey) else {
+                    let profile_txn = damus_state.profiles.lookup(id: damus_state.pubkey)
+                    guard let profile = profile_txn.unsafeUnownedValue else {
                         return
                     }
                     
                     let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: profile.lud16, nip05: profile.nip05, damus_donation: p, reactions: profile.reactions)
 
-                    notify(.profile_updated(pubkey: damus_state.pubkey, profile: prof))
+                    notify(.profile_updated(.manual(pubkey: self.damus_state.pubkey, profile: prof)))
                 }
                 .onDisappear {
+                    let profile_txn = damus_state.profiles.lookup(id: damus_state.pubkey)
+                    
                     guard let keypair = damus_state.keypair.to_full(),
-                          let profile = damus_state.profiles.lookup(id: damus_state.pubkey),
+                          let profile = profile_txn.unsafeUnownedValue,
                           model.initial_percent != profile.damus_donation
                     else {
                         return

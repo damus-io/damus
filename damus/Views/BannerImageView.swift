@@ -81,8 +81,10 @@ struct BannerImageView: View {
                 guard updated.pubkey == self.pubkey else {
                     return
                 }
-                
-                if let bannerImage = updated.profile.banner {
+
+                let profile_txn = profiles.lookup(id: updated.pubkey)
+                let profile = profile_txn.unsafeUnownedValue
+                if let bannerImage = profile?.banner, bannerImage != self.banner {
                     self.banner = bannerImage
                 }
             }
@@ -90,7 +92,7 @@ struct BannerImageView: View {
 }
 
 func get_banner_url(banner: String?, pubkey: Pubkey, profiles: Profiles) -> URL? {
-    let bannerUrlString = banner ?? profiles.lookup(id: pubkey)?.banner ?? ""
+    let bannerUrlString = banner ?? profiles.lookup(id: pubkey).map({ p in p?.banner }).value ?? ""
     if let url = URL(string: bannerUrlString) {
         return url
     }

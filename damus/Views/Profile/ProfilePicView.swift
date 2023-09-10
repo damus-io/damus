@@ -87,16 +87,25 @@ struct ProfilePicView: View {
                 guard updated.pubkey == self.pubkey else {
                     return
                 }
-                
-                if let pic = updated.profile.picture {
-                    self.picture = pic
+
+                switch updated {
+                case .manual(_, let profile):
+                    if let pic = profile.picture {
+                        self.picture = pic
+                    }
+                case .remote(pubkey: let pk):
+                    let profile_txn = profiles.lookup(id: pk)
+                    let profile = profile_txn.unsafeUnownedValue
+                    if let pic = profile?.picture {
+                        self.picture = pic
+                    }
                 }
             }
     }
 }
 
 func get_profile_url(picture: String?, pubkey: Pubkey, profiles: Profiles) -> URL {
-    let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
+    let pic = picture ?? profiles.lookup(id: pubkey).map({ $0?.picture }).value ?? robohash(pubkey)
     if let url = URL(string: pic) {
         return url
     }
