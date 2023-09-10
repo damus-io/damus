@@ -191,11 +191,11 @@ class Ndb {
 }
 
 #if DEBUG
-func getDebugCheckedRoot<T: FlatBufferObject & Verifiable>(byteBuffer: inout ByteBuffer) throws -> T {
-    return try getRoot(byteBuffer: &byteBuffer)
+func getDebugCheckedRoot<T: FlatBufferObject>(byteBuffer: inout ByteBuffer) throws -> T {
+    return getRoot(byteBuffer: &byteBuffer)
 }
 #else
 func getDebugCheckedRoot<T: FlatBufferObject>(byteBuffer: inout ByteBuffer) throws -> T {
-    return try getRoot(byteBuffer: &byteBuffer)
+    return getRoot(byteBuffer: &byteBuffer)
 }
 #endif
