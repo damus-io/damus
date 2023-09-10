@@ -18,8 +18,15 @@
 struct ndb_json_parser;
 struct ndb;
 
+// sorry, swift needs help with forward declared pointers like this
 struct ndb_t {
 	struct ndb *ndb;
+};
+
+// required to keep a read 
+struct ndb_txn {
+	struct ndb *ndb;
+	void *mdb_txn;
 };
 
 // To-client event types
@@ -154,9 +161,13 @@ int ndb_note_verify(void *secp_ctx, unsigned char pubkey[32], unsigned char id[3
 int ndb_init(struct ndb **ndb, const char *dbdir, size_t mapsize, int ingester_threads);
 int ndb_process_event(struct ndb *, const char *json, int len);
 int ndb_process_events(struct ndb *, const char *ldjson, size_t len);
-void *ndb_get_profile_by_pubkey(struct ndb *, const unsigned char *pubkey, size_t *len);
-struct ndb_note *ndb_get_note_by_id(struct ndb *, const unsigned char *id, size_t *len);
-struct ndb_note *ndb_get_note_by_key(struct ndb *, uint64_t key, size_t *len);
+int ndb_begin_query(struct ndb *, struct ndb_txn *);
+void ndb_end_query(struct ndb_txn *);
+void *ndb_get_profile_by_pubkey(struct ndb_txn *txn, const unsigned char *pubkey, size_t *len, uint64_t *primkey);
+void *ndb_get_profile_by_key(struct ndb_txn *txn, uint64_t key, size_t *len);
+uint64_t ndb_get_notekey_by_id(struct ndb_txn *txn, const unsigned char *id);
+struct ndb_note *ndb_get_note_by_id(struct ndb_txn *txn, const unsigned char *id, size_t *len, uint64_t *primkey);
+struct ndb_note *ndb_get_note_by_key(struct ndb_txn *txn, uint64_t key, size_t *len);
 void ndb_destroy(struct ndb *);
 
 // BUILDER
