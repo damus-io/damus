@@ -156,6 +156,7 @@
 		4C3BEFE0281DE1ED00B3DE84 /* DamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFDF281DE1ED00B3DE84 /* DamusState.swift */; };
 		4C3D52B6298DB4E6001C5831 /* ZapEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3D52B5298DB4E6001C5831 /* ZapEvent.swift */; };
 		4C3D52B8298DB5C6001C5831 /* TextEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3D52B7298DB5C6001C5831 /* TextEvent.swift */; };
+		4C3DCC762A9FE9EC0091E592 /* NdbTxn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3DCC752A9FC2030091E592 /* NdbTxn.swift */; };
 		4C3EA63D28FF52D600C48A62 /* bolt11.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA63C28FF52D600C48A62 /* bolt11.c */; };
 		4C3EA64128FF553900C48A62 /* hash_u5.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64028FF553900C48A62 /* hash_u5.c */; };
 		4C3EA64428FF558100C48A62 /* sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C3EA64328FF558100C48A62 /* sha256.c */; };
@@ -694,6 +695,7 @@
 		4C3BEFDF281DE1ED00B3DE84 /* DamusState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusState.swift; sourceTree = "<group>"; };
 		4C3D52B5298DB4E6001C5831 /* ZapEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapEvent.swift; sourceTree = "<group>"; };
 		4C3D52B7298DB5C6001C5831 /* TextEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEvent.swift; sourceTree = "<group>"; };
+		4C3DCC752A9FC2030091E592 /* NdbTxn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NdbTxn.swift; sourceTree = "<group>"; };
 		4C3EA63B28FF52D600C48A62 /* bolt11.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bolt11.h; sourceTree = "<group>"; };
 		4C3EA63C28FF52D600C48A62 /* bolt11.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bolt11.c; sourceTree = "<group>"; };
 		4C3EA63E28FF54BD00C48A62 /* short_types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = short_types.h; sourceTree = "<group>"; };
@@ -1815,6 +1817,7 @@
 				4CDD1ADF2A6B305F001CD4DF /* NdbTagElem.swift */,
 				4C478E242A9932C100489948 /* Ndb.swift */,
 				4CDD1AE12A6B3074001CD4DF /* NdbTagsIterator.swift */,
+				4C3DCC752A9FC2030091E592 /* NdbTxn.swift */,
 				4CE9FBB82A6B3B26007E485C /* nostrdb.c */,
 				4C4793032A993DB900489948 /* midl.c */,
 				4C4793002A993B9A00489948 /* mdb.c */,
@@ -2479,6 +2482,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C3DCC762A9FE9EC0091E592 /* NdbTxn.swift in Sources */,
 				4CEF958D2A9CE650000F901B /* verifier.c in Sources */,
 				4C32B9342A9AD01A00DC3548 /* NdbProfile.swift in Sources */,
 				4C32B9332A99845B00DC3548 /* Ndb.swift in Sources */,
