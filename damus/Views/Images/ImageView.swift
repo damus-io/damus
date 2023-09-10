@@ -63,18 +63,20 @@ struct ImageView: View {
                 showMenu.toggle()
             })
             .overlay(
-                VStack {
-                    if showMenu {
-                        NavDismissBarView()
-                        Spacer()
-                        
-                        if (urls.count > 1) {
-                            tabViewIndicator
+                GeometryReader { geo in
+                    VStack {
+                        if showMenu {
+                            NavDismissBarView()
+                            Spacer()
+                            
+                            if (urls.count > 1) {
+                                tabViewIndicator
+                            }
                         }
                     }
+                    .animation(.easeInOut, value: showMenu)
+                    .padding(.bottom, geo.safeAreaInsets.bottom == 0 ? 12 : 0)
                 }
-                .animation(.easeInOut, value: showMenu)
-                .padding(.bottom, Theme.safeAreaInsets?.bottom)
             )
         }
     }
