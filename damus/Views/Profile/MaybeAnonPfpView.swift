@@ -28,9 +28,10 @@ struct MaybeAnonPfpView: View {
                     .font(.largeTitle)
                     .frame(width: size, height: size)
             } else {
-                NavigationLink(value: Route.ProfileByKey(pubkey: pubkey)) {
-                    ProfilePicView(pubkey: pubkey, size: size, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation)
-                }
+                ProfilePicView(pubkey: pubkey, size: size, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation)
+                    .onTapGesture {
+                        state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
+                    }
             }
         }
     }

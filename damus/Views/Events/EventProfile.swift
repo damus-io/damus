@@ -38,11 +38,10 @@ struct EventProfile: View {
     
     var body: some View {
         HStack(alignment: .center) {
-            VStack {
-                NavigationLink(value: Route.ProfileByKey(pubkey: pubkey)) {
-                    ProfilePicView(pubkey: pubkey, size: pfp_size, highlight: .none, profiles: damus_state.profiles, disable_animation: disable_animation)
+            ProfilePicView(pubkey: pubkey, size: pfp_size, highlight: .none, profiles: damus_state.profiles, disable_animation: disable_animation)
+                .onTapGesture {
+                    damus_state.nav.push(route: .ProfileByKey(pubkey: pubkey))
                 }
-            }
 
             VStack(alignment: .leading) {
                 EventProfileName(pubkey: pubkey, profile: profile, damus: damus_state, size: size)
