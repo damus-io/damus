@@ -365,15 +365,15 @@ func get_preload_plan(evcache: EventCache, ev: NostrEvent, our_keypair: Keypair,
 
 func preload_image(url: URL) {
     if ImageCache.default.isCached(forKey: url.absoluteString) {
-        print("Preloaded image \(url.absoluteString) found in cache")
+        //print("Preloaded image \(url.absoluteString) found in cache")
         // looks like we already have it cached. no download needed
         return
     }
     
-    print("Preloading image \(url.absoluteString)")
-    
+    //print("Preloading image \(url.absoluteString)")
+
     KingfisherManager.shared.retrieveImage(with: Kingfisher.ImageResource(downloadURL: url)) { val in
-        print("Preloaded image \(url.absoluteString)")
+        //print("Preloaded image \(url.absoluteString)")
     }
 }
 
@@ -391,8 +391,8 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     let profiles = state.profiles
     let our_keypair = state.keypair
     
-    print("Preloading event \(plan.event.content)")
-    
+    //print("Preloading event \(plan.event.content)")
+
     if artifacts == nil && plan.load_artifacts {
         let arts = render_note_content(ev: plan.event, profiles: profiles, keypair: our_keypair)
         artifacts = arts
