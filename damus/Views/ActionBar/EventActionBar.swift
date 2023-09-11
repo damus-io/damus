@@ -198,27 +198,6 @@ struct LikeButton: View {
     }
 
     var body: some View {
-        ZStack {
-            likeButton()
-                .accessibilityLabel(NSLocalizedString("Like", comment: "Accessibility Label for Like button"))
-                .rotationEffect(Angle(degrees: shouldAnimate ? rotationAngle : 0))
-                .onReceive(self.timer) { _ in
-                    shakaAnimationLogic()
-                }
-                .simultaneousGesture(longPressGesture())
-                .highPriorityGesture(TapGesture().onEnded {
-                    guard !isReactionsVisible else { return }
-                    withAnimation(Animation.easeOut(duration: 0.15)) {
-                        self.action(damus_state.settings.default_emoji_reaction)
-                        shouldAnimate = true
-                        amountOfAngleIncrease = 20.0
-                    }
-                })
-                .overlay(reactionsOverlay())
-        }
-    }
-
-    func likeButton() -> some View {
         Group {
             if let liked_emoji {
                 buildMaskView(for: liked_emoji)
@@ -231,6 +210,21 @@ struct LikeButton: View {
                     .foregroundColor(.gray)
             }
         }
+        .accessibilityLabel(NSLocalizedString("Like", comment: "Accessibility Label for Like button"))
+        .rotationEffect(Angle(degrees: shouldAnimate ? rotationAngle : 0))
+        .onReceive(self.timer) { _ in
+            shakaAnimationLogic()
+        }
+        .simultaneousGesture(longPressGesture())
+        .highPriorityGesture(TapGesture().onEnded {
+            guard !isReactionsVisible else { return }
+            withAnimation(Animation.easeOut(duration: 0.15)) {
+                self.action(damus_state.settings.default_emoji_reaction)
+                shouldAnimate = true
+                amountOfAngleIncrease = 20.0
+            }
+        })
+        .overlay(reactionsOverlay())
     }
 
     func shakaAnimationLogic() {
