@@ -56,7 +56,7 @@ struct RelayConfigView: View {
                     
                     HStack(spacing: 20) {
                         ForEach(recommended, id: \.url) { r in
-                            RecommendedRelayView(damus: state, relay: r.url.id, showActionButtons: $showActionButtons)
+                            RecommendedRelayView(damus: state, relay: r.url.id)
                         }
                     }
                     .padding()
