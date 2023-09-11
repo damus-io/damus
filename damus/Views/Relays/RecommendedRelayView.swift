@@ -11,17 +11,16 @@ struct RecommendedRelayView: View {
     let damus: DamusState
     let relay: String
     let add_button: Bool
+    let user_recommended: Bool
     
     @ObservedObject private var model_cache: RelayModelCache
     
-    @Binding var showActionButtons: Bool
-    
-    init(damus: DamusState, relay: String, add_button: Bool = true, showActionButtons: Binding<Bool>) {
+    init(damus: DamusState, relay: String, add_button: Bool = true, user_recommended: Bool = false) {
         self.damus = damus
         self.relay = relay
         self.add_button = add_button
+        self.user_recommended = user_recommended
         self.model_cache = damus.relay_model_cache
-        self._showActionButtons = showActionButtons
     }
     
     var recommended: [RelayDescriptor] {
@@ -34,28 +33,65 @@ struct RecommendedRelayView: View {
     }
     
     var body: some View {
-        VStack {
-            let meta = model_cache.model(with_relay_id: relay)?.metadata
-            
-            RelayPicView(relay: relay, icon: meta?.icon, size: 70, highlight: .none, disable_animation: false)
-            if let meta = damus.relay_model_cache.model(with_relay_id: relay)?.metadata {
-                NavigationLink(value: Route.RelayDetail(relay: relay, metadata: meta)){
-                    EmptyView()
-                }
-                .opacity(0.0)
-                .disabled(showActionButtons)
-            }
-            
+        let meta = model_cache.model(with_relay_id: relay)?.metadata
+        
+        if user_recommended {
             HStack {
-                Text(meta?.name ?? relay.hostname ?? relay)
-                    .lineLimit(1)
+                RelayPicView(relay: relay, icon: meta?.icon, size: 50, highlight: .none, disable_animation: false)
+                    .padding(.horizontal, 5)
+                
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text(meta?.name ?? relay.hostname ?? relay)
+                            .font(.headline)
+                            .padding(.bottom, 2)
+                        
+                        RelayType(is_paid: damus.relay_model_cache.model(with_relay_id: relay)?.metadata.is_paid ?? false)
+                    }
+                    
+                    Text(relay)
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
+                
+                Spacer()
+                
+                if let keypair = damus.keypair.to_full() {
+                    VStack(alignment: .center) {
+                        if damus.pool.get_relay(relay) == nil {
+                            AddButton(keypair: keypair)
+                        } else {
+                            Image(systemName: "checkmark.circle")
+                                .resizable()
+                                .frame(width: 30, height: 30)
+                                .foregroundColor(DamusColors.success)
+                                .padding(.trailing, 10)
+                        }
+                    }
+                    .padding(.horizontal, 5)
+                }
             }
-            .contextMenu {
-                CopyAction(relay: relay)
-            }
-            
-            if let keypair = damus.keypair.to_full() {
-                AddButton(keypair: keypair)
+        } else {
+            VStack {
+                RelayPicView(relay: relay, icon: meta?.icon, size: 70, highlight: .none, disable_animation: false)
+                if let meta = damus.relay_model_cache.model(with_relay_id: relay)?.metadata {
+                    NavigationLink(value: Route.RelayDetail(relay: relay, metadata: meta)){
+                        EmptyView()
+                    }
+                    .opacity(0.0)
+                }
+                
+                HStack {
+                    Text(meta?.name ?? relay.hostname ?? relay)
+                        .lineLimit(1)
+                }
+                .contextMenu {
+                    CopyAction(relay: relay)
+                }
+                
+                if let keypair = damus.keypair.to_full() {
+                    AddButton(keypair: keypair)
+                }
             }
         }
     }
@@ -92,6 +128,6 @@ struct RecommendedRelayView: View {
 
 struct RecommendedRelayView_Previews: PreviewProvider {
     static var previews: some View {
-        RecommendedRelayView(damus: test_damus_state(), relay: "wss://relay.damus.io", showActionButtons: .constant(false))
+        RecommendedRelayView(damus: test_damus_state(), relay: "wss://relay.damus.io", user_recommended: true)
     }
 }
