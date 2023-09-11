@@ -37,13 +37,13 @@ struct EventProfile: View {
     }
     
     var body: some View {
-        HStack(alignment: .center) {
+        HStack(alignment: .center, spacing: 10) {
             ProfilePicView(pubkey: pubkey, size: pfp_size, highlight: .none, profiles: damus_state.profiles, disable_animation: disable_animation)
                 .onTapGesture {
                     damus_state.nav.push(route: .ProfileByKey(pubkey: pubkey))
                 }
 
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 0) {
                 EventProfileName(pubkey: pubkey, profile: profile, damus: damus_state, size: size)
 
                 UserStatusView(status: damus_state.profiles.profile_data(pubkey).status, show_general: damus_state.settings.show_general_statuses, show_music: damus_state.settings.show_music_statuses)
