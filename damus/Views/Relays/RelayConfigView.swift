@@ -157,11 +157,15 @@ struct RelayConfigView: View {
             if state.keypair.privkey != nil {
                 if showActionButtons {
                     Button("Done") {
-                        showActionButtons.toggle()
+                        withAnimation(.bouncy) {
+                            showActionButtons.toggle()
+                        }
                     }
                 } else {
                     Button("Edit") {
-                        showActionButtons.toggle()
+                        withAnimation(.bouncy) {
+                            showActionButtons.toggle()
+                        }
                     }
                 }
             }
