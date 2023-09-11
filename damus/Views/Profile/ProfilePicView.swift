@@ -45,26 +45,23 @@ struct InnerProfilePicView: View {
     }
 
     var body: some View {
-        ZStack {
-            Color(uiColor: .systemBackground)
-    
-            KFAnimatedImage(url)
-                .imageContext(.pfp, disable_animation: disable_animation)
-                .onFailure(fallbackUrl: fallbackUrl, cacheKey: url?.absoluteString)
-                .cancelOnDisappear(true)
-                .configure { view in
-                    view.framePreloadCount = 3
-                }
-                .placeholder { _ in
-                    Placeholder
-                }
-                .scaledToFill()
-        }
+        KFAnimatedImage(url)
+            .imageContext(.pfp, disable_animation: disable_animation)
+            .onFailure(fallbackUrl: fallbackUrl, cacheKey: url?.absoluteString)
+            .cancelOnDisappear(true)
+            .configure { view in
+                view.framePreloadCount = 3
+            }
+            .placeholder { _ in
+                Placeholder
+            }
+            .scaledToFill()
         .frame(width: size, height: size)
         .clipShape(Circle())
         .overlay(Circle().stroke(highlight_color(highlight), lineWidth: pfp_line_width(highlight)))
     }
 }
+
 
 struct ProfilePicView: View {
     let pubkey: Pubkey
