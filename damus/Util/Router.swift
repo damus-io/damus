@@ -125,10 +125,10 @@ enum Route: Hashable {
         switch self {
         case .ProfileByKey(let pubkey):
             hasher.combine("profilebykey")
-            hasher.combine(pubkey)
+            hasher.combine(pubkey.id.bytes)
         case .Profile(let profile, _):
             hasher.combine("profile")
-            hasher.combine(profile.pubkey)
+            hasher.combine(profile.pubkey.id.bytes)
         case .Followers:
             hasher.combine("followers")
         case .Relay(let relay, _):
