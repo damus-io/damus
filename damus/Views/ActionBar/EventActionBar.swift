@@ -149,14 +149,15 @@ struct EventActionBar: View {
 
 
 func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> some View {
-    Button(action: action) {
-        Image(img)
-            .resizable()
-            .foregroundColor(col == nil ? Color.gray : col!)
-            .font(.footnote.weight(.medium))
-            .aspectRatio(contentMode: .fit)
-            .frame(width: 20, height: 20)
-    }
+    Image(img)
+        .resizable()
+        .foregroundColor(col == nil ? Color.gray : col!)
+        .font(.footnote.weight(.medium))
+        .aspectRatio(contentMode: .fit)
+        .frame(width: 20, height: 20)
+        .onTapGesture {
+            action()
+        }
 }
 
 struct LikeButton: View {
