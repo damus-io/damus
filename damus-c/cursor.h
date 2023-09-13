@@ -107,6 +107,36 @@ static inline int pull_byte(struct cursor *cursor, u8 *c)
 	return 1;
 }
 
+static inline int parse_byte(struct cursor *cursor, u8 *c)
+{
+    if (unlikely(cursor->p >= cursor->end))
+        return 0;
+
+    *c = *cursor->p;
+    //cursor->p++;
+
+    return 1;
+}
+
+static inline int parse_char(struct cursor *cur, char c) {
+    if (cur->p >= cur->end)
+        return 0;
+        
+    if (*cur->p == c) {
+        cur->p++;
+        return 1;
+    }
+    
+    return 0;
+}
+
+static inline int peek_char(struct cursor *cur, int ind) {
+    if ((cur->p + ind < cur->start) || (cur->p + ind >= cur->end))
+        return -1;
+    
+    return *(cur->p + ind);
+}
+
 static inline int cursor_pull_c_str(struct cursor *cursor, const char **str)
 {
 	*str = (const char*)cursor->p;
@@ -435,12 +465,124 @@ static inline int is_whitespace(char c) {
     return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
 }
 
+static inline int is_underscore(char c) {
+    return c == '_';
+}
+
 static inline int is_utf8_byte(u8 c) {
     return c & 0x80;
 }
 
-static inline int is_right_boundary(char c) {
-    return is_whitespace(c) || ispunct(c);
+static inline int parse_utf8_char(struct cursor *cursor, unsigned int *code_point, unsigned int *utf8_length)
+{
+    u8 first_byte;
+    if (!parse_byte(cursor, &first_byte))
+        return 0; // Not enough data
+
+    // Determine the number of bytes in this UTF-8 character
+    int remaining_bytes = 0;
+    if (first_byte < 0x80) {
+        *code_point = first_byte;
+        return 1;
+    } else if ((first_byte & 0xE0) == 0xC0) {
+        remaining_bytes = 1;
+        *utf8_length = remaining_bytes + 1;
+        *code_point = first_byte & 0x1F;
+    } else if ((first_byte & 0xF0) == 0xE0) {
+        remaining_bytes = 2;
+        *utf8_length = remaining_bytes + 1;
+        *code_point = first_byte & 0x0F;
+    } else if ((first_byte & 0xF8) == 0xF0) {
+        remaining_bytes = 3;
+        *utf8_length = remaining_bytes + 1;
+        *code_point = first_byte & 0x07;
+    } else {
+        remaining_bytes = 0;
+        *utf8_length = 1; // Assume 1 byte length for unrecognized UTF-8 characters
+        // TODO: We need to gracefully handle unrecognized UTF-8 characters
+        printf("Invalid UTF-8 byte: %x\n", *code_point);
+        *code_point = ((first_byte & 0xF0) << 6); // Prevent testing as punctuation
+        return 0; // Invalid first byte
+    }
+
+    // Peek at remaining bytes
+    for (int i = 0; i < remaining_bytes; ++i) {
+        signed char next_byte;
+        if ((next_byte = peek_char(cursor, i+1)) == -1) {
+            *utf8_length = 1;
+            return 0; // Not enough data
+        }
+        
+        // Debugging lines
+        //printf("Cursor: %s\n", cursor->p);
+        //printf("Codepoint: %x\n", *code_point);
+        //printf("Codepoint <<6: %x\n", ((*code_point << 6) | (next_byte & 0x3F)));
+        //printf("Remaining bytes: %x\n", remaining_bytes);
+        //printf("First byte: %x\n", first_byte);
+        //printf("Next byte: %x\n", next_byte);
+        //printf("Bitwise AND result: %x\n", (next_byte & 0xC0));
+        
+        if ((next_byte & 0xC0) != 0x80) {
+            *utf8_length = 1;
+            return 0; // Invalid byte in sequence
+        }
+
+        *code_point = (*code_point << 6) | (next_byte & 0x3F);
+    }
+
+    return 1;
+}
+
+/**
+  * Checks if a given Unicode code point is a punctuation character
+  *
+  * @param codepoint The Unicode code point to check. @return true if the
+  * code point is a punctuation character, false otherwise.
+  */
+static inline int is_punctuation(unsigned int codepoint) {
+
+    // Check for underscore (underscore is not treated as punctuation)
+    if (is_underscore(codepoint))
+        return 0;
+    
+    // Check for ASCII punctuation
+    if (ispunct(codepoint))
+        return 1;
+
+    // Check for Unicode punctuation exceptions (punctuation allowed in hashtags)
+    if (codepoint == 0x301C || codepoint == 0xFF5E) // Japanese Wave Dash / Tilde
+        return 0;
+    
+    // Check for Unicode punctuation
+    // NOTE: We may need to adjust the codepoint ranges in the future,
+    // to include/exclude certain types of Unicode characters in hashtags.
+    // Unicode Blocks Reference: https://www.compart.com/en/unicode/block
+    return (
+        // Latin-1 Supplement No-Break Space (NBSP): U+00A0
+        (codepoint == 0x00A0) ||
+        
+        // Latin-1 Supplement Punctuation: U+00A1 to U+00BF
+        (codepoint >= 0x00A1 && codepoint <= 0x00BF) ||
+
+        // General Punctuation: U+2000 to U+206F
+        (codepoint >= 0x2000 && codepoint <= 0x206F) ||
+
+        // Currency Symbols: U+20A0 to U+20CF
+        (codepoint >= 0x20A0 && codepoint <= 0x20CF) ||
+
+        // Supplemental Punctuation: U+2E00 to U+2E7F
+        (codepoint >= 0x2E00 && codepoint <= 0x2E7F) ||
+
+        // CJK Symbols and Punctuation: U+3000 to U+303F
+        (codepoint >= 0x3000 && codepoint <= 0x303F) ||
+
+        // Ideographic Description Characters: U+2FF0 to U+2FFF
+        (codepoint >= 0x2FF0 && codepoint <= 0x2FFF)
+    );
+}
+
+static inline int is_right_boundary(int c) {
+    return is_whitespace(c) || is_punctuation(c);
 }
 
 static inline int is_left_boundary(char c) {
@@ -452,15 +594,36 @@ static inline int is_alphanumeric(char c) {
 }
 
 static inline int consume_until_boundary(struct cursor *cur) {
-    char c;
+    unsigned int c;
+    unsigned int char_length = 1;
+    unsigned int *utf8_char_length = &char_length;
     
     while (cur->p < cur->end) {
         c = *cur->p;
         
+        *utf8_char_length = 1;
+        
+        if (is_whitespace(c))
+            return 1;
+        
+        // Need to check for UTF-8 characters, which can be multiple bytes long
+        if (is_utf8_byte(c)) {
+            if (!parse_utf8_char(cur, &c, utf8_char_length)) {
+                if (!is_right_boundary(c)){
+                    // TODO: We should work towards handling all UTF-8 characters.
+                    printf("Invalid UTF-8 code point: %x\n", c);
+                }
+            }
+        }
+        
         if (is_right_boundary(c))
             return 1;
         
-        cur->p++;
+        // Need to use a variable character byte length for UTF-8 (2-4 bytes)
+        if (cur->p + *utf8_char_length <= cur->end)
+            cur->p += *utf8_char_length;
+        else
+            cur->p++;
     }
     
     return 1;
@@ -498,25 +661,6 @@ static inline int consume_until_non_alphanumeric(struct cursor *cur, int or_end)
     }
 
     return or_end;
-}
-
-static inline int parse_char(struct cursor *cur, char c) {
-    if (cur->p >= cur->end)
-        return 0;
-        
-    if (*cur->p == c) {
-        cur->p++;
-        return 1;
-    }
-    
-    return 0;
-}
-
-static inline int peek_char(struct cursor *cur, int ind) {
-    if ((cur->p + ind < cur->start) || (cur->p + ind >= cur->end))
-        return -1;
-    
-    return *(cur->p + ind);
 }
 
 #endif
