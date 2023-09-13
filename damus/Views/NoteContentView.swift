@@ -26,7 +26,7 @@ struct NoteContentView: View {
     
     let damus_state: DamusState
     let event: NostrEvent
-    let show_images: Bool
+    @State var show_images: Bool
     let size: EventViewKind
     let preview_height: CGFloat?
     let options: EventViewOptions
@@ -139,7 +139,9 @@ struct NoteContentView: View {
                 ZStack {
                     ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media)
                     Blur()
-                        .disabled(true)
+                        .onTapGesture {
+                            show_images = true
+                        }
                 }
                 //.cornerRadius(10)
             }
