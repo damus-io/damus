@@ -36,11 +36,11 @@ struct WalletConnectURL: Equatable {
     }
     
     init?(str: String) {
-        guard let url = URL(string: str),
-              url.scheme == "nostrwalletconnect" || url.scheme == "nostr+walletconnect",
-              let pkhost = url.host,
-              let pubkey = hex_decode_pubkey(pkhost),
-              let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
+        guard let components = URLComponents(string: str),
+              components.scheme == "nostrwalletconnect" || components.scheme == "nostr+walletconnect",
+              // The line below provides flexibility for both `nostrwalletconnect://` (non-compliant, but commonly used) and `nostrwalletconnect:` (NIP-47 compliant) formats
+              let encoded_pubkey = components.path == "" ? components.host : components.path,
+              let pubkey = hex_decode_pubkey(encoded_pubkey),
               let items = components.queryItems,
               let relay = items.first(where: { qi in qi.name == "relay" })?.value,
               let relay_url = RelayURL(relay),
