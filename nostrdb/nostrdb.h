@@ -7,6 +7,8 @@
 #define NDB_PACKED_STR     0x1
 #define NDB_PACKED_ID      0x2
 
+#define NDB_FLAG_NOMIGRATE (1 << 0)
+
 //#define DEBUG 1
 
 #ifdef DEBUG
@@ -158,7 +160,8 @@ int ndb_decode_key(const char *secstr, struct ndb_keypair *keypair);
 int ndb_note_verify(void *secp_ctx, unsigned char pubkey[32], unsigned char id[32], unsigned char signature[64]);
 
 // NDB
-int ndb_init(struct ndb **ndb, const char *dbdir, size_t mapsize, int ingester_threads);
+int ndb_init(struct ndb **ndb, const char *dbdir, size_t mapsize, int ingester_threads, int flags);
+int ndb_db_version(struct ndb *ndb);
 int ndb_process_event(struct ndb *, const char *json, int len);
 int ndb_process_events(struct ndb *, const char *ldjson, size_t len);
 int ndb_begin_query(struct ndb *, struct ndb_txn *);
