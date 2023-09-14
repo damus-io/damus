@@ -7,7 +7,7 @@
 
 import SwiftUI
 import MediaPlayer
-
+import WebKit
 
 struct UserStatusView: View {
     @ObservedObject var status: UserStatusModel
@@ -35,6 +35,15 @@ struct UserStatusView: View {
                 openURL(url)
             }
         }
+        .contextMenu(
+            menuItems: {
+                if let url = st.url {
+                    Button(url.absoluteString, action: { openURL(url) }) }
+            }, preview: {
+                if let url = st.url {
+                    URLPreview(url: url)
+                }
+            })
     }
 
     var body: some View {
@@ -48,6 +57,19 @@ struct UserStatusView: View {
             }
         }
 
+    }
+
+    struct URLPreview: UIViewRepresentable {
+        var url: URL
+
+        func makeUIView(context: Context) -> WKWebView {
+            return WKWebView()
+        }
+
+        func updateUIView(_ wkView: WKWebView, context: Context) {
+            let request = URLRequest(url: url)
+            wkView.load(request)
+        }
     }
 }
 
