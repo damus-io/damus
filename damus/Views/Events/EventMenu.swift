@@ -26,12 +26,19 @@ struct EventMenuContext: View {
     
     var body: some View {
         HStack {
-            Menu {
-                MenuItems(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks, muted_threads: muted_threads, settings: settings)
-            } label: {
-                Label("", systemImage: "ellipsis")
-                    .foregroundColor(Color.gray)
-            }
+            Label("", systemImage: "ellipsis")
+                .foregroundColor(Color.gray)
+                .contentShape(Circle())
+                // Add our Menu button inside an overlay modifier to avoid affecting the rest of the layout around us.
+                .overlay(
+                    Menu {
+                        MenuItems(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks, muted_threads: muted_threads, settings: settings)
+                    } label: {
+                        Color.clear
+                    }
+                    // Hitbox frame size
+                    .frame(width: 100, height: 70)
+                )
         }
         .padding([.bottom], 4)
         .contentShape(Rectangle())
