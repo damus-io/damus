@@ -14,6 +14,8 @@ enum NostrPostResult {
 }
 
 let POST_PLACEHOLDER = NSLocalizedString("Type your note here...", comment: "Text box prompt to ask user to type their note.")
+let GHOST_CARET_VIEW_ID = "GhostCaret"
+let DEBUG_SHOW_GHOST_CARET_VIEW: Bool = false
 
 class TagModel: ObservableObject {
     var diff = 0
@@ -54,7 +56,8 @@ struct PostView: View {
     @State var filtered_pubkeys: Set<Pubkey> = []
     @State var focusWordAttributes: (String?, NSRange?) = (nil, nil)
     @State var newCursorIndex: Int?
-    @State var postTextViewCanScroll: Bool = true
+    @State var caretRect: CGRect = CGRectNull
+    @State var textHeight: CGFloat? = nil
 
     @State var mediaToUpload: MediaUpload? = nil
     
@@ -102,6 +105,16 @@ struct PostView: View {
 
     var posting_disabled: Bool {
         return is_post_empty || uploading_disabled
+    }
+    
+    // Returns a valid height for the text box, even when textHeight is not a number
+    func get_valid_text_height() -> CGFloat {
+        if let textHeight, textHeight.isFinite, textHeight > 0 {
+            return textHeight
+        }
+        else {
+            return 10
+        }
     }
     
     var ImageButton: some View {
@@ -201,11 +214,18 @@ struct PostView: View {
     
     var TextEntry: some View {
         ZStack(alignment: .topLeading) {
-            TextViewWrapper(attributedText: $post, postTextViewCanScroll: $postTextViewCanScroll, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
+            TextViewWrapper(attributedText: $post, textHeight: $textHeight, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
                 focusWordAttributes = (word, range)
                 self.newCursorIndex = nil
             }, updateCursorPosition: { newCursorIndex in
                 self.newCursorIndex = newCursorIndex
+            }, onCaretRectChange: { uiView in
+                // When the caret position changes, we change the `caretRect` in our state, so that our ghost caret will follow our caret
+                if let selectedStartRange = uiView.selectedTextRange?.start {
+                    DispatchQueue.main.async {
+                        caretRect = uiView.caretRect(for: selectedStartRange)
+                    }
+                }
             })
                 .environmentObject(tagModel)
                 .focused($focus)
@@ -213,6 +233,8 @@ struct PostView: View {
                 .onChange(of: post) { p in
                     post_changed(post: p, media: uploadedMedias)
                 }
+                // Set a height based on the text content height, if it is available and valid
+                .frame(height: get_valid_text_height())
             
             if post.string.isEmpty {
                 Text(POST_PLACEHOLDER)
@@ -292,25 +314,48 @@ struct PostView: View {
     }
     
     func Editor(deviceSize: GeometryProxy) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .top) {
-                ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
-                
-                TextEntry
+        HStack(alignment: .top, spacing: 0) {
+            if(caretRect != CGRectNull) {
+                GhostCaret
             }
-            .frame(height: deviceSize.size.height * multiply_factor)
-            .id("post")
-                
-            PVImageCarouselView(media: $uploadedMedias, deviceWidth: deviceSize.size.width)
-                .onChange(of: uploadedMedias) { media in
-                    post_changed(post: post, media: media)
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .top) {
+                    ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                    
+                    TextEntry
                 }
-            
-            if case .quoting(let ev) = action {
-                BuilderEventView(damus: damus_state, event: ev)
+                .id("post")
+                
+                PVImageCarouselView(media: $uploadedMedias, deviceWidth: deviceSize.size.width)
+                    .onChange(of: uploadedMedias) { media in
+                        post_changed(post: post, media: media)
+                    }
+                
+                if case .quoting(let ev) = action {
+                    BuilderEventView(damus: damus_state, event: ev)
+                }
             }
+            .padding(.horizontal)
         }
-        .padding(.horizontal)
+    }
+    
+    // The GhostCaret is a vertical projection of the editor's caret that should sit beside the editor.
+    // The purpose of this view is create a reference point that we can scroll our ScrollView into
+    // This is necessary as a bridge to communicate between:
+    // - The UIKit-based UITextView (which has the caret position)
+    // - and the SwiftUI-based ScrollView/ScrollReader (where scrolling commands can only be done via the SwiftUI "ID" parameter
+    var GhostCaret: some View {
+        Rectangle()
+            .foregroundStyle(DEBUG_SHOW_GHOST_CARET_VIEW ? .cyan : .init(red: 0, green: 0, blue: 0, opacity: 0))
+            .frame(
+                width: DEBUG_SHOW_GHOST_CARET_VIEW ? caretRect.width : 0,
+                height: caretRect.height)
+            // Use padding to vertically align our ghost caret with our actual text caret.
+            // Note: Programmatic scrolling cannot be done with the `.position` modifier.
+            // Experiments revealed that the scroller ignores the position modifier.
+            .padding(.top, caretRect.origin.y)
+            .id(GHOST_CARET_VIEW_ID)
+            .disabled(true)
     }
     
     func fill_target_content(target: PostTarget) {
@@ -332,26 +377,36 @@ struct PostView: View {
         GeometryReader { (deviceSize: GeometryProxy) in
             VStack(alignment: .leading, spacing: 0) {
                 let searching = get_searching_string(focusWordAttributes.0)
+                let searchingIsNil = searching == nil
                 
                 TopBar
                 
                 ScrollViewReader { scroller in
                     ScrollView {
-                        if case .replying_to(let replying_to) = self.action {
-                            ReplyView(replying_to: replying_to, damus: damus_state, original_pubkeys: pubkeys, filtered_pubkeys: $filtered_pubkeys)
+                        VStack(alignment: .leading) {
+                            if case .replying_to(let replying_to) = self.action {
+                                ReplyView(replying_to: replying_to, damus: damus_state, original_pubkeys: pubkeys, filtered_pubkeys: $filtered_pubkeys)
+                            }
+                            
+                            Editor(deviceSize: deviceSize)
                         }
-                        
-                        Editor(deviceSize: deviceSize)
                     }
-                    .frame(maxHeight: searching == nil ? .infinity : 70)
+                    .frame(maxHeight: searching == nil ? deviceSize.size.height : 70)
                     .onAppear {
                         scroll_to_event(scroller: scroller, id: "post", delay: 1.0, animate: true, anchor: .top)
                     }
+                    // Note: The scroll commands below are specific because there seems to be quirk with ScrollReader where sending it to the exact same position twice resets its scroll position.
+                    .onChange(of: caretRect.origin.y, perform: { newValue in
+                        scroller.scrollTo(GHOST_CARET_VIEW_ID)
+                    })
+                    .onChange(of: searchingIsNil, perform: { newValue in
+                        scroller.scrollTo(GHOST_CARET_VIEW_ID)
+                    })
                 }
                 
                 // This if-block observes @ for tagging
                 if let searching {
-                    UserSearch(damus_state: damus_state, search: searching, focusWordAttributes: $focusWordAttributes, newCursorIndex: $newCursorIndex, postTextViewCanScroll: $postTextViewCanScroll, post: $post)
+                    UserSearch(damus_state: damus_state, search: searching, focusWordAttributes: $focusWordAttributes, newCursorIndex: $newCursorIndex, post: $post)
                         .frame(maxHeight: .infinity)
                         .environmentObject(tagModel)
                 } else {

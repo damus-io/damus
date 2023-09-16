@@ -7,20 +7,32 @@
 
 import SwiftUI
 
+// Defines how much extra bottom spacing will be applied after the text.
+// This will avoid jitters when applying new lines, by ensuring it has enough space until the height is updated on the next view update cycle
+let TEXT_BOX_BOTTOM_MARGIN_OFFSET: CGFloat = 30.0
+
 struct TextViewWrapper: UIViewRepresentable {
     @Binding var attributedText: NSMutableAttributedString
-    @Binding var postTextViewCanScroll: Bool
     @EnvironmentObject var tagModel: TagModel
+    @Binding var textHeight: CGFloat?
     
     let cursorIndex: Int?
     var getFocusWordForMention: ((String?, NSRange?) -> Void)? = nil
     let updateCursorPosition: ((Int) -> Void)
+    let onCaretRectChange: ((UITextView) -> Void)
     
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
         textView.delegate = context.coordinator
-        textView.isScrollEnabled = postTextViewCanScroll
+        
+        // Scroll has to be enabled. When this is disabled, the text input will overflow horizontally, even when its frame's width is limited.
+        textView.isScrollEnabled = true
+        // However, a scrolling text box inside of its parent scrollview does not provide a very good experience. We should have the textbox expand vertically
+        // To simulate that the text box can expand vertically, we will listen to text changes and dynamically change the text box height in response.
+        // Add an observer so that we can adapt the height of the text input whenever the text changes.
+        textView.addObserver(context.coordinator, forKeyPath: "contentSize", options: .new, context: nil)
         textView.showsVerticalScrollIndicator = false
+        
         TextViewWrapper.setTextProperties(textView)
         return textView
     }
@@ -34,7 +46,6 @@ struct TextViewWrapper: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UITextView, context: Context) {
-        uiView.isScrollEnabled = postTextViewCanScroll
         uiView.attributedText = attributedText
 
         TextViewWrapper.setTextProperties(uiView)
@@ -53,23 +64,37 @@ struct TextViewWrapper: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(attributedText: $attributedText, getFocusWordForMention: getFocusWordForMention, updateCursorPosition: updateCursorPosition)
+        Coordinator(attributedText: $attributedText, getFocusWordForMention: getFocusWordForMention, updateCursorPosition: updateCursorPosition, onCaretRectChange: onCaretRectChange, textHeight: $textHeight)
     }
 
     class Coordinator: NSObject, UITextViewDelegate {
         @Binding var attributedText: NSMutableAttributedString
         var getFocusWordForMention: ((String?, NSRange?) -> Void)? = nil
         let updateCursorPosition: ((Int) -> Void)
+        let onCaretRectChange: ((UITextView) -> Void)
+        @Binding var textHeight: CGFloat?
 
-        init(attributedText: Binding<NSMutableAttributedString>, getFocusWordForMention: ((String?, NSRange?) -> Void)?, updateCursorPosition: @escaping ((Int) -> Void)) {
+        init(attributedText: Binding<NSMutableAttributedString>,
+             getFocusWordForMention: ((String?, NSRange?) -> Void)?,
+             updateCursorPosition: @escaping ((Int) -> Void),
+             onCaretRectChange: @escaping ((UITextView) -> Void),
+             textHeight: Binding<CGFloat?>
+        ) {
             _attributedText = attributedText
             self.getFocusWordForMention = getFocusWordForMention
             self.updateCursorPosition = updateCursorPosition
+            self.onCaretRectChange = onCaretRectChange
+            _textHeight = textHeight
         }
 
         func textViewDidChange(_ textView: UITextView) {
             attributedText = NSMutableAttributedString(attributedString: textView.attributedText)
             processFocusedWordForMention(textView: textView)
+        }
+        
+        func textViewDidChangeSelection(_ textView: UITextView) {
+            textView.scrollRangeToVisible(textView.selectedRange)
+            onCaretRectChange(textView)
         }
 
         private func processFocusedWordForMention(textView: UITextView) {
@@ -156,6 +181,20 @@ struct TextViewWrapper: UIViewRepresentable {
             else {
                 attributedString.replaceCharacters(in: range, with: text)
             }
+        }
+        
+        override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+            if keyPath == "contentSize", let textView = object as? UITextView {
+                DispatchQueue.main.async {
+                    // Update text view height when text content size changes to fit all text content
+                    // This is necessary to avoid having a scrolling text box combined with its parent scrolling view
+                    self.updateTextViewHeight(textView: textView)
+                }
+            }
+        }
+        
+        func updateTextViewHeight(textView: UITextView) {
+            self.textHeight = textView.contentSize.height + TEXT_BOX_BOTTOM_MARGIN_OFFSET
         }
         
     }

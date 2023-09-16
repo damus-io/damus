@@ -21,7 +21,6 @@ struct UserSearch: View {
     let search: String
     @Binding var focusWordAttributes: (String?, NSRange?)
     @Binding var newCursorIndex: Int?
-    @Binding var postTextViewCanScroll: Bool
 
     @Binding var post: NSMutableAttributedString
     @EnvironmentObject var tagModel: TagModel
@@ -70,12 +69,6 @@ struct UserSearch: View {
                 .padding()
             }
         }
-        .onAppear() {
-            postTextViewCanScroll = false
-        }
-        .onDisappear() {
-            postTextViewCanScroll = true
-        }
     }
         
 }
@@ -85,10 +78,9 @@ struct UserSearch_Previews: PreviewProvider {
     @State static var post: NSMutableAttributedString = NSMutableAttributedString(string: "some @jb55")
     @State static var word: (String?, NSRange?) = (nil, nil)
     @State static var newCursorIndex: Int?
-    @State static var postTextViewCanScroll: Bool = false
-    
+
     static var previews: some View {
-        UserSearch(damus_state: test_damus_state(), search: search, focusWordAttributes: $word, newCursorIndex: $newCursorIndex, postTextViewCanScroll: $postTextViewCanScroll, post: $post)
+        UserSearch(damus_state: test_damus_state(), search: search, focusWordAttributes: $word, newCursorIndex: $newCursorIndex, post: $post)
     }
 }
 
