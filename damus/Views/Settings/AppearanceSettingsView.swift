@@ -85,6 +85,15 @@ struct AppearanceSettingsView: View {
                     clear_kingfisher_cache()
                 }
             }
+            
+            // MARK: - Content filters and moderation
+            Section(
+                header: Text(NSLocalizedString("Content filters", comment: "Section title for content filtering/moderation configuration.")),
+                footer: Text(NSLocalizedString("Notes with the #nsfw tag usually contains adult content or other \"Not safe for work\" content", comment: "Section footer clarifying what #nsfw (not safe for work) tags mean"))
+            ) {
+                Toggle(NSLocalizedString("Hide notes with #nsfw tags", comment: "Setting to hide notes with the #nsfw (not safe for work) tags"), isOn: $settings.hide_nsfw_tagged_content)
+                    .toggleStyle(.switch)
+            }
                 
 
         }

@@ -41,7 +41,7 @@ struct ConfigView: View {
                     }
 
                     NavigationLink(value: Route.AppearanceSettings(settings: settings)) {
-                        IconLabel(NSLocalizedString("Appearance", comment: "Section header for text and appearance settings"), img_name: "eye", color: .red)
+                        IconLabel(NSLocalizedString("Appearance and filters", comment: "Section header for text, appearance, and content filter settings"), img_name: "eye", color: .red)
                     }
 
                     NavigationLink(value: Route.SearchSettings(settings: settings)) {

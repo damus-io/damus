@@ -56,20 +56,6 @@ enum Sheets: Identifiable {
     }
 }
 
-enum FilterState : Int {
-    case posts_and_replies = 1
-    case posts = 0
-
-    func filter(ev: NostrEvent) -> Bool {
-        switch self {
-        case .posts:
-            return ev.known_kind == .boost || !ev.is_reply(.empty)
-        case .posts_and_replies:
-            return true
-        }
-    }
-}
-
 struct ContentView: View {
     let keypair: Keypair
     
@@ -96,6 +82,11 @@ struct ContentView: View {
     @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
     @AppStorage("has_seen_suggested_users") private var hasSeenSuggestedUsers = false
     let sub_id = UUID().description
+    var damus_filter: DamusFilter {
+        get {
+            return DamusFilter(hide_nsfw_tagged_content: self.damus_state?.settings.hide_nsfw_tagged_content ?? true)
+        }
+    }
     
     @Environment(\.colorScheme) var colorScheme
     
@@ -114,10 +105,10 @@ struct ContentView: View {
                     // This is needed or else there is a bug when switching from the 3rd or 2nd tab to first. no idea why.
                     mystery
                     
-                    contentTimelineView(filter: FilterState.posts.filter)
+                    contentTimelineView(filter: damus_filter.get_filter(.posts))
                         .tag(FilterState.posts)
                         .id(FilterState.posts)
-                    contentTimelineView(filter: FilterState.posts_and_replies.filter)
+                    contentTimelineView(filter: damus_filter.get_filter(.posts_and_replies))
                         .tag(FilterState.posts_and_replies)
                         .id(FilterState.posts_and_replies)
                 }
