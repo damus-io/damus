@@ -12,12 +12,14 @@ class FollowingModel {
     var needs_sub: Bool = true
     
     let contacts: [Pubkey]
+    let hashtags: [Hashtag]
 
     let sub_id: String = UUID().description
     
-    init(damus_state: DamusState, contacts: [Pubkey]) {
+    init(damus_state: DamusState, contacts: [Pubkey], hashtags: [Hashtag]) {
         self.damus_state = damus_state
         self.contacts = contacts
+        self.hashtags = hashtags
     }
     
     func get_filter() -> NostrFilter {

@@ -370,7 +370,8 @@ struct ProfileView: View {
             HStack {
                 if let contact = profile.contacts {
                     let contacts = Array(contact.referenced_pubkeys)
-                    let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
+                    let hashtags = Array(contact.referenced_hashtags)
+                    let following_model = FollowingModel(damus_state: damus_state, contacts: contacts, hashtags: hashtags)
                     NavigationLink(value: Route.Following(following: following_model)) {
                         HStack {
                             let noun_text = Text(verbatim: "\(pluralizedString(key: "following_count", count: profile.following))").font(.subheadline).foregroundColor(.gray)

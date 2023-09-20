@@ -25,54 +25,17 @@ struct SearchHeaderView: View {
 
     var Icon: some View {
         ZStack {
-            Circle()
-                .fill(Color(red: 0xF8/255.0, green: 0xE7/255.0, blue: 0xF8/255.0))
-                .frame(width: 54, height: 54)
-
             switch described {
-            case .hashtag:
-                Text(verbatim: "#")
-                    .font(.largeTitle.bold())
-                    .foregroundStyle(PinkGradient)
-                    .mask(Text(verbatim: "#")
-                        .font(.largeTitle.bold()))
-
-            case .unknown:
-                Image(systemName: "magnifyingglass")
-                    .font(.title.bold())
-                    .foregroundStyle(PinkGradient)
+                case .hashtag:
+                    SingleCharacterAvatar(character: "#")
+                case .unknown:
+                    SystemIconAvatar(system_name: "magnifyingglass")
             }
         }
     }
 
     var SearchText: Text {
         Text(described.description)
-    }
-
-    func unfollow(_ hashtag: String) {
-        is_following = false
-        handle_unfollow(state: state, unfollow: FollowRef.hashtag(hashtag))
-    }
-
-    func follow(_ hashtag: String) {
-        is_following = true
-        handle_follow(state: state, follow: .hashtag(hashtag))
-    }
-
-    func FollowButton(_ ht: String) -> some View {
-        return Button(action: { follow(ht) }) {
-            Text("Follow hashtag", comment: "Button to follow a given hashtag.")
-                .font(.footnote.bold())
-        }
-        .buttonStyle(GradientButtonStyle(padding: 10))
-    }
-
-    func UnfollowButton(_ ht: String) -> some View {
-        return Button(action: { unfollow(ht) }) {
-            Text("Unfollow hashtag", comment: "Button to unfollow a given hashtag.")
-                .font(.footnote.bold())
-        }
-        .buttonStyle(GradientButtonStyle(padding: 10))
     }
 
     var body: some View {
@@ -86,9 +49,9 @@ struct SearchHeaderView: View {
 
                 if state.is_privkey_user, case .hashtag(let ht) = described {
                     if is_following {
-                        UnfollowButton(ht)
+                        HashtagUnfollowButton(damus_state: state, hashtag: ht, is_following: $is_following)
                     } else {
-                        FollowButton(ht)
+                        HashtagFollowButton(damus_state: state, hashtag: ht, is_following: $is_following)
                     }
                 }
             }
@@ -101,6 +64,87 @@ struct SearchHeaderView: View {
             guard hashtag_matches_search(desc: self.described, ref: ref) else { return }
             self.is_following = false
         }
+    }
+}
+
+struct SystemIconAvatar: View {
+    let system_name: String
+    
+    var body: some View {
+        NonImageAvatar {
+            Image(systemName: system_name)
+                .font(.title.bold())
+        }
+    }
+}
+
+struct SingleCharacterAvatar: View {
+    let character: String
+    
+    var body: some View {
+        NonImageAvatar {
+            Text(verbatim: character)
+                .font(.largeTitle.bold())
+                .mask(Text(verbatim: character)
+                    .font(.largeTitle.bold()))
+        }
+    }
+}
+
+struct NonImageAvatar<Content: View>: View {
+    let content: Content
+    
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+    
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(Color(red: 0xF8/255.0, green: 0xE7/255.0, blue: 0xF8/255.0))
+                .frame(width: 54, height: 54)
+            
+            content
+                .foregroundStyle(PinkGradient)
+        }
+    }
+}
+
+struct HashtagUnfollowButton: View {
+    let damus_state: DamusState
+    let hashtag: String
+    @Binding var is_following: Bool
+    
+    var body: some View {
+        return Button(action: { unfollow(hashtag) }) {
+            Text("Unfollow hashtag", comment: "Button to unfollow a given hashtag.")
+                .font(.footnote.bold())
+        }
+        .buttonStyle(GradientButtonStyle(padding: 10))
+    }
+        
+    func unfollow(_ hashtag: String) {
+        is_following = false
+        handle_unfollow(state: damus_state, unfollow: FollowRef.hashtag(hashtag))
+    }
+}
+
+struct HashtagFollowButton: View {
+    let damus_state: DamusState
+    let hashtag: String
+    @Binding var is_following: Bool
+    
+    var body: some View {
+        return Button(action: { follow(hashtag) }) {
+            Text("Follow hashtag", comment: "Button to follow a given hashtag.")
+                .font(.footnote.bold())
+        }
+        .buttonStyle(GradientButtonStyle(padding: 10))
+    }
+    
+    func follow(_ hashtag: String) {
+        is_following = true
+        handle_follow(state: damus_state, follow: .hashtag(hashtag))
     }
 }
 
