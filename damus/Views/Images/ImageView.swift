@@ -16,7 +16,7 @@ struct ImageView: View {
     @State private var selectedIndex = 0
     @State var showMenu = true
     
-    let disable_animation: Bool
+    let settings: UserSettingsStore
     
     var tabViewIndicator: some View {
         HStack(spacing: 10) {
@@ -42,7 +42,7 @@ struct ImageView: View {
             TabView(selection: $selectedIndex) {
                 ForEach(urls.indices, id: \.self) { index in
                     ZoomableScrollView {
-                        ImageContainerView(video_controller: video_controller, url: urls[index], disable_animation: disable_animation)
+                        ImageContainerView(video_controller: video_controller, url: urls[index], settings: settings)
                             .aspectRatio(contentMode: .fit)
                             .padding(.top, Theme.safeAreaInsets?.top)
                             .padding(.bottom, Theme.safeAreaInsets?.bottom)
@@ -85,6 +85,6 @@ struct ImageView: View {
 struct ImageView_Previews: PreviewProvider {
     static var previews: some View {
         let url: MediaUrl = .image(URL(string: "https://jb55.com/red-me.jpg")!)
-        ImageView(video_controller: test_damus_state().video, urls: [url], disable_animation: false)
+        ImageView(video_controller: test_damus_state().video, urls: [url], settings: test_damus_state().settings)
     }
 }

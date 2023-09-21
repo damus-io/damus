@@ -318,7 +318,7 @@ struct ProfileView: View {
                         is_zoomed.toggle()
                     }
                     .fullScreenCover(isPresented: $is_zoomed) {
-                        ProfilePicImageView(pubkey: profile.pubkey, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                        ProfilePicImageView(pubkey: profile.pubkey, profiles: damus_state.profiles, settings: damus_state.settings)
                     }
 
                 Spacer()
