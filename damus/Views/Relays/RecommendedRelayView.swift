@@ -42,7 +42,7 @@ struct RecommendedRelayView: View {
                 
                 VStack(alignment: .leading) {
                     HStack {
-                        Text(meta?.name ?? relay.hostname ?? relay)
+                        Text(meta?.name ?? relay)
                             .font(.headline)
                             .padding(.bottom, 2)
                         
@@ -82,7 +82,7 @@ struct RecommendedRelayView: View {
                 }
                 
                 HStack {
-                    Text(meta?.name ?? relay.hostname ?? relay)
+                    Text(meta?.name ?? relay)
                         .lineLimit(1)
                 }
                 .contextMenu {
