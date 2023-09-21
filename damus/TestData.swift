@@ -66,7 +66,6 @@ var test_damus_state: DamusState = ({
     print("opening \(tempDir!)")
     let ndb = Ndb(path: tempDir)!
     let our_pubkey = test_pubkey
-    let user_search_cache = UserSearchCache()
     let pool = RelayPool(ndb: ndb)
     let settings = UserSettingsStore()
     let damus = DamusState(pool: pool,
@@ -74,7 +73,7 @@ var test_damus_state: DamusState = ({
                            likes: .init(our_pubkey: our_pubkey),
                            boosts: .init(our_pubkey: our_pubkey),
                            contacts: .init(our_pubkey: our_pubkey),
-                           profiles: .init(user_search_cache: user_search_cache, ndb: ndb),
+                           profiles: .init(ndb: ndb),
                            dms: .init(our_pubkey: our_pubkey),
                            previews: .init(),
                            zaps: .init(our_pubkey: our_pubkey),
@@ -91,7 +90,6 @@ var test_damus_state: DamusState = ({
                            muted_threads: .init(keypair: test_keypair),
                            wallet: .init(settings: settings),
                            nav: .init(),
-                           user_search_cache: user_search_cache,
                            music: .init(onChange: {_ in }),
                            video: .init(),
                            ndb: ndb)

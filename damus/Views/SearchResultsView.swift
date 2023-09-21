@@ -108,10 +108,12 @@ struct SearchResultsView: View {
         }
         .frame(maxHeight: .infinity)
         .onAppear {
-            self.result = search_for_string(profiles: damus_state.profiles, search)
+            let txn = NdbTxn.init(ndb: damus_state.ndb)
+            self.result = search_for_string(profiles: damus_state.profiles, search: search, txn: txn)
         }
         .onChange(of: search) { new in
-            self.result = search_for_string(profiles: damus_state.profiles, new)
+            let txn = NdbTxn.init(ndb: damus_state.ndb)
+            self.result = search_for_string(profiles: damus_state.profiles, search: search, txn: txn)
         }
     }
 }
@@ -125,7 +127,7 @@ struct SearchResultsView_Previews: PreviewProvider {
  */
 
 
-func search_for_string(profiles: Profiles, _ new: String) -> Search? {
+func search_for_string<Y>(profiles: Profiles, search new: String, txn: NdbTxn<Y>) -> Search? {
     guard new.count != 0 else {
         return nil
     }
@@ -154,7 +156,7 @@ func search_for_string(profiles: Profiles, _ new: String) -> Search? {
         return .note(NoteId(decoded.data))
     }
     
-    let multisearch = MultiSearch(hashtag: make_hashtagable(new), profiles: search_profiles(profiles: profiles, search: new))
+    let multisearch = MultiSearch(hashtag: make_hashtagable(new), profiles: search_profiles(profiles: profiles, search: new, txn: txn))
     return .multi(multisearch)
 }
 
@@ -171,7 +173,7 @@ func make_hashtagable(_ str: String) -> String {
     return String(new.filter{$0 != " "})
 }
 
-func search_profiles(profiles: Profiles, search: String) -> [Pubkey] {
+func search_profiles<Y>(profiles: Profiles, search: String, txn: NdbTxn<Y>) -> [Pubkey] {
     // Search by hex pubkey.
     if let pubkey = hex_decode_pubkey(search),
        profiles.lookup_key_by_pubkey(pubkey) != nil
@@ -189,5 +191,7 @@ func search_profiles(profiles: Profiles, search: String) -> [Pubkey] {
     }
 
     let new = search.lowercased()
-    return profiles.user_search_cache.search(key: new)
+
+    return profiles.search(search, limit: 10, txn: txn)
 }
+

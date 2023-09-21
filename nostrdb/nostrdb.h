@@ -25,6 +25,19 @@ struct ndb_t {
 	struct ndb *ndb;
 };
 
+struct ndb_search_key
+{
+	char search[24];
+	unsigned char id[32];
+	uint64_t timestamp;
+};
+
+struct ndb_search {
+	struct ndb_search_key *key;
+	uint64_t profile_key;
+	void *cursor; // MDB_cursor *
+};
+
 // required to keep a read 
 struct ndb_txn {
 	struct ndb *ndb;
@@ -165,6 +178,9 @@ int ndb_db_version(struct ndb *ndb);
 int ndb_process_event(struct ndb *, const char *json, int len);
 int ndb_process_events(struct ndb *, const char *ldjson, size_t len);
 int ndb_begin_query(struct ndb *, struct ndb_txn *);
+int ndb_search_profile(struct ndb_txn *txn, struct ndb_search *search, const char *query);
+int ndb_search_profile_next(struct ndb_search *search);
+void ndb_search_profile_end(struct ndb_search *search);
 void ndb_end_query(struct ndb_txn *);
 void *ndb_get_profile_by_pubkey(struct ndb_txn *txn, const unsigned char *pubkey, size_t *len, uint64_t *primkey);
 void *ndb_get_profile_by_key(struct ndb_txn *txn, uint64_t key, size_t *len);

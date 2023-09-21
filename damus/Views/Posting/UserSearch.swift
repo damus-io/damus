@@ -17,7 +17,8 @@ struct UserSearch: View {
     @EnvironmentObject var tagModel: TagModel
     
     var users: [Pubkey] {
-        return search_profiles(profiles: damus_state.profiles, search: search)
+        let txn = NdbTxn(ndb: damus_state.ndb)
+        return search_profiles(profiles: damus_state.profiles, search: search, txn: txn)
     }
     
     func on_user_tapped(pk: Pubkey) {

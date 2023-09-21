@@ -629,7 +629,7 @@ struct ContentView: View {
                                       likes: EventCounter(our_pubkey: pubkey),
                                       boosts: EventCounter(our_pubkey: pubkey),
                                       contacts: Contacts(our_pubkey: pubkey),
-                                      profiles: Profiles(user_search_cache: user_search_cache, ndb: ndb),
+                                      profiles: Profiles(ndb: ndb),
                                       dms: home.dms,
                                       previews: PreviewCache(),
                                       zaps: Zaps(our_pubkey: pubkey),
@@ -646,7 +646,6 @@ struct ContentView: View {
                                       muted_threads: MutedThreadsManager(keypair: keypair),
                                       wallet: WalletModel(settings: settings),
                                       nav: self.navigationCoordinator,
-                                      user_search_cache: user_search_cache,
                                       music: MusicController(onChange: music_changed),
                                       video: VideoController(),
                                       ndb: ndb
@@ -919,7 +918,6 @@ func handle_unfollow(state: DamusState, unfollow: FollowRef) -> Bool {
     switch unfollow {
     case .pubkey(let pk):
         state.contacts.remove_friend(pk)
-        state.user_search_cache.updateOwnContactsPetnames(id: state.pubkey, oldEvent: old_contacts, newEvent: ev)
     case .hashtag:
         // nothing to handle here really
         break

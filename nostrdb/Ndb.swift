@@ -188,6 +188,32 @@ class Ndb {
         }
     }
 
+    func search_profile<Y>(_ search: String, limit: Int, txn: NdbTxn<Y>) -> [Pubkey] {
+        var pks = Array<Pubkey>()
+
+        return search.withCString { q in
+            var s = ndb_search()
+            guard ndb_search_profile(&txn.txn, &s, q) != 0 else {
+                return pks
+            }
+
+            defer { ndb_search_profile_end(&s) }
+            pks.append(Pubkey(Data(bytes: &s.key.pointee.id.0, count: 32)))
+
+            var n = limit
+            while n > 0 {
+                guard ndb_search_profile_next(&s) != 0 else {
+                    return pks
+                }
+                pks.append(Pubkey(Data(bytes: &s.key.pointee.id.0, count: 32)))
+
+                n -= 1
+            }
+
+            return pks
+        }
+    }
+
     deinit {
         ndb_destroy(ndb.ndb)
     }

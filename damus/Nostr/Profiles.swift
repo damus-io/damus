@@ -38,10 +38,7 @@ class Profiles {
     @MainActor
     var nip05_pubkey: [String: Pubkey] = [:]
 
-    let user_search_cache: UserSearchCache
-
-    init(user_search_cache: UserSearchCache, ndb: Ndb) {
-        self.user_search_cache = user_search_cache
+    init(ndb: Ndb) {
         self.ndb = ndb
     }
 
@@ -82,6 +79,10 @@ class Profiles {
 
     func lookup_by_key(key: ProfileKey) -> NdbTxn<ProfileRecord?> {
         return ndb.lookup_profile_by_key(key: key)
+    }
+
+    func search<Y>(_ query: String, limit: Int, txn: NdbTxn<Y>) -> [Pubkey] {
+        return ndb.search_profile(query, limit: limit, txn: txn)
     }
 
     func lookup(id: Pubkey) -> NdbTxn<Profile?> {

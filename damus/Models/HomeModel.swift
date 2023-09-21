@@ -734,8 +734,6 @@ func load_our_contacts(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent)
             }
         }
     }
-
-    state.user_search_cache.updateOwnContactsPetnames(id: contacts.our_pubkey, oldEvent: m_old_ev, newEvent: ev)
 }
 
 
