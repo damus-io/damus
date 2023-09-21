@@ -82,12 +82,7 @@ struct ContentView: View {
     @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
     @AppStorage("has_seen_suggested_users") private var hasSeenSuggestedUsers = false
     let sub_id = UUID().description
-    var damus_filter: DamusFilter {
-        get {
-            return DamusFilter(hide_nsfw_tagged_content: self.damus_state?.settings.hide_nsfw_tagged_content ?? true)
-        }
-    }
-    
+
     @Environment(\.colorScheme) var colorScheme
     
     // connect retry timer
@@ -97,7 +92,13 @@ struct ContentView: View {
         Text("Are you lost?", comment: "Text asking the user if they are lost in the app.")
         .id("what")
     }
-    
+
+    func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
+        var filters = ContentFilters.defaults(damus_state!.settings)
+        filters.append(fstate.filter)
+        return ContentFilters(filters: filters).filter
+    }
+
     var PostingTimelineView: some View {
         VStack {
             ZStack {
@@ -105,10 +106,10 @@ struct ContentView: View {
                     // This is needed or else there is a bug when switching from the 3rd or 2nd tab to first. no idea why.
                     mystery
                     
-                    contentTimelineView(filter: damus_filter.get_filter(.posts))
+                    contentTimelineView(filter: content_filter(.posts))
                         .tag(FilterState.posts)
                         .id(FilterState.posts)
-                    contentTimelineView(filter: damus_filter.get_filter(.posts_and_replies))
+                    contentTimelineView(filter: content_filter(.posts_and_replies))
                         .tag(FilterState.posts_and_replies)
                         .id(FilterState.posts_and_replies)
                 }

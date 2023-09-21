@@ -7,15 +7,9 @@
 
 import Foundation
 
-protocol ContentFilter {
-    /// Function that implements the content filtering logic
-    /// - Parameter ev: The nostr event to be processed
-    /// - Returns: Must return `true` to show events, and return `false` to hide/filter events
-    func filter(ev: NostrEvent) -> Bool
-}
 
 /// Simple filter to determine whether to show posts or all posts and replies.
-enum FilterState : Int, ContentFilter {
+enum FilterState : Int {
     case posts_and_replies = 1
     case posts = 0
 
@@ -30,29 +24,31 @@ enum FilterState : Int, ContentFilter {
 }
 
 /// Simple filter to determine whether to show posts with #nsfw tags
-struct NSFWTagFilter: ContentFilter {
-    func filter(ev: NostrEvent) -> Bool {
+func nsfw_tag_filter(ev: NostrEvent) -> Bool {
         return ev.referenced_hashtags.first(where: { t in t.hashtag == "nsfw" }) == nil
-    }
 }
 
 /// Generic filter with various tweakable settings
-struct DamusFilter: ContentFilter {
-    let hide_nsfw_tagged_content: Bool
-    
+struct ContentFilters {
+    var filters: [(NostrEvent) -> Bool]
+
     func filter(ev: NostrEvent) -> Bool {
-        if self.hide_nsfw_tagged_content {
-            return NSFWTagFilter().filter(ev: ev)
+        for filter in filters {
+            if !filter(ev) {
+                return false
+            }
         }
-        else {
-            return true
-        }
+
+        return true
     }
-    
-    func get_filter(_ filter_state: FilterState) -> ((NostrEvent) -> Bool) {
-        return { ev in
-            return filter_state.filter(ev: ev) && self.filter(ev: ev)
+}
+
+extension ContentFilters {
+    static func defaults(_ settings: UserSettingsStore) -> [(NostrEvent) -> Bool] {
+        var filters = Array<(NostrEvent) -> Bool>()
+        if settings.hide_nsfw_tagged_content {
+            filters.append(nsfw_tag_filter)
         }
+        return filters
     }
-    
 }

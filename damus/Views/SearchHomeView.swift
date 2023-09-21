@@ -14,10 +14,10 @@ struct SearchHomeView: View {
     @StateObject var model: SearchHomeModel
     @State var search: String = ""
     @FocusState private var isFocused: Bool
-    var damus_filter: DamusFilter {
-        get {
-            return DamusFilter(hide_nsfw_tagged_content: self.damus_state.settings.hide_nsfw_tagged_content)
-        }
+
+    var content_filter: (NostrEvent) -> Bool {
+        let filters = ContentFilters.defaults(self.damus_state.settings)
+        return ContentFilters(filters: filters).filter
     }
 
     let preferredLanguages = Set(Locale.preferredLanguages.map { localeToLanguage($0) })
@@ -55,7 +55,7 @@ struct SearchHomeView: View {
             damus: damus_state,
             show_friend_icon: true,
             filter: { ev in
-                if !damus_filter.filter(ev: ev) {
+                if !content_filter(ev) {
                     return false
                 }
                 
