@@ -12,6 +12,7 @@ import UIKit
 struct ImageContextMenuModifier: ViewModifier {
     let url: URL?
     let image: UIImage?
+    let settings: UserSettingsStore
     
     @State var qrCodeLink: String = ""
     @State var open_link_confirm: Bool = false
@@ -44,20 +45,17 @@ struct ImageContextMenuModifier: ViewModifier {
                     let detector:CIDetector = CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: [CIDetectorAccuracy:CIDetectorAccuracyHigh])!
                     let ciImage: CIImage = CIImage(image:someImage)!
                     let features = detector.features(in: ciImage)
-                    for feature in features as! [CIQRCodeFeature] {
-                        qrCodeLink += feature.messageString!
+                    if let qrfeatures = features as? [CIQRCodeFeature] {
+                        for feature in qrfeatures {
+                            qrCodeLink += feature.messageString!
+                        }
                     }
                     
                     if qrCodeLink == "" {
                         no_link_found.toggle()
                     } else {
                         if qrCodeLink.contains("lnurl") {
-                            // TO DO:
-                            // Ideally this would open the user's default wallet from their settings but that would mean modifying way too many files
-                            qrCodeLink = "lightning:\(qrCodeLink)"
-                            if let url = URL(string: qrCodeLink) {
-                                openURL(url)
-                            }
+                            open_with_wallet(wallet: settings.default_wallet.model, invoice: qrCodeLink)
                         } else if let _ = URL(string: qrCodeLink) {
                             open_link_confirm.toggle()
                         }
