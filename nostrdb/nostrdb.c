@@ -124,12 +124,33 @@ struct ndb_tsid {
 	uint64_t timestamp;
 };
 
+// Copies only lowercase characters to the destination string and fills the rest with null bytes.
+// `dst` and `src` are pointers to the destination and source strings, respectively.
+// `n` is the maximum number of characters to copy.
+static void lowercase_strncpy(char *dst, const char *src, int n) {
+	int j = 0, i = 0;
+
+	if (!dst || !src || n == 0) {
+		return;
+	}
+
+	while (src[i] != '\0' && j < n) {
+		dst[j++] = tolower(src[i++]);
+	}
+
+	// Null-terminate and fill the destination string
+	while (j < n) {
+		dst[j++] = '\0';
+	}
+}
+
+
 static void ndb_make_search_key(struct ndb_search_key *key, unsigned char *id,
 			        uint64_t timestamp, const char *search)
 {
 	memcpy(key->id, id, 32);
 	key->timestamp = timestamp;
-	strncpy(key->search, search, sizeof(key->search) - 1);
+	lowercase_strncpy(key->search, search, sizeof(key->search) - 1);
 	key->search[sizeof(key->search) - 1] = '\0';
 }
 
@@ -265,8 +286,29 @@ static int ndb_migrate_user_search_indices(struct ndb *ndb)
 	return 1;
 }
 
+static int ndb_migrate_lower_user_search_indices(struct ndb *ndb)
+{
+	MDB_txn *txn;
+
+	if (mdb_txn_begin(ndb->lmdb.env, NULL, 0, &txn)) {
+		fprintf(stderr, "ndb_migrate_lower_user_search_indices: ndb_txn_begin failed\n");
+		return 0;
+	}
+
+	// just drop the search db so we can rebuild it
+	if (mdb_drop(txn, ndb->lmdb.dbs[NDB_DB_PROFILE_SEARCH], 0)) {
+		fprintf(stderr, "ndb_migrate_lower_user_search_indices: mdb_drop failed\n");
+		return 0;
+	}
+
+	mdb_txn_commit(txn);
+
+	return ndb_migrate_user_search_indices(ndb);
+}
+
 static struct ndb_migration MIGRATIONS[] = {
-	{ .fn = ndb_migrate_user_search_indices }
+	{ .fn = ndb_migrate_user_search_indices },
+	{ .fn = ndb_migrate_lower_user_search_indices }
 };
 
 
@@ -802,12 +844,13 @@ static uint64_t ndb_get_last_key(MDB_txn *txn, MDB_dbi db)
         return *((uint64_t*)key.mv_data);
 }
 
+//
 // make a search key meant for user queries without any other note info
 static void ndb_make_search_key_low(struct ndb_search_key *key, const char *search)
 {
 	memset(key->id, 0, sizeof(key->id));
 	key->timestamp = 0;
-	strncpy(key->search, search, sizeof(key->search) - 1);
+	lowercase_strncpy(key->search, search, sizeof(key->search) - 1);
 	key->search[sizeof(key->search) - 1] = '\0';
 }
 
