@@ -91,8 +91,8 @@ extension _AnyEncodable {
             try encode(nsnumber: number, into: &container)
         case let date as Date:
             try container.encode(date)
-        case let url as URL:
-            try container.encode(url)
+        case let profile_url as URL:
+            try container.encode(profile_url)
         #endif
         case let array as [Any?]:
             try container.encode(array.map { AnyEncodable($0) })

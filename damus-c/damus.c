@@ -28,9 +28,9 @@ static int parse_digit(struct cursor *cur, int *digit) {
 }
 
 
-static int parse_mention_index(struct cursor *cur, struct block *block) {
+static int parse_mention_index(struct cursor *cur, struct note_block *block) {
     int d1, d2, d3, ind;
-    const u8 *start = cur->p;
+    u8 *start = cur->p;
     
     if (!parse_str(cur, "#["))
         return 0;
@@ -59,9 +59,9 @@ static int parse_mention_index(struct cursor *cur, struct block *block) {
     return 1;
 }
 
-static int parse_hashtag(struct cursor *cur, struct block *block) {
+static int parse_hashtag(struct cursor *cur, struct note_block *block) {
     int c;
-    const u8 *start = cur->p;
+    u8 *start = cur->p;
     
     if (!parse_char(cur, '#'))
         return 0;
@@ -81,7 +81,7 @@ static int parse_hashtag(struct cursor *cur, struct block *block) {
     return 1;
 }
 
-static int add_block(struct blocks *blocks, struct block block)
+static int add_block(struct note_blocks *blocks, struct note_block block)
 {
     if (blocks->num_blocks + 1 >= MAX_BLOCKS)
         return 0;
@@ -90,9 +90,9 @@ static int add_block(struct blocks *blocks, struct block block)
     return 1;
 }
 
-static int add_text_block(struct blocks *blocks, const u8 *start, const u8 *end)
+static int add_text_block(struct note_blocks *blocks, const u8 *start, const u8 *end)
 {
-    struct block b;
+    struct note_block b;
     
     if (start == end)
         return 1;
@@ -104,8 +104,71 @@ static int add_text_block(struct blocks *blocks, const u8 *start, const u8 *end)
     return add_block(blocks, b);
 }
 
-static int parse_url(struct cursor *cur, struct block *block) {
-    const u8 *start = cur->p;
+static int consume_url_fragment(struct cursor *cur)
+{
+    int c;
+
+    if ((c = peek_char(cur, 0)) < 0)
+        return 1;
+
+    if (c != '#' && c != '?') {
+        return 1;
+    }
+
+    cur->p++;
+
+    return consume_until_whitespace(cur, 1);
+}
+
+static int consume_url_path(struct cursor *cur)
+{
+    int c;
+
+    if ((c = peek_char(cur, 0)) < 0)
+        return 1;
+
+    if (c != '/') {
+        return 1;
+    }
+
+    while (cur->p < cur->end) {
+        c = *cur->p;
+
+        if (c == '?' || c == '#' || is_whitespace(c)) {
+            return 1;
+        }
+
+        cur->p++;
+    }
+
+    return 1;
+}
+
+static int consume_url_host(struct cursor *cur)
+{
+	char c;
+	int count = 0;
+
+	while (cur->p < cur->end) {
+		c = *cur->p;
+		// TODO: handle IDNs
+        if (is_alphanumeric(c) || c == '.' || c == '-')
+		{
+			count++;
+			cur->p++;
+			continue;
+		}
+
+		return count != 0;
+	}
+
+
+	// this means the end of the URL hostname is the end of the buffer and we finished
+	return count != 0;
+}
+
+static int parse_url(struct cursor *cur, struct note_block *block) {
+    u8 *start = cur->p;
     
     if (!parse_str(cur, "http"))
         return 0;
@@ -121,15 +184,25 @@ static int parse_url(struct cursor *cur, struct block *block) {
             return 0;
         }
     }
-    
-    if (!consume_until_whitespace(cur, 1)) {
+
+    if (!(consume_url_host(cur) &&
+          consume_url_path(cur) &&
+          consume_url_fragment(cur)))
+    {
         cur->p = start;
         return 0;
     }
-    
-    // strip any unwanted characters
-    while(is_invalid_url_ending(peek_char(cur, -1))) cur->p--;
-    
+
+    // smart parens
+    if (start - 1 >= 0 &&
+        start < cur->end &&
+        *(start - 1) == '(' &&
+        (cur->p - 1) < cur->end &&
+        *(cur->p - 1) == ')')
+    {
+        cur->p--;
+    }
+
     block->type = BLOCK_URL;
     block->block.str.start = (const char *)start;
     block->block.str.end = (const char *)cur->p;
@@ -137,8 +210,8 @@ static int parse_url(struct cursor *cur, struct block *block) {
     return 1;
 }
 
-static int parse_invoice(struct cursor *cur, struct block *block) {
-    const u8 *start, *end;
+static int parse_invoice(struct cursor *cur, struct note_block *block) {
+    u8 *start, *end;
     char *fail;
     struct bolt11 *bolt11;
     // optional
@@ -177,12 +250,12 @@ static int parse_invoice(struct cursor *cur, struct block *block) {
 }
 
 
-static int parse_mention_bech32(struct cursor *cur, struct block *block) {
-    const u8 *start = cur->p;
+static int parse_mention_bech32(struct cursor *cur, struct note_block *block) {
+    u8 *start = cur->p;
     
-    if (!parse_str(cur, "nostr:"))
-        return 0;
-    
+    parse_char(cur, '@');
+    parse_str(cur, "nostr:");
+
     block->block.str.start = (const char *)cur->p;
     
     if (!parse_nostr_bech32(cur, &block->block.mention_bech32.bech32)) {
@@ -197,7 +270,7 @@ static int parse_mention_bech32(struct cursor *cur, struct block *block) {
     return 1;
 }
 
-static int add_text_then_block(struct cursor *cur, struct blocks *blocks, struct block block, const u8 **start, const u8 *pre_mention)
+static int add_text_then_block(struct cursor *cur, struct note_blocks *blocks, struct note_block block, u8 **start, const u8 *pre_mention)
 {
     if (!add_text_block(blocks, *start, pre_mention))
         return 0;
@@ -210,22 +283,28 @@ static int add_text_then_block(struct cursor *cur, struct blocks *blocks, struct
     return 1;
 }
 
-int damus_parse_content(struct blocks *blocks, const char *content) {
+int damus_parse_content(struct note_blocks *blocks, const char *content) {
     int cp, c;
     struct cursor cur;
-    struct block block;
-    const u8 *start, *pre_mention;
+    struct note_block block;
+    u8 *start, *pre_mention;
     
+    blocks->words = 0;
     blocks->num_blocks = 0;
-    make_cursor(&cur, (const u8*)content, strlen(content));
+    make_cursor((u8*)content, (u8*)content + strlen(content), &cur);
     
     start = cur.p;
     while (cur.p < cur.end && blocks->num_blocks < MAX_BLOCKS) {
         cp = peek_char(&cur, -1);
         c  = peek_char(&cur, 0);
         
+        // new word
+        if (is_whitespace(cp) && !is_whitespace(c)) {
+            blocks->words++;
+        }
+        
         pre_mention = cur.p;
-        if (cp == -1 || is_whitespace(cp) || c == '#') {
+        if (cp == -1 || is_left_boundary(cp) || c == '#') {
             if (c == '#' && (parse_mention_index(&cur, &block) || parse_hashtag(&cur, &block))) {
                 if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;
@@ -238,7 +317,7 @@ int damus_parse_content(struct blocks *blocks, const char *content) {
                 if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;
                 continue;
-            } else if (c == 'n' && parse_mention_bech32(&cur, &block)) {
+            } else if ((c == 'n' || c == '@') && parse_mention_bech32(&cur, &block)) {
                 if (!add_text_then_block(&cur, blocks, block, &start, pre_mention))
                     return 0;
                 continue;
@@ -256,12 +335,12 @@ int damus_parse_content(struct blocks *blocks, const char *content) {
     return 1;
 }
 
-void blocks_init(struct blocks *blocks) {
-    blocks->blocks = malloc(sizeof(struct block) * MAX_BLOCKS);
+void blocks_init(struct note_blocks *blocks) {
+    blocks->blocks = malloc(sizeof(struct note_block) * MAX_BLOCKS);
     blocks->num_blocks = 0;
 }
 
-void blocks_free(struct blocks *blocks) {
+void blocks_free(struct note_blocks *blocks) {
     if (!blocks->blocks) {
         return;
     }

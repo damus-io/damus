@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - "master"
+      - "ci"
   pull_request:
     branches:
       - "*"

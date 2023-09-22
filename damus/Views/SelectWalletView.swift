@@ -10,7 +10,7 @@ import SwiftUI
 struct SelectWalletView: View {
     let default_wallet: Wallet
     @Binding var active_sheet: Sheets?
-    let our_pubkey: String
+    let our_pubkey: Pubkey
     let invoice: String
     @State var invoice_copied: Bool = false
     
@@ -71,6 +71,6 @@ struct SelectWalletView_Previews: PreviewProvider {
     @State static var active_sheet: Sheets? = nil
     
     static var previews: some View {
-        SelectWalletView(default_wallet: .lnlink, active_sheet: $active_sheet, our_pubkey: "", invoice: "")
+        SelectWalletView(default_wallet: .lnlink, active_sheet: $active_sheet, our_pubkey: test_pubkey, invoice: "")
     }
 }

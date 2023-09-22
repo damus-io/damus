@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+import MarkdownUI
+
 let eula = """
 **End User License Agreement**
 
@@ -56,29 +58,24 @@ By using our Application, you signify your acceptance of this EULA. If you do no
 """
 
 struct EULAView: View {
-    @State private var login = false
-    @State var accepted = false
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismiss
+    var nav: NavigationCoordinator
 
     var body: some View {
         ZStack {
             ScrollView {
-                NavigationLink(destination: LoginView(accepted: $accepted), isActive: $login) {
-                    EmptyView()
-                }
-                
-                Text(Markdown.parse(content: eula))
+                Markdown(eula)
                     .padding()
             }
-            .padding(EdgeInsets(top: 20, leading: 10, bottom: 50, trailing: 10))
-            
+            .padding(EdgeInsets(top: 20, leading: 10, bottom: 60, trailing: 10))
+
             VStack {
                 Spacer()
-                
+
                 HStack {
                     Spacer()
-                    
+
                     Button(action: {
                         dismiss()
                     }) {
@@ -94,10 +91,11 @@ struct EULAView: View {
                                 .fill(DamusColors.darkGrey, strokeBorder: DamusColors.mediumGrey, lineWidth: 1)
                         }
                     }
-                    
+
+                    Spacer()
+
                     Button(action: {
-                        accepted = true
-                        login.toggle()
+                        nav.push(route: Route.Login)
                     }) {
                         HStack {
                             Text("Accept", comment:  "Button to accept the end user license agreement before being allowed into the app.")
@@ -106,9 +104,11 @@ struct EULAView: View {
                         .frame(minWidth: 75, maxHeight: 12, alignment: .center)
                     }
                     .buttonStyle(GradientButtonStyle())
+
+                    Spacer()
                 }
-                .padding(.trailing, 30)
             }
+            .padding(.bottom, 5)
         }
         .background(
             Image("eula-bg")
@@ -126,6 +126,6 @@ struct EULAView: View {
 
 struct EULAView_Previews: PreviewProvider {
     static var previews: some View {
-        EULAView()
+        EULAView(nav: .init())
     }
 }

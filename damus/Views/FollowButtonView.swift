@@ -31,20 +31,16 @@ struct FollowButtonView: View {
                         .stroke(follow_state == .unfollows ? .clear : borderColor(), lineWidth: 1)
                 }
         }
-        .onReceive(handle_notify(.followed)) { notif in
-            let pk = notif.object as! String
-            if pk != target.pubkey {
-                return
-            }
-            
+        .onReceive(handle_notify(.followed)) { follow in
+            guard case .pubkey(let pk) = follow,
+                  pk == target.pubkey else { return }
+
             self.follow_state = .follows
         }
-        .onReceive(handle_notify(.unfollowed)) { notif in
-            let pk = notif.object as! String
-            if pk != target.pubkey {
-                return
-            }
-            
+        .onReceive(handle_notify(.unfollowed)) { unfollow in
+            guard case .pubkey(let pk) = unfollow,
+                  pk == target.pubkey else { return }
+
             self.follow_state = .unfollows
         }
     }
@@ -67,7 +63,7 @@ struct FollowButtonView: View {
 }
 
 struct FollowButtonPreviews: View {
-    let target: FollowTarget = .pubkey("")
+    let target: FollowTarget = .pubkey(test_pubkey)
     var body: some View {
         VStack {
             Text(verbatim: "Unfollows")
@@ -97,14 +93,14 @@ struct FollowButtonView_Previews: PreviewProvider {
 func perform_follow_btn_action(_ fs: FollowState, target: FollowTarget) -> FollowState {
     switch fs {
     case .follows:
-        notify(.unfollow, target)
+        notify(.unfollow(target))
         return .following
     case .following:
         return .following
     case .unfollowing:
         return .following
     case .unfollows:
-        notify(.follow, target)
+        notify(.follow(target))
         return .unfollowing
     }
 }

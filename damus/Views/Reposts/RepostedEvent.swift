@@ -15,23 +15,20 @@ struct RepostedEvent: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            let prof = damus.profiles.lookup(id: event.pubkey)
-            let booster_profile = ProfileView(damus_state: damus, pubkey: event.pubkey)
-            
-            NavigationLink(destination: booster_profile) {
-                Reposted(damus: damus, pubkey: event.pubkey, profile: prof)
+            NavigationLink(value: Route.ProfileByKey(pubkey: event.pubkey)) {
+                Reposted(damus: damus, pubkey: event.pubkey)
                     .padding(.horizontal)
             }
            .buttonStyle(PlainButtonStyle())
             
             //SelectedEventView(damus: damus, event: inner_ev, size: .normal)
-            TextEvent(damus: damus, event: inner_ev, pubkey: inner_ev.pubkey, options: options)
+            EventView(damus: damus, event: inner_ev, pubkey: inner_ev.pubkey, options: options.union(.wide))
         }
     }
 }
 
 struct RepostedEvent_Previews: PreviewProvider {
     static var previews: some View {
-        RepostedEvent(damus: test_damus_state(), event: test_event, inner_ev: test_event, options: [])
+        RepostedEvent(damus: test_damus_state, event: test_note, inner_ev: test_note, options: [])
     }
 }

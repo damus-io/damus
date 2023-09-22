@@ -38,7 +38,6 @@ struct BookmarksView: View {
             } else {
                 ScrollView {
                     InnerTimelineView(events: EventHolder(events: bookmarks, incoming: []), damus: state, filter: noneFilter)
-
                 }
             }
         }

@@ -94,11 +94,23 @@ damus implements the following [Nostr Implementation Possibilities][nips]
 
 Contributors welcome! Start by examining known issues: https://github.com/damus-io/damus/issues.
 
-### Code
+### Mailing lists
 
-[Email patches][git-send-email] to jb55@jb55.com are preferred, but I accept PRs on GitHub as well.
+We have a few mailing lists that anyone can join to get involved in damus development:
 
-[git-send-email]: http://git-send-email.io
+- [dev][dev-list] - development discussions
+- [patches][patches-list] - code submission and review
+- [product][product-list] - product discussions
+- [design][design-list] - design discussions
+
+[dev-list]: https://damus.io/list/dev
+[patches-list]: https://damus.io/list/patches
+[product-list]: https://damus.io/list/product
+[design-list]: https://damus.io/list/design
+
+### Contributing
+
+See [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md)
 
 ### Privacy
 Your internet protocol (IP) address is exposed to the relays you connect to, and third party media hosters (e.g. nostr.build, imgur.com, giphy.com, youtube.com etc.) that render on Damus. If you want to improve your privacy, consider utilizing a service that masks your IP address (e.g. a VPN) from trackers online.

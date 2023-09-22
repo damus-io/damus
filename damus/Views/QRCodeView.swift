@@ -9,10 +9,14 @@ import SwiftUI
 import CoreImage.CIFilterBuiltins
 
 struct ProfileScanResult: Equatable {
-    let pubkey: String
-    
-    init(hex: String) {
-        self.pubkey = hex
+    let pubkey: Pubkey
+
+    init?(hex: String) {
+        guard let pk = hex_decode(hex).map({ bytes in Pubkey(Data(bytes)) }) else {
+            return nil
+        }
+
+        self.pubkey = pk
     }
     
     init?(string: String) {
@@ -25,14 +29,17 @@ struct ProfileScanResult: Equatable {
             str.removeFirst("nostr:".count)
         }
         
-        if let _ = hex_decode(str), str.count == 64 {
-            self = .init(hex: str)
+        if let decoded = hex_decode(str),
+           str.count == 64
+        {
+            self.pubkey = Pubkey(Data(decoded))
             return
         }
         
-        if str.starts(with: "npub"), let b32 = try? bech32_decode(str) {
-            let hex = hex_encode(b32.data)
-            self = .init(hex: hex)
+        if str.starts(with: "npub"),
+           let b32 = try? bech32_decode(str)
+        {
+            self.pubkey = Pubkey(b32.data)
             return
         }
         
@@ -42,31 +49,20 @@ struct ProfileScanResult: Equatable {
 
 struct QRCodeView: View {
     let damus_state: DamusState
-    @State var pubkey: String
+    @State var pubkey: Pubkey
     
     @Environment(\.presentationMode) var presentationMode
     
     @State private var selectedTab = 0
-    
     @State var scanResult: ProfileScanResult? = nil
-    
-    @State var showProfileView: Bool = false
     @State var profile: Profile? = nil
     @State var error: String? = nil
-    
     @State private var outerTrimEnd: CGFloat = 0
+
     var animationDuration: Double = 0.5
     
     let generator = UIImpactFeedbackGenerator(style: .light)
 
-    var maybe_key: String? {
-        guard let key = bech32_pubkey(pubkey) else {
-            return nil
-        }
-
-        return key
-    }
-    
     @ViewBuilder
     func navImage(systemImage: String) -> some View {
         Image(systemName: systemImage)
@@ -102,10 +98,8 @@ struct QRCodeView: View {
                 TabView(selection: $selectedTab) {
                     QRView
                         .tag(0)
-                    if pubkey == damus_state.pubkey {
-                        QRCameraView()
-                            .tag(1)
-                    }
+                    QRCameraView()
+                        .tag(1)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 .onAppear {
@@ -124,9 +118,11 @@ struct QRCodeView: View {
     
     var QRView: some View {
         VStack(alignment: .center) {
-            let profile = damus_state.profiles.lookup(id: pubkey)
-            
-            if (damus_state.profiles.lookup(id: damus_state.pubkey)?.picture) != nil {
+            let profile_txn = damus_state.profiles.lookup(id: pubkey)
+            let profile = profile_txn.unsafeUnownedValue
+            let our_profile = damus_state.ndb.lookup_profile_with_txn(damus_state.pubkey, txn: profile_txn)
+
+            if our_profile?.profile?.picture != nil {
                 ProfilePicView(pubkey: pubkey, size: 90.0, highlight: .custom(DamusColors.white, 3.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                     .padding(.top, 50)
             } else {
@@ -146,18 +142,16 @@ struct QRCodeView: View {
             
             Spacer()
             
-            if let key = maybe_key {
-                Image(uiImage: generateQRCode(pubkey: "nostr:" + key))
-                    .interpolation(.none)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 300, height: 300)
-                    .cornerRadius(10)
-                    .overlay(RoundedRectangle(cornerRadius: 10)
-                        .stroke(DamusColors.white, lineWidth: 5.0))
-                    .shadow(radius: 10)
-            }
-            
+            Image(uiImage: generateQRCode(pubkey: "nostr:" + pubkey.npub))
+                .interpolation(.none)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 300, height: 300)
+                .cornerRadius(10)
+                .overlay(RoundedRectangle(cornerRadius: 10)
+                    .stroke(DamusColors.white, lineWidth: 5.0))
+                .shadow(radius: 10)
+
             Spacer()
             
             Text("Follow me on Nostr", comment: "Text on QR code view to prompt viewer looking at screen to follow the user.")
@@ -208,13 +202,6 @@ struct QRCodeView: View {
             .shadow(radius: 10)
             
             Spacer()
-            
-            if let scanResult {
-                let dst = ProfileView(damus_state: damus_state, pubkey: scanResult.pubkey)
-                NavigationLink(destination: dst, isActive: $showProfileView) {
-                    EmptyView()
-                }
-            }
             
             Spacer()
             
@@ -271,9 +258,11 @@ struct QRCodeView: View {
     
     func show_profile_after_delay() {
         DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
-            showProfileView = true
+            if let scanResult {
+                damus_state.nav.push(route: Route.ProfileByKey(pubkey: scanResult.pubkey))
+                presentationMode.wrappedValue.dismiss()
+            }
         }
-        
     }
 
     func cameraAnimate(completion: @escaping () -> Void) {
@@ -306,7 +295,7 @@ struct QRCodeView: View {
 
 struct QRCodeView_Previews: PreviewProvider {
     static var previews: some View {
-        QRCodeView(damus_state: test_damus_state(), pubkey: test_event.pubkey)
+        QRCodeView(damus_state: test_damus_state, pubkey: test_note.pubkey)
     }
 }
 

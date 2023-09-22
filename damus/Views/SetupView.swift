@@ -17,16 +17,12 @@ func hex_col(r: UInt8, g: UInt8, b: UInt8) -> Color {
 
 
 struct SetupView: View {
-    @State private var eula = false
+    @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
     
     var body: some View {
-        NavigationView {
+        NavigationStack(path: $navigationCoordinator.path) {
             ZStack {
                 VStack(alignment: .center) {
-                    NavigationLink(destination: EULAView(), isActive: $eula) {
-                        EmptyView()
-                    }
-                    
                     Spacer()
                     
                     Image("logo-nobg")
@@ -53,7 +49,7 @@ struct SetupView: View {
                     Spacer()
                     
                     Button(action: {
-                        eula.toggle()
+                        navigationCoordinator.push(route: Route.EULA)
                     }) {
                         HStack {
                             Text("Let's get started!", comment: "Button to continue to login page.")
@@ -65,13 +61,10 @@ struct SetupView: View {
                     .padding()
                 }
             }
-            .background(
-                Image("login-header")
-                    .resizable()
-                    .frame(maxWidth: .infinity, maxHeight: 300, alignment: .center)
-                    .ignoresSafeArea(),
-                alignment: .top
-            )
+            .background(DamusBackground(maxHeight: 300), alignment: .top)
+            .navigationDestination(for: Route.self) { route in
+                route.view(navigationCoordinator: navigationCoordinator, damusState: DamusState.empty)
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationViewStyle(StackNavigationViewStyle())

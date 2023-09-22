@@ -7,13 +7,27 @@
 
 import SwiftUI
 
+fileprivate extension ReportTarget {
+    func reportTags(type: ReportType) -> [[String]] {
+        switch self {
+        case .user(let pubkey):
+            return [["p", pubkey.hex(), type.rawValue]]
+        case .note(let notet):
+            return [["e", notet.note_id.hex(), type.rawValue],
+                    ["p", notet.pubkey.hex()]]
+        }
+    }
+}
+
 struct ReportView: View {
     let postbox: PostBox
     let target: ReportTarget
-    let privkey: String
-     
+    let keypair: FullKeypair
+
     @State var report_sent: Bool = false
     @State var report_id: String = ""
+    @State var report_message: String = ""
+    @State var selected_report_type: ReportType?
     
     var body: some View {
         if report_sent {
@@ -43,17 +57,25 @@ struct ReportView: View {
         .padding()
     }
     
-    func do_send_report(type: ReportType) {
-        guard let ev = send_report(privkey: privkey, postbox: postbox, target: target, type: type) else {
+    func do_send_report() {
+        guard let selected_report_type,
+              let ev = NostrEvent(content: report_message, keypair: keypair.to_keypair(), kind: 1984, tags: target.reportTags(type: selected_report_type)) else {
             return
         }
         
-        guard let note_id = bech32_note_id(ev.id) else {
-            return
-        }
+        postbox.send(ev)
         
         report_sent = true
-        report_id = note_id
+        report_id = bech32_note_id(ev.id)
+    }
+
+    var send_report_button_text: String {
+        switch target {
+        case .note:
+            return NSLocalizedString("Report Note", comment: "Button to report a note.")
+        case .user:
+            return NSLocalizedString("Report User", comment: "Button to report a user.")
+        }
     }
     
     var MainForm: some View {
@@ -63,53 +85,57 @@ struct ReportView: View {
                 .font(.headline)
                 .padding()
             
-        Form {
-            Section(content: {
-                Button(NSLocalizedString("It's spam", comment: "Button for user to report that the account or content has spam.")) {
-                    do_send_report(type: .spam)
-                }
-                
-                Button(NSLocalizedString("Nudity or explicit content", comment: "Button for user to report that the account or content has nudity or explicit content.")) {
-                    do_send_report(type: .explicit)
-                }
-                
-                       Button(NSLocalizedString("Illegal content", comment: "Button for user to report that the account or content has illegal content.")) {
-                    do_send_report(type: .illegal)
-                }
-                
-                if case .user = target {
-                    Button(NSLocalizedString("They are impersonating someone", comment: "Button for user to report that the account is impersonating someone.")) {
-                        do_send_report(type: .impersonation)
+            Form {
+                Section(content: {
+                    Picker("", selection: $selected_report_type) {
+                        ForEach(ReportType.allCases, id: \.self) { report_type in
+                            // Impersonation type is not supported when reporting notes.
+                            switch target {
+                            case .note:
+                                if report_type != .impersonation {
+                                    Text(verbatim: String(describing: report_type))
+                                        .tag(Optional(report_type))
+                                }
+                            case .user:
+                                Text(verbatim: String(describing: report_type))
+                                    .tag(Optional(report_type))
+                            }
+                        }
                     }
-                }
-            }, header: {
-                Text("What do you want to report?", comment: "Header text to prompt user what issue they want to report.")
-            }, footer: {
-                Text("Your report will be sent to the relays you are connected to", comment: "Footer text to inform user what will happen when the report is submitted.")
-            })
-        }
-        }
-    }
-}
+                    .labelsHidden()
+                    .pickerStyle(.inline)
+                }, header: {
+                    Text("What do you want to report?", comment: "Header text to prompt user what issue they want to report.")
+                })
 
-func send_report(privkey: String, postbox: PostBox, target: ReportTarget, type: ReportType) -> NostrEvent? {
-    let report = Report(type: type, target: target, message: "")
-    guard let ev = create_report_event(privkey: privkey, report: report) else {
-        return nil
+                Section(content: {
+                    TextField(NSLocalizedString("Optional", comment: "Prompt to enter optional additional information when reporting an account or content."), text: $report_message, axis: .vertical)
+                }, header: {
+                    Text("Additional information", comment: "Header text to prompt user to optionally provide additional information when reporting a user or note.")
+                })
+
+                Section(content: {
+                    Button(send_report_button_text) {
+                        do_send_report()
+                    }
+                    .disabled(selected_report_type == nil)
+                }, footer: {
+                    Text("Your report will be sent to the relays you are connected to", comment: "Footer text to inform user what will happen when the report is submitted.")
+                })
+            }
+        }
     }
-    postbox.send(ev)
-    return ev
 }
 
 struct ReportView_Previews: PreviewProvider {
     static var previews: some View {
-        let ds = test_damus_state()
+        let ds = test_damus_state
         VStack {
         
-        ReportView(postbox: ds.postbox, target: ReportTarget.user(""), privkey: "")
-        
-            ReportView(postbox: ds.postbox, target: ReportTarget.user(""), privkey: "", report_sent: true, report_id: "report_id")
-            
+            ReportView(postbox: ds.postbox, target: ReportTarget.user(test_pubkey), keypair: test_keypair.to_full()!)
+
+            ReportView(postbox: ds.postbox, target: ReportTarget.user(test_pubkey), keypair: test_keypair.to_full()!, report_sent: true, report_id: "report_id")
+
         }
     }
 }

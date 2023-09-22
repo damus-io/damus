@@ -20,71 +20,127 @@ enum ValidationResult: Decodable {
     case bad_sig
 }
 
-struct ReferencedId: Identifiable, Hashable, Equatable {
-    let ref_id: String
-    let relay_id: String?
-    let key: String
+typealias NostrEvent = NdbNote
+typealias TagElem = NdbTagElem
+typealias Tag = TagSequence
+typealias Tags = TagsSequence
+//typealias TagElem = String
+//typealias Tag = [TagElem]
+//typealias Tags = [Tag]
+//typealias NostrEvent = NostrEventOld
 
-    var id: String {
-        return ref_id
-    }
-    
-    static func q(_ id: String, relay_id: String? = nil) -> ReferencedId {
-        return ReferencedId(ref_id: id, relay_id: relay_id, key: "q")
-    }
-    
-    static func e(_ id: String, relay_id: String? = nil) -> ReferencedId {
-        return ReferencedId(ref_id: id, relay_id: relay_id, key: "e")
-    }
-}
+let MAX_NOTE_SIZE: Int = 2 << 18
 
-class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Hashable, Comparable {
-    static func == (lhs: NostrEvent, rhs: NostrEvent) -> Bool {
-        return lhs.id == rhs.id
+    /*
+class NostrEventOld: Codable, Identifiable, CustomStringConvertible, Equatable, Hashable, Comparable {
+    // TODO: memory mapped db events
+    private var note_data: UnsafeMutablePointer<ndb_note>
+
+    init(data: UnsafeMutablePointer<ndb_note>) {
+        self.note_data = data
     }
-    
-    static func < (lhs: NostrEvent, rhs: NostrEvent) -> Bool {
-        return lhs.created_at < rhs.created_at
+
+    var id: [UInt8] {
+        let buffer = UnsafeBufferPointer(start: ndb_note_id(note_data), count: 32)
+        return Array(buffer)
     }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+
+    var content: String {
+        String(cString: ndb_note_content(self.note_data))
     }
-    
-    var id: String
-    var sig: String
-    var tags: [[String]]
-    var boosted_by: String?
+
+    var sig: [UInt8] {
+        let buffer = UnsafeBufferPointer(start: ndb_note_signature(note_data), count: 64)
+        return Array(buffer)
+    }
+
+    var tags: TagIterator
+
+    let id: String
+    let content: String
+    let sig: String
+    let tags: Tags
+
+    //var boosted_by: String?
 
     // cached field for pow calc
     //var pow: Int?
 
     // custom flags for internal use
-    var flags: Int = 0
+    //var flags: Int = 0
 
     let pubkey: String
-    let created_at: Int64
-    let kind: Int
-    let content: String
-    
+    let created_at: UInt32
+    let kind: UInt32
+
+    // cached stuff
+    private var _event_refs: [EventRef]? = nil
+    var decrypted_content: String? = nil
+    private var _blocks: Blocks? = nil
+    private lazy var inner_event: NostrEventOld? = {
+        return event_from_json(dat: self.content)
+    }()
+
+    static func == (lhs: NostrEventOld, rhs: NostrEventOld) -> Bool {
+        return lhs.id == rhs.id
+    }
+
+    static func < (lhs: NostrEventOld, rhs: NostrEventOld) -> Bool {
+        return lhs.created_at < rhs.created_at
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, sig, tags, pubkey, created_at, kind, content
+    }
+
+    static func owned_from_json(json: String) -> NostrEventOld? {
+        let decoder = JSONDecoder()
+        guard let dat = json.data(using: .utf8) else {
+            return nil
+        }
+        guard let ev = try? decoder.decode(NostrEventOld.self, from: dat) else {
+            return nil
+        }
+
+        return ev
+    }
+
+    init?(content: String, keypair: Keypair, kind: UInt32 = 1, tags: [[String]] = [], createdAt: UInt32 = UInt32(Date().timeIntervalSince1970)) {
+
+        self.content = content
+        self.pubkey = keypair.pubkey
+        self.kind = kind
+        self.tags = tags
+        self.created_at = createdAt
+
+        if let privkey = keypair.privkey {
+            self.id = hex_encode(calculate_event_id(pubkey: pubkey, created_at: created_at, kind: kind, tags: tags, content: content))
+            self.sig = sign_id(privkey: privkey, id: self.id)
+        } else {
+            self.id = ""
+            self.sig = ""
+        }
+    }
+}
+
+extension NostrEventOld {
     var is_textlike: Bool {
-        return kind == 1 || kind == 42
+        return kind == 1 || kind == 42 || kind == 30023
     }
-    
+
     var too_big: Bool {
-        return self.content.utf8.count > 16000
+        return known_kind != .longform && self.content.utf8.count > 16000
     }
-    
+
     var should_show_event: Bool {
         return !too_big
     }
-    
-    var is_valid_id: Bool {
-        return calculate_event_id(ev: self) == self.id
-    }
-    
-    private var _blocks: [Block]? = nil
-    func blocks(_ privkey: String?) -> [Block] {
+
+    func blocks(_ privkey: String?) -> Blocks {
         if let bs = _blocks {
             return bs
         }
@@ -93,37 +149,32 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         return blocks
     }
 
-    func get_blocks(content: String) -> [Block] {
-        return parse_mentions(content: content, tags: self.tags)
+    func get_blocks(content: String) -> Blocks {
+        return parse_note_content(content: content, tags: self.tags)
     }
 
-    private lazy var inner_event: NostrEvent? = {
-        return event_from_json(dat: self.content)
-    }()
-    
-    func get_inner_event(cache: EventCache) -> NostrEvent? {
+
+    func get_inner_event(cache: EventCache) -> NostrEventOld? {
         guard self.known_kind == .boost else {
             return nil
         }
-        
+
         if self.content == "", let ref = self.referenced_ids.first {
-            return cache.lookup(ref.ref_id)
+            return cache.lookup(ref.ref_id.string())
         }
-        
+
         return self.inner_event
     }
-    
-    private var _event_refs: [EventRef]? = nil
+
     func event_refs(_ privkey: String?) -> [EventRef] {
         if let rs = _event_refs {
             return rs
         }
-        let refs = interpret_event_refs(blocks: self.blocks(privkey), tags: self.tags)
+        let refs = interpret_event_refs(blocks: self.blocks(privkey).blocks, tags: self.tags)
         self._event_refs = refs
         return refs
     }
 
-    var decrypted_content: String? = nil
 
     func decrypted(privkey: String?) -> String? {
         if let decrypted_content = decrypted_content {
@@ -133,18 +184,18 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         guard let key = privkey else {
             return nil
         }
-        
+
         guard let our_pubkey = privkey_to_pubkey(privkey: key) else {
             return nil
         }
-        
+
         var pubkey = self.pubkey
         // This is our DM, we need to use the pubkey of the person we're talking to instead
         if our_pubkey == pubkey {
             guard let refkey = self.referenced_pubkeys.first else {
                 return nil
             }
-            
+
             pubkey = refkey.ref_id
         }
 
@@ -158,7 +209,7 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         if known_kind == .dm {
             return decrypted(privkey: privkey) ?? "*failed to decrypt content*"
         }
-        
+
         return content
     }
 
@@ -168,10 +219,6 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
 
     var known_kind: NostrKind? {
         return NostrKind.init(rawValue: kind)
-    }
-
-    private enum CodingKeys: String, CodingKey {
-        case id, sig, tags, pubkey, created_at, kind, content
     }
 
     private func get_referenced_ids(key: String) -> [ReferencedId] {
@@ -185,14 +232,14 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
             }
         }
     }
-    
+
     public func thread_id(privkey: String?) -> String {
         for ref in event_refs(privkey) {
             if let thread_id = ref.is_thread_id {
                 return thread_id.ref_id
             }
         }
-        
+
         return self.id
     }
 
@@ -213,9 +260,9 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         return tag_to_refid(tags[last])
     }
 
-    public func references(id: String, key: String) -> Bool {
+    public func references(id: String, key: AsciiCharacter) -> Bool {
         for tag in tags {
-            if tag.count >= 2 && tag[0] == key {
+            if tag.count >= 2 && tag[0].matches_char(key) {
                 if tag[1] == id {
                     return true
                 }
@@ -226,13 +273,13 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
     }
 
     func is_reply(_ privkey: String?) -> Bool {
-        return event_is_reply(self, privkey: privkey)
+        return event_is_reply(self.event_refs(privkey))
     }
 
     func note_language(_ privkey: String?) -> String? {
         // Rely on Apple's NLLanguageRecognizer to tell us which language it thinks the note is in
         // and filter on only the text portions of the content as URLs and hashtags confuse the language recognizer.
-        let originalBlocks = blocks(privkey)
+        let originalBlocks = blocks(privkey).blocks
         let originalOnlyText = originalBlocks.compactMap { $0.is_text }.joined(separator: " ")
 
         // Only accept language recognition hypothesis if there's at least a 50% probability that it's accurate.
@@ -256,43 +303,25 @@ class NostrEvent: Codable, Identifiable, CustomStringConvertible, Equatable, Has
         return get_referenced_ids(key: "p")
     }
 
-    public var is_local: Bool {
-        return (self.flags & 1) != 0
+    public var referenced_hashtags: [ReferencedId] {
+        return get_referenced_ids(key: "t")
     }
 
-    init(id: String = "", content: String, pubkey: String, kind: Int = 1, tags: [[String]] = [], createdAt: Int64 = Int64(Date().timeIntervalSince1970)) {
-        self.id = id
-        self.sig = ""
-
-        self.content = content
-        self.pubkey = pubkey
-        self.kind = kind
-        self.tags = tags
-        self.created_at = createdAt
-    }
-
-    func calculate_id() {
-        self.id = calculate_event_id(ev: self)
-    }
-
-    func sign(privkey: String) {
-        self.sig = sign_event(privkey: privkey, ev: self)
-    }
-    
     var age: TimeInterval {
         let event_date = Date(timeIntervalSince1970: TimeInterval(created_at))
         return Date.now.timeIntervalSince(event_date)
     }
 }
+     */
 
-func sign_event(privkey: String, ev: NostrEvent) -> String {
+func sign_id(privkey: String, id: String) -> String {
     let priv_key_bytes = try! privkey.bytes
     let key = try! secp256k1.Signing.PrivateKey(rawRepresentation: priv_key_bytes)
 
     // Extra params for custom signing
 
-    var aux_rand = random_bytes(count: 64)
-    var digest = try! ev.id.bytes
+    var aux_rand = random_bytes(count: 64).bytes
+    var digest = try! id.bytes
 
     // API allows for signing variable length messages
     let signature = try! key.schnorr.signature(message: &digest, auxiliaryRand: &aux_rand)
@@ -301,7 +330,7 @@ func sign_event(privkey: String, ev: NostrEvent) -> String {
 }
 
 func decode_nostr_event(txt: String) -> NostrResponse? {
-    return decode_data(Data(txt.utf8))
+    return NostrResponse.owned_from_json(json: txt)
 }
 
 func encode_json<T: Encodable>(_ val: T) -> String? {
@@ -311,8 +340,33 @@ func encode_json<T: Encodable>(_ val: T) -> String? {
 }
 
 func decode_nostr_event_json(json: String) -> NostrEvent? {
-    return decode_json(json)
+    return NostrEvent.owned_from_json(json: json)
 }
+
+/*
+func decode_nostr_event_json(json: String) -> NostrEvent? {
+    guard let json_str = json.cString(using: .utf8) else {
+        return nil
+    }
+
+    // Allocate a double pointer (pointer to pointer) for ndb_note
+    var notePtr: UnsafeMutablePointer<ndb_note>? = nil
+
+    // Create the buffer
+    var buf = [Int8](repeating: 0, count: 2<<18)
+
+    // Call the C function
+    let result = withUnsafeMutablePointer(to: &notePtr) { (ptr) -> Int32 in
+        return ndb_note_from_json(json_str, Int32(json_str.count), ptr, &buf, Int32(buf.count))
+    }
+
+    guard result == 0, let note = notePtr?.pointee else {
+        return nil
+    }
+
+    return .init(data: note)
+}
+*/
 
 func decode_json<T: Decodable>(_ val: String) -> T? {
     return try? JSONDecoder().decode(T.self, from: Data(val.utf8))
@@ -329,32 +383,28 @@ func decode_data<T: Decodable>(_ data: Data) -> T? {
     return nil
 }
 
-func event_commitment(ev: NostrEvent, tags: String) -> String {
+func event_commitment(pubkey: Pubkey, created_at: UInt32, kind: UInt32, tags: [[String]], content: String) -> String {
     let encoder = JSONEncoder()
     encoder.outputFormatting = .withoutEscapingSlashes
-    let str_data = try! encoder.encode(ev.content)
+    let str_data = try! encoder.encode(content)
     let content = String(decoding: str_data, as: UTF8.self)
-    let commit = "[0,\"\(ev.pubkey)\",\(ev.created_at),\(ev.kind),\(tags),\(content)]"
-    //print("COMMIT", commit)
-    return commit
-}
-
-func calculate_event_commitment(ev: NostrEvent) -> Data {
+    
     let tags_encoder = JSONEncoder()
     tags_encoder.outputFormatting = .withoutEscapingSlashes
-    let tags_data = try! tags_encoder.encode(ev.tags)
+    let tags_data = try! tags_encoder.encode(tags)
     let tags = String(decoding: tags_data, as: UTF8.self)
 
-    let target = event_commitment(ev: ev, tags: tags)
-    let target_data = target.data(using: .utf8)!
-    return target_data
+    return "[0,\"\(pubkey.hex())\",\(created_at),\(kind),\(tags),\(content)]"
 }
 
-func calculate_event_id(ev: NostrEvent) -> String {
-    let commitment = calculate_event_commitment(ev: ev)
-    let hash = sha256(commitment)
+func calculate_event_commitment(pubkey: Pubkey, created_at: UInt32, kind: UInt32, tags: [[String]], content: String) -> Data {
+    let target = event_commitment(pubkey: pubkey, created_at: created_at, kind: kind, tags: tags, content: content)
+    return target.data(using: .utf8)!
+}
 
-    return hex_encode(hash)
+func calculate_event_id(pubkey: Pubkey, created_at: UInt32, kind: UInt32, tags: [[String]], content: String) -> NoteId {
+    let commitment = calculate_event_commitment(pubkey: pubkey, created_at: created_at, kind: kind, tags: tags, content: content)
+    return NoteId(sha256(commitment))
 }
 
 
@@ -390,8 +440,6 @@ func hex_encode(_ data: Data) -> String {
     return str
 }
 
-
-
 func random_bytes(count: Int) -> Data {
     var bytes = [Int8](repeating: 0, count: count)
     guard
@@ -402,47 +450,7 @@ func random_bytes(count: Int) -> Data {
     return Data(bytes: bytes, count: count)
 }
 
-func refid_to_tag(_ ref: ReferencedId) -> [String] {
-    var tag = [ref.key, ref.ref_id]
-    if let relay_id = ref.relay_id {
-        tag.append(relay_id)
-    }
-    return tag
-}
-
-func tag_to_refid(_ tag: [String]) -> ReferencedId? {
-    if tag.count == 0 {
-        return nil
-    }
-    if tag.count == 1 {
-        return nil
-    }
-
-    var relay_id: String? = nil
-    if tag.count > 2 {
-        relay_id = tag[2]
-    }
-
-    return ReferencedId(ref_id: tag[1], relay_id: relay_id, key: tag[0])
-}
-
-func get_referenced_ids(tags: [[String]], key: String) -> [ReferencedId] {
-    return tags.reduce(into: []) { (acc, tag) in
-        if tag.count >= 2 && tag[0] == key {
-            var relay_id: String? = nil
-            if tag.count >= 3 {
-                relay_id = tag[2]
-            }
-            acc.append(ReferencedId(ref_id: tag[1], relay_id: relay_id, key: key))
-        }
-    }
-}
-
 func make_first_contact_event(keypair: Keypair) -> NostrEvent? {
-    guard let privkey = keypair.privkey else {
-        return nil
-    }
-    
     let bootstrap_relays = load_bootstrap_relays(pubkey: keypair.pubkey)
     let rw_relay_info = RelayInfo(read: true, write: true)
     var relays: [String: RelayInfo] = [:]
@@ -453,62 +461,53 @@ func make_first_contact_event(keypair: Keypair) -> NostrEvent? {
     
     let relay_json = encode_json(relays)!
     let damus_pubkey = "3efdaebb1d8923ebd99c9e7ace3b4194ab45512e2be79c1b7d68d9243e0d2681"
-    let jb55_pubkey = "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245" // lol
     let tags = [
         ["p", damus_pubkey],
-        ["p", jb55_pubkey],
-        ["p", keypair.pubkey] // you're a friend of yourself!
+        ["p", keypair.pubkey.hex()] // you're a friend of yourself!
     ]
-    let ev = NostrEvent(content: relay_json,
-                        pubkey: keypair.pubkey,
-                        kind: NostrKind.contacts.rawValue,
-                        tags: tags)
-    ev.calculate_id()
-    ev.sign(privkey: privkey)
-    return ev
+    return NostrEvent(content: relay_json, keypair: keypair, kind: NostrKind.contacts.rawValue, tags: tags)
 }
 
-func make_metadata_event(keypair: FullKeypair, metadata: Profile) -> NostrEvent {
-    let metadata_json = encode_json(metadata)!
-    let ev = NostrEvent(content: metadata_json,
-                        pubkey: keypair.pubkey,
-                        kind: NostrKind.metadata.rawValue,
-                        tags: [])
+func make_metadata_event(keypair: FullKeypair, metadata: Profile) -> NostrEvent? {
+    guard let metadata_json = encode_json(metadata) else {
+        return nil
+    }
+    return NostrEvent(content: metadata_json, keypair: keypair.to_keypair(), kind: NostrKind.metadata.rawValue, tags: [])
 
-    ev.calculate_id()
-    ev.sign(privkey: keypair.privkey)
-    return ev
 }
 
-func make_boost_event(pubkey: String, privkey: String, boosted: NostrEvent) -> NostrEvent {
-    var tags: [[String]] = boosted.tags.filter { tag in tag.count >= 2 && (tag[0] == "e" || tag[0] == "p") }
-    
-    tags.append(["e", boosted.id, "", "root"])
-    tags.append(["p", boosted.pubkey])
+func make_boost_event(keypair: FullKeypair, boosted: NostrEvent) -> NostrEvent? {
+    var tags = Array(boosted.referenced_pubkeys).map({ pk in pk.tag })
 
-    let ev = NostrEvent(content: event_to_json(ev: boosted), pubkey: pubkey, kind: 6, tags: tags)
-    ev.calculate_id()
-    ev.sign(privkey: privkey)
-    return ev
+    tags.append(["e", boosted.id.hex(), "", "root"])
+    tags.append(["p", boosted.pubkey.hex()])
+
+    let content = event_to_json(ev: boosted)
+    return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 6, tags: tags)
 }
 
-func make_like_event(pubkey: String, privkey: String, liked: NostrEvent, content: String = "🤙") -> NostrEvent {
-    var tags: [[String]] = liked.tags.filter { tag in tag.count >= 2 && (tag[0] == "e" || tag[0] == "p") }
-    tags.append(["e", liked.id])
-    tags.append(["p", liked.pubkey])
-    let ev = NostrEvent(content: content, pubkey: pubkey, kind: 7, tags: tags)
-    ev.calculate_id()
-    ev.sign(privkey: privkey)
+func make_like_event(keypair: FullKeypair, liked: NostrEvent, content: String = "🤙") -> NostrEvent? {
+    var tags = liked.tags.reduce(into: [[String]]()) { ts, tag in
+        guard tag.count >= 2,
+              (tag[0].matches_char("e") || tag[0].matches_char("p")) else {
+            return
+        }
+        ts.append(tag.strings())
+    }
 
-    return ev
+    tags.append(["e", liked.id.hex()])
+    tags.append(["p", liked.pubkey.hex()])
+
+    return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 7, tags: tags)
 }
 
 func zap_target_to_tags(_ target: ZapTarget) -> [[String]] {
     switch target {
     case .profile(let pk):
-        return [["p", pk]]
+        return [["p", pk.hex()]]
     case .note(let note_target):
-        return [["e", note_target.note_id], ["p", note_target.author]]
+        return [["e", note_target.note_id.hex()],
+                ["p", note_target.author.hex()]]
     }
 }
 
@@ -521,11 +520,8 @@ func make_private_zap_request_event(identity: FullKeypair, enc_key: FullKeypair,
     // target tags must be the same as zap request target tags
     let tags = zap_target_to_tags(target)
     
-    let note = NostrEvent(content: message, pubkey: identity.pubkey, kind: 9733, tags: tags)
-    note.id = calculate_event_id(ev: note)
-    note.sig = sign_event(privkey: identity.privkey, ev: note)
-    
-    guard let note_json = encode_json(note),
+    guard let note = NostrEvent(content: message, keypair: identity.to_keypair(), kind: 9733, tags: tags),
+          let note_json = encode_json(note),
           let enc = encrypt_message(message: note_json, privkey: enc_key.privkey, to_pk: target.pubkey, encoding: .bech32)
     else {
         return nil
@@ -534,18 +530,20 @@ func make_private_zap_request_event(identity: FullKeypair, enc_key: FullKeypair,
     return PrivateZapRequest(req: ZapRequest(ev: note), enc: enc)
 }
 
-func decrypt_private_zap(our_privkey: String, zapreq: NostrEvent, target: ZapTarget) -> NostrEvent? {
-    guard let anon_tag = zapreq.tags.first(where: { t in t.count >= 2 && t[0] == "anon" }) else {
+func decrypt_private_zap(our_privkey: Privkey, zapreq: NostrEvent, target: ZapTarget) -> NostrEvent? {
+    guard let anon_tag = zapreq.tags.first(where: { t in
+        t.count >= 2 && t[0].matches_str("anon")
+    }) else {
         return nil
     }
     
-    let enc_note = anon_tag[1]
-    
+    let enc_note = anon_tag[1].string()
+
     var note = decrypt_note(our_privkey: our_privkey, their_pubkey: zapreq.pubkey, enc_note: enc_note, encoding: .bech32)
     
     // check to see if the private note was from us
     if note == nil {
-        guard let our_private_keypair = generate_private_keypair(our_privkey: our_privkey, id: target.id, created_at: zapreq.created_at) else{
+        guard let our_private_keypair = generate_private_keypair(our_privkey: our_privkey, id: NoteId(target.id), created_at: zapreq.created_at) else {
             return nil
         }
         // use our private keypair and their pubkey to get the shared secret
@@ -581,17 +579,15 @@ func decrypt_private_zap(our_privkey: String, zapreq: NostrEvent, target: ZapTar
     return note
 }
 
-func generate_private_keypair(our_privkey: String, id: String, created_at: Int64) -> FullKeypair? {
-    let to_hash = our_privkey + id + String(created_at)
+func generate_private_keypair(our_privkey: Privkey, id: NoteId, created_at: UInt32) -> FullKeypair? {
+    let to_hash = our_privkey.hex() + id.hex() + String(created_at)
     guard let dat = to_hash.data(using: .utf8) else {
         return nil
     }
     let privkey_bytes = sha256(dat)
-    let privkey = hex_encode(privkey_bytes)
-    guard let pubkey = privkey_to_pubkey(privkey: privkey) else {
-        return nil
-    }
-    
+    let privkey = Privkey(privkey_bytes)
+    guard let pubkey = privkey_to_pubkey(privkey: privkey) else { return nil }
+
     return FullKeypair(pubkey: pubkey, privkey: privkey)
 }
 
@@ -626,8 +622,8 @@ func make_zap_request_event(keypair: FullKeypair, content: String, relays: [Rela
     
     var kp = keypair
     
-    let now = Int64(Date().timeIntervalSince1970)
-    
+    let now = UInt32(Date().timeIntervalSince1970)
+
     var privzap_req: PrivateZapRequest?
     
     var message = content
@@ -638,9 +634,9 @@ func make_zap_request_event(keypair: FullKeypair, content: String, relays: [Rela
         break
     case .anon:
         tags.append(["anon"])
-        kp = generate_new_keypair().to_full()!
+        kp = generate_new_keypair()
     case .priv:
-        guard let priv_kp = generate_private_keypair(our_privkey: keypair.privkey, id: target.id, created_at: now) else {
+        guard let priv_kp = generate_private_keypair(our_privkey: keypair.privkey, id: NoteId(target.id), created_at: now) else {
             return nil
         }
         kp = priv_kp
@@ -652,9 +648,9 @@ func make_zap_request_event(keypair: FullKeypair, content: String, relays: [Rela
         privzap_req = privreq
     }
     
-    let ev = NostrEvent(content: message, pubkey: kp.pubkey, kind: 9734, tags: tags, createdAt: now)
-    ev.id = calculate_event_id(ev: ev)
-    ev.sig = sign_event(privkey: kp.privkey, ev: ev)
+    guard let ev = NostrEvent(content: message, keypair: kp.to_keypair(), kind: 9734, tags: tags, createdAt: now) else {
+        return nil
+    }
     let zapreq = ZapRequest(ev: ev)
     if let privzap_req {
         return .priv(zapreq, privzap_req)
@@ -678,27 +674,36 @@ func uniq<T: Hashable>(_ xs: [T]) -> [T] {
     return ys
 }
 
-func gather_reply_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
-    var ids = get_referenced_ids(tags: from.tags, key: "e").first.map { [$0] } ?? []
+func gather_reply_ids(our_pubkey: Pubkey, from: NostrEvent) -> [RefId] {
+    var ids: [RefId] = from.referenced_ids.first.map({ ref in [ .event(ref) ] }) ?? []
 
-    ids.append(.e(from.id))
-    ids.append(contentsOf: uniq(from.referenced_pubkeys.filter { $0.ref_id != our_pubkey }))
-    if from.pubkey != our_pubkey {
-        ids.append(ReferencedId(ref_id: from.pubkey, relay_id: nil, key: "p"))
+    let pks = from.referenced_pubkeys.reduce(into: [RefId]()) { rs, pk in
+        if pk == our_pubkey {
+            return
+        }
+        rs.append(.pubkey(pk))
     }
+
+    ids.append(.event(from.id))
+    ids.append(contentsOf: uniq(pks))
+
+    if from.pubkey != our_pubkey {
+        ids.append(.pubkey(from.pubkey))
+    }
+
     return ids
 }
 
-func gather_quote_ids(our_pubkey: String, from: NostrEvent) -> [ReferencedId] {
-    var ids: [ReferencedId] = [.q(from.id)]
+func gather_quote_ids(our_pubkey: Pubkey, from: NostrEvent) -> [RefId] {
+    var ids: [RefId] = [.quote(from.id.quote_id)]
     if from.pubkey != our_pubkey {
-        ids.append(ReferencedId(ref_id: from.pubkey, relay_id: nil, key: "p"))
+        ids.append(.pubkey(from.pubkey))
     }
     return ids
 }
 
 func event_from_json(dat: String) -> NostrEvent? {
-    return try? JSONDecoder().decode(NostrEvent.self, from: Data(dat.utf8))
+    return NostrEvent.owned_from_json(json: dat)
 }
 
 func event_to_json(ev: NostrEvent) -> String {
@@ -712,7 +717,7 @@ func event_to_json(ev: NostrEvent) -> String {
     return str
 }
 
-func decrypt_dm(_ privkey: String?, pubkey: String, content: String, encoding: EncEncoding) -> String? {
+func decrypt_dm(_ privkey: Privkey?, pubkey: Pubkey, content: String, encoding: EncEncoding) -> String? {
     guard let privkey = privkey else {
         return nil
     }
@@ -728,7 +733,7 @@ func decrypt_dm(_ privkey: String?, pubkey: String, content: String, encoding: E
     return String(data: dat, encoding: .utf8)
 }
 
-func decrypt_note(our_privkey: String, their_pubkey: String, enc_note: String, encoding: EncEncoding) -> NostrEvent? {
+func decrypt_note(our_privkey: Privkey, their_pubkey: Pubkey, enc_note: String, encoding: EncEncoding) -> NostrEvent? {
     guard let dec = decrypt_dm(our_privkey, pubkey: their_pubkey, content: enc_note, encoding: encoding) else {
         return nil
     }
@@ -736,13 +741,10 @@ func decrypt_note(our_privkey: String, their_pubkey: String, enc_note: String, e
     return decode_nostr_event_json(json: dec)
 }
 
-func get_shared_secret(privkey: String, pubkey: String) -> [UInt8]? {
-    guard let privkey_bytes = try? privkey.bytes else {
-        return nil
-    }
-    guard var pk_bytes = try? pubkey.bytes else {
-        return nil
-    }
+func get_shared_secret(privkey: Privkey, pubkey: Pubkey) -> [UInt8]? {
+    let privkey_bytes = privkey.bytes
+    var pk_bytes = pubkey.bytes
+
     pk_bytes.insert(2, at: 0)
     
     var publicKey = secp256k1_pubkey()
@@ -903,55 +905,33 @@ func aes_operation(operation: CCOperation, data: [UInt8], iv: [UInt8], shared_se
 
 
 func validate_event(ev: NostrEvent) -> ValidationResult {
-    let raw_id = sha256(calculate_event_commitment(ev: ev))
-    let id = hex_encode(raw_id)
-    
+    let id = calculate_event_id(pubkey: ev.pubkey, created_at: ev.created_at, kind: ev.kind, tags: ev.tags.strings(), content: ev.content)
+
     if id != ev.id {
         return .bad_id
     }
 
-    // TODO: implement verify
-    guard var sig64 = hex_decode(ev.sig)?.bytes else {
-        return .bad_sig
-    }
-    
-    guard var ev_pubkey = hex_decode(ev.pubkey)?.bytes else {
-        return .bad_sig
-    }
-    
     let ctx = secp256k1.Context.raw
     var xonly_pubkey = secp256k1_xonly_pubkey.init()
+
+    var ev_pubkey = ev.pubkey.id.bytes
+
     var ok = secp256k1_xonly_pubkey_parse(ctx, &xonly_pubkey, &ev_pubkey) != 0
     if !ok {
         return .bad_sig
     }
-    var raw_id_bytes = raw_id.bytes
-    
-    ok = secp256k1_schnorrsig_verify(ctx, &sig64, &raw_id_bytes, raw_id.count, &xonly_pubkey) > 0
+
+    var sig = ev.sig.data.bytes
+    var idbytes = id.id.bytes
+
+    ok = secp256k1_schnorrsig_verify(ctx, &sig, &idbytes, 32, &xonly_pubkey) > 0
     return ok ? .ok : .bad_sig
 }
 
-func last_etag(tags: [[String]]) -> String? {
-    var e: String? = nil
-    for tag in tags {
-        if tag.count >= 2 && tag[0] == "e" {
-            e = tag[1]
-        }
-    }
-    return e
-}
-
-func first_eref_mention(ev: NostrEvent, privkey: String?) -> Mention? {
-    let blocks = ev.blocks(privkey).filter { block in
-        guard case .mention(let mention) = block else {
-            return false
-        }
-        
-        guard case .event = mention.type else {
-            return false
-        }
-        
-        if mention.ref.key != "e" {
+func first_eref_mention(ev: NostrEvent, keypair: Keypair) -> Mention<NoteId>? {
+    let blocks = ev.blocks(keypair).blocks.filter { block in
+        guard case .mention(let mention) = block,
+              case .note = mention.ref else {
             return false
         }
         
@@ -959,11 +939,37 @@ func first_eref_mention(ev: NostrEvent, privkey: String?) -> Mention? {
     }
     
     /// MARK: - Preview
-    if let firstBlock = blocks.first, case .mention(let mention) = firstBlock, mention.ref.key == "e" {
-        return mention
+    if let firstBlock = blocks.first,
+       case .mention(let mention) = firstBlock,
+       case .note(let note_id) = mention.ref
+    {
+        return .note(note_id)
     }
-    
+
     return nil
+}
+
+func separate_images(ev: NostrEvent, keypair: Keypair) -> [MediaUrl]? {
+    let urlBlocks: [URL] = ev.blocks(keypair).blocks.reduce(into: []) { urls, block in
+        guard case .url(let url) = block else {
+            return
+        }
+        if classify_url(url).is_img != nil {
+            urls.append(url)
+        }
+    }
+    let mediaUrls = urlBlocks.map { MediaUrl.image($0) }
+    return mediaUrls.isEmpty ? nil : mediaUrls
+}
+
+func separate_invoices(ev: NostrEvent, keypair: Keypair) -> [Invoice]? {
+    let invoiceBlocks: [Invoice] = ev.blocks(keypair).blocks.reduce(into: []) { invoices, block in
+        guard case .invoice(let invoice) = block else {
+            return
+        }
+        invoices.append(invoice)
+    }
+    return invoiceBlocks.isEmpty ? nil : invoiceBlocks
 }
 
 /**
@@ -988,20 +994,3 @@ func to_reaction_emoji(ev: NostrEvent) -> String? {
     }
 }
 
-extension [ReferencedId] {
-    var pRefs: [ReferencedId] {
-        get {
-            Set(self).filter { ref in
-                ref.key == "p"
-            }
-        }
-    }
-    
-    var eRefs: [ReferencedId] {
-        get {
-            self.filter { ref in
-                ref.key == "e"
-            }
-        }
-    }
-}

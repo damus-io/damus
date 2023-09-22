@@ -9,10 +9,10 @@
 #define damus_h
 
 #include <stdio.h>
-#include "nostr_bech32.h"
 #include "block.h"
+
 typedef unsigned char u8;
 
-int damus_parse_content(struct blocks *blocks, const char *content);
+int damus_parse_content(struct note_blocks *blocks, const char *content);
 
 #endif /* damus_h */

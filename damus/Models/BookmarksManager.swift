@@ -7,18 +7,18 @@
 
 import Foundation
 
-fileprivate func get_bookmarks_key(pubkey: String) -> String {
+fileprivate func get_bookmarks_key(pubkey: Pubkey) -> String {
     pk_setting_key(pubkey, key: "bookmarks")
 }
 
-func load_bookmarks(pubkey: String) -> [NostrEvent] {
+func load_bookmarks(pubkey: Pubkey) -> [NostrEvent] {
     let key = get_bookmarks_key(pubkey: pubkey)
     return (UserDefaults.standard.stringArray(forKey: key) ?? []).compactMap {
         event_from_json(dat: $0)
     }
 }
 
-func save_bookmarks(pubkey: String, current_value: [NostrEvent], value: [NostrEvent]) -> Bool {
+func save_bookmarks(pubkey: Pubkey, current_value: [NostrEvent], value: [NostrEvent]) -> Bool {
     let uniq_bookmarks = uniq(value)
     
     if uniq_bookmarks != current_value {
@@ -32,8 +32,8 @@ func save_bookmarks(pubkey: String, current_value: [NostrEvent], value: [NostrEv
 
 class BookmarksManager: ObservableObject {
     
-    private let pubkey: String
-    
+    private let pubkey: Pubkey
+
     private var _bookmarks: [NostrEvent]
     var bookmarks: [NostrEvent] {
         get {
@@ -47,7 +47,7 @@ class BookmarksManager: ObservableObject {
         }
     }
     
-    init(pubkey: String) {
+    init(pubkey: Pubkey) {
         self._bookmarks = load_bookmarks(pubkey: pubkey)
         self.pubkey = pubkey
     }

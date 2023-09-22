@@ -56,13 +56,8 @@ enum ReactingTo {
     case your_profile
 }
 
-func determine_reacting_to(our_pubkey: String, ev: NostrEvent?, group: EventGroupType, nozaps: Bool) -> ReactingTo {
+func determine_reacting_to(our_pubkey: Pubkey, ev: NostrEvent?) -> ReactingTo {
     guard let ev else {
-        return .your_profile
-    }
-    
-    if nozaps && group.is_note_zap {
-        // ZAPPING NOTES IS NOT ALLOWED!!!! EVIL!!!
         return .your_profile
     }
     
@@ -73,24 +68,48 @@ func determine_reacting_to(our_pubkey: String, ev: NostrEvent?, group: EventGrou
     return .tagged_in
 }
 
-func event_author_name(profiles: Profiles, pubkey: String) -> String {
-    let alice_prof = profiles.lookup(id: pubkey)
-    return Profile.displayName(profile: alice_prof, pubkey: pubkey).username.truncate(maxLength: 50)
+func event_author_name(profiles: Profiles, pubkey: Pubkey) -> String {
+    return profiles.lookup(id: pubkey).map({ profile in
+        Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
+    }).value
 }
 
-func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType) -> String {
+func event_group_unique_pubkeys(profiles: Profiles, group: EventGroupType) -> [Pubkey] {
+    var seen = Set<Pubkey>()
+    var sorted = [Pubkey]()
+
     if let zapgrp = group.zap_group {
-        let zap = zapgrp.zaps[ind]
-        
-        if zap.is_anon {
-            return NSLocalizedString("Anonymous", comment: "Placeholder author name of the anonymous person who zapped an event.")
+        let zaps = zapgrp.zaps
+
+        for i in 0..<zaps.count {
+            let zap = zapgrp.zaps[i]
+            let pubkey: Pubkey
+
+            if zap.is_anon {
+                pubkey = ANON_PUBKEY
+            } else {
+                pubkey = zap.request.ev.pubkey
+            }
+
+            if !seen.contains(pubkey) {
+                seen.insert(pubkey)
+                sorted.append(pubkey)
+            }
         }
-        
-        return event_author_name(profiles: profiles, pubkey: zap.request.ev.pubkey)
     } else {
-        let ev = group.events[ind]
-        return event_author_name(profiles: profiles, pubkey: ev.pubkey)
+        let events = group.events
+
+        for i in 0..<events.count {
+            let ev = events[i]
+            let pubkey = ev.pubkey
+            if !seen.contains(pubkey) {
+                seen.insert(pubkey)
+                sorted.append(pubkey)
+            }
+        }
     }
+
+    return sorted
 }
 
 /**
@@ -130,29 +149,29 @@ func event_group_author_name(profiles: Profiles, ind: Int, group: EventGroupType
  "zapped_your_profile_2" - returned when 2 zaps occurred to the current user's profile
  "zapped_your_profile_3" - returned when 3 or more zaps occurred to the current user's profile
  */
-func reacting_to_text(profiles: Profiles, our_pubkey: String, group: EventGroupType, ev: NostrEvent?, nozaps: Bool, locale: Locale? = nil) -> String {
+func reacting_to_text(profiles: Profiles, our_pubkey: Pubkey, group: EventGroupType, ev: NostrEvent?, pubkeys: [Pubkey], locale: Locale? = nil) -> String {
     if group.events.count == 0 {
         return "??"
     }
 
     let verb = reacting_to_verb(group: group)
-    let reacting_to = determine_reacting_to(our_pubkey: our_pubkey, ev: ev, group: group, nozaps: nozaps)
-    let localization_key = "\(verb)_\(reacting_to)_\(min(group.events.count, 3))"
+    let reacting_to = determine_reacting_to(our_pubkey: our_pubkey, ev: ev)
+    let localization_key = "\(verb)_\(reacting_to)_\(min(pubkeys.count, 3))"
     let format = localizedStringFormat(key: localization_key, locale: locale)
 
-    switch group.events.count {
+    switch pubkeys.count {
     case 1:
-        let display_name = event_group_author_name(profiles: profiles, ind: 0, group: group)
+        let display_name = event_author_name(profiles: profiles, pubkey: pubkeys[0])
 
         return String(format: format, locale: locale, display_name)
     case 2:
-        let alice_name = event_group_author_name(profiles: profiles, ind: 0, group: group)
-        let bob_name = event_group_author_name(profiles: profiles, ind: 1, group: group)
+        let alice_name = event_author_name(profiles: profiles, pubkey: pubkeys[0])
+        let bob_name = event_author_name(profiles: profiles, pubkey: pubkeys[1])
 
         return String(format: format, locale: locale, alice_name, bob_name)
     default:
-        let alice_name = event_group_author_name(profiles: profiles, ind: 0, group: group)
-        let count = group.events.count - 1
+        let alice_name = event_author_name(profiles: profiles, pubkey: pubkeys[0])
+        let count = pubkeys.count - 1
 
         return String(format: format, locale: locale, count, alice_name)
     }
@@ -164,8 +183,7 @@ func reacting_to_verb(group: EventGroupType) -> String {
         return "reacted"
     case .repost:
         return "reposted"
-    case .zap: fallthrough
-    case .profile_zap:
+    case .zap, .profile_zap:
         return "zapped"
     }
 }
@@ -174,9 +192,9 @@ struct EventGroupView: View {
     let state: DamusState
     let event: NostrEvent?
     let group: EventGroupType
-    
-    var GroupDescription: some View {
-        Text(verbatim: "\(reacting_to_text(profiles: state.profiles, our_pubkey: state.pubkey, group: group, ev: event, nozaps: state.settings.nozaps))")
+
+    func GroupDescription(_ pubkeys: [Pubkey]) -> some View {
+        Text(verbatim: "\(reacting_to_text(profiles: state.profiles, our_pubkey: state.pubkey, group: group, ev: event, pubkeys: pubkeys))")
     }
     
     func ZapIcon(_ zapgrp: ZapGroup) -> some View {
@@ -216,25 +234,24 @@ struct EventGroupView: View {
                 .frame(width: PFP_SIZE + 10)
             
             VStack(alignment: .leading) {
-                ProfilePicturesView(state: state, pubkeys: group.events.map { $0.pubkey })
+                let unique_pubkeys = event_group_unique_pubkeys(profiles: state.profiles, group: group)
+
+                ProfilePicturesView(state: state, pubkeys: unique_pubkeys)
                 
                 if let event {
                     let thread = ThreadModel(event: event, damus_state: state)
-                    let dest = ThreadView(state: state, thread: thread)
-                    GroupDescription
-                    if !state.settings.nozaps || !group.is_note_zap {
-                        NavigationLink(destination: dest) {
-                            VStack(alignment: .leading) {
-                                EventBody(damus_state: state, event: event, size: .normal, options: [.truncate_content])
-                                    .padding([.top], 1)
-                                    .padding([.trailing])
-                                    .foregroundColor(.gray)
-                            }
+                    NavigationLink(value: Route.Thread(thread: thread)) {
+                        VStack(alignment: .leading) {
+                            GroupDescription(unique_pubkeys)
+                            EventBody(damus_state: state, event: event, size: .normal, options: [.truncate_content])
+                                .padding([.top], 1)
+                                .padding([.trailing])
+                                .foregroundColor(.gray)
                         }
-                        .buttonStyle(.plain)
                     }
+                    .buttonStyle(.plain)
                 } else {
-                    GroupDescription
+                    GroupDescription(unique_pubkeys)
                 }
             }
         }
@@ -242,20 +259,14 @@ struct EventGroupView: View {
     }
 }
 
-let test_encoded_post = "{\"id\": \"8ba545ab96959fe0ce7db31bc10f3ac3aa5353bc4428dbf1e56a7be7062516db\",\"pubkey\": \"7e27509ccf1e297e1df164912a43406218f8bd80129424c3ef798ca3ef5c8444\",\"created_at\": 1677013417,\"kind\": 1,\"tags\": [],\"content\": \"hello\",\"sig\": \"93684f15eddf11f42afbdd81828ee9fc35350344d8650c78909099d776e9ad8d959cd5c4bff7045be3b0b255144add43d0feef97940794a1bc9c309791bebe4a\"}"
-let test_repost_1 = NostrEvent(id: "", content: test_encoded_post, pubkey: "pk1", kind: 6, tags: [], createdAt: 1)
-let test_repost_2 = NostrEvent(id: "", content: test_encoded_post, pubkey: "pk2", kind: 6, tags: [], createdAt: 1)
-let test_reposts = [test_repost_1, test_repost_2]
-let test_event_group = EventGroup(events: test_reposts)
-
 struct EventGroupView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
-            EventGroupView(state: test_damus_state(), event: test_event, group: .repost(test_event_group))
+            EventGroupView(state: test_damus_state, event: test_note, group: .repost(test_event_group))
                 .frame(height: 200)
                 .padding()
             
-            EventGroupView(state: test_damus_state(), event: test_event, group: .reaction(test_event_group))
+            EventGroupView(state: test_damus_state, event: test_note, group: .reaction(test_event_group))
                 .frame(height: 200)
                 .padding()
         }

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct BuilderEventView: View {
     let damus: DamusState
-    let event_id: String
+    let event_id: NoteId
     @State var event: NostrEvent?
     @State var subscription_uuid: String = UUID().description
     
@@ -19,7 +19,7 @@ struct BuilderEventView: View {
         self.event_id = event.id
     }
     
-    init(damus: DamusState, event_id: String) {
+    init(damus: DamusState, event_id: NoteId) {
         let event = damus.events.lookup(event_id)
         self.event_id = event_id
         self.damus = damus
@@ -59,24 +59,20 @@ struct BuilderEventView: View {
     
     func load() {
         subscribe(filters: [
-            NostrFilter(ids: [self.event_id], limit: 1),
-            NostrFilter(
-                kinds: [.zap],
-                referenced_ids: [self.event_id]
-            )
+            NostrFilter(ids: [self.event_id], limit: 1)
         ])
     }
     
     var body: some View {
         VStack {
             if let event {
-                let ev = event.get_inner_event(cache: damus.events) ?? event
-                let thread = ThreadModel(event: ev, damus_state: damus)
-                let dest = ThreadView(state: damus, thread: thread)
-                NavigationLink(destination: dest) {
-                    EventView(damus: damus, event: event, options: .embedded)
-                        .padding([.top, .bottom], 8)
-                }.buttonStyle(.plain)
+                EventView(damus: damus, event: event, options: .embedded)
+                    .padding([.top, .bottom], 8)
+                    .onTapGesture {
+                        let ev = event.get_inner_event(cache: damus.events) ?? event
+                        let thread = ThreadModel(event: ev, damus_state: damus)
+                        damus.nav.push(route: .Thread(thread: thread))
+                    }
             } else {
                 ProgressView().padding()
             }
@@ -97,7 +93,7 @@ struct BuilderEventView: View {
 
 struct BuilderEventView_Previews: PreviewProvider {
     static var previews: some View {
-        BuilderEventView(damus: test_damus_state(), event_id: "536bee9e83c818e3b82c101935128ae27a0d4290039aaf253efe5f09232c1962")
+        BuilderEventView(damus: test_damus_state, event_id: test_note.id)
     }
 }
 

@@ -59,7 +59,7 @@ struct NotificationItemView: View {
                 EventGroupView(state: state, event: ev, group: .reaction(evgrp))
             
             case .reply(let ev):
-                NavigationLink(destination: ThreadView(state: state, thread: ThreadModel(event: ev, damus_state: state))) {
+                NavigationLink(value: Route.Thread(thread: ThreadModel(event: ev, damus_state: state))) {
                     EventView(damus: state, event: ev, options: options)
                 }
                 .buttonStyle(.plain)
@@ -84,10 +84,10 @@ struct NotificationItemView: View {
     }
 }
 
-let test_notification_item: NotificationItem = .repost("evid", test_event_group)
+let test_notification_item: NotificationItem = .repost(test_note.id, test_event_group)
 
 struct NotificationItemView_Previews: PreviewProvider {
     static var previews: some View {
-        NotificationItemView(state: test_damus_state(), item: test_notification_item)
+        NotificationItemView(state: test_damus_state, item: test_notification_item)
     }
 }

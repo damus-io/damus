@@ -9,9 +9,10 @@ import Foundation
 
 
 enum Bech32Object {
-    case nsec(String)
-    case npub(String)
-    case note(String)
+    case nsec(Privkey)
+    case npub(Pubkey)
+    case note(NoteId)
+    case nscript([UInt8])
     
     static func parse(_ str: String) -> Bech32Object? {
         guard let decoded = try? bech32_decode(str) else {
@@ -19,11 +20,13 @@ enum Bech32Object {
         }
         
         if decoded.hrp == "npub" {
-            return .npub(hex_encode(decoded.data))
+            return .npub(Pubkey(decoded.data))
         } else if decoded.hrp == "nsec" {
-            return .nsec(hex_encode(decoded.data))
+            return .nsec(Privkey(decoded.data))
         } else if decoded.hrp == "note" {
-            return .note(hex_encode(decoded.data))
+            return .note(NoteId(decoded.data))
+        } else if decoded.hrp == "nscript" {
+            return .nscript(decoded.data.bytes)
         }
         
         return nil

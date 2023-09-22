@@ -14,7 +14,7 @@ struct ThreadView: View {
     @Environment(\.dismiss) var dismiss
     
     var parent_events: [NostrEvent] {
-        state.events.parent_events(event: thread.event)
+        state.events.parent_events(event: thread.event, keypair: state.keypair)
     }
     
     var child_events: [NostrEvent] {
@@ -34,7 +34,7 @@ struct ThreadView: View {
                                        selected: false)
                         .padding(.horizontal)
                         .onTapGesture {
-                            thread.set_active_event(parent_event)
+                            thread.set_active_event(parent_event, keypair: self.state.keypair)
                             scroll_to_event(scroller: reader, id: parent_event.id, delay: 0.1, animate: false)
                         }
                         
@@ -77,7 +77,7 @@ struct ThreadView: View {
                         )
                         .padding(.horizontal)
                         .onTapGesture {
-                            thread.set_active_event(child_event)
+                            thread.set_active_event(child_event, keypair: state.keypair)
                             scroll_to_event(scroller: reader, id: child_event.id, delay: 0.1, animate: false)
                         }
                         
@@ -88,7 +88,8 @@ struct ThreadView: View {
             }.navigationBarTitle(NSLocalizedString("Thread", comment: "Navigation bar title for note thread."))
             .onAppear {
                 thread.subscribe()
-                scroll_to_event(scroller: reader, id: self.thread.event.id, delay: 0.0, animate: false)
+                let anchor: UnitPoint = self.thread.event.known_kind == .longform ? .top : .bottom
+                scroll_to_event(scroller: reader, id: self.thread.event.id, delay: 0.0, animate: false, anchor: anchor)
             }
             .onDisappear {
                 thread.unsubscribe()
@@ -102,8 +103,8 @@ struct ThreadView: View {
 
 struct ThreadView_Previews: PreviewProvider {
     static var previews: some View {
-        let state = test_damus_state()
-        let thread = ThreadModel(event: test_event, damus_state: state)
+        let state = test_damus_state
+        let thread = ThreadModel(event: test_note, damus_state: state)
         ThreadView(state: state, thread: thread)
     }
 }

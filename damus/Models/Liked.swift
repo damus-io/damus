@@ -9,6 +9,6 @@ import Foundation
 
 struct Counted {
     let event: NostrEvent
-    let id: String
+    let id: NoteId
     let total: Int
 }

@@ -36,8 +36,14 @@ final class WalletConnectTests: XCTestCase {
     }
     
     func testDoesNWCParse() {
-        let pk = "9d088f4760422443d4699b485e2ac66e565a2f5da1198c55ddc5679458e3f67a"
-        let sec = "ff2eefd57196d42089e1b42acc39916d7ecac52e0625bd70597bbd5be14aff18"
+        // Test an NWC url format which is not technically NIP-47 and RFC 3986 compliant, but still commonly used (by Alby, for example)
+        // See Github issue #1547 for details on why this URL is non-compliant
+        // This test URL also features:
+        // - `nostrwalletconnect` scheme
+        // - A non-url-encoded relay parameter
+        // - lud16 parameter
+        let pk = Pubkey(hex: "9d088f4760422443d4699b485e2ac66e565a2f5da1198c55ddc5679458e3f67a")!
+        let sec = Privkey(hex: "ff2eefd57196d42089e1b42acc39916d7ecac52e0625bd70597bbd5be14aff18")!
         let relay = "wss://relay.getalby.com/v1"
         let str = "nostrwalletconnect://\(pk)?relay=\(relay)&secret=\(sec)&lud16=jb55@jb55.com"
         
@@ -51,6 +57,26 @@ final class WalletConnectTests: XCTestCase {
         XCTAssertEqual(url.keypair.pubkey, privkey_to_pubkey(privkey: sec))
         XCTAssertEqual(url.relay.id, relay)
         XCTAssertEqual(url.lud16, "jb55@jb55.com")
+
+        // Test an NWC url format which is NIP-47 and RFC 3986 compliant
+        // This test URL also features:
+        // - `nostr+walletconnect` scheme
+        // - A url-encoded relay parameter
+        // - No lud16 parameter
+        let pk_2 = Pubkey(hex: "b889ff5b1513b641e2a139f661a661364979c5beee91842f8f0ef42ab558e9d4")!
+        let sec_2 = Privkey(hex: "71a8c14c1407c113601079c4302dab36460f0ccd0ad506f1f2dc73b5100e4f3c")!
+        let relay_2 = "wss://relay.damus.io"
+        let str_2 = "nostr+walletconnect:b889ff5b1513b641e2a139f661a661364979c5beee91842f8f0ef42ab558e9d4?relay=wss%3A%2F%2Frelay.damus.io&secret=71a8c14c1407c113601079c4302dab36460f0ccd0ad506f1f2dc73b5100e4f3c"
+        
+        let url_2 = WalletConnectURL(str: str_2)
+        XCTAssertNotNil(url_2)
+        guard let url_2 else {
+            return
+        }
+        XCTAssertEqual(url_2.pubkey, pk_2)
+        XCTAssertEqual(url_2.keypair.privkey, sec_2)
+        XCTAssertEqual(url_2.keypair.pubkey, privkey_to_pubkey(privkey: sec_2))
+        XCTAssertEqual(url_2.relay.id, relay_2)
     }
     
     func testNWCEphemeralRelay() {
@@ -58,7 +84,7 @@ final class WalletConnectTests: XCTestCase {
         let pk =  "89446b900c70d62438dcf66756405eea6225ad94dc61f3856f62f9699111a9a6"
         let nwc = WalletConnectURL(str: "nostrwalletconnect://\(pk)?relay=ws://127.0.0.1&secret=\(sec)&lud16=jb55@jb55.com")!
         
-        let pool = RelayPool()
+        let pool = RelayPool(ndb: .empty)
         let box = PostBox(pool: pool)
         
         nwc_pay(url: nwc, pool: pool, post: box, invoice: "invoice")

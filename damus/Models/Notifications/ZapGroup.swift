@@ -8,11 +8,11 @@
 import Foundation
 
 class ZapGroup {
-    var zaps: [Zapping]
-    var msat_total: Int64
-    var zappers: Set<String>
-    
-    var last_event_at: Int64 {
+    var zaps: [Zapping] = []
+    var msat_total: Int64 = 0
+    var zappers = Set<Pubkey>()
+
+    var last_event_at: UInt32 {
         guard let first = zaps.first else {
             return 0
         }
@@ -44,12 +44,6 @@ class ZapGroup {
             grp.insert(zap)
         }
         return grp
-    }
-    
-    init() {
-        self.zaps = []
-        self.msat_total = 0
-        self.zappers = Set()
     }
     
     @discardableResult

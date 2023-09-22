@@ -9,9 +9,8 @@ import SwiftUI
 
 struct CreateAccountView: View {
     @StateObject var account: CreateAccountModel = CreateAccountModel()
-    @StateObject var profileUploadViewModel = ProfileUploadingViewModel()
-    
-    @State var is_done: Bool = false
+    @StateObject var profileUploadObserver = ImageUploadingObserver()
+    var nav: NavigationCoordinator
     
     func SignupForm<FormContent: View>(@ViewBuilder content: () -> FormContent) -> some View {
         return VStack(alignment: .leading, spacing: 10.0, content: content)
@@ -20,18 +19,14 @@ struct CreateAccountView: View {
     func regen_key() {
         let keypair = generate_new_keypair()
         self.account.pubkey = keypair.pubkey
-        self.account.privkey = keypair.privkey!
+        self.account.privkey = keypair.privkey
     }
     
     var body: some View {
         ZStack(alignment: .top) {
-            NavigationLink(destination: SaveKeysView(account: account), isActive: $is_done) {
-                EmptyView()
-            }
-            
             VStack {
                 VStack(alignment: .center) {
-                    ProfilePictureSelector(pubkey: account.pubkey, viewModel: profileUploadViewModel, callback: uploadedProfilePicture(image_url:))
+                    EditPictureControl(uploader: .nostrBuild, pubkey: account.pubkey, image_url: $account.profile_image , uploadObserver: profileUploadObserver, callback: uploadedProfilePicture)
 
                     Text(NSLocalizedString("Public Key", comment: "Label to indicate the public key of the account."))
                         .bold()
@@ -63,7 +58,7 @@ struct CreateAccountView: View {
                 .padding(.top, 10)
 
                 Button(action: {
-                    self.is_done = true
+                    nav.push(route: Route.SaveKeys(account: account))
                 }) {
                     HStack {
                         Text("Create account now", comment: "Button to create account.")
@@ -72,8 +67,8 @@ struct CreateAccountView: View {
                     .frame(minWidth: 300, maxWidth: .infinity, maxHeight: 12, alignment: .center)
                 }
                 .buttonStyle(GradientButtonStyle())
-                .disabled(profileUploadViewModel.isLoading)
-                .opacity(profileUploadViewModel.isLoading ? 0.5 : 1)
+                .disabled(profileUploadObserver.isLoading)
+                .opacity(profileUploadObserver.isLoading ? 0.5 : 1)
                 .padding(.top, 20)
 
                 LoginPrompt()
@@ -88,7 +83,7 @@ struct CreateAccountView: View {
     }
     
     func uploadedProfilePicture(image_url: URL?) {
-        account.profile_image = image_url?.absoluteString
+        account.profile_image = image_url
     }
 }
 
@@ -112,7 +107,7 @@ struct BackNav: View {
     @Environment(\.dismiss) var dismiss
     var body: some View {
         Image("chevron-left")
-            .foregroundColor(.white)
+            .foregroundColor(DamusColors.adaptableBlack)
         .onTapGesture {
             self.dismiss()
         }
@@ -135,13 +130,12 @@ extension View {
 struct CreateAccountView_Previews: PreviewProvider {
     static var previews: some View {
         let model = CreateAccountModel(real: "", nick: "jb55", about: "")
-        return CreateAccountView(account: model)
+        return CreateAccountView(account: model, nav: .init())
     }
 }
 
-func KeyText(_ text: Binding<String>) -> some View {
-    let decoded = hex_decode(text.wrappedValue)!
-    let bechkey = bech32_encode(hrp: PUBKEY_HRP, decoded)
+func KeyText(_ pubkey: Binding<Pubkey>) -> some View {
+    let bechkey = bech32_encode(hrp: PUBKEY_HRP, pubkey.wrappedValue.bytes)
     return Text(bechkey)
         .textSelection(.enabled)
         .multilineTextAlignment(.center)

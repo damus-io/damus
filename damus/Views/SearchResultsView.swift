@@ -9,16 +9,16 @@ import SwiftUI
 
 struct MultiSearch {
     let hashtag: String
-    let profiles: [SearchedUser]
+    let profiles: [Pubkey]
 }
 
 enum Search: Identifiable {
-    case profiles([SearchedUser])
+    case profiles([Pubkey])
     case hashtag(String)
-    case profile(String)
-    case note(String)
+    case profile(Pubkey)
+    case note(NoteId)
     case nip05(String)
-    case hex(String)
+    case hex(Data)
     case multi(MultiSearch)
     
     var id: String {
@@ -38,22 +38,21 @@ struct InnerSearchResults: View {
     let damus_state: DamusState
     let search: Search?
     
-    func ProfileSearchResult(pk: String) -> some View {
+    func ProfileSearchResult(pk: Pubkey) -> some View {
         FollowUserView(target: .pubkey(pk), damus_state: damus_state)
     }
     
     func HashtagSearch(_ ht: String) -> some View {
         let search_model = SearchModel(state: damus_state, search: .filter_hashtag([ht]))
-        let dst = SearchView(appstate: damus_state, search: search_model)
-        return NavigationLink(destination: dst) {
+        return NavigationLink(value: Route.Search(search: search_model)) {
             Text("Search hashtag: #\(ht)", comment: "Navigation link to search hashtag.")
         }
     }
     
-    func ProfilesSearch(_ results: [SearchedUser]) -> some View {
+    func ProfilesSearch(_ results: [Pubkey]) -> some View {
         return LazyVStack {
-            ForEach(results) { prof in
-                ProfileSearchResult(pk: prof.pubkey)
+            ForEach(results, id: \.id) { pk in
+                ProfileSearchResult(pk: pk)
             }
         }
     }
@@ -68,28 +67,22 @@ struct InnerSearchResults: View {
                 HashtagSearch(ht)
                 
             case .nip05(let addr):
-                SearchingEventView(state: damus_state, evid: addr, search_type: .nip05)
-                
-            case .profile(let prof):
-                let decoded = try? bech32_decode(prof)
-                let hex = hex_encode(decoded!.data)
-                
-                SearchingEventView(state: damus_state, evid: hex, search_type: .profile)
+                SearchingEventView(state: damus_state, search_type: .nip05(addr))
+
+            case .profile(let pubkey):
+                SearchingEventView(state: damus_state, search_type: .profile(pubkey))
+
             case .hex(let h):
-                //let prof_view = ProfileView(damus_state: damus_state, pubkey: h)
-                //let ev_view = ThreadView(damus: damus_state, event_id: h)
-                
+
                 VStack(spacing: 10) {
-                    SearchingEventView(state: damus_state, evid: h, search_type: .event)
-                    
-                    SearchingEventView(state: damus_state, evid: h, search_type: .profile)
+                    SearchingEventView(state: damus_state, search_type: .event(NoteId(h)))
+
+                    SearchingEventView(state: damus_state, search_type: .profile(Pubkey(h)))
                 }
                 
             case .note(let nid):
-                let decoded = try? bech32_decode(nid)
-                let hex = hex_encode(decoded!.data)
-                
-                SearchingEventView(state: damus_state, evid: hex, search_type: .event)
+                SearchingEventView(state: damus_state, search_type: .event(nid))
+
             case .multi(let multi):
                 VStack {
                     HashtagSearch(multi.hashtag)
@@ -115,10 +108,12 @@ struct SearchResultsView: View {
         }
         .frame(maxHeight: .infinity)
         .onAppear {
-            self.result = search_for_string(profiles: damus_state.profiles, search)
+            let txn = NdbTxn.init(ndb: damus_state.ndb)
+            self.result = search_for_string(profiles: damus_state.profiles, search: search, txn: txn)
         }
         .onChange(of: search) { new in
-            self.result = search_for_string(profiles: damus_state.profiles, new)
+            let txn = NdbTxn.init(ndb: damus_state.ndb)
+            self.result = search_for_string(profiles: damus_state.profiles, search: search, txn: txn)
         }
     }
 }
@@ -132,7 +127,7 @@ struct SearchResultsView_Previews: PreviewProvider {
  */
 
 
-func search_for_string(profiles: Profiles, _ new: String) -> Search? {
+func search_for_string<Y>(profiles: Profiles, search new: String, txn: NdbTxn<Y>) -> Search? {
     guard new.count != 0 else {
         return nil
     }
@@ -147,23 +142,21 @@ func search_for_string(profiles: Profiles, _ new: String) -> Search? {
         return .hashtag(make_hashtagable(new))
     }
     
-    if hex_decode(new) != nil, new.count == 64 {
+    if let new = hex_decode_id(new) {
         return .hex(new)
     }
-    
+
     if new.starts(with: "npub") {
-        if (try? bech32_decode(new)) != nil {
-            return .profile(new)
+        if let decoded = bech32_pubkey_decode(new) {
+            return .profile(decoded)
         }
     }
     
-    if new.starts(with: "note") {
-        if (try? bech32_decode(new)) != nil {
-            return .note(new)
-        }
+    if new.starts(with: "note"), let decoded = try? bech32_decode(new) {
+        return .note(NoteId(decoded.data))
     }
     
-    let multisearch = MultiSearch(hashtag: make_hashtagable(new), profiles: search_profiles(profiles: profiles, search: new))
+    let multisearch = MultiSearch(hashtag: make_hashtagable(new), profiles: search_profiles(profiles: profiles, search: new, txn: txn))
     return .multi(multisearch)
 }
 
@@ -180,34 +173,25 @@ func make_hashtagable(_ str: String) -> String {
     return String(new.filter{$0 != " "})
 }
 
-func search_profiles(profiles: Profiles, search: String) -> [SearchedUser] {
+func search_profiles<Y>(profiles: Profiles, search: String, txn: NdbTxn<Y>) -> [Pubkey] {
+    // Search by hex pubkey.
+    if let pubkey = hex_decode_pubkey(search),
+       profiles.lookup_key_by_pubkey(pubkey) != nil
+    {
+        return [pubkey]
+    }
+
+    // Search by npub pubkey.
+    if search.starts(with: "npub"),
+       let bech32_key = decode_bech32_key(search),
+       case Bech32Key.pub(let pk) = bech32_key,
+       profiles.lookup_key_by_pubkey(pk) != nil
+    {
+        return [pk]
+    }
+
     let new = search.lowercased()
-    return profiles.enumerated().reduce(into: []) { acc, els in
-        let pk = els.element.key
-        let prof = els.element.value.profile
-        
-        if let searched = profile_search_matches(profiles: profiles, profile: prof, pubkey: pk, search: new) {
-            acc.append(searched)
-        }
-    }
+
+    return profiles.search(search, limit: 10, txn: txn)
 }
 
-
-func profile_search_matches(profiles: Profiles, profile prof: Profile, pubkey pk: String, search new: String) -> SearchedUser? {
-    let lowname = prof.name.map { $0.lowercased() }
-    let lownip05 = profiles.is_validated(pk).map { $0.host.lowercased() }
-    let lowdisp = prof.display_name.map { $0.lowercased() }
-    let ok = new.count == 1 ?
-    ((lowname?.starts(with: new) ?? false) ||
-     (lownip05?.starts(with: new) ?? false) ||
-     (lowdisp?.starts(with: new) ?? false)) : (pk.starts(with: new) || String(new.dropFirst()) == pk
-        || lowname?.contains(new) ?? false
-        || lownip05?.contains(new) ?? false
-        || lowdisp?.contains(new) ?? false)
-    
-    if ok {
-        return SearchedUser(petname: nil, profile: prof, pubkey: pk)
-    }
-    
-    return nil
-}

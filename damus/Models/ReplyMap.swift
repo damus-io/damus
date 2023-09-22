@@ -8,20 +8,20 @@
 import Foundation
 
 class ReplyMap {
-    var replies: [String: Set<String>] = [:]
-    
-    func lookup(_ id: String) -> Set<String>? {
+    var replies: [NoteId: Set<NoteId>] = [:]
+
+    func lookup(_ id: NoteId) -> Set<NoteId>? {
         return replies[id]
     }
     
-    private func ensure_set(id: String) {
+    private func ensure_set(id: NoteId) {
         if replies[id] == nil {
             replies[id] = Set()
         }
     }
     
     @discardableResult
-    func add(id: String, reply_id: String) -> Bool {
+    func add(id: NoteId, reply_id: NoteId) -> Bool {
         ensure_set(id: id)
         if (replies[id]!).contains(reply_id) {
             return false

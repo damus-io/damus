@@ -8,8 +8,8 @@
 import SwiftUI
 
 enum ParsedKey {
-    case pub(String)
-    case priv(String)
+    case pub(Pubkey)
+    case priv(Privkey)
     case hex(String)
     case nip05(String)
 
@@ -33,13 +33,11 @@ enum ParsedKey {
 }
 
 struct LoginView: View {
-    @State private var create_account = false
     @State var key: String = ""
     @State var is_pubkey: Bool = false
     @State var error: String? = nil
     @State private var credential_handler = CredentialHandler()
-    
-    @Binding var accepted: Bool
+    var nav: NavigationCoordinator
 
     func get_error(parsed_key: ParsedKey?) -> String? {
         if self.error != nil {
@@ -55,12 +53,6 @@ struct LoginView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            if accepted {
-                NavigationLink(destination: CreateAccountView(), isActive: $create_account) {
-                    EmptyView()
-                }
-            }
-            
             VStack {
                 SignInHeader()
                     .padding(.top, 100)
@@ -107,25 +99,34 @@ struct LoginView: View {
                     .padding(.top, 10)
                 }
 
-                CreateAccountPrompt(create_account: $create_account)
+                CreateAccountPrompt(nav: nav)
                     .padding(.top, 10)
 
                 Spacer()
             }
             .padding()
         }
-        .background(
-            Image("login-header")
-                .resizable()
-                .frame(maxWidth: .infinity, maxHeight: 350, alignment: .center)
-                .ignoresSafeArea(),
-            alignment: .top
-        )
+        .background(DamusBackground(maxHeight: 350), alignment: .top)
         .onAppear {
             credential_handler.check_credentials()
         }
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: BackNav())
+    }
+}
+
+extension View {
+    func nsecLoginStyle(key: String, title: String) -> some View {
+        self
+            .placeholder(when: key.isEmpty) {
+                Text(title).foregroundColor(.white.opacity(0.6))
+            }
+            .padding(10)
+            .autocapitalization(.none)
+            .autocorrectionDisabled(true)
+            .textInputAutocapitalization(.never)
+            .font(.body.monospaced())
+            .textContentType(.password)
     }
 }
 
@@ -145,10 +146,8 @@ func parse_key(_ thekey: String) -> ParsedKey? {
 
     if let bech_key = decode_bech32_key(key) {
         switch bech_key {
-        case .pub(let pk):
-            return .pub(pk)
-        case .sec(let sec):
-            return .priv(sec)
+        case .pub(let pk):  return .pub(pk)
+        case .sec(let sec): return .priv(sec)
         }
     }
 
@@ -194,29 +193,32 @@ func process_login(_ key: ParsedKey, is_pubkey: Bool) async throws {
         save_pubkey(pubkey: nip05.pubkey)
 
     case .hex(let hexstr):
-        if is_pubkey {
+        if is_pubkey, let pubkey = hex_decode_pubkey(hexstr) {
             try clear_saved_privkey()
-            save_pubkey(pubkey: hexstr)
-        } else {
-            try handle_privkey(hexstr)
+
+            save_pubkey(pubkey: pubkey)
+        } else if let privkey = hex_decode_privkey(hexstr) {
+            try handle_privkey(privkey)
         }
     }
     
-    func handle_privkey(_ privkey: String) throws {
+    func handle_privkey(_ privkey: Privkey) throws {
         try save_privkey(privkey: privkey)
         
         guard let pk = privkey_to_pubkey(privkey: privkey) else {
             throw LoginError.invalid_key
         }
-        
-        if let pub = bech32_pubkey(pk), let priv = bech32_privkey(privkey) {
-            CredentialHandler().save_credential(pubkey: pub, privkey: priv)
-        }
+
+        CredentialHandler().save_credential(pubkey: pk, privkey: privkey)
         save_pubkey(pubkey: pk)
     }
-    
+
+    guard let keypair = get_saved_keypair() else {
+        return
+    }
+
     await MainActor.run {
-        notify(.login, ())
+        notify(.login(keypair))
     }
 }
 
@@ -226,8 +228,8 @@ struct NIP05Result: Decodable {
 }
 
 struct NIP05User {
-    let pubkey: String
-    let relays: [String]
+    let pubkey: Pubkey
+    //let relays: [String]
 }
 
 func get_nip05_pubkey(id: String) async -> NIP05User? {
@@ -240,35 +242,30 @@ func get_nip05_pubkey(id: String) async -> NIP05User? {
     let user = parts[0]
     let host = parts[1]
 
-    guard let url = URL(string: "https://\(host)/.well-known/nostr.json?name=\(user)") else {
+    guard let url = URL(string: "https://\(host)/.well-known/nostr.json?name=\(user)"),
+          let (data, _) = try? await URLSession.shared.data(for: URLRequest(url: url)),
+          let json: NIP05Result = decode_data(data),
+          let pubkey_hex = json.names[user],
+          let pubkey = hex_decode_pubkey(pubkey_hex)
+    else {
         return nil
     }
 
-    guard let (data, _) = try? await URLSession.shared.data(for: URLRequest(url: url)) else {
-        return nil
-    }
-
-    guard let json: NIP05Result = decode_data(data) else {
-        return nil
-    }
-
-    guard let pubkey = json.names[user] else {
-        return nil
-    }
-
+    /*
     var relays: [String] = []
-    if let rs = json.relays {
-        if let rs = rs[pubkey] {
-            relays = rs
-        }
-    }
 
-    return NIP05User(pubkey: pubkey, relays: relays)
+    if let rs = json.relays, let rs = rs[pubkey] {
+        relays = rs
+    }
+     */
+
+    return NIP05User(pubkey: pubkey/*, relays: relays*/)
 }
 
 struct KeyInput: View {
     let title: String
     let key: Binding<String>
+    @State private var is_secured: Bool = true
 
     init(_ title: String, key: Binding<String>) {
         self.title = title
@@ -284,16 +281,18 @@ struct KeyInput: View {
                         self.key.wrappedValue = pastedkey
                     }
                 }
-            TextField("", text: key)
-                .placeholder(when: key.wrappedValue.isEmpty) {
-                    Text(title).foregroundColor(.white.opacity(0.6))
+            if is_secured  {
+                     SecureField("", text: key)
+                         .nsecLoginStyle(key: key.wrappedValue, title: title)
+                 } else {
+                     TextField("", text: key)
+                         .nsecLoginStyle(key: key.wrappedValue, title: title)
+                 }
+            Image(systemName: "eye.slash")
+                .foregroundColor(.gray)
+                .onTapGesture {
+                    is_secured.toggle()
                 }
-                .padding(10)
-                .autocapitalization(.none)
-                .autocorrectionDisabled(true)
-                .textInputAutocapitalization(.never)
-                .font(.body.monospaced())
-                .textContentType(.password)
         }
         .padding(.horizontal, 10)
         .overlay {
@@ -337,14 +336,14 @@ struct SignInEntry: View {
 }
 
 struct CreateAccountPrompt: View {
-    @Binding var create_account: Bool
+    var nav: NavigationCoordinator
     var body: some View {
         HStack {
             Text("New to Nostr?", comment: "Ask the user if they are new to Nostr")
                 .foregroundColor(Color("DamusMediumGrey"))
             
             Button(NSLocalizedString("Create account", comment: "Button to navigate to create account view.")) {
-                create_account.toggle()
+                nav.push(route: Route.CreateAccount)
             }
             
             Spacer()
@@ -358,8 +357,8 @@ struct LoginView_Previews: PreviewProvider {
         let pubkey = "npub18m76awca3y37hkvuneavuw6pjj4525fw90necxmadrvjg0sdy6qsngq955"
         let bech32_pubkey = "KeyInput"
         Group {
-            LoginView(key: pubkey, accepted: .constant(true))
-            LoginView(key: bech32_pubkey, accepted: .constant(true))
+            LoginView(key: pubkey, nav: .init())
+            LoginView(key: bech32_pubkey, nav: .init())
         }
     }
 }

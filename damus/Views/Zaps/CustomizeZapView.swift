@@ -39,11 +39,6 @@ func get_zap_amount_items(_ default_zap_amt: Int) -> [ZapAmountItem] {
     return entries
 }
 
-func satsString(_ count: Int, locale: Locale = Locale.current) -> String {
-    let format = localizedStringFormat(key: "sats", locale: locale)
-    return String(format: format, locale: locale, count)
-}
-
 struct CustomizeZapView: View {
     let state: DamusState
     let target: ZapTarget
@@ -138,7 +133,8 @@ struct CustomizeZapView: View {
                    model.custom_amount_sats = nil
                }
             }
-            Text(verbatim: satsString(model.custom_amount_sats ?? 0))
+            let noun = pluralizedString(key: "sats", count: model.custom_amount_sats ?? 0)
+            Text(noun)
                 .font(.system(size: 18, weight: .heavy))
         }
     }
@@ -189,12 +185,8 @@ struct CustomizeZapView: View {
         }
     }
     
-    func receive_zap(notif: Notification) {
-        let zap_ev = notif.object as! ZappingEvent
-        guard zap_ev.is_custom else {
-            return
-        }
-        guard zap_ev.target.id == target.id else {
+    func receive_zap(zap_ev: ZappingEvent) {
+        guard zap_ev.is_custom, zap_ev.target.id == target.id else {
             return
         }
         
@@ -261,8 +253,8 @@ struct CustomizeZapView: View {
         .onAppear {
             model.set_defaults(settings: state.settings)
         }
-        .onReceive(handle_notify(.zapping)) { notif in
-            receive_zap(notif: notif)
+        .onReceive(handle_notify(.zapping)) { zap_ev in
+            receive_zap(zap_ev: zap_ev)
         }
         .background(fillColor().edgesIgnoringSafeArea(.all))
         .onTapGesture {
@@ -310,7 +302,7 @@ extension View {
 
 struct CustomizeZapView_Previews: PreviewProvider {
     static var previews: some View {
-        CustomizeZapView(state: test_damus_state(), target: ZapTarget.note(id: test_event.id, author: test_event.pubkey), lnurl: "")
+        CustomizeZapView(state: test_damus_state, target: ZapTarget.note(id: test_note.id, author: test_note.pubkey), lnurl: "")
             .frame(width: 400, height: 600)
     }
 }

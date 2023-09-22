@@ -11,18 +11,20 @@ class FollowingModel {
     let damus_state: DamusState
     var needs_sub: Bool = true
     
-    let contacts: [String]
-    
+    let contacts: [Pubkey]
+    let hashtags: [Hashtag]
+
     let sub_id: String = UUID().description
     
-    init(damus_state: DamusState, contacts: [String]) {
+    init(damus_state: DamusState, contacts: [Pubkey], hashtags: [Hashtag]) {
         self.damus_state = damus_state
         self.contacts = contacts
+        self.hashtags = hashtags
     }
     
     func get_filter() -> NostrFilter {
         var f = NostrFilter(kinds: [.metadata])
-        f.authors = self.contacts.reduce(into: Array<String>()) { acc, pk in
+        f.authors = self.contacts.reduce(into: Array<Pubkey>()) { acc, pk in
             // don't fetch profiles we already have
             if damus_state.profiles.has_fresh_profile(id: pk) {
                 return
@@ -39,7 +41,7 @@ class FollowingModel {
             return
         }
         let filters = [filter]
-        print_filters(relay_id: "following", filters: [filters])
+        //print_filters(relay_id: "following", filters: [filters])
         self.damus_state.pool.subscribe(sub_id: sub_id, filters: filters, handler: handle_event)
     }
     
@@ -52,22 +54,6 @@ class FollowingModel {
     }
     
     func handle_event(relay_id: String, ev: NostrConnectionEvent) {
-        switch ev {
-        case .ws_event:
-            break
-        case .nostr_event(let nev):
-            switch nev {
-            case .ok:
-                break
-            case .event(_, let ev):
-                if ev.kind == 0 {
-                    process_metadata_event(events: damus_state.events, our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
-                }
-            case .notice(let msg):
-                print("followingmodel notice: \(msg)")
-            case .eose:
-                break
-            }
-        }
+        // don't need to do anything here really
     }
 }

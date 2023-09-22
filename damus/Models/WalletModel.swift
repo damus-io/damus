@@ -16,7 +16,7 @@ enum WalletConnectState {
 class WalletModel: ObservableObject {
     var settings: UserSettingsStore
     private(set) var previous_state: WalletConnectState
-    var inital_percent: Int
+    var initial_percent: Int
     
     @Published private(set) var connect_state: WalletConnectState
     
@@ -24,7 +24,7 @@ class WalletModel: ObservableObject {
         self.connect_state = state
         self.previous_state = .none
         self.settings = settings
-        self.inital_percent = settings.donation_percent
+        self.initial_percent = settings.donation_percent
     }
     
     init(settings: UserSettingsStore) {
@@ -37,7 +37,7 @@ class WalletModel: ObservableObject {
             self.previous_state = .none
             self.connect_state = .none
         }
-        self.inital_percent = settings.donation_percent
+        self.initial_percent = settings.donation_percent
     }
     
     func cancel() {
@@ -57,7 +57,7 @@ class WalletModel: ObservableObject {
     
     func connect(_ nwc: WalletConnectURL) {
         self.settings.nostr_wallet_connect = nwc.to_url().absoluteString
-        notify(.attached_wallet, nwc)
+        notify(.attached_wallet(nwc))
         self.connect_state = .existing(nwc)
         self.previous_state = .existing(nwc)
     }

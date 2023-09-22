@@ -91,6 +91,9 @@ static int parse_nostr_bech32_type(const char *prefix, enum nostr_bech32_type *t
     } else if (strcmp(prefix, "npub") == 0) {
         *type = NOSTR_BECH32_NPUB;
         return 1;
+    } else if (strcmp(prefix, "nsec") == 0) {
+        *type = NOSTR_BECH32_NSEC;
+        return 1;
     } else if (strcmp(prefix, "nprofile") == 0) {
         *type = NOSTR_BECH32_NPROFILE;
         return 1;
@@ -114,6 +117,10 @@ static int parse_nostr_bech32_note(struct cursor *cur, struct bech32_note *note)
 
 static int parse_nostr_bech32_npub(struct cursor *cur, struct bech32_npub *npub) {
     return pull_bytes(cur, 32, &npub->pubkey);
+}
+
+static int parse_nostr_bech32_nsec(struct cursor *cur, struct bech32_nsec *nsec) {
+    return pull_bytes(cur, 32, &nsec->nsec);
 }
 
 static int tlvs_to_relays(struct nostr_tlvs *tlvs, struct relays *relays) {
@@ -218,7 +225,7 @@ static int parse_nostr_bech32_nrelay(struct cursor *cur, struct bech32_nrelay *n
 }
 
 int parse_nostr_bech32(struct cursor *cur, struct nostr_bech32 *obj) {
-    const u8 *start, *end;
+    u8 *start, *end;
     
     start = cur->p;
     
@@ -257,7 +264,7 @@ int parse_nostr_bech32(struct cursor *cur, struct nostr_bech32 *obj) {
     }
     
     struct cursor bcur;
-    make_cursor(&bcur, obj->buffer, obj->buflen);
+    make_cursor(obj->buffer, obj->buffer + obj->buflen, &bcur);
     
     switch (obj->type) {
         case NOSTR_BECH32_NOTE:
@@ -266,6 +273,10 @@ int parse_nostr_bech32(struct cursor *cur, struct nostr_bech32 *obj) {
             break;
         case NOSTR_BECH32_NPUB:
             if (!parse_nostr_bech32_npub(&bcur, &obj->data.npub))
+                goto fail;
+            break;
+        case NOSTR_BECH32_NSEC:
+            if (!parse_nostr_bech32_nsec(&bcur, &obj->data.nsec))
                 goto fail;
             break;
         case NOSTR_BECH32_NEVENT:

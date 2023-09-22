@@ -37,7 +37,7 @@ struct ReactionsView: View {
 
 struct ReactionsView_Previews: PreviewProvider {
     static var previews: some View {
-        let state = test_damus_state()
-        ReactionsView(damus_state: state, model: ReactionsModel(state: state, target: "pubkey"))
+        let state = test_damus_state
+        ReactionsView(damus_state: state, model: ReactionsModel(state: state, target: test_note.id))
     }
 }

@@ -8,15 +8,21 @@
 import SwiftUI
 
 struct GradientButtonStyle: ButtonStyle {
+    let padding: CGFloat
+
+    init(padding: CGFloat = 16.0) {
+        self.padding = padding
+    }
+
     func makeBody(configuration: Self.Configuration) -> some View {
         return configuration.label
-            .padding()
+            .padding(padding)
             .foregroundColor(Color.white)
             .background {
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(PinkGradient.gradient)
+                    .fill(PinkGradient)
             }
-            .scaleEffect(configuration.isPressed ? 0.8 : 1)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1)
     }
 }
 

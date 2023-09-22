@@ -14,6 +14,7 @@ struct ConnectWalletView: View {
     @State var scanning: Bool = false
     @State var error: String? = nil
     @State var wallet_scan_result: WalletScanResult = .scanning
+    var nav: NavigationCoordinator
     
     var body: some View {
         MainContent
@@ -29,7 +30,7 @@ struct ConnectWalletView: View {
                     self.model.new(url)
                     
                 case .failed:
-                    error = "Invalid nostr wallet connection string"
+                    error = NSLocalizedString("Invalid Nostr wallet connection string", comment: "Error message when an invalid Nostr wallet connection string is provided.")
                 
                 case .scanning:
                     error = nil
@@ -63,17 +64,13 @@ struct ConnectWalletView: View {
     }
     
     var ConnectWallet: some View {
-        VStack {
-            NavigationLink(destination: WalletScannerView(result: $wallet_scan_result), isActive: $scanning) {
-                EmptyView()
-            }
-            
+        VStack {            
             AlbyButton() {
                 openURL(URL(string:"https://nwc.getalby.com/apps/new?c=Damus")!)
             }
             
             BigButton(NSLocalizedString("Attach Wallet", comment: "Text for button to attach Nostr Wallet Connect lightning wallet.")) {
-                scanning = true
+                nav.push(route: Route.WalletScanner(result: $wallet_scan_result))
             }
             
             if let err = self.error {
@@ -99,6 +96,6 @@ struct ConnectWalletView: View {
 
 struct ConnectWalletView_Previews: PreviewProvider {
     static var previews: some View {
-        ConnectWalletView(model: WalletModel(settings: UserSettingsStore()))
+        ConnectWalletView(model: WalletModel(settings: UserSettingsStore()), nav: .init())
     }
 }

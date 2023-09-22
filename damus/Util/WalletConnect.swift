@@ -16,16 +16,16 @@ struct WalletConnectURL: Equatable {
     
     let relay: RelayURL
     let keypair: FullKeypair
-    let pubkey: String
+    let pubkey: Pubkey
     let lud16: String?
     
     func to_url() -> URL {
         var urlComponents = URLComponents()
         urlComponents.scheme = "nostrwalletconnect"
-        urlComponents.host = pubkey
+        urlComponents.host = pubkey.hex()
         urlComponents.queryItems = [
             URLQueryItem(name: "relay", value: relay.id),
-            URLQueryItem(name: "secret", value: keypair.privkey)
+            URLQueryItem(name: "secret", value: keypair.privkey.hex())
         ]
 
         if let lud16 {
@@ -36,26 +36,30 @@ struct WalletConnectURL: Equatable {
     }
     
     init?(str: String) {
-        guard let url = URL(string: str),
-              url.scheme == "nostrwalletconnect" || url.scheme == "nostr+walletconnect",
-              let pk = url.host, pk.utf8.count == 64,
-              let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
+        guard let components = URLComponents(string: str),
+              components.scheme == "nostrwalletconnect" || components.scheme == "nostr+walletconnect",
+              // The line below provides flexibility for both `nostrwalletconnect://` (non-compliant, but commonly used) and `nostrwalletconnect:` (NIP-47 compliant) formats
+              let encoded_pubkey = components.path == "" ? components.host : components.path,
+              let pubkey = hex_decode_pubkey(encoded_pubkey),
               let items = components.queryItems,
               let relay = items.first(where: { qi in qi.name == "relay" })?.value,
               let relay_url = RelayURL(relay),
               let secret = items.first(where: { qi in qi.name == "secret" })?.value,
               secret.utf8.count == 64,
-              let our_pk = privkey_to_pubkey(privkey: secret)
+              let decoded = hex_decode(secret)
         else {
             return nil
         }
-        
+
+        let privkey = Privkey(Data(decoded))
+        guard let our_pk = privkey_to_pubkey(privkey: privkey) else { return nil }
+
         let lud16 = items.first(where: { qi in qi.name == "lud16" })?.value
-        let keypair = FullKeypair(pubkey: our_pk, privkey: secret)
-        self = WalletConnectURL(pubkey: pk, relay: relay_url, keypair: keypair, lud16: lud16)
+        let keypair = FullKeypair(pubkey: our_pk, privkey: privkey)
+        self = WalletConnectURL(pubkey: pubkey, relay: relay_url, keypair: keypair, lud16: lud16)
     }
     
-    init(pubkey: String, relay: RelayURL, keypair: FullKeypair, lud16: String?) {
+    init(pubkey: Pubkey, relay: RelayURL, keypair: FullKeypair, lud16: String?) {
         self.pubkey = pubkey
         self.relay = relay
         self.keypair = keypair
@@ -86,16 +90,16 @@ enum WalletResponseResult {
 }
 
 struct FullWalletResponse {
-    let req_id: String
+    let req_id: NoteId
     let response: WalletResponse
     
     init?(from: NostrEvent, nwc: WalletConnectURL) async {
-        guard let req_id = from.referenced_ids.first else {
+        guard let note_id = from.referenced_ids.first else {
             return nil
         }
-        
-        self.req_id = req_id.ref_id
-        
+
+        self.req_id = note_id
+
         let ares = Task {
             guard let json = decrypt_dm(nwc.keypair.privkey, pubkey: nwc.pubkey, content: from.content, encoding: .base64),
                   let resp: WalletResponse = decode_json(json)
@@ -165,9 +169,9 @@ struct PayInvoiceRequest: Codable {
     let invoice: String
 }
 
-func make_wallet_connect_request<T>(req: WalletRequest<T>, to_pk: String, keypair: FullKeypair) -> NostrEvent? {
-    let tags = [["p", to_pk]]
-    let created_at = Int64(Date().timeIntervalSince1970)
+func make_wallet_connect_request<T>(req: WalletRequest<T>, to_pk: Pubkey, keypair: FullKeypair) -> NostrEvent? {
+    let tags = [to_pk.tag]
+    let created_at = UInt32(Date().timeIntervalSince1970)
     guard let content = encode_json(req) else {
         return nil
     }
@@ -213,7 +217,7 @@ func nwc_success(state: DamusState, resp: FullWalletResponse) {
             
             if nwc_state.update_state(state: .confirmed) {
                 // notify the zaps model of an update so it can mark them as paid
-                state.events.get_cache_data(pzap.target.id).zaps_model.objectWillChange.send()
+                state.events.get_cache_data(NoteId(pzap.target.id)).zaps_model.objectWillChange.send()
                 print("NWC success confirmed")
             }
             

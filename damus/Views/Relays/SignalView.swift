@@ -14,7 +14,7 @@ struct SignalView: View {
     var body: some View {
         Group {
             if signal.signal != signal.max_signal {
-                NavigationLink(destination: RelayConfigView(state: state)) {
+                NavigationLink(value: Route.RelayConfig) {
                     Text("\(signal.signal)/\(signal.max_signal)", comment: "Fraction of how many of the user's relay servers that are operational.")
                         .font(.callout)
                         .foregroundColor(.gray)
@@ -29,6 +29,6 @@ struct SignalView: View {
 
 struct SignalView_Previews: PreviewProvider {
     static var previews: some View {
-        SignalView(state: test_damus_state(), signal: SignalModel(signal: 5, max_signal: 10))
+        SignalView(state: test_damus_state, signal: SignalModel(signal: 5, max_signal: 10))
     }
 }

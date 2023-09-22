@@ -10,9 +10,6 @@ import SwiftUI
 struct RelayFilterView: View {
     let state: DamusState
     let timeline: Timeline
-    //@State var relays: [RelayDescriptor]
-    //@EnvironmentObject var user_settings: UserSettingsStore
-    //@State var relays: [RelayDescriptor]
     
     init(state: DamusState, timeline: Timeline) {
         self.state = state
@@ -39,6 +36,6 @@ struct RelayFilterView: View {
 
 struct RelayFilterView_Previews: PreviewProvider {
     static var previews: some View {
-        RelayFilterView(state: test_damus_state(), timeline: .search)
+        RelayFilterView(state: test_damus_state, timeline: .search)
     }
 }

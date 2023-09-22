@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct NIP05 {
+struct NIP05: Equatable {
     let username: String
     let host: String
     
@@ -30,14 +30,15 @@ struct NIP05 {
 
 
 struct NIP05Response: Decodable {
-    let names: [String: String]
+    let names: [String: Pubkey]
 }
 
 func fetch_nip05(nip05: NIP05) async -> NIP05Response? {
     guard let url = nip05.url else {
         return nil
     }
-    
+
+    print("fetching nip05 \(url.absoluteString)")
     guard let ret = try? await URLSession.shared.data(from: url) else {
         return nil
     }
@@ -50,7 +51,7 @@ func fetch_nip05(nip05: NIP05) async -> NIP05Response? {
     return decoded
 }
 
-func validate_nip05(pubkey: String, nip05_str: String) async -> NIP05? {
+func validate_nip05(pubkey: Pubkey, nip05_str: String) async -> NIP05? {
     guard let nip05 = NIP05.parse(nip05_str) else {
         return nil
     }

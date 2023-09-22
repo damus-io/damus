@@ -7,85 +7,101 @@
 
 import Foundation
 
+class ValidationModel: ObservableObject {
+    @Published var validated: NIP05?
+
+    init() {
+        self.validated = nil
+    }
+}
+
+class ProfileData {
+    var status: UserStatusModel
+    var validation_model: ValidationModel
+    var zapper: Pubkey?
+
+    init() {
+        status = .init()
+        validation_model = .init()
+        zapper = nil
+    }
+}
+
 class Profiles {
-    
+    private var ndb: Ndb
+
     static let db_freshness_threshold: TimeInterval = 24 * 60 * 60
-    
-    /// This queue is used to synchronize access to the profiles dictionary, which
-    /// prevents data races from crashing the app.
-    private var queue = DispatchQueue(label: "io.damus.profiles",
-                                      qos: .userInteractive,
-                                      attributes: .concurrent)
-    
-    private var profiles: [String: TimestampedProfile] = [:]
-    var validated: [String: NIP05] = [:]
-    var nip05_pubkey: [String: String] = [:]
-    var zappers: [String: String] = [:]
-    
-    private let database = ProfileDatabase()
-    
-    func is_validated(_ pk: String) -> NIP05? {
-        validated[pk]
+
+    @MainActor
+    private var profiles: [Pubkey: ProfileData] = [:]
+
+    @MainActor
+    var nip05_pubkey: [String: Pubkey] = [:]
+
+    init(ndb: Ndb) {
+        self.ndb = ndb
     }
-    
-    func enumerated() -> EnumeratedSequence<[String: TimestampedProfile]> {
-        return queue.sync {
-            return profiles.enumerated()
-        }
+
+    @MainActor
+    func is_validated(_ pk: Pubkey) -> NIP05? {
+        self.profile_data(pk).validation_model.validated
     }
-    
-    func lookup_zapper(pubkey: String) -> String? {
-        zappers[pubkey]
+
+    @MainActor
+    func invalidate_nip05(_ pk: Pubkey) {
+        self.profile_data(pk).validation_model.validated = nil
     }
-    
-    func add(id: String, profile: TimestampedProfile) {
-        queue.async(flags: .barrier) {
-            self.profiles[id] = profile
-        }
-        
-        Task {
-            do {
-                try await database.upsert(id: id, profile: profile.profile, last_update: Date(timeIntervalSince1970: TimeInterval(profile.timestamp)))
-            } catch {
-                print("⚠️ Warning: Profiles failed to save a profile: \(error)")
-            }
-        }
+
+    @MainActor
+    func set_validated(_ pk: Pubkey, nip05: NIP05?) {
+        self.profile_data(pk).validation_model.validated = nip05
     }
-    
-    func lookup(id: String) -> Profile? {
-        var profile: Profile?
-        queue.sync {
-            profile = profiles[id]?.profile
+
+    @MainActor
+    func profile_data(_ pubkey: Pubkey) -> ProfileData {
+        guard let data = profiles[pubkey] else {
+            let data = ProfileData()
+            profiles[pubkey] = data
+            return data
         }
-        return profile ?? database.get(id: id)
+
+        return data
     }
-    
-    func lookup_with_timestamp(id: String) -> TimestampedProfile? {
-        queue.sync {
-            return profiles[id]
-        }
+
+    @MainActor
+    func lookup_zapper(pubkey: Pubkey) -> Pubkey? {
+        profile_data(pubkey).zapper
     }
-    
-    func has_fresh_profile(id: String) -> Bool {
-        // check memory first
-        var profile: Profile?
-        queue.sync {
-            profile = profiles[id]?.profile
-        }
-        if profile != nil {
-            return true
-        }
-        
-        // then disk
-        guard let pull_date = database.get_network_pull_date(id: id) else {
-            return false
-        }
-        return Date.now.timeIntervalSince(pull_date) < Profiles.db_freshness_threshold
+
+    func lookup_with_timestamp(_ pubkey: Pubkey) -> NdbTxn<ProfileRecord?> {
+        return ndb.lookup_profile(pubkey)
+    }
+
+    func lookup_by_key(key: ProfileKey) -> NdbTxn<ProfileRecord?> {
+        return ndb.lookup_profile_by_key(key: key)
+    }
+
+    func search<Y>(_ query: String, limit: Int, txn: NdbTxn<Y>) -> [Pubkey] {
+        return ndb.search_profile(query, limit: limit, txn: txn)
+    }
+
+    func lookup(id: Pubkey) -> NdbTxn<Profile?> {
+        return ndb.lookup_profile(id).map({ pr in pr?.profile })
+    }
+
+    func lookup_key_by_pubkey(_ pubkey: Pubkey) -> ProfileKey? {
+        return ndb.lookup_profile_key(pubkey)
+    }
+
+    func has_fresh_profile(id: Pubkey) -> Bool {
+        guard let recv = lookup_with_timestamp(id).unsafeUnownedValue?.receivedAt else { return false }
+        return Date.now.timeIntervalSince(Date(timeIntervalSince1970: Double(recv))) < Profiles.db_freshness_threshold
     }
 }
 
 
-func invalidate_zapper_cache(pubkey: String, profiles: Profiles, lnurl: LNUrls) {
-    profiles.zappers.removeValue(forKey: pubkey)
+@MainActor
+func invalidate_zapper_cache(pubkey: Pubkey, profiles: Profiles, lnurl: LNUrls) {
+    profiles.profile_data(pubkey).zapper = nil
     lnurl.endpoints.removeValue(forKey: pubkey)
 }

@@ -17,8 +17,11 @@ final class CredentialHandler: NSObject, ASAuthorizationControllerDelegate {
         authorizationController.performRequests()
     }
     
-    func save_credential(pubkey: String, privkey: String) {
-        SecAddSharedWebCredential("damus.io" as CFString, pubkey as CFString, privkey as CFString, { error in
+    func save_credential(pubkey: Pubkey, privkey: Privkey) {
+        let pub = pubkey.npub
+        let priv = privkey.nsec
+
+        SecAddSharedWebCredential("damus.io" as CFString, pub as CFString, priv as CFString, { error in
             if let error {
                 print("⚠️ An error occurred while saving credentials: \(error)")
             }

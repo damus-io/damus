@@ -7,10 +7,121 @@
 
 import Foundation
 
+typealias Profile = NdbProfile
+typealias ProfileKey = UInt64
+//typealias ProfileRecord = NdbProfileRecord
+
+class ProfileRecord {
+    let data: NdbProfileRecord
+
+    init(data: NdbProfileRecord, key: ProfileKey) {
+        self.data = data
+        self.profileKey = key
+    }
+
+    let profileKey: ProfileKey
+    var profile: Profile? { return data.profile }
+    var receivedAt: UInt64 { data.receivedAt }
+    var noteKey: UInt64 { data.noteKey }
+
+    private var _lnurl: String? = nil
+    var lnurl: String? {
+        if let _lnurl {
+            return _lnurl
+        }
+        
+        guard let profile = data.profile,
+              let addr = profile.lud16 ?? profile.lud06 else {
+            return nil;
+        }
+        
+        if addr.contains("@") {
+            // this is a heavy op and is used a lot in views, cache it!
+            let addr = lnaddress_to_lnurl(addr);
+            self._lnurl = addr
+            return addr
+        }
+        
+        if !addr.lowercased().hasPrefix("lnurl") {
+            return nil
+        }
+        
+        return addr;
+    }
+    
+}
+
+extension NdbProfile {
+    var display_name: String? {
+        return displayName
+    }
+
+    static func displayName(profile: Profile?, pubkey: Pubkey) -> DisplayName {
+        return parse_display_name(profile: profile, pubkey: pubkey)
+    }
+
+    var damus_donation: Int? {
+        return Int(damusDonation)
+    }
+
+    var damus_donation_v2: Int {
+        return Int(damusDonationV2)
+    }
+
+    var website_url: URL? {
+        if self.website?.trimmingCharacters(in: .whitespacesAndNewlines) == "" {
+            return nil
+        }
+        return self.website.flatMap { url in
+            let trim = url.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !(trim.hasPrefix("http://") || trim.hasPrefix("https://")) {
+                return URL(string: "https://" + trim)
+            }
+            return URL(string: trim)
+        }
+    }
+
+    init(name: String? = nil, display_name: String? = nil, about: String? = nil, picture: String? = nil, banner: String? = nil, website: String? = nil, lud06: String? = nil, lud16: String? = nil, nip05: String? = nil, damus_donation: Int? = nil, reactions: Bool = true) {
+
+        var fbb = FlatBufferBuilder()
+
+        let name_off = fbb.create(string: name)
+        let display_name_off = fbb.create(string: display_name)
+        let about_off = fbb.create(string: about)
+        let picture_off = fbb.create(string: picture)
+        let banner_off = fbb.create(string: banner)
+        let website_off = fbb.create(string: website)
+        let lud06_off = fbb.create(string: lud06)
+        let lud16_off = fbb.create(string: lud16)
+        let nip05_off = fbb.create(string: nip05)
+
+        let profile_data = NdbProfile.createNdbProfile(&fbb,
+                                    nameOffset: name_off,
+                                    websiteOffset: website_off,
+                                    aboutOffset: about_off,
+                                    lud16Offset: lud16_off,
+                                    bannerOffset: banner_off,
+                                    displayNameOffset: display_name_off,
+                                    reactions: reactions,
+                                    pictureOffset: picture_off,
+                                    nip05Offset: nip05_off,
+                                    damusDonation: 0,
+                                    damusDonationV2: damus_donation.map({ Int32($0) }) ?? 0,
+                                    lud06Offset: lud06_off)
+
+        fbb.finish(offset: profile_data)
+
+        var buf = ByteBuffer(bytes: fbb.sizedByteArray)
+        let profile: Profile = try! getCheckedRoot(byteBuffer: &buf)
+        self = profile
+    }
+}
+
+/*
 class Profile: Codable {
     var value: [String: AnyCodable]
     
-    init (name: String?, display_name: String?, about: String?, picture: String?, banner: String?, website: String?, lud06: String?, lud16: String?, nip05: String?, damus_donation: Int?) {
+    init(name: String? = nil, display_name: String? = nil, about: String? = nil, picture: String? = nil, banner: String? = nil, website: String? = nil, lud06: String? = nil, lud16: String? = nil, nip05: String? = nil, damus_donation: Int? = nil) {
         self.value = [:]
         self.name = name
         self.display_name = display_name
@@ -22,19 +133,6 @@ class Profile: Codable {
         self.lud16 = lud16
         self.nip05 = nip05
         self.damus_donation = damus_donation
-    }
-    
-    convenience init(persisted_profile: PersistedProfile) {
-        self.init(name: persisted_profile.name,
-                  display_name: persisted_profile.display_name,
-                  about: persisted_profile.about,
-                  picture: persisted_profile.picture,
-                  banner: persisted_profile.banner,
-                  website: persisted_profile.website,
-                  lud06: persisted_profile.lud06,
-                  lud16: persisted_profile.lud16,
-                  nip05: persisted_profile.nip05,
-                  damus_donation: Int(persisted_profile.damus_donation))
     }
     
     private func str(_ str: String) -> String? {
@@ -77,11 +175,6 @@ class Profile: Codable {
     var reactions: Bool? {
         get { return get_val("reactions"); }
         set(s) { set_val("reactions", s) }
-    }
-    
-    var deleted: Bool? {
-        get { return get_val("deleted"); }
-        set(s) { set_val("deleted", s) }
     }
     
     var display_name: String? {
@@ -201,10 +294,11 @@ class Profile: Codable {
         try container.encode(value)
     }
     
-    static func displayName(profile: Profile?, pubkey: String) -> DisplayName {
+    static func displayName(profile: Profile?, pubkey: Pubkey) -> DisplayName {
         return parse_display_name(profile: profile, pubkey: pubkey)
     }
 }
+*/
 
 func make_test_profile() -> Profile {
     return Profile(name: "jb55", display_name: "Will", about: "Its a me", picture: "https://cdn.jb55.com/img/red-me.jpg", banner: "https://pbs.twimg.com/profile_banners/9918032/1531711830/600x200",  website: "jb55.com", lud06: "jb55@jb55.com", lud16: nil, nip05: "jb55@jb55.com", damus_donation: 1)
@@ -227,3 +321,4 @@ func lnaddress_to_lnurl(_ lnaddr: String) -> String? {
     
     return bech32_encode(hrp: "lnurl", Array(dat))
 }
+

@@ -2,20 +2,20 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>collapsed_event_view_other_notes</key>
+	<key>followed_by_three_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@NOTES@</string>
-		<key>NOTES</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>...%d andra inlägg...</string>
+			<string>Följd av %2$@, %3$@, %4$@ &amp; %1$d andra</string>
 			<key>other</key>
-			<string>...%d andra anteckningar...</string>
+			<string>Följd av %2$@, %3$@, %4$@ &amp; %1$d andra</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -48,6 +48,22 @@
 			<string>Följer</string>
 			<key>other</key>
 			<string>Följer</string>
+		</dict>
+	</dict>
+	<key>imports_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@IMPORTS@</string>
+		<key>IMPORTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Importer</string>
+			<key>other</key>
+			<string>Importer</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -317,9 +333,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ och %1$d annan zappade din profil</string>
+			<string>%2$@ och %1$d andra zapped dig</string>
 			<key>other</key>
-			<string>%2$@ och %1$d andra zappade din profil</string>
+			<string>%2$@ och %1$d andra zapped dig</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>

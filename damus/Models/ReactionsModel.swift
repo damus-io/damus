@@ -10,7 +10,7 @@ import Foundation
 
 final class ReactionsModel: EventsModel {
     
-    init(state: DamusState, target: String) {
+    init(state: DamusState, target: NoteId) {
         super.init(state: state, target: target, kind: .like)
     }
 }

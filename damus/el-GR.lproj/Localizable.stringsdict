@@ -2,20 +2,20 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>collapsed_event_view_other_notes</key>
+	<key>followed_by_three_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@NOTES@</string>
-		<key>NOTES</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>... %d άλλη σημείωση ...</string>
+			<string>Ακολουθείται από %2$@, %3$@, %4$@ &amp; %1$d ακόμα</string>
 			<key>other</key>
-			<string>... %d άλλες σημειώσεις ...</string>
+			<string>Ακολουθείται από %2$@, %3$@, %4$@ &amp; %1$d ακόμα</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -48,6 +48,22 @@
 			<string>Ακολουθεί</string>
 			<key>other</key>
 			<string>Ακολουθεί</string>
+		</dict>
+	</dict>
+	<key>imports_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@IMPORTS@</string>
+		<key>IMPORTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Εισαγωγή</string>
+			<key>other</key>
+			<string>Εισαγωγές</string>
 		</dict>
 	</dict>
 	<key>reacted_tagged_in_3</key>
@@ -317,9 +333,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ και %1$d ακόμα έστειλε zap στο προφίλ σας</string>
+			<string>%2$@ και %1$d ακόμα σας έστειλε zap</string>
 			<key>other</key>
-			<string>%2$@ και %1$d ακόμα έστειλαν zap στο προφίλ σας</string>
+			<string>%2$@ και %1$d ακόμα σας έστειλαν zap</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>

@@ -15,6 +15,8 @@ func eventview_pfp_size(_ size: EventViewKind) -> CGFloat {
         return PFP_SIZE
     case .selected:
         return PFP_SIZE
+    case .title:
+        return PFP_SIZE
     case .subheadline:
         return PFP_SIZE * 0.5
     }
@@ -22,8 +24,7 @@ func eventview_pfp_size(_ size: EventViewKind) -> CGFloat {
 
 struct EventProfile: View {
     let damus_state: DamusState
-    let pubkey: String
-    let profile: Profile?
+    let pubkey: Pubkey
     let size: EventViewKind
     
     var pfp_size: CGFloat {
@@ -35,20 +36,23 @@ struct EventProfile: View {
     }
     
     var body: some View {
-        HStack(alignment: .center) {
-            VStack {
-                NavigationLink(destination: ProfileView(damus_state: damus_state, pubkey: pubkey)) {
-                    ProfilePicView(pubkey: pubkey, size: pfp_size, highlight: .none, profiles: damus_state.profiles, disable_animation: disable_animation)
+        HStack(alignment: .center, spacing: 10) {
+            ProfilePicView(pubkey: pubkey, size: pfp_size, highlight: .none, profiles: damus_state.profiles, disable_animation: disable_animation)
+                .onTapGesture {
+                    damus_state.nav.push(route: .ProfileByKey(pubkey: pubkey))
                 }
+
+            VStack(alignment: .leading, spacing: 0) {
+                EventProfileName(pubkey: pubkey, damus: damus_state, size: size)
+
+                UserStatusView(status: damus_state.profiles.profile_data(pubkey).status, show_general: damus_state.settings.show_general_statuses, show_music: damus_state.settings.show_music_statuses)
             }
-            
-            EventProfileName(pubkey: pubkey, profile: profile, damus: damus_state, size: size)
         }
     }
 }
 
 struct EventProfile_Previews: PreviewProvider {
     static var previews: some View {
-        EventProfile(damus_state: test_damus_state(), pubkey: "pk", profile: nil, size: .normal)
+        EventProfile(damus_state: test_damus_state, pubkey: test_note.pubkey, size: .normal)
     }
 }

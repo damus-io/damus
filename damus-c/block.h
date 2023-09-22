@@ -35,7 +35,7 @@ typedef struct mention_bech32_block {
     struct nostr_bech32 bech32;
 } mention_bech32_block_t;
 
-typedef struct block {
+typedef struct note_block {
     enum block_type type;
     union {
         struct str_block str;
@@ -45,12 +45,13 @@ typedef struct block {
     } block;
 } block_t;
 
-typedef struct blocks {
+typedef struct note_blocks {
+    int words;
     int num_blocks;
-    struct block *blocks;
+    struct note_block *blocks;
 } blocks_t;
 
-void blocks_init(struct blocks *blocks);
-void blocks_free(struct blocks *blocks);
+void blocks_init(struct note_blocks *blocks);
+void blocks_free(struct note_blocks *blocks);
 
 #endif /* block_h */

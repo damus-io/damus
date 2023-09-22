@@ -5,3 +5,9 @@
 #include "damus.h"
 #include "bolt11.h"
 #include "amount.h"
+#include "nostr_bech32.h"
+#include "wasm.h"
+#include "nostrscript.h"
+#include "nostrdb.h"
+#include "lmdb.h"
+

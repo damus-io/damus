@@ -13,7 +13,7 @@ class SearchHomeModel: ObservableObject {
     var events: EventHolder
     @Published var loading: Bool = false
 
-    var seen_pubkey: Set<String> = Set()
+    var seen_pubkey: Set<Pubkey> = Set()
     let damus_state: DamusState
     let base_subid = UUID().description
     let profiles_subid = UUID().description
@@ -30,12 +30,12 @@ class SearchHomeModel: ObservableObject {
     func get_base_filter() -> NostrFilter {
         var filter = NostrFilter(kinds: [.text, .chat])
         filter.limit = self.limit
-        filter.until = Int64(Date.now.timeIntervalSince1970)
+        filter.until = UInt32(Date.now.timeIntervalSince1970)
         return filter
     }
     
     func filter_muted() {
-        events.filter { should_show_event(contacts: damus_state.contacts, ev: $0) }
+        events.filter { should_show_event(keypair: damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: $0) }
         self.objectWillChange.send()
     }
     
@@ -60,7 +60,8 @@ class SearchHomeModel: ObservableObject {
             guard sub_id == self.base_subid || sub_id == self.profiles_subid else {
                 return
             }
-            if ev.is_textlike && should_show_event(contacts: damus_state.contacts, ev: ev) && !ev.is_reply(nil) {
+            if ev.is_textlike && should_show_event(keypair: damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: ev) && !ev.is_reply(damus_state.keypair)
+            {
                 if !damus_state.settings.multiple_events_per_pubkey && seen_pubkey.contains(ev.pubkey) {
                     return
                 }
@@ -91,7 +92,7 @@ class SearchHomeModel: ObservableObject {
     }
 }
 
-func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: EventCache) -> [String] {
+func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: EventCache) -> [Pubkey] {
     switch load {
     case .from_events(let events):
         return find_profiles_to_fetch_from_events(profiles: profiles, events: events, cache: cache)
@@ -100,13 +101,13 @@ func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: Even
     }
 }
 
-func find_profiles_to_fetch_from_keys(profiles: Profiles, pks: [String]) -> [String] {
+func find_profiles_to_fetch_from_keys(profiles: Profiles, pks: [Pubkey]) -> [Pubkey] {
     Array(Set(pks.filter { pk in !profiles.has_fresh_profile(id: pk) }))
 }
 
-func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent], cache: EventCache) -> [String] {
-    var pubkeys = Set<String>()
-    
+func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent], cache: EventCache) -> [Pubkey] {
+    var pubkeys = Set<Pubkey>()
+
     for ev in events {
         // lookup profiles from boosted events
         if ev.known_kind == .boost, let bev = ev.get_inner_event(cache: cache), !profiles.has_fresh_profile(id: bev.pubkey) {
@@ -123,7 +124,7 @@ func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent]
 
 enum PubkeysToLoad {
     case from_events([NostrEvent])
-    case from_keys([String])
+    case from_keys([Pubkey])
 }
 
 func load_profiles(profiles_subid: String, relay_id: String, load: PubkeysToLoad, damus_state: DamusState) {
@@ -138,21 +139,13 @@ func load_profiles(profiles_subid: String, relay_id: String, load: PubkeysToLoad
                              authors: authors)
     
     damus_state.pool.subscribe_to(sub_id: profiles_subid, filters: [filter], to: [relay_id]) { sub_id, conn_ev in
-        let (sid, done) = handle_subid_event(pool: damus_state.pool, relay_id: relay_id, ev: conn_ev) { sub_id, ev in
-            guard sub_id == profiles_subid else {
-                return
-            }
-            
-            if ev.known_kind == .metadata {
-                process_metadata_event(events: damus_state.events, our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
-            }
-            
-        }
-        
-        guard done && sid == profiles_subid else {
+        guard case .nostr_event(let ev) = conn_ev,
+              case .eose = ev,
+              sub_id == profiles_subid
+        else {
             return
         }
-            
+
         print("done loading \(authors.count) profiles from \(relay_id)")
         damus_state.pool.unsubscribe(sub_id: profiles_subid, to: [relay_id])
     }

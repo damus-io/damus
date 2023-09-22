@@ -8,10 +8,10 @@
 import Foundation
 
 enum NotificationItem {
-    case repost(String, EventGroup)
-    case reaction(String, EventGroup)
+    case repost(NoteId, EventGroup)
+    case reaction(NoteId, EventGroup)
     case profile_zap(ZapGroup)
-    case event_zap(String, ZapGroup)
+    case event_zap(NoteId, ZapGroup)
     case reply(NostrEvent)
     
     var is_reply: NostrEvent? {
@@ -35,23 +35,8 @@ enum NotificationItem {
             return nil
         }
     }
-    
-    var id: String {
-        switch self {
-        case .repost(let evid, _):
-            return "repost_" + evid
-        case .reaction(let evid, _):
-            return "reaction_" + evid
-        case .profile_zap:
-            return "profile_zap"
-        case .event_zap(let evid, _):
-            return "event_zap_" + evid
-        case .reply(let ev):
-            return "reply_" + ev.id
-        }
-    }
-    
-    var last_event_at: Int64 {
+
+    var last_event_at: UInt32 {
         switch self {
         case .reaction(_, let evgrp):
             return evgrp.last_event_at
@@ -99,42 +84,28 @@ enum NotificationItem {
 }
 
 class NotificationsModel: ObservableObject, ScrollQueue {
-    var incoming_zaps: [Zapping]
-    var incoming_events: [NostrEvent]
-    var should_queue: Bool
+    var incoming_zaps: [Zapping] = []
+    var incoming_events: [NostrEvent] = []
+    var should_queue: Bool = true
     
     // mappings from events to
-    var zaps: [String: ZapGroup]
-    var profile_zaps: ZapGroup
-    var reactions: [String: EventGroup]
-    var reposts: [String: EventGroup]
-    var replies: [NostrEvent]
-    var has_reply: Set<String>
-    var has_ev: Set<String>
-    
-    @Published var notifications: [NotificationItem]
-    
-    init() {
-        self.zaps = [:]
-        self.reactions = [:]
-        self.reposts = [:]
-        self.replies = []
-        self.has_reply = Set()
-        self.should_queue = true
-        self.incoming_zaps = []
-        self.incoming_events = []
-        self.profile_zaps = ZapGroup()
-        self.notifications = []
-        self.has_ev = Set()
-    }
+    var zaps: [NoteId: ZapGroup] = [:]
+    var profile_zaps = ZapGroup()
+    var reactions: [NoteId: EventGroup] = [:]
+    var reposts: [NoteId: EventGroup] = [:]
+    var replies: [NostrEvent] = []
+    var has_reply = Set<NoteId>()
+    var has_ev = Set<NoteId>()
+
+    @Published var notifications: [NotificationItem] = []
     
     func set_should_queue(_ val: Bool) {
         self.should_queue = val
     }
     
-    func uniq_pubkeys() -> [String] {
-        var pks = Set<String>()
-        
+    func uniq_pubkeys() -> [Pubkey] {
+        var pks = Set<Pubkey>()
+
         for ev in incoming_events {
             pks.insert(ev.pubkey)
         }
@@ -222,12 +193,10 @@ class NotificationsModel: ObservableObject, ScrollQueue {
     }
     
     private func insert_reaction(_ ev: NostrEvent) -> Bool {
-        guard let ref_id = ev.referenced_ids.last else {
+        guard let id = ev.referenced_ids.last else {
             return false
         }
-        
-        let id = ref_id.id
-        
+
         if let evgrp = self.reactions[id] {
             return evgrp.insert(ev)
         } else {

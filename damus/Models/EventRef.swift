@@ -7,20 +7,18 @@
 
 import Foundation
 
-enum EventRef {
-    case mention(Mention)
-    case thread_id(ReferencedId)
-    case reply(ReferencedId)
-    case reply_to_root(ReferencedId)
-    
-    var is_mention: Mention? {
-        if case .mention(let m) = self {
-            return m
-        }
+enum EventRef: Equatable {
+    case mention(Mention<NoteRef>)
+    case thread_id(NoteRef)
+    case reply(NoteRef)
+    case reply_to_root(NoteRef)
+
+    var is_mention: NoteRef? {
+        if case .mention(let m) = self { return m.ref }
         return nil
     }
     
-    var is_direct_reply: ReferencedId? {
+    var is_direct_reply: NoteRef? {
         switch self {
         case .mention:
             return nil
@@ -33,7 +31,7 @@ enum EventRef {
         }
     }
     
-    var is_thread_id: ReferencedId? {
+    var is_thread_id: NoteRef? {
         switch self {
         case .mention:
             return nil
@@ -46,7 +44,7 @@ enum EventRef {
         }
     }
     
-    var is_reply: ReferencedId? {
+    var is_reply: NoteRef? {
         switch self {
         case .mention:
             return nil
@@ -64,10 +62,8 @@ func build_mention_indices(_ blocks: [Block], type: MentionType) -> Set<Int> {
     return blocks.reduce(into: []) { acc, block in
         switch block {
         case .mention(let m):
-            if m.type == type {
-                if let idx = m.index {
-                    acc.insert(idx)
-                }
+            if m.ref.key == type, let idx = m.index {
+                acc.insert(idx)
             }
         case .relay:
             return
@@ -83,7 +79,7 @@ func build_mention_indices(_ blocks: [Block], type: MentionType) -> Set<Int> {
     }
 }
 
-func interp_event_refs_without_mentions(_ refs: [ReferencedId]) -> [EventRef] {
+func interp_event_refs_without_mentions(_ refs: [NoteRef]) -> [EventRef] {
     if refs.count == 0 {
         return []
     }
@@ -105,16 +101,15 @@ func interp_event_refs_without_mentions(_ refs: [ReferencedId]) -> [EventRef] {
     return evrefs
 }
 
-func interp_event_refs_with_mentions(tags: [[String]], mention_indices: Set<Int>) -> [EventRef] {
+func interp_event_refs_with_mentions(tags: Tags, mention_indices: Set<Int>) -> [EventRef] {
     var mentions: [EventRef] = []
-    var ev_refs: [ReferencedId] = []
+    var ev_refs: [NoteRef] = []
     var i: Int = 0
-    
+
     for tag in tags {
-        if tag.count >= 2 && tag[0] == "e" {
-            let ref = tag_to_refid(tag)!
+        if let ref = NoteRef.from_tag(tag: tag) {
             if mention_indices.contains(i) {
-                let mention = Mention(index: i, type: .event, ref: ref)
+                let mention = Mention<NoteRef>(index: i, ref: ref)
                 mentions.append(.mention(mention))
             } else {
                 ev_refs.append(ref)
@@ -128,26 +123,25 @@ func interp_event_refs_with_mentions(tags: [[String]], mention_indices: Set<Int>
     return replies
 }
 
-func interpret_event_refs(blocks: [Block], tags: [[String]]) -> [EventRef] {
+func interpret_event_refs(blocks: [Block], tags: Tags) -> [EventRef] {
     if tags.count == 0 {
         return []
     }
     
     /// build a set of indices for each event mention
-    let mention_indices = build_mention_indices(blocks, type: .event)
-    
+    let mention_indices = build_mention_indices(blocks, type: .e)
+
     /// simpler case with no mentions
     if mention_indices.count == 0 {
-        let ev_refs = get_referenced_ids(tags: tags, key: "e")
-        return interp_event_refs_without_mentions(ev_refs)
+        return interp_event_refs_without_mentions_ndb(References<NoteRef>(tags: tags))
     }
     
     return interp_event_refs_with_mentions(tags: tags, mention_indices: mention_indices)
 }
 
 
-func event_is_reply(_ ev: NostrEvent, privkey: String?) -> Bool {
-    return ev.event_refs(privkey).contains { evref in
+func event_is_reply(_ refs: [EventRef]) -> Bool {
+    return refs.contains { evref in
         return evref.is_reply != nil
     }
 }

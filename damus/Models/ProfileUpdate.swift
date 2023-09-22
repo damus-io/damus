@@ -8,7 +8,16 @@
 import Foundation
 
 
-struct ProfileUpdate {
-    let pubkey: String
-    let profile: Profile
+enum ProfileUpdate {
+    case manual(pubkey: Pubkey, profile: Profile)
+    case remote(pubkey: Pubkey)
+
+    var pubkey: Pubkey {
+        switch self {
+        case .manual(let pubkey, _):
+            return pubkey
+        case .remote(let pubkey):
+            return pubkey
+        }
+    }
 }

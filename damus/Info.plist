@@ -68,6 +68,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Damus needs access to your camera if you want to upload photos from it</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Damus needs access to your media library for playback statuses</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Damus needs access to your microphone if you want to upload recorded videos from it</string>
 </dict>

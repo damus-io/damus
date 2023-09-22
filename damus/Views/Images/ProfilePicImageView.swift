@@ -62,7 +62,7 @@ struct NavDismissBarView: View {
 }
 
 struct ProfilePicImageView: View {
-    let pubkey: String
+    let pubkey: Pubkey
     let profiles: Profiles
     let disable_animation: Bool
     
@@ -90,12 +90,10 @@ struct ProfilePicImageView: View {
 }
 
 struct ProfileZoomView_Previews: PreviewProvider {
-    static let pubkey = "ca48854ac6555fed8e439ebb4fa2d928410e0eef13fa41164ec45aaaa132d846"
-    
     static var previews: some View {
         ProfilePicImageView(
-            pubkey: pubkey,
-            profiles: make_preview_profiles(pubkey),
+            pubkey: test_pubkey,
+            profiles: make_preview_profiles(test_pubkey),
             disable_animation: false
         )
     }

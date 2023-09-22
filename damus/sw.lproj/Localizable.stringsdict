@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>followed_by_three_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Fuatwa na %2$@, %3$@, %4$@ &amp; %1$d wengine</string>
+			<key>other</key>
+			<string>Fuatwa na %2$@, %3$@, %4$@ &amp; %1$d wengine</string>
+		</dict>
+	</dict>
+	<key>followers_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWERS@</string>
+		<key>FOLLOWERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Wafuasi</string>
+			<key>other</key>
+			<string>Wafuasi</string>
+		</dict>
+	</dict>
+	<key>following_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@FOLLOWING@</string>
+		<key>FOLLOWING</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Unafuata</string>
+			<key>other</key>
+			<string>Unafuata</string>
+		</dict>
+	</dict>
+	<key>reacted_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ and %1$d wengine walijibu kwa taarifa uliyewekewa alama.</string>
+			<key>other</key>
+			<string>%2$@ and %1$d wengine walijibu kwa taarifa uliyewekewa alama.</string>
+		</dict>
+	</dict>
+	<key>reacted_your_note_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ and %1$d wengine walijibu kwa kidokezo chako</string>
+			<key>other</key>
+			<string>%2$@ and %1$d wengine walijibu kwa kidokezo chako</string>
+		</dict>
+	</dict>
+	<key>reacted_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTED@</string>
+		<key>REACTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ na %1$d wengine walitoa hisia kwenye wasifu wako.</string>
+			<key>other</key>
+			<string>%2$@ na %1$d wengine walitoa hisia kwenye wasifu wako.</string>
+		</dict>
+	</dict>
+	<key>reactions_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REACTIONS@</string>
+		<key>REACTIONS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Hisia</string>
+			<key>other</key>
+			<string>Hisia</string>
+		</dict>
+	</dict>
+	<key>relays_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@RELAYS@</string>
+		<key>RELAYS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Relays</string>
+			<key>other</key>
+			<string>Relays</string>
+		</dict>
+	</dict>
+	<key>replying_to_two_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Jibu %2$@, %3$@, &amp; %1$@ wengine</string>
+			<key>other</key>
+			<string>Jibu %2$@, %3$@, &amp;  %1$@ wengine</string>
+		</dict>
+	</dict>
+	<key>reposted_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ na %1$d wengine walirudisha chapisho ambalo uliwekewa alama.</string>
+			<key>other</key>
+			<string>%2$@ na %1$d wengine walirudisha chapisho ambalo uliwekewa alama.</string>
+		</dict>
+	</dict>
+	<key>reposted_your_note_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ na %1$d wengine wamerudisha tena kidokezo chako.</string>
+			<key>other</key>
+			<string>%2$@ na %1$d wengine wamerudisha tena kidokezo chako.</string>
+		</dict>
+	</dict>
+	<key>reposted_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTED@</string>
+		<key>REPOSTED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ na %1$d wengine  wameirudisha tena wasifu wako.</string>
+			<key>other</key>
+			<string>"%2$@ na %1$d wengine  wameirudisha tena wasifu wako."</string>
+		</dict>
+	</dict>
+	<key>reposts_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@REPOSTS@</string>
+		<key>REPOSTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Chapisho tena</string>
+			<key>other</key>
+			<string>Chapisho tena</string>
+		</dict>
+	</dict>
+	<key>sats</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@SATS@</string>
+		<key>SATS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>sats</string>
+			<key>other</key>
+			<string>sats</string>
+		</dict>
+	</dict>
+	<key>sats_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@SATS@</string>
+		<key>SATS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>%2$@ sats</string>
+			<key>other</key>
+			<string>%2$@ sats</string>
+		</dict>
+	</dict>
+	<key>zap_notification_no_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>Ulipokea %2$@ sats kutoka kwa %3$@</string>
+			<key>other</key>
+			<string>Ulipokea %2$@ sats kutoka kwa %3$@</string>
+		</dict>
+	</dict>
+	<key>zap_notification_with_message</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@NOTIFICATION@</string>
+		<key>NOTIFICATION</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>@</string>
+			<key>one</key>
+			<string>Ume pokea %2$@ sats kutoka kwa %3$@: &quot;%4$@&quot;</string>
+			<key>other</key>
+			<string>Ume pokea %2$@ sats kutoka kwa %3$@: &quot;%4$@&quot;</string>
+		</dict>
+	</dict>
+	<key>zapped_tagged_in_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ na %1$d wengine wame zap kidokezo ambapo umetajwa</string>
+			<key>other</key>
+			<string>%2$@ na %1$d wengine wame zap kidokezo ambapo umetajwa</string>
+		</dict>
+	</dict>
+	<key>zapped_your_note_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ na %1$d wengine wame zap kidokezo chako</string>
+			<key>other</key>
+			<string>%2$@ na %1$d wengine wame zap kidokezo chako</string>
+		</dict>
+	</dict>
+	<key>zapped_your_profile_3</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPPED@</string>
+		<key>ZAPPED</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%2$@ na %1$d wengine wameku zap</string>
+			<key>other</key>
+			<string>%2$@ na %1$d wengine wameku zap</string>
+		</dict>
+	</dict>
+	<key>zaps_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@ZAPS@</string>
+		<key>ZAPS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Zaps</string>
+			<key>other</key>
+			<string>Zaps</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

@@ -45,7 +45,8 @@
       <trans-unit id="%@ %@" xml:space="preserve">
         <source>%@ %@</source>
         <target>%@ %@</target>
-        <note>Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
+        <note>Sentence composed of 2 variables to describe how many imports were performed from loading a NostrScript. In source English, the first variable is the number of imports, and the second variable is 'Import' or 'Imports'.
+Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
 Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.</note>
       </trans-unit>
       <trans-unit id="%@ has been muted" xml:space="preserve">
@@ -88,15 +89,10 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>%lld/%lld</target>
         <note>Fraction of how many of the user's relay servers that are operational.</note>
       </trans-unit>
-      <trans-unit id="'%@' at '%@' will be used for verification" xml:space="preserve">
-        <source>'%@' at '%@' will be used for verification</source>
-        <target>'%@' at '%@' will be used for verification</target>
-        <note>Description of how the nip05 identifier would be used for verification.</note>
-      </trans-unit>
-      <trans-unit id="'%@' is an invalid NIP-05 identifier. It should look like an email." xml:space="preserve">
-        <source>'%@' is an invalid NIP-05 identifier. It should look like an email.</source>
-        <target>'%@' is an invalid NIP-05 identifier. It should look like an email.</target>
-        <note>Description of why the nip05 identifier is invalid.</note>
+      <trans-unit id="'%@' is an invalid Nostr address. It should look like an email address." xml:space="preserve">
+        <source>'%@' is an invalid Nostr address. It should look like an email address.</source>
+        <target>'%@' is an invalid Nostr address. It should look like an email address.</target>
+        <note>Description of why the Nostr address is invalid.</note>
       </trans-unit>
       <trans-unit id="API Key (optional)" xml:space="preserve">
         <source>API Key (optional)</source>
@@ -158,6 +154,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Add bookmark</target>
         <note>Context menu option for adding a note bookmark.</note>
       </trans-unit>
+      <trans-unit id="Additional information" xml:space="preserve">
+        <source>Additional information</source>
+        <target>Additional information</target>
+        <note>Header text to prompt user to optionally provide additional information when reporting a user or note.</note>
+      </trans-unit>
       <trans-unit id="Admin" xml:space="preserve">
         <source>Admin</source>
         <target>Admin</target>
@@ -191,7 +192,7 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Anonymous" xml:space="preserve">
         <source>Anonymous</source>
         <target>Anonymous</target>
-        <note>Placeholder author name of the anonymous person who zapped an event.
+        <note>Picker option to indicate that a zap should be sent anonymously and not identify the user as who sent it.
    Placeholder display name of anonymous user.</note>
       </trans-unit>
       <trans-unit id="Any" xml:space="preserve">
@@ -275,11 +276,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Bookmarks</target>
         <note>Sidebar menu label for Bookmarks view.
    Title of bookmarks view</note>
-      </trans-unit>
-      <trans-unit id="Boosts" xml:space="preserve">
-        <source>Boosts</source>
-        <target>Boosts</target>
-        <note>Accessibility label for boosts button</note>
       </trans-unit>
       <trans-unit id="Broadcast" xml:space="preserve">
         <source>Broadcast</source>
@@ -481,15 +477,26 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Delete Account</target>
         <note>Button to delete the user's account.</note>
       </trans-unit>
-      <trans-unit id="Deleted Account" xml:space="preserve">
-        <source>Deleted Account</source>
-        <target>Deleted Account</target>
-        <note>Alert message to indicate this is a deleted account</note>
-      </trans-unit>
       <trans-unit id="Description" xml:space="preserve">
         <source>Description</source>
         <target>Description</target>
         <note>Label to display relay description.</note>
+      </trans-unit>
+      <trans-unit id="Developer" xml:space="preserve">
+        <source>Developer</source>
+        <target>Developer</target>
+        <note>Navigation title for developer settings
+   Section header for developer settings</note>
+      </trans-unit>
+      <trans-unit id="Developer Mode" xml:space="preserve">
+        <source>Developer Mode</source>
+        <target>Developer Mode</target>
+        <note>Setting to enable developer mode</note>
+      </trans-unit>
+      <trans-unit id="Developer Mode enables features and options that may help developers diagnose issues and improve this app. Most users will not need Developer Mode." xml:space="preserve">
+        <source>Developer Mode enables features and options that may help developers diagnose issues and improve this app. Most users will not need Developer Mode.</source>
+        <target>Developer Mode enables features and options that may help developers diagnose issues and improve this app. Most users will not need Developer Mode.</target>
+        <note>Section header for Developer Settings view</note>
       </trans-unit>
       <trans-unit id="Disconnect" xml:space="preserve">
         <source>Disconnect</source>
@@ -556,6 +563,21 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Everyone will see that you zapped</target>
         <note>Description of public zap type where the zap is sent publicly and identifies the user who sent it.</note>
       </trans-unit>
+      <trans-unit id="Executed successfully, returned with code %@" xml:space="preserve">
+        <source>Executed successfully, returned with code %@</source>
+        <target>Executed successfully, returned with code %@</target>
+        <note>Indication that the execution of running a NostrScript finished successfully, while providing a numeric return code.</note>
+      </trans-unit>
+      <trans-unit id="Failed to initialize" xml:space="preserve">
+        <source>Failed to initialize</source>
+        <target>Failed to initialize</target>
+        <note>NostrScript error message when it fails to initialize a module.</note>
+      </trans-unit>
+      <trans-unit id="Failed to parse" xml:space="preserve">
+        <source>Failed to parse</source>
+        <target>Failed to parse</target>
+        <note>NostrScript error message when it fails to parse a script.</note>
+      </trans-unit>
       <trans-unit id="Filter" xml:space="preserve">
         <source>Filter</source>
         <target>Filter</target>
@@ -571,14 +593,39 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Follow Back</target>
         <note>Button to follow a user back.</note>
       </trans-unit>
+      <trans-unit id="Follow hashtag" xml:space="preserve">
+        <source>Follow hashtag</source>
+        <target>Follow hashtag</target>
+        <note>Button to follow a given hashtag.</note>
+      </trans-unit>
       <trans-unit id="Follow me on Nostr" xml:space="preserve">
         <source>Follow me on Nostr</source>
         <target>Follow me on Nostr</target>
         <note>Text on QR code view to prompt viewer looking at screen to follow the user.</note>
       </trans-unit>
+      <trans-unit id="Followed by %@" xml:space="preserve">
+        <source>Followed by %@</source>
+        <target>Followed by %@</target>
+        <note>Text to indicate that the user is followed by one of our follows.</note>
+      </trans-unit>
+      <trans-unit id="Followed by %@ &amp; %@" xml:space="preserve">
+        <source>Followed by %1$@ &amp; %2$@</source>
+        <target>Followed by %1$@ &amp; %2$@</target>
+        <note>Text to indicate that the user is followed by two of our follows.</note>
+      </trans-unit>
+      <trans-unit id="Followed by %@, %@ &amp; %@" xml:space="preserve">
+        <source>Followed by %1$@, %2$@ &amp; %3$@</source>
+        <target>Followed by %1$@, %2$@ &amp; %3$@</target>
+        <note>Text to indicate that the user is followed by three of our follows.</note>
+      </trans-unit>
       <trans-unit id="Followers" xml:space="preserve">
         <source>Followers</source>
         <target>Followers</target>
+        <note>Navigation bar title for view that shows who is following a user.</note>
+      </trans-unit>
+      <trans-unit id="Followers You Know" xml:space="preserve">
+        <source>Followers You Know</source>
+        <target>Followers You Know</target>
         <note>Navigation bar title for view that shows who is following a user.</note>
       </trans-unit>
       <trans-unit id="Following" xml:space="preserve">
@@ -631,10 +678,10 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Home</target>
         <note>Navigation bar title for Home view where notes and replies appear from those who the user is following.</note>
       </trans-unit>
-      <trans-unit id="Illegal content" xml:space="preserve">
-        <source>Illegal content</source>
-        <target>Illegal content</target>
-        <note>Button for user to report that the account or content has illegal content.</note>
+      <trans-unit id="Illegal Content" xml:space="preserve">
+        <source>Illegal Content</source>
+        <target>Illegal Content</target>
+        <note>Description of report type for illegal content.</note>
       </trans-unit>
       <trans-unit id="Image uploader" xml:space="preserve">
         <source>Image uploader</source>
@@ -646,15 +693,20 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Images</target>
         <note>Section title for images configuration.</note>
       </trans-unit>
+      <trans-unit id="Impersonation" xml:space="preserve">
+        <source>Impersonation</source>
+        <target>Impersonation</target>
+        <note>Description of report type for impersonation.</note>
+      </trans-unit>
+      <trans-unit id="Invalid Nostr wallet connection string" xml:space="preserve">
+        <source>Invalid Nostr wallet connection string</source>
+        <target>Invalid Nostr wallet connection string</target>
+        <note>Error message when an invalid Nostr wallet connection string is provided.</note>
+      </trans-unit>
       <trans-unit id="Invalid Tip Address" xml:space="preserve">
         <source>Invalid Tip Address</source>
         <target>Invalid Tip Address</target>
         <note>Title of alerting as invalid tip address.</note>
-      </trans-unit>
-      <trans-unit id="Invalid Zap" xml:space="preserve">
-        <source>Invalid Zap</source>
-        <target>Invalid Zap</target>
-        <note>Text indicating that a zap event is malformed and could not be displayed.</note>
       </trans-unit>
       <trans-unit id="Invalid key" xml:space="preserve">
         <source>Invalid key</source>
@@ -665,11 +717,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Invalid lightning address</source>
         <target>Invalid lightning address</target>
         <note>Message to display when there was an error attempting to zap due to an invalid lightning address.</note>
-      </trans-unit>
-      <trans-unit id="It's spam" xml:space="preserve">
-        <source>It's spam</source>
-        <target>It's spam</target>
-        <note>Button for user to report that the account or content has spam.</note>
       </trans-unit>
       <trans-unit id="Keys" xml:space="preserve">
         <source>Keys</source>
@@ -722,11 +769,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Likes</target>
         <note>Setting to enable Like Local Notification</note>
       </trans-unit>
-      <trans-unit id="Load %lld more" xml:space="preserve">
-        <source>Load %lld more</source>
-        <target>Load %lld more</target>
-        <note>Button text for loading more events, where the variable is the number of events.</note>
-      </trans-unit>
       <trans-unit id="Local Notifications" xml:space="preserve">
         <source>Local Notifications</source>
         <target>Local Notifications</target>
@@ -742,6 +784,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Local default</target>
         <note>Dropdown option label for system default for Lightning wallet.</note>
       </trans-unit>
+      <trans-unit id="Log" xml:space="preserve">
+        <source>Log</source>
+        <target>Log</target>
+        <note>Label to display developer mode logs.</note>
+      </trans-unit>
       <trans-unit id="Login" xml:space="preserve">
         <source>Login</source>
         <target>Login</target>
@@ -751,8 +798,7 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Logout</source>
         <target>Logout</target>
         <note>Alert for logging out the user.
-   Button for logging out the user.
-   Button to close the alert that informs that the current account has been deleted.</note>
+   Button for logging out the user.</note>
       </trans-unit>
       <trans-unit id="Looking for %@..." xml:space="preserve">
         <source>Looking for %@...</source>
@@ -815,11 +861,6 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Muted Users</target>
         <note>Navigation title of view to see list of muted users.</note>
       </trans-unit>
-      <trans-unit id="NIP-05 Verification" xml:space="preserve">
-        <source>NIP-05 Verification</source>
-        <target>NIP-05 Verification</target>
-        <note>Label for NIP-05 Verification section of user profile form.</note>
-      </trans-unit>
       <trans-unit id="New encrypted direct message" xml:space="preserve">
         <source>New encrypted direct message</source>
         <target>New encrypted direct message</target>
@@ -863,12 +904,27 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="None" xml:space="preserve">
         <source>None</source>
         <target>None</target>
-        <note>Button text to indicate that the zap type is a private zap.</note>
+        <note>Picker option to indicate that sats should be sent to the user's wallet as a regular Lightning payment, not as a zap.</note>
+      </trans-unit>
+      <trans-unit id="Nostr Address" xml:space="preserve">
+        <source>Nostr Address</source>
+        <target>Nostr Address</target>
+        <note>Label for the Nostr Address section of user profile form.</note>
       </trans-unit>
       <trans-unit id="Nostr is a protocol, designed for simplicity, that aims to create a censorship-resistant global social network" xml:space="preserve">
         <source>Nostr is a protocol, designed for simplicity, that aims to create a censorship-resistant global social network</source>
         <target>Nostr is a protocol, designed for simplicity, that aims to create a censorship-resistant global social network</target>
         <note>Description about what is Nostr.</note>
+      </trans-unit>
+      <trans-unit id="NostrScript" xml:space="preserve">
+        <source>NostrScript</source>
+        <target>NostrScript</target>
+        <note>Navigation title for the view showing NostrScript.</note>
+      </trans-unit>
+      <trans-unit id="NostrScript Error" xml:space="preserve">
+        <source>NostrScript Error</source>
+        <target>NostrScript Error</target>
+        <note>Text indicating that there was an error with loading NostrScript. There is a more descriptive error message shown separately underneath.</note>
       </trans-unit>
       <trans-unit id="Note contains &quot;nsec1&quot; private key. Are you sure?" xml:space="preserve">
         <source>Note contains "nsec1" private key. Are you sure?</source>
@@ -913,10 +969,10 @@ Label for filter for seeing your notes and replies (instead of only your notes).
         <note>Section header for Damus notifications
    Toolbar label for Notifications view.</note>
       </trans-unit>
-      <trans-unit id="Nudity or explicit content" xml:space="preserve">
-        <source>Nudity or explicit content</source>
-        <target>Nudity or explicit content</target>
-        <note>Button for user to report that the account or content has nudity or explicit content.</note>
+      <trans-unit id="Nudity" xml:space="preserve">
+        <source>Nudity</source>
+        <target>Nudity</target>
+        <note>Description of report type for nudity.</note>
       </trans-unit>
       <trans-unit id="Ok" xml:space="preserve">
         <source>Ok</source>
@@ -942,6 +998,11 @@ Label for filter for seeing your notes and replies (instead of only your notes).
         <source>OnlyZaps mode</source>
         <target>OnlyZaps mode</target>
         <note>Setting toggle to hide reactions.</note>
+      </trans-unit>
+      <trans-unit id="Optional" xml:space="preserve">
+        <source>Optional</source>
+        <target>Optional</target>
+        <note>Prompt to enter optional additional information when reporting an account or content.</note>
       </trans-unit>
       <trans-unit id="Paid Relay" xml:space="preserve">
         <source>Paid Relay</source>
@@ -987,8 +1048,7 @@ Label for filter for seeing your notes and replies (instead of only your notes).
       <trans-unit id="Private" xml:space="preserve">
         <source>Private</source>
         <target>Private</target>
-        <note>Heading indicating that this application keeps personally identifiable information private. A sentence describing what is done to keep data private comes after this heading.
-Button text to indicate that the zap type is a private zap.</note>
+        <note>Picker option to indicate that a zap should be sent privately and not identify the user to the public.</note>
       </trans-unit>
       <trans-unit id="Private Key" xml:space="preserve">
         <source>Private Key</source>
@@ -1005,6 +1065,11 @@ Button text to indicate that the zap type is a private zap.</note>
         <target>Pro</target>
         <note>Dropdown option for selecting Pro plan for DeepL translation service.</note>
       </trans-unit>
+      <trans-unit id="Profanity" xml:space="preserve">
+        <source>Profanity</source>
+        <target>Profanity</target>
+        <note>Description of report type for profanity.</note>
+      </trans-unit>
       <trans-unit id="Profile" xml:space="preserve">
         <source>Profile</source>
         <target>Profile</target>
@@ -1018,7 +1083,7 @@ Button text to indicate that the zap type is a private zap.</note>
       <trans-unit id="Public" xml:space="preserve">
         <source>Public</source>
         <target>Public</target>
-        <note>Button text to indicate that the zap type is a public zap.</note>
+        <note>Picker option to indicate that a zap should be sent publicly and identify the user as who sent it.</note>
       </trans-unit>
       <trans-unit id="Public Account ID" xml:space="preserve">
         <source>Public Account ID</source>
@@ -1044,6 +1109,11 @@ Button text to indicate that the zap type is a private zap.</note>
         <source>Quote</source>
         <target>Quote</target>
         <note>Button to compose a quoted note</note>
+      </trans-unit>
+      <trans-unit id="Ran to suspension." xml:space="preserve">
+        <source>Ran to suspension.</source>
+        <target>Ran to suspension.</target>
+        <note>Indication that a NostrScript was run until it reached a suspended state.</note>
       </trans-unit>
       <trans-unit id="Reactions" xml:space="preserve">
         <source>Reactions</source>
@@ -1128,6 +1198,16 @@ Button text to indicate that the zap type is a private zap.</note>
         <target>Report ID:</target>
         <note>Label indicating that the text underneath is the identifier of the report that was sent to relay servers.</note>
       </trans-unit>
+      <trans-unit id="Report Note" xml:space="preserve">
+        <source>Report Note</source>
+        <target>Report Note</target>
+        <note>Button to report a note.</note>
+      </trans-unit>
+      <trans-unit id="Report User" xml:space="preserve">
+        <source>Report User</source>
+        <target>Report User</target>
+        <note>Button to report a user.</note>
+      </trans-unit>
       <trans-unit id="Report sent!" xml:space="preserve">
         <source>Report sent!</source>
         <target>Report sent!</target>
@@ -1151,7 +1231,8 @@ Button text to indicate that the zap type is a private zap.</note>
       <trans-unit id="Reposts" xml:space="preserve">
         <source>Reposts</source>
         <target>Reposts</target>
-        <note>Navigation bar title for Reposts view.
+        <note>Accessibility label for boosts button
+   Navigation bar title for Reposts view.
    Setting to enable Repost Local Notification</note>
       </trans-unit>
       <trans-unit id="Requests" xml:space="preserve">
@@ -1163,6 +1244,21 @@ Button text to indicate that the zap type is a private zap.</note>
         <source>Retry</source>
         <target>Retry</target>
         <note>Button to retry completing account creation after an error occurred.</note>
+      </trans-unit>
+      <trans-unit id="Run" xml:space="preserve">
+        <source>Run</source>
+        <target>Run</target>
+        <note>Button that runs a NostrScript.</note>
+      </trans-unit>
+      <trans-unit id="Running..." xml:space="preserve">
+        <source>Running...</source>
+        <target>Running...</target>
+        <note>Indication that the execution of a NostrScript is running.</note>
+      </trans-unit>
+      <trans-unit id="Runtime error" xml:space="preserve">
+        <source>Runtime error</source>
+        <target>Runtime error</target>
+        <note>Indication that a runtime error occurred when running a NostrScript.</note>
       </trans-unit>
       <trans-unit id="Satoshi Nakamoto" xml:space="preserve">
         <source>Satoshi Nakamoto</source>
@@ -1230,9 +1326,9 @@ Button text to indicate that the zap type is a private zap.</note>
         <target>Send a message to start the conversation...</target>
         <note>Text prompt for user to send a message to the other user.</note>
       </trans-unit>
-      <trans-unit id="Send a reply with your zap..." xml:space="preserve">
-        <source>Send a reply with your zap...</source>
-        <target>Send a reply with your zap...</target>
+      <trans-unit id="Send a message with your zap..." xml:space="preserve">
+        <source>Send a message with your zap...</source>
+        <target>Send a message with your zap...</target>
         <note>Placeholder text for a comment to send as part of a zap to the user.</note>
       </trans-unit>
       <trans-unit id="Server" xml:space="preserve">
@@ -1333,7 +1429,8 @@ Button text to indicate that the zap type is a private zap.</note>
       <trans-unit id="Spam" xml:space="preserve">
         <source>Spam</source>
         <target>Spam</target>
-        <note>Section header for Universe/Search spam</note>
+        <note>Description of report type for spam.
+   Section header for Universe/Search spam</note>
       </trans-unit>
       <trans-unit id="Support Damus" xml:space="preserve">
         <source>Support Damus</source>
@@ -1370,11 +1467,6 @@ Button text to indicate that the zap type is a private zap.</note>
         <target>The go-to iOS Nostr client</target>
         <note>Quick description of what Damus is</note>
       </trans-unit>
-      <trans-unit id="They are impersonating someone" xml:space="preserve">
-        <source>They are impersonating someone</source>
-        <target>They are impersonating someone</target>
-        <note>Button for user to report that the account is impersonating someone.</note>
-      </trans-unit>
       <trans-unit id="This is a paid relay, you must pay for notes to be accepted." xml:space="preserve">
         <source>This is a paid relay, you must pay for notes to be accepted.</source>
         <target>This is a paid relay, you must pay for notes to be accepted.</target>
@@ -1394,6 +1486,11 @@ Button text to indicate that the zap type is a private zap.</note>
         <source>This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!</source>
         <target>This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!</target>
         <note>Label to describe that a private key is the user's secret account key and what they should do with it.</note>
+      </trans-unit>
+      <trans-unit id="This relay is already in your list" xml:space="preserve">
+        <source>This relay is already in your list</source>
+        <target>This relay is already in your list</target>
+        <note>An error message that appears when the user attempts to add a relay that has already been added.</note>
       </trans-unit>
       <trans-unit id="Thread" xml:space="preserve">
         <source>Thread</source>
@@ -1461,6 +1558,11 @@ Button text to indicate that the zap type is a private zap.</note>
         <target>Unfollow</target>
         <note>Button to unfollow a user.</note>
       </trans-unit>
+      <trans-unit id="Unfollow hashtag" xml:space="preserve">
+        <source>Unfollow hashtag</source>
+        <target>Unfollow hashtag</target>
+        <note>Button to unfollow a given hashtag.</note>
+      </trans-unit>
       <trans-unit id="Unfollowing..." xml:space="preserve">
         <source>Unfollowing...</source>
         <target>Unfollowing...</target>
@@ -1480,6 +1582,11 @@ Button text to indicate that the zap type is a private zap.</note>
         <source>Unmute conversation</source>
         <target>Unmute conversation</target>
         <note>Context menu option for unmuting a conversation.</note>
+      </trans-unit>
+      <trans-unit id="Untitled" xml:space="preserve">
+        <source>Untitled</source>
+        <target>Untitled</target>
+        <note>Text indicating that the long-form note title is untitled.</note>
       </trans-unit>
       <trans-unit id="Upload" xml:space="preserve">
         <source>Upload</source>
@@ -1620,8 +1727,12 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <source>Zap</source>
         <target>Zap</target>
         <note>Accessibility label for zap button
-   Button to send a zap.
    Title of notification when a non-private zap is received.</note>
+      </trans-unit>
+      <trans-unit id="Zap User" xml:space="preserve">
+        <source>Zap User</source>
+        <target>Zap User</target>
+        <note>Button to send a zap.</note>
       </trans-unit>
       <trans-unit id="Zap Vibration" xml:space="preserve">
         <source>Zap Vibration</source>
@@ -1670,7 +1781,7 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
       <trans-unit id="jb55@jb55.com" xml:space="preserve">
         <source>jb55@jb55.com</source>
         <target>jb55@jb55.com</target>
-        <note>Placeholder example text for identifier used for NIP-05 verification.</note>
+        <note>Placeholder example text for identifier used for Nostr addresses.</note>
       </trans-unit>
       <trans-unit id="none" xml:space="preserve">
         <source>none</source>
@@ -1819,19 +1930,19 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
       <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.3.1" build-num="14E300c"/>
     </header>
     <body>
-      <trans-unit id="/collapsed_event_view_other_notes:dict/NOTES:dict/one:dict/:string" xml:space="preserve">
-        <source>... %d other note ...</source>
-        <target>... %d other note ...</target>
+      <trans-unit id="/followed_by_three_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@OTHERS@</source>
+        <target>%#@OTHERS@</target>
         <note/>
       </trans-unit>
-      <trans-unit id="/collapsed_event_view_other_notes:dict/NOTES:dict/other:dict/:string" xml:space="preserve">
-        <source>... %d other notes ...</source>
-        <target>... %d other notes ...</target>
+      <trans-unit id="/followed_by_three_and_others:dict/OTHERS:dict/one:dict/:string" xml:space="preserve">
+        <source>Followed by %2$@, %3$@, %4$@ &amp; %1$d other</source>
+        <target>Followed by %2$@, %3$@, %4$@ &amp; %1$d other</target>
         <note/>
       </trans-unit>
-      <trans-unit id="/collapsed_event_view_other_notes:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
-        <source>%#@NOTES@</source>
-        <target>%#@NOTES@</target>
+      <trans-unit id="/followed_by_three_and_others:dict/OTHERS:dict/other:dict/:string" xml:space="preserve">
+        <source>Followed by %2$@, %3$@, %4$@ &amp; %1$d others</source>
+        <target>Followed by %2$@, %3$@, %4$@ &amp; %1$d others</target>
         <note/>
       </trans-unit>
       <trans-unit id="/followers_count:dict/FOLLOWERS:dict/one:dict/:string" xml:space="preserve">
@@ -1862,6 +1973,21 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
       <trans-unit id="/following_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
         <source>%#@FOLLOWING@</source>
         <target>%#@FOLLOWING@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/imports_count:dict/IMPORTS:dict/one:dict/:string" xml:space="preserve">
+        <source>Import</source>
+        <target>Import</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/imports_count:dict/IMPORTS:dict/other:dict/:string" xml:space="preserve">
+        <source>Imports</source>
+        <target>Imports</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/imports_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@IMPORTS@</source>
+        <target>%#@IMPORTS@</target>
         <note/>
       </trans-unit>
       <trans-unit id="/reacted_tagged_in_3:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
@@ -2042,6 +2168,21 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
       <trans-unit id="/sats_count:dict/SATS:dict/other:dict/:string" xml:space="preserve">
         <source>%2$@ sats</source>
         <target>%2$@ sats</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/word_count:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">
+        <source>%#@WORDS@</source>
+        <target>%#@WORDS@</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/word_count:dict/WORDS:dict/one:dict/:string" xml:space="preserve">
+        <source>%d Word</source>
+        <target>%d Word</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/word_count:dict/WORDS:dict/other:dict/:string" xml:space="preserve">
+        <source>%d Words</source>
+        <target>%d Words</target>
         <note/>
       </trans-unit>
       <trans-unit id="/zap_notification_no_message:dict/NOTIFICATION:dict/one:dict/:string" xml:space="preserve">

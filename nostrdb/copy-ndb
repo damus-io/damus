@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+rm -rf flatcc bindings
+mkdir -p flatcc
+cp ~/src/c/nostrdb/nostrdb.{c,h} .
+cp ~/src/c/nostrdb/{jsmn,threadpool,protected_queue,memchr,util}.h .
+cp ~/src/c/nostrdb/deps/lmdb/{lmdb,midl}.h .
+cp ~/src/c/nostrdb/deps/lmdb/mdb.c .
+cp ~/src/c/nostrdb/deps/lmdb/midl.c .
+cp -r ~/src/c/nostrdb/deps/flatcc/include/flatcc/* flatcc
+cp ~/src/c/nostrdb/deps/flatcc/src/runtime/* flatcc
+cp -r ~/src/c/nostrdb/bindings .
+#patch -p2 < flatcc.patch
+sed -i"" 's,import FlatBuffers,,' bindings/swift/NdbProfile.swift
+sed -i"" 's,^#include "flatcc/,#include ",g' bindings/c/*.h flatcc/*.{c,h}

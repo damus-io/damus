@@ -11,8 +11,6 @@ import XCTest
 final class ZapTests: XCTestCase {
 
     override func setUpWithError() throws {
-        let db = ProfileDatabase()
-        try db.remove_all_profiles()
     }
 
     override func tearDownWithError() throws {
@@ -20,8 +18,8 @@ final class ZapTests: XCTestCase {
     }
     
     func test_private_zap() throws {
-        let alice = generate_new_keypair().to_full()!
-        let bob = generate_new_keypair().to_full()!
+        let alice = generate_new_keypair()
+        let bob = generate_new_keypair()
         let target = ZapTarget.profile(bob.pubkey)
         
         let message = "hey bob!"
@@ -60,16 +58,18 @@ final class ZapTests: XCTestCase {
             return
         }
         
-        guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: "9630f464cca6a5147aa8a35f0bcdd3ce485324e732fd39e09233b1d848238f31", our_privkey: nil) else {
+        let zapper = Pubkey(hex: "9630f464cca6a5147aa8a35f0bcdd3ce485324e732fd39e09233b1d848238f31")!
+        guard let zap = Zap.from_zap_event(zap_ev: ev, zapper: zapper, our_privkey: nil) else {
             XCTAssert(false)
             return
         }
-        
-        XCTAssertEqual(zap.zapper, "9630f464cca6a5147aa8a35f0bcdd3ce485324e732fd39e09233b1d848238f31")
-        XCTAssertEqual(zap.target, ZapTarget.profile("32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245"))
+
+        let profile = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
+        XCTAssertEqual(zap.zapper, zapper)
+        XCTAssertEqual(zap.target, ZapTarget.profile(profile))
 
         XCTAssertEqual(zap_notification_title(zap), "Zap")
-        XCTAssertEqual(zap_notification_body(profiles: Profiles(), zap: zap), "You received 1k sats from 107jk7ht:2qlu3nfm")
+        XCTAssertEqual(zap_notification_body(profiles: Profiles(user_search_cache: UserSearchCache(), ndb: test_damus_state.ndb), zap: zap), "You received 1k sats from 107jk7ht:2quqncxg")
     }
 
 }

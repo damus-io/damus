@@ -29,7 +29,7 @@ struct ZapSettingsView: View {
                 Toggle(NSLocalizedString("OnlyZaps mode", comment: "Setting toggle to hide reactions."), isOn: $settings.onlyzaps_mode)
                     .toggleStyle(.switch)
                     .onChange(of: settings.onlyzaps_mode) { newVal in
-                        notify(.onlyzaps_mode, newVal)
+                        notify(.onlyzaps_mode(newVal))
                     }
             }
 

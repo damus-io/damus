@@ -61,7 +61,7 @@ class ZapsDataModel: ObservableObject {
         self.zaps = zaps
     }
     
-    func confirm_nwc(reqid: String) {
+    func confirm_nwc(reqid: NoteId) {
         guard let zap = zaps.first(where: { z in z.request.ev.id == reqid }),
               case .pending(let pzap) = zap
         else {
@@ -82,17 +82,17 @@ class ZapsDataModel: ObservableObject {
         zaps.reduce(0) { total, zap in total + zap.amount }
     }
    
-    func from(_ pubkey: String) -> [Zapping] {
+    func from(_ pubkey: Pubkey) -> [Zapping] {
         return self.zaps.filter { z in z.request.ev.pubkey == pubkey }
     }
     
     @discardableResult
-    func remove(reqid: String) -> Bool {
-        guard zaps.first(where: { z in z.request.ev.id == reqid }) != nil else {
+    func remove(reqid: ZapRequestId) -> Bool {
+        guard zaps.first(where: { z in z.request.id == reqid }) != nil else {
             return false
         }
         
-        self.zaps = zaps.filter { z in z.request.ev.id != reqid }
+        self.zaps = zaps.filter { z in z.request.id != reqid }
         return true
     }
 }
@@ -137,16 +137,18 @@ class EventData {
 }
 
 class EventCache {
-    private var events: [String: NostrEvent] = [:]
+    // TODO: remove me and change code to use ndb directly
+    private let ndb: Ndb
+    private var events: [NoteId: NostrEvent] = [:]
     private var replies = ReplyMap()
     private var cancellable: AnyCancellable?
-    private var image_metadata: [String: ImageMetadataState] = [:]
-    private var video_meta: [String: VideoPlayerModel] = [:]
-    private var event_data: [String: EventData] = [:]
-    
+    private var image_metadata: [String: ImageMetadataState] = [:] // lowercased URL key
+    private var event_data: [NoteId: EventData] = [:]
+
     //private var thread_latest: [String: Int64]
     
-    init() {
+    init(ndb: Ndb) {
+        self.ndb = ndb
         cancellable = NotificationCenter.default.publisher(
             for: UIApplication.didReceiveMemoryWarningNotification
         ).sink { [weak self] _ in
@@ -154,7 +156,7 @@ class EventCache {
         }
     }
     
-    func get_cache_data(_ evid: String) -> EventData {
+    func get_cache_data(_ evid: NoteId) -> EventData {
         guard let data = event_data[evid] else {
             let data = EventData()
             event_data[evid] = data
@@ -164,17 +166,17 @@ class EventCache {
         return data
     }
     
-    func is_event_valid(_ evid: String) -> ValidationResult {
+    func is_event_valid(_ evid: NoteId) -> ValidationResult {
         return get_cache_data(evid).validated
     }
     
-    func store_event_validation(evid: String, validated: ValidationResult) {
+    func store_event_validation(evid: NoteId, validated: ValidationResult) {
         get_cache_data(evid).validated = validated
     }
     
     @discardableResult
     func store_zap(zap: Zapping) -> Bool {
-        let data = get_cache_data(zap.target.id).zaps_model
+        let data = get_cache_data(NoteId(zap.target.id)).zaps_model
         if let ev = zap.event {
             insert(ev)
         }
@@ -185,7 +187,7 @@ class EventCache {
         switch zap.target {
         case .note(let note_target):
             let zaps = get_cache_data(note_target.note_id).zaps_model
-            zaps.remove(reqid: zap.request.ev.id)
+            zaps.remove(reqid: zap.request.id)
         case .profile:
             // these aren't stored anywhere yet
             break
@@ -193,7 +195,7 @@ class EventCache {
     }
     
     func lookup_zaps(target: ZapTarget) -> [Zapping] {
-        return get_cache_data(target.id).zaps_model.zaps
+        return get_cache_data(NoteId(target.id)).zaps_model.zaps
     }
     
     func store_img_metadata(url: URL, meta: ImageMetadataState) {
@@ -204,41 +206,15 @@ class EventCache {
         return image_metadata[url.absoluteString.lowercased()]
     }
     
-    @MainActor
-    func lookup_media_size(url: URL) -> CGSize? {
-        if let img_meta = lookup_img_metadata(url: url) {
-            return img_meta.meta.dim?.size
-        }
-        
-        return get_video_player_model(url: url).size
-    }
-    
-    func store_video_player_model(url: URL, meta: VideoPlayerModel) {
-        video_meta[url.absoluteString] = meta
-    }
-    
-    @MainActor
-    func get_video_player_model(url: URL) -> VideoPlayerModel {
-        if let model = video_meta[url.absoluteString] {
-            return model
-        }
-        
-        let model = VideoPlayerModel()
-        video_meta[url.absoluteString] = model
-        return model
-    }
-    
-    func parent_events(event: NostrEvent) -> [NostrEvent] {
+    func parent_events(event: NostrEvent, keypair: Keypair) -> [NostrEvent] {
         var parents: [NostrEvent] = []
         
         var ev = event
         
         while true {
-            guard let direct_reply = ev.direct_replies(nil).last else {
-                break
-            }
-            
-            guard let next_ev = lookup(direct_reply.ref_id), next_ev != ev else {
+            guard let direct_reply = ev.direct_replies(keypair).last,
+                  let next_ev = lookup(direct_reply), next_ev != ev
+            else {
                 break
             }
             
@@ -249,9 +225,9 @@ class EventCache {
         return parents.reversed()
     }
     
-    func add_replies(ev: NostrEvent) {
-        for reply in ev.direct_replies(nil) {
-            replies.add(id: reply.ref_id, reply_id: ev.id)
+    func add_replies(ev: NostrEvent, keypair: Keypair) {
+        for reply in ev.direct_replies(keypair) {
+            replies.add(id: reply, reply_id: ev.id)
         }
     }
     
@@ -277,8 +253,14 @@ class EventCache {
         insert(ev)
         return ev
     }
-    
-    func lookup(_ evid: String) -> NostrEvent? {
+
+    /*
+    func lookup_by_key(_ key: UInt64) -> NostrEvent? {
+        ndb.lookup_note_by_key(key)
+    }
+     */
+
+    func lookup(_ evid: NoteId) -> NostrEvent? {
         return events[evid]
     }
     
@@ -291,7 +273,6 @@ class EventCache {
     
     private func prune() {
         events = [:]
-        video_meta = [:]
         event_data = [:]
         replies.replies = [:]
     }
@@ -344,7 +325,7 @@ struct PreloadPlan {
     let load_preview: Bool
 }
 
-func load_preview(artifacts: NoteArtifacts) async -> Preview? {
+func load_preview(artifacts: NoteArtifactsSeparated) async -> Preview? {
     guard let link = artifacts.links.first else {
         return nil
     }
@@ -360,7 +341,7 @@ func get_preload_plan(evcache: EventCache, ev: NostrEvent, our_keypair: Keypair,
     }
 
     // Cached event might not have the note language determined yet, so determine the language here before figuring out if translations should be preloaded.
-    let note_lang = cache.translations_model.note_language ?? ev.note_language(our_keypair.privkey) ?? current_language()
+    let note_lang = cache.translations_model.note_language ?? /*ev.note_language(our_keypair.privkey)*/ current_language()
 
     let load_translations = should_preload_translation(event: ev, our_keypair: our_keypair, current_status: cache.translations, settings: settings, note_lang: note_lang)
     if load_translations {
@@ -393,15 +374,15 @@ func get_preload_plan(evcache: EventCache, ev: NostrEvent, our_keypair: Keypair,
 
 func preload_image(url: URL) {
     if ImageCache.default.isCached(forKey: url.absoluteString) {
-        print("Preloaded image \(url.absoluteString) found in cache")
+        //print("Preloaded image \(url.absoluteString) found in cache")
         // looks like we already have it cached. no download needed
         return
     }
     
-    print("Preloading image \(url.absoluteString)")
-    
+    //print("Preloading image \(url.absoluteString)")
+
     KingfisherManager.shared.retrieveImage(with: Kingfisher.ImageResource(downloadURL: url)) { val in
-        print("Preloaded image \(url.absoluteString)")
+        //print("Preloaded image \(url.absoluteString)")
     }
 }
 
@@ -419,10 +400,10 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
     let profiles = state.profiles
     let our_keypair = state.keypair
     
-    print("Preloading event \(plan.event.content)")
-    
+    //print("Preloading event \(plan.event.content)")
+
     if artifacts == nil && plan.load_artifacts {
-        let arts = render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)
+        let arts = render_note_content(ev: plan.event, profiles: profiles, keypair: our_keypair)
         artifacts = arts
         
         // we need these asap
@@ -442,25 +423,29 @@ func preload_event(plan: PreloadPlan, state: DamusState) async {
         }
     }
     
-    if plan.load_preview {
-        let arts = artifacts ?? render_note_content(ev: plan.event, profiles: profiles, privkey: our_keypair.privkey)
-        let preview = await load_preview(artifacts: arts)
-        DispatchQueue.main.async {
-            if let preview {
-                plan.data.preview_model.state = .loaded(preview)
-            } else {
-                plan.data.preview_model.state = .loaded(.failed)
+    if plan.load_preview, note_artifact_is_separated(kind: plan.event.known_kind) {
+        let arts = artifacts ?? render_note_content(ev: plan.event, profiles: profiles, keypair: our_keypair)
+
+        // only separated artifacts have previews
+        if case .separated(let sep) = arts {
+            let preview = await load_preview(artifacts: sep)
+            DispatchQueue.main.async {
+                if let preview {
+                    plan.data.preview_model.state = .loaded(preview)
+                } else {
+                    plan.data.preview_model.state = .loaded(.failed)
+                }
             }
         }
     }
     
-    let note_language = plan.data.translations_model.note_language ?? plan.event.note_language(our_keypair.privkey) ?? current_language()
-    
+    let note_language = plan.data.translations_model.note_language ?? plan.event.note_language(our_keypair) ?? current_language()
+
     var translations: TranslateStatus? = nil
     // We have to recheck should_translate here now that we have note_language
     if plan.load_translations && should_translate(event: plan.event, our_keypair: our_keypair, settings: settings, note_lang: note_language) && settings.auto_translate
     {
-        translations = await translate_note(profiles: profiles, privkey: our_keypair.privkey, event: plan.event, settings: settings, note_lang: note_language)
+        translations = await translate_note(profiles: profiles, keypair: our_keypair, event: plan.event, settings: settings, note_lang: note_language)
     }
     
     let ts = translations
@@ -490,7 +475,7 @@ func preload_events(state: DamusState, events: [NostrEvent]) {
         return
     }
     
-    Task.init {
+    Task {
         for plan in plans {
             await preload_event(plan: plan, state: state)
         }

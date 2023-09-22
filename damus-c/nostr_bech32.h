@@ -26,6 +26,7 @@ enum nostr_bech32_type {
     NOSTR_BECH32_NEVENT = 4,
     NOSTR_BECH32_NRELAY = 5,
     NOSTR_BECH32_NADDR = 6,
+    NOSTR_BECH32_NSEC = 7,
 };
 
 struct bech32_note {
@@ -34,6 +35,10 @@ struct bech32_note {
 
 struct bech32_npub {
     const u8 *pubkey;
+};
+
+struct bech32_nsec {
+    const u8 *nsec;
 };
 
 struct bech32_nevent {
@@ -65,6 +70,7 @@ typedef struct nostr_bech32 {
     union {
         struct bech32_note note;
         struct bech32_npub npub;
+        struct bech32_nsec nsec;
         struct bech32_nevent nevent;
         struct bech32_nprofile nprofile;
         struct bech32_naddr naddr;

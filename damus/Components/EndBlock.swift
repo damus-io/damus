@@ -10,11 +10,7 @@ import SwiftUI
 struct EndBlock: View {
     let height: CGFloat
     
-    init () {
-        self.height = 10.0
-    }
-    
-    init (height: Float) {
+    init(height: Float = 10) {
         self.height = CGFloat(height)
     }
     

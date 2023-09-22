@@ -32,3 +32,9 @@ func localeToLanguage(_ locale: String) -> String? {
         return NSLocale(localeIdentifier: locale).languageCode
     }
 }
+
+/// Returns a localized string that is pluralized based on a single Int-typed count variable.
+func pluralizedString(key: String, count: Int, locale: Locale = Locale.current) -> String {
+    let format = localizedStringFormat(key: key, locale: locale)
+    return String(format: format, locale: locale, count)
+}

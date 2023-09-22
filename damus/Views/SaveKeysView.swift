@@ -10,7 +10,7 @@ import Security
 
 struct SaveKeysView: View {
     let account: CreateAccountModel
-    let pool: RelayPool = RelayPool()
+    let pool: RelayPool = RelayPool(ndb: Ndb()!)
     @State var pub_copied: Bool = false
     @State var priv_copied: Bool = false
     @State var loading: Bool = false
@@ -38,7 +38,7 @@ struct SaveKeysView: View {
                 Text("This is your account ID, you can give this to your friends so that they can follow you. Tap to copy.", comment: "Label to describe that a public key is the user's account ID and what they can do with it.")
                     .padding(.bottom, 10)
                 
-                SaveKeyView(text: account.pubkey_bech32, textContentType: .username, is_copied: $pub_copied, focus: $pubkey_focused)
+                SaveKeyView(text: account.pubkey.npub, textContentType: .username, is_copied: $pub_copied, focus: $pubkey_focused)
                     .padding(.bottom, 10)
                 
                 if pub_copied {
@@ -49,7 +49,7 @@ struct SaveKeysView: View {
                     Text("This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!", comment: "Label to describe that a private key is the user's secret account key and what they should do with it.")
                         .padding(.bottom, 10)
                     
-                    SaveKeyView(text: account.privkey_bech32, textContentType: .newPassword, is_copied: $priv_copied, focus: $privkey_focused)
+                    SaveKeyView(text: account.privkey.nsec, textContentType: .newPassword, is_copied: $priv_copied, focus: $privkey_focused)
                         .padding(.bottom, 10)
                 }
                 
@@ -115,8 +115,8 @@ struct SaveKeysView: View {
 
         self.pool.register_handler(sub_id: "signup", handler: handle_event)
         
-        credential_handler.save_credential(pubkey: account.pubkey_bech32, privkey: account.privkey_bech32)
-        
+        credential_handler.save_credential(pubkey: account.pubkey, privkey: account.privkey)
+
         self.loading = true
         
         self.pool.connect()
@@ -130,8 +130,8 @@ struct SaveKeysView: View {
                 let metadata = create_account_to_metadata(account)
                 let contacts_ev = make_first_contact_event(keypair: account.keypair)
                 
-                if let keypair = account.keypair.to_full() {
-                    let metadata_ev = make_metadata_event(keypair: keypair, metadata: metadata)
+                if let keypair = account.keypair.to_full(),
+                   let metadata_ev = make_metadata_event(keypair: keypair, metadata: metadata) {
                     self.pool.send(.event(metadata_ev))
                 }
                 
@@ -141,7 +141,7 @@ struct SaveKeysView: View {
                 
                 do {
                     try save_keypair(pubkey: account.pubkey, privkey: account.privkey)
-                    notify(.login, account.keypair)
+                    notify(.login(account.keypair))
                 } catch {
                     self.error = "Failed to save keys"
                 }
@@ -239,5 +239,5 @@ struct SaveKeysView_Previews: PreviewProvider {
 }
 
 func create_account_to_metadata(_ model: CreateAccountModel) -> Profile {
-    return Profile(name: model.nick_name, display_name: model.real_name, about: model.about, picture: model.profile_image, banner: nil, website: nil, lud06: nil, lud16: nil, nip05: nil, damus_donation: nil)
+    return Profile(name: model.nick_name, display_name: model.real_name, about: model.about, picture: model.profile_image?.absoluteString, banner: nil, website: nil, lud06: nil, lud16: nil, nip05: nil, damus_donation: nil)
 }

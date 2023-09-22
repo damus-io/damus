@@ -8,6 +8,7 @@
 import SwiftUI
 import LinkPresentation
 import NaturalLanguage
+import MarkdownUI
 
 struct Blur: UIViewRepresentable {
     var style: UIBlurEffect.Style = .systemUltraThinMaterial
@@ -25,16 +26,17 @@ struct NoteContentView: View {
     
     let damus_state: DamusState
     let event: NostrEvent
-    let show_images: Bool
+    @State var show_images: Bool
     let size: EventViewKind
     let preview_height: CGFloat?
     let options: EventViewOptions
 
     @ObservedObject var artifacts_model: NoteArtifactsModel
     @ObservedObject var preview_model: PreviewModel
-    
-    var artifacts: NoteArtifacts {
-        return self.artifacts_model.state.artifacts ?? .just_content(event.get_content(damus_state.keypair.privkey))
+    @ObservedObject var settings: UserSettingsStore
+
+    var note_artifacts: NoteArtifacts {
+        return self.artifacts_model.state.artifacts ?? .separated(.just_content(event.get_content(damus_state.keypair)))
     }
     
     init(damus_state: DamusState, event: NostrEvent, show_images: Bool, size: EventViewKind, options: EventViewOptions) {
@@ -47,6 +49,7 @@ struct NoteContentView: View {
         let cached = damus_state.events.get_cache_data(event.id)
         self._preview_model = ObservedObject(wrappedValue: cached.preview_model)
         self._artifacts_model = ObservedObject(wrappedValue: cached.artifacts_model)
+        self._settings = ObservedObject(wrappedValue: damus_state.settings)
     }
     
     var truncate: Bool {
@@ -54,7 +57,7 @@ struct NoteContentView: View {
     }
     
     var with_padding: Bool {
-        return options.contains(.pad_content)
+        return options.contains(.wide)
     }
     
     var preview: LinkViewRepresentable? {
@@ -67,27 +70,27 @@ struct NoteContentView: View {
         return LinkViewRepresentable(meta: .linkmeta(cached))
     }
     
-    var truncatedText: some View {
+    func truncatedText(content: CompatibleText) -> some View {
         Group {
             if truncate {
-                TruncatedText(text: artifacts.content)
-                    .font(eventviewsize_to_font(size))
+                TruncatedText(text: content)
+                    .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
             } else {
-                artifacts.content.text
-                    .font(eventviewsize_to_font(size))
+                content.text
+                    .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
             }
         }
     }
     
-    var invoicesView: some View {
-        InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: artifacts.invoices, settings: damus_state.settings)
+    func invoicesView(invoices: [Invoice]) -> some View {
+        InvoicesView(our_pubkey: damus_state.keypair.pubkey, invoices: invoices, settings: damus_state.settings)
     }
 
     var translateView: some View {
         TranslateView(damus_state: damus_state, event: event, size: self.size)
     }
     
-    var previewView: some View {
+    func previewView(links: [URL]) -> some View {
         Group {
             if let preview = self.preview, show_images {
                 if let preview_height {
@@ -96,14 +99,14 @@ struct NoteContentView: View {
                 } else {
                     preview
                 }
-            } else if let link = artifacts.links.first {
+            } else if let link = links.first {
                 LinkViewRepresentable(meta: .url(link))
                     .frame(height: 50)
             }
         }
     }
     
-    var MainContent: some View {
+    func MainContent(artifacts: NoteArtifactsSeparated) -> some View {
         VStack(alignment: .leading) {
             if size == .selected {
                 if with_padding {
@@ -114,10 +117,10 @@ struct NoteContentView: View {
                 }
             } else {
                 if with_padding {
-                    truncatedText
+                    truncatedText(content: artifacts.content)
                         .padding(.horizontal)
                 } else {
-                    truncatedText
+                    truncatedText(content: artifacts.content)
                 }
             }
 
@@ -136,24 +139,26 @@ struct NoteContentView: View {
                 ZStack {
                     ImageCarousel(state: damus_state, evid: event.id, urls: artifacts.media)
                     Blur()
-                        .disabled(true)
+                        .onTapGesture {
+                            show_images = true
+                        }
                 }
                 //.cornerRadius(10)
             }
             
             if artifacts.invoices.count > 0 {
                 if with_padding {
-                    invoicesView
+                    invoicesView(invoices: artifacts.invoices)
                         .padding(.horizontal)
                 } else {
-                    invoicesView
+                    invoicesView(invoices: artifacts.invoices)
                 }
             }
             
             if with_padding {
-                previewView.padding(.horizontal)
+                previewView(links: artifacts.links).padding(.horizontal)
             } else {
-                previewView
+                previewView(links: artifacts.links)
             }
             
         }
@@ -177,21 +182,59 @@ struct NoteContentView: View {
                 }
                 await preload_event(plan: plan, state: damus_state)
             } else if force_artifacts {
-                let arts = render_note_content(ev: event, profiles: damus_state.profiles, privkey: damus_state.keypair.privkey)
+                let arts = render_note_content(ev: event, profiles: damus_state.profiles, keypair: damus_state.keypair)
                 self.artifacts_model.state = .loaded(arts)
             }
         }
     }
     
+    func artifactPartsView(_ parts: [ArtifactPart]) -> some View {
+        
+        LazyVStack(alignment: .leading) {
+            ForEach(parts.indices, id: \.self) { ind in
+                let part = parts[ind]
+                switch part {
+                case .text(let txt):
+                    if with_padding {
+                        txt.padding(.horizontal)
+                    } else {
+                        txt
+                    }
+                case .invoice(let inv):
+                    if with_padding {
+                        InvoiceView(our_pubkey: damus_state.pubkey, invoice: inv, settings: damus_state.settings)
+                            .padding(.horizontal)
+                    } else {
+                        InvoiceView(our_pubkey: damus_state.pubkey, invoice: inv, settings: damus_state.settings)
+                    }
+                case .media(let media):
+                    Text(verbatim: "media \(media.url.absoluteString)")
+                }
+            }
+        }
+    }
+    
+    var ArtifactContent: some View {
+        Group {
+            switch self.note_artifacts {
+            case .longform(let md):
+                Markdown(md.markdown)
+                    .padding([.leading, .trailing, .top])
+            case .separated(let separated):
+                MainContent(artifacts: separated)
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+    }
+    
     var body: some View {
-        MainContent
-            .onReceive(handle_notify(.profile_updated)) { notif in
-                let profile = notif.object as! ProfileUpdate
-                let blocks = event.blocks(damus_state.keypair.privkey)
-                for block in blocks {
+        ArtifactContent
+            .onReceive(handle_notify(.profile_updated)) { profile in
+                let blocks = event.blocks(damus_state.keypair)
+                for block in blocks.blocks {
                     switch block {
                     case .mention(let m):
-                        if m.type == .pubkey && m.ref.ref_id == profile.pubkey {
+                        if case .pubkey(let pk) = m.ref, pk == profile.pubkey {
                             load(force_artifacts: true)
                             return
                         }
@@ -226,41 +269,84 @@ func url_str(_ url: URL) -> CompatibleText {
     return CompatibleText(attributed: attributedString)
  }
 
-func mention_str(_ m: Mention, profiles: Profiles) -> CompatibleText {
-    switch m.type {
-    case .pubkey:
-        let pk = m.ref.ref_id
-        let profile = profiles.lookup(id: pk)
+func mention_str(_ m: Mention<MentionRef>, profiles: Profiles) -> CompatibleText {
+    switch m.ref {
+    case .pubkey(let pk):
+        let npub = bech32_pubkey(pk) 
+        let profile_txn = profiles.lookup(id: pk)
+        let profile = profile_txn.unsafeUnownedValue
         let disp = Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 50)
         var attributedString = AttributedString(stringLiteral: "@\(disp)")
-        attributedString.link = URL(string: "damus:\(encode_pubkey_uri(m.ref))")
+        attributedString.link = URL(string: "damus:nostr:\(npub)")
         attributedString.foregroundColor = DamusColors.purple
         
         return CompatibleText(attributed: attributedString)
-    case .event:
-        let bevid = bech32_note_id(m.ref.ref_id) ?? m.ref.ref_id
+    case .note(let note_id):
+        let bevid = bech32_note_id(note_id)
         var attributedString = AttributedString(stringLiteral: "@\(abbrev_pubkey(bevid))")
-        attributedString.link = URL(string: "damus:\(encode_event_id_uri(m.ref))")
+        attributedString.link = URL(string: "damus:nostr:\(bevid)")
         attributedString.foregroundColor = DamusColors.purple
 
         return CompatibleText(attributed: attributedString)
     }
 }
 
-struct NoteContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        let state = test_damus_state()
-        let content = "hi there ¯\\_(ツ)_/¯ https://jb55.com/s/Oct12-150217.png 5739a762ef6124dd.jpg"
-        NoteContentView(damus_state: state, event: NostrEvent(content: content, pubkey: "pk"), show_images: true, size: .normal, options: [])
+struct LongformContent {
+    let markdown: MarkdownContent
+    let words: Int
+
+    init(_ markdown: String) {
+        let blocks = [BlockNode].init(markdown: markdown)
+        self.markdown = MarkdownContent(blocks: blocks)
+        self.words = count_markdown_words(blocks: blocks)
     }
 }
 
-struct NoteArtifacts: Equatable {
-    static func == (lhs: NoteArtifacts, rhs: NoteArtifacts) -> Bool {
+enum NoteArtifacts {
+    case separated(NoteArtifactsSeparated)
+    case longform(LongformContent)
+
+    var images: [URL] {
+        switch self {
+        case .separated(let arts):
+            return arts.images
+        case .longform:
+            return []
+        }
+    }
+}
+
+enum ArtifactPart {
+    case text(Text)
+    case media(MediaUrl)
+    case invoice(Invoice)
+    
+    var is_text: Bool {
+        switch self {
+        case .text:    return true
+        case .media:   return false
+        case .invoice: return false
+        }
+    }
+}
+
+class NoteArtifactsParts {
+    var parts: [ArtifactPart]
+    var words: Int
+    
+    init(parts: [ArtifactPart], words: Int) {
+        self.parts = parts
+        self.words = words
+    }
+}
+
+struct NoteArtifactsSeparated: Equatable {
+    static func == (lhs: NoteArtifactsSeparated, rhs: NoteArtifactsSeparated) -> Bool {
         return lhs.content == rhs.content
     }
     
     let content: CompatibleText
+    let words: Int
     let urls: [UrlType]
     let invoices: [Invoice]
     
@@ -276,9 +362,9 @@ struct NoteArtifacts: Equatable {
         return urls.compactMap { url in url.is_link }
     }
     
-    static func just_content(_ content: String) -> NoteArtifacts {
+    static func just_content(_ content: String) -> NoteArtifactsSeparated {
         let txt = CompatibleText(attributed: AttributedString(stringLiteral: content))
-        return NoteArtifacts(content: txt, urls: [], invoices: [])
+        return NoteArtifactsSeparated(content: txt, words: 0, urls: [], invoices: [])
     }
 }
 
@@ -307,18 +393,70 @@ enum NoteArtifactState {
     }
 }
 
-func render_note_content(ev: NostrEvent, profiles: Profiles, privkey: String?) -> NoteArtifacts {
-    let blocks = ev.blocks(privkey)
-    
-    return render_blocks(blocks: blocks, profiles: profiles)
+func note_artifact_is_separated(kind: NostrKind?) -> Bool {
+    return kind != .longform
 }
 
-func render_blocks(blocks: [Block], profiles: Profiles) -> NoteArtifacts {
+func render_note_content(ev: NostrEvent, profiles: Profiles, keypair: Keypair) -> NoteArtifacts {
+    let blocks = ev.blocks(keypair)
+
+    if ev.known_kind == .longform {
+        return .longform(LongformContent(ev.content))
+    }
+    
+    return .separated(render_blocks(blocks: blocks, profiles: profiles))
+}
+
+fileprivate func artifact_part_last_text_ind(parts: [ArtifactPart]) -> (Int, Text)? {
+    let ind = parts.count - 1
+    if ind < 0 {
+        return nil
+    }
+    
+    guard case .text(let txt) = parts[safe: ind] else {
+        return nil
+    }
+    
+    return (ind, txt)
+}
+
+func reduce_text_block(blocks: [Block], ind: Int, txt: String, one_note_ref: Bool) -> String {
+    var trimmed = txt
+    
+    if let prev = blocks[safe: ind-1],
+       case .url(let u) = prev,
+       classify_url(u).is_media != nil {
+        trimmed = " " + trim_prefix(trimmed)
+    }
+    
+    if let next = blocks[safe: ind+1] {
+        if case .url(let u) = next, classify_url(u).is_media != nil {
+            trimmed = trim_suffix(trimmed)
+        } else if case .mention(let m) = next,
+                  case .note = m.ref,
+                  one_note_ref {
+            trimmed = trim_suffix(trimmed)
+        }
+    }
+    
+    return trimmed
+}
+
+func render_blocks(blocks bs: Blocks, profiles: Profiles) -> NoteArtifactsSeparated {
     var invoices: [Invoice] = []
     var urls: [UrlType] = []
+    let blocks = bs.blocks
     
     let one_note_ref = blocks
-        .filter({ $0.is_note_mention })
+        .filter({
+            if case .mention(let mention) = $0,
+               case .note = mention.ref {
+                return true
+            }
+            else {
+                return false
+            }
+        })
         .count == 1
     
     var ind: Int = -1
@@ -327,27 +465,13 @@ func render_blocks(blocks: [Block], profiles: Profiles) -> NoteArtifacts {
         
         switch block {
         case .mention(let m):
-            if m.type == .event && one_note_ref {
+            if case .note = m.ref, one_note_ref {
                 return str
             }
             return str + mention_str(m, profiles: profiles)
         case .text(let txt):
-            var trimmed = txt
-            if let prev = blocks[safe: ind-1],
-               case .url(let u) = prev,
-               classify_url(u).is_media != nil {
-                trimmed = " " + trim_prefix(trimmed)
-            }
-            
-            if let next = blocks[safe: ind+1] {
-                if case .url(let u) = next, classify_url(u).is_media != nil {
-                    trimmed = trim_suffix(trimmed)
-                } else if case .mention(let m) = next, m.type == .event, one_note_ref {
-                    trimmed = trim_suffix(trimmed)
-                }
-            }
-            
-            return str + CompatibleText(stringLiteral: trimmed)
+            return str + CompatibleText(stringLiteral: reduce_text_block(blocks: blocks, ind: ind, txt: txt, one_note_ref: one_note_ref))
+
         case .relay(let relay):
             return str + CompatibleText(stringLiteral: relay)
             
@@ -369,7 +493,7 @@ func render_blocks(blocks: [Block], profiles: Profiles) -> NoteArtifacts {
         }
     }
 
-    return NoteArtifacts(content: txt, urls: urls, invoices: invoices)
+    return NoteArtifactsSeparated(content: txt, words: bs.words, urls: urls, invoices: invoices)
 }
 
 enum MediaUrl {
@@ -465,7 +589,7 @@ func classify_url(_ url: URL) -> UrlType {
     return .link(url)
 }
 
-func lookup_cached_preview_size(previews: PreviewCache, evid: String) -> CGFloat? {
+func lookup_cached_preview_size(previews: PreviewCache, evid: NoteId) -> CGFloat? {
     guard case .value(let cached) = previews.lookup(evid) else {
         return nil
     }
@@ -486,3 +610,62 @@ func trim_suffix(_ str: String) -> String {
 func trim_prefix(_ str: String) -> String {
     return str.replacingOccurrences(of: "^\\s+", with: "", options: .regularExpression)
 }
+
+struct NoteContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        let state = test_damus_state
+        let state2 = test_damus_state
+
+        Group {
+            VStack {
+                NoteContentView(damus_state: state, event: test_note, show_images: true, size: .normal, options: [])
+            }
+            .previewDisplayName("Short note")
+            
+            VStack {
+                NoteContentView(damus_state: state, event: test_encoded_note_with_image!, show_images: true, size: .normal, options: [])
+            }
+            .previewDisplayName("Note with image")
+
+            VStack {
+                NoteContentView(damus_state: state2, event: test_longform_event.event, show_images: true, size: .normal, options: [.wide])
+                    .border(Color.red)
+            }
+            .previewDisplayName("Long-form note")
+        }
+    }
+}
+
+
+func count_words(_ s: String) -> Int {
+    return s.components(separatedBy: .whitespacesAndNewlines).count
+}
+
+func count_inline_nodes_words(nodes: [InlineNode]) -> Int {
+    return nodes.reduce(0) { words, node in
+        switch node {
+        case .text(let words):
+            return count_words(words)
+        case .emphasis(let children):
+            return words + count_inline_nodes_words(nodes: children)
+        case .strong(let children):
+            return words + count_inline_nodes_words(nodes: children)
+        case .strikethrough(let children):
+            return words + count_inline_nodes_words(nodes: children)
+        case .softBreak, .lineBreak, .code, .html, .image, .link:
+            return words
+        }
+    }
+}
+
+func count_markdown_words(blocks: [BlockNode]) -> Int {
+    return blocks.reduce(0) { words, block in
+        switch block {
+        case .paragraph(let content):
+            return words + count_inline_nodes_words(nodes: content)
+        case .blockquote, .bulletedList, .numberedList, .taskList, .codeBlock, .htmlBlock, .heading, .table, .thematicBreak:
+            return words
+        }
+    }
+}
+

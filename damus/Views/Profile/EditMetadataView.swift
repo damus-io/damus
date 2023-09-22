@@ -20,18 +20,18 @@ struct EditMetadataView: View {
     @State var name: String
     @State var ln: String
     @State var website: String
-    let profile: Profile?
-    
+
     @Environment(\.dismiss) var dismiss
 
     @State var confirm_ln_address: Bool = false
-    @StateObject var profileUploadViewModel = ProfileUploadingViewModel()
     
-    init (damus_state: DamusState) {
+    @StateObject var profileUploadObserver = ImageUploadingObserver()
+    @StateObject var bannerUploadObserver = ImageUploadingObserver()
+    
+    init(damus_state: DamusState) {
         self.damus_state = damus_state
-        let data = damus_state.profiles.lookup(id: damus_state.pubkey)
-        self.profile = data
-        
+        let data = damus_state.profiles.lookup(id: damus_state.pubkey).unsafeUnownedValue
+
         _name = State(initialValue: data?.name ?? "")
         _display_name = State(initialValue: data?.display_name ?? "")
         _about = State(initialValue: data?.about ?? "")
@@ -43,27 +43,25 @@ struct EditMetadataView: View {
     }
     
     func to_profile() -> Profile {
-        let profile = self.profile ?? Profile()
-        
-        profile.name = name
-        profile.display_name = display_name
-        profile.about = about
-        profile.website = website
-        profile.nip05 = nip05.isEmpty ? nil : nip05
-        profile.picture = picture.isEmpty ? nil : picture
-        profile.banner = banner.isEmpty ? nil : banner
-        profile.lud06 = ln.contains("@") ? nil : ln
-        profile.lud16 = ln.contains("@") ? ln : nil
-        
+        let new_nip05 = nip05.isEmpty ? nil : nip05
+        let new_picture = picture.isEmpty ? nil : picture
+        let new_banner = banner.isEmpty ? nil : banner
+        let new_lud06 = ln.contains("@") ? nil : ln
+        let new_lud16 = ln.contains("@") ? ln : nil
+
+        let profile = Profile(name: name, display_name: display_name, about: about, picture: new_picture, banner: new_banner, website: website, lud06: new_lud06, lud16: new_lud16, nip05: new_nip05, damus_donation: nil)
+
         return profile
     }
     
     func save() {
         let profile = to_profile()
-        guard let keypair = damus_state.keypair.to_full() else {
+        guard let keypair = damus_state.keypair.to_full(),
+              let metadata_ev = make_metadata_event(keypair: keypair, metadata: profile)
+        else {
             return
         }
-        let metadata_ev = make_metadata_event(keypair: keypair, metadata: profile)
+
         damus_state.postbox.send(metadata_ev)
     }
 
@@ -78,7 +76,7 @@ struct EditMetadataView: View {
     var TopSection: some View {
         ZStack(alignment: .top) {
             GeometryReader { geo in
-                BannerImageView(pubkey: damus_state.pubkey, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                EditBannerImageView(damus_state: damus_state, viewModel: bannerUploadObserver, callback: uploadedBanner(image_url:))
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geo.size.width, height: BANNER_HEIGHT)
                     .clipped()
@@ -87,7 +85,7 @@ struct EditMetadataView: View {
                 let pfp_size: CGFloat = 90.0
 
                 HStack(alignment: .center) {
-                    ProfilePictureSelector(pubkey: damus_state.pubkey, damus_state: damus_state, viewModel: profileUploadViewModel, callback: uploadedProfilePicture(image_url:))
+                    EditProfilePictureView(pubkey: damus_state.pubkey, damus_state: damus_state, size: pfp_size, uploadObserver: profileUploadObserver, callback: uploadedProfilePicture(image_url:))
                         .offset(y: -(pfp_size/2.0)) // Increase if set a frame
 
                    Spacer()
@@ -156,21 +154,23 @@ struct EditMetadataView: View {
                 }
                                 
                 Section(content: {
-                    TextField(NSLocalizedString("jb55@jb55.com", comment: "Placeholder example text for identifier used for NIP-05 verification."), text: $nip05)
+                    TextField(NSLocalizedString("jb55@jb55.com", comment: "Placeholder example text for identifier used for Nostr addresses."), text: $nip05)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
                         .onReceive(Just(nip05)) { newValue in
                             self.nip05 = newValue.trimmingCharacters(in: .whitespaces)
                         }
                 }, header: {
-                    Text("NIP-05 Verification", comment: "Label for NIP-05 Verification section of user profile form.")
+                    Text("Nostr Address", comment: "Label for the Nostr Address section of user profile form.")
                 }, footer: {
-                    if let parts = nip05_parts {
-                        Text("'\(parts.username)' at '\(parts.host)' will be used for verification", comment: "Description of how the nip05 identifier would be used for verification.")
-                    } else if !nip05.isEmpty {
-                        Text("'\(nip05)' is an invalid NIP-05 identifier. It should look like an email.", comment: "Description of why the nip05 identifier is invalid.")
-                    } else {
-                        Text("")    // without this, the keyboard dismisses unnecessarily when the footer changes state
+                    switch validate_nostr_address(nip05: nip05_parts, nip05_str: nip05) {
+                    case .empty:
+                        // without this, the keyboard dismisses unnecessarily when the footer changes state
+                        Text("")
+                    case .valid:
+                        Text("")
+                    case .invalid:
+                        Text("'\(nip05)' is an invalid Nostr address. It should look like an email address.", comment: "Description of why the Nostr address is invalid.")
                     }
                 })
 
@@ -182,7 +182,7 @@ struct EditMetadataView: View {
                         dismiss()
                     }
                 }
-                .disabled(profileUploadViewModel.isLoading)
+                .disabled(profileUploadObserver.isLoading || bannerUploadObserver.isLoading)
                 .alert(NSLocalizedString("Invalid Tip Address", comment: "Title of alerting as invalid tip address."), isPresented: $confirm_ln_address) {
                     Button(NSLocalizedString("Ok", comment: "Button to dismiss the alert.")) {
                     }
@@ -198,10 +198,34 @@ struct EditMetadataView: View {
     func uploadedProfilePicture(image_url: URL?) {
         picture = image_url?.absoluteString ?? ""
     }
+    
+    func uploadedBanner(image_url: URL?) {
+        banner = image_url?.absoluteString ?? ""
+    }
 }
 
 struct EditMetadataView_Previews: PreviewProvider {
     static var previews: some View {
-        EditMetadataView(damus_state: test_damus_state())
+        EditMetadataView(damus_state: test_damus_state)
     }
+}
+
+enum NIP05ValidationResult {
+    case empty
+    case invalid
+    case valid
+}
+
+func validate_nostr_address(nip05: NIP05?, nip05_str: String) -> NIP05ValidationResult {
+    guard nip05 != nil else {
+        // couldn't parse
+        if nip05_str.isEmpty {
+            return .empty
+        } else {
+            return .invalid
+        }
+    }
+
+    // could parse so we valid.
+    return .valid
 }

@@ -1,0 +1,80 @@
+[
+    {
+        "title": "nostr",
+        "users": [
+            "ba2f394833658475e91680b898f9be0f1d850166c6a839dbe084d0266ad6e20a",
+            "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2",
+            "fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52",
+            "b708f7392f588406212c3882e7b3bc0d9b08d62f95fa170d099127ece2770e5e"
+        ]
+    },
+    {
+        "title": "permaculture & livestock & gardening",
+        "users": [
+            "4b1804c90d59dff195ee0e8f692b98a7c762bf1793b3e126c546d730dcb04477",
+            "2c24e1af571fb4ccfeca3981649c1b09c695cd83b129709eb3b41c7ad2854899",
+            "296842eaaed9be5ae0668da09fe48aac0521c4af859ad547d93145e5ac34c17e",
+            "2c24e1af571fb4ccfeca3981649c1b09c695cd83b129709eb3b41c7ad2854899"
+        ]
+    },
+    {
+        "title": "music",
+        "users": [
+            "23708a76e7090cb108d33e8801fd36262c475e5499b23eb87eee4a31f4f0144e",
+            "ca9d68eb25620fc755e1b8c76b5f155f4c7e96d99c532c109a8b36d208bdce55"
+        ]
+    },
+    {
+        "title": "books",
+        "users": [
+            "2652f3af10de63bc10a2628871a3fce62e08655e4fcf90a58be16f246bb65da3",
+            "b83a28b7e4e5d20bd960c5faeb6625f95529166b8bdb045d42634a2f35919450"
+        ]
+    },
+    {
+        "title": "art & photography",
+        "users": [
+            "f96c3d76497074c4c83a7b3823380e77dc73d5a9494fd2e053e4a1453e17824b",
+            "11b2d93b26d7e56fb57f0afce0d33bfa7fb35b913e4c0aeb7706464befb9ca97",
+            "f4db5270bd991b17bea1e6d035f45dee392919c29474bbac10342d223c74e0d0",
+            "af146f51634a5fb0abc592fbc2bed42cf740700990344a766a8999fe55eed1c6",
+            "8816e8938fe60a3a925433c77410f39500fe1320787acb2165f9345e70464592",
+            "8d0638d3e8d9b23e337fb4017bb7d5a97def40bdc258e8121ee7d51e623ca065",
+            "ece8ed2111f73b92251e74a3da22dee1d6c6d9b497040acc68a37ac6bbf5a105",
+            "64bfa9abffe5b18d0731eed57b38173adc2ba89bf87c168da90517f021e722b5",
+            "546bffcb9317edf919828de272dd8eba11f2aadc07969cba6c9bb894c07712ef",
+            "20998a8d433181cc5e778903db528d162f5579918a3437be40fdba0130b3469c",
+            "37c962bfb34d32e667d5075f7d55f3a7ca9bcddbafeff59a4003c276ad147352",
+            "387fa328198e67a400caf00947cc91e0c166d24d71d8b4b78a6c3ef91ff4d058",
+            "87deef9034c52d87ae327af3a76358e58e7ee2e03d80c738ee1a2be399c23e79"
+        ]
+    },
+    {
+        "title": "ai art",
+        "users": [
+            "431fa2f340f0adf8963d6d7c6e2c20d913278c691fe609fd3857db13d8f39feb",
+            "9936a53def39d712f886ac7e2ed509ce223b534834dd29d95caba9f6bc01ef35",
+            "1577e4599dd10c863498fe3c20bd82aafaf829a595ce83c5cf8ac3463531b09b",
+            "693c2832de939b4af8ccd842b17f05df2edd551e59989d3c4ef9a44957b2f1fb",
+            "55f04590674f3648f4cdc9dc8ce32da2a282074cd0b020596ee033d12d385185"
+        ]
+    },
+    {
+        "title": "parenting",
+        "users": [
+            "c7c8f645fd45b09055fb6c26d148737ad7ed12ddecde0d4c877b88f8d4196865",
+            "fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52",
+            "e451c4e82e272ef912a04f490373fce9054a044b11a2aa847823b3686c8eba77",
+            "261c7e18545aee4eb55e8052297fd93bd886c2f96b10d599cfdad4f3477b87ab",
+            "22a193fb86c793d7f73348126a5fe55ab8a4c975805ebc2ff81bf290f7805f7e"
+        ]
+    },
+    {
+        "title": "food",
+        "users": [
+            "cbb2f023b6aa09626d51d2f4ea99fa9138ea80ec7d5ffdce9feef8dcd6352031"
+        ]
+    }
+]
+
+ 

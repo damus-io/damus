@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct InvoicesView: View {
-    let our_pubkey: String
+    let our_pubkey: Pubkey
     var invoices: [Invoice]
     let settings: UserSettingsStore
     
@@ -29,7 +29,7 @@ struct InvoicesView: View {
 
 struct InvoicesView_Previews: PreviewProvider {
     static var previews: some View {
-        InvoicesView(our_pubkey: "", invoices: [Invoice.init(description: .description("description"), amount: .specific(10000), string: "invstr", expiry: 100000, payment_hash: Data(), created_at: 1000000)], settings: test_damus_state().settings)
+        InvoicesView(our_pubkey: test_note.pubkey, invoices: [Invoice.init(description: .description("description"), amount: .specific(10000), string: "invstr", expiry: 100000, payment_hash: Data(), created_at: 1000000)], settings: test_damus_state.settings)
             .frame(width: 300)
     }
 }

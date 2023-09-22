@@ -9,8 +9,8 @@ import SwiftUI
 
 struct ZapUserView: View {
     let state: DamusState
-    let pubkey: String
-    
+    let pubkey: Pubkey
+
     var body: some View {
         HStack(alignment: .center) {
             Text("Zap")
@@ -23,6 +23,6 @@ struct ZapUserView: View {
 
 struct ZapUserView_Previews: PreviewProvider {
     static var previews: some View {
-        ZapUserView(state: test_damus_state(), pubkey: "anon")
+        ZapUserView(state: test_damus_state, pubkey: ANON_PUBKEY)
     }
 }

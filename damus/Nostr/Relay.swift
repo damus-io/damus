@@ -68,13 +68,14 @@ struct Limitations: Codable {
 struct RelayMetadata: Codable {
     let name: String?
     let description: String?
-    let pubkey: String?
+    let pubkey: Pubkey?
     let contact: String?
     let supported_nips: [Int]?
     let software: String?
     let version: String?
     let limitation: Limitations?
     let payments_url: String?
+    let icon: String?
     
     var is_paid: Bool {
         return limitation?.payment_required ?? false

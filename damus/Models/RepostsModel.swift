@@ -9,7 +9,7 @@ import Foundation
 
 final class RepostsModel: EventsModel {
     
-    init(state: DamusState, target: String) {
+    init(state: DamusState, target: NoteId) {
         super.init(state: state, target: target, kind: .boost)
     }
 }

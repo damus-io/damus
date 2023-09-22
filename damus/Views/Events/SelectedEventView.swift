@@ -12,11 +12,19 @@ struct SelectedEventView: View {
     let event: NostrEvent
     let size: EventViewKind
     
-    var pubkey: String {
+    var pubkey: Pubkey {
         event.pubkey
     }
     
     @StateObject var bar: ActionBarModel
+
+    var replying_to: NostrEvent? {
+        guard let note_ref = event.event_refs(damus.keypair).first(where: { evref in evref.is_direct_reply != nil })?.is_direct_reply else {
+            return nil
+        }
+
+        return damus.events.lookup(note_ref.note_id)
+    }
     
     init(damus: DamusState, event: NostrEvent, size: EventViewKind) {
         self.damus = damus
@@ -27,31 +35,28 @@ struct SelectedEventView: View {
     
     var body: some View {
         HStack(alignment: .top) {
-            let profile = damus.profiles.lookup(id: pubkey)
-
             VStack(alignment: .leading) {
                 HStack {
-                    EventProfile(damus_state: damus, pubkey: pubkey, profile: profile, size: .normal)
+                    EventProfile(damus_state: damus, pubkey: pubkey, size: .normal)
                     
                     Spacer()
                     
-                    EventMenuContext(event: event, keypair: damus.keypair, target_pubkey: event.pubkey, bookmarks: damus.bookmarks, muted_threads: damus.muted_threads)
+                    EventMenuContext(damus: damus, event: event)
                         .padding([.bottom], 4)
-
                 }
                 .padding(.horizontal)
                 .minimumScaleFactor(0.75)
                 .lineLimit(1)
-                
-                if event_is_reply(event, privkey: damus.keypair.privkey) {
-                    ReplyDescription(event: event, profiles: damus.profiles)
+
+                if event_is_reply(event.event_refs(damus.keypair)) {
+                    ReplyDescription(event: event, replying_to: replying_to, ndb: damus.ndb)
                         .padding(.horizontal)
                 }
                 
-                EventBody(damus_state: damus, event: event, size: size, options: [.pad_content])
-                
-                if let mention = first_eref_mention(ev: event, privkey: damus.keypair.privkey) {
-                    BuilderEventView(damus: damus, event_id: mention.ref.id)
+                EventBody(damus_state: damus, event: event, size: size, options: [.wide])
+
+                if let mention = first_eref_mention(ev: event, keypair: damus.keypair) {
+                    BuilderEventView(damus: damus, event_id: mention.ref)
                         .padding(.horizontal)
                 }
                 
@@ -76,8 +81,7 @@ struct SelectedEventView: View {
                 Divider()
                     .padding([.top], 4)
             }
-            .onReceive(handle_notify(.update_stats)) { n in
-                let target = n.object as! String
+            .onReceive(handle_notify(.update_stats)) { target in
                 guard target == self.event.id else { return }
                 self.bar.update(damus: self.damus, evid: target)
             }
@@ -88,7 +92,6 @@ struct SelectedEventView: View {
 
 struct SelectedEventView_Previews: PreviewProvider {
     static var previews: some View {
-        SelectedEventView(damus: test_damus_state(), event: test_event, size: .selected)
-            .padding()
+        SelectedEventView(damus: test_damus_state, event: test_note, size: .selected)
     }
 }

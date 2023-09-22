@@ -14,15 +14,22 @@ enum NostrPostResult {
 }
 
 let POST_PLACEHOLDER = NSLocalizedString("Type your note here...", comment: "Text box prompt to ask user to type their note.")
+let GHOST_CARET_VIEW_ID = "GhostCaret"
+let DEBUG_SHOW_GHOST_CARET_VIEW: Bool = false
 
 class TagModel: ObservableObject {
     var diff = 0
 }
 
+enum PostTarget {
+    case none
+    case user(Pubkey)
+}
+
 enum PostAction {
     case replying_to(NostrEvent)
     case quoting(NostrEvent)
-    case posting
+    case posting(PostTarget)
     
     var ev: NostrEvent? {
         switch self {
@@ -45,11 +52,12 @@ struct PostView: View {
     @State var error: String? = nil
     @State var uploadedMedias: [UploadedMedia] = []
     @State var image_upload_confirm: Bool = false
-    @State var originalReferences: [ReferencedId] = []
-    @State var references: [ReferencedId] = []
+    @State var references: [RefId] = []
+    @State var filtered_pubkeys: Set<Pubkey> = []
     @State var focusWordAttributes: (String?, NSRange?) = (nil, nil)
     @State var newCursorIndex: Int?
-    @State var postTextViewCanScroll: Bool = true
+    @State var caretRect: CGRect = CGRectNull
+    @State var textHeight: CGFloat? = nil
 
     @State var mediaToUpload: MediaUpload? = nil
     
@@ -62,7 +70,7 @@ struct PostView: View {
     @Environment(\.presentationMode) var presentationMode
 
     func cancel() {
-        NotificationCenter.default.post(name: .post, object: NostrPostResult.cancel)
+        notify(.post(.cancel))
         dismiss()
     }
 
@@ -71,45 +79,42 @@ struct PostView: View {
     }
     
     func send_post() {
-        var kind: NostrKind = .text
-
-        if case .replying_to(let ev) = action, ev.known_kind == .chat {
-            kind = .chat
-        }
-
-        post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
-            if let link = attributes[.link] as? String {
-                post.replaceCharacters(in: range, with: link)
+        let refs = references.filter { ref in
+            if case .pubkey(let pk) = ref, filtered_pubkeys.contains(pk) {
+                return false
             }
+            return true
         }
+        let new_post = build_post(post: self.post, action: action, uploadedMedias: uploadedMedias, references: refs)
 
-        var content = self.post.string
-            .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            .replacingOccurrences(of: "\u{200B}", with: "") // these characters are added when adding mentions.
+        notify(.post(.post(new_post)))
 
-        let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
-        
-        let img_meta_tags = uploadedMedias.compactMap { $0.metadata?.to_tag() }
-        
-        if !imagesString.isEmpty {
-            content.append(" " + imagesString + " ")
-        }
-
-        if case .quoting(let ev) = action, let id = bech32_note_id(ev.id) {
-            content.append(" nostr:" + id)
-        }
-        
-        let new_post = NostrPost(content: content, references: references, kind: kind, tags: img_meta_tags)
-
-        NotificationCenter.default.post(name: .post, object: NostrPostResult.post(new_post))
-        
         clear_draft()
 
         dismiss()
+
     }
 
     var is_post_empty: Bool {
         return post.string.allSatisfy { $0.isWhitespace } && uploadedMedias.isEmpty
+    }
+
+    var uploading_disabled: Bool {
+        return image_upload.progress != nil
+    }
+
+    var posting_disabled: Bool {
+        return is_post_empty || uploading_disabled
+    }
+    
+    // Returns a valid height for the text box, even when textHeight is not a number
+    func get_valid_text_height() -> CGFloat {
+        if let textHeight, textHeight.isFinite, textHeight > 0 {
+            return textHeight
+        }
+        else {
+            return 10
+        }
     }
     
     var ImageButton: some View {
@@ -135,7 +140,7 @@ struct PostView: View {
             ImageButton
             CameraButton
         }
-        .disabled(image_upload.progress != nil)
+        .disabled(uploading_disabled)
     }
     
     var PostButton: some View {
@@ -146,18 +151,31 @@ struct PostView: View {
                 self.send_post()
             }
         }
-        .disabled(is_post_empty)
+        .disabled(posting_disabled)
         .font(.system(size: 14, weight: .bold))
         .frame(width: 80, height: 30)
         .foregroundColor(.white)
         .background(LINEAR_GRADIENT)
-        .opacity(is_post_empty ? 0.5 : 1.0)
+        .opacity(posting_disabled ? 0.5 : 1.0)
         .clipShape(Capsule())
     }
     
-    var isEmpty: Bool {
-        self.uploadedMedias.count == 0 &&
-        self.post.mutableString.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    func isEmpty() -> Bool {
+        return self.uploadedMedias.count == 0 &&
+            self.post.mutableString.trimmingCharacters(in: .whitespacesAndNewlines) ==
+                initialString().mutableString.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    
+    func initialString() -> NSMutableAttributedString {
+        guard case .posting(let target) = action,
+              case .user(let pubkey) = target,
+              damus_state.pubkey != pubkey else {
+            return .init(string: "")
+        }
+        
+        let profile_txn = damus_state.profiles.lookup(id: pubkey)
+        let profile = profile_txn.unsafeUnownedValue
+        return user_tag_attr_string(profile: profile, pubkey: pubkey)
     }
     
     func clear_draft() {
@@ -172,48 +190,43 @@ struct PostView: View {
 
     }
     
-    func load_draft() {
+    func load_draft() -> Bool {
         guard let draft = load_draft_for_post(drafts: self.damus_state.drafts, action: self.action) else {
             self.post = NSMutableAttributedString("")
             self.uploadedMedias = []
-            return
+            
+            return false
         }
         
         self.uploadedMedias = draft.media
         self.post = draft.content
+        return true
     }
-    
+
     func post_changed(post: NSMutableAttributedString, media: [UploadedMedia]) {
-        switch action {
-        case .replying_to(let ev):
-            if let draft = damus_state.drafts.replies[ev] {
-                draft.content = post
-                draft.media = media
-            } else {
-                damus_state.drafts.replies[ev] = DraftArtifacts(content: post, media: media)
-            }
-        case .quoting(let ev):
-            if let draft = damus_state.drafts.quotes[ev] {
-                draft.content = post
-                draft.media = media
-            } else {
-                damus_state.drafts.quotes[ev] = DraftArtifacts(content: post, media: media)
-            }
-        case .posting:
-            if let draft = damus_state.drafts.post {
-                draft.content = post
-                draft.media = media
-            } else {
-                damus_state.drafts.post = DraftArtifacts(content: post, media: media)
-            }
+        if let draft = load_draft_for_post(drafts: damus_state.drafts, action: action) {
+            draft.content = post
+            draft.media = media
+        } else {
+            let artifacts = DraftArtifacts(content: post, media: media)
+            set_draft_for_post(drafts: damus_state.drafts, action: action, artifacts: artifacts)
         }
     }
     
     var TextEntry: some View {
         ZStack(alignment: .topLeading) {
-            TextViewWrapper(attributedText: $post, postTextViewCanScroll: $postTextViewCanScroll, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
+            TextViewWrapper(attributedText: $post, textHeight: $textHeight, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
                 focusWordAttributes = (word, range)
                 self.newCursorIndex = nil
+            }, updateCursorPosition: { newCursorIndex in
+                self.newCursorIndex = newCursorIndex
+            }, onCaretRectChange: { uiView in
+                // When the caret position changes, we change the `caretRect` in our state, so that our ghost caret will follow our caret
+                if let selectedStartRange = uiView.selectedTextRange?.start {
+                    DispatchQueue.main.async {
+                        caretRect = uiView.caretRect(for: selectedStartRange)
+                    }
+                }
             })
                 .environmentObject(tagModel)
                 .focused($focus)
@@ -221,6 +234,8 @@ struct PostView: View {
                 .onChange(of: post) { p in
                     post_changed(post: p, media: uploadedMedias)
                 }
+                // Set a height based on the text content height, if it is available and valid
+                .frame(height: get_valid_text_height())
             
             if post.string.isEmpty {
                 Text(POST_PLACEHOLDER)
@@ -261,11 +276,11 @@ struct PostView: View {
     
     func handle_upload(media: MediaUpload) {
         let uploader = damus_state.settings.default_media_uploader
-        Task.init {
+        Task {
             let img = getImage(media: media)
             print("img size w:\(img.size.width) h:\(img.size.height)")
             async let blurhash = calculate_blurhash(img: img)
-            let res = await image_upload.start(media: media, uploader: uploader)
+            let res = await image_upload.start(media: media, uploader: uploader, keypair: damus_state.keypair)
             
             switch res {
             case .success(let url):
@@ -300,51 +315,99 @@ struct PostView: View {
     }
     
     func Editor(deviceSize: GeometryProxy) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .top) {
-                ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
-                
-                TextEntry
+        HStack(alignment: .top, spacing: 0) {
+            if(caretRect != CGRectNull) {
+                GhostCaret
             }
-            .frame(height: deviceSize.size.height * multiply_factor)
-            .id("post")
-                
-            PVImageCarouselView(media: $uploadedMedias, deviceWidth: deviceSize.size.width)
-                .onChange(of: uploadedMedias) { media in
-                    post_changed(post: post, media: media)
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .top) {
+                    ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                    
+                    TextEntry
                 }
-            
-            if case .quoting(let ev) = action {
-                BuilderEventView(damus: damus_state, event: ev)
+                .id("post")
+                
+                PVImageCarouselView(media: $uploadedMedias, deviceWidth: deviceSize.size.width)
+                    .onChange(of: uploadedMedias) { media in
+                        post_changed(post: post, media: media)
+                    }
+                
+                if case .quoting(let ev) = action {
+                    BuilderEventView(damus: damus_state, event: ev)
+                }
             }
+            .padding(.horizontal)
         }
-        .padding(.horizontal)
     }
     
+    // The GhostCaret is a vertical projection of the editor's caret that should sit beside the editor.
+    // The purpose of this view is create a reference point that we can scroll our ScrollView into
+    // This is necessary as a bridge to communicate between:
+    // - The UIKit-based UITextView (which has the caret position)
+    // - and the SwiftUI-based ScrollView/ScrollReader (where scrolling commands can only be done via the SwiftUI "ID" parameter
+    var GhostCaret: some View {
+        Rectangle()
+            .foregroundStyle(DEBUG_SHOW_GHOST_CARET_VIEW ? .cyan : .init(red: 0, green: 0, blue: 0, opacity: 0))
+            .frame(
+                width: DEBUG_SHOW_GHOST_CARET_VIEW ? caretRect.width : 0,
+                height: caretRect.height)
+            // Use padding to vertically align our ghost caret with our actual text caret.
+            // Note: Programmatic scrolling cannot be done with the `.position` modifier.
+            // Experiments revealed that the scroller ignores the position modifier.
+            .padding(.top, caretRect.origin.y)
+            .id(GHOST_CARET_VIEW_ID)
+            .disabled(true)
+    }
+    
+    func fill_target_content(target: PostTarget) {
+        self.post = initialString()
+        self.tagModel.diff = post.string.count
+    }
+
+    var pubkeys: [Pubkey] {
+        self.references.reduce(into: [Pubkey]()) { pks, ref in
+            guard case .pubkey(let pk) = ref else {
+                return
+            }
+
+            pks.append(pk)
+        }
+    }
+
     var body: some View {
         GeometryReader { (deviceSize: GeometryProxy) in
             VStack(alignment: .leading, spacing: 0) {
                 let searching = get_searching_string(focusWordAttributes.0)
+                let searchingIsNil = searching == nil
                 
                 TopBar
                 
                 ScrollViewReader { scroller in
                     ScrollView {
-                        if case .replying_to(let replying_to) = self.action {
-                            ReplyView(replying_to: replying_to, damus: damus_state, originalReferences: $originalReferences, references: $references)
+                        VStack(alignment: .leading) {
+                            if case .replying_to(let replying_to) = self.action {
+                                ReplyView(replying_to: replying_to, damus: damus_state, original_pubkeys: pubkeys, filtered_pubkeys: $filtered_pubkeys)
+                            }
+                            
+                            Editor(deviceSize: deviceSize)
                         }
-                        
-                        Editor(deviceSize: deviceSize)
                     }
-                    .frame(maxHeight: searching == nil ? .infinity : 70)
+                    .frame(maxHeight: searching == nil ? deviceSize.size.height : 70)
                     .onAppear {
                         scroll_to_event(scroller: scroller, id: "post", delay: 1.0, animate: true, anchor: .top)
                     }
+                    // Note: The scroll commands below are specific because there seems to be quirk with ScrollReader where sending it to the exact same position twice resets its scroll position.
+                    .onChange(of: caretRect.origin.y, perform: { newValue in
+                        scroller.scrollTo(GHOST_CARET_VIEW_ID)
+                    })
+                    .onChange(of: searchingIsNil, perform: { newValue in
+                        scroller.scrollTo(GHOST_CARET_VIEW_ID)
+                    })
                 }
                 
                 // This if-block observes @ for tagging
                 if let searching {
-                    UserSearch(damus_state: damus_state, search: searching, focusWordAttributes: $focusWordAttributes, newCursorIndex: $newCursorIndex, postTextViewCanScroll: $postTextViewCanScroll, post: $post)
+                    UserSearch(damus_state: damus_state, search: searching, focusWordAttributes: $focusWordAttributes, newCursorIndex: $newCursorIndex, post: $post)
                         .frame(maxHeight: .infinity)
                         .environmentObject(tagModel)
                 } else {
@@ -390,17 +453,17 @@ struct PostView: View {
                 }
             }
             .onAppear() {
-                load_draft()
+                let loaded_draft = load_draft()
                 
                 switch action {
                 case .replying_to(let replying_to):
                     references = gather_reply_ids(our_pubkey: damus_state.pubkey, from: replying_to)
-                    originalReferences = references
                 case .quoting(let quoting):
                     references = gather_quote_ids(our_pubkey: damus_state.pubkey, from: quoting)
-                    originalReferences = references
-                case .posting:
-                    break
+                case .posting(let target):
+                    guard !loaded_draft else { break }
+                    
+                    fill_target_content(target: target)
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -408,7 +471,7 @@ struct PostView: View {
                 }
             }
             .onDisappear {
-                if isEmpty {
+                if isEmpty() {
                     clear_draft()
                 }
             }
@@ -448,7 +511,7 @@ func get_searching_string(_ word: String?) -> String? {
 
 struct PostView_Previews: PreviewProvider {
     static var previews: some View {
-        PostView(action: .posting, damus_state: test_damus_state())
+        PostView(action: .posting(.none), damus_state: test_damus_state)
     }
 }
 
@@ -536,6 +599,17 @@ struct UploadedMedia: Equatable {
 }
 
 
+func set_draft_for_post(drafts: Drafts, action: PostAction, artifacts: DraftArtifacts) {
+    switch action {
+    case .replying_to(let ev):
+        drafts.replies[ev] = artifacts
+    case .quoting(let ev):
+        drafts.quotes[ev] = artifacts
+    case .posting:
+        drafts.post = artifacts
+    }
+}
+
 func load_draft_for_post(drafts: Drafts, action: PostAction) -> DraftArtifacts? {
     switch action {
     case .replying_to(let ev):
@@ -545,4 +619,41 @@ func load_draft_for_post(drafts: Drafts, action: PostAction) -> DraftArtifacts? 
     case .posting:
         return drafts.post
     }
+}
+
+
+func build_post(post: NSMutableAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId]) -> NostrPost {
+    post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
+        if let link = attributes[.link] as? String {
+            let normalized_link: String
+            if link.hasPrefix("damus:nostr:") {
+                // Replace damus:nostr: URI prefix with nostr: since the former is for internal navigation and not meant to be posted.
+                normalized_link = String(link.dropFirst(6))
+            } else {
+                normalized_link = link
+            }
+
+            // Add zero-width space in case text preceding the mention is not a whitespace.
+            // In the case where the character preceding the mention is a whitespace, the added zero-width space will be stripped out.
+            post.replaceCharacters(in: range, with: "\(normalized_link)")
+        }
+    }
+
+
+    var content = post.string
+        .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+
+    let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
+
+    let img_meta_tags = uploadedMedias.compactMap { $0.metadata?.to_tag() }
+
+    if !imagesString.isEmpty {
+        content.append(" " + imagesString + " ")
+    }
+
+    if case .quoting(let ev) = action {
+        content.append(" nostr:" + bech32_note_id(ev.id))
+    }
+
+    return NostrPost(content: content, references: references, kind: .text, tags: img_meta_tags)
 }

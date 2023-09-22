@@ -10,8 +10,16 @@ import SwiftUI
 struct RelayView: View {
     let state: DamusState
     let relay: String
+    @ObservedObject private var model_cache: RelayModelCache
     
     @Binding var showActionButtons: Bool
+    
+    init(state: DamusState, relay: String, showActionButtons: Binding<Bool>) {
+        self.state = state
+        self.relay = relay
+        self.model_cache = state.relay_model_cache
+        _showActionButtons = showActionButtons
+    }
     
     var body: some View {
         Group {
@@ -20,35 +28,35 @@ struct RelayView: View {
                     if showActionButtons {
                         RemoveButton(privkey: privkey, showText: false)
                     }
-                    else if let relay_connection {
-                        RelayStatusView(connection: relay_connection)
-                    }
                 }
-                
-                RelayType(is_paid: state.relay_metadata.lookup(relay_id: relay)?.is_paid ?? false)
-                
-                if let meta = state.relay_metadata.lookup(relay_id: relay) {
-                    Text(relay)
-                        .background(
-                            NavigationLink("", destination: RelayDetailView(state: state, relay: relay, nip11: meta)).opacity(0.0)
-                                .disabled(showActionButtons)
-                        )
-                    
-                    Spacer()
 
-                    Image("info")
-                        .resizable()
-                        .frame(width: 20, height: 20)
-                        .foregroundColor(Color.accentColor)
-                } else {
+                let meta = model_cache.model(with_relay_id: relay)?.metadata
+            
+                RelayPicView(relay: relay, icon: meta?.icon, size: 55, highlight: .none, disable_animation: false)
+                    
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text(meta?.name ?? relay)
+                            .font(.headline)
+                            .padding(.bottom, 2)
+                        RelayType(is_paid: state.relay_model_cache.model(with_relay_id: relay)?.metadata.is_paid ?? false)
+                    }
                     Text(relay)
-                    
-                    Spacer()
-                    
-                    Image("question")
-                        .resizable()
-                        .frame(width: 20, height: 20)
+                        .font(.subheadline)
                         .foregroundColor(.gray)
+                }
+                    
+                Spacer()
+                    
+                if let relay_connection {
+                    RelayStatusView(connection: relay_connection)
+                        .background(
+                            NavigationLink(value: Route.RelayDetail(relay: relay, metadata: meta), label: {
+                                EmptyView()
+                            })
+                            .buttonStyle(.plain)
+                            .disabled(showActionButtons)
+                        )
                 }
             }
         }
@@ -79,14 +87,15 @@ struct RelayView: View {
         }
     }
         
-    func RemoveButton(privkey: String, showText: Bool) -> some View {
+    func RemoveButton(privkey: Privkey, showText: Bool) -> some View {
         Button(action: {
             guard let ev = state.contacts.event else {
                 return
             }
             
             let descriptors = state.pool.our_descriptors
-            guard let new_ev = remove_relay( ev: ev, current_relays: descriptors, privkey: privkey, relay: relay) else {
+            guard let keypair = state.keypair.to_full(),
+                  let new_ev = remove_relay(ev: ev, current_relays: descriptors, keypair: keypair, relay: relay) else {
                 return
             }
             
@@ -108,6 +117,6 @@ struct RelayView: View {
 
 struct RelayView_Previews: PreviewProvider {
     static var previews: some View {
-        RelayView(state: test_damus_state(), relay: "wss://relay.damus.io", showActionButtons: .constant(false))
+        RelayView(state: test_damus_state, relay: "wss://relay.damus.io", showActionButtons: .constant(false))
     }
 }

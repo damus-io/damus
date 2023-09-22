@@ -2,20 +2,20 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>collapsed_event_view_other_notes</key>
+	<key>followed_by_three_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@NOTES@</string>
-		<key>NOTES</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>... %d egyéb bejegyzés ...</string>
+			<string>Téged követ %2$@, %3$@, %4$@ &amp; %1$d más</string>
 			<key>other</key>
-			<string>... %d további bejegyzések ...</string>
+			<string>Téged követ %2$@, %3$@, %4$@ &amp; %1$d mások</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -50,6 +50,22 @@
 			<string>Követek</string>
 		</dict>
 	</dict>
+	<key>imports_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@IMPORTS@</string>
+		<key>IMPORTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Import</string>
+			<key>other</key>
+			<string>Importok</string>
+		</dict>
+	</dict>
 	<key>reacted_tagged_in_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -66,7 +82,7 @@
 			<string>%2$@ és %1$d mások reagáltak egy bejegyzésre amiben meg voltál jelölve</string>
 		</dict>
 	</dict>
-	<key>reacted_your_post_3</key>
+	<key>reacted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REACTED@</string>
@@ -162,7 +178,7 @@
 			<string>%2$@ és %1$d mások megosztották azt a bejegyzést amiben meg voltál jelölve</string>
 		</dict>
 	</dict>
-	<key>reposted_your_post_3</key>
+	<key>reposted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REPOSTED@</string>
@@ -269,9 +285,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>%2$@ sat kaptál %3$@: "%4$@"-tól</string>
+			<string>%2$@ sat kaptál %3$@: &quot;%4$@&quot;-tól</string>
 			<key>other</key>
-			<string>%2$@ sats kaptál %3$@: "%4$@"-tól</string>
+			<string>%2$@ sats kaptál %3$@: &quot;%4$@&quot;-tól</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -290,7 +306,7 @@
 			<string>%2$@ és %1$d mások Zap-eltek egy bejegyzést amiben meg voltál jelölve</string>
 		</dict>
 	</dict>
-	<key>zapped_your_post_3</key>
+	<key>zapped_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@ZAPPED@</string>
@@ -317,9 +333,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ és %1$d más Zap-elte a profilodat</string>
+			<string>%2$@ és %1$d más Zap-elt téged</string>
 			<key>other</key>
-			<string>%2$@ és %1$d mások Zap-elték a profilodat</string>
+			<string>%2$@ és %1$d mások Zap-elt téged</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>

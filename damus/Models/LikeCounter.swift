@@ -13,16 +13,16 @@ enum CountResult {
 }
 
 class EventCounter {
-    var counts: [String: Int] = [:]
-    var user_events: [String: Set<String>] = [:]
-    var our_events: [String: NostrEvent] = [:]
-    var our_pubkey: String
-    
-    init (our_pubkey: String) {
+    var counts: [NoteId: Int] = [:]
+    var user_events: [Pubkey: Set<NoteId>] = [:]
+    var our_events: [NoteId: NostrEvent] = [:]
+    var our_pubkey: Pubkey
+
+    init(our_pubkey: Pubkey) {
         self.our_pubkey = our_pubkey
     }
     
-    func add_event(_ ev: NostrEvent, target: String) -> CountResult {
+    func add_event(_ ev: NostrEvent, target: NoteId) -> CountResult {
         let pubkey = ev.pubkey
         
         if self.user_events[pubkey] == nil {

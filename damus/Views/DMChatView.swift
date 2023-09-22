@@ -13,7 +13,7 @@ struct DMChatView: View, KeyboardReadable {
     @ObservedObject var dms: DirectMessageModel
     @State var showPrivateKeyWarning: Bool = false
     
-    var pubkey: String {
+    var pubkey: Pubkey {
         dms.pubkey
     }
     
@@ -23,7 +23,7 @@ struct DMChatView: View, KeyboardReadable {
                 LazyVStack(alignment: .leading) {
                     ForEach(Array(zip(dms.events, dms.events.indices)), id: \.0.id) { (ev, ind) in
                         DMView(event: dms.events[ind], damus_state: damus_state)
-                            .contextMenu{MenuItems(event: ev, keypair: damus_state.keypair, target_pubkey: ev.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads)}
+                            .contextMenu{MenuItems(event: ev, keypair: damus_state.keypair, target_pubkey: ev.pubkey, bookmarks: damus_state.bookmarks, muted_threads: damus_state.muted_threads, settings: damus_state.settings)}
                     }
                     EndBlock(height: 1)
                 }
@@ -60,13 +60,11 @@ struct DMChatView: View, KeyboardReadable {
     }
 
     var Header: some View {
-        let profile = damus_state.profiles.lookup(id: pubkey)
-        let profile_page = ProfileView(damus_state: damus_state, pubkey: pubkey)
-        return NavigationLink(destination: profile_page) {
+        return NavigationLink(value: Route.ProfileByKey(pubkey: pubkey)) {
             HStack {
                 ProfilePicView(pubkey: pubkey, size: 24, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
 
-                ProfileName(pubkey: pubkey, profile: profile, damus: damus_state)
+                ProfileName(pubkey: pubkey, damus: damus_state)
             }
         }
         .buttonStyle(PlainButtonStyle())
@@ -129,12 +127,13 @@ struct DMChatView: View, KeyboardReadable {
     }
 
     func send_message() {
-        let tags = [["p", pubkey]]
+        let tags = [["p", pubkey.hex()]]
         let post_blocks = parse_post_blocks(content: dms.draft)
-        let post_tags = make_post_tags(post_blocks: post_blocks, tags: tags, silent_mentions: true)
-        let content = render_blocks(blocks: post_tags.blocks)
-        
-        guard let dm = create_dm(content, to_pk: pubkey, tags: post_tags.tags, keypair: damus_state.keypair) else {
+        let content = post_blocks
+            .map(\.asString)
+            .joined(separator: "")
+
+        guard let dm = create_dm(content, to_pk: pubkey, tags: tags, keypair: damus_state.keypair) else {
             print("error creating dm")
             return
         }
@@ -179,11 +178,11 @@ struct DMChatView: View, KeyboardReadable {
 
 struct DMChatView_Previews: PreviewProvider {
     static var previews: some View {
-        let ev = NostrEvent(content: "hi", pubkey: "pubkey", kind: 1, tags: [])
+        let ev = NostrEvent(content: "hi", keypair: test_keypair, kind: 1, tags: [])!
 
-        let model = DirectMessageModel(events: [ev], our_pubkey: "pubkey", pubkey: "the_pk")
+        let model = DirectMessageModel(events: [ev], our_pubkey: test_pubkey, pubkey: test_pubkey)
 
-        DMChatView(damus_state: test_damus_state(), dms: model)
+        DMChatView(damus_state: test_damus_state, dms: model)
     }
 }
 
@@ -192,7 +191,7 @@ enum EncEncoding {
     case bech32
 }
 
-func encrypt_message(message: String, privkey: String, to_pk: String, encoding: EncEncoding = .base64) -> String? {
+func encrypt_message(message: String, privkey: Privkey, to_pk: Pubkey, encoding: EncEncoding = .base64) -> String? {
     let iv = random_bytes(count: 16).bytes
     guard let shared_sec = get_shared_secret(privkey: privkey, pubkey: to_pk) else {
         return nil
@@ -211,25 +210,20 @@ func encrypt_message(message: String, privkey: String, to_pk: String, encoding: 
     
 }
 
-func create_encrypted_event(_ message: String, to_pk: String, tags: [[String]], keypair: FullKeypair, created_at: Int64, kind: Int) -> NostrEvent? {
-    
+func create_encrypted_event(_ message: String, to_pk: Pubkey, tags: [[String]], keypair: FullKeypair, created_at: UInt32, kind: UInt32) -> NostrEvent? {
     let privkey = keypair.privkey
     
     guard let enc_content = encrypt_message(message: message, privkey: privkey, to_pk: to_pk) else {
         return nil
     }
     
-    let ev = NostrEvent(content: enc_content, pubkey: keypair.pubkey, kind: kind, tags: tags, createdAt: created_at)
-    
-    ev.calculate_id()
-    ev.sign(privkey: privkey)
-    return ev
+    return NostrEvent(content: enc_content, keypair: keypair.to_keypair(), kind: kind, tags: tags, createdAt: created_at)
 }
 
-func create_dm(_ message: String, to_pk: String, tags: [[String]], keypair: Keypair, created_at: Int64? = nil) -> NostrEvent?
+func create_dm(_ message: String, to_pk: Pubkey, tags: [[String]], keypair: Keypair, created_at: UInt32? = nil) -> NostrEvent?
 {
-    let created = created_at ?? Int64(Date().timeIntervalSince1970)
-    
+    let created = created_at ?? UInt32(Date().timeIntervalSince1970)
+
     guard let keypair = keypair.to_full() else {
         return nil
     }

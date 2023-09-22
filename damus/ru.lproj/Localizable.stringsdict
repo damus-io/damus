@@ -2,24 +2,24 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>collapsed_event_view_other_notes</key>
+	<key>followed_by_three_and_others</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@NOTES@</string>
-		<key>NOTES</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>... %d другая заметка ...</string>
+			<string>Подписаны %2$@, %3$@ и %1$d другим</string>
 			<key>few</key>
-			<string>... %d other notes ...</string>
+			<string>Подписаны %2$@, %3$@ и %1$d others</string>
 			<key>many</key>
-			<string>... %d other notes ...</string>
+			<string>Подписаны %2$@, %3$@ и %1$d others</string>
 			<key>other</key>
-			<string>... %d другие заметки ...</string>
+			<string>Подписаны %2$@, %3$@ и %1$d другим</string>
 		</dict>
 	</dict>
 	<key>followers_count</key>
@@ -73,16 +73,16 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ и %1$d отреагировали на пост, в котором Вы были упомянуты</string>
+			<string>%2$@ и %1$d отреагировали на заметку, в котором Вы были упомянуты</string>
 			<key>few</key>
-			<string>%2$@ и еще %1$d пользователя отреагировали на пост, в котором Вы были упомянуты</string>
+			<string>%2$@ и еще %1$d пользователя отреагировали на заметку, в котором Вы были упомянуты</string>
 			<key>many</key>
-			<string>%2$@ и еще  %1$d пользователей отреагировали на пост, в котором Вы были упомянуты</string>
+			<string>%2$@ и еще  %1$d пользователей отреагировали на заметку, в котором Вы были упомянуты</string>
 			<key>other</key>
-			<string>%2$@ и еще %1$d пользователь отреагировали на пост, в котором Вы были упомянуты</string>
+			<string>%2$@ и еще %1$d пользователь отреагировали на заметку, в котором Вы были упомянуты</string>
 		</dict>
 	</dict>
-	<key>reacted_your_post_3</key>
+	<key>reacted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REACTED@</string>
@@ -93,13 +93,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ и %1$d отреагировали на Ваш пост</string>
+			<string>%2$@ и %1$d отреагировали на Вашу заметку</string>
 			<key>few</key>
-			<string>%2$@ и еще %1$d пользователя отреагировали на Ваш пост</string>
+			<string>%2$@ и еще %1$d пользователя отреагировали на Вашу заметку</string>
 			<key>many</key>
-			<string>%2$@ и еще %1$d пользователей отреагировали на Ваш пост</string>
+			<string>%2$@ и еще %1$d пользователей отреагировали на Вашу заметку</string>
 			<key>other</key>
-			<string>%2$@ и еще %1$d пользователь отреагировали на Ваш пост</string>
+			<string>%2$@ и еще %1$d пользователь отреагировали на Вашу заметку</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -202,7 +202,7 @@
 			<string>%2$@ и еще %1$d пользователь сделали репост заметки, в которой Вы были упомянуты</string>
 		</dict>
 	</dict>
-	<key>reposted_your_post_3</key>
+	<key>reposted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REPOSTED@</string>
@@ -213,13 +213,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ и %1$d сделали репост Вашего поста</string>
+			<string>%2$@ и %1$d сделали репост Вашей заметки</string>
 			<key>few</key>
-			<string>%2$@ и еще %1$d пользователя сделали репост Вашего поста</string>
+			<string>%2$@ и еще %1$d пользователя сделали репост Вашей заметки</string>
 			<key>many</key>
 			<string>%2$@ и еще %1$d пользователей сделали репост Вашей заметки</string>
 			<key>other</key>
-			<string>%2$@ и еще %1$d пользователь сделали репост Вашего поста</string>
+			<string>%2$@ и еще %1$d пользователь сделали репост Вашей заметки</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -260,6 +260,26 @@
 			<string>Репостов</string>
 			<key>other</key>
 			<string>Репосты</string>
+		</dict>
+	</dict>
+	<key>sats</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@SATS@</string>
+		<key>SATS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>сат</string>
+			<key>few</key>
+			<string>сата</string>
+			<key>many</key>
+			<string>сат</string>
+			<key>other</key>
+			<string>сат</string>
 		</dict>
 	</dict>
 	<key>sats_count</key>
@@ -313,13 +333,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>Вы получили %2$@ сат от %3$@: "%4$@"</string>
+			<string>Вы получили %2$@ сат от %3$@: &quot;%4$@&quot;</string>
 			<key>few</key>
-			<string>Вы получили %2$@ сат от %3$@: "%4$@"</string>
+			<string>Вы получили %2$@ сат от %3$@: &quot;%4$@&quot;</string>
 			<key>many</key>
-			<string>Вы получили %2$@ сат от %3$@: "%4$@"</string>
+			<string>Вы получили %2$@ сат от %3$@: &quot;%4$@&quot;</string>
 			<key>other</key>
-			<string>Вы получили %2$@ сат от %3$@: "%4$@"</string>
+			<string>Вы получили %2$@ сат от %3$@: &quot;%4$@&quot;</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -333,16 +353,16 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ и %1$d запнули пост, в котором Вы были упомянуты</string>
+			<string>%2$@ и %1$d запнули заметку, в котором Вы были упомянуты</string>
 			<key>few</key>
-			<string>%2$@ и еще %1$d пользователя запнули пост, в котором Вы были упомянуты</string>
+			<string>%2$@ и еще %1$d пользователя запнули заметку, в котором Вы были упомянуты</string>
 			<key>many</key>
-			<string>%2$@ и еще %1$d пользователей запнули пост, в котором Вы были упомянуты</string>
+			<string>%2$@ и еще %1$d пользователей запнули заметку, в котором Вы были упомянуты</string>
 			<key>other</key>
-			<string>%2$@ и еще %1$d пользователь запнули пост, в котором Вы были упомянуты</string>
+			<string>%2$@ и еще %1$d пользователь запнули заметку, в котором Вы были упомянуты</string>
 		</dict>
 	</dict>
-	<key>zapped_your_post_3</key>
+	<key>zapped_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@ZAPPED@</string>
@@ -353,13 +373,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ и %1$d запнули Ваш пост</string>
+			<string>%2$@ и %1$d запнули Вашу заметку</string>
 			<key>few</key>
-			<string>%2$@ и еще %1$d пользователя запнули Ваш пост</string>
+			<string>%2$@ и еще %1$d пользователя запнули Вашу заметку</string>
 			<key>many</key>
-			<string>%2$@ и еще %1$d пользователей запнули Ваш пост</string>
+			<string>%2$@ и еще %1$d пользователей запнули Вашу заметку</string>
 			<key>other</key>
-			<string>%2$@ и еще %1$d пользователь запнули Ваш пост</string>
+			<string>%2$@ и еще %1$d пользователь запнули Вашу заметку</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -373,13 +393,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>one</key>
-			<string>%2$@ и %1$d запнули Ваш профиль</string>
+			<string>%2$@ и %1$d запнули Вашу заметку</string>
 			<key>few</key>
-			<string>%2$@ и еще %1$d пользователя запнули Ваш профиль</string>
+			<string>%2$@ и еще %1$d пользователя запнули Вашу заметку</string>
 			<key>many</key>
-			<string>%2$@ и еще %1$d пользователей запнули Ваш профиль</string>
+			<string>%2$@ и еще %1$d пользователей запнули Вашу заметку</string>
 			<key>other</key>
-			<string>%2$@ и еще %1$d пользователь запнули Ваш профиль</string>
+			<string>%2$@ и еще %1$d пользователь запнули Вашу заметку</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>

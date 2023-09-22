@@ -55,8 +55,8 @@ enum CancelSendErr {
 
 class PostBox {
     let pool: RelayPool
-    var events: [String: PostedEvent]
-    
+    var events: [NoteId: PostedEvent]
+
     init(pool: RelayPool) {
         self.pool = pool
         self.events = [:]
@@ -64,7 +64,7 @@ class PostBox {
     }
     
     // only works reliably on delay-sent events
-    func cancel_send(evid: String) -> CancelSendErr? {
+    func cancel_send(evid: NoteId) -> CancelSendErr? {
         guard let ev = events[evid] else {
             return .nothing_to_cancel
         }
@@ -114,7 +114,7 @@ class PostBox {
     }
     
     @discardableResult
-    func remove_relayer(relay_id: String, event_id: String) -> Bool {
+    func remove_relayer(relay_id: String, event_id: NoteId) -> Bool {
         guard let ev = self.events[event_id] else {
             return false
         }
@@ -150,7 +150,7 @@ class PostBox {
             relayer.attempts += 1
             relayer.last_attempt = Int64(Date().timeIntervalSince1970)
             relayer.retry_after *= 1.5
-            if let relay = pool.get_relay(relayer.relay) {
+            if pool.get_relay(relayer.relay) != nil {
                 print("flushing event \(event.event.id) to \(relayer.relay)")
             } else {
                 print("could not find relay when flushing: \(relayer.relay)")

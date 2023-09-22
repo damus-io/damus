@@ -20,7 +20,7 @@ struct KeySettingsView: View {
     @Environment(\.dismiss) var dismiss
     
     init(keypair: Keypair) {
-        _privkey = State(initialValue: keypair.privkey_bech32 ?? "")
+        _privkey = State(initialValue: keypair.privkey?.nsec ?? "")
         self.keypair = keypair
     }
     
@@ -40,7 +40,7 @@ struct KeySettingsView: View {
     func CopyButton(is_pk: Bool) -> some View {
         return Button(action: {
             let copyKey = {
-                UIPasteboard.general.string = is_pk ? self.keypair.pubkey_bech32 : self.privkey
+                UIPasteboard.general.string = is_pk ? self.keypair.pubkey.npub : self.privkey
                 self.privkey_copied = !is_pk
                 self.pubkey_copied = is_pk
     
@@ -74,14 +74,14 @@ struct KeySettingsView: View {
         Form {
             Section(NSLocalizedString("Public Account ID", comment: "Section title for the user's public account ID.")) {
                 HStack {
-                    Text(keypair.pubkey_bech32)
-                    
+                    Text(keypair.pubkey.npub)
+
                     CopyButton(is_pk: true)
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 5))
             }
             
-            if let sec = keypair.privkey_bech32 {
+            if let sec = keypair.privkey?.nsec {
                 Section(NSLocalizedString("Secret Account Login Key", comment: "Section title for user's secret account login key.")) {
                     HStack {
                         if show_privkey == false || !has_authenticated_locally {
@@ -110,7 +110,7 @@ struct KeySettingsView: View {
 struct KeySettingsView_Previews: PreviewProvider {
     static var previews: some View {
         let kp = generate_new_keypair()
-        KeySettingsView(keypair: kp)
+        KeySettingsView(keypair: kp.to_keypair())
     }
 }
 

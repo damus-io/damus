@@ -21,7 +21,7 @@ struct DamusState {
     let lnurls: LNUrls
     let settings: UserSettingsStore
     let relay_filters: RelayFilters
-    let relay_metadata: RelayMetadatas
+    let relay_model_cache: RelayModelCache
     let drafts: Drafts
     let events: EventCache
     let bookmarks: BookmarksManager
@@ -30,7 +30,11 @@ struct DamusState {
     let replies: ReplyCounter
     let muted_threads: MutedThreadsManager
     let wallet: WalletModel
-    
+    let nav: NavigationCoordinator
+    let music: MusicController?
+    let video: VideoController
+    let ndb: Ndb
+
     @discardableResult
     func add_zap(zap: Zapping) -> Bool {
         // store generic zap mapping
@@ -40,15 +44,15 @@ struct DamusState {
         // thread zaps
         if let ev = zap.event, !settings.nozaps, zap.is_in_thread {
             // [nozaps]: thread zaps are only available outside of the app store
-            replies.count_replies(ev)
-            events.add_replies(ev: ev)
+            replies.count_replies(ev, keypair: self.keypair)
+            events.add_replies(ev: ev, keypair: self.keypair)
         }
 
         // associate with events as well
         return stored
     }
     
-    var pubkey: String {
+    var pubkey: Pubkey {
         return keypair.pubkey
     }
     
@@ -57,5 +61,36 @@ struct DamusState {
     }
     
     static var empty: DamusState {
-        return DamusState.init(pool: RelayPool(), keypair: Keypair(pubkey: "", privkey: ""), likes: EventCounter(our_pubkey: ""), boosts: EventCounter(our_pubkey: ""), contacts: Contacts(our_pubkey: ""), profiles: Profiles(), dms: DirectMessagesModel(our_pubkey: ""), previews: PreviewCache(), zaps: Zaps(our_pubkey: ""), lnurls: LNUrls(), settings: UserSettingsStore(), relay_filters: RelayFilters(our_pubkey: ""), relay_metadata: RelayMetadatas(), drafts: Drafts(), events: EventCache(), bookmarks: BookmarksManager(pubkey: ""), postbox: PostBox(pool: RelayPool()), bootstrap_relays: [], replies: ReplyCounter(our_pubkey: ""), muted_threads: MutedThreadsManager(keypair: Keypair(pubkey: "", privkey: nil)), wallet: WalletModel(settings: UserSettingsStore())) }
+        let empty_pub: Pubkey = .empty
+        let empty_sec: Privkey = .empty
+        let kp = Keypair(pubkey: empty_pub, privkey: nil)
+        
+        return DamusState.init(
+            pool: RelayPool(ndb: .empty),
+            keypair: Keypair(pubkey: empty_pub, privkey: empty_sec),
+            likes: EventCounter(our_pubkey: empty_pub),
+            boosts: EventCounter(our_pubkey: empty_pub),
+            contacts: Contacts(our_pubkey: empty_pub),
+            profiles: Profiles(ndb: .empty),
+            dms: DirectMessagesModel(our_pubkey: empty_pub),
+            previews: PreviewCache(),
+            zaps: Zaps(our_pubkey: empty_pub),
+            lnurls: LNUrls(),
+            settings: UserSettingsStore(),
+            relay_filters: RelayFilters(our_pubkey: empty_pub),
+            relay_model_cache: RelayModelCache(),
+            drafts: Drafts(),
+            events: EventCache(ndb: .empty),
+            bookmarks: BookmarksManager(pubkey: empty_pub),
+            postbox: PostBox(pool: RelayPool(ndb: .empty)),
+            bootstrap_relays: [],
+            replies: ReplyCounter(our_pubkey: empty_pub),
+            muted_threads: MutedThreadsManager(keypair: kp),
+            wallet: WalletModel(settings: UserSettingsStore()),
+            nav: NavigationCoordinator(),
+            music: nil,
+            video: VideoController(),
+            ndb: .empty
+        )
+    }
 }

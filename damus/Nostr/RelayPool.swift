@@ -14,13 +14,14 @@ struct RelayHandler {
 }
 
 struct QueuedRequest {
-    let req: NostrRequest
+    let req: NostrRequestType
     let relay: String
+    let skip_ephemeral: Bool
 }
 
 struct SeenEvent: Hashable {
     let relay_id: String
-    let evid: String
+    let evid: NoteId
 }
 
 class RelayPool {
@@ -29,16 +30,25 @@ class RelayPool {
     var request_queue: [QueuedRequest] = []
     var seen: Set<SeenEvent> = Set()
     var counts: [String: UInt64] = [:]
-    
+    var ndb: Ndb
+
     private let network_monitor = NWPathMonitor()
     private let network_monitor_queue = DispatchQueue(label: "io.damus.network_monitor")
     private var last_network_status: NWPath.Status = .unsatisfied
 
-    init() {
+    init(ndb: Ndb) {
+        self.ndb = ndb
+
         network_monitor.pathUpdateHandler = { [weak self] path in
             if (path.status == .satisfied || path.status == .requiresConnection) && self?.last_network_status != path.status {
                 DispatchQueue.main.async {
                     self?.connect_to_disconnected()
+                }
+            }
+            
+            if let self, path.status != self.last_network_status {
+                for relay in self.relays {
+                    relay.connection.log?.add("Network state: \(path.status)")
                 }
             }
             
@@ -88,6 +98,7 @@ class RelayPool {
         
         for relay in relays {
             if relay.id == relay_id {
+                relay.connection.disablePermanently()
                 relays.remove(at: i)
                 break
             }
@@ -102,11 +113,24 @@ class RelayPool {
         if get_relay(relay_id) != nil {
             throw RelayError.RelayAlreadyExists
         }
-        let conn = RelayConnection(url: url) { event in
+        let conn = RelayConnection(url: url, handleEvent: { event in
             self.handle_event(relay_id: relay_id, event: event)
-        }
+        }, processEvent: { wsev in
+            guard case .message(let msg) = wsev,
+                  case .string(let str) = msg
+            else { return }
+
+            self.ndb.process_event(str)
+        })
         let relay = Relay(descriptor: desc, connection: conn)
         self.relays.append(relay)
+    }
+    
+    func setLog(_ log: RelayLog, for relay_id: String) {
+        // add the current network state to the log
+        log.add("Network state: \(network_monitor.currentPath.status)")
+        
+        get_relay(relay_id)?.connection.log = log
     }
     
     /// This is used to retry dead connections
@@ -178,18 +202,18 @@ class RelayPool {
         return c
     }
     
-    func queue_req(r: NostrRequest, relay: String) {
+    func queue_req(r: NostrRequestType, relay: String, skip_ephemeral: Bool) {
         let count = count_queued(relay: relay)
         guard count <= 10 else {
             print("can't queue, too many queued events for \(relay)")
             return
         }
         
-        print("queueing request: \(r) for \(relay)")
-        request_queue.append(QueuedRequest(req: r, relay: relay))
+        print("queueing request for \(relay)")
+        request_queue.append(QueuedRequest(req: r, relay: relay, skip_ephemeral: skip_ephemeral))
     }
     
-    func send(_ req: NostrRequest, to: [String]? = nil, skip_ephemeral: Bool = true) {
+    func send_raw(_ req: NostrRequestType, to: [String]? = nil, skip_ephemeral: Bool = true) {
         let relays = to.map{ get_relays($0) } ?? self.relays
 
         for relay in relays {
@@ -206,12 +230,16 @@ class RelayPool {
             }
             
             guard relay.connection.isConnected else {
-                queue_req(r: req, relay: relay.id)
+                queue_req(r: req, relay: relay.id, skip_ephemeral: skip_ephemeral)
                 continue
             }
             
             relay.connection.send(req)
         }
+    }
+    
+    func send(_ req: NostrRequest, to: [String]? = nil, skip_ephemeral: Bool = true) {
+        send_raw(.typical(req), to: to, skip_ephemeral: skip_ephemeral)
     }
     
     func get_relays(_ ids: [String]) -> [Relay] {
@@ -231,7 +259,7 @@ class RelayPool {
             }
             
             print("running queueing request: \(req.req) for \(relay_id)")
-            self.send(req.req, to: [relay_id])
+            self.send_raw(req.req, to: [relay_id], skip_ephemeral: false)
         }
     }
     

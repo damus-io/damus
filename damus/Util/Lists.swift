@@ -7,85 +7,64 @@
 
 import Foundation
 
-func create_or_update_mutelist(keypair: FullKeypair, mprev: NostrEvent?, to_add: String) -> NostrEvent? {
+func create_or_update_mutelist(keypair: FullKeypair, mprev: NostrEvent?, to_add: RefId) -> NostrEvent? {
     return create_or_update_list_event(keypair: keypair, mprev: mprev, to_add: to_add, list_name: "mute", list_type: "p")
 }
 
-func remove_from_mutelist(keypair: FullKeypair, prev: NostrEvent, to_remove: String) -> NostrEvent? {
-    return remove_from_list_event(keypair: keypair, prev: prev, to_remove: to_remove, tag_type: "p")
+func remove_from_mutelist(keypair: FullKeypair, prev: NostrEvent, to_remove: RefId) -> NostrEvent? {
+    return remove_from_list_event(keypair: keypair, prev: prev, to_remove: to_remove)
 }
 
-func create_or_update_list_event(keypair: FullKeypair, mprev: NostrEvent?, to_add: String, list_name: String, list_type: String) -> NostrEvent? {
-    let pubkey = keypair.pubkey
-    
-    if let prev = mprev {
-        if let okprev = ensure_list_name(list: prev, name: list_name), prev.pubkey == keypair.pubkey {
-            return add_to_list_event(keypair: keypair, prev: okprev, to_add: to_add, tag_type: list_type)
-        }
+func create_or_update_list_event(keypair: FullKeypair, mprev: NostrEvent?, to_add: RefId, list_name: String, list_type: String) -> NostrEvent? {
+    if let prev = mprev,
+       prev.pubkey == keypair.pubkey,
+       matches_list_name(tags: prev.tags, name: list_name)
+    {
+        return add_to_list_event(keypair: keypair, prev: prev, to_add: to_add)
     }
     
-    let tags = [["d", list_name], [list_type, to_add]]
-    let ev = NostrEvent(content: "", pubkey: pubkey, kind: 30000, tags: tags)
-    
-    ev.tags = tags
-    ev.id = calculate_event_id(ev: ev)
-    ev.sig = sign_event(privkey: keypair.privkey, ev: ev)
-    
-    return ev
+    let tags = [["d", list_name], [list_type, to_add.description]]
+    return NostrEvent(content: "", keypair: keypair.to_keypair(), kind: 30000, tags: tags)
 }
 
-func remove_from_list_event(keypair: FullKeypair, prev: NostrEvent, to_remove: String, tag_type: String) -> NostrEvent? {
-    var exists = false
-    for tag in prev.tags {
-        if tag.count >= 2 && tag[0] == tag_type && tag[1] == to_remove {
-            exists = true
+func remove_from_list_event(keypair: FullKeypair, prev: NostrEvent, to_remove: RefId) -> NostrEvent? {
+    var removed = false
+
+    let tags = prev.tags.reduce(into: [[String]](), { acc, tag in
+        if let ref_id = RefId.from_tag(tag: tag), ref_id == to_remove {
+            removed = true
+            return
         }
-    }
-    
-    // make sure we actually have the pubkey to remove
-    guard exists else {
+        acc.append(tag.strings())
+    })
+
+    guard removed else {
         return nil
     }
-    
-    let new_tags = prev.tags.filter { tag in
-        !(tag.count >= 2 && tag[0] == tag_type && tag[1] == to_remove)
-    }
-        
-    let ev = NostrEvent(content: prev.content, pubkey: keypair.pubkey, kind: 30000, tags: new_tags)
-    ev.id = calculate_event_id(ev: ev)
-    ev.sig = sign_event(privkey: keypair.privkey, ev: ev)
-    
-    return ev
+
+    return NostrEvent(content: prev.content, keypair: keypair.to_keypair(), kind: 30000, tags: tags)
 }
 
-func add_to_list_event(keypair: FullKeypair, prev: NostrEvent, to_add: String, tag_type: String) -> NostrEvent? {
+func add_to_list_event(keypair: FullKeypair, prev: NostrEvent, to_add: RefId) -> NostrEvent? {
     for tag in prev.tags {
         // we are already muting this user
-        if tag.count >= 2 && tag[0] == tag_type && tag[1] == to_add {
+        if let ref = RefId.from_tag(tag: tag), to_add == ref {
             return nil
         }
     }
-    
-    let new = NostrEvent(content: prev.content, pubkey: keypair.pubkey, kind: 30000, tags: prev.tags)
-    new.tags.append([tag_type, to_add])
-    new.id = calculate_event_id(ev: new)
-    new.sig = sign_event(privkey: keypair.privkey, ev: new)
-    
-    return new
+
+    var tags = prev.tags.strings()
+    tags.append(to_add.tag)
+
+    return NostrEvent(content: prev.content, keypair: keypair.to_keypair(), kind: 30000, tags: tags)
 }
 
-func ensure_list_name(list: NostrEvent, name: String) -> NostrEvent? {
-    for tag in list.tags {
-        if tag.count >= 2 && tag[0] == "d" {
-            if tag[1] != name {
-                return nil
-            } else {
-                return list
-            }
+func matches_list_name(tags: Tags, name: String) -> Bool {
+    for tag in tags {
+        if tag.count >= 2 && tag[0].matches_char("d") {
+            return tag[1].matches_str(name)
         }
     }
-    
-    list.tags.insert(["d", name], at: 0)
-    
-    return list
+
+    return false
 }

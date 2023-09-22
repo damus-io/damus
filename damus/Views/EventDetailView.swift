@@ -16,12 +16,12 @@ struct EventDetailView: View {
 
 struct EventDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        let _ = test_damus_state()
+        let _ = test_damus_state
         EventDetailView()
     }
 }
 
-func scroll_to_event(scroller: ScrollViewProxy, id: String, delay: Double, animate: Bool, anchor: UnitPoint = .bottom) {
+func scroll_to_event<ID: Hashable>(scroller: ScrollViewProxy, id: ID, delay: Double, animate: Bool, anchor: UnitPoint = .bottom) {
     DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
         if animate {
             withAnimation {

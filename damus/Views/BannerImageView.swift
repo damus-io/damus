@@ -8,6 +8,33 @@
 import SwiftUI
 import Kingfisher
 
+struct EditBannerImageView: View {
+    
+    var damus_state: DamusState
+    @ObservedObject var viewModel: ImageUploadingObserver
+    let callback: (URL?) -> Void
+    let defaultImage = UIImage(named: "profile-banner") ?? UIImage()
+    
+    @State var banner_image: URL? = nil
+
+    var body: some View {
+        ZStack {
+            Color(uiColor: .systemBackground)
+            KFAnimatedImage(get_banner_url(banner: banner_image?.absoluteString, pubkey: damus_state.pubkey, profiles: damus_state.profiles))
+                .imageContext(.banner, disable_animation: damus_state.settings.disable_animation)
+                .configure { view in
+                    view.framePreloadCount = 3
+                }
+                .placeholder { _ in
+                    Color(uiColor: .secondarySystemBackground)
+                }
+                .onFailureImage(defaultImage)
+            
+            EditPictureControl(uploader: damus_state.settings.default_media_uploader, pubkey: damus_state.pubkey, image_url: $banner_image, uploadObserver: viewModel, callback: callback)
+        }
+    }
+}
+
 struct InnerBannerImageView: View {
     let disable_animation: Bool
     let url: URL?
@@ -36,12 +63,12 @@ struct InnerBannerImageView: View {
 
 struct BannerImageView: View {
     let disable_animation: Bool
-    let pubkey: String
+    let pubkey: Pubkey
     let profiles: Profiles
     
     @State var banner: String?
     
-    init (pubkey: String, profiles: Profiles, disable_animation: Bool, banner: String? = nil) {
+    init(pubkey: Pubkey, profiles: Profiles, disable_animation: Bool, banner: String? = nil) {
         self.pubkey = pubkey
         self.profiles = profiles
         self._banner = State(initialValue: banner)
@@ -50,22 +77,22 @@ struct BannerImageView: View {
     
     var body: some View {
         InnerBannerImageView(disable_animation: disable_animation, url: get_banner_url(banner: banner, pubkey: pubkey, profiles: profiles))
-            .onReceive(handle_notify(.profile_updated)) { notif in
-                let updated = notif.object as! ProfileUpdate
-
+            .onReceive(handle_notify(.profile_updated)) { updated in
                 guard updated.pubkey == self.pubkey else {
                     return
                 }
-                
-                if let bannerImage = updated.profile.banner {
+
+                let profile_txn = profiles.lookup(id: updated.pubkey)
+                let profile = profile_txn.unsafeUnownedValue
+                if let bannerImage = profile?.banner, bannerImage != self.banner {
                     self.banner = bannerImage
                 }
             }
     }
 }
 
-func get_banner_url(banner: String?, pubkey: String, profiles: Profiles) -> URL? {
-    let bannerUrlString = banner ?? profiles.lookup(id: pubkey)?.banner ?? ""
+func get_banner_url(banner: String?, pubkey: Pubkey, profiles: Profiles) -> URL? {
+    let bannerUrlString = banner ?? profiles.lookup(id: pubkey).map({ p in p?.banner }).value ?? ""
     if let url = URL(string: bannerUrlString) {
         return url
     }
@@ -73,12 +100,10 @@ func get_banner_url(banner: String?, pubkey: String, profiles: Profiles) -> URL?
 }
 
 struct BannerImageView_Previews: PreviewProvider {
-    static let pubkey = "ca48854ac6555fed8e439ebb4fa2d928410e0eef13fa41164ec45aaaa132d846"
-    
     static var previews: some View {
         BannerImageView(
-            pubkey: pubkey,
-            profiles: make_preview_profiles(pubkey),
+            pubkey: test_pubkey,
+            profiles: make_preview_profiles(test_pubkey),
             disable_animation: false
         )
     }

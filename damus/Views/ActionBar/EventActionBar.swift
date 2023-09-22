@@ -28,7 +28,7 @@ struct EventActionBar: View {
     }
     
     var lnurl: String? {
-        damus_state.profiles.lookup(id: event.pubkey)?.lnurl
+        damus_state.profiles.lookup_with_timestamp(event.pubkey).map({ pr in pr?.lnurl }).value
     }
     
     var show_like: Bool {
@@ -44,7 +44,7 @@ struct EventActionBar: View {
             if damus_state.keypair.privkey != nil {
                 HStack(spacing: 4) {
                     EventActionButton(img: "bubble2", col: bar.replied ? DamusColors.purple : Color.gray) {
-                        notify(.compose, PostAction.replying_to(event))
+                        notify(.compose(.replying_to(event)))
                     }
                     .accessibilityLabel(NSLocalizedString("Reply", comment: "Accessibility label for reply button"))
                     Text(verbatim: "\(bar.replies > 0 ? "\(bar.replies)" : "")")
@@ -56,11 +56,7 @@ struct EventActionBar: View {
             HStack(spacing: 4) {
                 
                 EventActionButton(img: "repost", col: bar.boosted ? Color.green : nil) {
-                    if bar.boosted {
-                        notify(.delete, bar.our_boost)
-                    } else {
-                        self.show_repost_action = true
-                    }
+                    self.show_repost_action = true
                 }
                 .accessibilityLabel(NSLocalizedString("Reposts", comment: "Accessibility label for boosts button"))
                 Text(verbatim: "\(bar.boosts > 0 ? "\(bar.boosts)" : "")")
@@ -72,11 +68,11 @@ struct EventActionBar: View {
                 Spacer()
 
                 HStack(spacing: 4) {
-                    LikeButton(liked: bar.liked) {
+                    LikeButton(damus_state: damus_state, liked: bar.liked, liked_emoji: bar.our_like != nil ? to_reaction_emoji(ev: bar.our_like!) : nil) { emoji in
                         if bar.liked {
-                            notify(.delete, bar.our_like)
+                            //notify(.delete, bar.our_like)
                         } else {
-                            send_like()
+                            send_like(emoji: emoji)
                         }
                     }
 
@@ -110,11 +106,7 @@ struct EventActionBar: View {
             }
         }
         .sheet(isPresented: $show_share_sheet, onDismiss: { self.show_share_sheet = false }) {
-            if let note_id = bech32_note_id(event.id) {
-                if let url = URL(string: "https://damus.io/" + note_id) {
-                    ShareSheet(activityItems: [url])
-                }
-            }
+            ShareSheet(activityItems: [URL(string: "https://damus.io/" + event.id.bech32)!])
         }
         .sheet(isPresented: $show_repost_action, onDismiss: { self.show_repost_action = false }) {
         
@@ -126,13 +118,11 @@ struct EventActionBar: View {
                 RepostAction(damus_state: self.damus_state, event: event)
             }
         }
-        .onReceive(handle_notify(.update_stats)) { n in
-            let target = n.object as! String
+        .onReceive(handle_notify(.update_stats)) { target in
             guard target == self.event.id else { return }
             self.bar.update(damus: self.damus_state, evid: target)
         }
-        .onReceive(handle_notify(.liked)) { n in
-            let liked = n.object as! Counted
+        .onReceive(handle_notify(.liked)) { liked in
             if liked.id != event.id {
                 return
             }
@@ -143,13 +133,12 @@ struct EventActionBar: View {
         }
     }
     
-    func send_like() {
-        guard let privkey = damus_state.keypair.privkey else {
+    func send_like(emoji: String) {
+        guard let keypair = damus_state.keypair.to_full(),
+              let like_ev = make_like_event(keypair: keypair, liked: event, content: emoji) else {
             return
         }
-        
-        let like_ev = make_like_event(pubkey: damus_state.pubkey, privkey: privkey, liked: event)
-        
+
         self.bar.our_like = like_ev
 
         generator.impactOccurred()
@@ -160,41 +149,58 @@ struct EventActionBar: View {
 
 
 func EventActionButton(img: String, col: Color?, action: @escaping () -> ()) -> some View {
-    Button(action: action) {
-        Image(img)
-            .resizable()
-            .foregroundColor(col == nil ? Color.gray : col!)
-            .font(.footnote.weight(.medium))
-            .aspectRatio(contentMode: .fit)
-            .frame(width: 20, height: 20)
-    }
+    Image(img)
+        .resizable()
+        .foregroundColor(col == nil ? Color.gray : col!)
+        .font(.footnote.weight(.medium))
+        .aspectRatio(contentMode: .fit)
+        .frame(width: 20, height: 20)
+        .onTapGesture {
+            action()
+        }
 }
 
 struct LikeButton: View {
+    let damus_state: DamusState
     let liked: Bool
-    let action: () -> ()
+    let liked_emoji: String?
+    let action: (_ emoji: String) -> Void
+
+    // For reactions background
+    @State private var showReactionsBG = 0
+    @State private var showEmojis: [Int] = []
+    @State private var rotateThumb = -45
+
+    @State private var isReactionsVisible = false
 
     // Following four are Shaka animation properties
     let timer = Timer.publish(every: 0.10, on: .main, in: .common).autoconnect()
     @State private var shouldAnimate = false
     @State private var rotationAngle = 0.0
     @State private var amountOfAngleIncrease: Double = 0.0
-    
-    var body: some View {
 
-        Button(action: {
-            withAnimation(Animation.easeOut(duration: 0.15)) {
-                self.action()
-                shouldAnimate = true
-                amountOfAngleIncrease = 20.0
-            }
-        }) {
-            if liked {
-                LINEAR_GRADIENT
-                    .mask(Image("shaka.fill")
+    var emojis: [String] {
+        damus_state.settings.emoji_reactions
+    }
+    
+    @ViewBuilder
+    func buildMaskView(for emoji: String) -> some View {
+        if emoji == "🤙" {
+            LINEAR_GRADIENT
+                .mask(
+                    Image("shaka.fill")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                    )
+                )
+        } else {
+            Text(emoji)
+        }
+    }
+
+    var body: some View {
+        Group {
+            if let liked_emoji {
+                buildMaskView(for: liked_emoji)
                     .frame(width: 20, height: 20)
             } else {
                 Image("shaka")
@@ -207,18 +213,160 @@ struct LikeButton: View {
         .accessibilityLabel(NSLocalizedString("Like", comment: "Accessibility Label for Like button"))
         .rotationEffect(Angle(degrees: shouldAnimate ? rotationAngle : 0))
         .onReceive(self.timer) { _ in
-            // Shaka animation logic
-            rotationAngle = amountOfAngleIncrease
-            if amountOfAngleIncrease == 0 {
-                timer.upstream.connect().cancel()
-                return
+            shakaAnimationLogic()
+        }
+        .simultaneousGesture(longPressGesture())
+        .highPriorityGesture(TapGesture().onEnded {
+            guard !isReactionsVisible else { return }
+            withAnimation(Animation.easeOut(duration: 0.15)) {
+                self.action(damus_state.settings.default_emoji_reaction)
+                shouldAnimate = true
+                amountOfAngleIncrease = 20.0
             }
-            amountOfAngleIncrease = -amountOfAngleIncrease
-            if amountOfAngleIncrease < 0 {
-                amountOfAngleIncrease += 2.5
+        })
+        .overlay(reactionsOverlay())
+    }
+
+    func shakaAnimationLogic() {
+        rotationAngle = amountOfAngleIncrease
+        if amountOfAngleIncrease == 0 {
+            timer.upstream.connect().cancel()
+            return
+        }
+        amountOfAngleIncrease = -amountOfAngleIncrease
+        if amountOfAngleIncrease < 0 {
+            amountOfAngleIncrease += 2.5
+        } else {
+            amountOfAngleIncrease -= 2.5
+        }
+    }
+
+    func longPressGesture() -> some Gesture {
+        LongPressGesture(minimumDuration: 0.5).onEnded { _ in
+            reactionLongPressed()
+        }
+    }
+
+    func reactionsOverlay() -> some View {
+        Group {
+            if isReactionsVisible {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 20)
+                        .frame(width: calculateOverlayWidth(), height: 50)
+                        .foregroundColor(DamusColors.black)
+                        .scaleEffect(Double(showReactionsBG), anchor: .topTrailing)
+                        .animation(
+                            .interpolatingSpring(stiffness: 170, damping: 15).delay(0.05),
+                            value: showReactionsBG
+                        )
+                        .overlay(
+                            Rectangle()
+                                .foregroundColor(Color.white.opacity(0.2))
+                                .frame(width: calculateOverlayWidth(), height: 50)
+                                .clipShape(
+                                    RoundedRectangle(cornerRadius: 20)
+                                )
+                        )
+                        .overlay(reactions())
+                }
+                .offset(y: -40)
+                .onTapGesture {
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        isReactionsVisible = false
+                        showReactionsBG = 0
+                    }
+                    showEmojis = []
+                }
             } else {
-                amountOfAngleIncrease -= 2.5
+                EmptyView()
             }
+        }
+    }
+    
+    func calculateOverlayWidth() -> CGFloat {
+        let maxWidth: CGFloat = 250
+        let numberOfEmojis = emojis.count
+        let minimumWidth: CGFloat = 75
+        
+        if numberOfEmojis > 0 {
+            let emojiWidth: CGFloat = 25
+            let padding: CGFloat = 15
+            let buttonWidth: CGFloat = 18
+            let buttonPadding: CGFloat = 20
+            
+            let totalWidth = CGFloat(numberOfEmojis) * (emojiWidth + padding) + buttonWidth + buttonPadding
+            return min(maxWidth, max(minimumWidth, totalWidth))
+        } else {
+            return minimumWidth
+        }
+    }
+
+    func reactions() -> some View {
+        HStack {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 15) {
+                    ForEach(emojis, id: \.self) { emoji in
+                        if let index = emojis.firstIndex(of: emoji) {
+                            let scale = index < showEmojis.count ? showEmojis[index] : 0
+                            Text(emoji)
+                                .font(.system(size: 25))
+                                .scaleEffect(Double(scale))
+                                .onTapGesture {
+                                    emojiTapped(emoji)
+                                }
+                        }
+                    }
+                }
+                .padding(.leading, 10)
+            }
+            Button(action: {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    isReactionsVisible = false
+                    showReactionsBG = 0
+                }
+                showEmojis = []
+            }) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 18))
+                    .foregroundColor(.gray)
+            }
+            .padding(.trailing, 7.5)
+        }
+    }
+
+    // When reaction button is long pressed, it displays the multiple emojis overlay and displays the user's selected emojis with an animation
+    private func reactionLongPressed() {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        showEmojis = Array(repeating: 0, count: emojis.count) // Initialize the showEmojis array
+        
+        for (index, _) in emojis.enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1 * Double(index)) {
+                withAnimation(.interpolatingSpring(stiffness: 170, damping: 8)) {
+                    if index < showEmojis.count {
+                        showEmojis[index] = 1
+                    }
+                }
+            }
+        }
+        
+        isReactionsVisible = true
+        showReactionsBG = 1
+    }
+    
+    private func emojiTapped(_ emoji: String) {
+        print("Tapped emoji: \(emoji)")
+        
+        self.action(emoji)
+
+        withAnimation(.easeOut(duration: 0.2)) {
+            isReactionsVisible = false
+            showReactionsBG = 0
+        }
+        showEmojis = []
+        
+        withAnimation(Animation.easeOut(duration: 0.15)) {
+            shouldAnimate = true
+            amountOfAngleIncrease = 20.0
         }
     }
 }
@@ -226,17 +374,16 @@ struct LikeButton: View {
 
 struct EventActionBar_Previews: PreviewProvider {
     static var previews: some View {
-        let pk = "pubkey"
-        let ds = test_damus_state()
-        let ev = NostrEvent(content: "hi", pubkey: pk)
-        
+        let ds = test_damus_state
+        let ev = NostrEvent(content: "hi", keypair: test_keypair)!
+
         let bar = ActionBarModel.empty()
         let likedbar = ActionBarModel(likes: 10, boosts: 0, zaps: 0, zap_total: 0, replies: 0, our_like: nil, our_boost: nil, our_zap: nil, our_reply: nil)
-        let likedbar_ours = ActionBarModel(likes: 10, boosts: 0, zaps: 0, zap_total: 0, replies: 0, our_like: test_event, our_boost: nil, our_zap: nil, our_reply: nil)
-        let maxed_bar = ActionBarModel(likes: 999, boosts: 999, zaps: 999, zap_total: 99999999, replies: 999, our_like: test_event, our_boost: test_event, our_zap: nil, our_reply: nil)
-        let extra_max_bar = ActionBarModel(likes: 9999, boosts: 9999, zaps: 9999, zap_total: 99999999, replies: 9999, our_like: test_event, our_boost: test_event, our_zap: nil, our_reply: test_event)
-        let mega_max_bar = ActionBarModel(likes: 9999999, boosts: 99999, zaps: 9999, zap_total: 99999999, replies: 9999999,  our_like: test_event, our_boost: test_event, our_zap: .zap(test_zap), our_reply: test_event)
-        
+        let likedbar_ours = ActionBarModel(likes: 10, boosts: 0, zaps: 0, zap_total: 0, replies: 0, our_like: test_note, our_boost: nil, our_zap: nil, our_reply: nil)
+        let maxed_bar = ActionBarModel(likes: 999, boosts: 999, zaps: 999, zap_total: 99999999, replies: 999, our_like: test_note, our_boost: test_note, our_zap: nil, our_reply: nil)
+        let extra_max_bar = ActionBarModel(likes: 9999, boosts: 9999, zaps: 9999, zap_total: 99999999, replies: 9999, our_like: test_note, our_boost: test_note, our_zap: nil, our_reply: test_note)
+        let mega_max_bar = ActionBarModel(likes: 9999999, boosts: 99999, zaps: 9999, zap_total: 99999999, replies: 9999999,  our_like: test_note, our_boost: test_note, our_zap: .zap(test_zap), our_reply: test_note)
+
         VStack(spacing: 50) {
             EventActionBar(damus_state: ds, event: ev, bar: bar)
             

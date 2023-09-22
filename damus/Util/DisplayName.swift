@@ -7,22 +7,16 @@
 
 import Foundation
 
-
-struct BothNames {
-    let username: String
-    let display_name: String
-}
-
-enum DisplayName {
-    case both(BothNames)
+enum DisplayName: Equatable {
+    case both(username: String, displayName: String)
     case one(String)
     
-    var display_name: String {
+    var displayName: String {
         switch self {
         case .one(let one):
             return one
-        case .both(let b):
-            return b.display_name
+        case .both(username: _, displayName: let displayName):
+            return displayName
         }
     }
     
@@ -30,15 +24,15 @@ enum DisplayName {
         switch self {
         case .one(let one):
             return one
-        case .both(let b):
-            return b.username
+        case .both(username: let username, displayName: _):
+            return username
         }
     }
 }
 
 
-func parse_display_name(profile: Profile?, pubkey: String) -> DisplayName {
-    if pubkey == "anon" {
+func parse_display_name(profile: Profile?, pubkey: Pubkey) -> DisplayName {
+    if pubkey == ANON_PUBKEY {
         return .one(NSLocalizedString("Anonymous", comment: "Placeholder display name of anonymous user."))
     }
     
@@ -50,7 +44,7 @@ func parse_display_name(profile: Profile?, pubkey: String) -> DisplayName {
     let disp_name = profile.display_name?.isEmpty == false ? profile.display_name : nil
     
     if let name, let disp_name, name != disp_name {
-        return .both(BothNames(username: name, display_name: disp_name))
+        return .both(username: name, displayName: disp_name)
     }
     
     if let one = name ?? disp_name {
@@ -60,7 +54,6 @@ func parse_display_name(profile: Profile?, pubkey: String) -> DisplayName {
     return .one(abbrev_bech32_pubkey(pubkey: pubkey))
 }
 
-func abbrev_bech32_pubkey(pubkey: String) -> String {
-    let pk = bech32_nopre_pubkey(pubkey) ?? pubkey
-    return abbrev_pubkey(pk)
+func abbrev_bech32_pubkey(pubkey: Pubkey) -> String {
+    return abbrev_pubkey(String(pubkey.npub.dropFirst(4)))
 }

@@ -7,53 +7,36 @@
 
 import Foundation
 
-enum ReportType: String {
-    case explicit
-    case illegal
+enum ReportType: String, CustomStringConvertible, CaseIterable {
     case spam
+    case nudity
+    case profanity
+    case illegal
     case impersonation
+
+    var description: String {
+        switch self {
+        case .spam:
+            return NSLocalizedString("Spam", comment: "Description of report type for spam.")
+        case .nudity:
+            return NSLocalizedString("Nudity", comment: "Description of report type for nudity.")
+        case .profanity:
+            return NSLocalizedString("Profanity", comment: "Description of report type for profanity.")
+        case .illegal:
+            return NSLocalizedString("Illegal Content", comment: "Description of report type for illegal content.")
+        case .impersonation:
+            return NSLocalizedString("Impersonation", comment: "Description of report type for impersonation.")
+        }
+    }
 }
 
 struct ReportNoteTarget {
-    let pubkey: String
-    let note_id: String
+    let pubkey: Pubkey
+    let note_id: NoteId
 }
 
 enum ReportTarget {
-    case user(String)
+    case user(Pubkey)
     case note(ReportNoteTarget)
 }
 
-struct Report {
-    let type: ReportType
-    let target: ReportTarget
-    let message: String
-}
-
-func create_report_tags(target: ReportTarget, type: ReportType) -> [[String]] {
-    var tags: [[String]]
-    switch target {
-    case .user(let pubkey):
-        tags = [["p", pubkey]]
-    case .note(let notet):
-        tags = [["e", notet.note_id], ["p", notet.pubkey]]
-    }
-    
-    tags.append(["report", type.rawValue])
-    return tags
-}
-
-func create_report_event(privkey: String, report: Report) -> NostrEvent? {
-    guard let pubkey = privkey_to_pubkey(privkey: privkey) else {
-        return nil
-    }
-    
-    let kind = 1984
-    let tags = create_report_tags(target: report.target, type: report.type)
-    let ev = NostrEvent(content: report.message, pubkey: pubkey, kind: kind, tags: tags)
-    
-    ev.id = calculate_event_id(ev: ev)
-    ev.sig = sign_event(privkey: privkey, ev: ev)
-    
-    return ev
-}

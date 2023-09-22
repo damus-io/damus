@@ -20,12 +20,11 @@ struct RepostAction: View {
             Button {
                 dismiss()
                             
-                guard let privkey = self.damus_state.keypair.privkey else {
+                guard let keypair = self.damus_state.keypair.to_full(),
+                      let boost = make_boost_event(keypair: keypair, boosted: self.event) else {
                     return
                 }
-                
-                let boost = make_boost_event(pubkey: damus_state.keypair.pubkey, privkey: privkey, boosted: self.event)
-                
+
                 damus_state.postbox.send(boost)
             } label: {
                 Label(NSLocalizedString("Repost", comment: "Button to repost a note"), image: "repost")
@@ -39,7 +38,7 @@ struct RepostAction: View {
             Button {
                 dismiss()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    notify(.compose, PostAction.quoting(self.event))
+                    notify(.compose(.quoting(self.event)))
                 }
                 
             } label: {
@@ -62,6 +61,6 @@ struct RepostAction: View {
 
 struct RepostAction_Previews: PreviewProvider {
     static var previews: some View {
-        RepostAction(damus_state: test_damus_state(), event: test_event)
+        RepostAction(damus_state: test_damus_state, event: test_note)
     }
 }

@@ -57,7 +57,7 @@ enum ImageShape {
 struct ImageCarousel: View {
     var urls: [MediaUrl]
     
-    let evid: String
+    let evid: NoteId
     
     let state: DamusState
     
@@ -72,7 +72,7 @@ struct ImageCarousel: View {
     @State private var selectedIndex = 0
     @State private var video_size: CGSize? = nil
     
-    init(state: DamusState, evid: String, urls: [MediaUrl]) {
+    init(state: DamusState, evid: NoteId, urls: [MediaUrl]) {
         _open_sheet = State(initialValue: false)
         _current_url = State(initialValue: nil)
         let media_model = state.events.get_cache_data(evid).media_metadata_model
@@ -105,15 +105,11 @@ struct ImageCarousel: View {
             }
         }
         .onAppear {
-            if self.image_fill == nil, let size = state.events.lookup_media_size(url: url) {
+            if self.image_fill == nil, let size = state.video.size_for_url(url) {
                 let fill = ImageFill.calculate_image_fill(geo_size: geo_size, img_size: size, maxHeight: maxHeight, fillHeight: fillHeight)
                 self.image_fill = fill
             }
         }
-    }
-    
-    func video_model(_ url: URL) -> VideoPlayerModel {
-        return state.events.get_video_player_model(url: url)
     }
     
     func Media(geo: GeometryProxy, url: MediaUrl, index: Int) -> some View {
@@ -125,7 +121,7 @@ struct ImageCarousel: View {
                         open_sheet = true
                     }
             case .video(let url):
-                DamusVideoPlayer(url: url, model: video_model(url), video_size: $video_size)
+                DamusVideoPlayer(url: url, video_size: $video_size, controller: state.video)
                     .onChange(of: video_size) { size in
                         guard let size else { return }
                         
@@ -194,7 +190,7 @@ struct ImageCarousel: View {
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
         .fullScreenCover(isPresented: $open_sheet) {
-            ImageView(cache: state.events, urls: urls, disable_animation: state.settings.disable_animation)
+            ImageView(video_controller: state.video, urls: urls, disable_animation: state.settings.disable_animation)
         }
         .frame(height: height)
         .onChange(of: selectedIndex) { value in
@@ -289,7 +285,7 @@ public struct ImageFill {
 struct ImageCarousel_Previews: PreviewProvider {
     static var previews: some View {
         let url: MediaUrl = .image(URL(string: "https://jb55.com/red-me.jpg")!)
-        ImageCarousel(state: test_damus_state(), evid: "evid", urls: [url, url])
+        ImageCarousel(state: test_damus_state, evid: test_note.id, urls: [url, url])
     }
 }
 
