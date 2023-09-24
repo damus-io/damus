@@ -13,7 +13,7 @@ struct RelayStatusView: View {
     var body: some View {
         Group {
             if connection.isConnecting {
-                Text("Connecting")
+                Text("Connecting", comment: "Relay status label that indicates a relay is connecting.")
                     .font(.caption)
                     .frame(height: 20)
                     .padding(.horizontal, 10)
@@ -25,7 +25,7 @@ struct RelayStatusView: View {
                             .stroke(DamusColors.warningBorder, lineWidth: 1)
                     )
             } else if connection.isConnected {
-                Text("Online")
+                Text("Online", comment: "Relay status label that indicates a relay is connected.")
                     .font(.caption)
                     .frame(height: 20)
                     .padding(.horizontal, 10)
@@ -37,7 +37,7 @@ struct RelayStatusView: View {
                             .stroke(DamusColors.successBorder, lineWidth: 1)
                     )
             } else {
-                Text("Error")
+                Text("Error", comment: "Relay status label that indicates a relay had an error when connecting")
                     .font(.caption)
                     .frame(height: 20)
                     .padding(.horizontal, 10)

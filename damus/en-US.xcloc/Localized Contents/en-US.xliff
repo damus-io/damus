@@ -2,7 +2,7 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
   <file original="damus/en-US.lproj/InfoPlist.strings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.3.1" build-num="14E300c"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.0" build-num="15A240d"/>
     </header>
     <body>
       <trans-unit id="CFBundleDisplayName" xml:space="preserve">
@@ -14,6 +14,11 @@
         <source>damus</source>
         <target>damus</target>
         <note>Bundle name</note>
+      </trans-unit>
+      <trans-unit id="NSAppleMusicUsageDescription" xml:space="preserve">
+        <source>Damus needs access to your media library for playback statuses</source>
+        <target>Damus needs access to your media library for playback statuses</target>
+        <note>Privacy - Media Library Usage Description</note>
       </trans-unit>
       <trans-unit id="NSCameraUsageDescription" xml:space="preserve">
         <source>Damus needs access to your camera if you want to upload photos from it</source>
@@ -39,15 +44,15 @@
   </file>
   <file original="damus/en-US.lproj/Localizable.strings" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.3.1" build-num="14E300c"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.0" build-num="15A240d"/>
     </header>
     <body>
       <trans-unit id="%@ %@" xml:space="preserve">
         <source>%@ %@</source>
         <target>%@ %@</target>
-        <note>Sentence composed of 2 variables to describe how many imports were performed from loading a NostrScript. In source English, the first variable is the number of imports, and the second variable is 'Import' or 'Imports'.
-Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.
-Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.</note>
+        <note>Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.
+Sentence composed of 2 variables to describe how many imports were performed from loading a NostrScript. In source English, the first variable is the number of imports, and the second variable is 'Import' or 'Imports'.
+Sentence composed of 2 variables to describe how many reposts. In source English, the first variable is the number of reposts, and the second variable is 'Repost' or 'Reposts'.</note>
       </trans-unit>
       <trans-unit id="%@ has been muted" xml:space="preserve">
         <source>%@ has been muted</source>
@@ -137,12 +142,18 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Add" xml:space="preserve">
         <source>Add</source>
         <target>Add</target>
-        <note>Button to confirm adding user inputted relay.</note>
+        <note>Button to add relay server to list.
+   Button to confirm adding user inputted emoji.</note>
       </trans-unit>
       <trans-unit id="Add Bookmark" xml:space="preserve">
         <source>Add Bookmark</source>
         <target>Add Bookmark</target>
         <note>Button text to add bookmark to a note.</note>
+      </trans-unit>
+      <trans-unit id="Add Emoji" xml:space="preserve">
+        <source>Add Emoji</source>
+        <target>Add Emoji</target>
+        <note>Label for section for adding an emoji to the reactions list.</note>
       </trans-unit>
       <trans-unit id="Add all" xml:space="preserve">
         <source>Add all</source>
@@ -153,6 +164,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Add bookmark</source>
         <target>Add bookmark</target>
         <note>Context menu option for adding a note bookmark.</note>
+      </trans-unit>
+      <trans-unit id="Add relay" xml:space="preserve">
+        <source>Add relay</source>
+        <target>Add relay</target>
+        <note>Title text to indicate user to an add a relay.</note>
       </trans-unit>
       <trans-unit id="Additional information" xml:space="preserve">
         <source>Additional information</source>
@@ -205,6 +221,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Appearance</target>
         <note>Navigation title for text and appearance settings.
    Section header for text and appearance settings</note>
+      </trans-unit>
+      <trans-unit id="Appearance and filters" xml:space="preserve">
+        <source>Appearance and filters</source>
+        <target>Appearance and filters</target>
+        <note>Section header for text, appearance, and content filter settings</note>
       </trans-unit>
       <trans-unit id="Are you lost?" xml:space="preserve">
         <source>Are you lost?</source>
@@ -283,6 +304,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <note>Button to broadcast note to all your relays
    Context menu option for broadcasting the user's note to all of the user's connected relay servers.</note>
       </trans-unit>
+      <trans-unit id="Broadcast music playing on Apple Music" xml:space="preserve">
+        <source>Broadcast music playing on Apple Music</source>
+        <target>Broadcast music playing on Apple Music</target>
+        <note>Toggle to enable or disable broadcasting what music is being played on Apple Music in their profile status.</note>
+      </trans-unit>
       <trans-unit id="Cancel" xml:space="preserve">
         <source>Cancel</source>
         <target>Cancel</target>
@@ -290,7 +316,7 @@ Sentence composed of 2 variables to describe how many people are following a use
    Button to cancel a repost.
    Button to cancel out of alert that creates a new mutelist.
    Button to cancel out of posting a note.
-   Button to cancel out of view adding user inputted relay.
+   Button to cancel out of view adding user inputted emoji.
    Button to cancel the upload.
    Cancel deleting bookmarks.
    Cancel deleting the user.
@@ -312,30 +338,36 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Clear Cache</target>
         <note>Button to clear image cache.</note>
       </trans-unit>
-      <trans-unit id="Connect" xml:space="preserve">
-        <source>Connect</source>
-        <target>Connect</target>
-        <note>Button to connect to recommended relay server.</note>
+      <trans-unit id="Clear status" xml:space="preserve">
+        <source>Clear status</source>
+        <target>Clear status</target>
+        <note>Label to prompt user to select an expiration time for the profile status to clear.</note>
       </trans-unit>
       <trans-unit id="Connect To Relay" xml:space="preserve">
         <source>Connect To Relay</source>
         <target>Connect To Relay</target>
-        <note>Label for section for adding a relay server.</note>
+        <note>Button to connect to the relay.</note>
       </trans-unit>
-      <trans-unit id="Connected Relays" xml:space="preserve">
-        <source>Connected Relays</source>
-        <target>Connected Relays</target>
-        <note>Section title for relay servers that are connected.</note>
+      <trans-unit id="Connecting" xml:space="preserve">
+        <source>Connecting</source>
+        <target>Connecting</target>
+        <note>Relay status label that indicates a relay is connecting.</note>
       </trans-unit>
       <trans-unit id="Contact" xml:space="preserve">
         <source>Contact</source>
         <target>Contact</target>
         <note>Label to display relay contact information.</note>
       </trans-unit>
+      <trans-unit id="Content filters" xml:space="preserve">
+        <source>Content filters</source>
+        <target>Content filters</target>
+        <note>Section title for content filtering/moderation configuration.</note>
+      </trans-unit>
       <trans-unit id="Continue" xml:space="preserve">
         <source>Continue</source>
         <target>Continue</target>
-        <note>Continue with bookmarks.
+        <note>Button to dismiss suggested users view and continue to the main app
+   Continue with bookmarks.
    Continue with deleting the user.</note>
       </trans-unit>
       <trans-unit id="Copied" xml:space="preserve">
@@ -346,7 +378,9 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Copy" xml:space="preserve">
         <source>Copy</source>
         <target>Copy</target>
-        <note>Button to copy a relay server address.</note>
+        <note>Button to copy a relay server address.
+   Button to copy an emoji reaction
+   Context menu option for copying the version of damus.</note>
       </trans-unit>
       <trans-unit id="Copy Account ID" xml:space="preserve">
         <source>Copy Account ID</source>
@@ -521,7 +555,17 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Done" xml:space="preserve">
         <source>Done</source>
         <target>Done</target>
-        <note>Button that, when tapped, will finish adding a different user's relays to your relay by hiding the + buttons next to the relays.</note>
+        <note>Button to dismiss wallet selection view for paying Lightning invoice.</note>
+      </trans-unit>
+      <trans-unit id="Duplicate relay" xml:space="preserve">
+        <source>Duplicate relay</source>
+        <target>Duplicate relay</target>
+        <note>Title of the duplicate relay error message.</note>
+      </trans-unit>
+      <trans-unit id="Duration" xml:space="preserve">
+        <source>Duration</source>
+        <target>Duration</target>
+        <note>Label for profile status expiration duration picker.</note>
       </trans-unit>
       <trans-unit id="EULA" xml:space="preserve">
         <source>EULA</source>
@@ -538,6 +582,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Edit</target>
         <note>Button to edit user's profile.</note>
       </trans-unit>
+      <trans-unit id="Emoji Reactions" xml:space="preserve">
+        <source>Emoji Reactions</source>
+        <target>Emoji Reactions</target>
+        <note>Section title for emoji reactions that are currently added.</note>
+      </trans-unit>
       <trans-unit id="Encrypted" xml:space="preserve">
         <source>Encrypted</source>
         <target>Encrypted</target>
@@ -547,6 +596,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Enter your account key</source>
         <target>Enter your account key</target>
         <note>Prompt for user to enter an account key to login.</note>
+      </trans-unit>
+      <trans-unit id="Error" xml:space="preserve">
+        <source>Error</source>
+        <target>Error</target>
+        <note>Relay status label that indicates a relay had an error when connecting</note>
       </trans-unit>
       <trans-unit id="Error fetching lightning invoice" xml:space="preserve">
         <source>Error fetching lightning invoice</source>
@@ -587,6 +641,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Follow</source>
         <target>Follow</target>
         <note>Button to follow a user.</note>
+      </trans-unit>
+      <trans-unit id="Follow All" xml:space="preserve">
+        <source>Follow All</source>
+        <target>Follow All</target>
+        <note>Button to follow all users in this section</note>
       </trans-unit>
       <trans-unit id="Follow Back" xml:space="preserve">
         <source>Follow Back</source>
@@ -643,6 +702,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Follows you</target>
         <note>Text to indicate that a user is following your profile.</note>
       </trans-unit>
+      <trans-unit id="Font Size" xml:space="preserve">
+        <source>Font Size</source>
+        <target>Font Size</target>
+        <note>Section label for font size settings.</note>
+      </trans-unit>
       <trans-unit id="Free" xml:space="preserve">
         <source>Free</source>
         <target>Free</target>
@@ -658,6 +722,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Get API Key with BTC/Lightning</target>
         <note>Button to navigate to nokyctranslate website to get a translation API key.</note>
       </trans-unit>
+      <trans-unit id="Hashtags" xml:space="preserve">
+        <source>Hashtags</source>
+        <target>Hashtags</target>
+        <note>Label for filter for seeing only hashtag follows.</note>
+      </trans-unit>
       <trans-unit id="Help build the future of decentralized communication on the web." xml:space="preserve">
         <source>Help build the future of decentralized communication on the web.</source>
         <target>Help build the future of decentralized communication on the web.</target>
@@ -672,6 +741,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>Hide all 🤙's</source>
         <target>Hide all 🤙's</target>
         <note>Section footer describing OnlyZaps mode</note>
+      </trans-unit>
+      <trans-unit id="Hide notes with #nsfw tags" xml:space="preserve">
+        <source>Hide notes with #nsfw tags</source>
+        <target>Hide notes with #nsfw tags</target>
+        <note>Setting to hide notes with the #nsfw (not safe for work) tags</note>
       </trans-unit>
       <trans-unit id="Home" xml:space="preserve">
         <source>Home</source>
@@ -861,6 +935,16 @@ Sentence composed of 2 variables to describe how many people are following a use
         <target>Muted Users</target>
         <note>Navigation title of view to see list of muted users.</note>
       </trans-unit>
+      <trans-unit id="My Relays" xml:space="preserve">
+        <source>My Relays</source>
+        <target>My Relays</target>
+        <note>Section title for relay servers that the user is connected to.</note>
+      </trans-unit>
+      <trans-unit id="Never" xml:space="preserve">
+        <source>Never</source>
+        <target>Never</target>
+        <note>Profile status duration setting of never expiring.</note>
+      </trans-unit>
       <trans-unit id="New encrypted direct message" xml:space="preserve">
         <source>New encrypted direct message</source>
         <target>New encrypted direct message</target>
@@ -880,6 +964,11 @@ Sentence composed of 2 variables to describe how many people are following a use
         <source>No data available</source>
         <target>No data available</target>
         <note>Text indicating that there is no data available to show for specific metadata about a relay server.</note>
+      </trans-unit>
+      <trans-unit id="No logs to display" xml:space="preserve">
+        <source>No logs to display</source>
+        <target>No logs to display</target>
+        <note>Label to indicate that there are no developer mode logs available to be displayed on the screen</note>
       </trans-unit>
       <trans-unit id="No mute list found, create a new one? This will overwrite any previous mute lists." xml:space="preserve">
         <source>No mute list found, create a new one? This will overwrite any previous mute lists.</source>
@@ -939,14 +1028,19 @@ Sentence composed of 2 variables to describe how many people are following a use
       <trans-unit id="Notes" xml:space="preserve">
         <source>Notes</source>
         <target>Notes</target>
-        <note>Label for filter for seeing only notes (instead of notes and replies).
-Label for filter for seeing only your notes (instead of notes and replies).</note>
+        <note>Label for filter for seeing only your notes (instead of notes and replies).
+Label for filter for seeing only notes (instead of notes and replies).</note>
       </trans-unit>
       <trans-unit id="Notes &amp; Replies" xml:space="preserve">
         <source>Notes &amp; Replies</source>
         <target>Notes &amp; Replies</target>
-        <note>Label for filter for seeing notes and replies (instead of only notes).
-Label for filter for seeing your notes and replies (instead of only your notes).</note>
+        <note>Label for filter for seeing your notes and replies (instead of only your notes).
+Label for filter for seeing notes and replies (instead of only notes).</note>
+      </trans-unit>
+      <trans-unit id="Notes with the #nsfw tag usually contains adult content or other &quot;Not safe for work&quot; content" xml:space="preserve">
+        <source>Notes with the #nsfw tag usually contains adult content or other "Not safe for work" content</source>
+        <target>Notes with the #nsfw tag usually contains adult content or other "Not safe for work" content</target>
+        <note>Section footer clarifying what #nsfw (not safe for work) tags mean</note>
       </trans-unit>
       <trans-unit id="Nothing to see here. Check back later!" xml:space="preserve">
         <source>Nothing to see here. Check back later!</source>
@@ -978,6 +1072,11 @@ Label for filter for seeing your notes and replies (instead of only your notes).
         <source>Ok</source>
         <target>Ok</target>
         <note>Button to dismiss the alert.</note>
+      </trans-unit>
+      <trans-unit id="Online" xml:space="preserve">
+        <source>Online</source>
+        <target>Online</target>
+        <note>Relay status label that indicates a relay is connected.</note>
       </trans-unit>
       <trans-unit id="Only you can see this message and who sent it." xml:space="preserve">
         <source>Only you can see this message and who sent it.</source>
@@ -1023,6 +1122,11 @@ Label for filter for seeing your notes and replies (instead of only your notes).
         <source>Pay the Lightning invoice</source>
         <target>Pay the Lightning invoice</target>
         <note>Navigation bar title for view to pay Lightning invoice.</note>
+      </trans-unit>
+      <trans-unit id="People" xml:space="preserve">
+        <source>People</source>
+        <target>People</target>
+        <note>Label for filter for seeing only people follows.</note>
       </trans-unit>
       <trans-unit id="Permanently Delete Account" xml:space="preserve">
         <source>Permanently Delete Account</source>
@@ -1118,12 +1222,19 @@ Label for filter for seeing your notes and replies (instead of only your notes).
       <trans-unit id="Reactions" xml:space="preserve">
         <source>Reactions</source>
         <target>Reactions</target>
-        <note>Navigation bar title for Reactions view.</note>
+        <note>Navigation bar title for Reactions view.
+   Section header for reactions settings
+   Title of emoji reactions view</note>
       </trans-unit>
-      <trans-unit id="Recommended Relays" xml:space="preserve">
-        <source>Recommended Relays</source>
-        <target>Recommended Relays</target>
-        <note>Section title for recommend relay servers that could be added as part of configuration</note>
+      <trans-unit id="Recommended Emojis" xml:space="preserve">
+        <source>Recommended Emojis</source>
+        <target>Recommended Emojis</target>
+        <note>Section title for recommend emojis</note>
+      </trans-unit>
+      <trans-unit id="Recommended relays" xml:space="preserve">
+        <source>Recommended relays</source>
+        <target>Recommended relays</target>
+        <note>Title for view of recommended relays.</note>
       </trans-unit>
       <trans-unit id="Reject" xml:space="preserve">
         <source>Reject</source>
@@ -1316,6 +1427,11 @@ Label for filter for seeing your notes and replies (instead of only your notes).
         <target>Select a Lightning wallet</target>
         <note>Title of section for selecting a Lightning wallet to pay a Lightning invoice.</note>
       </trans-unit>
+      <trans-unit id="Select default emoji" xml:space="preserve">
+        <source>Select default emoji</source>
+        <target>Select default emoji</target>
+        <note>Prompt selection of user's default emoji reaction</note>
+      </trans-unit>
       <trans-unit id="Select default wallet" xml:space="preserve">
         <source>Select default wallet</source>
         <target>Select default wallet</target>
@@ -1340,6 +1456,11 @@ Label for filter for seeing your notes and replies (instead of only your notes).
         <source>Service</source>
         <target>Service</target>
         <note>Prompt selection of translation service provider.</note>
+      </trans-unit>
+      <trans-unit id="Set Status" xml:space="preserve">
+        <source>Set Status</source>
+        <target>Set Status</target>
+        <note>Sidebar menu label to set user status</note>
       </trans-unit>
       <trans-unit id="Settings" xml:space="preserve">
         <source>Settings</source>
@@ -1370,10 +1491,10 @@ Label for filter for seeing your notes and replies (instead of only your notes).
         <note>Button to show a note from a user who has been muted.
    Toggle to show or hide user's secret account login key.</note>
       </trans-unit>
-      <trans-unit id="Show +" xml:space="preserve">
-        <source>Show +</source>
-        <target>Show +</target>
-        <note>Button that, when tapped, will show + buttons next to a user's relays.</note>
+      <trans-unit id="Show general statuses" xml:space="preserve">
+        <source>Show general statuses</source>
+        <target>Show general statuses</target>
+        <note>Settings toggle for enabling general user statuses</note>
       </trans-unit>
       <trans-unit id="Show less" xml:space="preserve">
         <source>Show less</source>
@@ -1385,6 +1506,11 @@ Label for filter for seeing your notes and replies (instead of only your notes).
         <target>Show more</target>
         <note>Button to show entire note.
    Button to show more of a long profile description.</note>
+      </trans-unit>
+      <trans-unit id="Show music statuses" xml:space="preserve">
+        <source>Show music statuses</source>
+        <target>Show music statuses</target>
+        <note>Settings toggle for enabling now playing music statuses</note>
       </trans-unit>
       <trans-unit id="Show only from users you follow" xml:space="preserve">
         <source>Show only from users you follow</source>
@@ -1415,6 +1541,11 @@ Label for filter for seeing your notes and replies (instead of only your notes).
         <source>Sign out</source>
         <target>Sign out</target>
         <note>Sidebar menu label to sign out of the account.</note>
+      </trans-unit>
+      <trans-unit id="Skip" xml:space="preserve">
+        <source>Skip</source>
+        <target>Skip</target>
+        <note>Button to dismiss the suggested users screen</note>
       </trans-unit>
       <trans-unit id="Social media has developed into a key way information flows around the world. Unfortunately, our current social media systems are broken" xml:space="preserve">
         <source>Social media has developed into a key way information flows around the world. Unfortunately, our current social media systems are broken</source>
@@ -1467,6 +1598,13 @@ Label for filter for seeing your notes and replies (instead of only your notes).
         <target>The go-to iOS Nostr client</target>
         <note>Quick description of what Damus is</note>
       </trans-unit>
+      <trans-unit id="The relay you are trying to add is already added.&#10;You're all set!" xml:space="preserve">
+        <source>The relay you are trying to add is already added.
+You're all set!</source>
+        <target>The relay you are trying to add is already added.
+You're all set!</target>
+        <note>An error message that appears when the user attempts to add a relay that has already been added.</note>
+      </trans-unit>
       <trans-unit id="This is a paid relay, you must pay for notes to be accepted." xml:space="preserve">
         <source>This is a paid relay, you must pay for notes to be accepted.</source>
         <target>This is a paid relay, you must pay for notes to be accepted.</target>
@@ -1486,11 +1624,6 @@ Label for filter for seeing your notes and replies (instead of only your notes).
         <source>This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!</source>
         <target>This is your secret account key. You need this to access your account. Don't share this with anyone! Save it in a password manager and keep it safe!</target>
         <note>Label to describe that a private key is the user's secret account key and what they should do with it.</note>
-      </trans-unit>
-      <trans-unit id="This relay is already in your list" xml:space="preserve">
-        <source>This relay is already in your list</source>
-        <target>This relay is already in your list</target>
-        <note>An error message that appears when the user attempts to add a relay that has already been added.</note>
       </trans-unit>
       <trans-unit id="Thread" xml:space="preserve">
         <source>Thread</source>
@@ -1593,10 +1726,15 @@ Label for filter for seeing your notes and replies (instead of only your notes).
         <target>Upload</target>
         <note>Button to proceed with uploading.</note>
       </trans-unit>
+      <trans-unit id="User Statuses" xml:space="preserve">
+        <source>User Statuses</source>
+        <target>User Statuses</target>
+        <note>Section header for user profile status settings.</note>
+      </trans-unit>
       <trans-unit id="User has been muted" xml:space="preserve">
         <source>User has been muted</source>
         <target>User has been muted</target>
-        <note>Alert message that informs a user was d.</note>
+        <note>Alert message that informs a user was muted.</note>
       </trans-unit>
       <trans-unit id="User muted" xml:space="preserve">
         <source>User muted</source>
@@ -1688,6 +1826,11 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <target>What is Nostr?</target>
         <note>Heading text for section describing what is Nostr.</note>
       </trans-unit>
+      <trans-unit id="Who to Follow" xml:space="preserve">
+        <source>Who to Follow</source>
+        <target>Who to Follow</target>
+        <note>Title for a screen displaying suggestions of who to follow</note>
+      </trans-unit>
       <trans-unit id="Why we need Nostr?" xml:space="preserve">
         <source>Why we need Nostr?</source>
         <target>Why we need Nostr?</target>
@@ -1767,6 +1910,11 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
    Section header for zap settings
    Setting to enable Zap Local Notification
    Title for section in zap settings that controls general zap preferences.</note>
+      </trans-unit>
+      <trans-unit id="https://example.com" xml:space="preserve">
+        <source>https://example.com</source>
+        <target>https://example.com</target>
+        <note>Placeholder as an example of what the user could set so that the link is opened when the status is tapped.</note>
       </trans-unit>
       <trans-unit id="https://example.com/pic.jpg" xml:space="preserve">
         <source>https://example.com/pic.jpg</source>
@@ -1923,11 +2071,21 @@ YOU WILL NO LONGER BE ABLE TO LOG INTO DAMUS USING THIS ACCOUNT KEY.
         <target>%@ and %@ zapped you</target>
         <note>Notification that 2 users zapped the current user's profile</note>
       </trans-unit>
+      <trans-unit id="⚡" xml:space="preserve">
+        <source>⚡</source>
+        <target>⚡</target>
+        <note>Placeholder example for an emoji reaction</note>
+      </trans-unit>
+      <trans-unit id="📋 Working" xml:space="preserve">
+        <source>📋 Working</source>
+        <target>📋 Working</target>
+        <note>Placeholder as an example of what the user could set as their profile status.</note>
+      </trans-unit>
     </body>
   </file>
   <file original="damus/en-US.lproj/Localizable.stringsdict" source-language="en-US" target-language="en-US" datatype="plaintext">
     <header>
-      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="14.3.1" build-num="14E300c"/>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="15.0" build-num="15A240d"/>
     </header>
     <body>
       <trans-unit id="/followed_by_three_and_others:dict/NSStringLocalizedFormatKey:dict/:string" xml:space="preserve">

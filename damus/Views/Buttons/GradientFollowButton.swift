@@ -22,7 +22,7 @@ struct GradientFollowButton: View {
         Button(action: {
             follow_state = perform_follow_btn_action(follow_state, target: target)
         }) {
-            Text("\(follow_btn_txt(follow_state, follows_you: follows_you))")
+            Text(follow_btn_txt(follow_state, follows_you: follows_you))
                     .foregroundColor(follow_state == .unfollows ? .white : grayTextColor)
                     .font(.callout)
                     .fontWeight(.medium)
