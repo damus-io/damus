@@ -476,6 +476,7 @@ struct ProfileView: View {
                     customNavbar
                 }
             }
+            .toolbarBackground(.hidden)
             .onReceive(handle_notify(.switched_timeline)) { _ in
                 dismiss()
             }
