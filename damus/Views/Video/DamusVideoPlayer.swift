@@ -43,6 +43,9 @@ struct DamusVideoPlayer: View {
                 if model.has_audio {
                     mute_button
                 }
+                if model.is_live {
+                    live_indicator
+                }
             }
             .onChange(of: centerY) { _ in
                 update_is_visible(centerY: centerY)
@@ -91,6 +94,25 @@ struct DamusVideoPlayer: View {
                     }
                 }
             }
+        }
+    }
+    
+    private var live_indicator: some View {
+        VStack {
+            HStack {
+                Text("LIVE")
+                    .bold()
+                    .foregroundColor(.red)
+                    .padding(.horizontal)
+                    .padding(.vertical, 5)
+                    .background(
+                        Capsule()
+                            .fill(Color.black.opacity(0.5))
+                    )
+                    .padding([.top, .leading])
+                Spacer()
+            }
+            Spacer()
         }
     }
 }

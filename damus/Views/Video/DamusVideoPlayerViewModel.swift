@@ -10,16 +10,15 @@ import Combine
 import Foundation
 import SwiftUI
 
-func get_video_size(player: AVPlayer) async -> CGSize? {
-    let res = Task.detached(priority: .background) {
-        return player.currentImage?.size
-    }
-    return await res.value
-}
-
 func video_has_audio(player: AVPlayer) async -> Bool {
-    let tracks = try? await player.currentItem?.asset.load(.tracks)
-    return tracks?.filter({ t in t.mediaType == .audio }).first != nil
+    do {
+        let hasAudibleTracks = ((try await player.currentItem?.asset.loadMediaSelectionGroup(for: .audible)) != nil)
+        let tracks = try? await player.currentItem?.asset.load(.tracks)
+        let hasAudioTrack = tracks?.filter({ t in t.mediaType == .audio }).first != nil // Deal with odd cases of audio only MOV
+        return hasAudibleTracks || hasAudioTrack
+    } catch {
+        return false
+    }
 }
 
 @MainActor
@@ -32,11 +31,15 @@ final class DamusVideoPlayerViewModel: ObservableObject {
     let id = UUID()
     
     @Published var has_audio = false
+    @Published var is_live = false
     @Binding var video_size: CGSize?
     @Published var is_muted = true
     @Published var is_loading = true
     
     private var cancellables = Set<AnyCancellable>()
+    
+    private var videoSizeObserver: NSKeyValueObservation?
+    private var videoDurationObserver: NSKeyValueObservation?
     
     private var is_scrolled_into_view = false {
         didSet {
@@ -78,6 +81,31 @@ final class DamusVideoPlayerViewModel: ObservableObject {
                 model_id == self?.id ? self?.player.play() : self?.player.pause()
             }
             .store(in: &cancellables)
+        
+        observeVideoSize()
+        observeDuration()
+    }
+    
+    private func observeVideoSize() {
+        videoSizeObserver = player.currentItem?.observe(\.presentationSize, options: [.new], changeHandler: { [weak self] (playerItem, change) in
+            guard let self else { return }
+            if let newSize = change.newValue, newSize != .zero {
+                DispatchQueue.main.async {
+                    self.video_size = newSize  // Update the bound value
+                }
+            }
+        })
+    }
+    
+    private func observeDuration() {
+        videoDurationObserver = player.currentItem?.observe(\.duration, options: [.new], changeHandler: { [weak self] (playerItem, change) in
+            guard let self else { return }
+            if let newDuration = change.newValue, newDuration != .zero {
+                DispatchQueue.main.async {
+                    self.is_live = newDuration == .indefinite
+                }
+            }
+        })
     }
     
     private func load() async {
@@ -86,11 +114,6 @@ final class DamusVideoPlayerViewModel: ObservableObject {
             video_size = meta.size
         } else {
             has_audio = await video_has_audio(player: player)
-            if let video_size = await get_video_size(player: player) {
-                self.video_size = video_size
-                let meta = VideoMetadata(has_audio: has_audio, size: video_size)
-                controller.set_metadata(meta, url: url)
-            }
         }
         
         is_loading = false
@@ -113,5 +136,10 @@ final class DamusVideoPlayerViewModel: ObservableObject {
     @objc private func did_play_to_end() {
         player.seek(to: CMTime.zero)
         player.play()
+    }
+    
+    deinit {
+        videoSizeObserver?.invalidate()
+        videoDurationObserver?.invalidate()
     }
 }
