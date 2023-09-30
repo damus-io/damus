@@ -9,11 +9,11 @@ import SwiftUI
 
 struct MultiSearch {
     let hashtag: String
-    let profiles: [SearchedUser]
+    let profiles: [Pubkey]
 }
 
 enum Search: Identifiable {
-    case profiles([SearchedUser])
+    case profiles([Pubkey])
     case hashtag(String)
     case profile(Pubkey)
     case note(NoteId)
@@ -49,10 +49,10 @@ struct InnerSearchResults: View {
         }
     }
     
-    func ProfilesSearch(_ results: [SearchedUser]) -> some View {
+    func ProfilesSearch(_ results: [Pubkey]) -> some View {
         return LazyVStack {
-            ForEach(results) { prof in
-                ProfileSearchResult(pk: prof.pubkey)
+            ForEach(results, id: \.id) { pk in
+                ProfileSearchResult(pk: pk)
             }
         }
     }
@@ -108,10 +108,12 @@ struct SearchResultsView: View {
         }
         .frame(maxHeight: .infinity)
         .onAppear {
-            self.result = search_for_string(profiles: damus_state.profiles, search)
+            let txn = NdbTxn.init(ndb: damus_state.ndb)
+            self.result = search_for_string(profiles: damus_state.profiles, search: search, txn: txn)
         }
         .onChange(of: search) { new in
-            self.result = search_for_string(profiles: damus_state.profiles, new)
+            let txn = NdbTxn.init(ndb: damus_state.ndb)
+            self.result = search_for_string(profiles: damus_state.profiles, search: search, txn: txn)
         }
     }
 }
@@ -125,7 +127,7 @@ struct SearchResultsView_Previews: PreviewProvider {
  */
 
 
-func search_for_string(profiles: Profiles, _ new: String) -> Search? {
+func search_for_string<Y>(profiles: Profiles, search new: String, txn: NdbTxn<Y>) -> Search? {
     guard new.count != 0 else {
         return nil
     }
@@ -154,7 +156,7 @@ func search_for_string(profiles: Profiles, _ new: String) -> Search? {
         return .note(NoteId(decoded.data))
     }
     
-    let multisearch = MultiSearch(hashtag: make_hashtagable(new), profiles: search_profiles(profiles: profiles, search: new))
+    let multisearch = MultiSearch(hashtag: make_hashtagable(new), profiles: search_profiles(profiles: profiles, search: new, txn: txn))
     return .multi(multisearch)
 }
 
@@ -171,27 +173,25 @@ func make_hashtagable(_ str: String) -> String {
     return String(new.filter{$0 != " "})
 }
 
-func search_profiles(profiles: Profiles, search: String) -> [SearchedUser] {
+func search_profiles<Y>(profiles: Profiles, search: String, txn: NdbTxn<Y>) -> [Pubkey] {
     // Search by hex pubkey.
     if let pubkey = hex_decode_pubkey(search),
-       let profile = profiles.lookup(id: pubkey)
+       profiles.lookup_key_by_pubkey(pubkey) != nil
     {
-        return [SearchedUser(profile: profile, pubkey: pubkey)]
+        return [pubkey]
     }
 
     // Search by npub pubkey.
     if search.starts(with: "npub"),
        let bech32_key = decode_bech32_key(search),
        case Bech32Key.pub(let pk) = bech32_key,
-       let profile = profiles.lookup(id: pk)
+       profiles.lookup_key_by_pubkey(pk) != nil
     {
-        return [SearchedUser(profile: profile, pubkey: pk)]
+        return [pk]
     }
 
     let new = search.lowercased()
-    let matched_pubkeys = profiles.user_search_cache.search(key: new)
 
-    return matched_pubkeys
-        .map { SearchedUser(profile: profiles.lookup(id: $0), pubkey: $0) }
-        .filter { $0.profile != nil }
+    return profiles.search(search, limit: 10, txn: txn)
 }
+

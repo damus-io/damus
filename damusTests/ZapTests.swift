@@ -11,8 +11,6 @@ import XCTest
 final class ZapTests: XCTestCase {
 
     override func setUpWithError() throws {
-        let db = ProfileDatabase()
-        try db.remove_all_profiles()
     }
 
     override func tearDownWithError() throws {
@@ -71,7 +69,7 @@ final class ZapTests: XCTestCase {
         XCTAssertEqual(zap.target, ZapTarget.profile(profile))
 
         XCTAssertEqual(zap_notification_title(zap), "Zap")
-        XCTAssertEqual(zap_notification_body(profiles: Profiles(user_search_cache: UserSearchCache()), zap: zap), "You received 1k sats from 107jk7ht:2quqncxg")
+        XCTAssertEqual(zap_notification_body(profiles: Profiles(user_search_cache: UserSearchCache(), ndb: test_damus_state.ndb), zap: zap), "You received 1k sats from 107jk7ht:2quqncxg")
     }
 
 }

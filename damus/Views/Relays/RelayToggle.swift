@@ -42,7 +42,7 @@ struct RelayToggle: View {
 
 struct RelayToggle_Previews: PreviewProvider {
     static var previews: some View {
-        RelayToggle(state: test_damus_state(), timeline: .search, relay_id: "wss://jb55.com")
+        RelayToggle(state: test_damus_state, timeline: .search, relay_id: "wss://jb55.com")
             .padding()
     }
 }

@@ -31,11 +31,11 @@ func follow_btn_txt(_ fs: FollowState, follows_you: Bool) -> String {
     }
 }
 
-func followedByString(_ friend_intersection: [Pubkey], profiles: Profiles, locale: Locale = Locale.current) -> String {
+func followedByString<Y>(txn: NdbTxn<Y>, _ friend_intersection: [Pubkey], ndb: Ndb, locale: Locale = Locale.current) -> String {
     let bundle = bundleForLocale(locale: locale)
-    let names: [String] = friend_intersection.prefix(3).map {
-        let profile = profiles.lookup(id: $0)
-        return Profile.displayName(profile: profile, pubkey: $0).username.truncate(maxLength: 20)
+    let names: [String] = friend_intersection.prefix(3).map { pk in
+        let profile = ndb.lookup_profile_with_txn(pk, txn: txn)?.profile
+        return Profile.displayName(profile: profile, pubkey: pk).username.truncate(maxLength: 20)
     }
 
     switch friend_intersection.count {
@@ -212,30 +212,32 @@ struct ProfileView: View {
             navActionSheetButton
         }
         .padding(.top, 5)
-        .padding(.horizontal)
         .accentColor(DamusColors.white)
     }
 
-    func lnButton(lnurl: String, profile: Profile) -> some View {
-        let button_img = profile.reactions == false ? "zap.fill" : "zap"
-        return Button(action: {
+    func lnButton(lnurl: String, unownedProfile: Profile?, pubkey: Pubkey) -> some View {
+        let reactions = unownedProfile?.reactions ?? true
+        let button_img = reactions ? "zap.fill" : "zap"
+        let lud16 = unownedProfile?.lud16
+
+        return Button(action: { [lnurl] in
             present_sheet(.zap(target: .profile(self.profile.pubkey), lnurl: lnurl))
         }) {
             Image(button_img)
                 .foregroundColor(button_img == "zap.fill" ? .orange : Color.primary)
                 .profile_button_style(scheme: colorScheme)
-                .contextMenu {
-                    if profile.reactions == false {
+                .contextMenu { [lud16, reactions, lnurl] in
+                    if reactions == false {
                         Text("OnlyZaps Enabled", comment: "Non-tappable text in context menu that shows up when the zap button on profile is long pressed to indicate that the user has enabled OnlyZaps, meaning that they would like to be only zapped and not accept reactions to their notes.")
                     }
 
-                    if let addr = profile.lud16 {
+                    if let lud16 {
                         Button {
-                            UIPasteboard.general.string = addr
+                            UIPasteboard.general.string = lud16
                         } label: {
-                            Label(addr, image: "copy2")
+                            Label(lud16, image: "copy2")
                         }
-                    } else if let lnurl = profile.lnurl {
+                    } else {
                         Button {
                             UIPasteboard.general.string = lnurl
                         } label: {
@@ -268,14 +270,14 @@ struct ProfileView: View {
             .font(.footnote)
     }
 
-    func actionSection(profile_data: Profile?) -> some View {
+    func actionSection(record: ProfileRecord?, pubkey: Pubkey) -> some View {
         return Group {
-
-            if let profile = profile_data,
-               let lnurl = profile.lnurl,
+            if let record,
+               let profile = record.profile,
+               let lnurl = record.lnurl,
                lnurl != ""
             {
-                lnButton(lnurl: lnurl, profile: profile)
+                lnButton(lnurl: lnurl, unownedProfile: profile, pubkey: pubkey)
             }
 
             dmButton
@@ -307,8 +309,10 @@ struct ProfileView: View {
         return scale < 1 ? scale : 1
     }
 
-    func nameSection(profile_data: Profile?) -> some View {
+    func nameSection(profile_data: ProfileRecord?) -> some View {
         return Group {
+            let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
+
             HStack(alignment: .center) {
                 ProfilePicView(pubkey: profile.pubkey, size: pfp_size, highlight: .custom(imageBorderColor(), 4.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                     .padding(.top, -(pfp_size / 2.0))
@@ -322,55 +326,55 @@ struct ProfileView: View {
                     }
 
                 Spacer()
-                
-                let follows_you = profile.pubkey != damus_state.pubkey && profile.follows(pubkey: damus_state.pubkey)
+
                 if follows_you {
                     followsYouBadge
                 }
 
-                actionSection(profile_data: profile_data)
+                actionSection(record: profile_data, pubkey: profile.pubkey)
             }
-            
-            ProfileNameView(pubkey: profile.pubkey, profile: profile_data, damus: damus_state)
+
+            ProfileNameView(pubkey: profile.pubkey, damus: damus_state)
         }
     }
 
     var followersCount: some View {
         HStack {
-            if followers.count == nil {
+            if let followerCount = followers.count {
+                let nounString = pluralizedString(key: "followers_count", count: followerCount)
+                let nounText = Text(verbatim: nounString).font(.subheadline).foregroundColor(.gray)
+                Text("\(Text(verbatim: followerCount.formatted()).font(.subheadline.weight(.medium))) \(nounText)", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
+            } else {
                 Image("download")
                     .resizable()
                     .frame(width: 20, height: 20)
                 Text("Followers", comment: "Label describing followers of a user.")
                     .font(.subheadline)
                     .foregroundColor(.gray)
-            } else {
-                let followerCount = followers.count!
-                let nounString = pluralizedString(key: "followers_count", count: followerCount)
-                let nounText = Text(verbatim: nounString).font(.subheadline).foregroundColor(.gray)
-                Text("\(Text(verbatim: followerCount.formatted()).font(.subheadline.weight(.medium))) \(nounText)", comment: "Sentence composed of 2 variables to describe how many people are following a user. In source English, the first variable is the number of followers, and the second variable is 'Follower' or 'Followers'.")
             }
         }
     }
 
     var aboutSection: some View {
         VStack(alignment: .leading, spacing: 8.0) {
-            let profile_data = damus_state.profiles.lookup(id: profile.pubkey)
+            let profile_txn = damus_state.profiles.lookup_with_timestamp(profile.pubkey)
+            let profile_data = profile_txn.unsafeUnownedValue
 
             nameSection(profile_data: profile_data)
 
-            if let about = profile_data?.about {
+            if let about = profile_data?.profile?.about {
                 AboutView(state: damus_state, about: about)
             }
 
-            if let url = profile_data?.website_url {
+            if let url = profile_data?.profile?.website_url {
                 WebsiteLink(url: url)
             }
 
             HStack {
                 if let contact = profile.contacts {
                     let contacts = Array(contact.referenced_pubkeys)
-                    let following_model = FollowingModel(damus_state: damus_state, contacts: contacts)
+                    let hashtags = Array(contact.referenced_hashtags)
+                    let following_model = FollowingModel(damus_state: damus_state, contacts: contacts, hashtags: hashtags)
                     NavigationLink(value: Route.Following(following: following_model)) {
                         HStack {
                             let noun_text = Text(verbatim: "\(pluralizedString(key: "following_count", count: profile.following))").font(.subheadline).foregroundColor(.gray)
@@ -421,7 +425,7 @@ struct ProfileView: View {
                     NavigationLink(value: Route.FollowersYouKnow(friendedFollowers: friended_followers, followers: followers)) {
                         HStack {
                             CondensedProfilePicturesView(state: damus_state, pubkeys: friended_followers, maxPictures: 3)
-                            let followedByString = followedByString(friended_followers, profiles: damus_state.profiles)
+                            let followedByString = followedByString(txn: profile_txn, friended_followers, ndb: damus_state.ndb)
                             Text(followedByString)
                                 .font(.subheadline).foregroundColor(.gray)
                                 .multilineTextAlignment(.leading)
@@ -466,8 +470,12 @@ struct ProfileView: View {
             }
             .ignoresSafeArea()
             .navigationTitle("")
-            .navigationBarHidden(true)
-            .overlay(customNavbar, alignment: .top)
+            .navigationBarBackButtonHidden()
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    customNavbar
+                }
+            }
             .onReceive(handle_notify(.switched_timeline)) { _ in
                 dismiss()
             }
@@ -500,7 +508,7 @@ struct ProfileView: View {
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        let ds = test_damus_state()
+        let ds = test_damus_state
         ProfileView(damus_state: ds, pubkey: ds.pubkey)
     }
 }
@@ -513,8 +521,11 @@ extension View {
     }
 }
 
+@MainActor
 func check_nip05_validity(pubkey: Pubkey, profiles: Profiles) {
-    guard let profile = profiles.lookup(id: pubkey),
+    let profile_txn = profiles.lookup(id: pubkey)
+
+    guard let profile = profile_txn.unsafeUnownedValue,
           let nip05 = profile.nip05,
           profiles.is_validated(pubkey) == nil
     else {
@@ -530,7 +541,7 @@ func check_nip05_validity(pubkey: Pubkey, profiles: Profiles) {
         Task { @MainActor in
             profiles.set_validated(pubkey, nip05: validated)
             profiles.nip05_pubkey[nip05] = pubkey
-            notify(.profile_updated(pubkey: pubkey, profile: profile))
+            notify(.profile_updated(.remote(pubkey: pubkey)))
         }
     }
 }

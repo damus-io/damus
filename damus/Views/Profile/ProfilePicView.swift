@@ -87,16 +87,25 @@ struct ProfilePicView: View {
                 guard updated.pubkey == self.pubkey else {
                     return
                 }
-                
-                if let pic = updated.profile.picture {
-                    self.picture = pic
+
+                switch updated {
+                case .manual(_, let profile):
+                    if let pic = profile.picture {
+                        self.picture = pic
+                    }
+                case .remote(pubkey: let pk):
+                    let profile_txn = profiles.lookup(id: pk)
+                    let profile = profile_txn.unsafeUnownedValue
+                    if let pic = profile?.picture {
+                        self.picture = pic
+                    }
                 }
             }
     }
 }
 
 func get_profile_url(picture: String?, pubkey: Pubkey, profiles: Profiles) -> URL {
-    let pic = picture ?? profiles.lookup(id: pubkey)?.picture ?? robohash(pubkey)
+    let pic = picture ?? profiles.lookup(id: pubkey).map({ $0?.picture }).value ?? robohash(pubkey)
     if let url = URL(string: pic) {
         return url
     }
@@ -104,12 +113,11 @@ func get_profile_url(picture: String?, pubkey: Pubkey, profiles: Profiles) -> UR
 }
 
 func make_preview_profiles(_ pubkey: Pubkey) -> Profiles {
-    let user_search_cache = UserSearchCache()
-    let profiles = Profiles(user_search_cache: user_search_cache)
+    let profiles = Profiles(ndb: test_damus_state.ndb)
     let picture = "http://cdn.jb55.com/img/red-me.jpg"
     let profile = Profile(name: "jb55", display_name: "William Casarin", about: "It's me", picture: picture, banner: "", website: "https://jb55.com", lud06: nil, lud16: nil, nip05: "jb55.com", damus_donation: nil)
-    let ts_profile = TimestampedProfile(profile: profile, timestamp: 0, event: test_note)
-    profiles.add(id: pubkey, profile: ts_profile)
+    //let ts_profile = TimestampedProfile(profile: profile, timestamp: 0, event: test_note)
+    //profiles.add(id: pubkey, profile: ts_profile)
     return profiles
 }
 

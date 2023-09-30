@@ -42,7 +42,7 @@ struct RecommendedRelayView: View {
                 
                 VStack(alignment: .leading) {
                     HStack {
-                        Text(meta?.name ?? relay.hostname ?? relay)
+                        Text(meta?.name ?? relay)
                             .font(.headline)
                             .padding(.bottom, 2)
                         
@@ -82,7 +82,7 @@ struct RecommendedRelayView: View {
                 }
                 
                 HStack {
-                    Text(meta?.name ?? relay.hostname ?? relay)
+                    Text(meta?.name ?? relay)
                         .lineLimit(1)
                 }
                 .contextMenu {
@@ -128,6 +128,6 @@ struct RecommendedRelayView: View {
 
 struct RecommendedRelayView_Previews: PreviewProvider {
     static var previews: some View {
-        RecommendedRelayView(damus: test_damus_state(), relay: "wss://relay.damus.io", user_recommended: true)
+        RecommendedRelayView(damus: test_damus_state, relay: "wss://relay.damus.io", user_recommended: true)
     }
 }

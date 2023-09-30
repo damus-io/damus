@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 struct SideMenuView: View {
     let damus_state: DamusState
     @Binding var isSidebarVisible: Bool
@@ -82,7 +83,8 @@ struct SideMenuView: View {
     }
 
     var TopProfile: some View {
-        let profile = damus_state.profiles.lookup(id: damus_state.pubkey)
+        let profile_txn = damus_state.profiles.lookup(id: damus_state.pubkey)
+        let profile = profile_txn.unsafeUnownedValue
         return VStack(alignment: .leading, spacing: verticalSpacing) {
             HStack {
                 ProfilePicView(pubkey: damus_state.pubkey, size: 60, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
@@ -231,7 +233,7 @@ struct SideMenuView: View {
 
 struct Previews_SideMenuView_Previews: PreviewProvider {
     static var previews: some View {
-        let ds = test_damus_state()
+        let ds = test_damus_state
         SideMenuView(damus_state: ds, isSidebarVisible: .constant(true))
     }
 }

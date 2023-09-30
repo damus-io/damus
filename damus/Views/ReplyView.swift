@@ -24,10 +24,11 @@ struct ReplyView: View {
     var ReplyingToSection: some View {
         HStack {
             Group {
+                let txn = NdbTxn(ndb: damus.ndb)
                 let names = references
                     .map { pubkey in
                         let pk = pubkey
-                        let prof = damus.profiles.lookup(id: pk)
+                        let prof = damus.ndb.lookup_profile_with_txn(pk, txn: txn)?.profile
                         return "@" + Profile.displayName(profile: prof, pubkey: pk).username.truncate(maxLength: 50)
                     }
                     .joined(separator: " ")
@@ -92,13 +93,13 @@ struct ReplyView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
             ReplyView(replying_to: test_note,
-                      damus: test_damus_state(),
+                      damus: test_damus_state,
                       original_pubkeys: [],
                       filtered_pubkeys: .constant([]))
                 .frame(height: 300)
 
             ReplyView(replying_to: test_longform_event.event,
-                      damus: test_damus_state(),
+                      damus: test_damus_state,
                       original_pubkeys: [],
                       filtered_pubkeys: .constant([]))
                 .frame(height: 300)

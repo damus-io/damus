@@ -7,13 +7,12 @@
 
 import SwiftUI
 import Kingfisher
-import TLDExtract
 
 struct FailedRelayImage: View {
     let url: URL?
 
     var body: some View {
-        let abbrv = String(url?.hostname?.first?.uppercased() ?? "R")
+        let abbrv = String(url?.host()?.first?.uppercased() ?? "R")
         Text("\(abbrv)")
             .font(.system(size: 40, weight: .bold))
     }
@@ -90,11 +89,28 @@ struct RelayPicView: View {
     }
 }
 
+func extract_tld(_ host: String) -> String {
+    let parts = host.split(separator: ".")
+
+    if parts.count >= 3  {
+        let last_3 = parts.suffix(3)
+        if parts[1] == "co" && parts[2] == "uk" {
+            return String(last_3.joined(separator: "."))
+        } else {
+            return String(parts.suffix(2).joined(separator: "."))
+        }
+    } else if parts.count == 2 {
+        return host
+    }
+
+    return host
+}
+
 func get_relay_url(relay: String, icon: String?) -> URL? {
-    let extractor = TLDExtract()
     var favicon = relay + "/favicon.ico"
-    if let parseRelay: TLDResult = extractor.parse(relay) {
-        favicon = "https://" + (parseRelay.rootDomain ?? relay) + "/favicon.ico"
+    let tld = extract_tld(relay)
+    if tld != relay {
+        favicon = "https://" + tld + "/favicon.ico"
     }
     let pic = icon ?? favicon
     return URL(string: pic)

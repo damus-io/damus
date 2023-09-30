@@ -51,9 +51,9 @@ struct ZapEvent: View {
 struct ZapEvent_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
-            ZapEvent(damus: test_damus_state(), zap: .zap(test_zap), is_top_zap: true)
+            ZapEvent(damus: test_damus_state, zap: .zap(test_zap), is_top_zap: true)
             
-            ZapEvent(damus: test_damus_state(), zap: .zap(test_private_zap), is_top_zap: false)
+            ZapEvent(damus: test_damus_state, zap: .zap(test_private_zap), is_top_zap: false)
         }
     }
 }

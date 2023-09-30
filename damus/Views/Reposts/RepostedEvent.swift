@@ -15,10 +15,8 @@ struct RepostedEvent: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            let prof = damus.profiles.lookup(id: event.pubkey)
-            
             NavigationLink(value: Route.ProfileByKey(pubkey: event.pubkey)) {
-                Reposted(damus: damus, pubkey: event.pubkey, profile: prof)
+                Reposted(damus: damus, pubkey: event.pubkey)
                     .padding(.horizontal)
             }
            .buttonStyle(PlainButtonStyle())
@@ -31,6 +29,6 @@ struct RepostedEvent: View {
 
 struct RepostedEvent_Previews: PreviewProvider {
     static var previews: some View {
-        RepostedEvent(damus: test_damus_state(), event: test_note, inner_ev: test_note, options: [])
+        RepostedEvent(damus: test_damus_state, event: test_note, inner_ev: test_note, options: [])
     }
 }

@@ -65,7 +65,7 @@ struct Privkey: IdType {
 }
 
 
-struct Hashtag: TagConvertible {
+struct Hashtag: TagConvertible, Hashable {
     let hashtag: String
 
     static func from_tag(tag: TagSequence) -> Hashtag? {

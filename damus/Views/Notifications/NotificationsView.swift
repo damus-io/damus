@@ -86,8 +86,10 @@ struct NotificationsView: View {
     @Environment(\.colorScheme) var colorScheme
     
     var mystery: some View {
-        VStack(spacing: 20) {
-            Text("Wake up, \(Profile.displayName(profile: state.profiles.lookup(id: state.pubkey), pubkey: state.pubkey).displayName.truncate(maxLength: 50))", comment: "Text telling the user to wake up, where the argument is their display name.")
+        let profile_txn = state.profiles.lookup(id: state.pubkey)
+        let profile = profile_txn.unsafeUnownedValue
+        return VStack(spacing: 20) {
+            Text("Wake up, \(Profile.displayName(profile: profile, pubkey: state.pubkey).displayName.truncate(maxLength: 50))", comment: "Text telling the user to wake up, where the argument is their display name.")
             Text("You are dreaming...", comment: "Text telling the user that they are dreaming.")
         }
         .id("what")
@@ -193,7 +195,7 @@ struct NotificationsView: View {
 
 struct NotificationsView_Previews: PreviewProvider {
     static var previews: some View {
-        NotificationsView(state: test_damus_state(), notifications: NotificationsModel(), filter: NotificationFilter())
+        NotificationsView(state: test_damus_state, notifications: NotificationsModel(), filter: NotificationFilter())
     }
 }
 

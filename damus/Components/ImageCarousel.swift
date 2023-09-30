@@ -285,7 +285,7 @@ public struct ImageFill {
 struct ImageCarousel_Previews: PreviewProvider {
     static var previews: some View {
         let url: MediaUrl = .image(URL(string: "https://jb55.com/red-me.jpg")!)
-        ImageCarousel(state: test_damus_state(), evid: test_note.id, urls: [url, url])
+        ImageCarousel(state: test_damus_state, evid: test_note.id, urls: [url, url])
     }
 }
 

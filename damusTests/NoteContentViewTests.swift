@@ -14,7 +14,7 @@ class NoteContentViewTests: XCTestCase {
         let note = NostrEvent(content: content, keypair: test_keypair, tags: [["t", "かっこいい"]])!
         let parsed: Blocks = parse_note_content(content: .init(note: note, keypair: test_keypair))
 
-        let testState = test_damus_state()
+        let testState = test_damus_state
         
         let text: NoteArtifactsSeparated = render_blocks(blocks: parsed, profiles: testState.profiles)
         let attributedText: AttributedString = text.content.attributed

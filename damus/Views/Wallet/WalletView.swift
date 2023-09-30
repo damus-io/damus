@@ -145,7 +145,7 @@ struct WalletView: View {
                     Spacer()
                 }
                 
-                EventProfile(damus_state: damus_state, pubkey: damus_state.pubkey, profile: damus_state.profiles.lookup(id: damus_state.pubkey), size: .small)
+                EventProfile(damus_state: damus_state, pubkey: damus_state.pubkey, size: .small)
             }
             .padding(25)
         }
@@ -164,38 +164,40 @@ struct WalletView: View {
                     model.initial_percent = settings.donation_percent
                 }
                 .onChange(of: settings.donation_percent) { p in
-                    guard let profile = damus_state.profiles.lookup(id: damus_state.pubkey) else {
+                    let profile_txn = damus_state.profiles.lookup(id: damus_state.pubkey)
+                    guard let profile = profile_txn.unsafeUnownedValue else {
                         return
                     }
                     
-                    profile.damus_donation = p
+                    let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: profile.lud16, nip05: profile.nip05, damus_donation: p, reactions: profile.reactions)
 
-                    notify(.profile_updated(pubkey: damus_state.pubkey, profile: profile))
+                    notify(.profile_updated(.manual(pubkey: self.damus_state.pubkey, profile: prof)))
                 }
                 .onDisappear {
+                    let profile_txn = damus_state.profiles.lookup(id: damus_state.pubkey)
+                    
                     guard let keypair = damus_state.keypair.to_full(),
-                          let profile = damus_state.profiles.lookup(id: damus_state.pubkey),
+                          let profile = profile_txn.unsafeUnownedValue,
                           model.initial_percent != profile.damus_donation
                     else {
                         return
                     }
                     
-                    profile.damus_donation = settings.donation_percent
-                    guard let meta = make_metadata_event(keypair: keypair, metadata: profile) else {
+                    let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: profile.lud16, nip05: profile.nip05, damus_donation: settings.donation_percent, reactions: profile.reactions)
+
+                    guard let meta = make_metadata_event(keypair: keypair, metadata: prof) else {
                         return
                     }
-                    let tsprofile = TimestampedProfile(profile: profile, timestamp: meta.created_at, event: meta)
-                    damus_state.profiles.add(id: damus_state.pubkey, profile: tsprofile)
                     damus_state.postbox.send(meta)
                 }
         }
     }
 }
 
-let test_wallet_connect_url = WalletConnectURL(pubkey: test_pubkey, relay: .init("wss://relay.damus.io")!, keypair: test_damus_state().keypair.to_full()!, lud16: "jb55@sendsats.com")
+let test_wallet_connect_url = WalletConnectURL(pubkey: test_pubkey, relay: .init("wss://relay.damus.io")!, keypair: test_damus_state.keypair.to_full()!, lud16: "jb55@sendsats.com")
 
 struct WalletView_Previews: PreviewProvider {
-    static let tds = test_damus_state()
+    static let tds = test_damus_state
     static var previews: some View {
         WalletView(damus_state: tds, model: WalletModel(state: .existing(test_wallet_connect_url), settings: tds.settings))
     }

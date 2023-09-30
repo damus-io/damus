@@ -7,6 +7,8 @@
 
 import Foundation
 
+typealias NoteKey = UInt64
+
 struct NoteId: IdType, TagKey, TagConvertible {
     let id: Data
 

@@ -149,6 +149,7 @@ class HomeModel {
         }
     }
 
+    @MainActor
     func process_event(sub_id: String, relay_id: String, ev: NostrEvent) {
         if has_sub_id_event(sub_id: sub_id, ev_id: ev.id) {
             return
@@ -169,7 +170,8 @@ class HomeModel {
         case .contacts:
             handle_contact_event(sub_id: sub_id, relay_id: relay_id, ev: ev)
         case .metadata:
-            handle_metadata_event(ev)
+            // profile metadata processing is handled by nostrdb
+            break
         case .list:
             handle_list_event(ev)
         case .boost:
@@ -195,6 +197,7 @@ class HomeModel {
         }
     }
 
+    @MainActor
     func handle_status_event(_ ev: NostrEvent) {
         guard let st = UserStatus(ev: ev) else {
             return
@@ -248,7 +251,8 @@ class HomeModel {
             nwc_success(state: self.damus_state, resp: resp)
         }
     }
-    
+
+    @MainActor
     func handle_zap_event(_ ev: NostrEvent) {
         process_zap_event(damus_state: damus_state, ev: ev) { zapres in
             guard case .done(let zap) = zapres,
@@ -373,7 +377,7 @@ class HomeModel {
         }
     }
 
-
+    @MainActor
     func handle_event(relay_id: String, conn_event: NostrConnectionEvent) {
         switch conn_event {
         case .ws_event(let ev):
@@ -582,10 +586,6 @@ class HomeModel {
         damus_state.contacts.set_mutelist(ev)
     }
     
-    func handle_metadata_event(_ ev: NostrEvent) {
-        process_metadata_event(events: damus_state.events, our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
-    }
-
     func get_last_event_of_kind(relay_id: String, kind: UInt32) -> NostrEvent? {
         guard let m = last_event_of_kind[relay_id] else {
             last_event_of_kind[relay_id] = [:]
@@ -734,8 +734,6 @@ func load_our_contacts(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent)
             }
         }
     }
-
-    state.user_search_cache.updateOwnContactsPetnames(id: contacts.our_pubkey, oldEvent: m_old_ev, newEvent: ev)
 }
 
 
@@ -791,45 +789,6 @@ func print_filters(relay_id: String?, filters groups: [[NostrFilter]]) {
 }
  */
 
-func process_metadata_profile(our_pubkey: Pubkey, profiles: Profiles, profile: Profile, ev: NostrEvent) {
-    var old_nip05: String? = nil
-    let mprof = profiles.lookup_with_timestamp(id: ev.pubkey)
-
-    if let mprof {
-        old_nip05 = mprof.profile.nip05
-        if mprof.event.created_at > ev.created_at {
-            // skip if we already have an newer profile
-            return
-        }
-    }
-
-    if old_nip05 != profile.nip05 {
-        // if it's been validated before, invalidate it now
-        profiles.invalidate_nip05(ev.pubkey)
-    }
-
-    let tprof = TimestampedProfile(profile: profile, timestamp: ev.created_at, event: ev)
-    profiles.add(id: ev.pubkey, profile: tprof)
-
-    // load pfps asap
-    
-    var changed = false
-    
-    let picture = tprof.profile.picture ?? robohash(ev.pubkey)
-    if URL(string: picture) != nil {
-        changed = true
-    }
-    
-    let banner = tprof.profile.banner ?? ""
-    if URL(string: banner) != nil {
-        changed = true
-    }
-    
-    if changed {
-        notify(.profile_updated(pubkey: ev.pubkey, profile: profile))
-    }
-}
-
 // TODO: remove this, let nostrdb handle all validation
 func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping () -> Void) {
     let validated = events.is_event_valid(ev.id)
@@ -853,24 +812,6 @@ func guard_valid_event(events: EventCache, ev: NostrEvent, callback: @escaping (
         
     case .bad_id, .bad_sig:
         break
-    }
-}
-
-func process_metadata_event(events: EventCache, our_pubkey: Pubkey, profiles: Profiles, ev: NostrEvent, completion: ((Profile?) -> Void)? = nil) {
-    guard_valid_event(events: events, ev: ev) {
-        DispatchQueue.global(qos: .background).async {
-            guard let profile: Profile = decode_data(Data(ev.content.utf8)) else {
-                completion?(nil)
-                return
-            }
-            
-            profile.cache_lnurl()
-            
-            DispatchQueue.main.async {
-                process_metadata_profile(our_pubkey: our_pubkey, profiles: profiles, profile: profile, ev: ev)
-                completion?(profile)
-            }
-        }
     }
 }
 
@@ -1165,10 +1106,13 @@ func zap_notification_title(_ zap: Zap) -> String {
 func zap_notification_body(profiles: Profiles, zap: Zap, locale: Locale = Locale.current) -> String {
     let src = zap.request.ev
     let pk = zap.is_anon ? ANON_PUBKEY : src.pubkey
-    let profile = profiles.lookup(id: pk)
+
+    let name = profiles.lookup(id: pk).map { profile in
+        Profile.displayName(profile: profile, pubkey: pk).displayName.truncate(maxLength: 50)
+    }.value
+
     let sats = NSNumber(value: (Double(zap.invoice.amount) / 1000.0))
     let formattedSats = format_msats_abbrev(zap.invoice.amount)
-    let name = Profile.displayName(profile: profile, pubkey: pk).displayName.truncate(maxLength: 50)
 
     if src.content.isEmpty {
         let format = localizedStringFormat(key: "zap_notification_no_message", locale: locale)
@@ -1394,6 +1338,7 @@ func get_zap_target_pubkey(ev: NostrEvent, events: EventCache) -> Pubkey? {
     return pk
 }
 
+@MainActor
 func process_zap_event(damus_state: DamusState, ev: NostrEvent, completion: @escaping (ProcessZapResult) -> Void) {
     // These are zap notifications
     guard let ptag = get_zap_target_pubkey(ev: ev, events: damus_state.events) else {
@@ -1417,17 +1362,13 @@ func process_zap_event(damus_state: DamusState, ev: NostrEvent, completion: @esc
         return
     }
     
-    guard let profile = damus_state.profiles.lookup(id: ptag) else {
-        completion(.failed)
-        return
-    }
-    
-    guard let lnurl = profile.lnurl else {
+    guard let lnurl = damus_state.profiles.lookup_with_timestamp(ptag)
+                        .map({ pr in pr?.lnurl }).value else {
         completion(.failed)
         return
     }
 
-    Task {
+    Task { [lnurl] in
         guard let zapper = await fetch_zapper_from_lnurl(lnurls: damus_state.lnurls, pubkey: ptag, lnurl: lnurl) else {
             completion(.failed)
             return

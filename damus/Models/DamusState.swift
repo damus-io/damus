@@ -31,9 +31,9 @@ struct DamusState {
     let muted_threads: MutedThreadsManager
     let wallet: WalletModel
     let nav: NavigationCoordinator
-    let user_search_cache: UserSearchCache
     let music: MusicController?
     let video: VideoController
+    let ndb: Ndb
 
     @discardableResult
     func add_zap(zap: Zapping) -> Bool {
@@ -61,18 +61,17 @@ struct DamusState {
     }
     
     static var empty: DamusState {
-        let user_search_cache = UserSearchCache()
         let empty_pub: Pubkey = .empty
         let empty_sec: Privkey = .empty
         let kp = Keypair(pubkey: empty_pub, privkey: nil)
         
         return DamusState.init(
-            pool: RelayPool(),
+            pool: RelayPool(ndb: .empty),
             keypair: Keypair(pubkey: empty_pub, privkey: empty_sec),
             likes: EventCounter(our_pubkey: empty_pub),
             boosts: EventCounter(our_pubkey: empty_pub),
             contacts: Contacts(our_pubkey: empty_pub),
-            profiles: Profiles(user_search_cache: user_search_cache),
+            profiles: Profiles(ndb: .empty),
             dms: DirectMessagesModel(our_pubkey: empty_pub),
             previews: PreviewCache(),
             zaps: Zaps(our_pubkey: empty_pub),
@@ -81,17 +80,17 @@ struct DamusState {
             relay_filters: RelayFilters(our_pubkey: empty_pub),
             relay_model_cache: RelayModelCache(),
             drafts: Drafts(),
-            events: EventCache(),
+            events: EventCache(ndb: .empty),
             bookmarks: BookmarksManager(pubkey: empty_pub),
-            postbox: PostBox(pool: RelayPool()),
+            postbox: PostBox(pool: RelayPool(ndb: .empty)),
             bootstrap_relays: [],
             replies: ReplyCounter(our_pubkey: empty_pub),
             muted_threads: MutedThreadsManager(keypair: kp),
             wallet: WalletModel(settings: UserSettingsStore()),
             nav: NavigationCoordinator(),
-            user_search_cache: user_search_cache,
             music: nil,
-            video: VideoController()
+            video: VideoController(),
+            ndb: .empty
         )
     }
 }

@@ -88,6 +88,6 @@ let test_notification_item: NotificationItem = .repost(test_note.id, test_event_
 
 struct NotificationItemView_Previews: PreviewProvider {
     static var previews: some View {
-        NotificationItemView(state: test_damus_state(), item: test_notification_item)
+        NotificationItemView(state: test_damus_state, item: test_notification_item)
     }
 }

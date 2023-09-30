@@ -28,7 +28,7 @@ struct EventActionBar: View {
     }
     
     var lnurl: String? {
-        damus_state.profiles.lookup(id: event.pubkey)?.lnurl
+        damus_state.profiles.lookup_with_timestamp(event.pubkey).map({ pr in pr?.lnurl }).value
     }
     
     var show_like: Bool {
@@ -374,7 +374,7 @@ struct LikeButton: View {
 
 struct EventActionBar_Previews: PreviewProvider {
     static var previews: some View {
-        let ds = test_damus_state()
+        let ds = test_damus_state
         let ev = NostrEvent(content: "hi", keypair: test_keypair)!
 
         let bar = ActionBarModel.empty()

@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 struct EventTop: View {
     let state: DamusState
     let event: NostrEvent
@@ -21,9 +22,8 @@ struct EventTop: View {
     }
     
     func ProfileName(is_anon: Bool) -> some View {
-        let profile = state.profiles.lookup(id: self.pubkey)
         let pk = is_anon ? ANON_PUBKEY : self.pubkey
-        return EventProfileName(pubkey: pk, profile: profile, damus: state, size: .normal)
+        return EventProfileName(pubkey: pk, damus: state, size: .normal)
     }
     
     var body: some View {
@@ -40,6 +40,6 @@ struct EventTop: View {
 
 struct EventTop_Previews: PreviewProvider {
     static var previews: some View {
-        EventTop(state: test_damus_state(), event: test_note, pubkey: test_note.pubkey, is_anon: false)
+        EventTop(state: test_damus_state, event: test_note, pubkey: test_note.pubkey, is_anon: false)
     }
 }

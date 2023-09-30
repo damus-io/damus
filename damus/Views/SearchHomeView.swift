@@ -15,6 +15,11 @@ struct SearchHomeView: View {
     @State var search: String = ""
     @FocusState private var isFocused: Bool
 
+    var content_filter: (NostrEvent) -> Bool {
+        let filters = ContentFilters.defaults(self.damus_state.settings)
+        return ContentFilters(filters: filters).filter
+    }
+
     let preferredLanguages = Set(Locale.preferredLanguages.map { localeToLanguage($0) })
     
     var SearchInput: some View {
@@ -50,6 +55,10 @@ struct SearchHomeView: View {
             damus: damus_state,
             show_friend_icon: true,
             filter: { ev in
+                if !content_filter(ev) {
+                    return false
+                }
+                
                 if damus_state.muted_threads.isMutedThread(ev, keypair: self.damus_state.keypair) {
                     return false
                 }
@@ -125,7 +134,7 @@ struct SearchHomeView: View {
 
 struct SearchHomeView_Previews: PreviewProvider {
     static var previews: some View {
-        let state = test_damus_state()
+        let state = test_damus_state
         SearchHomeView(damus_state: state, model: SearchHomeModel(damus_state: state))
     }
 }

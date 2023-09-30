@@ -20,6 +20,7 @@ enum SearchType: Equatable {
     case nip05(String)
 }
 
+@MainActor
 struct SearchingEventView: View {
     let state: DamusState
     let search_type: SearchType
@@ -43,23 +44,25 @@ struct SearchingEventView: View {
         switch search {
         case .nip05(let nip05):
             if let pk = state.profiles.nip05_pubkey[nip05] {
-                if state.profiles.lookup(id: pk) != nil {
+                if state.profiles.lookup_key_by_pubkey(pk) != nil {
                     self.search_state = .found_profile(pk)
                 }
             } else {
                 Task {
                     guard let nip05 = NIP05.parse(nip05) else {
-                        self.search_state = .not_found
+                        Task { @MainActor in
+                            self.search_state = .not_found
+                        }
                         return
                     }
                     guard let nip05_resp = await fetch_nip05(nip05: nip05) else {
-                        DispatchQueue.main.async {
+                        Task { @MainActor in
                             self.search_state = .not_found
                         }
                         return
                     }
                     
-                    DispatchQueue.main.async {
+                    Task { @MainActor in
                         guard let pk = nip05_resp.names[nip05.username] else {
                             self.search_state = .not_found
                             return
@@ -80,11 +83,11 @@ struct SearchingEventView: View {
             }
         case .profile(let pubkey):
             find_event(state: state, query: .profile(pubkey: pubkey)) { res in
-                guard case .profile(_, let ev) = res else {
+                guard case .profile(let pubkey) = res else {
                     self.search_state = .not_found
                     return
                 }
-                self.search_state = .found_profile(ev.pubkey)
+                self.search_state = .found_profile(pubkey)
             }
         }
     }
@@ -123,7 +126,7 @@ struct SearchingEventView: View {
 
 struct SearchingEventView_Previews: PreviewProvider {
     static var previews: some View {
-        let state = test_damus_state()
+        let state = test_damus_state
         SearchingEventView(state: state, search_type: .event(test_note.id))
     }
 }

@@ -21,24 +21,25 @@ final class ProfileViewTests: XCTestCase {
     }
 
     func testFollowedByString() throws {
-        let profiles = test_damus_state().profiles
-
         let pk1 = test_pubkey
         let pk2 = test_pubkey_2
         let pk3 = Pubkey(hex: "b42e44b555013239a0d5dcdb09ebde0857cd8a5a57efbba5a2b6ac78833cb9f0")!
         let pk4 = Pubkey(hex: "cc590e46363d0fa66bb27081368d01f169b8ffc7c614629d4e9eef6c88b38670")!
         let pk5 = Pubkey(hex: "f2aa579bb998627e04a8f553842a09446360c9d708c6141dd119c479f6ab9d29")!
 
-        XCTAssertEqual(followedByString([pk1], profiles: profiles, locale: enUsLocale), "Followed by damus")
-        XCTAssertEqual(followedByString([pk1, pk2], profiles: profiles, locale: enUsLocale), "Followed by damus & 1rppft3m:4qxhsgnj")
-        XCTAssertEqual(followedByString([pk1, pk2, pk3], profiles: profiles, locale: enUsLocale), "Followed by damus, 1rppft3m:4qxhsgnj & 1kshyfd2:cq04aze0")
-        XCTAssertEqual(followedByString([pk1, pk2, pk3, pk4,], profiles: profiles, locale: enUsLocale), "Followed by damus, 1rppft3m:4qxhsgnj, 1kshyfd2:cq04aze0 & 1 other")
-        XCTAssertEqual(followedByString([pk1, pk2, pk3, pk4, pk5], profiles: profiles, locale: enUsLocale), "Followed by damus, 1rppft3m:4qxhsgnj, 1kshyfd2:cq04aze0 & 2 others")
+        let ndb = Ndb(path: Ndb.db_path)!
+        let txn = NdbTxn(ndb: ndb)
+
+        XCTAssertEqual(followedByString(txn: txn, [pk1], ndb: ndb, locale: enUsLocale), "Followed by damus")
+        XCTAssertEqual(followedByString(txn: txn, [pk1, pk2], ndb: ndb, locale: enUsLocale), "Followed by damus & 1rppft3m:4qxhsgnj")
+        XCTAssertEqual(followedByString(txn: txn, [pk1, pk2, pk3], ndb: ndb, locale: enUsLocale), "Followed by damus, 1rppft3m:4qxhsgnj & 1kshyfd2:cq04aze0")
+        XCTAssertEqual(followedByString(txn: txn, [pk1, pk2, pk3, pk4,], ndb: ndb, locale: enUsLocale), "Followed by damus, 1rppft3m:4qxhsgnj, 1kshyfd2:cq04aze0 & 1 other")
+        XCTAssertEqual(followedByString(txn: txn, [pk1, pk2, pk3, pk4, pk5], ndb: ndb, locale: enUsLocale), "Followed by damus, 1rppft3m:4qxhsgnj, 1kshyfd2:cq04aze0 & 2 others")
 
         let pubkeys = [pk1, pk2, pk3, pk4, pk5, pk1, pk2, pk3, pk4, pk5]
         Bundle.main.localizations.map { Locale(identifier: $0) }.forEach {
             for count in 1...10 {
-                XCTAssertNoThrow(followedByString(pubkeys.prefix(count).map { $0 }, profiles: profiles, locale: $0))
+                XCTAssertNoThrow(followedByString(txn: txn, pubkeys.prefix(count).map { $0 }, ndb: ndb, locale: $0))
             }
         }
     }

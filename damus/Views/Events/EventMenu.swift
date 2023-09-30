@@ -52,8 +52,9 @@ struct MenuItems: View {
     let target_pubkey: Pubkey
     let bookmarks: BookmarksManager
     let muted_threads: MutedThreadsManager
+
     @ObservedObject var settings: UserSettingsStore
-    
+
     @State private var isBookmarked: Bool = false
     @State private var isMutedThread: Bool = false
     

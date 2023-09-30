@@ -25,7 +25,6 @@ func eventview_pfp_size(_ size: EventViewKind) -> CGFloat {
 struct EventProfile: View {
     let damus_state: DamusState
     let pubkey: Pubkey
-    let profile: Profile?
     let size: EventViewKind
     
     var pfp_size: CGFloat {
@@ -44,7 +43,7 @@ struct EventProfile: View {
                 }
 
             VStack(alignment: .leading, spacing: 0) {
-                EventProfileName(pubkey: pubkey, profile: profile, damus: damus_state, size: size)
+                EventProfileName(pubkey: pubkey, damus: damus_state, size: size)
 
                 UserStatusView(status: damus_state.profiles.profile_data(pubkey).status, show_general: damus_state.settings.show_general_statuses, show_music: damus_state.settings.show_music_statuses)
             }
@@ -54,6 +53,6 @@ struct EventProfile: View {
 
 struct EventProfile_Previews: PreviewProvider {
     static var previews: some View {
-        EventProfile(damus_state: test_damus_state(), pubkey: test_note.pubkey, profile: nil, size: .normal)
+        EventProfile(damus_state: test_damus_state, pubkey: test_note.pubkey, size: .normal)
     }
 }

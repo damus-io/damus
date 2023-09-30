@@ -35,8 +35,9 @@ class SuggestedUsersViewModel: ObservableObject {
     }
 
     func suggestedUser(pubkey: Pubkey) -> SuggestedUser? {
-        if let profile = damus_state.profiles.lookup(id: pubkey),
-           let user = SuggestedUser(profile: profile, pubkey: pubkey) {
+        let profile_txn = damus_state.profiles.lookup(id: pubkey)
+        if let profile = profile_txn.unsafeUnownedValue,
+           let user = SuggestedUser(name: profile.name, about: profile.about, picture: profile.picture, pubkey: pubkey) {
             return user
         }
         return nil
@@ -86,13 +87,7 @@ class SuggestedUsersViewModel: ObservableObject {
 
         switch nev {
         case .event(let sub_id, let ev):
-            guard sub_id == self.sub_id else {
-                return
-            }
-
-            if ev.known_kind == .metadata {
-                process_metadata_event(events: damus_state.events, our_pubkey: damus_state.pubkey, profiles: damus_state.profiles, ev: ev)
-            }
+            break
 
         case .notice(let msg):
             print("suggested user profiles notice: \(msg)")

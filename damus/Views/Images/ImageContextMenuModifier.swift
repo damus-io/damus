@@ -47,7 +47,9 @@ struct ImageContextMenuModifier: ViewModifier {
                     let features = detector.features(in: ciImage)
                     if let qrfeatures = features as? [CIQRCodeFeature] {
                         for feature in qrfeatures {
-                            qrCodeLink += feature.messageString!
+                            if let msgStr = feature.messageString {
+                                qrCodeLink += msgStr
+                            }
                         }
                     }
                     

@@ -949,6 +949,29 @@ func first_eref_mention(ev: NostrEvent, keypair: Keypair) -> Mention<NoteId>? {
     return nil
 }
 
+func separate_images(ev: NostrEvent, keypair: Keypair) -> [MediaUrl]? {
+    let urlBlocks: [URL] = ev.blocks(keypair).blocks.reduce(into: []) { urls, block in
+        guard case .url(let url) = block else {
+            return
+        }
+        if classify_url(url).is_img != nil {
+            urls.append(url)
+        }
+    }
+    let mediaUrls = urlBlocks.map { MediaUrl.image($0) }
+    return mediaUrls.isEmpty ? nil : mediaUrls
+}
+
+func separate_invoices(ev: NostrEvent, keypair: Keypair) -> [Invoice]? {
+    let invoiceBlocks: [Invoice] = ev.blocks(keypair).blocks.reduce(into: []) { invoices, block in
+        guard case .invoice(let invoice) = block else {
+            return
+        }
+        invoices.append(invoice)
+    }
+    return invoiceBlocks.isEmpty ? nil : invoiceBlocks
+}
+
 /**
  Transforms a `NostrEvent` of known kind `NostrKind.like`to a human-readable emoji.
  If the known kind is not a `NostrKind.like`, it will return `nil`.

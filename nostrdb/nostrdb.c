@@ -27,6 +27,7 @@ static const int THREAD_QUEUE_BATCH = 4096;
 // the maximum size of inbox queues
 static const int DEFAULT_QUEUE_SIZE = 1000000;
 
+#define ndb_flag_set(flags, f) ((flags & f) == f)
 
 #define NDB_PARSED_ID           (1 << 0)
 #define NDB_PARSED_PUBKEY       (1 << 1)
@@ -36,6 +37,12 @@ static const int DEFAULT_QUEUE_SIZE = 1000000;
 #define NDB_PARSED_CONTENT      (1 << 5)
 #define NDB_PARSED_TAGS         (1 << 6)
 #define NDB_PARSED_ALL          (NDB_PARSED_ID|NDB_PARSED_PUBKEY|NDB_PARSED_SIG|NDB_PARSED_CREATED_AT|NDB_PARSED_KIND|NDB_PARSED_CONTENT|NDB_PARSED_TAGS)
+
+typedef int (*ndb_migrate_fn)(struct ndb *);
+
+struct ndb_migration {
+	ndb_migrate_fn fn;
+};
 
 struct ndb_profile_record_builder {
 	flatcc_builder_t *builder;
@@ -61,7 +68,14 @@ enum ndb_dbs {
 	NDB_DB_PROFILE,
 	NDB_DB_NOTE_ID,
 	NDB_DB_PROFILE_PK,
+	NDB_DB_NDB_META,
+	NDB_DB_PROFILE_SEARCH,
 	NDB_DBS,
+};
+
+// keys used for storing data in the NDB metadata database (NDB_DB_NDB_META)
+enum ndb_meta_key {
+	NDB_META_KEY_VERSION = 1
 };
 
 struct ndb_json_parser {
@@ -100,6 +114,7 @@ struct ndb {
 	struct ndb_lmdb lmdb;
 	struct ndb_ingester ingester;
 	struct ndb_writer writer;
+	int version;
 	// lmdb environ handles, etc
 };
 
@@ -108,6 +123,224 @@ struct ndb_tsid {
 	unsigned char id[32];
 	uint64_t timestamp;
 };
+
+// Copies only lowercase characters to the destination string and fills the rest with null bytes.
+// `dst` and `src` are pointers to the destination and source strings, respectively.
+// `n` is the maximum number of characters to copy.
+static void lowercase_strncpy(char *dst, const char *src, int n) {
+	int j = 0, i = 0;
+
+	if (!dst || !src || n == 0) {
+		return;
+	}
+
+	while (src[i] != '\0' && j < n) {
+		dst[j++] = tolower(src[i++]);
+	}
+
+	// Null-terminate and fill the destination string
+	while (j < n) {
+		dst[j++] = '\0';
+	}
+}
+
+
+static void ndb_make_search_key(struct ndb_search_key *key, unsigned char *id,
+			        uint64_t timestamp, const char *search)
+{
+	memcpy(key->id, id, 32);
+	key->timestamp = timestamp;
+	lowercase_strncpy(key->search, search, sizeof(key->search) - 1);
+	key->search[sizeof(key->search) - 1] = '\0';
+}
+
+static int ndb_write_profile_search_index(struct ndb_lmdb *lmdb,
+					  MDB_txn *txn,
+					  struct ndb_search_key *index_key,
+					  uint64_t profile_key)
+{
+	int rc;
+	MDB_val key, val;
+	
+	key.mv_data = index_key;
+	key.mv_size = sizeof(*index_key);
+	val.mv_data = &profile_key;
+	val.mv_size = sizeof(profile_key);
+
+	if ((rc = mdb_put(txn, lmdb->dbs[NDB_DB_PROFILE_SEARCH], &key, &val, 0))) {
+		ndb_debug("ndb_write_profile_search_index failed: %s\n",
+			  mdb_strerror(rc));
+		return 0;
+	}
+
+	return 1;
+}
+
+
+// map usernames and display names to profile keys for user searching
+static int ndb_write_profile_search_indices(struct ndb_lmdb *lmdb,
+					    MDB_txn *txn,
+					    struct ndb_note *note,
+					    uint64_t profile_key,
+					    void *profile_root)
+{
+	struct ndb_search_key index;
+	NdbProfileRecord_table_t profile_record;
+	NdbProfile_table_t profile;
+
+	profile_record = NdbProfileRecord_as_root(profile_root);
+	profile = NdbProfileRecord_profile_get(profile_record);
+
+	const char *name = NdbProfile_name_get(profile);
+	const char *display_name = NdbProfile_display_name_get(profile);
+
+	// words + pubkey + created
+	if (name) {
+		ndb_make_search_key(&index, note->pubkey, note->created_at,
+				    name);
+		if (!ndb_write_profile_search_index(lmdb, txn, &index,
+						    profile_key))
+			return 0;
+	}
+
+	if (display_name) {
+		// don't write the same name/display_name twice
+		if (name && !strcmp(display_name, name)) {
+			return 1;
+		}
+		ndb_make_search_key(&index, note->pubkey, note->created_at,
+				    display_name);
+		if (!ndb_write_profile_search_index(lmdb, txn, &index,
+						    profile_key))
+			return 0;
+	}
+
+	return 1;
+}
+
+int ndb_begin_query(struct ndb *ndb, struct ndb_txn *txn)
+{
+	txn->ndb = ndb;
+	MDB_txn **mdb_txn = (MDB_txn **)&txn->mdb_txn;
+	return mdb_txn_begin(ndb->lmdb.env, NULL, 0, mdb_txn) == 0;
+}
+
+
+// Migrations
+//
+
+static int ndb_migrate_user_search_indices(struct ndb *ndb)
+{
+	int rc;
+	MDB_cursor *cur;
+	MDB_val k, v;
+	void *profile_root;
+	NdbProfileRecord_table_t record;
+	struct ndb_txn txn;
+	struct ndb_note *note;
+	uint64_t note_key, profile_key;
+	size_t len;
+	int count;
+
+	if (!ndb_begin_query(ndb, &txn)) {
+		fprintf(stderr, "ndb_migrate_user_search_indices: ndb_begin_query failed\n");
+		return 0;
+	}
+
+	if ((rc = mdb_cursor_open(txn.mdb_txn, ndb->lmdb.dbs[NDB_DB_PROFILE], &cur))) {
+		fprintf(stderr, "ndb_migrate_user_search_indices: mdb_cursor_open failed, error %d\n", rc);
+		return 0;
+	}
+
+	count = 0;
+
+	// loop through all profiles and write search indices
+	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		profile_root = v.mv_data;
+		profile_key = *((uint64_t*)k.mv_data);
+		record = NdbProfileRecord_as_root(profile_root);
+		note_key = NdbProfileRecord_note_key(record);
+		note = ndb_get_note_by_key(&txn, note_key, &len);
+
+		if (note == NULL) {
+			fprintf(stderr, "ndb_migrate_user_search_indices: note lookup failed\n");
+			return 0;
+		}
+
+		if (!ndb_write_profile_search_indices(&ndb->lmdb, txn.mdb_txn,
+						      note, profile_key,
+						      profile_root)) {
+
+			fprintf(stderr, "ndb_migrate_user_search_indices: ndb_write_profile_search_indices failed\n");
+			return 0;
+		}
+
+		count++;
+	}
+
+	fprintf(stderr, "migrated %d profiles to include search indices\n", count);
+
+	mdb_cursor_close(cur);
+	mdb_txn_commit(txn.mdb_txn);
+
+	return 1;
+}
+
+static int ndb_migrate_lower_user_search_indices(struct ndb *ndb)
+{
+	MDB_txn *txn;
+
+	if (mdb_txn_begin(ndb->lmdb.env, NULL, 0, &txn)) {
+		fprintf(stderr, "ndb_migrate_lower_user_search_indices: ndb_txn_begin failed\n");
+		return 0;
+	}
+
+	// just drop the search db so we can rebuild it
+	if (mdb_drop(txn, ndb->lmdb.dbs[NDB_DB_PROFILE_SEARCH], 0)) {
+		fprintf(stderr, "ndb_migrate_lower_user_search_indices: mdb_drop failed\n");
+		return 0;
+	}
+
+	mdb_txn_commit(txn);
+
+	return ndb_migrate_user_search_indices(ndb);
+}
+
+static struct ndb_migration MIGRATIONS[] = {
+	{ .fn = ndb_migrate_user_search_indices },
+	{ .fn = ndb_migrate_lower_user_search_indices }
+};
+
+
+int ndb_db_version(struct ndb *ndb)
+{
+	int rc;
+	uint64_t version, version_key;
+	MDB_val k, v;
+	MDB_txn *txn;
+
+	version_key = NDB_META_KEY_VERSION;
+	k.mv_data = &version_key;
+	k.mv_size = sizeof(version_key);
+
+	if ((rc = mdb_txn_begin(ndb->lmdb.env, NULL, 0, &txn))) {
+		fprintf(stderr, "ndb_db_version: mdb_txn_begin failed, error %d\n", rc);
+		return -1;
+	}
+
+	if (mdb_get(txn, ndb->lmdb.dbs[NDB_DB_NDB_META], &k, &v)) {
+		version = -1;
+	} else {
+		if (v.mv_size != 8) {
+			fprintf(stderr, "run_migrations: invalid version size?");
+			return 0;
+		}
+		version = *((uint64_t*)v.mv_data);
+	}
+
+	mdb_txn_abort(txn);
+	return version;
+}
 
 /** From LMDB: Compare two items lexically */
 static int mdb_cmp_memn(const MDB_val *a, const MDB_val *b) {
@@ -130,6 +363,7 @@ static int ndb_tsid_compare(const MDB_val *a, const MDB_val *b)
 {
 	struct ndb_tsid *tsa, *tsb;
 	MDB_val a2 = *a, b2 = *b;
+
 	a2.mv_size = sizeof(tsa->id);
 	b2.mv_size = sizeof(tsb->id);
 
@@ -175,6 +409,7 @@ enum ndb_writer_msgtype {
 	NDB_WRITER_QUIT, // kill thread immediately
 	NDB_WRITER_NOTE, // write a note to the db
 	NDB_WRITER_PROFILE, // write a profile to the db
+	NDB_WRITER_DBMETA, // write ndb metadata
 };
 
 struct ndb_ingester_event {
@@ -199,13 +434,24 @@ struct ndb_ingester_msg {
 	};
 };
 
+struct ndb_writer_ndb_meta {
+	// these are 64 bit because I'm paranoid of db-wide alignment issues
+	uint64_t version;
+};
+
 struct ndb_writer_msg {
 	enum ndb_writer_msgtype type;
 	union {
 		struct ndb_writer_note note;
 		struct ndb_writer_profile profile;
+		struct ndb_writer_ndb_meta ndb_meta;
 	};
 };
+
+void ndb_end_query(struct ndb_txn *txn)
+{
+	mdb_txn_abort(txn->mdb_txn);
+}
 
 int ndb_note_verify(void *ctx, unsigned char pubkey[32], unsigned char id[32],
 		    unsigned char sig[64])
@@ -222,6 +468,12 @@ int ndb_note_verify(void *ctx, unsigned char pubkey[32], unsigned char id[32],
 	if (!ok) return 0;
 
 	return 1;
+}
+
+static inline int ndb_writer_queue_msg(struct ndb_writer *writer,
+				       struct ndb_writer_msg *msg)
+{
+	return prot_queue_push(&writer->inbox, msg);
 }
 
 static inline int ndb_writer_queue_msgs(struct ndb_writer *writer,
@@ -249,10 +501,12 @@ int ndb_get_tsid(MDB_txn *txn, struct ndb_lmdb *lmdb, enum ndb_dbs db,
 {
 	MDB_val k, v;
 	MDB_cursor *cur;
-	struct ndb_tsid tsid;
 	int success = 0;
+	struct ndb_tsid tsid;
 
+	// position at the most recent
 	ndb_tsid_high(&tsid, id);
+
 	k.mv_data = &tsid;
 	k.mv_size = sizeof(tsid);
 
@@ -280,23 +534,17 @@ cleanup:
 	return success;
 }
 
-static void *ndb_lookup_by_key(struct ndb *ndb, uint64_t key,
+static void *ndb_lookup_by_key(struct ndb_txn *txn, uint64_t key,
 			       enum ndb_dbs store, size_t *len)
 {
 	MDB_val k, v;
-	MDB_txn *txn;
 
 	k.mv_data = &key;
 	k.mv_size = sizeof(key);
 
-	if (mdb_txn_begin(ndb->lmdb.env, 0, 0, &txn)) {
-		ndb_debug("ndb_get_note_by_id: mdb_txn_begin failed\n");
-		return NULL;
-	}
-
-	if (mdb_get(txn, ndb->lmdb.dbs[store], &k, &v)) {
+	if (mdb_get(txn->mdb_txn, txn->ndb->lmdb.dbs[store], &k, &v)) {
 		ndb_debug("ndb_get_profile_by_pubkey: mdb_get note failed\n");
-		mdb_txn_abort(txn);
+		mdb_txn_abort(txn->mdb_txn);
 		return NULL;
 	}
 
@@ -306,53 +554,75 @@ static void *ndb_lookup_by_key(struct ndb *ndb, uint64_t key,
 	return v.mv_data;
 }
 
-static void *ndb_lookup_tsid(struct ndb *ndb, enum ndb_dbs ind,
+static void *ndb_lookup_tsid(struct ndb_txn *txn, enum ndb_dbs ind,
 			     enum ndb_dbs store, const unsigned char *pk,
-			     size_t *len)
+			     size_t *len, uint64_t *primkey)
 {
 	MDB_val k, v;
-	MDB_txn *txn;
 	void *res = NULL;
 	if (len)
 		*len = 0;
 
-	if (mdb_txn_begin(ndb->lmdb.env, 0, 0, &txn)) {
-		ndb_debug("ndb_get_note_by_id: mdb_txn_begin failed\n");
-		return NULL;
-	}
-
-	if (!ndb_get_tsid(txn, &ndb->lmdb, ind, pk, &k)) {
+	if (!ndb_get_tsid(txn->mdb_txn, &txn->ndb->lmdb, ind, pk, &k)) {
 		//ndb_debug("ndb_get_profile_by_pubkey: ndb_get_tsid failed\n");
-		goto cleanup;
+		return 0;
 	}
 
-	if (mdb_get(txn, ndb->lmdb.dbs[store], &k, &v)) {
+	if (primkey)
+		*primkey = *(uint64_t*)k.mv_data;
+
+	if (mdb_get(txn->mdb_txn, txn->ndb->lmdb.dbs[store], &k, &v)) {
 		ndb_debug("ndb_get_profile_by_pubkey: mdb_get note failed\n");
-		goto cleanup;
+		return 0;
 	}
 
 	res = v.mv_data;
 	assert(((uint64_t)res % 4) == 0);
 	if (len)
 		*len = v.mv_size;
-cleanup:
-	mdb_txn_abort(txn);
 	return res;
 }
 
-void *ndb_get_profile_by_pubkey(struct ndb *ndb, const unsigned char *pk, size_t *len)
+void *ndb_get_profile_by_pubkey(struct ndb_txn *txn, const unsigned char *pk, size_t *len, uint64_t *key)
 {
-	return ndb_lookup_tsid(ndb, NDB_DB_PROFILE_PK, NDB_DB_PROFILE, pk, len);
+	return ndb_lookup_tsid(txn, NDB_DB_PROFILE_PK, NDB_DB_PROFILE, pk, len, key);
 }
 
-struct ndb_note *ndb_get_note_by_id(struct ndb *ndb, const unsigned char *id, size_t *len)
+struct ndb_note *ndb_get_note_by_id(struct ndb_txn *txn, const unsigned char *id, size_t *len, uint64_t *key)
 {
-	return ndb_lookup_tsid(ndb, NDB_DB_NOTE_ID, NDB_DB_NOTE, id, len);
+	return ndb_lookup_tsid(txn, NDB_DB_NOTE_ID, NDB_DB_NOTE, id, len, key);
 }
 
-struct ndb_note *ndb_get_note_by_key(struct ndb *ndb, uint64_t key, size_t *len)
+static inline uint64_t ndb_get_indexkey_by_id(struct ndb_txn *txn,
+					      enum ndb_dbs db,
+					      const unsigned char *id)
 {
-	return ndb_lookup_by_key(ndb, key, NDB_DB_NOTE, len);
+	MDB_val k;
+
+	if (!ndb_get_tsid(txn->mdb_txn, &txn->ndb->lmdb, db, id, &k))
+		return 0;
+
+	return *(uint32_t*)k.mv_data;
+}
+
+uint64_t ndb_get_notekey_by_id(struct ndb_txn *txn, const unsigned char *id)
+{
+	return ndb_get_indexkey_by_id(txn, NDB_DB_NOTE_ID, id);
+}
+
+uint64_t ndb_get_profilekey_by_pubkey(struct ndb_txn *txn, const unsigned char *id)
+{
+	return ndb_get_indexkey_by_id(txn, NDB_DB_PROFILE_PK, id);
+}
+
+struct ndb_note *ndb_get_note_by_key(struct ndb_txn *txn, uint64_t key, size_t *len)
+{
+	return ndb_lookup_by_key(txn, key, NDB_DB_NOTE, len);
+}
+
+void *ndb_get_profile_by_key(struct ndb_txn *txn, uint64_t key, size_t *len)
+{
+	return ndb_lookup_by_key(txn, key, NDB_DB_PROFILE, len);
 }
 
 static int ndb_has_note(MDB_txn *txn, struct ndb_lmdb *lmdb, const unsigned char *id)
@@ -574,6 +844,114 @@ static uint64_t ndb_get_last_key(MDB_txn *txn, MDB_dbi db)
         return *((uint64_t*)key.mv_data);
 }
 
+//
+// make a search key meant for user queries without any other note info
+static void ndb_make_search_key_low(struct ndb_search_key *key, const char *search)
+{
+	memset(key->id, 0, sizeof(key->id));
+	key->timestamp = 0;
+	lowercase_strncpy(key->search, search, sizeof(key->search) - 1);
+	key->search[sizeof(key->search) - 1] = '\0';
+}
+
+int ndb_search_profile(struct ndb_txn *txn, struct ndb_search *search, const char *query)
+{
+	int rc;
+	struct ndb_search_key s;
+	MDB_val k, v;
+	search->cursor = NULL;
+
+	MDB_cursor **cursor = (MDB_cursor **)&search->cursor;
+
+	ndb_make_search_key_low(&s, query);
+
+	k.mv_data = &s;
+	k.mv_size = sizeof(s);
+
+	if ((rc = mdb_cursor_open(txn->mdb_txn,
+			    txn->ndb->lmdb.dbs[NDB_DB_PROFILE_SEARCH],
+			    cursor))) {
+		printf("search_profile: cursor opened failed: %s\n",
+				mdb_strerror(rc));
+		return 0;
+	}
+
+	// Position cursor at the next key greater than or equal to the specified key
+	if (mdb_cursor_get(search->cursor, &k, &v, MDB_SET_RANGE)) {
+		printf("search_profile: cursor get failed\n");
+		goto cleanup;
+	} else {
+		search->key = k.mv_data;
+		assert(v.mv_size == 8);
+		search->profile_key = *((uint64_t*)v.mv_data);
+		return 1;
+	}
+
+cleanup:
+	mdb_cursor_close(search->cursor);
+	search->cursor = NULL;
+	return 0;
+}
+
+void ndb_search_profile_end(struct ndb_search *search)
+{
+	if (search->cursor)
+		mdb_cursor_close(search->cursor);
+}
+
+int ndb_search_profile_next(struct ndb_search *search)
+{
+	int rc;
+	MDB_val k, v;
+	unsigned char *init_id;
+
+	init_id = search->key->id;
+	k.mv_data = search->key;
+	k.mv_size = sizeof(*search->key);
+
+retry:
+	if ((rc = mdb_cursor_get(search->cursor, &k, &v, MDB_NEXT))) {
+		ndb_debug("ndb_search_profile_next: %s\n",
+				mdb_strerror(rc));
+		return 0;
+	} else {
+		search->key = k.mv_data;
+		assert(v.mv_size == 8);
+		search->profile_key = *((uint64_t*)v.mv_data);
+
+		// skip duplicate pubkeys
+		if (!memcmp(init_id, search->key->id, 32))
+			goto retry;
+	}
+
+	return 1;
+}
+
+static int ndb_search_key_cmp(const MDB_val *a, const MDB_val *b)
+{
+	int cmp;
+	struct ndb_search_key *ska, *skb;
+
+	ska = a->mv_data;
+	skb = b->mv_data;
+
+	MDB_val a2 = *a;
+	MDB_val b2 = *b;
+
+	a2.mv_data = ska->search;
+	a2.mv_size = sizeof(ska->search) + sizeof(ska->id);
+
+	cmp = mdb_cmp_memn(&a2, &b2);
+	if (cmp) return cmp;
+
+	if (ska->timestamp < skb->timestamp)
+		return -1;
+	else if (ska->timestamp > skb->timestamp)
+		return 1;
+
+	return 0;
+}
+
 static int ndb_write_profile(struct ndb_lmdb *lmdb, MDB_txn *txn,
 			     struct ndb_writer_profile *profile,
 			     uint64_t note_key)
@@ -637,6 +1015,13 @@ static int ndb_write_profile(struct ndb_lmdb *lmdb, MDB_txn *txn,
 		return 0;
 	}
 
+	// write name, display_name profile search indices
+	if (!ndb_write_profile_search_indices(lmdb, txn, note, profile_key,
+					      flatbuf)) {
+		ndb_debug("failed to write profile search indices\n");
+		return 0;
+	}
+
 	return 1;
 }
 
@@ -684,6 +1069,29 @@ static uint64_t ndb_write_note(struct ndb_lmdb *lmdb, MDB_txn *txn,
 	return note_key;
 }
 
+// only to be called from the writer thread
+static void ndb_write_version(struct ndb_lmdb *lmdb, MDB_txn *txn, uint64_t version)
+{
+	int rc;
+	MDB_val key, val;
+	uint64_t version_key;
+
+	version_key = NDB_META_KEY_VERSION;
+	
+	key.mv_data = &version_key;
+	key.mv_size = sizeof(version_key);
+	val.mv_data = &version;
+	val.mv_size = sizeof(version);
+
+	if ((rc = mdb_put(txn, lmdb->dbs[NDB_DB_NDB_META], &key, &val, 0))) {
+		ndb_debug("write version to ndb_meta failed: %s\n",
+				mdb_strerror(rc));
+		return;
+	}
+
+	fprintf(stderr, "writing version %" PRIu64 "\n", version);
+}
+
 static void *ndb_writer_thread(void *data)
 {
 	struct ndb_writer *writer = data;
@@ -704,6 +1112,7 @@ static void *ndb_writer_thread(void *data)
 			switch (msg->type) {
 			case NDB_WRITER_NOTE: any_note = 1; break;
 			case NDB_WRITER_PROFILE: any_note = 1; break;
+			case NDB_WRITER_DBMETA: any_note = 1; break;
 			case NDB_WRITER_QUIT: break;
 			}
 		}
@@ -736,6 +1145,9 @@ static void *ndb_writer_thread(void *data)
 				break;
 			case NDB_WRITER_NOTE:
 				ndb_write_note(writer->lmdb, txn, &msg->note);
+				break;
+			case NDB_WRITER_DBMETA:
+				ndb_write_version(writer->lmdb, txn, msg->ndb_meta.version);
 				break;
 			}
 		}
@@ -932,7 +1344,7 @@ static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t map
 	}
 
 	if ((rc = mdb_env_set_maxdbs(lmdb->env, NDB_DBS))) {
-		fprintf(stderr, "mdb_env_set_mapsize failed, error %d\n", rc);
+		fprintf(stderr, "mdb_env_set_maxdbs failed, error %d\n", rc);
 		return 0;
 	}
 
@@ -965,6 +1377,19 @@ static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t map
 		return 0;
 	}
 
+	// profile search db
+	if ((rc = mdb_dbi_open(txn, "profile_search", MDB_CREATE, &lmdb->dbs[NDB_DB_PROFILE_SEARCH]))) {
+		fprintf(stderr, "mdb_dbi_open profile_search failed, error %d\n", rc);
+		return 0;
+	}
+	mdb_set_compare(txn, lmdb->dbs[NDB_DB_PROFILE_SEARCH], ndb_search_key_cmp);
+
+	// ndb metadata (db version, etc)
+	if ((rc = mdb_dbi_open(txn, "ndb_meta", MDB_CREATE | MDB_INTEGERKEY, &lmdb->dbs[NDB_DB_NDB_META]))) {
+		fprintf(stderr, "mdb_dbi_open ndb_meta failed, error %d\n", rc);
+		return 0;
+	}
+
 	// id+ts index flags
 	unsigned int tsid_flags = MDB_CREATE | MDB_DUPSORT | MDB_DUPFIXED;
 
@@ -991,7 +1416,59 @@ static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t map
 	return 1;
 }
 
-int ndb_init(struct ndb **pndb, const char *filename, size_t mapsize, int ingester_threads)
+static int ndb_queue_write_version(struct ndb *ndb, uint64_t version)
+{
+	struct ndb_writer_msg msg;
+	msg.type = NDB_WRITER_DBMETA;
+	msg.ndb_meta.version = version;
+	return ndb_writer_queue_msg(&ndb->writer, &msg);
+}
+
+static int ndb_run_migrations(struct ndb *ndb)
+{
+	uint64_t version, latest_version, i;
+	
+	latest_version = sizeof(MIGRATIONS) / sizeof(MIGRATIONS[0]);
+
+	if ((version = ndb_db_version(ndb)) == -1) {
+		fprintf(stderr, "run_migrations: no version found, assuming new db\n");
+		version = latest_version;
+
+		// no version found. fresh db?
+		if (!ndb_queue_write_version(ndb, version)) {
+			fprintf(stderr, "run_migrations: failed writing db version");
+			return 0;
+		}
+
+		return 1;
+	} else {
+		fprintf(stderr, "ndb: version %" PRIu64 " found\n", version);
+	}
+
+	if (version < latest_version)
+		fprintf(stderr, "nostrdb: migrating v%d -> v%d\n",
+				(int)version, (int)latest_version);
+
+	for (i = version; i < latest_version; i++) {
+		if (!MIGRATIONS[i].fn(ndb)) {
+			fprintf(stderr, "run_migrations: migration v%d -> v%d failed\n", (int)i, (int)(i+1));
+			return 0;
+		}
+
+		if (!ndb_queue_write_version(ndb, i+1)) {
+			fprintf(stderr, "run_migrations: failed writing db version");
+			return 0;
+		}
+
+		version = i+1;
+	}
+
+	ndb->version = version;
+
+	return 1;
+}
+
+int ndb_init(struct ndb **pndb, const char *filename, size_t mapsize, int ingester_threads, int flags)
 {
 	struct ndb *ndb;
 	//MDB_dbi ind_id; // TODO: ind_pk, etc
@@ -1006,13 +1483,18 @@ int ndb_init(struct ndb **pndb, const char *filename, size_t mapsize, int ingest
 		return 0;
 
 	if (!ndb_writer_init(&ndb->writer, &ndb->lmdb)) {
-		fprintf(stderr, "ndb_writer_init failed");
+		fprintf(stderr, "ndb_writer_init failed\n");
 		return 0;
 	}
 
 	if (!ndb_ingester_init(&ndb->ingester, &ndb->writer, ingester_threads)) {
-		fprintf(stderr, "failed to initialize %d ingester thread(s)",
+		fprintf(stderr, "failed to initialize %d ingester thread(s)\n",
 				ingester_threads);
+		return 0;
+	}
+
+	if (!ndb_flag_set(flags, NDB_FLAG_NOMIGRATE) && !ndb_run_migrations(ndb)) {
+		fprintf(stderr, "failed to run migrations\n");
 		return 0;
 	}
 

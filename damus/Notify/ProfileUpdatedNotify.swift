@@ -19,7 +19,7 @@ extension NotifyHandler {
 }
 
 extension Notifications {
-    static func profile_updated(pubkey: Pubkey, profile: Profile) -> Notifications<ProfileUpdatedNotify> {
-        .init(.init(payload: ProfileUpdate(pubkey: pubkey, profile: profile)))
+    static func profile_updated(_ update: ProfileUpdate) -> Notifications<ProfileUpdatedNotify> {
+        .init(.init(payload: update))
     }
 }

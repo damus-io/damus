@@ -9,12 +9,6 @@ import SwiftUI
 import AVKit
 import MediaPlayer
 
-struct TimestampedProfile {
-    let profile: Profile
-    let timestamp: UInt32
-    let event: NostrEvent
-}
-
 struct ZapSheet {
     let target: ZapTarget
     let lnurl: String
@@ -56,20 +50,6 @@ enum Sheets: Identifiable {
     }
 }
 
-enum FilterState : Int {
-    case posts_and_replies = 1
-    case posts = 0
-
-    func filter(ev: NostrEvent) -> Bool {
-        switch self {
-        case .posts:
-            return ev.known_kind == .boost || !ev.is_reply(.empty)
-        case .posts_and_replies:
-            return true
-        }
-    }
-}
-
 struct ContentView: View {
     let keypair: Keypair
     
@@ -96,7 +76,7 @@ struct ContentView: View {
     @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
     @AppStorage("has_seen_suggested_users") private var hasSeenSuggestedUsers = false
     let sub_id = UUID().description
-    
+
     @Environment(\.colorScheme) var colorScheme
     
     // connect retry timer
@@ -106,7 +86,13 @@ struct ContentView: View {
         Text("Are you lost?", comment: "Text asking the user if they are lost in the app.")
         .id("what")
     }
-    
+
+    func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
+        var filters = ContentFilters.defaults(damus_state!.settings)
+        filters.append(fstate.filter)
+        return ContentFilters(filters: filters).filter
+    }
+
     var PostingTimelineView: some View {
         VStack {
             ZStack {
@@ -114,10 +100,10 @@ struct ContentView: View {
                     // This is needed or else there is a bug when switching from the 3rd or 2nd tab to first. no idea why.
                     mystery
                     
-                    contentTimelineView(filter: FilterState.posts.filter)
+                    contentTimelineView(filter: content_filter(.posts))
                         .tag(FilterState.posts)
                         .id(FilterState.posts)
-                    contentTimelineView(filter: FilterState.posts_and_replies.filter)
+                    contentTimelineView(filter: content_filter(.posts_and_replies))
                         .tag(FilterState.posts_and_replies)
                         .id(FilterState.posts_and_replies)
                 }
@@ -373,33 +359,33 @@ struct ContentView: View {
             // wallet with an associated
             guard let ds = self.damus_state,
                   let lud16 = nwc.lud16,
-                  let keypair = ds.keypair.to_full(),
-                  let profile = ds.profiles.lookup(id: ds.pubkey),
-                  lud16 != profile.lud16
+                  let keypair = ds.keypair.to_full()
             else {
                 return
             }
-            
+
+            let profile_txn = ds.profiles.lookup(id: ds.pubkey)
+
+            guard let profile = profile_txn.unsafeUnownedValue,
+                  lud16 != profile.lud16 else {
+                return
+            }
+
             // clear zapper cache for old lud16
             if profile.lud16 != nil {
                 // TODO: should this be somewhere else, where we process profile events!?
                 invalidate_zapper_cache(pubkey: keypair.pubkey, profiles: ds.profiles, lnurl: ds.lnurls)
             }
             
-            profile.lud16 = lud16
-            guard let ev = make_metadata_event(keypair: keypair, metadata: profile) else {
-                return
-            }
+            let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: lud16, nip05: profile.nip05, damus_donation: profile.damus_donation, reactions: profile.reactions)
+
+            guard let ev = make_metadata_event(keypair: keypair, metadata: prof) else { return }
             ds.postbox.send(ev)
         }
         .onReceive(handle_notify(.broadcast)) { ev in
-            guard let ds = self.damus_state else {
-                return
-            }
+            guard let ds = self.damus_state else { return }
+
             ds.postbox.send(ev)
-            if let profile = ds.profiles.lookup_with_timestamp(id: ev.pubkey) {
-                ds.postbox.send(profile.event)
-            }
         }
         .onReceive(handle_notify(.unfollow)) { target in
             guard let state = self.damus_state else { return }
@@ -501,19 +487,20 @@ struct ContentView: View {
         }
         .onReceive(handle_notify(.onlyzaps_mode)) { hide in
             home.filter_events()
-            
-            guard let damus_state,
-                  let profile = damus_state.profiles.lookup(id: damus_state.pubkey),
-                  let keypair = damus_state.keypair.to_full()
+
+            guard let ds = damus_state else { return }
+            let profile_txn = ds.profiles.lookup(id: ds.pubkey)
+
+            guard let profile = profile_txn.unsafeUnownedValue,
+                  let keypair = ds.keypair.to_full()
             else {
                 return
             }
-            
-            profile.reactions = !hide
-            guard let profile_ev = make_metadata_event(keypair: keypair, metadata: profile) else {
-                return
-            }
-            damus_state.postbox.send(profile_ev)
+
+            let prof = Profile(name: profile.name, display_name: profile.display_name, about: profile.about, picture: profile.picture, banner: profile.banner, website: profile.website, lud06: profile.lud06, lud16: profile.lud16, nip05: profile.nip05, damus_donation: profile.damus_donation, reactions: !hide)
+
+            guard let profile_ev = make_metadata_event(keypair: keypair, metadata: prof) else { return }
+            ds.postbox.send(profile_ev)
         }
         .alert(NSLocalizedString("User muted", comment: "Alert message to indicate the user has been muted"), isPresented: $user_muted_confirm, actions: {
             Button(NSLocalizedString("Thanks!", comment: "Button to close out of alert that informs that the action to muted a user was successful.")) {
@@ -521,11 +508,12 @@ struct ContentView: View {
             }
         }, message: {
             if let pubkey = self.muting {
-                let profile = damus_state!.profiles.lookup(id: pubkey)
-                let name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
+                let name = damus_state!.profiles.lookup(id: pubkey).map { profile in
+                    Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
+                }.value
                 Text("\(name) has been muted", comment: "Alert message that informs a user was muted.")
             } else {
-                Text("User has been muted", comment: "Alert message that informs a user was d.")
+                Text("User has been muted", comment: "Alert message that informs a user was muted.")
             }
         })
         .alert(NSLocalizedString("Create new mutelist", comment: "Title of alert prompting the user to create a new mutelist."), isPresented: $confirm_overwrite_mutelist, actions: {
@@ -581,8 +569,9 @@ struct ContentView: View {
             }
         }, message: {
             if let pubkey = muting {
-                let profile = damus_state?.profiles.lookup(id: pubkey)
-                let name = Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
+                let name = damus_state?.profiles.lookup(id: pubkey).map({ profile in
+                    Profile.displayName(profile: profile, pubkey: pubkey).username.truncate(maxLength: 50)
+                }).value ?? "unknown"
                 Text("Mute \(name)?", comment: "Alert message prompt to ask if a user should be muted.")
             } else {
                 Text("Could not find user to mute...", comment: "Alert message to indicate that the muted user could not be found.")
@@ -605,7 +594,10 @@ struct ContentView: View {
     }
 
     func connect() {
-        let pool = RelayPool()
+        // nostrdb
+        let ndb = Ndb()!
+
+        let pool = RelayPool(ndb: ndb)
         let model_cache = RelayModelCache()
         let relay_filters = RelayFilters(our_pubkey: pubkey)
         let bootstrap_relays = load_bootstrap_relays(pubkey: pubkey)
@@ -630,13 +622,14 @@ struct ContentView: View {
             try? pool.add_relay(.nwc(url: nwc.relay))
         }
 
+
         let user_search_cache = UserSearchCache()
         self.damus_state = DamusState(pool: pool,
                                       keypair: keypair,
                                       likes: EventCounter(our_pubkey: pubkey),
                                       boosts: EventCounter(our_pubkey: pubkey),
                                       contacts: Contacts(our_pubkey: pubkey),
-                                      profiles: Profiles(user_search_cache: user_search_cache),
+                                      profiles: Profiles(ndb: ndb),
                                       dms: home.dms,
                                       previews: PreviewCache(),
                                       zaps: Zaps(our_pubkey: pubkey),
@@ -645,7 +638,7 @@ struct ContentView: View {
                                       relay_filters: relay_filters,
                                       relay_model_cache: model_cache,
                                       drafts: Drafts(),
-                                      events: EventCache(),
+                                      events: EventCache(ndb: ndb),
                                       bookmarks: BookmarksManager(pubkey: pubkey),
                                       postbox: PostBox(pool: pool),
                                       bootstrap_relays: bootstrap_relays,
@@ -653,9 +646,9 @@ struct ContentView: View {
                                       muted_threads: MutedThreadsManager(keypair: keypair),
                                       wallet: WalletModel(settings: settings),
                                       nav: self.navigationCoordinator,
-                                      user_search_cache: user_search_cache,
                                       music: MusicController(onChange: music_changed),
-                                      video: VideoController()
+                                      video: VideoController(),
+                                      ndb: ndb
         )
         home.damus_state = self.damus_state!
         
@@ -808,7 +801,7 @@ enum FindEventType {
 }
 
 enum FoundEvent {
-    case profile(Profile, NostrEvent)
+    case profile(Pubkey)
     case invalid_profile(NostrEvent)
     case event(NostrEvent)
 }
@@ -825,8 +818,10 @@ func find_event_with_subid(state: DamusState, query query_: FindEvent, subid: St
     
     switch query {
     case .profile(let pubkey):
-        if let profile = state.profiles.lookup_with_timestamp(id: pubkey) {
-            callback(.profile(profile.profile, profile.event))
+        if let record = state.ndb.lookup_profile(pubkey).unsafeUnownedValue,
+           record.profile != nil
+        {
+            callback(.profile(pubkey))
             return
         }
         filter = NostrFilter(kinds: [.metadata], limit: 1, authors: [pubkey])
@@ -863,14 +858,11 @@ func find_event_with_subid(state: DamusState, query query_: FindEvent, subid: St
             switch query {
             case .profile:
                 if ev.known_kind == .metadata {
-                    process_metadata_event(events: state.events, our_pubkey: state.pubkey, profiles: state.profiles, ev: ev) { profile in
-                        guard let profile else {
-                            callback(.invalid_profile(ev))
-                            return
-                        }
-                        callback(.profile(profile, ev))
+                    guard state.ndb.lookup_profile_key(ev.pubkey) != nil else {
+                        callback(.invalid_profile(ev))
                         return
                     }
+                    callback(.profile(ev.pubkey))
                 }
             case .event:
                 callback(.event(ev))
@@ -926,7 +918,6 @@ func handle_unfollow(state: DamusState, unfollow: FollowRef) -> Bool {
     switch unfollow {
     case .pubkey(let pk):
         state.contacts.remove_friend(pk)
-        state.user_search_cache.updateOwnContactsPetnames(id: state.pubkey, oldEvent: old_contacts, newEvent: ev)
     case .hashtag:
         // nothing to handle here really
         break

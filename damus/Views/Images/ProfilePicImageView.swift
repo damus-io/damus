@@ -93,7 +93,7 @@ struct ProfileZoomView_Previews: PreviewProvider {
         ProfilePicImageView(
             pubkey: test_pubkey,
             profiles: make_preview_profiles(test_pubkey),
-            settings: test_damus_state().settings
+            settings: test_damus_state.settings
         )
     }
 }

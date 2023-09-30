@@ -36,6 +36,6 @@ struct RelayFilterView: View {
 
 struct RelayFilterView_Previews: PreviewProvider {
     static var previews: some View {
-        RelayFilterView(state: test_damus_state(), timeline: .search)
+        RelayFilterView(state: test_damus_state, timeline: .search)
     }
 }

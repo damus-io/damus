@@ -56,6 +56,6 @@ struct EventDetailBar: View {
 
 struct EventDetailBar_Previews: PreviewProvider {
     static var previews: some View {
-        EventDetailBar(state: test_damus_state(), target: .empty, target_pk: .empty)
+        EventDetailBar(state: test_damus_state, target: .empty, target_pk: .empty)
     }
 }

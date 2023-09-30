@@ -74,6 +74,11 @@ class Contacts {
         guard let ev = self.event else { return Set() }
         return Set(ev.referenced_hashtags.map({ $0.hashtag }))
     }
+    
+    func follows(hashtag: Hashtag) -> Bool {
+        guard let ev = self.event else { return false }
+        return ev.referenced_hashtags.first(where: { $0 == hashtag }) != nil
+    }
 
     func add_friend_pubkey(_ pubkey: Pubkey) {
         friends.insert(pubkey)

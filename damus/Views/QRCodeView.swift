@@ -118,9 +118,11 @@ struct QRCodeView: View {
     
     var QRView: some View {
         VStack(alignment: .center) {
-            let profile = damus_state.profiles.lookup(id: pubkey)
-            
-            if (damus_state.profiles.lookup(id: damus_state.pubkey)?.picture) != nil {
+            let profile_txn = damus_state.profiles.lookup(id: pubkey)
+            let profile = profile_txn.unsafeUnownedValue
+            let our_profile = damus_state.ndb.lookup_profile_with_txn(damus_state.pubkey, txn: profile_txn)
+
+            if our_profile?.profile?.picture != nil {
                 ProfilePicView(pubkey: pubkey, size: 90.0, highlight: .custom(DamusColors.white, 3.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                     .padding(.top, 50)
             } else {
@@ -293,7 +295,7 @@ struct QRCodeView: View {
 
 struct QRCodeView_Previews: PreviewProvider {
     static var previews: some View {
-        QRCodeView(damus_state: test_damus_state(), pubkey: test_note.pubkey)
+        QRCodeView(damus_state: test_damus_state, pubkey: test_note.pubkey)
     }
 }
 

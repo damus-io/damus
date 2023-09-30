@@ -39,6 +39,6 @@ struct MaybeAnonPfpView: View {
 
 struct MaybeAnonPfpView_Previews: PreviewProvider {
     static var previews: some View {
-        MaybeAnonPfpView(state: test_damus_state(), is_anon: true, pubkey: ANON_PUBKEY, size: PFP_SIZE)
+        MaybeAnonPfpView(state: test_damus_state, is_anon: true, pubkey: ANON_PUBKEY, size: PFP_SIZE)
     }
 }

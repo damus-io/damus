@@ -37,7 +37,7 @@ final class NostrScriptTests: XCTestCase {
     
     func test_bool_set() throws {
         let data = try load_bool_set_test_wasm().bytes
-        let pool = RelayPool()
+        let pool = RelayPool(ndb: .empty)
         let script = NostrScript(pool: pool, data: data)
         let pk = Pubkey(hex: "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245")!
         UserSettingsStore.pubkey = pk

@@ -84,7 +84,7 @@ final class WalletConnectTests: XCTestCase {
         let pk =  "89446b900c70d62438dcf66756405eea6225ad94dc61f3856f62f9699111a9a6"
         let nwc = WalletConnectURL(str: "nostrwalletconnect://\(pk)?relay=ws://127.0.0.1&secret=\(sec)&lud16=jb55@jb55.com")!
         
-        let pool = RelayPool()
+        let pool = RelayPool(ndb: .empty)
         let box = PostBox(pool: pool)
         
         nwc_pay(url: nwc, pool: pool, post: box, invoice: "invoice")

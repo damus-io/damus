@@ -16,7 +16,7 @@ struct EventDetailView: View {
 
 struct EventDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        let _ = test_damus_state()
+        let _ = test_damus_state
         EventDetailView()
     }
 }

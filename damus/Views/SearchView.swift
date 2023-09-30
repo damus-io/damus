@@ -79,7 +79,7 @@ func describe_search(_ filter: NostrFilter) -> DescribedSearch {
 
 struct SearchView_Previews: PreviewProvider {
     static var previews: some View {
-        let test_state = test_damus_state()
+        let test_state = test_damus_state
         let filter = NostrFilter(hashtag: ["bitcoin"])
         
         let model = SearchModel(state: test_state, search: filter)

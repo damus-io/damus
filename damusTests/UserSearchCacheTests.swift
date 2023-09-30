@@ -11,9 +11,10 @@ import XCTest
 final class UserSearchCacheTests: XCTestCase {
 
     var keypair: FullKeypair? = nil
-    let damusState = DamusState.empty
+    let damusState = test_damus_state
     let nip05 = "_@somedomain.com"
 
+    @MainActor
     override func setUpWithError() throws {
         keypair = try XCTUnwrap(generate_new_keypair())
 
@@ -24,8 +25,6 @@ final class UserSearchCacheTests: XCTestCase {
             damusState.profiles.set_validated(pubkey, nip05: validatedNip05)
 
             let profile = Profile(name: "tyiu", display_name: "Terry Yiu", about: nil, picture: nil, banner: nil, website: nil, lud06: nil, lud16: nil, nip05: nip05, damus_donation: nil)
-            let timestampedProfile = TimestampedProfile(profile: profile, timestamp: 0, event: test_note)
-            damusState.profiles.add(id: pubkey, profile: timestampedProfile)
 
             // Lookup to synchronize access on profiles dictionary to avoid race conditions.
             let _ = damusState.profiles.lookup(id: pubkey)
@@ -47,6 +46,7 @@ final class UserSearchCacheTests: XCTestCase {
         XCTAssertEqual(damusState.user_search_cache.search(key: "i"), [keypair.pubkey])
     }
 
+    @MainActor
     func testUpdateProfile() throws {
         let keypair = try XCTUnwrap(keypair)
 
@@ -54,13 +54,6 @@ final class UserSearchCacheTests: XCTestCase {
         _ = try XCTUnwrap(NIP05.parse(newNip05))
 
         damusState.profiles.set_validated(keypair.pubkey, nip05: NIP05.parse(newNip05))
-
-        let newProfile = Profile(name: "whoami", display_name: "T-DAWG", about: nil, picture: nil, banner: nil, website: nil, lud06: nil, lud16: nil, nip05: newNip05, damus_donation: nil)
-        let newTimestampedProfile = TimestampedProfile(profile: newProfile, timestamp: 1000, event: test_note)
-        damusState.profiles.add(id: keypair.pubkey, profile: newTimestampedProfile)
-
-        // Lookup to synchronize access on profiles dictionary to avoid race conditions.
-        let _ = damusState.profiles.lookup(id: keypair.pubkey)
 
         // Old profile attributes are removed from cache.
         XCTAssertEqual(damusState.user_search_cache.search(key: "tyiu"), [])

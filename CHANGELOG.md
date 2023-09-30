@@ -1,3 +1,36 @@
+## [1.6-18] - 2023-09-21
+
+### Added
+
+- Add followed hashtags to your following list (Daniel D’Aquino)
+- Add "Do not show #nsfw tagged posts" setting (Daniel D’Aquino)
+- Hold tap to preview status URL (Jericho Hasselbush)
+- Finnish translations (etrikaj)
+
+
+### Changed
+
+- Switch to nostrdb for @'s and user search (William Casarin)
+- Use nostrdb for profiles (William Casarin)
+- Updated relay view (ericholguin)
+- Increase size of the hitbox on note ellipsis button (Daniel D’Aquino)
+- Make carousel tab dots tappable (Bryan Montz)
+- Move the "Follow you" badge into the profile header (Grimless)
+
+
+### Fixed
+
+- Fix text composer wrapping issue when mentioning npub (Daniel D’Aquino)
+- Make blurred videos viewable by allowing blur to disappear once tapped (Daniel D’Aquino)
+- Fix parsing issue with NIP-47 compliant NWC urls without double-slashes (Daniel D’Aquino)
+- Fix padding of username next to pfp on some views (William Casarin)
+- Fixes issue where username with multiple emojis would place cursor in strange position. (Jericho Hasselbush)
+- Fixed audio in video playing twice (Bryan Montz)
+- Fix crash when long pressing custom reactions (William Casarin)
+- Fix random crashom due to old profile database (William Casarin)
+
+[1.6-18]: https://github.com/damus-io/damus/releases/tag/v1.6-18
+
 ## [1.6-17] - 2023-08-23
 
 ### Added

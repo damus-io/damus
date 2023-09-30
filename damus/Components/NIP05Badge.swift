@@ -45,8 +45,7 @@ struct NIP05Badge: View {
     }
 
     var username_matches_nip05: Bool {
-        guard let profile = profiles.lookup(id: pubkey),
-              let name = profile.name
+        guard let name = profiles.lookup(id: pubkey).map({ p in p?.name }).value
         else {
             return false
         }
@@ -97,7 +96,7 @@ func use_nip05_color(pubkey: Pubkey, contacts: Contacts) -> Bool {
 
 struct NIP05Badge_Previews: PreviewProvider {
     static var previews: some View {
-        let test_state = test_damus_state()
+        let test_state = test_damus_state
         VStack {
             NIP05Badge(nip05: NIP05(username: "jb55", host: "jb55.com"), pubkey: test_state.pubkey, contacts: test_state.contacts, show_domain: true, profiles: test_state.profiles)
 
