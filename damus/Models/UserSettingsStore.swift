@@ -221,7 +221,7 @@ class UserSettingsStore: ObservableObject {
         }
     }
 
-    @StringSetting(key: "libretranslate_server", default_value: .terraprint)
+    @StringSetting(key: "libretranslate_server", default_value: .custom)
     var libretranslate_server: LibreTranslateServer
     
     @Setting(key: "libretranslate_url", default_value: "")
