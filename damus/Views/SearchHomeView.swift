@@ -16,7 +16,7 @@ struct SearchHomeView: View {
     @FocusState private var isFocused: Bool
 
     var content_filter: (NostrEvent) -> Bool {
-        let filters = ContentFilters.defaults(self.damus_state.settings)
+        let filters = ContentFilters.defaults(damus_state: self.damus_state)
         return ContentFilters(filters: filters).filter
     }
 

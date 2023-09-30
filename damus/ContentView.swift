@@ -88,7 +88,7 @@ struct ContentView: View {
     }
 
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
-        var filters = ContentFilters.defaults(damus_state!.settings)
+        var filters = ContentFilters.defaults(damus_state: damus_state!)
         filters.append(fstate.filter)
         return ContentFilters(filters: filters).filter
     }

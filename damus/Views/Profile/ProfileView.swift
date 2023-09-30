@@ -108,6 +108,12 @@ struct ProfileView: View {
         let progress = -(yOffset + navbarHeight) / 100
         return Double(-yOffset > navbarHeight ? progress : 0)
     }
+    
+    func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
+        var filters = ContentFilters.defaults(damus_state: damus_state)
+        filters.append(fstate.filter)
+        return ContentFilters(filters: filters).filter
+    }
 
     var bannerSection: some View {
         GeometryReader { proxy -> AnyView in
@@ -458,10 +464,10 @@ struct ProfileView: View {
                         .background(colorScheme == .dark ? Color.black : Color.white)
 
                         if filter_state == FilterState.posts {
-                            InnerTimelineView(events: profile.events, damus: damus_state, filter: FilterState.posts.filter)
+                            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.posts))
                         }
                         if filter_state == FilterState.posts_and_replies {
-                            InnerTimelineView(events: profile.events, damus: damus_state, filter: FilterState.posts_and_replies.filter)
+                            InnerTimelineView(events: profile.events, damus: damus_state, filter: content_filter(FilterState.posts_and_replies))
                         }
                     }
                     .padding(.horizontal, Theme.safeAreaInsets?.left)
