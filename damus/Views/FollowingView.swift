@@ -40,7 +40,7 @@ struct FollowHashtagView: View {
             HStack {
                 SingleCharacterAvatar(character: "#")
                 
-                Text("#\(hashtag.hashtag)")
+                Text(verbatim: "#\(hashtag.hashtag)")
                     .bold()
             }
             .onTapGesture {

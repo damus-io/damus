@@ -212,9 +212,19 @@ class RelayPool {
         print("queueing request for \(relay)")
         request_queue.append(QueuedRequest(req: r, relay: relay, skip_ephemeral: skip_ephemeral))
     }
-    
+
     func send_raw(_ req: NostrRequestType, to: [String]? = nil, skip_ephemeral: Bool = true) {
         let relays = to.map{ get_relays($0) } ?? self.relays
+        
+        // send to local relay (nostrdb)
+        switch req {
+        case .typical(let r):
+            if let rstr = make_nostr_req(r) {
+                ndb.process_client_event(rstr)
+            }
+        case .custom(let string):
+            ndb.process_client_event(string)
+        }
 
         for relay in relays {
             if req.is_read && !(relay.descriptor.info.read ?? true) {

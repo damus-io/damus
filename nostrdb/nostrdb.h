@@ -44,6 +44,11 @@ struct ndb_txn {
 	void *mdb_txn;
 };
 
+// From-client event types
+enum fce_type {
+	NDB_FCE_EVENT = 0x1
+};
+
 // To-client event types
 enum tce_type {
 	NDB_TCE_EVENT  = 0x1,
@@ -79,6 +84,14 @@ struct ndb_command_result {
 	int msglen;
 };
 
+
+// From-client event
+struct ndb_fce {
+	enum fce_type evtype;
+	union {
+		struct ndb_event event;
+	};
+};
 
 // To-client event
 struct ndb_tce {
@@ -177,6 +190,8 @@ int ndb_init(struct ndb **ndb, const char *dbdir, size_t mapsize, int ingester_t
 int ndb_db_version(struct ndb *ndb);
 int ndb_process_event(struct ndb *, const char *json, int len);
 int ndb_process_events(struct ndb *, const char *ldjson, size_t len);
+int ndb_process_client_event(struct ndb *, const char *json, int len);
+int ndb_process_client_events(struct ndb *, const char *json, size_t len);
 int ndb_begin_query(struct ndb *, struct ndb_txn *);
 int ndb_search_profile(struct ndb_txn *txn, struct ndb_search *search, const char *query);
 int ndb_search_profile_next(struct ndb_search *search);
@@ -192,6 +207,7 @@ void ndb_destroy(struct ndb *);
 
 // BUILDER
 int ndb_parse_json_note(struct ndb_json_parser *, struct ndb_note **);
+int ndb_client_event_from_json(const char *json, int len, struct ndb_fce *fce, unsigned char *buf, int bufsize, struct ndb_id_cb *cb);
 int ndb_ws_event_from_json(const char *json, int len, struct ndb_tce *tce, unsigned char *buf, int bufsize, struct ndb_id_cb *);
 int ndb_note_from_json(const char *json, int len, struct ndb_note **, unsigned char *buf, int buflen);
 int ndb_builder_init(struct ndb_builder *builder, unsigned char *buf, int bufsize);

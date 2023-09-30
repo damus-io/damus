@@ -24,10 +24,8 @@ struct AppearanceSettingsView: View {
 
     var FontSize: some View {
         VStack(alignment: .leading) {
-            Slider(value: $settings.font_size, in: 0.5...2.0, step: 0.1) {
-                Text("Font Size")
-            }
-            .padding()
+            Slider(value: $settings.font_size, in: 0.5...2.0, step: 0.1)
+                .padding()
 
             // Sample text to show how the font size would look
             ResizedEventPreview(damus_state: damus_state, settings: settings)
@@ -37,7 +35,7 @@ struct AppearanceSettingsView: View {
 
     var body: some View {
         Form {
-            Section("Font Size") {
+            Section(NSLocalizedString("Font Size", comment: "Section label for font size settings.")) {
                 FontSize
             }
 
@@ -49,7 +47,7 @@ struct AppearanceSettingsView: View {
                     .toggleStyle(.switch)
             }
 
-            Section(header: Text("User Statuses")) {
+            Section(header: Text("User Statuses", comment: "Section header for user profile status settings.")) {
                 Toggle(NSLocalizedString("Show general statuses", comment: "Settings toggle for enabling general user statuses"), isOn: $settings.show_general_statuses)
                     .toggleStyle(.switch)
 

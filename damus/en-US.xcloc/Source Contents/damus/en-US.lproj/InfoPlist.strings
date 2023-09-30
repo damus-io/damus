@@ -2,6 +2,8 @@
 "CFBundleDisplayName" = "Damus";
 /* Bundle name */
 "CFBundleName" = "damus";
+/* Privacy - Media Library Usage Description */
+"NSAppleMusicUsageDescription" = "Damus needs access to your media library for playback statuses";
 /* Privacy - Camera Usage Description */
 "NSCameraUsageDescription" = "Damus needs access to your camera if you want to upload photos from it";
 /* Privacy - Face ID Usage Description */

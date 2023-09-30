@@ -212,7 +212,6 @@ struct ProfileView: View {
             navActionSheetButton
         }
         .padding(.top, 5)
-        .padding(.horizontal)
         .accentColor(DamusColors.white)
     }
 
@@ -471,8 +470,13 @@ struct ProfileView: View {
             }
             .ignoresSafeArea()
             .navigationTitle("")
-            .navigationBarHidden(true)
-            .overlay(customNavbar, alignment: .top)
+            .navigationBarBackButtonHidden()
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    customNavbar
+                }
+            }
+            .toolbarBackground(.hidden)
             .onReceive(handle_notify(.switched_timeline)) { _ in
                 dismiss()
             }

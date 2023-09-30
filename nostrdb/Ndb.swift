@@ -175,6 +175,12 @@ class Ndb {
     func lookup_profile_with_txn<Y>(_ pubkey: Pubkey, txn: NdbTxn<Y>) -> ProfileRecord? {
         lookup_profile_with_txn_inner(pubkey: pubkey, txn: txn)
     }
+    
+    func process_client_event(_ str: String) -> Bool {
+        return str.withCString { cstr in
+            return ndb_process_client_event(ndb.ndb, cstr, Int32(str.utf8.count)) != 0
+        }
+    }
 
     func process_event(_ str: String) -> Bool {
         return str.withCString { cstr in

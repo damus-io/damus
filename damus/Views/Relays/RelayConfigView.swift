@@ -45,7 +45,7 @@ struct RelayConfigView: View {
             
             if recommended.count > 0 {
                 VStack {
-                    Text("Recommended relays")
+                    Text("Recommended relays", comment: "Title for view of recommended relays.")
                         .foregroundStyle(DamusLightGradient.gradient)
                         .padding(10)
                         .background {
