@@ -849,7 +849,7 @@ func load_our_relays(state: DamusState, m_old_ev: NostrEvent?, ev: NostrEvent) {
         d[r] = .rw
     }
     
-    guard let decoded = decode_json_relays(ev.content) else {
+    guard let decoded: [String: RelayInfo] = decode_json_relays(ev.content) else {
         return
     }
     

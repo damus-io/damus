@@ -13,37 +13,6 @@ enum NostrConnectionEvent {
     case nostr_event(NostrResponse)
 }
 
-public struct RelayURL: Hashable {
-    private(set) var url: URL
-    
-    var id: String {
-        return url.absoluteString
-    }
-    
-    init?(_ str: String) {
-        guard let last = str.last else { return nil }
-
-        var urlstr = str
-        if last == "/" {
-            urlstr = String(str.dropLast(1))
-        }
-
-        guard let url = URL(string: urlstr) else {
-            return nil
-        }
-        
-        guard let scheme = url.scheme else {
-            return nil
-        }
-        
-        guard scheme == "ws" || scheme == "wss" else {
-            return nil
-        }
-        
-        self.url = url
-    }
-}
-
 final class RelayConnection: ObservableObject {
     @Published private(set) var isConnected = false
     @Published private(set) var isConnecting = false

@@ -48,7 +48,8 @@ struct RelayDetailView: View {
             }
 
             let descriptors = state.pool.our_descriptors
-            guard let new_ev = remove_relay( ev: ev, current_relays: descriptors, keypair: keypair, relay: relay) else {
+            guard let relay_url = RelayURL(relay),
+                let new_ev = remove_relay( ev: ev, current_relays: descriptors, keypair: keypair, relay: relay_url) else {
                 return
             }
 
@@ -71,7 +72,8 @@ struct RelayDetailView: View {
                             guard let ev_before_add = state.contacts.event else {
                                 return
                             }
-                            guard let ev_after_add = add_relay(ev: ev_before_add, keypair: keypair, current_relays: state.pool.our_descriptors, relay: relay, info: .rw) else {
+                            guard let relay_url = RelayURL(relay),
+                                let ev_after_add = add_relay(ev: ev_before_add, keypair: keypair, current_relays: state.pool.our_descriptors, relay: relay_url, info: .rw) else {
                                 return
                             }
                             process_contact_event(state: state, ev: ev_after_add)

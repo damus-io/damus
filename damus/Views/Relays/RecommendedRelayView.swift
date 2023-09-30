@@ -118,7 +118,8 @@ struct RecommendedRelayView: View {
         guard let ev_before_add = damus.contacts.event else {
             return
         }
-        guard let ev_after_add = add_relay(ev: ev_before_add, keypair: keypair, current_relays: damus.pool.our_descriptors, relay: relay, info: .rw) else {
+        guard let relay_url = RelayURL(relay),
+            let ev_after_add = add_relay(ev: ev_before_add, keypair: keypair, current_relays: damus.pool.our_descriptors, relay: relay_url, info: .rw) else {
             return
         }
         process_contact_event(state: damus, ev: ev_after_add)
