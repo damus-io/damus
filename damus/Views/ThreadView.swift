@@ -41,10 +41,9 @@ struct ThreadView: View {
                 LazyVStack {
                     // MARK: - Parents events view
                     ForEach(parent_events, id: \.id) { parent_event in
-                            
-                        MutedEventView(damus_state: state,
-                                       event: parent_event,
-                                       selected: false)
+                        EventMutingContainerView(damus_state: state, event: parent_event) {
+                            EventView(damus: state, event: parent_event)
+                        }
                         .padding(.horizontal)
                         .onTapGesture {
                             thread.set_active_event(parent_event, keypair: self.state.keypair)
@@ -68,11 +67,18 @@ struct ThreadView: View {
                     })
                     
                     // MARK: - Actual event view
-                    MutedEventView(
+                    EventMutingContainerView(
                         damus_state: state,
                         event: self.thread.event,
-                        selected: true
-                    )
+                        muteBox: { event_shown in
+                            AnyView(
+                                EventMutedBoxView(shown: event_shown)
+                                .padding(5)
+                            )
+                        }
+                    ) {
+                        SelectedEventView(damus: state, event: self.thread.event, size: .selected)
+                    }
                     .id(self.thread.event.id)
                     
                     /*
@@ -83,11 +89,12 @@ struct ThreadView: View {
                      */
                     
                     ForEach(sorted_child_events, id: \.id) { child_event in
-                        MutedEventView(
+                        EventMutingContainerView(
                             damus_state: state,
-                            event: child_event,
-                            selected: false
-                        )
+                            event: child_event
+                        ) {
+                            EventView(damus: state, event: child_event)
+                        }
                         .padding(.horizontal)
                         .onTapGesture {
                             thread.set_active_event(child_event, keypair: state.keypair)
