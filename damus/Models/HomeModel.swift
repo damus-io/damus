@@ -1069,6 +1069,14 @@ func event_has_our_pubkey(_ ev: NostrEvent, our_pubkey: Pubkey) -> Bool {
     return ev.referenced_pubkeys.contains(our_pubkey)
 }
 
+func should_show_event(event: NostrEvent, damus_state: DamusState) -> Bool {
+    return should_show_event(
+        keypair: damus_state.keypair,
+        hellthreads: damus_state.muted_threads,
+        contacts: damus_state.contacts,
+        ev: event
+    )
+}
 
 func should_show_event(keypair: Keypair, hellthreads: MutedThreadsManager, contacts: Contacts, ev: NostrEvent) -> Bool {
     if contacts.is_muted(ev.pubkey) {

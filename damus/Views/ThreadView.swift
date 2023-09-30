@@ -17,8 +17,21 @@ struct ThreadView: View {
         state.events.parent_events(event: thread.event, keypair: state.keypair)
     }
     
-    var child_events: [NostrEvent] {
-        state.events.child_events(event: thread.event)
+    var sorted_child_events: [NostrEvent] {
+        state.events.child_events(event: thread.event).sorted(by: { a, b in
+            let a_is_muted = !should_show_event(event: a, damus_state: state)
+            let b_is_muted = !should_show_event(event: b, damus_state: state)
+            
+            if a_is_muted == b_is_muted {
+                // If both are muted or unmuted, sort them based on their creation date.
+                return a.created_at < b.created_at
+            }
+            else {
+                // Muting status is different
+                // Prioritize the replies that are not muted
+                return !a_is_muted && b_is_muted
+            }
+        })
     }
     
     var body: some View {
@@ -69,7 +82,7 @@ struct ThreadView: View {
                     }
                      */
                     
-                    ForEach(child_events, id: \.id) { child_event in
+                    ForEach(sorted_child_events, id: \.id) { child_event in
                         MutedEventView(
                             damus_state: state,
                             event: child_event,
