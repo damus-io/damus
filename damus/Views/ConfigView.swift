@@ -175,8 +175,22 @@ func handle_string_amount(new_value: String) -> Int? {
     return amt
 }
 
-func clear_kingfisher_cache() -> Void {
+func clear_kingfisher_cache(completion: (() -> Void)? = nil) {
     KingfisherManager.shared.cache.clearMemoryCache()
-    KingfisherManager.shared.cache.clearDiskCache()
-    KingfisherManager.shared.cache.cleanExpiredDiskCache()
+    
+    let group = DispatchGroup()
+
+    group.enter()
+    KingfisherManager.shared.cache.clearDiskCache {
+        group.leave()
+    }
+
+    group.enter()
+    KingfisherManager.shared.cache.cleanExpiredDiskCache {
+        group.leave()
+    }
+
+    group.notify(queue: .main) {
+        completion?()
+    }
 }
