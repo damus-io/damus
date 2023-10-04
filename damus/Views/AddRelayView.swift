@@ -82,12 +82,6 @@ struct AddRelayView: View {
                     new_relay = "wss://" + new_relay
                 }
 
-                /*
-                if new_relay.hasSuffix("/") {
-                    new_relay.removeLast();
-                }
-                */
-
                 guard let url = RelayURL(new_relay),
                       let ev = state.contacts.event,
                       let keypair = state.keypair.to_full() else {
