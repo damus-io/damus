@@ -1,3 +1,24 @@
+
+## [1.6-20] - 2023-10-04
+
+### Changed
+
+- Improve UX around clearing cache (Daniel D’Aquino)
+- Show muted thread replies at the bottom of the thread view (#1522) (Daniel D’Aquino)
+
+### Fixed
+
+- Fix situations where the note composer cursor gets stuck in one place after tagging a user (Daniel D’Aquino)
+- Fix some note composer issues, such as when copying/pasting larger text, and make the post composer more robust. (Daniel D’Aquino)
+- Apply filters to hashtag search timeline view (Daniel D’Aquino)
+- Hide quoted or reposted notes from people whom the user has muted. (#1216) (Daniel D’Aquino)
+- Fix profile not updating (William Casarin)
+- Fix small graphical toolbar bug when scrolling profiles (Daniel D’Aquino)
+- Fix localization issues and export strings for translation (Terry Yiu)
+
+
+[1.6-20]: https://github.com/damus-io/damus/releases/tag/v1.6-20
+
 ## [1.6-18] - 2023-09-21
 
 ### Added
@@ -1558,5 +1579,4 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
 
