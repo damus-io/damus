@@ -1,3 +1,21 @@
+## [1.6-23] - 2023-10-06 - Appstore Release
+
+### Added
+
+- Added merch store button to sidebar menu (Daniel D’Aquino)
+
+### Changed
+
+- Damus icon now opens sidebar (Daniel D’Aquino)
+
+### Fixed
+
+- Stop tab buttons from causing the root view to scroll to the top unless user is coming from another tab or already at the root view (Daniel D’Aquino)
+- Fix profiles not updating (William Casarin)
+- Fix issue where relays with trailing slashes cannot be removed (#1531) (Daniel D’Aquino)
+
+
+[1.6-23]: https://github.com/damus-io/damus/releases/tag/v1.6-23
 
 ## [1.6-20] - 2023-10-04
 
@@ -1579,4 +1597,3 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
