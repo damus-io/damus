@@ -292,6 +292,10 @@ extension NdbNote {
     public var referenced_ids: References<NoteId> {
         References<NoteId>(tags: self.tags)
     }
+    
+    public var referenced_quote_ids: References<QuoteId> {
+        References<QuoteId>(tags: self.tags)
+    }
 
     public var referenced_noterefs: References<NoteRef> {
         References<NoteRef>(tags: self.tags)

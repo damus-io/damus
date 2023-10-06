@@ -987,6 +987,12 @@ func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: Ev
                 postbox.send(ev)
             }
         }
+        for qref in new_ev.referenced_quote_ids.prefix(3) {
+            // also broadcast at most 3 referenced quoted events
+            if let ev = events.lookup(qref.note_id) {
+                postbox.send(ev)
+            }
+        }
         return true
     case .cancel:
         print("post cancelled")
