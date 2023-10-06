@@ -70,6 +70,7 @@ enum ndb_dbs {
 	NDB_DB_PROFILE_PK,
 	NDB_DB_NDB_META,
 	NDB_DB_PROFILE_SEARCH,
+	NDB_DB_PROFILE_LAST_FETCH,
 	NDB_DBS,
 };
 
@@ -410,6 +411,7 @@ enum ndb_writer_msgtype {
 	NDB_WRITER_NOTE, // write a note to the db
 	NDB_WRITER_PROFILE, // write a profile to the db
 	NDB_WRITER_DBMETA, // write ndb metadata
+	NDB_WRITER_PROFILE_LAST_FETCH, // when profiles were last fetched
 };
 
 struct ndb_ingester_event {
@@ -440,12 +442,18 @@ struct ndb_writer_ndb_meta {
 	uint64_t version;
 };
 
+struct ndb_writer_last_fetch {
+	unsigned char pubkey[32];
+	uint64_t fetched_at;
+};
+
 struct ndb_writer_msg {
 	enum ndb_writer_msgtype type;
 	union {
 		struct ndb_writer_note note;
 		struct ndb_writer_profile profile;
 		struct ndb_writer_ndb_meta ndb_meta;
+		struct ndb_writer_last_fetch last_fetch;
 	};
 };
 
@@ -494,6 +502,37 @@ static int ndb_writer_queue_note(struct ndb_writer *writer,
 	msg.note.note_len = note_len;
 
 	return prot_queue_push(&writer->inbox, &msg);
+}
+
+static void ndb_writer_last_profile_fetch(struct ndb_lmdb *lmdb, MDB_txn *txn,
+					  struct ndb_writer_last_fetch *w)
+{
+	int rc;
+	MDB_val key, val;
+	
+	key.mv_data = (unsigned char*)&w->pubkey;
+	key.mv_size = sizeof(w->pubkey);
+	val.mv_data = &w->fetched_at;
+	val.mv_size = sizeof(w->fetched_at);
+
+	if ((rc = mdb_put(txn, lmdb->dbs[NDB_DB_PROFILE_LAST_FETCH], &key, &val, 0))) {
+		ndb_debug("write version to ndb_meta failed: %s\n",
+				mdb_strerror(rc));
+		return;
+	}
+
+	//fprintf(stderr, "writing version %" PRIu64 "\n", version);
+}
+
+int ndb_write_last_profile_fetch(struct ndb *ndb, const unsigned char *pubkey,
+				 uint64_t fetched_at)
+{
+	struct ndb_writer_msg msg;
+	msg.type = NDB_WRITER_PROFILE_LAST_FETCH;
+	memcpy(&msg.last_fetch.pubkey[0], pubkey, 32);
+	msg.last_fetch.fetched_at = fetched_at;
+
+	return ndb_writer_queue_msg(&ndb->writer, &msg);
 }
 
 // get some value based on a clustered id key
@@ -545,7 +584,6 @@ static void *ndb_lookup_by_key(struct ndb_txn *txn, uint64_t key,
 
 	if (mdb_get(txn->mdb_txn, txn->ndb->lmdb.dbs[store], &k, &v)) {
 		ndb_debug("ndb_get_profile_by_pubkey: mdb_get note failed\n");
-		mdb_txn_abort(txn->mdb_txn);
 		return NULL;
 	}
 
@@ -625,6 +663,17 @@ void *ndb_get_profile_by_key(struct ndb_txn *txn, uint64_t key, size_t *len)
 {
 	return ndb_lookup_by_key(txn, key, NDB_DB_PROFILE, len);
 }
+
+uint64_t ndb_read_last_profile_fetch(struct ndb_txn *txn, uint64_t profile_key)
+{
+	size_t len;
+	void *ret = ndb_lookup_by_key(txn, profile_key, NDB_DB_PROFILE_LAST_FETCH, &len);
+	if (ret == NULL)
+		return 0;
+	assert(len == sizeof(uint64_t));
+	return *((uint64_t*)ret);
+}
+
 
 static int ndb_has_note(MDB_txn *txn, struct ndb_lmdb *lmdb, const unsigned char *id)
 {
@@ -1152,6 +1201,7 @@ static void *ndb_writer_thread(void *data)
 			case NDB_WRITER_NOTE: any_note = 1; break;
 			case NDB_WRITER_PROFILE: any_note = 1; break;
 			case NDB_WRITER_DBMETA: any_note = 1; break;
+			case NDB_WRITER_PROFILE_LAST_FETCH: any_note = 1; break;
 			case NDB_WRITER_QUIT: break;
 			}
 		}
@@ -1187,6 +1237,9 @@ static void *ndb_writer_thread(void *data)
 				break;
 			case NDB_WRITER_DBMETA:
 				ndb_write_version(writer->lmdb, txn, msg->ndb_meta.version);
+				break;
+			case NDB_WRITER_PROFILE_LAST_FETCH:
+				ndb_writer_last_profile_fetch(writer->lmdb, txn, &msg->last_fetch);
 				break;
 			}
 		}
@@ -1427,6 +1480,12 @@ static int ndb_init_lmdb(const char *filename, struct ndb_lmdb *lmdb, size_t map
 	// ndb metadata (db version, etc)
 	if ((rc = mdb_dbi_open(txn, "ndb_meta", MDB_CREATE | MDB_INTEGERKEY, &lmdb->dbs[NDB_DB_NDB_META]))) {
 		fprintf(stderr, "mdb_dbi_open ndb_meta failed, error %d\n", rc);
+		return 0;
+	}
+
+	// profile last fetches
+	if ((rc = mdb_dbi_open(txn, "profile_last_fetch", MDB_CREATE, &lmdb->dbs[NDB_DB_PROFILE_LAST_FETCH]))) {
+		fprintf(stderr, "mdb_dbi_open profile last fetch, error %d\n", rc);
 		return 0;
 	}
 
