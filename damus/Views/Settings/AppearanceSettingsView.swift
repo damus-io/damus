@@ -115,7 +115,7 @@ struct AppearanceSettingsView: View {
         let group = DispatchGroup()
         
         group.enter()
-        clear_kingfisher_cache(completion: {
+        DamusCacheManager.shared.clear_cache(damus_state: self.damus_state, completion: {
             group.leave()
         })
         

@@ -12,6 +12,7 @@ import os.log
 enum LogCategory: String {
     case nav
     case render
+    case storage
 }
 
 /// Damus structured logger
@@ -43,5 +44,13 @@ class Log {
 
     static func info(_ msg: StaticString, for logcat: LogCategory, _ args: CVarArg...) {
         Log.log(msg, for: logger(for: logcat), type: OSLogType.info, args)
+    }
+    
+    static func debug(_ msg: StaticString, for logcat: LogCategory, _ args: CVarArg...) {
+        Log.log(msg, for: logger(for: logcat), type: OSLogType.debug, args)
+    }
+    
+    static func error(_ msg: StaticString, for logcat: LogCategory, _ args: CVarArg...) {
+        Log.log(msg, for: logger(for: logcat), type: OSLogType.error, args)
     }
 }
