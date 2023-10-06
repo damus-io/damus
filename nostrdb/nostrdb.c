@@ -391,7 +391,7 @@ static inline void ndb_tsid_init(struct ndb_tsid *key, unsigned char *id,
 				 uint64_t timestamp)
 {
 	memcpy(key->id, id, 32);
-	key->timestamp = 0;
+	key->timestamp = timestamp;
 }
 
 // useful for range-searching for the latest key with a clustered created_at timen
