@@ -184,6 +184,9 @@ struct ContentView: View {
                             .shadow(color: DamusColors.purple, radius: 2)
                             .opacity(isSideBarOpened ? 0 : 1)
                             .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
+                            .onTapGesture {
+                                isSideBarOpened.toggle()
+                            }
                     } else {
                         timelineNavItem
                             .opacity(isSideBarOpened ? 0 : 1)

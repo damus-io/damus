@@ -76,6 +76,10 @@ struct SideMenuView: View {
                 navLabel(title: NSLocalizedString("Bookmarks", comment: "Sidebar menu label for Bookmarks view."), img: "bookmark")
             }
 
+            Link(destination: URL(string: "https://store.damus.io/?ref=damus_ios_app")!) {
+                navLabel(title: NSLocalizedString("Merch", comment: "Sidebar menu label for merch store link."), img: "basket")
+            }
+
             NavigationLink(value: Route.Config) {
                 navLabel(title: NSLocalizedString("Settings", comment: "Sidebar menu label for accessing the app settings"), img: "settings")
             }
