@@ -220,6 +220,10 @@ class NavigationCoordinator: ObservableObject {
     func push(route: Route) {
         path.append(route)
     }
+    
+    func isAtRoot() -> Bool {
+        return path.count == 0
+    }
 
     func popToRoot() {
         path = []

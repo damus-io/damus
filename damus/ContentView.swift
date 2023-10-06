@@ -137,6 +137,10 @@ struct ContentView: View {
         }
     }
     
+    func navIsAtRoot() -> Bool {
+        return navigationCoordinator.isAtRoot()
+    }
+    
     func popToRoot() {
         navigationCoordinator.popToRoot()
         isSideBarOpened = false
@@ -581,11 +585,12 @@ struct ContentView: View {
     
     func switch_timeline(_ timeline: Timeline) {
         self.isSideBarOpened = false
+        let navWasAtRoot = self.navIsAtRoot()
         self.popToRoot()
 
         notify(.switched_timeline(timeline))
 
-        if timeline == self.selected_timeline {
+        if timeline == self.selected_timeline && navWasAtRoot {
             notify(.scroll_to_top)
             return
         }
