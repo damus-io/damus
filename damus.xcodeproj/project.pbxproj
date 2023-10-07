@@ -435,6 +435,8 @@
 		D78525252A7B2EA4002FA637 /* NoteContentViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */; };
 		D7870BC12AC4750B0080BA88 /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC02AC4750B0080BA88 /* MentionView.swift */; };
 		D7870BC32AC47EBC0080BA88 /* EventLoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC22AC47EBC0080BA88 /* EventLoaderView.swift */; };
+		D7A343EE2AD0D77C00CED48B /* InlineSnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = D7A343ED2AD0D77C00CED48B /* InlineSnapshotTesting */; };
+		D7A343F02AD0D77C00CED48B /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = D7A343EF2AD0D77C00CED48B /* SnapshotTesting */; };
 		D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */; };
 		D7FF94002AC7AC5300FD969D /* RelayURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */; };
 		E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */; };
@@ -1164,6 +1166,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D7A343EE2AD0D77C00CED48B /* InlineSnapshotTesting in Frameworks */,
+				D7A343F02AD0D77C00CED48B /* SnapshotTesting in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2382,6 +2386,10 @@
 				4CE6DEF527F7A08200C66700 /* PBXTargetDependency */,
 			);
 			name = damusTests;
+			packageProductDependencies = (
+				D7A343ED2AD0D77C00CED48B /* InlineSnapshotTesting */,
+				D7A343EF2AD0D77C00CED48B /* SnapshotTesting */,
+			);
 			productName = damusTests;
 			productReference = 4CE6DEF327F7A08200C66700 /* damusTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -2470,6 +2478,7 @@
 				4C06670228FC7EC500038D2A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				4CCF9AB02A1FE80B00E03CFB /* XCRemoteSwiftPackageReference "GSPlayer" */,
 				4C27C9302A64766F007DBC75 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
+				D7A343EC2AD0D77C00CED48B /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
 			);
 			productRefGroup = 4CE6DEE427F7A08100C66700 /* Products */;
 			projectDirPath = "";
@@ -3490,6 +3499,14 @@
 				minimumVersion = 0.2.26;
 			};
 		};
+		D7A343EC2AD0D77C00CED48B /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.14.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -3507,6 +3524,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
 			productName = secp256k1;
+		};
+		D7A343ED2AD0D77C00CED48B /* InlineSnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D7A343EC2AD0D77C00CED48B /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = InlineSnapshotTesting;
+		};
+		D7A343EF2AD0D77C00CED48B /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D7A343EC2AD0D77C00CED48B /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
