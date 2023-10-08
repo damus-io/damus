@@ -383,6 +383,7 @@
 		BA3759922ABCCEBA0018D73B /* CameraService+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA37598F2ABCCEBA0018D73B /* CameraService+Extensions.swift */; };
 		BA3759932ABCCEBA0018D73B /* CameraModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759902ABCCEBA0018D73B /* CameraModel.swift */; };
 		BA3759942ABCCEBA0018D73B /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759912ABCCEBA0018D73B /* CameraService.swift */; };
+		BA3759972ABCCF360018D73B /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3759962ABCCF360018D73B /* CameraPreview.swift */; };
 		501F8C822A0224EB001AFC1D /* KeychainStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501F8C812A0224EB001AFC1D /* KeychainStorageTests.swift */; };
 		504323A72A34915F006AE6DC /* RelayModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504323A62A34915F006AE6DC /* RelayModel.swift */; };
 		504323A92A3495B6006AE6DC /* RelayModelCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504323A82A3495B6006AE6DC /* RelayModelCache.swift */; };
@@ -940,6 +941,7 @@
 		BA37598F2ABCCEBA0018D73B /* CameraService+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CameraService+Extensions.swift"; sourceTree = "<group>"; };
 		BA3759902ABCCEBA0018D73B /* CameraModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraModel.swift; sourceTree = "<group>"; };
 		BA3759912ABCCEBA0018D73B /* CameraService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraService.swift; sourceTree = "<group>"; };
+		BA3759962ABCCF360018D73B /* CameraPreview.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; };
 		4C9BB83329C12D9900FC4E37 /* EventProfileName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventProfileName.swift; sourceTree = "<group>"; };
 		4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomizeZapView.swift; sourceTree = "<group>"; };
 		4C9F18E329ABDE6D008C55EC /* MaybeAnonPfpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaybeAnonPfpView.swift; sourceTree = "<group>"; };
@@ -1247,6 +1249,7 @@
 				4C3EA66C28FF782800C48A62 /* amount.c */,
 				4C3EA66E28FF787100C48A62 /* overflows.h */,
 				4C3EA67228FF79F600C48A62 /* structeq.h */,
+				BA3759952ABCCF360018D73B /* Camera */,
 				4C3EA67328FF7A2600C48A62 /* cppmagic.h */,
 				4C3EA67428FF7A5A00C48A62 /* take.c */,
 				4C3EA67628FF7A9800C48A62 /* talstr.c */,
@@ -2303,6 +2306,14 @@
 			path = Camera;
 			sourceTree = "<group>";
 		};
+		BA3759952ABCCF360018D73B /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				BA3759962ABCCF360018D73B /* CameraPreview.swift */,
+			);
+			path = Camera;
+			sourceTree = "<group>";
+		};
 		F71694E82A66221E001F4053 /* Onboarding */ = {
 			isa = PBXGroup;
 			children = (
@@ -2626,6 +2637,7 @@
 				4C8D1A6F29F31E5000ACDF75 /* FriendsButton.swift in Sources */,
 				3A5E47C52A4A6CF400C0D090 /* Trie.swift in Sources */,
 				4C216F382871EDE300040376 /* DirectMessageModel.swift in Sources */,
+				BA3759972ABCCF360018D73B /* CameraPreview.swift in Sources */,
 				4C75EFA627FF87A20006080F /* Nostr.swift in Sources */,
 				4CA927672A290F8B0098A105 /* RelativeTime.swift in Sources */,
 				4CB883A62975F83C00DC99E7 /* LNUrlPayRequest.swift in Sources */,
