@@ -322,6 +322,26 @@
 			<string>%2$@ satsa</string>
 		</dict>
 	</dict>
+	<key>word_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@WORDS@</string>
+		<key>WORDS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%d słowo</string>
+			<key>few</key>
+			<string>%d słowa</string>
+			<key>many</key>
+			<string>%d słów</string>
+			<key>other</key>
+			<string>%d słowa</string>
+		</dict>
+	</dict>
 	<key>zap_notification_no_message</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
