@@ -74,6 +74,19 @@ struct SearchHomeView: View {
                 }
 
                 return preferredLanguages.contains(note_lang)
+            },
+            content: {
+                AnyView(VStack {
+                    SuggestedHashtagsView(damus_state: damus_state, max_items: 5)
+                    HStack {
+                        Image(systemName: "bubble.fill")
+                        Text(NSLocalizedString("All recent notes", comment: "A label indicating that the notes being displayed below it are all recent notes"))
+                        Spacer()
+                    }
+                    .foregroundColor(.secondary)
+                    .padding(.top, 20)
+                    .padding(.horizontal)
+                })
             }
         )
         .refreshable {
