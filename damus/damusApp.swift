@@ -32,6 +32,9 @@ struct MainView: View {
                     .onReceive(handle_notify(.login)) { notif in
                         needs_setup = false
                         keypair = get_saved_keypair()
+                        if keypair == nil, let tempkeypair = notif.to_full()?.to_keypair() {
+                            keypair = tempkeypair
+                        }
                     }
             }
         }
