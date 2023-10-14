@@ -312,7 +312,8 @@ struct ContentView: View {
             case .post(let action):
                 PostView(action: action, damus_state: damus_state!)
             case .user_status:
-                UserStatusSheet(postbox: damus_state!.postbox, keypair: damus_state!.keypair, status: damus_state!.profiles.profile_data(damus_state!.pubkey).status)
+                UserStatusSheet(damus_state: damus_state!, postbox: damus_state!.postbox, keypair: damus_state!.keypair, status: damus_state!.profiles.profile_data(damus_state!.pubkey).status)
+                    .presentationDragIndicator(.visible)
             case .event:
                 EventDetailView()
             case .zap(let zapsheet):
