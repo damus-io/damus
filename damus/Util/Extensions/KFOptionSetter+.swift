@@ -28,6 +28,18 @@ extension KFOptionSetter {
         options.scaleFactor = UIScreen.main.scale
         options.onlyLoadFirstFrame = disable_animation
         
+        switch imageContext {
+            case .pfp:
+                options.diskCacheExpiration = .never
+                break
+            case .banner:
+                options.diskCacheExpiration = .days(14)
+                break
+            case .note:
+                options.diskCacheExpiration = .days(7)
+                break
+        }
+        
         return self
     }
     
