@@ -110,6 +110,9 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "always_show_images", default_value: false)
     var always_show_images: Bool
     
+    @Setting(key: "collapse_images", default_value: false)
+    var collapse_images: Bool
+    
     @Setting(key: "hide_nsfw_tagged_content", default_value: false)
     var hide_nsfw_tagged_content: Bool
 
