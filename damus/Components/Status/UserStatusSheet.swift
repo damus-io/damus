@@ -46,17 +46,26 @@ enum StatusDuration: CustomStringConvertible, CaseIterable {
         }
 
         let formatter = DateComponentsFormatter()
-        formatter.unitsStyle = .full
+        formatter.unitsStyle = .abbreviated
         formatter.allowedUnits = [.minute, .hour, .day, .weekOfMonth]
         return formatter.string(from: timeInterval) ?? "\(timeInterval) seconds"
     }
 }
 
+enum Fields{
+    case status
+    case link
+}
+
 struct UserStatusSheet: View {
+    let damus_state: DamusState
     let postbox: PostBox
     let keypair: Keypair
 
     @State var duration: StatusDuration = .never
+    @State var show_link: Bool = false
+
+    @FocusState var focusedTextField : Fields?
     
     @ObservedObject var status: UserStatusModel
     @Environment(\.dismiss) var dismiss
@@ -86,45 +95,15 @@ struct UserStatusSheet: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Set Status", comment: "Title of view that allows the user to set their profile status (e.g. working, studying, coding)")
-                .font(.largeTitle)
-
-            TextField(text: status_binding, label: {
-                Text("📋 Working", comment: "Placeholder as an example of what the user could set as their profile status.")
-            })
-
+        VStack {
             HStack {
-                Image("link")
-
-                TextField(text: url_binding, label: {
-                    Text("https://example.com", comment: "Placeholder as an example of what the user could set so that the link is opened when the status is tapped.")
-                })
-            }
-
-            HStack {
-                Text("Clear status", comment: "Label to prompt user to select an expiration time for the profile status to clear.")
-
-                Spacer()
-
-                Picker(NSLocalizedString("Duration", comment: "Label for profile status expiration duration picker."), selection: $duration) {
-                    ForEach(StatusDuration.allCases, id: \.self) { d in
-                        Text(verbatim: d.description)
-                            .tag(d)
-                    }
-                }
-            }
-
-            Toggle(isOn: $status.playing_enabled, label: {
-                Text("Broadcast music playing on Apple Music", comment: "Toggle to enable or disable broadcasting what music is being played on Apple Music in their profile status.")
-            })
-
-            HStack(alignment: .center) {
                 Button(action: {
                     dismiss()
                 }, label: {
                     Text("Cancel", comment: "Cancel button text for dismissing profile status settings view.")
+                        .padding(10)
                 })
+                .buttonStyle(NeutralButtonStyle())
 
                 Spacer()
 
@@ -140,21 +119,98 @@ struct UserStatusSheet: View {
 
                     dismiss()
                 }, label: {
-                    Text("Save", comment: "Save button text for saving profile status settings.")
+                    Text("Share", comment: "Save button text for saving profile status settings.")
                 })
-                .buttonStyle(GradientButtonStyle())
+                .buttonStyle(GradientButtonStyle(padding: 10))
             }
-            .padding([.top], 30)
+            .padding()
+
+            Divider()
+
+            ZStack {
+                ProfilePicView(pubkey: keypair.pubkey, size: 120.0, highlight: .custom(DamusColors.white, 3.0), profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
+                    .padding(.top, 130)
+
+                VStack(spacing: 0) {
+                    HStack {
+                        TextField(NSLocalizedString("Staying humble...", comment: "Placeholder as an example of what the user could set as their profile status."), text: status_binding, axis: .vertical)
+                            .focused($focusedTextField, equals: Fields.status)
+                            .task {
+                                        self.focusedTextField = .status
+                            }
+                            .autocorrectionDisabled(true)
+                            .textInputAutocapitalization(.never)
+                            .lineLimit(3)
+                            .frame(width: 175)
+                    }
+                    .padding(10)
+                    .background(DamusColors.adaptableWhite)
+                    .cornerRadius(15)
+                    .shadow(color: DamusColors.neutral3, radius: 15)
+
+                    Circle()
+                        .fill(DamusColors.adaptableWhite)
+                        .frame(width: 12, height: 12)
+                        .padding(.trailing, 140)
+
+                    Circle()
+                        .fill(DamusColors.adaptableWhite)
+                        .frame(width: 7, height: 7)
+                        .padding(.trailing, 120)
+
+                }
+                .padding(.leading, 60)
+            }
+
+            VStack {
+                HStack {
+                    Image("link")
+                        .foregroundColor(DamusColors.neutral3)
+
+                    TextField(text: url_binding, label: {
+                        Text("Add an external link", comment: "Placeholder as an example of what the user could set so that the link is opened when the status is tapped.")
+                    })
+                    .focused($focusedTextField, equals: Fields.link)
+                }
+                .padding(10)
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(DamusColors.neutral3, lineWidth: 1)
+                )
+            }
+            .padding()
+
+            Toggle(isOn: $status.playing_enabled, label: {
+                Text("Broadcast music playing on Apple Music", comment: "Toggle to enable or disable broadcasting what music is being played on Apple Music in their profile status.")
+            })
+            .tint(DamusColors.purple)
+            .padding(.horizontal)
+
+            HStack {
+                Text("Clear status", comment: "Label to prompt user to select an expiration time for the profile status to clear.")
+
+                Spacer()
+
+                Picker(NSLocalizedString("Duration", comment: "Label for profile status expiration duration picker."), selection: $duration) {
+                    ForEach(StatusDuration.allCases, id: \.self) { d in
+                        Text(verbatim: d.description)
+                            .tag(d)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+            .padding()
 
             Spacer()
         }
-        .padding(30)
+        .padding(.top)
     }
 }
 
 
 struct UserStatusSheet_Previews: PreviewProvider {
     static var previews: some View {
-        UserStatusSheet(postbox: test_damus_state.postbox, keypair: test_keypair, status: .init())
+        UserStatusSheet(damus_state: test_damus_state, postbox: test_damus_state.postbox, keypair: test_keypair, status: .init())
     }
 }
