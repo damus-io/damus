@@ -218,6 +218,9 @@ class NavigationCoordinator: ObservableObject {
     @Published var path = [Route]()
 
     func push(route: Route) {
+        guard route != path.last else {
+            return
+        }
         path.append(route)
     }
     
