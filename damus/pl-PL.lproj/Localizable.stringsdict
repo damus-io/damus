@@ -373,7 +373,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>Otrzymano %2$@ satoshi od %3$@: "%4$@"</string>
+			<string>Otrzymano %2$@ satoshi od %3$@: &quot;%4$@&quot;</string>
 			<key>few</key>
 			<string>Otrzymano %2$@ satoshi od %3$@: &quot;%4$@&quot;</string>
 			<key>many</key>
