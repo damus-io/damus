@@ -377,9 +377,9 @@
 			<key>few</key>
 			<string>Otrzymano %2$@ satoshi od %3$@: "%4$@"</string>
 			<key>many</key>
-			<string>Otrzymano %2$@ satoshi od %3$@: "%4$@"</string>
+			<string>Otrzymano %2$@ satoshi od %3$@: &quot;%4$@&quot;</string>
 			<key>other</key>
-			<string>Otrzymano %2$@ satoshi od %3$@: "%4$@"</string>
+			<string>Otrzymano %2$@ satoshi od %3$@: &quot;%4$@&quot;</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
