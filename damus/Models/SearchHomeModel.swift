@@ -17,7 +17,7 @@ class SearchHomeModel: ObservableObject {
     let damus_state: DamusState
     let base_subid = UUID().description
     let profiles_subid = UUID().description
-    let limit: UInt32 = 250
+    let limit: UInt32 = 500
     //let multiple_events_per_pubkey: Bool = false
     
     init(damus_state: DamusState) {
