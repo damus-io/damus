@@ -11,6 +11,7 @@ struct TextViewWrapper: UIViewRepresentable {
     @Binding var attributedText: NSMutableAttributedString
     @EnvironmentObject var tagModel: TagModel
     @Binding var textHeight: CGFloat?
+    let initialTextSuffix: String?
     
     let cursorIndex: Int?
     var getFocusWordForMention: ((String?, NSRange?) -> Void)? = nil
@@ -74,25 +75,41 @@ struct TextViewWrapper: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(attributedText: $attributedText, getFocusWordForMention: getFocusWordForMention, updateCursorPosition: updateCursorPosition)
+        Coordinator(attributedText: $attributedText, getFocusWordForMention: getFocusWordForMention, updateCursorPosition: updateCursorPosition, initialTextSuffix: initialTextSuffix)
     }
 
     class Coordinator: NSObject, UITextViewDelegate {
         @Binding var attributedText: NSMutableAttributedString
         var getFocusWordForMention: ((String?, NSRange?) -> Void)? = nil
         let updateCursorPosition: ((Int) -> Void)
+        let initialTextSuffix: String?
+        var initialTextSuffixWasAdded: Bool = false
 
         init(attributedText: Binding<NSMutableAttributedString>,
              getFocusWordForMention: ((String?, NSRange?) -> Void)?,
-             updateCursorPosition: @escaping ((Int) -> Void)
+             updateCursorPosition: @escaping ((Int) -> Void),
+             initialTextSuffix: String?
         ) {
             _attributedText = attributedText
             self.getFocusWordForMention = getFocusWordForMention
             self.updateCursorPosition = updateCursorPosition
+            self.initialTextSuffix = initialTextSuffix
         }
 
         func textViewDidChange(_ textView: UITextView) {
-            attributedText = NSMutableAttributedString(attributedString: textView.attributedText)
+            if let initialTextSuffix, !self.initialTextSuffixWasAdded {
+                self.initialTextSuffixWasAdded = true
+                var mutable = NSMutableAttributedString(attributedString: textView.attributedText)
+                let originalRange = textView.selectedRange
+                addUnattributedText(initialTextSuffix, to: &mutable, inRange: originalRange)
+                attributedText = mutable
+                DispatchQueue.main.async {
+                    self.updateCursorPosition(originalRange.location)
+                }
+            }
+            else {
+                attributedText = NSMutableAttributedString(attributedString: textView.attributedText)
+            }
             processFocusedWordForMention(textView: textView)
         }
 

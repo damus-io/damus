@@ -26,7 +26,7 @@ enum Sheets: Identifiable {
     case select_wallet(SelectWallet)
     case filter
     case user_status
-    case suggestedUsers
+    case onboardingSuggestions
     
     static func zap(target: ZapTarget, lnurl: String) -> Sheets {
         return .zap(ZapSheet(target: target, lnurl: lnurl))
@@ -45,7 +45,7 @@ enum Sheets: Identifiable {
         case .zap(let sheet): return "zap-" + hex_encode(sheet.target.id)
         case .select_wallet: return "select-wallet"
         case .filter: return "filter"
-        case .suggestedUsers: return "suggested-users"
+        case .onboardingSuggestions: return "onboarding-suggestions"
         }
     }
 }
@@ -74,7 +74,7 @@ struct ContentView: View {
     @State private var isSideBarOpened = false
     var home: HomeModel = HomeModel()
     @StateObject var navigationCoordinator: NavigationCoordinator = NavigationCoordinator()
-    @AppStorage("has_seen_suggested_users") private var hasSeenSuggestedUsers = false
+    @AppStorage("has_seen_suggested_users") private var hasSeenOnboardingSuggestions = false
     let sub_id = UUID().description
 
     @Environment(\.colorScheme) var colorScheme
@@ -300,9 +300,9 @@ struct ContentView: View {
             self.connect()
             try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default, options: .mixWithOthers)
             setup_notifications()
-            if !hasSeenSuggestedUsers {
-                active_sheet = .suggestedUsers
-                hasSeenSuggestedUsers = true
+            if !hasSeenOnboardingSuggestions {
+                active_sheet = .onboardingSuggestions
+                hasSeenOnboardingSuggestions = true
             }
         }
         .sheet(item: $active_sheet) { item in
@@ -329,8 +329,8 @@ struct ContentView: View {
                 } else {
                     RelayFilterView(state: damus_state!, timeline: timeline)
                 }
-            case .suggestedUsers:
-                SuggestedUsersView(model: SuggestedUsersViewModel(damus_state: damus_state!))
+            case .onboardingSuggestions:
+                OnboardingSuggestionsView(model: SuggestedUsersViewModel(damus_state: damus_state!))
             }
         }
         .onOpenURL { url in

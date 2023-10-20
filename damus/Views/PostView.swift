@@ -62,9 +62,28 @@ struct PostView: View {
     
     @StateObject var image_upload: ImageUploadModel = ImageUploadModel()
     @StateObject var tagModel: TagModel = TagModel()
+    
+    @State private var current_placeholder_index = 0
 
     let action: PostAction
     let damus_state: DamusState
+    let prompt_view: (() -> AnyView)?
+    let placeholder_messages: [String]
+    let initial_text_suffix: String?
+    
+    init(
+        action: PostAction,
+        damus_state: DamusState,
+        prompt_view: (() -> AnyView)? = nil,
+        placeholder_messages: [String]? = nil,
+        initial_text_suffix: String? = nil
+    ) {
+        self.action = action
+        self.damus_state = damus_state
+        self.prompt_view = prompt_view
+        self.placeholder_messages = placeholder_messages ?? [POST_PLACEHOLDER]
+        self.initial_text_suffix = initial_text_suffix
+    }
 
     @Environment(\.presentationMode) var presentationMode
 
@@ -151,12 +170,10 @@ struct PostView: View {
             }
         }
         .disabled(posting_disabled)
-        .font(.system(size: 14, weight: .bold))
-        .frame(width: 80, height: 30)
-        .foregroundColor(.white)
-        .background(LINEAR_GRADIENT)
         .opacity(posting_disabled ? 0.5 : 1.0)
-        .clipShape(Capsule())
+        .bold()
+        .buttonStyle(GradientButtonStyle(padding: 10))
+        
     }
     
     func isEmpty() -> Bool {
@@ -214,12 +231,19 @@ struct PostView: View {
     
     var TextEntry: some View {
         ZStack(alignment: .topLeading) {
-            TextViewWrapper(attributedText: $post, textHeight: $textHeight, cursorIndex: newCursorIndex, getFocusWordForMention: { word, range in
-                focusWordAttributes = (word, range)
-                self.newCursorIndex = nil
-            }, updateCursorPosition: { newCursorIndex in
-                self.newCursorIndex = newCursorIndex
-            })
+            TextViewWrapper(
+                attributedText: $post,
+                textHeight: $textHeight,
+                initialTextSuffix: initial_text_suffix, 
+                cursorIndex: newCursorIndex,
+                getFocusWordForMention: { word, range in
+                    focusWordAttributes = (word, range)
+                    self.newCursorIndex = nil
+                }, 
+                updateCursorPosition: { newCursorIndex in
+                    self.newCursorIndex = newCursorIndex
+                }
+            )
                 .environmentObject(tagModel)
                 .focused($focus)
                 .textInputAutocapitalization(.sentences)
@@ -230,11 +254,19 @@ struct PostView: View {
                 .frame(height: get_valid_text_height())
             
             if post.string.isEmpty {
-                Text(POST_PLACEHOLDER)
+                Text(self.placeholder_messages[self.current_placeholder_index])
                     .padding(.top, 8)
                     .padding(.leading, 4)
                     .foregroundColor(Color(uiColor: .placeholderText))
                     .allowsHitTesting(false)
+            }
+        }
+        .onAppear {
+            // Schedule a timer to switch messages every 3 seconds
+            Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { timer in
+                withAnimation {
+                    self.current_placeholder_index = (self.current_placeholder_index + 1) % self.placeholder_messages.count
+                }
             }
         }
     }
@@ -242,10 +274,13 @@ struct PostView: View {
     var TopBar: some View {
         VStack {
             HStack(spacing: 5.0) {
-                Button(NSLocalizedString("Cancel", comment: "Button to cancel out of posting a note.")) {
+                Button(action: {
                     self.cancel()
-                }
-                .foregroundColor(.primary)
+                }, label: {
+                    Text(NSLocalizedString("Cancel", comment: "Button to cancel out of posting a note."))
+                        .padding(10)
+                })
+                .buttonStyle(NeutralButtonStyle())
                 
                 if let error {
                     Text(error)
@@ -261,9 +296,14 @@ struct PostView: View {
                 ProgressView(value: progress, total: 1.0)
                     .progressViewStyle(.linear)
             }
+            
+            Divider()
+                .foregroundColor(DamusColors.neutral3)
+                .padding(.top, 5)
         }
         .frame(height: 30)
         .padding()
+        .padding(.top, 15)
     }
     
     func handle_upload(media: MediaUpload) {
@@ -312,7 +352,12 @@ struct PostView: View {
                 HStack(alignment: .top) {
                     ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
                     
-                    TextEntry
+                    VStack(alignment: .leading) {
+                        if let prompt_view {
+                            prompt_view()
+                        }
+                        TextEntry
+                    }
                 }
                 .id("post")
                 
@@ -360,6 +405,7 @@ struct PostView: View {
                             }
                             
                             Editor(deviceSize: deviceSize)
+                                .padding(.top, 5)
                         }
                     }
                     .frame(maxHeight: searching == nil ? deviceSize.size.height : 70)
