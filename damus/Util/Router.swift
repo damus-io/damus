@@ -188,8 +188,7 @@ enum Route: Hashable {
             hasher.combine(reactions.target)
         case .Search(let search):
             hasher.combine("search")
-            hasher.combine(search.sub_id)
-            hasher.combine(search.profiles_subid)
+            hasher.combine(search.search)
         case .EULA:
             hasher.combine("eula")
         case .Login:
