@@ -22,6 +22,7 @@ enum Sheets: Identifiable {
     case post(PostAction)
     case report(ReportTarget)
     case event(NostrEvent)
+    case profile_action(Pubkey)
     case zap(ZapSheet)
     case select_wallet(SelectWallet)
     case filter
@@ -42,6 +43,7 @@ enum Sheets: Identifiable {
         case .user_status: return "user_status"
         case .post(let action): return "post-" + (action.ev?.id.hex() ?? "")
         case .event(let ev): return "event-" + ev.id.hex()
+        case .profile_action(let pubkey): return "profile-action-" + pubkey.npub
         case .zap(let sheet): return "zap-" + hex_encode(sheet.target.id)
         case .select_wallet: return "select-wallet"
         case .filter: return "filter"
@@ -316,6 +318,8 @@ struct ContentView: View {
                     .presentationDragIndicator(.visible)
             case .event:
                 EventDetailView()
+            case .profile_action(let pubkey):
+                ProfileActionSheetView(damus_state: damus_state!, pubkey: pubkey)
             case .zap(let zapsheet):
                 CustomizeZapView(state: damus_state!, target: zapsheet.target, lnurl: zapsheet.lnurl)
             case .select_wallet(let select):

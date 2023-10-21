@@ -10,15 +10,23 @@ import SwiftUI
 struct AboutView: View {
     let state: DamusState
     let about: String
-    let max_about_length = 280
+    let max_about_length: Int
+    let text_alignment: NSTextAlignment
     @State var show_full_about: Bool = false
     @State private var about_string: AttributedString? = nil
+    
+    init(state: DamusState, about: String, max_about_length: Int? = nil, text_alignment: NSTextAlignment? = nil) {
+        self.state = state
+        self.about = about
+        self.max_about_length = max_about_length ?? 280
+        self.text_alignment = text_alignment ?? .natural
+    }
     
     var body: some View {
         Group {
             if let about_string {
                 let truncated_about = show_full_about ? about_string : about_string.truncateOrNil(maxLength: max_about_length)
-                SelectableText(attributedString: truncated_about ?? about_string, size: .subheadline)
+                SelectableText(attributedString: truncated_about ?? about_string, textAlignment: self.text_alignment, size: .subheadline)
 
                 if truncated_about != nil {
                     if show_full_about {

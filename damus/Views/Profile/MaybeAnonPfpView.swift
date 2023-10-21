@@ -21,16 +21,16 @@ struct MaybeAnonPfpView: View {
     }
     
     var body: some View {
-        Group {
+        ZStack {
             if is_anon {
                 Image("question")
                     .resizable()
                     .font(.largeTitle)
                     .frame(width: size, height: size)
             } else {
-                ProfilePicView(pubkey: pubkey, size: size, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation)
+                ProfilePicView(pubkey: pubkey, size: size, highlight: .none, profiles: state.profiles, disable_animation: state.settings.disable_animation, show_zappability: true)
                     .onTapGesture {
-                        state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
+                        notify(.present_sheet(Sheets.profile_action(pubkey)))
                     }
             }
         }

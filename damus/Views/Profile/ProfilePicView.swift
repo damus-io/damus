@@ -69,38 +69,59 @@ struct ProfilePicView: View {
     let highlight: Highlight
     let profiles: Profiles
     let disable_animation: Bool
+    let zappability_indicator: Bool
     
     @State var picture: String?
     
-    init(pubkey: Pubkey, size: CGFloat, highlight: Highlight, profiles: Profiles, disable_animation: Bool, picture: String? = nil) {
+    init(pubkey: Pubkey, size: CGFloat, highlight: Highlight, profiles: Profiles, disable_animation: Bool, picture: String? = nil, show_zappability: Bool? = nil) {
         self.pubkey = pubkey
         self.profiles = profiles
         self.size = size
         self.highlight = highlight
         self._picture = State(initialValue: picture)
         self.disable_animation = disable_animation
+        self.zappability_indicator = show_zappability ?? false
+    }
+    
+    func get_lnurl() -> String? {
+        return profiles.lookup_with_timestamp(pubkey).unsafeUnownedValue?.lnurl
     }
     
     var body: some View {
-        InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: size, highlight: highlight, disable_animation: disable_animation)
-            .onReceive(handle_notify(.profile_updated)) { updated in
-                guard updated.pubkey == self.pubkey else {
-                    return
-                }
-
-                switch updated {
-                case .manual(_, let profile):
-                    if let pic = profile.picture {
-                        self.picture = pic
+        ZStack (alignment: Alignment(horizontal: .trailing, vertical: .bottom)) {
+            InnerProfilePicView(url: get_profile_url(picture: picture, pubkey: pubkey, profiles: profiles), fallbackUrl: URL(string: robohash(pubkey)), pubkey: pubkey, size: size, highlight: highlight, disable_animation: disable_animation)
+                .onReceive(handle_notify(.profile_updated)) { updated in
+                    guard updated.pubkey == self.pubkey else {
+                        return
                     }
-                case .remote(pubkey: let pk):
-                    let profile_txn = profiles.lookup(id: pk)
-                    let profile = profile_txn.unsafeUnownedValue
-                    if let pic = profile?.picture {
-                        self.picture = pic
+                    
+                    switch updated {
+                        case .manual(_, let profile):
+                            if let pic = profile.picture {
+                                self.picture = pic
+                            }
+                        case .remote(pubkey: let pk):
+                            let profile_txn = profiles.lookup(id: pk)
+                            let profile = profile_txn.unsafeUnownedValue
+                            if let pic = profile?.picture {
+                                self.picture = pic
+                            }
                     }
                 }
+            
+            if self.zappability_indicator, let lnurl = self.get_lnurl(), lnurl != "" {
+                Image("zap.fill")
+                    .resizable()
+                    .frame(
+                        width: size * 0.24,
+                        height: size * 0.24
+                    )
+                    .padding(size * 0.04)
+                    .foregroundColor(.white)
+                    .background(Color.orange)
+                    .clipShape(Circle())
             }
+        }
     }
 }
 

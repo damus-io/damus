@@ -221,39 +221,13 @@ struct ProfileView: View {
         .accentColor(DamusColors.white)
     }
 
-    func lnButton(lnurl: String, unownedProfile: Profile?, pubkey: Pubkey) -> some View {
-        let reactions = unownedProfile?.reactions ?? true
-        let button_img = reactions ? "zap.fill" : "zap"
-        let lud16 = unownedProfile?.lud16
-
-        return Button(action: { [lnurl] in
-            present_sheet(.zap(target: .profile(self.profile.pubkey), lnurl: lnurl))
-        }) {
-            Image(button_img)
-                .foregroundColor(button_img == "zap.fill" ? .orange : Color.primary)
+    func lnButton(unownedProfile: Profile?, record: ProfileRecord?) -> some View {
+        return ZapButtonView(unownedProfileRecord: record, profileModel: self.profile) { reactions_enabled, lud16, lnurl in
+            Image(reactions_enabled ? "zap.fill" : "zap")
+                .foregroundColor(reactions_enabled ? .orange : Color.primary)
                 .profile_button_style(scheme: colorScheme)
-                .contextMenu { [lud16, reactions, lnurl] in
-                    if reactions == false {
-                        Text("OnlyZaps Enabled", comment: "Non-tappable text in context menu that shows up when the zap button on profile is long pressed to indicate that the user has enabled OnlyZaps, meaning that they would like to be only zapped and not accept reactions to their notes.")
-                    }
-
-                    if let lud16 {
-                        Button {
-                            UIPasteboard.general.string = lud16
-                        } label: {
-                            Label(lud16, image: "copy2")
-                        }
-                    } else {
-                        Button {
-                            UIPasteboard.general.string = lnurl
-                        } label: {
-                            Label(NSLocalizedString("Copy LNURL", comment: "Context menu option for copying a user's Lightning URL."), image: "copy")
-                        }
-                    }
-                }
-
+                .cornerRadius(24)
         }
-        .cornerRadius(24)
     }
     
     var dmButton: some View {
@@ -283,7 +257,7 @@ struct ProfileView: View {
                let lnurl = record.lnurl,
                lnurl != ""
             {
-                lnButton(lnurl: lnurl, unownedProfile: profile, pubkey: pubkey)
+                lnButton(unownedProfile: profile, record: record)
             }
 
             dmButton

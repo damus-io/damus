@@ -37,9 +37,9 @@ struct EventProfile: View {
     
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
-            ProfilePicView(pubkey: pubkey, size: pfp_size, highlight: .none, profiles: damus_state.profiles, disable_animation: disable_animation)
+            ProfilePicView(pubkey: pubkey, size: pfp_size, highlight: .none, profiles: damus_state.profiles, disable_animation: disable_animation, show_zappability: true)
                 .onTapGesture {
-                    damus_state.nav.push(route: .ProfileByKey(pubkey: pubkey))
+                    notify(.present_sheet(Sheets.profile_action(pubkey)))
                 }
 
             VStack(alignment: .leading, spacing: 0) {

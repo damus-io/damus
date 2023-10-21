@@ -11,11 +11,18 @@ import SwiftUI
 struct SelectableText: View {
     
     let attributedString: AttributedString
+    let textAlignment: NSTextAlignment
     
     @State private var selectedTextHeight: CGFloat = .zero
     @State private var selectedTextWidth: CGFloat = .zero
     
     let size: EventViewKind
+    
+    init(attributedString: AttributedString, textAlignment: NSTextAlignment? = nil, size: EventViewKind) {
+        self.attributedString = attributedString
+        self.textAlignment = textAlignment ?? NSTextAlignment.natural
+        self.size = size
+    }
     
     var body: some View {
         GeometryReader { geo in
@@ -24,6 +31,7 @@ struct SelectableText: View {
                 textColor: UIColor.label,
                 font: eventviewsize_to_uifont(size),
                 fixedWidth: selectedTextWidth,
+                textAlignment: self.textAlignment,
                 height: $selectedTextHeight
             )
             .padding([.leading, .trailing], -1.0)
@@ -48,6 +56,7 @@ struct SelectableText: View {
     let textColor: UIColor
     let font: UIFont
     let fixedWidth: CGFloat
+    let textAlignment: NSTextAlignment
 
     @Binding var height: CGFloat
 
@@ -61,12 +70,14 @@ struct SelectableText: View {
         view.textContainerInset = .zero
         view.textContainerInset.left = 1.0
         view.textContainerInset.right = 1.0
+        view.textAlignment = textAlignment
         return view
     }
 
     func updateUIView(_ uiView: UITextView, context: UIViewRepresentableContext<Self>) {
         let mutableAttributedString = createNSAttributedString()
         uiView.attributedText = mutableAttributedString
+        uiView.textAlignment = self.textAlignment
 
         let newHeight = mutableAttributedString.height(containerWidth: fixedWidth)
 
