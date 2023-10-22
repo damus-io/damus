@@ -1,3 +1,30 @@
+## [1.6-24] - 2023-10-22 - AppStore Rejection Cope
+
+### Added
+
+- Improve discoverability of profile zaps with zappability badges and profile action sheets (Daniel D’Aquino)
+- Add suggested hashtags to universe view (Daniel D’Aquino)
+- Suggest first post during onboarding (Daniel D’Aquino)
+- Add expiry date for images in cache to be auto-deleted after a preset time to save space on storage (Daniel D’Aquino)
+- Add QR scan nsec logins. (Jericho Hasselbush)
+
+
+### Changed
+
+- Improved status view design (ericholguin)
+- Improve clear cache functionality (Daniel D’Aquino)
+
+
+### Fixed
+
+- Reduce size of event menu hitbox (William Casarin)
+- Do not show DMs from muted users (Daniel D’Aquino)
+- Add more spacing between display name and username, and prefix username with `@` character (Daniel D’Aquino)
+- Broadcast quoted notes when posting a note with quotes (Daniel D’Aquino)
+
+
+[1.6-24]: https://github.com/damus-io/damus/releases/tag/v1.6-24
+
 ## [1.6-23] - 2023-10-06 - Appstore Release
 
 ### Added
