@@ -34,14 +34,37 @@ protocol TagConvertible {
     static func from_tag(tag: TagSequence) -> Self?
 }
 
-struct QuoteId: IdType, TagKey {
+struct QuoteId: IdType, TagKey, TagConvertible {
     let id: Data
     
     init(_ data: Data) {
         self.id = data
     }
+    
+    /// Refer to this QuoteId as a NoteId
+    var note_id: NoteId {
+        NoteId(self.id)
+    }
 
     var keychar: AsciiCharacter { "q" }
+    
+    var tag: [String] {
+        ["q", self.hex()]
+    }
+    
+    static func from_tag(tag: TagSequence) -> QuoteId? {
+        var i = tag.makeIterator()
+
+        guard tag.count >= 2,
+              let t0 = i.next(),
+              let key = t0.single_char,
+              key == "q",
+              let t1 = i.next(),
+              let quote_id = t1.id().map(QuoteId.init)
+        else { return nil }
+
+        return quote_id
+    }
 }
 
 

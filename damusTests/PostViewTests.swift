@@ -6,6 +6,8 @@
 //
 import Foundation
 import XCTest
+import SnapshotTesting
+import SwiftUI
 @testable import damus
 import SwiftUI
 
@@ -17,6 +19,29 @@ final class PostViewTests: XCTestCase {
     
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
+    }
+    
+    func testTextWrapperViewWillWrapText() {
+        // Setup test variables to be passed into the TextViewWrapper
+        let tagModel: TagModel = TagModel()
+        var textHeight: CGFloat? = nil
+        let textHeightBinding: Binding<CGFloat?> = Binding(get: {
+            return textHeight
+        }, set: { newValue in
+            textHeight = newValue
+        })
+        
+        // Setup the test view
+        let textEditorView = TextViewWrapper(
+            attributedText: .constant(NSMutableAttributedString(string: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")),
+            textHeight: textHeightBinding,
+            cursorIndex: 9,
+            updateCursorPosition: { _ in return }
+        ).environmentObject(tagModel)
+        let hostView = UIHostingController(rootView: textEditorView)
+        
+        // Run snapshot check
+        assertSnapshot(matching: hostView, as: .image(on: .iPhoneSe(.portrait)))
     }
     
     /// Based on https://github.com/damus-io/damus/issues/1375

@@ -30,6 +30,13 @@ enum ParsedKey {
         }
         return false
     }
+
+    var is_priv: Bool {
+        if case .priv = self {
+            return true
+        }
+        return false
+    }
 }
 
 struct LoginView: View {
@@ -37,6 +44,7 @@ struct LoginView: View {
     @State var is_pubkey: Bool = false
     @State var error: String? = nil
     @State private var credential_handler = CredentialHandler()
+    @State private var shouldSaveKey: Bool = true
     var nav: NavigationCoordinator
 
     func get_error(parsed_key: ParsedKey?) -> String? {
@@ -57,7 +65,7 @@ struct LoginView: View {
                 SignInHeader()
                     .padding(.top, 100)
                 
-                SignInEntry(key: $key)
+                SignInEntry(key: $key, shouldSaveKey: $shouldSaveKey)
                 
                 let parsed = parse_key(key)
                 
@@ -83,7 +91,7 @@ struct LoginView: View {
                     Button(action: {
                         Task {
                             do {
-                                try await process_login(p, is_pubkey: is_pubkey)
+                                try await process_login(p, is_pubkey: is_pubkey, shouldSaveKey: shouldSaveKey)
                             } catch {
                                 self.error = error.localizedDescription
                             }
@@ -168,37 +176,39 @@ enum LoginError: LocalizedError {
     }
 }
 
-func process_login(_ key: ParsedKey, is_pubkey: Bool) async throws {
-    switch key {
-    case .priv(let priv):
-        try handle_privkey(priv)
-    case .pub(let pub):
-        try clear_saved_privkey()
-        save_pubkey(pubkey: pub)
-
-    case .nip05(let id):
-        guard let nip05 = await get_nip05_pubkey(id: id) else {
-            throw LoginError.nip05_failed
-        }
-        
-        // this is a weird way to login anyways
-        /*
-         var bootstrap_relays = load_bootstrap_relays(pubkey: nip05.pubkey)
-         for relay in nip05.relays {
-         if !(bootstrap_relays.contains { $0 == relay }) {
-         bootstrap_relays.append(relay)
-         }
-         }
-         */
-        save_pubkey(pubkey: nip05.pubkey)
-
-    case .hex(let hexstr):
-        if is_pubkey, let pubkey = hex_decode_pubkey(hexstr) {
+func process_login(_ key: ParsedKey, is_pubkey: Bool, shouldSaveKey: Bool = true) async throws {
+    if shouldSaveKey {
+        switch key {
+        case .priv(let priv):
+            try handle_privkey(priv)
+        case .pub(let pub):
             try clear_saved_privkey()
+            save_pubkey(pubkey: pub)
 
-            save_pubkey(pubkey: pubkey)
-        } else if let privkey = hex_decode_privkey(hexstr) {
-            try handle_privkey(privkey)
+        case .nip05(let id):
+            guard let nip05 = await get_nip05_pubkey(id: id) else {
+                throw LoginError.nip05_failed
+            }
+
+            // this is a weird way to login anyways
+            /*
+             var bootstrap_relays = load_bootstrap_relays(pubkey: nip05.pubkey)
+             for relay in nip05.relays {
+             if !(bootstrap_relays.contains { $0 == relay }) {
+             bootstrap_relays.append(relay)
+             }
+             }
+             */
+            save_pubkey(pubkey: nip05.pubkey)
+
+        case .hex(let hexstr):
+            if is_pubkey, let pubkey = hex_decode_pubkey(hexstr) {
+                try clear_saved_privkey()
+
+                save_pubkey(pubkey: pubkey)
+            } else if let privkey = hex_decode_privkey(hexstr) {
+                try handle_privkey(privkey)
+            }
         }
     }
     
@@ -213,7 +223,16 @@ func process_login(_ key: ParsedKey, is_pubkey: Bool) async throws {
         save_pubkey(pubkey: pk)
     }
 
-    guard let keypair = get_saved_keypair() else {
+    func handle_transient_privkey(_ key: ParsedKey) -> Keypair? {
+        if case let .priv(priv) = key, let pubkey = privkey_to_pubkey(privkey: priv) {
+            return Keypair(pubkey: pubkey, privkey: priv)
+        }
+        return nil
+    }
+
+    let keypair = shouldSaveKey ? get_saved_keypair() : handle_transient_privkey(key)
+
+    guard let keypair = keypair else {
         return
     }
 
@@ -265,11 +284,15 @@ func get_nip05_pubkey(id: String) async -> NIP05User? {
 struct KeyInput: View {
     let title: String
     let key: Binding<String>
+    let shouldSaveKey: Binding<Bool>
+    var privKeyFound: Binding<Bool>
     @State private var is_secured: Bool = true
 
-    init(_ title: String, key: Binding<String>) {
+    init(_ title: String, key: Binding<String>, shouldSaveKey: Binding<Bool>, privKeyFound: Binding<Bool>) {
         self.title = title
         self.key = key
+        self.shouldSaveKey = shouldSaveKey
+        self.privKeyFound = privKeyFound
     }
 
     var body: some View {
@@ -281,6 +304,8 @@ struct KeyInput: View {
                         self.key.wrappedValue = pastedkey
                     }
                 }
+            SignInScan(shouldSaveKey: shouldSaveKey, loginKey: key, privKeyFound: privKeyFound)
+
             if is_secured  {
                      SecureField("", text: key)
                          .nsecLoginStyle(key: key.wrappedValue, title: title)
@@ -323,15 +348,76 @@ struct SignInHeader: View {
 
 struct SignInEntry: View {
     let key: Binding<String>
-    
+    let shouldSaveKey: Binding<Bool>
+    @State private var privKeyFound: Bool = false
     var body: some View {
         VStack(alignment: .leading) {
             Text("Enter your account key", comment: "Prompt for user to enter an account key to login.")
                 .fontWeight(.medium)
                 .padding(.top, 30)
             
-            KeyInput(NSLocalizedString("nsec1...", comment: "Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key."), key: key)
+            KeyInput(NSLocalizedString("nsec1...", comment: "Prompt for user to enter in an account key to login. This text shows the characters the key could start with if it was a private key."),
+                     key: key,
+                     shouldSaveKey: shouldSaveKey,
+                     privKeyFound: $privKeyFound)
+            if privKeyFound {
+                Toggle("Save Key in Secure Keychain", isOn: shouldSaveKey)
+            }
         }
+    }
+}
+
+struct SignInScan: View {
+    @State var showQR: Bool = false
+    @State var qrkey: ParsedKey?
+    @Binding var shouldSaveKey: Bool
+    @Binding var loginKey: String
+    @Binding var privKeyFound: Bool
+    let generator = UINotificationFeedbackGenerator()
+
+    var body: some View {
+        VStack {
+            Button(action: { showQR.toggle() }, label: {
+                Image(systemName: "qrcode.viewfinder")})
+            .foregroundColor(.gray)
+
+        }
+        .sheet(isPresented: $showQR, onDismiss: {
+            if qrkey == nil { resetView() }}
+        ) {
+            QRScanNSECView(showQR: $showQR,
+                           privKeyFound: $privKeyFound,
+                           codeScannerCompletion: { scannerCompletion($0) })
+        }
+        .onChange(of: showQR) { show in
+            if showQR { resetView() }
+        }
+    }
+
+    func handleQRString(_ string: String) {
+        qrkey = parse_key(string)
+        if let key = qrkey, key.is_priv {
+            loginKey = string
+            privKeyFound = true
+            shouldSaveKey = false
+            generator.notificationOccurred(.success)
+        }
+    }
+
+    func scannerCompletion(_ result: Result<ScanResult, ScanError>) {
+        switch result {
+        case .success(let success):
+            handleQRString(success.string)
+        case .failure:
+            return
+        }
+    }
+
+    func resetView() {
+        loginKey = ""
+        qrkey = nil
+        privKeyFound = false
+        shouldSaveKey = true
     }
 }
 

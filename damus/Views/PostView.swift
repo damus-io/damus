@@ -56,7 +56,6 @@ struct PostView: View {
     @State var filtered_pubkeys: Set<Pubkey> = []
     @State var focusWordAttributes: (String?, NSRange?) = (nil, nil)
     @State var newCursorIndex: Int?
-    @State var caretRect: CGRect = CGRectNull
     @State var textHeight: CGFloat? = nil
 
     @State var mediaToUpload: MediaUpload? = nil
@@ -220,13 +219,6 @@ struct PostView: View {
                 self.newCursorIndex = nil
             }, updateCursorPosition: { newCursorIndex in
                 self.newCursorIndex = newCursorIndex
-            }, onCaretRectChange: { uiView in
-                // When the caret position changes, we change the `caretRect` in our state, so that our ghost caret will follow our caret
-                if let selectedStartRange = uiView.selectedTextRange?.start {
-                    DispatchQueue.main.async {
-                        caretRect = uiView.caretRect(for: selectedStartRange)
-                    }
-                }
             })
                 .environmentObject(tagModel)
                 .focused($focus)
@@ -316,9 +308,6 @@ struct PostView: View {
     
     func Editor(deviceSize: GeometryProxy) -> some View {
         HStack(alignment: .top, spacing: 0) {
-            if(caretRect != CGRectNull) {
-                GhostCaret
-            }
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top) {
                     ProfilePicView(pubkey: damus_state.pubkey, size: PFP_SIZE, highlight: .none, profiles: damus_state.profiles, disable_animation: damus_state.settings.disable_animation)
@@ -338,25 +327,6 @@ struct PostView: View {
             }
             .padding(.horizontal)
         }
-    }
-    
-    // The GhostCaret is a vertical projection of the editor's caret that should sit beside the editor.
-    // The purpose of this view is create a reference point that we can scroll our ScrollView into
-    // This is necessary as a bridge to communicate between:
-    // - The UIKit-based UITextView (which has the caret position)
-    // - and the SwiftUI-based ScrollView/ScrollReader (where scrolling commands can only be done via the SwiftUI "ID" parameter
-    var GhostCaret: some View {
-        Rectangle()
-            .foregroundStyle(DEBUG_SHOW_GHOST_CARET_VIEW ? .cyan : .init(red: 0, green: 0, blue: 0, opacity: 0))
-            .frame(
-                width: DEBUG_SHOW_GHOST_CARET_VIEW ? caretRect.width : 0,
-                height: caretRect.height)
-            // Use padding to vertically align our ghost caret with our actual text caret.
-            // Note: Programmatic scrolling cannot be done with the `.position` modifier.
-            // Experiments revealed that the scroller ignores the position modifier.
-            .padding(.top, caretRect.origin.y)
-            .id(GHOST_CARET_VIEW_ID)
-            .disabled(true)
     }
     
     func fill_target_content(target: PostTarget) {
@@ -396,13 +366,6 @@ struct PostView: View {
                     .onAppear {
                         scroll_to_event(scroller: scroller, id: "post", delay: 1.0, animate: true, anchor: .top)
                     }
-                    // Note: The scroll commands below are specific because there seems to be quirk with ScrollReader where sending it to the exact same position twice resets its scroll position.
-                    .onChange(of: caretRect.origin.y, perform: { newValue in
-                        scroller.scrollTo(GHOST_CARET_VIEW_ID)
-                    })
-                    .onChange(of: searchingIsNil, perform: { newValue in
-                        scroller.scrollTo(GHOST_CARET_VIEW_ID)
-                    })
                 }
                 
                 // This if-block observes @ for tagging

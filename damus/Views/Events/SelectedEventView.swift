@@ -55,10 +55,7 @@ struct SelectedEventView: View {
                 
                 EventBody(damus_state: damus, event: event, size: size, options: [.wide])
 
-                if let mention = first_eref_mention(ev: event, keypair: damus.keypair) {
-                    BuilderEventView(damus: damus, event_id: mention.ref)
-                        .padding(.horizontal)
-                }
+                Mention
                 
                 Text(verbatim: "\(format_date(event.created_at))")
                     .padding([.top, .leading, .trailing])
@@ -86,6 +83,15 @@ struct SelectedEventView: View {
                 self.bar.update(damus: self.damus, evid: target)
             }
             .compositingGroup()
+        }
+    }
+    
+    var Mention: some View {
+        Group {
+            if let mention = first_eref_mention(ev: event, keypair: damus.keypair) {
+                MentionView(damus_state: damus, mention: mention)
+                    .padding(.horizontal)
+            }
         }
     }
 }

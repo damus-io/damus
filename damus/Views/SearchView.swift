@@ -11,11 +11,16 @@ struct SearchView: View {
     let appstate: DamusState
     @ObservedObject var search: SearchModel
     @Environment(\.dismiss) var dismiss
+    
+    var content_filter: (NostrEvent) -> Bool {
+        let filters = ContentFilters.defaults(damus_state: self.appstate)
+        return ContentFilters(filters: filters).filter
+    }
 
     let height: CGFloat = 250.0
 
     var body: some View {
-        TimelineView(events: search.events, loading: $search.loading, damus: appstate, show_friend_icon: true, filter: { _ in true }) {
+        TimelineView(events: search.events, loading: $search.loading, damus: appstate, show_friend_icon: true, filter: content_filter) {
             ZStack(alignment: .leading) {
                 DamusBackground(maxHeight: height)
                     .mask(LinearGradient(gradient: Gradient(colors: [.black, .black, .black, .clear]), startPoint: .top, endPoint: .bottom))

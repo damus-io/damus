@@ -22,11 +22,12 @@ struct DirectMessagesView: View {
     func MainContent(requests: Bool) -> some View {
         ScrollView {
             LazyVStack(spacing: 0) {
-                if model.dms.isEmpty, !model.loading {
+                let dms = requests ? model.message_requests : model.friend_dms
+                let filtered_dms = filter_dms(dms: dms)
+                if filtered_dms.isEmpty, !model.loading {
                     EmptyTimelineView()
                 } else {
-                    let dms = requests ? model.message_requests : model.friend_dms
-                    ForEach(dms, id: \.pubkey) { dm in
+                    ForEach(filtered_dms, id: \.pubkey) { dm in
                         MaybeEvent(dm)
                             .padding(.top, 10)
                     }
@@ -34,6 +35,12 @@ struct DirectMessagesView: View {
             }
             .padding(.horizontal)
         }
+    }
+    
+    func filter_dms(dms: [DirectMessageModel]) -> [DirectMessageModel] {
+        return dms.filter({ dm in
+            return damus_state.settings.friend_filter.filter(contacts: damus_state.contacts, pubkey: dm.pubkey) && !damus_state.contacts.is_muted(dm.pubkey)
+        })
     }
     
     var options: EventViewOptions {
@@ -46,8 +53,7 @@ struct DirectMessagesView: View {
     
     func MaybeEvent(_ model: DirectMessageModel) -> some View {
         Group {
-            let ok = damus_state.settings.friend_filter.filter(contacts: damus_state.contacts, pubkey: model.pubkey)
-            if ok, let ev = model.events.last {
+            if let ev = model.events.last {
                 EventView(damus: damus_state, event: ev, pubkey: model.pubkey, options: options)
                     .onTapGesture {
                         self.model.set_active_dm_model(model)

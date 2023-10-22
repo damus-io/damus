@@ -219,7 +219,7 @@ class RelayPool {
         // send to local relay (nostrdb)
         switch req {
         case .typical(let r):
-            if let rstr = make_nostr_req(r) {
+            if case .event = r, let rstr = make_nostr_req(r) {
                 ndb.process_client_event(rstr)
             }
         case .custom(let string):

@@ -22,7 +22,17 @@ struct RepostedEvent: View {
            .buttonStyle(PlainButtonStyle())
             
             //SelectedEventView(damus: damus, event: inner_ev, size: .normal)
-            EventView(damus: damus, event: inner_ev, pubkey: inner_ev.pubkey, options: options.union(.wide))
+            EventMutingContainerView(
+                damus_state: damus,
+                event: inner_ev,
+                muteBox: { event_shown in
+                    AnyView(
+                        EventMutedBoxView(shown: event_shown)
+                            .padding(.horizontal, 5)    // Add a bit of horizontal padding to avoid the mute box from touching the edges of the screen
+                    )
+                }) {
+                EventView(damus: damus, event: inner_ev, pubkey: inner_ev.pubkey, options: options.union(.wide))
+            }
         }
     }
 }

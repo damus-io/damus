@@ -42,10 +42,6 @@ struct EventShell<Content: View>: View {
         
         return first_eref_mention(ev: event, keypair: state.keypair)
     }
-
-    func Mention(_ mention: Mention<NoteId>) -> some View {
-        return BuilderEventView(damus: state, event_id: mention.ref)
-    }
     
     var ActionBar: some View {
         return EventActionBar(damus_state: state, event: event)
@@ -78,7 +74,7 @@ struct EventShell<Content: View>: View {
                 content
 
                 if let mention = get_mention() {
-                    Mention(mention)
+                    MentionView(damus_state: state, mention: mention)
                 }
                 
                 if has_action_bar {
@@ -107,7 +103,7 @@ struct EventShell<Content: View>: View {
             content
             
             if !options.contains(.no_mentions), let mention = get_mention() {
-                Mention(mention)
+                MentionView(damus_state: state, mention: mention)
                     .padding(.horizontal)
             }
             
@@ -128,7 +124,6 @@ struct EventShell<Content: View>: View {
         }
         .contentShape(Rectangle())
         .id(event.id)
-        .frame(maxWidth: .infinity, minHeight: PFP_SIZE)
         .padding([.bottom], 2)
     }
 }

@@ -7,6 +7,15 @@
 
 import SwiftUI
 
+fileprivate let CACHE_CLEAR_BUTTON_RESET_TIME_IN_SECONDS: Double = 60
+fileprivate let MINIMUM_CACHE_CLEAR_BUTTON_DELAY_IN_SECONDS: Double = 1
+
+/// A simple type to keep track of the cache clearing state
+fileprivate enum CacheClearingState {
+    case not_cleared
+    case clearing
+    case cleared
+}
 
 struct ResizedEventPreview: View {
     let damus_state: DamusState
@@ -21,6 +30,11 @@ struct AppearanceSettingsView: View {
     let damus_state: DamusState
     @ObservedObject var settings: UserSettingsStore
     @Environment(\.dismiss) var dismiss
+    @State fileprivate var cache_clearing_state: CacheClearingState = .not_cleared
+    @State var showing_cache_clear_alert: Bool = false
+    
+    @State var showing_enable_animation_alert: Bool = false
+    @State var enable_animation_toggle_is_user_initiated: Bool = true
 
     var FontSize: some View {
         VStack(alignment: .leading) {
@@ -63,11 +77,7 @@ struct AppearanceSettingsView: View {
             
             // MARK: - Images
             Section(NSLocalizedString("Images", comment: "Section title for images configuration.")) {
-                Toggle(NSLocalizedString("Animations", comment: "Toggle to enable or disable image animation"), isOn: $settings.enable_animation)
-                    .toggleStyle(.switch)
-                    .onChange(of: settings.enable_animation) { _ in
-                        clear_kingfisher_cache()
-                    }
+                self.EnableAnimationsToggle
                 Toggle(NSLocalizedString("Always show images", comment: "Setting to always show and never blur images"), isOn: $settings.always_show_images)
                     .toggleStyle(.switch)
                 
@@ -79,9 +89,7 @@ struct AppearanceSettingsView: View {
                     }
                 }
 
-                Button(NSLocalizedString("Clear Cache", comment: "Button to clear image cache.")) {
-                    clear_kingfisher_cache()
-                }
+                self.ClearCacheButton
             }
             
             // MARK: - Content filters and moderation
@@ -98,6 +106,83 @@ struct AppearanceSettingsView: View {
         .navigationTitle(NSLocalizedString("Appearance", comment: "Navigation title for text and appearance settings."))
         .onReceive(handle_notify(.switched_timeline)) { _ in
             dismiss()
+        }
+    }
+    
+    func clear_cache_button_action() {
+        cache_clearing_state = .clearing
+        
+        let group = DispatchGroup()
+        
+        group.enter()
+        DamusCacheManager.shared.clear_cache(damus_state: self.damus_state, completion: {
+            group.leave()
+        })
+        
+        // Make clear cache button take at least a second or so to avoid issues with labor perception bias (https://growth.design/case-studies/labor-perception-bias)
+        group.enter()
+        DispatchQueue.main.asyncAfter(deadline: .now() + MINIMUM_CACHE_CLEAR_BUTTON_DELAY_IN_SECONDS) {
+            group.leave()
+        }
+        
+        group.notify(queue: .main) {
+            cache_clearing_state = .cleared
+            DispatchQueue.main.asyncAfter(deadline: .now() + CACHE_CLEAR_BUTTON_RESET_TIME_IN_SECONDS) {
+                cache_clearing_state = .not_cleared
+            }
+        }
+    }
+    
+    var EnableAnimationsToggle: some View {
+        Toggle(NSLocalizedString("Animations", comment: "Toggle to enable or disable image animation"), isOn: $settings.enable_animation)
+            .toggleStyle(.switch)
+            .onChange(of: settings.enable_animation) { _ in
+                if self.enable_animation_toggle_is_user_initiated {
+                    self.showing_enable_animation_alert = true
+                }
+                else {
+                    self.enable_animation_toggle_is_user_initiated = true
+                }
+            }
+            .alert(isPresented: $showing_enable_animation_alert) {
+                Alert(title: Text(NSLocalizedString("Confirmation", comment: "Confirmation dialog title")),
+                      message: Text(NSLocalizedString("Changing this setting will cause the cache to be cleared. This will free space, but images may take longer to load again. Are you sure you want to proceed?", comment: "Message explaining consequences of changing the 'enable animation' setting")),
+                      primaryButton: .default(Text(NSLocalizedString("OK", comment: "Button label indicating user wants to proceed."))) {
+                          self.clear_cache_button_action()
+                      },
+                      secondaryButton: .cancel() {
+                          // Toggle back if user cancels action
+                          self.enable_animation_toggle_is_user_initiated = false
+                          settings.enable_animation.toggle()
+                      }
+                )
+            }
+    }
+    
+    var ClearCacheButton: some View {
+        Button(action: { self.showing_cache_clear_alert = true }, label: {
+            HStack(spacing: 6) {
+                switch cache_clearing_state {
+                    case .not_cleared:
+                        Text(NSLocalizedString("Clear Cache", comment: "Button to clear image cache."))
+                    case .clearing:
+                        ProgressView()
+                        Text(NSLocalizedString("Clearing Cache", comment: "Loading message indicating that the cache is being cleared."))
+                    case .cleared:
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                        Text(NSLocalizedString("Cache has been cleared", comment: "Message indicating that the cache was successfully cleared."))
+                }
+            }
+        })
+        .disabled(self.cache_clearing_state != .not_cleared)
+        .alert(isPresented: $showing_cache_clear_alert) {
+            Alert(title: Text(NSLocalizedString("Confirmation", comment: "Confirmation dialog title")),
+                  message: Text(NSLocalizedString("Are you sure you want to clear the cache? This will free space, but images may take longer to load again.", comment: "Message explaining what it means to clear the cache, asking if user wants to proceed.")),
+                  primaryButton: .default(Text(NSLocalizedString("OK", comment: "Button label indicating user wants to proceed."))) {
+                      self.clear_cache_button_action()
+                  },
+                  secondaryButton: .cancel())
         }
     }
 }

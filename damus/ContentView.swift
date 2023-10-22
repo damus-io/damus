@@ -88,7 +88,7 @@ struct ContentView: View {
     }
 
     func content_filter(_ fstate: FilterState) -> ((NostrEvent) -> Bool) {
-        var filters = ContentFilters.defaults(damus_state!.settings)
+        var filters = ContentFilters.defaults(damus_state: damus_state!)
         filters.append(fstate.filter)
         return ContentFilters(filters: filters).filter
     }
@@ -137,6 +137,10 @@ struct ContentView: View {
         }
     }
     
+    func navIsAtRoot() -> Bool {
+        return navigationCoordinator.isAtRoot()
+    }
+    
     func popToRoot() {
         navigationCoordinator.popToRoot()
         isSideBarOpened = false
@@ -180,6 +184,9 @@ struct ContentView: View {
                             .shadow(color: DamusColors.purple, radius: 2)
                             .opacity(isSideBarOpened ? 0 : 1)
                             .animation(isSideBarOpened ? .none : .default, value: isSideBarOpened)
+                            .onTapGesture {
+                                isSideBarOpened.toggle()
+                            }
                     } else {
                         timelineNavItem
                             .opacity(isSideBarOpened ? 0 : 1)
@@ -305,7 +312,8 @@ struct ContentView: View {
             case .post(let action):
                 PostView(action: action, damus_state: damus_state!)
             case .user_status:
-                UserStatusSheet(postbox: damus_state!.postbox, keypair: damus_state!.keypair, status: damus_state!.profiles.profile_data(damus_state!.pubkey).status)
+                UserStatusSheet(damus_state: damus_state!, postbox: damus_state!.postbox, keypair: damus_state!.keypair, status: damus_state!.profiles.profile_data(damus_state!.pubkey).status)
+                    .presentationDragIndicator(.visible)
             case .event:
                 EventDetailView()
             case .zap(let zapsheet):
@@ -581,11 +589,12 @@ struct ContentView: View {
     
     func switch_timeline(_ timeline: Timeline) {
         self.isSideBarOpened = false
+        let navWasAtRoot = self.navIsAtRoot()
         self.popToRoot()
 
         notify(.switched_timeline(timeline))
 
-        if timeline == self.selected_timeline {
+        if timeline == self.selected_timeline && navWasAtRoot {
             notify(.scroll_to_top)
             return
         }
@@ -976,6 +985,12 @@ func handle_post_notification(keypair: FullKeypair, postbox: PostBox, events: Ev
         for eref in new_ev.referenced_ids.prefix(3) {
             // also broadcast at most 3 referenced events
             if let ev = events.lookup(eref) {
+                postbox.send(ev)
+            }
+        }
+        for qref in new_ev.referenced_quote_ids.prefix(3) {
+            // also broadcast at most 3 referenced quoted events
+            if let ev = events.lookup(qref.note_id) {
                 postbox.send(ev)
             }
         }

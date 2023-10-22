@@ -1,3 +1,42 @@
+## [1.6-23] - 2023-10-06 - Appstore Release
+
+### Added
+
+- Added merch store button to sidebar menu (Daniel D’Aquino)
+
+### Changed
+
+- Damus icon now opens sidebar (Daniel D’Aquino)
+
+### Fixed
+
+- Stop tab buttons from causing the root view to scroll to the top unless user is coming from another tab or already at the root view (Daniel D’Aquino)
+- Fix profiles not updating (William Casarin)
+- Fix issue where relays with trailing slashes cannot be removed (#1531) (Daniel D’Aquino)
+
+
+[1.6-23]: https://github.com/damus-io/damus/releases/tag/v1.6-23
+
+## [1.6-20] - 2023-10-04
+
+### Changed
+
+- Improve UX around clearing cache (Daniel D’Aquino)
+- Show muted thread replies at the bottom of the thread view (#1522) (Daniel D’Aquino)
+
+### Fixed
+
+- Fix situations where the note composer cursor gets stuck in one place after tagging a user (Daniel D’Aquino)
+- Fix some note composer issues, such as when copying/pasting larger text, and make the post composer more robust. (Daniel D’Aquino)
+- Apply filters to hashtag search timeline view (Daniel D’Aquino)
+- Hide quoted or reposted notes from people whom the user has muted. (#1216) (Daniel D’Aquino)
+- Fix profile not updating (William Casarin)
+- Fix small graphical toolbar bug when scrolling profiles (Daniel D’Aquino)
+- Fix localization issues and export strings for translation (Terry Yiu)
+
+
+[1.6-20]: https://github.com/damus-io/damus/releases/tag/v1.6-20
+
 ## [1.6-18] - 2023-09-21
 
 ### Added
@@ -1558,5 +1597,3 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
-
-

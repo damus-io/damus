@@ -25,7 +25,15 @@ enum FilterState : Int {
 
 /// Simple filter to determine whether to show posts with #nsfw tags
 func nsfw_tag_filter(ev: NostrEvent) -> Bool {
-        return ev.referenced_hashtags.first(where: { t in t.hashtag == "nsfw" }) == nil
+    return ev.referenced_hashtags.first(where: { t in t.hashtag == "nsfw" }) == nil
+}
+
+func get_repost_of_muted_user_filter(damus_state: DamusState) -> ((_ ev: NostrEvent) -> Bool) {
+    return { ev in
+        guard ev.known_kind == .boost else { return true }
+        guard let inner_ev = ev.get_inner_event(cache: damus_state.events) else { return true }
+        return should_show_event(keypair: damus_state.keypair, hellthreads: damus_state.muted_threads, contacts: damus_state.contacts, ev: inner_ev)
+    }
 }
 
 /// Generic filter with various tweakable settings
@@ -44,11 +52,12 @@ struct ContentFilters {
 }
 
 extension ContentFilters {
-    static func defaults(_ settings: UserSettingsStore) -> [(NostrEvent) -> Bool] {
+    static func defaults(damus_state: DamusState) -> [(NostrEvent) -> Bool] {
         var filters = Array<(NostrEvent) -> Bool>()
-        if settings.hide_nsfw_tagged_content {
+        if damus_state.settings.hide_nsfw_tagged_content {
             filters.append(nsfw_tag_filter)
         }
+        filters.append(get_repost_of_muted_user_filter(damus_state: damus_state))
         return filters
     }
 }

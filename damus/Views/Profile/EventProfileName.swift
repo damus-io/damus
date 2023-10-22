@@ -66,12 +66,14 @@ struct EventProfileName: View {
                     .font(.body.weight(.bold))
                 
             case .both(username: let username, displayName: let displayName):
-                Text(verbatim: displayName)
-                    .font(.body.weight(.bold))
-                
-                Text(verbatim: username)
-                    .foregroundColor(.gray)
-                    .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
+                    HStack(spacing: 6) {
+                        Text(verbatim: displayName)
+                            .font(.body.weight(.bold))
+                        
+                        Text(verbatim: "@\(username)")
+                            .foregroundColor(.gray)
+                            .font(eventviewsize_to_font(size, font_size: damus_state.settings.font_size))
+                    }
             }
             
             /*

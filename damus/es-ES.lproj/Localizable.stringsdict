@@ -56,6 +56,24 @@
 			<string>Siguiendo</string>
 		</dict>
 	</dict>
+	<key>imports_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@IMPORTS@</string>
+		<key>IMPORTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Importación</string>
+			<key>many</key>
+			<string>Importaciones</string>
+			<key>other</key>
+			<string>Importaciones</string>
+		</dict>
+	</dict>
 	<key>reacted_tagged_in_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -270,6 +288,24 @@
 			<string>%2$@ sats</string>
 			<key>other</key>
 			<string>%2$@ sats</string>
+		</dict>
+	</dict>
+	<key>word_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@WORDS@</string>
+		<key>WORDS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%d Palabra</string>
+			<key>many</key>
+			<string>%d Palabras</string>
+			<key>other</key>
+			<string>%d Palabras</string>
 		</dict>
 	</dict>
 	<key>zap_notification_no_message</key>

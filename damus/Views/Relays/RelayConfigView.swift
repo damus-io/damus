@@ -12,6 +12,7 @@ struct RelayConfigView: View {
     @State var relays: [RelayDescriptor]
     @State private var showActionButtons = false
     @State var show_add_relay: Bool = false
+    @SceneStorage("RelayConfigView.show_recommended") var show_recommended : Bool = true
     
     @Environment(\.dismiss) var dismiss
     
@@ -43,8 +44,41 @@ struct RelayConfigView: View {
         VStack {
             Divider()
             
-            if recommended.count > 0 {
+            if showActionButtons && !show_recommended {
                 VStack {
+                    Button(action: {
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            show_recommended.toggle()
+                        }
+                    }) {
+                        Text("Show recommended relays", comment: "Button to show recommended relays.")
+                            .foregroundStyle(DamusLightGradient.gradient)
+                            .padding(10)
+                            .background {
+                                RoundedRectangle(cornerRadius: 15)
+                                    .stroke(DamusLightGradient.gradient)
+                            }
+                    }
+                    .padding(.top, 10)
+                }
+            }
+            
+            if recommended.count > 0 && show_recommended {
+                VStack {
+                    HStack(alignment: .top) {
+                        Spacer()
+                        Button(action: {
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                show_recommended.toggle()
+                            }
+                        }) {
+                            Image(systemName: "xmark.circle")
+                                .font(.system(size: 18))
+                                .foregroundStyle(DamusLightGradient.gradient)
+                        }
+                        .padding([.top, .trailing], 8)
+                    }
+                    
                     Text("Recommended relays", comment: "Title for view of recommended relays.")
                         .foregroundStyle(DamusLightGradient.gradient)
                         .padding(10)
@@ -52,7 +86,6 @@ struct RelayConfigView: View {
                             RoundedRectangle(cornerRadius: 15)
                                 .stroke(DamusLightGradient.gradient)
                         }
-                        .padding(.vertical)
                     
                     HStack(spacing: 20) {
                         ForEach(recommended, id: \.url) { r in

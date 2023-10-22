@@ -184,8 +184,13 @@ func decode_json_relays(_ content: String) -> [String: RelayInfo]? {
     return decode_json(content)
 }
 
-func remove_relay(ev: NostrEvent, current_relays: [RelayDescriptor], keypair: FullKeypair, relay: String) -> NostrEvent?{
+func decode_json_relays(_ content: String) -> [RelayURL: RelayInfo]? {
+    return decode_json(content)
+}
+
+func remove_relay(ev: NostrEvent, current_relays: [RelayDescriptor], keypair: FullKeypair, relay: RelayURL) -> NostrEvent?{
     var relays = ensure_relay_info(relays: current_relays, content: ev.content)
+    
     relays.removeValue(forKey: relay)
     
     guard let content = encode_json(relays) else {
@@ -195,8 +200,9 @@ func remove_relay(ev: NostrEvent, current_relays: [RelayDescriptor], keypair: Fu
     return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 3, tags: ev.tags.strings())
 }
 
-func add_relay(ev: NostrEvent, keypair: FullKeypair, current_relays: [RelayDescriptor], relay: String, info: RelayInfo) -> NostrEvent? {
+func add_relay(ev: NostrEvent, keypair: FullKeypair, current_relays: [RelayDescriptor], relay: RelayURL, info: RelayInfo) -> NostrEvent? {
     var relays = ensure_relay_info(relays: current_relays, content: ev.content)
+    
     
     guard relays.index(forKey: relay) == nil else {
         return nil
@@ -211,11 +217,8 @@ func add_relay(ev: NostrEvent, keypair: FullKeypair, current_relays: [RelayDescr
     return NostrEvent(content: content, keypair: keypair.to_keypair(), kind: 3, tags: ev.tags.strings())
 }
 
-func ensure_relay_info(relays: [RelayDescriptor], content: String) -> [String: RelayInfo] {
-    guard let relay_info = decode_json_relays(content) else {
-        return make_contact_relays(relays)
-    }
-    return relay_info
+func ensure_relay_info(relays: [RelayDescriptor], content: String) -> [RelayURL: RelayInfo] {
+    return decode_json_relays(content) ?? make_contact_relays(relays)
 }
 
 func is_already_following(contacts: NostrEvent, follow: FollowRef) -> Bool {
@@ -245,8 +248,8 @@ func follow_with_existing_contacts(keypair: FullKeypair, our_contacts: NostrEven
     return NostrEvent(content: our_contacts.content, keypair: keypair.to_keypair(), kind: kind, tags: tags)
 }
 
-func make_contact_relays(_ relays: [RelayDescriptor]) -> [String: RelayInfo] {
+func make_contact_relays(_ relays: [RelayDescriptor]) -> [RelayURL: RelayInfo] {
     return relays.reduce(into: [:]) { acc, relay in
-        acc[relay.url.url.absoluteString] = relay.info
+        acc[relay.url] = relay.info
     }
 }

@@ -28,16 +28,10 @@ enum LibreTranslateServer: String, CaseIterable, Identifiable, StringCodable {
         self = libreTranslateServer
     }
 
-    case argosopentech
-    case terraprint
     case custom
 
     var model: Model {
         switch self {
-        case .argosopentech:
-            return .init(tag: self.rawValue, displayName: "translate.argosopentech.com", url: "https://translate.argosopentech.com")
-        case .terraprint:
-            return .init(tag: self.rawValue, displayName: "translate.terraprint.co", url: "https://translate.terraprint.co")
         case .custom:
             return .init(tag: self.rawValue, displayName: NSLocalizedString("Custom", comment: "Dropdown option for selecting a custom translation server."), url: nil)
         }
