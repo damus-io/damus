@@ -34,7 +34,7 @@ struct EventMenuContext: View {
                     Menu {
                         MenuItems(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks, muted_threads: muted_threads, settings: settings)
                     } label: {
-                        Color.pink
+                        Color.clear
                     }
                     // Hitbox frame size
                     .frame(width: 50, height: 35)
