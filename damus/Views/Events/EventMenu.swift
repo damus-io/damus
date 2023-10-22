@@ -34,10 +34,10 @@ struct EventMenuContext: View {
                     Menu {
                         MenuItems(event: event, keypair: keypair, target_pubkey: target_pubkey, bookmarks: bookmarks, muted_threads: muted_threads, settings: settings)
                     } label: {
-                        Color.clear
+                        Color.pink
                     }
                     // Hitbox frame size
-                    .frame(width: 100, height: 70)
+                    .frame(width: 50, height: 35)
                 )
         }
         .padding([.bottom], 4)
