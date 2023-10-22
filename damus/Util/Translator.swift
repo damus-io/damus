@@ -107,10 +107,11 @@ public struct Translator {
         request.httpBody = try encoder.encode(body)
 
         struct Response: Decodable {
-            let translatedText: String
+            let translatedText: String?
+            let error: String?
         }
         let response: Response = try await decodedData(for: request)
-        return response.translatedText
+        return response.error ?? response.translatedText
     }
 
     private func translateWithWineTranslate(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> String? {
