@@ -84,7 +84,7 @@ class SearchHomeModel: ObservableObject {
                 unsubscribe(to: relay_id)
                 
                 let txn = NdbTxn(ndb: damus_state.ndb)
-                load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(events.all_events), damus_state: damus_state, txn: txn)
+                load_profiles(context: "universe", profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(events.all_events), damus_state: damus_state, txn: txn)
             }
 
             break
@@ -127,14 +127,14 @@ enum PubkeysToLoad {
     case from_keys([Pubkey])
 }
 
-func load_profiles<Y>(profiles_subid: String, relay_id: String, load: PubkeysToLoad, damus_state: DamusState, txn: NdbTxn<Y>) {
+func load_profiles<Y>(context: String, profiles_subid: String, relay_id: String, load: PubkeysToLoad, damus_state: DamusState, txn: NdbTxn<Y>) {
     let authors = find_profiles_to_fetch(profiles: damus_state.profiles, load: load, cache: damus_state.events, txn: txn)
 
     guard !authors.isEmpty else {
         return
     }
     
-    print("load_profiles: requesting \(authors.count) profiles from \(relay_id)")
+    print("load_profiles[\(context)]: requesting \(authors.count) profiles from \(relay_id)")
 
     let filter = NostrFilter(kinds: [.metadata], authors: authors)
 
@@ -153,7 +153,7 @@ func load_profiles<Y>(profiles_subid: String, relay_id: String, load: PubkeysToL
                     damus_state.ndb.write_profile_last_fetched(pubkey: ev.pubkey, fetched_at: now)
                 }
             case .eose:
-                print("load_profiles: done loading \(authors.count) profiles from \(relay_id)")
+                print("load_profiles[\(context)]: done loading \(authors.count) profiles from \(relay_id)")
                 damus_state.pool.unsubscribe(sub_id: profiles_subid, to: [relay_id])
             case .ok:
                 break

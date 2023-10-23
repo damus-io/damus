@@ -81,7 +81,7 @@ class SearchModel: ObservableObject {
         
         if sub_id == self.sub_id {
             let txn = NdbTxn(ndb: state.ndb)
-            load_profiles(profiles_subid: self.profiles_subid, relay_id: relay_id, load: .from_events(self.events.all_events), damus_state: state, txn: txn)
+            load_profiles(context: "search", profiles_subid: self.profiles_subid, relay_id: relay_id, load: .from_events(self.events.all_events), damus_state: state, txn: txn)
         }
     }
 }

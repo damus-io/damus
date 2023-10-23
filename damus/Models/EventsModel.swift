@@ -65,7 +65,7 @@ class EventsModel: ObservableObject {
             break
         case .eose:
             let txn = NdbTxn(ndb: self.state.ndb)
-            load_profiles(profiles_subid: profiles_id, relay_id: relay_id, load: .from_events(events), damus_state: state, txn: txn)
+            load_profiles(context: "events_model", profiles_subid: profiles_id, relay_id: relay_id, load: .from_events(events), damus_state: state, txn: txn)
         }
     }
 }
