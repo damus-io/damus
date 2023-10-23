@@ -47,6 +47,11 @@ __flatbuffers_offset_vec_at(NdbEventMeta_table_t, vec, i, 0)
 __flatbuffers_table_as_root(NdbEventMeta)
 
 __flatbuffers_define_scalar_field(0, NdbEventMeta, received_at, flatbuffers_int32, int32_t, INT32_C(0))
+__flatbuffers_define_scalar_field(1, NdbEventMeta, reactions, flatbuffers_int32, int32_t, INT32_C(0))
+__flatbuffers_define_scalar_field(2, NdbEventMeta, quotes, flatbuffers_int32, int32_t, INT32_C(0))
+__flatbuffers_define_scalar_field(3, NdbEventMeta, reposts, flatbuffers_int32, int32_t, INT32_C(0))
+__flatbuffers_define_scalar_field(4, NdbEventMeta, zaps, flatbuffers_int32, int32_t, INT32_C(0))
+__flatbuffers_define_scalar_field(5, NdbEventMeta, zap_total, flatbuffers_int64, int64_t, INT64_C(0))
 
 
 #include "flatcc_epilogue.h"

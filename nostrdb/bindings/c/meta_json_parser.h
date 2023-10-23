@@ -33,16 +33,14 @@ static const char *NdbEventMeta_parse_json_table(flatcc_json_parser_t *ctx, cons
     uint64_t w;
 
     *result = 0;
-    if (flatcc_builder_start_table(ctx->ctx, 1)) goto failed;
+    if (flatcc_builder_start_table(ctx->ctx, 6)) goto failed;
     buf = flatcc_json_parser_object_start(ctx, buf, end, &more);
     while (more) {
         buf = flatcc_json_parser_symbol_start(ctx, buf, end);
         w = flatcc_json_parser_symbol_part(buf, end);
-        if (w == 0x7265636569766564) { /* descend "received" */
-            buf += 8;
-            w = flatcc_json_parser_symbol_part(buf, end);
-            if ((w & 0xffffff0000000000) == 0x5f61740000000000) { /* "_at" */
-                buf = flatcc_json_parser_match_symbol(ctx, (mark = buf), end, 3);
+        if (w < 0x7265636569766564) { /* branch "received" */
+            if ((w & 0xffffffffffff0000) == 0x71756f7465730000) { /* "quotes" */
+                buf = flatcc_json_parser_match_symbol(ctx, (mark = buf), end, 6);
                 if (mark != buf) {
                     int32_t val = 0;
                     static flatcc_json_parser_integral_symbol_f *symbolic_parsers[] = {
@@ -54,18 +52,154 @@ static const char *NdbEventMeta_parse_json_table(flatcc_json_parser_t *ctx, cons
                         if (buf == mark || buf == end) goto failed;
                     }
                     if (val != INT32_C(0) || (ctx->flags & flatcc_json_parser_f_force_add)) {
-                        if (!(pval = flatcc_builder_table_add(ctx->ctx, 0, 4, 4))) goto failed;
+                        if (!(pval = flatcc_builder_table_add(ctx->ctx, 2, 4, 4))) goto failed;
                         flatbuffers_int32_write_to_pe(pval, val);
                     }
                 } else {
-                    buf = flatcc_json_parser_unmatched_symbol(ctx, buf, end);
+                    goto pfguard1;
                 }
-            } else { /* "_at" */
+            } else { /* "quotes" */
+                goto pfguard1;
+            } /* "quotes" */
+            goto endpfguard1;
+pfguard1:
+            if (w == 0x7265616374696f6e) { /* descend "reaction" */
+                buf += 8;
+                w = flatcc_json_parser_symbol_part(buf, end);
+                if ((w & 0xff00000000000000) == 0x7300000000000000) { /* "s" */
+                    buf = flatcc_json_parser_match_symbol(ctx, (mark = buf), end, 1);
+                    if (mark != buf) {
+                        int32_t val = 0;
+                        static flatcc_json_parser_integral_symbol_f *symbolic_parsers[] = {
+                                meta_local_json_parser_enum,
+                                meta_global_json_parser_enum, 0 };
+                        buf = flatcc_json_parser_int32(ctx, (mark = buf), end, &val);
+                        if (mark == buf) {
+                            buf = flatcc_json_parser_symbolic_int32(ctx, (mark = buf), end, symbolic_parsers, &val);
+                            if (buf == mark || buf == end) goto failed;
+                        }
+                        if (val != INT32_C(0) || (ctx->flags & flatcc_json_parser_f_force_add)) {
+                            if (!(pval = flatcc_builder_table_add(ctx->ctx, 1, 4, 4))) goto failed;
+                            flatbuffers_int32_write_to_pe(pval, val);
+                        }
+                    } else {
+                        buf = flatcc_json_parser_unmatched_symbol(ctx, buf, end);
+                    }
+                } else { /* "s" */
+                    buf = flatcc_json_parser_unmatched_symbol(ctx, buf, end);
+                } /* "s" */
+            } else { /* descend "reaction" */
                 buf = flatcc_json_parser_unmatched_symbol(ctx, buf, end);
-            } /* "_at" */
-        } else { /* descend "received" */
-            buf = flatcc_json_parser_unmatched_symbol(ctx, buf, end);
-        } /* descend "received" */
+            } /* descend "reaction" */
+endpfguard1:
+            (void)0;
+        } else { /* branch "received" */
+            if (w < 0x7265706f73747300) { /* branch "reposts" */
+                if (w == 0x7265636569766564) { /* descend "received" */
+                    buf += 8;
+                    w = flatcc_json_parser_symbol_part(buf, end);
+                    if ((w & 0xffffff0000000000) == 0x5f61740000000000) { /* "_at" */
+                        buf = flatcc_json_parser_match_symbol(ctx, (mark = buf), end, 3);
+                        if (mark != buf) {
+                            int32_t val = 0;
+                            static flatcc_json_parser_integral_symbol_f *symbolic_parsers[] = {
+                                    meta_local_json_parser_enum,
+                                    meta_global_json_parser_enum, 0 };
+                            buf = flatcc_json_parser_int32(ctx, (mark = buf), end, &val);
+                            if (mark == buf) {
+                                buf = flatcc_json_parser_symbolic_int32(ctx, (mark = buf), end, symbolic_parsers, &val);
+                                if (buf == mark || buf == end) goto failed;
+                            }
+                            if (val != INT32_C(0) || (ctx->flags & flatcc_json_parser_f_force_add)) {
+                                if (!(pval = flatcc_builder_table_add(ctx->ctx, 0, 4, 4))) goto failed;
+                                flatbuffers_int32_write_to_pe(pval, val);
+                            }
+                        } else {
+                            buf = flatcc_json_parser_unmatched_symbol(ctx, buf, end);
+                        }
+                    } else { /* "_at" */
+                        buf = flatcc_json_parser_unmatched_symbol(ctx, buf, end);
+                    } /* "_at" */
+                } else { /* descend "received" */
+                    buf = flatcc_json_parser_unmatched_symbol(ctx, buf, end);
+                } /* descend "received" */
+            } else { /* branch "reposts" */
+                if (w < 0x7a61705f746f7461) { /* branch "zap_tota" */
+                    if ((w & 0xffffffffffffff00) == 0x7265706f73747300) { /* "reposts" */
+                        buf = flatcc_json_parser_match_symbol(ctx, (mark = buf), end, 7);
+                        if (mark != buf) {
+                            int32_t val = 0;
+                            static flatcc_json_parser_integral_symbol_f *symbolic_parsers[] = {
+                                    meta_local_json_parser_enum,
+                                    meta_global_json_parser_enum, 0 };
+                            buf = flatcc_json_parser_int32(ctx, (mark = buf), end, &val);
+                            if (mark == buf) {
+                                buf = flatcc_json_parser_symbolic_int32(ctx, (mark = buf), end, symbolic_parsers, &val);
+                                if (buf == mark || buf == end) goto failed;
+                            }
+                            if (val != INT32_C(0) || (ctx->flags & flatcc_json_parser_f_force_add)) {
+                                if (!(pval = flatcc_builder_table_add(ctx->ctx, 3, 4, 4))) goto failed;
+                                flatbuffers_int32_write_to_pe(pval, val);
+                            }
+                        } else {
+                            buf = flatcc_json_parser_unmatched_symbol(ctx, buf, end);
+                        }
+                    } else { /* "reposts" */
+                        buf = flatcc_json_parser_unmatched_symbol(ctx, buf, end);
+                    } /* "reposts" */
+                } else { /* branch "zap_tota" */
+                    if (w == 0x7a61705f746f7461) { /* descend "zap_tota" */
+                        buf += 8;
+                        w = flatcc_json_parser_symbol_part(buf, end);
+                        if ((w & 0xff00000000000000) == 0x6c00000000000000) { /* "l" */
+                            buf = flatcc_json_parser_match_symbol(ctx, (mark = buf), end, 1);
+                            if (mark != buf) {
+                                int64_t val = 0;
+                                static flatcc_json_parser_integral_symbol_f *symbolic_parsers[] = {
+                                        meta_local_json_parser_enum,
+                                        meta_global_json_parser_enum, 0 };
+                                buf = flatcc_json_parser_int64(ctx, (mark = buf), end, &val);
+                                if (mark == buf) {
+                                    buf = flatcc_json_parser_symbolic_int64(ctx, (mark = buf), end, symbolic_parsers, &val);
+                                    if (buf == mark || buf == end) goto failed;
+                                }
+                                if (val != INT64_C(0) || (ctx->flags & flatcc_json_parser_f_force_add)) {
+                                    if (!(pval = flatcc_builder_table_add(ctx->ctx, 5, 8, 8))) goto failed;
+                                    flatbuffers_int64_write_to_pe(pval, val);
+                                }
+                            } else {
+                                buf = flatcc_json_parser_unmatched_symbol(ctx, buf, end);
+                            }
+                        } else { /* "l" */
+                            buf = flatcc_json_parser_unmatched_symbol(ctx, buf, end);
+                        } /* "l" */
+                    } else { /* descend "zap_tota" */
+                        if ((w & 0xffffffff00000000) == 0x7a61707300000000) { /* "zaps" */
+                            buf = flatcc_json_parser_match_symbol(ctx, (mark = buf), end, 4);
+                            if (mark != buf) {
+                                int32_t val = 0;
+                                static flatcc_json_parser_integral_symbol_f *symbolic_parsers[] = {
+                                        meta_local_json_parser_enum,
+                                        meta_global_json_parser_enum, 0 };
+                                buf = flatcc_json_parser_int32(ctx, (mark = buf), end, &val);
+                                if (mark == buf) {
+                                    buf = flatcc_json_parser_symbolic_int32(ctx, (mark = buf), end, symbolic_parsers, &val);
+                                    if (buf == mark || buf == end) goto failed;
+                                }
+                                if (val != INT32_C(0) || (ctx->flags & flatcc_json_parser_f_force_add)) {
+                                    if (!(pval = flatcc_builder_table_add(ctx->ctx, 4, 4, 4))) goto failed;
+                                    flatbuffers_int32_write_to_pe(pval, val);
+                                }
+                            } else {
+                                buf = flatcc_json_parser_unmatched_symbol(ctx, buf, end);
+                            }
+                        } else { /* "zaps" */
+                            buf = flatcc_json_parser_unmatched_symbol(ctx, buf, end);
+                        } /* "zaps" */
+                    } /* descend "zap_tota" */
+                } /* branch "zap_tota" */
+            } /* branch "reposts" */
+        } /* branch "received" */
         buf = flatcc_json_parser_object_end(ctx, buf, end, &more);
     }
     if (ctx->error) goto failed;

@@ -15,6 +15,11 @@ static int NdbEventMeta_verify_table(flatcc_table_verifier_descriptor_t *td)
 {
     int ret;
     if ((ret = flatcc_verify_field(td, 0, 4, 4) /* received_at */)) return ret;
+    if ((ret = flatcc_verify_field(td, 1, 4, 4) /* reactions */)) return ret;
+    if ((ret = flatcc_verify_field(td, 2, 4, 4) /* quotes */)) return ret;
+    if ((ret = flatcc_verify_field(td, 3, 4, 4) /* reposts */)) return ret;
+    if ((ret = flatcc_verify_field(td, 4, 4, 4) /* zaps */)) return ret;
+    if ((ret = flatcc_verify_field(td, 5, 8, 8) /* zap_total */)) return ret;
     return flatcc_verify_ok;
 }
 
