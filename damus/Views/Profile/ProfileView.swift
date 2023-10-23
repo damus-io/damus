@@ -222,7 +222,7 @@ struct ProfileView: View {
     }
 
     func lnButton(unownedProfile: Profile?, record: ProfileRecord?) -> some View {
-        return ZapButtonView(unownedProfileRecord: record, profileModel: self.profile) { reactions_enabled, lud16, lnurl in
+        return ProfileZapLinkView(unownedProfileRecord: record, profileModel: self.profile) { reactions_enabled, lud16, lnurl in
             Image(reactions_enabled ? "zap.fill" : "zap")
                 .foregroundColor(reactions_enabled ? .orange : Color.primary)
                 .profile_button_style(scheme: colorScheme)

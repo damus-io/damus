@@ -1,5 +1,5 @@
 //
-//  ZapButtonView.swift
+//  ProfileZapLinkView.swift
 //  damus
 //
 //  Created by Daniel D’Aquino on 2023-10-20.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ZapButtonView<Content: View>: View {
+struct ProfileZapLinkView<Content: View>: View {
     typealias ContentViewFunction = (_ reactions_enabled: Bool, _ lud16: String?, _ lnurl: String?) -> Content
     typealias ActionFunction = () -> Void
     
@@ -86,7 +86,7 @@ struct ZapButtonView<Content: View>: View {
 }
 
 #Preview {
-    ZapButtonView(pubkey: test_pubkey, reactions_enabled: true, lud16: make_test_profile().lud16, lnurl: "test@sendzaps.lol", label: { reactions_enabled, lud16, lnurl in
+    ProfileZapLinkView(pubkey: test_pubkey, reactions_enabled: true, lud16: make_test_profile().lud16, lnurl: "test@sendzaps.lol", label: { reactions_enabled, lud16, lnurl in
         Image("zap.fill")
     })
 }

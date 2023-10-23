@@ -299,7 +299,7 @@
 		4CB883A82975FC1800DC99E7 /* Zaps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB883A72975FC1800DC99E7 /* Zaps.swift */; };
 		4CB883AA297612FF00DC99E7 /* ZapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB883A9297612FF00DC99E7 /* ZapTests.swift */; };
 		4CB883AE2976FA9300DC99E7 /* FormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB883AD2976FA9300DC99E7 /* FormatTests.swift */; };
-		4CB883B0297705DD00DC99E7 /* ZapButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB883AF297705DD00DC99E7 /* ZapButton.swift */; };
+		4CB883B0297705DD00DC99E7 /* NoteZapButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB883AF297705DD00DC99E7 /* NoteZapButton.swift */; };
 		4CB883B6297730E400DC99E7 /* LNUrls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB883B5297730E400DC99E7 /* LNUrls.swift */; };
 		4CB8FC232A41ABA800763C51 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB8FC222A41ABA500763C51 /* AboutView.swift */; };
 		4CB9D4A72992D02B00A9A7E4 /* ProfileNameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB9D4A62992D02B00A9A7E4 /* ProfileNameView.swift */; };
@@ -434,12 +434,11 @@
 		D72A2D022AD9C136002AFF62 /* EventViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */; };
 		D72A2D052AD9C1B5002AFF62 /* MockDamusState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2D042AD9C1B5002AFF62 /* MockDamusState.swift */; };
 		D72A2D072AD9C1FB002AFF62 /* MockProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */; };
-		D723C38E2AB8D83400065664 /* ContentFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = D723C38D2AB8D83400065664 /* ContentFilters.swift */; };
 		D7315A2A2ACDF3B70036E30A /* DamusCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */; };
 		D7315A2C2ACDF4DA0036E30A /* DamusCacheManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7315A2B2ACDF4DA0036E30A /* DamusCacheManagerTests.swift */; };
-		D783A63F2AD4E53D00658DDA /* SuggestedHashtagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */; };
-		D76874F32AE3632B00FB0F68 /* ZapButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76874F22AE3632B00FB0F68 /* ZapButtonView.swift */; };
+		D76874F32AE3632B00FB0F68 /* ProfileZapLinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76874F22AE3632B00FB0F68 /* ProfileZapLinkView.swift */; };
 		D77BFA0B2AE3051200621634 /* ProfileActionSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77BFA0A2AE3051200621634 /* ProfileActionSheetView.swift */; };
+		D783A63F2AD4E53D00658DDA /* SuggestedHashtagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */; };
 		D78525252A7B2EA4002FA637 /* NoteContentViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */; };
 		D7870BC12AC4750B0080BA88 /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC02AC4750B0080BA88 /* MentionView.swift */; };
 		D7870BC32AC47EBC0080BA88 /* EventLoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC22AC47EBC0080BA88 /* EventLoaderView.swift */; };
@@ -996,7 +995,7 @@
 		4CB883A72975FC1800DC99E7 /* Zaps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zaps.swift; sourceTree = "<group>"; };
 		4CB883A9297612FF00DC99E7 /* ZapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapTests.swift; sourceTree = "<group>"; };
 		4CB883AD2976FA9300DC99E7 /* FormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatTests.swift; sourceTree = "<group>"; };
-		4CB883AF297705DD00DC99E7 /* ZapButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapButton.swift; sourceTree = "<group>"; };
+		4CB883AF297705DD00DC99E7 /* NoteZapButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteZapButton.swift; sourceTree = "<group>"; };
 		4CB883B5297730E400DC99E7 /* LNUrls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LNUrls.swift; sourceTree = "<group>"; };
 		4CB8FC222A41ABA500763C51 /* AboutView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		4CB9D4A62992D02B00A9A7E4 /* ProfileNameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileNameView.swift; sourceTree = "<group>"; };
@@ -1138,9 +1137,9 @@
 		D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockProfiles.swift; sourceTree = "<group>"; };
 		D7315A292ACDF3B70036E30A /* DamusCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusCacheManager.swift; sourceTree = "<group>"; };
 		D7315A2B2ACDF4DA0036E30A /* DamusCacheManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DamusCacheManagerTests.swift; sourceTree = "<group>"; };
-		D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedHashtagsView.swift; sourceTree = "<group>"; };
-		D76874F22AE3632B00FB0F68 /* ZapButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZapButtonView.swift; sourceTree = "<group>"; };
+		D76874F22AE3632B00FB0F68 /* ProfileZapLinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileZapLinkView.swift; sourceTree = "<group>"; };
 		D77BFA0A2AE3051200621634 /* ProfileActionSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileActionSheetView.swift; sourceTree = "<group>"; };
+		D783A63E2AD4E53D00658DDA /* SuggestedHashtagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedHashtagsView.swift; sourceTree = "<group>"; };
 		D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteContentViewTests.swift; sourceTree = "<group>"; };
 		D7870BC02AC4750B0080BA88 /* MentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MentionView.swift; sourceTree = "<group>"; };
 		D7870BC22AC47EBC0080BA88 /* EventLoaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventLoaderView.swift; sourceTree = "<group>"; };
@@ -2091,7 +2090,7 @@
 				5C513FB9297F72980072348F /* CustomPicker.swift */,
 				4CF0ABE22981BC7D00D66079 /* UserView.swift */,
 				7C902AE22981D55B002AB16E /* ZoomableScrollView.swift */,
-				4CB883AF297705DD00DC99E7 /* ZapButton.swift */,
+				4CB883AF297705DD00DC99E7 /* NoteZapButton.swift */,
 				4C42812B298C848200DBF26F /* TranslateView.swift */,
 				7CFF6316299FEFE5005D382A /* SelectableText.swift */,
 				4C8EC52429D1FA6C0085D9A8 /* DamusColors.swift */,
@@ -2242,7 +2241,7 @@
 				4C9F18E129AA9B6C008C55EC /* CustomizeZapView.swift */,
 				4CA3FA0F29F593D000FDB3C3 /* ZapTypePicker.swift */,
 				4C73C5132A4437C10062CAC0 /* ZapUserView.swift */,
-				D76874F22AE3632B00FB0F68 /* ZapButtonView.swift */,
+				D76874F22AE3632B00FB0F68 /* ProfileZapLinkView.swift */,
 			);
 			path = Zaps;
 			sourceTree = "<group>";
@@ -2896,7 +2895,7 @@
 				4C5E54062A9671F800FF6E60 /* UserStatusSheet.swift in Sources */,
 				F71694F42A6732B7001F4053 /* GradientFollowButton.swift in Sources */,
 				4C3AC7A728369BA200E1F516 /* SearchHomeView.swift in Sources */,
-				4CB883B0297705DD00DC99E7 /* ZapButton.swift in Sources */,
+				4CB883B0297705DD00DC99E7 /* NoteZapButton.swift in Sources */,
 				4C363A922825FCF2006E126D /* ProfileUpdate.swift in Sources */,
 				4C3BEFDA281DCA1400B3DE84 /* LikeCounter.swift in Sources */,
 				4C32B9502A9AD44700DC3548 /* FlatBufferBuilder.swift in Sources */,
@@ -2967,7 +2966,7 @@
 				E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */,
 				4C75EFBB2804A34C0006080F /* ProofOfWork.swift in Sources */,
 				4C3AC7A52836987600E1F516 /* MainTabView.swift in Sources */,
-				D76874F32AE3632B00FB0F68 /* ZapButtonView.swift in Sources */,
+				D76874F32AE3632B00FB0F68 /* ProfileZapLinkView.swift in Sources */,
 				D77BFA0B2AE3051200621634 /* ProfileActionSheetView.swift in Sources */,
 				4C1A9A1F29DDD24B00516EAC /* AppearanceSettingsView.swift in Sources */,
 				3AA59D1D2999B0400061C48E /* DraftsModel.swift in Sources */,

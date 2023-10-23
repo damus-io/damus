@@ -1,5 +1,5 @@
 //
-//  ZapButton.swift
+//  NoteZapButton.swift
 //  damus
 //
 //  Created by William Casarin on 2023-01-17.
@@ -26,7 +26,7 @@ struct ZappingEvent {
     let target: ZapTarget
 }
 
-struct ZapButton: View {
+struct NoteZapButton: View {
     let damus_state: DamusState
     let target: ZapTarget
     let lnurl: String
@@ -144,7 +144,7 @@ struct ZapButton_Previews: PreviewProvider {
         let pending_zap = PendingZap(amount_msat: 1000, target: ZapTarget.note(id: test_note.id, author: test_note.pubkey), request: .normal(test_zap_request), type: .pub, state: .external(.init(state: .fetching_invoice)))
         let zaps = ZapsDataModel([.pending(pending_zap)])
         
-        ZapButton(damus_state: test_damus_state, target: ZapTarget.note(id: test_note.id, author: test_note.pubkey), lnurl: "lnurl", zaps: zaps)
+        NoteZapButton(damus_state: test_damus_state, target: ZapTarget.note(id: test_note.id, author: test_note.pubkey), lnurl: "lnurl", zaps: zaps)
     }
 }
 

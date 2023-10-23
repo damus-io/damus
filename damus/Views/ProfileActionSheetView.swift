@@ -61,7 +61,7 @@ struct ProfileActionSheetView: View {
         if let lnurl = self.profile_data()?.lnurl, lnurl != "" {
             return AnyView(
                 VStack(alignment: .center, spacing: 10) {
-                    ZapButtonView(damus_state: damus_state, pubkey: self.profile.pubkey, action: { dismiss() }) { reactions_enabled, lud16, lnurl in
+                    ProfileZapLinkView(damus_state: damus_state, pubkey: self.profile.pubkey, action: { dismiss() }) { reactions_enabled, lud16, lnurl in
                         Image(reactions_enabled ? "zap.fill" : "zap")
                             .foregroundColor(reactions_enabled ? .orange : Color.primary)
                             .profile_button_style(scheme: colorScheme)
