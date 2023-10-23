@@ -40,7 +40,7 @@ struct ndb_search {
 
 // required to keep a read 
 struct ndb_txn {
-	struct ndb *ndb;
+	struct ndb_lmdb *lmdb;
 	void *mdb_txn;
 };
 
@@ -196,15 +196,16 @@ int ndb_begin_query(struct ndb *, struct ndb_txn *);
 int ndb_search_profile(struct ndb_txn *txn, struct ndb_search *search, const char *query);
 int ndb_search_profile_next(struct ndb_search *search);
 void ndb_search_profile_end(struct ndb_search *search);
-void ndb_end_query(struct ndb_txn *);
+int ndb_end_query(struct ndb_txn *);
 int ndb_write_last_profile_fetch(struct ndb *ndb, const unsigned char *pubkey, uint64_t fetched_at);
-uint64_t ndb_read_last_profile_fetch(struct ndb_txn *txn, uint64_t profile_key);
+uint64_t ndb_read_last_profile_fetch(struct ndb_txn *txn, const unsigned char *pubkey);
 void *ndb_get_profile_by_pubkey(struct ndb_txn *txn, const unsigned char *pubkey, size_t *len, uint64_t *primkey);
 void *ndb_get_profile_by_key(struct ndb_txn *txn, uint64_t key, size_t *len);
 uint64_t ndb_get_notekey_by_id(struct ndb_txn *txn, const unsigned char *id);
 uint64_t ndb_get_profilekey_by_pubkey(struct ndb_txn *txn, const unsigned char *id);
 struct ndb_note *ndb_get_note_by_id(struct ndb_txn *txn, const unsigned char *id, size_t *len, uint64_t *primkey);
 struct ndb_note *ndb_get_note_by_key(struct ndb_txn *txn, uint64_t key, size_t *len);
+void *ndb_get_note_meta(struct ndb_txn *txn, const unsigned char *id, size_t *len);
 void ndb_destroy(struct ndb *);
 
 // BUILDER
