@@ -334,6 +334,15 @@ struct InnerHeightPreferenceKey: PreferenceKey {
     }
 }
 
+func show_profile_action_sheet_if_enabled(damus_state: DamusState, pubkey: Pubkey) {
+    if damus_state.settings.show_profile_action_sheet_on_pfp_click {
+        notify(.present_sheet(Sheets.profile_action(pubkey)))
+    }
+    else {
+        damus_state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
+    }
+}
+
 #Preview {
     ProfileActionSheetView(damus_state: test_damus_state, pubkey: test_pubkey)
 }

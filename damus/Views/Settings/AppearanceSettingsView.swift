@@ -100,6 +100,15 @@ struct AppearanceSettingsView: View {
                 Toggle(NSLocalizedString("Hide notes with #nsfw tags", comment: "Setting to hide notes with the #nsfw (not safe for work) tags"), isOn: $settings.hide_nsfw_tagged_content)
                     .toggleStyle(.switch)
             }
+            
+            // MARK: - Profiles
+            Section(
+                header: Text(NSLocalizedString("Profiles", comment: "Section title for profile view configuration.")),
+                footer: Text(NSLocalizedString("Profile action sheets allow you to follow, zap, or DM profiles more quickly without having to view their full profile", comment: "Section footer clarifying what the profile action sheet feature does"))
+            ) {
+                Toggle(NSLocalizedString("Show profile action sheets", comment: "Setting to show profile action sheets when clicking on a user's profile picture"), isOn: $settings.show_profile_action_sheet_on_pfp_click)
+                    .toggleStyle(.switch)
+            }
                 
 
         }

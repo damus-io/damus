@@ -112,6 +112,9 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "hide_nsfw_tagged_content", default_value: false)
     var hide_nsfw_tagged_content: Bool
+    
+    @Setting(key: "show_profile_action_sheet_on_pfp_click", default_value: true)
+    var show_profile_action_sheet_on_pfp_click: Bool
 
     @Setting(key: "zap_vibration", default_value: true)
     var zap_vibration: Bool
