@@ -182,6 +182,25 @@ class Ndb {
         }
     }
 
+    func write_profile_last_fetched(pubkey: Pubkey, fetched_at: UInt64) {
+        let _ = pubkey.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> () in
+            guard let p = ptr.baseAddress else { return }
+            ndb_write_last_profile_fetch(ndb.ndb, p, fetched_at)
+        }
+    }
+
+    func read_profile_last_fetched<Y>(txn: NdbTxn<Y>, pubkey: Pubkey) -> UInt64? {
+        return pubkey.id.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) -> UInt64? in
+            guard let p = ptr.baseAddress else { return nil }
+            let res = ndb_read_last_profile_fetch(&txn.txn, p)
+            if res == 0 {
+                return nil
+            }
+
+            return res
+        }
+    }
+
     func process_event(_ str: String) -> Bool {
         return str.withCString { cstr in
             return ndb_process_event(ndb.ndb, cstr, Int32(str.utf8.count)) != 0
