@@ -38,7 +38,8 @@ struct SelectWalletView: View {
                 Section(NSLocalizedString("Select a Lightning wallet", comment: "Title of section for selecting a Lightning wallet to pay a Lightning invoice.")) {
                     List{
                         Button() {
-                            open_with_wallet(wallet: default_wallet.model, invoice: invoice)
+                            // TODO: Handle cases where wallet cannot be opened by the system
+                            try? open_with_wallet(wallet: default_wallet.model, invoice: invoice)
                         } label: {
                             HStack {
                                 Text("Default Wallet", comment: "Button to pay a Lightning invoice with the user's default Lightning wallet.").font(.body).foregroundColor(.blue)
@@ -47,7 +48,8 @@ struct SelectWalletView: View {
                         List($allWalletModels) { $wallet in
                             if wallet.index >= 0 {
                                 Button() {
-                                    open_with_wallet(wallet: wallet, invoice: invoice)
+                                    // TODO: Handle cases where wallet cannot be opened by the system
+                                    try? open_with_wallet(wallet: wallet, invoice: invoice)
                                 } label: {
                                     HStack {
                                         Image(wallet.image).resizable().frame(width: 32.0, height: 32.0,alignment: .center).cornerRadius(5)

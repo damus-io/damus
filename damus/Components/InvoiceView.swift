@@ -39,7 +39,12 @@ struct InvoiceView: View {
             if settings.show_wallet_selector {
                 present_sheet(.select_wallet(invoice: invoice.string))
             } else {
-                open_with_wallet(wallet: settings.default_wallet.model, invoice: invoice.string)
+                do {
+                    try open_with_wallet(wallet: settings.default_wallet.model, invoice: invoice.string)
+                }
+                catch {
+                    present_sheet(.select_wallet(invoice: invoice.string))
+                }
             }
         } label: {
             RoundedRectangle(cornerRadius: 20, style: .circular)
@@ -82,21 +87,26 @@ struct InvoiceView: View {
     }
 }
 
-func open_with_wallet(wallet: Wallet.Model, invoice: String) {
+enum OpenWalletError: Error {
+    case no_wallet_to_open
+    case store_link_invalid
+    case system_cannot_open_store_link
+}
+
+func open_with_wallet(wallet: Wallet.Model, invoice: String) throws {
     if let url = URL(string: "\(wallet.link)\(invoice)"), UIApplication.shared.canOpenURL(url) {
         UIApplication.shared.open(url)
     } else {
         guard let store_link = wallet.appStoreLink else {
-            // TODO: do something here if we don't have an appstore link
-            return
+            throw OpenWalletError.no_wallet_to_open
         }
         
         guard let url = URL(string: store_link) else {
-            return
+            throw OpenWalletError.store_link_invalid
         }
         
         guard UIApplication.shared.canOpenURL(url) else {
-            return
+            throw OpenWalletError.system_cannot_open_store_link
         }
         
         UIApplication.shared.open(url)

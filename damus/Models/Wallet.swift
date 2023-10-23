@@ -51,7 +51,7 @@ enum Wallet: String, CaseIterable, Identifiable, StringCodable {
         switch self {
         case .system_default_wallet:
             return .init(index: -1, tag: "systemdefaultwallet", displayName: NSLocalizedString("Local default", comment: "Dropdown option label for system default for Lightning wallet."),
-                         link: "lightning:", appStoreLink: "lightning:", image: "")
+                         link: "lightning:", appStoreLink: nil, image: "")
         case .strike:
             return .init(index: 0, tag: "strike", displayName: "Strike", link: "strike:",
                          appStoreLink: "https://apps.apple.com/us/app/strike-bitcoin-payments/id1488724463", image: "strike")

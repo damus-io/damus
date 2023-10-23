@@ -448,7 +448,12 @@ struct ContentView: View {
                     present_sheet(.select_wallet(invoice: inv))
                 } else {
                     let wallet = damus_state!.settings.default_wallet.model
-                    open_with_wallet(wallet: wallet, invoice: inv)
+                    do {
+                        try open_with_wallet(wallet: wallet, invoice: inv)
+                    }
+                    catch {
+                        present_sheet(.select_wallet(invoice: inv))
+                    }
                 }
             case .sent_from_nwc:
                 break

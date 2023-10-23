@@ -59,20 +59,7 @@ struct ProfileActionSheetView: View {
     
     var zapButton: some View {
         if let lnurl = self.profile_data()?.lnurl, lnurl != "" {
-            return AnyView(
-                VStack(alignment: .center, spacing: 10) {
-                    ProfileZapLinkView(damus_state: damus_state, pubkey: self.profile.pubkey, action: { dismiss() }) { reactions_enabled, lud16, lnurl in
-                        Image(reactions_enabled ? "zap.fill" : "zap")
-                            .foregroundColor(reactions_enabled ? .orange : Color.primary)
-                            .profile_button_style(scheme: colorScheme)
-                    }
-                    .buttonStyle(NeutralCircleButtonStyle())
-                    
-                    Text(NSLocalizedString("Zap", comment: "Button label that allows the user to zap (i.e. send a Bitcoin tip via the lightning network) the user shown on-screen"))
-                        .foregroundStyle(.secondary)
-                        .font(.caption)
-                }
-            )
+            return AnyView(ProfileActionSheetZapButton(damus_state: damus_state, profile: profile, lnurl: lnurl))
         }
         else {
             return AnyView(EmptyView())
@@ -139,6 +126,146 @@ struct ProfileActionSheetView: View {
             sheetHeight = newHeight
         }
         .presentationDetents([.height(sheetHeight)])
+    }
+}
+
+fileprivate struct ProfileActionSheetZapButton: View {
+    enum ZappingState: Equatable {
+        case not_zapped
+        case zapping
+        case zap_success
+        case zap_failure(error: ZappingError)
+        
+        func error_message() -> String? {
+            switch self {
+                case .zap_failure(let error):
+                    return error.humanReadableMessage()
+                default:
+                    return nil
+            }
+        }
+    }
+    
+    let damus_state: DamusState
+    @StateObject var profile: ProfileModel
+    let lnurl: String
+    @State var zap_state: ZappingState = .not_zapped
+    @State var show_error_alert: Bool = false
+    
+    @Environment(\.colorScheme) var colorScheme
+    
+    func receive_zap(zap_ev: ZappingEvent) {
+        print("Received zap event")
+        guard zap_ev.target == ZapTarget.profile(self.profile.pubkey) else {
+            return
+        }
+        
+        switch zap_ev.type {
+            case .failed(let err):
+                zap_state = .zap_failure(error: err)
+                show_error_alert = true
+                break
+            case .got_zap_invoice(let inv):
+                if damus_state.settings.show_wallet_selector {
+                    present_sheet(.select_wallet(invoice: inv))
+                } else {
+                    let wallet = damus_state.settings.default_wallet.model
+                    do {
+                        try open_with_wallet(wallet: wallet, invoice: inv)
+                    }
+                    catch {
+                        present_sheet(.select_wallet(invoice: inv))
+                    }
+                }
+                break
+            case .sent_from_nwc:
+                zap_state = .zap_success
+                break
+        }
+    }
+    
+    var button_label: String {
+        switch zap_state {
+            case .not_zapped:
+                return NSLocalizedString("Zap", comment: "Button label that allows the user to zap (i.e. send a Bitcoin tip via the lightning network) the user shown on-screen")
+            case .zapping:
+                return NSLocalizedString("Zapping", comment: "Button label indicating that a zap action is in progress (i.e. the user is currently sending a Bitcoin tip via the lightning network to the user shown on-screen) ")
+            case .zap_success:
+                return NSLocalizedString("Zapped!", comment: "Button label indicating that a zap action was successful (i.e. the user is successfully sent a Bitcoin tip via the lightning network to the user shown on-screen) ")
+            case .zap_failure(_):
+                return NSLocalizedString("Zap failed", comment: "Button label indicating that a zap action was unsuccessful (i.e. the user was unable to send a Bitcoin tip via the lightning network to the user shown on-screen) ")
+        }
+    }
+    
+    var body: some View {
+        VStack(alignment: .center, spacing: 10) {
+            Button(
+                action: {
+                    send_zap(damus_state: damus_state, target: .profile(self.profile.pubkey), lnurl: lnurl, is_custom: false, comment: nil, amount_sats: nil, zap_type: damus_state.settings.default_zap_type)
+                    zap_state = .zapping
+                },
+                label: {
+                    switch zap_state {
+                        case .not_zapped:
+                            Image("zap")
+                                .foregroundColor(Color.primary)
+                                .profile_button_style(scheme: colorScheme)
+                        case .zapping:
+                            ProgressView()
+                                .foregroundColor(Color.primary)
+                                .profile_button_style(scheme: colorScheme)
+                        case .zap_success:
+                            Image("checkmark")
+                                .foregroundColor(Color.green)
+                                .profile_button_style(scheme: colorScheme)
+                        case .zap_failure:
+                            Image("close")
+                                .foregroundColor(Color.red)
+                                .profile_button_style(scheme: colorScheme)
+                    }
+                    
+                }
+            )
+            .disabled({
+                switch zap_state {
+                    case .not_zapped:
+                        return false
+                    default:
+                        return true
+                }
+            }())
+            .buttonStyle(NeutralCircleButtonStyle())
+            
+            Text(button_label)
+            .foregroundStyle(.secondary)
+            .font(.caption)
+        }
+        .onReceive(handle_notify(.zapping)) { zap_ev in
+            receive_zap(zap_ev: zap_ev)
+        }
+        .simultaneousGesture(LongPressGesture().onEnded {_  in
+            present_sheet(.zap(target: .profile(self.profile.pubkey), lnurl: lnurl))
+        })
+        .alert(isPresented: $show_error_alert) {
+            Alert(
+                title: Text(NSLocalizedString("Zap failed", comment: "Title of an alert indicating that a zap action failed")),
+                message: Text(zap_state.error_message() ?? ""),
+                dismissButton: .default(Text(NSLocalizedString("OK", comment: "Button label to dismiss an error dialog")))
+            )
+        }
+        .onChange(of: zap_state) { new_zap_state in
+            switch new_zap_state {
+                case .zap_success, .zap_failure:
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                        withAnimation {
+                            zap_state = .not_zapped
+                        }
+                    }
+                    break
+                default:
+                    break
+            }
+        }
     }
 }
 

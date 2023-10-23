@@ -61,7 +61,12 @@ struct ImageContextMenuModifier: ViewModifier {
                         no_link_found.toggle()
                     } else {
                         if qrCodeLink.contains("lnurl") {
-                            open_with_wallet(wallet: settings.default_wallet.model, invoice: qrCodeLink)
+                            do {
+                                try open_with_wallet(wallet: settings.default_wallet.model, invoice: qrCodeLink)
+                            }
+                            catch {
+                                present_sheet(.select_wallet(invoice: qrCodeLink))
+                            }
                         } else if let _ = URL(string: qrCodeLink) {
                             open_link_confirm.toggle()
                         }

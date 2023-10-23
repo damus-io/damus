@@ -18,6 +18,19 @@ enum ZappingError {
     case bad_lnurl
     case canceled
     case send_failed
+    
+    func humanReadableMessage() -> String {
+        switch self {
+            case .fetching_invoice:
+                return NSLocalizedString("Error fetching lightning invoice", comment: "Message to display when there was an error fetching a lightning invoice while attempting to zap.")
+            case .bad_lnurl:
+                return NSLocalizedString("Invalid lightning address", comment: "Message to display when there was an error attempting to zap due to an invalid lightning address.")
+            case .canceled:
+                return NSLocalizedString("Zap attempt from connected wallet was canceled.", comment: "Message to display when a zap from the user's connected wallet was canceled.")
+            case .send_failed:
+                return NSLocalizedString("Zap attempt from connected wallet failed.", comment: "Message to display when sending a zap from the user's connected wallet failed.")
+        }
+    }
 }
 
 struct ZappingEvent {
