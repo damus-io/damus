@@ -2,6 +2,24 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>followed_by_three_and_others</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@OTHERS@</string>
+		<key>OTHERS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>Sekots pēc %2$@, %3$@, %4$@ &amp; %1$d citiem</string>
+			<key>one</key>
+			<string>Sekots pēc %2$@, %3$@, %4$@ &amp; %1$d citiem</string>
+			<key>other</key>
+			<string>Sekots pēc %2$@, %3$@, %4$@ &amp; %1$d citiem</string>
+		</dict>
+	</dict>
 	<key>followers_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -38,6 +56,24 @@
 			<string>Sekojat</string>
 		</dict>
 	</dict>
+	<key>imports_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@IMPORTS@</string>
+		<key>IMPORTS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>Importi</string>
+			<key>one</key>
+			<string>Importi</string>
+			<key>other</key>
+			<string>Importi</string>
+		</dict>
+	</dict>
 	<key>reacted_tagged_in_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -49,14 +85,14 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>zero</key>
-			<string>%2$@ un %1$d citi reaģēja uz ziņu, kurā esat atzīmēts</string>
+			<string>%2$@ un %1$d citi reaģēja uz ierakstu, kurā bijāt atzīmēts</string>
 			<key>one</key>
-			<string>%2$@ un %1$d cits reaģēja uz ziņu, kurā esat atzīmēts</string>
+			<string>%2$@ un %1$d citi reaģēja uz ierakstu, kurā bijāt atzīmēts</string>
 			<key>other</key>
-			<string>%2$@ un %1$d citi reaģēja uz ziņu, kurā esat atzīmēts</string>
+			<string>%2$@ un %1$d citi reaģēja uz ierakstu, kurā bijāt atzīmēts</string>
 		</dict>
 	</dict>
-	<key>reacted_your_post_3</key>
+	<key>reacted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REACTED@</string>
@@ -67,11 +103,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>zero</key>
-			<string>%2$@ un %1$d citi reaģēja tavai ziņai</string>
+			<string>%2$@ un %1$d citi reaģēja uz jūsu ierakstu</string>
 			<key>one</key>
-			<string>%2$@ un %1$d cits reaģēja tavai ziņai</string>
+			<string>%2$@ un %1$d citi reaģēja uz jūsu ierakstu</string>
 			<key>other</key>
-			<string>%2$@ un %1$d citi reaģēja tavai ziņai</string>
+			<string>%2$@ un %1$d citi reaģēja uz jūsu ierakstu</string>
 		</dict>
 	</dict>
 	<key>reacted_your_profile_3</key>
@@ -157,14 +193,14 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>zero</key>
-			<string>%2$@ un %1$d citi atkārtoti publicēja ziņu, kurā bijāt atzīmēts</string>
+			<string>%2$@ un %1$d citi atkārtoti pārpublicēja ierakstu, kurā bijāt atzīmēts</string>
 			<key>one</key>
-			<string>%2$@ un %1$d cits atkārtoti publicēja ziņu, kurā bijāt atzīmēts</string>
+			<string>%2$@ un %1$d citi atkārtoti pārpublicēja ierakstu, kurā bijāt atzīmēts</string>
 			<key>other</key>
-			<string>%2$@ un %1$d citi atkārtoti publicēja ziņu, kurā bijāt atzīmēts</string>
+			<string>%2$@ un %1$d citi atkārtoti pārpublicēja ierakstu, kurā bijāt atzīmēts</string>
 		</dict>
 	</dict>
-	<key>reposted_your_post_3</key>
+	<key>reposted_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@REPOSTED@</string>
@@ -175,11 +211,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>zero</key>
-			<string>%2$@ un %1$d citi atkārtoti publicēja tavu ziņu</string>
+			<string>%2$@ un %1$d citi pārpublicēja jūsu ierakstu</string>
 			<key>one</key>
-			<string>%2$@ un %1$d cits atkārtoti publicēja tavu ziņu</string>
+			<string>%2$@ un %1$d citi pārpublicēja jūsu ierakstu</string>
 			<key>other</key>
-			<string>%2$@ un %1$d citi atkārtoti publicēja tavu ziņu</string>
+			<string>%2$@ un %1$d citi pārpublicēja jūsu ierakstu</string>
 		</dict>
 	</dict>
 	<key>reposted_your_profile_3</key>
@@ -254,6 +290,24 @@
 			<string>%2$@ sati</string>
 		</dict>
 	</dict>
+	<key>word_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@WORDS@</string>
+		<key>WORDS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>%d Vārdi</string>
+			<key>one</key>
+			<string>%d Vārdi</string>
+			<key>other</key>
+			<string>%d Vārdi</string>
+		</dict>
+	</dict>
 	<key>zap_notification_no_message</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -283,11 +337,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>zero</key>
-			<string>Jūs saņēmāt %2$@ satus no %3$@: "%4$@"</string>
+			<string>Jūs saņēmāt %2$@ satus no %3$@: &quot;%4$@&quot;</string>
 			<key>one</key>
-			<string>Jūs saņēmāt %2$@ satu no %3$@: "%4$@"</string>
+			<string>Jūs saņēmāt %2$@ satus no %3$@: &quot;%4$@&quot;</string>
 			<key>other</key>
-			<string>Jūs saņēmāt %2$@ satus no %3$@: "%4$@"</string>
+			<string>Jūs saņēmāt %2$@ satus no %3$@: &quot;%4$@&quot;</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
@@ -301,14 +355,14 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>zero</key>
-			<string>%2$@ un %1$d citi sazapoja ziņu, kurā bijāt atzīmēts</string>
+			<string>%2$@ un %1$d citi zapoja ierakstam, kurā bijāt atzīmēts</string>
 			<key>one</key>
-			<string>%2$@ un %1$d cits sazapoja ziņu, kurā bijāt atzīmēts</string>
+			<string>%2$@ un %1$d citi zapoja ierakstam, kurā bijāt atzīmēts</string>
 			<key>other</key>
 			<string>%2$@ un %1$d citi zapoja ierakstam, kurā bijāt atzīmēts</string>
 		</dict>
 	</dict>
-	<key>zapped_your_post_3</key>
+	<key>zapped_your_note_3</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@ZAPPED@</string>
@@ -319,11 +373,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>zero</key>
-			<string>%2$@ un %1$d citi sazapoja tavai ziņai</string>
+			<string>%2$@ un %1$d citi zapoja jūsu ierakstam</string>
 			<key>one</key>
-			<string>%2$@ un %1$d cits sazapoja tavai ziņai</string>
+			<string>%2$@ un %1$d citi zapoja jūsu ierakstam</string>
 			<key>other</key>
-			<string>%2$@ un %1$d citi sazapoja tavam ierakstam</string>
+			<string>%2$@ un %1$d citi zapoja jūsu ierakstam</string>
 		</dict>
 	</dict>
 	<key>zapped_your_profile_3</key>
@@ -337,11 +391,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>zero</key>
-			<string>%2$@ un %1$d citi sazapoja tavam profilam</string>
+			<string>%2$@ un %1$d citi zapoja jums</string>
 			<key>one</key>
-			<string>%2$@ un %1$d cits sazapoja tavam profilam</string>
+			<string>%2$@ un %1$d citi zapoja jums</string>
 			<key>other</key>
-			<string>%2$@ un %1$d citi zapoja tavam profilam</string>
+			<string>%2$@ un %1$d citi zapoja jums</string>
 		</dict>
 	</dict>
 	<key>zaps_count</key>

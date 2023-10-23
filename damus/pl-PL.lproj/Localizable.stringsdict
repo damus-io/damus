@@ -322,6 +322,26 @@
 			<string>%2$@ satsa</string>
 		</dict>
 	</dict>
+	<key>word_count</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@WORDS@</string>
+		<key>WORDS</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%d słowo</string>
+			<key>few</key>
+			<string>%d słowa</string>
+			<key>many</key>
+			<string>%d słów</string>
+			<key>other</key>
+			<string>%d słowa</string>
+		</dict>
+	</dict>
 	<key>zap_notification_no_message</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -353,13 +373,13 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>@</string>
 			<key>one</key>
-			<string>Otrzymano %2$@ satoshi od %3$@: "%4$@"</string>
+			<string>Otrzymano %2$@ satoshi od %3$@: &quot;%4$@&quot;</string>
 			<key>few</key>
-			<string>Otrzymano %2$@ satoshi od %3$@: "%4$@"</string>
+			<string>Otrzymano %2$@ satoshi od %3$@: &quot;%4$@&quot;</string>
 			<key>many</key>
-			<string>Otrzymano %2$@ satoshi od %3$@: "%4$@"</string>
+			<string>Otrzymano %2$@ satoshi od %3$@: &quot;%4$@&quot;</string>
 			<key>other</key>
-			<string>Otrzymano %2$@ satoshi od %3$@: "%4$@"</string>
+			<string>Otrzymano %2$@ satoshi od %3$@: &quot;%4$@&quot;</string>
 		</dict>
 	</dict>
 	<key>zapped_tagged_in_3</key>
