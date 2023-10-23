@@ -30,7 +30,7 @@ class ProfileData {
 class Profiles {
     private var ndb: Ndb
 
-    static let db_freshness_threshold: TimeInterval = 24 * 60 * 60
+    static let db_freshness_threshold: TimeInterval = 24 * 60 * 8
 
     @MainActor
     private var profiles: [Pubkey: ProfileData] = [:]
@@ -93,9 +93,24 @@ class Profiles {
         return ndb.lookup_profile_key(pubkey)
     }
 
-    func has_fresh_profile(id: Pubkey) -> Bool {
-        guard let recv = lookup_with_timestamp(id).unsafeUnownedValue?.receivedAt else { return false }
-        return Date.now.timeIntervalSince(Date(timeIntervalSince1970: Double(recv))) < Profiles.db_freshness_threshold
+    func has_fresh_profile<Y>(id: Pubkey, txn: NdbTxn<Y>) -> Bool {
+        guard let fetched_at = ndb.read_profile_last_fetched(txn: txn, pubkey: id)
+        else {
+            return false
+        }
+        
+        // In situations where a batch of profiles was fetched all at once,
+        // this will reduce the herding of the profile requests
+        let fuzz = Double.random(in: -60...60)
+        let threshold = Profiles.db_freshness_threshold + fuzz
+        let fetch_date = Date(timeIntervalSince1970: Double(fetched_at))
+        
+        let since = Date.now.timeIntervalSince(fetch_date)
+        let fresh = since < threshold
+
+        //print("fresh = \(fresh): fetch_date \(since) < threshold \(threshold) \(id)")
+
+        return fresh
     }
 }
 

@@ -123,8 +123,9 @@ class ProfileModel: ObservableObject, Equatable {
                 break
                 //notify(.notice, notice)
             case .eose:
+                let txn = NdbTxn(ndb: damus.ndb)
                 if resp.subid == sub_id {
-                    load_profiles(profiles_subid: prof_subid, relay_id: relay_id, load: .from_events(events.events), damus_state: damus)
+                    load_profiles(profiles_subid: prof_subid, relay_id: relay_id, load: .from_events(events.events), damus_state: damus, txn: txn)
                 }
                 progress += 1
                 break

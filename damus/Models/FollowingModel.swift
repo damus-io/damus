@@ -22,11 +22,11 @@ class FollowingModel {
         self.hashtags = hashtags
     }
     
-    func get_filter() -> NostrFilter {
+    func get_filter<Y>(txn: NdbTxn<Y>) -> NostrFilter {
         var f = NostrFilter(kinds: [.metadata])
         f.authors = self.contacts.reduce(into: Array<Pubkey>()) { acc, pk in
             // don't fetch profiles we already have
-            if damus_state.profiles.has_fresh_profile(id: pk) {
+            if damus_state.profiles.has_fresh_profile(id: pk, txn: txn) {
                 return
             }
             acc.append(pk)
@@ -34,8 +34,8 @@ class FollowingModel {
         return f
     }
     
-    func subscribe() {
-        let filter = get_filter()
+    func subscribe<Y>(txn: NdbTxn<Y>) {
+        let filter = get_filter(txn: txn)
         if (filter.authors?.count ?? 0) == 0 {
             needs_sub = false
             return

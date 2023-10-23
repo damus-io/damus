@@ -83,38 +83,38 @@ class SearchHomeModel: ObservableObject {
                 // global events are not realtime
                 unsubscribe(to: relay_id)
                 
-                load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(events.all_events), damus_state: damus_state)
+                let txn = NdbTxn(ndb: damus_state.ndb)
+                load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(events.all_events), damus_state: damus_state, txn: txn)
             }
-            
-            
+
             break
         }
     }
 }
 
-func find_profiles_to_fetch(profiles: Profiles, load: PubkeysToLoad, cache: EventCache) -> [Pubkey] {
+func find_profiles_to_fetch<Y>(profiles: Profiles, load: PubkeysToLoad, cache: EventCache, txn: NdbTxn<Y>) -> [Pubkey] {
     switch load {
     case .from_events(let events):
-        return find_profiles_to_fetch_from_events(profiles: profiles, events: events, cache: cache)
+        return find_profiles_to_fetch_from_events(profiles: profiles, events: events, cache: cache, txn: txn)
     case .from_keys(let pks):
-        return find_profiles_to_fetch_from_keys(profiles: profiles, pks: pks)
+        return find_profiles_to_fetch_from_keys(profiles: profiles, pks: pks, txn: txn)
     }
 }
 
-func find_profiles_to_fetch_from_keys(profiles: Profiles, pks: [Pubkey]) -> [Pubkey] {
-    Array(Set(pks.filter { pk in !profiles.has_fresh_profile(id: pk) }))
+func find_profiles_to_fetch_from_keys<Y>(profiles: Profiles, pks: [Pubkey], txn: NdbTxn<Y>) -> [Pubkey] {
+    Array(Set(pks.filter { pk in !profiles.has_fresh_profile(id: pk, txn: txn) }))
 }
 
-func find_profiles_to_fetch_from_events(profiles: Profiles, events: [NostrEvent], cache: EventCache) -> [Pubkey] {
+func find_profiles_to_fetch_from_events<Y>(profiles: Profiles, events: [NostrEvent], cache: EventCache, txn: NdbTxn<Y>) -> [Pubkey] {
     var pubkeys = Set<Pubkey>()
 
     for ev in events {
         // lookup profiles from boosted events
-        if ev.known_kind == .boost, let bev = ev.get_inner_event(cache: cache), !profiles.has_fresh_profile(id: bev.pubkey) {
+        if ev.known_kind == .boost, let bev = ev.get_inner_event(cache: cache), !profiles.has_fresh_profile(id: bev.pubkey, txn: txn) {
             pubkeys.insert(bev.pubkey)
         }
         
-        if !profiles.has_fresh_profile(id: ev.pubkey) {
+        if !profiles.has_fresh_profile(id: ev.pubkey, txn: txn) {
             pubkeys.insert(ev.pubkey)
         }
     }
@@ -127,27 +127,42 @@ enum PubkeysToLoad {
     case from_keys([Pubkey])
 }
 
-func load_profiles(profiles_subid: String, relay_id: String, load: PubkeysToLoad, damus_state: DamusState) {
-    let authors = find_profiles_to_fetch(profiles: damus_state.profiles, load: load, cache: damus_state.events)
+func load_profiles<Y>(profiles_subid: String, relay_id: String, load: PubkeysToLoad, damus_state: DamusState, txn: NdbTxn<Y>) {
+    let authors = find_profiles_to_fetch(profiles: damus_state.profiles, load: load, cache: damus_state.events, txn: txn)
+
     guard !authors.isEmpty else {
         return
     }
     
-    print("loading \(authors.count) profiles from \(relay_id)")
-    
-    let filter = NostrFilter(kinds: [.metadata],
-                             authors: authors)
-    
-    damus_state.pool.subscribe_to(sub_id: profiles_subid, filters: [filter], to: [relay_id]) { sub_id, conn_ev in
-        guard case .nostr_event(let ev) = conn_ev,
-              case .eose = ev,
-              sub_id == profiles_subid
-        else {
-            return
+    print("load_profiles: requesting \(authors.count) profiles from \(relay_id)")
+
+    let filter = NostrFilter(kinds: [.metadata], authors: authors)
+
+    damus_state.pool.subscribe_to(sub_id: profiles_subid, filters: [filter], to: [relay_id]) { rid, conn_ev in
+        
+        let now = UInt64(Date.now.timeIntervalSince1970)
+        switch conn_ev {
+        case .ws_event:
+            break
+        case .nostr_event(let ev):
+            guard ev.subid == profiles_subid, rid == relay_id else { return }
+
+            switch ev {
+            case .event(_, let ev):
+                if ev.known_kind == .metadata {
+                    damus_state.ndb.write_profile_last_fetched(pubkey: ev.pubkey, fetched_at: now)
+                }
+            case .eose:
+                print("load_profiles: done loading \(authors.count) profiles from \(relay_id)")
+                damus_state.pool.unsubscribe(sub_id: profiles_subid, to: [relay_id])
+            case .ok:
+                break
+            case .notice:
+                break
+            }
         }
 
-        print("done loading \(authors.count) profiles from \(relay_id)")
-        damus_state.pool.unsubscribe(sub_id: profiles_subid, to: [relay_id])
+
     }
 }
 

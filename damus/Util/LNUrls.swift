@@ -29,10 +29,10 @@ class LNUrls {
             guard tries < 5 else { return nil }
             self.endpoints[pubkey] = .failed(tries: tries + 1)
         case .fetched(let pr):
-            print("lnurls.lookup_or_fetch fetched \(lnurl)")
+            //print("lnurls.lookup_or_fetch fetched \(lnurl)")
             return pr
         case .fetching(let task):
-            print("lnurls.lookup_or_fetch already fetching \(lnurl)")
+            //print("lnurls.lookup_or_fetch already fetching \(lnurl)")
             return await task.value
         case .not_fetched:
             print("lnurls.lookup_or_fetch not fetched \(lnurl)")

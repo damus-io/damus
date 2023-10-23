@@ -53,8 +53,8 @@ class FollowersModel: ObservableObject {
         has_contact.insert(ev.pubkey)
     }
     
-    func load_profiles(relay_id: String) {
-        let authors = find_profiles_to_fetch_from_keys(profiles: damus_state.profiles, pks: contacts ?? [])
+    func load_profiles<Y>(relay_id: String, txn: NdbTxn<Y>) {
+        let authors = find_profiles_to_fetch_from_keys(profiles: damus_state.profiles, pks: contacts ?? [], txn: txn)
         if authors.isEmpty {
             return
         }
@@ -83,7 +83,8 @@ class FollowersModel: ObservableObject {
             
         case .eose(let sub_id):
             if sub_id == self.sub_id {
-                load_profiles(relay_id: relay_id)
+                let txn = NdbTxn(ndb: self.damus_state.ndb)
+                load_profiles(relay_id: relay_id, txn: txn)
             } else if sub_id == self.profiles_id {
                 damus_state.pool.unsubscribe(sub_id: profiles_id, to: [relay_id])
             }

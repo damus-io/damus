@@ -55,7 +55,8 @@ class ZapsModel: ObservableObject {
             break
         case .eose:
             let events = state.events.lookup_zaps(target: target).map { $0.request.ev }
-            load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(events), damus_state: state)
+            let txn = NdbTxn(ndb: state.ndb)
+            load_profiles(profiles_subid: profiles_subid, relay_id: relay_id, load: .from_events(events), damus_state: state, txn: txn)
         case .event(_, let ev):
             guard ev.kind == 9735,
                   let zapper = state.profiles.lookup_zapper(pubkey: target.pubkey),
