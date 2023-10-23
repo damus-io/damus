@@ -37,6 +37,14 @@ struct ProfileActionSheetView: View {
         return self.profile_data()?.profile
     }
     
+    var followButton: some View {
+        return ProfileActionSheetFollowButton(
+            target: .pubkey(self.profile.pubkey),
+            follows_you: self.profile.follows(pubkey: damus_state.pubkey),
+            follow_state: damus_state.contacts.follow_state(profile.pubkey)
+        )
+    }
+    
     var dmButton: some View {
         let dm_model = damus_state.dms.lookup_or_create(profile.pubkey)
         return VStack(alignment: .center, spacing: 10) {
@@ -92,8 +100,9 @@ struct ProfileActionSheetView: View {
             }
             
             HStack(spacing: 20) {
-                self.dmButton
+                self.followButton
                 self.zapButton
+                self.dmButton
             }
             .padding()
             
@@ -128,6 +137,55 @@ struct ProfileActionSheetView: View {
         .presentationDetents([.height(sheetHeight)])
     }
 }
+
+fileprivate struct ProfileActionSheetFollowButton: View {
+    @Environment(\.colorScheme) var colorScheme
+    
+    let target: FollowTarget
+    let follows_you: Bool
+    @State var follow_state: FollowState
+    
+    var body: some View {
+        VStack(alignment: .center, spacing: 10) {
+            Button(
+                action: {
+                    follow_state = perform_follow_btn_action(follow_state, target: target)
+                },
+                label: {
+                    switch follow_state {
+                        case .unfollows:
+                            Image("user-add-down")
+                                .foregroundColor(Color.primary)
+                                .profile_button_style(scheme: colorScheme)
+                        default:
+                            Image("user-added")
+                                .foregroundColor(Color.green)
+                                .profile_button_style(scheme: colorScheme)
+                    }
+                    
+                }
+            )
+            .buttonStyle(NeutralCircleButtonStyle())
+            
+            Text(verbatim: "\(follow_btn_txt(follow_state, follows_you: follows_you))")
+            .foregroundStyle(.secondary)
+            .font(.caption)
+        }
+        .onReceive(handle_notify(.followed)) { follow in
+            guard case .pubkey(let pk) = follow,
+                  pk == target.pubkey else { return }
+
+            self.follow_state = .follows
+        }
+        .onReceive(handle_notify(.unfollowed)) { unfollow in
+            guard case .pubkey(let pk) = unfollow,
+                  pk == target.pubkey else { return }
+
+            self.follow_state = .unfollows
+        }
+    }
+}
+    
 
 fileprivate struct ProfileActionSheetZapButton: View {
     enum ZappingState: Equatable {
