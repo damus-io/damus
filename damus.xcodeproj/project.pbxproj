@@ -441,6 +441,7 @@
 		BA4AB0AE2A63B9270070A32A /* AddEmojiView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA4AB0AD2A63B9270070A32A /* AddEmojiView.swift */; };
 		BA4AB0B02A63B94D0070A32A /* EmojiListItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA4AB0AF2A63B94D0070A32A /* EmojiListItemView.swift */; };
 		BA693074295D649800ADDB87 /* UserSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA693073295D649800ADDB87 /* UserSettingsStore.swift */; };
+		BAA578D52AED7F4000EA8BE3 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA578D42AED7F4000EA8BE3 /* CameraView.swift */; };
 		BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
 		D2277EEA2A089BD5006C3807 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
 		D70A3B172B02DCE5008BD568 /* NotificationFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */; };
@@ -1337,6 +1338,7 @@
 		BA4AB0AD2A63B9270070A32A /* AddEmojiView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEmojiView.swift; sourceTree = "<group>"; };
 		BA4AB0AF2A63B94D0070A32A /* EmojiListItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiListItemView.swift; sourceTree = "<group>"; };
 		BA693073295D649800ADDB87 /* UserSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsStore.swift; sourceTree = "<group>"; };
+		BAA578D42AED7F4000EA8BE3 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectWalletView.swift; sourceTree = "<group>"; };
 		D2277EE92A089BD5006C3807 /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationFormatter.swift; sourceTree = "<group>"; };
@@ -2629,6 +2631,7 @@
 			isa = PBXGroup;
 			children = (
 				BA3759962ABCCF360018D73B /* CameraPreview.swift */,
+				BAA578D42AED7F4000EA8BE3 /* CameraView.swift */,
 			);
 			path = Camera;
 			sourceTree = "<group>";
@@ -2638,6 +2641,8 @@
 			children = (
 				D72A2D042AD9C1B5002AFF62 /* MockDamusState.swift */,
 				D72A2D062AD9C1FB002AFF62 /* MockProfiles.swift */,
+				BAA8C3262AEC570800696158 /* CameraView.swift */,
+				BA3759962ABCCF360018D73B /* CameraPreview.swift */,
 			);
 			path = Mocking;
 			sourceTree = "<group>";
@@ -3141,6 +3146,7 @@
 				4CC7AAF8297F1CEE00430951 /* EventProfile.swift in Sources */,
 				5CF2DCCC2AA3AF0B00984B8D /* RelayPicView.swift in Sources */,
 				4C687C242A5FA86D0092C550 /* SearchHeaderView.swift in Sources */,
+				BAA578D52AED7F4000EA8BE3 /* CameraView.swift in Sources */,
 				64FBD06F296255C400D9D3B2 /* Theme.swift in Sources */,
 				4C1A9A2329DDDB8100516EAC /* IconLabel.swift in Sources */,
 				4CA352AC2A76C07F003BB08B /* NewUnmutesNotify.swift in Sources */,
