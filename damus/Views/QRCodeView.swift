@@ -134,10 +134,12 @@ struct QRCodeView: View {
             if let display_name = profile?.display_name {
                 Text(display_name)
                     .font(.system(size: 24, weight: .heavy))
+                    .foregroundColor(.white)
             }
             if let name = profile?.name {
                 Text("@" + name)
                     .font(.body)
+                    .foregroundColor(.white)
             }
             
             Spacer()
@@ -157,9 +159,11 @@ struct QRCodeView: View {
             Text("Follow me on Nostr", comment: "Text on QR code view to prompt viewer looking at screen to follow the user.")
                 .font(.system(size: 24, weight: .heavy))
                 .padding(.top)
+                .foregroundColor(.white)
             
             Text("Scan the code", comment: "Text on QR code view to prompt viewer to scan the QR code on screen with their device camera.")
                 .font(.system(size: 18, weight: .ultraLight))
+                .foregroundColor(.white)
             
             Spacer()
             
@@ -182,6 +186,7 @@ struct QRCodeView: View {
             Text("Scan a user's pubkey", comment: "Text to prompt scanning a QR code of a user's pubkey to open their profile.")
                 .padding(.top, 50)
                 .font(.system(size: 24, weight: .heavy))
+                .foregroundColor(.white)
             
             Spacer()
 
