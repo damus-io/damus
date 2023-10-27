@@ -39,12 +39,19 @@ func get_zap_amount_items(_ default_zap_amt: Int) -> [ZapAmountItem] {
     return entries
 }
 
+enum ZapFields{
+    case amount
+    case comment
+}
+
 struct CustomizeZapView: View {
     let state: DamusState
     let target: ZapTarget
     let lnurl: String
     
     let zap_amounts: [ZapAmountItem]
+    
+    @FocusState var focusedTextField : ZapFields?
     
     @StateObject var model: CustomizeZapModel = CustomizeZapModel()
     @Environment(\.dismiss) var dismiss
@@ -67,8 +74,8 @@ struct CustomizeZapView: View {
     
     func amount_parts(_ n: Int) -> [ZapAmountItem] {
         var i: Int = -1
-        let start = n * 3
-        let end = start + 3
+        let start = n * 4
+        let end = start + 4
         
         return zap_amounts.filter { _ in
             i += 1
@@ -92,8 +99,6 @@ struct CustomizeZapView: View {
             AmountsPart(n: 0)
             
             AmountsPart(n: 1)
-            
-            AmountsPart(n: 2)
         }
         .padding(10)
     }
@@ -116,23 +121,23 @@ struct CustomizeZapView: View {
     var CustomZapTextField: some View {
         VStack(alignment: .center, spacing: 0) {
             TextField("", text: $model.custom_amount)
-                .placeholder(when: model.custom_amount.isEmpty, alignment: .center) {
-                Text(verbatim: 0.formatted())
-            }
-            .accentColor(.clear)
-            .font(.system(size: 72, weight: .heavy))
-            .minimumScaleFactor(0.01)
-            .keyboardType(.numberPad)
-            .multilineTextAlignment(.center)
-            .onChange(of: model.custom_amount) { newValue in
-                if let parsed = handle_string_amount(new_value: newValue) {
-                    model.custom_amount = parsed.formatted()
-                    model.custom_amount_sats = parsed
-                } else {
-                   model.custom_amount = ""
-                   model.custom_amount_sats = nil
-               }
-            }
+                .focused($focusedTextField, equals: ZapFields.amount)
+                .task {
+                    self.focusedTextField = .amount
+                }
+                .font(.system(size: 72, weight: .heavy))
+                .minimumScaleFactor(0.01)
+                .keyboardType(.numberPad)
+                .multilineTextAlignment(.center)
+                .onChange(of: model.custom_amount) { newValue in
+                    if let parsed = handle_string_amount(new_value: newValue) {
+                        model.custom_amount = parsed.formatted()
+                        model.custom_amount_sats = parsed
+                    } else {
+                        model.custom_amount = "0"
+                        model.custom_amount_sats = nil
+                    }
+                }
             let noun = pluralizedString(key: "sats", count: model.custom_amount_sats ?? 0)
             Text(noun)
                 .font(.system(size: 18, weight: .heavy))
@@ -141,16 +146,14 @@ struct CustomizeZapView: View {
     
     var ZapReply: some View {
         HStack {
-            if #available(iOS 16.0, *) {
-                TextField(NSLocalizedString("Send a message with your zap...", comment: "Placeholder text for a comment to send as part of a zap to the user."), text: $model.comment, axis: .vertical)
-                    .autocorrectionDisabled(true)
-                    .textInputAutocapitalization(.never)
-                    .lineLimit(5)
-            } else {
-                TextField(NSLocalizedString("Send a message with your zap...", comment: "Placeholder text for a comment to send as part of a zap to the user."), text: $model.comment)
-                    .autocorrectionDisabled(true)
-                    .textInputAutocapitalization(.never)
-            }
+            TextField(NSLocalizedString("Send a message with your zap...", comment: "Placeholder text for a comment to send as part of a zap to the user."), text: $model.comment, axis: .vertical)
+                .focused($focusedTextField, equals: ZapFields.comment)
+                .task {
+                            self.focusedTextField = .comment
+                }
+                .autocorrectionDisabled(true)
+                .textInputAutocapitalization(.never)
+                .lineLimit(5)
         }
         .frame(minHeight: 30)
         .padding(10)
@@ -164,18 +167,21 @@ struct CustomizeZapView: View {
             if model.zapping {
                 Text("Zapping...", comment: "Text to indicate that the app is in the process of sending a zap.")
             } else {
-                Button(NSLocalizedString("Zap User", comment: "Button to send a zap.")) {
+                Button(action: {
                     let amount = model.custom_amount_sats
                     send_zap(damus_state: state, target: target, lnurl: lnurl, is_custom: true, comment: model.comment, amount_sats: amount, zap_type: model.zap_type)
                     model.zapping = true
+                }) {
+                    HStack {
+                        Text(NSLocalizedString("Zap User", comment: "Button to send a zap."))
+                            .font(.system(size: 20, weight: .bold))
+                    }
+                    .frame(minWidth: 300, maxWidth: .infinity, alignment: .center)
                 }
-                .disabled(model.custom_amount_sats == 0 || model.custom_amount.isEmpty)
-                .font(.system(size: 28, weight: .bold))
-                .frame(width: 180, height: 50)
-                .foregroundColor(.white)
-                .background(LINEAR_GRADIENT)
-                .opacity(model.custom_amount_sats == 0 || model.custom_amount.isEmpty ? 0.5 : 1.0)
-                .clipShape(Capsule())
+                .buttonStyle(GradientButtonStyle())
+                .disabled(model.custom_amount_sats == 0 || model.custom_amount == "0")
+                .opacity(model.custom_amount_sats == 0 || model.custom_amount == "0" ? 0.5 : 1.0)
+                .padding(10)
             }
             
             if let error = model.error {
