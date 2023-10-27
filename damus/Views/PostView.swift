@@ -103,7 +103,7 @@ struct PostView: View {
             }
             return true
         }
-        let new_post = build_post(post: self.post, action: action, uploadedMedias: uploadedMedias, references: refs)
+        let new_post = build_post(state: damus_state, post: self.post, action: action, uploadedMedias: uploadedMedias, references: refs)
 
         notify(.post(.post(new_post)))
 
@@ -631,7 +631,7 @@ func load_draft_for_post(drafts: Drafts, action: PostAction) -> DraftArtifacts? 
 }
 
 
-func build_post(post: NSMutableAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId]) -> NostrPost {
+func build_post(state: DamusState, post: NSMutableAttributedString, action: PostAction, uploadedMedias: [UploadedMedia], references: [RefId]) -> NostrPost {
     post.enumerateAttributes(in: NSRange(location: 0, length: post.length), options: []) { attributes, range, stop in
         if let link = attributes[.link] as? String {
             let normalized_link: String
@@ -654,7 +654,7 @@ func build_post(post: NSMutableAttributedString, action: PostAction, uploadedMed
 
     let imagesString = uploadedMedias.map { $0.uploadedURL.absoluteString }.joined(separator: " ")
 
-    let img_meta_tags = uploadedMedias.compactMap { $0.metadata?.to_tag() }
+    var tags = uploadedMedias.compactMap { $0.metadata?.to_tag() }
 
     if !imagesString.isEmpty {
         content.append(" " + imagesString + " ")
@@ -662,7 +662,12 @@ func build_post(post: NSMutableAttributedString, action: PostAction, uploadedMed
 
     if case .quoting(let ev) = action {
         content.append(" nostr:" + bech32_note_id(ev.id))
+
+        if let quoted_ev = state.events.lookup(ev.id) {
+            tags.append(["p", quoted_ev.pubkey.hex()])
+        }
     }
 
-    return NostrPost(content: content, references: references, kind: .text, tags: img_meta_tags)
+    return NostrPost(content: content, references: references, kind: .text, tags: tags)
 }
+
