@@ -41,6 +41,10 @@ struct EventProfile: View {
                 .onTapGesture {
                     show_profile_action_sheet_if_enabled(damus_state: damus_state, pubkey: pubkey)
                 }
+                .onLongPressGesture(minimumDuration: 0.1) {
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    damus_state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
+                }
 
             VStack(alignment: .leading, spacing: 0) {
                 EventProfileName(pubkey: pubkey, damus: damus_state, size: size)
