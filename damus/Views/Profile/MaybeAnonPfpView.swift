@@ -32,6 +32,10 @@ struct MaybeAnonPfpView: View {
                     .onTapGesture {
                         show_profile_action_sheet_if_enabled(damus_state: state, pubkey: pubkey)
                     }
+                    .onLongPressGesture(minimumDuration: 0.1) {
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        state.nav.push(route: Route.ProfileByKey(pubkey: pubkey))
+                    }
             }
         }
     }
