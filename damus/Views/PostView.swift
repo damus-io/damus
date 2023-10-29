@@ -154,7 +154,7 @@ struct PostView: View {
     }
     
     var AttachmentBar: some View {
-        HStack(alignment: .center) {
+        HStack(alignment: .center, spacing: 15) {
             ImageButton
             CameraButton
         }
@@ -428,6 +428,7 @@ struct PostView: View {
                     }
                 }
             }
+            .background(DamusColors.adaptableWhite.edgesIgnoringSafeArea(.all))
             .sheet(isPresented: $attach_media) {
                 ImagePicker(uploader: damus_state.settings.default_media_uploader, sourceType: .photoLibrary, pubkey: damus_state.pubkey, image_upload_confirm: $image_upload_confirm) { img in
                     self.mediaToUpload = .image(img)

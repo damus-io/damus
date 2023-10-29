@@ -19,6 +19,7 @@ struct TextViewWrapper: UIViewRepresentable {
     
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
+        textView.backgroundColor = UIColor(DamusColors.adaptableWhite)
         textView.delegate = context.coordinator
         
         // Disable scrolling (this view will expand vertically as needed to fit text)
