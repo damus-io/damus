@@ -1,3 +1,30 @@
+## [1.6-25] - 2023-10-31
+
+### Added
+
+- Tap to dismiss keyboard on user status view (ericholguin)
+- Add setting that allows users to optionally disable the new profile action sheet feature (Daniel D’Aquino)
+- Add follow button to profile action sheet (Daniel D’Aquino)
+- Added reaction counters to nostrdb (William Casarin)
+- Record when profile is last fetched in nostrdb (William Casarin)
+
+
+### Changed
+
+- Automatically load extra regional Japanese relays during account creation if user's region is set to Japan. (Daniel D’Aquino)
+- Updated customize zap view (ericholguin)
+- Users are now notified when you quote repost them (William Casarin)
+- Save bandwidth by only fetching new profiles after a certain amount of time (William Casarin)
+- Zap button on profile action sheet now zaps with a single click, while a long press brings custom zap view (Daniel D’Aquino)
+
+
+### Fixed
+
+- Use white font color in qrcode view (ericholguin)
+- Fixed an issue where zapping would silently fail on default settings if the user does not have a lightning wallet preinstalled on their device. (Daniel D’Aquino)
+
+
+[1.6-25]: https://github.com/damus-io/damus/releases/tag/v1.6-25
 ## [1.6-24] - 2023-10-22 - AppStore Rejection Cope
 
 ### Added
@@ -1624,3 +1651,4 @@
 
 
 [0.1.2]: https://github.com/damus-io/damus/releases/tag/v0.1.2
+
