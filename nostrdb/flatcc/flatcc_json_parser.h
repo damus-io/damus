@@ -237,6 +237,7 @@ static inline uint64_t flatcc_json_parser_symbol_part_ext(const char *buf, const
 {
     uint64_t w = 0;
     size_t n = (size_t)(end - buf);
+    const uint8_t *ubuf = (const uint8_t*)buf;
 
     if (n > 8) {
         n = 8;
@@ -245,21 +246,21 @@ static inline uint64_t flatcc_json_parser_symbol_part_ext(const char *buf, const
 #if 1
     /* Fall through comments needed to silence gcc 7 warnings. */
     switch (n) {
-    case 8: w |= ((uint64_t)buf[7]) << (0 * 8);
+    case 8: w |= ((uint64_t)ubuf[7]) << (0 * 8);
         fallthrough;
-    case 7: w |= ((uint64_t)buf[6]) << (1 * 8);
+    case 7: w |= ((uint64_t)ubuf[6]) << (1 * 8);
         fallthrough;
-    case 6: w |= ((uint64_t)buf[5]) << (2 * 8);
+    case 6: w |= ((uint64_t)ubuf[5]) << (2 * 8);
         fallthrough;
-    case 5: w |= ((uint64_t)buf[4]) << (3 * 8);
+    case 5: w |= ((uint64_t)ubuf[4]) << (3 * 8);
         fallthrough;
-    case 4: w |= ((uint64_t)buf[3]) << (4 * 8);
+    case 4: w |= ((uint64_t)ubuf[3]) << (4 * 8);
         fallthrough;
-    case 3: w |= ((uint64_t)buf[2]) << (5 * 8);
+    case 3: w |= ((uint64_t)ubuf[2]) << (5 * 8);
         fallthrough;
-    case 2: w |= ((uint64_t)buf[1]) << (6 * 8);
+    case 2: w |= ((uint64_t)ubuf[1]) << (6 * 8);
         fallthrough;
-    case 1: w |= ((uint64_t)buf[0]) << (7 * 8);
+    case 1: w |= ((uint64_t)ubuf[0]) << (7 * 8);
         fallthrough;
     case 0:
         break;
