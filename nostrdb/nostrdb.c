@@ -64,6 +64,14 @@ struct ndb_ingest_controller
 	struct ndb_lmdb *lmdb;
 };
 
+enum ndb_writer_msgtype {
+	NDB_WRITER_QUIT, // kill thread immediately
+	NDB_WRITER_NOTE, // write a note to the db
+	NDB_WRITER_PROFILE, // write a profile to the db
+	NDB_WRITER_DBMETA, // write ndb metadata
+	NDB_WRITER_PROFILE_LAST_FETCH, // when profiles were last fetched
+};
+
 enum ndb_dbs {
 	NDB_DB_NOTE,
 	NDB_DB_META,
@@ -121,6 +129,7 @@ struct ndb {
 	// lmdb environ handles, etc
 };
 
+
 // A clustered key with an id and a timestamp
 struct ndb_tsid {
 	unsigned char id[32];
@@ -146,7 +155,6 @@ static void lowercase_strncpy(char *dst, const char *src, int n) {
 		dst[j++] = '\0';
 	}
 }
-
 
 static void ndb_make_search_key(struct ndb_search_key *key, unsigned char *id,
 			        uint64_t timestamp, const char *search)
@@ -319,10 +327,7 @@ static int ndb_migrate_lower_user_search_indices(struct ndb *ndb)
 	return ndb_migrate_user_search_indices(ndb);
 }
 
-static struct ndb_migration MIGRATIONS[] = {
-	{ .fn = ndb_migrate_user_search_indices },
-	{ .fn = ndb_migrate_lower_user_search_indices }
-};
+int ndb_process_profile_note(struct ndb_note *note, struct ndb_profile_record_builder *profile);
 
 
 int ndb_db_version(struct ndb *ndb)
@@ -418,14 +423,6 @@ enum ndb_ingester_msgtype {
 	NDB_INGEST_QUIT,  // kill ingester thread immediately
 };
 
-enum ndb_writer_msgtype {
-	NDB_WRITER_QUIT, // kill thread immediately
-	NDB_WRITER_NOTE, // write a note to the db
-	NDB_WRITER_PROFILE, // write a profile to the db
-	NDB_WRITER_DBMETA, // write ndb metadata
-	NDB_WRITER_PROFILE_LAST_FETCH, // when profiles were last fetched
-};
-
 struct ndb_ingester_event {
 	char *json;
 	unsigned client : 1; // ["EVENT", {...}] messages
@@ -473,6 +470,92 @@ struct ndb_writer_msg {
 	};
 };
 
+static inline int ndb_writer_queue_msg(struct ndb_writer *writer,
+				       struct ndb_writer_msg *msg)
+{
+	return prot_queue_push(&writer->inbox, msg);
+}
+
+static int ndb_migrate_utf8_profile_names(struct ndb *ndb)
+{
+	int rc;
+	MDB_cursor *cur;
+	MDB_val k, v;
+	void *profile_root;
+	NdbProfileRecord_table_t record;
+	struct ndb_txn txn;
+	struct ndb_note *note, *copied_note;
+	uint64_t note_key;
+	size_t len;
+	int count, failed;
+	struct ndb_writer_msg out;
+
+	if (!ndb_begin_rw_query(ndb, &txn)) {
+		fprintf(stderr, "ndb_migrate_utf8_profile_names: ndb_begin_rw_query failed\n");
+		return 0;
+	}
+
+	if ((rc = mdb_cursor_open(txn.mdb_txn, ndb->lmdb.dbs[NDB_DB_PROFILE], &cur))) {
+		fprintf(stderr, "ndb_migrate_utf8_profile_names: mdb_cursor_open failed, error %d\n", rc);
+		return 0;
+	}
+
+	count = 0;
+	failed = 0;
+
+	// loop through all profiles and write search indices
+	while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+		profile_root = v.mv_data;
+		record = NdbProfileRecord_as_root(profile_root);
+		note_key = NdbProfileRecord_note_key(record);
+		note = ndb_get_note_by_key(&txn, note_key, &len);
+
+		if (note == NULL) {
+			fprintf(stderr, "ndb_migrate_utf8_profile_names: note lookup failed\n");
+			return 0;
+		}
+
+		struct ndb_profile_record_builder *b = &out.profile.record;
+
+		// reprocess profile
+		if (!ndb_process_profile_note(note, b)) {
+			failed++;
+			continue;
+		}
+
+		// the writer needs to own this note, and its expected to free it
+		copied_note = malloc(len);
+		memcpy(copied_note, note, len);
+
+		out.type = NDB_WRITER_PROFILE;
+		out.profile.note.note = copied_note;
+		out.profile.note.note_len = len;
+
+		ndb_writer_queue_msg(&ndb->writer, &out);
+
+		count++;
+	}
+
+	fprintf(stderr, "migrated %d profiles to fix utf8 profile names\n", count);
+
+	if (failed != 0) {
+		fprintf(stderr, "failed to migrate %d profiles to fix utf8 profile names\n", failed);
+	}
+
+	mdb_cursor_close(cur);
+
+	ndb_end_query(&txn);
+
+	return 1;
+}
+
+static struct ndb_migration MIGRATIONS[] = {
+	{ .fn = ndb_migrate_user_search_indices },
+	{ .fn = ndb_migrate_lower_user_search_indices },
+	{ .fn = ndb_migrate_utf8_profile_names }
+};
+
+
 int ndb_end_query(struct ndb_txn *txn)
 {
 	// this works on read or write queries. 
@@ -494,12 +577,6 @@ int ndb_note_verify(void *ctx, unsigned char pubkey[32], unsigned char id[32],
 	if (!ok) return 0;
 
 	return 1;
-}
-
-static inline int ndb_writer_queue_msg(struct ndb_writer *writer,
-				       struct ndb_writer_msg *msg)
-{
-	return prot_queue_push(&writer->inbox, msg);
 }
 
 static inline int ndb_writer_queue_msgs(struct ndb_writer *writer,
@@ -814,8 +891,8 @@ void ndb_profile_record_builder_free(struct ndb_profile_record_builder *b)
 	b->flatbuf = NULL;
 }
 
-static int ndb_process_profile_note(struct ndb_note *note,
-				    struct ndb_profile_record_builder *profile)
+int ndb_process_profile_note(struct ndb_note *note,
+			     struct ndb_profile_record_builder *profile)
 {
 	int res;
 
