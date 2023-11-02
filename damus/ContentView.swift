@@ -264,16 +264,13 @@ struct ContentView: View {
                                         
                                         // maybe expand this to other timelines in the future
                                         if selected_timeline == .search {
+                                            
                                             Button(action: {
-                                                //isFilterVisible.toggle()
                                                 present_sheet(.filter)
-                                            }) {
-                                                // checklist, checklist.checked, lisdt.bullet, list.bullet.circle, line.3.horizontal.decrease...,  line.3.horizontail.decrease
-                                                Label(NSLocalizedString("Filter", comment: "Button label text for filtering relay servers."), image: "filter")
+                                            }, label: {
+                                                Image("filter")
                                                     .foregroundColor(.gray)
-                                                    //.contentShape(Rectangle())
-                                            }
-                                            .buttonStyle(.plain)
+                                            })
                                         }
                                     }
                                 }
@@ -326,13 +323,9 @@ struct ContentView: View {
                 SelectWalletView(default_wallet: damus_state!.settings.default_wallet, active_sheet: $active_sheet, our_pubkey: damus_state!.pubkey, invoice: select.invoice)
             case .filter:
                 let timeline = selected_timeline
-                if #available(iOS 16.0, *) {
-                    RelayFilterView(state: damus_state!, timeline: timeline)
-                        .presentationDetents([.height(550)])
-                        .presentationDragIndicator(.visible)
-                } else {
-                    RelayFilterView(state: damus_state!, timeline: timeline)
-                }
+                RelayFilterView(state: damus_state!, timeline: timeline)
+                    .presentationDetents([.height(550)])
+                    .presentationDragIndicator(.visible)
             case .onboardingSuggestions:
                 OnboardingSuggestionsView(model: SuggestedUsersViewModel(damus_state: damus_state!))
             }
