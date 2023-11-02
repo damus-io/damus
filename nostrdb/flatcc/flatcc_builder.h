@@ -710,10 +710,13 @@ static inline void flatcc_builder_refmap_reset(flatcc_builder_t *B)
 }
 
 
-enum flatcc_builder_buffer_flags {
-    flatcc_builder_is_nested = 1,
-    flatcc_builder_with_size = 2,
-};
+typedef uint16_t flatcc_builder_buffer_flags_t;
+static const flatcc_builder_buffer_flags_t flatcc_builder_is_nested = 1;
+static const flatcc_builder_buffer_flags_t flatcc_builder_with_size = 2;
+
+/* The flag size in the API needs to match the internal size. */
+static_assert(sizeof(flatcc_builder_buffer_flags_t) ==
+              sizeof(((flatcc_builder_t *)0)->buffer_flags), "flag size mismatch");
 
 /**
  * An alternative to start buffer, start struct/table ... end buffer.
@@ -776,7 +779,7 @@ enum flatcc_builder_buffer_flags {
 flatcc_builder_ref_t flatcc_builder_create_buffer(flatcc_builder_t *B,
         const char identifier[FLATBUFFERS_IDENTIFIER_SIZE],
         uint16_t block_align,
-        flatcc_builder_ref_t ref, uint16_t align, int flags);
+        flatcc_builder_ref_t ref, uint16_t align, flatcc_builder_buffer_flags_t flags);
 
 /**
  * Creates a struct within the current buffer without using any
@@ -867,7 +870,7 @@ flatcc_builder_ref_t flatcc_builder_end_struct(flatcc_builder_t *B);
  */
 int flatcc_builder_start_buffer(flatcc_builder_t *B,
         const char identifier[FLATBUFFERS_IDENTIFIER_SIZE],
-        uint16_t block_align, int flags);
+        uint16_t block_align, flatcc_builder_buffer_flags_t flags);
 
 /**
  * The root object should be a struct or a table to conform to the
@@ -923,7 +926,7 @@ flatcc_builder_ref_t flatcc_builder_end_buffer(flatcc_builder_t *B, flatcc_build
  */
 flatcc_builder_ref_t flatcc_builder_embed_buffer(flatcc_builder_t *B,
         uint16_t block_align,
-        const void *data, size_t size, uint16_t align, int flags);
+        const void *data, size_t size, uint16_t align, flatcc_builder_buffer_flags_t flags);
 
 /**
  * Applies to the innermost open buffer. The identifier may be null or

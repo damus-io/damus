@@ -177,7 +177,7 @@ int flatcc_builder_default_alloc(void *alloc_context, iovec_t *b, size_t request
     return 0;
 }
 
-#define T_ptr(base, pos) ((void *)((uint8_t *)(base) + (uoffset_t)(pos)))
+#define T_ptr(base, pos) ((void *)((size_t)(base) + (size_t)(pos)))
 #define ds_ptr(pos) (T_ptr(B->buffers[flatcc_builder_alloc_ds].iov_base, (pos)))
 #define vs_ptr(pos) (T_ptr(B->buffers[flatcc_builder_alloc_vs].iov_base, (pos)))
 #define pl_ptr(pos) (T_ptr(B->buffers[flatcc_builder_alloc_pl].iov_base, (pos)))
@@ -698,7 +698,8 @@ static inline flatcc_builder_ref_t emit_back(flatcc_builder_t *B, iov_state_t *i
     return ref + 1;
 }
 
-static int align_to_block(flatcc_builder_t *B, uint16_t *align, uint16_t block_align, int is_nested)
+/* If nested we cannot pad the end of the buffer without moving the entire buffer, so we don't. */
+static int align_buffer_end(flatcc_builder_t *B, uint16_t *align, uint16_t block_align, int is_nested)
 {
     size_t end_pad;
     iov_state_t iov;
@@ -708,7 +709,7 @@ static int align_to_block(flatcc_builder_t *B, uint16_t *align, uint16_t block_a
     get_min_align(align, block_align);
     /* Pad end of buffer to multiple. */
     if (!is_nested) {
-        end_pad = back_pad(B, block_align);
+        end_pad = back_pad(B, *align);
         if (end_pad) {
             init_iov();
             push_iov(_pad, end_pad);
@@ -723,13 +724,13 @@ static int align_to_block(flatcc_builder_t *B, uint16_t *align, uint16_t block_a
 
 flatcc_builder_ref_t flatcc_builder_embed_buffer(flatcc_builder_t *B,
         uint16_t block_align,
-        const void *data, size_t size, uint16_t align, int flags)
+        const void *data, size_t size, uint16_t align, flatcc_builder_buffer_flags_t flags)
 {
     uoffset_t size_field, pad;
     iov_state_t iov;
-    int with_size = flags & flatcc_builder_with_size;
+    int with_size = (flags & flatcc_builder_with_size) != 0;
 
-    if (align_to_block(B, &align, block_align, !is_top_buffer(B))) {
+    if (align_buffer_end(B, &align, block_align, !is_top_buffer(B))) {
         return 0;
     }
     pad = front_pad(B, (uoffset_t)(size + (with_size ? field_size : 0)), align);
@@ -744,7 +745,7 @@ flatcc_builder_ref_t flatcc_builder_embed_buffer(flatcc_builder_t *B,
 
 flatcc_builder_ref_t flatcc_builder_create_buffer(flatcc_builder_t *B,
         const char identifier[identifier_size], uint16_t block_align,
-        flatcc_builder_ref_t object_ref, uint16_t align, int flags)
+        flatcc_builder_ref_t object_ref, uint16_t align, flatcc_builder_buffer_flags_t flags)
 {
     flatcc_builder_ref_t buffer_ref;
     uoffset_t header_pad, id_size = 0;
@@ -754,7 +755,7 @@ flatcc_builder_ref_t flatcc_builder_create_buffer(flatcc_builder_t *B,
     int is_nested = (flags & flatcc_builder_is_nested) != 0;
     int with_size = (flags & flatcc_builder_with_size) != 0;
 
-    if (align_to_block(B, &align, block_align, is_nested)) {
+    if (align_buffer_end(B, &align, block_align, is_nested)) {
         return 0;
     }
     set_min_align(B, align);
@@ -808,7 +809,7 @@ flatcc_builder_ref_t flatcc_builder_create_struct(flatcc_builder_t *B, const voi
 }
 
 int flatcc_builder_start_buffer(flatcc_builder_t *B,
-        const char identifier[identifier_size], uint16_t block_align, int flags)
+        const char identifier[identifier_size], uint16_t block_align, flatcc_builder_buffer_flags_t flags)
 {
     /*
      * This saves the parent `min_align` in the align field since we
@@ -820,7 +821,11 @@ int flatcc_builder_start_buffer(flatcc_builder_t *B,
         return -1;
     }
     /* B->align now has parent min_align, and child frames will save it. */
-    B->min_align = 1;
+    /* Since we allow objects to be created before the buffer at top level,
+       we need to respect min_align in that case. */
+    if (!is_top_buffer(B) || B->min_align == 0) {
+        B->min_align = 1;
+    }
     /* Save the parent block align, and set proper defaults for this buffer. */
     frame(container.buffer.block_align) = B->block_align;
     B->block_align = block_align;
@@ -845,9 +850,9 @@ int flatcc_builder_start_buffer(flatcc_builder_t *B,
 flatcc_builder_ref_t flatcc_builder_end_buffer(flatcc_builder_t *B, flatcc_builder_ref_t root)
 {
     flatcc_builder_ref_t buffer_ref;
-    int flags;
+    flatcc_builder_buffer_flags_t flags;
 
-    flags = B->buffer_flags & flatcc_builder_with_size;
+    flags = (flatcc_builder_buffer_flags_t)B->buffer_flags & flatcc_builder_with_size;
     flags |= is_top_buffer(B) ? 0 : flatcc_builder_is_nested;
     check(frame(type) == flatcc_builder_buffer, "expected buffer frame");
     set_min_align(B, B->block_align);
@@ -859,6 +864,8 @@ flatcc_builder_ref_t flatcc_builder_end_buffer(flatcc_builder_t *B, flatcc_build
     B->nest_id = frame(container.buffer.nest_id);
     B->identifier = frame(container.buffer.identifier);
     B->buffer_flags = frame(container.buffer.flags);
+    B->block_align = frame(container.buffer.block_align);
+
     exit_frame(B);
     return buffer_ref;
 }
@@ -1327,6 +1334,7 @@ flatcc_builder_ref_t flatcc_builder_end_table(flatcc_builder_t *B)
     flatcc_builder_ref_t table_ref, vt_ref;
     int pl_count;
     voffset_t *pl;
+    size_t tsize;
 
     check(frame(type) == flatcc_builder_table, "expected table frame");
 
@@ -1341,7 +1349,14 @@ flatcc_builder_ref_t flatcc_builder_end_table(flatcc_builder_t *B)
      * initial vtable offset field. Therefore `field_size` is added here
      * to the total table size in the vtable.
      */
-    vt[1] = (voffset_t)(B->ds_offset + field_size);
+    tsize = (size_t)(B->ds_offset + field_size);
+    /*
+     * Tables are limited to 64K in standard FlatBuffers format due to the voffset
+     * 16 bit size, but we must also be able to store the table size, so the
+     * table payload has to be slightly less than that.
+     */
+    check(tsize <= FLATBUFFERS_VOFFSET_MAX, "table too large"); 
+    vt[1] = (voffset_t)tsize;
     FLATCC_BUILDER_UPDATE_VT_HASH(B->vt_hash, (uint32_t)vt[0], (uint32_t)vt[1]);
     /* Find already emitted vtable, or emit a new one. */
     if (!(vt_ref = flatcc_builder_create_cached_vtable(B, vt, vt_size, B->vt_hash))) {

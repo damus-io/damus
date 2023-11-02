@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 #ifndef PORTABLE_EXPOSE_ATTRIBUTES
-#define PORTABLE_EXPOSE_ATTRIBUTES 1
+#define PORTABLE_EXPOSE_ATTRIBUTES 0
 #endif
 
 #ifdef __has_c_attribute

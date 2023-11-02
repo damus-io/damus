@@ -243,14 +243,13 @@ static inline void flatcc_json_printer_set_nonstrict(flatcc_json_printer_t *ctx)
     flatcc_json_printer_set_noenum(ctx, 0);
 }
 
-enum flatcc_json_printer_flags {
-    flatcc_json_printer_f_unquote = 1,
-    flatcc_json_printer_f_noenum = 2,
-    flatcc_json_printer_f_skip_default = 4,
-    flatcc_json_printer_f_force_default = 8,
-    flatcc_json_printer_f_pretty = 16,
-    flatcc_json_printer_f_nonstrict = 32,
-};
+typedef uint32_t flatcc_json_printer_flags_t;
+static const flatcc_json_printer_flags_t flatcc_json_printer_f_unquote = 1;
+static const flatcc_json_printer_flags_t flatcc_json_printer_f_noenum = 2;
+static const flatcc_json_printer_flags_t flatcc_json_printer_f_skip_default = 4;
+static const flatcc_json_printer_flags_t flatcc_json_printer_f_force_default = 8;
+static const flatcc_json_printer_flags_t flatcc_json_printer_f_pretty = 16;
+static const flatcc_json_printer_flags_t flatcc_json_printer_f_nonstrict = 32;
 
 /*
  * May be called instead of setting operational modes individually.
@@ -268,7 +267,7 @@ enum flatcc_json_printer_flags {
  * `pretty` flag sets indentation to 2.
  * `nonstrict` implies: `noenum`, `unquote`, `pretty`.
  */
-static inline void flatcc_json_printer_set_flags(flatcc_json_printer_t *ctx, int flags)
+static inline void flatcc_json_printer_set_flags(flatcc_json_printer_t *ctx, flatcc_json_printer_flags_t flags)
 {
     ctx->unquote = !!(flags & flatcc_json_printer_f_unquote);
     ctx->noenum = !!(flags & flatcc_json_printer_f_noenum);

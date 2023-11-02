@@ -64,7 +64,6 @@ static inline TK ## _option_t N ## _ ## NK ## _option(N ## _table_t t__tmp)\
 #define __flatbuffers_offset_field(T, ID, t, r, adjust)\
 {\
     flatbuffers_uoffset_t *elem__tmp;\
-	printf("got here\n");
     __flatbuffers_read_vt(ID, offset__tmp, t)\
     if (offset__tmp) {\
         elem__tmp = (flatbuffers_uoffset_t *)((uint8_t *)(t) + offset__tmp);\
