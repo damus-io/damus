@@ -189,6 +189,9 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "developer_mode", default_value: false)
     var developer_mode: Bool
     
+    @Setting(key: "always_show_onboarding_suggestions", default_value: false)
+    var always_show_onboarding_suggestions: Bool
+    
     @Setting(key: "emoji_reactions", default_value: default_emoji_reactions)
     var emoji_reactions: [String]
     

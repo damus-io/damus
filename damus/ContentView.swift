@@ -299,7 +299,7 @@ struct ContentView: View {
             self.connect()
             try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default, options: .mixWithOthers)
             setup_notifications()
-            if !hasSeenOnboardingSuggestions {
+            if !hasSeenOnboardingSuggestions || damus_state!.settings.always_show_onboarding_suggestions {
                 active_sheet = .onboardingSuggestions
                 hasSeenOnboardingSuggestions = true
             }
