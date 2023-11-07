@@ -678,7 +678,7 @@ int ndb_get_tsid(struct ndb_txn *txn, enum ndb_dbs db, const unsigned char *id,
 {
 	MDB_val k, v;
 	MDB_cursor *cur;
-	int success = 0;
+	int success = 0, rc;
 	struct ndb_tsid tsid;
 
 	// position at the most recent
@@ -687,7 +687,10 @@ int ndb_get_tsid(struct ndb_txn *txn, enum ndb_dbs db, const unsigned char *id,
 	k.mv_data = &tsid;
 	k.mv_size = sizeof(tsid);
 
-	mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[db], &cur);
+	if ((rc = mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[db], &cur))) {
+		ndb_debug("ndb_get_tsid: failed to open cursor: '%s'\n", mdb_errstr(rc));
+		return 0;
+	}
 
 	// Position cursor at the next key greater than or equal to the specified key
 	if (mdb_cursor_get(cur, &k, &v, MDB_SET_RANGE)) {
