@@ -30,13 +30,13 @@ extension KFOptionSetter {
         
         switch imageContext {
             case .pfp:
-                options.diskCacheExpiration = .never
+                options.diskCacheExpiration = .days(60)
                 break
             case .banner:
-                options.diskCacheExpiration = .days(14)
+                options.diskCacheExpiration = .days(5)
                 break
             case .note:
-                options.diskCacheExpiration = .days(7)
+                options.diskCacheExpiration = .days(1)
                 break
         }
         
