@@ -67,7 +67,7 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Damus needs access to your camera for creating photo posts</string>
+	<string>Damus needs access to your camera in order to upload photos and scan QR codes.</string>
 	<key>NSAppleMusicUsageDescription</key>
 	<string>Damus needs access to your media library for playback statuses</string>
 	<key>NSMicrophoneUsageDescription</key>
