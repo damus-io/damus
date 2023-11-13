@@ -688,7 +688,7 @@ int ndb_get_tsid(struct ndb_txn *txn, enum ndb_dbs db, const unsigned char *id,
 	k.mv_size = sizeof(tsid);
 
 	if ((rc = mdb_cursor_open(txn->mdb_txn, txn->lmdb->dbs[db], &cur))) {
-		ndb_debug("ndb_get_tsid: failed to open cursor: '%s'\n", mdb_errstr(rc));
+		ndb_debug("ndb_get_tsid: failed to open cursor: '%s'\n", mdb_strerror(rc));
 		return 0;
 	}
 
