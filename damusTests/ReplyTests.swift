@@ -123,7 +123,7 @@ class ReplyTests: XCTestCase {
         post.append(user_tag_attr_string(profile: profile, pubkey: pk))
         post.append(.init(string: "\n"))
 
-        let post_note = build_post(post: post, action: .posting(.none), uploadedMedias: [], references: [.pubkey(pk)])
+        let post_note = build_post(state: test_damus_state, post: post, action: .posting(.none), uploadedMedias: [], references: [.pubkey(pk)])
 
         let expected_render = "nostr:\(pk.npub)\nnostr:\(pk.npub)"
         XCTAssertEqual(post_note.content, expected_render)
@@ -134,9 +134,9 @@ class ReplyTests: XCTestCase {
         XCTAssertEqual(rendered, expected_render)
 
         XCTAssertEqual(blocks.count, 3)
-        XCTAssertEqual(blocks[0].asMention, .any(.pubkey(pk)))
+        XCTAssertEqual(blocks[0].asMention, Mention<MentionRef>.any(.pubkey(pk)))
         XCTAssertEqual(blocks[1].asText, "\n")
-        XCTAssertEqual(blocks[2].asMention, .any(.pubkey(pk)))
+        XCTAssertEqual(blocks[2].asMention, Mention<MentionRef>.any(.pubkey(pk)))
     }
     
     func testThreadedReply() throws {

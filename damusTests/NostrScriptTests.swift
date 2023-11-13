@@ -52,7 +52,13 @@ final class NostrScriptTests: XCTestCase {
         case .finished:
             let set = UserDefaults.standard.bool(forKey: key)
             XCTAssertEqual(set, false)
-        case .runtime_err: XCTAssert(false)
+        case .runtime_err(let errs):
+            var c = 0
+            for err in errs {
+                print("\(c) test_bool_set runtime err: \(err)")
+                c += 1
+            }
+            XCTAssert(false)
         case .suspend:
             XCTAssert(false)
             break

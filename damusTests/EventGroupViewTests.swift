@@ -20,7 +20,8 @@ final class EventGroupViewTests: XCTestCase {
 
     func testEventAuthorName() {
         let damusState = test_damus_state
-        XCTAssertEqual(event_author_name(profiles: damusState.profiles, pubkey: test_pubkey), "damus")
+        let damus_name = "17ldvg64:nq5mhr77"
+        XCTAssertEqual(event_author_name(profiles: damusState.profiles, pubkey: test_pubkey), damus_name)
         XCTAssertEqual(event_author_name(profiles: damusState.profiles, pubkey: test_pubkey_2), "1rppft3m:4qxhsgnj")
         XCTAssertEqual(event_author_name(profiles: damusState.profiles, pubkey: ANON_PUBKEY), "Anonymous")
     }

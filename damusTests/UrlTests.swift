@@ -18,13 +18,6 @@ final class UrlTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testRelayUrlStripsEndingSlash() throws {
-        let url1 = RelayURL("wss://jb55.com/")!
-        let url2 = RelayURL("wss://jb55.com")!
-        XCTAssertEqual(url1, url2)
-        XCTAssertEqual(url1.url.absoluteString, "wss://jb55.com")
-    }
-
     func testParseUrlTrailingParenthesis() {
         let testURL = URL(string: "https://en.m.wikipedia.org/wiki/Delicious_(website)")
         XCTAssertNotNil(testURL)

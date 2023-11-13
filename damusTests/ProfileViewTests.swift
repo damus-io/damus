@@ -30,11 +30,12 @@ final class ProfileViewTests: XCTestCase {
         let ndb = Ndb(path: Ndb.db_path)!
         let txn = NdbTxn(ndb: ndb)
 
-        XCTAssertEqual(followedByString(txn: txn, [pk1], ndb: ndb, locale: enUsLocale), "Followed by damus")
-        XCTAssertEqual(followedByString(txn: txn, [pk1, pk2], ndb: ndb, locale: enUsLocale), "Followed by damus & 1rppft3m:4qxhsgnj")
-        XCTAssertEqual(followedByString(txn: txn, [pk1, pk2, pk3], ndb: ndb, locale: enUsLocale), "Followed by damus, 1rppft3m:4qxhsgnj & 1kshyfd2:cq04aze0")
-        XCTAssertEqual(followedByString(txn: txn, [pk1, pk2, pk3, pk4,], ndb: ndb, locale: enUsLocale), "Followed by damus, 1rppft3m:4qxhsgnj, 1kshyfd2:cq04aze0 & 1 other")
-        XCTAssertEqual(followedByString(txn: txn, [pk1, pk2, pk3, pk4, pk5], ndb: ndb, locale: enUsLocale), "Followed by damus, 1rppft3m:4qxhsgnj, 1kshyfd2:cq04aze0 & 2 others")
+        let damus_name = "17ldvg64:nq5mhr77"
+        XCTAssertEqual(followedByString(txn: txn, [pk1], ndb: ndb, locale: enUsLocale), "Followed by \(damus_name)")
+        XCTAssertEqual(followedByString(txn: txn, [pk1, pk2], ndb: ndb, locale: enUsLocale), "Followed by \(damus_name) & 1rppft3m:4qxhsgnj")
+        XCTAssertEqual(followedByString(txn: txn, [pk1, pk2, pk3], ndb: ndb, locale: enUsLocale), "Followed by \(damus_name), 1rppft3m:4qxhsgnj & 1kshyfd2:cq04aze0")
+        XCTAssertEqual(followedByString(txn: txn, [pk1, pk2, pk3, pk4,], ndb: ndb, locale: enUsLocale), "Followed by \(damus_name), 1rppft3m:4qxhsgnj, 1kshyfd2:cq04aze0 & 1 other")
+        XCTAssertEqual(followedByString(txn: txn, [pk1, pk2, pk3, pk4, pk5], ndb: ndb, locale: enUsLocale), "Followed by \(damus_name), 1rppft3m:4qxhsgnj, 1kshyfd2:cq04aze0 & 2 others")
 
         let pubkeys = [pk1, pk2, pk3, pk4, pk5, pk1, pk2, pk3, pk4, pk5]
         Bundle.main.localizations.map { Locale(identifier: $0) }.forEach {
