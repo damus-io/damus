@@ -189,6 +189,12 @@ class UserSettingsStore: ObservableObject {
     @Setting(key: "developer_mode", default_value: false)
     var developer_mode: Bool
     
+    @Setting(key: "enable_experimental_push_notifications", default_value: false)
+    var enable_experimental_push_notifications: Bool
+    
+    @Setting(key: "send_device_token_to_localhost", default_value: false)
+    var send_device_token_to_localhost: Bool
+    
     @Setting(key: "emoji_reactions", default_value: default_emoji_reactions)
     var emoji_reactions: [String]
     

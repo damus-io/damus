@@ -16,6 +16,12 @@ struct DeveloperSettingsView: View {
             Section(footer: Text(NSLocalizedString("Developer Mode enables features and options that may help developers diagnose issues and improve this app. Most users will not need Developer Mode.", comment: "Section header for Developer Settings view"))) {
                 Toggle(NSLocalizedString("Developer Mode", comment: "Setting to enable developer mode"), isOn: $settings.developer_mode)
                     .toggleStyle(.switch)
+                if settings.developer_mode {
+                    Toggle(NSLocalizedString("Enable experimental push notifications", comment: "Developer Setting to enable experimental push notifications"), isOn: $settings.enable_experimental_push_notifications)
+                        .toggleStyle(.switch)
+                    Toggle(NSLocalizedString("Send device token to localhost", comment: "Developer setting to send device token to localhost"), isOn: $settings.send_device_token_to_localhost)
+                        .toggleStyle(.switch)
+                }
             }
         }
         .navigationTitle(NSLocalizedString("Developer", comment: "Navigation title for developer settings"))

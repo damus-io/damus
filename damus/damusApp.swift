@@ -12,7 +12,7 @@ struct damusApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     var body: some Scene {
         WindowGroup {
-            MainView()
+            MainView(appDelegate: appDelegate)
         }
     }
 }
@@ -21,11 +21,12 @@ struct MainView: View {
     @State var needs_setup = false;
     @State var keypair: Keypair? = nil;
     @StateObject private var orientationTracker = OrientationTracker()
+    var appDelegate: AppDelegate
     
     var body: some View {
         Group {
             if let kp = keypair, !needs_setup {
-                ContentView(keypair: kp)
+                ContentView(keypair: kp, appDelegate: appDelegate)
                     .environmentObject(orientationTracker)
             } else {
                 SetupView()
@@ -49,14 +50,66 @@ struct MainView: View {
         .onAppear {
             orientationTracker.setDeviceMajorAxis()
             keypair = get_saved_keypair()
+            appDelegate.keypair = keypair
         }
     }
 }
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    var keypair: Keypair? = nil
+    var settings: UserSettingsStore? = nil
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         return true
+    }
+    
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        // Return if this feature is disabled
+        guard let settings = self.settings else { return }
+        if !settings.enable_experimental_push_notifications {
+            return
+        }
+        
+        // Send the device token and pubkey to the server
+        let token = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+        
+        print("Received device token: \(token)")
+
+        guard let pubkey = keypair?.pubkey else {
+            return
+        }
+
+        // Send those as JSON to the server
+        let json: [String: Any] = ["deviceToken": token, "pubkey": pubkey.hex()]
+
+        // create post request
+        let url = URL(string: settings.send_device_token_to_localhost ? "http://localhost:8000/user-info" : "https://notify.damus.io:8000/user-info")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+
+        // insert json data to the request
+        request.httpBody = try? JSONSerialization.data(withJSONObject: json, options: [])
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, error == nil else {
+                print(error?.localizedDescription ?? "No data")
+                return
+            }
+
+            if let response = response as? HTTPURLResponse, !(200...299).contains(response.statusCode) {
+                print("Unexpected status code: \(response.statusCode)")
+                return
+            }
+
+            let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
+            if let responseJSON = responseJSON as? [String: Any] {
+                print(responseJSON)
+            }
+        }
+
+        task.resume()
     }
 
     // Handle the notification in the foreground state

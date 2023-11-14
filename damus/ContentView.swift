@@ -54,6 +54,7 @@ enum Sheets: Identifiable {
 
 struct ContentView: View {
     let keypair: Keypair
+    let appDelegate: AppDelegate?
     
     var pubkey: Pubkey {
         return keypair.pubkey
@@ -303,6 +304,7 @@ struct ContentView: View {
                 active_sheet = .onboardingSuggestions
                 hasSeenOnboardingSuggestions = true
             }
+            self.appDelegate?.settings = damus_state?.settings
         }
         .sheet(item: $active_sheet) { item in
             switch item {
@@ -694,7 +696,7 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(keypair: Keypair(pubkey: test_pubkey, privkey: nil))
+        ContentView(keypair: Keypair(pubkey: test_pubkey, privkey: nil), appDelegate: nil)
     }
 }
 

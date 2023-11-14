@@ -429,6 +429,8 @@
 		BA693074295D649800ADDB87 /* UserSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA693073295D649800ADDB87 /* UserSettingsStore.swift */; };
 		BAB68BED29543FA3007BA466 /* SelectWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */; };
 		D2277EEA2A089BD5006C3807 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2277EE92A089BD5006C3807 /* Router.swift */; };
+		D70A3B172B02DCE5008BD568 /* NotificationFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */; };
+		D70A3B192B02DD2D008BD568 /* NostrEventInfoFromPushNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B182B02DD2D008BD568 /* NostrEventInfoFromPushNotification.swift */; };
 		D71DC1EC2A9129C3006E207C /* PostViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71DC1EB2A9129C3006E207C /* PostViewTests.swift */; };
 		D723C38E2AB8D83400065664 /* ContentFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = D723C38D2AB8D83400065664 /* ContentFilters.swift */; };
 		D72A2D022AD9C136002AFF62 /* EventViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */; };
@@ -442,8 +444,13 @@
 		D78525252A7B2EA4002FA637 /* NoteContentViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */; };
 		D7870BC12AC4750B0080BA88 /* MentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC02AC4750B0080BA88 /* MentionView.swift */; };
 		D7870BC32AC47EBC0080BA88 /* EventLoaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7870BC22AC47EBC0080BA88 /* EventLoaderView.swift */; };
+		D789D1202AFEFBF20083A7AB /* secp256k1 in Frameworks */ = {isa = PBXBuildFile; productRef = D789D11F2AFEFBF20083A7AB /* secp256k1 */; };
+		D79C4C172AFEB061003A41B4 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79C4C162AFEB061003A41B4 /* NotificationService.swift */; };
+		D79C4C1B2AFEB061003A41B4 /* DamusNotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D79C4C142AFEB061003A41B4 /* DamusNotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D7A343EE2AD0D77C00CED48B /* InlineSnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = D7A343ED2AD0D77C00CED48B /* InlineSnapshotTesting */; };
 		D7A343F02AD0D77C00CED48B /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = D7A343EF2AD0D77C00CED48B /* SnapshotTesting */; };
+		D7DBD41F2B02F15E002A6197 /* NostrKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */; };
+		D7DBD4202B0307C7002A6197 /* NostrEventInfoFromPushNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B182B02DD2D008BD568 /* NostrEventInfoFromPushNotification.swift */; };
 		D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */; };
 		D7FF94002AC7AC5300FD969D /* RelayURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */; };
 		E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */; };
@@ -481,7 +488,28 @@
 			remoteGlobalIDString = 4CE6DEE227F7A08100C66700;
 			remoteInfo = damus;
 		};
+		D79C4C192AFEB061003A41B4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4CE6DEDB27F7A08100C66700 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D79C4C132AFEB061003A41B4;
+			remoteInfo = DamusNotificationService;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D79C4C1D2AFEB061003A41B4 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				D79C4C1B2AFEB061003A41B4 /* DamusNotificationService.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		0E8A4BB62AE4359200065E81 /* NostrFilter+Hashable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NostrFilter+Hashable.swift"; sourceTree = "<group>"; };
@@ -1130,6 +1158,8 @@
 		BA693073295D649800ADDB87 /* UserSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsStore.swift; sourceTree = "<group>"; };
 		BAB68BEC29543FA3007BA466 /* SelectWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectWalletView.swift; sourceTree = "<group>"; };
 		D2277EE92A089BD5006C3807 /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
+		D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationFormatter.swift; sourceTree = "<group>"; };
+		D70A3B182B02DD2D008BD568 /* NostrEventInfoFromPushNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrEventInfoFromPushNotification.swift; sourceTree = "<group>"; };
 		D71DC1EB2A9129C3006E207C /* PostViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostViewTests.swift; sourceTree = "<group>"; };
 		D723C38D2AB8D83400065664 /* ContentFilters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentFilters.swift; sourceTree = "<group>"; };
 		D72A2CFF2AD9B66B002AFF62 /* EventViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewTests.swift; sourceTree = "<group>"; };
@@ -1143,6 +1173,10 @@
 		D78525242A7B2EA4002FA637 /* NoteContentViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteContentViewTests.swift; sourceTree = "<group>"; };
 		D7870BC02AC4750B0080BA88 /* MentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MentionView.swift; sourceTree = "<group>"; };
 		D7870BC22AC47EBC0080BA88 /* EventLoaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventLoaderView.swift; sourceTree = "<group>"; };
+		D79C4C142AFEB061003A41B4 /* DamusNotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DamusNotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D79C4C162AFEB061003A41B4 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		D79C4C182AFEB061003A41B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D79C4C1C2AFEB061003A41B4 /* DamusNotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DamusNotificationService.entitlements; sourceTree = "<group>"; };
 		D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NostrEventTests.swift; sourceTree = "<group>"; };
 		D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayURL.swift; sourceTree = "<group>"; };
 		E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSettingsView.swift; sourceTree = "<group>"; };
@@ -1189,6 +1223,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D79C4C112AFEB061003A41B4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D789D1202AFEFBF20083A7AB /* secp256k1 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2114,6 +2156,7 @@
 				4CE6DEE527F7A08100C66700 /* damus */,
 				4CE6DEF627F7A08200C66700 /* damusTests */,
 				4CE6DF0027F7A08200C66700 /* damusUITests */,
+				D79C4C152AFEB061003A41B4 /* DamusNotificationService */,
 				4CE6DEE427F7A08100C66700 /* Products */,
 				4CEE2AE62804F57B00AB5EEF /* Frameworks */,
 			);
@@ -2127,6 +2170,7 @@
 				4CE6DEE327F7A08100C66700 /* damus.app */,
 				4CE6DEF327F7A08200C66700 /* damusTests.xctest */,
 				4CE6DEFD27F7A08200C66700 /* damusUITests.xctest */,
+				D79C4C142AFEB061003A41B4 /* DamusNotificationService.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2339,6 +2383,18 @@
 			path = Mocking;
 			sourceTree = "<group>";
 		};
+		D79C4C152AFEB061003A41B4 /* DamusNotificationService */ = {
+			isa = PBXGroup;
+			children = (
+				D79C4C1C2AFEB061003A41B4 /* DamusNotificationService.entitlements */,
+				D79C4C162AFEB061003A41B4 /* NotificationService.swift */,
+				D79C4C182AFEB061003A41B4 /* Info.plist */,
+				D70A3B162B02DCE5008BD568 /* NotificationFormatter.swift */,
+				D70A3B182B02DD2D008BD568 /* NostrEventInfoFromPushNotification.swift */,
+			);
+			path = DamusNotificationService;
+			sourceTree = "<group>";
+		};
 		F71694E82A66221E001F4053 /* Onboarding */ = {
 			isa = PBXGroup;
 			children = (
@@ -2378,10 +2434,12 @@
 				4CE6DEE027F7A08100C66700 /* Frameworks */,
 				4C1D4FB22A7965230024F453 /* ShellScript */,
 				4CE6DEE127F7A08100C66700 /* Resources */,
+				D79C4C1D2AFEB061003A41B4 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				D79C4C1A2AFEB061003A41B4 /* PBXTargetDependency */,
 			);
 			name = damus;
 			packageProductDependencies = (
@@ -2433,6 +2491,26 @@
 			productReference = 4CE6DEFD27F7A08200C66700 /* damusUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		D79C4C132AFEB061003A41B4 /* DamusNotificationService */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D79C4C202AFEB061003A41B4 /* Build configuration list for PBXNativeTarget "DamusNotificationService" */;
+			buildPhases = (
+				D79C4C102AFEB061003A41B4 /* Sources */,
+				D79C4C112AFEB061003A41B4 /* Frameworks */,
+				D79C4C122AFEB061003A41B4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DamusNotificationService;
+			packageProductDependencies = (
+				D789D11F2AFEFBF20083A7AB /* secp256k1 */,
+			);
+			productName = DamusNotificationService;
+			productReference = D79C4C142AFEB061003A41B4 /* DamusNotificationService.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -2440,7 +2518,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1330;
+				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					4CE6DEE227F7A08100C66700 = {
@@ -2454,6 +2532,9 @@
 					4CE6DEFC27F7A08200C66700 = {
 						CreatedOnToolsVersion = 13.3;
 						TestTargetID = 4CE6DEE227F7A08100C66700;
+					};
+					D79C4C132AFEB061003A41B4 = {
+						CreatedOnToolsVersion = 15.0.1;
 					};
 				};
 			};
@@ -2508,6 +2589,7 @@
 				4CE6DEE227F7A08100C66700 /* damus */,
 				4CE6DEF227F7A08200C66700 /* damusTests */,
 				4CE6DEFC27F7A08200C66700 /* damusUITests */,
+				D79C4C132AFEB061003A41B4 /* DamusNotificationService */,
 			);
 		};
 /* End PBXProject section */
@@ -2540,6 +2622,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		4CE6DEFB27F7A08200C66700 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D79C4C122AFEB061003A41B4 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2713,6 +2802,7 @@
 				9C83F89329A937B900136C08 /* TextViewWrapper.swift in Sources */,
 				4C1253502A76C5B20004F4B8 /* UnfollowedNotify.swift in Sources */,
 				4C86F7C62A76C51100EC0817 /* AttachedWalletNotify.swift in Sources */,
+				D7DBD4202B0307C7002A6197 /* NostrEventInfoFromPushNotification.swift in Sources */,
 				4CF0ABE12981A83900D66079 /* MutelistView.swift in Sources */,
 				4CB883A82975FC1800DC99E7 /* Zaps.swift in Sources */,
 				4C75EFB128049D510006080F /* NostrResponse.swift in Sources */,
@@ -3032,6 +3122,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D79C4C102AFEB061003A41B4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D79C4C172AFEB061003A41B4 /* NotificationService.swift in Sources */,
+				D70A3B192B02DD2D008BD568 /* NostrEventInfoFromPushNotification.swift in Sources */,
+				D7DBD41F2B02F15E002A6197 /* NostrKind.swift in Sources */,
+				D70A3B172B02DCE5008BD568 /* NotificationFormatter.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -3044,6 +3145,11 @@
 			isa = PBXTargetDependency;
 			target = 4CE6DEE227F7A08100C66700 /* damus */;
 			targetProxy = 4CE6DEFE27F7A08200C66700 /* PBXContainerItemProxy */;
+		};
+		D79C4C1A2AFEB061003A41B4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D79C4C132AFEB061003A41B4 /* DamusNotificationService */;
+			targetProxy = D79C4C192AFEB061003A41B4 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -3284,6 +3390,7 @@
 		4CE6DF0827F7A08200C66700 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
@@ -3333,6 +3440,7 @@
 		4CE6DF0927F7A08200C66700 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
@@ -3454,6 +3562,73 @@
 			};
 			name = Release;
 		};
+		D79C4C1E2AFEB061003A41B4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = DamusNotificationService/DamusNotificationService.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XK7H4JAB3D;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DamusNotificationService/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DamusNotificationService;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2.DamusNotificationService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D79C4C1F2AFEB061003A41B4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = DamusNotificationService/DamusNotificationService.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XK7H4JAB3D;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DamusNotificationService/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DamusNotificationService;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jb55.damus2.DamusNotificationService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -3489,6 +3664,15 @@
 			buildConfigurations = (
 				4CE6DF0E27F7A08200C66700 /* Debug */,
 				4CE6DF0F27F7A08200C66700 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D79C4C202AFEB061003A41B4 /* Build configuration list for PBXNativeTarget "DamusNotificationService" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D79C4C1E2AFEB061003A41B4 /* Debug */,
+				D79C4C1F2AFEB061003A41B4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -3550,6 +3734,11 @@
 			productName = MarkdownUI;
 		};
 		4C649880286E0EE300EAE2B3 /* secp256k1 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
+			productName = secp256k1;
+		};
+		D789D11F2AFEFBF20083A7AB /* secp256k1 */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4C64987F286E0EE300EAE2B3 /* XCRemoteSwiftPackageReference "secp256k1" */;
 			productName = secp256k1;
