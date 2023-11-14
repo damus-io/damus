@@ -32,6 +32,51 @@ struct ndb_search_key
 	uint64_t timestamp;
 };
 
+enum ndb_dbs {
+	NDB_DB_NOTE,
+	NDB_DB_META,
+	NDB_DB_PROFILE,
+	NDB_DB_NOTE_ID,
+	NDB_DB_PROFILE_PK,
+	NDB_DB_NDB_META,
+	NDB_DB_PROFILE_SEARCH,
+	NDB_DB_PROFILE_LAST_FETCH,
+	NDB_DBS,
+};
+
+// common kinds. we collect stats on these in ndb_stat. mainly because I don't
+// want to deal with including a hashtable to the project.
+enum ndb_common_kind {
+	NDB_CKIND_PROFILE,
+	NDB_CKIND_TEXT,
+	NDB_CKIND_CONTACTS,
+	NDB_CKIND_DM,
+	NDB_CKIND_DELETE,
+	NDB_CKIND_REPOST,
+	NDB_CKIND_REACTION,
+	NDB_CKIND_ZAP,
+	NDB_CKIND_ZAP_REQUEST,
+	NDB_CKIND_NWC_REQUEST,
+	NDB_CKIND_NWC_RESPONSE,
+	NDB_CKIND_HTTP_AUTH,
+	NDB_CKIND_LIST,
+	NDB_CKIND_LONGFORM,
+	NDB_CKIND_STATUS,
+	NDB_CKIND_COUNT, // should always be last
+};
+
+struct ndb_stat_counts {
+	size_t key_size;
+	size_t value_size;
+	size_t count;
+};
+
+struct ndb_stat {
+	struct ndb_stat_counts dbs[NDB_DBS];
+	struct ndb_stat_counts common_kinds[NDB_CKIND_COUNT];
+	struct ndb_stat_counts other_kinds;
+};
+
 struct ndb_search {
 	struct ndb_search_key *key;
 	uint64_t profile_key;
@@ -224,6 +269,10 @@ void ndb_builder_set_kind(struct ndb_builder *builder, uint32_t kind);
 int ndb_builder_new_tag(struct ndb_builder *builder);
 int ndb_builder_push_tag_str(struct ndb_builder *builder, const char *str, int len);
 
+// stats
+int ndb_stat(struct ndb *ndb, struct ndb_stat *stat);
+void ndb_stat_counts_init(struct ndb_stat_counts *counts);
+
 static inline struct ndb_str ndb_note_str(struct ndb_note *note,
 					  union ndb_packed_str *pstr)
 {
@@ -347,6 +396,83 @@ static inline int ndb_tags_iterate_next(struct ndb_iterator *iter)
 	}
 
 	return 0;
+}
+
+static inline enum ndb_common_kind
+ndb_kind_to_common_kind(int kind)
+{
+	switch (kind)
+	{
+		case 0:     return NDB_CKIND_PROFILE;
+		case 1:     return NDB_CKIND_TEXT;
+		case 3:     return NDB_CKIND_CONTACTS;
+		case 4:     return NDB_CKIND_DM;
+		case 5:     return NDB_CKIND_DELETE;
+		case 6:     return NDB_CKIND_REPOST;
+		case 7:     return NDB_CKIND_REACTION;
+		case 9735:  return NDB_CKIND_ZAP;
+		case 9734:  return NDB_CKIND_ZAP_REQUEST;
+		case 23194: return NDB_CKIND_NWC_REQUEST;
+		case 23195: return NDB_CKIND_NWC_RESPONSE;
+		case 27235: return NDB_CKIND_HTTP_AUTH;
+		case 30000: return NDB_CKIND_LIST;
+		case 30023: return NDB_CKIND_LONGFORM;
+		case 30315: return NDB_CKIND_STATUS;
+	}
+
+	return -1;
+}
+
+static inline const char *
+ndb_kind_name(enum ndb_common_kind ck)
+{
+	switch (ck) {
+		case NDB_CKIND_PROFILE:      return "profile";
+		case NDB_CKIND_TEXT:         return "text";
+		case NDB_CKIND_CONTACTS:     return "contacts";
+		case NDB_CKIND_DM:           return "dm";
+		case NDB_CKIND_DELETE:       return "delete";
+		case NDB_CKIND_REPOST:       return "repost";
+		case NDB_CKIND_REACTION:     return "reaction";
+		case NDB_CKIND_ZAP:          return "zap";
+		case NDB_CKIND_ZAP_REQUEST:  return "zap_request";
+		case NDB_CKIND_NWC_REQUEST:  return "nwc_request";
+		case NDB_CKIND_NWC_RESPONSE: return "nwc_response";
+		case NDB_CKIND_HTTP_AUTH:    return "http_auth";
+		case NDB_CKIND_LIST:         return "list";
+		case NDB_CKIND_LONGFORM:     return "longform";
+		case NDB_CKIND_STATUS:       return "status";
+		case NDB_CKIND_COUNT:        return "unknown";
+	}
+
+	return "unknown";
+}
+
+static inline const char *
+ndb_db_name(enum ndb_dbs db)
+{
+	switch (db) {
+		case NDB_DB_NOTE:
+			return "note";
+		case NDB_DB_META:
+			return "note_metadata";
+		case NDB_DB_PROFILE:
+			return "profile";
+		case NDB_DB_NOTE_ID:
+			return "note_index";
+		case NDB_DB_PROFILE_PK:
+			return "profile_pubkey_index";
+		case NDB_DB_NDB_META:
+			return "nostrdb_metadata";
+		case NDB_DB_PROFILE_SEARCH:
+			return "profile_search";
+		case NDB_DB_PROFILE_LAST_FETCH:
+			return "profile_last_fetch";
+		case NDB_DBS:
+			return "count";
+	}
+
+	return "unknown";
 }
 
 #endif

@@ -72,18 +72,6 @@ enum ndb_writer_msgtype {
 	NDB_WRITER_PROFILE_LAST_FETCH, // when profiles were last fetched
 };
 
-enum ndb_dbs {
-	NDB_DB_NOTE,
-	NDB_DB_META,
-	NDB_DB_PROFILE,
-	NDB_DB_NOTE_ID,
-	NDB_DB_PROFILE_PK,
-	NDB_DB_NDB_META,
-	NDB_DB_PROFILE_SEARCH,
-	NDB_DB_PROFILE_LAST_FETCH,
-	NDB_DBS,
-};
-
 // keys used for storing data in the NDB metadata database (NDB_DB_NDB_META)
 enum ndb_meta_key {
 	NDB_META_KEY_VERSION = 1
@@ -1572,6 +1560,7 @@ static void *ndb_ingester_thread(void *data)
 	struct ndb_writer_msg outs[THREAD_QUEUE_BATCH], *out;
 	int i, to_write, popped, done, any_event;
 	MDB_txn *read_txn = NULL;
+	int rc;
 
 	ctx = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY);
 	ndb_debug("started ingester thread\n");
@@ -1592,8 +1581,12 @@ static void *ndb_ingester_thread(void *data)
 			}
 		}
 
-		if (any_event)
-			mdb_txn_begin(lmdb->env, NULL, MDB_RDONLY, &read_txn);
+		if (any_event && (rc = mdb_txn_begin(lmdb->env, NULL, MDB_RDONLY, &read_txn))) {
+			// this is bad
+			fprintf(stderr, "UNUSUAL ndb_ingester: mdb_txn_begin failed: '%s'\n",
+					mdb_strerror(rc));
+			continue;
+		}
 
 		for (i = 0; i < popped; i++) {
 			msg = &msgs[i];
@@ -2914,6 +2907,93 @@ int ndb_builder_new_tag(struct ndb_builder *builder)
 	struct ndb_tag tag = {0};
 	builder->current_tag = (struct ndb_tag *)builder->note_cur.p;
 	return cursor_push_tag(&builder->note_cur, &tag);
+}
+
+void ndb_stat_counts_init(struct ndb_stat_counts *counts)
+{
+	counts->count = 0;
+	counts->key_size = 0;
+	counts->value_size = 0;
+}
+
+static void ndb_stat_init(struct ndb_stat *stat)
+{
+	// init stats
+	int i;
+
+	for (i = 0; i < NDB_CKIND_COUNT; i++) {
+		ndb_stat_counts_init(&stat->common_kinds[i]);
+	}
+
+	for (i = 0; i < NDB_DBS; i++) {
+		ndb_stat_counts_init(&stat->dbs[i]);
+	}
+
+	ndb_stat_counts_init(&stat->other_kinds);
+}
+
+int ndb_stat(struct ndb *ndb, struct ndb_stat *stat)
+{
+	int rc;
+	MDB_cursor *cur;
+	MDB_val k, v;
+	MDB_dbi db;
+	struct ndb_txn txn;
+	struct ndb_note *note;
+	int i;
+	enum ndb_common_kind common_kind;
+
+	// initialize to 0
+	ndb_stat_init(stat);
+
+	if (!ndb_begin_query(ndb, &txn)) {
+		fprintf(stderr, "ndb_stat failed at ndb_begin_query\n");
+		return 0;
+	}
+
+	// stat each dbi in the database
+	for (i = 0; i < NDB_DBS; i++)
+	{
+		db = ndb->lmdb.dbs[i];
+
+		if ((rc = mdb_cursor_open(txn.mdb_txn, db, &cur))) {
+			fprintf(stderr, "ndb_stat: mdb_cursor_open failed, error '%s'\n",
+					mdb_strerror(rc));
+			return 0;
+		}
+
+		// loop over every entry and count kv sizes
+		while (mdb_cursor_get(cur, &k, &v, MDB_NEXT) == 0) {
+			// we gather more detailed per-kind stats if we're in
+			// the notes db
+			if (i == NDB_DB_NOTE) {
+				note = v.mv_data;
+				common_kind = ndb_kind_to_common_kind(note->kind);
+
+				// uncommon kind? just count them in bulk
+				if (common_kind == -1) {
+					stat->other_kinds.count++;
+					stat->other_kinds.key_size += k.mv_size;
+					stat->other_kinds.value_size += v.mv_size;
+				} else {
+					stat->common_kinds[common_kind].count++;
+					stat->common_kinds[common_kind].key_size += k.mv_size;
+					stat->common_kinds[common_kind].value_size += v.mv_size;
+				}
+			}
+
+			stat->dbs[i].count++;
+			stat->dbs[i].key_size += k.mv_size;
+			stat->dbs[i].value_size += v.mv_size;
+		}
+
+		// close the cursor, they are per-dbi
+		mdb_cursor_close(cur);
+	}
+
+	ndb_end_query(&txn);
+
+	return 1;
 }
 
 /// Push an element to the current tag
