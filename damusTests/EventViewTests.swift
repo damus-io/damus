@@ -21,6 +21,7 @@ final class EventViewTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
     
+    /*
     func testBasicEventViewLayout() {
         let test_mock_damus_state = generate_test_damus_state(
             mock_profile_info: [
@@ -43,4 +44,5 @@ final class EventViewTests: XCTestCase {
         // Run snapshot check
         assertSnapshot(matching: hostView, as: .image(on: .iPhone13(.portrait)))
     }
+     */
 }

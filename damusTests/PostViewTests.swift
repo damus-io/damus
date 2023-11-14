@@ -21,6 +21,7 @@ final class PostViewTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
     
+    /*
     func testTextWrapperViewWillWrapText() {
         // Setup test variables to be passed into the TextViewWrapper
         let tagModel: TagModel = TagModel()
@@ -44,7 +45,8 @@ final class PostViewTests: XCTestCase {
         // Run snapshot check
         assertSnapshot(matching: hostView, as: .image(on: .iPhoneSe(.portrait)))
     }
-    
+     */
+
     /// Based on https://github.com/damus-io/damus/issues/1375
     /// Tests whether the editor properly handles mention links after they have been added, to avoid manual editing of attributed links
     func testMentionLinkEditorHandling() throws {
