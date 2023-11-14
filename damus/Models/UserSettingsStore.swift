@@ -191,6 +191,12 @@ class UserSettingsStore: ObservableObject {
     
     @Setting(key: "always_show_onboarding_suggestions", default_value: false)
     var always_show_onboarding_suggestions: Bool
+
+    @Setting(key: "enable_experimental_push_notifications", default_value: false)
+    var enable_experimental_push_notifications: Bool
+    
+    @Setting(key: "send_device_token_to_localhost", default_value: false)
+    var send_device_token_to_localhost: Bool
     
     @Setting(key: "emoji_reactions", default_value: default_emoji_reactions)
     var emoji_reactions: [String]

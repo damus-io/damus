@@ -17,7 +17,12 @@ struct DeveloperSettingsView: View {
                 Toggle(NSLocalizedString("Developer Mode", comment: "Setting to enable developer mode"), isOn: $settings.developer_mode)
                     .toggleStyle(.switch)
                 if settings.developer_mode {
-                    Toggle(NSLocalizedString("Always show onboarding", comment: "Setting to always show onboarding suggestions, for developers who need to test onboarding"), isOn: $settings.always_show_onboarding_suggestions)
+                    Toggle("Always show onboarding", isOn: $settings.always_show_onboarding_suggestions)
+
+                    Toggle("Enable experimental push notifications", isOn: $settings.enable_experimental_push_notifications)
+                        .toggleStyle(.switch)
+
+                    Toggle("Send device token to localhost", isOn: $settings.send_device_token_to_localhost)
                         .toggleStyle(.switch)
                 }
             }
