@@ -21,8 +21,8 @@
         <note>Privacy - Media Library Usage Description</note>
       </trans-unit>
       <trans-unit id="NSCameraUsageDescription" xml:space="preserve">
-        <source>Damus needs access to your camera if you want to upload photos from it</source>
-        <target>Damus needs access to your camera if you want to upload photos from it</target>
+        <source>Damus needs access to your camera if you want to scan QR codes and upload photos</source>
+        <target>Damus needs access to your camera if you want to scan QR codes and upload photos</target>
         <note>Privacy - Camera Usage Description</note>
       </trans-unit>
       <trans-unit id="NSFaceIDUsageDescription" xml:space="preserve">
