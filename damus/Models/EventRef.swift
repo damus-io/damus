@@ -145,4 +145,3 @@ func event_is_reply(_ refs: [EventRef]) -> Bool {
         return evref.is_reply != nil
     }
 }
-
