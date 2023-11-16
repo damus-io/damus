@@ -123,11 +123,6 @@ struct LightningInvoice<T> {
     }
 }
 
-struct Blocks: Equatable {
-    let words: Int
-    let blocks: [Block]
-}
-
 func maybe_pointee<T>(_ p: UnsafeMutablePointer<T>!) -> T? {
     guard p != nil else {
         return nil

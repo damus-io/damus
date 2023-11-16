@@ -89,7 +89,3 @@ struct PubkeyView: View {
 #Preview {
     PubkeyView(pubkey: test_pubkey)
 }
-
-func abbrev_pubkey(_ pubkey: String, amount: Int = 8) -> String {
-    return pubkey.prefix(amount) + ":" + pubkey.suffix(amount)
-}

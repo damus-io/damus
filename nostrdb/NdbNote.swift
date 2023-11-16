@@ -7,7 +7,12 @@
 
 import Foundation
 import NaturalLanguage
+import CommonCrypto
+import secp256k1
+import secp256k1_implementation
+import CryptoKit
 
+let MAX_NOTE_SIZE: Int = 2 << 18
 
 struct NdbStr {
     let note: NdbNote
@@ -42,12 +47,7 @@ class NdbNote: Encodable, Equatable, Hashable {
     let note: UnsafeMutablePointer<ndb_note>
 
     // cached stuff (TODO: remove these)
-    private var _event_refs: [EventRef]? = nil
     var decrypted_content: String? = nil
-    private var _blocks: Blocks? = nil
-    private lazy var inner_event: NdbNote? = {
-        return NdbNote.owned_from_json_cstr(json: content_raw, json_len: content_len)
-    }()
 
     init(note: UnsafeMutablePointer<ndb_note>, owned_size: Int?, key: NoteKey?) {
         self.note = note
@@ -252,8 +252,7 @@ class NdbNote: Encodable, Equatable, Hashable {
     }
 }
 
-
-// NostrEvent compat
+// Extension to make NdbNote compatible with NostrEvent's original API
 extension NdbNote {
     var is_textlike: Bool {
         return kind == 1 || kind == 42 || kind == 30023
@@ -273,19 +272,6 @@ extension NdbNote {
 
     func get_blocks(keypair: Keypair) -> Blocks {
         return parse_note_content(content: .init(note: self, keypair: keypair))
-    }
-
-    func get_inner_event(cache: EventCache) -> NostrEvent? {
-        guard self.known_kind == .boost else {
-            return nil
-        }
-
-        if self.content_len == 0, let id = self.referenced_ids.first {
-            // TODO: raw id cache lookups
-            return cache.lookup(id)
-        }
-
-        return self.inner_event
     }
 
     // TODO: References iterator
@@ -322,11 +308,7 @@ extension NdbNote {
     }
 
     func event_refs(_ keypair: Keypair) -> [EventRef] {
-        if let rs = _event_refs {
-            return rs
-        }
         let refs = interpret_event_refs_ndb(blocks: self.blocks(keypair).blocks, tags: self.tags)
-        self._event_refs = refs
         return refs
     }
 
@@ -339,11 +321,7 @@ extension NdbNote {
     }
 
     func blocks(_ keypair: Keypair) -> Blocks {
-        if let bs = _blocks { return bs }
-
-        let blocks = get_blocks(keypair: keypair)
-        self._blocks = blocks
-        return blocks
+        return get_blocks(keypair: keypair)
     }
 
     // NDBTODO: switch this to operating on bytes not strings
@@ -447,4 +425,16 @@ extension NdbNote {
         let event_date = Date(timeIntervalSince1970: TimeInterval(created_at))
         return Date.now.timeIntervalSince(event_date)
     }
+}
+
+func hex_encode(_ data: Data) -> String {
+    var str = ""
+    for c in data {
+        let c1 = hexchar(c >> 4)
+        let c2 = hexchar(c & 0xF)
+
+        str.append(Character(Unicode.Scalar(c1)))
+        str.append(Character(Unicode.Scalar(c2)))
+    }
+    return str
 }

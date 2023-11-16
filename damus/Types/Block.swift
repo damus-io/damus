@@ -45,6 +45,12 @@ enum Block: Equatable {
     case invoice(Invoice)
     case relay(String)
 }
+
+struct Blocks: Equatable {
+    let words: Int
+    let blocks: [Block]
+}
+
 extension Block {
     /// Failable initializer for the C-backed type `block_t`. This initializer will inspect
     /// the underlying block type and build the appropriate enum value as needed.

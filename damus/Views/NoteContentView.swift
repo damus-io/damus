@@ -669,3 +669,16 @@ func count_markdown_words(blocks: [BlockNode]) -> Int {
     }
 }
 
+func separate_images(ev: NostrEvent, keypair: Keypair) -> [MediaUrl]? {
+    let urlBlocks: [URL] = ev.blocks(keypair).blocks.reduce(into: []) { urls, block in
+        guard case .url(let url) = block else {
+            return
+        }
+        if classify_url(url).is_img != nil {
+            urls.append(url)
+        }
+    }
+    let mediaUrls = urlBlocks.map { MediaUrl.image($0) }
+    return mediaUrls.isEmpty ? nil : mediaUrls
+}
+

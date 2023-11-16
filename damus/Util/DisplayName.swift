@@ -57,3 +57,7 @@ func parse_display_name(profile: Profile?, pubkey: Pubkey) -> DisplayName {
 func abbrev_bech32_pubkey(pubkey: Pubkey) -> String {
     return abbrev_pubkey(String(pubkey.npub.dropFirst(4)))
 }
+
+func abbrev_pubkey(_ pubkey: String, amount: Int = 8) -> String {
+    return pubkey.prefix(amount) + ":" + pubkey.suffix(amount)
+}

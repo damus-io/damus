@@ -186,11 +186,6 @@ struct DMChatView_Previews: PreviewProvider {
     }
 }
 
-enum EncEncoding {
-    case base64
-    case bech32
-}
-
 func encrypt_message(message: String, privkey: Privkey, to_pk: Pubkey, encoding: EncEncoding = .base64) -> String? {
     let iv = random_bytes(count: 16).bytes
     guard let shared_sec = get_shared_secret(privkey: privkey, pubkey: to_pk) else {
