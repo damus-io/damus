@@ -169,6 +169,10 @@ static int consume_url_host(struct cursor *cur)
 
 static int parse_url(struct cursor *cur, struct note_block *block) {
     u8 *start = cur->p;
+    u8 *host;
+    int host_len;
+    struct cursor path_cur;
+    struct nostr_bech32 bech32;
     
     if (!parse_str(cur, "http"))
         return 0;
@@ -185,12 +189,34 @@ static int parse_url(struct cursor *cur, struct note_block *block) {
         }
     }
 
-    if (!(consume_url_host(cur) &&
-          consume_url_path(cur) &&
-          consume_url_fragment(cur)))
-    {
-        cur->p = start;
+    // make sure to save the hostname. We will use this to detect damus.io links
+    host = cur->p;
+
+    if (!consume_url_host(cur)) {
+	    cur->p = start;
+	    return 0;
+    }
+
+    // get the length of the host string
+    host_len = cur->p - host;
+
+    // save the current parse state so that we can continue from here when
+    // parsing the bech32 in the damus.io link if we have it
+    copy_cursor(cur, &path_cur);
+
+    // skip leading /
+    if (!cursor_skip(&path_cur, 1)) {
         return 0;
+    }
+
+    if (!consume_url_path(cur)) {
+	    cur->p = start;
+	    return 0;
+    }
+
+    if (!consume_url_fragment(cur)) {
+	    cur->p = start;
+	    return 0;
     }
 
     // smart parens
@@ -201,6 +227,19 @@ static int parse_url(struct cursor *cur, struct note_block *block) {
         *(cur->p - 1) == ')')
     {
         cur->p--;
+    }
+
+    // save the bech32 string pos in case we hit a damus.io link
+    block->block.str.start = path_cur.p;
+
+    // if we have a damus link, make it a mention
+    if (host_len == 8
+	&& !strncmp(host, "damus.io", 8)
+	&& parse_nostr_bech32(&path_cur, &block->block.mention_bech32.bech32))
+    {
+	    block->block.str.end = path_cur.p;
+	    block->type = BLOCK_MENTION_BECH32;
+	    return 1;
     }
 
     block->type = BLOCK_URL;
