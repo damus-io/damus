@@ -96,6 +96,16 @@ static inline void copy_cursor(struct cursor *src, struct cursor *dest)
 	dest->end = src->end;
 }
 
+static inline int cursor_skip(struct cursor *cursor, int n)
+{
+    if (cursor->p + n >= cursor->end)
+        return 0;
+
+    cursor->p += n;
+
+    return 1;
+}
+
 static inline int pull_byte(struct cursor *cursor, u8 *c)
 {
 	if (unlikely(cursor->p >= cursor->end))
