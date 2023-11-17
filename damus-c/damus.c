@@ -205,9 +205,7 @@ static int parse_url(struct cursor *cur, struct note_block *block) {
     copy_cursor(cur, &path_cur);
 
     // skip leading /
-    if (!cursor_skip(&path_cur, 1)) {
-        return 0;
-    }
+    cursor_skip(&path_cur, 1);
 
     if (!consume_url_path(cur)) {
 	    cur->p = start;
