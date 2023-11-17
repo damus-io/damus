@@ -85,15 +85,11 @@ struct PostView: View {
         self.initial_text_suffix = initial_text_suffix
     }
 
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) var dismiss
 
     func cancel() {
         notify(.post(.cancel))
         dismiss()
-    }
-
-    func dismiss() {
-        self.presentationMode.wrappedValue.dismiss()
     }
     
     func send_post() {

@@ -19,7 +19,7 @@ struct OnboardingSuggestionsView: View {
     let first_post_examples: [String] = [first_post_example_1, first_post_example_2, first_post_example_3, first_post_example_4]
     let initial_text_suffix: String = "\n\n#introductions"
 
-    @Environment(\.presentationMode) private var presentationMode
+    @Environment(\.dismiss) var dismiss
     
     func next_page() {
         withAnimation {
@@ -58,6 +58,12 @@ struct OnboardingSuggestionsView: View {
                     placeholder_messages: self.first_post_examples,
                     initial_text_suffix: self.initial_text_suffix
                 )
+                .onReceive(handle_notify(.post)) { _ in
+                    // NOTE: Even though PostView already calls `dismiss`, that is not guaranteed to work under deeply nested views.
+                    // Thus, we should also call `dismiss` from here (a direct subview of a sheet), which is explicitly supported by Apple.
+                    // See https://github.com/damus-io/damus/issues/1726 for more context and information
+                    dismiss()
+                }
                 .tag(1)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
