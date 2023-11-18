@@ -7,14 +7,15 @@
 
 import Foundation
 
-let BOOTSTRAP_RELAYS = [
+// This is `fileprivate` because external code should use the `get_default_bootstrap_relays` instead.
+fileprivate let BOOTSTRAP_RELAYS = [
     "wss://relay.damus.io",
     "wss://eden.nostr.land",
     "wss://nostr.wine",
     "wss://nos.lol",
 ]
 
-let REGION_SPECIFIC_BOOTSTRAP_RELAYS: [Locale.Region: [String]] = [
+fileprivate let REGION_SPECIFIC_BOOTSTRAP_RELAYS: [Locale.Region: [String]] = [
     Locale.Region.japan: [
         "wss://relay-jp.nostr.wirednet.jp",
         "wss://yabu.me",

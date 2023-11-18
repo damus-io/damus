@@ -23,15 +23,6 @@ struct RecommendedRelayView: View {
         self.model_cache = damus.relay_model_cache
     }
     
-    var recommended: [RelayDescriptor] {
-        let rs: [RelayDescriptor] = []
-        return BOOTSTRAP_RELAYS.reduce(into: rs) { xs, x in
-            if damus.pool.get_relay(x) == nil, let url = RelayURL(x) {
-                xs.append(RelayDescriptor(url: url, info: .rw))
-            }
-        }
-    }
-    
     var body: some View {
         let meta = model_cache.model(with_relay_id: relay)?.metadata
         
@@ -84,6 +75,8 @@ struct RecommendedRelayView: View {
                 HStack {
                     Text(meta?.name ?? relay)
                         .lineLimit(1)
+                        .frame(maxWidth: 150)
+                        .padding(.vertical, 5)
                 }
                 .contextMenu {
                     CopyAction(relay: relay)
