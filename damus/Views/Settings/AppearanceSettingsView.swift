@@ -78,7 +78,7 @@ struct AppearanceSettingsView: View {
             // MARK: - Images
             Section(NSLocalizedString("Images", comment: "Section title for images configuration.")) {
                 self.EnableAnimationsToggle
-                Toggle(NSLocalizedString("Always show images", comment: "Setting to always show and never blur images"), isOn: $settings.always_show_images)
+                Toggle(NSLocalizedString("Blur images", comment: "Setting to blur images"), isOn: $settings.blur_images)
                     .toggleStyle(.switch)
                 
                 Toggle(NSLocalizedString("Media previews", comment: "Setting to show media"), isOn: $settings.media_previews)
