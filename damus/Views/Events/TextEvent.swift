@@ -45,11 +45,11 @@ struct TextEvent: View {
     }
 
     func EvBody(options: EventViewOptions) -> some View {
-        let show_imgs = should_show_images(settings: damus.settings, contacts: damus.contacts, ev: event, our_pubkey: damus.pubkey)
+        let blur_imgs = should_blur_images(settings: damus.settings, contacts: damus.contacts, ev: event, our_pubkey: damus.pubkey)
         return NoteContentView(
             damus_state: damus,
             event: event,
-            show_images: show_imgs,
+            blur_images: blur_imgs,
             size: .normal,
             options: options
         )

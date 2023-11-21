@@ -54,7 +54,7 @@ struct LongformView: View {
         EventShell(state: state, event: event.event, options: options) {
             SelectableText(attributedString: AttributedString(stringLiteral: event.title ?? "Untitled"), size: .title)
 
-            NoteContentView(damus_state: state, event: event.event, show_images: true, size: .selected, options: options)
+            NoteContentView(damus_state: state, event: event.event, blur_images: false, size: .selected, options: options)
         }
     }
 }

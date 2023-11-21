@@ -39,10 +39,10 @@ struct DMView: View {
                 Spacer(minLength: UIScreen.main.bounds.width * 0.2)
             }
 
-            let should_show_img = should_show_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
+            let should_blur_img = should_blur_images(settings: damus_state.settings, contacts: damus_state.contacts, ev: event, our_pubkey: damus_state.pubkey)
 
             VStack(alignment: .trailing) {
-                NoteContentView(damus_state: damus_state, event: event, show_images: should_show_img, size: .normal, options: dm_options)
+                NoteContentView(damus_state: damus_state, event: event, blur_images: should_blur_img, size: .normal, options: dm_options)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding([.top, .leading, .trailing], 10)
                     .padding([.bottom], 25)
