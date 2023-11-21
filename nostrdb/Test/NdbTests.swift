@@ -55,13 +55,13 @@ final class NdbTests: XCTestCase {
     func test_ndb_init() {
 
         do {
-            let ndb = Ndb(path: db_dir)!
+            let ndb = try! Ndb(path: db_dir)!
             let ok = ndb.process_events(test_wire_events)
             XCTAssertTrue(ok)
         }
 
         do {
-            let ndb = Ndb(path: db_dir)!
+            let ndb = try! Ndb(path: db_dir)!
             let id = NoteId(hex: "d12c17bde3094ad32f4ab862a6cc6f5c289cfe7d5802270bdf34904df585f349")!
             let txn = NdbTxn(ndb: ndb)
             let note = ndb.lookup_note_with_txn(id: id, txn: txn)

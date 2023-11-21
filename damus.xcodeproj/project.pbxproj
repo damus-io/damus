@@ -531,6 +531,7 @@
 		D7DBD41F2B02F15E002A6197 /* NostrKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3BEFD32819DE8F00B3DE84 /* NostrKind.swift */; };
 		D7DBD4202B0307C7002A6197 /* NostrEventInfoFromPushNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A3B182B02DD2D008BD568 /* NostrEventInfoFromPushNotification.swift */; };
 		D7DEEF2F2A8C021E00E0C99F /* NostrEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7DEEF2E2A8C021E00E0C99F /* NostrEventTests.swift */; };
+		D7FB10A72B0C371A00FA8D42 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2B10272A7B0F5C008AA43E /* Log.swift */; };
 		D7FF94002AC7AC5300FD969D /* RelayURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FF93FF2AC7AC5200FD969D /* RelayURL.swift */; };
 		E4FA1C032A24BB7F00482697 /* SearchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FA1C022A24BB7F00482697 /* SearchSettingsView.swift */; };
 		E990020F2955F837003BBC5A /* EditMetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E990020E2955F837003BBC5A /* EditMetadataView.swift */; };
@@ -3236,6 +3237,7 @@
 				D7CCFC072B05833200323D86 /* NdbNote.swift in Sources */,
 				D7CE1B3F2B0BE719002EDAD4 /* Enum.swift in Sources */,
 				D7CE1B422B0BE719002EDAD4 /* Offset.swift in Sources */,
+				D7FB10A72B0C371A00FA8D42 /* Log.swift in Sources */,
 				D7CE1B232B0BE1EE002EDAD4 /* bolt11.c in Sources */,
 				D7CE1B182B0BDFDD002EDAD4 /* mdb.c in Sources */,
 				D7CCFC162B05894300323D86 /* Pubkey.swift in Sources */,
